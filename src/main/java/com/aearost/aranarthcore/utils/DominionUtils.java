@@ -2319,6 +2319,8 @@ public class DominionUtils {
             }
         }
 
+        NetworkManager nm = NetworkManager.isActive() ? NetworkManager.getInstance() : null;
+
         // Conquest auto-success, no defender logged on for 3 consecutive days
         for (Dominion defender : conquestInactive) {
             Dominion conqueror = getPlayerDominion(defender.getConqueredRequest());
@@ -2341,11 +2343,17 @@ public class DominionUtils {
             defender.setConqueredTimestamp(now);
             updateDominion(defender);
             updateDominion(conqueror);
+            String conquestAutoMsg = ChatUtils.chatMessage(defender.getName() + " &4has been conquered by &e" + conqueror.getName());
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_7, 1F, 1F);
-                onlinePlayer.sendMessage(ChatUtils.chatMessage(defender.getName() + " &4has been conquered by &e" + conqueror.getName()));
+                onlinePlayer.sendMessage(conquestAutoMsg);
             }
             DiscordUtils.dominionMessage(defender, defender.getName() + " has been conquered by " + conqueror.getName(), new Color(101, 0, 0));
+            if (nm != null) {
+                nm.publishBroadcast(conquestAutoMsg);
+                // a=defender, b=conqueror
+                nm.publishDominionConquestUpdate("conquest_auto", defender, conqueror);
+            }
         }
 
         // Conquest expired, 7-day window ended with defenders having been active, no outcome
@@ -2363,11 +2371,17 @@ public class DominionUtils {
             conqueror.setLastConquerAttemptTimestamp(now);
             updateDominion(defender);
             updateDominion(conqueror);
+            String conquestExpiredMsg = ChatUtils.chatMessage("&e" + conqueror.getName() + " &7's conquest of &e" + defender.getName() + " &7has failed");
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 1F);
-                onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + conqueror.getName() + " &7's conquest of &e" + defender.getName() + " &7has failed"));
+                onlinePlayer.sendMessage(conquestExpiredMsg);
             }
             DiscordUtils.dominionMessage(defender, conqueror.getName() + "'s conquest of " + defender.getName() + " has failed", new Color(135, 245, 220));
+            if (nm != null) {
+                nm.publishBroadcast(conquestExpiredMsg);
+                // a=defender, b=conqueror
+                nm.publishDominionConquestUpdate("conquest_expired", defender, conqueror);
+            }
         }
 
         // Rebellion auto-success, conqueror was inactive for 3 consecutive days
@@ -2388,11 +2402,17 @@ public class DominionUtils {
             rebel.setLastRebelAttemptTimestamp(now);
             updateDominion(conqueror);
             updateDominion(rebel);
+            String rebelAutoMsg = ChatUtils.chatMessage(rebel.getName() + " &dhas successfully rebelled against &e" + conqueror.getName());
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 1F);
-                onlinePlayer.sendMessage(ChatUtils.chatMessage(rebel.getName() + " &dhas successfully rebelled against &e" + conqueror.getName()));
+                onlinePlayer.sendMessage(rebelAutoMsg);
             }
             DiscordUtils.dominionMessage(conqueror, rebel.getName() + " has successfully rebelled against " + conqueror.getName(), new Color(135, 245, 220));
+            if (nm != null) {
+                nm.publishBroadcast(rebelAutoMsg);
+                // a=rebel, b=conqueror
+                nm.publishDominionConquestUpdate("rebel_auto", rebel, conqueror);
+            }
         }
 
         // Rebellion expired, 7 days passed with no resolution so the dominion stays conquered
@@ -2409,11 +2429,17 @@ public class DominionUtils {
             updateDominion(conqueror);
 
             if (rebel != null) {
+                String rebelExpiredMsg = ChatUtils.chatMessage("&e" + rebel.getName() + "&7's rebellion against &e" + conqueror.getName() + " &7has failed");
                 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                     onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_4, 1F, 1F);
-                    onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + rebel.getName() + "&7's rebellion against &e" + conqueror.getName() + " &7has failed"));
+                    onlinePlayer.sendMessage(rebelExpiredMsg);
                 }
                 DiscordUtils.dominionMessage(conqueror, rebel.getName() + "'s rebellion against " + conqueror.getName() + " has failed", new Color(101, 0, 0));
+                if (nm != null) {
+                    nm.publishBroadcast(rebelExpiredMsg);
+                    // a=rebel, b=conqueror
+                    nm.publishDominionConquestUpdate("rebel_expired", rebel, conqueror);
+                }
             }
         }
     }

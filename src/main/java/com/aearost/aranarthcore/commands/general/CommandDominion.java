@@ -1108,8 +1108,13 @@ public class CommandDominion implements CommandExecutor {
                             DominionUtils.updateDominion(dominion);
                             DominionUtils.updateDominion(dominionFromList);
 
-                            Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The Dominion of &e" + dominion.getName() + " &7is now &5allied &7with &e" + dominionFromList.getName()));
+                            String allyMsg = ChatUtils.chatMessage("&7The Dominion of &e" + dominion.getName() + " &7is now &5allied &7with &e" + dominionFromList.getName());
+                            Bukkit.broadcastMessage(allyMsg);
                             DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " is now allied with " + dominionFromList.getName(), new Color(170, 0, 170));
+                            if (NetworkManager.isActive()) {
+                                NetworkManager.getInstance().publishBroadcast(allyMsg);
+                                NetworkManager.getInstance().publishDominionRelationUpdate(dominion.getId(), dominionFromList.getId(), "ally");
+                            }
                         }
                         // If sending a new request for an alliance
                         else {
@@ -1130,6 +1135,9 @@ public class CommandDominion implements CommandExecutor {
                                         onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.9F);
                                         onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &7has requested an &5Alliance &7with your Dominion"));
                                     }
+                                }
+                                if (NetworkManager.isActive()) {
+                                    NetworkManager.getInstance().publishDominionDiploRequest(dominionFromList.getId(), dominion.getLeader(), "ally");
                                 }
                             }
                         }
@@ -1205,8 +1213,13 @@ public class CommandDominion implements CommandExecutor {
                             DominionUtils.updateDominion(dominion);
                             DominionUtils.updateDominion(dominionFromList);
 
-                            Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The Dominion of &e" + dominion.getName() + " &7is now &dtruced &7with &e" + dominionFromList.getName()));
+                            String truceMsg = ChatUtils.chatMessage("&7The Dominion of &e" + dominion.getName() + " &7is now &dtruced &7with &e" + dominionFromList.getName());
+                            Bukkit.broadcastMessage(truceMsg);
                             DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " is now truced with " + dominionFromList.getName(), new Color(255, 85, 255));
+                            if (NetworkManager.isActive()) {
+                                NetworkManager.getInstance().publishBroadcast(truceMsg);
+                                NetworkManager.getInstance().publishDominionRelationUpdate(dominion.getId(), dominionFromList.getId(), "truce");
+                            }
                         }
                         // If sending a new request for a truce
                         else {
@@ -1227,6 +1240,9 @@ public class CommandDominion implements CommandExecutor {
                                         onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.9F);
                                         onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &7has requested a &dTruce &7with your Dominion"));
                                     }
+                                }
+                                if (NetworkManager.isActive()) {
+                                    NetworkManager.getInstance().publishDominionDiploRequest(dominionFromList.getId(), dominion.getLeader(), "truce");
                                 }
                             }
                         }
@@ -1294,8 +1310,13 @@ public class CommandDominion implements CommandExecutor {
                                 DominionUtils.updateDominion(dominionFromList);
                             }
 
-                            Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The Dominion of &e" + dominion.getName() + " &7has enemied &e" + dominionFromList.getName()));
+                            String enemyMsg = ChatUtils.chatMessage("&7The Dominion of &e" + dominion.getName() + " &7has enemied &e" + dominionFromList.getName());
+                            Bukkit.broadcastMessage(enemyMsg);
                             DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " has enemied " + dominionFromList.getName(), new Color(255, 85, 85));
+                            if (NetworkManager.isActive()) {
+                                NetworkManager.getInstance().publishBroadcast(enemyMsg);
+                                NetworkManager.getInstance().publishDominionRelationUpdate(dominion.getId(), dominionFromList.getId(), "enemy");
+                            }
                         } else {
                             player.sendMessage(ChatUtils.chatMessage("&cYour Dominion is already Enemied with &e" + dominionFromList.getName()));
                             return;
@@ -1362,8 +1383,13 @@ public class CommandDominion implements CommandExecutor {
                         if (wasEnemied && dominion.getNeutralRequests().contains(dominionFromList.getLeader())) {
                             resetDominionRelations(dominion, dominionFromList);
 
-                            Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The Dominions &e" + dominion.getName() + " &7and &e" + dominionFromList.getName() + " &7are now &fneutral"));
+                            String neutralMsg = ChatUtils.chatMessage("&7The Dominions &e" + dominion.getName() + " &7and &e" + dominionFromList.getName() + " &7are now &fneutral");
+                            Bukkit.broadcastMessage(neutralMsg);
                             DiscordUtils.dominionMessage(dominion, "The Dominions " + dominion.getName() + " and " + dominionFromList.getName() + " are now neutral", Color.WHITE);
+                            if (NetworkManager.isActive()) {
+                                NetworkManager.getInstance().publishBroadcast(neutralMsg);
+                                NetworkManager.getInstance().publishDominionRelationUpdate(dominion.getId(), dominionFromList.getId(), "neutral");
+                            }
                         }
                         // If sending a new request for neutrality
                         else {
@@ -1381,6 +1407,9 @@ public class CommandDominion implements CommandExecutor {
                                         onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &7has requested &fNeutrality &7with your Dominion"));
                                     }
                                 }
+                                if (NetworkManager.isActive()) {
+                                    NetworkManager.getInstance().publishDominionDiploRequest(dominionFromList.getId(), dominion.getLeader(), "neutral");
+                                }
                             } else if (wasAllied || wasTruced) {
                                 resetDominionRelations(dominion, dominionFromList);
 
@@ -1392,6 +1421,9 @@ public class CommandDominion implements CommandExecutor {
                                         onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.9F);
                                         onlinePlayer.sendMessage(ChatUtils.chatMessage("&7Your Dominion has become &fNeutral &7with &e" + dominion.getName()));
                                     }
+                                }
+                                if (NetworkManager.isActive()) {
+                                    NetworkManager.getInstance().publishDominionRelationUpdate(dominion.getId(), dominionFromList.getId(), "neutral_members");
                                 }
                             } else {
                                 player.sendMessage(ChatUtils.chatMessage("&cYour Dominion is already &fNeutral &7with &e" + dominionFromList.getName()));
@@ -2612,6 +2644,10 @@ public class CommandDominion implements CommandExecutor {
                         onlinePlayer.sendMessage(ChatUtils.chatMessage("&4Your Dominion will automatically be conquered if nobody logs on for 3 days during the conquest!"));
                     }
                 }
+                if (NetworkManager.isActive()) {
+                    // a=conqueror, b=defender
+                    NetworkManager.getInstance().publishDominionConquestUpdate("conquer_request", dominion, dominionFromList);
+                }
                 break;
             }
         }
@@ -2675,11 +2711,17 @@ public class CommandDominion implements CommandExecutor {
                     DominionUtils.updateDominion(dominion);
                     DominionUtils.updateDominion(dominionFromList);
 
+                    String surrenderMsg = ChatUtils.chatMessage(dominion.getName() + " &4has been conquered by &e" + dominionFromList.getName());
                     for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                         onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_7, 1F, 1F);
-                        onlinePlayer.sendMessage(ChatUtils.chatMessage(dominion.getName() + " &4has been conquered by &e" + dominionFromList.getName()));
+                        onlinePlayer.sendMessage(surrenderMsg);
                     }
                     DiscordUtils.dominionMessage(dominion, dominion.getName() + " has been conquered by " + dominionFromList.getName(), new Color(101, 0, 0));
+                    if (NetworkManager.isActive()) {
+                        NetworkManager.getInstance().publishBroadcast(surrenderMsg);
+                        // a=defender, b=conqueror
+                        NetworkManager.getInstance().publishDominionConquestUpdate("surrender", dominion, dominionFromList);
+                    }
                 } else {
                     player.sendMessage(ChatUtils.chatMessage("&cThere is no Dominion attempting to conquer yours!"));
                 }
@@ -2767,6 +2809,10 @@ public class CommandDominion implements CommandExecutor {
                         onlinePlayer.sendMessage(ChatUtils.chatMessage("They will be freed if your Dominion goes 3 days without logging on"));
                     }
                 }
+                if (NetworkManager.isActive()) {
+                    // a=rebel, b=conqueror
+                    NetworkManager.getInstance().publishDominionConquestUpdate("rebel_request", dominion, dominionFromList);
+                }
                 break;
             }
         }
@@ -2825,11 +2871,17 @@ public class CommandDominion implements CommandExecutor {
                     DominionUtils.updateDominion(dominion);
                     DominionUtils.updateDominion(dominionFromList);
 
+                    String retreatConquestMsg = ChatUtils.chatMessage("&e" + dominion.getName() + " &dhas retreated from conquering &e" + dominionFromList.getName());
                     for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                         onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 1F);
-                        onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &dhas retreated from conquering &e" + dominionFromList.getName()));
+                        onlinePlayer.sendMessage(retreatConquestMsg);
                     }
                     DiscordUtils.dominionMessage(dominionFromList, dominion.getName() + " has retreated from conquering " + dominionFromList.getName(), new Color(135, 245, 220));
+                    if (NetworkManager.isActive()) {
+                        NetworkManager.getInstance().publishBroadcast(retreatConquestMsg);
+                        // a=conqueror, b=defender
+                        NetworkManager.getInstance().publishDominionConquestUpdate("retreat_conquest", dominion, dominionFromList);
+                    }
                     return;
                 }
 
@@ -2849,11 +2901,17 @@ public class CommandDominion implements CommandExecutor {
                     DominionUtils.updateDominion(dominion);
                     DominionUtils.updateDominion(dominionFromList);
 
+                    String retreatReleaseMsg = ChatUtils.chatMessage("&e" + dominion.getName() + " &dhas retreated from &e" + dominionFromList.getName());
                     for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                         onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 1F);
-                        onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &dhas retreated from &e" + dominionFromList.getName()));
+                        onlinePlayer.sendMessage(retreatReleaseMsg);
                     }
                     DiscordUtils.dominionMessage(dominion, dominion.getName() + " has retreated from " + dominionFromList.getName(), new Color(135, 245, 220));
+                    if (NetworkManager.isActive()) {
+                        NetworkManager.getInstance().publishBroadcast(retreatReleaseMsg);
+                        // a=conqueror, b=released
+                        NetworkManager.getInstance().publishDominionConquestUpdate("retreat_release", dominion, dominionFromList);
+                    }
                     return;
                 }
 

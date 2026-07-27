@@ -96,8 +96,11 @@ public class NetworkManager {
     public static final String CH_SOUND_ALL    = "aranarth:sound_all";
     public static final String CH_MAIL_NOTIFY       = "aranarth:mail_notify";
     public static final String CH_COUNCIL_MSG       = "aranarth:council_msg";
-    public static final String CH_DOMINION_DISBAND  = "aranarth:dominion_disband";
-    public static final String CH_DOMINION_CREATE   = "aranarth:dominion_create";
+    public static final String CH_DOMINION_DISBAND         = "aranarth:dominion_disband";
+    public static final String CH_DOMINION_CREATE          = "aranarth:dominion_create";
+    public static final String CH_DOMINION_DIPLO_REQUEST    = "aranarth:dominion_diplo_request";
+    public static final String CH_DOMINION_RELATION_UPDATE  = "aranarth:dominion_relation_update";
+    public static final String CH_DOMINION_CONQUEST_UPDATE  = "aranarth:dominion_conquest_update";
     public static final String CH_CHAT_GAME_START   = "aranarth:chat_game_start";
     public static final String CH_CHAT_GAME_WIN     = "aranarth:chat_game_win";
     public static final String CH_CHAT_GAME_EXPIRE  = "aranarth:chat_game_expire";
@@ -289,8 +292,11 @@ public class NetworkManager {
             case CH_SOUND_ALL     -> handleSoundAll(json);
             case CH_MAIL_NOTIFY      -> handleMailNotification(json);
             case CH_COUNCIL_MSG      -> handleCouncilMessage(json);
-            case CH_DOMINION_DISBAND -> handleDominionDisband(json);
-            case CH_DOMINION_CREATE  -> handleDominionCreate(json);
+            case CH_DOMINION_DISBAND         -> handleDominionDisband(json);
+            case CH_DOMINION_CREATE          -> handleDominionCreate(json);
+            case CH_DOMINION_DIPLO_REQUEST    -> handleDominionDiploRequest(json);
+            case CH_DOMINION_RELATION_UPDATE  -> handleDominionRelationUpdate(json);
+            case CH_DOMINION_CONQUEST_UPDATE  -> handleDominionConquestUpdate(json);
             case CH_CHAT_GAME_START  -> handleChatGameStart(json);
             case CH_CHAT_GAME_WIN    -> handleChatGameWin(json);
             case CH_CHAT_GAME_EXPIRE -> handleChatGameExpire(json);
@@ -1658,6 +1664,300 @@ public class NetworkManager {
         UUID dominionId = UUID.fromString(json.get("dominionId").getAsString());
         Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () ->
             PersistenceUtils.loadSingleDominionFromDatabase(dominionId));
+    }
+
+    /**
+     * Notifies other servers that a dominion has sent a diplomacy request (ally/truce/neutral)
+     * so the pending request is added to the target dominion's in-memory list and members
+     * on those servers are notified.
+     *
+     * @param targetDominionId    The UUID of the dominion receiving the request.
+     * @param requesterLeaderUUID The leader UUID of the dominion sending the request.
+     * @param type                "ally", "truce", or "neutral".
+     */
+    public void publishDominionDiploRequest(UUID targetDominionId, UUID requesterLeaderUUID, String type) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("targetDominionId", targetDominionId.toString());
+        json.addProperty("requesterLeaderUUID", requesterLeaderUUID.toString());
+        json.addProperty("type", type);
+        publish(CH_DOMINION_DIPLO_REQUEST, json);
+    }
+
+    private void handleDominionDiploRequest(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) return;
+
+        UUID targetDominionId = UUID.fromString(json.get("targetDominionId").getAsString());
+        UUID requesterLeaderUUID = UUID.fromString(json.get("requesterLeaderUUID").getAsString());
+        String type = json.get("type").getAsString();
+
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+            Dominion targetDominion = DominionUtils.getDominionById(targetDominionId);
+            if (targetDominion == null) return;
+            Dominion requesterDominion = DominionUtils.getPlayerDominion(requesterLeaderUUID);
+            if (requesterDominion == null) return;
+
+            switch (type) {
+                case "ally" -> {
+                    if (!targetDominion.getAllianceRequests().contains(requesterLeaderUUID)) {
+                        targetDominion.getAllianceRequests().add(requesterLeaderUUID);
+                    }
+                }
+                case "truce" -> {
+                    if (!targetDominion.getTruceRequests().contains(requesterLeaderUUID)) {
+                        targetDominion.getTruceRequests().add(requesterLeaderUUID);
+                    }
+                }
+                case "neutral" -> {
+                    if (!targetDominion.getNeutralRequests().contains(requesterLeaderUUID)) {
+                        targetDominion.getNeutralRequests().add(requesterLeaderUUID);
+                    }
+                }
+            }
+
+            String targetMsg = switch (type) {
+                case "ally"     -> "&e" + requesterDominion.getName() + " &7has requested an &5Alliance &7with your Dominion";
+                case "truce"    -> "&e" + requesterDominion.getName() + " &7has requested a &dTruce &7with your Dominion";
+                default         -> "&e" + requesterDominion.getName() + " &7has requested &fNeutrality &7with your Dominion";
+            };
+            String requesterMsg = switch (type) {
+                case "ally"     -> "&7Your Dominion has requested an &5Alliance &7with &e" + targetDominion.getName();
+                case "truce"    -> "&7Your Dominion has requested a &dTruce &7with &e" + targetDominion.getName();
+                default         -> "&7Your Dominion has requested &fNeutrality &7with &e" + targetDominion.getName();
+            };
+
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                if (targetDominion.getMembers().contains(p.getUniqueId())) {
+                    p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.9F);
+                    p.sendMessage(ChatUtils.chatMessage(targetMsg));
+                } else if (requesterDominion.getMembers().contains(p.getUniqueId())) {
+                    p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.9F);
+                    p.sendMessage(ChatUtils.chatMessage(requesterMsg));
+                }
+            }
+        });
+    }
+
+    /**
+     * Notifies other servers that a dominion relation has been finalized so they can update
+     * their in-memory state. The global broadcast message (if any) is sent separately via
+     * {@link #publishBroadcast}.
+     *
+     * @param dominionAId  UUID of the first dominion.
+     * @param dominionBId  UUID of the second dominion.
+     * @param relationType "ally", "truce", "enemy", "neutral", or "neutral_members"
+     *                     ("neutral_members" means immediate neutrality from ally/truce — sends
+     *                     member-specific notifications instead of a global broadcast).
+     */
+    public void publishDominionRelationUpdate(UUID dominionAId, UUID dominionBId, String relationType) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("dominionAId", dominionAId.toString());
+        json.addProperty("dominionBId", dominionBId.toString());
+        json.addProperty("relationType", relationType);
+        publish(CH_DOMINION_RELATION_UPDATE, json);
+    }
+
+    private void handleDominionRelationUpdate(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) return;
+
+        UUID dominionAId = UUID.fromString(json.get("dominionAId").getAsString());
+        UUID dominionBId = UUID.fromString(json.get("dominionBId").getAsString());
+        String relationType = json.get("relationType").getAsString();
+
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+            Dominion a = DominionUtils.getDominionById(dominionAId);
+            Dominion b = DominionUtils.getDominionById(dominionBId);
+            if (a == null || b == null) return;
+
+            // Clear all existing relations between the two dominions
+            a.getAllianceRequests().remove(b.getLeader());
+            a.getTruceRequests().remove(b.getLeader());
+            a.getNeutralRequests().remove(b.getLeader());
+            a.getAllied().remove(b.getLeader());
+            a.getTruced().remove(b.getLeader());
+            a.getEnemied().remove(b.getLeader());
+            b.getAllianceRequests().remove(a.getLeader());
+            b.getTruceRequests().remove(a.getLeader());
+            b.getNeutralRequests().remove(a.getLeader());
+            b.getAllied().remove(a.getLeader());
+            b.getTruced().remove(a.getLeader());
+            b.getEnemied().remove(a.getLeader());
+
+            switch (relationType) {
+                case "ally" -> {
+                    a.getAllied().add(b.getLeader());
+                    b.getAllied().add(a.getLeader());
+                }
+                case "truce" -> {
+                    a.getTruced().add(b.getLeader());
+                    b.getTruced().add(a.getLeader());
+                }
+                case "enemy" -> {
+                    a.getEnemied().add(b.getLeader());
+                    b.getEnemied().add(a.getLeader());
+                }
+                // "neutral" and "neutral_members" just leave both sides fully cleared
+            }
+
+            DominionUtils.updateDominion(a);
+            DominionUtils.updateDominion(b);
+
+            // "neutral_members" skips the global broadcast (handled locally) but needs
+            // member-specific horn + chat notifications on this server.
+            if (relationType.equals("neutral_members")) {
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    if (a.getMembers().contains(p.getUniqueId())) {
+                        p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.9F);
+                        p.sendMessage(ChatUtils.chatMessage("&7Your Dominion has become &fNeutral &7with &e" + b.getName()));
+                    } else if (b.getMembers().contains(p.getUniqueId())) {
+                        p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.9F);
+                        p.sendMessage(ChatUtils.chatMessage("&7Your Dominion has become &fNeutral &7with &e" + a.getName()));
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Notifies other servers that the conquest/rebellion state of one or two dominions has
+     * changed, so their in-memory copies can be updated.
+     *
+     * <p>The {@code type} string identifies the event for cross-server member notifications:
+     * <ul>
+     *   <li>"conquer_request" — a=conqueror, b=defender</li>
+     *   <li>"rebel_request"   — a=rebel,     b=conqueror</li>
+     *   <li>All other types  — no extra notifications (global broadcast is sent via publishBroadcast)</li>
+     * </ul>
+     *
+     * @param type      Event type string.
+     * @param a         First affected dominion (always present).
+     * @param b         Second affected dominion, or null if only one dominion changed.
+     */
+    public void publishDominionConquestUpdate(String type, Dominion a, Dominion b) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("type", type);
+        json.addProperty("dominionAId", a.getId().toString());
+        addConquestState(json, a, "a");
+        if (b != null) {
+            json.addProperty("dominionBId", b.getId().toString());
+            addConquestState(json, b, "b");
+        }
+        publish(CH_DOMINION_CONQUEST_UPDATE, json);
+    }
+
+    /** Serialises the conquest/rebellion fields of {@code d} into {@code json} under the given prefix. */
+    private void addConquestState(JsonObject json, Dominion d, String prefix) {
+        json.addProperty(prefix + "ConqueredRequest",
+                d.getConqueredRequest() == null ? "null" : d.getConqueredRequest().toString());
+        json.addProperty(prefix + "ConqueredRequestTs", d.getConqueredRequestTimestamp());
+        json.addProperty(prefix + "ConqueredRequestDefenderLastSeen", d.getConqueredRequestDefenderLastSeen());
+
+        StringBuilder conquered = new StringBuilder();
+        for (UUID u : d.getConquered()) {
+            if (!conquered.isEmpty()) conquered.append(",");
+            conquered.append(u);
+        }
+        json.addProperty(prefix + "Conquered", conquered.toString());
+        json.addProperty(prefix + "LastConquerAttemptTs", d.getLastConquerAttemptTimestamp());
+        json.addProperty(prefix + "ConqueredTs", d.getConqueredTimestamp());
+
+        json.addProperty(prefix + "RebelRequest",
+                d.getRebelRequest() == null ? "null" : d.getRebelRequest().toString());
+        json.addProperty(prefix + "RebelRequestTs", d.getRebelRequestTimestamp());
+        json.addProperty(prefix + "RebelRequestConquerorLastSeen", d.getRebelRequestConquerorLastSeen());
+        json.addProperty(prefix + "LastRebelAttemptTs", d.getLastRebelAttemptTimestamp());
+    }
+
+    private void handleDominionConquestUpdate(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) return;
+
+        UUID dominionAId = UUID.fromString(json.get("dominionAId").getAsString());
+        String type = json.get("type").getAsString();
+
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+            Dominion a = DominionUtils.getDominionById(dominionAId);
+            if (a == null) return;
+            applyConquestState(a, json, "a");
+            DominionUtils.updateDominion(a);
+
+            Dominion b = null;
+            if (json.has("dominionBId")) {
+                UUID dominionBId = UUID.fromString(json.get("dominionBId").getAsString());
+                b = DominionUtils.getDominionById(dominionBId);
+                if (b != null) {
+                    applyConquestState(b, json, "b");
+                    DominionUtils.updateDominion(b);
+                }
+            }
+
+            sendConquestMemberNotifications(type, a, b);
+        });
+    }
+
+    /** Reads the conquest/rebellion state fields from {@code json} and applies them to {@code d}. */
+    private void applyConquestState(Dominion d, JsonObject json, String prefix) {
+        String cr = json.get(prefix + "ConqueredRequest").getAsString();
+        d.setConqueredRequest(cr.equals("null") ? null : UUID.fromString(cr));
+        d.setConqueredRequestTimestamp(json.get(prefix + "ConqueredRequestTs").getAsLong());
+        d.setConqueredRequestDefenderLastSeen(json.get(prefix + "ConqueredRequestDefenderLastSeen").getAsLong());
+
+        List<UUID> conquered = new ArrayList<>();
+        String conqueredStr = json.get(prefix + "Conquered").getAsString();
+        if (!conqueredStr.isEmpty()) {
+            for (String s : conqueredStr.split(",")) conquered.add(UUID.fromString(s));
+        }
+        d.setConquered(conquered);
+        d.setLastConquerAttemptTimestamp(json.get(prefix + "LastConquerAttemptTs").getAsLong());
+        d.setConqueredTimestamp(json.get(prefix + "ConqueredTs").getAsLong());
+
+        String rr = json.get(prefix + "RebelRequest").getAsString();
+        d.setRebelRequest(rr.equals("null") ? null : UUID.fromString(rr));
+        d.setRebelRequestTimestamp(json.get(prefix + "RebelRequestTs").getAsLong());
+        d.setRebelRequestConquerorLastSeen(json.get(prefix + "RebelRequestConquerorLastSeen").getAsLong());
+        d.setLastRebelAttemptTimestamp(json.get(prefix + "LastRebelAttemptTs").getAsLong());
+    }
+
+    /**
+     * Sends member-targeted sound+chat notifications on this server for conquest/rebellion events
+     * that require them (conquer_request, rebel_request). Broadcast-style events are handled
+     * by the CH_BROADCAST channel instead.
+     */
+    private void sendConquestMemberNotifications(String type, Dominion a, Dominion b) {
+        if (b == null) return;
+        switch (type) {
+            case "conquer_request" -> {
+                // a=conqueror, b=defender
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    if (a.getMembers().contains(p.getUniqueId())) {
+                        p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_2, 2F, 1F);
+                        p.sendMessage(ChatUtils.chatMessage("&4Your Dominion is attempting to conquer &e" + b.getName()));
+                    } else if (b.getMembers().contains(p.getUniqueId())) {
+                        p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_4, 2F, 1F);
+                        p.sendMessage(ChatUtils.chatMessage("&e" + a.getName() + " &4is attempting to conquer your Dominion"));
+                        p.sendMessage(ChatUtils.chatMessage("&4Your Dominion will automatically be conquered if nobody logs on for 3 days during the conquest!"));
+                    }
+                }
+            }
+            case "rebel_request" -> {
+                // a=rebel, b=conqueror
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    if (a.getMembers().contains(p.getUniqueId())) {
+                        p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_1, 2F, 1F);
+                        p.sendMessage(ChatUtils.chatMessage("&5Your Dominion has started a rebellion against &e" + b.getName()));
+                    } else if (b.getMembers().contains(p.getUniqueId())) {
+                        p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_1, 2F, 1F);
+                        p.sendMessage(ChatUtils.chatMessage("&e" + a.getName() + " &5has started a rebellion against your Dominion!"));
+                        p.sendMessage(ChatUtils.chatMessage("&5Use &e/dominion retreat " + ChatUtils.stripColorFormatting(a.getName()) + " &5to release them of your conquest"));
+                        p.sendMessage(ChatUtils.chatMessage("They will be freed if your Dominion goes 3 days without logging on"));
+                    }
+                }
+            }
+        }
     }
 
     private void handleChatGameStart(JsonObject json) {
