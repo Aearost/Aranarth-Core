@@ -1,8 +1,10 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -12,6 +14,7 @@ import org.bukkit.entity.Player;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.UUID;
 
 /**
  * Displays the balance of the player or the specified player.
@@ -72,25 +75,29 @@ public class CommandBalance implements CommandExecutor {
 								// If increasing the balance
 								if (args[1].charAt(0) == '+') {
 									double valueAsDouble = Double.parseDouble(args[1].substring(1));
-									String valueWithTwoDecimals = df.format(valueAsDouble);
-									aranarthPlayer.setBalance(aranarthPlayer.getBalance() + Double.parseDouble(valueWithTwoDecimals));
+									double delta = Double.parseDouble(df.format(valueAsDouble));
+									aranarthPlayer.setBalance(aranarthPlayer.getBalance() + delta);
 									sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + "&e's &7balance has been increased by &6" + formatter.format(valueAsDouble)));
+									persistAndBroadcastBalanceDelta(offlinePlayer.getUniqueId(), delta);
 									return true;
 								}
 								// If decreasing the balance
 								else if (args[1].charAt(0) == '-') {
 									double valueAsDouble = Double.parseDouble(args[1].substring(1));
-									String valueWithTwoDecimals = df.format(valueAsDouble);
-									aranarthPlayer.setBalance(aranarthPlayer.getBalance() - Double.parseDouble(valueWithTwoDecimals));
+									double delta = -Double.parseDouble(df.format(valueAsDouble));
+									aranarthPlayer.setBalance(aranarthPlayer.getBalance() + delta);
 									sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + "&e's &7balance has been decreased by &6" + formatter.format(valueAsDouble)));
+									persistAndBroadcastBalanceDelta(offlinePlayer.getUniqueId(), delta);
 									return true;
 								}
 								// If overriding the balance
 								else {
 									double valueAsDouble = Double.parseDouble(args[1]);
-									String valueWithTwoDecimals = df.format(valueAsDouble);
-									aranarthPlayer.setBalance(Double.parseDouble(valueWithTwoDecimals));
+									double newBalance = Double.parseDouble(df.format(valueAsDouble));
+									double delta = newBalance - aranarthPlayer.getBalance();
+									aranarthPlayer.setBalance(newBalance);
 									sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + "&e's &7balance has been set to &6" + formatter.format(valueAsDouble)));
+									persistAndBroadcastBalanceDelta(offlinePlayer.getUniqueId(), delta);
 									return true;
 								}
 							} catch (NumberFormatException e) {
@@ -103,5 +110,12 @@ public class CommandBalance implements CommandExecutor {
 			}
 		}
 		return false;
+	}
+
+	private void persistAndBroadcastBalanceDelta(UUID uuid, double delta) {
+		PersistenceUtils.saveAranarthPlayerImmediately(uuid);
+		if (Bukkit.getPlayer(uuid) == null && NetworkManager.isActive()) {
+			NetworkManager.getInstance().publishBalanceAdjust(uuid, delta);
+		}
 	}
 }
