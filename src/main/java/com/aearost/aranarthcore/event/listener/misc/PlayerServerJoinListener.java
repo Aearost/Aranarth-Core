@@ -132,6 +132,7 @@ public class PlayerServerJoinListener implements Listener {
 		// Load job data from MySQL for this player
 		if (DatabaseManager.isActive()) {
 			final UUID joinUuid = player.getUniqueId();
+			Bukkit.getLogger().info("[AC][Jobs] Dispatching async load for " + player.getName() + " on join");
 			Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
 				() -> PersistenceUtils.loadJobDataForPlayer(joinUuid));
 		}
@@ -388,6 +389,7 @@ public class PlayerServerJoinListener implements Listener {
 				// the async DB write from the quit event may not have finished yet.
 				if (hadPendingTp && !isLoginRouting && DatabaseManager.isActive()) {
 					PersistenceUtils.reloadQuestProgressForPlayer(player.getUniqueId());
+					Bukkit.getLogger().info("[AC][Jobs] Reloading job data (sync) for " + player.getName() + " on cross-server arrival");
 					PersistenceUtils.loadJobDataForPlayer(player.getUniqueId());
 					// Reload the player's dominion in case it was created on the other server
 					PersistenceUtils.reloadDominionForPlayer(player.getUniqueId());

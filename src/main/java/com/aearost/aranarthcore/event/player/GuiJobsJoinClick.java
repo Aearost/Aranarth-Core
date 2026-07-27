@@ -9,6 +9,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.JobUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -51,6 +52,8 @@ public class GuiJobsJoinClick {
 
         jobData.addJob(job);
         AranarthUtils.setPlayer(player.getUniqueId(), ap);
+        Bukkit.getLogger().info("[AC][Jobs] " + player.getName() + " joined job " + job.name()
+                + " — active=" + jobData.getActiveJobs());
         PersistenceUtils.saveJobData(player.getUniqueId());
 
         player.sendMessage(ChatUtils.chatMessage("&7You have joined the &e" + job.getDisplayName() + " &7job!"));

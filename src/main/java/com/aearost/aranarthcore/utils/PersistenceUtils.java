@@ -8186,18 +8186,31 @@ public class PersistenceUtils {
 
     public static void loadJobDataForPlayer(UUID uuid) {
         if (!DatabaseManager.isActive()) return;
+        String name = playerName(uuid);
+        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] Loading job data for " + name
+                + " (thread=" + Thread.currentThread().getName() + ")");
         try {
             String json = DatabaseManager.getInstance().loadJobData(uuid);
             AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
-            if (ap == null) return;
+            if (ap == null) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Jobs] Load skipped for " + name
+                        + " — AranarthPlayer not in memory");
+                return;
+            }
             if (json != null && !json.isEmpty()) {
-                ap.setJobData(deserializeJobData(json));
+                JobData loaded = deserializeJobData(json);
+                ap.setJobData(loaded);
+                Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] Loaded for " + name
+                        + " — jobs=" + loaded.getActiveJobs()
+                        + " levels=" + loaded.getLevels());
             } else {
                 ap.setJobData(new JobData());
+                Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] No DB row for " + name
+                        + " — initialised with empty JobData");
             }
             AranarthUtils.setPlayer(uuid, ap);
         } catch (Exception e) {
-            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Jobs: Failed to load job data for " + uuid + ": " + e.getMessage());
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Jobs] Failed to load job data for " + name + ": " + e.getMessage());
         }
     }
 
@@ -8206,18 +8219,61 @@ public class PersistenceUtils {
         AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
         if (ap == null) return;
         String json = serializeJobData(ap.getJobData());
+        String name = playerName(uuid);
         if (AranarthCore.getInstance().isEnabled()) {
-            Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
-                    () -> DatabaseManager.getInstance().saveJobData(uuid, json));
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] Dispatching async save for " + name
+                    + " — jobs=" + ap.getJobData().getActiveJobs());
+            Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+                try {
+                    DatabaseManager.getInstance().saveJobData(uuid, json);
+                    Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] Async save completed for " + name);
+                } catch (Exception e) {
+                    Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Jobs] Async save FAILED for " + name + ": " + e.getMessage());
+                }
+            });
         } else {
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] Saving sync (plugin disabled) for " + name
+                    + " — jobs=" + ap.getJobData().getActiveJobs());
             DatabaseManager.getInstance().saveJobData(uuid, json);
         }
     }
 
-    public static void saveAllJobData() {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            saveJobData(player.getUniqueId());
+    /**
+     * Saves job data for a single player synchronously (blocking the calling thread).
+     * Use this from quit events and shutdown paths to avoid racing with DatabaseManager.shutdown(),
+     * which can close the connection pool before async tasks dispatched by saveJobData() execute.
+     */
+    public static void saveJobDataSync(UUID uuid) {
+        if (!DatabaseManager.isActive()) return;
+        AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+        if (ap == null) return;
+        String name = playerName(uuid);
+        String json = serializeJobData(ap.getJobData());
+        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] Saving sync for " + name
+                + " — jobs=" + ap.getJobData().getActiveJobs()
+                + " thread=" + Thread.currentThread().getName());
+        try {
+            DatabaseManager.getInstance().saveJobData(uuid, json);
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] Sync save completed for " + name);
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Jobs] Sync save FAILED for " + name + ": " + e.getMessage());
         }
+    }
+
+    public static void saveAllJobData() {
+        if (!DatabaseManager.isActive()) return;
+        java.util.Collection<? extends Player> online = Bukkit.getOnlinePlayers();
+        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] saveAllJobData — " + online.size() + " online player(s)");
+        for (Player player : online) {
+            saveJobDataSync(player.getUniqueId());
+        }
+    }
+
+    /** Returns a human-readable name for logging: "Name(uuid)" or just the uuid if offline. */
+    private static String playerName(UUID uuid) {
+        Player p = Bukkit.getPlayer(uuid);
+        if (p != null) return p.getName() + "(" + uuid + ")";
+        return uuid.toString();
     }
 
     private static String serializeJobData(JobData jobData) {

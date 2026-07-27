@@ -10,6 +10,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.JobUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -56,6 +57,8 @@ public class CommandJobs implements CommandExecutor {
             }
             jobData.addJob(job);
             AranarthUtils.setPlayer(player.getUniqueId(), ap);
+            Bukkit.getLogger().info("[AC][Jobs] " + player.getName() + " joined job (cmd) " + job.name()
+                    + " — active=" + jobData.getActiveJobs());
             PersistenceUtils.saveJobData(player.getUniqueId());
             String aOrAn = job == JobType.EXCAVATOR || job == JobType.EXPLORER || job == JobType.ALCHEMIST ? "an" : "a";
             player.sendMessage(ChatUtils.chatMessage("&7You have become " + aOrAn + " &e" + job.getDisplayName() + " &7job!"));
@@ -82,6 +85,8 @@ public class CommandJobs implements CommandExecutor {
             }
             jobData.removeJob(job);
             AranarthUtils.setPlayer(player.getUniqueId(), ap);
+            Bukkit.getLogger().info("[AC][Jobs] " + player.getName() + " left job (cmd) " + job.name()
+                    + " — active=" + jobData.getActiveJobs());
             PersistenceUtils.saveJobData(player.getUniqueId());
             GuiJobsLeaveClick.applyCooldown(player.getUniqueId());
             String aOrAn = job == JobType.EXCAVATOR || job == JobType.EXPLORER || job == JobType.ALCHEMIST ? "an" : "a";
