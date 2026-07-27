@@ -125,6 +125,7 @@ Minor Features
 [+] Added snow and ice smoothing between colder and warmer biomes
 [~] Fixed issue where resources from outpost chunks could not be claimed
 [+] Implemented single door opening by shift + right-clicking
+[~] Fixed issue with double door opening if doors were touching hinges
 
 Backend Code Changes
 - Implemented discord support bot basis

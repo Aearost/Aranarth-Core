@@ -68,6 +68,10 @@ public class DoubleDoorOpen {
             }
 
             if (sideBlock.getBlockData() instanceof Door sideDoor) {
+                // Only treat as a double-door if hinges are on opposite sides
+                if (sideDoor.getHinge() == door.getHinge()) {
+                    return;
+                }
                 sideDoor.setOpen(!sideDoor.isOpen());
                 sideBlock.setBlockData(sideDoor, true);
             }
