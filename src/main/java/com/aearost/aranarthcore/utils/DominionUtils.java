@@ -767,6 +767,14 @@ public class DominionUtils {
         }
 
         for (Dominion dominion : new ArrayList<>(getDominions())) {
+            // Each server only consumes food for its own dominions.
+            // SMP dominions have world names stored with a "smp:" prefix; Survival dominions do not.
+            String homeWorldName = dominion.getDominionHomeWorldName();
+            boolean isSmpDominion = homeWorldName != null && homeWorldName.startsWith("smp:");
+            if (AranarthCore.isSmpServer() != isSmpDominion) {
+                continue;
+            }
+
             // Conquered dominions are exempt from daily food/money/land taxes
             if (getConquerorOfDominion(dominion) != null) {
                 continue;
