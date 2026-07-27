@@ -303,12 +303,10 @@ public class DateUtils {
 				}
 			}
 
-			// Dominion food/tax cycles must only run on the Survival server.
-			// The SMP server loads dominion data at startup and keeps a stale in-memory copy;
-			// running consumption on SMP overwrites valid food data in MySQL with that stale copy.
-			if (!AranarthCore.isSmpServer()) {
-				DominionUtils.reEvaluateFoodInventory();
-			}
+			// Each server handles food/tax cycles for its own dominions only.
+			// reEvaluateFoodInventory() skips dominions belonging to the other server,
+			// so running it on both Survival and SMP is safe.
+			DominionUtils.reEvaluateFoodInventory();
 		}
 		determineMonthEffects();
 	}
@@ -924,10 +922,10 @@ public class DateUtils {
 		// Applies delay to first snow storm
 		if (!AranarthUtils.getHasStormedInMonth()) {
 			AranarthUtils.setHasStormedInMonth(true);
-			// At least 0.25 days, no more than 1 day
-			AranarthUtils.setStormDelay(new Random().nextInt(18000) + 6000);
+			// TESTING: instant start
+			AranarthUtils.setStormDelay(100);
 		}
-		applySnow(50, 1000);
+		applySnow(200, 4000);
 	}
 
 	/**
@@ -1074,8 +1072,8 @@ public class DateUtils {
 										// At least 0.5 days, no more than 2 days
 										delay = random.nextInt(48000) + 12000;
 									case Month.FRIGORVOR ->
-										// At least 0.25 days, no more than 1 day
-										delay = random.nextInt(18000) + 6000;
+										// TESTING: instant restart
+										delay = 100;
 									case Month.OBSCURVOR ->
 										// At least 0.5 days, no more than 1.5 days
 										delay = random.nextInt(36000) + 12000;
@@ -1288,10 +1286,25 @@ public class DateUtils {
 
 				double temperature = surfaceBlock.getWorld().getTemperature(surfaceBlock.getX(), surfaceBlock.getY(), surfaceBlock.getZ());
 
-				// Hot biomes do not get snow
+				// Hot biomes do not get snow, but allow seeping up to 7 blocks into warm biomes
+				// that border a cold biome, with a chance that decreases with distance.
 				if (temperature >= 0.85) {
-					snowAmountToCreate--;
-					continue;
+					int distToCold = 8;
+					World scanWorld = surfaceBlock.getWorld();
+					int bx = surfaceBlock.getX(), by = surfaceBlock.getY(), bz = surfaceBlock.getZ();
+					for (int[] dir : new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
+						for (int dist = 1; dist <= 7; dist++) {
+							if (scanWorld.getTemperature(bx + dir[0] * dist, by, bz + dir[1] * dist) < 0.85) {
+								if (dist < distToCold) distToCold = dist;
+								break;
+							}
+						}
+					}
+					// No cold neighbour within 7 blocks, or random chance failed — skip
+					if (distToCold == 8 || tlr.nextDouble() >= (8 - distToCold) / 8.0) {
+						snowAmountToCreate--;
+						continue;
+					}
 				}
 
 				// If the surface block is invalid, skip this column
@@ -1443,10 +1456,25 @@ public class DateUtils {
 				Block surfaceBlock = world.getHighestBlockAt(locToCreateIce.getBlockX(), locToCreateIce.getBlockZ());
 
 				double temperature = surfaceBlock.getWorld().getTemperature(surfaceBlock.getX(), surfaceBlock.getY(), surfaceBlock.getZ());
-				// Hot biomes do not get snow
+				// Hot biomes do not get ice, but allow seeping up to 7 blocks into warm biomes
+				// that border a cold biome, with a chance that decreases with distance.
 				if (temperature > 0.85) {
-					iceAmountToCreate--;
-					continue;
+					int distToCold = 8;
+					World scanWorld = surfaceBlock.getWorld();
+					int bx = surfaceBlock.getX(), by = surfaceBlock.getY(), bz = surfaceBlock.getZ();
+					for (int[] dir : new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
+						for (int dist = 1; dist <= 7; dist++) {
+							if (scanWorld.getTemperature(bx + dir[0] * dist, by, bz + dir[1] * dist) <= 0.85) {
+								if (dist < distToCold) distToCold = dist;
+								break;
+							}
+						}
+					}
+					// No cold neighbour within 7 blocks, or random chance failed — skip
+					if (distToCold == 8 || tlr.nextDouble() >= (8 - distToCold) / 8.0) {
+						iceAmountToCreate--;
+						continue;
+					}
 				}
 
 				// Verifies that the block is a source water block and not flowing
