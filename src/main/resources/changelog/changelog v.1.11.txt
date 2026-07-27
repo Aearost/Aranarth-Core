@@ -124,6 +124,7 @@ Minor Features
 [~] Changed location of Aranarthium tutorial exit portal to be further as Fae Aranarthium was added to the tutorial
 [+] Added snow and ice smoothing between colder and warmer biomes
 [~] Fixed issue where resources from outpost chunks could not be claimed
+[+] Implemented single door opening by shift + right-clicking
 
 Backend Code Changes
 - Implemented discord support bot basis
