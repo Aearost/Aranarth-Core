@@ -479,6 +479,7 @@ public class ChatUtils {
 			tips.add("&7&oUse &e&o/aranarthium &7&ofor a guide on clusters and aranarthium");
 			tips.add("&7&oDo you have an Incantation? Use &e&o/incantations &7&ofor more info!");
 			tips.add("&7&oMake sure to use your &e&o/mount &7&oto level them up!");
+			tips.add("&7&oNeed some money? Join up to 5 with &e&o/jobs");
 
 			Collections.shuffle(tips);
 		}
