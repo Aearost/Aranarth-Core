@@ -75,6 +75,7 @@ async function postWorkQueueMessage(channel, issue) {
   await msg.react(config.WORK_QUEUE_EMOJIS.CHANGE_PRIORITY);
   await msg.react(config.WORK_QUEUE_EMOJIS.ON_HOLD);
   await msg.react(config.WORK_QUEUE_EMOJIS.TAKE_NOTE);
+  await msg.react(config.WORK_QUEUE_EMOJIS.REJECT);
   await msg.react(config.WORK_QUEUE_EMOJIS.CLOSE);
   return msg;
 }
@@ -86,6 +87,7 @@ async function postSearchedQueueMessage(channel, issue) {
   await msg.react(config.WORK_QUEUE_EMOJIS.CHANGE_PRIORITY);
   await msg.react(config.WORK_QUEUE_EMOJIS.ON_HOLD);
   await msg.react(config.WORK_QUEUE_EMOJIS.TAKE_NOTE);
+  await msg.react(config.WORK_QUEUE_EMOJIS.REJECT);
   await msg.react(config.WORK_QUEUE_EMOJIS.CLOSE);
   await msg.react(config.WORK_QUEUE_EMOJIS.REMOVE);
   return msg;
@@ -165,6 +167,7 @@ async function refreshWorkQueue(client, excludeIssueNumber = null, injectIssue =
             `${config.WORK_QUEUE_EMOJIS.CHANGE_PRIORITY} **Change Priority** — Update the GitHub priority label\n` +
             `${config.WORK_QUEUE_EMOJIS.ON_HOLD} **On Hold** — Pause work on this issue\n` +
             `${config.WORK_QUEUE_EMOJIS.TAKE_NOTE} **Progress Note** — Add a note to the issue (mirrored to GitHub)\n` +
+            `${config.WORK_QUEUE_EMOJIS.REJECT} **Reject** — Mark the issue as rejected, apply the REJECTED label, and close it\n` +
             `${config.WORK_QUEUE_EMOJIS.CLOSE} **Close** — Mark the issue as resolved and close it\n` +
             `${config.WORK_QUEUE_EMOJIS.SEARCH} **Custom Search** — Look up any issue by number\n` +
             `${config.WORK_QUEUE_EMOJIS.REMOVE} **Remove** — Remove a custom-searched issue from this list`
@@ -446,6 +449,26 @@ async function handleReaction(reaction, user, client) {
     const op = workQueueManager.getPendingOp(user.id);
     if (op) op.promptMessageId = prompt.id;
 
+  // ── Reject ──
+  } else if (emojiName === config.WORK_QUEUE_EMOJIS.REJECT) {
+    if (workQueueManager.getPendingOp(user.id)) return;
+    workQueueManager.setPendingOp(user.id, {
+      type: 'reject',
+      issueNumber,
+      issueTitle,
+      queueMessageId: message.id,
+      promptMessageId: null,
+    });
+    const prompt = await message.channel.send({
+      embeds: [
+        new EmbedBuilder()
+          .setDescription(`❌ <@${user.id}> — Reply with a rejection reason for **${issueTitle} · #${issueNumber}**. Type \`cancel\` to abort.`)
+          .setColor(config.COLORS.ERROR),
+      ],
+    });
+    const op = workQueueManager.getPendingOp(user.id);
+    if (op) op.promptMessageId = prompt.id;
+
   // ── Close ──
   } else if (emojiName === config.WORK_QUEUE_EMOJIS.CLOSE) {
     if (workQueueManager.getPendingOp(user.id)) return;
@@ -598,6 +621,21 @@ async function handleWorkQueueMessage(message, client) {
       console.error('[WorkQueue] Failed to set ON HOLD:', err.message);
     }
     await refreshWorkQueue(client);
+
+  } else if (pending.type === 'reject') {
+    const rejectComment = `❌ **Rejected by ${displayName}:**\n\n${message.content.trim()}`;
+    try {
+      await removeLabel(pending.issueNumber, 'WIP');
+      await removeLabel(pending.issueNumber, 'ON HOLD');
+      holdTimestampManager.remove(pending.issueNumber);
+      await closeIssue(pending.issueNumber, rejectComment);
+      await addLabel(pending.issueNumber, 'REJECTED');
+      await lockForumThread(client, pending.issueNumber);
+      councilActivityManager.remove(pending.issueNumber);
+    } catch (err) {
+      console.error('[WorkQueue] Failed to reject issue:', err.message);
+    }
+    await refreshWorkQueue(client, pending.issueNumber);
 
   } else if (pending.type === 'close') {
     const closeComment = `🔒 **Closed by ${displayName}:**\n\n${message.content.trim()}`;

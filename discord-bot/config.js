@@ -75,6 +75,7 @@ module.exports = {
     IN_PROGRESS: '▶️',
     TAKE_NOTE: '💬',
     ON_HOLD: '⏸️',
+    REJECT: '❌',
     CLOSE: '🔒',
     CHANGE_PRIORITY: '🔄',
     REMOVE: '🗑️',

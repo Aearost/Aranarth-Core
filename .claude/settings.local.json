@@ -334,7 +334,9 @@
       "Bash(sort echo:*)",
       "Bash(find C:/Users/liamh/IdeaProjects/AranarthCore -name *.env* -o -name channels.yml -o -name config.yml)",
       "Bash(for worktree:*)",
-      "WebFetch(domain:jpenilla.github.io)"
+      "WebFetch(domain:jpenilla.github.io)",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -type f -name *alliance* -o -name *request*)",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -type f -name *.txt -o -name *.dat)"
     ]
   }
 }
