@@ -1,9 +1,11 @@
 AranarthCore v. 1.11
 
 Major Features
+[+] Added /jobs functionality
 [+] Implemented Fae Aranarthium
 [+] Implemented Netherite and Aranarthium Elytras
-[+] Implemented Dominion plots, allowing you to designate chunks for individual playersvej
+[+] Implemented Dominion plots, allowing you to designate chunks for individual players
+[+] Added functionality to the Luck effect to improve the loot of all structure chests
 [+] Implemented /brewbook to view all unlocked BreweryX recipes as a paged GUI
 [+] Implemented shop collaboration through /shop invite, restricted to owning or collaborating on an island
 [~] Overhauled quest thresholds to be more accurate for the scaling of the player's rank
@@ -121,7 +123,6 @@ Minor Features
 [~] Made it so cauldrons infinitely fill water bottles
 [~] Changed location of Aranarthium tutorial exit portal to be further as Fae Aranarthium was added to the tutorial
 [+] Added snow and ice smoothing between colder and warmer biomes
-[+] Fixed issue where dominion food reserves were not consumed in the SMP server
 
 Backend Code Changes
 - Implemented discord support bot basis

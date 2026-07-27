@@ -336,7 +336,15 @@
       "Bash(for worktree:*)",
       "WebFetch(domain:jpenilla.github.io)",
       "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -type f -name *alliance* -o -name *request*)",
-      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -type f -name *.txt -o -name *.dat)"
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -type f -name *.txt -o -name *.dat)",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\liamh\\\\IdeaProjects\\\\AranarthCore && mvn compile -q 2>&1\")",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\liamh\\\\IdeaProjects\\\\AranarthCore && mvn compile 2>&1\")",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\liamh\\\\IdeaProjects\\\\AranarthCore && mvn compile\")",
+      "Bash(powershell -Command \"cd 'C:\\\\Users\\\\liamh\\\\IdeaProjects\\\\AranarthCore'; mvn compile 2>&1 | Select-Object -Last 10\")",
+      "Bash(powershell -Command \"cd 'C:\\\\Users\\\\liamh\\\\IdeaProjects\\\\AranarthCore'; & 'C:\\\\Users\\\\liamh\\\\AppData\\\\Roaming\\\\JetBrains\\\\Toolbox\\\\apps\\\\intellij-idea-community\\\\jre\\\\bin\\\\java.exe' -version 2>&1; ls *.xml\")",
+      "Bash(where.exe mvn:*)",
+      "Read(//c/Users/liamh/IdeaProjects/AranarthCore/$LOCALAPPDATA/Programs/Maven/**)",
+      "WebFetch(domain:minecraft.wiki)"
     ]
   }
 }

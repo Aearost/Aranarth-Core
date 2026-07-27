@@ -495,9 +495,15 @@ public class PotionEffectListener implements Listener {
 			}
         } else if (type == PotionEffectType.WITHER) {
             int max = wearingFae ? 4 : 2;
-			if (calculatedAmplifier > max) {
-				calculatedAmplifier = max;
-			}
+            if (calculatedAmplifier > max) {
+                calculatedAmplifier = max;
+            }
+        }
+        // Hard cap of Luck III, regardless of Fae Aranarthium
+        else if (type == PotionEffectType.LUCK) {
+            if (calculatedAmplifier > 2) {
+                calculatedAmplifier = 2;
+            }
         } else {
             int max = wearingFae ? 14 : 9;
 			if (calculatedAmplifier > max) {

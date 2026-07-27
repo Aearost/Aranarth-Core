@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.block.IncantationMagnetismBlockBreak;
+import com.aearost.aranarthcore.event.block.TrialChamberLuck;
 import com.aearost.aranarthcore.utils.CropUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -31,5 +32,7 @@ public class ItemSpawnEventListener implements Listener {
         if (toolId != null) {
             e.getEntity().getPersistentDataContainer().set(MAGNETISM_TAG, PersistentDataType.STRING, toolId);
         }
+
+        new TrialChamberLuck().execute(e);
     }
 }

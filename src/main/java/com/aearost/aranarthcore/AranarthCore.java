@@ -684,6 +684,7 @@ public class AranarthCore extends JavaPlugin {
         new PlayerItemDamageEventListener(this);
         new PlayerItemHeldEventListener(this);
         new ItemSpawnEventListener(this);
+        new LootGenerateEventListener(this);
 
         // Multi-event listeners for single purpose
         new InvisibleItemFrameListener(this);
