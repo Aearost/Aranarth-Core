@@ -240,6 +240,7 @@ public class DominionUtils {
         for (Chunk chunk : dominion.getChunks()) {
             chunkKeyToDominion.put(getChunkKey(chunk), dominion);
         }
+        refreshBiomeCache(dominion);
     }
 
     /**
@@ -347,6 +348,7 @@ public class DominionUtils {
             resizeFoodArray(playerDominion);
             updateDominion(playerDominion);
             DominionLevelUtils.reevaluateDominion(playerDominion);
+            refreshBiomeCache(playerDominion);
             return "&e" + playerDominion.getName() + " &7has claimed &e"
                     + playerDominion.getChunks().size() + "/" + playerDominion.getMaxChunks() + " chunks";
         }
@@ -433,6 +435,7 @@ public class DominionUtils {
                                 resizeFoodArray(playerDominion);
                                 updateDominion(playerDominion);
                                 DominionLevelUtils.reevaluateDominion(playerDominion);
+                                refreshBiomeCache(playerDominion);
                                 return "&7This chunk has been unclaimed successfully";
                             } else {
                                 return "&cYou cannot unclaim this chunk as they all must remain connected!";
@@ -963,6 +966,7 @@ public class DominionUtils {
         chunkKeyToDominion.remove(getChunkKey(chunk));
         resizeFoodArray(dominion);
         updateDominion(dominion);
+        refreshBiomeCache(dominion);
     }
 
     /**
@@ -1151,6 +1155,7 @@ public class DominionUtils {
                 chunkKeyToDominion.remove(getChunkKey(chunkToRemove));
                 resizeFoodArray(dominion);
                 updateDominion(dominion);
+                refreshBiomeCache(dominion);
                 return 0;
             }
         }
@@ -1158,32 +1163,68 @@ public class DominionUtils {
 
     /**
      * Provides the list of biomes that a Dominion has access to claim from.
+     * Uses pre-computed caches populated at startup and on every claim/unclaim.
      *
      * @param dominion The Dominion.
      * @return The list of biomes that a Dominion has access to claim from.
      */
     public static List<Biome> getResourceClaimTypes(Dominion dominion) {
-        List<Biome> biomes = new ArrayList<>();
-        int y = 63;
-
-        List<Chunk> allChunks = new ArrayList<>(dominion.getChunks());
+        Set<Biome> biomes = new LinkedHashSet<>(dominion.getCachedBiomes());
         for (Outpost outpost : OutpostUtils.getDominionOutposts(dominion.getId())) {
-            allChunks.addAll(outpost.getChunks());
+            biomes.addAll(outpost.getCachedBiomes());
         }
+        return new ArrayList<>(biomes);
+    }
 
-        for (Chunk chunk : allChunks) {
-            for (int x = 0; x < 16; x++) {
-                for (int z = 0; z < 16; z++) {
-                    Biome biome = chunk.getBlock(x, y, z).getBiome();
-                    if (!biomes.contains(biome) && biome != Biome.LUSH_CAVES
-                            && biome != Biome.DRIPSTONE_CAVES && biome != Biome.DEEP_DARK) {
-                        biomes.add(biome);
-                    }
+    /**
+     * Recomputes and stores the biome cache for a dominion from its current chunk list.
+     * Should be called after any chunk is claimed or unclaimed.
+     */
+    public static void refreshBiomeCache(Dominion dominion) {
+        dominion.setCachedBiomes(sampleBiomesFromChunks(dominion.getChunks()));
+    }
+
+    /**
+     * Recomputes and stores the biome cache for an outpost from its current chunk list.
+     * Should be called after any outpost chunk is claimed or unclaimed.
+     */
+    public static void refreshOutpostBiomeCache(Outpost outpost) {
+        outpost.setCachedBiomes(sampleBiomesFromChunks(outpost.getChunks()));
+    }
+
+    /**
+     * Samples biomes from a list of chunks, force-loading each chunk's world as needed.
+     * Chunks whose world is not available on this server are skipped gracefully.
+     * Overworld chunks are sampled at y=63 (sea level). Non-overworld chunks are sampled
+     * every 16 blocks across the world's full height range to account for 3D biome placement.
+     */
+    private static Set<Biome> sampleBiomesFromChunks(List<Chunk> chunks) {
+        Set<Biome> biomes = new LinkedHashSet<>();
+        for (Chunk chunk : chunks) {
+            World world = chunk.getWorld();
+            if (world == null) continue;
+            Chunk live = world.getChunkAt(chunk.getX(), chunk.getZ());
+            if (world.getEnvironment() == World.Environment.NORMAL) {
+                sampleBiomesAtY(live, 63, biomes);
+            } else {
+                for (int y = world.getMinHeight(); y < world.getMaxHeight(); y += 16) {
+                    sampleBiomesAtY(live, y, biomes);
                 }
             }
         }
-
         return biomes;
+    }
+
+    private static void sampleBiomesAtY(Chunk chunk, int y, Set<Biome> biomes) {
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+                Biome biome = chunk.getBlock(x, y, z).getBiome();
+                if (biome != Biome.LUSH_CAVES && biome != Biome.DRIPSTONE_CAVES
+                        && biome != Biome.DEEP_DARK) {
+                    biomes.add(biome);
+                }
+            }
+        }
     }
 
     /**
@@ -2189,6 +2230,7 @@ public class DominionUtils {
                     dominion.getChunks().remove(chunkToRemove);
                     chunkKeyToDominion.remove(getChunkKey(chunkToRemove));
                     resizeFoodArray(dominion);
+                    refreshBiomeCache(dominion);
                     if (player.isOnline()) {
                         player.getPlayer().sendMessage(ChatUtils.chatMessage(
                                 "&cYour Dominion is over its chunk limit and has lost a chunk! "

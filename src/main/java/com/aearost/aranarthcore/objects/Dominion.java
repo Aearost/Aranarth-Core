@@ -60,6 +60,7 @@ public class Dominion {
 
 	private int boughtOutpostChunks;
 	private int storedChunkCount = -1; // set when chunks can't be loaded (cross-server stub)
+	private Set<Biome> cachedBiomes = new HashSet<>();
 	private Map<String, String> plotChunkNames;  // chunk key → plot name
 	private Map<String, Set<UUID>> plotMembers;  // plot name → member UUIDs
 	// A null entry for a permission means it is inherited from the player's rank or relation
@@ -880,6 +881,14 @@ public class Dominion {
 	 */
 	public void setLevelDropTimestamp(long levelDropTimestamp) {
 		this.levelDropTimestamp = levelDropTimestamp;
+	}
+
+	public Set<Biome> getCachedBiomes() {
+		return cachedBiomes;
+	}
+
+	public void setCachedBiomes(Set<Biome> cachedBiomes) {
+		this.cachedBiomes = cachedBiomes;
 	}
 
 	/**

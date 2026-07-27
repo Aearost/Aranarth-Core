@@ -43,6 +43,7 @@ public class OutpostUtils {
         for (Chunk chunk : outpost.getChunks()) {
             chunkKeyToOutpost.put(getChunkKey(chunk), outpost);
         }
+        DominionUtils.refreshOutpostBiomeCache(outpost);
     }
 
     /**
@@ -256,6 +257,7 @@ public class OutpostUtils {
         outpost.getChunks().add(chunkToClaim);
         chunkKeyToOutpost.put(getChunkKey(chunkToClaim), outpost);
         DominionUtils.updateDominion(dominion);
+        DominionUtils.refreshOutpostBiomeCache(outpost);
         return "&e" + outpost.getName() + " &7has claimed &e"
                 + outpost.getChunks().size() + "/" + maxChunks + " outpost chunks";
     }
@@ -284,6 +286,7 @@ public class OutpostUtils {
         outpost.getChunks().remove(chunk);
         chunkKeyToOutpost.remove(getChunkKey(chunk));
         DominionUtils.updateDominion(dominion);
+        DominionUtils.refreshOutpostBiomeCache(outpost);
 
         // Refund half the claim price
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
@@ -327,6 +330,7 @@ public class OutpostUtils {
             chunks.remove(toRemove);
             chunkKeyToOutpost.remove(getChunkKey(toRemove));
             updateOutpost(outpost);
+            DominionUtils.refreshOutpostBiomeCache(outpost);
             notifyMembers(dominion, "&cA chunk has been lost from outpost &e" + outpost.getName()
                     + " &cfor failing to maintain the required dominion level");
         }

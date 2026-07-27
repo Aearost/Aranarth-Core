@@ -4,8 +4,11 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.block.Biome;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -23,6 +26,7 @@ public class Outpost {
     private List<Chunk> chunks;
     private int boughtChunks;
     private final long createdTimestamp;
+    private Set<Biome> cachedBiomes = new HashSet<>();
 
     public Outpost(UUID id, String name, UUID dominionId, int outpostIndex,
                    String worldName, double homeX, double homeY, double homeZ,
@@ -96,5 +100,13 @@ public class Outpost {
 
     public long getCreatedTimestamp() {
         return createdTimestamp;
+    }
+
+    public Set<Biome> getCachedBiomes() {
+        return cachedBiomes;
+    }
+
+    public void setCachedBiomes(Set<Biome> cachedBiomes) {
+        this.cachedBiomes = cachedBiomes;
     }
 }
