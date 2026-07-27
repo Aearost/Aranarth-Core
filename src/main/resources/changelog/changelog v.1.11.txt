@@ -128,6 +128,7 @@ Minor Features
 [~] Fixed issue with double door opening if doors were touching hinges
 [+] Added jobs server tips message
 [~] Fixed issue where outpost names were counted by the unstripped length
+[+] Implemented announcement of Dominion Outpost creation/renaming
 
 Backend Code Changes
 - Implemented discord support bot basis

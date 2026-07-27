@@ -1636,9 +1636,13 @@ public class CommandDominion implements CommandExecutor {
                 loc.getYaw(), loc.getPitch(), outpostChunks, 0, System.currentTimeMillis());
         OutpostUtils.registerOutpost(outpost);
 
-        NumberFormat formatter = NumberFormat.getCurrencyInstance();
-        player.sendMessage(ChatUtils.chatMessage("&7The outpost of &e" + outpostName
-                + " &7has been established"));
+        String foundedMsg = ChatUtils.chatMessage("&e" + dominion.getName() + " &7has founded the outpost, &e" + outpostName);
+        Bukkit.broadcastMessage(foundedMsg);
+        DiscordUtils.dominionMessage(dominion, dominion.getName() + " has founded the outpost, " + outpostName, new Color(245, 197, 66));
+        NetworkManager nm = NetworkManager.getInstance();
+        if (nm != null) {
+            nm.publishBroadcast(foundedMsg);
+        }
         player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 1.2F, 1.5F);
     }
 
@@ -1664,9 +1668,17 @@ public class CommandDominion implements CommandExecutor {
         if (newName == null) {
             return;
         }
+        String oldName = outpost.getName();
         outpost.setName(newName);
         OutpostUtils.updateOutpost(outpost);
         player.sendMessage(ChatUtils.chatMessage("&7Outpost renamed to &e" + newName));
+        String renamedMsg = ChatUtils.chatMessage("&e" + dominion.getName() + "&7's outpost, &e" + oldName + "&7, has been renamed to &e" + newName);
+        Bukkit.broadcastMessage(renamedMsg);
+        DiscordUtils.dominionMessage(dominion, dominion.getName() + "'s outpost, " + oldName + ", has been renamed to " + newName, new Color(135, 245, 220));
+        NetworkManager nm = NetworkManager.getInstance();
+        if (nm != null) {
+            nm.publishBroadcast(renamedMsg);
+        }
     }
 
     private static void outpostSethome(Dominion dominion, Player player) {
