@@ -1,7 +1,6 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.enums.JobType;
-import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.JobData;
 import org.bukkit.Bukkit;
@@ -91,15 +90,9 @@ public class JobUtils {
             10, 60, 20
         );
 
-        String broadcastMsg = ChatUtils.translateToColor(
-            "&8[&eAC&8] &7" + nickname + " &7has reached &e&lLevel " + newLevel + " &7in &e" + jobName + "&7!"
-        );
+        String broadcastMsg = ChatUtils.chatMessage("&7" + nickname + " &7has reached &e&lLevel " + newLevel + " &7in &e" + jobName + "&7!");
 
         Bukkit.broadcastMessage(broadcastMsg);
-
-        if (NetworkManager.isActive()) {
-            NetworkManager.getInstance().publishBroadcast(broadcastMsg);
-        }
     }
 
     public static void trackPlacedBlock(UUID playerUuid, long locationKey) {
