@@ -107,6 +107,7 @@ public class NetworkManager {
     public static final String CH_CHAT_GAME_CLAIM   = "aranarth:chat_game_claim";
     public static final String CH_DEATH             = "aranarth:death";
     public static final String CH_BREW_UNLOCK       = "aranarth:brew_unlock";
+    public static final String CH_BALANCE_ADJUST    = "aranarth:balance_adjust";
 
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
@@ -303,6 +304,7 @@ public class NetworkManager {
             case CH_CHAT_GAME_CLAIM  -> handleChatGameClaim(json);
             case CH_DEATH            -> handleDeath(json);
             case CH_BREW_UNLOCK      -> handleBrewUnlock(json);
+            case CH_BALANCE_ADJUST   -> handleBalanceAdjust(json);
         }
     }
 
@@ -520,6 +522,22 @@ public class NetworkManager {
         json.addProperty("uuid", uuid.toString());
         json.addProperty("recipeId", recipeId);
         publish(CH_BREW_UNLOCK, json);
+    }
+
+    /**
+     * Notifies all other servers of a balance change for a player not online on this server
+     * (e.g., a shop sale or purchase). Receiving servers update their in-memory copy so that
+     * the next periodic save does not overwrite the change with a stale value.
+     *
+     * @param uuid  The UUID of the player whose balance changed.
+     * @param delta The amount added (positive) or subtracted (negative) from the balance.
+     */
+    public void publishBalanceAdjust(UUID uuid, double delta) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", uuid.toString());
+        json.addProperty("delta", delta);
+        publish(CH_BALANCE_ADJUST, json);
     }
 
     /**
@@ -1492,6 +1510,20 @@ public class NetworkManager {
         UUID uuid = UUID.fromString(json.get("uuid").getAsString());
         String recipeId = json.get("recipeId").getAsString();
         BrewRecipeUtils.applyRemoteUnlock(uuid, recipeId);
+    }
+
+    private void handleBalanceAdjust(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) return;
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        double delta = json.get("delta").getAsDouble();
+        AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+        if (ap != null) {
+            ap.setBalance(ap.getBalance() + delta);
+            // Immediately persist so the next periodic save cannot overwrite
+            // the updated balance with a stale value.
+            PersistenceUtils.saveAranarthPlayerImmediately(uuid);
+        }
     }
 
     private void handleSleepMessage(JsonObject json) {

@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -307,6 +308,11 @@ public class ShopInteract {
                     shopUser.setBalance(shopUser.getBalance() + shop.getBuyPrice());
                     // Immediately persist the shop owner's new balance
                     PersistenceUtils.saveAranarthPlayerImmediately(shop.getUuid());
+                    // If the owner is on another server, broadcast the delta so their in-memory
+                    // balance there is updated before the next periodic save overwrites the DB.
+                    if (Bukkit.getPlayer(shop.getUuid()) == null && NetworkManager.isActive()) {
+                        NetworkManager.getInstance().publishBalanceAdjust(shop.getUuid(), shop.getBuyPrice());
+                    }
                 }
 
                 // Logic to add items to player's inventory
@@ -514,6 +520,9 @@ public class ShopInteract {
                     shopUser.setBalance(shopUser.getBalance() - shop.getSellPrice());
                     // Same cross-server race fix as in handleBuyLogic
                     PersistenceUtils.saveAranarthPlayerImmediately(shop.getUuid());
+                    if (Bukkit.getPlayer(shop.getUuid()) == null && NetworkManager.isActive()) {
+                        NetworkManager.getInstance().publishBalanceAdjust(shop.getUuid(), -shop.getSellPrice());
+                    }
                     ItemStack shopItem = shop.getItem().clone();
                     shopItem.setAmount(shop.getQuantity());
                     chestInventory.addItem(shopItem);
