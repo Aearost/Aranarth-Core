@@ -1165,7 +1165,13 @@ public class DominionUtils {
     public static List<Biome> getResourceClaimTypes(Dominion dominion) {
         List<Biome> biomes = new ArrayList<>();
         int y = 63;
-        for (Chunk chunk : dominion.getChunks()) {
+
+        List<Chunk> allChunks = new ArrayList<>(dominion.getChunks());
+        for (Outpost outpost : OutpostUtils.getDominionOutposts(dominion.getId())) {
+            allChunks.addAll(outpost.getChunks());
+        }
+
+        for (Chunk chunk : allChunks) {
             for (int x = 0; x < 16; x++) {
                 for (int z = 0; z < 16; z++) {
                     Biome biome = chunk.getBlock(x, y, z).getBiome();
