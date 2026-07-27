@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
@@ -8,7 +9,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-
 import java.util.*;
 
 /**
@@ -45,22 +45,32 @@ public class GuiPotionAddClose {
                         continue;
                     }
 
+                    // Strip brewing tags so that bonus copies (BREWING_COPY) and originals
+                    // (BREWED_POTION already stripped, but defensive) are treated as the same key
+                    ItemStack normalizedPotion = inventoryPotion.clone();
+                    if (normalizedPotion.hasItemMeta()) {
+                        var normalizedMeta = normalizedPotion.getItemMeta();
+                        normalizedMeta.getPersistentDataContainer().remove(CustomKeys.BREWING_COPY);
+                        normalizedMeta.getPersistentDataContainer().remove(CustomKeys.BREWED_POTION);
+                        normalizedPotion.setItemMeta(normalizedMeta);
+                    }
+
                     // If they are not yet exceeding the limit
                     // +1 as it is attempting to be added but may not add successfully
                     if (storedPotionNum + potionAmountAdded + 1 <= AranarthUtils.getMaxPotionNum(player)) {
-                        if (potions.containsKey(inventoryPotion)) {
-                            int amount = potions.get(inventoryPotion);
-                            potions.put(inventoryPotion, amount + 1);
+                        if (potions.containsKey(normalizedPotion)) {
+                            int amount = potions.get(normalizedPotion);
+                            potions.put(normalizedPotion, amount + 1);
                             potionAmountAdded++;
                         } else {
-                            potions.put(inventoryPotion, 1);
+                            potions.put(normalizedPotion, 1);
                             potionAmountAdded++;
                         }
                     }
                     // The limit has been exceeded
                     else {
                         potionAmountUnableToAdd++;
-                        HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(inventoryPotion);
+                        HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(normalizedPotion);
                         // If the player's inventory was full, drop it to the ground
                         if (!leftover.isEmpty()) {
                             player.getLocation().getWorld().dropItemNaturally(player.getLocation(), leftover.get(0));
