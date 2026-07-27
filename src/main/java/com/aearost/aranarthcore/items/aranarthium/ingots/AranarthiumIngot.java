@@ -40,7 +40,7 @@ public class AranarthiumIngot implements AranarthItem {
 	}
 	
 	public String getName() {
-		return "&#e67373&lA#f08a65&lr#f7a84f&la#fcd237&ln#a8c84f&la#69d673&lr#42c8a6&lt#2abbdc&lh#5295e9&li#8162ec&lu#a040ec&lm";
+		return "&#e67373&lA&#f08a65&lr&#f7a84f&la&#fcd237&ln&#a8c84f&la&#69d673&lr&#42c8a6&lt&#2abbdc&lh&#5295e9&li&#8162ec&lu&#a040ec&lm";
 	}
 	
 	public String getLore() {
