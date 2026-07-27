@@ -127,6 +127,7 @@ Minor Features
 [+] Implemented single door opening by shift + right-clicking
 [~] Fixed issue with double door opening if doors were touching hinges
 [+] Added jobs server tips message
+[~] Fixed issue where outpost names were counted by the unstripped length
 
 Backend Code Changes
 - Implemented discord support bot basis

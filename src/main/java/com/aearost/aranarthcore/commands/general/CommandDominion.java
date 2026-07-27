@@ -1826,7 +1826,7 @@ public class CommandDominion implements CommandExecutor {
             player.sendMessage(ChatUtils.chatMessage("&cThat name for the outpost is invalid"));
             return null;
         }
-        if (cleaned.length() > 30) {
+        if (ChatUtils.stripColorFormatting(cleaned).length() > 30) {
             player.sendMessage(ChatUtils.chatMessage("&cThat name is too long (max 30 characters)"));
             return null;
         }
