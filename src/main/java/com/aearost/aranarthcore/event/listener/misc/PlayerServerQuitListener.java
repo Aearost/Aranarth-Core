@@ -84,12 +84,24 @@ public class PlayerServerQuitListener implements Listener {
 			NetworkManager.getInstance().publishPlayerQuit(player.getUniqueId(), crossServerQuitMsg, isVanished);
 		}
 		PersistenceUtils.saveQuestProgress();
+		// For cross-server transfers, also write the quest progress synchronously so the receiving
+		// server's reloadQuestProgressForPlayer() call sees the current data immediately.
+		// The async write inside saveQuestProgress() may not complete before the other server reads.
+		if (isCrossServerTransfer && DatabaseManager.isActive()) {
+			PersistenceUtils.syncQuestProgressForPlayerSync(player.getUniqueId());
+		}
 		// Use synchronous save to avoid racing with DatabaseManager.shutdown(), which can close
 		// the connection pool before an async-dispatched save task gets a chance to execute.
 		PersistenceUtils.saveJobDataSync(player.getUniqueId());
 		// Prevent this player's stale in-memory quest data from being written to the shared DB
 		// after they leave — the other server owns their quest state from this point on.
 		QuestUtils.getLocallyModifiedUuids().remove(player.getUniqueId());
+		// Also remove from sessionModifiedUuids so that if THIS server restarts while the player
+		// is on the other server, onDisable()'s syncAllQuestDataToDatabase() doesn't overwrite
+		// the other server's more recent DB data with this server's stale in-memory snapshot.
+		if (isCrossServerTransfer) {
+			QuestUtils.getSessionModifiedUuids().remove(player.getUniqueId());
+		}
 		// Record today as the player's last login day before saving. This ensures that if the
 		// player crashes before claiming their streak, the saved data captures that they were
 		// online today, preventing a false reset when they reconnect after midnight.

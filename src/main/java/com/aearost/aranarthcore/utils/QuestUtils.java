@@ -626,6 +626,8 @@ public class QuestUtils {
         // Reset player state if their rank changed
         Integer storedRank = playerQuestRank.get(uuid);
         if (storedRank == null || storedRank != rank) {
+            Bukkit.getLogger().info("[AC] [Quest] Rank change for " + uuid
+                    + " (stored=" + storedRank + " current=" + rank + ") — wiping quest data and assigning new quests");
             playerActiveDailyQuests.remove(uuid);
             playerActiveWeeklyQuests.remove(uuid);
             playerDailyProgress.remove(uuid);

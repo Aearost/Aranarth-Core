@@ -5099,6 +5099,11 @@ public class PersistenceUtils {
                 QuestUtils.getPlayerWeeklyClaimed().remove(uuid);
             }
             QuestUtils.getPlayerQuestRank().put(uuid, rank);
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quest] Reloaded from DB for " + uuid
+                    + " daily=" + java.util.Arrays.toString(QuestUtils.getPlayerDailyProgress().get(uuid))
+                    + " weekly=" + java.util.Arrays.toString(QuestUtils.getPlayerWeeklyProgress().get(uuid))
+                    + " rank=" + rank
+                    + " dailyCurrent=" + dailyCurrent + " weeklyCurrent=" + weeklyCurrent);
             if (dailyCurrent && prog.has("dTasks") && prog.has("dRewards")) {
                 String[] dTasks = GSON.fromJson(prog.get("dTasks"), String[].class);
                 double[] dRewards = GSON.fromJson(prog.get("dRewards"), double[].class);
@@ -5297,6 +5302,21 @@ public class PersistenceUtils {
         syncQuestDataToDatabase(uuids);
     }
 
+    /**
+     * Synchronously writes a single player's quest progress to MySQL.
+     * Call from cross-server transfer quit events so the receiving server can immediately
+     * read the current progress — the async path in saveQuestProgress() may not complete
+     * in time before reloadQuestProgressForPlayer() runs on the other server.
+     */
+    public static void syncQuestProgressForPlayerSync(UUID uuid) {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quest] Sync-writing quest progress for "
+                + uuid + " (cross-server transfer)");
+        syncQuestDataToDatabase(java.util.Set.of(uuid));
+    }
+
     private static void syncQuestDataToDatabase(Set<UUID> uuidsToSync) {
         if (!DatabaseManager.isActive()) {
             return;
@@ -5368,6 +5388,10 @@ public class PersistenceUtils {
             prog.add("dRewards", GSON.toJsonTree(dRewards));
             prog.add("wTasks", GSON.toJsonTree(wTasks));
             prog.add("wRewards", GSON.toJsonTree(wRewards));
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quest] Writing to DB for " + uuid
+                    + " daily=" + java.util.Arrays.toString(dp)
+                    + " weekly=" + java.util.Arrays.toString(wp)
+                    + " tasks=" + java.util.Arrays.toString(dTasks));
             try {
                 db.saveQuestData(uuid, null, GSON.toJson(prog));
             } catch (Exception e) {
@@ -6695,6 +6719,11 @@ public class PersistenceUtils {
                     wc = new boolean[3];
                     wClaim = new boolean[3];
                 }
+                Bukkit.getLogger().info("[AC] [Quest] Loaded from DB for " + uuid
+                        + " daily=" + java.util.Arrays.toString(dp)
+                        + " weekly=" + java.util.Arrays.toString(wp)
+                        + " rank=" + rank
+                        + " dailyCurrent=" + dailyCurrent + " weeklyCurrent=" + weeklyCurrent);
                 QuestUtils.getPlayerDailyProgress().put(uuid, dp);
                 QuestUtils.getPlayerDailyCompleted().put(uuid, dc);
                 QuestUtils.getPlayerDailyClaimed().put(uuid, dClaim);
