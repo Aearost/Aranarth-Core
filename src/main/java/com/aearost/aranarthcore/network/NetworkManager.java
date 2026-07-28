@@ -108,6 +108,7 @@ public class NetworkManager {
     public static final String CH_DEATH             = "aranarth:death";
     public static final String CH_BREW_UNLOCK       = "aranarth:brew_unlock";
     public static final String CH_BALANCE_ADJUST    = "aranarth:balance_adjust";
+    public static final String CH_PAY_NOTIFY        = "aranarth:pay_notify";
 
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
@@ -305,6 +306,7 @@ public class NetworkManager {
             case CH_DEATH            -> handleDeath(json);
             case CH_BREW_UNLOCK      -> handleBrewUnlock(json);
             case CH_BALANCE_ADJUST   -> handleBalanceAdjust(json);
+            case CH_PAY_NOTIFY       -> handlePayNotify(json);
         }
     }
 
@@ -538,6 +540,22 @@ public class NetworkManager {
         json.addProperty("uuid", uuid.toString());
         json.addProperty("delta", delta);
         publish(CH_BALANCE_ADJUST, json);
+    }
+
+    /**
+     * Notifies the server where the target player is online that they received a payment.
+     *
+     * @param toUuid          The UUID of the player who received the payment.
+     * @param fromNickname    The nickname of the paying player.
+     * @param formattedAmount The already-formatted currency string (e.g. "$4,000.00").
+     */
+    public void publishPayNotify(UUID toUuid, String fromNickname, String formattedAmount) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("toUuid", toUuid.toString());
+        json.addProperty("fromNickname", fromNickname);
+        json.addProperty("formattedAmount", formattedAmount);
+        publish(CH_PAY_NOTIFY, json);
     }
 
     /**
@@ -1524,6 +1542,17 @@ public class NetworkManager {
             // the updated balance with a stale value.
             PersistenceUtils.saveAranarthPlayerImmediately(uuid);
         }
+    }
+
+    private void handlePayNotify(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) return;
+        UUID toUuid = UUID.fromString(json.get("toUuid").getAsString());
+        Player target = Bukkit.getPlayer(toUuid);
+        if (target == null) return;
+        String fromNickname = json.get("fromNickname").getAsString();
+        String formattedAmount = json.get("formattedAmount").getAsString();
+        target.sendMessage(ChatUtils.chatMessage("&7You have received &6" + formattedAmount + " &7from &e" + fromNickname));
     }
 
     private void handleSleepMessage(JsonObject json) {

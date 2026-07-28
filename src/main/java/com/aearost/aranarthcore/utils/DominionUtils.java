@@ -1181,7 +1181,8 @@ public class DominionUtils {
      * Should be called after any chunk is claimed or unclaimed.
      */
     public static void refreshBiomeCache(Dominion dominion) {
-        dominion.setCachedBiomes(sampleBiomesFromChunks(dominion.getChunks()));
+        World world = dominion.getDominionHome().getWorld();
+        dominion.setCachedBiomes(sampleBiomesFromChunks(dominion.getChunks(), world));
     }
 
     /**
@@ -1189,23 +1190,33 @@ public class DominionUtils {
      * Should be called after any outpost chunk is claimed or unclaimed.
      */
     public static void refreshOutpostBiomeCache(Outpost outpost) {
-        outpost.setCachedBiomes(sampleBiomesFromChunks(outpost.getChunks()));
+        World world = outpost.getHome().getWorld();
+        outpost.setCachedBiomes(sampleBiomesFromChunks(outpost.getChunks(), world));
     }
 
     /**
-     * Samples biomes from a list of chunks, force-loading each chunk's world as needed.
-     * Chunks whose world is not available on this server are skipped gracefully.
-     * Overworld chunks are sampled at y=63 (sea level). Non-overworld chunks are sampled
-     * every 16 blocks across the world's full height range to account for 3D biome placement.
+     * Samples biomes from a list of chunks, restricted to the specified world.
+     * Chunks belonging to a different world are skipped to prevent cross-world biome contamination —
+     * for example, an outpost in the nether should never pick up overworld biomes at the same chunk
+     * coordinates, even if a different world happens to have claims there.
+     * Overworld chunks are sampled at the surface height of each column so that underground biome
+     * zones (e.g. Cherry Grove extending below a mountain at Y=63) are not included. Non-overworld
+     * chunks are sampled every 16 blocks across the world's full height range to account for 3D
+     * biome placement.
+     *
+     * @param chunks        The chunks to sample biomes from.
+     * @param expectedWorld The world these chunks must belong to; chunks in any other world are ignored.
+     *                      If null (e.g. world not loaded on this server), returns an empty set.
      */
-    private static Set<Biome> sampleBiomesFromChunks(List<Chunk> chunks) {
+    private static Set<Biome> sampleBiomesFromChunks(List<Chunk> chunks, World expectedWorld) {
         Set<Biome> biomes = new LinkedHashSet<>();
+        if (expectedWorld == null) return biomes;
         for (Chunk chunk : chunks) {
             World world = chunk.getWorld();
-            if (world == null) continue;
+            if (world == null || !world.equals(expectedWorld)) continue;
             Chunk live = world.getChunkAt(chunk.getX(), chunk.getZ());
             if (world.getEnvironment() == World.Environment.NORMAL) {
-                sampleBiomesAtY(live, 63, biomes);
+                sampleBiomesAtSurface(live, biomes);
             } else {
                 for (int y = world.getMinHeight(); y < world.getMaxHeight(); y += 16) {
                     sampleBiomesAtY(live, y, biomes);
@@ -1219,6 +1230,27 @@ public class DominionUtils {
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
                 Biome biome = chunk.getBlock(x, y, z).getBiome();
+                if (biome != Biome.LUSH_CAVES && biome != Biome.DRIPSTONE_CAVES
+                        && biome != Biome.DEEP_DARK) {
+                    biomes.add(biome);
+                }
+            }
+        }
+    }
+
+    /**
+     * Samples biomes from an overworld chunk by reading each column at its actual surface height.
+     * This prevents underground biome zones (e.g. a mountain biome extending below sea level) from
+     * appearing in the set even though no surface terrain of that biome exists in the claim.
+     */
+    private static void sampleBiomesAtSurface(Chunk chunk, Set<Biome> biomes) {
+        World world = chunk.getWorld();
+        int baseX = chunk.getX() << 4;
+        int baseZ = chunk.getZ() << 4;
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+                int surfaceY = world.getHighestBlockYAt(baseX + x, baseZ + z);
+                Biome biome = chunk.getBlock(x, surfaceY, z).getBiome();
                 if (biome != Biome.LUSH_CAVES && biome != Biome.DRIPSTONE_CAVES
                         && biome != Biome.DEEP_DARK) {
                     biomes.add(biome);
