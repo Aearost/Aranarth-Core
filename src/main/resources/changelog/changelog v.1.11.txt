@@ -132,6 +132,7 @@ Minor Features
 [~] Fixed issue where mobs were spawning in Dominion outpost land, despite the flag being set to disallow it
 [~] Fixed issue where outpost color names were not displayed in the dominion GUI
 [+] Added extra farmland counter for dominions in unloaded chunks
+[+] Added /brewbook server tips message
 
 Backend Code Changes
 - Implemented discord support bot basis
