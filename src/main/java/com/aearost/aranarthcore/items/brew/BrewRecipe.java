@@ -80,7 +80,8 @@ public enum BrewRecipe {
     MOSS_MULE(          "moss_mule",          Tier.COMMON, 26000, -1, false),
 
     // ─── RARE tier ────────────────────────────────────────────────────────────
-    // Difficulty 5–6. Unlocked through vote crates.
+    // Difficulty 5–6. Unlocked through vote crates (or by perfecting the recipe).
+    // diff 5
     CHERRY_WINE(     "cherry_wine",      Tier.RARE, 0, -1, false),  // diff 5, age 16 Cherry
     GLOW_WINE(       "glow_wine",        Tier.RARE, 0, -1, false),  // diff 5, age 8 Pale Oak, GLOWING+NIGHT_VISION
     MELON_VODKA(     "melon_vodka",      Tier.RARE, 0, -1, false),  // diff 5, distillruns 3
@@ -90,6 +91,7 @@ public enum BrewRecipe {
     APPLE_LIQUOR(    "apple_liquor",     Tier.RARE, 0, -1, false),  // diff 5, distillruns 3, age 6 Acacia
     DANDELION_LIQUOR("dandelion_liquor", Tier.RARE, 0, -1, false),  // diff 5, distillruns 2, age 4 Birch
     TEQUILA(         "tequila",          Tier.RARE, 0, -1, false),  // diff 5, distillruns 2, age 12 Birch
+    // diff 6
     GIN(             "gin",              Tier.RARE, 0, -1, false),  // diff 6, distillruns 2
     CHAMPAGNE(       "champagne",        Tier.RARE, 0, -1, false),  // diff 6, distillruns 1, age 4
     RUM(             "rum",              Tier.RARE, 0, -1, false),  // diff 6, distillruns 2, age 14, FIRE_RESISTANCE+POISON
@@ -104,7 +106,8 @@ public enum BrewRecipe {
     WHITE_DRAGON_TEA("atla13",           Tier.RARE, 0, 1,  false),  // REGEN+LUCK/160s
 
     // ─── RARE tier additions ──────────────────────────────────────────────────
-    // Unlocked by perfecting — not from vote crates.
+    // Also obtainable from vote crates (or by perfecting). Perfecting any brew
+    // unlocks it automatically regardless of whether the recipe was known before.
     // diff 5
     MATCHA_LATTE(       "matcha_latte",       Tier.RARE, 0, -1, false),
     TORCHFLOWER_TEA(    "torchflower_tea",    Tier.RARE, 0, -1, false),
@@ -144,7 +147,7 @@ public enum BrewRecipe {
     WITCHES_BREW(       "witches_brew",       Tier.RARE, 0, -1, false),
 
     // ─── LEGENDARY tier ───────────────────────────────────────────────────────
-    // Difficulty 7–10. Unlocked through weekly quests (rank 5+, 33% chance).
+    // Difficulty 7–10. Unlocked through weekly quests (rank 5+, 33% chance), or by perfecting.
     EGGNOG(            "eggnog",       Tier.LEGENDARY, 0, -1, false),  // diff 4→end-tier Advocaat
     WHISKEY(           "whiskey",      Tier.LEGENDARY, 0, -1, false),  // diff 7, distillruns 2, age 18 Spruce
     FIRE_WHISKEY(      "fire_whiskey", Tier.LEGENDARY, 0, -1, false),  // diff 7, distillruns 3, age 18 Spruce
@@ -168,7 +171,7 @@ public enum BrewRecipe {
     FORBIDDEN_INK(     "atla24",       Tier.LEGENDARY, 0, -1, false),  // diff 9, NIGHT_VISION+LUCK+SLOW_FALLING, Dark Oak age 12
 
     // ─── LEGENDARY tier additions ─────────────────────────────────────────────
-    // Unlocked by perfecting — not from weekly quests.
+    // Also obtainable from weekly quests (or by perfecting).
     // diff 7
     SCULK_STOUT(        "sculk_stout",        Tier.LEGENDARY, 0, -1, false),
     RYE_WHISKEY(        "rye_whiskey",        Tier.LEGENDARY, 0, -1, false),
