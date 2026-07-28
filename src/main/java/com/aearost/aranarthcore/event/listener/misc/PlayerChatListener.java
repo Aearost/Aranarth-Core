@@ -153,7 +153,7 @@ public class PlayerChatListener implements Listener {
         Component messageComponent = null;
         if (aranarthPlayer.isGradientChatEnabled() && !aranarthPlayer.getGradientChatColors().isEmpty()) {
             messageComponent = ChatUtils.buildGradientMessageWithUrls(
-                    aranarthPlayer.getGradientChatColors(), message, aranarthPlayer.isGradientChatBold());
+                    aranarthPlayer.getGradientChatColors(), ChatUtils.stripColorFormatting(message), aranarthPlayer.isGradientChatBold());
         }
         if (messageComponent == null) {
             messageComponent = ChatUtils.buildMessageWithUrls(chatMessage);
