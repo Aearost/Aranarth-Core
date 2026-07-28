@@ -838,7 +838,7 @@ public class DateUtils {
 	 * @return The Description of the month.
 	 */
 	public static String getStrigavorDescription() {
-		return "The month of Strigavór is for witchcraft, providing increased positive effects during the day, and increased negative effects during the night.";
+		return "The month of Strigavór is for witchcraft, providing increased positive effects during the day, and increased negative effects during the night. Also grants a 25% chance for a doubled potion.";
 	}
 
 	/**
