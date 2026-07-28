@@ -3,7 +3,10 @@ package com.aearost.aranarthcore.event.listener;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.block.*;
 import com.aearost.aranarthcore.event.player.PlayerAutoReplenishSlot;
+import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.DominionLevelUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
@@ -43,5 +46,14 @@ public class BlockPlaceEventListener implements Listener {
             new RandomizerBlockPlace().execute(e);
         }
         new PlayerAutoReplenishSlot().execute(e);
+
+        // Track farmland placed directly (e.g. creative mode) for dominion level criteria
+        if (e.getBlock().getType() == Material.FARMLAND) {
+            Dominion dominion = DominionUtils.getDominionOfChunkAnywhere(e.getBlock().getChunk());
+            if (dominion != null) {
+                dominion.setCachedFarmlandCount(dominion.getCachedFarmlandCount() + 1);
+                DominionLevelUtils.reevaluateDominion(dominion);
+            }
+        }
     }
 }

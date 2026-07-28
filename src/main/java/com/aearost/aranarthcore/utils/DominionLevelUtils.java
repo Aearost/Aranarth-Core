@@ -17,6 +17,7 @@ import org.bukkit.entity.Tameable;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 /**
  * Manages the Dominion level system (levels 1–5).
@@ -359,6 +360,49 @@ public class DominionLevelUtils {
             }
         }
         return -1;
+    }
+
+    /**
+     * Forces a full farmland recount for a single dominion, loading any unloaded chunks as needed.
+     * Safe to call for block-only scans since block data is immediately available on load
+     * (unlike entity data, which Paper loads asynchronously).
+     * Must be called on the main thread.
+     *
+     * @param dominion   The dominion to rescan.
+     * @param onComplete Called on the main thread with the new farmland count, or null.
+     */
+    public static void rescanFarmland(Dominion dominion, Consumer<Integer> onComplete) {
+        record SnapshotBundle(ChunkSnapshot snapshot, int minY, int maxY) {}
+        List<SnapshotBundle> bundles = new ArrayList<>();
+
+        List<Chunk> allChunks = new ArrayList<>(dominion.getChunks());
+        for (Outpost outpost : OutpostUtils.getDominionOutposts(dominion.getId())) {
+            allChunks.addAll(outpost.getChunks());
+        }
+
+        for (Chunk chunk : allChunks) {
+            if (!chunk.isLoaded()) {
+                chunk.load();
+            }
+            int minY = chunk.getWorld().getMinHeight();
+            int maxY = chunk.getWorld().getMaxHeight();
+            bundles.add(new SnapshotBundle(chunk.getChunkSnapshot(), minY, maxY));
+        }
+
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+            int count = 0;
+            for (SnapshotBundle bundle : bundles) {
+                count += countFarmlandInSnapshot(bundle.snapshot(), bundle.minY(), bundle.maxY());
+            }
+            final int finalCount = count;
+            Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+                dominion.setCachedFarmlandCount(finalCount);
+                reevaluateDominion(dominion);
+                if (onComplete != null) {
+                    onComplete.accept(finalCount);
+                }
+            });
+        });
     }
 
     /**

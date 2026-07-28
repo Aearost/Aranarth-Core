@@ -281,6 +281,8 @@ public class CommandDominion implements CommandExecutor {
                     handleOutpost(args, dominion, player);
                 } else if (args[0].equalsIgnoreCase("plot")) {
                     handlePlot(args, dominion, player);
+                } else if (args[0].equalsIgnoreCase("rescan")) {
+                    rescanDominion(args, player);
                 } else {
                     player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/dominion <command>"));
                     return false;
@@ -737,6 +739,37 @@ public class CommandDominion implements CommandExecutor {
     }
 
     private static final int[] PLOT_LIMITS_BY_LEVEL = {0, 4, 12, 25, Integer.MAX_VALUE};
+
+    /**
+     * Forces a farmland recount for a dominion. Op-only.
+     * Usage: /d rescan [dominion name]
+     */
+    private static void rescanDominion(String[] args, Player player) {
+        if (!player.isOp()) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+            return;
+        }
+        Dominion target;
+        if (args.length >= 2) {
+            String name = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
+            target = DominionUtils.getDominions().stream()
+                    .filter(d -> d.getName().equalsIgnoreCase(name))
+                    .findFirst().orElse(null);
+            if (target == null) {
+                player.sendMessage(ChatUtils.chatMessage("&cNo dominion found with name: &e" + name));
+                return;
+            }
+        } else {
+            target = DominionUtils.getPlayerDominion(player.getUniqueId());
+            if (target == null) {
+                player.sendMessage(ChatUtils.chatMessage("&cYou are not in a dominion!"));
+                return;
+            }
+        }
+        player.sendMessage(ChatUtils.chatMessage("&7Rescanning farmland for &e" + target.getName() + "&7..."));
+        DominionLevelUtils.rescanFarmland(target, count ->
+                player.sendMessage(ChatUtils.chatMessage("&aRescan complete: &e" + count + " &7farmland blocks found in &e" + target.getName() + "&7.")));
+    }
 
     /**
      * Dispatches /d plot sub-commands.

@@ -6,7 +6,10 @@ import com.aearost.aranarthcore.event.block.*;
 import com.aearost.aranarthcore.event.player.HomepadBreak;
 import com.aearost.aranarthcore.event.player.ShopDestroy;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.DominionLevelUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import com.projectkorra.projectkorra.util.TempBlock;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -48,6 +51,15 @@ public class BlockBreakEventListener implements Listener {
         handlePlentifulBreak(e);
         if (e.isCancelled()) return;
         handleMagnetismBreak(e);
+
+        // Track farmland breaks for dominion level criteria
+        if (e.getBlock().getType() == Material.FARMLAND) {
+            Dominion dominion = DominionUtils.getDominionOfChunkAnywhere(e.getBlock().getChunk());
+            if (dominion != null) {
+                dominion.setCachedFarmlandCount(Math.max(0, dominion.getCachedFarmlandCount() - 1));
+                DominionLevelUtils.reevaluateDominion(dominion);
+            }
+        }
 
         // Blocks that are not necessarily destroyed
         if (AranarthUtils.isBlockCrop(e.getBlock().getType())) {

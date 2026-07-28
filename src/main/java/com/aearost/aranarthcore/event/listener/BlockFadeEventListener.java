@@ -2,8 +2,11 @@ package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.block.CoralDry;
+import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
+import com.aearost.aranarthcore.utils.DominionLevelUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -28,6 +31,16 @@ public class BlockFadeEventListener implements Listener {
     public void onBlockFade(BlockFadeEvent e) {
         if (e.getBlock().getType().name().contains("CORAL")) {
             new CoralDry().execute(e);
+            return;
+        }
+
+        // Farmland drying out (no water nearby) reverts to dirt — decrement the cached count
+        if (e.getBlock().getType() == Material.FARMLAND) {
+            Dominion dominion = DominionUtils.getDominionOfChunkAnywhere(e.getBlock().getChunk());
+            if (dominion != null) {
+                dominion.setCachedFarmlandCount(Math.max(0, dominion.getCachedFarmlandCount() - 1));
+                DominionLevelUtils.reevaluateDominion(dominion);
+            }
             return;
         }
 
