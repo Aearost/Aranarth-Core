@@ -170,23 +170,23 @@ public class JobEventListener implements Listener {
         }
 
         // FARMER rewards (block break - crops)
+        // Note: mcMMO eligibility is NOT used here because crops are always planted by players,
+        // causing isEligible() to return false for every crop block. Maturity checks in
+        // getFarmerBreakPay() and the isRecentlyPlaced() check for sugar cane/cactus handle anti-exploit.
         if (jobData.hasJob(JobType.FARMER)) {
-            boolean eligible = mcMMO.getChunkManager().isEligible(e.getBlock());
-            if (eligible) {
-                double pay = getFarmerBreakPay(e.getBlock());
-                if (pay > 0) {
-                    JobUtils.awardJob(player, JobType.FARMER, pay);
-                }
+            double pay = getFarmerBreakPay(e.getBlock());
+            if (pay > 0) {
+                JobUtils.awardJob(player, JobType.FARMER, pay);
             }
         }
     }
 
     private double getMinerPay(Material type) {
         return switch (type) {
-            case STONE, ANDESITE, GRANITE, DIORITE -> 0.03;
-            case DEEPSLATE, COBBLESTONE, COBBLED_DEEPSLATE -> 0.03;
-            case TUFF, CALCITE, BASALT, BLACKSTONE, NETHERRACK -> 0.02;
-            case DRIPSTONE_BLOCK, MUD -> 0.02;
+            case STONE, ANDESITE, GRANITE, DIORITE -> 0.003;
+            case DEEPSLATE, COBBLESTONE, COBBLED_DEEPSLATE -> 0.003;
+            case TUFF, CALCITE, BASALT, BLACKSTONE, NETHERRACK -> 0.002;
+            case DRIPSTONE_BLOCK, MUD -> 0.002;
             case COPPER_ORE, DEEPSLATE_COPPER_ORE -> 0.04;
             case COAL_ORE, DEEPSLATE_COAL_ORE -> 0.04;
             case IRON_ORE, DEEPSLATE_IRON_ORE -> 0.08;
@@ -204,23 +204,23 @@ public class JobEventListener implements Listener {
 
     private double getExcavatorBlockBreakPay(Material type) {
         return switch (type) {
-            case DIRT, COARSE_DIRT, ROOTED_DIRT, PODZOL, MYCELIUM -> 0.02;
-            case SAND, RED_SAND -> 0.02;
-            case GRAVEL -> 0.02;
-            case CLAY -> 0.04;
-            case MUD -> 0.02;
-            case SOUL_SAND, SOUL_SOIL -> 0.03;
-            case SNOW_BLOCK -> 0.02;
+            case DIRT, COARSE_DIRT, ROOTED_DIRT, PODZOL, MYCELIUM -> 0.002;
+            case SAND, RED_SAND -> 0.002;
+            case GRAVEL -> 0.002;
+            case CLAY -> 0.004;
+            case MUD -> 0.002;
+            case SOUL_SAND, SOUL_SOIL -> 0.003;
+            case SNOW_BLOCK -> 0.002;
             default -> 0;
         };
     }
 
     private double getLumberjackBreakPay(Material type) {
-        if (LOG_MATERIALS.contains(type)) return 0.08;
-        if (STRIPPED_LOG_MATERIALS.contains(type)) return 0.05;
-        if (type == Material.BAMBOO_BLOCK) return 0.04;
-        if (MUSHROOM_BLOCK_MATERIALS.contains(type)) return 0.06;
-        if (LEAF_MATERIALS.contains(type)) return 0.01;
+        if (LOG_MATERIALS.contains(type)) return 0.008;
+        if (STRIPPED_LOG_MATERIALS.contains(type)) return 0.005;
+        if (type == Material.BAMBOO_BLOCK) return 0.004;
+        if (MUSHROOM_BLOCK_MATERIALS.contains(type)) return 0.006;
+        if (LEAF_MATERIALS.contains(type)) return 0.001;
         return 0;
     }
 
@@ -237,8 +237,8 @@ public class JobEventListener implements Listener {
             case PUMPKIN -> 0.20;
             case SWEET_BERRY_BUSH -> isMature(block) ? 0.08 : 0;
             case CAVE_VINES, CAVE_VINES_PLANT -> hasGlowBerries(block) ? 0.06 : 0;
-            case SUGAR_CANE -> mcMMO.getChunkManager().isEligible(block) ? 0.04 : 0;
-            case CACTUS -> mcMMO.getChunkManager().isEligible(block) ? 0.04 : 0;
+            case SUGAR_CANE -> !JobUtils.isRecentlyPlaced(JobUtils.toLocationKey(block.getX(), block.getY(), block.getZ())) ? 0.04 : 0;
+            case CACTUS -> !JobUtils.isRecentlyPlaced(JobUtils.toLocationKey(block.getX(), block.getY(), block.getZ())) ? 0.04 : 0;
             default -> 0;
         };
     }
@@ -777,7 +777,6 @@ public class JobEventListener implements Listener {
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent e) {
         if (e.getFrom().getBlockX() == e.getTo().getBlockX()
-                && e.getFrom().getBlockY() == e.getTo().getBlockY()
                 && e.getFrom().getBlockZ() == e.getTo().getBlockZ()) return;
 
         Player player = e.getPlayer();
