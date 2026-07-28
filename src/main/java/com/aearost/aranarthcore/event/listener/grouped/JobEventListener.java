@@ -239,6 +239,7 @@ public class JobEventListener implements Listener {
             case CAVE_VINES, CAVE_VINES_PLANT -> hasGlowBerries(block) ? 0.06 : 0;
             case SUGAR_CANE -> !JobUtils.isRecentlyPlaced(JobUtils.toLocationKey(block.getX(), block.getY(), block.getZ())) ? 0.04 : 0;
             case CACTUS -> !JobUtils.isRecentlyPlaced(JobUtils.toLocationKey(block.getX(), block.getY(), block.getZ())) ? 0.04 : 0;
+            case HAY_BLOCK -> mcMMO.getChunkManager().isEligible(block) ? 0.10 : 0;
             default -> 0;
         };
     }
@@ -367,13 +368,13 @@ public class JobEventListener implements Listener {
         if (ap == null) return;
         JobData jobData = ap.getJobData();
 
-        // Passive mob: both FARMER and HUNTER get $0.10
+        // Passive mob: both FARMER and HUNTER get $0.05
         if (entity instanceof Animals || PASSIVE_MOB_TYPES.contains(entity.getType())) {
             if (jobData.hasJob(JobType.FARMER)) {
-                JobUtils.awardJob(killer, JobType.FARMER, 0.10);
+                JobUtils.awardJob(killer, JobType.FARMER, 0.05);
             }
             if (jobData.hasJob(JobType.HUNTER)) {
-                JobUtils.awardJob(killer, JobType.HUNTER, 0.10);
+                JobUtils.awardJob(killer, JobType.HUNTER, 0.05);
             }
             return;
         }
@@ -381,7 +382,7 @@ public class JobEventListener implements Listener {
         // Player kill
         if (entity instanceof Player) {
             if (jobData.hasJob(JobType.HUNTER)) {
-                JobUtils.awardJob(killer, JobType.HUNTER, 5.00);
+                JobUtils.awardJob(killer, JobType.HUNTER, 2.50);
             }
             return;
         }
@@ -397,20 +398,20 @@ public class JobEventListener implements Listener {
 
     private double getHunterMobPay(EntityType type) {
         return switch (type) {
-            case ZOMBIE, ZOMBIE_VILLAGER, HUSK, DROWNED -> 0.20;
-            case SKELETON, STRAY -> 0.25;
-            case SPIDER, CAVE_SPIDER -> 0.20;
-            case CREEPER -> 0.35;
-            case WITCH -> 0.50;
-            case BLAZE -> 0.80;
-            case GHAST -> 1.00;
-            case ENDERMAN -> 0.15;
-            case PIGLIN, ZOMBIFIED_PIGLIN, PIGLIN_BRUTE -> 0.20;
-            case WITHER_SKELETON -> 1.50;
-            case GUARDIAN, ELDER_GUARDIAN -> 0.75;
-            case SHULKER -> 0.60;
-            case BREEZE -> 1.20;
-            case WARDEN -> 15.00;
+            case ZOMBIE, ZOMBIE_VILLAGER, HUSK, DROWNED -> 0.10;
+            case SKELETON, STRAY -> 0.125;
+            case SPIDER, CAVE_SPIDER -> 0.10;
+            case CREEPER -> 0.175;
+            case WITCH -> 0.25;
+            case BLAZE -> 0.40;
+            case GHAST -> 0.50;
+            case ENDERMAN -> 0.075;
+            case PIGLIN, ZOMBIFIED_PIGLIN, PIGLIN_BRUTE -> 0.10;
+            case WITHER_SKELETON -> 0.75;
+            case GUARDIAN, ELDER_GUARDIAN -> 0.375;
+            case SHULKER -> 0.30;
+            case BREEZE -> 0.60;
+            case WARDEN -> 7.50;
             default -> 0;
         };
     }
@@ -450,13 +451,13 @@ public class JobEventListener implements Listener {
         Material mat = caught.getType();
 
         if (isTreasureItem(mat)) {
-            JobUtils.awardJob(player, JobType.HUNTER, 1.50);
+            JobUtils.awardJob(player, JobType.HUNTER, 0.75);
         } else if (mat == Material.COD || mat == Material.SALMON) {
-            JobUtils.awardJob(player, JobType.HUNTER, 0.20);
+            JobUtils.awardJob(player, JobType.HUNTER, 0.10);
         } else if (mat == Material.PUFFERFISH) {
-            JobUtils.awardJob(player, JobType.HUNTER, 0.35);
+            JobUtils.awardJob(player, JobType.HUNTER, 0.175);
         } else if (mat == Material.TROPICAL_FISH) {
-            JobUtils.awardJob(player, JobType.HUNTER, 0.25);
+            JobUtils.awardJob(player, JobType.HUNTER, 0.125);
         }
     }
 

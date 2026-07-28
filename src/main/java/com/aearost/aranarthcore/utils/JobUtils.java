@@ -114,6 +114,29 @@ public class JobUtils {
         return ((long)(x & 0x3FFFFFF) << 38) | ((long)(z & 0x3FFFFFF) << 12) | (long)(y & 0xFFF);
     }
 
+    /**
+     * Awards the Farmer job pay for a harvested crop block.
+     * Called from CropHarvest (which cancels the BlockBreakEvent before JobEventListener sees it).
+     */
+    public static void awardFarmerCropHarvest(Player player, org.bukkit.Material cropType) {
+        double pay = switch (cropType) {
+            case WHEAT -> 0.10;
+            case CARROTS -> 0.05;
+            case POTATOES -> 0.05;
+            case BEETROOTS -> 0.12;
+            case NETHER_WART -> 0.15;
+            case COCOA -> 0.10;
+            case MELON -> 0.20;
+            case PUMPKIN -> 0.20;
+            case SWEET_BERRY_BUSH -> 0.08;
+            case CAVE_VINES, CAVE_VINES_PLANT -> 0.06;
+            case SUGAR_CANE -> 0.04;
+            case CACTUS -> 0.04;
+            default -> 0;
+        };
+        if (pay > 0) awardJob(player, JobType.FARMER, pay);
+    }
+
     public static String formatPay(double amount) {
         return String.format("$%.2f", amount);
     }

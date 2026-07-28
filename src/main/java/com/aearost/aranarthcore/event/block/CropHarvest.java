@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.CropUtils;
+import com.aearost.aranarthcore.utils.JobUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
 import com.gmail.nossr50.mcMMO;
@@ -68,6 +69,9 @@ public class CropHarvest {
 		if (!CropUtils.getIsMature(block)) {
 			return;
 		}
+
+		// Award Farmer job pay — CropHarvest cancels the BlockBreakEvent so JobEventListener never sees crop breaks
+		JobUtils.awardFarmerCropHarvest(player, block.getType());
 
 		// Get vanilla fortune-based drops, then scale each by the seasonal yield multiplier
 		ArrayList<ItemStack> drops = new ArrayList<>(block.getDrops(player.getInventory().getItemInMainHand()));
@@ -161,6 +165,9 @@ public class CropHarvest {
 		if (!mcMMO.getChunkManager().isEligible(block)) {
 			return;
 		}
+
+		// Award Farmer job pay for naturally generated non-Ageable crops
+		JobUtils.awardFarmerCropHarvest(player, block.getType());
 
 		e.setCancelled(true);
 
