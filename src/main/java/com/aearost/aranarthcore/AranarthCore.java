@@ -197,6 +197,7 @@ public class AranarthCore extends JavaPlugin {
                 PersistenceUtils.saveDominionPermissions();
                 PersistenceUtils.saveDominionPlayerPermissions();
                 PersistenceUtils.saveDominionPlots();
+                PersistenceUtils.saveOutposts();
                 if (!isSmpServer()) {
                     DominionUtils.checkAndProcessConquestDeadlines();
                 }
@@ -1465,8 +1466,8 @@ public class AranarthCore extends JavaPlugin {
         PersistenceUtils.saveDominionPermissions();
         PersistenceUtils.saveDominionPlayerPermissions();
         PersistenceUtils.saveDominionPlots();
+        PersistenceUtils.saveOutposts();
         if (!isSmpServer()) {
-            PersistenceUtils.saveOutposts();
             PersistenceUtils.saveDefenders();
         }
         PersistenceUtils.saveWarps();

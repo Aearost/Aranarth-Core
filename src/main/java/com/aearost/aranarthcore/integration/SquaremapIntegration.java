@@ -2,8 +2,10 @@ package com.aearost.aranarthcore.integration;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.Outpost;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.OutpostUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.scheduler.BukkitTask;
@@ -32,8 +34,10 @@ import java.util.Set;
 public class SquaremapIntegration {
 
     private static final Key LAYER_KEY = Key.of("aranarthcore-dominions");
+    private static final Key OUTPOST_LAYER_KEY = Key.of("aranarthcore-outposts");
     // One provider per world (keyed by squaremap world identifier string)
     private final Map<String, SimpleLayerProvider> providers = new HashMap<>();
+    private final Map<String, SimpleLayerProvider> outpostProviders = new HashMap<>();
     private BukkitTask refreshTask;
 
     /**
@@ -54,6 +58,17 @@ public class SquaremapIntegration {
                 mapWorld.layerRegistry().register(LAYER_KEY, provider);
             }
             providers.put(mapWorld.identifier().asString(), provider);
+
+            SimpleLayerProvider outpostProvider = SimpleLayerProvider.builder("Outposts")
+                    .showControls(true)
+                    .defaultHidden(false)
+                    .layerPriority(6)
+                    .zIndex(251)
+                    .build();
+            if (!mapWorld.layerRegistry().hasEntry(OUTPOST_LAYER_KEY)) {
+                mapWorld.layerRegistry().register(OUTPOST_LAYER_KEY, outpostProvider);
+            }
+            outpostProviders.put(mapWorld.identifier().asString(), outpostProvider);
         }
 
         // Refresh every 30 seconds (600 ticks) asynchronously
@@ -78,12 +93,16 @@ public class SquaremapIntegration {
                 if (mapWorld.layerRegistry().hasEntry(LAYER_KEY)) {
                     mapWorld.layerRegistry().unregister(LAYER_KEY);
                 }
+                if (mapWorld.layerRegistry().hasEntry(OUTPOST_LAYER_KEY)) {
+                    mapWorld.layerRegistry().unregister(OUTPOST_LAYER_KEY);
+                }
             }
         } catch (IllegalStateException ignored) {
             // SquareMap already shut down
         }
 
         providers.clear();
+        outpostProviders.clear();
     }
 
     /**
@@ -93,51 +112,95 @@ public class SquaremapIntegration {
         for (SimpleLayerProvider provider : providers.values()) {
             provider.clearMarkers();
         }
+        for (SimpleLayerProvider provider : outpostProviders.values()) {
+            provider.clearMarkers();
+        }
 
         // Snapshot to avoid ConcurrentModificationException on the async thread
         List<Dominion> snapshot = new ArrayList<>(DominionUtils.getDominions());
 
         for (Dominion dominion : snapshot) {
-            List<Chunk> domChunks = dominion.getChunks();
-            if (domChunks.isEmpty()) continue;
+            // Only render dominions that belong to this server.
+            // SMP dominions store their home world with the "smp:" prefix; Survival dominions do not.
+            String homeWorldName = dominion.getDominionHomeWorldName();
+            boolean isSmpDominion = homeWorldName != null && homeWorldName.startsWith("smp:");
+            if (AranarthCore.isSmpServer() != isSmpDominion) continue;
 
             Color fillColor = parseColor(dominion.getMapColor());
             // Two shades darker for the border so it contrasts against the fill
             Color strokeColor = fillColor.darker().darker();
             String dominionName = ChatUtils.stripColorFormatting(dominion.getName());
 
-            MarkerOptions options = MarkerOptions.builder()
-                    .strokeColor(strokeColor)
-                    .strokeWeight(2)
-                    .strokeOpacity(1.0)
-                    .fillColor(fillColor)
-                    .fillOpacity(0.45)
-                    .hoverTooltip("<b>" + dominionName + "</b>")
-                    .build();
+            // Dominion land claims
+            List<Chunk> domChunks = dominion.getChunks();
+            if (!domChunks.isEmpty()) {
+                MarkerOptions options = MarkerOptions.builder()
+                        .strokeColor(strokeColor)
+                        .strokeWeight(2)
+                        .strokeOpacity(1.0)
+                        .fillColor(fillColor)
+                        .fillOpacity(0.45)
+                        .hoverTooltip("<b>\uD83C\uDFF0 " + dominionName + " \uD83C\uDFF0</b>")
+                        .build();
 
-            // Group chunks by world so we register markers on the correct map
-            Map<String, Set<String>> chunksByWorld = new HashMap<>();
-            for (Chunk chunk : domChunks) {
-                String worldKey = BukkitAdapter.worldIdentifier(chunk.getWorld()).asString();
-                chunksByWorld
-                        .computeIfAbsent(worldKey, k -> new HashSet<>())
-                        .add(chunk.getX() + "," + chunk.getZ());
+                Map<String, Set<String>> chunksByWorld = new HashMap<>();
+                for (Chunk chunk : domChunks) {
+                    String worldKey = BukkitAdapter.worldIdentifier(chunk.getWorld()).asString();
+                    chunksByWorld
+                            .computeIfAbsent(worldKey, k -> new HashSet<>())
+                            .add(chunk.getX() + "," + chunk.getZ());
+                }
+
+                for (Map.Entry<String, Set<String>> entry : chunksByWorld.entrySet()) {
+                    SimpleLayerProvider provider = providers.get(entry.getKey());
+                    if (provider == null) continue;
+
+                    List<List<Point>> polygons = buildBoundaryPolygons(entry.getValue());
+                    int regionIdx = 0;
+                    for (List<Point> points : polygons) {
+                        Marker polygon = Marker.polygon(points);
+                        polygon.markerOptions(options);
+                        Key markerKey = Key.of("d-" + dominion.getId() + "-" + entry.getKey().hashCode() + "-r" + regionIdx++);
+                        provider.addMarker(markerKey, polygon);
+                    }
+                }
             }
 
-            for (Map.Entry<String, Set<String>> entry : chunksByWorld.entrySet()) {
-                SimpleLayerProvider provider = providers.get(entry.getKey());
-                if (provider == null) continue;
+            // Outpost land claims
+            for (Outpost outpost : OutpostUtils.getDominionOutposts(dominion.getId())) {
+                List<Chunk> outpostChunks = outpost.getChunks();
+                if (outpostChunks.isEmpty()) continue;
 
-                // Compute outer-boundary polygons (one per contiguous region)
-                List<List<Point>> polygons = buildBoundaryPolygons(entry.getValue());
+                String outpostName = ChatUtils.stripColorFormatting(outpost.getName());
+                MarkerOptions outpostOptions = MarkerOptions.builder()
+                        .strokeColor(strokeColor)
+                        .strokeWeight(2)
+                        .strokeOpacity(1.0)
+                        .fillColor(fillColor)
+                        .fillOpacity(0.45)
+                        .hoverTooltip("<b>\uD83D\uDEA9 " + outpostName + " \uD83D\uDEA9</b><br><i>Outpost of " + dominionName + "</i>")
+                        .build();
 
-                int regionIdx = 0;
-                for (List<Point> points : polygons) {
-                    Marker polygon = Marker.polygon(points);
-                    polygon.markerOptions(options);
-                    // Key: "d-<uuid>-<worldIdx>-<regionIdx>"
-                    Key markerKey = Key.of("d-" + dominion.getId() + "-" + entry.getKey().hashCode() + "-r" + regionIdx++);
-                    provider.addMarker(markerKey, polygon);
+                Map<String, Set<String>> outpostChunksByWorld = new HashMap<>();
+                for (Chunk chunk : outpostChunks) {
+                    String worldKey = BukkitAdapter.worldIdentifier(chunk.getWorld()).asString();
+                    outpostChunksByWorld
+                            .computeIfAbsent(worldKey, k -> new HashSet<>())
+                            .add(chunk.getX() + "," + chunk.getZ());
+                }
+
+                for (Map.Entry<String, Set<String>> entry : outpostChunksByWorld.entrySet()) {
+                    SimpleLayerProvider provider = outpostProviders.get(entry.getKey());
+                    if (provider == null) continue;
+
+                    List<List<Point>> polygons = buildBoundaryPolygons(entry.getValue());
+                    int regionIdx = 0;
+                    for (List<Point> points : polygons) {
+                        Marker polygon = Marker.polygon(points);
+                        polygon.markerOptions(outpostOptions);
+                        Key markerKey = Key.of("op-" + outpost.getId() + "-" + entry.getKey().hashCode() + "-r" + regionIdx++);
+                        provider.addMarker(markerKey, polygon);
+                    }
                 }
             }
         }

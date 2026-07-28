@@ -640,7 +640,7 @@ public class DominionProtectionListener implements Listener {
             return;
         }
         // Only hostile mobs will make it this far
-        Dominion chunkDominion = DominionUtils.getDominionOfChunk(e.getLocation().getChunk());
+        Dominion chunkDominion = DominionUtils.getDominionOfChunkAnywhere(e.getLocation().getChunk());
         if (chunkDominion != null) {
             if (!chunkDominion.isMobSpawningEnabled()) {
                 e.setCancelled(true);

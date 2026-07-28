@@ -95,7 +95,7 @@ public class GuiOutposts {
     private static ItemStack buildActiveOutpostItem(Outpost outpost, Dominion dominion) {
         ItemStack item = new ItemStack(Material.OAK_LOG);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&e" + ChatUtils.stripColorFormatting(outpost.getName())));
+        meta.setDisplayName(ChatUtils.translateToColor(outpost.getName()));
         List<String> lore = new ArrayList<>();
         lore.add(ChatUtils.translateToColor("&7Click to teleport to this outpost"));
         meta.setLore(lore);
