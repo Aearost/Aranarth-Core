@@ -49,15 +49,20 @@ public class PlayerServerQuitListener implements Listener {
 
 		// Persist the player's logout location so they are returned here on next login.
 		// Skipped for cross-server transfers; the receiving server will track their location.
+		// Saved synchronously (not async) to prevent a race with DatabaseManager.shutdown():
+		// an async task queued here may never run if the connection pool closes first, leaving
+		// a stale location in MySQL that causes the player to spawn at the wrong position.
 		if (!isCrossServerTransfer && DatabaseManager.isActive()) {
 			final String server = NetworkManager.isActive() ? NetworkManager.getInstance().getThisServer() : "survival";
 			final Location loc = player.getLocation();
 			final String world = loc.getWorld().getName();
 			final double x = loc.getX(), y = loc.getY(), z = loc.getZ();
 			final float yaw = loc.getYaw(), pitch = loc.getPitch();
-			Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
-				DatabaseManager.getInstance().saveLastLocation(player.getUniqueId(), server, world, x, y, z, yaw, pitch)
-			);
+			Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName()
+					+ " — saving last location: server=" + server + " world=" + world
+					+ " pos=(" + String.format("%.1f", x) + "," + String.format("%.1f", y) + "," + String.format("%.1f", z) + ")");
+			DatabaseManager.getInstance().saveLastLocation(player.getUniqueId(), server, world, x, y, z, yaw, pitch);
+			Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName() + " — last location saved to MySQL.");
 		}
 
 		if (NetworkManager.isActive()) {
@@ -128,16 +133,27 @@ public class PlayerServerQuitListener implements Listener {
 				aranarthPlayer.setSurvivalSaturation(player.getSaturation());
 				aranarthPlayer.setSurvivalExpLevel(player.getLevel());
 				aranarthPlayer.setSurvivalExpProgress(player.getExp());
+				int nonNullItems = 0;
+				for (org.bukkit.inventory.ItemStack is : player.getInventory().getContents()) { if (is != null) nonNullItems++; }
+				Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName()
+						+ " — inventory snapshot taken: " + nonNullItems + " item(s) in world=" + quitWorld);
+			} else {
+				Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName()
+						+ " — world=" + quitWorld + " is not a survival world; inventory snapshot skipped.");
 			}
 		}
 		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 		// Flush the updated player row to MySQL so the snapshot is durable before the next periodic save.
+		// Saved synchronously (matching saveJobDataSync above) to prevent the same shutdown race:
+		// if this were async, the connection pool could close before the task executes, leaving
+		// a stale inventory snapshot that causes inventory rollbacks on next login.
 		if (!isCrossServerTransfer && DatabaseManager.isActive()) {
 			final String rawRow = PersistenceUtils.buildPlayerRowForTransfer(player.getUniqueId());
 			if (rawRow != null) {
-				final java.util.UUID quittingUuid = player.getUniqueId();
-				Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
-						() -> DatabaseManager.getInstance().saveAranarthPlayerRaw(quittingUuid, rawRow));
+				DatabaseManager.getInstance().saveAranarthPlayerRaw(player.getUniqueId(), rawRow);
+				Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName() + " — player row (inventory/stats) flushed to MySQL.");
+			} else {
+				Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName() + " — WARNING: rawRow was null, player row NOT flushed to MySQL.");
 			}
 		}
 

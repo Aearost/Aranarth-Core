@@ -72,6 +72,12 @@ public class PlayerServerJoinListener implements Listener {
 		boolean needsServerRouting = lastLoc != null && thisServerName != null && !lastLoc.server.equals(thisServerName);
 		boolean hasPendingTp = NetworkManager.isActive() && NetworkManager.getInstance().getPendingTeleport(player.getUniqueId()) != null;
 		boolean isCrossServerTransfer = needsServerRouting || hasPendingTp;
+		Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
+				+ " — lastLoc=" + (lastLoc == null ? "null" : lastLoc.server + "/" + lastLoc.world
+						+ " @ (" + String.format("%.1f", lastLoc.x) + "," + String.format("%.1f", lastLoc.y) + "," + String.format("%.1f", lastLoc.z) + ")")
+				+ " thisServer=" + thisServerName
+				+ " needsServerRouting=" + needsServerRouting
+				+ " hasPendingTp=" + hasPendingTp);
 		// If the player was offline when the resource world was reset, teleport them to spawn
 		long resetTime = AranarthUtils.getLastResourceWorldResetTime();
 		if (resetTime > 0 && player.getWorld().getName().startsWith("resource")
@@ -438,12 +444,18 @@ public class PlayerServerJoinListener implements Listener {
 						if (w != null) {
 							Location dest = new Location(
 									w, lastLoc.x, lastLoc.y, lastLoc.z, lastLoc.yaw, lastLoc.pitch);
+							Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
+									+ " — same-server login; restoring position to " + lastLoc.world
+									+ " @ (" + String.format("%.1f", lastLoc.x) + "," + String.format("%.1f", lastLoc.y) + "," + String.format("%.1f", lastLoc.z) + ")");
 							new BukkitRunnable() {
 								@Override
 								public void run() {
 									if (player.isOnline()) player.teleport(dest);
 								}
 							}.runTaskLater(AranarthCore.getInstance(), 2L);
+						} else {
+							Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
+									+ " — same-server login but world '" + lastLoc.world + "' is not loaded; position restore skipped.");
 						}
 					} else {
 						// Unplanned cross-server landing: the player's last known location is on
@@ -479,14 +491,46 @@ public class PlayerServerJoinListener implements Listener {
 								String snapState = apSnapshot == null ? "no AranarthPlayer in memory"
 										: apSnapshot.getSurvivalInventory().isEmpty() ? "EMPTY"
 										: "length=" + apSnapshot.getSurvivalInventory().length();
-								int currentNonNull = 0;
-								for (org.bukkit.inventory.ItemStack is : player.getInventory().getContents()) {
-									if (is != null) currentNonNull++;
-								}
 								Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Inv] Unplanned landing state for "
 										+ player.getName() + " — MySQL survivalInventory snapshot: " + snapState
-										+ "; current inventory on this server (from player.dat): " + currentNonNull + " non-null slot(s)."
-										+ " Snapshot NOT applied — routing to destination server.");
+										+ ". Applying snapshot now (quit saves are synchronous so MySQL is authoritative).");
+								// Apply the MySQL inventory snapshot so the player sees their correct items
+								// while on this server. Quit-time saves are now synchronous, so MySQL is
+								// reliable. If routing back to the source server succeeds, that server will
+								// override inventory from its own player.dat; if it fails (source down),
+								// the player retains the correct items here instead of reverting to a stale
+								// player.dat from their last visit to this server.
+								if (apSnapshot != null && !apSnapshot.getSurvivalInventory().isEmpty()) {
+									try {
+										player.getInventory().setContents(
+												ItemUtils.itemStackArrayFromBase64(apSnapshot.getSurvivalInventory()));
+										int nonNull = 0;
+										for (org.bukkit.inventory.ItemStack is : player.getInventory().getContents()) { if (is != null) nonNull++; }
+										Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
+												+ " — unplanned-landing MySQL inventory applied: " + nonNull + " item(s).");
+									} catch (Exception ex) {
+										Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] Failed to apply unplanned-landing inventory for " + player.getName() + ": " + ex.getMessage());
+									}
+								} else {
+									Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] survivalInventory is empty for " + player.getName() + " on unplanned landing — leaving player.dat inventory intact.");
+								}
+								if (apSnapshot != null && !apSnapshot.getSurvivalEnderChest().isEmpty()) {
+									try {
+										player.getEnderChest().setContents(
+												ItemUtils.itemStackArrayFromBase64(apSnapshot.getSurvivalEnderChest()));
+									} catch (Exception ex) {
+										Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] Failed to apply unplanned-landing ender chest for " + player.getName() + ": " + ex.getMessage());
+									}
+								}
+								if (apSnapshot != null) {
+									if (apSnapshot.getSurvivalHealth() > 0) {
+										player.setHealth(Math.min(apSnapshot.getSurvivalHealth(), player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH).getValue()));
+									}
+									player.setFoodLevel(apSnapshot.getSurvivalFoodLevel());
+									player.setSaturation(apSnapshot.getSurvivalSaturation());
+									player.setLevel(apSnapshot.getSurvivalExpLevel());
+									player.setExp(apSnapshot.getSurvivalExpProgress());
+								}
 								Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Inv] Routing " + player.getName()
 										+ " back to " + velocityTarget + " after unplanned landing.");
 								PendingTeleport pt = new PendingTeleport(
@@ -494,7 +538,7 @@ public class PlayerServerJoinListener implements Listener {
 								pt.setLoginRouting(true);
 								NetworkManager.getInstance().setPendingAndTransfer(player, velocityTarget, pt);
 							}
-						}.runTaskLater(AranarthCore.getInstance(), 40L); // 2s — allows source server's async shutdown save to commit to MySQL
+						}.runTaskLater(AranarthCore.getInstance(), 40L); // 2s — brief delay before routing; keeps player visible on this server momentarily
 					}
 				}
 
@@ -523,6 +567,10 @@ public class PlayerServerJoinListener implements Listener {
 						try {
 							player.getInventory().setContents(
 									ItemUtils.itemStackArrayFromBase64(apInv.getSurvivalInventory()));
+							int nonNull = 0;
+							for (org.bukkit.inventory.ItemStack is : player.getInventory().getContents()) { if (is != null) nonNull++; }
+							Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
+									+ " — same-server MySQL inventory restore applied: " + nonNull + " item(s).");
 						} catch (Exception ex) {
 							Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
 									+ "[Inv] Failed to apply survival inventory on login for " + player.getName() + ": " + ex.getMessage());
@@ -543,6 +591,10 @@ public class PlayerServerJoinListener implements Listener {
 						player.setSaturation(apInv.getSurvivalSaturation());
 						player.setLevel(apInv.getSurvivalExpLevel());
 						player.setExp(apInv.getSurvivalExpProgress());
+					} else {
+						Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
+								+ " — same-server MySQL inventory restore skipped: snapshot is "
+								+ (apInv == null ? "null (no AranarthPlayer)" : "empty"));
 					}
 				}
 
