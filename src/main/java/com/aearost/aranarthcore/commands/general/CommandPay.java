@@ -1,8 +1,11 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -66,8 +69,30 @@ public class CommandPay implements CommandExecutor {
 						return true;
 					} else {
 						AranarthPlayer aranarthPlayerSender = AranarthUtils.getPlayer(player.getUniqueId());
+						AranarthPlayer aranarthPlayerReceiver = AranarthUtils.getPlayer(target.getUniqueId());
+
+						if (aranarthPlayerReceiver == null) {
+							// Receiver is on another server - route payment through the network
+							NetworkPlayer networkReceiver = NetworkManager.isActive()
+									? NetworkManager.getInstance().getRemoteRoster().get(target.getUniqueId())
+									: null;
+							if (networkReceiver == null) {
+								player.sendMessage(ChatUtils.chatMessage("&e" + args[0] + " &ccould not be found"));
+								return true;
+							}
+							if (aranarthPlayerSender.getBalance() >= amount) {
+								aranarthPlayerSender.setBalance(aranarthPlayerSender.getBalance() - amount);
+								PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
+								NetworkManager.getInstance().publishBalanceAdjust(target.getUniqueId(), amount);
+								NetworkManager.getInstance().publishPayNotify(target.getUniqueId(), aranarthPlayerSender.getNickname(), formattedAmount);
+								player.sendMessage(ChatUtils.chatMessage("&7You have paid &e" + networkReceiver.getNickname() + " &6" + formattedAmount));
+							} else {
+								player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough money for this!"));
+							}
+							return true;
+						}
+
 						if (aranarthPlayerSender.getBalance() >= amount) {
-							AranarthPlayer aranarthPlayerReceiver = AranarthUtils.getPlayer(target.getUniqueId());
 							aranarthPlayerSender.setBalance(aranarthPlayerSender.getBalance() - amount);
 							aranarthPlayerReceiver.setBalance(aranarthPlayerReceiver.getBalance() + amount);
 							player.sendMessage(ChatUtils.chatMessage("&7You have paid &e" + aranarthPlayerReceiver.getNickname() + " &6" + formattedAmount));
