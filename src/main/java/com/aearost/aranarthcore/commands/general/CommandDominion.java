@@ -2028,7 +2028,7 @@ public class CommandDominion implements CommandExecutor {
             for (int i = 0; i < dominionOutposts.size(); i++) {
                 Outpost op = dominionOutposts.get(i);
                 int maxChunks = OutpostUtils.getOutpostMaxChunks(op);
-                outpostsBuilder.append("&e").append(ChatUtils.stripColorFormatting(op.getName()))
+                outpostsBuilder.append("&e").append(op.getName())
                         .append(" &7(").append(op.getChunks().size()).append("/").append(maxChunks).append(" chunks)");
                 if (i < dominionOutposts.size() - 1) {
                     outpostsBuilder.append("&7, ");
