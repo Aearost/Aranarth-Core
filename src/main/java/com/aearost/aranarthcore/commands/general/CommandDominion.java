@@ -3,9 +3,11 @@ package com.aearost.aranarthcore.commands.general;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.PendingTeleport;
+import com.aearost.aranarthcore.gui.GuiDefenders;
 import com.aearost.aranarthcore.gui.GuiDominionFood;
 import com.aearost.aranarthcore.gui.GuiDominionPermissions;
 import com.aearost.aranarthcore.gui.GuiDominionResources;
+import com.aearost.aranarthcore.gui.GuiOutposts;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
@@ -279,6 +281,8 @@ public class CommandDominion implements CommandExecutor {
                     buyChunks(args, dominion, player);
                 } else if (args[0].equalsIgnoreCase("outpost")) {
                     handleOutpost(args, dominion, player);
+                } else if (args[0].equalsIgnoreCase("defender")) {
+                    handleDefender(dominion, player);
                 } else if (args[0].equalsIgnoreCase("plot")) {
                     handlePlot(args, dominion, player);
                 } else if (args[0].equalsIgnoreCase("rescan")) {
@@ -1584,7 +1588,7 @@ public class CommandDominion implements CommandExecutor {
             return;
         }
         if (args.length < 2) {
-            player.sendMessage(ChatUtils.chatMessage("&cUsage: &e/dominion outpost <create|rename|sethome|buychunks>"));
+            GuiOutposts.open(player);
             return;
         }
 
@@ -1598,6 +1602,17 @@ public class CommandDominion implements CommandExecutor {
             case "disband" -> outpostDisband(args, dominion, player);
             default -> player.sendMessage(ChatUtils.chatMessage("&cUsage: &e/dominion outpost <create|disband|rename|sethome|home|buychunks>"));
         }
+    }
+
+    /**
+     * Opens the Defenders GUI.
+     */
+    private static void handleDefender(Dominion dominion, Player player) {
+        if (dominion == null) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
+            return;
+        }
+        GuiDefenders.open(player);
     }
 
     private static void outpostCreate(String[] args, Dominion dominion, Player player) {
