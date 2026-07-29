@@ -71,7 +71,12 @@ public class CommandPay implements CommandExecutor {
 						AranarthPlayer aranarthPlayerSender = AranarthUtils.getPlayer(player.getUniqueId());
 						AranarthPlayer aranarthPlayerReceiver = AranarthUtils.getPlayer(target.getUniqueId());
 
-						if (aranarthPlayerReceiver == null) {
+						// Check whether the receiver is actually online on THIS server.
+						// aranarthPlayerReceiver is non-null for all players (data is loaded from MySQL
+						// at startup), so we cannot use null-check to detect cross-server targets.
+						boolean receiverOnThisServer = Bukkit.getPlayer(target.getUniqueId()) != null;
+
+						if (!receiverOnThisServer) {
 							// Receiver is on another server - route payment through the network
 							NetworkPlayer networkReceiver = NetworkManager.isActive()
 									? NetworkManager.getInstance().getRemoteRoster().get(target.getUniqueId())
@@ -82,8 +87,14 @@ public class CommandPay implements CommandExecutor {
 							}
 							if (aranarthPlayerSender.getBalance() >= amount) {
 								aranarthPlayerSender.setBalance(aranarthPlayerSender.getBalance() - amount);
+								// Also update the receiver's in-memory balance on this server so
+								// local /balance lookups reflect the payment immediately.
+								aranarthPlayerReceiver.setBalance(aranarthPlayerReceiver.getBalance() + amount);
 								PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
+								// Tell the remote server to credit the receiver and debit the sender
+								// so both servers show correct balances without waiting for a DB reload.
 								NetworkManager.getInstance().publishBalanceAdjust(target.getUniqueId(), amount);
+								NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), -amount);
 								NetworkManager.getInstance().publishPayNotify(target.getUniqueId(), aranarthPlayerSender.getNickname(), formattedAmount);
 								player.sendMessage(ChatUtils.chatMessage("&7You have paid &e" + networkReceiver.getNickname() + " &6" + formattedAmount));
 							} else {
@@ -96,10 +107,8 @@ public class CommandPay implements CommandExecutor {
 							aranarthPlayerSender.setBalance(aranarthPlayerSender.getBalance() - amount);
 							aranarthPlayerReceiver.setBalance(aranarthPlayerReceiver.getBalance() + amount);
 							player.sendMessage(ChatUtils.chatMessage("&7You have paid &e" + aranarthPlayerReceiver.getNickname() + " &6" + formattedAmount));
-							if (target.isOnline()) {
-								Player onlineTarget = Bukkit.getPlayer(target.getUniqueId());
-								onlineTarget.sendMessage(ChatUtils.chatMessage("&7You have received &6" + formattedAmount + " &7from &e" + aranarthPlayerSender.getNickname()));
-							}
+							Player onlineTarget = Bukkit.getPlayer(target.getUniqueId());
+							onlineTarget.sendMessage(ChatUtils.chatMessage("&7You have received &6" + formattedAmount + " &7from &e" + aranarthPlayerSender.getNickname()));
 							return true;
 						} else {
 							player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough money for this!"));

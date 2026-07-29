@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.items.brew.BrewRecipe;
 import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
 import com.aearost.aranarthcore.items.key.KeyRare;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Quest;
 import org.bukkit.Bukkit;
@@ -751,6 +752,9 @@ public class QuestUtils {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
             aranarthPlayer.setBalance(aranarthPlayer.getBalance() + quest.getReward());
             AranarthUtils.setPlayer(uuid, aranarthPlayer);
+            if (NetworkManager.isActive()) {
+                NetworkManager.getInstance().publishBalanceAdjust(uuid, quest.getReward());
+            }
 
             String formattedReward = "$" + MONEY_FORMAT.format(quest.getReward());
             player.sendMessage(ChatUtils.chatMessage("&7You have been rewarded &6" + formattedReward

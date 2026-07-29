@@ -15,6 +15,7 @@ import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
 import com.aearost.aranarthcore.items.key.KeyRare;
 import com.aearost.aranarthcore.items.key.KeyVote;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.AranarthVote;
 import com.aearost.aranarthcore.objects.CrateType;
@@ -453,6 +454,9 @@ public class CrateOpen {
                 if (chance <= 12) {
                     player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                     aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 500);
+                    if (NetworkManager.isActive()) {
+                        NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), 500);
+                    }
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.VOTE);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
@@ -564,6 +568,9 @@ public class CrateOpen {
                 if (chance <= 12) {
                     player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                     aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 5000);
+                    if (NetworkManager.isActive()) {
+                        NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), 5000);
+                    }
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.RARE);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
@@ -666,6 +673,9 @@ public class CrateOpen {
                 if (chance <= 12) {
                     player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                     aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 25000);
+                    if (NetworkManager.isActive()) {
+                        NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), 25000);
+                    }
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.EPIC);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
@@ -836,6 +846,9 @@ public class CrateOpen {
                 if (chance <= 12) {
                     player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                     aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 75000);
+                    if (NetworkManager.isActive()) {
+                        NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), 75000);
+                    }
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.GODLY);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);

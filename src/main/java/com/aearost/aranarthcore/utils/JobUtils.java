@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.enums.JobType;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.JobData;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -54,6 +55,9 @@ public class JobUtils {
         double actualPay = basePay * multiplier;
 
         ap.setBalance(ap.getBalance() + actualPay);
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), actualPay);
+        }
 
         double xpGain = actualPay * 100;
         double currentXp = jobData.getCurrentXp(job) + xpGain;

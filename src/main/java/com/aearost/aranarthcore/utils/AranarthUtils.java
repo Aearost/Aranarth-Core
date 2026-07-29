@@ -172,21 +172,34 @@ public class AranarthUtils {
 		List<String> names = new ArrayList<>();
 		String lowerPrefix = prefix.toLowerCase();
 
+		List<String> localNames = new ArrayList<>();
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			String username = p.getName();
 			if (lowerPrefix.isEmpty() || username.toLowerCase().startsWith(lowerPrefix)) {
 				names.add(username);
+				localNames.add(username);
 			}
 		}
-		if (NetworkManager.isActive()) {
+
+		boolean active = NetworkManager.isActive();
+		int remoteRosterSize = active ? NetworkManager.getInstance().getRemoteRoster().size() : -1;
+		List<String> remoteNames = new ArrayList<>();
+		if (active) {
 			for (NetworkPlayer np : NetworkManager.getInstance().getRemoteRoster().values()) {
 				String username = np.getUsername();
 				if (!username.isEmpty()
 						&& (lowerPrefix.isEmpty() || username.toLowerCase().startsWith(lowerPrefix))) {
 					names.add(username);
+					remoteNames.add(username);
 				}
 			}
 		}
+
+		Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[TabDebug][getNetworkPlayerNames] prefix=\"" + prefix
+				+ "\" networkActive=" + active
+				+ " localCount=" + localNames.size() + " local=" + localNames
+				+ " remoteRosterTotal=" + remoteRosterSize + " remoteMatched=" + remoteNames.size() + " remote=" + remoteNames
+				+ " total=" + names.size());
 		return names;
 	}
 

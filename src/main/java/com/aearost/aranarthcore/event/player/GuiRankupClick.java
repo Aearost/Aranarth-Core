@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.PermissionUtils;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
@@ -51,6 +52,9 @@ public class GuiRankupClick {
 
 						NumberFormat formatter = NumberFormat.getCurrencyInstance();
 						aranarthPlayer.setBalance(balance - price);
+						if (NetworkManager.isActive()) {
+							NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), -price);
+						}
 						aranarthPlayer.setRank(aranarthPlayer.getRank() + 1);
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 

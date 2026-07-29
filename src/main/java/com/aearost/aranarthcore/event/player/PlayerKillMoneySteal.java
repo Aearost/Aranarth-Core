@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -41,6 +42,10 @@ public class PlayerKillMoneySteal {
 
         victimAranarthPlayer.setBalance(victimBalance - stolenAmount);
         killerAranarthPlayer.setBalance(killerAranarthPlayer.getBalance() + stolenAmount);
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishBalanceAdjust(victim.getUniqueId(), -stolenAmount);
+            NetworkManager.getInstance().publishBalanceAdjust(killer.getUniqueId(), stolenAmount);
+        }
 
         NumberFormat formatter = NumberFormat.getCurrencyInstance();
         String formattedAmount = formatter.format(stolenAmount);

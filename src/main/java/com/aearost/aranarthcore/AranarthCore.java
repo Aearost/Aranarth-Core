@@ -746,6 +746,7 @@ public class AranarthCore extends JavaPlugin {
         new ArmorStandInteractListener(this);
         new PlayerFishEventListener(this);
         new InvseeListener(this);
+        new NetworkPlayerTabCompleteListener(this);
         new BukkitRunnable() {
             @Override
             public void run() {

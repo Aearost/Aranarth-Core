@@ -456,6 +456,9 @@ public class CommandDominion implements CommandExecutor {
                                 List<Chunk> chunks = new ArrayList<>();
                                 chunks.add(player.getLocation().getChunk());
                                 aranarthPlayer.setBalance(aranarthPlayer.getBalance() - dominionCost);
+                                if (NetworkManager.isActive()) {
+                                    NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), -dominionCost);
+                                }
 
                                 List<UUID> conquered = new ArrayList<>();
 
@@ -1778,6 +1781,24 @@ public class CommandDominion implements CommandExecutor {
             return;
         }
 
+        // Cross-server: if the outpost lives on a different server, transfer there first.
+        if (NetworkManager.isActive()) {
+            String currentServer = AranarthCore.getInstance().getConfig().getString("network.this-server", "survival");
+            String targetServer = getServerForWorld(outpost.getHomeWorldName());
+            if (targetServer != null && !targetServer.equals(currentServer)) {
+                AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
+                String cmd = "dominion outpost home " + targetName;
+                AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
+                        ap.isInAdminMode(), "&e&lDominion", "&7Transferring to your outpost...", success -> {
+                    if (success) {
+                        NetworkManager.getInstance().saveInventoryAndTransfer(player, targetServer,
+                                PendingTeleport.forCommand(cmd, "&e&lDominion", "&7You have teleported to your outpost"));
+                    }
+                });
+                return;
+            }
+        }
+
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
         AranarthUtils.teleportPlayer(player, player.getLocation(), outpost.getHome(), aranarthPlayer.isInAdminMode(), outpost.getName(), "&7You have teleported to your outpost", success -> {
             if (success) {
@@ -2183,6 +2204,9 @@ public class CommandDominion implements CommandExecutor {
                     DominionUtils.updateDominion(dominion);
                     aranarthPlayer.setBalance(aranarthPlayer.getBalance() - trimmedAmount);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    if (NetworkManager.isActive()) {
+                        NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), -trimmedAmount);
+                    }
                     DominionLevelUtils.reevaluateDominion(dominion);
 
                     player.sendMessage(ChatUtils.chatMessage("&7You have deposited &6" + formatter.format(trimmedAmount) + " &7to your Dominion"));
@@ -2234,6 +2258,9 @@ public class CommandDominion implements CommandExecutor {
                         DominionUtils.updateDominion(dominion);
                         aranarthPlayer.setBalance(aranarthPlayer.getBalance() + trimmedAmount);
                         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                        if (NetworkManager.isActive()) {
+                            NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), trimmedAmount);
+                        }
 
                         player.sendMessage(ChatUtils.chatMessage("&7You have withdrawn &6" + formatter.format(trimmedAmount) + " &7from your Dominion"));
                         for (UUID uuid : dominion.getMembers()) {

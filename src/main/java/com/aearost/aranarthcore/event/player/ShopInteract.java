@@ -304,6 +304,9 @@ public class ShopInteract {
 
                 // Logic to update balances and chest inventory
                 clickUser.setBalance(clickUser.getBalance() - shop.getBuyPrice());
+                if (NetworkManager.isActive()) {
+                    NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), -shop.getBuyPrice());
+                }
                 if (shopUser != null) {
                     shopUser.setBalance(shopUser.getBalance() + shop.getBuyPrice());
                     // Immediately persist the shop owner's new balance
@@ -516,6 +519,9 @@ public class ShopInteract {
 
                 // Logic to update balances and chest inventory
                 clickUser.setBalance(clickUser.getBalance() + shop.getSellPrice());
+                if (NetworkManager.isActive()) {
+                    NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), shop.getSellPrice());
+                }
                 if (shopUser != null) {
                     shopUser.setBalance(shopUser.getBalance() - shop.getSellPrice());
                     // Same cross-server race fix as in handleBuyLogic

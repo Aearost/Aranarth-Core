@@ -114,7 +114,7 @@ public class CommandBalance implements CommandExecutor {
 
 	private void persistAndBroadcastBalanceDelta(UUID uuid, double delta) {
 		PersistenceUtils.saveAranarthPlayerImmediately(uuid);
-		if (Bukkit.getPlayer(uuid) == null && NetworkManager.isActive()) {
+		if (NetworkManager.isActive()) {
 			NetworkManager.getInstance().publishBalanceAdjust(uuid, delta);
 		}
 	}

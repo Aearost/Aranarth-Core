@@ -11,6 +11,7 @@ import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.objects.Perk;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.AvatarUtils;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.NamespacedKey;
 import org.bukkit.persistence.PersistentDataType;
@@ -229,6 +230,9 @@ public class GuiVoteShopPurchaseClick {
                     else if (clicked.getType() == Material.GOLD_INGOT) {
                         aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 15000);
                         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                        if (NetworkManager.isActive()) {
+                            NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), 15000);
+                        }
                     }
                     // Acolyte
                     else if (clicked.getType() == Material.PINK_CONCRETE_POWDER) {

@@ -340,6 +340,9 @@ public class ChatGameUtils {
             double reward = baseReward * multiplier;
 
             ap.setBalance(ap.getBalance() + reward);
+            if (NetworkManager.isActive()) {
+                NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), reward);
+            }
             AranarthUtils.addChatGameGuess(player.getUniqueId());
             AranarthUtils.addChatGameEarnings(player.getUniqueId(), reward);
 
@@ -606,6 +609,9 @@ public class ChatGameUtils {
             double reward = baseReward * multiplier;
 
             ap.setBalance(ap.getBalance() + reward);
+            if (NetworkManager.isActive()) {
+                NetworkManager.getInstance().publishBalanceAdjust(winner.getUniqueId(), reward);
+            }
             AranarthUtils.addChatGameGuess(winner.getUniqueId());
             AranarthUtils.addChatGameEarnings(winner.getUniqueId(), reward);
 

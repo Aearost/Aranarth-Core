@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.DominionRank;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.Outpost;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -292,6 +293,9 @@ public class OutpostUtils {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
         aranarthPlayer.setBalance(aranarthPlayer.getBalance() + (500));
         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), 500);
+        }
 
         return "&7Outpost chunk unclaimed successfully";
     }

@@ -430,6 +430,9 @@ public class DominionUtils {
                                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                                 aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 125);
                                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                                if (NetworkManager.isActive()) {
+                                    NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), 125);
+                                }
                                 playerDominion.getChunks().remove(chunk);
                                 chunkKeyToDominion.remove(getChunkKey(chunk));
                                 resizeFoodArray(playerDominion);
@@ -466,6 +469,9 @@ public class DominionUtils {
         DefenderUtils.sellAllDominionDefenders(dominion);
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(dominion.getLeader());
         aranarthPlayer.setBalance(aranarthPlayer.getBalance() + dominion.getBalance());
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishBalanceAdjust(dominion.getLeader(), dominion.getBalance());
+        }
         if (Bukkit.getOfflinePlayer(dominion.getLeader()).isOnline()) {
             Player leader = Bukkit.getPlayer(dominion.getLeader());
             leader.sendMessage(ChatUtils.chatMessage("&7Your Dominion's balance has been added to your own"));

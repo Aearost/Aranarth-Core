@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.items.brew.BrewRecipe;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.BrewRecipeUtils;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -85,6 +86,9 @@ public class GuiBrewShopClick {
             NumberFormat fmt = NumberFormat.getInstance();
             ap.setBalance(ap.getBalance() - target.getPrice());
             AranarthUtils.setPlayer(player.getUniqueId(), ap);
+            if (NetworkManager.isActive()) {
+                NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), -target.getPrice());
+            }
             BrewRecipeUtils.unlock(player.getUniqueId(), target.getId());
 
             player.sendMessage(ChatUtils.chatMessage("&7You've unlocked the recipe for &f&l"

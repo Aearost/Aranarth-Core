@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
 import com.aearost.aranarthcore.items.key.KeyRare;
 import com.aearost.aranarthcore.items.key.KeyVote;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -166,6 +167,9 @@ public class LoginStreakUtils {
             double money = getMoneyReward(day, rank);
             aranarthPlayer.setBalance(aranarthPlayer.getBalance() + money);
             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+            if (NetworkManager.isActive()) {
+                NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), money);
+            }
             player.sendMessage(ChatUtils.chatMessage(
                     "&7Day &e" + day + " &7streak reward: &6$" + MONEY_FORMAT.format(money)));
         }

@@ -4627,13 +4627,11 @@ public class PersistenceUtils {
                 String outpostLookupName = (worldName.startsWith("smp:") && AranarthCore.isSmpServer())
                         ? worldName.substring(4) : worldName;
                 World world = Bukkit.getWorld(outpostLookupName);
-                if (world == null) {
-                    Bukkit.getLogger().warning("Outpost " + name + " references unknown world: " + worldName + " — skipping.");
-                    continue;
-                }
 
+                // If world is null the outpost lives on a different server. Still register it
+                // (with an empty chunk list) so tab-complete and cross-server teleport work.
                 List<Chunk> chunks = new ArrayList<>();
-                if (!fields[10].isEmpty()) {
+                if (world != null && !fields[10].isEmpty()) {
                     for (String chunkEntry : fields[10].split("\\*\\*\\*")) {
                         String[] parts = chunkEntry.split(",");
                         int cx = Integer.parseInt(parts[0]);
@@ -8085,14 +8083,15 @@ public class PersistenceUtils {
                 String outpostLookupName = (worldName.startsWith("smp:") && AranarthCore.isSmpServer())
                         ? worldName.substring(4) : worldName;
                 World world = Bukkit.getWorld(outpostLookupName);
-                if (world == null) {
-                    Bukkit.getLogger().warning("[AC] Outpost " + name + " references unknown world: " + worldName + " — skipping.");
-                    continue;
-                }
+
+                // If world is null the outpost lives on a different server. Still register it
+                // (with an empty chunk list) so tab-complete and cross-server teleport work.
                 List<Chunk> chunks = new ArrayList<>();
-                for (com.google.gson.JsonElement cEl : obj.getAsJsonArray("chunks")) {
-                    JsonObject c = cEl.getAsJsonObject();
-                    chunks.add(world.getChunkAt(c.get("x").getAsInt(), c.get("z").getAsInt()));
+                if (world != null) {
+                    for (com.google.gson.JsonElement cEl : obj.getAsJsonArray("chunks")) {
+                        JsonObject c = cEl.getAsJsonObject();
+                        chunks.add(world.getChunkAt(c.get("x").getAsInt(), c.get("z").getAsInt()));
+                    }
                 }
                 Outpost outpost = new Outpost(
                         id, name, dominionId, outpostIndex,
