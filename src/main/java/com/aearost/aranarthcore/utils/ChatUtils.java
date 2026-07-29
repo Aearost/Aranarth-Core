@@ -145,6 +145,9 @@ public class ChatUtils {
 	}
 
 	private static String checkForHex(String msg) {
+		// Auto-convert old-format bare hex codes (#RRGGBB) to the new format (&#RRGGBB).
+		// The negative lookbehind ensures already-valid &#RRGGBB sequences are left alone.
+		msg = msg.replaceAll("(?<!&)#([a-fA-F0-9]{6})", "&#$1");
 		Pattern ampPattern = Pattern.compile("&#[a-fA-F0-9]{6}");
 		Matcher ampMatcher = ampPattern.matcher(msg);
 		while (ampMatcher.find()) {
@@ -208,11 +211,9 @@ public class ChatUtils {
 			colorStripped = colorStripped.replaceAll(pattern, "");
 		}
 
-		// Removes any manually added hex codes
-		if (colorStripped.contains("&#")) {
-			String pattern = "&#.{6}";
-			colorStripped = colorStripped.replaceAll(pattern, "");
-		}
+		// Removes any manually added hex codes (both new &#RRGGBB and old bare #RRGGBB formats)
+		colorStripped = colorStripped.replaceAll("&#[a-fA-F0-9]{6}", "");
+		colorStripped = colorStripped.replaceAll("(?<!&)#[a-fA-F0-9]{6}", "");
 
 		return colorStripped;
 	}
