@@ -1100,9 +1100,6 @@ public class NetworkManager {
             db.clearRosterForServer(thisServer);
             Map<UUID, NetworkPlayer> loaded = db.loadRemoteRoster(thisServer);
             remoteRoster.putAll(loaded);
-            List<String> loadedNames = loaded.values().stream().map(NetworkPlayer::getUsername).toList();
-            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[TabDebug][RemoteRoster] syncRosterFromDatabase loaded="
-                    + loaded.size() + " players: " + loadedNames);
             if (!remoteRoster.isEmpty()) {
                 Bukkit.getLogger().info(AranarthCore.LOG_PREFIX
                         + "Synced " + remoteRoster.size() + " remote player(s) from MySQL");
@@ -1154,9 +1151,6 @@ public class NetworkManager {
                 textureSignature
         );
         remoteRoster.put(uuid, np);
-        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[TabDebug][RemoteRoster] ADD uuid=" + uuid
-                + " username=\"" + username + "\" server=" + server
-                + " vanished=" + vanished + " rosterSize=" + remoteRoster.size());
         if (!vanished) {
             NetworkTabManager.addToTab(np);
         }
@@ -1206,10 +1200,7 @@ public class NetworkManager {
         if (server.equals(thisServer)) return;
 
         UUID uuid = UUID.fromString(json.get("uuid").getAsString());
-        NetworkPlayer removed = remoteRoster.remove(uuid);
-        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[TabDebug][RemoteRoster] REMOVE uuid=" + uuid
-                + " username=\"" + (removed != null ? removed.getUsername() : "?") + "\""
-                + " rosterSize=" + remoteRoster.size());
+        remoteRoster.remove(uuid);
         // Guard: if the player just transferred to THIS server, their vanilla tab entry is
         // already present — removing it would blank their skin and hide them from their own tab.
         if (Bukkit.getPlayer(uuid) == null) {

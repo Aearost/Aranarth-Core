@@ -16,7 +16,6 @@ import com.aearost.aranarthcore.objects.DefenderType;
 import com.aearost.aranarthcore.objects.Quest;
 import com.projectkorra.projectkorra.BendingPlayer;
 
-import java.time.LocalDate;
 import java.util.stream.Collectors;
 
 import com.projectkorra.projectkorra.OfflineBendingPlayer;
@@ -4156,16 +4155,11 @@ public class PersistenceUtils {
             HashMap<UUID, Long> claims = LoginStreakUtils.getLastClaimEpochDayMap();
             HashMap<UUID, Long> logins = LoginStreakUtils.getLastLoginEpochDayMap();
 
-            long today = LocalDate.now(java.time.ZoneId.of("America/New_York")).toEpochDay();
             for (UUID uuid : days.keySet()) {
                 int day = days.get(uuid);
                 long lastClaim = claims.getOrDefault(uuid, 0L);
                 long lastLogin = logins.getOrDefault(uuid, lastClaim);
                 writer.write(uuid + "|" + day + "|" + lastClaim + "|" + lastLogin + "\n");
-                if (lastClaim == today || lastLogin == today) {
-                    Bukkit.getLogger().info("[AC][Streak] SAVE " + uuid
-                            + " | day=" + day + " lastClaim=" + lastClaim + " lastLogin=" + lastLogin);
-                }
             }
 
             // Also persist players who have a lastClaim but no explicit day entry
@@ -4174,10 +4168,6 @@ public class PersistenceUtils {
                     long lastClaim = claims.get(uuid);
                     long lastLogin = logins.getOrDefault(uuid, lastClaim);
                     writer.write(uuid + "|1|" + lastClaim + "|" + lastLogin + "\n");
-                    if (lastClaim == today || lastLogin == today) {
-                        Bukkit.getLogger().info("[AC][Streak] SAVE(claim-only) " + uuid
-                                + " | day=1 lastClaim=" + lastClaim + " lastLogin=" + lastLogin);
-                    }
                 }
             }
 

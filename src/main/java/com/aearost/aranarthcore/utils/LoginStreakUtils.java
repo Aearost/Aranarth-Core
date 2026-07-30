@@ -6,7 +6,6 @@ import com.aearost.aranarthcore.items.key.KeyRare;
 import com.aearost.aranarthcore.items.key.KeyVote;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -104,15 +103,10 @@ public class LoginStreakUtils {
 
         // If the player is past day 1 and missed yesterday, reset
         if (day > 1 && lastActivity < today - 1) {
-            Bukkit.getLogger().warning("[AC][Streak] RESET for " + uuid
-                    + " | day=" + day + " lastClaim=" + lastClaim + " lastLogin=" + getLastLoginEpochDay(uuid)
-                    + " lastActivity=" + lastActivity + " today=" + today);
             currentStreakDay.put(uuid, 1);
             locallyModified.add(uuid);
             return true;
         }
-        Bukkit.getLogger().info("[AC][Streak] ensureStreakValid OK for " + uuid
-                + " | day=" + day + " lastClaim=" + lastClaim + " lastActivity=" + lastActivity + " today=" + today);
         return false;
     }
 
@@ -149,10 +143,6 @@ public class LoginStreakUtils {
         lastClaimEpochDay.put(uuid, getTodayEpochDay());
         currentStreakDay.put(uuid, day == 28 ? 1 : day + 1);
         locallyModified.add(uuid);
-
-        Bukkit.getLogger().info("[AC][Streak] CLAIMED day " + day + " for " + uuid
-                + " (" + player.getName() + ") | newDay=" + getStreakDay(uuid)
-                + " newLastClaim=" + getLastClaimEpochDay(uuid));
 
         return true;
     }

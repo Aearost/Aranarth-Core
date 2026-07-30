@@ -504,10 +504,7 @@ public class DominionLevelUtils {
         // No chunks accessible on this server (cross-server stub or world not loaded) —
         // retain the previous cached count rather than collapsing it to 0.
         if (chunksByWorld.isEmpty()) {
-            int prev = dominion.getCachedLivestockCount();
-            Bukkit.getLogger().info("[AC][LivestockScan] " + dominion.getName()
-                    + " noChunks retaining prev=" + prev);
-            return prev;
+            return dominion.getCachedLivestockCount();
         }
 
         Map<String, Integer> cachedByWorld = dominion.getCachedLivestockByWorld();
@@ -533,46 +530,19 @@ public class DominionLevelUtils {
                     }
                 }
                 Integer prevCache = cachedByWorld.get(worldName);
-                Bukkit.getLogger().info("[AC][LivestockScan] " + dominion.getName()
-                        + " world=" + worldName
-                        + " allLoaded=true"
-                        + " scanned=" + worldCount
-                        + " prevCache=" + prevCache
-                        + " onlinePlayers=" + Bukkit.getOnlinePlayers().size());
-                // Warn if a fully-loaded scan returned 0 but we previously had animals here —
-                // this may indicate Paper's async entity loading hasn't populated the chunks yet.
-                if (worldCount == 0 && prevCache != null && prevCache > 0) {
-                    Bukkit.getLogger().warning("[AC][LivestockScan] " + dominion.getName()
-                            + " world=" + worldName
-                            + " SUSPECT: allLoaded=true but scanned=0 while prevCache=" + prevCache
-                            + " — possible Paper async entity load lag");
-                }
                 cachedByWorld.put(worldName, worldCount);
                 total += worldCount;
             } else if (cachedByWorld.containsKey(worldName)) {
                 // We have a prior scan result for this world — use it
                 int cached = cachedByWorld.get(worldName);
-                Bukkit.getLogger().info("[AC][LivestockScan] " + dominion.getName()
-                        + " world=" + worldName
-                        + " allLoaded=false"
-                        + " usingCache=" + cached
-                        + " onlinePlayers=" + Bukkit.getOnlinePlayers().size());
                 total += cached;
             } else {
                 // Use the unknown remainder so the count doesn't collapse to 0
-                Bukkit.getLogger().info("[AC][LivestockScan] " + dominion.getName()
-                        + " world=" + worldName
-                        + " allLoaded=false"
-                        + " noCache usingRemainder=" + unknownRemainder
-                        + " onlinePlayers=" + Bukkit.getOnlinePlayers().size());
                 total += unknownRemainder;
                 unknownRemainder = 0; // consume it and only apply once to avoid double-counting
             }
         }
 
-        Bukkit.getLogger().info("[AC][LivestockScan] " + dominion.getName()
-                + " finalTotal=" + total
-                + " prevCachedLivestockCount=" + dominion.getCachedLivestockCount());
         return total;
     }
 
