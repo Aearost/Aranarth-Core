@@ -4607,7 +4607,7 @@ public class PersistenceUtils {
                     continue;
                 }
 
-                // #id|dominionId|name|outpostIndex|worldName|homeX|homeY|homeZ|homeYaw|homePitch|chunks|createdTimestamp|boughtChunks
+                // #id|dominionId|name|outpostIndex|worldName|homeX|homeY|homeZ|homeYaw|homePitch|chunks|createdTimestamp|boughtChunks|icon
                 String[] fields = row.split("\\|", -1);
                 if (fields.length < 12) {
                     continue;
@@ -4642,12 +4642,19 @@ public class PersistenceUtils {
 
                 long createdTimestamp = Long.parseLong(fields[11]);
                 int boughtChunks = fields.length > 12 ? Integer.parseInt(fields[12]) : 0;
+                Material icon = Material.OAK_LOG;
+                if (fields.length > 13 && !fields[13].isEmpty()) {
+                    try {
+                        icon = Material.valueOf(fields[13]);
+                    } catch (IllegalArgumentException ignored) {}
+                }
 
                 Outpost outpost = new Outpost(
                         id, name, dominionId, outpostIndex,
                         worldName, homeX, homeY, homeZ, homeYaw, homePitch,
                         chunks, boughtChunks, createdTimestamp
                 );
+                outpost.setIcon(icon);
                 OutpostUtils.registerOutpost(outpost);
             }
 
@@ -4687,7 +4694,7 @@ public class PersistenceUtils {
 
         try {
             FileWriter writer = new FileWriter(filePath);
-            writer.write("#id|dominionId|name|outpostIndex|worldName|homeX|homeY|homeZ|homeYaw|homePitch|chunks|createdTimestamp|boughtChunks\n");
+            writer.write("#id|dominionId|name|outpostIndex|worldName|homeX|homeY|homeZ|homeYaw|homePitch|chunks|createdTimestamp|boughtChunks|icon\n");
 
             for (Dominion dominion : DominionUtils.getDominions()) {
                 // Skip cross-server stubs to avoid overwriting valid outpost data
@@ -4718,7 +4725,8 @@ public class PersistenceUtils {
                             + home.getPitch() + "|"
                             + chunks + "|"
                             + outpost.getCreatedTimestamp() + "|"
-                            + outpost.getBoughtChunks() + "\n";
+                            + outpost.getBoughtChunks() + "|"
+                            + outpost.getIcon().name() + "\n";
                     writer.write(row);
                 }
             }
@@ -6250,6 +6258,7 @@ public class PersistenceUtils {
                 obj.addProperty("homePitch", home.getPitch());
                 obj.addProperty("createdTimestamp", outpost.getCreatedTimestamp());
                 obj.addProperty("boughtChunks", outpost.getBoughtChunks());
+                obj.addProperty("icon", outpost.getIcon().name());
                 JsonArray chunks = new JsonArray();
                 for (Chunk chunk : outpost.getChunks()) {
                     JsonObject c = new JsonObject();

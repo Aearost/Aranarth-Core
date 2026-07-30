@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Biome;
 
 import java.util.HashSet;
@@ -26,6 +27,7 @@ public class Outpost {
     private List<Chunk> chunks;
     private int boughtChunks;
     private final long createdTimestamp;
+    private Material icon;
     private Set<Biome> cachedBiomes = new HashSet<>();
 
     public Outpost(UUID id, String name, UUID dominionId, int outpostIndex,
@@ -41,6 +43,7 @@ public class Outpost {
         this.chunks = chunks;
         this.boughtChunks = boughtChunks;
         this.createdTimestamp = createdTimestamp;
+        this.icon = Material.OAK_LOG;
     }
 
     public UUID getId() {
@@ -100,6 +103,14 @@ public class Outpost {
 
     public long getCreatedTimestamp() {
         return createdTimestamp;
+    }
+
+    public Material getIcon() {
+        return icon;
+    }
+
+    public void setIcon(Material icon) {
+        this.icon = icon;
     }
 
     public Set<Biome> getCachedBiomes() {

@@ -7,11 +7,14 @@ import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.PendingTeleport;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.Outpost;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.OutpostUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -27,11 +30,11 @@ import java.util.List;
 public class GuiOutpostsClick {
 
     public void execute(InventoryClickEvent e) {
-        e.setCancelled(true);
-
         if (e.getClickedInventory() == null || e.getClickedInventory().getType() != InventoryType.CHEST) {
             return;
         }
+
+        e.setCancelled(true);
 
         Player player = (Player) e.getWhoClicked();
         Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
@@ -93,6 +96,26 @@ public class GuiOutpostsClick {
 
         if (outpost == null) {
             player.sendMessage(ChatUtils.chatMessage("&cThat outpost could not be found!"));
+            return;
+        }
+
+        // Drag an item onto the slot to change the outpost icon
+        Material heldItem = e.getCursor() != null ? e.getCursor().getType() : Material.AIR;
+        if (heldItem != Material.AIR) {
+            if (!dominion.getLeader().equals(player.getUniqueId())
+                    && !DominionUtils.hasPermission(player, dominion, DominionPermission.MANAGE_OUTPOSTS)) {
+                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to change the outpost icon!"));
+                player.closeInventory();
+                return;
+            }
+            if (heldItem == outpost.getIcon()) {
+                player.sendMessage(ChatUtils.chatMessage("&cThis outpost already uses that icon!"));
+            } else {
+                outpost.setIcon(heldItem);
+                Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), PersistenceUtils::saveOutposts);
+                player.sendMessage(ChatUtils.chatMessage("&e" + ChatUtils.stripColorFormatting(outpost.getName()) + "&7's icon is now &e" + ChatUtils.getFormattedItemName(heldItem.name())));
+            }
+            player.closeInventory();
             return;
         }
 

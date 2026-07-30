@@ -136,6 +136,7 @@ Minor Features
 [~] Fixed issue where Dominion outpost names were not displayed in color in /d info
 [~] Fixed issue where dominion resources were able to claim biomes' resources even if they didn't have any claimed land in them
 [~] Made it so /d outpost and /d defender open their respective GUIs
+[+] Implemented outpost icon changing functionality in /d outpost
 
 Backend Code Changes
 - Implemented discord support bot basis

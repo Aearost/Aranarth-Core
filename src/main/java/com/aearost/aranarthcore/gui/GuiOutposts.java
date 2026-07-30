@@ -93,7 +93,7 @@ public class GuiOutposts {
     }
 
     private static ItemStack buildActiveOutpostItem(Outpost outpost, Dominion dominion) {
-        ItemStack item = new ItemStack(Material.OAK_LOG);
+        ItemStack item = new ItemStack(outpost.getIcon());
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(ChatUtils.translateToColor(outpost.getName()));
         List<String> lore = new ArrayList<>();
