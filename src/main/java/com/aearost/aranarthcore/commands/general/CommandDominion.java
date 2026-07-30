@@ -1784,7 +1784,8 @@ public class CommandDominion implements CommandExecutor {
         // Cross-server: if the outpost lives on a different server, transfer there first.
         if (NetworkManager.isActive()) {
             String currentServer = AranarthCore.getInstance().getConfig().getString("network.this-server", "survival");
-            String targetServer = getServerForWorld(outpost.getHomeWorldName());
+            // Use the dominion's world name rather than the outpost's homeWorldName
+            String targetServer = getServerForWorld(dominion.getDominionHomeWorldName());
             if (targetServer != null && !targetServer.equals(currentServer)) {
                 AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
                 String cmd = "dominion outpost home " + targetName;

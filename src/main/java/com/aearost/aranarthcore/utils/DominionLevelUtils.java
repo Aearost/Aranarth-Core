@@ -427,6 +427,8 @@ public class DominionLevelUtils {
         }
         Map<UUID, List<SnapshotBundle>> snapshotMap = new HashMap<>();
         for (Dominion dominion : dominions) {
+            // Skip cross-server stubs
+            if (dominion.getChunks().isEmpty()) continue;
             List<SnapshotBundle> bundles = new ArrayList<>();
             boolean anyUnloaded = false;
 
@@ -612,6 +614,8 @@ public class DominionLevelUtils {
      */
     private static void reevaluateAllLevels(List<Dominion> dominions) {
         for (Dominion dominion : dominions) {
+            // Skip cross-server stubs
+            if (dominion.getChunks().isEmpty()) continue;
             int newLevel = evaluateLevel(dominion);
             int oldLevel = dominion.getDominionLevel();
 
@@ -644,6 +648,7 @@ public class DominionLevelUtils {
      * Re-evaluates a single dominion's level immediately.
      */
     public static void reevaluateDominion(Dominion dominion) {
+        if (dominion.getChunks().isEmpty()) return; // cross-server stub, skip
         int newLevel = evaluateLevel(dominion);
         int oldLevel = dominion.getDominionLevel();
 

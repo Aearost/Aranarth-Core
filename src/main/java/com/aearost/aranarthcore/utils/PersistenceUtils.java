@@ -4690,6 +4690,8 @@ public class PersistenceUtils {
             writer.write("#id|dominionId|name|outpostIndex|worldName|homeX|homeY|homeZ|homeYaw|homePitch|chunks|createdTimestamp|boughtChunks\n");
 
             for (Dominion dominion : DominionUtils.getDominions()) {
+                // Skip cross-server stubs to avoid overwriting valid outpost data
+                if (dominion.getChunks().isEmpty()) continue;
                 for (Outpost outpost : OutpostUtils.getDominionOutposts(dominion.getId())) {
                     StringBuilder chunks = new StringBuilder();
                     for (Chunk chunk : outpost.getChunks()) {
@@ -6228,6 +6230,8 @@ public class PersistenceUtils {
         }
         DatabaseManager db = DatabaseManager.getInstance();
         for (Dominion dominion : DominionUtils.getDominions()) {
+            // Skip cross-server stubs - their outposts have empty or wrong-server chunk lists
+            if (dominion.getChunks().isEmpty()) continue;
             for (Outpost outpost : OutpostUtils.getDominionOutposts(dominion.getId())) {
                 Location home = outpost.getHome();
                 if (home.getWorld() == null) {

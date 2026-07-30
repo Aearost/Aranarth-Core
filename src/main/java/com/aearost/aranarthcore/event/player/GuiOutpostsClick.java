@@ -1,7 +1,10 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiDominionPermissions;
 import com.aearost.aranarthcore.gui.GuiOutposts;
+import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.PendingTeleport;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.Outpost;
@@ -91,6 +94,33 @@ public class GuiOutpostsClick {
         if (outpost == null) {
             player.sendMessage(ChatUtils.chatMessage("&cThat outpost could not be found!"));
             return;
+        }
+
+        // If the outpost's dominion lives on a different server, transfer there and re-run the command
+        if (NetworkManager.isActive()) {
+            String currentServer = AranarthCore.getInstance().getConfig().getString("network.this-server", "survival");
+            String worldName = dominion.getDominionHomeWorldName();
+            String resolvedServer = null;
+            if (worldName != null) {
+                String smpServer = AranarthCore.getInstance().getConfig().getString("network.servers.smp", "smp");
+                String survivalServer = AranarthCore.getInstance().getConfig().getString("network.servers.survival", "survival");
+                if (worldName.startsWith("smp")) resolvedServer = smpServer;
+                else if (worldName.startsWith("world")) resolvedServer = survivalServer;
+            }
+            final String targetServer = resolvedServer;
+            if (targetServer != null && !targetServer.equals(currentServer)) {
+                AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
+                String cmd = "dominion outpost home " + ChatUtils.stripColorFormatting(outpost.getName());
+                player.closeInventory();
+                AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
+                        ap.isInAdminMode(), "&e&lDominion", "&7Transferring to your outpost...", success -> {
+                    if (success) {
+                        NetworkManager.getInstance().saveInventoryAndTransfer(player, targetServer,
+                                PendingTeleport.forCommand(cmd, "&e&lDominion", "&7You have teleported to your outpost"));
+                    }
+                });
+                return;
+            }
         }
 
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
