@@ -1686,6 +1686,7 @@ public class CommandDominion implements CommandExecutor {
                 AranarthUtils.toStoredDominionWorldName(loc.getWorld().getName()), loc.getX(), loc.getY(), loc.getZ(),
                 loc.getYaw(), loc.getPitch(), outpostChunks, 0, System.currentTimeMillis());
         OutpostUtils.registerOutpost(outpost);
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), PersistenceUtils::saveOutposts);
 
         String foundedMsg = ChatUtils.chatMessage("&e" + dominion.getName() + " &7has founded the outpost, &e" + outpostName);
         Bukkit.broadcastMessage(foundedMsg);
@@ -1693,6 +1694,7 @@ public class CommandDominion implements CommandExecutor {
         NetworkManager nm = NetworkManager.getInstance();
         if (nm != null) {
             nm.publishBroadcast(foundedMsg);
+            nm.publishOutpostCreate(outpost);
         }
         player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 1.2F, 1.5F);
     }
@@ -1722,6 +1724,7 @@ public class CommandDominion implements CommandExecutor {
         String oldName = outpost.getName();
         outpost.setName(newName);
         OutpostUtils.updateOutpost(outpost);
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), PersistenceUtils::saveOutposts);
         player.sendMessage(ChatUtils.chatMessage("&7Outpost renamed to &e" + newName));
         String renamedMsg = ChatUtils.chatMessage("&e" + dominion.getName() + "&7's outpost, &e" + oldName + "&7, has been renamed to &e" + newName);
         Bukkit.broadcastMessage(renamedMsg);
@@ -1729,6 +1732,7 @@ public class CommandDominion implements CommandExecutor {
         NetworkManager nm = NetworkManager.getInstance();
         if (nm != null) {
             nm.publishBroadcast(renamedMsg);
+            nm.publishOutpostUpdate(outpost);
         }
     }
 

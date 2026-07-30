@@ -114,6 +114,9 @@ public class GuiOutpostsClick {
                 outpost.setIcon(heldItem);
                 Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), PersistenceUtils::saveOutposts);
                 player.sendMessage(ChatUtils.chatMessage("&e" + ChatUtils.stripColorFormatting(outpost.getName()) + "&7's icon is now &e" + ChatUtils.getFormattedItemName(heldItem.name())));
+                if (NetworkManager.isActive()) {
+                    NetworkManager.getInstance().publishOutpostUpdate(outpost);
+                }
             }
             player.closeInventory();
             return;

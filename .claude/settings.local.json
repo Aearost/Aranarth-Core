@@ -350,7 +350,8 @@
       "Bash(zcat /c/Users/liamh/Downloads/Logs/SMP/2026-07-28-1.log.gz)",
       "Bash(zcat /c/Users/liamh/Downloads/Logs/SMP/2026-07-28-2.log.gz)",
       "Bash(zcat /c/Users/liamh/Downloads/Logs/Survival/2026-07-28-1.log.gz)",
-      "Bash(head -50 grep -i \"outpost\\\\|disband\\\\|evict\\\\|publishDominion\\\\|dominion.*disband\\\\|Aranarth\" /c/Users/liamh/Downloads/Logs/Survival/latest.log)"
+      "Bash(head -50 grep -i \"outpost\\\\|disband\\\\|evict\\\\|publishDominion\\\\|dominion.*disband\\\\|Aranarth\" /c/Users/liamh/Downloads/Logs/Survival/latest.log)",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -name PlayerServerJoin* -o -name *ServerJoin*)"
     ]
   }
 }

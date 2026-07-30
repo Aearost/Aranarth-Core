@@ -3497,6 +3497,14 @@ public class AranarthUtils {
 				for (int i = 0; i < sentinels.get(type).size(); i++) {
 					Sentinel sentinel = sentinels.get(type).get(i);
 
+					// Skip sentinels that belong to a different server — they won't have entities here
+					String sentinelServer = sentinel.getServerName();
+					if (!sentinelServer.isEmpty()
+							&& com.aearost.aranarthcore.network.NetworkManager.isActive()
+							&& !sentinelServer.equals(com.aearost.aranarthcore.network.NetworkManager.getInstance().getThisServer())) {
+						continue;
+					}
+
 					// Must manually load the chunk to allow the entity to teleport
 					if (sentinel.getLocation().getWorld() == null) continue;
 					Chunk chunk = sentinel.getLocation().getChunk();

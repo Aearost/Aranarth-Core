@@ -13,6 +13,7 @@ public class Sentinel {
 	private EntityType type;
 	private Location location;
 	private String worldName;
+	private String serverName = "";
 
 	public Sentinel(UUID uuid, EntityType type, Location location) {
 		this.uuid = uuid;
@@ -74,4 +75,7 @@ public class Sentinel {
 
 	public String getWorldName() { return worldName; }
 	public void setWorldName(String worldName) { this.worldName = worldName; }
+
+	public String getServerName() { return serverName; }
+	public void setServerName(String serverName) { this.serverName = serverName; }
 }

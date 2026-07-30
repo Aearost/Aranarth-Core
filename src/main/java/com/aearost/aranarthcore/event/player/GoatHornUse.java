@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.DefenderMode;
 import com.aearost.aranarthcore.objects.Dominion;
@@ -22,7 +23,9 @@ import org.bukkit.potion.PotionEffectTypeCategory;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -220,49 +223,81 @@ public class GoatHornUse {
         if (sentinelType == EntityType.IRON_GOLEM || sentinelType == EntityType.WOLF) {
             List<Sentinel> sentinels = aranarthPlayer.getSentinels().get(sentinelType);
 
-            // Must manually load the chunk to allow the entity to teleport
+            // Partition sentinels into local (on this server) vs remote (on another server)
+            List<Sentinel> localSentinels = new ArrayList<>();
+            Map<String, List<Sentinel>> remoteSentinelsByServer = new HashMap<>();
+            String thisServer = NetworkManager.isActive() ? NetworkManager.getInstance().getThisServer() : "";
             for (Sentinel sentinel : sentinels) {
-                Chunk chunk = sentinel.getLocation().getChunk();
-                chunk.load(true);
+                String sentinelServer = sentinel.getServerName();
+                if (!NetworkManager.isActive() || sentinelServer.isEmpty() || sentinelServer.equals(thisServer)) {
+                    localSentinels.add(sentinel);
+                } else {
+                    remoteSentinelsByServer.computeIfAbsent(sentinelServer, k -> new ArrayList<>()).add(sentinel);
+                }
             }
 
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    Player closestPlayerTarget = getTarget(player);
-
-                    for (Sentinel sentinel : sentinels) {
-                        Entity entity = Bukkit.getEntity(sentinel.getUuid());
-                        entity.teleport(player.getLocation());
-                        if (entity instanceof Mob mob) {
-                            if (closestPlayerTarget != null) {
-                                mob.setTarget(closestPlayerTarget);
-                            }
-                            if (mob instanceof Wolf wolf) {
-                                wolf.setSitting(false);
+            // Teleport local sentinels (existing behaviour)
+            if (!localSentinels.isEmpty()) {
+                for (Sentinel sentinel : localSentinels) {
+                    sentinel.getLocation().getChunk().load(true);
+                }
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        Player closestPlayerTarget = getTarget(player);
+                        for (Sentinel sentinel : localSentinels) {
+                            Entity entity = Bukkit.getEntity(sentinel.getUuid());
+                            if (entity == null) continue;
+                            entity.teleport(player.getLocation());
+                            if (entity instanceof Mob mob) {
+                                if (closestPlayerTarget != null) mob.setTarget(closestPlayerTarget);
+                                if (mob instanceof Wolf wolf) wolf.setSitting(false);
                             }
                         }
+                        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
+                        player.getWorld().spawnParticle(Particle.PORTAL, player.getEyeLocation(), 250, 3, 2, 3);
                     }
-                    player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
-                    player.getWorld().spawnParticle(Particle.PORTAL, player.getEyeLocation(), 250, 3, 2, 3);
+                }.runTaskLater(AranarthCore.getInstance(), 60L);
+            }
+
+            // Request cross-server transfer for remote sentinels
+            if (NetworkManager.isActive()) {
+                Location loc = player.getLocation();
+                for (Map.Entry<String, List<Sentinel>> entry : remoteSentinelsByServer.entrySet()) {
+                    List<UUID> uuids = new ArrayList<>();
+                    for (Sentinel s : entry.getValue()) uuids.add(s.getUuid());
+                    NetworkManager.getInstance().publishSentinelSummon(
+                            player.getUniqueId(), entry.getKey(), uuids, sentinelType,
+                            loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ());
                 }
-            }.runTaskLater(AranarthCore.getInstance(), 60L);
+            }
         } else if (sentinelType == EntityType.HORSE) {
             Sentinel sentinel = aranarthPlayer.getSentinels().get(sentinelType).getFirst();
+            String thisServer = NetworkManager.isActive() ? NetworkManager.getInstance().getThisServer() : "";
+            String sentinelServer = sentinel.getServerName();
 
-            // Must manually load the chunk to allow the entity to teleport
-            Chunk chunk = sentinel.getLocation().getChunk();
-            chunk.load(true);
-
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    Entity entity = Bukkit.getEntity(sentinel.getUuid());
-                    entity.teleport(player.getLocation());
-                    player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
-                    player.getWorld().spawnParticle(Particle.PORTAL, player.getEyeLocation(), 250, 3, 2, 3);
-                }
-            }.runTaskLater(AranarthCore.getInstance(), 60L);
+            if (NetworkManager.isActive() && !sentinelServer.isEmpty() && !sentinelServer.equals(thisServer)) {
+                // Sentinel is on a different server — request cross-server transfer
+                Location loc = player.getLocation();
+                List<UUID> uuids = new ArrayList<>();
+                uuids.add(sentinel.getUuid());
+                NetworkManager.getInstance().publishSentinelSummon(
+                        player.getUniqueId(), sentinelServer, uuids, sentinelType,
+                        loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ());
+            } else {
+                // Local teleport
+                sentinel.getLocation().getChunk().load(true);
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        Entity entity = Bukkit.getEntity(sentinel.getUuid());
+                        if (entity == null) return;
+                        entity.teleport(player.getLocation());
+                        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
+                        player.getWorld().spawnParticle(Particle.PORTAL, player.getEyeLocation(), 250, 3, 2, 3);
+                    }
+                }.runTaskLater(AranarthCore.getInstance(), 60L);
+            }
         }
     }
 

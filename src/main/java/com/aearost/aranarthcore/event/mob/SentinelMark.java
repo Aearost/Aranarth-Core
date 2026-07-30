@@ -1,9 +1,11 @@
 package com.aearost.aranarthcore.event.mob;
 
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Sentinel;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.MusicInstrument;
 import org.bukkit.Sound;
 import org.bukkit.entity.*;
@@ -44,15 +46,19 @@ public class SentinelMark {
 							if (sentinelToUnmark != null) {
 								ironGolemSentinels.remove(sentinelToUnmark);
 								player.sendMessage(ChatUtils.chatMessage("&7You have unmarked this &eIron Golem"));
+								PersistenceUtils.syncPlayerSentinelsToDatabase(player.getUniqueId());
 								return;
 							}
 
 							if (ironGolemSentinels.size() < 2) {
-								ironGolemSentinels.add(new Sentinel(ironGolem.getUniqueId(), EntityType.IRON_GOLEM, ironGolem.getLocation()));
+								Sentinel newGolem = new Sentinel(ironGolem.getUniqueId(), EntityType.IRON_GOLEM, ironGolem.getLocation());
+								if (NetworkManager.isActive()) newGolem.setServerName(NetworkManager.getInstance().getThisServer());
+								ironGolemSentinels.add(newGolem);
 								sentinels.put(EntityType.IRON_GOLEM, ironGolemSentinels);
 								aranarthPlayer.setSentinels(sentinels);
 								player.sendMessage(ChatUtils.chatMessage("&7You have marked this as one of your &eIron Golem Sentinels"));
 								player.playSound(player, Sound.BLOCK_BELL_RESONATE, 1F, 2F);
+								PersistenceUtils.syncPlayerSentinelsToDatabase(player.getUniqueId());
 							} else {
 								player.sendMessage(ChatUtils.chatMessage("&cYou have already designated 2 &eIron Golem Sentinels"));
 							}
@@ -82,15 +88,19 @@ public class SentinelMark {
 							if (sentinelToUnmark != null) {
 								wolfSentinels.remove(sentinelToUnmark);
 								player.sendMessage(ChatUtils.chatMessage("&7You have unmarked this &eWolf"));
+								PersistenceUtils.syncPlayerSentinelsToDatabase(player.getUniqueId());
 								return;
 							}
 
 							if (wolfSentinels.size() < 8) {
-								wolfSentinels.add(new Sentinel(wolf.getUniqueId(), EntityType.WOLF, wolf.getLocation()));
+								Sentinel newWolf = new Sentinel(wolf.getUniqueId(), EntityType.WOLF, wolf.getLocation());
+								if (NetworkManager.isActive()) newWolf.setServerName(NetworkManager.getInstance().getThisServer());
+								wolfSentinels.add(newWolf);
 								sentinels.put(EntityType.WOLF, wolfSentinels);
 								aranarthPlayer.setSentinels(sentinels);
 								player.sendMessage(ChatUtils.chatMessage("&7You have marked this as one of your &eWolf Sentinels"));
 								player.playSound(player, Sound.BLOCK_BELL_RESONATE, 1F, 2F);
+								PersistenceUtils.syncPlayerSentinelsToDatabase(player.getUniqueId());
 							} else {
 								player.sendMessage(ChatUtils.chatMessage("&cYou have already designated 8 &eWolf Sentinels"));
 							}
@@ -120,15 +130,19 @@ public class SentinelMark {
 							if (sentinelToUnmark != null) {
 								horseSentinel.remove(sentinelToUnmark);
 								player.sendMessage(ChatUtils.chatMessage("&7You have unmarked this &eHorse"));
+								PersistenceUtils.syncPlayerSentinelsToDatabase(player.getUniqueId());
 								return;
 							}
 
 							if (horseSentinel.isEmpty()) {
-								horseSentinel.add(new Sentinel(horse.getUniqueId(), EntityType.HORSE, horse.getLocation()));
+								Sentinel newHorse = new Sentinel(horse.getUniqueId(), EntityType.HORSE, horse.getLocation());
+								if (NetworkManager.isActive()) newHorse.setServerName(NetworkManager.getInstance().getThisServer());
+								horseSentinel.add(newHorse);
 								sentinels.put(EntityType.HORSE, horseSentinel);
 								aranarthPlayer.setSentinels(sentinels);
 								player.sendMessage(ChatUtils.chatMessage("&7You have marked this as your &eHorse Sentinel"));
 								player.playSound(player, Sound.BLOCK_BELL_RESONATE, 1F, 2F);
+								PersistenceUtils.syncPlayerSentinelsToDatabase(player.getUniqueId());
 							} else {
 								player.sendMessage(ChatUtils.chatMessage("&cYou have already designated a &eHorse Sentinel"));
 							}

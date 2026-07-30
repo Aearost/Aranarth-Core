@@ -1908,6 +1908,19 @@ public class DatabaseManager {
         return result;
     }
 
+    public String loadPlayerSentinels(UUID uuid) {
+        String sql = "SELECT data_json FROM player_sentinels WHERE uuid = ?";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getString("data_json");
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load player sentinels for " + uuid + ": " + e.getMessage());
+        }
+        return null;
+    }
+
     public void saveServerShops(String dataJson) {
         String sql = "INSERT INTO server_shops (id, data_json) VALUES (1, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {

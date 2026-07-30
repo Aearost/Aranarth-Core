@@ -6160,6 +6160,7 @@ public class PersistenceUtils {
                     JsonObject s = new JsonObject();
                     s.addProperty("uuid", sentinel.getUuid().toString());
                     s.addProperty("worldName", sentinel.getWorldName());
+                    s.addProperty("serverName", sentinel.getServerName());
                     Location loc = sentinel.getLocation();
                     s.addProperty("x", loc.getBlockX());
                     s.addProperty("y", loc.getBlockY());
@@ -6173,6 +6174,82 @@ public class PersistenceUtils {
             } catch (Exception e) {
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync sentinels for " + uuid + ": " + e.getMessage());
             }
+        }
+    }
+
+    /**
+     * Syncs a single player's sentinel data to MySQL immediately (async).
+     * Called after marking/unmarking a sentinel so cross-server data is up to date.
+     */
+    public static void syncPlayerSentinelsToDatabase(UUID uuid) {
+        if (!DatabaseManager.isActive()) return;
+        AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+        if (ap == null) return;
+        HashMap<EntityType, List<Sentinel>> sentinels = ap.getSentinels();
+        if (sentinels == null || sentinels.isEmpty()) return;
+        JsonObject obj = new JsonObject();
+        for (Map.Entry<EntityType, List<Sentinel>> typeEntry : sentinels.entrySet()) {
+            JsonArray arr = new JsonArray();
+            for (Sentinel sentinel : typeEntry.getValue()) {
+                JsonObject s = new JsonObject();
+                s.addProperty("uuid", sentinel.getUuid().toString());
+                s.addProperty("worldName", sentinel.getWorldName());
+                s.addProperty("serverName", sentinel.getServerName());
+                Location loc = sentinel.getLocation();
+                s.addProperty("x", loc.getBlockX());
+                s.addProperty("y", loc.getBlockY());
+                s.addProperty("z", loc.getBlockZ());
+                arr.add(s);
+            }
+            obj.add(typeEntry.getKey().name(), arr);
+        }
+        final String json = GSON.toJson(obj);
+        runDbSync(() -> {
+            try {
+                DatabaseManager.getInstance().savePlayerSentinels(uuid, json);
+            } catch (Exception e) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync sentinels for " + uuid + ": " + e.getMessage());
+            }
+        });
+    }
+
+    /**
+     * Reloads a single player's sentinel data from MySQL.
+     * Called on cross-server arrival so the player's sentinels reflect what was saved on another server.
+     */
+    public static void reloadPlayerSentinelsFromDatabase(UUID uuid) {
+        if (!DatabaseManager.isActive()) return;
+        try {
+            String raw = DatabaseManager.getInstance().loadPlayerSentinels(uuid);
+            if (raw == null) return;
+            AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+            if (ap == null) return;
+            JsonObject obj = GSON.fromJson(raw, JsonObject.class);
+            HashMap<EntityType, List<Sentinel>> sentinels = new HashMap<>();
+            for (EntityType type : new EntityType[]{EntityType.HORSE, EntityType.IRON_GOLEM, EntityType.WOLF}) {
+                List<Sentinel> list = new ArrayList<>();
+                if (obj.has(type.name())) {
+                    for (com.google.gson.JsonElement el : obj.getAsJsonArray(type.name())) {
+                        JsonObject s = el.getAsJsonObject();
+                        UUID sentinelUuid = UUID.fromString(s.get("uuid").getAsString());
+                        String worldName = s.get("worldName").getAsString();
+                        int x = s.get("x").getAsInt();
+                        int y = s.get("y").getAsInt();
+                        int z = s.get("z").getAsInt();
+                        World world = Bukkit.getWorld(worldName);
+                        Location loc = new Location(world, x, y, z);
+                        Sentinel sentinel = new Sentinel(sentinelUuid, type, loc);
+                        sentinel.setWorldName(worldName);
+                        if (s.has("serverName")) sentinel.setServerName(s.get("serverName").getAsString());
+                        list.add(sentinel);
+                    }
+                }
+                sentinels.put(type, list);
+            }
+            ap.setSentinels(sentinels);
+            AranarthUtils.setPlayer(uuid, ap);
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to reload sentinels for " + uuid + ": " + e.getMessage());
         }
     }
 
@@ -6220,48 +6297,133 @@ public class PersistenceUtils {
     }
 
     /**
-     * Syncs outpost data to MySQL.
+     * Serialises an outpost to the JSON format used by the database and network messages.
      */
+    public static JsonObject buildOutpostDataJson(Outpost outpost) {
+        Location home = outpost.getHome();
+        JsonObject obj = new JsonObject();
+        obj.addProperty("id", outpost.getId().toString());
+        obj.addProperty("dominionId", outpost.getDominionId().toString());
+        obj.addProperty("name", outpost.getName());
+        obj.addProperty("outpostIndex", outpost.getOutpostIndex());
+        String worldName = outpost.getHomeWorldName();
+        if (worldName == null && home != null && home.getWorld() != null) {
+            worldName = AranarthUtils.toStoredDominionWorldName(home.getWorld().getName());
+        }
+        obj.addProperty("worldName", worldName != null ? worldName : "");
+        if (home != null) {
+            obj.addProperty("homeX", home.getX());
+            obj.addProperty("homeY", home.getY());
+            obj.addProperty("homeZ", home.getZ());
+            obj.addProperty("homeYaw", (double) home.getYaw());
+            obj.addProperty("homePitch", (double) home.getPitch());
+        }
+        obj.addProperty("createdTimestamp", outpost.getCreatedTimestamp());
+        obj.addProperty("boughtChunks", outpost.getBoughtChunks());
+        obj.addProperty("icon", outpost.getIcon().name());
+        JsonArray chunks = new JsonArray();
+        for (Chunk chunk : outpost.getChunks()) {
+            JsonObject c = new JsonObject();
+            c.addProperty("x", chunk.getX());
+            c.addProperty("z", chunk.getZ());
+            chunks.add(c);
+        }
+        obj.add("chunks", chunks);
+        return obj;
+    }
+
+    /**
+     * Parses a single outpost from a JSON object (network message or DB record) and registers
+     * it in memory. Loads chunks only if the outpost's world exists on this server; otherwise
+     * registers a stub with an empty chunk list so cross-server tab-complete and teleport work.
+     * No-ops if an outpost with the same ID is already in memory.
+     */
+    public static void loadSingleOutpostFromJson(JsonObject obj) {
+        try {
+            UUID id = UUID.fromString(obj.get("id").getAsString());
+            if (OutpostUtils.getOutpostById(id) != null) return;
+            UUID dominionId = UUID.fromString(obj.get("dominionId").getAsString());
+            String name = obj.get("name").getAsString();
+            int outpostIndex = obj.get("outpostIndex").getAsInt();
+            String worldName = obj.get("worldName").getAsString();
+            double homeX = obj.has("homeX") ? obj.get("homeX").getAsDouble() : 0;
+            double homeY = obj.has("homeY") ? obj.get("homeY").getAsDouble() : 0;
+            double homeZ = obj.has("homeZ") ? obj.get("homeZ").getAsDouble() : 0;
+            float homeYaw = obj.has("homeYaw") ? obj.get("homeYaw").getAsFloat() : 0;
+            float homePitch = obj.has("homePitch") ? obj.get("homePitch").getAsFloat() : 0;
+            long createdTimestamp = obj.has("createdTimestamp") ? obj.get("createdTimestamp").getAsLong() : 0;
+            int boughtChunks = obj.has("boughtChunks") ? obj.get("boughtChunks").getAsInt() : 0;
+            Material icon = Material.OAK_LOG;
+            if (obj.has("icon")) {
+                try { icon = Material.valueOf(obj.get("icon").getAsString()); } catch (IllegalArgumentException ignored) {}
+            }
+            String outpostLookupName = (worldName.startsWith("smp:") && AranarthCore.isSmpServer())
+                    ? worldName.substring(4) : worldName;
+            World world = Bukkit.getWorld(outpostLookupName);
+            List<Chunk> chunks = new ArrayList<>();
+            if (world != null && obj.has("chunks")) {
+                for (com.google.gson.JsonElement cEl : obj.getAsJsonArray("chunks")) {
+                    JsonObject c = cEl.getAsJsonObject();
+                    chunks.add(world.getChunkAt(c.get("x").getAsInt(), c.get("z").getAsInt()));
+                }
+            }
+            Outpost outpost = new Outpost(id, name, dominionId, outpostIndex,
+                    worldName, homeX, homeY, homeZ, homeYaw, homePitch, chunks, boughtChunks, createdTimestamp);
+            outpost.setIcon(icon);
+            OutpostUtils.registerOutpost(outpost);
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Net] Failed to parse outpost from JSON: " + e.getMessage());
+        }
+    }
+
     public static void syncOutpostsToDatabase() {
         if (!DatabaseManager.isActive()) {
             return;
         }
         DatabaseManager db = DatabaseManager.getInstance();
+
+        // Track which outpost UUIDs and dominion UUIDs are locally owned (non-stubs)
+        // so we can reconcile stale DB records at the end.
+        Set<UUID> localOutpostIds = new HashSet<>();
+        Set<UUID> localDominionIds = new HashSet<>();
+
         for (Dominion dominion : DominionUtils.getDominions()) {
             // Skip cross-server stubs - their outposts have empty or wrong-server chunk lists
             if (dominion.getChunks().isEmpty()) continue;
+            localDominionIds.add(dominion.getId());
             for (Outpost outpost : OutpostUtils.getDominionOutposts(dominion.getId())) {
                 Location home = outpost.getHome();
                 if (home.getWorld() == null) {
                     continue;
                 }
-                JsonObject obj = new JsonObject();
-                obj.addProperty("id", outpost.getId().toString());
-                obj.addProperty("dominionId", outpost.getDominionId().toString());
-                obj.addProperty("name", outpost.getName());
-                obj.addProperty("outpostIndex", outpost.getOutpostIndex());
-                obj.addProperty("worldName", AranarthUtils.toStoredDominionWorldName(home.getWorld().getName()));
-                obj.addProperty("homeX", home.getX());
-                obj.addProperty("homeY", home.getY());
-                obj.addProperty("homeZ", home.getZ());
-                obj.addProperty("homeYaw", home.getYaw());
-                obj.addProperty("homePitch", home.getPitch());
-                obj.addProperty("createdTimestamp", outpost.getCreatedTimestamp());
-                obj.addProperty("boughtChunks", outpost.getBoughtChunks());
-                obj.addProperty("icon", outpost.getIcon().name());
-                JsonArray chunks = new JsonArray();
-                for (Chunk chunk : outpost.getChunks()) {
-                    JsonObject c = new JsonObject();
-                    c.addProperty("x", chunk.getX());
-                    c.addProperty("z", chunk.getZ());
-                    chunks.add(c);
-                }
-                obj.add("chunks", chunks);
+                localOutpostIds.add(outpost.getId());
                 try {
-                    db.saveOutpost(outpost.getId(), GSON.toJson(obj));
+                    db.saveOutpost(outpost.getId(), GSON.toJson(buildOutpostDataJson(outpost)));
                 } catch (Exception e) {
                     Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync outpost " + outpost.getId() + ": " + e.getMessage());
                 }
+            }
+        }
+
+        // Reconcile: delete any DB outpost records for locally-owned dominions that are no
+        // longer in memory (e.g., an outpost disbanded whose async deleteOutpost task didn't
+        // complete before a previous shutdown).
+        if (!localDominionIds.isEmpty()) {
+            try {
+                Map<UUID, String> allDbOutposts = db.loadAllOutposts();
+                for (Map.Entry<UUID, String> entry : allDbOutposts.entrySet()) {
+                    UUID dbOutpostId = entry.getKey();
+                    if (localOutpostIds.contains(dbOutpostId)) continue;
+                    try {
+                        JsonObject obj = GSON.fromJson(entry.getValue(), JsonObject.class);
+                        UUID dominionId = UUID.fromString(obj.get("dominionId").getAsString());
+                        if (localDominionIds.contains(dominionId)) {
+                            db.deleteOutpost(dbOutpostId);
+                        }
+                    } catch (Exception ignored) {}
+                }
+            } catch (Exception e) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Outpost reconciliation failed: " + e.getMessage());
             }
         }
     }
@@ -7978,6 +8140,7 @@ public class PersistenceUtils {
                             Location loc = new Location(world, x, y, z);
                             Sentinel sentinel = new Sentinel(sentinelUuid, type, loc);
                             sentinel.setWorldName(worldName);
+                            if (s.has("serverName")) sentinel.setServerName(s.get("serverName").getAsString());
                             list.add(sentinel);
                         }
                     }
@@ -8071,37 +8234,7 @@ public class PersistenceUtils {
         for (Map.Entry<UUID, String> entry : all.entrySet()) {
             try {
                 JsonObject obj = GSON.fromJson(entry.getValue(), JsonObject.class);
-                UUID id = UUID.fromString(obj.get("id").getAsString());
-                UUID dominionId = UUID.fromString(obj.get("dominionId").getAsString());
-                String name = obj.get("name").getAsString();
-                int outpostIndex = obj.get("outpostIndex").getAsInt();
-                String worldName = obj.get("worldName").getAsString();
-                double homeX = obj.get("homeX").getAsDouble();
-                double homeY = obj.get("homeY").getAsDouble();
-                double homeZ = obj.get("homeZ").getAsDouble();
-                float homeYaw = obj.get("homeYaw").getAsFloat();
-                float homePitch = obj.get("homePitch").getAsFloat();
-                long createdTimestamp = obj.get("createdTimestamp").getAsLong();
-                int boughtChunks = obj.has("boughtChunks") ? obj.get("boughtChunks").getAsInt() : 0;
-                String outpostLookupName = (worldName.startsWith("smp:") && AranarthCore.isSmpServer())
-                        ? worldName.substring(4) : worldName;
-                World world = Bukkit.getWorld(outpostLookupName);
-
-                // If world is null the outpost lives on a different server. Still register it
-                // (with an empty chunk list) so tab-complete and cross-server teleport work.
-                List<Chunk> chunks = new ArrayList<>();
-                if (world != null) {
-                    for (com.google.gson.JsonElement cEl : obj.getAsJsonArray("chunks")) {
-                        JsonObject c = cEl.getAsJsonObject();
-                        chunks.add(world.getChunkAt(c.get("x").getAsInt(), c.get("z").getAsInt()));
-                    }
-                }
-                Outpost outpost = new Outpost(
-                        id, name, dominionId, outpostIndex,
-                        worldName, homeX, homeY, homeZ, homeYaw, homePitch,
-                        chunks, boughtChunks, createdTimestamp
-                );
-                OutpostUtils.registerOutpost(outpost);
+                loadSingleOutpostFromJson(obj);
             } catch (Exception e) {
                 Bukkit.getLogger().warning("[AC] Failed to parse outpost " + entry.getKey() + " from DB: " + e.getMessage());
             }

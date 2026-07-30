@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.mob;
 
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Sentinel;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -43,6 +44,9 @@ public class SentinelDeath {
 			sentinels.put(e.getEntityType(), sentinelsOfType);
 			aranarthPlayerOfSentinel.setSentinels(sentinels);
 			AranarthUtils.setPlayer(AranarthUtils.getUuidOfAranarthPlayer(aranarthPlayerOfSentinel), aranarthPlayerOfSentinel);
+		} else if (NetworkManager.isActive()) {
+			// Owner is on a different server — notify them so they can clean up their sentinel list
+			NetworkManager.getInstance().publishSentinelDeath(uuidOfSentinel, e.getEntityType());
 		}
 	}
 }

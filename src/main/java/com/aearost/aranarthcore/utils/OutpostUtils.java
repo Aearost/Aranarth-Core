@@ -78,6 +78,24 @@ public class OutpostUtils {
             Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
                     DatabaseManager.getInstance().deleteOutpost(outpostId));
         }
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishOutpostDisband(outpost.getId());
+        }
+    }
+
+    /**
+     * Removes an outpost stub from all in-memory maps without touching the database,
+     * sending member notifications, or publishing network events. Used by the cross-server
+     * disband handler on the receiving server.
+     */
+    public static void evictOutpostFromMemory(UUID outpostId) {
+        Outpost outpost = outpostById.remove(outpostId);
+        if (outpost == null) return;
+        chunkKeyToOutpost.entrySet().removeIf(e -> e.getValue().getId().equals(outpostId));
+        List<Outpost> list = dominionToOutposts.get(outpost.getDominionId());
+        if (list != null) {
+            list.remove(outpost);
+        }
     }
 
     /**

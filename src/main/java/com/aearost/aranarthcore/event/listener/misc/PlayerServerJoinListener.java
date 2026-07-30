@@ -235,6 +235,7 @@ public class PlayerServerJoinListener implements Listener {
 								localDelta = preReloadAp.getBalance() - preReloadAp.getBalanceSnapshot();
 							}
 							PersistenceUtils.reloadPlayerFromDatabase(player.getUniqueId());
+							PersistenceUtils.reloadPlayerSentinelsFromDatabase(player.getUniqueId());
 							PersistenceUtils.loadPlayerTogglesFromDatabase(player.getUniqueId());
 							if (localDelta != 0.0) {
 								AranarthPlayer apBalance = AranarthUtils.getPlayer(player.getUniqueId());

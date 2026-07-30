@@ -6,6 +6,8 @@ import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.Outpost;
+import com.aearost.aranarthcore.utils.OutpostUtils;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.BrewRecipeUtils;
 import com.aearost.aranarthcore.utils.ChatGameUtils;
@@ -109,6 +111,12 @@ public class NetworkManager {
     public static final String CH_BREW_UNLOCK       = "aranarth:brew_unlock";
     public static final String CH_BALANCE_ADJUST    = "aranarth:balance_adjust";
     public static final String CH_PAY_NOTIFY        = "aranarth:pay_notify";
+    public static final String CH_SENTINEL_SUMMON   = "aranarth:sentinel_summon";
+    public static final String CH_SENTINEL_SPAWN    = "aranarth:sentinel_spawn";
+    public static final String CH_SENTINEL_DEATH    = "aranarth:sentinel_death";
+    public static final String CH_OUTPOST_DISBAND   = "aranarth:outpost_disband";
+    public static final String CH_OUTPOST_CREATE    = "aranarth:outpost_create";
+    public static final String CH_OUTPOST_UPDATE    = "aranarth:outpost_update";
 
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
@@ -307,6 +315,12 @@ public class NetworkManager {
             case CH_BREW_UNLOCK      -> handleBrewUnlock(json);
             case CH_BALANCE_ADJUST   -> handleBalanceAdjust(json);
             case CH_PAY_NOTIFY       -> handlePayNotify(json);
+            case CH_SENTINEL_SUMMON  -> handleSentinelSummon(json);
+            case CH_SENTINEL_SPAWN   -> handleSentinelSpawn(json);
+            case CH_SENTINEL_DEATH   -> handleSentinelDeath(json);
+            case CH_OUTPOST_DISBAND  -> handleOutpostDisband(json);
+            case CH_OUTPOST_CREATE   -> handleOutpostCreate(json);
+            case CH_OUTPOST_UPDATE   -> handleOutpostUpdate(json);
         }
     }
 
@@ -556,6 +570,39 @@ public class NetworkManager {
         json.addProperty("fromNickname", fromNickname);
         json.addProperty("formattedAmount", formattedAmount);
         publish(CH_PAY_NOTIFY, json);
+    }
+
+    /**
+     * Requests that a remote server despawn and transfer the given sentinel entities to this server.
+     */
+    public void publishSentinelSummon(UUID playerUuid, String targetServer, List<UUID> entityUuids,
+                                      org.bukkit.entity.EntityType type,
+                                      String targetWorld, double targetX, double targetY, double targetZ) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("targetServer", targetServer);
+        json.addProperty("playerUuid", playerUuid.toString());
+        json.addProperty("sentinelType", type.name());
+        json.addProperty("targetWorld", targetWorld);
+        json.addProperty("targetX", targetX);
+        json.addProperty("targetY", targetY);
+        json.addProperty("targetZ", targetZ);
+        com.google.gson.JsonArray uuids = new com.google.gson.JsonArray();
+        for (UUID uuid : entityUuids) uuids.add(uuid.toString());
+        json.add("entityUuids", uuids);
+        publish(CH_SENTINEL_SUMMON, json);
+    }
+
+    /**
+     * Notifies other servers that a sentinel entity has died, so the owner's server
+     * can remove it from their player data.
+     */
+    public void publishSentinelDeath(UUID sentinelUuid, org.bukkit.entity.EntityType type) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("sentinelUuid", sentinelUuid.toString());
+        json.addProperty("sentinelType", type.name());
+        publish(CH_SENTINEL_DEATH, json);
     }
 
     /**
@@ -1727,6 +1774,68 @@ public class NetworkManager {
             PersistenceUtils.loadSingleDominionFromDatabase(dominionId));
     }
 
+    /** Publishes an outpost disband so other servers remove the stub from memory. */
+    public void publishOutpostDisband(java.util.UUID outpostId) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("outpostId", outpostId.toString());
+        publish(CH_OUTPOST_DISBAND, json);
+    }
+
+    private void handleOutpostDisband(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) return;
+        java.util.UUID outpostId = java.util.UUID.fromString(json.get("outpostId").getAsString());
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () ->
+                OutpostUtils.evictOutpostFromMemory(outpostId));
+    }
+
+    /** Publishes a new outpost so other servers can register a cross-server stub. */
+    public void publishOutpostCreate(Outpost outpost) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.add("data", PersistenceUtils.buildOutpostDataJson(outpost));
+        publish(CH_OUTPOST_CREATE, json);
+    }
+
+    private void handleOutpostCreate(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) return;
+        JsonObject data = json.getAsJsonObject("data");
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () ->
+                PersistenceUtils.loadSingleOutpostFromJson(data));
+    }
+
+    /** Publishes an outpost update (rename, icon change, chunk change) to keep stubs in sync. */
+    public void publishOutpostUpdate(Outpost outpost) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.add("data", PersistenceUtils.buildOutpostDataJson(outpost));
+        publish(CH_OUTPOST_UPDATE, json);
+    }
+
+    private void handleOutpostUpdate(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) return;
+        JsonObject data = json.getAsJsonObject("data");
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+            java.util.UUID outpostId = java.util.UUID.fromString(data.get("id").getAsString());
+            Outpost existing = OutpostUtils.getOutpostById(outpostId);
+            if (existing == null) {
+                // Not yet in memory — register it as a new stub
+                PersistenceUtils.loadSingleOutpostFromJson(data);
+                return;
+            }
+            existing.setName(data.get("name").getAsString());
+            existing.setBoughtChunks(data.has("boughtChunks") ? data.get("boughtChunks").getAsInt() : existing.getBoughtChunks());
+            if (data.has("icon")) {
+                try {
+                    existing.setIcon(org.bukkit.Material.valueOf(data.get("icon").getAsString()));
+                } catch (IllegalArgumentException ignored) {}
+            }
+        });
+    }
+
     /**
      * Notifies other servers that a dominion has sent a diplomacy request (ally/truce/neutral)
      * so the pending request is added to the target dominion's in-memory list and members
@@ -2068,6 +2177,195 @@ public class NetworkManager {
     // -------------------------------------------------------------------------
     // Internal publish helper
     // -------------------------------------------------------------------------
+
+    /**
+     * Received on the server that holds the sentinel entities.
+     * Captures their attributes, removes them, and publishes spawn data back to the player's server.
+     */
+    private void handleSentinelSummon(JsonObject json) {
+        String targetServer = json.get("targetServer").getAsString();
+        if (!targetServer.equals(thisServer)) return;
+
+        String originServer = json.get("server").getAsString();
+        UUID playerUuid = UUID.fromString(json.get("playerUuid").getAsString());
+        org.bukkit.entity.EntityType type = org.bukkit.entity.EntityType.valueOf(json.get("sentinelType").getAsString());
+        String targetWorld = json.get("targetWorld").getAsString();
+        double targetX = json.get("targetX").getAsDouble();
+        double targetY = json.get("targetY").getAsDouble();
+        double targetZ = json.get("targetZ").getAsDouble();
+
+        com.google.gson.JsonArray spawnData = new com.google.gson.JsonArray();
+        for (com.google.gson.JsonElement el : json.get("entityUuids").getAsJsonArray()) {
+            UUID entityUuid = UUID.fromString(el.getAsString());
+            org.bukkit.entity.Entity entity = Bukkit.getEntity(entityUuid);
+            if (!(entity instanceof org.bukkit.entity.LivingEntity living) || entity.isDead()) continue;
+
+            JsonObject data = new JsonObject();
+            data.addProperty("oldUuid", entityUuid.toString());
+            data.addProperty("health", living.getHealth());
+
+            if (entity instanceof org.bukkit.entity.Wolf wolf) {
+                data.addProperty("collarColor", wolf.getCollarColor().name());
+            } else if (entity instanceof org.bukkit.entity.AbstractHorse horse) {
+                org.bukkit.attribute.AttributeInstance speedAttr = horse.getAttribute(org.bukkit.attribute.Attribute.MOVEMENT_SPEED);
+                org.bukkit.attribute.AttributeInstance jumpAttr  = horse.getAttribute(org.bukkit.attribute.Attribute.JUMP_STRENGTH);
+                org.bukkit.attribute.AttributeInstance maxHpAttr = horse.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH);
+                data.addProperty("movementSpeed", speedAttr != null ? speedAttr.getBaseValue() : 0.225);
+                data.addProperty("jumpStrength",  jumpAttr  != null ? jumpAttr.getBaseValue()  : 0.7);
+                data.addProperty("maxHealth",     maxHpAttr != null ? maxHpAttr.getBaseValue() : 20.0);
+                if (entity instanceof org.bukkit.entity.Horse h) {
+                    data.addProperty("horseColor", h.getColor().name());
+                    data.addProperty("horseStyle", h.getStyle().name());
+                    org.bukkit.inventory.ItemStack saddle = h.getInventory().getSaddle();
+                    org.bukkit.inventory.ItemStack armor  = h.getInventory().getArmor();
+                    if (saddle != null && saddle.getType() != org.bukkit.Material.AIR) {
+                        data.addProperty("saddleItem", java.util.Base64.getEncoder().encodeToString(saddle.serializeAsBytes()));
+                    }
+                    if (armor != null && armor.getType() != org.bukkit.Material.AIR) {
+                        data.addProperty("armorItem", java.util.Base64.getEncoder().encodeToString(armor.serializeAsBytes()));
+                    }
+                }
+            }
+            entity.remove();
+            spawnData.add(data);
+        }
+
+        if (spawnData.isEmpty()) return;
+
+        JsonObject spawnJson = new JsonObject();
+        spawnJson.addProperty("server", thisServer);
+        spawnJson.addProperty("targetServer", originServer);
+        spawnJson.addProperty("playerUuid", playerUuid.toString());
+        spawnJson.addProperty("sentinelType", type.name());
+        spawnJson.addProperty("targetWorld", targetWorld);
+        spawnJson.addProperty("targetX", targetX);
+        spawnJson.addProperty("targetY", targetY);
+        spawnJson.addProperty("targetZ", targetZ);
+        spawnJson.add("entities", spawnData);
+        publish(CH_SENTINEL_SPAWN, spawnJson);
+    }
+
+    /**
+     * Received on the player's server. Spawns the transferred sentinel entities,
+     * updates UUIDs in player data, and plays the summon effects.
+     */
+    private void handleSentinelSpawn(JsonObject json) {
+        String targetServer = json.get("targetServer").getAsString();
+        if (!targetServer.equals(thisServer)) return;
+
+        UUID playerUuid = UUID.fromString(json.get("playerUuid").getAsString());
+        org.bukkit.entity.EntityType type = org.bukkit.entity.EntityType.valueOf(json.get("sentinelType").getAsString());
+        String targetWorld = json.get("targetWorld").getAsString();
+        double targetX = json.get("targetX").getAsDouble();
+        double targetY = json.get("targetY").getAsDouble();
+        double targetZ = json.get("targetZ").getAsDouble();
+
+        AranarthPlayer ap = AranarthUtils.getPlayer(playerUuid);
+        if (ap == null) return;
+
+        org.bukkit.entity.Player player = Bukkit.getPlayer(playerUuid);
+        World world = Bukkit.getWorld(targetWorld);
+        Location spawnLoc = player != null ? player.getLocation()
+                : (world != null ? new Location(world, targetX, targetY, targetZ) : null);
+        if (spawnLoc == null || spawnLoc.getWorld() == null) return;
+
+        java.util.List<com.aearost.aranarthcore.objects.Sentinel> sentinels =
+                ap.getSentinels().getOrDefault(type, new java.util.ArrayList<>());
+
+        for (com.google.gson.JsonElement el : json.get("entities").getAsJsonArray()) {
+            JsonObject data = el.getAsJsonObject();
+            UUID oldUuid = UUID.fromString(data.get("oldUuid").getAsString());
+            double health = data.get("health").getAsDouble();
+
+            org.bukkit.entity.Entity spawned = spawnLoc.getWorld().spawnEntity(spawnLoc, type);
+
+            if (spawned instanceof org.bukkit.entity.Wolf wolf) {
+                wolf.setTamed(true);
+                wolf.setOwner(Bukkit.getOfflinePlayer(playerUuid));
+                wolf.setHealth(Math.min(health, wolf.getMaxHealth()));
+                if (data.has("collarColor")) {
+                    wolf.setCollarColor(org.bukkit.DyeColor.valueOf(data.get("collarColor").getAsString()));
+                }
+                wolf.setSitting(false);
+            } else if (spawned instanceof org.bukkit.entity.AbstractHorse horse) {
+                horse.setTamed(true);
+                horse.setOwner(Bukkit.getOfflinePlayer(playerUuid));
+                if (data.has("maxHealth")) {
+                    horse.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH).setBaseValue(data.get("maxHealth").getAsDouble());
+                }
+                horse.setHealth(Math.min(health, horse.getMaxHealth()));
+                if (data.has("movementSpeed")) {
+                    horse.getAttribute(org.bukkit.attribute.Attribute.MOVEMENT_SPEED).setBaseValue(data.get("movementSpeed").getAsDouble());
+                }
+                if (data.has("jumpStrength")) {
+                    horse.getAttribute(org.bukkit.attribute.Attribute.JUMP_STRENGTH).setBaseValue(data.get("jumpStrength").getAsDouble());
+                }
+                if (spawned instanceof org.bukkit.entity.Horse h) {
+                    if (data.has("horseColor")) {
+                        h.setColor(org.bukkit.entity.Horse.Color.valueOf(data.get("horseColor").getAsString()));
+                    }
+                    if (data.has("horseStyle")) {
+                        h.setStyle(org.bukkit.entity.Horse.Style.valueOf(data.get("horseStyle").getAsString()));
+                    }
+                    if (data.has("saddleItem")) {
+                        h.getInventory().setSaddle(org.bukkit.inventory.ItemStack.deserializeBytes(
+                                java.util.Base64.getDecoder().decode(data.get("saddleItem").getAsString())));
+                    }
+                    if (data.has("armorItem")) {
+                        h.getInventory().setArmor(org.bukkit.inventory.ItemStack.deserializeBytes(
+                                java.util.Base64.getDecoder().decode(data.get("armorItem").getAsString())));
+                    }
+                }
+            } else if (spawned instanceof org.bukkit.entity.IronGolem golem) {
+                golem.setPlayerCreated(true);
+            }
+
+            for (com.aearost.aranarthcore.objects.Sentinel s : sentinels) {
+                if (s.getUuid().equals(oldUuid)) {
+                    s.setUuid(spawned.getUniqueId());
+                    s.setServerName(thisServer);
+                    s.setLocation(spawnLoc);
+                    break;
+                }
+            }
+        }
+
+        ap.getSentinels().put(type, sentinels);
+        AranarthUtils.setPlayer(playerUuid, ap);
+        PersistenceUtils.syncSentinelsToDatabase();
+
+        if (player != null) {
+            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
+            player.getWorld().spawnParticle(org.bukkit.Particle.PORTAL, player.getEyeLocation(), 250, 3, 2, 3);
+        }
+    }
+
+    /**
+     * Received on the sentinel owner's server when the entity died on a remote server.
+     * Removes the sentinel from the player's data.
+     */
+    private void handleSentinelDeath(JsonObject json) {
+        UUID sentinelUuid = UUID.fromString(json.get("sentinelUuid").getAsString());
+        org.bukkit.entity.EntityType type = org.bukkit.entity.EntityType.valueOf(json.get("sentinelType").getAsString());
+
+        for (Map.Entry<UUID, AranarthPlayer> entry : AranarthUtils.getAranarthPlayers().entrySet()) {
+            AranarthPlayer ap = entry.getValue();
+            if (ap.getSentinels() == null || ap.getSentinels().get(type) == null) continue;
+            java.util.List<com.aearost.aranarthcore.objects.Sentinel> list = ap.getSentinels().get(type);
+            com.aearost.aranarthcore.objects.Sentinel toRemove = null;
+            for (com.aearost.aranarthcore.objects.Sentinel s : list) {
+                if (s.getUuid().equals(sentinelUuid)) {
+                    toRemove = s;
+                    break;
+                }
+            }
+            if (toRemove != null) {
+                list.remove(toRemove);
+                AranarthUtils.setPlayer(entry.getKey(), ap);
+                break;
+            }
+        }
+    }
 
     private void publish(String channel, JsonObject json) {
         final String payload = json.toString();

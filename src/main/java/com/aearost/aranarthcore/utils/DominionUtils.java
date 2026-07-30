@@ -533,7 +533,7 @@ public class DominionUtils {
     public static void evictDominionFromMemory(Dominion dominion) {
         DefenderUtils.sellAllDominionDefenders(dominion);
         for (Outpost outpost : new ArrayList<>(OutpostUtils.getDominionOutposts(dominion.getId()))) {
-            OutpostUtils.disbandOutpost(dominion, outpost);
+            OutpostUtils.evictOutpostFromMemory(outpost.getId());
         }
         dominionById.remove(dominion.getId());
         for (UUID memberUuid : dominion.getMembers()) {
