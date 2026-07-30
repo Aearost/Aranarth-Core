@@ -641,6 +641,7 @@ public class PlayerServerJoinListener implements Listener {
 					inv.setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
 					inv.setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
 					inv.setBoots(new ItemStack(Material.LEATHER_BOOTS));
+					inv.setItemInOffHand(new ItemStack(Material.SHIELD));
 				}
 			}
 		}.runTaskLater(AranarthCore.getInstance(), 1L);

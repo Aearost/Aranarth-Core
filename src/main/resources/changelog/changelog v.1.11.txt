@@ -137,6 +137,7 @@ Minor Features
 [~] Fixed issue where dominion resources were able to claim biomes' resources even if they didn't have any claimed land in them
 [~] Made it so /d outpost and /d defender open their respective GUIs
 [+] Implemented outpost icon changing functionality in /d outpost
+[+] Added shields to players' off-hands when they first join the server
 
 Backend Code Changes
 - Implemented discord support bot basis
