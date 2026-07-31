@@ -50,47 +50,47 @@ public class JobEventListener implements Listener {
 
     // Materials that count as logs for lumberjack
     private static final Set<Material> LOG_MATERIALS = Set.of(
-        Material.OAK_LOG, Material.SPRUCE_LOG, Material.BIRCH_LOG,
-        Material.JUNGLE_LOG, Material.ACACIA_LOG, Material.DARK_OAK_LOG,
-        Material.MANGROVE_LOG, Material.CHERRY_LOG,
-        Material.OAK_WOOD, Material.SPRUCE_WOOD, Material.BIRCH_WOOD,
-        Material.JUNGLE_WOOD, Material.ACACIA_WOOD, Material.DARK_OAK_WOOD,
-        Material.MANGROVE_WOOD, Material.CHERRY_WOOD,
-        Material.CRIMSON_STEM, Material.WARPED_STEM
+            Material.OAK_LOG, Material.SPRUCE_LOG, Material.BIRCH_LOG,
+            Material.JUNGLE_LOG, Material.ACACIA_LOG, Material.DARK_OAK_LOG,
+            Material.MANGROVE_LOG, Material.CHERRY_LOG,
+            Material.OAK_WOOD, Material.SPRUCE_WOOD, Material.BIRCH_WOOD,
+            Material.JUNGLE_WOOD, Material.ACACIA_WOOD, Material.DARK_OAK_WOOD,
+            Material.MANGROVE_WOOD, Material.CHERRY_WOOD,
+            Material.CRIMSON_STEM, Material.WARPED_STEM
     );
 
     private static final Set<Material> STRIPPED_LOG_MATERIALS = Set.of(
-        Material.STRIPPED_OAK_LOG, Material.STRIPPED_SPRUCE_LOG, Material.STRIPPED_BIRCH_LOG,
-        Material.STRIPPED_JUNGLE_LOG, Material.STRIPPED_ACACIA_LOG, Material.STRIPPED_DARK_OAK_LOG,
-        Material.STRIPPED_MANGROVE_LOG, Material.STRIPPED_CHERRY_LOG,
-        Material.STRIPPED_OAK_WOOD, Material.STRIPPED_SPRUCE_WOOD, Material.STRIPPED_BIRCH_WOOD,
-        Material.STRIPPED_JUNGLE_WOOD, Material.STRIPPED_ACACIA_WOOD, Material.STRIPPED_DARK_OAK_WOOD,
-        Material.STRIPPED_MANGROVE_WOOD, Material.STRIPPED_CHERRY_WOOD,
-        Material.STRIPPED_CRIMSON_STEM, Material.STRIPPED_WARPED_STEM,
-        Material.STRIPPED_BAMBOO_BLOCK
+            Material.STRIPPED_OAK_LOG, Material.STRIPPED_SPRUCE_LOG, Material.STRIPPED_BIRCH_LOG,
+            Material.STRIPPED_JUNGLE_LOG, Material.STRIPPED_ACACIA_LOG, Material.STRIPPED_DARK_OAK_LOG,
+            Material.STRIPPED_MANGROVE_LOG, Material.STRIPPED_CHERRY_LOG,
+            Material.STRIPPED_OAK_WOOD, Material.STRIPPED_SPRUCE_WOOD, Material.STRIPPED_BIRCH_WOOD,
+            Material.STRIPPED_JUNGLE_WOOD, Material.STRIPPED_ACACIA_WOOD, Material.STRIPPED_DARK_OAK_WOOD,
+            Material.STRIPPED_MANGROVE_WOOD, Material.STRIPPED_CHERRY_WOOD,
+            Material.STRIPPED_CRIMSON_STEM, Material.STRIPPED_WARPED_STEM,
+            Material.STRIPPED_BAMBOO_BLOCK
     );
 
     private static final Set<Material> LEAF_MATERIALS = Set.of(
-        Material.OAK_LEAVES, Material.SPRUCE_LEAVES, Material.BIRCH_LEAVES,
-        Material.JUNGLE_LEAVES, Material.ACACIA_LEAVES, Material.DARK_OAK_LEAVES,
-        Material.MANGROVE_LEAVES, Material.CHERRY_LEAVES, Material.AZALEA_LEAVES,
-        Material.FLOWERING_AZALEA_LEAVES
+            Material.OAK_LEAVES, Material.SPRUCE_LEAVES, Material.BIRCH_LEAVES,
+            Material.JUNGLE_LEAVES, Material.ACACIA_LEAVES, Material.DARK_OAK_LEAVES,
+            Material.MANGROVE_LEAVES, Material.CHERRY_LEAVES, Material.AZALEA_LEAVES,
+            Material.FLOWERING_AZALEA_LEAVES
     );
 
     private static final Set<Material> MUSHROOM_BLOCK_MATERIALS = Set.of(
-        Material.BROWN_MUSHROOM_BLOCK, Material.RED_MUSHROOM_BLOCK, Material.MUSHROOM_STEM
+            Material.BROWN_MUSHROOM_BLOCK, Material.RED_MUSHROOM_BLOCK, Material.MUSHROOM_STEM
     );
 
     // Passive mob types for farmer/hunter
     private static final Set<EntityType> PASSIVE_MOB_TYPES = Set.of(
-        EntityType.COW, EntityType.MOOSHROOM, EntityType.PIG, EntityType.SHEEP,
-        EntityType.CHICKEN, EntityType.RABBIT, EntityType.HORSE, EntityType.DONKEY,
-        EntityType.MULE, EntityType.LLAMA, EntityType.TRADER_LLAMA, EntityType.FOX,
-        EntityType.GOAT, EntityType.CAMEL, EntityType.AXOLOTL, EntityType.CAT,
-        EntityType.WOLF, EntityType.OCELOT, EntityType.PARROT, EntityType.STRIDER,
-        EntityType.FROG, EntityType.SNIFFER, EntityType.ALLAY, EntityType.BEE,
-        EntityType.TURTLE, EntityType.GLOW_SQUID, EntityType.SQUID, EntityType.PANDA,
-        EntityType.POLAR_BEAR, EntityType.ARMADILLO, EntityType.BOGGED
+            EntityType.COW, EntityType.MOOSHROOM, EntityType.PIG, EntityType.SHEEP,
+            EntityType.CHICKEN, EntityType.RABBIT, EntityType.HORSE, EntityType.DONKEY,
+            EntityType.MULE, EntityType.LLAMA, EntityType.TRADER_LLAMA, EntityType.FOX,
+            EntityType.GOAT, EntityType.CAMEL, EntityType.AXOLOTL, EntityType.CAT,
+            EntityType.WOLF, EntityType.OCELOT, EntityType.PARROT, EntityType.STRIDER,
+            EntityType.FROG, EntityType.SNIFFER, EntityType.ALLAY, EntityType.BEE,
+            EntityType.TURTLE, EntityType.GLOW_SQUID, EntityType.SQUID, EntityType.PANDA,
+            EntityType.POLAR_BEAR, EntityType.ARMADILLO, EntityType.BOGGED
     );
 
     // Alchemist: track brewing stand ownership
@@ -106,7 +106,7 @@ public class JobEventListener implements Listener {
 
     // Explorer: PDC key for claimed chests
     private static final org.bukkit.NamespacedKey EXPLORER_CHEST_CLAIMED_KEY =
-        new org.bukkit.NamespacedKey(AranarthCore.getInstance(), "explorer_chest_claimed");
+            new org.bukkit.NamespacedKey(AranarthCore.getInstance(), "explorer_chest_claimed");
 
     public JobEventListener(AranarthCore plugin) {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -114,7 +114,9 @@ public class JobEventListener implements Listener {
 
     private boolean hasChunkPermission(Player player, Chunk chunk, DominionPermission permission) {
         Dominion dominion = DominionUtils.getDominionOfChunk(chunk);
-        if (dominion == null) return true;
+        if (dominion == null) {
+            return true;
+        }
         return DominionUtils.hasPermission(player, dominion, permission);
     }
 
@@ -126,12 +128,20 @@ public class JobEventListener implements Listener {
     public void onBlockBreakMiner(BlockBreakEvent e) {
         Player player = e.getPlayer();
         String worldName = player.getWorld().getName();
-        if (!AranarthUtils.isSurvivalWorld(worldName)) return;
-        if (!hasChunkPermission(player, e.getBlock().getChunk(), DominionPermission.BUILD)) return;
+        if (!AranarthUtils.isSurvivalWorld(worldName)) {
+            return;
+        }
+        if (!hasChunkPermission(player, e.getBlock().getChunk(), DominionPermission.BUILD)) {
+            return;
+        }
 
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
-        if (ap == null) return;
-        if (ap.getPlentifulBlocksToDestroy() > 0) return;
+        if (ap == null) {
+            return;
+        }
+        if (ap.getPlentifulBlocksToDestroy() > 0) {
+            return;
+        }
 
         JobData jobData = ap.getJobData();
         Material type = e.getBlock().getType();
@@ -216,11 +226,21 @@ public class JobEventListener implements Listener {
     }
 
     private double getLumberjackBreakPay(Material type) {
-        if (LOG_MATERIALS.contains(type)) return 0.008;
-        if (STRIPPED_LOG_MATERIALS.contains(type)) return 0.005;
-        if (type == Material.BAMBOO_BLOCK) return 0.004;
-        if (MUSHROOM_BLOCK_MATERIALS.contains(type)) return 0.006;
-        if (LEAF_MATERIALS.contains(type)) return 0.001;
+        if (LOG_MATERIALS.contains(type)) {
+            return 0.18;
+        }
+        if (STRIPPED_LOG_MATERIALS.contains(type)) {
+            return 0.12;
+        }
+        if (type == Material.BAMBOO_BLOCK) {
+            return 0.09;
+        }
+        if (MUSHROOM_BLOCK_MATERIALS.contains(type)) {
+            return 0.12;
+        }
+        if (LEAF_MATERIALS.contains(type)) {
+            return 0.005;
+        }
         return 0;
     }
 
@@ -237,15 +257,19 @@ public class JobEventListener implements Listener {
             case PUMPKIN -> 0.20;
             case SWEET_BERRY_BUSH -> isMature(block) ? 0.08 : 0;
             case CAVE_VINES, CAVE_VINES_PLANT -> hasGlowBerries(block) ? 0.06 : 0;
-            case SUGAR_CANE -> !JobUtils.isRecentlyPlaced(JobUtils.toLocationKey(block.getX(), block.getY(), block.getZ())) ? 0.04 : 0;
-            case CACTUS -> !JobUtils.isRecentlyPlaced(JobUtils.toLocationKey(block.getX(), block.getY(), block.getZ())) ? 0.04 : 0;
+            case SUGAR_CANE ->
+                    !JobUtils.isRecentlyPlaced(JobUtils.toLocationKey(block.getX(), block.getY(), block.getZ())) ? 0.04 : 0;
+            case CACTUS ->
+                    !JobUtils.isRecentlyPlaced(JobUtils.toLocationKey(block.getX(), block.getY(), block.getZ())) ? 0.04 : 0;
             case HAY_BLOCK -> mcMMO.getChunkManager().isEligible(block) ? 0.10 : 0;
             default -> 0;
         };
     }
 
     private boolean isMature(Block block) {
-        if (block.getType() == Material.MELON || block.getType() == Material.PUMPKIN) return true;
+        if (block.getType() == Material.MELON || block.getType() == Material.PUMPKIN) {
+            return true;
+        }
         if (block.getBlockData() instanceof Ageable ageable) {
             return ageable.getAge() >= ageable.getMaximumAge();
         }
@@ -270,10 +294,14 @@ public class JobEventListener implements Listener {
     public void onBlockPlace(BlockPlaceEvent e) {
         Player player = e.getPlayer();
         String worldName = player.getWorld().getName();
-        if (!AranarthUtils.isSurvivalWorld(worldName)) return;
+        if (!AranarthUtils.isSurvivalWorld(worldName)) {
+            return;
+        }
 
         Block block = e.getBlockPlaced();
-        if (!hasChunkPermission(player, block.getChunk(), DominionPermission.BUILD)) return;
+        if (!hasChunkPermission(player, block.getChunk(), DominionPermission.BUILD)) {
+            return;
+        }
         long locationKey = JobUtils.toLocationKey(block.getX(), block.getY(), block.getZ());
 
         // Check BEFORE tracking whether this location was recently placed by anyone
@@ -282,9 +310,15 @@ public class JobEventListener implements Listener {
         JobUtils.trackPlacedBlock(player.getUniqueId(), locationKey);
 
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
-        if (ap == null) return;
-        if (!ap.getJobData().hasJob(JobType.BUILDER)) return;
-        if (wasRecentlyPlaced) return;
+        if (ap == null) {
+            return;
+        }
+        if (!ap.getJobData().hasJob(JobType.BUILDER)) {
+            return;
+        }
+        if (wasRecentlyPlaced) {
+            return;
+        }
 
         Material mat = block.getType();
         if (isBuildableBlock(mat)) {
@@ -294,14 +328,14 @@ public class JobEventListener implements Listener {
 
     private boolean isBuildableBlock(Material mat) {
         return mat.isBlock() && mat.isSolid() && !mat.isAir()
-            && mat != Material.BEDROCK
-            && mat != Material.BARRIER
-            && mat != Material.STRUCTURE_BLOCK
-            && mat != Material.STRUCTURE_VOID
-            && mat != Material.COMMAND_BLOCK
-            && mat != Material.CHAIN_COMMAND_BLOCK
-            && mat != Material.REPEATING_COMMAND_BLOCK
-            && mat != Material.JIGSAW;
+                && mat != Material.BEDROCK
+                && mat != Material.BARRIER
+                && mat != Material.STRUCTURE_BLOCK
+                && mat != Material.STRUCTURE_VOID
+                && mat != Material.COMMAND_BLOCK
+                && mat != Material.CHAIN_COMMAND_BLOCK
+                && mat != Material.REPEATING_COMMAND_BLOCK
+                && mat != Material.JIGSAW;
     }
 
     // -------------------------------------------------------------------------
@@ -312,16 +346,24 @@ public class JobEventListener implements Listener {
     public void onPlayerInteract(PlayerInteractEvent e) {
         Player player = e.getPlayer();
         String worldName = player.getWorld().getName();
-        if (!AranarthUtils.isSurvivalWorld(worldName)) return;
-        if (e.getClickedBlock() == null) return;
+        if (!AranarthUtils.isSurvivalWorld(worldName)) {
+            return;
+        }
+        if (e.getClickedBlock() == null) {
+            return;
+        }
 
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
-        if (ap == null) return;
+        if (ap == null) {
+            return;
+        }
 
         Block clickedBlock = e.getClickedBlock();
         Material blockType = clickedBlock.getType();
         ItemStack inHand = e.getItem();
-        if (inHand == null) return;
+        if (inHand == null) {
+            return;
+        }
 
         // Farmer: collect honey (bottle) or honeycomb (shears) from beehives
         if ((blockType == Material.BEEHIVE || blockType == Material.BEE_NEST)
@@ -359,13 +401,19 @@ public class JobEventListener implements Listener {
     public void onEntityDeath(EntityDeathEvent e) {
         LivingEntity entity = e.getEntity();
         Player killer = getPlayerKiller(entity);
-        if (killer == null) return;
+        if (killer == null) {
+            return;
+        }
 
         String worldName = killer.getWorld().getName();
-        if (!AranarthUtils.isSurvivalWorld(worldName)) return;
+        if (!AranarthUtils.isSurvivalWorld(worldName)) {
+            return;
+        }
 
         AranarthPlayer ap = AranarthUtils.getPlayer(killer.getUniqueId());
-        if (ap == null) return;
+        if (ap == null) {
+            return;
+        }
         JobData jobData = ap.getJobData();
 
         // Passive mob: both FARMER and HUNTER get $0.05
@@ -388,7 +436,9 @@ public class JobEventListener implements Listener {
         }
 
         // Hostile mobs - HUNTER
-        if (!jobData.hasJob(JobType.HUNTER)) return;
+        if (!jobData.hasJob(JobType.HUNTER)) {
+            return;
+        }
 
         double pay = getHunterMobPay(entity.getType());
         if (pay > 0) {
@@ -418,14 +468,20 @@ public class JobEventListener implements Listener {
 
     private Player getPlayerKiller(LivingEntity entity) {
         Player directKiller = entity.getKiller();
-        if (directKiller != null) return directKiller;
+        if (directKiller != null) {
+            return directKiller;
+        }
         EntityDamageEvent lastDamage = entity.getLastDamageCause();
         if (lastDamage instanceof EntityDamageByEntityEvent dmgByEntity) {
             Entity damager = dmgByEntity.getDamager();
-            if (damager instanceof Player p) return p;
+            if (damager instanceof Player p) {
+                return p;
+            }
             if (damager instanceof Projectile proj) {
                 ProjectileSource shooter = proj.getShooter();
-                if (shooter instanceof Player p) return p;
+                if (shooter instanceof Player p) {
+                    return p;
+                }
             }
         }
         return null;
@@ -437,15 +493,23 @@ public class JobEventListener implements Listener {
 
     @EventHandler
     public void onPlayerFish(PlayerFishEvent e) {
-        if (e.getState() != PlayerFishEvent.State.CAUGHT_FISH) return;
+        if (e.getState() != PlayerFishEvent.State.CAUGHT_FISH) {
+            return;
+        }
         Player player = e.getPlayer();
         String worldName = player.getWorld().getName();
-        if (!AranarthUtils.isSurvivalWorld(worldName)) return;
+        if (!AranarthUtils.isSurvivalWorld(worldName)) {
+            return;
+        }
 
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
-        if (ap == null || !ap.getJobData().hasJob(JobType.HUNTER)) return;
+        if (ap == null || !ap.getJobData().hasJob(JobType.HUNTER)) {
+            return;
+        }
 
-        if (!(e.getCaught() instanceof Item item)) return;
+        if (!(e.getCaught() instanceof Item item)) {
+            return;
+        }
 
         ItemStack caught = item.getItemStack();
         Material mat = caught.getType();
@@ -463,10 +527,10 @@ public class JobEventListener implements Listener {
 
     private boolean isTreasureItem(Material mat) {
         return mat == Material.ENCHANTED_BOOK
-            || mat == Material.BOW
-            || mat == Material.FISHING_ROD
-            || mat == Material.SADDLE
-            || mat == Material.NAME_TAG;
+                || mat == Material.BOW
+                || mat == Material.FISHING_ROD
+                || mat == Material.SADDLE
+                || mat == Material.NAME_TAG;
     }
 
     // -------------------------------------------------------------------------
@@ -475,16 +539,24 @@ public class JobEventListener implements Listener {
 
     @EventHandler
     public void onCraftItem(CraftItemEvent e) {
-        if (!(e.getWhoClicked() instanceof Player player)) return;
+        if (!(e.getWhoClicked() instanceof Player player)) {
+            return;
+        }
         String worldName = player.getWorld().getName();
-        if (!AranarthUtils.isSurvivalWorld(worldName)) return;
+        if (!AranarthUtils.isSurvivalWorld(worldName)) {
+            return;
+        }
 
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
-        if (ap == null) return;
+        if (ap == null) {
+            return;
+        }
         JobData jobData = ap.getJobData();
 
         ItemStack result = e.getRecipe().getResult();
-        if (result == null || result.getType() == Material.AIR) return;
+        if (result == null || result.getType() == Material.AIR) {
+            return;
+        }
         Material mat = result.getType();
         int amount = result.getAmount();
 
@@ -506,16 +578,36 @@ public class JobEventListener implements Listener {
     }
 
     private double getLumberjackCraftPay(Material mat, int amount) {
-        if (isWoodenPlanks(mat)) return 0.02 * amount;
-        if (isWoodenStairs(mat)) return 0.04 * amount;
-        if (isWoodenSlab(mat)) return 0.02 * amount;
-        if (isWoodenDoor(mat)) return 0.08;
-        if (isWoodenTrapdoor(mat)) return 0.06;
-        if (isFence(mat)) return 0.05;
-        if (isFenceGate(mat)) return 0.05;
-        if (isWoodenPressurePlate(mat)) return 0.04;
-        if (isWoodenButton(mat)) return 0.03;
-        if (mat == Material.CHISELED_BOOKSHELF) return 0.10;
+        if (isWoodenPlanks(mat)) {
+            return 0.05 * amount;
+        }
+        if (isWoodenStairs(mat)) {
+            return 0.10 * amount;
+        }
+        if (isWoodenSlab(mat)) {
+            return 0.05 * amount;
+        }
+        if (isWoodenDoor(mat)) {
+            return 0.20;
+        }
+        if (isWoodenTrapdoor(mat)) {
+            return 0.15;
+        }
+        if (isFence(mat)) {
+            return 0.12;
+        }
+        if (isFenceGate(mat)) {
+            return 0.12;
+        }
+        if (isWoodenPressurePlate(mat)) {
+            return 0.10;
+        }
+        if (isWoodenButton(mat)) {
+            return 0.08;
+        }
+        if (mat == Material.CHISELED_BOOKSHELF) {
+            return 0.25;
+        }
         return 0;
     }
 
@@ -564,60 +656,82 @@ public class JobEventListener implements Listener {
 
     private boolean isWoodType(String name) {
         return name.startsWith("OAK") || name.startsWith("SPRUCE") || name.startsWith("BIRCH")
-            || name.startsWith("JUNGLE") || name.startsWith("ACACIA") || name.startsWith("DARK_OAK")
-            || name.startsWith("MANGROVE") || name.startsWith("CHERRY") || name.startsWith("BAMBOO")
-            || name.startsWith("CRIMSON") || name.startsWith("WARPED");
+                || name.startsWith("JUNGLE") || name.startsWith("ACACIA") || name.startsWith("DARK_OAK")
+                || name.startsWith("MANGROVE") || name.startsWith("CHERRY") || name.startsWith("BAMBOO")
+                || name.startsWith("CRIMSON") || name.startsWith("WARPED");
     }
 
     private double getSmithCraftPay(Material mat, int amount) {
-        if (isIronTool(mat)) return 0.50;
-        if (isIronArmor(mat)) return 0.60;
-        if (isGoldTool(mat)) return 0.35;
-        if (isGoldArmor(mat)) return 0.40;
-        if (isDiamondTool(mat)) return 2.00;
-        if (isDiamondArmor(mat)) return 2.50;
-        if (isChainArmor(mat)) return 0.80;
-        if (mat == Material.COPPER_BLOCK) return 0.15;
-        if (mat == Material.IRON_BLOCK) return 0.25;
-        if (mat == Material.GOLD_BLOCK) return 0.30;
+        if (isIronTool(mat)) {
+            return 0.50;
+        }
+        if (isIronArmor(mat)) {
+            return 0.60;
+        }
+        if (isGoldTool(mat)) {
+            return 0.35;
+        }
+        if (isGoldArmor(mat)) {
+            return 0.40;
+        }
+        if (isDiamondTool(mat)) {
+            return 6.00;
+        }
+        if (isDiamondArmor(mat)) {
+            return 8.00;
+        }
+        if (isChainArmor(mat)) {
+            return 0.80;
+        }
+        if (mat == Material.COPPER_BLOCK) {
+            return 0.15;
+        }
+        if (mat == Material.IRON_BLOCK) {
+            return 0.25;
+        }
+        if (mat == Material.GOLD_BLOCK) {
+            return 0.30;
+        }
         if (mat.name().endsWith("_CHAIN") || mat == Material.LANTERN || mat == Material.SOUL_LANTERN
-                || mat == Material.IRON_BARS) return 0.20;
+                || mat == Material.IRON_BARS) {
+            return 0.20;
+        }
         return 0;
     }
 
     private boolean isIronTool(Material mat) {
         return mat == Material.IRON_PICKAXE || mat == Material.IRON_SHOVEL
-            || mat == Material.IRON_HOE || mat == Material.IRON_SWORD || mat == Material.IRON_AXE;
+                || mat == Material.IRON_HOE || mat == Material.IRON_SWORD || mat == Material.IRON_AXE;
     }
 
     private boolean isIronArmor(Material mat) {
         return mat == Material.IRON_HELMET || mat == Material.IRON_CHESTPLATE
-            || mat == Material.IRON_LEGGINGS || mat == Material.IRON_BOOTS;
+                || mat == Material.IRON_LEGGINGS || mat == Material.IRON_BOOTS;
     }
 
     private boolean isGoldTool(Material mat) {
         return mat == Material.GOLDEN_PICKAXE || mat == Material.GOLDEN_SHOVEL
-            || mat == Material.GOLDEN_HOE || mat == Material.GOLDEN_SWORD || mat == Material.GOLDEN_AXE;
+                || mat == Material.GOLDEN_HOE || mat == Material.GOLDEN_SWORD || mat == Material.GOLDEN_AXE;
     }
 
     private boolean isGoldArmor(Material mat) {
         return mat == Material.GOLDEN_HELMET || mat == Material.GOLDEN_CHESTPLATE
-            || mat == Material.GOLDEN_LEGGINGS || mat == Material.GOLDEN_BOOTS;
+                || mat == Material.GOLDEN_LEGGINGS || mat == Material.GOLDEN_BOOTS;
     }
 
     private boolean isDiamondTool(Material mat) {
         return mat == Material.DIAMOND_PICKAXE || mat == Material.DIAMOND_SHOVEL
-            || mat == Material.DIAMOND_HOE || mat == Material.DIAMOND_SWORD || mat == Material.DIAMOND_AXE;
+                || mat == Material.DIAMOND_HOE || mat == Material.DIAMOND_SWORD || mat == Material.DIAMOND_AXE;
     }
 
     private boolean isDiamondArmor(Material mat) {
         return mat == Material.DIAMOND_HELMET || mat == Material.DIAMOND_CHESTPLATE
-            || mat == Material.DIAMOND_LEGGINGS || mat == Material.DIAMOND_BOOTS;
+                || mat == Material.DIAMOND_LEGGINGS || mat == Material.DIAMOND_BOOTS;
     }
 
     private boolean isChainArmor(Material mat) {
         return mat == Material.CHAINMAIL_HELMET || mat == Material.CHAINMAIL_CHESTPLATE
-            || mat == Material.CHAINMAIL_LEGGINGS || mat == Material.CHAINMAIL_BOOTS;
+                || mat == Material.CHAINMAIL_LEGGINGS || mat == Material.CHAINMAIL_BOOTS;
     }
 
     // -------------------------------------------------------------------------
@@ -626,24 +740,32 @@ public class JobEventListener implements Listener {
 
     @EventHandler
     public void onInventoryClickSmith(InventoryClickEvent e) {
-        if (!(e.getWhoClicked() instanceof Player player)) return;
+        if (!(e.getWhoClicked() instanceof Player player)) {
+            return;
+        }
         String worldName = player.getWorld().getName();
-        if (!AranarthUtils.isSurvivalWorld(worldName)) return;
+        if (!AranarthUtils.isSurvivalWorld(worldName)) {
+            return;
+        }
 
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
-        if (ap == null) return;
+        if (ap == null) {
+            return;
+        }
         JobData jobData = ap.getJobData();
 
         if (e.getView().getType() == InventoryType.SMITHING && e.getRawSlot() == 3) {
             ItemStack result = e.getCurrentItem();
-            if (result == null || result.getType() == Material.AIR) return;
+            if (result == null || result.getType() == Material.AIR) {
+                return;
+            }
             if (jobData.hasJob(JobType.SMITH)) {
                 // Check if netherite upgrade or armor trim
                 ItemStack template = e.getView().getTopInventory().getItem(0);
                 if (template != null && template.getType() == Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE) {
-                    JobUtils.awardJob(player, JobType.SMITH, 5.00);
+                    JobUtils.awardJob(player, JobType.SMITH, 20.00);
                 } else if (isArmorTrimTemplate(template)) {
-                    JobUtils.awardJob(player, JobType.SMITH, 2.00);
+                    JobUtils.awardJob(player, JobType.SMITH, 10.00);
                 }
             }
         }
@@ -651,13 +773,15 @@ public class JobEventListener implements Listener {
         // ALCHEMIST - Grindstone
         if (e.getView().getType() == InventoryType.GRINDSTONE && e.getRawSlot() == 2) {
             ItemStack result = e.getCurrentItem();
-            if (result == null || result.getType() == Material.AIR) return;
+            if (result == null || result.getType() == Material.AIR) {
+                return;
+            }
             if (jobData.hasJob(JobType.ALCHEMIST)) {
                 // Check if any input item had enchantments
                 ItemStack input1 = e.getView().getTopInventory().getItem(0);
                 ItemStack input2 = e.getView().getTopInventory().getItem(1);
                 boolean hadEnchants = (input1 != null && !input1.getEnchantments().isEmpty())
-                    || (input2 != null && !input2.getEnchantments().isEmpty());
+                        || (input2 != null && !input2.getEnchantments().isEmpty());
                 if (hadEnchants) {
                     JobUtils.awardJob(player, JobType.ALCHEMIST, 0.30);
                 }
@@ -667,7 +791,9 @@ public class JobEventListener implements Listener {
         // ALCHEMIST - Anvil
         if (e.getView().getType() == InventoryType.ANVIL && e.getRawSlot() == 2) {
             ItemStack result = e.getCurrentItem();
-            if (result == null || result.getType() == Material.AIR) return;
+            if (result == null || result.getType() == Material.AIR) {
+                return;
+            }
             if (jobData.hasJob(JobType.ALCHEMIST)) {
                 ItemStack sacrifice = e.getView().getTopInventory().getItem(1);
                 if (sacrifice != null && sacrifice.getType() == Material.ENCHANTED_BOOK) {
@@ -683,10 +809,12 @@ public class JobEventListener implements Listener {
     }
 
     private boolean isArmorTrimTemplate(ItemStack template) {
-        if (template == null) return false;
+        if (template == null) {
+            return false;
+        }
         String name = template.getType().name();
         return name.endsWith("_SMITHING_TEMPLATE")
-            && !name.equals("NETHERITE_UPGRADE_SMITHING_TEMPLATE");
+                && !name.equals("NETHERITE_UPGRADE_SMITHING_TEMPLATE");
     }
 
     // -------------------------------------------------------------------------
@@ -697,10 +825,14 @@ public class JobEventListener implements Listener {
     public void onEnchantItem(EnchantItemEvent e) {
         Player player = e.getEnchanter();
         String worldName = player.getWorld().getName();
-        if (!AranarthUtils.isSurvivalWorld(worldName)) return;
+        if (!AranarthUtils.isSurvivalWorld(worldName)) {
+            return;
+        }
 
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
-        if (ap == null || !ap.getJobData().hasJob(JobType.ALCHEMIST)) return;
+        if (ap == null || !ap.getJobData().hasJob(JobType.ALCHEMIST)) {
+            return;
+        }
 
         JobUtils.awardJob(player, JobType.ALCHEMIST, 0.50);
     }
@@ -711,42 +843,64 @@ public class JobEventListener implements Listener {
 
     @EventHandler
     public void onInventoryOpen(InventoryOpenEvent e) {
-        if (!(e.getPlayer() instanceof Player player)) return;
-        if (e.getInventory().getType() != InventoryType.BREWING) return;
+        if (!(e.getPlayer() instanceof Player player)) {
+            return;
+        }
+        if (e.getInventory().getType() != InventoryType.BREWING) {
+            return;
+        }
 
         Location loc = e.getInventory().getLocation();
-        if (loc == null) return;
+        if (loc == null) {
+            return;
+        }
         activeBrewing.put(loc, player.getUniqueId());
     }
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent e) {
-        if (e.getInventory().getType() != InventoryType.BREWING) return;
+        if (e.getInventory().getType() != InventoryType.BREWING) {
+            return;
+        }
         Location loc = e.getInventory().getLocation();
-        if (loc != null) activeBrewing.remove(loc);
+        if (loc != null) {
+            activeBrewing.remove(loc);
+        }
     }
 
     @EventHandler
     public void onBrew(BrewEvent e) {
         BrewerInventory brewer = e.getContents();
         Location loc = brewer.getLocation();
-        if (loc == null) return;
-        if (loc.getWorld() == null || !AranarthUtils.isSurvivalWorld(loc.getWorld().getName())) return;
+        if (loc == null) {
+            return;
+        }
+        if (loc.getWorld() == null || !AranarthUtils.isSurvivalWorld(loc.getWorld().getName())) {
+            return;
+        }
 
         UUID brewerUuid = activeBrewing.get(loc);
-        if (brewerUuid == null) return;
+        if (brewerUuid == null) {
+            return;
+        }
 
         Player player = org.bukkit.Bukkit.getPlayer(brewerUuid);
-        if (player == null) return;
+        if (player == null) {
+            return;
+        }
 
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
-        if (ap == null || !ap.getJobData().hasJob(JobType.ALCHEMIST)) return;
+        if (ap == null || !ap.getJobData().hasJob(JobType.ALCHEMIST)) {
+            return;
+        }
 
         // Count filled output slots (slots 0-2)
         int bottles = 0;
         for (int slot = 0; slot <= 2; slot++) {
             ItemStack item = brewer.getItem(slot);
-            if (item != null && item.getType() != Material.AIR) bottles++;
+            if (item != null && item.getType() != Material.AIR) {
+                bottles++;
+            }
         }
         for (int i = 0; i < bottles; i++) {
             JobUtils.awardJob(player, JobType.ALCHEMIST, 0.80);
@@ -759,14 +913,22 @@ public class JobEventListener implements Listener {
 
     @EventHandler
     public void onBrewModify(BrewModifyEvent e) {
-        if (e.getType() != BrewModifyEvent.Type.FILL) return;
+        if (e.getType() != BrewModifyEvent.Type.FILL) {
+            return;
+        }
 
         Player player = e.getPlayer();
-        if (player == null) return;
-        if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) return;
+        if (player == null) {
+            return;
+        }
+        if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
+            return;
+        }
 
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
-        if (ap == null || !ap.getJobData().hasJob(JobType.ALCHEMIST)) return;
+        if (ap == null || !ap.getJobData().hasJob(JobType.ALCHEMIST)) {
+            return;
+        }
 
         JobUtils.awardJob(player, JobType.ALCHEMIST, 1.00);
     }
@@ -778,19 +940,31 @@ public class JobEventListener implements Listener {
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent e) {
         if (e.getFrom().getBlockX() == e.getTo().getBlockX()
-                && e.getFrom().getBlockZ() == e.getTo().getBlockZ()) return;
+                && e.getFrom().getBlockZ() == e.getTo().getBlockZ()) {
+            return;
+        }
 
         Player player = e.getPlayer();
         String worldName = player.getWorld().getName();
-        if (!AranarthUtils.isSurvivalWorld(worldName)) return;
+        if (!AranarthUtils.isSurvivalWorld(worldName)) {
+            return;
+        }
 
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
-        if (ap == null || !ap.getJobData().hasJob(JobType.EXPLORER)) return;
+        if (ap == null || !ap.getJobData().hasJob(JobType.EXPLORER)) {
+            return;
+        }
 
         // Must be on ground, not in water, not flying
-        if (!player.isOnGround()) return;
-        if (player.isInWater()) return;
-        if (player.isFlying() || player.isGliding()) return;
+        if (!player.isOnGround()) {
+            return;
+        }
+        if (player.isInWater()) {
+            return;
+        }
+        if (player.isFlying() || player.isGliding()) {
+            return;
+        }
 
         Entity vehicle = player.getVehicle();
         if (vehicle instanceof AbstractHorse) {
@@ -806,22 +980,36 @@ public class JobEventListener implements Listener {
 
     @EventHandler
     public void onInventoryOpenExplorer(InventoryOpenEvent e) {
-        if (!(e.getPlayer() instanceof Player player)) return;
+        if (!(e.getPlayer() instanceof Player player)) {
+            return;
+        }
         if (e.getInventory().getType() != InventoryType.CHEST
-                && e.getInventory().getType() != InventoryType.BARREL) return;
+                && e.getInventory().getType() != InventoryType.BARREL) {
+            return;
+        }
 
         String worldName = player.getWorld().getName();
-        if (!AranarthUtils.isSurvivalWorld(worldName)) return;
+        if (!AranarthUtils.isSurvivalWorld(worldName)) {
+            return;
+        }
 
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
-        if (ap == null || !ap.getJobData().hasJob(JobType.EXPLORER)) return;
+        if (ap == null || !ap.getJobData().hasJob(JobType.EXPLORER)) {
+            return;
+        }
 
         Location loc = e.getInventory().getLocation();
-        if (loc == null) return;
+        if (loc == null) {
+            return;
+        }
 
         Block block = loc.getBlock();
-        if (!mcMMO.getChunkManager().isEligible(block)) return;
-        if (!hasChunkPermission(player, block.getChunk(), DominionPermission.CONTAINER)) return;
+        if (!mcMMO.getChunkManager().isEligible(block)) {
+            return;
+        }
+        if (!hasChunkPermission(player, block.getChunk(), DominionPermission.CONTAINER)) {
+            return;
+        }
         BlockState state = block.getState();
 
         // Check if claimed already via PDC

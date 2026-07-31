@@ -16,21 +16,29 @@ import java.util.HashSet;
 public class JobUtils {
 
     private static final double[] LEVEL_MULTIPLIERS = {
-        1.00, 1.05, 1.12, 1.25, 1.50, 2.00, 3.00, 5.00, 7.50, 10.00
+            1.00, 1.05, 1.12, 1.25, 1.50, 2.00, 3.00, 5.00, 7.50, 10.00
     };
 
     private static final long[] XP_REQUIRED = {
-        500, 2000, 6000, 15000, 40000, 90000, 175000, 300000, 500000
+            200000, 275000, 375000, 515000, 700000, 950000, 1300000, 1800000, 2500000
     };
 
     // Builder anti-exploit: Map<playerUUID, Set<blockLocationKey>>
     private static final Map<UUID, Set<Long>> placedBlockLocations = new HashMap<>();
 
     public static int getMaxJobs(int rank) {
-        if (rank >= 8) return 5;
-        if (rank >= 6) return 4;
-        if (rank >= 4) return 3;
-        if (rank >= 2) return 2;
+        if (rank >= 8) {
+            return 5;
+        }
+        if (rank >= 6) {
+            return 4;
+        }
+        if (rank >= 4) {
+            return 3;
+        }
+        if (rank >= 2) {
+            return 2;
+        }
         return 1;
     }
 
@@ -39,48 +47,83 @@ public class JobUtils {
         return LEVEL_MULTIPLIERS[idx];
     }
 
+    public static int computeLevel(double totalXp) {
+        int level = 1;
+        double remaining = totalXp;
+        for (long threshold : XP_REQUIRED) {
+            if (remaining < threshold) {
+                break;
+            }
+            remaining -= threshold;
+            level++;
+            if (level >= 10) {
+                return 10;
+            }
+        }
+        return level;
+    }
+
+    public static double computeWithinLevelXp(double totalXp) {
+        double remaining = totalXp;
+        for (long threshold : XP_REQUIRED) {
+            if (remaining < threshold) {
+                return remaining;
+            }
+            remaining -= threshold;
+        }
+        return 0;
+    }
+
     public static long getXpRequired(int level) {
-        if (level <= 0 || level > 9) return -1;
+        if (level <= 0 || level > 9) {
+            return -1;
+        }
         return XP_REQUIRED[level - 1];
+    }
+
+    public static double getRankPayMultiplier(int rank) {
+        return switch (rank) {
+            case 0 -> 1.00;
+            case 1 -> 1.05;
+            case 2 -> 1.15;
+            case 3 -> 1.30;
+            case 4 -> 1.50;
+            case 5 -> 1.75;
+            case 6 -> 2.00;
+            case 7 -> 2.25;
+            default -> 2.50;
+        };
     }
 
     public static void awardJob(Player player, JobType job, double basePay) {
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
-        if (ap == null) return;
+        if (ap == null) {
+            return;
+        }
         JobData jobData = ap.getJobData();
-        if (!jobData.hasJob(job)) return;
+        if (!jobData.hasJob(job)) {
+            return;
+        }
 
         int level = jobData.getLevel(job);
-        double multiplier = getLevelMultiplier(level);
-        double actualPay = basePay * multiplier;
+        double levelMultiplier = getLevelMultiplier(level);
+        double rankMultiplier = getRankPayMultiplier(ap.getRank());
+        double actualPay = basePay * levelMultiplier * rankMultiplier;
 
         ap.setBalance(ap.getBalance() + actualPay);
         if (NetworkManager.isActive()) {
             NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), actualPay);
         }
 
-        double xpGain = actualPay * 100;
-        double currentXp = jobData.getCurrentXp(job) + xpGain;
-
         if (level < 10) {
-            long required = getXpRequired(level);
-            while (level < 10 && currentXp >= required) {
-                currentXp -= required;
-                level++;
-                jobData.setLevel(job, level);
-                handleLevelUp(player, ap, job, level);
-                if (level < 10) {
-                    required = getXpRequired(level);
-                } else {
-                    currentXp = 0;
-                    break;
-                }
+            double xpGain = basePay * 100;
+            jobData.addTotalXp(job, xpGain);
+            int newLevel = jobData.getLevel(job);
+            for (int lvl = level + 1; lvl <= newLevel; lvl++) {
+                handleLevelUp(player, ap, job, lvl);
             }
-        } else {
-            currentXp = 0;
         }
 
-        jobData.setCurrentXp(job, currentXp);
         AranarthUtils.setPlayer(player.getUniqueId(), ap);
     }
 
@@ -89,9 +132,9 @@ public class JobUtils {
         String nickname = ap.getNickname();
 
         player.sendTitle(
-            ChatUtils.translateToColor("&6&lLevel Up!"),
-            ChatUtils.translateToColor("&e" + jobName + " &fis now &e&lLevel " + newLevel),
-            10, 60, 20
+                ChatUtils.translateToColor("&6&lLevel Up!"),
+                ChatUtils.translateToColor("&e" + jobName + " &fis now &e&lLevel " + newLevel),
+                10, 60, 20
         );
 
         String broadcastMsg = ChatUtils.chatMessage("&7" + nickname + " &7has reached &e&lLevel " + newLevel + " &7in &e" + jobName + "&7!");
@@ -105,7 +148,9 @@ public class JobUtils {
 
     public static boolean isRecentlyPlaced(long locationKey) {
         for (Set<Long> blocks : placedBlockLocations.values()) {
-            if (blocks.contains(locationKey)) return true;
+            if (blocks.contains(locationKey)) {
+                return true;
+            }
         }
         return false;
     }
@@ -115,7 +160,7 @@ public class JobUtils {
     }
 
     public static long toLocationKey(int x, int y, int z) {
-        return ((long)(x & 0x3FFFFFF) << 38) | ((long)(z & 0x3FFFFFF) << 12) | (long)(y & 0xFFF);
+        return ((long) (x & 0x3FFFFFF) << 38) | ((long) (z & 0x3FFFFFF) << 12) | (long) (y & 0xFFF);
     }
 
     /**
@@ -138,7 +183,9 @@ public class JobUtils {
             case CACTUS -> 0.04;
             default -> 0;
         };
-        if (pay > 0) awardJob(player, JobType.FARMER, pay);
+        if (pay > 0) {
+            awardJob(player, JobType.FARMER, pay);
+        }
     }
 
     public static String formatPay(double amount) {

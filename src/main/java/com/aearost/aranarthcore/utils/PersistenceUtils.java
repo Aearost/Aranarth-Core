@@ -1457,7 +1457,9 @@ public class PersistenceUtils {
                     if (dominions != null && !dominions.isEmpty()) {
                         for (Dominion dominion : dominions) {
                             // Skip dominions that belong to the other server
-                            if (dominion.getChunks().isEmpty()) continue;
+                            if (dominion.getChunks().isEmpty()) {
+                                continue;
+                            }
                             String row = buildDominionRow(dominion) + "\n";
                             writer.write(row);
                         }
@@ -2149,10 +2151,16 @@ public class PersistenceUtils {
                 try (Scanner reader = new Scanner(file)) {
                     while (reader.hasNextLine()) {
                         String row = reader.nextLine().trim();
-                        if (row.isEmpty() || row.startsWith("#")) continue;
-                        try { fileUuids.add(UUID.fromString(row)); } catch (IllegalArgumentException ignored) {}
+                        if (row.isEmpty() || row.startsWith("#")) {
+                            continue;
+                        }
+                        try {
+                            fileUuids.add(UUID.fromString(row));
+                        } catch (IllegalArgumentException ignored) {
+                        }
                     }
-                } catch (FileNotFoundException ignored) {}
+                } catch (FileNotFoundException ignored) {
+                }
                 if (!fileUuids.isEmpty()) {
                     DatabaseManager.getInstance().mergeOriginalPlayers(fileUuids);
                     Bukkit.getLogger().info("[AC] Merged " + fileUuids.size() + " original players from file into database");
@@ -4636,7 +4644,8 @@ public class PersistenceUtils {
                 if (fields.length > 13 && !fields[13].isEmpty()) {
                     try {
                         icon = Material.valueOf(fields[13]);
-                    } catch (IllegalArgumentException ignored) {}
+                    } catch (IllegalArgumentException ignored) {
+                    }
                 }
 
                 Outpost outpost = new Outpost(
@@ -4688,7 +4697,9 @@ public class PersistenceUtils {
 
             for (Dominion dominion : DominionUtils.getDominions()) {
                 // Skip cross-server stubs to avoid overwriting valid outpost data
-                if (dominion.getChunks().isEmpty()) continue;
+                if (dominion.getChunks().isEmpty()) {
+                    continue;
+                }
                 for (Outpost outpost : OutpostUtils.getDominionOutposts(dominion.getId())) {
                     StringBuilder chunks = new StringBuilder();
                     for (Chunk chunk : outpost.getChunks()) {
@@ -5227,7 +5238,9 @@ public class PersistenceUtils {
      * Must be called from an async thread.
      */
     public static void syncVoteKeysForPlayerToDatabase(UUID uuid) {
-        if (!DatabaseManager.isActive()) return;
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
         DatabaseManager db = DatabaseManager.getInstance();
         int vc = 0;
         JsonArray history = new JsonArray();
@@ -5264,18 +5277,34 @@ public class PersistenceUtils {
      * May be called synchronously (blocks the calling thread briefly for the DB query).
      */
     public static void reloadVoteKeysForPlayerFromDatabase(UUID uuid) {
-        if (!DatabaseManager.isActive()) return;
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
         int[] data = DatabaseManager.getInstance().loadVoteData(uuid);
-        if (data == null) return;
+        if (data == null) {
+            return;
+        }
         // data[0]=voteCount, [1]=voteKeys, [2]=rareKeys, [3]=epicKeys, [4]=godlyKeys
-        if (data[1] > 0) AranarthUtils.setPendingVoteKeys(uuid, data[1]);
-        else AranarthUtils.removePendingVoteKeys(uuid);
-        if (data[2] > 0) AranarthUtils.setPendingRareKeys(uuid, data[2]);
-        else AranarthUtils.removePendingRareKeys(uuid);
-        if (data[3] > 0) AranarthUtils.setPendingEpicKeys(uuid, data[3]);
-        else AranarthUtils.removePendingEpicKeys(uuid);
-        if (data[4] > 0) AranarthUtils.setPendingGodlyKeys(uuid, data[4]);
-        else AranarthUtils.removePendingGodlyKeys(uuid);
+        if (data[1] > 0) {
+            AranarthUtils.setPendingVoteKeys(uuid, data[1]);
+        } else {
+            AranarthUtils.removePendingVoteKeys(uuid);
+        }
+        if (data[2] > 0) {
+            AranarthUtils.setPendingRareKeys(uuid, data[2]);
+        } else {
+            AranarthUtils.removePendingRareKeys(uuid);
+        }
+        if (data[3] > 0) {
+            AranarthUtils.setPendingEpicKeys(uuid, data[3]);
+        } else {
+            AranarthUtils.removePendingEpicKeys(uuid);
+        }
+        if (data[4] > 0) {
+            AranarthUtils.setPendingGodlyKeys(uuid, data[4]);
+        } else {
+            AranarthUtils.removePendingGodlyKeys(uuid);
+        }
     }
 
     /**
@@ -5489,7 +5518,9 @@ public class PersistenceUtils {
      * before the next periodic save, and is visible to other servers in the network.
      */
     public static void syncPlayerMailToDatabase(UUID uuid) {
-        if (!DatabaseManager.isActive()) return;
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
         List<Mail> mailList = MailUtils.getMail(uuid);
         JsonArray arr = new JsonArray();
         for (Mail mail : mailList) {
@@ -5519,7 +5550,9 @@ public class PersistenceUtils {
      * rather than the potentially stale snapshot loaded at startup.
      */
     public static void reloadPlayerMailFromDatabase(UUID uuid) {
-        if (!DatabaseManager.isActive()) return;
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
         int previousCount = MailUtils.getMail(uuid).size();
         String json = DatabaseManager.getInstance().loadAllMail(uuid);
         if (json == null) {
@@ -5555,9 +5588,13 @@ public class PersistenceUtils {
      * (e.g. the player already claimed on another server before switching here).
      */
     public static void reloadPlayerLoginStreakFromDatabase(UUID uuid) {
-        if (!DatabaseManager.isActive()) return;
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
         String json = DatabaseManager.getInstance().loadLoginStreak(uuid);
-        if (json == null) return;
+        if (json == null) {
+            return;
+        }
         try {
             JsonObject obj = GSON.fromJson(json, JsonObject.class);
             int day = obj.has("day") ? obj.get("day").getAsInt() : 1;
@@ -5869,7 +5906,9 @@ public class PersistenceUtils {
         for (Dominion dominion : dominions) {
             // Skip cross-server stubs (empty chunk list) — saving them would overwrite valid
             // chunk data in the DB with an empty string, corrupting the row on next load.
-            if (dominion.getChunks().isEmpty()) continue;
+            if (dominion.getChunks().isEmpty()) {
+                continue;
+            }
             try {
                 String row = buildDominionRow(dominion);
                 db.saveDominion(dominion.getId(), row);
@@ -6182,11 +6221,17 @@ public class PersistenceUtils {
      * Called after marking/unmarking a sentinel so cross-server data is up to date.
      */
     public static void syncPlayerSentinelsToDatabase(UUID uuid) {
-        if (!DatabaseManager.isActive()) return;
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
         AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
-        if (ap == null) return;
+        if (ap == null) {
+            return;
+        }
         HashMap<EntityType, List<Sentinel>> sentinels = ap.getSentinels();
-        if (sentinels == null || sentinels.isEmpty()) return;
+        if (sentinels == null || sentinels.isEmpty()) {
+            return;
+        }
         JsonObject obj = new JsonObject();
         for (Map.Entry<EntityType, List<Sentinel>> typeEntry : sentinels.entrySet()) {
             JsonArray arr = new JsonArray();
@@ -6218,12 +6263,18 @@ public class PersistenceUtils {
      * Called on cross-server arrival so the player's sentinels reflect what was saved on another server.
      */
     public static void reloadPlayerSentinelsFromDatabase(UUID uuid) {
-        if (!DatabaseManager.isActive()) return;
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
         try {
             String raw = DatabaseManager.getInstance().loadPlayerSentinels(uuid);
-            if (raw == null) return;
+            if (raw == null) {
+                return;
+            }
             AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
-            if (ap == null) return;
+            if (ap == null) {
+                return;
+            }
             JsonObject obj = GSON.fromJson(raw, JsonObject.class);
             HashMap<EntityType, List<Sentinel>> sentinels = new HashMap<>();
             for (EntityType type : new EntityType[]{EntityType.HORSE, EntityType.IRON_GOLEM, EntityType.WOLF}) {
@@ -6240,7 +6291,9 @@ public class PersistenceUtils {
                         Location loc = new Location(world, x, y, z);
                         Sentinel sentinel = new Sentinel(sentinelUuid, type, loc);
                         sentinel.setWorldName(worldName);
-                        if (s.has("serverName")) sentinel.setServerName(s.get("serverName").getAsString());
+                        if (s.has("serverName")) {
+                            sentinel.setServerName(s.get("serverName").getAsString());
+                        }
                         list.add(sentinel);
                     }
                 }
@@ -6341,7 +6394,9 @@ public class PersistenceUtils {
     public static void loadSingleOutpostFromJson(JsonObject obj) {
         try {
             UUID id = UUID.fromString(obj.get("id").getAsString());
-            if (OutpostUtils.getOutpostById(id) != null) return;
+            if (OutpostUtils.getOutpostById(id) != null) {
+                return;
+            }
             UUID dominionId = UUID.fromString(obj.get("dominionId").getAsString());
             String name = obj.get("name").getAsString();
             int outpostIndex = obj.get("outpostIndex").getAsInt();
@@ -6355,7 +6410,10 @@ public class PersistenceUtils {
             int boughtChunks = obj.has("boughtChunks") ? obj.get("boughtChunks").getAsInt() : 0;
             Material icon = Material.OAK_LOG;
             if (obj.has("icon")) {
-                try { icon = Material.valueOf(obj.get("icon").getAsString()); } catch (IllegalArgumentException ignored) {}
+                try {
+                    icon = Material.valueOf(obj.get("icon").getAsString());
+                } catch (IllegalArgumentException ignored) {
+                }
             }
             String outpostLookupName = (worldName.startsWith("smp:") && AranarthCore.isSmpServer())
                     ? worldName.substring(4) : worldName;
@@ -6389,7 +6447,9 @@ public class PersistenceUtils {
 
         for (Dominion dominion : DominionUtils.getDominions()) {
             // Skip cross-server stubs - their outposts have empty or wrong-server chunk lists
-            if (dominion.getChunks().isEmpty()) continue;
+            if (dominion.getChunks().isEmpty()) {
+                continue;
+            }
             localDominionIds.add(dominion.getId());
             for (Outpost outpost : OutpostUtils.getDominionOutposts(dominion.getId())) {
                 Location home = outpost.getHome();
@@ -6413,14 +6473,17 @@ public class PersistenceUtils {
                 Map<UUID, String> allDbOutposts = db.loadAllOutposts();
                 for (Map.Entry<UUID, String> entry : allDbOutposts.entrySet()) {
                     UUID dbOutpostId = entry.getKey();
-                    if (localOutpostIds.contains(dbOutpostId)) continue;
+                    if (localOutpostIds.contains(dbOutpostId)) {
+                        continue;
+                    }
                     try {
                         JsonObject obj = GSON.fromJson(entry.getValue(), JsonObject.class);
                         UUID dominionId = UUID.fromString(obj.get("dominionId").getAsString());
                         if (localDominionIds.contains(dominionId)) {
                             db.deleteOutpost(dbOutpostId);
                         }
-                    } catch (Exception ignored) {}
+                    } catch (Exception ignored) {
+                    }
                 }
             } catch (Exception e) {
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Outpost reconciliation failed: " + e.getMessage());
@@ -7672,12 +7735,16 @@ public class PersistenceUtils {
     }
 
     public static void saveSingleDominionToDatabase(Dominion dominion, Runnable afterSave) {
-        if (!DatabaseManager.isActive()) return;
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
             try {
                 String row = buildDominionRow(dominion);
                 DatabaseManager.getInstance().saveDominion(dominion.getId(), row);
-                if (afterSave != null) afterSave.run();
+                if (afterSave != null) {
+                    afterSave.run();
+                }
             } catch (Exception e) {
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to immediately save new dominion " + dominion.getId() + ": " + e.getMessage());
             }
@@ -7689,10 +7756,16 @@ public class PersistenceUtils {
      * No-op if the dominion is already in memory or not found in the database.
      */
     public static void loadSingleDominionFromDatabase(UUID dominionId) {
-        if (!DatabaseManager.isActive()) return;
-        if (DominionUtils.getDominionById(dominionId) != null) return;
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        if (DominionUtils.getDominionById(dominionId) != null) {
+            return;
+        }
         String raw = DatabaseManager.getInstance().loadDominion(dominionId);
-        if (raw == null) return;
+        if (raw == null) {
+            return;
+        }
         try {
             parseAndAddDominionRow(raw);
         } catch (Exception e) {
@@ -7704,28 +7777,43 @@ public class PersistenceUtils {
      * Checks if the given player's dominion is in the cache, and attempts to load it from MySQL.
      */
     public static void reloadDominionForPlayer(UUID playerUuid) {
-        if (!DatabaseManager.isActive()) return;
-        if (DominionUtils.getPlayerDominion(playerUuid) != null) return;
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        if (DominionUtils.getPlayerDominion(playerUuid) != null) {
+            return;
+        }
 
         DatabaseManager db = DatabaseManager.getInstance();
         String uuidStr = playerUuid.toString();
         Map<UUID, String> all = db.loadAllDominions();
         for (Map.Entry<UUID, String> entry : all.entrySet()) {
-            if (DominionUtils.getDominionById(entry.getKey()) != null) continue;
+            if (DominionUtils.getDominionById(entry.getKey()) != null) {
+                continue;
+            }
             // Check only the leader and member list
             String[] fields = entry.getValue().split("\\|");
-            if (fields.length < 4) continue;
+            if (fields.length < 4) {
+                continue;
+            }
             boolean isMember = fields[2].equals(uuidStr);
             if (!isMember) {
                 for (String m : fields[3].split("\\*\\*\\*")) {
-                    if (m.equals(uuidStr)) { isMember = true; break; }
+                    if (m.equals(uuidStr)) {
+                        isMember = true;
+                        break;
+                    }
                 }
             }
-            if (!isMember) continue;
+            if (!isMember) {
+                continue;
+            }
             try {
                 parseAndAddDominionRow(entry.getValue());
                 Dominion loaded = DominionUtils.getPlayerDominion(playerUuid);
-                if (loaded == null) continue;
+                if (loaded == null) {
+                    continue;
+                }
 
                 // Load rank permissions for this dominion
                 String permsData = db.loadDominionPermissionsById(loaded.getId());
@@ -7739,11 +7827,15 @@ public class PersistenceUtils {
                                 Set<DominionPermission> perms = new HashSet<>();
                                 if (!parts[1].isEmpty()) {
                                     for (String permName : parts[1].split(",")) {
-                                        try { perms.add(DominionPermission.valueOf(permName)); } catch (IllegalArgumentException ignored) {}
+                                        try {
+                                            perms.add(DominionPermission.valueOf(permName));
+                                        } catch (IllegalArgumentException ignored) {
+                                        }
                                     }
                                 }
                                 allPerms.put(rank, perms);
-                            } catch (IllegalArgumentException ignored) {}
+                            } catch (IllegalArgumentException ignored) {
+                            }
                         }
                     }
                     allPerms.put(DominionRank.LEADER, new HashSet<>(Arrays.asList(DominionPermission.values())));
@@ -7769,7 +7861,9 @@ public class PersistenceUtils {
                     Map<UUID, Map<DominionPermission, Boolean>> allOverrides = new HashMap<>();
                     for (String playerEntry : playerPermsData.split(";")) {
                         String[] parts = playerEntry.split(":", 2);
-                        if (parts.length != 2) continue;
+                        if (parts.length != 2) {
+                            continue;
+                        }
                         try {
                             UUID pUuid = UUID.fromString(parts[0]);
                             Map<DominionPermission, Boolean> overrides = new HashMap<>();
@@ -7777,12 +7871,18 @@ public class PersistenceUtils {
                                 for (String permEntry : parts[1].split(",")) {
                                     String[] kv = permEntry.split("=", 2);
                                     if (kv.length == 2) {
-                                        try { overrides.put(DominionPermission.valueOf(kv[0]), Boolean.parseBoolean(kv[1])); } catch (IllegalArgumentException ignored) {}
+                                        try {
+                                            overrides.put(DominionPermission.valueOf(kv[0]), Boolean.parseBoolean(kv[1]));
+                                        } catch (IllegalArgumentException ignored) {
+                                        }
                                     }
                                 }
                             }
-                            if (!overrides.isEmpty()) allOverrides.put(pUuid, overrides);
-                        } catch (IllegalArgumentException ignored) {}
+                            if (!overrides.isEmpty()) {
+                                allOverrides.put(pUuid, overrides);
+                            }
+                        } catch (IllegalArgumentException ignored) {
+                        }
                     }
                     loaded.setPlayerPermissionOverrides(allOverrides);
                 }
@@ -8140,7 +8240,9 @@ public class PersistenceUtils {
                             Location loc = new Location(world, x, y, z);
                             Sentinel sentinel = new Sentinel(sentinelUuid, type, loc);
                             sentinel.setWorldName(worldName);
-                            if (s.has("serverName")) sentinel.setServerName(s.get("serverName").getAsString());
+                            if (s.has("serverName")) {
+                                sentinel.setServerName(s.get("serverName").getAsString());
+                            }
                             list.add(sentinel);
                         }
                     }
@@ -8349,7 +8451,9 @@ public class PersistenceUtils {
     private static final Gson JOB_GSON = new Gson();
 
     public static void loadJobDataForPlayer(UUID uuid) {
-        if (!DatabaseManager.isActive()) return;
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
         String name = playerName(uuid);
         Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] Loading job data for " + name
                 + " (thread=" + Thread.currentThread().getName() + ")");
@@ -8379,9 +8483,13 @@ public class PersistenceUtils {
     }
 
     public static void saveJobData(UUID uuid) {
-        if (!DatabaseManager.isActive()) return;
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
         AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
-        if (ap == null) return;
+        if (ap == null) {
+            return;
+        }
         String json = serializeJobData(ap.getJobData());
         String name = playerName(uuid);
         if (AranarthCore.getInstance().isEnabled()) {
@@ -8408,9 +8516,13 @@ public class PersistenceUtils {
      * which can close the connection pool before async tasks dispatched by saveJobData() execute.
      */
     public static void saveJobDataSync(UUID uuid) {
-        if (!DatabaseManager.isActive()) return;
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
         AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
-        if (ap == null) return;
+        if (ap == null) {
+            return;
+        }
         String name = playerName(uuid);
         String json = serializeJobData(ap.getJobData());
         Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] Saving sync for " + name
@@ -8425,7 +8537,9 @@ public class PersistenceUtils {
     }
 
     public static void saveAllJobData() {
-        if (!DatabaseManager.isActive()) return;
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
         java.util.Collection<? extends Player> online = Bukkit.getOnlinePlayers();
         Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] saveAllJobData — " + online.size() + " online player(s)");
         for (Player player : online) {
@@ -8433,10 +8547,14 @@ public class PersistenceUtils {
         }
     }
 
-    /** Returns a human-readable name for logging: "Name(uuid)" or just the uuid if offline. */
+    /**
+     * Returns a human-readable name for logging: "Name(uuid)" or just the uuid if offline.
+     */
     private static String playerName(UUID uuid) {
         Player p = Bukkit.getPlayer(uuid);
-        if (p != null) return p.getName() + "(" + uuid + ")";
+        if (p != null) {
+            return p.getName() + "(" + uuid + ")";
+        }
         return uuid.toString();
     }
 
@@ -8447,46 +8565,73 @@ public class PersistenceUtils {
             activeJobs.add(job.name());
         }
         obj.add("activeJobs", activeJobs);
-        JsonObject levels = new JsonObject();
-        for (Map.Entry<JobType, Integer> entry : jobData.getLevels().entrySet()) {
-            levels.addProperty(entry.getKey().name(), entry.getValue());
+        JsonObject totalXp = new JsonObject();
+        for (Map.Entry<JobType, Double> entry : jobData.getTotalXpMap().entrySet()) {
+            totalXp.addProperty(entry.getKey().name(), entry.getValue());
         }
-        obj.add("levels", levels);
-        JsonObject xp = new JsonObject();
-        for (Map.Entry<JobType, Double> entry : jobData.getXp().entrySet()) {
-            xp.addProperty(entry.getKey().name(), entry.getValue());
-        }
-        obj.add("xp", xp);
+        obj.add("totalXp", totalXp);
         return obj.toString();
     }
+
+    // Used for one-time migration.
+    private static final long[] OLD_CUMULATIVE_XP = {0, 500, 2500, 8500, 23500, 63500, 153500, 328500, 628500, 1128500};
 
     private static JobData deserializeJobData(String json) {
         JobData jobData = new JobData();
         try {
             JsonObject obj = JOB_GSON.fromJson(json, JsonObject.class);
-            if (obj == null) return jobData;
+            if (obj == null) {
+                return jobData;
+            }
             if (obj.has("activeJobs")) {
                 List<JobType> activeJobs = new ArrayList<>();
                 for (var el : obj.getAsJsonArray("activeJobs")) {
-                    try { activeJobs.add(JobType.valueOf(el.getAsString())); } catch (Exception ignored) {}
+                    try {
+                        activeJobs.add(JobType.valueOf(el.getAsString()));
+                    } catch (Exception ignored) {
+                    }
                 }
                 jobData.setActiveJobs(activeJobs);
             }
-            if (obj.has("levels")) {
+            if (obj.has("totalXp")) {
+                // Total accumulated XP stored directly
+                JsonObject xpObj = obj.getAsJsonObject("totalXp");
+                for (String key : xpObj.keySet()) {
+                    try {
+                        JobType job = JobType.valueOf(key);
+                        jobData.setTotalXp(job, xpObj.get(key).getAsDouble());
+                    } catch (Exception ignored) {
+                    }
+                }
+            } else if (obj.has("levels")) {
+                // Separate level + within-level XP - migrate to totalXp
                 Map<JobType, Integer> levelsMap = new HashMap<>();
                 JsonObject lvlObj = obj.getAsJsonObject("levels");
                 for (String key : lvlObj.keySet()) {
-                    try { levelsMap.put(JobType.valueOf(key), lvlObj.get(key).getAsInt()); } catch (Exception ignored) {}
+                    try {
+                        levelsMap.put(JobType.valueOf(key), lvlObj.get(key).getAsInt());
+                    } catch (Exception ignored) {
+                    }
                 }
-                jobData.setLevels(levelsMap);
-            }
-            if (obj.has("xp")) {
-                Map<JobType, Double> xpMap = new HashMap<>();
-                JsonObject xpObj = obj.getAsJsonObject("xp");
-                for (String key : xpObj.keySet()) {
-                    try { xpMap.put(JobType.valueOf(key), xpObj.get(key).getAsDouble()); } catch (Exception ignored) {}
+                Map<JobType, Double> withinLevelXp = new HashMap<>();
+                if (obj.has("xp")) {
+                    JsonObject xpObj = obj.getAsJsonObject("xp");
+                    for (String key : xpObj.keySet()) {
+                        try {
+                            withinLevelXp.put(JobType.valueOf(key), xpObj.get(key).getAsDouble());
+                        } catch (Exception ignored) {
+                        }
+                    }
                 }
-                jobData.setXp(xpMap);
+                for (JobType job : jobData.getActiveJobs()) {
+                    int level = levelsMap.getOrDefault(job, 1);
+                    double within = withinLevelXp.getOrDefault(job, 0.0);
+                    int clampedLevel = Math.max(1, Math.min(level, 10));
+                    double totalXp = OLD_CUMULATIVE_XP[clampedLevel - 1] + within;
+                    jobData.setTotalXp(job, totalXp);
+                    Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] Migrated " + job.name()
+                            + ": old level=" + level + " within=" + within + " → totalXp=" + totalXp);
+                }
             }
         } catch (Exception e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Jobs: Failed to parse job data JSON: " + e.getMessage());

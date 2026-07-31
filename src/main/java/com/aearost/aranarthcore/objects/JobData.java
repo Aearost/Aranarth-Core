@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.objects;
 
 import com.aearost.aranarthcore.enums.JobType;
+import com.aearost.aranarthcore.utils.JobUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,8 +11,7 @@ import java.util.Map;
 public class JobData {
 
     private List<JobType> activeJobs = new ArrayList<>();
-    private Map<JobType, Integer> levels = new HashMap<>();
-    private Map<JobType, Double> xp = new HashMap<>();
+    private final Map<JobType, Double> totalXp = new HashMap<>();
 
     public JobData() {
     }
@@ -24,36 +24,39 @@ public class JobData {
         this.activeJobs = activeJobs;
     }
 
-    public Map<JobType, Integer> getLevels() {
-        return levels;
+    public double getTotalXp(JobType job) {
+        return totalXp.getOrDefault(job, 0.0);
     }
 
-    public void setLevels(Map<JobType, Integer> levels) {
-        this.levels = levels;
+    public void setTotalXp(JobType job, double amount) {
+        totalXp.put(job, amount);
     }
 
-    public Map<JobType, Double> getXp() {
-        return xp;
+    public void addTotalXp(JobType job, double amount) {
+        totalXp.merge(job, amount, Double::sum);
     }
 
-    public void setXp(Map<JobType, Double> xp) {
-        this.xp = xp;
+    public Map<JobType, Double> getTotalXpMap() {
+        return totalXp;
     }
 
+    // Level computed from totalXp against current thresholds
     public int getLevel(JobType job) {
-        return levels.getOrDefault(job, 1);
+        return JobUtils.computeLevel(getTotalXp(job));
     }
 
-    public void setLevel(JobType job, int level) {
-        levels.put(job, level);
-    }
-
+    // XP accumulated within the current level, for progress-bar display
     public double getCurrentXp(JobType job) {
-        return xp.getOrDefault(job, 0.0);
+        return JobUtils.computeWithinLevelXp(getTotalXp(job));
     }
 
-    public void setCurrentXp(JobType job, double amount) {
-        xp.put(job, amount);
+    // Used for logging only
+    public Map<JobType, Integer> getLevels() {
+        Map<JobType, Integer> result = new HashMap<>();
+        for (JobType job : activeJobs) {
+            result.put(job, getLevel(job));
+        }
+        return result;
     }
 
     public boolean hasJob(JobType job) {
@@ -63,8 +66,7 @@ public class JobData {
     public void addJob(JobType job) {
         if (!activeJobs.contains(job)) {
             activeJobs.add(job);
-            levels.putIfAbsent(job, 1);
-            xp.putIfAbsent(job, 0.0);
+            totalXp.putIfAbsent(job, 0.0);
         }
     }
 

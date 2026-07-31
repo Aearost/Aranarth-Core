@@ -81,6 +81,7 @@ public class GuiRanks {
 		peasantLore.add(ChatUtils.translateToColor("&f&o- 1 home"));
 		peasantLore.add(ChatUtils.translateToColor("&f&o- 3 quiver slots"));
 		peasantLore.add(ChatUtils.translateToColor("&f&o- 50 potion slots"));
+		peasantLore.add(ChatUtils.translateToColor("&f&o- 1.0x pay from Jobs"));
 		peasantMeta.setLore(peasantLore);
 		peasant.setItemMeta(peasantMeta);
 
@@ -104,6 +105,7 @@ public class GuiRanks {
 		esquireLore.add(ChatUtils.translateToColor("&f&o- 100 potion slots"));
 		esquireLore.add("");
 		esquireLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 100 levels"));
+		esquireLore.add(ChatUtils.translateToColor("&f&o- 1.05x pay from Jobs"));
 		esquireMeta.setLore(esquireLore);
 		esquire.setItemMeta(esquireMeta);
 
@@ -128,6 +130,7 @@ public class GuiRanks {
 		knightLore.add(ChatUtils.translateToColor("&f&o- 200 potion slots"));
 		knightLore.add("");
 		knightLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 350 levels"));
+		knightLore.add(ChatUtils.translateToColor("&f&o- 1.15x pay from Jobs"));
 		knightMeta.setLore(knightLore);
 		knight.setItemMeta(knightMeta);
 
@@ -164,7 +167,7 @@ public class GuiRanks {
 		baronLore.add("");
 		baronLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 500 levels"));
 		baronLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO per category: 150 levels"));
-
+		baronLore.add(ChatUtils.translateToColor("&f&o- 1.3x pay from Jobs"));
 		baronMeta.setLore(baronLore);
 		baron.setItemMeta(baronMeta);
 
@@ -200,6 +203,7 @@ public class GuiRanks {
 		countLore.add("");
 		countLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 1000 levels"));
 		countLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO per category: 375 levels"));
+		countLore.add(ChatUtils.translateToColor("&f&o- 1.5x pay from Jobs"));
 		countMeta.setLore(countLore);
 		count.setItemMeta(countMeta);
 
@@ -234,6 +238,7 @@ public class GuiRanks {
 		dukeLore.add("");
 		dukeLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 2500 levels"));
 		dukeLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO per category: 750 levels"));
+		dukeLore.add(ChatUtils.translateToColor("&f&o- 1.75x pay from Jobs"));
 		dukeMeta.setLore(dukeLore);
 		duke.setItemMeta(dukeMeta);
 
@@ -270,6 +275,7 @@ public class GuiRanks {
 		princeLore.add("");
 		princeLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 7500 levels"));
 		princeLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO per category: 1250 levels"));
+		princeLore.add(ChatUtils.translateToColor("&f&o- 2.0x pay from Jobs"));
 		princeMeta.setLore(princeLore);
 		prince.setItemMeta(princeMeta);
 
@@ -307,6 +313,7 @@ public class GuiRanks {
 		kingLore.add("");
 		kingLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 12500 levels"));
 		kingLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO per category: 2500 levels"));
+		kingLore.add(ChatUtils.translateToColor("&f&o- 2.25x pay from Jobs"));
 		kingMeta.setLore(kingLore);
 		king.setItemMeta(kingMeta);
 
@@ -342,6 +349,7 @@ public class GuiRanks {
 		emperorLore.add("");
 		emperorLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 25000 levels"));
 		emperorLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO per category: 5000 levels"));
+		emperorLore.add(ChatUtils.translateToColor("&f&o- 2.5x pay from Jobs"));
 		emperorMeta.setLore(emperorLore);
 		emperor.setItemMeta(emperorMeta);
 
