@@ -7,8 +7,10 @@ import com.aearost.aranarthcore.event.player.*;
 import com.aearost.aranarthcore.event.player.DoubleBrewingBonus;
 import com.aearost.aranarthcore.gui.GuiBrewBook;
 import com.aearost.aranarthcore.gui.GuiBrewShop;
+import com.aearost.aranarthcore.event.player.GuiWrenchClick;
 import com.aearost.aranarthcore.gui.GuiDefenderManage;
 import com.aearost.aranarthcore.gui.GuiDefenders;
+import com.aearost.aranarthcore.gui.GuiWrench;
 import com.aearost.aranarthcore.gui.GuiPetFood;
 import com.aearost.aranarthcore.gui.GuiDominionPermissions;
 import com.aearost.aranarthcore.gui.GuiJobs;
@@ -63,7 +65,9 @@ public class InventoryClickEventListener implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent e) {
         if (e.getView().getType() == InventoryType.CHEST) {
-            if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Teleport")) {
+            if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiWrench.TITLE)) {
+                new GuiWrenchClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Teleport")) {
                 new GuiHomepadClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Blacklist")) {
                 new GuiBlacklistClick().execute(e);

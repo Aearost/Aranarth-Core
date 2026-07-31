@@ -3,6 +3,8 @@ package com.aearost.aranarthcore.event.listener;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.block.*;
 import com.aearost.aranarthcore.event.player.*;
+import com.aearost.aranarthcore.objects.CustomKeys;
+import org.bukkit.persistence.PersistentDataType;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.DominionLevelUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
@@ -27,6 +29,7 @@ public class PlayerInteractEventListener implements Listener {
 
     /**
      * Centralizes all logic to be called by a player interacting with blocks.
+     *
      * @param e The event.
      */
     @EventHandler
@@ -70,6 +73,16 @@ public class PlayerInteractEventListener implements Listener {
             if (type == Material.DIRT || type == Material.GRASS_BLOCK) {
                 Bukkit.getScheduler().runTaskLater(plugin, () -> new HoeTillArea().execute(e), 1L);
             }
+        }
+
+        // Wrench must run before any other RIGHT_CLICK_BLOCK logic
+        if (e.getAction() == Action.RIGHT_CLICK_BLOCK
+                && e.getItem() != null
+                && e.getItem().hasItemMeta()
+                && e.getItem().getItemMeta().getPersistentDataContainer()
+                .has(CustomKeys.WRENCH, PersistentDataType.STRING)) {
+            new WrenchInteract().execute(e);
+            return;
         }
 
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {

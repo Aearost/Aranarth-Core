@@ -686,6 +686,7 @@ public class AranarthCore extends JavaPlugin {
         new PlayerItemHeldEventListener(this);
         new ItemSpawnEventListener(this);
         new LootGenerateEventListener(this);
+        new WrenchEnchantListener(this);
 
         // Multi-event listeners for single purpose
         new InvisibleItemFrameListener(this);
@@ -760,6 +761,7 @@ public class AranarthCore extends JavaPlugin {
      * Initializes all AranarthCore recipes.
      */
     private void initializeRecipes() {
+        new RecipeWrench(this);
         new RecipeHomePad(this);
         new RecipeChorusDiamond(this);
         new RecipeAmethystUncraft(this);
