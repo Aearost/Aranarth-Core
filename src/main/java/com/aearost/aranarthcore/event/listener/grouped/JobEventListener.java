@@ -30,7 +30,6 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.inventory.BrewEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerFishEvent;
@@ -858,17 +857,6 @@ public class JobEventListener implements Listener {
     }
 
     @EventHandler
-    public void onInventoryClose(InventoryCloseEvent e) {
-        if (e.getInventory().getType() != InventoryType.BREWING) {
-            return;
-        }
-        Location loc = e.getInventory().getLocation();
-        if (loc != null) {
-            activeBrewing.remove(loc);
-        }
-    }
-
-    @EventHandler
     public void onBrew(BrewEvent e) {
         BrewerInventory brewer = e.getContents();
         Location loc = brewer.getLocation();
@@ -879,7 +867,7 @@ public class JobEventListener implements Listener {
             return;
         }
 
-        UUID brewerUuid = activeBrewing.get(loc);
+        UUID brewerUuid = activeBrewing.remove(loc);
         if (brewerUuid == null) {
             return;
         }
