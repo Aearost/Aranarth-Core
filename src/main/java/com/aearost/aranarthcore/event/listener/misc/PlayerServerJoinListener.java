@@ -237,6 +237,12 @@ public class PlayerServerJoinListener implements Listener {
 							PersistenceUtils.reloadPlayerFromDatabase(player.getUniqueId());
 							PersistenceUtils.reloadPlayerSentinelsFromDatabase(player.getUniqueId());
 							PersistenceUtils.loadPlayerTogglesFromDatabase(player.getUniqueId());
+							// Prevents empty jobs data
+							if (DatabaseManager.isActive()) {
+								Bukkit.getLogger().info("[AC][Jobs] Reloading job data (sync) for "
+										+ player.getName() + " after isApplyInventory reload");
+								PersistenceUtils.loadJobDataForPlayer(player.getUniqueId());
+							}
 							if (localDelta != 0.0) {
 								AranarthPlayer apBalance = AranarthUtils.getPlayer(player.getUniqueId());
 								if (apBalance != null) {
