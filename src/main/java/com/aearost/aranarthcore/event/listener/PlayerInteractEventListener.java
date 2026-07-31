@@ -73,6 +73,10 @@ public class PlayerInteractEventListener implements Listener {
         }
 
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            new SawmillInteract().execute(e);
+            if (e.isCancelled()) {
+                return;
+            }
             new PlayerAutoReplenishSlot().execute(e, plugin);
             new CauldronFillBottle().execute(e);
             new SweetBerryHarvest().execute(e);

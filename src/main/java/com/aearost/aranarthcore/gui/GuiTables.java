@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 public class GuiTables {
 
@@ -40,6 +41,11 @@ public class GuiTables {
 		gui.setItem(6, grindstone);
 		ItemStack stonecutter = new ItemStack(Material.STONECUTTER);
 		gui.setItem(7, stonecutter);
+		ItemStack sawmill = new ItemStack(Material.OAK_LOG);
+		ItemMeta sawmillMeta = sawmill.getItemMeta();
+		sawmillMeta.setDisplayName("Sawmill");
+		sawmill.setItemMeta(sawmillMeta);
+		gui.setItem(8, sawmill);
 
 		return gui;
 	}

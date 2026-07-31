@@ -218,6 +218,9 @@ commands:
   stonecutter:
     description: Opens a stonecutter GUI
     permission: aranarth.tables
+  sawmill:
+    description: Opens a sawmill GUI
+    permission: aranarth.tables
   store:
     description: Provides the player with a GUI of the server's store
     permission: aranarth.store

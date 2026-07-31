@@ -1,0 +1,10 @@
+AranarthCore v. 1.12
+
+Major Features
+[+] Added the sawmill functionality
+
+Minor Features
+[]
+
+Backend Code Changes
+-

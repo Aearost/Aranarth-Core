@@ -822,6 +822,7 @@ public class AranarthCore extends JavaPlugin {
         new RecipeGodApple(this);
         new RecipeGreenDye(this);
         new RecipeMushroomStew(this);
+        new RecipeSawmill(this);
     }
 
     /**
@@ -910,6 +911,7 @@ public class AranarthCore extends JavaPlugin {
         getCommand("smp").setExecutor(new CommandSMP());
         getCommand("spawn").setExecutor(new CommandSpawn());
         getCommand("stonecutter").setExecutor(new CommandStonecutter());
+        getCommand("sawmill").setExecutor(new CommandSawmill());
         getCommand("store").setExecutor(new CommandStore());
         getCommand("survival").setExecutor(new CommandSurvival());
         getCommand("tables").setExecutor(new CommandTables());

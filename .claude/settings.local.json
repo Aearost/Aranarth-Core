@@ -353,7 +353,8 @@
       "Bash(head -50 grep -i \"outpost\\\\|disband\\\\|evict\\\\|publishDominion\\\\|dominion.*disband\\\\|Aranarth\" /c/Users/liamh/Downloads/Logs/Survival/latest.log)",
       "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -name PlayerServerJoin* -o -name *ServerJoin*)",
       "Bash(do zcat:*)",
-      "Bash(sed \"s/^/$f: /\")"
+      "Bash(sed \"s/^/$f: /\")",
+      "Bash(xargs cat:*)"
     ]
   }
 }

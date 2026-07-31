@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.gui.GuiFletchingTable;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -85,6 +86,16 @@ public class GuiTablesClick {
 					e.setCancelled(true);
 					player.closeInventory();
 					MenuType.STONECUTTER.builder()
+							.checkReachable(false)
+							.build(player)
+							.open();
+				}
+				// Sawmill
+				else if (e.getSlot() == 8) {
+					e.setCancelled(true);
+					player.closeInventory();
+					MenuType.STONECUTTER.builder()
+							.title(Component.text("Sawmill"))
 							.checkReachable(false)
 							.build(player)
 							.open();
