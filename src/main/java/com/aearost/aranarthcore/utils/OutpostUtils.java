@@ -274,6 +274,9 @@ public class OutpostUtils {
         }
         dominion.setBalance(dominion.getBalance() - claimPrice);
         PersistenceUtils.saveSingleDominionToDatabase(dominion);
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishDominionBalanceAdjust(dominion.getId(), -claimPrice);
+        }
         outpost.getChunks().add(chunkToClaim);
         chunkKeyToOutpost.put(getChunkKey(chunkToClaim), outpost);
         DominionUtils.updateDominion(dominion);

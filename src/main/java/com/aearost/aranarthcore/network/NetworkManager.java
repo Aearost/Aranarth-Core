@@ -103,6 +103,7 @@ public class NetworkManager {
     public static final String CH_DOMINION_DIPLO_REQUEST    = "aranarth:dominion_diplo_request";
     public static final String CH_DOMINION_RELATION_UPDATE  = "aranarth:dominion_relation_update";
     public static final String CH_DOMINION_CONQUEST_UPDATE  = "aranarth:dominion_conquest_update";
+    public static final String CH_DOMINION_BALANCE_ADJUST   = "aranarth:dominion_balance_adjust";
     public static final String CH_CHAT_GAME_START   = "aranarth:chat_game_start";
     public static final String CH_CHAT_GAME_WIN     = "aranarth:chat_game_win";
     public static final String CH_CHAT_GAME_EXPIRE  = "aranarth:chat_game_expire";
@@ -307,6 +308,7 @@ public class NetworkManager {
             case CH_DOMINION_DIPLO_REQUEST    -> handleDominionDiploRequest(json);
             case CH_DOMINION_RELATION_UPDATE  -> handleDominionRelationUpdate(json);
             case CH_DOMINION_CONQUEST_UPDATE  -> handleDominionConquestUpdate(json);
+            case CH_DOMINION_BALANCE_ADJUST   -> handleDominionBalanceAdjust(json);
             case CH_CHAT_GAME_START  -> handleChatGameStart(json);
             case CH_CHAT_GAME_WIN    -> handleChatGameWin(json);
             case CH_CHAT_GAME_EXPIRE -> handleChatGameExpire(json);
@@ -554,6 +556,20 @@ public class NetworkManager {
         json.addProperty("uuid", uuid.toString());
         json.addProperty("delta", delta);
         publish(CH_BALANCE_ADJUST, json);
+    }
+
+    /**
+     * Broadcasts a dominion balance delta to all other servers.
+     *
+     * @param dominionId The UUID of the dominion whose balance changed.
+     * @param delta      The amount added (positive) or subtracted (negative).
+     */
+    public void publishDominionBalanceAdjust(UUID dominionId, double delta) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("dominionId", dominionId.toString());
+        json.addProperty("delta", delta);
+        publish(CH_DOMINION_BALANCE_ADJUST, json);
     }
 
     /**
@@ -1588,6 +1604,18 @@ public class NetworkManager {
             // Immediately persist so the next periodic save cannot overwrite
             // the updated balance with a stale value.
             PersistenceUtils.saveAranarthPlayerImmediately(uuid);
+        }
+    }
+
+    private void handleDominionBalanceAdjust(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) return;
+        UUID dominionId = UUID.fromString(json.get("dominionId").getAsString());
+        double delta = json.get("delta").getAsDouble();
+        Dominion dominion = DominionUtils.getDominionById(dominionId);
+        if (dominion != null) {
+            dominion.setBalance(dominion.getBalance() + delta);
+            PersistenceUtils.saveSingleDominionToDatabase(dominion);
         }
     }
 

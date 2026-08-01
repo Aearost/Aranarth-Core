@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.Outpost;
 import org.bukkit.Bukkit;
@@ -709,6 +710,9 @@ public class DominionLevelUtils {
             if (dominion.getBalance() >= moneyPenalty) {
                 dominion.setBalance(dominion.getBalance() - moneyPenalty);
                 PersistenceUtils.saveSingleDominionToDatabase(dominion);
+                if (NetworkManager.isActive()) {
+                    NetworkManager.getInstance().publishDominionBalanceAdjust(dominion.getId(), -moneyPenalty);
+                }
                 DominionUtils.updateDominion(dominion);
                 notifyMembers(dominion, "&e" + dominion.getName()
                         + " &chas been penalized &6" + formatter.format(moneyPenalty)

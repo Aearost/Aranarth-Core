@@ -1696,6 +1696,7 @@ public class CommandDominion implements CommandExecutor {
         if (nm != null) {
             nm.publishBroadcast(foundedMsg);
             nm.publishOutpostCreate(outpost);
+            nm.publishDominionBalanceAdjust(dominion.getId(), -cost);
         }
         player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 1.2F, 1.5F);
     }
@@ -1859,6 +1860,9 @@ public class CommandDominion implements CommandExecutor {
             outpost.setBoughtChunks(currentBought + amount);
             OutpostUtils.updateOutpost(outpost);
             DominionUtils.updateDominion(dominion);
+            if (NetworkManager.isActive()) {
+                NetworkManager.getInstance().publishDominionBalanceAdjust(dominion.getId(), -totalCost);
+            }
             NumberFormat formatter = NumberFormat.getCurrencyInstance();
             player.sendMessage(ChatUtils.chatMessage("&7Purchased &e" + amount + " additional chunk"
                     + (amount > 1 ? "s" : "") + " &7for outpost &e" + outpost.getName()
@@ -2214,6 +2218,7 @@ public class CommandDominion implements CommandExecutor {
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                     if (NetworkManager.isActive()) {
                         NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), -trimmedAmount);
+                        NetworkManager.getInstance().publishDominionBalanceAdjust(dominion.getId(), trimmedAmount);
                     }
                     DominionLevelUtils.reevaluateDominion(dominion);
 
@@ -2269,6 +2274,7 @@ public class CommandDominion implements CommandExecutor {
                         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                         if (NetworkManager.isActive()) {
                             NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), trimmedAmount);
+                            NetworkManager.getInstance().publishDominionBalanceAdjust(dominion.getId(), -trimmedAmount);
                         }
 
                         player.sendMessage(ChatUtils.chatMessage("&7You have withdrawn &6" + formatter.format(trimmedAmount) + " &7from your Dominion"));

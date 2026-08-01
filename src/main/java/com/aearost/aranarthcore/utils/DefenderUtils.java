@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.objects.DefenderMode;
 import com.aearost.aranarthcore.objects.DefenderType;
@@ -383,6 +384,9 @@ public class DefenderUtils {
         }
         dominion.setBalance(dominion.getBalance() - price);
         PersistenceUtils.saveSingleDominionToDatabase(dominion);
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishDominionBalanceAdjust(dominion.getId(), -price);
+        }
         counts.computeIfAbsent(dominion.getId(), k -> new EnumMap<>(DefenderType.class))
                 .merge(type, 1, Integer::sum);
         spawnEntity(dominion, type, outpost);
@@ -433,6 +437,9 @@ public class DefenderUtils {
         double refund = type.getSellPrice();
         dominion.setBalance(dominion.getBalance() + refund);
         PersistenceUtils.saveSingleDominionToDatabase(dominion);
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishDominionBalanceAdjust(dominion.getId(), refund);
+        }
         DominionUtils.updateDominion(dominion);
         return "&7A &e" + type.getDisplayName()
                 + " defender &7has been sold for &6$" + NumberFormat.getInstance().format((long) refund);

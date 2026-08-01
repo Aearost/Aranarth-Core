@@ -344,6 +344,9 @@ public class DominionUtils {
             }
             playerDominion.setBalance(playerDominion.getBalance() - claimPrice);
             PersistenceUtils.saveSingleDominionToDatabase(playerDominion);
+            if (NetworkManager.isActive()) {
+                NetworkManager.getInstance().publishDominionBalanceAdjust(playerDominion.getId(), -claimPrice);
+            }
             playerDominion.getChunks().add(chunkToClaim);
             chunkKeyToDominion.put(getChunkKey(chunkToClaim), playerDominion);
             resizeFoodArray(playerDominion);
