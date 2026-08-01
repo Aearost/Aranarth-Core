@@ -3,6 +3,7 @@ AranarthCore v. 1.12
 Major Features
 [+] Added the sawmill functionality
 [+] Implemented the Wrench item
+[+] Did a full overhaul of wandering traders, providing each with their own theme
 
 Minor Features
 [~] Fixed issue where the alchemist job was not providing xp when shift-clicking ingredients into a brewing stand
