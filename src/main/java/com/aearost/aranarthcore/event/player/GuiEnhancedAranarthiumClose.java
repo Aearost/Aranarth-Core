@@ -22,7 +22,7 @@ public class GuiEnhancedAranarthiumClose {
 				if (!meta.getPersistentDataContainer().has(ARMOR_TYPE)) {
 					e.getPlayer().getInventory().addItem(inventory.getItem(0));
 				}
-			} else if (hasNetheriteArmour(inventory.getItem(0))) {
+			} else if (hasNetheriteArmour(inventory.getItem(0)) || inventory.getItem(0).getType() == Material.NETHERITE_INGOT) {
 				e.getPlayer().getInventory().addItem(inventory.getItem(0));
 			}
 		}
@@ -34,7 +34,7 @@ public class GuiEnhancedAranarthiumClose {
 				if (!meta.getPersistentDataContainer().has(ARMOR_TYPE)) {
 					e.getPlayer().getInventory().addItem(inventory.getItem(1));
 				}
-			} else if (hasNetheriteArmour(inventory.getItem(1))) {
+			} else if (hasNetheriteArmour(inventory.getItem(1)) || inventory.getItem(1).getType() == Material.NETHERITE_INGOT) {
 				e.getPlayer().getInventory().addItem(inventory.getItem(1));
 			}
 		}

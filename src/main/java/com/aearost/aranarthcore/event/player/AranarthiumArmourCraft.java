@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.gui.GuiEnhancedAranarthium;
 import com.aearost.aranarthcore.items.aranarthium.armour.*;
+import com.aearost.aranarthcore.items.netherite.NetheriteElytra;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -20,6 +21,7 @@ import java.util.Map;
 
 import static com.aearost.aranarthcore.objects.CustomKeys.ARANARTHIUM_INGOT;
 import static com.aearost.aranarthcore.objects.CustomKeys.ARMOR_TYPE;
+import static com.aearost.aranarthcore.objects.CustomKeys.NETHERITE_ITEM;
 
 /**
  * Enhances the piece of netherite armour to one of the Aranarthium armours.
@@ -45,12 +47,26 @@ public class AranarthiumArmourCraft {
                         } else if (hasEnhancedAranarthium(e.getCursor()) && hasNetheriteArmour(inventory.getItem(1))) {
                             ingot = e.getCursor().clone();
                             armor = inventory.getItem(1).clone();
+                        } else if (hasPlainElytra(e.getCursor()) && hasNetheriteIngot(inventory.getItem(1))) {
+                            armor = e.getCursor().clone();
+                            ingot = inventory.getItem(1).clone();
+                            isArmorFirst = true;
+                        } else if (hasNetheriteIngot(e.getCursor()) && hasPlainElytra(inventory.getItem(1))) {
+                            ingot = e.getCursor().clone();
+                            armor = inventory.getItem(1).clone();
                         }
                     } else if (slot == 1) {
                         if (hasNetheriteArmour(e.getCursor()) && hasEnhancedAranarthium(inventory.getItem(0))) {
                             armor = e.getCursor().clone();
                             ingot = inventory.getItem(0).clone();
                         } else if (hasEnhancedAranarthium(e.getCursor()) && hasNetheriteArmour(inventory.getItem(0))) {
+                            ingot = e.getCursor().clone();
+                            armor = inventory.getItem(0).clone();
+                            isArmorFirst = true;
+                        } else if (hasPlainElytra(e.getCursor()) && hasNetheriteIngot(inventory.getItem(0))) {
+                            armor = e.getCursor().clone();
+                            ingot = inventory.getItem(0).clone();
+                        } else if (hasNetheriteIngot(e.getCursor()) && hasPlainElytra(inventory.getItem(0))) {
                             ingot = e.getCursor().clone();
                             armor = inventory.getItem(0).clone();
                             isArmorFirst = true;
@@ -72,7 +88,9 @@ public class AranarthiumArmourCraft {
                     } else if (slot == 2) {
                         boolean armorInFirst = hasNetheriteArmour(inventory.getItem(0)) && hasEnhancedAranarthium(inventory.getItem(1)) && inventory.getItem(2) != null;
                         boolean ingotInFirst = hasEnhancedAranarthium(inventory.getItem(0)) && hasNetheriteArmour(inventory.getItem(1)) && inventory.getItem(2) != null;
-                        if (armorInFirst || ingotInFirst) {
+                        boolean netheriteElytraArmorFirst = hasPlainElytra(inventory.getItem(0)) && hasNetheriteIngot(inventory.getItem(1)) && inventory.getItem(2) != null;
+                        boolean netheriteElytraIngotFirst = hasNetheriteIngot(inventory.getItem(0)) && hasPlainElytra(inventory.getItem(1)) && inventory.getItem(2) != null;
+                        if (armorInFirst || ingotInFirst || netheriteElytraArmorFirst || netheriteElytraIngotFirst) {
                             if (e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
                                 HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(inventory.getItem(2));
                                 if (!remainder.isEmpty()) {
@@ -104,7 +122,8 @@ public class AranarthiumArmourCraft {
                         && e.getAction().name().startsWith("PICKUP")) {
                     // Prevents non-Aranarthium items from being added to the Aranarthium Anvil
                     if (!hasNetheriteArmour(e.getClickedInventory().getItem(e.getSlot()))
-                            && !hasEnhancedAranarthium(e.getClickedInventory().getItem(e.getSlot()))) {
+                            && !hasEnhancedAranarthium(e.getClickedInventory().getItem(e.getSlot()))
+                            && !hasNetheriteIngot(e.getClickedInventory().getItem(e.getSlot()))) {
                         e.setCancelled(true);
                         return;
                     }
@@ -178,6 +197,13 @@ public class AranarthiumArmourCraft {
                         } else if (hasEnhancedAranarthium(second) && hasNetheriteArmour(clickedItem)) {
                             ingot = second.clone();
                             armor = clickedItem.clone();
+                        } else if (hasPlainElytra(second) && hasNetheriteIngot(clickedItem)) {
+                            armor = second.clone();
+                            ingot = clickedItem.clone();
+                            isArmorFirst = true;
+                        } else if (hasNetheriteIngot(second) && hasPlainElytra(clickedItem)) {
+                            ingot = second.clone();
+                            armor = clickedItem.clone();
                         }
                     }
                     // Placing into the second slot
@@ -189,11 +215,19 @@ public class AranarthiumArmourCraft {
                         } else if (hasEnhancedAranarthium(first) && hasNetheriteArmour(clickedItem)) {
                             ingot = first.clone();
                             armor = clickedItem.clone();
+                        } else if (hasPlainElytra(first) && hasNetheriteIngot(clickedItem)) {
+                            armor = first.clone();
+                            ingot = clickedItem.clone();
+                            isArmorFirst = true;
+                        } else if (hasNetheriteIngot(first) && hasPlainElytra(clickedItem)) {
+                            ingot = first.clone();
+                            armor = clickedItem.clone();
                         }
                     } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarthium Anvil")) {
                         // Prevents non-Aranarthium items from being added to the Aranarthium Anvil
                         if (!hasNetheriteArmour(e.getClickedInventory().getItem(e.getSlot()))
-                                && !hasEnhancedAranarthium(e.getClickedInventory().getItem(e.getSlot()))) {
+                                && !hasEnhancedAranarthium(e.getClickedInventory().getItem(e.getSlot()))
+                                && !hasNetheriteIngot(e.getClickedInventory().getItem(e.getSlot()))) {
                             e.setCancelled(true);
                             return;
                         }
@@ -256,6 +290,27 @@ public class AranarthiumArmourCraft {
     }
 
     /**
+     * Determines if the item is a regular elytra.
+     */
+    private boolean hasPlainElytra(ItemStack item) {
+        if (item == null || item.getType() != Material.ELYTRA) {
+            return false;
+        }
+        if (!item.hasItemMeta()) {
+            return true;
+        }
+        var pdc = item.getItemMeta().getPersistentDataContainer();
+        return !pdc.has(ARMOR_TYPE) && !pdc.has(NETHERITE_ITEM);
+    }
+
+    /**
+     * Determines if the item is a netherite ingot.
+     */
+    private boolean hasNetheriteIngot(ItemStack item) {
+        return item != null && item.getType() == Material.NETHERITE_INGOT;
+    }
+
+    /**
      * Determines if the input slot is an enhanced Aranarthium ingot.
      *
      * @param item The item in the anvil to be verified.
@@ -285,6 +340,9 @@ public class AranarthiumArmourCraft {
      * @return The enhanced Aranarthium armor piece.
      */
     private ItemStack determineArmourResult(ItemStack armor, ItemStack ingot) {
+        if (ingot.getType() == Material.NETHERITE_INGOT) {
+            return new NetheriteElytra().getItem();
+        }
         String ingotName = ingot.getItemMeta().getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING);
         Material type = armor.getType();
         ItemStack enhancedAranarthiumArmor = null;
