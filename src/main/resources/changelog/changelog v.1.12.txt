@@ -9,6 +9,7 @@ Minor Features
 [~] Fixed issue where the alchemist job was not providing xp when shift-clicking ingredients into a brewing stand
 [+] Added in missing netherite elytra "recipe" in an anvil
 [+] Added missing restriction to tapping sneak in a restricted bending area
+[~] Fixed incorrect world validations for snow in the SMP server
 
 Backend Code Changes
 -

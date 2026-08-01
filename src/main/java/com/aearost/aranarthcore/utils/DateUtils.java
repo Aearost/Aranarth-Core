@@ -1171,9 +1171,10 @@ public class DateUtils {
 						Location loc = player.getLocation();
 						// Handles applying the snow functionality
 						if (AranarthUtils.getWeather() == Weather.SNOW) {
-							// Only apply logic in the survival world
-							if (!loc.getWorld().getName().equals("world") && !AranarthUtils.isSmpWorld(loc.getWorld().getName())
-									&& !loc.getWorld().getName().equals("resource") && !loc.getWorld().getName().equals("spawn")) {
+							// Only apply logic in the survival world (overworld environments only)
+							if (loc.getWorld().getEnvironment() != World.Environment.NORMAL
+									|| (!loc.getWorld().getName().equals("world") && !AranarthUtils.isSmpWorld(loc.getWorld().getName())
+									&& !loc.getWorld().getName().equals("resource") && !loc.getWorld().getName().equals("spawn"))) {
 								continue;
 							}
 							// Do not proceed if the chunk is not yet loaded
@@ -1194,8 +1195,9 @@ public class DateUtils {
 
 						// Generate ice every second regardless of if it is snowing
 						if (runs % 5 == 0) {
-							if (!loc.getWorld().getName().equals("world") && !AranarthUtils.isSmpWorld(loc.getWorld().getName())
-									&& !loc.getWorld().getName().equals("resource")) {
+							if (loc.getWorld().getEnvironment() != World.Environment.NORMAL
+									|| (!loc.getWorld().getName().equals("world") && !AranarthUtils.isSmpWorld(loc.getWorld().getName())
+									&& !loc.getWorld().getName().equals("resource"))) {
 								continue;
 							}
 
@@ -1244,8 +1246,9 @@ public class DateUtils {
 	 * @param bigFlakeDensity The density of the large snowflakes to base the snowfall chance on.
 	 */
 	private void generateSnow(Player player, Location loc, final int bigFlakeDensity) {
-		// Only apply logic in the survival world
-		if (!loc.getWorld().getName().equals("world") && !AranarthUtils.isSmpWorld(loc.getWorld().getName()) && !loc.getWorld().getName().equals("resource")) {
+		// Only apply logic in the survival world (overworld environments only)
+		if (loc.getWorld().getEnvironment() != World.Environment.NORMAL
+				|| (!loc.getWorld().getName().equals("world") && !AranarthUtils.isSmpWorld(loc.getWorld().getName()) && !loc.getWorld().getName().equals("resource"))) {
 			return;
 		}
 
