@@ -351,6 +351,10 @@ public class AranarthCoreBendingListener implements Listener {
                 e.setCancelled(true);
                 return;
             }
+            if (isBendingRestricted(player, player.getLocation())) {
+                e.setCancelled(true);
+                return;
+            }
             if (!bendingPlayer.canCurrentlyBendWithWeapons()) {
                 return;
             }
