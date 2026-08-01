@@ -157,6 +157,7 @@ public class LoginStreakUtils {
             double money = getMoneyReward(day, rank);
             aranarthPlayer.setBalance(aranarthPlayer.getBalance() + money);
             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+            PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
             if (NetworkManager.isActive()) {
                 NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), money);
             }

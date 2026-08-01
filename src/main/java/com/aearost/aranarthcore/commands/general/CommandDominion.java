@@ -1677,6 +1677,7 @@ public class CommandDominion implements CommandExecutor {
         }
 
         dominion.setBalance(dominion.getBalance() - cost);
+        PersistenceUtils.saveSingleDominionToDatabase(dominion);
         DominionUtils.updateDominion(dominion);
 
         List<Chunk> outpostChunks = new ArrayList<>();
@@ -1854,6 +1855,7 @@ public class CommandDominion implements CommandExecutor {
                 return;
             }
             dominion.setBalance(dominion.getBalance() - totalCost);
+            PersistenceUtils.saveSingleDominionToDatabase(dominion);
             outpost.setBoughtChunks(currentBought + amount);
             OutpostUtils.updateOutpost(outpost);
             DominionUtils.updateDominion(dominion);
@@ -2207,6 +2209,7 @@ public class CommandDominion implements CommandExecutor {
                 if (aranarthPlayer.getBalance() >= trimmedAmount) {
                     dominion.setBalance(dominion.getBalance() + trimmedAmount);
                     DominionUtils.updateDominion(dominion);
+                    PersistenceUtils.saveSingleDominionToDatabase(dominion);
                     aranarthPlayer.setBalance(aranarthPlayer.getBalance() - trimmedAmount);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                     if (NetworkManager.isActive()) {
@@ -2261,6 +2264,7 @@ public class CommandDominion implements CommandExecutor {
                     if (dominion.getBalance() >= trimmedAmount) {
                         dominion.setBalance(dominion.getBalance() - trimmedAmount);
                         DominionUtils.updateDominion(dominion);
+                        PersistenceUtils.saveSingleDominionToDatabase(dominion);
                         aranarthPlayer.setBalance(aranarthPlayer.getBalance() + trimmedAmount);
                         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                         if (NetworkManager.isActive()) {

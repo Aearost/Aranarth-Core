@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.PermissionUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
 import com.gmail.nossr50.util.EventUtils;
@@ -57,6 +58,7 @@ public class GuiRankupClick {
 						}
 						aranarthPlayer.setRank(aranarthPlayer.getRank() + 1);
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+						PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
 
 						if (ChatUtils.stripColorFormatting(rankDisplay).equals("Esquire")
 								|| ChatUtils.stripColorFormatting(rankDisplay).equals("Emperor")

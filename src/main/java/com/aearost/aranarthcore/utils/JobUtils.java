@@ -111,6 +111,7 @@ public class JobUtils {
         double actualPay = basePay * levelMultiplier * rankMultiplier;
 
         ap.setBalance(ap.getBalance() + actualPay);
+        PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
         if (NetworkManager.isActive()) {
             NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), actualPay);
         }

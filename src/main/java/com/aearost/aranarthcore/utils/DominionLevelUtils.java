@@ -708,6 +708,7 @@ public class DominionLevelUtils {
 
             if (dominion.getBalance() >= moneyPenalty) {
                 dominion.setBalance(dominion.getBalance() - moneyPenalty);
+                PersistenceUtils.saveSingleDominionToDatabase(dominion);
                 DominionUtils.updateDominion(dominion);
                 notifyMembers(dominion, "&e" + dominion.getName()
                         + " &chas been penalized &6" + formatter.format(moneyPenalty)

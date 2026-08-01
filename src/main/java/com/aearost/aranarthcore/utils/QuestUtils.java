@@ -752,6 +752,7 @@ public class QuestUtils {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
             aranarthPlayer.setBalance(aranarthPlayer.getBalance() + quest.getReward());
             AranarthUtils.setPlayer(uuid, aranarthPlayer);
+            PersistenceUtils.saveAranarthPlayerImmediately(uuid);
             if (NetworkManager.isActive()) {
                 NetworkManager.getInstance().publishBalanceAdjust(uuid, quest.getReward());
             }

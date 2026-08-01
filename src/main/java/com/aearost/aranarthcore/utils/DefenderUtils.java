@@ -382,6 +382,7 @@ public class DefenderUtils {
             return "&cYour dominion cannot afford this";
         }
         dominion.setBalance(dominion.getBalance() - price);
+        PersistenceUtils.saveSingleDominionToDatabase(dominion);
         counts.computeIfAbsent(dominion.getId(), k -> new EnumMap<>(DefenderType.class))
                 .merge(type, 1, Integer::sum);
         spawnEntity(dominion, type, outpost);
@@ -431,6 +432,7 @@ public class DefenderUtils {
 
         double refund = type.getSellPrice();
         dominion.setBalance(dominion.getBalance() + refund);
+        PersistenceUtils.saveSingleDominionToDatabase(dominion);
         DominionUtils.updateDominion(dominion);
         return "&7A &e" + type.getDisplayName()
                 + " defender &7has been sold for &6$" + NumberFormat.getInstance().format((long) refund);

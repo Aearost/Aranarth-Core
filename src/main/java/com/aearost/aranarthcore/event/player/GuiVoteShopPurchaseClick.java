@@ -13,6 +13,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.AvatarUtils;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.NamespacedKey;
 import org.bukkit.persistence.PersistentDataType;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
@@ -230,6 +231,7 @@ public class GuiVoteShopPurchaseClick {
                     else if (clicked.getType() == Material.GOLD_INGOT) {
                         aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 15000);
                         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                        PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
                         if (NetworkManager.isActive()) {
                             NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), 15000);
                         }

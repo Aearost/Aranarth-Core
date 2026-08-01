@@ -340,6 +340,7 @@ public class ChatGameUtils {
             double reward = baseReward * multiplier;
 
             ap.setBalance(ap.getBalance() + reward);
+            PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
             if (NetworkManager.isActive()) {
                 NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), reward);
             }
@@ -609,6 +610,7 @@ public class ChatGameUtils {
             double reward = baseReward * multiplier;
 
             ap.setBalance(ap.getBalance() + reward);
+            PersistenceUtils.saveAranarthPlayerImmediately(winner.getUniqueId());
             if (NetworkManager.isActive()) {
                 NetworkManager.getInstance().publishBalanceAdjust(winner.getUniqueId(), reward);
             }

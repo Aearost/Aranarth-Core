@@ -304,6 +304,7 @@ public class ShopInteract {
 
                 // Logic to update balances and chest inventory
                 clickUser.setBalance(clickUser.getBalance() - shop.getBuyPrice());
+                PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
                 if (NetworkManager.isActive()) {
                     NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), -shop.getBuyPrice());
                 }
@@ -519,6 +520,7 @@ public class ShopInteract {
 
                 // Logic to update balances and chest inventory
                 clickUser.setBalance(clickUser.getBalance() + shop.getSellPrice());
+                PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
                 if (NetworkManager.isActive()) {
                     NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), shop.getSellPrice());
                 }

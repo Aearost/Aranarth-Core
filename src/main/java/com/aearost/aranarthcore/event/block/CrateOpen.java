@@ -23,6 +23,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.BrewRecipeUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
 import com.gmail.nossr50.datatypes.player.PlayerProfile;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
@@ -460,6 +461,7 @@ public class CrateOpen {
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.VOTE);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
                     broadcastRewardToNearbyPlayers(player, aranarthPlayer, "&6$500 of In-Game Currency", "&aVote Crate");
                     player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$500 of In-Game Currency"));
                     Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled $500 of In-Game Currency in a Vote Crate"));
@@ -574,6 +576,7 @@ public class CrateOpen {
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.RARE);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
                     broadcastRewardToNearbyPlayers(player, aranarthPlayer, "&6$5,000 of In-Game Currency", "&6Rare Crate");
                     player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$5,000 of In-Game Currency"));
                     Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled $5,000 of In-Game Currency in a Rare Crate"));
@@ -679,6 +682,7 @@ public class CrateOpen {
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.EPIC);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
                     broadcastRewardToNearbyPlayers(player, aranarthPlayer, "&6$25,000 of In-Game Currency", "&3Epic Crate");
                     player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$25,000 of In-Game Currency"));
                     Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled $25,000 of In-Game Currency in an Epic Crate"));
@@ -852,6 +856,7 @@ public class CrateOpen {
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.GODLY);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
                     broadcastRewardToNearbyPlayers(player, aranarthPlayer, "&6$75,000 of In-Game Currency", "&5Godly Crate");
                     player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$75,000 of In-Game Currency"));
                     Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled $75,000 of In-Game Currency in a Godly Crate"));

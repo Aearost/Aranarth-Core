@@ -343,6 +343,7 @@ public class DominionUtils {
                 return "&cYou cannot claim more than &e" + playerDominion.getMaxChunks() + " chunks!";
             }
             playerDominion.setBalance(playerDominion.getBalance() - claimPrice);
+            PersistenceUtils.saveSingleDominionToDatabase(playerDominion);
             playerDominion.getChunks().add(chunkToClaim);
             chunkKeyToDominion.put(getChunkKey(chunkToClaim), playerDominion);
             resizeFoodArray(playerDominion);
@@ -430,6 +431,7 @@ public class DominionUtils {
                                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                                 aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 125);
                                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                                PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
                                 if (NetworkManager.isActive()) {
                                     NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), 125);
                                 }
@@ -469,6 +471,7 @@ public class DominionUtils {
         DefenderUtils.sellAllDominionDefenders(dominion);
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(dominion.getLeader());
         aranarthPlayer.setBalance(aranarthPlayer.getBalance() + dominion.getBalance());
+        PersistenceUtils.saveAranarthPlayerImmediately(dominion.getLeader());
         if (NetworkManager.isActive()) {
             NetworkManager.getInstance().publishBalanceAdjust(dominion.getLeader(), dominion.getBalance());
         }

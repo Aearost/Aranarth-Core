@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.BrewRecipeUtils;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -86,6 +87,7 @@ public class GuiBrewShopClick {
             NumberFormat fmt = NumberFormat.getInstance();
             ap.setBalance(ap.getBalance() - target.getPrice());
             AranarthUtils.setPlayer(player.getUniqueId(), ap);
+            PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
             if (NetworkManager.isActive()) {
                 NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), -target.getPrice());
             }

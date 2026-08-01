@@ -273,6 +273,7 @@ public class OutpostUtils {
             return "&cThis chunk is not connected to your outpost!";
         }
         dominion.setBalance(dominion.getBalance() - claimPrice);
+        PersistenceUtils.saveSingleDominionToDatabase(dominion);
         outpost.getChunks().add(chunkToClaim);
         chunkKeyToOutpost.put(getChunkKey(chunkToClaim), outpost);
         DominionUtils.updateDominion(dominion);
@@ -311,6 +312,7 @@ public class OutpostUtils {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
         aranarthPlayer.setBalance(aranarthPlayer.getBalance() + (500));
         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+        PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
         if (NetworkManager.isActive()) {
             NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), 500);
         }

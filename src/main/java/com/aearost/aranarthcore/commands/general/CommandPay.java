@@ -106,6 +106,8 @@ public class CommandPay implements CommandExecutor {
 						if (aranarthPlayerSender.getBalance() >= amount) {
 							aranarthPlayerSender.setBalance(aranarthPlayerSender.getBalance() - amount);
 							aranarthPlayerReceiver.setBalance(aranarthPlayerReceiver.getBalance() + amount);
+							PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
+							PersistenceUtils.saveAranarthPlayerImmediately(target.getUniqueId());
 							player.sendMessage(ChatUtils.chatMessage("&7You have paid &e" + aranarthPlayerReceiver.getNickname() + " &6" + formattedAmount));
 							Player onlineTarget = Bukkit.getPlayer(target.getUniqueId());
 							onlineTarget.sendMessage(ChatUtils.chatMessage("&7You have received &6" + formattedAmount + " &7from &e" + aranarthPlayerSender.getNickname()));
