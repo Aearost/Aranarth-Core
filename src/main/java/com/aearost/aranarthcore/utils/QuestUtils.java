@@ -543,6 +543,9 @@ public class QuestUtils {
             }
             if (lastDailyReset < todayReset3amMillis) {
                 resetDailyQuests();
+            } else {
+                // The other server already reset this period and we adopted its timestamp
+                clearDailyQuestMaps();
             }
         }
 
@@ -561,6 +564,9 @@ public class QuestUtils {
             }
             if (lastWeeklyReset < todayReset3amMillis) {
                 resetWeeklyQuests();
+            } else {
+                // Same as above for weekly resets.
+                clearWeeklyQuestMaps();
             }
         }
     }
@@ -606,6 +612,36 @@ public class QuestUtils {
                 } catch (Exception ignored) {}
             });
         }
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            online.sendMessage(ChatUtils.chatMessage("&bWeekly quests have reset! Visit the Quest Master for new quests."));
+        }
+    }
+
+    /**
+     * Clears all daily quest maps without touching the reset timestamp or writing to DB.
+     */
+    private static void clearDailyQuestMaps() {
+        playerActiveDailyQuests.clear();
+        playerDailyProgress.clear();
+        playerDailyCompleted.clear();
+        playerDailyClaimed.clear();
+        locallyModifiedUuids.clear();
+        Bukkit.getLogger().info("[AC] [AranarthCore] Daily quests synced from remote reset.");
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            online.sendMessage(ChatUtils.chatMessage("&6Daily quests have reset! Visit the Quest Master for new quests."));
+        }
+    }
+
+    /**
+     * Clears all weekly quest maps without touching the reset timestamp or writing to DB.
+     */
+    private static void clearWeeklyQuestMaps() {
+        playerActiveWeeklyQuests.clear();
+        playerWeeklyProgress.clear();
+        playerWeeklyCompleted.clear();
+        playerWeeklyClaimed.clear();
+        locallyModifiedUuids.clear();
+        Bukkit.getLogger().info("[AC] [AranarthCore] Weekly quests synced from remote reset.");
         for (Player online : Bukkit.getOnlinePlayers()) {
             online.sendMessage(ChatUtils.chatMessage("&bWeekly quests have reset! Visit the Quest Master for new quests."));
         }
@@ -911,6 +947,32 @@ public class QuestUtils {
 
     public static void setLastWeeklyReset(long lastWeeklyReset) {
         QuestUtils.lastWeeklyReset = lastWeeklyReset;
+    }
+
+    /**
+     * Clears daily quest state for a single player and marks them for DB sync.
+     * The next time the player interacts with the quest system, fresh quests will be assigned.
+     */
+    public static void resetPlayerDailyQuests(UUID uuid) {
+        playerActiveDailyQuests.remove(uuid);
+        playerDailyProgress.remove(uuid);
+        playerDailyCompleted.remove(uuid);
+        playerDailyClaimed.remove(uuid);
+        locallyModifiedUuids.add(uuid);
+        sessionModifiedUuids.add(uuid);
+    }
+
+    /**
+     * Clears weekly quest state for a single player and marks them for DB sync.
+     * The next time the player interacts with the quest system, fresh quests will be assigned.
+     */
+    public static void resetPlayerWeeklyQuests(UUID uuid) {
+        playerActiveWeeklyQuests.remove(uuid);
+        playerWeeklyProgress.remove(uuid);
+        playerWeeklyCompleted.remove(uuid);
+        playerWeeklyClaimed.remove(uuid);
+        locallyModifiedUuids.add(uuid);
+        sessionModifiedUuids.add(uuid);
     }
 
     public static void setPlayerActiveDailyQuests(UUID uuid, List<Quest> quests) {

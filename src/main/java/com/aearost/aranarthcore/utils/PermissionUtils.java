@@ -556,6 +556,7 @@ public class PermissionUtils {
         perms.setPermission("aranarth.shop.modify", false);
         perms.setPermission("aranarth.time", false);
         perms.setPermission("aranarth.skull", false);
+        perms.setPermission("aranarth.resetquests", false);
         perms.setPermission("aranarth.sudo", false);
         perms.setPermission("aranarth.trash", false);
         perms.setPermission("aranarth.enderchest", false);
@@ -1137,6 +1138,7 @@ public class PermissionUtils {
             perms.setPermission("aranarth.broadcast", true);
             perms.setPermission("aranarth.time", true);
             perms.setPermission("aranarth.skull", true);
+            perms.setPermission("aranarth.resetquests", true);
             perms.setPermission("minecraft.command.gamemode", true);
             setSaintPermissions(perms, 2);
         } else {

@@ -16,6 +16,8 @@ Minor Features
 [~] Fixed issue where mail was not synced properly across servers
 [~] Fixed issue where you couldn't use /resource from the SMP server as the world didn't exist
 [~] Fixed issue where homepad worlds were not being saved correctly in the SMP
+[~] Fixed issue where quests were not resetting correctly in the SMP server
+[+] Implemented /ac resetquests
 
 Backend Code Changes
 -
