@@ -2,8 +2,10 @@ package com.aearost.aranarthcore.objects;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 
 /**
  * Handles all necessary functionality relating to homes in Aranarth.
@@ -79,6 +81,14 @@ public class Home {
 	 * @return The current Location.
 	 */
 	public Location getLocation() {
+		if (location != null && location.getWorld() == null) {
+			String bukkit = (worldName.startsWith("smp:") && AranarthCore.isSmpServer())
+					? worldName.substring(4) : worldName;
+			World w = Bukkit.getWorld(bukkit);
+			if (w != null) {
+				location.setWorld(w);
+			}
+		}
 		return location;
 	}
 

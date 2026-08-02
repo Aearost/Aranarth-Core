@@ -114,13 +114,8 @@ public class PersistenceUtils {
                 Material icon = Material.valueOf(fields[7]);
 
                 Location location = new Location(Bukkit.getWorld(toBukkitWorldName(worldName)), x, y, z, yaw, pitch);
-                AranarthUtils.addNewHomepad(location);
-
-                if (Objects.nonNull(homeName)) {
-                    if (!homeName.equals("NEW")) {
-                        AranarthUtils.updateHomepad(homeName, location, icon);
-                    }
-                }
+                String effectiveName = (homeName == null || homeName.equals("NEW")) ? "NEW" : homeName;
+                AranarthUtils.getHomepads().add(new Home(effectiveName, location, icon, worldName));
             }
 
             Bukkit.getLogger().info("[AC] All homepads have been initialized");
@@ -7183,10 +7178,8 @@ public class PersistenceUtils {
                 float pitch = h.get("pitch").getAsFloat();
                 Material icon = Material.valueOf(h.get("icon").getAsString());
                 Location location = new Location(Bukkit.getWorld(toBukkitWorldName(worldName)), x, y, z, yaw, pitch);
-                AranarthUtils.addNewHomepad(location);
-                if (homeName != null && !homeName.equals("NEW")) {
-                    AranarthUtils.updateHomepad(homeName, location, icon);
-                }
+                String effectiveName = (homeName == null || homeName.equals("NEW")) ? "NEW" : homeName;
+                AranarthUtils.getHomepads().add(new Home(effectiveName, location, icon, worldName));
             }
             Bukkit.getLogger().info("[AC] Homepads initialized from MySQL");
         } catch (Exception e) {
