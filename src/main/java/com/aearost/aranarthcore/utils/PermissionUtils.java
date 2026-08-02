@@ -80,9 +80,10 @@ public class PermissionUtils {
             }
         }
 
-        // Grant creative world access to original players
+        // Grant creative world access and SMP map link to original players
         if (AranarthUtils.isOriginalPlayer(player.getUniqueId())) {
             perms.setPermission("aranarth.creative", true);
+            perms.setPermission("aranarth.smpmap", true);
         }
 
         // Grant WorldEdit permissions if the player is in the creative world
