@@ -13,6 +13,7 @@ Minor Features
 [~] Fixed issue where OG players could not access /smpmap
 [~] Fixed issue where /msg and /r click functionality was typing /msg instead of prompting a hyperlink
 [~] Increase rates of obtaining blaze rods in nether fortress simulations in dominion resource claims
+[~] Fixed issue where mail was not synced properly across servers
 
 Backend Code Changes
 -

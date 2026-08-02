@@ -1703,6 +1703,11 @@ public class NetworkManager {
         Player target = Bukkit.getPlayer(toUuid);
         if (target == null) return;
 
+        // Reload this server's in-memory mail cache from MySQL so the new message
+        // is immediately readable with /mail read without needing a server switch.
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                () -> PersistenceUtils.reloadPlayerMailFromDatabase(toUuid));
+
         String fromNickname = json.get("fromNickname").getAsString();
         target.sendMessage(ChatUtils.chatMessage("&7You have received mail from &e" + fromNickname));
         target.sendMessage(ChatUtils.chatMessage("&7View it with &e/mail read"));
