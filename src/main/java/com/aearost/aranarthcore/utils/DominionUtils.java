@@ -1987,9 +1987,7 @@ public class DominionUtils {
                 items.add(new ItemStack(Material.NETHER_BRICKS, 64));
                 items.add(new ItemStack(Material.NETHER_BRICKS, 64));
                 items.add(new ItemStack(Material.NETHER_WART, 32));
-                if (random.nextInt(4) != 0) {
-                    items.add(new ItemStack(Material.BLAZE_ROD, random.nextInt(3) + 1));
-                }
+                items.add(new ItemStack(Material.BLAZE_ROD, random.nextInt(5) + 2));
                 if (random.nextInt(15) == 0) {
                     items.add(new ItemStack(Material.WITHER_SKELETON_SKULL, 1));
                 }
@@ -2030,9 +2028,7 @@ public class DominionUtils {
                 items.add(new ItemStack(Material.NETHER_BRICKS, 64));
                 items.add(new ItemStack(Material.NETHER_BRICKS, 64));
                 items.add(new ItemStack(Material.NETHER_WART, 32));
-                if (random.nextInt(4) != 0) {
-                    items.add(new ItemStack(Material.BLAZE_ROD, random.nextInt(3) + 1));
-                }
+                items.add(new ItemStack(Material.BLAZE_ROD, random.nextInt(5) + 2));
                 if (random.nextInt(15) == 0) {
                     items.add(new ItemStack(Material.WITHER_SKELETON_SKULL, 1));
                 }
@@ -2075,9 +2071,7 @@ public class DominionUtils {
                 items.add(new ItemStack(Material.NETHER_BRICKS, 64));
                 items.add(new ItemStack(Material.NETHER_BRICKS, 64));
                 items.add(new ItemStack(Material.NETHER_WART, 32));
-                if (random.nextInt(4) != 0) {
-                    items.add(new ItemStack(Material.BLAZE_ROD, random.nextInt(3) + 1));
-                }
+                items.add(new ItemStack(Material.BLAZE_ROD, random.nextInt(5) + 2));
                 if (random.nextInt(15) == 0) {
                     items.add(new ItemStack(Material.WITHER_SKELETON_SKULL, 1));
                 }
@@ -2117,9 +2111,7 @@ public class DominionUtils {
                 items.add(new ItemStack(Material.NETHER_BRICKS, 64));
                 items.add(new ItemStack(Material.NETHER_BRICKS, 64));
                 items.add(new ItemStack(Material.NETHER_WART, 32));
-                if (random.nextInt(4) != 0) {
-                    items.add(new ItemStack(Material.BLAZE_ROD, random.nextInt(3) + 1));
-                }
+                items.add(new ItemStack(Material.BLAZE_ROD, random.nextInt(5) + 2));
                 if (random.nextInt(15) == 0) {
                     items.add(new ItemStack(Material.WITHER_SKELETON_SKULL, 1));
                 }
@@ -2162,9 +2154,7 @@ public class DominionUtils {
                 items.add(new ItemStack(Material.NETHER_BRICKS, 64));
                 items.add(new ItemStack(Material.NETHER_BRICKS, 64));
                 items.add(new ItemStack(Material.NETHER_WART, 32));
-                if (random.nextInt(4) != 0) {
-                    items.add(new ItemStack(Material.BLAZE_ROD, random.nextInt(3) + 1));
-                }
+                items.add(new ItemStack(Material.BLAZE_ROD, random.nextInt(5) + 2));
                 if (random.nextInt(15) == 0) {
                     items.add(new ItemStack(Material.WITHER_SKELETON_SKULL, 1));
                 }
