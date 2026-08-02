@@ -19,6 +19,8 @@ import com.aearost.aranarthcore.utils.PersistenceUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
@@ -1529,8 +1531,9 @@ public class NetworkManager {
 
         String prefixStart = "&7⊰&r";
         String prefixEnd = "&7⊱&r";
-        String targetPrefix = ChatUtils.translateToColor(prefixStart + "&7&l&oFrom: &r&e" + fromNickname + prefixEnd + " &7&o>> &e&o") + message;
-        target.sendMessage(targetPrefix);
+        Component targetPrefixComp = LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(prefixStart + "&7&l&oFrom: &r&e" + fromNickname + prefixEnd + " &7&o>> &e&o"));
+        Component targetMsgComp = targetPrefixComp.append(LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor("&e&o") + message));
+        target.sendMessage(ChatUtils.clickableCommand(targetMsgComp, ChatUtils.translateToColor("&7Reply to &e" + fromNickname), "/r ", true));
         target.playSound(target, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.4f, 1f);
 
         // Store the sender UUID for /reply (uses last received message UUID)

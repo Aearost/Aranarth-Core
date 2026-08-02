@@ -11,6 +11,7 @@ Minor Features
 [+] Added missing restriction to tapping sneak in a restricted bending area
 [~] Fixed incorrect world validations for snow in the SMP server
 [~] Fixed issue where OG players could not access /smpmap
+[~] Fixed issue where /msg and /r click functionality was typing /msg instead of prompting a hyperlink
 
 Backend Code Changes
 -

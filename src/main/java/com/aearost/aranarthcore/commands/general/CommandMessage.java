@@ -5,6 +5,8 @@ import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -97,8 +99,9 @@ public class CommandMessage implements CommandExecutor {
 							// Show confirmation to sender
 							String prefixStart = "&7⊰&r";
 							String prefixEnd = "&7⊱&r";
-							String senderMsg = ChatUtils.translateToColor(prefixStart + "&7&l&oTo: &r&e" + targetNickname + prefixEnd + " &7&o>> &e&o") + formattedMsg;
-							player.sendMessage(senderMsg);
+							Component senderPrefixComp = LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(prefixStart + "&7&l&oTo: &r&e" + targetNickname + prefixEnd + " &7&o>> &e&o"));
+							Component senderMsgComp = senderPrefixComp.append(LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor("&e&o") + formattedMsg));
+							player.sendMessage(ChatUtils.clickableCommand(senderMsgComp, ChatUtils.translateToColor("&7Message &e" + targetNickname), "/msg " + remoteTarget.getUsername() + " ", true));
 
 							// Store last received for /reply on sender side
 							aranarthPlayer.setLastReceivedMessage(targetUuid);
