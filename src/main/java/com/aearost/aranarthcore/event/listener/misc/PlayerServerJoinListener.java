@@ -543,6 +543,7 @@ public class PlayerServerJoinListener implements Listener {
 								PendingTeleport pt = new PendingTeleport(
 										locWorld, locX, locY, locZ, locYaw, locPitch, "", "");
 								pt.setLoginRouting(true);
+								pt.setApplyInventory(true);
 								NetworkManager.getInstance().setPendingAndTransfer(player, velocityTarget, pt);
 							}
 						}.runTaskLater(AranarthCore.getInstance(), 40L); // 2s — brief delay before routing; keeps player visible on this server momentarily
