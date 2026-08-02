@@ -14,6 +14,7 @@ Minor Features
 [~] Fixed issue where /msg and /r click functionality was typing /msg instead of prompting a hyperlink
 [~] Increase rates of obtaining blaze rods in nether fortress simulations in dominion resource claims
 [~] Fixed issue where mail was not synced properly across servers
+[~] Fixed issue where you couldn't use /resource from the SMP server as the world didn't exist
 
 Backend Code Changes
 -

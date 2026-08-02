@@ -1,5 +1,8 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.PendingTeleport;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -35,6 +38,21 @@ public class CommandResource implements CommandExecutor {
 			}
 
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+
+			// On the SMP server: transfer to Survival, which will dispatch /resource on arrival.
+			if (AranarthCore.isSmpServer() && NetworkManager.isActive()) {
+				AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
+						aranarthPlayer.isInAdminMode(), "&e&lResource World", "&7Transferring to the Resource World...", success -> {
+					if (success) {
+						PendingTeleport resourcePt = PendingTeleport.forCommand(
+								"resource", "&e&lResource World", "&7You have teleported to the Resource World");
+						String survivalServerName = AranarthCore.getInstance().getConfig()
+								.getString("network.servers.survival", "survival");
+						NetworkManager.getInstance().saveInventoryAndTransfer(player, survivalServerName, resourcePt);
+					}
+				});
+				return true;
+			}
 			if (System.currentTimeMillis() < aranarthPlayer.getLastWorldCommandUse() + 60000) {
 				if (!aranarthPlayer.isInAdminMode()) {
 					int wait = (int) ((aranarthPlayer.getLastWorldCommandUse() + 60000) - System.currentTimeMillis()) / 1000;
