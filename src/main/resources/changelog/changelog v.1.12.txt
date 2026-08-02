@@ -18,6 +18,8 @@ Minor Features
 [~] Fixed issue where homepad worlds were not being saved correctly in the SMP
 [~] Fixed issue where quests were not resetting correctly in the SMP server
 [+] Implemented /ac resetquests
+[~] Fixed issue where inventories were not saved upon server transfer i.e during server restart
+[~] Mitigated issue where previous locations are not saving correctly across server restarts causing players to be teleported abnormally on later login
 
 Backend Code Changes
 -

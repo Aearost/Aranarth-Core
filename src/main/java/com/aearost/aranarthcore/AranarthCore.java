@@ -46,6 +46,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -173,6 +174,17 @@ public class AranarthCore extends JavaPlugin {
                                 ap.setSurvivalExpProgress(p.getExp());
                                 AranarthUtils.setPlayer(p.getUniqueId(), ap);
                             }
+                        }
+                        // Periodically persist each player's current location to MySQL.
+                        // Limits location rollback to at most 30 minutes on a hard crash
+                        // (SIGKILL, OOM) where even the JVM shutdown hook cannot run.
+                        if (DatabaseManager.isActive()) {
+                            Location loc = p.getLocation();
+                            String server = NetworkManager.isActive() ? NetworkManager.getInstance().getThisServer() : "survival";
+                            DatabaseManager.getInstance().saveLastLocation(
+                                    p.getUniqueId(), server, loc.getWorld().getName(),
+                                    loc.getX(), loc.getY(), loc.getZ(),
+                                    loc.getYaw(), loc.getPitch());
                         }
                     } catch (Exception e) {
                         Bukkit.getLogger().warning(LOG_PREFIX + "Failed to snapshot inventory for " + p.getName() + " during periodic save: " + e.getMessage());
@@ -1425,7 +1437,9 @@ public class AranarthCore extends JavaPlugin {
         // We also snapshot each online player's live inventory into AranarthPlayer.survivalInventory
         // so that MySQL stays in sync (avoids stale data if they transfer cross-server shortly
         // after the restart).
-        for (Player p : Bukkit.getOnlinePlayers()) {
+        Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
+        Bukkit.getLogger().info(LOG_PREFIX + "[Shutdown] saveAll() called — " + onlinePlayers.size() + " player(s) still online.");
+        for (Player p : onlinePlayers) {
             try {
                 if (AranarthUtils.isSurvivalWorld(p.getWorld().getName())) {
                     AranarthPlayer ap = AranarthUtils.getPlayer(p.getUniqueId());
@@ -1441,6 +1455,22 @@ public class AranarthCore extends JavaPlugin {
                     }
                 }
                 p.saveData();
+                // Save the player's current location to MySQL so that if onDisable() was bypassed
+                // by a restarter (System.exit()), PlayerQuitEvent never fires and saveLastLocation()
+                // in the quit listener is never called. Without this, the next login restores the
+                // location from the player's PREVIOUS session, teleporting them potentially thousands
+                // of blocks away from where they actually were when the server shut down.
+                if (DatabaseManager.isActive()) {
+                    Location loc = p.getLocation();
+                    String server = NetworkManager.isActive() ? NetworkManager.getInstance().getThisServer() : "survival";
+                    Bukkit.getLogger().info(LOG_PREFIX + "[Shutdown] Saving last location for " + p.getName()
+                            + " — server=" + server + " world=" + loc.getWorld().getName()
+                            + " pos=(" + String.format("%.1f", loc.getX()) + "," + String.format("%.1f", loc.getY()) + "," + String.format("%.1f", loc.getZ()) + ")");
+                    DatabaseManager.getInstance().saveLastLocation(
+                            p.getUniqueId(), server, loc.getWorld().getName(),
+                            loc.getX(), loc.getY(), loc.getZ(),
+                            loc.getYaw(), loc.getPitch());
+                }
             } catch (Exception e) {
                 Bukkit.getLogger().warning(LOG_PREFIX + "Failed to save data for " + p.getName() + " on shutdown: " + e.getMessage());
             }
