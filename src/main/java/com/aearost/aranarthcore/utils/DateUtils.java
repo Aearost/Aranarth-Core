@@ -891,7 +891,9 @@ public class DateUtils {
 	 */
 	private void applyGlacivorEffects() {
 		List<PotionEffect> effects = new ArrayList<>();
-		effects.add(new PotionEffect(PotionEffectType.SLOWNESS, 320, 0));
+		if (AranarthUtils.getWeather() == Weather.SNOW) {
+			effects.add(new PotionEffect(PotionEffectType.SLOWNESS, 320, 0));
+		}
 		applyWeatherEffectsToAllPlayers(effects);
 
 		// Applies delay to first snow storm
@@ -916,7 +918,9 @@ public class DateUtils {
 	 */
 	private void applyFrigorvorEffects() {
 		List<PotionEffect> effects = new ArrayList<>();
-		effects.add(new PotionEffect(PotionEffectType.SLOWNESS, 320, 1));
+		if (AranarthUtils.getWeather() == Weather.SNOW) {
+			effects.add(new PotionEffect(PotionEffectType.SLOWNESS, 320, 1));
+		}
 		applyWeatherEffectsToAllPlayers(effects);
 
 		// Applies delay to first snow storm
@@ -941,7 +945,9 @@ public class DateUtils {
 	 */
 	private void applyObscurvorEffects() {
 		List<PotionEffect> effects = new ArrayList<>();
-		effects.add(new PotionEffect(PotionEffectType.SLOWNESS, 320, 0));
+		if (AranarthUtils.getWeather() == Weather.SNOW) {
+			effects.add(new PotionEffect(PotionEffectType.SLOWNESS, 320, 0));
+		}
 		applyWeatherEffectsToAllPlayers(effects);
 
 		// Applies delay to first snow storm
