@@ -20,7 +20,7 @@ public class Wrench implements AranarthItem {
 
     @Override
     public ItemStack getItem() {
-        ItemStack item = new ItemStack(Material.TRIPWIRE_HOOK, 1);
+        ItemStack item = new ItemStack(Material.IRON_INGOT, 1);
         ItemMeta meta = item.getItemMeta();
         if (Objects.nonNull(meta)) {
             NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "wrench");
