@@ -21,6 +21,7 @@ Minor Features
 [~] Fixed issue where inventories were not saved upon server transfer i.e during server restart
 [~] Mitigated issue where previous locations are not saving correctly across server restarts causing players to be teleported abnormally on later login
 [~] Added missing functionality where Saints bypass all bending change cooldowns
+[~] Fixed issue where shops were not allowing bulk sale of shulkers due to recent change with bending sourcing in restricted locations/worlds
 
 Backend Code Changes
 -

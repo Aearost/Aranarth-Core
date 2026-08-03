@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.gui.GuiShulker;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.CropUtils;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -20,7 +21,7 @@ public class ShulkerClick {
 	public void execute(PlayerInteractEvent e) {
 		if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 			Player player = e.getPlayer();
-			if (e.getPlayer().isSneaking()) {
+			if (AranarthUtils.isPhysicallySneaking(e.getPlayer().getUniqueId())) {
 				if (e.getHand() == EquipmentSlot.HAND) {
 					ItemStack heldItem = player.getInventory().getItemInMainHand();
 					if (heldItem != null && heldItem.getType() != Material.AIR) {

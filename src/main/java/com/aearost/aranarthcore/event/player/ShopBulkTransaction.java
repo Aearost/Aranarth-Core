@@ -28,19 +28,19 @@ public class ShopBulkTransaction {
 
         // Skip bulk transaction logic when an admin is modifying a server shop
         if (shop != null && shop.getUuid() == null && aranarthPlayer.getCouncilRank() == 3
-                && player.isSneaking() && player.getGameMode() == GameMode.CREATIVE) {
+                && AranarthUtils.isPhysicallySneaking(player.getUniqueId()) && player.getGameMode() == GameMode.CREATIVE) {
             return;
         }
 
         // If they click elsewhere or stop sneaking after enabling/completing a bulk transaction
-        if ((aranarthPlayer.getBulkTransactionNum() == 1 || aranarthPlayer.getBulkTransactionNum() == -1) && (shop == null || !player.isSneaking())) {
+        if ((aranarthPlayer.getBulkTransactionNum() == 1 || aranarthPlayer.getBulkTransactionNum() == -1) && (shop == null || !AranarthUtils.isPhysicallySneaking(player.getUniqueId()))) {
             if (aranarthPlayer.getBulkTransactionNum() == 1) {
                 player.sendMessage(ChatUtils.chatMessage("&7You have disabled the bulk transaction mode"));
             }
             aranarthPlayer.setBulkTransactionNum(0);
         }
         // If they are enabling the bulk transaction mode
-        else if (aranarthPlayer.getBulkTransactionNum() == 0 && shop != null && player.isSneaking()) {
+        else if (aranarthPlayer.getBulkTransactionNum() == 0 && shop != null && AranarthUtils.isPhysicallySneaking(player.getUniqueId())) {
             String itemName = "";
             if (shop.getItem().hasItemMeta()) {
                 ItemMeta meta = shop.getItem().getItemMeta();

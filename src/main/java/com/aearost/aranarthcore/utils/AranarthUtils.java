@@ -86,6 +86,7 @@ public class AranarthUtils {
 	private static final Set<String> sentBoostReminders = new HashSet<>();
 	private static final HashMap<UUID, List<Material>> compressibleTypes = new HashMap<>();
 	private static final List<CrateType> cratesInUse = new ArrayList<>();
+	private static final Set<UUID> physicallySneaking = new HashSet<>();
 	private static final HashMap<UUID, Location> shopLocations = new LinkedHashMap<>();
 	public static final Map<UUID, Boolean> playerInFaeBiome = new HashMap<>();
 	public static final Map<UUID, Location> playerLastFlowerLocation = new HashMap<>();
@@ -151,6 +152,23 @@ public class AranarthUtils {
 	 */
 	public static void setPlayer(UUID uuid, AranarthPlayer aranarthPlayer) {
 		players.put(uuid, aranarthPlayer);
+	}
+
+	/**
+	 * Returns whether the player is physically holding the sneak key, regardless of whether the
+	 * server-side sneak state was cancelled (e.g. by the bending restriction handler).
+	 * Updated at EventPriority.LOWEST in AranarthCoreBendingListener before any cancellation.
+	 */
+	public static boolean isPhysicallySneaking(UUID uuid) {
+		return physicallySneaking.contains(uuid);
+	}
+
+	public static void setPhysicallySneaking(UUID uuid, boolean sneaking) {
+		if (sneaking) {
+			physicallySneaking.add(uuid);
+		} else {
+			physicallySneaking.remove(uuid);
+		}
 	}
 
 	/**

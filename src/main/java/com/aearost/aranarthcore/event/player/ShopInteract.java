@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.network.NetworkManager;
+import org.bukkit.Bukkit;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -52,7 +53,7 @@ public class ShopInteract {
                         }
 
                         // Enables bulk mode for the purchase
-                        if (clickUser.getBulkTransactionNum() == 1 && player.isSneaking()) {
+                        if (clickUser.getBulkTransactionNum() == 1 && AranarthUtils.isPhysicallySneaking(player.getUniqueId())) {
                             // If bulk mode was enabled at a different shop, reset and let ShopBulkTransaction prompt for this one
                             if (!shop.getLocation().equals(clickUser.getBulkTransactionShopLocation())) {
                                 clickUser.setBulkTransactionNum(0);
@@ -63,7 +64,7 @@ public class ShopInteract {
                                     clickUser.getBulkTransactionQuantity(), clickUser.getBulkTransactionPrice(), 0);
                         }
                         // The user is just toggling the bulk purchase mode
-                        else if (clickUser.getBulkTransactionNum() == 0 && player.isSneaking()) {
+                        else if (clickUser.getBulkTransactionNum() == 0 && AranarthUtils.isPhysicallySneaking(player.getUniqueId())) {
                             return;
                         }
 
@@ -76,14 +77,14 @@ public class ShopInteract {
                         }
 
                         // Bulk transaction was just completed - reset and skip to re-enable bulk mode for next shop
-                        if (clickUser.getBulkTransactionNum() == -1 && player.isSneaking()) {
+                        if (clickUser.getBulkTransactionNum() == -1 && AranarthUtils.isPhysicallySneaking(player.getUniqueId())) {
                             clickUser.setBulkTransactionNum(0);
                             AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
                             return;
                         }
 
                         // Enables bulk mode for the sale
-                        if (clickUser.getBulkTransactionNum() == 1 && player.isSneaking()) {
+                        if (clickUser.getBulkTransactionNum() == 1 && AranarthUtils.isPhysicallySneaking(player.getUniqueId())) {
                             // If bulk mode was enabled at a different shop, reset and let ShopBulkTransaction prompt for this one
                             if (!shop.getLocation().equals(clickUser.getBulkTransactionShopLocation())) {
                                 clickUser.setBulkTransactionNum(0);
@@ -94,14 +95,14 @@ public class ShopInteract {
                                     clickUser.getBulkTransactionQuantity(), 0, clickUser.getBulkTransactionPrice());
                         }
                         // The user is just toggling the bulk sale mode
-                        else if (clickUser.getBulkTransactionNum() == 0 && player.isSneaking()) {
+                        else if (clickUser.getBulkTransactionNum() == 0 && AranarthUtils.isPhysicallySneaking(player.getUniqueId())) {
                             return;
                         }
 
                         handleSellLogic(e, player, clickUser, shopUser, shop, locationBelow);
                     }
                 } else {
-                    if (player.isSneaking()) {
+                    if (AranarthUtils.isPhysicallySneaking(player.getUniqueId())) {
                         if (e.getClickedBlock().getState() instanceof Sign sign) {
                             player.openSign(sign);
                         }
@@ -118,7 +119,7 @@ public class ShopInteract {
 
                         if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
                             // If editing a server shop
-                            if (aranarthPlayer.getCouncilRank() == 3 && player.isSneaking() && player.getGameMode() == GameMode.CREATIVE) {
+                            if (aranarthPlayer.getCouncilRank() == 3 && AranarthUtils.isPhysicallySneaking(player.getUniqueId()) && player.getGameMode() == GameMode.CREATIVE) {
                                 if (e.getClickedBlock().getState() instanceof Sign sign) {
                                     player.openSign(sign);
                                 }
@@ -126,7 +127,7 @@ public class ShopInteract {
                             }
 
                             // Enables bulk mode for the purchase
-                            if (clickUser.getBulkTransactionNum() == 1 && player.isSneaking()) {
+                            if (clickUser.getBulkTransactionNum() == 1 && AranarthUtils.isPhysicallySneaking(player.getUniqueId())) {
                                 // If bulk mode was enabled at a different shop, reset and let ShopBulkTransaction prompt for this one
                                 if (!shop.getLocation().equals(clickUser.getBulkTransactionShopLocation())) {
                                     clickUser.setBulkTransactionNum(0);
@@ -137,21 +138,21 @@ public class ShopInteract {
                                         clickUser.getBulkTransactionQuantity(), clickUser.getBulkTransactionPrice(), 0);
                             }
                             // The user is just toggling the bulk purchase mode
-                            else if (clickUser.getBulkTransactionNum() == 0 && player.isSneaking()) {
+                            else if (clickUser.getBulkTransactionNum() == 0 && AranarthUtils.isPhysicallySneaking(player.getUniqueId())) {
                                 return;
                             }
 
                             handleBuyLogic(player, clickUser, null, shop, null);
                         } else if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
                             // Bulk transaction was just completed - reset and skip to re-enable bulk mode for next shop
-                            if (clickUser.getBulkTransactionNum() == -1 && player.isSneaking()) {
+                            if (clickUser.getBulkTransactionNum() == -1 && AranarthUtils.isPhysicallySneaking(player.getUniqueId())) {
                                 clickUser.setBulkTransactionNum(0);
                                 AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
                                 return;
                             }
 
                             // Enables bulk mode for the sale
-                            if (clickUser.getBulkTransactionNum() == 1 && player.isSneaking()) {
+                            if (clickUser.getBulkTransactionNum() == 1 && AranarthUtils.isPhysicallySneaking(player.getUniqueId())) {
                                 // If bulk mode was enabled at a different shop, reset and let ShopBulkTransaction prompt for this one
                                 if (!shop.getLocation().equals(clickUser.getBulkTransactionShopLocation())) {
                                     clickUser.setBulkTransactionNum(0);
@@ -162,7 +163,7 @@ public class ShopInteract {
                                         clickUser.getBulkTransactionQuantity(), 0, clickUser.getBulkTransactionPrice());
                             }
                             // The user is just toggling the bulk sale mode
-                            else if (clickUser.getBulkTransactionNum() == 0 && player.isSneaking()) {
+                            else if (clickUser.getBulkTransactionNum() == 0 && AranarthUtils.isPhysicallySneaking(player.getUniqueId())) {
                                 return;
                             }
                             if (player.getGameMode() != GameMode.CREATIVE) {
@@ -176,7 +177,7 @@ public class ShopInteract {
                         }
                     }
                 } else {
-                    if (player.isSneaking()) {
+                    if (AranarthUtils.isPhysicallySneaking(player.getUniqueId())) {
                         if (e.getClickedBlock().getState() instanceof Sign sign) {
                             player.openSign(sign);
                         }
@@ -397,7 +398,7 @@ public class ShopInteract {
                     }
                 }
             } else {
-                if (clickUser.getBulkTransactionNum() <= 0 && player.isSneaking()) {
+                if (clickUser.getBulkTransactionNum() <= 0 && AranarthUtils.isPhysicallySneaking(player.getUniqueId())) {
                     return;
                 }
                 player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough money to buy this!"));
@@ -511,7 +512,8 @@ public class ShopInteract {
                 // not selling a shulker), don't let a regular sell drain protected shulker slots.
                 boolean leaveOneMode = player.hasPermission("aranarth.shulker")
                         && !isShulkerBox(shop.getItem())
-                        && !clickUser.isBulkSellShulkerEnabled();
+                        && !clickUser.isBulkSellShulkerEnabled()
+                        && clickUser.getBulkTransactionNum() == 1;
                 result = checkIfContentsHasShopItems(playerInventory.getContents(), shop, !leaveOneMode);
             }
 
@@ -566,7 +568,7 @@ public class ShopInteract {
                 player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough of this item!"));
             }
         } else {
-            if (clickUser.getBulkTransactionNum() == 1 && player.isSneaking()) {
+            if (clickUser.getBulkTransactionNum() == 1 && AranarthUtils.isPhysicallySneaking(player.getUniqueId())) {
                 return;
             }
             if (shop.getUuid() != null) {
