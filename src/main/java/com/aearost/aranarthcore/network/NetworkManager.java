@@ -120,6 +120,7 @@ public class NetworkManager {
     public static final String CH_OUTPOST_DISBAND   = "aranarth:outpost_disband";
     public static final String CH_OUTPOST_CREATE    = "aranarth:outpost_create";
     public static final String CH_OUTPOST_UPDATE    = "aranarth:outpost_update";
+    public static final String CH_JOB_UPDATE        = "aranarth:job_update";
 
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
@@ -325,6 +326,7 @@ public class NetworkManager {
             case CH_OUTPOST_DISBAND  -> handleOutpostDisband(json);
             case CH_OUTPOST_CREATE   -> handleOutpostCreate(json);
             case CH_OUTPOST_UPDATE   -> handleOutpostUpdate(json);
+            case CH_JOB_UPDATE       -> handleJobUpdate(json);
         }
     }
 
@@ -1870,6 +1872,33 @@ public class NetworkManager {
                 } catch (IllegalArgumentException ignored) {}
             }
         });
+    }
+
+    /**
+     * Notifies other servers that a player's job list changed so their in-memory copy is
+     * refreshed from MySQL immediately. This prevents the periodic saveAllJobData task on
+     * the receiving server from overwriting the updated job list with stale [] data.
+     *
+     * @param uuid The UUID of the player whose jobs changed.
+     */
+    public void publishJobUpdate(UUID uuid) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", uuid.toString());
+        publish(CH_JOB_UPDATE, json);
+    }
+
+    private void handleJobUpdate(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) return;
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        // If this player is currently online on this server, reload their job data from MySQL
+        // so the updated list is reflected in memory and won't be overwritten by the next
+        // periodic save.
+        if (Bukkit.getPlayer(uuid) != null) {
+            Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                    () -> PersistenceUtils.loadJobDataForPlayer(uuid));
+        }
     }
 
     /**

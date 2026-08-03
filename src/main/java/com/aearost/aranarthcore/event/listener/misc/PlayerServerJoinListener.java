@@ -493,6 +493,11 @@ public class PlayerServerJoinListener implements Listener {
 								if (DatabaseManager.isActive()) {
 									PersistenceUtils.reloadPlayerFromDatabase(player.getUniqueId());
 									PersistenceUtils.loadPlayerTogglesFromDatabase(player.getUniqueId());
+									// reloadPlayerFromDatabase() creates a fresh AranarthPlayer from the
+									// main DB row, which does not include job data (stored separately).
+									// Restore it immediately so the quit-time sync save doesn't write []
+									// to the jobs table and corrupt the next server's load.
+									PersistenceUtils.loadJobDataForPlayer(player.getUniqueId());
 								}
 								AranarthPlayer apSnapshot = AranarthUtils.getPlayer(player.getUniqueId());
 								String snapState = apSnapshot == null ? "no AranarthPlayer in memory"

@@ -354,7 +354,8 @@
       "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -name PlayerServerJoin* -o -name *ServerJoin*)",
       "Bash(do zcat:*)",
       "Bash(sed \"s/^/$f: /\")",
-      "Bash(xargs cat:*)"
+      "Bash(xargs cat:*)",
+      "Bash(find C:/Users/liamh/Downloads/Logs/ -type f -name *.log)"
     ]
   }
 }

@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.gui.GuiJobs;
 import com.aearost.aranarthcore.gui.GuiJobsJoin;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.JobData;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.JobUtils;
@@ -54,7 +55,14 @@ public class GuiJobsJoinClick {
         AranarthUtils.setPlayer(player.getUniqueId(), ap);
         Bukkit.getLogger().info("[AC][Jobs] " + player.getName() + " joined job " + job.name()
                 + " — active=" + jobData.getActiveJobs());
-        PersistenceUtils.saveJobData(player.getUniqueId());
+        // Sync save ensures the DB row is committed before the player can switch servers.
+        // An async save would race with Velocity's join-before-quit ordering: the destination
+        // server loads from DB before the source server's quit handler fires, so an async
+        // save dispatched here may not reach the DB in time.
+        PersistenceUtils.saveJobDataSync(player.getUniqueId());
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishJobUpdate(player.getUniqueId());
+        }
 
         player.sendMessage(ChatUtils.chatMessage("&7You have joined the &e" + job.getDisplayName() + " &7job!"));
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);

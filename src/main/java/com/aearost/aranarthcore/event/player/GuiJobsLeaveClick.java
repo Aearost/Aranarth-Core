@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.gui.GuiJobs;
 import com.aearost.aranarthcore.gui.GuiJobsLeave;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.JobData;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
@@ -55,7 +56,10 @@ public class GuiJobsLeaveClick {
                 AranarthUtils.setPlayer(player.getUniqueId(), ap);
                 Bukkit.getLogger().info("[AC][Jobs] " + player.getName() + " left job " + job.name()
                         + " — active=" + jobData.getActiveJobs());
-                PersistenceUtils.saveJobData(player.getUniqueId());
+                PersistenceUtils.saveJobDataSync(player.getUniqueId());
+                if (NetworkManager.isActive()) {
+                    NetworkManager.getInstance().publishJobUpdate(player.getUniqueId());
+                }
                 applyCooldown(player.getUniqueId());
 
                 player.sendMessage(ChatUtils.chatMessage("&7You have left the &e" + job.getDisplayName() + " &7job &8— &7your progress has been saved"));
