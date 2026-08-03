@@ -48,6 +48,7 @@ import com.aearost.aranarthcore.abilities.waterbending.bloodbending.LifeRip;
 import com.aearost.aranarthcore.abilities.waterbending.healing.CorruptingHelix;
 import com.aearost.aranarthcore.abilities.waterbending.healing.HealingHelix;
 import com.aearost.aranarthcore.abilities.waterbending.healing.MendingWaters;
+import com.projectkorra.projectkorra.airbending.AirBlast;
 import com.projectkorra.projectkorra.ability.BloodAbility;
 import com.projectkorra.projectkorra.ability.HealingAbility;
 import com.aearost.aranarthcore.abilities.waterbending.plantbending.LeafScythe;
@@ -113,13 +114,45 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.UUID;
 
 /**
  * Handles all logic regarding the use of AranarthCore bending abilities.
  */
 public class AranarthCoreBendingListener implements Listener {
+
+    private static Field airBlastOriginsField;
+    static {
+        try {
+            airBlastOriginsField = AirBlast.class.getDeclaredField("ORIGINS");
+            airBlastOriginsField.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            airBlastOriginsField = null;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<Player, Location> getAirBlastOrigins() {
+        if (airBlastOriginsField == null) return null;
+        try {
+            return (Map<Player, Location>) airBlastOriginsField.get(null);
+        } catch (IllegalAccessException e) {
+            return null;
+        }
+    }
+
+    private static boolean airBlastHasOrigin(Player player) {
+        Map<Player, Location> origins = getAirBlastOrigins();
+        return origins != null && origins.containsKey(player);
+    }
+
+    private static void airBlastClearOrigin(Player player) {
+        Map<Player, Location> origins = getAirBlastOrigins();
+        if (origins != null) origins.remove(player);
+    }
 
     public AranarthCoreBendingListener(AranarthCore plugin) {
         Bukkit.getPluginManager().registerEvents(this, plugin);
@@ -292,7 +325,36 @@ public class AranarthCoreBendingListener implements Listener {
         }
     }
 
+    /**
+     * Tracks the raw physical sneak state before any cancellation so that shop and shulker
+     * handlers can check the real key-press even when the event is cancelled by the bending
+     * restriction below.
+     */
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerSneakTrack(final PlayerToggleSneakEvent e) {
+        AranarthUtils.setPhysicallySneaking(e.getPlayer().getUniqueId(), e.isSneaking());
+    }
+
     @EventHandler
+    public void onPlayerQuitClearSneak(final org.bukkit.event.player.PlayerQuitEvent e) {
+        AranarthUtils.setPhysicallySneaking(e.getPlayer().getUniqueId(), false);
+    }
+
+    /**
+     * Clears stale AirBlast origins when a player enters a restricted zone.
+     * Without this, particles persist if the player sourced outside and walked in.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerMoveClearAirBlastOrigin(final org.bukkit.event.player.PlayerMoveEvent e) {
+        if (!airBlastHasOrigin(e.getPlayer())) {
+            return;
+        }
+        if (isBendingRestricted(e.getPlayer(), e.getTo())) {
+            airBlastClearOrigin(e.getPlayer());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
     public void onPlayerSneak(final PlayerToggleSneakEvent e) {
         Player player = e.getPlayer();
         BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
@@ -346,15 +408,31 @@ public class AranarthCoreBendingListener implements Listener {
             }
         }
 
-        if (e.isSneaking() && player.getGameMode() == GameMode.SURVIVAL) {
+        if (e.isSneaking()) {
             if (BloodGrip.isControlled(player.getUniqueId())) {
                 e.setCancelled(true);
                 return;
             }
             if (isBendingRestricted(player, player.getLocation())) {
+                // Cancel the sneak-press event to prevent PK from sourcing abilities.
+                // Physical sneak state is tracked separately (onPlayerSneakTrack at LOWEST
+                // priority) so shop and shulker handlers can still detect the key-press.
+                // Also clear any stale AirBlast origin so particles don't persist.
+                airBlastClearOrigin(player);
                 e.setCancelled(true);
                 return;
             }
+        } else if (isBendingRestricted(player, player.getLocation()) && !player.isSneaking()) {
+            // When the sneak-press was cancelled, the server never set isSneaking=true.
+            // On release, player.isSneaking() is therefore still false — PK's handler
+            // (ignoreCancelled=true) would see sneaking=false and call AirBlast.setOrigin.
+            // Cancel the release event too to prevent this.
+            airBlastClearOrigin(player);
+            e.setCancelled(true);
+            return;
+        }
+
+        if (e.isSneaking() && player.getGameMode() == GameMode.SURVIVAL) {
             if (!bendingPlayer.canCurrentlyBendWithWeapons()) {
                 return;
             }
