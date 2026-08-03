@@ -94,6 +94,10 @@ public class CommandOverrides {
                         if (!player.getWorld().getName().equalsIgnoreCase("arena")) {
                             PermissionUtils.evaluatePlayerPermissions(player);
                         }
+                        // Saints always get their element change cooldown reset
+                        if (aranarthPlayer.getSaintRank() >= 1) {
+                            Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "b cooldown reset " + player.getName());
+                        }
                         // Dismiss any active mount as the new element may have a different mount
                         dismissActiveMountIfPresent(player);
                         // Strip any LifeRip health bonus
