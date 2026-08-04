@@ -90,6 +90,7 @@ public class GuiJobsLeaveClick {
 
                 JobType job = activeJobs.get(i);
                 jobData.removeJob(job);
+                ap.setJobDataLoaded(true);
                 AranarthUtils.setPlayer(player.getUniqueId(), ap);
                 Bukkit.getLogger().info("[AC][Jobs] " + player.getName() + " left job " + job.name()
                         + " — active=" + jobData.getActiveJobs());

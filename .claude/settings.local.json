@@ -355,7 +355,15 @@
       "Bash(do zcat:*)",
       "Bash(sed \"s/^/$f: /\")",
       "Bash(xargs cat:*)",
-      "Bash(find C:/Users/liamh/Downloads/Logs/ -type f -name *.log)"
+      "Bash(find C:/Users/liamh/Downloads/Logs/ -type f -name *.log)",
+      "Bash(zcat C:/Users/liamh/Downloads/Logs/SMP/2026-08-03-5.log.gz)",
+      "Bash(zcat C:/Users/liamh/Downloads/Logs/SMP/2026-08-03-4.log.gz)",
+      "Bash(zcat C:/Users/liamh/Downloads/Logs/SMP/2026-08-03-3.log.gz)",
+      "Bash(zcat C:/Users/liamh/Downloads/Logs/Survival/2026-08-03-3.log.gz)",
+      "Bash(zcat $f)",
+      "Bash(done 2)",
+      "Bash(1 grep:*)",
+      "Bash(head -20 grep -i \"notasocial\\\\|Breathtaking\" C:/Users/liamh/Downloads/Logs/Survival/2026-08-03-5.log.gz)"
     ]
   }
 }

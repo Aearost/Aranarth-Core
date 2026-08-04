@@ -124,6 +124,7 @@ public class AranarthPlayer {
     private int bulkTransactionQuantity = 0;
     private double bulkTransactionPrice = 0;
     private JobData jobData = new JobData();
+    private boolean jobDataLoaded = false;
 
     public AranarthPlayer(String username) {
         this.username = username;
@@ -1770,6 +1771,14 @@ public class AranarthPlayer {
 
     public void setJobData(JobData jobData) {
         this.jobData = jobData;
+    }
+
+    public boolean isJobDataLoaded() {
+        return jobDataLoaded;
+    }
+
+    public void setJobDataLoaded(boolean jobDataLoaded) {
+        this.jobDataLoaded = jobDataLoaded;
     }
 
     public int getJoinSoundVolume() {

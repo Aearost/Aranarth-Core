@@ -551,7 +551,7 @@ public class PersistenceUtils {
                 // Write to a temp file first; only replace the real file if the entire
                 // write succeeds. This prevents a mid-write exception from truncating the
                 // live file (e.g. a NullPointerException from a home in an unloaded world).
-                // NOTE: Files.move() must be called AFTER the FileWriter is closed —
+                // NOTE: Files.move() must be called AFTER the FileWriter is closed -
                 // on Windows, renaming an open file throws an exception.
                 File tempFile = new File(filePath + ".tmp");
                 boolean writeSucceeded = false;
@@ -571,7 +571,7 @@ public class PersistenceUtils {
                         Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Could not delete temp file: " + tempFile.getPath());
                     }
                 }
-                // Writer is now closed — safe to move on Windows.
+                // Writer is now closed - safe to move on Windows.
                 if (writeSucceeded) {
                     try {
                         Files.move(tempFile.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -585,7 +585,7 @@ public class PersistenceUtils {
                 }
             }
         }
-        // MySQL sync (additive — runs after file save)
+        // MySQL sync (additive - runs after file save)
         if (DatabaseManager.isActive()) {
             runDbSync(
                     PersistenceUtils::syncAranarthPlayersToDatabase);
@@ -703,7 +703,7 @@ public class PersistenceUtils {
                     aranarthPlayer.setAutoLockingChests(false);
                 }
 
-                // Fields from index 11 onward are optional — checked with fields.length > N so that
+                // Fields from index 11 onward are optional - checked with fields.length > N so that
                 // existing files without the field load fine and use the default from the constructor.
 
                 // Blue Fire (index 11)
@@ -3962,14 +3962,14 @@ public class PersistenceUtils {
 
         try {
             FileWriter writer = new FileWriter(filePath);
-            writer.write("#Quest state — do not edit manually\n");
+            writer.write("#Quest state - do not edit manually\n");
             writer.write("lastDailyReset|" + QuestUtils.getLastDailyReset() + "\n");
             writer.write("lastWeeklyReset|" + QuestUtils.getLastWeeklyReset() + "\n");
             writer.close();
         } catch (IOException e) {
             Bukkit.getLogger().info("[AC] There was an error in saving the quest state");
         }
-        // MySQL sync — snapshot UUIDs now so async dispatch doesn't miss any removed after this call
+        // MySQL sync - snapshot UUIDs now so async dispatch doesn't miss any removed after this call
         if (DatabaseManager.isActive()) {
             Set<UUID> snapshot = new HashSet<>(QuestUtils.getLocallyModifiedUuids());
             runDbSync(() -> syncQuestDataToDatabase(snapshot));
@@ -4035,7 +4035,7 @@ public class PersistenceUtils {
                     weeklyCompleted = new boolean[]{fields[20].equals("1"), fields[25].equals("1"), fields[30].equals("1")};
                     weeklyClaimed = new boolean[]{fields[21].equals("1"), fields[26].equals("1"), fields[31].equals("1")};
                 } else {
-                    // Old format — rewards will be regenerated randomly
+                    // Old format - rewards will be regenerated randomly
                     dTasks = new String[]{fields[2], fields[6], fields[10]};
                     dRewards = new double[]{0.0, 0.0, 0.0};
                     dailyProgress = new int[]{Integer.parseInt(fields[3]), Integer.parseInt(fields[7]), Integer.parseInt(fields[11])};
@@ -4211,7 +4211,7 @@ public class PersistenceUtils {
         } catch (IOException e) {
             Bukkit.getLogger().info("[AC] There was an error in saving quest progress");
         }
-        // MySQL sync — snapshot UUIDs now so async dispatch doesn't miss any removed after this call
+        // MySQL sync - snapshot UUIDs now so async dispatch doesn't miss any removed after this call
         if (DatabaseManager.isActive()) {
             Set<UUID> snapshot = new HashSet<>(QuestUtils.getLocallyModifiedUuids());
             runDbSync(() -> syncQuestDataToDatabase(snapshot));
@@ -4404,7 +4404,7 @@ public class PersistenceUtils {
                                 mat = fallbackMaterial(gateType);
                             }
                         } else {
-                            // Legacy entry without material — use a sensible default.
+                            // Legacy entry without material - use a sensible default.
                             mat = fallbackMaterial(gateType);
                         }
                         blockMaterials.put(loc, mat);
@@ -4698,7 +4698,7 @@ public class PersistenceUtils {
 
         try {
             FileWriter writer = new FileWriter(filePath);
-            writer.write("#Mail data — do not edit manually\n");
+            writer.write("#Mail data - do not edit manually\n");
             for (Map.Entry<UUID, List<Mail>> entry : MailUtils.getAllMail().entrySet()) {
                 UUID recipientUUID = entry.getKey();
                 for (Mail mail : entry.getValue()) {
@@ -4797,7 +4797,7 @@ public class PersistenceUtils {
             Bukkit.getLogger().info("[AC] All outposts have been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().warning("outposts.txt not found — skipping outpost load.");
+            Bukkit.getLogger().warning("outposts.txt not found - skipping outpost load.");
         }
     }
 
@@ -4879,7 +4879,7 @@ public class PersistenceUtils {
     }
 
     // =========================================================================
-    // MySQL sync helpers — called from existing save/load methods when DB is active.
+    // MySQL sync helpers - called from existing save/load methods when DB is active.
     // All MySQL operations run synchronously here; callers may wrap in async tasks.
     // The file-based code is always executed first; MySQL is purely supplemental.
     // =========================================================================
@@ -5341,7 +5341,7 @@ public class PersistenceUtils {
             voteCounts.merge(vote.getUuid(), 1, Integer::sum);
         }
 
-        // Only iterate players who have votes — key counts are intentionally excluded from
+        // Only iterate players who have votes - key counts are intentionally excluded from
         // this periodic sync. Pending key counts are exclusively written by
         // syncVoteKeysForPlayerToDatabase (called on vote receipt and after /keyclaim),
         // which is the authoritative source. Writing in-memory key counts here would race
@@ -5395,7 +5395,7 @@ public class PersistenceUtils {
         int ek = AranarthUtils.getPendingEpicKeys().getOrDefault(uuid, 0);
         int gk = AranarthUtils.getPendingGodlyKeys().getOrDefault(uuid, 0);
         Bukkit.getLogger().info("[AC] [VOTE] Syncing vote data to DB for " + uuid
-                + " — vote_count=" + vc + ", history_entries=" + history.size()
+                + " - vote_count=" + vc + ", history_entries=" + history.size()
                 + ", pendingVoteKeys=" + vk + ", pendingRareKeys=" + rk
                 + ", pendingEpicKeys=" + ek + ", pendingGodlyKeys=" + gk);
         try {
@@ -5453,8 +5453,8 @@ public class PersistenceUtils {
     }
 
     /**
-     * Shutdown-safe DB sync. Uses sessionModifiedUuids — the set of players whose quest
-     * data was touched on THIS server during this session — instead of locallyModifiedUuids,
+     * Shutdown-safe DB sync. Uses sessionModifiedUuids - the set of players whose quest
+     * data was touched on THIS server during this session - instead of locallyModifiedUuids,
      * which is cleared by quit events before onDisable() runs.
      * This avoids clobbering the other server's data for players it actively owns, while
      * still ensuring all locally-touched data is persisted.
@@ -5469,7 +5469,7 @@ public class PersistenceUtils {
     /**
      * Synchronously writes a single player's quest progress to MySQL.
      * Call from cross-server transfer quit events so the receiving server can immediately
-     * read the current progress — the async path in saveQuestProgress() may not complete
+     * read the current progress - the async path in saveQuestProgress() may not complete
      * in time before reloadQuestProgressForPlayer() runs on the other server.
      */
     public static void syncQuestProgressForPlayerSync(UUID uuid) {
@@ -5499,7 +5499,7 @@ public class PersistenceUtils {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync quest state: " + e.getMessage());
         }
 
-        // Per-player quest progress — only sync UUIDs that had actual quest actions on THIS
+        // Per-player quest progress - only sync UUIDs that had actual quest actions on THIS
         // server this session, so we don't overwrite data for players active on the other server
         // (both servers load all players from the shared DB at startup, but only the server where
         // the player is actually playing should write back their progress).
@@ -5693,7 +5693,7 @@ public class PersistenceUtils {
         int previousCount = MailUtils.getMail(uuid).size();
         String json = DatabaseManager.getInstance().loadAllMail(uuid);
         if (json == null) {
-            // No row in MySQL — player has no mail
+            // No row in MySQL - player has no mail
             MailUtils.setMailForPlayer(uuid, new ArrayList<>());
             MailUtils.getLocallyModifiedMailUuids().remove(uuid);
             Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Mail] Reloaded from MySQL for " + uuid
@@ -6057,7 +6057,7 @@ public class PersistenceUtils {
             return;
         }
         for (Dominion dominion : dominions) {
-            // Skip cross-server stubs (empty chunk list) — saving them would overwrite valid
+            // Skip cross-server stubs (empty chunk list) - saving them would overwrite valid
             // chunk data in the DB with an empty string, corrupting the row on next load.
             if (dominion.getChunks().isEmpty()) {
                 continue;
@@ -6708,7 +6708,7 @@ public class PersistenceUtils {
     }
 
     /**
-     * Shared parser — same logic as the while-loop body in loadAranarthPlayers().
+     * Shared parser - same logic as the while-loop body in loadAranarthPlayers().
      * Parses a single pipe-delimited row and registers the player via AranarthUtils.
      */
     static void parseAndAddAranarthPlayer(String row) throws Exception {
@@ -6842,7 +6842,7 @@ public class PersistenceUtils {
             Bukkit.getLogger().warning("[AC] [Inv] Loaded " + uuid + " from DB with empty survivalInventory"
                     + " (creativeInventory=" + (creativeInventory.isEmpty() ? "empty" : "set")
                     + ", arenaInventory=" + (arenaInventory.isEmpty() ? "empty" : "set") + ")"
-                    + " — will skip clear if they switch to survival");
+                    + " - will skip clear if they switch to survival");
         }
         AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname,
                 survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist,
@@ -6955,10 +6955,10 @@ public class PersistenceUtils {
             return;
         }
         if (counts.isEmpty()) {
-            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[DB] No vote rows in MySQL — starting with empty vote data");
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[DB] No vote rows in MySQL - starting with empty vote data");
             return;
         }
-        Bukkit.getLogger().info("[AC] Loading vote data from MySQL — " + counts.size() + " player row(s), "
+        Bukkit.getLogger().info("[AC] Loading vote data from MySQL - " + counts.size() + " player row(s), "
                 + (histories != null ? histories.size() : 0) + " with history_json");
         // Restore individual vote history
         if (histories == null) {
@@ -6987,7 +6987,7 @@ public class PersistenceUtils {
                 int dbVoteCount = entry.getValue()[0];
                 if (dbVoteCount > 0 && !histories.containsKey(uuid)) {
                     Bukkit.getLogger().warning("[AC] [VOTE] Player " + uuid + " has vote_count=" + dbVoteCount
-                            + " in DB but no history_json — their vote points will show as 0 this session!");
+                            + " in DB but no history_json - their vote points will show as 0 this session!");
                 }
             }
         }
@@ -7013,7 +7013,7 @@ public class PersistenceUtils {
                 totalGodly += vals[4];
             }
         }
-        Bukkit.getLogger().info("[AC] Vote data initialized from MySQL — " + counts.size() + " player(s) with pending keys"
+        Bukkit.getLogger().info("[AC] Vote data initialized from MySQL - " + counts.size() + " player(s) with pending keys"
                 + " (vote=" + totalVote + ", rare=" + totalRare + ", epic=" + totalEpic + ", godly=" + totalGodly + ")");
     }
 
@@ -7175,16 +7175,16 @@ public class PersistenceUtils {
         DatabaseManager db = DatabaseManager.getInstance();
         Map<UUID, String> all = db.loadAllMailData();
         if (all == null) {
-            // DB query failed — fall back to flat file as best-effort. #195
+            // DB query failed - fall back to flat file as best-effort. #195
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] loadAllMailData failed; falling back to flat file");
             loadMail();
             return;
         }
         if (all.isEmpty()) {
             // Table is genuinely empty (e.g. everyone has cleared their mail). Do NOT fall back
-            // to mail.txt — the file may contain old mail that was already read/deleted from DB,
+            // to mail.txt - the file may contain old mail that was already read/deleted from DB,
             // and loading it would resurface it. #195
-            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[DB] No mail rows in MySQL — starting with empty mailbox");
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[DB] No mail rows in MySQL - starting with empty mailbox");
             return;
         }
         Bukkit.getLogger().info("[AC] Loading mail from MySQL...");
@@ -7208,7 +7208,7 @@ public class PersistenceUtils {
         }
         MailUtils.setAllMail(mailData);
         int totalMessages = mailData.values().stream().mapToInt(List::size).sum();
-        Bukkit.getLogger().info("[AC] Mail initialized from MySQL — " + mailData.size() + " recipient(s), " + totalMessages + " message(s)");
+        Bukkit.getLogger().info("[AC] Mail initialized from MySQL - " + mailData.size() + " recipient(s), " + totalMessages + " message(s)");
     }
 
     /**
@@ -8585,7 +8585,7 @@ public class PersistenceUtils {
     }
 
     // -------------------------------------------------------------------------
-    // Job Data (MySQL only — shared across servers)
+    // Job Data (MySQL only - shared across servers)
     // -------------------------------------------------------------------------
 
     /**
@@ -8723,20 +8723,21 @@ public class PersistenceUtils {
             AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
             if (ap == null) {
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Jobs] Load skipped for " + name
-                        + " — AranarthPlayer not in memory");
+                        + " - AranarthPlayer not in memory");
                 return;
             }
             if (json != null && !json.isEmpty()) {
                 JobData loaded = deserializeJobData(json);
                 ap.setJobData(loaded);
                 Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] Loaded for " + name
-                        + " — jobs=" + loaded.getActiveJobs()
+                        + " - jobs=" + loaded.getActiveJobs()
                         + " levels=" + loaded.getLevels());
             } else {
                 ap.setJobData(new JobData());
                 Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] No DB row for " + name
-                        + " — initialised with empty JobData");
+                        + " - initialised with empty JobData");
             }
+            ap.setJobDataLoaded(true);
             AranarthUtils.setPlayer(uuid, ap);
         } catch (Exception e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Jobs] Failed to load job data for " + name + ": " + e.getMessage());
@@ -8751,11 +8752,16 @@ public class PersistenceUtils {
         if (ap == null) {
             return;
         }
+        if (!ap.isJobDataLoaded()) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Jobs] Skipping async save for " + playerName(uuid)
+                    + " - job data not yet loaded from DB (join-time async load still pending)");
+            return;
+        }
         String json = serializeJobData(ap.getJobData());
         String name = playerName(uuid);
         if (AranarthCore.getInstance().isEnabled()) {
             Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] Dispatching async save for " + name
-                    + " — jobs=" + ap.getJobData().getActiveJobs());
+                    + " - jobs=" + ap.getJobData().getActiveJobs());
             Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
                 try {
                     DatabaseManager.getInstance().saveJobData(uuid, json);
@@ -8766,7 +8772,7 @@ public class PersistenceUtils {
             });
         } else {
             Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] Saving sync (plugin disabled) for " + name
-                    + " — jobs=" + ap.getJobData().getActiveJobs());
+                    + " - jobs=" + ap.getJobData().getActiveJobs());
             DatabaseManager.getInstance().saveJobData(uuid, json);
         }
     }
@@ -8784,10 +8790,15 @@ public class PersistenceUtils {
         if (ap == null) {
             return;
         }
+        if (!ap.isJobDataLoaded()) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Jobs] Skipping sync save for " + playerName(uuid)
+                    + " - job data not yet loaded from DB (join-time async load still pending)");
+            return;
+        }
         String name = playerName(uuid);
         String json = serializeJobData(ap.getJobData());
         Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] Saving sync for " + name
-                + " — jobs=" + ap.getJobData().getActiveJobs()
+                + " - jobs=" + ap.getJobData().getActiveJobs()
                 + " thread=" + Thread.currentThread().getName());
         try {
             DatabaseManager.getInstance().saveJobData(uuid, json);
@@ -8802,7 +8813,7 @@ public class PersistenceUtils {
             return;
         }
         java.util.Collection<? extends Player> online = Bukkit.getOnlinePlayers();
-        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] saveAllJobData — " + online.size() + " online player(s)");
+        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] saveAllJobData - " + online.size() + " online player(s)");
         for (Player player : online) {
             saveJobDataSync(player.getUniqueId());
         }

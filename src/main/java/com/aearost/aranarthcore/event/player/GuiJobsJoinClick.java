@@ -62,6 +62,7 @@ public class GuiJobsJoinClick {
         }
 
         jobData.addJob(job);
+        ap.setJobDataLoaded(true);
         AranarthUtils.setPlayer(player.getUniqueId(), ap);
         Bukkit.getLogger().info("[AC][Jobs] " + player.getName() + " joined job " + job.name()
                 + " — active=" + jobData.getActiveJobs());

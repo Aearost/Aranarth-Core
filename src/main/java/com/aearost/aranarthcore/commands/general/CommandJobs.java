@@ -56,6 +56,7 @@ public class CommandJobs implements CommandExecutor {
                 return true;
             }
             jobData.addJob(job);
+            ap.setJobDataLoaded(true);
             AranarthUtils.setPlayer(player.getUniqueId(), ap);
             Bukkit.getLogger().info("[AC][Jobs] " + player.getName() + " joined job (cmd) " + job.name()
                     + " — active=" + jobData.getActiveJobs());
@@ -84,6 +85,7 @@ public class CommandJobs implements CommandExecutor {
                 return true;
             }
             jobData.removeJob(job);
+            ap.setJobDataLoaded(true);
             AranarthUtils.setPlayer(player.getUniqueId(), ap);
             Bukkit.getLogger().info("[AC][Jobs] " + player.getName() + " left job (cmd) " + job.name()
                     + " — active=" + jobData.getActiveJobs());
