@@ -4,9 +4,11 @@ import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.enums.QuestTaskType;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.CropUtils;
 import com.aearost.aranarthcore.utils.JobUtils;
+import com.aearost.aranarthcore.utils.QuestUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
 import com.gmail.nossr50.mcMMO;
@@ -70,8 +72,9 @@ public class CropHarvest {
 			return;
 		}
 
-		// Award Farmer job pay — CropHarvest cancels the BlockBreakEvent so JobEventListener never sees crop breaks
+		// Award Farmer job pay and quest progress — CropHarvest cancels the BlockBreakEvent so those listeners never see crop breaks
 		JobUtils.awardFarmerCropHarvest(player, block.getType());
+		QuestUtils.updateProgress(player, QuestTaskType.HARVEST_CROPS, 1);
 
 		// Get vanilla fortune-based drops, then scale each by the seasonal yield multiplier
 		ArrayList<ItemStack> drops = new ArrayList<>(block.getDrops(player.getInventory().getItemInMainHand()));
@@ -164,8 +167,9 @@ public class CropHarvest {
 			return;
 		}
 
-		// Award Farmer job pay for naturally generated non-Ageable crops
+		// Award Farmer job pay and quest progress for naturally generated non-Ageable crops
 		JobUtils.awardFarmerCropHarvest(player, block.getType());
+		QuestUtils.updateProgress(player, QuestTaskType.HARVEST_CROPS, 1);
 
 		e.setCancelled(true);
 

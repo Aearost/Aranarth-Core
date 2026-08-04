@@ -93,6 +93,7 @@ public class PlayerInteractEventListener implements Listener {
             new PlayerAutoReplenishSlot().execute(e, plugin);
             new CauldronFillBottle().execute(e);
             new SweetBerryHarvest().execute(e);
+            new CaveVineHarvest().execute(e);
             new LogWoodStripPrevent().execute(e);
             new BoneMealSapling().execute(e);
             new BoneMealWood().execute(e);
