@@ -5864,6 +5864,9 @@ public class PersistenceUtils {
 
     /**
      * Syncs per-player toggled features to MySQL.
+     * Only saves data for players currently online on this server, so that a
+     * stale in-memory copy of an offline player cannot overwrite the toggle data
+     * already saved by the other server where that player is (or was) active.
      */
     public static void syncToggledFeaturesToDatabase() {
         if (!DatabaseManager.isActive()) {
@@ -5872,6 +5875,9 @@ public class PersistenceUtils {
         DatabaseManager db = DatabaseManager.getInstance();
         for (Map.Entry<UUID, AranarthPlayer> entry : AranarthUtils.getAranarthPlayers().entrySet()) {
             UUID uuid = entry.getKey();
+            if (Bukkit.getPlayer(uuid) == null) {
+                continue;
+            }
             AranarthPlayer ap = entry.getValue();
             JsonObject obj = new JsonObject();
             obj.addProperty("chat", ap.isTogglingChat());

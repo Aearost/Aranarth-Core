@@ -27,6 +27,7 @@ Minor Features
 [~] Fixed issue where vote points were not being saved due to cross-server voting
 [~] Added fix to prevent loss of job progress
 [~] Fixed issue where crops were not going into shulkers correctly due to lore issues
+[~] Fixed issue where gradient chat was not persisting correctly across server restarts
 
 Backend Code Changes
 -
