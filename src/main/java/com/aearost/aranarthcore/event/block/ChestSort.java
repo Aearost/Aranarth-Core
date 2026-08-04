@@ -25,12 +25,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionType;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Handles the chest sort logic.
@@ -267,7 +262,10 @@ public class ChestSort {
         }
 
         player.sendMessage(ChatUtils.chatMessage("&7The chest has been sorted!"));
-        player.playSound(player, Sound.UI_STONECUTTER_TAKE_RESULT, 1F, 1F);
+        int sortVol = AranarthUtils.getPlayer(player.getUniqueId()).getChestSortSoundVolume();
+        if (sortVol > 0) {
+            player.playSound(player, Sound.UI_STONECUTTER_TAKE_RESULT, sortVol / 100f, 1F);
+        }
     }
 
     /**

@@ -11,32 +11,32 @@ import org.bukkit.block.Biome;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.*;
+import java.awt.*;
 import java.awt.Color;
+import java.util.*;
+import java.util.List;
 
 /**
  * Provides a large variety of utility methods for everything related to land claiming.
  */
 public class DominionUtils {
 
-    private static final List<Dominion> dominions = new ArrayList<>();
-
-    /**
-     * Tracks the last in-game date on which the daily food/tax cycle ran, to prevent double-firing.
-     */
-    private static String lastFoodEvalDate = null;
-
-    private static final Map<UUID, Dominion> dominionById = new HashMap<>();
-    private static final Map<String, Dominion> chunkKeyToDominion = new HashMap<>();
-    private static final Map<UUID, Dominion> playerToDominion = new HashMap<>();
-    private static final Map<UUID, UUID> foodInventoryLocks = new HashMap<>();
-    private static final Set<UUID> foodNavigating = new HashSet<>();
     public static final long CONQUEST_DEADLINE_MS = 7L * 24 * 60 * 60 * 1000; // 1 week
     public static final long CONQUER_COOLDOWN_MS = 3L * 24 * 60 * 60 * 1000; // 3 days
     public static final long REBEL_DEADLINE_MS = 7L * 24 * 60 * 60 * 1000; // 1 week
     public static final long REBEL_COOLDOWN_MS = 3L * 24 * 60 * 60 * 1000; // 3 days
     public static final long REBEL_INACTIVITY_MS = 3L * 24 * 60 * 60 * 1000; // 3 days
     public static final long CONQUEST_INACTIVITY_MS = 3L * 24 * 60 * 60 * 1000; // 3 days
+    private static final List<Dominion> dominions = new ArrayList<>();
+    private static final Map<UUID, Dominion> dominionById = new HashMap<>();
+    private static final Map<String, Dominion> chunkKeyToDominion = new HashMap<>();
+    private static final Map<UUID, Dominion> playerToDominion = new HashMap<>();
+    private static final Map<UUID, UUID> foodInventoryLocks = new HashMap<>();
+    private static final Set<UUID> foodNavigating = new HashSet<>();
+    /**
+     * Tracks the last in-game date on which the daily food/tax cycle ran, to prevent double-firing.
+     */
+    private static String lastFoodEvalDate = null;
 
     /**
      * Provides the list of Dominions.
@@ -1222,10 +1222,14 @@ public class DominionUtils {
      */
     private static Set<Biome> sampleBiomesFromChunks(List<Chunk> chunks, World expectedWorld) {
         Set<Biome> biomes = new LinkedHashSet<>();
-        if (expectedWorld == null) return biomes;
+        if (expectedWorld == null) {
+            return biomes;
+        }
         for (Chunk chunk : chunks) {
             World world = chunk.getWorld();
-            if (world == null || !world.equals(expectedWorld)) continue;
+            if (world == null || !world.equals(expectedWorld)) {
+                continue;
+            }
             Chunk live = world.getChunkAt(chunk.getX(), chunk.getZ());
             if (world.getEnvironment() == World.Environment.NORMAL) {
                 sampleBiomesAtSurface(live, biomes);
@@ -2435,7 +2439,10 @@ public class DominionUtils {
             updateDominion(conqueror);
             String conquestAutoMsg = ChatUtils.chatMessage(defender.getName() + " &4has been conquered by &e" + conqueror.getName());
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_7, 1F, 1F);
+                int domVol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getDominionSoundVolume();
+                if (domVol > 0) {
+                    onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_7, domVol / 100f, 1F);
+                }
                 onlinePlayer.sendMessage(conquestAutoMsg);
             }
             DiscordUtils.dominionMessage(defender, defender.getName() + " has been conquered by " + conqueror.getName(), new Color(101, 0, 0));
@@ -2463,7 +2470,10 @@ public class DominionUtils {
             updateDominion(conqueror);
             String conquestExpiredMsg = ChatUtils.chatMessage("&e" + conqueror.getName() + " &7's conquest of &e" + defender.getName() + " &7has failed");
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 1F);
+                int domVol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getDominionSoundVolume();
+                if (domVol > 0) {
+                    onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 1F);
+                }
                 onlinePlayer.sendMessage(conquestExpiredMsg);
             }
             DiscordUtils.dominionMessage(defender, conqueror.getName() + "'s conquest of " + defender.getName() + " has failed", new Color(135, 245, 220));
@@ -2494,7 +2504,10 @@ public class DominionUtils {
             updateDominion(rebel);
             String rebelAutoMsg = ChatUtils.chatMessage(rebel.getName() + " &dhas successfully rebelled against &e" + conqueror.getName());
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 1F);
+                int domVol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getDominionSoundVolume();
+                if (domVol > 0) {
+                    onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 1F);
+                }
                 onlinePlayer.sendMessage(rebelAutoMsg);
             }
             DiscordUtils.dominionMessage(conqueror, rebel.getName() + " has successfully rebelled against " + conqueror.getName(), new Color(135, 245, 220));
@@ -2521,7 +2534,10 @@ public class DominionUtils {
             if (rebel != null) {
                 String rebelExpiredMsg = ChatUtils.chatMessage("&e" + rebel.getName() + "&7's rebellion against &e" + conqueror.getName() + " &7has failed");
                 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                    onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_4, 1F, 1F);
+                    int domVol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getDominionSoundVolume();
+                    if (domVol > 0) {
+                        onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_4, domVol / 100f, 1F);
+                    }
                     onlinePlayer.sendMessage(rebelExpiredMsg);
                 }
                 DiscordUtils.dominionMessage(conqueror, rebel.getName() + "'s rebellion against " + conqueror.getName() + " has failed", new Color(101, 0, 0));

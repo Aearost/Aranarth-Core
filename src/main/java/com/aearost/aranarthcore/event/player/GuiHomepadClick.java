@@ -26,153 +26,159 @@ import java.util.Objects;
  */
 public class GuiHomepadClick {
 
-	public void execute(InventoryClickEvent e) {
-		Player player = (Player) e.getWhoClicked();
-		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		int slot = e.getSlot();
+    public void execute(InventoryClickEvent e) {
+        Player player = (Player) e.getWhoClicked();
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        int slot = e.getSlot();
 
-		// If the user did not click a slot
-		if (e.getClickedInventory() == null) {
-			return;
-		}
+        // If the user did not click a slot
+        if (e.getClickedInventory() == null) {
+            return;
+        }
 
-		boolean isClickedHomepadGui = e.getClickedInventory().getSize() == 36;
-		Material heldItem = e.getCursor().getType();
+        boolean isClickedHomepadGui = e.getClickedInventory().getSize() == 36;
+        Material heldItem = e.getCursor().getType();
 
-		// If they click Previous, bring them back to the previous page
-		if (isClickedHomepadGui && slot == 27 && heldItem == Material.AIR) {
-			e.setCancelled(true);
-			int currentPage = aranarthPlayer.getCurrentGuiPageNum();
-			if (currentPage > 0) {
-				currentPage--;
-				aranarthPlayer.setCurrentGuiPageNum(currentPage);
-				GuiTeleport gui = new GuiTeleport(player, currentPage);
-				gui.openGui();
-				player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
-			} else if (currentPage == 0) {
-				int numOfHomes = AranarthUtils.getHomepads().size();
-				int maxPages;
-				// If the amount is a multiple of 27
-				if (numOfHomes % 27 == 0) {
-					maxPages = numOfHomes / 27;
-				} else {
-					maxPages = (int) (double) (numOfHomes / 27) + 1;
-				}
-				if (maxPages > 1) {
-					aranarthPlayer.setCurrentGuiPageNum(maxPages - 1);
-					GuiTeleport gui = new GuiTeleport(player, maxPages - 1);
-					gui.openGui();
-					player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
-				}
-			}
-		}
-		// If they click Exit
-		else if (isClickedHomepadGui && slot == 31 && heldItem == Material.AIR) {
-			e.setCancelled(true);
-			player.closeInventory();
-			player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
-		}
-		// If they click Next
-		else if (isClickedHomepadGui && slot == 35 && heldItem == Material.AIR) {
-			e.setCancelled(true);
-			int numOfHomes = AranarthUtils.getHomepads().size();
-			int currentPage = aranarthPlayer.getCurrentGuiPageNum();
-			int maxPages;
+        // If they click Previous, bring them back to the previous page
+        if (isClickedHomepadGui && slot == 27 && heldItem == Material.AIR) {
+            e.setCancelled(true);
+            int currentPage = aranarthPlayer.getCurrentGuiPageNum();
+            if (currentPage > 0) {
+                currentPage--;
+                aranarthPlayer.setCurrentGuiPageNum(currentPage);
+                GuiTeleport gui = new GuiTeleport(player, currentPage);
+                gui.openGui();
+                player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
+            } else if (currentPage == 0) {
+                int numOfHomes = AranarthUtils.getHomepads().size();
+                int maxPages;
+                // If the amount is a multiple of 27
+                if (numOfHomes % 27 == 0) {
+                    maxPages = numOfHomes / 27;
+                } else {
+                    maxPages = (int) (double) (numOfHomes / 27) + 1;
+                }
+                if (maxPages > 1) {
+                    aranarthPlayer.setCurrentGuiPageNum(maxPages - 1);
+                    GuiTeleport gui = new GuiTeleport(player, maxPages - 1);
+                    gui.openGui();
+                    player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
+                }
+            }
+        }
+        // If they click Exit
+        else if (isClickedHomepadGui && slot == 31 && heldItem == Material.AIR) {
+            e.setCancelled(true);
+            player.closeInventory();
+            player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
+        }
+        // If they click Next
+        else if (isClickedHomepadGui && slot == 35 && heldItem == Material.AIR) {
+            e.setCancelled(true);
+            int numOfHomes = AranarthUtils.getHomepads().size();
+            int currentPage = aranarthPlayer.getCurrentGuiPageNum();
+            int maxPages;
 
-			// If the amount is a multiple of 27
-			if (numOfHomes % 27 == 0) {
-				maxPages = numOfHomes / 27;
-			} else {
-				maxPages = (int) (double) (numOfHomes / 27) + 1;
-			}
-			if (currentPage + 1 < maxPages) {
-				currentPage++;
-				aranarthPlayer.setCurrentGuiPageNum(currentPage);
-				GuiTeleport gui = new GuiTeleport(player, currentPage);
-				gui.openGui();
-				player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
-			} else {
-				aranarthPlayer.setCurrentGuiPageNum(0);
-				GuiTeleport gui = new GuiTeleport(player, 0);
-				gui.openGui();
-				player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
-			}
-		} else {
-			if (isClickedHomepadGui) {
-				// If clicking a slot in the last row
-				if (slot >= 27) {
-					e.setCancelled(true);
-					return;
-				}
+            // If the amount is a multiple of 27
+            if (numOfHomes % 27 == 0) {
+                maxPages = numOfHomes / 27;
+            } else {
+                maxPages = (int) (double) (numOfHomes / 27) + 1;
+            }
+            if (currentPage + 1 < maxPages) {
+                currentPage++;
+                aranarthPlayer.setCurrentGuiPageNum(currentPage);
+                GuiTeleport gui = new GuiTeleport(player, currentPage);
+                gui.openGui();
+                player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
+            } else {
+                aranarthPlayer.setCurrentGuiPageNum(0);
+                GuiTeleport gui = new GuiTeleport(player, 0);
+                gui.openGui();
+                player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
+            }
+        } else {
+            if (isClickedHomepadGui) {
+                // If clicking a slot in the last row
+                if (slot >= 27) {
+                    e.setCancelled(true);
+                    return;
+                }
 
-				List<Home> homes = AranarthUtils.getHomepads();
-				Home home = null;
-				try {
-					home = homes.get((aranarthPlayer.getCurrentGuiPageNum() * 27) + slot);
-				} catch (IndexOutOfBoundsException exception) {
-					e.setCancelled(true);
-				}
+                List<Home> homes = AranarthUtils.getHomepads();
+                Home home = null;
+                try {
+                    home = homes.get((aranarthPlayer.getCurrentGuiPageNum() * 27) + slot);
+                } catch (IndexOutOfBoundsException exception) {
+                    e.setCancelled(true);
+                }
 
-				// Only proceed if the slot they click is actually a homepad
-				if (!Objects.isNull(home)) {
+                // Only proceed if the slot they click is actually a homepad
+                if (!Objects.isNull(home)) {
 
-					// If the user is trying to update the icon of a home
-					if (heldItem != Material.AIR) {
-						e.setCancelled(true);
-						if (heldItem == home.getIcon()) {
-							player.sendMessage(ChatUtils.chatMessage("&cThis homepad already uses that icon!"));
-						} else {
-							AranarthUtils.updateHomepad(home.getName(), home.getLocation(), heldItem);
-							player.sendMessage(ChatUtils.chatMessage(home.getName() + "&7's icon is now &e" + ChatUtils.getFormattedItemName(heldItem.name())));
-						}
-					} else {
-						if (player.isInsideVehicle()) {
-							Entity mount = player.getVehicle();
-							if (player.getVehicle() instanceof Horse || player.getVehicle() instanceof Camel) {
-								String fromWorld = player.getLocation().getWorld().getName();
-								aranarthPlayer.setLastKnownTeleportLocation(player.getLocation().clone());
-								Location destination = home.getLocation();
-								player.leaveVehicle();
-								mount.teleport(destination);
-								player.teleport(destination);
-								player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
-								Bukkit.getLogger().info("[AC] " + player.getName() + " has teleported to " + home.getName() + " via homepad");
-								player.sendMessage(ChatUtils.chatMessage("&5&oYou have been wooshed to &d" + home.getName() + "&5!"));
-								try {
-									AranarthUtils.switchInventory(player, fromWorld, destination.getWorld().getName());
-								} catch (IOException ex) {
-									player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
+                    // If the user is trying to update the icon of a home
+                    if (heldItem != Material.AIR) {
+                        e.setCancelled(true);
+                        if (heldItem == home.getIcon()) {
+                            player.sendMessage(ChatUtils.chatMessage("&cThis homepad already uses that icon!"));
+                        } else {
+                            AranarthUtils.updateHomepad(home.getName(), home.getLocation(), heldItem);
+                            player.sendMessage(ChatUtils.chatMessage(home.getName() + "&7's icon is now &e" + ChatUtils.getFormattedItemName(heldItem.name())));
+                        }
+                    } else {
+                        if (player.isInsideVehicle()) {
+                            Entity mount = player.getVehicle();
+                            if (player.getVehicle() instanceof Horse || player.getVehicle() instanceof Camel) {
+                                String fromWorld = player.getLocation().getWorld().getName();
+                                aranarthPlayer.setLastKnownTeleportLocation(player.getLocation().clone());
+                                Location destination = home.getLocation();
+                                player.leaveVehicle();
+                                mount.teleport(destination);
+                                player.teleport(destination);
+                                int tpVol = AranarthUtils.getPlayer(player.getUniqueId()).getTeleportSoundVolume();
+								if (tpVol > 0) {
+									player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, tpVol / 100f, 0.9F);
 								}
-								new BukkitRunnable() {
-									@Override
-									public void run() {
-										mount.addPassenger(player);
-									}
-								}.runTaskLater(AranarthCore.getInstance(), 2L);
+                                Bukkit.getLogger().info("[AC] " + player.getName() + " has teleported to " + home.getName() + " via homepad");
+                                player.sendMessage(ChatUtils.chatMessage("&5&oYou have been wooshed to &d" + home.getName() + "&5!"));
+                                try {
+                                    AranarthUtils.switchInventory(player, fromWorld, destination.getWorld().getName());
+                                } catch (IOException ex) {
+                                    player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
+                                }
+                                new BukkitRunnable() {
+                                    @Override
+                                    public void run() {
+                                        mount.addPassenger(player);
+                                    }
+                                }.runTaskLater(AranarthCore.getInstance(), 2L);
+                            }
+                        } else {
+                            String fromWorld = player.getLocation().getWorld().getName();
+                            aranarthPlayer.setLastKnownTeleportLocation(player.getLocation().clone());
+                            Bukkit.getLogger().info("[AC] " + player.getName() + " has teleported to " + home.getName() + " via homepad");
+                            player.teleport(home.getLocation());
+                            int tpVol = AranarthUtils.getPlayer(player.getUniqueId()).getTeleportSoundVolume();
+							if (tpVol > 0) {
+								player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, tpVol / 100f, 0.9F);
 							}
-						} else {
-							String fromWorld = player.getLocation().getWorld().getName();
-							aranarthPlayer.setLastKnownTeleportLocation(player.getLocation().clone());
-							Bukkit.getLogger().info("[AC] " + player.getName() + " has teleported to " + home.getName() + " via homepad");
-							player.teleport(home.getLocation());
-							player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
-							player.sendMessage(ChatUtils
-									.chatMessage("&5&oYou have been wooshed to &d" + home.getName() + "&5!"));
-							try {
-								AranarthUtils.switchInventory(player, fromWorld, home.getLocation().getWorld().getName());
-							} catch (IOException ex) {
-								player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
-							}
-						}
-						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-					}
-					player.closeInventory();
-				} else {
-					e.setCancelled(true);
-				}
-			}
+                            player.sendMessage(ChatUtils
+                                    .chatMessage("&5&oYou have been wooshed to &d" + home.getName() + "&5!"));
+                            try {
+                                AranarthUtils.switchInventory(player, fromWorld, home.getLocation().getWorld().getName());
+                            } catch (IOException ex) {
+                                player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
+                            }
+                        }
+                        AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    }
+                    player.closeInventory();
+                } else {
+                    e.setCancelled(true);
+                }
+            }
 
-		}
-	}
+        }
+    }
 
 }

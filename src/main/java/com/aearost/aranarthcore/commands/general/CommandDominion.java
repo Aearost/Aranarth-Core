@@ -1,25 +1,11 @@
 package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.gui.*;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.PendingTeleport;
-import com.aearost.aranarthcore.gui.GuiDefenders;
-import com.aearost.aranarthcore.gui.GuiDominionFood;
-import com.aearost.aranarthcore.gui.GuiDominionPermissions;
-import com.aearost.aranarthcore.gui.GuiDominionResources;
-import com.aearost.aranarthcore.gui.GuiOutposts;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
-import com.aearost.aranarthcore.objects.Dominion;
-import com.aearost.aranarthcore.objects.DominionPermission;
-import com.aearost.aranarthcore.objects.DominionRank;
-import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
-import com.aearost.aranarthcore.utils.DiscordUtils;
-import com.aearost.aranarthcore.utils.DominionLevelUtils;
-import com.aearost.aranarthcore.utils.DominionUtils;
-import com.aearost.aranarthcore.utils.PersistenceUtils;
-import com.aearost.aranarthcore.objects.Outpost;
-import com.aearost.aranarthcore.utils.OutpostUtils;
+import com.aearost.aranarthcore.objects.*;
+import com.aearost.aranarthcore.utils.*;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -27,11 +13,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.awt.*;
 import java.awt.Color;
 import java.text.DecimalFormat;
-import java.util.Arrays;
 import java.text.NumberFormat;
 import java.util.*;
+import java.util.List;
 
 /**
  * Centralizes all functionality relating to dominions.
@@ -41,263 +28,7 @@ public class CommandDominion implements CommandExecutor {
     private static final Map<UUID, Integer> pendingChunkPurchases = new HashMap<>();
     private static final Map<UUID, Map.Entry<UUID, Integer>> pendingOutpostChunkPurchases = new HashMap<>();
     private static final Map<UUID, String> pendingConfirmations = new HashMap<>();
-
-    /**
-     * @param sender  The user that entered the command.
-     * @param command The command itself.
-     * @param alias   The alias of the command.
-     * @param args    The arguments of the command.
-     * @return Confirmation of whether the command was a success or not.
-     */
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
-        // No-args: open the Dominion Hub GUI
-        if (args.length == 0) {
-            if (sender instanceof Player player) {
-                Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
-                if (dominion != null) {
-                    new GuiDominionPermissions(player).openGui();
-                    player.playSound(player, Sound.BLOCK_CHEST_OPEN, 1F, 1F);
-                } else {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
-                }
-                return true;
-            } else {
-                sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to execute this command!"));
-                return false;
-            }
-        } else {
-            if (sender instanceof Player player) {
-                Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
-
-                if (args[0].equalsIgnoreCase("create")) {
-                    if (!player.hasPermission("aranarth.dominion.create")) {
-                        player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this command!"));
-                        return true;
-                    }
-                    createDominion(args, player);
-                } else if (args[0].equalsIgnoreCase("invite")) {
-                    invitePlayerToDominion(args, dominion, player);
-                } else if (args[0].equalsIgnoreCase("accept")) {
-                    acceptDominionInvite(player);
-                } else if (args[0].equalsIgnoreCase("leave")) {
-                    leaveDominion(dominion, player);
-                } else if (args[0].equalsIgnoreCase("remove")) {
-                    removePlayer(args, dominion, player);
-                } else if (args[0].equalsIgnoreCase("disband")) {
-                    disbandDominion(dominion, player, args);
-                } else if (args[0].equalsIgnoreCase("claim")) {
-                    player.sendMessage(ChatUtils.chatMessage(DominionUtils.claimChunk(player, player.getChunk())));
-                } else if (args[0].equalsIgnoreCase("unclaim")) {
-                    player.sendMessage(ChatUtils.chatMessage(DominionUtils.unclaimChunk(player)));
-                } else if (args[0].equalsIgnoreCase("balance")) {
-                    if (dominion != null) {
-                        NumberFormat formatter = NumberFormat.getCurrencyInstance();
-                        String valueWithTwoDecimals = formatter.format(dominion.getBalance());
-                        player.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + "&7's balance is &6" + valueWithTwoDecimals));
-                        return true;
-                    } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
-                        return false;
-                    }
-                } else if (args[0].equalsIgnoreCase("deposit")) {
-                    if (dominion != null) {
-                        depositToDominion(args, dominion, player);
-                    } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
-                    }
-                } else if (args[0].equalsIgnoreCase("withdraw")) {
-                    if (dominion != null) {
-                        withdrawFromDominion(args, dominion, player);
-                    } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
-                    }
-                } else if (args[0].equalsIgnoreCase("home")) {
-                    // Cross-server: transfer to whichever server the target dominion/outpost lives on.
-                    if (NetworkManager.isActive()) {
-                        String currentServer = AranarthCore.getInstance().getConfig()
-                                .getString("network.this-server", "survival");
-                        String targetServer = getHomeTargetServer(args, dominion);
-                        if (targetServer != null && !targetServer.equals(currentServer)) {
-                            AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
-                            String cmd = args.length >= 2
-                                    ? "dominion home " + String.join(" ", Arrays.copyOfRange(args, 1, args.length))
-                                    : "dominion home";
-                            AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
-                                    ap.isInAdminMode(), "&e&lDominion", "&7Transferring to your Dominion...", success -> {
-                                if (success) {
-                                    NetworkManager.getInstance().saveInventoryAndTransfer(player, targetServer,
-                                            PendingTeleport.forCommand(cmd, "&e&lDominion", "&7You have teleported to your Dominion"));
-                                }
-                            });
-                            return true;
-                        }
-                    }
-                    if (!player.hasPermission("aranarth.dominion.home")) {
-                        player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this command!"));
-                        return true;
-                    }
-                    if (args.length >= 2) {
-                        String[] remaining = Arrays.copyOfRange(args, 1, args.length);
-                        // Try longest dominion-name prefix first
-                        Dominion targetDominion = null;
-                        String outpostPart = null;
-                        for (int split = remaining.length; split >= 1; split--) {
-                            String dominionPart = String.join(" ", Arrays.copyOfRange(remaining, 0, split));
-                            Dominion match = DominionUtils.getDominions().stream()
-                                    .filter(d -> ChatUtils.stripColorFormatting(d.getName()).equalsIgnoreCase(dominionPart))
-                                    .findFirst().orElse(null);
-                            if (match != null) {
-                                targetDominion = match;
-                                if (split < remaining.length) {
-                                    outpostPart = String.join(" ", Arrays.copyOfRange(remaining, split, remaining.length));
-                                }
-                                break;
-                            }
-                        }
-                        if (targetDominion != null && outpostPart != null) {
-                            teleportToAllyOutpostHome(player, targetDominion, outpostPart);
-                        } else {
-                            teleportToAllyDominionHome(player, String.join(" ", remaining));
-                        }
-                    } else {
-                        teleportToDominionHome(player);
-                    }
-                } else if (args[0].equalsIgnoreCase("sethome")) {
-                    updateDominionHome(dominion, player);
-                } else if (args[0].equalsIgnoreCase("who")) {
-                    getDominionWho(args, player);
-                } else if (args[0].equalsIgnoreCase("list")) {
-                    List<Dominion> sortedDominions = DominionLevelUtils.getDominionsSortedByPlacement();
-                    if (sortedDominions.isEmpty()) {
-                        player.sendMessage(ChatUtils.chatMessage("&cThere are no dominions yet!"));
-                    } else {
-                        player.sendMessage(ChatUtils.translateToColor("&8      - - - &6&lDominion Leaderboard &8- - -"));
-                        NumberFormat formatter = NumberFormat.getCurrencyInstance();
-                        for (int i = 0; i < sortedDominions.size(); i++) {
-                            Dominion dominionFromList = sortedDominions.get(i);
-                            String valueWithTwoDecimals = formatter.format(dominionFromList.getBalance());
-                            player.sendMessage(ChatUtils.translateToColor(
-                                "&8[&6" + (i + 1) + "&8] &e" + dominionFromList.getName()
-                                + " &7ruled by &e" + AranarthUtils.getNickname(Bukkit.getOfflinePlayer(dominionFromList.getLeader()))
-                                + " &7- &e" + dominionFromList.getChunkCount() + " chunks &7- &6" + valueWithTwoDecimals));
-                        }
-                    }
-                } else if (args[0].equalsIgnoreCase("info")) {
-                    if (args.length == 1) {
-                        if (dominion != null) {
-                            displayInfoForDominion(player, dominion);
-                        } else {
-                            player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
-                        }
-                    } else {
-                        StringBuilder dominionNameBuilder = new StringBuilder();
-                        for (int i = 1; i < args.length; i++) {
-                            dominionNameBuilder.append(args[i]);
-                            if (i < args.length - 1) {
-                                dominionNameBuilder.append(" ");
-                            }
-                        }
-
-                        List<Dominion> dominions = DominionUtils.getDominions();
-                        boolean wasDominionFound = false;
-                        for (Dominion dominionFromList : dominions) {
-                            if (ChatUtils.stripColorFormatting(dominionFromList.getName()).equalsIgnoreCase(dominionNameBuilder.toString())) {
-                                displayInfoForDominion(player, dominionFromList);
-                                wasDominionFound = true;
-                                return true;
-                            }
-                        }
-
-                        if (!wasDominionFound) {
-                            player.sendMessage(ChatUtils.chatMessage("&cThat dominion could not be found!"));
-                        }
-                    }
-                } else if (args[0].equalsIgnoreCase("rename")) {
-                    if (dominion != null) {
-                        if (dominion.getLeader().equals(player.getUniqueId())) {
-                            String dominionName = verifyDominionName(args, player);
-                            if (dominionName != null) {
-                                String oldName = dominion.getName();
-                                dominion.setName(dominionName);
-                                DominionUtils.updateDominion(dominion);
-                                Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The Dominion of &e" + oldName + " &7has been renamed to &e" + dominionName));
-                                DiscordUtils.dominionMessage(dominion, "&7The Dominion of &e" + oldName + " &7has been renamed to &e" + dominionName, Color.CYAN);
-                                for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                                    onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_PLAYER_LEVELUP, 1.2F, 1.5F);
-                                }
-                            }
-                        } else {
-                            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to rename the Dominion!"));
-                        }
-                    }
-                } else if (args[0].equalsIgnoreCase("ally")) {
-                    allyDominion(args, dominion, player);
-                } else if (args[0].equalsIgnoreCase("truce")) {
-                    truceDominion(args, dominion, player);
-                } else if (args[0].equalsIgnoreCase("enemy")) {
-                    enemyDominion(args, dominion, player);
-                } else if (args[0].equalsIgnoreCase("neutral")) {
-                    neutralDominion(args, dominion, player);
-                } else if (args[0].equalsIgnoreCase("setleader")) {
-                    setLeader(args, dominion, player);
-                } else if (args[0].equalsIgnoreCase("map")) {
-                    showDominionMap(player);
-                } else if (args[0].equalsIgnoreCase("mapcolor")) {
-                    setMapColor(args, dominion, player);
-                } else if (args[0].equalsIgnoreCase("autoclaim")) {
-                    claimToggle(player);
-                } else if (args[0].equalsIgnoreCase("food")) {
-                    foodStorage(player);
-                } else if (args[0].equalsIgnoreCase("resources")) {
-                    resources(dominion, player);
-                } else if (args[0].equalsIgnoreCase("conquer")) {
-                    conquer(args, dominion, player);
-                } else if (args[0].equalsIgnoreCase("surrender")) {
-                    surrender(args, dominion, player);
-                } else if (args[0].equalsIgnoreCase("rebel")) {
-                    rebel(args, dominion, player);
-                } else if (args[0].equalsIgnoreCase("retreat")) {
-                    retreat(args, dominion, player);
-                } else if (args[0].equalsIgnoreCase("msg")) {
-                    ChatUtils.evaluateDominionMessage(player, args, true);
-                } else if (args[0].equalsIgnoreCase("guide")) {
-                    CommandDominions.giveBook(player);
-                } else if (args[0].equalsIgnoreCase("rank")) {
-                    if (args.length >= 2 && args[1].equalsIgnoreCase("scan")) {
-                        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                        if (aranarthPlayer.getCouncilRank() == 3) {
-                            DominionLevelUtils.runPeriodicScan();
-                            player.sendMessage(ChatUtils.chatMessage("&7Dominion scan triggered"));
-                        } else {
-                            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to run this command"));
-                        }
-                    } else {
-                        showDominionLevel(player, dominion);
-                    }
-                } else if (args[0].equalsIgnoreCase("setrank")) {
-                    setMemberRank(args, dominion, player);
-                } else if (args[0].equalsIgnoreCase("buychunks")) {
-                    buyChunks(args, dominion, player);
-                } else if (args[0].equalsIgnoreCase("outpost")) {
-                    handleOutpost(args, dominion, player);
-                } else if (args[0].equalsIgnoreCase("defender")) {
-                    handleDefender(dominion, player);
-                } else if (args[0].equalsIgnoreCase("plot")) {
-                    handlePlot(args, dominion, player);
-                } else if (args[0].equalsIgnoreCase("rescan")) {
-                    rescanDominion(args, player);
-                } else {
-                    player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/dominion <command>"));
-                    return false;
-                }
-                return true;
-            } else {
-                sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to execute this command!"));
-                return false;
-            }
-        }
-    }
+    private static final int[] PLOT_LIMITS_BY_LEVEL = {0, 4, 12, 25, Integer.MAX_VALUE};
 
     /**
      * Teleports the player to their dominion's home.
@@ -518,8 +249,8 @@ public class CommandDominion implements CommandExecutor {
         if (args.length >= 2 && aranarthPlayer.isInAdminMode() && aranarthPlayer.getCouncilRank() == 3) {
             String targetName = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
             Dominion target = DominionUtils.getDominions().stream()
-                .filter(d -> ChatUtils.stripColorFormatting(d.getName()).equalsIgnoreCase(targetName))
-                .findFirst().orElse(null);
+                    .filter(d -> ChatUtils.stripColorFormatting(d.getName()).equalsIgnoreCase(targetName))
+                    .findFirst().orElse(null);
             if (target == null) {
                 player.sendMessage(ChatUtils.chatMessage("&cNo Dominion named &e" + targetName + " &cwas found!"));
                 return;
@@ -744,8 +475,6 @@ public class CommandDominion implements CommandExecutor {
             player.sendMessage(ChatUtils.chatMessage("&cYou do not have a Dominion invitation!"));
         }
     }
-
-    private static final int[] PLOT_LIMITS_BY_LEVEL = {0, 4, 12, 25, Integer.MAX_VALUE};
 
     /**
      * Forces a farmland recount for a dominion. Op-only.
@@ -1168,11 +897,16 @@ public class CommandDominion implements CommandExecutor {
                                 player.sendMessage(ChatUtils.chatMessage("&cYour Dominion is already &5Allied &7with &e" + dominionFromList.getName()));
                             } else {
                                 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                                    int domVol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getDominionSoundVolume();
                                     if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
-                                        onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.9F);
+                                        if (domVol > 0) {
+                                            onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 0.9F);
+                                        }
                                         onlinePlayer.sendMessage(ChatUtils.chatMessage("&7Your Dominion has requested an &5Alliance &7with &e" + dominionFromList.getName()));
                                     } else if (dominionFromList.getMembers().contains(onlinePlayer.getUniqueId())) {
-                                        onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.9F);
+                                        if (domVol > 0) {
+                                            onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 0.9F);
+                                        }
                                         onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &7has requested an &5Alliance &7with your Dominion"));
                                     }
                                 }
@@ -1273,11 +1007,16 @@ public class CommandDominion implements CommandExecutor {
                                 player.sendMessage(ChatUtils.chatMessage("&cYour Dominion is already &dTruced &7with &e" + dominionFromList.getName()));
                             } else {
                                 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                                    int domVol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getDominionSoundVolume();
                                     if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
-                                        onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.9F);
+                                        if (domVol > 0) {
+                                            onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 0.9F);
+                                        }
                                         onlinePlayer.sendMessage(ChatUtils.chatMessage("&7Your Dominion has requested a &dTruce &7with &e" + dominionFromList.getName()));
                                     } else if (dominionFromList.getMembers().contains(onlinePlayer.getUniqueId())) {
-                                        onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.9F);
+                                        if (domVol > 0) {
+                                            onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 0.9F);
+                                        }
                                         onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &7has requested a &dTruce &7with your Dominion"));
                                     }
                                 }
@@ -1439,11 +1178,16 @@ public class CommandDominion implements CommandExecutor {
                                 dominionFromList.setNeutralRequests(neutralRequests);
 
                                 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                                    int domVol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getDominionSoundVolume();
                                     if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
-                                        onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.9F);
+                                        if (domVol > 0) {
+                                            onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 0.9F);
+                                        }
                                         onlinePlayer.sendMessage(ChatUtils.chatMessage("&7Your Dominion has requested &fNeutrality &7with &e" + dominionFromList.getName()));
                                     } else if (dominionFromList.getMembers().contains(onlinePlayer.getUniqueId())) {
-                                        onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.9F);
+                                        if (domVol > 0) {
+                                            onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 0.9F);
+                                        }
                                         onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &7has requested &fNeutrality &7with your Dominion"));
                                     }
                                 }
@@ -1454,11 +1198,16 @@ public class CommandDominion implements CommandExecutor {
                                 resetDominionRelations(dominion, dominionFromList);
 
                                 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                                    int domVol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getDominionSoundVolume();
                                     if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
-                                        onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.9F);
+                                        if (domVol > 0) {
+                                            onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 0.9F);
+                                        }
                                         onlinePlayer.sendMessage(ChatUtils.chatMessage("&7Your Dominion has become &fNeutral &7with &e" + dominionFromList.getName()));
                                     } else if (dominionFromList.getMembers().contains(onlinePlayer.getUniqueId())) {
-                                        onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.9F);
+                                        if (domVol > 0) {
+                                            onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 0.9F);
+                                        }
                                         onlinePlayer.sendMessage(ChatUtils.chatMessage("&7Your Dominion has become &fNeutral &7with &e" + dominion.getName()));
                                     }
                                 }
@@ -1603,7 +1352,8 @@ public class CommandDominion implements CommandExecutor {
             case "home" -> outpostHome(args, dominion, player);
             case "buychunks" -> outpostBuyChunks(args, dominion, player);
             case "disband" -> outpostDisband(args, dominion, player);
-            default -> player.sendMessage(ChatUtils.chatMessage("&cUsage: &e/dominion outpost <create|disband|rename|sethome|home|buychunks>"));
+            default ->
+                    player.sendMessage(ChatUtils.chatMessage("&cUsage: &e/dominion outpost <create|disband|rename|sethome|home|buychunks>"));
         }
     }
 
@@ -1797,11 +1547,11 @@ public class CommandDominion implements CommandExecutor {
                 String cmd = "dominion outpost home " + targetName;
                 AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
                         ap.isInAdminMode(), "&e&lDominion", "&7Transferring to your outpost...", success -> {
-                    if (success) {
-                        NetworkManager.getInstance().saveInventoryAndTransfer(player, targetServer,
-                                PendingTeleport.forCommand(cmd, "&e&lDominion", "&7You have teleported to your outpost"));
-                    }
-                });
+                            if (success) {
+                                NetworkManager.getInstance().saveInventoryAndTransfer(player, targetServer,
+                                        PendingTeleport.forCommand(cmd, "&e&lDominion", "&7You have teleported to your outpost"));
+                            }
+                        });
                 return;
             }
         }
@@ -2494,9 +2244,9 @@ public class CommandDominion implements CommandExecutor {
      * Accepts named colors (e.g. "red", "blue") or hex codes (e.g. "#FF5500").
      * Use "reset" or "none" to restore the default white color.
      *
-     * @param args    The command arguments (args[1] is the color).
+     * @param args     The command arguments (args[1] is the color).
      * @param dominion The player's dominion.
-     * @param player  The player.
+     * @param player   The player.
      */
     private static void setMapColor(String[] args, Dominion dominion, Player player) {
         if (dominion == null) {
@@ -2737,11 +2487,16 @@ public class CommandDominion implements CommandExecutor {
                 DominionUtils.updateDominion(dominionFromList);
 
                 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                    int domVol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getDominionSoundVolume();
                     if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
-                        onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_2, 2F, 1F);
+                        if (domVol > 0) {
+                            onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_2, 2F * (domVol / 100f), 1F);
+                        }
                         onlinePlayer.sendMessage(ChatUtils.chatMessage("&4Your Dominion is attempting to conquer &e" + dominionFromList.getName()));
                     } else if (dominionFromList.getMembers().contains(onlinePlayer.getUniqueId())) {
-                        onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_4, 2F, 1F);
+                        if (domVol > 0) {
+                            onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_4, 2F * (domVol / 100f), 1F);
+                        }
                         onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &4is attempting to conquer your Dominion"));
                         onlinePlayer.sendMessage(ChatUtils.chatMessage("&4Your Dominion will automatically be conquered if nobody logs on for 3 days during the conquest!"));
                     }
@@ -2815,7 +2570,10 @@ public class CommandDominion implements CommandExecutor {
 
                     String surrenderMsg = ChatUtils.chatMessage(dominion.getName() + " &4has been conquered by &e" + dominionFromList.getName());
                     for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                        onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_7, 1F, 1F);
+                        int domVol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getDominionSoundVolume();
+                        if (domVol > 0) {
+                            onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_7, domVol / 100f, 1F);
+                        }
                         onlinePlayer.sendMessage(surrenderMsg);
                     }
                     DiscordUtils.dominionMessage(dominion, dominion.getName() + " has been conquered by " + dominionFromList.getName(), new Color(101, 0, 0));
@@ -2901,11 +2659,16 @@ public class CommandDominion implements CommandExecutor {
                 DominionUtils.updateDominion(dominionFromList);
 
                 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                    int domVol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getDominionSoundVolume();
                     if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
-                        onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_1, 2F, 1F);
+                        if (domVol > 0) {
+                            onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_1, 2F * (domVol / 100f), 1F);
+                        }
                         onlinePlayer.sendMessage(ChatUtils.chatMessage("&5Your Dominion has started a rebellion against &e" + dominionFromList.getName()));
                     } else if (dominionFromList.getMembers().contains(onlinePlayer.getUniqueId())) {
-                        onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_1, 2F, 1F);
+                        if (domVol > 0) {
+                            onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_1, 2F * (domVol / 100f), 1F);
+                        }
                         onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &5has started a rebellion against your Dominion!"));
                         onlinePlayer.sendMessage(ChatUtils.chatMessage("&5Use &e/dominion retreat " + ChatUtils.stripColorFormatting(dominion.getName()) + " &5to release them of your conquest"));
                         onlinePlayer.sendMessage(ChatUtils.chatMessage("They will be freed if your Dominion goes 3 days without logging on"));
@@ -2975,7 +2738,10 @@ public class CommandDominion implements CommandExecutor {
 
                     String retreatConquestMsg = ChatUtils.chatMessage("&e" + dominion.getName() + " &dhas retreated from conquering &e" + dominionFromList.getName());
                     for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                        onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 1F);
+                        int domVol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getDominionSoundVolume();
+                        if (domVol > 0) {
+                            onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 1F);
+                        }
                         onlinePlayer.sendMessage(retreatConquestMsg);
                     }
                     DiscordUtils.dominionMessage(dominionFromList, dominion.getName() + " has retreated from conquering " + dominionFromList.getName(), new Color(135, 245, 220));
@@ -3005,7 +2771,10 @@ public class CommandDominion implements CommandExecutor {
 
                     String retreatReleaseMsg = ChatUtils.chatMessage("&e" + dominion.getName() + " &dhas retreated from &e" + dominionFromList.getName());
                     for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                        onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 1F);
+                        int domVol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getDominionSoundVolume();
+                        if (domVol > 0) {
+                            onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 1F);
+                        }
                         onlinePlayer.sendMessage(retreatReleaseMsg);
                     }
                     DiscordUtils.dominionMessage(dominion, dominion.getName() + " has retreated from " + dominionFromList.getName(), new Color(135, 245, 220));
@@ -3028,7 +2797,7 @@ public class CommandDominion implements CommandExecutor {
     }
 
     /**
-    /**
+     * /**
      * Displays the dominion's current level, progress toward the next level across all 6
      * criteria, and the global leaderboard placement summary.
      * Usage: /dominion rank
@@ -3057,44 +2826,44 @@ public class CommandDominion implements CommandExecutor {
 
             player.sendMessage(ChatUtils.translateToColor(
                     "&e" + dominion.getName() + " &7must meet &e" + DominionLevelUtils.CRITERIA_REQUIRED + "&8/&e"
-                    + DominionLevelUtils.CRITERIA_COUNT + " &7criteria to rank up"));
+                            + DominionLevelUtils.CRITERIA_COUNT + " &7criteria to rank up"));
 
             // Members
             int membThresh = DominionLevelUtils.getMembersThreshold(nextLevel);
             player.sendMessage(ChatUtils.translateToColor(
                     "&8[" + (criteria[0] ? "&a✔" : "&cX") + "&8] &7Members - &e"
-                    + dominion.getMembers().size() + " &8/ &e" + membThresh));
+                            + dominion.getMembers().size() + " &8/ &e" + membThresh));
 
             // Balance
             double balThresh = DominionLevelUtils.getBalanceThreshold(nextLevel);
             player.sendMessage(ChatUtils.translateToColor(
                     "&8[" + (criteria[1] ? "&a✔" : "&cX") + "&8] &7Balance - &6"
-                    + formatter.format(dominion.getBalance()) + " &8/ &6" + formatter.format(balThresh)));
+                            + formatter.format(dominion.getBalance()) + " &8/ &6" + formatter.format(balThresh)));
 
             // Farmland
             int farmThresh = DominionLevelUtils.getFarmlandThreshold(nextLevel);
             player.sendMessage(ChatUtils.translateToColor(
                     "&8[" + (criteria[2] ? "&a✔" : "&cX") + "&8] &7Farmland - &e"
-                    + dominion.getCachedFarmlandCount() + " &8/ &e" + farmThresh + " &7blocks"));
+                            + dominion.getCachedFarmlandCount() + " &8/ &e" + farmThresh + " &7blocks"));
 
             // Livestock
             int liveThresh = DominionLevelUtils.getLivestockThreshold(nextLevel);
             player.sendMessage(ChatUtils.translateToColor(
                     "&8[" + (criteria[3] ? "&a✔" : "&cX") + "&8] &7Livestock - &e"
-                    + dominion.getCachedLivestockCount() + " &8/ &e" + liveThresh + " &7mobs"));
+                            + dominion.getCachedLivestockCount() + " &8/ &e" + liveThresh + " &7mobs"));
 
             // Chunks
             int chunkThresh = DominionLevelUtils.getChunksThreshold(nextLevel);
             int totalChunks = dominion.getChunks().size() + OutpostUtils.getTotalOutpostChunkCount(dominion.getId());
             player.sendMessage(ChatUtils.translateToColor(
                     "&8[" + (criteria[4] ? "&a✔" : "&cX") + "&8] &7Chunks - &e"
-                    + totalChunks + " &8/ &e" + chunkThresh));
+                            + totalChunks + " &8/ &e" + chunkThresh));
 
             // Age
             int ageThresh = DominionLevelUtils.getAgeThreshold(nextLevel);
             player.sendMessage(ChatUtils.translateToColor(
                     "&8[" + (criteria[5] ? "&a✔" : "&cX") + "&8] &7Age - &e"
-                    + DominionLevelUtils.getFormattedAge(dominion) + " &8/ &e" + ageThresh + " &7yrs"));
+                            + DominionLevelUtils.getFormattedAge(dominion) + " &8/ &e" + ageThresh + " &7yrs"));
         } else {
             player.sendMessage(ChatUtils.translateToColor("&a✔ Maximum dominion level reached!"));
         }
@@ -3169,20 +2938,28 @@ public class CommandDominion implements CommandExecutor {
     }
 
     private static String getServerForWorld(String worldName) {
-        if (worldName == null) return null;
+        if (worldName == null) {
+            return null;
+        }
         String survivalServer = AranarthCore.getInstance().getConfig().getString("network.servers.survival", "survival");
         String smpServer = AranarthCore.getInstance().getConfig().getString("network.servers.smp", "smp");
         // Use stored-name logic, NOT isSmpWorld(), which is server-aware and would misidentify
         // survival's "world" as SMP when running on the SMP server.
         // Stored names: "smp*" / "smp:*" = SMP; "world*" = survival.
-        if (worldName.startsWith("smp")) return smpServer;
-        if (worldName.startsWith("world")) return survivalServer;
+        if (worldName.startsWith("smp")) {
+            return smpServer;
+        }
+        if (worldName.startsWith("world")) {
+            return survivalServer;
+        }
         return null;
     }
 
     private static String getHomeTargetServer(String[] args, Dominion playerDominion) {
         if (args.length < 2) {
-            if (playerDominion == null) return null;
+            if (playerDominion == null) {
+                return null;
+            }
             return getServerForWorld(playerDominion.getDominionHomeWorldName());
         }
         String[] remaining = Arrays.copyOfRange(args, 1, args.length);
@@ -3201,7 +2978,9 @@ public class CommandDominion implements CommandExecutor {
                 break;
             }
         }
-        if (targetDominion == null) return null;
+        if (targetDominion == null) {
+            return null;
+        }
         if (outpostPart != null) {
             String finalOutpostPart = outpostPart;
             Outpost outpost = OutpostUtils.getDominionOutposts(targetDominion.getId()).stream()
@@ -3212,5 +2991,262 @@ public class CommandDominion implements CommandExecutor {
             }
         }
         return getServerForWorld(targetDominion.getDominionHomeWorldName());
+    }
+
+    /**
+     * @param sender  The user that entered the command.
+     * @param command The command itself.
+     * @param alias   The alias of the command.
+     * @param args    The arguments of the command.
+     * @return Confirmation of whether the command was a success or not.
+     */
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
+        // No-args: open the Dominion Hub GUI
+        if (args.length == 0) {
+            if (sender instanceof Player player) {
+                Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+                if (dominion != null) {
+                    new GuiDominionPermissions(player).openGui();
+                    player.playSound(player, Sound.BLOCK_CHEST_OPEN, 1F, 1F);
+                } else {
+                    player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
+                }
+                return true;
+            } else {
+                sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to execute this command!"));
+                return false;
+            }
+        } else {
+            if (sender instanceof Player player) {
+                Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+
+                if (args[0].equalsIgnoreCase("create")) {
+                    if (!player.hasPermission("aranarth.dominion.create")) {
+                        player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this command!"));
+                        return true;
+                    }
+                    createDominion(args, player);
+                } else if (args[0].equalsIgnoreCase("invite")) {
+                    invitePlayerToDominion(args, dominion, player);
+                } else if (args[0].equalsIgnoreCase("accept")) {
+                    acceptDominionInvite(player);
+                } else if (args[0].equalsIgnoreCase("leave")) {
+                    leaveDominion(dominion, player);
+                } else if (args[0].equalsIgnoreCase("remove")) {
+                    removePlayer(args, dominion, player);
+                } else if (args[0].equalsIgnoreCase("disband")) {
+                    disbandDominion(dominion, player, args);
+                } else if (args[0].equalsIgnoreCase("claim")) {
+                    player.sendMessage(ChatUtils.chatMessage(DominionUtils.claimChunk(player, player.getChunk())));
+                } else if (args[0].equalsIgnoreCase("unclaim")) {
+                    player.sendMessage(ChatUtils.chatMessage(DominionUtils.unclaimChunk(player)));
+                } else if (args[0].equalsIgnoreCase("balance")) {
+                    if (dominion != null) {
+                        NumberFormat formatter = NumberFormat.getCurrencyInstance();
+                        String valueWithTwoDecimals = formatter.format(dominion.getBalance());
+                        player.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + "&7's balance is &6" + valueWithTwoDecimals));
+                        return true;
+                    } else {
+                        player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
+                        return false;
+                    }
+                } else if (args[0].equalsIgnoreCase("deposit")) {
+                    if (dominion != null) {
+                        depositToDominion(args, dominion, player);
+                    } else {
+                        player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
+                    }
+                } else if (args[0].equalsIgnoreCase("withdraw")) {
+                    if (dominion != null) {
+                        withdrawFromDominion(args, dominion, player);
+                    } else {
+                        player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
+                    }
+                } else if (args[0].equalsIgnoreCase("home")) {
+                    // Cross-server: transfer to whichever server the target dominion/outpost lives on.
+                    if (NetworkManager.isActive()) {
+                        String currentServer = AranarthCore.getInstance().getConfig()
+                                .getString("network.this-server", "survival");
+                        String targetServer = getHomeTargetServer(args, dominion);
+                        if (targetServer != null && !targetServer.equals(currentServer)) {
+                            AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
+                            String cmd = args.length >= 2
+                                    ? "dominion home " + String.join(" ", Arrays.copyOfRange(args, 1, args.length))
+                                    : "dominion home";
+                            AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
+                                    ap.isInAdminMode(), "&e&lDominion", "&7Transferring to your Dominion...", success -> {
+                                        if (success) {
+                                            NetworkManager.getInstance().saveInventoryAndTransfer(player, targetServer,
+                                                    PendingTeleport.forCommand(cmd, "&e&lDominion", "&7You have teleported to your Dominion"));
+                                        }
+                                    });
+                            return true;
+                        }
+                    }
+                    if (!player.hasPermission("aranarth.dominion.home")) {
+                        player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this command!"));
+                        return true;
+                    }
+                    if (args.length >= 2) {
+                        String[] remaining = Arrays.copyOfRange(args, 1, args.length);
+                        // Try longest dominion-name prefix first
+                        Dominion targetDominion = null;
+                        String outpostPart = null;
+                        for (int split = remaining.length; split >= 1; split--) {
+                            String dominionPart = String.join(" ", Arrays.copyOfRange(remaining, 0, split));
+                            Dominion match = DominionUtils.getDominions().stream()
+                                    .filter(d -> ChatUtils.stripColorFormatting(d.getName()).equalsIgnoreCase(dominionPart))
+                                    .findFirst().orElse(null);
+                            if (match != null) {
+                                targetDominion = match;
+                                if (split < remaining.length) {
+                                    outpostPart = String.join(" ", Arrays.copyOfRange(remaining, split, remaining.length));
+                                }
+                                break;
+                            }
+                        }
+                        if (targetDominion != null && outpostPart != null) {
+                            teleportToAllyOutpostHome(player, targetDominion, outpostPart);
+                        } else {
+                            teleportToAllyDominionHome(player, String.join(" ", remaining));
+                        }
+                    } else {
+                        teleportToDominionHome(player);
+                    }
+                } else if (args[0].equalsIgnoreCase("sethome")) {
+                    updateDominionHome(dominion, player);
+                } else if (args[0].equalsIgnoreCase("who")) {
+                    getDominionWho(args, player);
+                } else if (args[0].equalsIgnoreCase("list")) {
+                    List<Dominion> sortedDominions = DominionLevelUtils.getDominionsSortedByPlacement();
+                    if (sortedDominions.isEmpty()) {
+                        player.sendMessage(ChatUtils.chatMessage("&cThere are no dominions yet!"));
+                    } else {
+                        player.sendMessage(ChatUtils.translateToColor("&8      - - - &6&lDominion Leaderboard &8- - -"));
+                        NumberFormat formatter = NumberFormat.getCurrencyInstance();
+                        for (int i = 0; i < sortedDominions.size(); i++) {
+                            Dominion dominionFromList = sortedDominions.get(i);
+                            String valueWithTwoDecimals = formatter.format(dominionFromList.getBalance());
+                            player.sendMessage(ChatUtils.translateToColor(
+                                    "&8[&6" + (i + 1) + "&8] &e" + dominionFromList.getName()
+                                            + " &7ruled by &e" + AranarthUtils.getNickname(Bukkit.getOfflinePlayer(dominionFromList.getLeader()))
+                                            + " &7- &e" + dominionFromList.getChunkCount() + " chunks &7- &6" + valueWithTwoDecimals));
+                        }
+                    }
+                } else if (args[0].equalsIgnoreCase("info")) {
+                    if (args.length == 1) {
+                        if (dominion != null) {
+                            displayInfoForDominion(player, dominion);
+                        } else {
+                            player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
+                        }
+                    } else {
+                        StringBuilder dominionNameBuilder = new StringBuilder();
+                        for (int i = 1; i < args.length; i++) {
+                            dominionNameBuilder.append(args[i]);
+                            if (i < args.length - 1) {
+                                dominionNameBuilder.append(" ");
+                            }
+                        }
+
+                        List<Dominion> dominions = DominionUtils.getDominions();
+                        boolean wasDominionFound = false;
+                        for (Dominion dominionFromList : dominions) {
+                            if (ChatUtils.stripColorFormatting(dominionFromList.getName()).equalsIgnoreCase(dominionNameBuilder.toString())) {
+                                displayInfoForDominion(player, dominionFromList);
+                                wasDominionFound = true;
+                                return true;
+                            }
+                        }
+
+                        if (!wasDominionFound) {
+                            player.sendMessage(ChatUtils.chatMessage("&cThat dominion could not be found!"));
+                        }
+                    }
+                } else if (args[0].equalsIgnoreCase("rename")) {
+                    if (dominion != null) {
+                        if (dominion.getLeader().equals(player.getUniqueId())) {
+                            String dominionName = verifyDominionName(args, player);
+                            if (dominionName != null) {
+                                String oldName = dominion.getName();
+                                dominion.setName(dominionName);
+                                DominionUtils.updateDominion(dominion);
+                                Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The Dominion of &e" + oldName + " &7has been renamed to &e" + dominionName));
+                                DiscordUtils.dominionMessage(dominion, "&7The Dominion of &e" + oldName + " &7has been renamed to &e" + dominionName, Color.CYAN);
+                                for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                                    onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_PLAYER_LEVELUP, 1.2F, 1.5F);
+                                }
+                            }
+                        } else {
+                            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to rename the Dominion!"));
+                        }
+                    }
+                } else if (args[0].equalsIgnoreCase("ally")) {
+                    allyDominion(args, dominion, player);
+                } else if (args[0].equalsIgnoreCase("truce")) {
+                    truceDominion(args, dominion, player);
+                } else if (args[0].equalsIgnoreCase("enemy")) {
+                    enemyDominion(args, dominion, player);
+                } else if (args[0].equalsIgnoreCase("neutral")) {
+                    neutralDominion(args, dominion, player);
+                } else if (args[0].equalsIgnoreCase("setleader")) {
+                    setLeader(args, dominion, player);
+                } else if (args[0].equalsIgnoreCase("map")) {
+                    showDominionMap(player);
+                } else if (args[0].equalsIgnoreCase("mapcolor")) {
+                    setMapColor(args, dominion, player);
+                } else if (args[0].equalsIgnoreCase("autoclaim")) {
+                    claimToggle(player);
+                } else if (args[0].equalsIgnoreCase("food")) {
+                    foodStorage(player);
+                } else if (args[0].equalsIgnoreCase("resources")) {
+                    resources(dominion, player);
+                } else if (args[0].equalsIgnoreCase("conquer")) {
+                    conquer(args, dominion, player);
+                } else if (args[0].equalsIgnoreCase("surrender")) {
+                    surrender(args, dominion, player);
+                } else if (args[0].equalsIgnoreCase("rebel")) {
+                    rebel(args, dominion, player);
+                } else if (args[0].equalsIgnoreCase("retreat")) {
+                    retreat(args, dominion, player);
+                } else if (args[0].equalsIgnoreCase("msg")) {
+                    ChatUtils.evaluateDominionMessage(player, args, true);
+                } else if (args[0].equalsIgnoreCase("guide")) {
+                    CommandDominions.giveBook(player);
+                } else if (args[0].equalsIgnoreCase("rank")) {
+                    if (args.length >= 2 && args[1].equalsIgnoreCase("scan")) {
+                        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+                        if (aranarthPlayer.getCouncilRank() == 3) {
+                            DominionLevelUtils.runPeriodicScan();
+                            player.sendMessage(ChatUtils.chatMessage("&7Dominion scan triggered"));
+                        } else {
+                            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to run this command"));
+                        }
+                    } else {
+                        showDominionLevel(player, dominion);
+                    }
+                } else if (args[0].equalsIgnoreCase("setrank")) {
+                    setMemberRank(args, dominion, player);
+                } else if (args[0].equalsIgnoreCase("buychunks")) {
+                    buyChunks(args, dominion, player);
+                } else if (args[0].equalsIgnoreCase("outpost")) {
+                    handleOutpost(args, dominion, player);
+                } else if (args[0].equalsIgnoreCase("defender")) {
+                    handleDefender(dominion, player);
+                } else if (args[0].equalsIgnoreCase("plot")) {
+                    handlePlot(args, dominion, player);
+                } else if (args[0].equalsIgnoreCase("rescan")) {
+                    rescanDominion(args, player);
+                } else {
+                    player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/dominion <command>"));
+                    return false;
+                }
+                return true;
+            } else {
+                sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to execute this command!"));
+                return false;
+            }
+        }
     }
 }

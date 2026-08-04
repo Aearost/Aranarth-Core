@@ -22,11 +22,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionEffectTypeCategory;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Handles logic when a player blows a Goat Horn.
@@ -127,6 +123,7 @@ public class GoatHornUse {
 
     /**
      * Temporarily toggles the goat horn attribute and applies the potion effect.
+     *
      * @param player The player.
      * @param effect The potion effect.
      */
@@ -139,6 +136,7 @@ public class GoatHornUse {
 
     /**
      * Rallies all nearby defenders of the player's dominion to the targeted location.
+     *
      * @param player The player blowing the horn.
      */
     private void callNearbyDefenders(Player player) {
@@ -198,6 +196,7 @@ public class GoatHornUse {
 
     /**
      * Removes all negative potion effects from the player.
+     *
      * @param player The player.
      */
     private void cleanseNegativeEffects(Player player) {
@@ -215,7 +214,8 @@ public class GoatHornUse {
 
     /**
      * Summons the pre-designated sentinels associated to the player.
-     * @param player The player who blew the horn.
+     *
+     * @param player       The player who blew the horn.
      * @param sentinelType The sentinel type that the player will be summoning.
      */
     private void summonSentinels(Player player, EntityType sentinelType) {
@@ -247,14 +247,23 @@ public class GoatHornUse {
                         Player closestPlayerTarget = getTarget(player);
                         for (Sentinel sentinel : localSentinels) {
                             Entity entity = Bukkit.getEntity(sentinel.getUuid());
-                            if (entity == null) continue;
+                            if (entity == null) {
+                                continue;
+                            }
                             entity.teleport(player.getLocation());
                             if (entity instanceof Mob mob) {
-                                if (closestPlayerTarget != null) mob.setTarget(closestPlayerTarget);
-                                if (mob instanceof Wolf wolf) wolf.setSitting(false);
+                                if (closestPlayerTarget != null) {
+                                    mob.setTarget(closestPlayerTarget);
+                                }
+                                if (mob instanceof Wolf wolf) {
+                                    wolf.setSitting(false);
+                                }
                             }
                         }
-                        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
+                        int tpVol = AranarthUtils.getPlayer(player.getUniqueId()).getTeleportSoundVolume();
+                        if (tpVol > 0) {
+                            player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, tpVol / 100f, 0.9F);
+                        }
                         player.getWorld().spawnParticle(Particle.PORTAL, player.getEyeLocation(), 250, 3, 2, 3);
                     }
                 }.runTaskLater(AranarthCore.getInstance(), 60L);
@@ -291,9 +300,14 @@ public class GoatHornUse {
                     @Override
                     public void run() {
                         Entity entity = Bukkit.getEntity(sentinel.getUuid());
-                        if (entity == null) return;
+                        if (entity == null) {
+                            return;
+                        }
                         entity.teleport(player.getLocation());
-                        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
+                        int tpVol = AranarthUtils.getPlayer(player.getUniqueId()).getTeleportSoundVolume();
+                        if (tpVol > 0) {
+                            player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, tpVol / 100f, 0.9F);
+                        }
                         player.getWorld().spawnParticle(Particle.PORTAL, player.getEyeLocation(), 250, 3, 2, 3);
                     }
                 }.runTaskLater(AranarthCore.getInstance(), 60L);
@@ -303,6 +317,7 @@ public class GoatHornUse {
 
     /**
      * Provides the target of the player using the horn.
+     *
      * @param player The player using the horn.
      * @return The target of the player using the horn.
      */
@@ -319,8 +334,8 @@ public class GoatHornUse {
 
                     if ((playerDominion == null || nearbyDominion == null) ||
                             (!nearbyDominion.isSameDominion(playerDominion)
-                            && !playerDominion.isAllied(nearbyDominion)
-                            && !playerDominion.isTruced(nearbyDominion))) {
+                                    && !playerDominion.isAllied(nearbyDominion)
+                                    && !playerDominion.isTruced(nearbyDominion))) {
                         closestPlayer = nearbyPlayer;
                         closestDistance = distance;
                     }

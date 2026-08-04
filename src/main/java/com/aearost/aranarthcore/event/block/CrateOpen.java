@@ -19,11 +19,7 @@ import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.AranarthVote;
 import com.aearost.aranarthcore.objects.CrateType;
-import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.BrewRecipeUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
-import com.aearost.aranarthcore.utils.DiscordUtils;
-import com.aearost.aranarthcore.utils.PersistenceUtils;
+import com.aearost.aranarthcore.utils.*;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
 import com.gmail.nossr50.datatypes.player.PlayerProfile;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
@@ -360,6 +356,7 @@ public class CrateOpen {
 
     /**
      * Gets the number of empty inventory slots the player has.
+     *
      * @param player The player.
      * @return The number of empty inventory slots the player has.
      */
@@ -375,8 +372,9 @@ public class CrateOpen {
 
     /**
      * Plays a sound effect when a player opens the crate.
-     * @param player The player that is opening the crate.
-     * @param type The type of crate that is being opened.
+     *
+     * @param player   The player that is opening the crate.
+     * @param type     The type of crate that is being opened.
      * @param onFinish The callback allowing the item to be provided with a delay.
      */
     private void playCrateOpenSound(Player player, CrateType type, Runnable onFinish) {
@@ -384,6 +382,7 @@ public class CrateOpen {
         Sound sound = Sound.BLOCK_NOTE_BLOCK_BELL;
         new BukkitRunnable() {
             int runs = 0;
+
             @Override
             public void run() {
                 float pitch = 1F;
@@ -409,8 +408,9 @@ public class CrateOpen {
                 }
 
                 // No sound
-                if (pitch != 0) {
-                    player.playSound(player, sound, 1F, pitch);
+                int crateVol = AranarthUtils.getPlayer(player.getUniqueId()).getCrateSoundVolume();
+                if (pitch != 0 && crateVol > 0) {
+                    player.playSound(player, sound, crateVol / 100f, pitch);
                 }
 
                 // End after a short delay
@@ -428,6 +428,7 @@ public class CrateOpen {
 
     /**
      * Determines which reward the player will get from the Vote Crate.
+     *
      * @param player The player opening the Vote Crate.
      */
     private void determineVoteCrateReward(Player player) {
@@ -543,6 +544,7 @@ public class CrateOpen {
 
     /**
      * Determines which reward the player will get from the Rare Crate.
+     *
      * @param player The player opening the Rare Crate.
      */
     private void determineRareCrateReward(Player player) {
@@ -648,6 +650,7 @@ public class CrateOpen {
 
     /**
      * Determines which reward the player will get from the Epic Crate.
+     *
      * @param player The player opening the Epic Crate.
      */
     private void determineEpicCrateReward(Player player) {
@@ -700,11 +703,26 @@ public class CrateOpen {
                 } else if (chance <= 56) {
                     int weaponRoll = new Random().nextInt(5);
                     switch (weaponRoll) {
-                        case 0 -> { reward = new ItemStack(Material.TRIDENT, 1); name = "&#579b8c&lTrident x1"; }
-                        case 1 -> { reward = new ItemStack(Material.ELYTRA, 1); name = "&#7d7d96&lElytra x1"; }
-                        case 2 -> { reward = new ItemStack(Material.SNIFFER_EGG, 1); name = "&#6ab567&lSniffer Egg x1"; }
-                        case 3 -> { reward = new ItemStack(Material.CONDUIT, 1); name = "&#4dcfcf&lConduit x1"; }
-                        default -> { reward = new ItemStack(Material.SHULKER_SHELL, 8); name = "&#946794&lShulker Shell x8"; }
+                        case 0 -> {
+                            reward = new ItemStack(Material.TRIDENT, 1);
+                            name = "&#579b8c&lTrident x1";
+                        }
+                        case 1 -> {
+                            reward = new ItemStack(Material.ELYTRA, 1);
+                            name = "&#7d7d96&lElytra x1";
+                        }
+                        case 2 -> {
+                            reward = new ItemStack(Material.SNIFFER_EGG, 1);
+                            name = "&#6ab567&lSniffer Egg x1";
+                        }
+                        case 3 -> {
+                            reward = new ItemStack(Material.CONDUIT, 1);
+                            name = "&#4dcfcf&lConduit x1";
+                        }
+                        default -> {
+                            reward = new ItemStack(Material.SHULKER_SHELL, 8);
+                            name = "&#946794&lShulker Shell x8";
+                        }
                     }
                 } else if (chance <= 64) {
                     reward = getCycledEpicSpawnEgg(new Random().nextInt(4));
@@ -822,6 +840,7 @@ public class CrateOpen {
 
     /**
      * Determines which reward the player will get from the Godly Crate.
+     *
      * @param player The player opening the Godly Crate.
      */
     private void determineGodlyCrateReward(Player player) {
@@ -959,10 +978,11 @@ public class CrateOpen {
 
     /**
      * Sends a nearby broadcast message to all players within 10 blocks of the crate opener.
-     * @param player The player that opened the crate.
+     *
+     * @param player         The player that opened the crate.
      * @param aranarthPlayer The AranarthPlayer object of the opener.
-     * @param reward The reward string to display.
-     * @param crateName The name of the crate type (with color codes).
+     * @param reward         The reward string to display.
+     * @param crateName      The name of the crate type (with color codes).
      */
     private void broadcastRewardToNearbyPlayers(Player player, AranarthPlayer aranarthPlayer, String reward, String crateName) {
         for (Player nearby : Bukkit.getOnlinePlayers()) {
@@ -974,6 +994,7 @@ public class CrateOpen {
 
     /**
      * Provides the current time as a formatted String.
+     *
      * @return The current time.
      */
     private String getCurrentTime() {
@@ -989,6 +1010,7 @@ public class CrateOpen {
 
     /**
      * Provides the name of the crate type that the player is currently opening.
+     *
      * @param aranarthPlayer The player that is already opening a crate.
      * @return The name of the crate type that the player is currently opening.
      */
@@ -1007,6 +1029,7 @@ public class CrateOpen {
 
     /**
      * Provides the cluster that is associated to the input index.
+     *
      * @param index The index of the cluster.
      * @return The cluster.
      */
@@ -1027,6 +1050,7 @@ public class CrateOpen {
 
     /**
      * Provides the armor trim that is associated to the input index.
+     *
      * @param index The index of the armor trim.
      * @return The armor trim.
      */
@@ -1057,6 +1081,7 @@ public class CrateOpen {
 
     /**
      * Provides the enhanced aranarthium ingot that is associated to the input index.
+     *
      * @param index The index of the enhanced aranarthium ingot.
      * @return The enhanced aranarthium ingot.
      */
@@ -1075,6 +1100,7 @@ public class CrateOpen {
 
     /**
      * Provides the spawn egg that is associated to the input index for Epic crate rewards.
+     *
      * @param index The index of the spawn egg.
      * @return The spawn egg.
      */
@@ -1091,6 +1117,7 @@ public class CrateOpen {
 
     /**
      * Provides the spawn egg that is associated to the input index for Godly crate rewards.
+     *
      * @param index The index of the spawn egg.
      * @return The spawn egg.
      */
@@ -1106,6 +1133,7 @@ public class CrateOpen {
 
     /**
      * Combines the 4 clusters if they are for the same type.
+     *
      * @param cluster1 The first cluster.
      * @param cluster2 The second cluster.
      * @param cluster3 The third cluster.

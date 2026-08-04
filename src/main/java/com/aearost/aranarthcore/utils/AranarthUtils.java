@@ -1,25 +1,20 @@
 package com.aearost.aranarthcore.utils;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
+import com.aearost.aranarthcore.enums.Pronouns;
+import com.aearost.aranarthcore.enums.Weather;
+import com.aearost.aranarthcore.event.listener.misc.PotionEffectListener;
+import com.aearost.aranarthcore.items.arrow.*;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.network.NetworkTabManager;
-import com.aearost.aranarthcore.enums.Pronouns;
-import com.aearost.aranarthcore.enums.Weather;
-import com.aearost.aranarthcore.items.arrow.*;
-import com.aearost.aranarthcore.event.listener.misc.PotionEffectListener;
 import com.aearost.aranarthcore.objects.*;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.*;
 import org.bukkit.ban.ProfileBanList;
-import org.bukkit.Chunk;
-import org.bukkit.block.Biome;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.Chest;
-import org.bukkit.block.DoubleChest;
+import org.bukkit.block.*;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -59,4128 +54,4348 @@ import static com.aearost.aranarthcore.objects.CustomKeys.*;
  */
 public class AranarthUtils {
 
-	private static final HashMap<UUID, AranarthPlayer> players = new HashMap<>();
-	private static List<Home> homes = new ArrayList<>();
-	private static final HashMap<Location, Integer> dragonHeads = new HashMap<>();
-	private static final HashMap<UUID, BannerMeta> playerBanners = new HashMap<>();
-	private static List<LockedContainer> lockedContainers;
-	private static int day;
-	private static int weekday;
-	private static Month month;
-	private static int year;
-	private static long lastResourceWorldResetTime = 0L;
-	private static int stormDuration;
-	private static int stormDelay;
-	private static boolean hasStormedInMonth;
-	private static int currentTime;
-	private static int windPlayTimer;
-	private static boolean isPlayingWindSound;
-	private static int cherryParticleDelay;
-	private static Weather weather;
-	private static final List<UUID> mutedPlayers = new ArrayList<>();
-	private static List<Home> warps = new ArrayList<>();
-	private static final HashMap<UUID, List<Punishment>> punishments = new HashMap<>();
-	private static final List<UUID> originalPlayers = new ArrayList<>();
-	private static int phantomSpawnDelay = 0;
-	private static final HashMap<Boost, LocalDateTime> serverBoosts = new HashMap<>();
-	private static final Set<String> sentBoostReminders = new HashSet<>();
-	private static final HashMap<UUID, List<Material>> compressibleTypes = new HashMap<>();
-	private static final List<CrateType> cratesInUse = new ArrayList<>();
-	private static final Set<UUID> physicallySneaking = new HashSet<>();
-	private static final HashMap<UUID, Location> shopLocations = new LinkedHashMap<>();
-	public static final Map<UUID, Boolean> playerInFaeBiome = new HashMap<>();
-	public static final Map<UUID, Location> playerLastFlowerLocation = new HashMap<>();
-	private static final Set<Material> VALID_TRAIL_SOIL = EnumSet.of(
-			Material.GRASS_BLOCK, Material.DIRT, Material.COARSE_DIRT,
-			Material.PODZOL, Material.ROOTED_DIRT, Material.MUD,
-			Material.MUDDY_MANGROVE_ROOTS, Material.MYCELIUM
-	);
-	private static final HashMap<UUID, int[]> shopIslandCenters = new HashMap<>();
-	private static final HashMap<UUID, Set<UUID>> shopCollaborators = new HashMap<>();
-	private static final HashMap<UUID, UUID> collaboratorShop = new HashMap<>(); // collaborator UUID → owner UUID
-	private static final HashMap<UUID, UUID> pendingShopInvites = new HashMap<>(); // invitee UUID → owner UUID
-	private static final HashMap<UUID, String> shopNames = new HashMap<>();
-	private static int shopIslandCounter = 0;
-	private static final HashMap<UUID, BukkitTask> teleportingPlayers = new HashMap<>();
-	private static final List<AranarthVote> votes = new ArrayList<>();
-	private static final HashMap<UUID, List<PlayerKillDeathScore>> killDeathScores = new HashMap<>();
-	private static final HashMap<UUID, Integer> chatGameGuesses = new HashMap<>();
-	private static final HashMap<UUID, Double> chatGameEarnings = new HashMap<>();
-	private static final HashMap<UUID, Double> chatGameBestTimes = new HashMap<>();
-	private static final HashMap<UUID, Integer> chatGameHighestStreaks = new HashMap<>();
-	private static final HashMap<UUID, Integer> pendingVoteKeys = new HashMap<>();
-	private static final HashMap<UUID, Integer> pendingRareKeys = new HashMap<>();
-	private static final HashMap<UUID, Integer> pendingEpicKeys = new HashMap<>();
-	private static final HashMap<UUID, Integer> pendingGodlyKeys = new HashMap<>();
+    public static final Map<UUID, Boolean> playerInFaeBiome = new HashMap<>();
+    public static final Map<UUID, Location> playerLastFlowerLocation = new HashMap<>();
+    private static final HashMap<UUID, AranarthPlayer> players = new HashMap<>();
+    private static final HashMap<Location, Integer> dragonHeads = new HashMap<>();
+    private static final HashMap<UUID, BannerMeta> playerBanners = new HashMap<>();
+    private static final List<UUID> mutedPlayers = new ArrayList<>();
+    private static final HashMap<UUID, List<Punishment>> punishments = new HashMap<>();
+    private static final List<UUID> originalPlayers = new ArrayList<>();
+    private static final HashMap<Boost, LocalDateTime> serverBoosts = new HashMap<>();
+    private static final Set<String> sentBoostReminders = new HashSet<>();
+    private static final HashMap<UUID, List<Material>> compressibleTypes = new HashMap<>();
+    private static final List<CrateType> cratesInUse = new ArrayList<>();
+    private static final Set<UUID> physicallySneaking = new HashSet<>();
+    private static final HashMap<UUID, Location> shopLocations = new LinkedHashMap<>();
+    private static final Set<Material> VALID_TRAIL_SOIL = EnumSet.of(
+            Material.GRASS_BLOCK, Material.DIRT, Material.COARSE_DIRT,
+            Material.PODZOL, Material.ROOTED_DIRT, Material.MUD,
+            Material.MUDDY_MANGROVE_ROOTS, Material.MYCELIUM
+    );
+    private static final HashMap<UUID, int[]> shopIslandCenters = new HashMap<>();
+    private static final HashMap<UUID, Set<UUID>> shopCollaborators = new HashMap<>();
+    private static final HashMap<UUID, UUID> collaboratorShop = new HashMap<>(); // collaborator UUID → owner UUID
+    private static final HashMap<UUID, UUID> pendingShopInvites = new HashMap<>(); // invitee UUID → owner UUID
+    private static final HashMap<UUID, String> shopNames = new HashMap<>();
+    private static final HashMap<UUID, BukkitTask> teleportingPlayers = new HashMap<>();
+    private static final List<AranarthVote> votes = new ArrayList<>();
+    private static final HashMap<UUID, List<PlayerKillDeathScore>> killDeathScores = new HashMap<>();
+    private static final HashMap<UUID, Integer> chatGameGuesses = new HashMap<>();
+    private static final HashMap<UUID, Double> chatGameEarnings = new HashMap<>();
+    private static final HashMap<UUID, Double> chatGameBestTimes = new HashMap<>();
+    private static final HashMap<UUID, Integer> chatGameHighestStreaks = new HashMap<>();
+    private static final HashMap<UUID, Integer> pendingVoteKeys = new HashMap<>();
+    private static final HashMap<UUID, Integer> pendingRareKeys = new HashMap<>();
+    private static final HashMap<UUID, Integer> pendingEpicKeys = new HashMap<>();
+    private static final HashMap<UUID, Integer> pendingGodlyKeys = new HashMap<>();
+    private static final Set<String> SURVIVAL_WORLD_PREFIXES = Set.of("world", "resource", "spawn");
+    private static List<Home> homes = new ArrayList<>();
+    private static List<LockedContainer> lockedContainers;
+    private static int day;
+    private static int weekday;
+    private static Month month;
+    private static int year;
+    private static long lastResourceWorldResetTime = 0L;
+    private static int stormDuration;
+    private static int stormDelay;
+    private static boolean hasStormedInMonth;
+    private static int currentTime;
+    private static int windPlayTimer;
+    private static boolean isPlayingWindSound;
+    private static int cherryParticleDelay;
+    private static Weather weather;
+    private static List<Home> warps = new ArrayList<>();
+    private static int phantomSpawnDelay = 0;
+    private static int shopIslandCounter = 0;
 
-	/**
-	 * Determines if the player has played on the server before.
-	 *
-	 * @param player The player to determine.
-	 * @return Confirmation of whether they've played before.
-	 */
-	public static boolean hasPlayedBefore(Player player) {
-		return players.containsKey(player.getUniqueId());
-	}
+    /**
+     * Determines if the player has played on the server before.
+     *
+     * @param player The player to determine.
+     * @return Confirmation of whether they've played before.
+     */
+    public static boolean hasPlayedBefore(Player player) {
+        return players.containsKey(player.getUniqueId());
+    }
 
-	/**
-	 * Sets the username of a player. This is used to update a player's username
-	 * value in the case that they changed it.
-	 *
-	 * @param player The player whose username will be changed.
-	 */
-	public static void setUsername(Player player) {
-		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
-		aranarthPlayer.setUsername(player.getName());
-		players.put(player.getUniqueId(), aranarthPlayer);
-	}
+    /**
+     * Sets the username of a player. This is used to update a player's username
+     * value in the case that they changed it.
+     *
+     * @param player The player whose username will be changed.
+     */
+    public static void setUsername(Player player) {
+        AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+        aranarthPlayer.setUsername(player.getName());
+        players.put(player.getUniqueId(), aranarthPlayer);
+    }
 
-	/**
-	 * Gets the AranarthPlayer corresponding to an input UUID.
-	 *
-	 * @param uuid The UUID of the player to be found.
-	 * @return The AranarthPlayer tied to the UUID.
-	 */
-	public static AranarthPlayer getPlayer(UUID uuid) {
-		return players.get(uuid);
-	}
-	/**
-	 * Adds or overrides a player to the players HashMap.
-	 *
-	 * @param uuid The UUID of the player to be updated.
-	 * @param aranarthPlayer The new AranarthPlayer to be used.
-	 */
-	public static void setPlayer(UUID uuid, AranarthPlayer aranarthPlayer) {
-		players.put(uuid, aranarthPlayer);
-	}
+    /**
+     * Gets the AranarthPlayer corresponding to an input UUID.
+     *
+     * @param uuid The UUID of the player to be found.
+     * @return The AranarthPlayer tied to the UUID.
+     */
+    public static AranarthPlayer getPlayer(UUID uuid) {
+        return players.get(uuid);
+    }
 
-	/**
-	 * Returns whether the player is physically holding the sneak key, regardless of whether the
-	 * server-side sneak state was cancelled (e.g. by the bending restriction handler).
-	 * Updated at EventPriority.LOWEST in AranarthCoreBendingListener before any cancellation.
-	 */
-	public static boolean isPhysicallySneaking(UUID uuid) {
-		return physicallySneaking.contains(uuid);
-	}
+    /**
+     * Adds or overrides a player to the players HashMap.
+     *
+     * @param uuid           The UUID of the player to be updated.
+     * @param aranarthPlayer The new AranarthPlayer to be used.
+     */
+    public static void setPlayer(UUID uuid, AranarthPlayer aranarthPlayer) {
+        players.put(uuid, aranarthPlayer);
+    }
 
-	public static void setPhysicallySneaking(UUID uuid, boolean sneaking) {
-		if (sneaking) {
-			physicallySneaking.add(uuid);
-		} else {
-			physicallySneaking.remove(uuid);
-		}
-	}
+    /**
+     * Returns whether the player is physically holding the sneak key, regardless of whether the
+     * server-side sneak state was cancelled (e.g. by the bending restriction handler).
+     * Updated at EventPriority.LOWEST in AranarthCoreBendingListener before any cancellation.
+     */
+    public static boolean isPhysicallySneaking(UUID uuid) {
+        return physicallySneaking.contains(uuid);
+    }
 
-	/**
-	 * Adds a player to the players HashMap.
-	 *
-	 * @param uuid The UUID of the player to be added.
-	 * @param aranarthPlayer The new AranarthPlayer to be added.
-	 */
-	public static void addPlayer(UUID uuid, AranarthPlayer aranarthPlayer) {
-		players.put(uuid, aranarthPlayer);
-	}
+    public static void setPhysicallySneaking(UUID uuid, boolean sneaking) {
+        if (sneaking) {
+            physicallySneaking.add(uuid);
+        } else {
+            physicallySneaking.remove(uuid);
+        }
+    }
 
-	/**
-	 * Returns the names/nicknames of all players currently online across the entire network
-	 * (both this server and any remote servers), filtered by the given prefix.
-	 * Falls back to local-only when the network layer is not active (test server).
-	 */
-	public static List<String> getNetworkPlayerNames(String prefix) {
-		List<String> names = new ArrayList<>();
-		String lowerPrefix = prefix.toLowerCase();
+    /**
+     * Adds a player to the players HashMap.
+     *
+     * @param uuid           The UUID of the player to be added.
+     * @param aranarthPlayer The new AranarthPlayer to be added.
+     */
+    public static void addPlayer(UUID uuid, AranarthPlayer aranarthPlayer) {
+        players.put(uuid, aranarthPlayer);
+    }
 
-		for (Player p : Bukkit.getOnlinePlayers()) {
-			String username = p.getName();
-			if (lowerPrefix.isEmpty() || username.toLowerCase().startsWith(lowerPrefix)) {
-				names.add(username);
+    /**
+     * Returns the names/nicknames of all players currently online across the entire network
+     * (both this server and any remote servers), filtered by the given prefix.
+     * Falls back to local-only when the network layer is not active (test server).
+     */
+    public static List<String> getNetworkPlayerNames(String prefix) {
+        List<String> names = new ArrayList<>();
+        String lowerPrefix = prefix.toLowerCase();
+
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            String username = p.getName();
+            if (lowerPrefix.isEmpty() || username.toLowerCase().startsWith(lowerPrefix)) {
+                names.add(username);
+            }
+        }
+
+        boolean active = NetworkManager.isActive();
+        int remoteRosterSize = active ? NetworkManager.getInstance().getRemoteRoster().size() : -1;
+        if (active) {
+            for (NetworkPlayer np : NetworkManager.getInstance().getRemoteRoster().values()) {
+                String username = np.getUsername();
+                if (!username.isEmpty()
+                        && (lowerPrefix.isEmpty() || username.toLowerCase().startsWith(lowerPrefix))) {
+                    names.add(username);
+                }
+            }
+        }
+
+        return names;
+    }
+
+    /**
+     * Determines if the player is one of the original players of Aranarth.
+     *
+     * @param uuid The player's UUID.
+     * @return Confirmation whether the player is one of the original players of Aranarth.
+     */
+    public static boolean isOriginalPlayer(UUID uuid) {
+        return originalPlayers.contains(uuid);
+    }
+
+    public static void addOriginalPlayer(UUID uuid) {
+        if (!originalPlayers.contains(uuid)) {
+            originalPlayers.add(uuid);
+        }
+    }
+
+    public static void removeOriginalPlayer(UUID uuid) {
+        originalPlayers.remove(uuid);
+    }
+
+    public static List<UUID> getOriginalPlayers() {
+        return originalPlayers;
+    }
+
+    public static void setOriginalPlayers(List<UUID> uuids) {
+        originalPlayers.clear();
+        originalPlayers.addAll(uuids);
+    }
+
+    /**
+     * Gets the stored username of a player.
+     *
+     * @param player The player whose username is to be found.
+     * @return The username of the player.
+     */
+    public static String getUsername(OfflinePlayer player) {
+        return players.get(player.getUniqueId()).getUsername();
+    }
+
+    /**
+     * Gets the stored nickname of a player.
+     *
+     * @param player The player whose nickname is to be found.
+     * @return The nickname of the player, or username if no nickname was found.
+     */
+    public static String getNickname(OfflinePlayer player) {
+        String nickname = players.get(player.getUniqueId()).getNickname();
+        return (nickname == null || nickname.isEmpty()) ? getUsername(player) : nickname;
+    }
+
+    /**
+     * Adds a new homepad location.
+     *
+     * @param location The Location that the homepad is located at.
+     */
+    public static void addNewHomepad(Location location) {
+        homes.add(new Home("NEW", location, Material.HEAVY_WEIGHTED_PRESSURE_PLATE));
+    }
+
+    /**
+     * Updates the name, location, and/or icon of an existing homepad.
+     *
+     * @param homeName  The new name to be used for the home.
+     * @param direction The Location containing the direction of the homepad to be used.
+     * @param icon      The Material that will be displayed for the homepad.
+     */
+    public static void updateHomepad(String homeName, Location direction, Material icon) {
+        for (int i = 0; i < homes.size(); i++) {
+            if (homes.get(i).getLocation().getBlockX() == direction.getBlockX()
+                    && homes.get(i).getLocation().getBlockY() == direction.getBlockY()
+                    && homes.get(i).getLocation().getBlockZ() == direction.getBlockZ()) {
+                Home updatedHome = new Home(homeName, direction, icon);
+                homes.set(i, updatedHome);
+            }
+        }
+    }
+
+    /**
+     * Provides the list of homepads being used.
+     *
+     * @return The List of homepads.
+     */
+    public static List<Home> getHomepads() {
+        return homes;
+    }
+
+    /**
+     * Overrides the list of homepads being used.
+     *
+     * @param newHomes The new list of homepads.
+     */
+    public static void setHomepads(List<Home> newHomes) {
+        homes = newHomes;
+    }
+
+    /**
+     * Provides the HashMap of AranarthPlayers separated by UUID.
+     *
+     * @return The List of AranarthPlayers
+     */
+    public static HashMap<UUID, AranarthPlayer> getAranarthPlayers() {
+        return players;
+    }
+
+    /**
+     * Provides the homepad at the specified Location.
+     *
+     * @param location The location of the homepad.
+     * @return The homepad at the location.
+     */
+    public static Home getHomepad(Location location) {
+        for (Home home : homes) {
+            if (locationsMatch(location, home.getLocation())) {
+                return home;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Removes the homepad at the specified Location.
+     *
+     * @param location The location of the homepad to be removed.
+     */
+    public static void removeHomepad(Location location) {
+        Home toRemove = null;
+        for (Home home : homes) {
+            if (locationsMatch(location, home.getLocation())) {
+                toRemove = home;
+            }
+        }
+        homes.remove(toRemove);
+    }
+
+    /**
+     * Verifies that the two locations share the same block coordinate.
+     *
+     * @param location1 The first location.
+     * @param location2 The second location.
+     * @return Confirmation of whether the two locations are the same.
+     */
+    public static boolean locationsMatch(Location location1, Location location2) {
+        if (Objects.nonNull(location1.getWorld()) && Objects.nonNull(location2.getWorld())) {
+            return location1.getBlockX() == location2.getBlockX() && location1.getBlockY() == location2.getBlockY()
+                    && location1.getBlockZ() == location2.getBlockZ()
+                    && location1.getWorld().getName().equals(location2.getWorld().getName());
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Returns the number of non-null slots in the player's main inventory (for logging).
+     */
+    private static int invSize(Player player) {
+        int count = 0;
+        for (ItemStack s : player.getInventory().getContents()) {
+			if (s != null) {
+				count++;
 			}
-		}
+        }
+        return count;
+    }
 
-		boolean active = NetworkManager.isActive();
-		int remoteRosterSize = active ? NetworkManager.getInstance().getRemoteRoster().size() : -1;
-		if (active) {
-			for (NetworkPlayer np : NetworkManager.getInstance().getRemoteRoster().values()) {
-				String username = np.getUsername();
-				if (!username.isEmpty()
-						&& (lowerPrefix.isEmpty() || username.toLowerCase().startsWith(lowerPrefix))) {
-					names.add(username);
-				}
-			}
-		}
+    public static void switchInventory(Player player, String currentWorld, String destinationWorld) throws IOException {
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
-		return names;
-	}
+        String rawFrom = currentWorld;
+        String rawTo = destinationWorld;
 
-	/**
-	 * Determines if the player is one of the original players of Aranarth.
-	 * @param uuid The player's UUID.
-	 * @return Confirmation whether the player is one of the original players of Aranarth.
-	 */
-	public static boolean isOriginalPlayer(UUID uuid) {
-		return originalPlayers.contains(uuid);
-	}
+        // Include any world that should share the inventory of Survival
+        if (isSmpWorld(currentWorld) || currentWorld.startsWith("resource") || currentWorld.startsWith("spawn") || currentWorld.equals("shops")) {
+            currentWorld = "world";
+        }
+        if (isSmpWorld(destinationWorld) || destinationWorld.startsWith("resource") || destinationWorld.startsWith("spawn") || destinationWorld.equals("shops")) {
+            destinationWorld = "world";
+        }
 
-	public static void addOriginalPlayer(UUID uuid) {
-		if (!originalPlayers.contains(uuid)) {
-			originalPlayers.add(uuid);
-		}
-	}
+        boolean isSurvivalToSurvival = currentWorld.startsWith("world") && destinationWorld.startsWith("world");
+        boolean isSameWorld = currentWorld.equals(destinationWorld);
 
-	public static void removeOriginalPlayer(UUID uuid) {
-		originalPlayers.remove(uuid);
-	}
+        // No need to change inventory
+        if (isSurvivalToSurvival || isSameWorld) {
+            if (!destinationWorld.equals("creative")) {
+                if (aranarthPlayer.getCouncilRank() != 3) {
+                    player.setGameMode(GameMode.SURVIVAL);
+                }
+                return;
+            }
+        } else {
+            // Remove potion effects when changing the world
+            for (PotionEffect effect : player.getActivePotionEffects()) {
+                player.removePotionEffect(effect.getType());
+            }
+        }
 
-	public static void setOriginalPlayers(List<UUID> uuids) {
-		originalPlayers.clear();
-		originalPlayers.addAll(uuids);
-	}
+        // World edit permissions
+        PermissionAttachment perms = PermissionUtils.addTrackedAttachment(player);
+        if (destinationWorld.equals("creative")) {
+            perms.setPermission("worldedit.*", true);
+        } else {
+            perms.setPermission("worldedit.*", false);
+        }
+        player.updateCommands();
 
-	public static List<UUID> getOriginalPlayers() {
-		return originalPlayers;
-	}
+        if (currentWorld.startsWith("world")) {
+            aranarthPlayer.setSurvivalInventory(ItemUtils.toBase64(player.getInventory()));
+            // Immediately persist the survival snapshot to MySQL so it survives a rapid server
+            // restart before the next periodic save or quit-time async write can run.
+            PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
+            if (destinationWorld.startsWith("arena")) {
+                boolean hasArena = !aranarthPlayer.getArenaInventory().isEmpty();
+                if (hasArena) {
+                    player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getArenaInventory()));
+                    player.setGameMode(GameMode.SURVIVAL);
+                    PermissionUtils.toggleArenaBendingPermissions(player, true);
+                    PermissionUtils.updateSubElements(player);
+                    player.updateCommands();
+                    return;
+                }
+                player.getInventory().clear();
+                player.setGameMode(GameMode.SURVIVAL);
+                PermissionUtils.toggleArenaBendingPermissions(player, true);
+                PermissionUtils.updateSubElements(player);
+                player.updateCommands();
+                return;
+            } else if (destinationWorld.startsWith("creative")) {
+                boolean hasCreative = !aranarthPlayer.getCreativeInventory().isEmpty();
+                if (hasCreative) {
+                    player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getCreativeInventory()));
+                } else {
+                    player.getInventory().clear();
+                }
+                player.setGameMode(GameMode.CREATIVE);
+                return;
+            }
+            player.getInventory().clear();
+        } else if (currentWorld.startsWith("arena")) {
+            if (destinationWorld.startsWith("world")) {
+                aranarthPlayer.setArenaInventory(ItemUtils.toBase64(player.getInventory()));
+                boolean hasSurvival = !aranarthPlayer.getSurvivalInventory().isEmpty();
+                if (hasSurvival) {
+                    player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));
+                } else {
+                    // survivalInventory is empty — this should not happen for a player who has
+                    // previously played in survival. Skipping clear to avoid wiping items that
+                    // were not properly persisted (MySQL race condition on restart). Logging so
+                    // admins can investigate and use /invswap to correct if needed.
+                    Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] survivalInventory empty for "
+                            + player.getName() + " during arena→world switch — skipping clear to protect items");
+                }
+                player.setGameMode(GameMode.SURVIVAL);
+                PermissionUtils.toggleArenaBendingPermissions(player, false);
+                PermissionUtils.updateSubElements(player);
+                player.updateCommands();
+                return;
+            } else if (destinationWorld.startsWith("creative")) {
+                aranarthPlayer.setArenaInventory(ItemUtils.toBase64(player.getInventory()));
+                boolean hasCreative = !aranarthPlayer.getCreativeInventory().isEmpty();
+                if (hasCreative) {
+                    player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getCreativeInventory()));
+                } else {
+                    player.getInventory().clear();
+                }
+                player.setGameMode(GameMode.CREATIVE);
+                PermissionUtils.toggleArenaBendingPermissions(player, false);
+                PermissionUtils.updateSubElements(player);
+                player.updateCommands();
+                return;
+            }
+            player.getInventory().clear();
+        } else if (currentWorld.startsWith("creative")) {
+            if (destinationWorld.startsWith("world")) {
+                aranarthPlayer.setCreativeInventory(ItemUtils.toBase64(player.getInventory()));
+                boolean hasSurvival = !aranarthPlayer.getSurvivalInventory().isEmpty();
+                Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Inv] creative→world switch for "
+                        + player.getName() + ": survivalInventory "
+                        + (hasSurvival ? "set (length=" + aranarthPlayer.getSurvivalInventory().length() + ")" : "EMPTY"));
+                if (hasSurvival) {
+                    player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));
+                } else {
+                    // survivalInventory is empty — this should not happen for a player who has
+                    // previously played in survival. Skipping clear to avoid wiping items that
+                    // were not properly persisted (MySQL race condition on restart). Logging so
+                    // admins can investigate and use /invswap to correct if needed.
+                    Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] survivalInventory empty for "
+                            + player.getName() + " during creative→world switch — skipping clear to protect items");
+                }
+                player.setGameMode(GameMode.SURVIVAL);
+                return;
+            } else if (destinationWorld.startsWith("arena")) {
+                aranarthPlayer.setCreativeInventory(ItemUtils.toBase64(player.getInventory()));
+                boolean hasArena = !aranarthPlayer.getArenaInventory().isEmpty();
+                if (hasArena) {
+                    player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getArenaInventory()));
+                    player.setGameMode(GameMode.SURVIVAL);
+                    PermissionUtils.toggleArenaBendingPermissions(player, true);
+                    PermissionUtils.updateSubElements(player);
+                    player.updateCommands();
+                    return;
+                }
+                player.getInventory().clear();
+                player.setGameMode(GameMode.SURVIVAL);
+                PermissionUtils.toggleArenaBendingPermissions(player, true);
+                PermissionUtils.updateSubElements(player);
+                player.updateCommands();
+                return;
+            } else if (destinationWorld.equals("creative")) {
+                return;
+            }
+            player.getInventory().clear();
+        } else {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] switchInventory: unrecognised currentWorld \"" + currentWorld + "\" for " + player.getName() + " — no inventory action taken");
+            return;
+        }
+        AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+    }
 
-	/**
-	 * Gets the stored username of a player.
-	 *
-	 * @param player The player whose username is to be found.
-	 * @return The username of the player.
-	 */
-	public static String getUsername(OfflinePlayer player) {
-		return players.get(player.getUniqueId()).getUsername();
-	}
+    /**
+     * Cycles through online players and verifies if they are wearing a full set of Aranarthium armor.
+     */
+    public static void applyArmourEffects() {
+        for (AranarthPlayer aranarthPlayer : players.values()) {
+            if (Objects.nonNull(aranarthPlayer.getUsername())) {
+                Player player = Bukkit.getPlayer(aranarthPlayer.getUsername());
+                if (Objects.nonNull(player)) {
+                    ItemStack[] armor = player.getInventory().getArmorContents();
+                    if (armor[0] != null && armor[1] != null && armor[2] != null && armor[3] != null) {
+                        verifyAndApplyAranarthiumArmourEffects(player);
+                    }
+                }
+            }
+        }
+    }
 
-	/**
-	 * Gets the stored nickname of a player.
-	 *
-	 * @param player The player whose nickname is to be found.
-	 * @return The nickname of the player, or username if no nickname was found.
-	 */
-	public static String getNickname(OfflinePlayer player) {
-		String nickname = players.get(player.getUniqueId()).getNickname();
-		return (nickname == null || nickname.isEmpty()) ? getUsername(player) : nickname;
-	}
+    /**
+     * Ensures that the given player is wearing a full set of Aranarthium Armour and applies its effects.
+     *
+     * @param player The player being verified.
+     */
+    private static void verifyAndApplyAranarthiumArmourEffects(Player player) {
+        if (isWearingArmorType(player, "aquatic")) {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.CONDUIT_POWER, 320, 0));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
+            boolean isRaining = AranarthUtils.getWeather() == Weather.RAIN || AranarthUtils.getWeather() == Weather.THUNDER;
+            if (isRaining || player.isInWater()) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 1));
+            }
+        } else if (isWearingArmorType(player, "ardent")) {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 2));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 320, 1));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
+        } else if (isWearingArmorType(player, "dwarven")) {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 320, 0));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
+        } else if (isWearingArmorType(player, "elven")) {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 320, 1));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 9));
+        } else if (isWearingArmorType(player, "scorched")) {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 320, 0));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 320, 0));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
+            if (player.getWorld().getName().endsWith("_nether")) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 1));
+            }
+        } else if (isWearingArmorType(player, "soulbound")) {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
+        } else if (isWearingArmorType(player, "fae")) {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 0));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 0));
+            Biome biome = player.getLocation().getBlock().getBiome();
+            boolean isNight = player.getWorld().getTime() >= 13000 && player.getWorld().getTime() <= 23000;
+            if (DateUtils.isFaeBiome(biome)) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 1));
+                if (isNight) {
+                    PotionEffect existingRegen = player.getPotionEffect(PotionEffectType.REGENERATION);
+                    int regenAmp = (existingRegen != null) ? existingRegen.getAmplifier() + 1 : 0;
+                    regenAmp = PotionEffectListener.determineEffectAmplifierRestriction(regenAmp, PotionEffectType.REGENERATION, player);
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 320, regenAmp), true);
+                }
+            } else if (DateUtils.isMushroomFieldsBiome(biome)) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 4));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 2));
+                if (isNight) {
+                    PotionEffect existingRegen = player.getPotionEffect(PotionEffectType.REGENERATION);
+                    int regenAmp = (existingRegen != null) ? existingRegen.getAmplifier() + 1 : 0;
+                    regenAmp = PotionEffectListener.determineEffectAmplifierRestriction(regenAmp, PotionEffectType.REGENERATION, player);
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 320, regenAmp), true);
+                }
+            }
+        }
+    }
 
-	/**
-	 * Adds a new homepad location.
-	 *
-	 * @param location The Location that the homepad is located at.
-	 */
-	public static void addNewHomepad(Location location) {
-		homes.add(new Home("NEW", location, Material.HEAVY_WEIGHTED_PRESSURE_PLATE));
-	}
+    /**
+     * Verifies if the input armor type is fully equipped by the player.
+     *
+     * @param player The player being verified.
+     * @param type   The armor type to be verified.
+     * @return Confirmation whether the specified type is fully equipped.
+     */
+    public static boolean isWearingArmorType(Player player, String type) {
+        ItemStack[] armor = player.getInventory().getArmorContents();
+        int counter = 0;
+        for (ItemStack is : player.getInventory().getArmorContents()) {
+            if (is == null) {
+                return false;
+            }
 
-	/**
-	 * Updates the name, location, and/or icon of an existing homepad.
-	 *
-	 * @param homeName The new name to be used for the home.
-	 * @param direction The Location containing the direction of the homepad to be used.
-	 * @param icon The Material that will be displayed for the homepad.
-	 */
-	public static void updateHomepad(String homeName, Location direction, Material icon) {
-		for (int i = 0; i < homes.size(); i++) {
-			if (homes.get(i).getLocation().getBlockX() == direction.getBlockX()
-					&& homes.get(i).getLocation().getBlockY() == direction.getBlockY()
-					&& homes.get(i).getLocation().getBlockZ() == direction.getBlockZ()) {
-				Home updatedHome = new Home(homeName, direction, icon);
-				homes.set(i, updatedHome);
-			}
-		}
-	}
-
-	/**
-	 * Provides the list of homepads being used.
-	 *
-	 * @return The List of homepads.
-	 */
-	public static List<Home> getHomepads() {
-		return homes;
-	}
-
-	/**
-	 * Overrides the list of homepads being used.
-	 *
-	 * @param newHomes The new list of homepads.
-	 */
-	public static void setHomepads(List<Home> newHomes) {
-		homes = newHomes;
-	}
-
-	/**
-	 * Provides the HashMap of AranarthPlayers separated by UUID.
-	 *
-	 * @return The List of AranarthPlayers
-	 */
-	public static HashMap<UUID, AranarthPlayer> getAranarthPlayers() {
-		return players;
-	}
-
-	/**
-	 * Provides the homepad at the specified Location.
-	 *
-	 * @param location The location of the homepad.
-	 * @return The homepad at the location.
-	 */
-	public static Home getHomepad(Location location) {
-		for (Home home : homes) {
-			if (locationsMatch(location, home.getLocation())) {
-				return home;
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Removes the homepad at the specified Location.
-	 *
-	 * @param location The location of the homepad to be removed.
-	 */
-	public static void removeHomepad(Location location) {
-		Home toRemove = null;
-		for (Home home : homes) {
-			if (locationsMatch(location, home.getLocation())) {
-				toRemove = home;
-			}
-		}
-		homes.remove(toRemove);
-	}
-
-	/**
-	 * Verifies that the two locations share the same block coordinate.
-	 *
-	 * @param location1 The first location.
-	 * @param location2 The second location.
-	 * @return Confirmation of whether the two locations are the same.
-	 */
-	public static boolean locationsMatch(Location location1, Location location2) {
-		if (Objects.nonNull(location1.getWorld()) && Objects.nonNull(location2.getWorld())) {
-			return location1.getBlockX() == location2.getBlockX() && location1.getBlockY() == location2.getBlockY()
-					&& location1.getBlockZ() == location2.getBlockZ()
-					&& location1.getWorld().getName().equals(location2.getWorld().getName());
-		} else {
-			return false;
-		}
-	}
-
-    /** Returns the number of non-null slots in the player's main inventory (for logging). */
-	private static int invSize(Player player) {
-		int count = 0;
-		for (ItemStack s : player.getInventory().getContents()) {
-			if (s != null) count++;
-		}
-		return count;
-	}
-
-	public static void switchInventory(Player player, String currentWorld, String destinationWorld) throws IOException {
-		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-
-		String rawFrom = currentWorld;
-		String rawTo = destinationWorld;
-
-		// Include any world that should share the inventory of Survival
-		if (isSmpWorld(currentWorld) || currentWorld.startsWith("resource") || currentWorld.startsWith("spawn") || currentWorld.equals("shops")) {
-			currentWorld = "world";
-		}
-		if (isSmpWorld(destinationWorld) || destinationWorld.startsWith("resource") || destinationWorld.startsWith("spawn") || destinationWorld.equals("shops")) {
-			destinationWorld = "world";
-		}
-
-		boolean isSurvivalToSurvival = currentWorld.startsWith("world") && destinationWorld.startsWith("world");
-		boolean isSameWorld = currentWorld.equals(destinationWorld);
-
-		// No need to change inventory
-		if (isSurvivalToSurvival || isSameWorld) {
-			if (!destinationWorld.equals("creative")) {
-				if (aranarthPlayer.getCouncilRank() != 3) {
-					player.setGameMode(GameMode.SURVIVAL);
-				}
-				return;
-			}
-		} else {
-			// Remove potion effects when changing the world
-			for (PotionEffect effect : player.getActivePotionEffects()) {
-				player.removePotionEffect(effect.getType());
-			}
-		}
-
-		// World edit permissions
-		PermissionAttachment perms = PermissionUtils.addTrackedAttachment(player);
-		if (destinationWorld.equals("creative")) {
-			perms.setPermission("worldedit.*", true);
-		} else {
-			perms.setPermission("worldedit.*", false);
-		}
-		player.updateCommands();
-
-		if (currentWorld.startsWith("world")) {
-			aranarthPlayer.setSurvivalInventory(ItemUtils.toBase64(player.getInventory()));
-			// Immediately persist the survival snapshot to MySQL so it survives a rapid server
-			// restart before the next periodic save or quit-time async write can run.
-			PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
-			if (destinationWorld.startsWith("arena")) {
-				boolean hasArena = !aranarthPlayer.getArenaInventory().isEmpty();
-				if (hasArena) {
-					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getArenaInventory()));
-					player.setGameMode(GameMode.SURVIVAL);
-					PermissionUtils.toggleArenaBendingPermissions(player, true);
-					PermissionUtils.updateSubElements(player);
-					player.updateCommands();
-					return;
-				}
-				player.getInventory().clear();
-				player.setGameMode(GameMode.SURVIVAL);
-				PermissionUtils.toggleArenaBendingPermissions(player, true);
-				PermissionUtils.updateSubElements(player);
-				player.updateCommands();
-				return;
-			} else if (destinationWorld.startsWith("creative")) {
-				boolean hasCreative = !aranarthPlayer.getCreativeInventory().isEmpty();
-				if (hasCreative) {
-					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getCreativeInventory()));
-				} else {
-					player.getInventory().clear();
-				}
-				player.setGameMode(GameMode.CREATIVE);
-				return;
-			}
-			player.getInventory().clear();
-		} else if (currentWorld.startsWith("arena")) {
-			if (destinationWorld.startsWith("world")) {
-				aranarthPlayer.setArenaInventory(ItemUtils.toBase64(player.getInventory()));
-				boolean hasSurvival = !aranarthPlayer.getSurvivalInventory().isEmpty();
-				if (hasSurvival) {
-					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));
-				} else {
-					// survivalInventory is empty — this should not happen for a player who has
-					// previously played in survival. Skipping clear to avoid wiping items that
-					// were not properly persisted (MySQL race condition on restart). Logging so
-					// admins can investigate and use /invswap to correct if needed.
-					Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] survivalInventory empty for "
-							+ player.getName() + " during arena→world switch — skipping clear to protect items");
-				}
-				player.setGameMode(GameMode.SURVIVAL);
-				PermissionUtils.toggleArenaBendingPermissions(player, false);
-				PermissionUtils.updateSubElements(player);
-				player.updateCommands();
-				return;
-			} else if (destinationWorld.startsWith("creative")) {
-				aranarthPlayer.setArenaInventory(ItemUtils.toBase64(player.getInventory()));
-				boolean hasCreative = !aranarthPlayer.getCreativeInventory().isEmpty();
-				if (hasCreative) {
-					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getCreativeInventory()));
-				} else {
-					player.getInventory().clear();
-				}
-				player.setGameMode(GameMode.CREATIVE);
-				PermissionUtils.toggleArenaBendingPermissions(player, false);
-				PermissionUtils.updateSubElements(player);
-				player.updateCommands();
-				return;
-			}
-			player.getInventory().clear();
-		} else if (currentWorld.startsWith("creative")) {
-			if (destinationWorld.startsWith("world")) {
-				aranarthPlayer.setCreativeInventory(ItemUtils.toBase64(player.getInventory()));
-				boolean hasSurvival = !aranarthPlayer.getSurvivalInventory().isEmpty();
-				Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Inv] creative→world switch for "
-						+ player.getName() + ": survivalInventory "
-						+ (hasSurvival ? "set (length=" + aranarthPlayer.getSurvivalInventory().length() + ")" : "EMPTY"));
-				if (hasSurvival) {
-					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));
-				} else {
-					// survivalInventory is empty — this should not happen for a player who has
-					// previously played in survival. Skipping clear to avoid wiping items that
-					// were not properly persisted (MySQL race condition on restart). Logging so
-					// admins can investigate and use /invswap to correct if needed.
-					Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] survivalInventory empty for "
-							+ player.getName() + " during creative→world switch — skipping clear to protect items");
-				}
-				player.setGameMode(GameMode.SURVIVAL);
-				return;
-			} else if (destinationWorld.startsWith("arena")) {
-				aranarthPlayer.setCreativeInventory(ItemUtils.toBase64(player.getInventory()));
-				boolean hasArena = !aranarthPlayer.getArenaInventory().isEmpty();
-				if (hasArena) {
-					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getArenaInventory()));
-					player.setGameMode(GameMode.SURVIVAL);
-					PermissionUtils.toggleArenaBendingPermissions(player, true);
-					PermissionUtils.updateSubElements(player);
-					player.updateCommands();
-					return;
-				}
-				player.getInventory().clear();
-				player.setGameMode(GameMode.SURVIVAL);
-				PermissionUtils.toggleArenaBendingPermissions(player, true);
-				PermissionUtils.updateSubElements(player);
-				player.updateCommands();
-				return;
-			} else if (destinationWorld.equals("creative")) {
-				return;
-			}
-			player.getInventory().clear();
-		} else {
-			Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] switchInventory: unrecognised currentWorld \"" + currentWorld + "\" for " + player.getName() + " — no inventory action taken");
-			return;
-		}
-		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-	}
-
-	/**
-	 * Cycles through online players and verifies if they are wearing a full set of Aranarthium armor.
-	 */
-	public static void applyArmourEffects() {
-		for (AranarthPlayer aranarthPlayer : players.values()) {
-			if (Objects.nonNull(aranarthPlayer.getUsername())) {
-				Player player = Bukkit.getPlayer(aranarthPlayer.getUsername());
-				if (Objects.nonNull(player)) {
-					ItemStack[] armor = player.getInventory().getArmorContents();
-					if (armor[0] != null && armor[1] != null && armor[2] != null && armor[3] != null) {
-						verifyAndApplyAranarthiumArmourEffects(player);
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Ensures that the given player is wearing a full set of Aranarthium Armour and applies its effects.
-	 * @param player The player being verified.
-	 */
-	private static void verifyAndApplyAranarthiumArmourEffects(Player player) {
-		if (isWearingArmorType(player, "aquatic")) {
-			player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
-			player.addPotionEffect(new PotionEffect(PotionEffectType.CONDUIT_POWER, 320, 0));
-			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
-			boolean isRaining = AranarthUtils.getWeather() == Weather.RAIN || AranarthUtils.getWeather() == Weather.THUNDER;
-			if (isRaining || player.isInWater()) {
-				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
-				player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 1));
-			}
-		} else if (isWearingArmorType(player, "ardent")) {
-			player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 2));
-			player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 320, 1));
-			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
-		} else if (isWearingArmorType(player, "dwarven")) {
-			player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 320, 0));
-			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
-		} else if (isWearingArmorType(player, "elven")) {
-			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
-			player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 320, 1));
-			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 9));
-		} else if (isWearingArmorType(player, "scorched")) {
-			player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 320, 0));
-			player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 320, 0));
-			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
-			if (player.getWorld().getName().endsWith("_nether")) {
-				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
-				player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 1));
-			}
-		} else if (isWearingArmorType(player, "soulbound")) {
-			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
-		} else if (isWearingArmorType(player, "fae")) {
-			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
-			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 0));
-			player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 0));
-			Biome biome = player.getLocation().getBlock().getBiome();
-			boolean isNight = player.getWorld().getTime() >= 13000 && player.getWorld().getTime() <= 23000;
-			if (DateUtils.isFaeBiome(biome)) {
-				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
-				player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 1));
-				if (isNight) {
-					PotionEffect existingRegen = player.getPotionEffect(PotionEffectType.REGENERATION);
-					int regenAmp = (existingRegen != null) ? existingRegen.getAmplifier() + 1 : 0;
-					regenAmp = PotionEffectListener.determineEffectAmplifierRestriction(regenAmp, PotionEffectType.REGENERATION, player);
-					player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 320, regenAmp), true);
-				}
-			} else if (DateUtils.isMushroomFieldsBiome(biome)) {
-				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 4));
-				player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 2));
-				if (isNight) {
-					PotionEffect existingRegen = player.getPotionEffect(PotionEffectType.REGENERATION);
-					int regenAmp = (existingRegen != null) ? existingRegen.getAmplifier() + 1 : 0;
-					regenAmp = PotionEffectListener.determineEffectAmplifierRestriction(regenAmp, PotionEffectType.REGENERATION, player);
-					player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 320, regenAmp), true);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Verifies if the input armor type is fully equipped by the player.
-	 * @param player The player being verified.
-	 * @param type The armor type to be verified.
-	 * @return Confirmation whether the specified type is fully equipped.
-	 */
-	public static boolean isWearingArmorType(Player player, String type) {
-		ItemStack[] armor = player.getInventory().getArmorContents();
-		int counter = 0;
-		for (ItemStack is : player.getInventory().getArmorContents()) {
-			if (is == null) {
-				return false;
-			}
-
-			if (is.hasItemMeta()) {
-				if (is.getItemMeta().getPersistentDataContainer().has(ARMOR_TYPE, PersistentDataType.STRING)) {
-					if (is.getItemMeta().getPersistentDataContainer().get(ARMOR_TYPE, PersistentDataType.STRING).equals(type)) {
-						counter++;
-					}
-				}
-			}
-		}
-		// Ensures that all 4 pieces of armour are Dwarven
+            if (is.hasItemMeta()) {
+                if (is.getItemMeta().getPersistentDataContainer().has(ARMOR_TYPE, PersistentDataType.STRING)) {
+                    if (is.getItemMeta().getPersistentDataContainer().get(ARMOR_TYPE, PersistentDataType.STRING).equals(type)) {
+                        counter++;
+                    }
+                }
+            }
+        }
+        // Ensures that all 4 pieces of armour are Dwarven
         return counter == 4;
-	}
+    }
 
-	/**
-	 * Returns true if the given block is a valid spot for the Fae Aranarthium flower trail —
-	 * i.e. the block itself is air and sits on valid soil.
-	 */
-	public static boolean isValidTrailSpot(Block feetBlock) {
-		Block ground = feetBlock.getRelative(BlockFace.DOWN);
-		return VALID_TRAIL_SOIL.contains(ground.getType()) && feetBlock.getType() == Material.AIR;
-	}
+    /**
+     * Returns true if the given block is a valid spot for the Fae Aranarthium flower trail —
+     * i.e. the block itself is air and sits on valid soil.
+     */
+    public static boolean isValidTrailSpot(Block feetBlock) {
+        Block ground = feetBlock.getRelative(BlockFace.DOWN);
+        return VALID_TRAIL_SOIL.contains(ground.getType()) && feetBlock.getType() == Material.AIR;
+    }
 
-	/**
-	 * Handles updates to the fuel source of a dragon head at a particular location.
-	 *
-	 * @param location The Location of the dragon head.
-	 * @param isPoweredByRedstone Whether the head is powered by redstone.
-	 * @return The amount of fuel that will be added to the dragon head.
-	 */
-	public static int updateDragonHead(Location location, boolean isPoweredByRedstone) {
-		int amount = 8;
-		if (isPoweredByRedstone) {
-			amount = amount * 2;
-		}
-		// If no dragon heads have been running since the server was started
-		if (dragonHeads.isEmpty()) {
-			dragonHeads.put(location, amount);
-		} else {
-			for (Location locationInMap : dragonHeads.keySet()) {
-				// If the coordinate is already added
-				if (location.getX() == locationInMap.getX()
-						&& location.getY() == locationInMap.getY()
-						&& location.getZ() == locationInMap.getZ()) {
-					Integer newAmount = dragonHeads.get(location) + amount;
-					dragonHeads.put(location, newAmount);
-				} else {
-					dragonHeads.put(location, amount);
-				}
-			}
-		}
-		return amount;
-	}
+    /**
+     * Handles updates to the fuel source of a dragon head at a particular location.
+     *
+     * @param location            The Location of the dragon head.
+     * @param isPoweredByRedstone Whether the head is powered by redstone.
+     * @return The amount of fuel that will be added to the dragon head.
+     */
+    public static int updateDragonHead(Location location, boolean isPoweredByRedstone) {
+        int amount = 8;
+        if (isPoweredByRedstone) {
+            amount = amount * 2;
+        }
+        // If no dragon heads have been running since the server was started
+        if (dragonHeads.isEmpty()) {
+            dragonHeads.put(location, amount);
+        } else {
+            for (Location locationInMap : dragonHeads.keySet()) {
+                // If the coordinate is already added
+                if (location.getX() == locationInMap.getX()
+                        && location.getY() == locationInMap.getY()
+                        && location.getZ() == locationInMap.getZ()) {
+                    Integer newAmount = dragonHeads.get(location) + amount;
+                    dragonHeads.put(location, newAmount);
+                } else {
+                    dragonHeads.put(location, amount);
+                }
+            }
+        }
+        return amount;
+    }
 
-	/**
-	 * Provides the quantity of fuel that remains in the input dragon head's Location.
-	 *
-	 * @param location The Location of the dragon head.
-	 * @return The quantity of fuel that remains.
-	 */
-	public static int getDragonHeadFuelAmount(Location location) {
-		if (Objects.isNull(dragonHeads.get(location))) {
-			return -1;
-		} else {
-			return dragonHeads.get(location);
-		}
+    /**
+     * Provides the quantity of fuel that remains in the input dragon head's Location.
+     *
+     * @param location The Location of the dragon head.
+     * @return The quantity of fuel that remains.
+     */
+    public static int getDragonHeadFuelAmount(Location location) {
+        if (Objects.isNull(dragonHeads.get(location))) {
+            return -1;
+        } else {
+            return dragonHeads.get(location);
+        }
 
-	}
+    }
 
-	/**
-	 * Handles the decrementing of fuel in the dragon head at the input Location.
-	 *
-	 * @param location The Location of the dragon head to be decremented.
-	 */
-	public static void decrementDragonHeadFuelAmount(Location location) {
-		Integer newAmount = dragonHeads.get(location) - 1;
-		dragonHeads.put(location, newAmount);
-	}
+    /**
+     * Handles the decrementing of fuel in the dragon head at the input Location.
+     *
+     * @param location The Location of the dragon head to be decremented.
+     */
+    public static void decrementDragonHeadFuelAmount(Location location) {
+        Integer newAmount = dragonHeads.get(location) - 1;
+        dragonHeads.put(location, newAmount);
+    }
 
-	/**
-	 * Provides the current server day.
-	 * @return The server day.
-	 */
-	public static int getDay() {
-		return day;
-	}
+    /**
+     * Provides the current server day.
+     *
+     * @return The server day.
+     */
+    public static int getDay() {
+        return day;
+    }
 
-	/**
-	 * Updates the current server day.
-	 * @param newDay The new server day.
-	 */
-	public static void setDay(int newDay) {
-		day = newDay;
-	}
+    /**
+     * Updates the current server day.
+     *
+     * @param newDay The new server day.
+     */
+    public static void setDay(int newDay) {
+        day = newDay;
+    }
 
-	/**
-	 * Provides the current server weekday.
-	 * @return The server weekday.
-	 */
-	public static int getWeekday() {
-		return weekday;
-	}
+    /**
+     * Provides the current server weekday.
+     *
+     * @return The server weekday.
+     */
+    public static int getWeekday() {
+        return weekday;
+    }
 
-	/**
-	 * Updates the current server weekday.
-	 * @param newWeekday The new server weekday.
-	 */
-	public static void setWeekday(int newWeekday) {
-		weekday = newWeekday;
-	}
+    /**
+     * Updates the current server weekday.
+     *
+     * @param newWeekday The new server weekday.
+     */
+    public static void setWeekday(int newWeekday) {
+        weekday = newWeekday;
+    }
 
-	/**
-	 * Provides the current server month.
-	 * @return The server month.
-	 */
-	public static Month getMonth() {
-		return month;
-	}
+    /**
+     * Provides the current server month.
+     *
+     * @return The server month.
+     */
+    public static Month getMonth() {
+        return month;
+    }
 
-	/**
-	 * Updates the current server month.
-	 * @param newMonth The new server month.
-	 */
-	public static void setMonth(Month newMonth) {
-		if (newMonth != month) {
-			// Ensures that each month has a new value
-			hasStormedInMonth = false;
-			stormDelay = 0;
-			stormDuration = 0;
-		}
-		month = newMonth;
+    /**
+     * Updates the current server month.
+     *
+     * @param newMonth The new server month.
+     */
+    public static void setMonth(Month newMonth) {
+        if (newMonth != month) {
+            // Ensures that each month has a new value
+            hasStormedInMonth = false;
+            stormDelay = 0;
+            stormDuration = 0;
+        }
+        month = newMonth;
 
-	}
+    }
 
-	/**
-	 * Provides the current server year.
-	 * @return The server year.
-	 */
-	public static int getYear() {
-		return year;
-	}
+    /**
+     * Provides the current server year.
+     *
+     * @return The server year.
+     */
+    public static int getYear() {
+        return year;
+    }
 
-	/**
-	 * Updates the current server year.
-	 * @param newYear The new server year.
-	 */
-	public static void setYear(int newYear) {
-		year = newYear;
-	}
+    /**
+     * Updates the current server year.
+     *
+     * @param newYear The new server year.
+     */
+    public static void setYear(int newYear) {
+        year = newYear;
+    }
 
-	public static long getLastResourceWorldResetTime() {
-		return lastResourceWorldResetTime;
-	}
+    public static long getLastResourceWorldResetTime() {
+        return lastResourceWorldResetTime;
+    }
 
-	public static void setLastResourceWorldResetTime(long time) {
-		lastResourceWorldResetTime = time;
-	}
+    public static void setLastResourceWorldResetTime(long time) {
+        lastResourceWorldResetTime = time;
+    }
 
-	/**
-	 * Provides the intended duration of the current storm.
-	 * @return The duration of the current storm.
-	 */
-	public static int getStormDuration() {
-		return stormDuration;
-	}
+    /**
+     * Provides the intended duration of the current storm.
+     *
+     * @return The duration of the current storm.
+     */
+    public static int getStormDuration() {
+        return stormDuration;
+    }
 
-	/**
-	 * Updates the value of the current storm duration.
-	 * @param newStormDuration The new duration of the storm.
-	 */
-	public static void setStormDuration(int newStormDuration) {
-		stormDuration = newStormDuration;
-	}
+    /**
+     * Updates the value of the current storm duration.
+     *
+     * @param newStormDuration The new duration of the storm.
+     */
+    public static void setStormDuration(int newStormDuration) {
+        stormDuration = newStormDuration;
+    }
 
-	/**
-	 * Provides the current delay between storms.
-	 * @return The current delay between storms.
-	 */
-	public static int getStormDelay() {
-		return stormDelay;
-	}
+    /**
+     * Provides the current delay between storms.
+     *
+     * @return The current delay between storms.
+     */
+    public static int getStormDelay() {
+        return stormDelay;
+    }
 
-	/**
-	 * Updates the value of the delay between storms.
-	 * @param newStormDelay The new delay between storms.
-	 */
-	public static void setStormDelay(int newStormDelay) {
-		stormDelay = newStormDelay;
-	}
+    /**
+     * Updates the value of the delay between storms.
+     *
+     * @param newStormDelay The new delay between storms.
+     */
+    public static void setStormDelay(int newStormDelay) {
+        stormDelay = newStormDelay;
+    }
 
-	/**
-	 * Provides the confirmation whether it has stormed since server startup or new month.
-	 * @return Confirmation if it has stormed since the server startup or new month.
-	 */
-	public static boolean getHasStormedInMonth() {
-		return hasStormedInMonth;
-	}
+    /**
+     * Provides the confirmation whether it has stormed since server startup or new month.
+     *
+     * @return Confirmation if it has stormed since the server startup or new month.
+     */
+    public static boolean getHasStormedInMonth() {
+        return hasStormedInMonth;
+    }
 
-	/**
-	 * Updates the value of whether it has stormed in the month since the server startup or new month.
-	 * @param newHasStormedInMonth The new confirmation whether it has stormed since the server startup or new month.
-	 */
-	public static void setHasStormedInMonth(boolean newHasStormedInMonth) {
-		hasStormedInMonth = newHasStormedInMonth;
-	}
+    /**
+     * Updates the value of whether it has stormed in the month since the server startup or new month.
+     *
+     * @param newHasStormedInMonth The new confirmation whether it has stormed since the server startup or new month.
+     */
+    public static void setHasStormedInMonth(boolean newHasStormedInMonth) {
+        hasStormedInMonth = newHasStormedInMonth;
+    }
 
-	/**
-	 * Provides the current timer since the last wind began.
-	 * @return The current timer since the last wind began.
-	 */
-	public static int getWindPlayTimer() {
-		return windPlayTimer;
-	}
+    /**
+     * Provides the current timer since the last wind began.
+     *
+     * @return The current timer since the last wind began.
+     */
+    public static int getWindPlayTimer() {
+        return windPlayTimer;
+    }
 
-	/**
-	 * Updates the current timer since the last wind began.
-	 * @param newWindPlayTimer The new current timer since the last wind began.
-	 */
-	public static void setWindPlayTimer(int newWindPlayTimer) {
-		windPlayTimer = newWindPlayTimer;
-	}
+    /**
+     * Updates the current timer since the last wind began.
+     *
+     * @param newWindPlayTimer The new current timer since the last wind began.
+     */
+    public static void setWindPlayTimer(int newWindPlayTimer) {
+        windPlayTimer = newWindPlayTimer;
+    }
 
-	/**
-	 * Provides confirmation whether the wind sound is currently playing.
-	 * @return Confirmation whether the wind sound is currently playing.
-	 */
-	public static boolean getIsPlayingWindSound() {
-		return isPlayingWindSound;
-	}
+    /**
+     * Provides confirmation whether the wind sound is currently playing.
+     *
+     * @return Confirmation whether the wind sound is currently playing.
+     */
+    public static boolean getIsPlayingWindSound() {
+        return isPlayingWindSound;
+    }
 
-	/**
-	 * Updates the value of whether the wind sound is currently playing.
-	 * @param newIsPlayingWindSound The new value of whether the wind sound is currently playing.
-	 */
-	public static void setIsPlayingWindSound(boolean newIsPlayingWindSound) {
-		isPlayingWindSound = newIsPlayingWindSound;
-	}
+    /**
+     * Updates the value of whether the wind sound is currently playing.
+     *
+     * @param newIsPlayingWindSound The new value of whether the wind sound is currently playing.
+     */
+    public static void setIsPlayingWindSound(boolean newIsPlayingWindSound) {
+        isPlayingWindSound = newIsPlayingWindSound;
+    }
 
-	/**
-	 * Provides the current delay since the last display of cherry leaf particles.
-	 * @return The delay since the last display of cherry leaf particles.
-	 */
-	public static int getCherryParticleDelay() {
-		return cherryParticleDelay;
-	}
+    /**
+     * Provides the current delay since the last display of cherry leaf particles.
+     *
+     * @return The delay since the last display of cherry leaf particles.
+     */
+    public static int getCherryParticleDelay() {
+        return cherryParticleDelay;
+    }
 
-	/**
-	 * Updates the value of the current delay since the last display of cherry leaf particles.
-	 * @param newCherryParticleDelay The new value of the delay since the last display of cherry leaf particles.
-	 */
-	public static void setCherryParticleDelay(int newCherryParticleDelay) {
-		cherryParticleDelay = newCherryParticleDelay;
-	}
+    /**
+     * Updates the value of the current delay since the last display of cherry leaf particles.
+     *
+     * @param newCherryParticleDelay The new value of the delay since the last display of cherry leaf particles.
+     */
+    public static void setCherryParticleDelay(int newCherryParticleDelay) {
+        cherryParticleDelay = newCherryParticleDelay;
+    }
 
-	/**
-	 * Provides the banner the player is editing.
-	 * @param uuid The player's UUID.
-	 * @return The banner's meta.
-	 */
-	public static BannerMeta getPlayerBanner(UUID uuid) {
-		return playerBanners.get(uuid);
-	}
+    /**
+     * Provides the banner the player is editing.
+     *
+     * @param uuid The player's UUID.
+     * @return The banner's meta.
+     */
+    public static BannerMeta getPlayerBanner(UUID uuid) {
+        return playerBanners.get(uuid);
+    }
 
-	/**
-	 * Updates the value of the player's banner.
-	 * @param uuid The UUID of the player.
-	 * @param bannerMeta The banner's meta.
-	 */
-	public static void setPlayerBanner(UUID uuid, BannerMeta bannerMeta) {
-		// If the player is done with editing the banner
-		if (bannerMeta == null) {
-			playerBanners.remove(uuid);
-			return;
-		}
+    /**
+     * Updates the value of the player's banner.
+     *
+     * @param uuid       The UUID of the player.
+     * @param bannerMeta The banner's meta.
+     */
+    public static void setPlayerBanner(UUID uuid, BannerMeta bannerMeta) {
+        // If the player is done with editing the banner
+        if (bannerMeta == null) {
+            playerBanners.remove(uuid);
+            return;
+        }
 
-		playerBanners.put(uuid, bannerMeta);
-	}
+        playerBanners.put(uuid, bannerMeta);
+    }
 
-	/**
-	 * Confirms if the input item is indeed a crop.
-	 * @param type The type of item it is.
-	 * @return Confirmation of whether the block is a crop or not.
-	 */
-	public static boolean isBlockCrop(Material type) {
-		return type == Material.WHEAT || type == Material.CARROTS
-				|| type == Material.POTATOES || type == Material.BEETROOTS
-				|| type == Material.NETHER_WART || type == Material.COCOA
-				|| type == Material.CACTUS || type == Material.SUGAR_CANE
-				|| type == Material.MELON || type == Material.PUMPKIN;
-	}
+    /**
+     * Confirms if the input item is indeed a crop.
+     *
+     * @param type The type of item it is.
+     * @return Confirmation of whether the block is a crop or not.
+     */
+    public static boolean isBlockCrop(Material type) {
+        return type == Material.WHEAT || type == Material.CARROTS
+                || type == Material.POTATOES || type == Material.BEETROOTS
+                || type == Material.NETHER_WART || type == Material.COCOA
+                || type == Material.CACTUS || type == Material.SUGAR_CANE
+                || type == Material.MELON || type == Material.PUMPKIN;
+    }
 
-	/**
-	 * Confirms if the input item can be harvested by a pickaxe.
-	 * @param type The type of item it is.
-	 * @return Confirmation of whether the input item can be harvested by a pickaxe.
-	 */
-	public static boolean isHarvestableWithPickaxe(Material type) {
-		return type == Material.STONE || type == Material.DEEPSLATE
-				|| type == Material.COBBLESTONE || type == Material.COBBLED_DEEPSLATE
-				|| type == Material.SANDSTONE || type == Material.RED_SANDSTONE
-				|| type == Material.GRANITE || type == Material.DIORITE
-				|| type == Material.ANDESITE || type == Material.CALCITE
-				|| type == Material.TUFF || type == Material.DRIPSTONE_BLOCK
-				|| type == Material.POINTED_DRIPSTONE || type == Material.MAGMA_BLOCK
-				|| type == Material.NETHERRACK || type == Material.CRIMSON_NYLIUM
-				|| type == Material.BASALT || type == Material.SMOOTH_BASALT
-				|| type == Material.END_STONE || type == Material.ANCIENT_DEBRIS
-				|| type == Material.AMETHYST_BLOCK || type == Material.BUDDING_AMETHYST
-				|| type == Material.ICE || type == Material.PACKED_ICE || type == Material.BLUE_ICE
-				|| type == Material.PRISMARINE_BRICKS || type == Material.PRISMARINE
-				|| type == Material.BONE_BLOCK || type == Material.OBSIDIAN
-				|| type == Material.CRYING_OBSIDIAN || type == Material.WARPED_NYLIUM
-				|| type == Material.BLACKSTONE || type == Material.GLOWSTONE
-				|| type == Material.SULFUR || type == Material.CINNABAR
-				|| type.name().endsWith("_ORE") || type.name().endsWith("_CORAL_BLOCK");
-	}
+    /**
+     * Confirms if the input item can be harvested by a pickaxe.
+     *
+     * @param type The type of item it is.
+     * @return Confirmation of whether the input item can be harvested by a pickaxe.
+     */
+    public static boolean isHarvestableWithPickaxe(Material type) {
+        return type == Material.STONE || type == Material.DEEPSLATE
+                || type == Material.COBBLESTONE || type == Material.COBBLED_DEEPSLATE
+                || type == Material.SANDSTONE || type == Material.RED_SANDSTONE
+                || type == Material.GRANITE || type == Material.DIORITE
+                || type == Material.ANDESITE || type == Material.CALCITE
+                || type == Material.TUFF || type == Material.DRIPSTONE_BLOCK
+                || type == Material.POINTED_DRIPSTONE || type == Material.MAGMA_BLOCK
+                || type == Material.NETHERRACK || type == Material.CRIMSON_NYLIUM
+                || type == Material.BASALT || type == Material.SMOOTH_BASALT
+                || type == Material.END_STONE || type == Material.ANCIENT_DEBRIS
+                || type == Material.AMETHYST_BLOCK || type == Material.BUDDING_AMETHYST
+                || type == Material.ICE || type == Material.PACKED_ICE || type == Material.BLUE_ICE
+                || type == Material.PRISMARINE_BRICKS || type == Material.PRISMARINE
+                || type == Material.BONE_BLOCK || type == Material.OBSIDIAN
+                || type == Material.CRYING_OBSIDIAN || type == Material.WARPED_NYLIUM
+                || type == Material.BLACKSTONE || type == Material.GLOWSTONE
+                || type == Material.SULFUR || type == Material.CINNABAR
+                || type.name().endsWith("_ORE") || type.name().endsWith("_CORAL_BLOCK");
+    }
 
-	/**
-	 * Confirms if the input item can be harvested by an axe.
-	 * @param type The type of item it is.
-	 * @return Confirmation of whether the input item can be harvested by an axe.
-	 */
-	public static boolean isHarvestableWithAxe(Material type) {
-		if ((type.name().endsWith("_LOG") && !type.name().endsWith("_STRIPPED_LOG")) || type.name().endsWith("_LEAVES")) {
-			return true;
-		} else if (type == Material.CRIMSON_STEM || type == Material.CRIMSON_HYPHAE
-				|| type == Material.WARPED_STEM || type == Material.WARPED_HYPHAE
-				|| type == Material.NETHER_WART_BLOCK || type == Material.WARPED_WART_BLOCK) {
-			return true;
-		}
-		return false;
-	}
+    /**
+     * Confirms if the input item can be harvested by an axe.
+     *
+     * @param type The type of item it is.
+     * @return Confirmation of whether the input item can be harvested by an axe.
+     */
+    public static boolean isHarvestableWithAxe(Material type) {
+        if ((type.name().endsWith("_LOG") && !type.name().endsWith("_STRIPPED_LOG")) || type.name().endsWith("_LEAVES")) {
+            return true;
+        } else if (type == Material.CRIMSON_STEM || type == Material.CRIMSON_HYPHAE
+                || type == Material.WARPED_STEM || type == Material.WARPED_HYPHAE
+                || type == Material.NETHER_WART_BLOCK || type == Material.WARPED_WART_BLOCK) {
+            return true;
+        }
+        return false;
+    }
 
-	/**
-	 * Confirms if the input item can be harvested by a shovel.
-	 * @param type The type of item it is.
-	 * @return Confirmation of whether the input item can be harvested by a shovel.
-	 */
-	public static boolean isHarvestableWithShovel(Material type) {
-		return type == Material.DIRT || type == Material.COARSE_DIRT || type == Material.PODZOL
-				|| type == Material.GRASS_BLOCK || type == Material.MYCELIUM || type == Material.ROOTED_DIRT
-				|| type == Material.MUD || type == Material.SAND || type == Material.RED_SAND
-				|| type == Material.GRAVEL || type == Material.CLAY || type == Material.SNOW_BLOCK
-				|| type == Material.SOUL_SAND || type == Material.SOUL_SOIL;
-	}
+    /**
+     * Confirms if the input item can be harvested by a shovel.
+     *
+     * @param type The type of item it is.
+     * @return Confirmation of whether the input item can be harvested by a shovel.
+     */
+    public static boolean isHarvestableWithShovel(Material type) {
+        return type == Material.DIRT || type == Material.COARSE_DIRT || type == Material.PODZOL
+                || type == Material.GRASS_BLOCK || type == Material.MYCELIUM || type == Material.ROOTED_DIRT
+                || type == Material.MUD || type == Material.SAND || type == Material.RED_SAND
+                || type == Material.GRAVEL || type == Material.CLAY || type == Material.SNOW_BLOCK
+                || type == Material.SOUL_SAND || type == Material.SOUL_SOIL;
+    }
 
-	/**
-	 * Applies the waterfall effect at the base of flowing water.
-	 */
-	public static void applyWaterfallEffect() {
-		for (Player player : Bukkit.getOnlinePlayers()) {
-			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			// Skips the particle
-			if (new Random().nextInt(100) >= aranarthPlayer.getParticleNum()) {
-				continue;
-			}
+    /**
+     * Applies the waterfall effect at the base of flowing water.
+     */
+    public static void applyWaterfallEffect() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+            // Skips the particle
+            if (new Random().nextInt(100) >= aranarthPlayer.getParticleNum()) {
+                continue;
+            }
 
-			Location playerLoc = player.getLocation();
-			int radius = 40;
+            Location playerLoc = player.getLocation();
+            int radius = 40;
 
-			int px = playerLoc.getBlockX();
-			int py = playerLoc.getBlockY();
-			int pz = playerLoc.getBlockZ();
+            int px = playerLoc.getBlockX();
+            int py = playerLoc.getBlockY();
+            int pz = playerLoc.getBlockZ();
 
-			World world = player.getWorld();
+            World world = player.getWorld();
 
-			for (int x = -radius; x <= radius; x++) {
-				for (int z = -radius; z <= radius; z++) {
-					for (int y = py + 10; y >= py - 10; y--) {
-						Block start = world.getBlockAt(px + x, y, pz + z);
+            for (int x = -radius; x <= radius; x++) {
+                for (int z = -radius; z <= radius; z++) {
+                    for (int y = py + 10; y >= py - 10; y--) {
+                        Block start = world.getBlockAt(px + x, y, pz + z);
 
-						// Only check flowing water blocks (NOT source blocks)
-						if (start.getType() != Material.WATER) continue;
-
-						if (start.getBlockData() instanceof Levelled startLevel) {
-							if (startLevel.getLevel() == 0) {
-								continue; // Skip source blocks
-							}
-						} else {
+                        // Only check flowing water blocks (NOT source blocks)
+						if (start.getType() != Material.WATER) {
 							continue;
 						}
 
-						// Check how far this water can fall
-						int fallHeight = 0;
-						Block landing = null;
+                        if (start.getBlockData() instanceof Levelled startLevel) {
+                            if (startLevel.getLevel() == 0) {
+                                continue; // Skip source blocks
+                            }
+                        } else {
+                            continue;
+                        }
 
-						for (int dy = 1; dy <= 10; dy++) {
-							Block below = start.getRelative(0, -dy, 0);
+                        // Check how far this water can fall
+                        int fallHeight = 0;
+                        Block landing = null;
 
-							if (below.getType() == Material.WATER) {
-								if (below.getBlockData() instanceof Levelled landingLevel) {
-									if (landingLevel.getLevel() == 0) {
-										// Found a source block as landing
-										fallHeight = dy;
-										landing = below;
-										break;
-									}
-								}
-							} else if (!below.getType().isAir()) {
-								// Hit something solid or non-water — stop
-								break;
-							}
-						}
+                        for (int dy = 1; dy <= 10; dy++) {
+                            Block below = start.getRelative(0, -dy, 0);
 
-						// Trigger particle effect if flow into source block from at least 2 blocks up
-						if (fallHeight >= 2 && landing != null) {
-							Location particleLoc = landing.getLocation().add(0.5, 1.2, 0.5);
+                            if (below.getType() == Material.WATER) {
+                                if (below.getBlockData() instanceof Levelled landingLevel) {
+                                    if (landingLevel.getLevel() == 0) {
+                                        // Found a source block as landing
+                                        fallHeight = dy;
+                                        landing = below;
+                                        break;
+                                    }
+                                }
+                            } else if (!below.getType().isAir()) {
+                                // Hit something solid or non-water — stop
+                                break;
+                            }
+                        }
 
-							if (player.getLocation().distanceSquared(particleLoc) <= radius * radius) {
-								Particle.DustOptions whiteDust = new Particle.DustOptions(Color.fromRGB(255, 255, 255), 1.0f);
-								player.spawnParticle(Particle.DUST, particleLoc, 5, 0.6, 0.3, 0.6, whiteDust);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+                        // Trigger particle effect if flow into source block from at least 2 blocks up
+                        if (fallHeight >= 2 && landing != null) {
+                            Location particleLoc = landing.getLocation().add(0.5, 1.2, 0.5);
 
-	/**
-	 * Provides the current state of the weather.
-	 * @return The current state of the weather.
-	 */
-	public static Weather getWeather() {
-		return weather;
-	}
+                            if (player.getLocation().distanceSquared(particleLoc) <= radius * radius) {
+                                Particle.DustOptions whiteDust = new Particle.DustOptions(Color.fromRGB(255, 255, 255), 1.0f);
+                                player.spawnParticle(Particle.DUST, particleLoc, 5, 0.6, 0.3, 0.6, whiteDust);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-	/**
-	 * Updates the value of the current state of the weather.
-	 * @param newWeather The new value of the current state of the weather.
-	 */
-	public static void setWeather(Weather newWeather) {
-		weather = newWeather;
-	}
-
-	/**
-	 * Provides the list of locked containers.
-	 * @return The list of locked containers.
-	 */
-	public static List<LockedContainer> getLockedContainers() {
-		if (lockedContainers == null || lockedContainers.isEmpty()) {
-			return null;
-		}
-		return lockedContainers;
-	}
-
-	/**
-	 * Updates the list of locked containers.
-	 * @param newLockedContainers The new list of locked containers.
-	 */
-	public static void setLockedContainers(List<LockedContainer> newLockedContainers) {
-		lockedContainers = newLockedContainers;
-	}
-
-	/**
-	 * Adds a new locked container to the list.
-	 * @param lockedContainer The locked container to be added to the list.
-	 */
-	public static void addLockedContainer(LockedContainer lockedContainer) {
-		if (getLockedContainers() == null || getLockedContainers().isEmpty()) {
-			lockedContainers = new ArrayList<>();
-		}
-		lockedContainers.add(lockedContainer);
-	}
-
-	/**
-	 * Removes a container if it was a locked container in the list.
-	 * @param locations The locations of the container being removed.
-	 * @return 0 if the whole container was removed, 1 if one of the container locations was removed, -1 if unsuccessful
-	 */
-	public static int removeLockedContainer(Location[] locations) {
-		if (lockedContainers == null || lockedContainers.isEmpty()) {
-			return -1;
-		}
-
-		boolean isLockedContainer = false;
-		boolean isDoubleContainer = false;
-		int i = 0;
-
-		while (i < lockedContainers.size()) {
-			Location loc1 = lockedContainers.get(i).getLocations()[0];
-			Location loc2 = lockedContainers.get(i).getLocations()[1];
-			isDoubleContainer = loc1 != null && loc2 != null;
-
-			if (isDoubleContainer) {
-				// If the whole container is being removed
-				if (locations[1] != null) {
-					if (isSameLocation(loc1, locations[0]) && isSameLocation(loc2, locations[1])) {
-						isLockedContainer = true;
-						lockedContainers.remove(i);
-						return 0;
-					}
-				}
-				// Only one of the two locations is being removed
-				else {
-					// Breaking left chest
-					if (isSameLocation(loc1, locations[0])) {
-						locations[0] = loc2;
-						isLockedContainer = true;
-						break;
-					}
-					// Breaking right chest
-					else if (isSameLocation(loc2, locations[0])) {
-						locations[0] = loc1;
-						isLockedContainer = true;
-						break;
-					}
-				}
-			} else {
-				if (isSameLocation(loc1, locations[0])) {
-					isLockedContainer = true;
-					break;
-				}
-			}
-			i++;
-		}
-
-		if (isLockedContainer) {
-			if (isDoubleContainer) {
-				lockedContainers.get(i).setLocations(locations);
-				return 1;
-			} else {
-				lockedContainers.remove(i);
-				return 0;
-			}
-		} else {
-			return -1;
-		}
-	}
-
-	/**
-	 * Removes all non-shop chest lock protections for containers located in the given chunk.
-	 * @param chunk The chunk whose locks should be cleared.
-	 */
-	public static void removeLocksInChunk(Chunk chunk) {
-		if (lockedContainers == null || lockedContainers.isEmpty()) {
-			return;
-		}
-		Iterator<LockedContainer> iterator = lockedContainers.iterator();
-		while (iterator.hasNext()) {
-			LockedContainer container = iterator.next();
-			Location loc1 = container.getLocations()[0];
-			Location loc2 = container.getLocations()[1];
-			boolean inChunk = (loc1 != null && loc1.getWorld() != null && loc1.getChunk().equals(chunk))
-					|| (loc2 != null && loc2.getWorld() != null && loc2.getChunk().equals(chunk));
-			if (!inChunk) {
-				continue;
-			}
-			// Skip chest shops
-			boolean isShop = (loc1 != null && loc1.getWorld() != null && ShopUtils.getShopFromLocation(
-					loc1.getBlock().getRelative(BlockFace.UP).getLocation()) != null)
-					|| (loc2 != null && loc2.getWorld() != null && ShopUtils.getShopFromLocation(
-					loc2.getBlock().getRelative(BlockFace.UP).getLocation()) != null);
-			if (!isShop) {
-				iterator.remove();
-			}
-		}
-	}
-
-	/**
-	 * Provides the Location[] of the container, locked or unlocked.
-	 * If it is a double chest, the left chest is the first index, right is the second.
-	 * @param container The container that the location is being fetched for.
-	 * @return The Location[] of the container.
-	 */
-	public static Location[] getLocationsOfContainer(Block container) {
-		Location loc1 = container.getLocation();
-		Location loc2 = null;
-		if (container.getState() instanceof Chest chest) {
-			InventoryHolder holder = chest.getInventory().getHolder();
-			// Chests can be two blocks wide and the non-clicked block may be the locked container
-			if (holder instanceof DoubleChest doubleChest) {
-				Chest leftChest = (Chest) doubleChest.getLeftSide();
-				Chest rightChest = (Chest) doubleChest.getRightSide();
-				loc1 = leftChest.getLocation();
-				loc2 = rightChest.getLocation();
-			}
-		}
-		return new Location[] { loc1, loc2 };
-	}
-
-	/**
-	 * Adds a player to the list of trusted players to access the container.
-	 * @param uuidToAdd The UUID of the player being added to the container.
-	 * @param location The location of the container.
-	 */
-	public static void addPlayerToContainer(UUID uuidToAdd, Location location) {
-		List<UUID> trusted = null;
-		for (LockedContainer container : getLockedContainers()) {
-			Location loc1 = container.getLocations()[0];
-			Location loc2 = container.getLocations()[1];
-			if (loc2 == null) {
-				if (isSameLocation(loc1, location)) {
-					trusted = container.getTrusted();
-					// If the UUID is already there, do nothing
-					if (!trusted.contains(uuidToAdd)) {
-						trusted.add(uuidToAdd);
-					}
-				}
-			} else {
-				if (isSameLocation(loc1, location) || isSameLocation(loc2, location)) {
-					trusted = container.getTrusted();
-					// If the UUID is already there, do nothing
-					if (!trusted.contains(uuidToAdd)) {
-						trusted.add(uuidToAdd);
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Removes a player from the list of trusted players to access the container.
-	 * @param uuidToRemove The UUID of the player being removed from the container.
-	 * @param location The location of the container.
-	 */
-	public static boolean removePlayerFromContainer(UUID uuidToRemove, Location location) {
-		List<UUID> trusted = null;
-		for (LockedContainer container : getLockedContainers()) {
-			Location loc1 = container.getLocations()[0];
-			Location loc2 = container.getLocations()[1];
-			if (loc2 == null) {
-				if (isSameLocation(loc1, location)) {
-					trusted = container.getTrusted();
-					if (trusted.contains(uuidToRemove)) {
-						trusted.remove(uuidToRemove);
-						return true;
-					}
-				}
-			} else {
-				if (isSameLocation(loc1, location) || isSameLocation(loc2, location)) {
-					trusted = container.getTrusted();
-					if (trusted.contains(uuidToRemove)) {
-						trusted.remove(uuidToRemove);
-						return true;
-					}
-				}
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Confirms if the input block is a container block.
-	 * @param block The block being verified.
-	 * @return Confirmation whether the input block is a container block.
-	 */
-	public static boolean isContainerBlock(Block block) {
-		if (block == null) {
-			return false;
-		}
-
-		return block.getType() == Material.CHEST
-				|| block.getType() == Material.TRAPPED_CHEST
-				|| block.getType() == Material.BARREL
-				|| block.getType() == Material.COPPER_CHEST
-				|| block.getType() == Material.EXPOSED_COPPER_CHEST
-				|| block.getType() == Material.WEATHERED_COPPER_CHEST
-				|| block.getType() == Material.OXIDIZED_COPPER_CHEST
-				|| block.getType() == Material.WAXED_COPPER_CHEST
-				|| block.getType() == Material.WAXED_EXPOSED_COPPER_CHEST
-				|| block.getType() == Material.WAXED_WEATHERED_COPPER_CHEST
-				|| block.getType() == Material.WAXED_OXIDIZED_COPPER_CHEST
-				|| block.getType().name().endsWith("SHULKER_BOX");
-	}
-
-	/**
-	 * Helper method to determine if the input locations are the same.
-	 * @param loc1 The first location.
-	 * @param loc2 The second location.
-	 * @return Confirmation whether the input locations are the same.
-	 */
-	private static boolean isSameLocation(Location loc1, Location loc2) {
-		return loc1.getBlockX() == loc2.getBlockX()
-				&& loc1.getBlockY() == loc2.getBlockY()
-				&& loc1.getBlockZ() == loc2.getBlockZ();
-	}
-
-	/**
-	 * Provides the LockedContainer at the given block, if it is indeed a locked container.
-	 * @param block The block being searched.
-	 * @return The LockedContainer object if found, or null if not.
-	 */
-	public static LockedContainer getLockedContainerAtBlock(Block block) {
-		if (getLockedContainers() == null || getLockedContainers().isEmpty()) {
-			return null;
-		}
-
-		if (isContainerBlock(block)) {
-			for (LockedContainer container : getLockedContainers()) {
-				Location loc1 = container.getLocations()[0];
-				Location loc2 = container.getLocations()[1];
-				// If it is a single chest/container
-				if (loc2 == null) {
-					if (isSameLocation(loc1, block.getLocation())) {
-						return container;
-					}
-				} else {
-					if (isSameLocation(loc1, block.getLocation()) || isSameLocation(loc2, block.getLocation())) {
-						return container;
-					}
-				}
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Confirms whether the player is trusted to the container they are interacting with.
-	 * @param player The player clicking the block.
-	 * @param block The block that was clicked.
-	 * @return Confirmation whether the player is trusted to the container.
-	 */
-	public static boolean canOpenContainer(Player player, Block block) {
-		List<LockedContainer> lockedContainers = getLockedContainers();
-
-		if (lockedContainers == null || lockedContainers.isEmpty()) {
-			return true;
-		}
-
-		if (isContainerBlock(block)) {
-			LockedContainer lockedContainer = getLockedContainerAtBlock(block);
-			if (lockedContainer != null) {
-				List<UUID> trusted = lockedContainer.getTrusted();
-				if (trusted.contains(player.getUniqueId())) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Verifies if the launched arrow and the arrow from the Quiver are the same.
-	 * @param launchedArrow The launched arrow.
-	 * @param quiverArrow The arrow in the quiver.
-	 * @return The arrow if it matches.
-	 */
-	public static ItemStack verifyIsSameArrow(ItemStack launchedArrow, ItemStack quiverArrow) {
-		// Basic or special arrow
-		if (launchedArrow.getType() == Material.ARROW) {
-			if (quiverArrow.getType() == Material.ARROW) {
-				if (launchedArrow.hasItemMeta()) {
-					if (quiverArrow.hasItemMeta()) {
-						// Both have meta
-						ItemMeta launchedMeta = launchedArrow.getItemMeta();
-						ItemMeta quiverMeta = quiverArrow.getItemMeta();
-						if (launchedMeta.getPersistentDataContainer().has(ARROW)) {
-							if (quiverMeta.getPersistentDataContainer().has(ARROW)) {
-								String launchedType = launchedMeta.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
-								String quiverType = quiverMeta.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
-								if (launchedType.equals(quiverType)) {
-									return launchedArrow;
-								} else {
-									return null;
-								}
-							}
-						}
-						// One of them is not a Special arrow but has meta somehow
-						Bukkit.getLogger().info("[AC] Something went wrong with identifying the arrows...");
-						return null;
-					} else {
-						return null;
-					}
-				} else {
-					if (quiverArrow.hasItemMeta()) {
-						return null;
-					} else {
-						// Both are regular arrows
-						return launchedArrow;
-					}
-				}
-			} else {
-				return null;
-			}
-		}
-		// Spectral arrow
-		else if (launchedArrow.getType() == Material.SPECTRAL_ARROW) {
-			if (quiverArrow.getType() == Material.SPECTRAL_ARROW) {
-				return launchedArrow;
-			}
-		}
-		// Tipped arrow
-		else {
-			if (quiverArrow.hasItemMeta()) {
-				if (launchedArrow.getItemMeta() instanceof PotionMeta launchedMeta
-						&& quiverArrow.getItemMeta() instanceof PotionMeta quiverMeta) {
-                    if (launchedMeta.getBasePotionType() == quiverMeta.getBasePotionType()) {
-						return launchedArrow;
-					} else {
-						return null;
-					}
-				}
-			} else {
-				return null;
-			}
-		}
-
-		return null;
-	}
-
-	/**
-	 * Provides the ItemStack with a single quantity of the input arrow type.
-	 * @param arrowType The type of custom arrow.
-	 * @return The arrow with a single quantity.
-	 */
-	public static ItemStack getArrowFromType(String arrowType) {
-		return switch (arrowType) {
-			case "arrowhead" -> new ItemStack(Material.ARROW, 4);
-			case "iron" -> new ArrowIron().getItem();
-			case "gold" -> new ArrowGold().getItem();
-			case "amethyst" -> new ArrowAmethyst().getItem();
-			case "obsidian" -> new ArrowObsidian().getItem();
-			case "diamond" -> new ArrowDiamond().getItem();
-			case "explosive" -> new ArrowExplosive().getItem();
-			case "lightning" -> new ArrowLightning().getItem();
-			case "spectral" -> new ItemStack(Material.SPECTRAL_ARROW, 4);
-			case "rooting" -> new ArrowRooting().getItem();
-			case "gust" -> new ArrowGust().getItem();
-			case "dragon" -> new ArrowDragon().getItem();
-			case "bone" -> new ArrowBone().getItem();
-			default -> null;
-		};
-	}
-
-	/**
-	 * Provides the UUID associated to the given username.
-	 * @param username The username being verified.
-	 * @return The UUID of the associated player.
-	 */
-	public static UUID getUUIDFromUsername(String username) {
-		for (UUID uuid : players.keySet()) {
-			if (getPlayer(uuid).getUsername() == null) {
-				continue;
-			}
-
-			if (getPlayer(uuid).getUsername().equalsIgnoreCase(username)) {
-				return uuid;
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Provides the UUID associated to the given username or nickname.
-	 * Searches usernames first, then nicknames if no username match is found.
-	 * @param input The username or nickname being searched.
-	 * @return The UUID of the associated player, or null if not found.
-	 */
-	public static UUID getUUIDFromUsernameOrNickname(String input) {
-		UUID uuid = getUUIDFromUsername(input);
-		if (uuid != null) {
-			return uuid;
-		}
-
-		// Cycles through nicknames second
-		for (Map.Entry<UUID, AranarthPlayer> entry : players.entrySet()) {
-			AranarthPlayer aranarthPlayer = entry.getValue();
-			if (aranarthPlayer.getNickname() == null || aranarthPlayer.getNickname().isEmpty()) {
-				continue;
-			}
-			if (ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()).equalsIgnoreCase(input)) {
-				return entry.getKey();
-			}
-		}
-
-		// Fall back to the network roster for players on other servers
-		if (NetworkManager.isActive()) {
-			for (NetworkPlayer np : NetworkManager.getInstance().getRemoteRoster().values()) {
-				if (np.getUsername().equalsIgnoreCase(input)) {
-					return np.getUuid();
-				}
-				if (np.getNickname().equalsIgnoreCase(input)) {
-					return np.getUuid();
-				}
-				// Also check if input matches the stored nickname stripped of colour codes
-				if (ChatUtils.stripColorFormatting(np.getNickname()).equalsIgnoreCase(input)) {
-					return np.getUuid();
-				}
-			}
-		}
-
-		return null;
-	}
-
-	/**
-	 * Provides the combined total number of homes that a given player can set.
-	 * Includes homes from both the in-game rank, and Saint ranks.
-	 * @param player The player.
-	 * @return The combined total number of homes that a given player can set.
-	 */
-	public static int getMaxHomeNum(Player player) {
-		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
-		int rankHomeNum = 0;
-		int saintHomeNum = 0;
-		int perksHomeNum = 0;
-
-		int rank = aranarthPlayer.getRank();
-		if (rank == 0 || rank == 1) {
-			rankHomeNum = 1;
-		} else if (rank == 2 || rank == 3) {
-			rankHomeNum = 2;
-		} else if (rank == 4 || rank == 5) {
-			rankHomeNum = 3;
-		} else if (rank == 6 || rank == 7) {
-			rankHomeNum = 4;
-		} else if (rank == 8) {
-			rankHomeNum = 5;
-		}
-
-		if (aranarthPlayer.getSaintRank() == 1 || aranarthPlayer.getCouncilRank() == 1) {
-			saintHomeNum = 1;
-		}
-		if (aranarthPlayer.getSaintRank() == 2 || aranarthPlayer.getCouncilRank() == 2) {
-			saintHomeNum = 3;
-		}
-		if (aranarthPlayer.getSaintRank() == 3 || aranarthPlayer.getCouncilRank() == 3) {
-			saintHomeNum = 5;
-		}
-
-		int perksHomeAmount = 0;
-		if (aranarthPlayer.getPerks() != null) {
-			if (aranarthPlayer.getPerks().containsKey(Perk.HOMES)) {
-				perksHomeAmount = aranarthPlayer.getPerks().get(Perk.HOMES);
-			}
-		}
-
-		return rankHomeNum + saintHomeNum + perksHomeAmount;
-	}
-
-	/**
-	 * Adds a new home to the player.
-	 * Assumes validation was done.
-	 * @param player The player.
-	 * @param home The player's home.
+    /**
+     * Provides the current state of the weather.
+     *
+     * @return The current state of the weather.
      */
-	public static void addPlayerHome(Player player, Home home) {
-		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
-		aranarthPlayer.getHomes().add(home);
-		setPlayer(player.getUniqueId(), aranarthPlayer);
-	}
+    public static Weather getWeather() {
+        return weather;
+    }
 
-	/**
-	 * Deletes one of the player's homes.
-	 * @param player The player.
-	 * @param homeName The player's home name that they will be deleting.
-	 */
-	public static void deletePlayerHome(Player player, String homeName) {
-		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
-		Home homeToDelete = null;
-		for (Home home : aranarthPlayer.getHomes()) {
-			if (homeName.equalsIgnoreCase(ChatUtils.stripColorFormatting(home.getName()))) {
-				homeToDelete = home;
-			}
-		}
-		aranarthPlayer.getHomes().remove(homeToDelete);
-		setPlayer(player.getUniqueId(), aranarthPlayer);
-	}
+    /**
+     * Updates the value of the current state of the weather.
+     *
+     * @param newWeather The new value of the current state of the weather.
+     */
+    public static void setWeather(Weather newWeather) {
+        weather = newWeather;
+    }
 
-	/**
-	 * Provides the Location with a solid block that is directly underneath the player.
-	 * @param loc The teleport location.
-	 * @return The Location.
-	 */
-	public static Location getSafeTeleportLocation(Location loc) {
-		World world = loc.getWorld();
-		if (world == null) return null;
+    /**
+     * Provides the list of locked containers.
+     *
+     * @return The list of locked containers.
+     */
+    public static List<LockedContainer> getLockedContainers() {
+        if (lockedContainers == null || lockedContainers.isEmpty()) {
+            return null;
+        }
+        return lockedContainers;
+    }
 
-		// Start from the player's current Y position and go downward
-		int x = loc.getBlockX();
-		int z = loc.getBlockZ();
-		int y = loc.getBlockY();
+    /**
+     * Updates the list of locked containers.
+     *
+     * @param newLockedContainers The new list of locked containers.
+     */
+    public static void setLockedContainers(List<LockedContainer> newLockedContainers) {
+        lockedContainers = newLockedContainers;
+    }
 
-		Block solidBlock = null;
+    /**
+     * Adds a new locked container to the list.
+     *
+     * @param lockedContainer The locked container to be added to the list.
+     */
+    public static void addLockedContainer(LockedContainer lockedContainer) {
+        if (getLockedContainers() == null || getLockedContainers().isEmpty()) {
+            lockedContainers = new ArrayList<>();
+        }
+        lockedContainers.add(lockedContainer);
+    }
 
-		for (int currentY = y; currentY >= world.getMinHeight(); currentY--) {
-			Block currentBlock = world.getBlockAt(x, currentY, z);
-			Material type = currentBlock.getType();
+    /**
+     * Removes a container if it was a locked container in the list.
+     *
+     * @param locations The locations of the container being removed.
+     * @return 0 if the whole container was removed, 1 if one of the container locations was removed, -1 if unsuccessful
+     */
+    public static int removeLockedContainer(Location[] locations) {
+        if (lockedContainers == null || lockedContainers.isEmpty()) {
+            return -1;
+        }
 
-			// Check if this block is solid and not water/lava
-			if (type.isSolid() && type != Material.WATER && type != Material.LAVA) {
-				solidBlock = currentBlock;
-				break;
-			}
-		}
+        boolean isLockedContainer = false;
+        boolean isDoubleContainer = false;
+        int i = 0;
 
-		// If a solid block was found, place the player just above it.
-		// Preserve the original X,Z so admin-set locations (warps, homes) land exactly
-		// where they were placed rather than being snapped to block centres.
-		Location surfaceLoc = null;
-		if (solidBlock != null) {
-			surfaceLoc = new Location(world, loc.getX(), solidBlock.getY() + 1, loc.getZ(),
-					loc.getYaw(), loc.getPitch());
-		} else {
+        while (i < lockedContainers.size()) {
+            Location loc1 = lockedContainers.get(i).getLocations()[0];
+            Location loc2 = lockedContainers.get(i).getLocations()[1];
+            isDoubleContainer = loc1 != null && loc2 != null;
+
+            if (isDoubleContainer) {
+                // If the whole container is being removed
+                if (locations[1] != null) {
+                    if (isSameLocation(loc1, locations[0]) && isSameLocation(loc2, locations[1])) {
+                        isLockedContainer = true;
+                        lockedContainers.remove(i);
+                        return 0;
+                    }
+                }
+                // Only one of the two locations is being removed
+                else {
+                    // Breaking left chest
+                    if (isSameLocation(loc1, locations[0])) {
+                        locations[0] = loc2;
+                        isLockedContainer = true;
+                        break;
+                    }
+                    // Breaking right chest
+                    else if (isSameLocation(loc2, locations[0])) {
+                        locations[0] = loc1;
+                        isLockedContainer = true;
+                        break;
+                    }
+                }
+            } else {
+                if (isSameLocation(loc1, locations[0])) {
+                    isLockedContainer = true;
+                    break;
+                }
+            }
+            i++;
+        }
+
+        if (isLockedContainer) {
+            if (isDoubleContainer) {
+                lockedContainers.get(i).setLocations(locations);
+                return 1;
+            } else {
+                lockedContainers.remove(i);
+                return 0;
+            }
+        } else {
+            return -1;
+        }
+    }
+
+    /**
+     * Removes all non-shop chest lock protections for containers located in the given chunk.
+     *
+     * @param chunk The chunk whose locks should be cleared.
+     */
+    public static void removeLocksInChunk(Chunk chunk) {
+        if (lockedContainers == null || lockedContainers.isEmpty()) {
+            return;
+        }
+        Iterator<LockedContainer> iterator = lockedContainers.iterator();
+        while (iterator.hasNext()) {
+            LockedContainer container = iterator.next();
+            Location loc1 = container.getLocations()[0];
+            Location loc2 = container.getLocations()[1];
+            boolean inChunk = (loc1 != null && loc1.getWorld() != null && loc1.getChunk().equals(chunk))
+                    || (loc2 != null && loc2.getWorld() != null && loc2.getChunk().equals(chunk));
+            if (!inChunk) {
+                continue;
+            }
+            // Skip chest shops
+            boolean isShop = (loc1 != null && loc1.getWorld() != null && ShopUtils.getShopFromLocation(
+                    loc1.getBlock().getRelative(BlockFace.UP).getLocation()) != null)
+                    || (loc2 != null && loc2.getWorld() != null && ShopUtils.getShopFromLocation(
+                    loc2.getBlock().getRelative(BlockFace.UP).getLocation()) != null);
+            if (!isShop) {
+                iterator.remove();
+            }
+        }
+    }
+
+    /**
+     * Provides the Location[] of the container, locked or unlocked.
+     * If it is a double chest, the left chest is the first index, right is the second.
+     *
+     * @param container The container that the location is being fetched for.
+     * @return The Location[] of the container.
+     */
+    public static Location[] getLocationsOfContainer(Block container) {
+        Location loc1 = container.getLocation();
+        Location loc2 = null;
+        if (container.getState() instanceof Chest chest) {
+            InventoryHolder holder = chest.getInventory().getHolder();
+            // Chests can be two blocks wide and the non-clicked block may be the locked container
+            if (holder instanceof DoubleChest doubleChest) {
+                Chest leftChest = (Chest) doubleChest.getLeftSide();
+                Chest rightChest = (Chest) doubleChest.getRightSide();
+                loc1 = leftChest.getLocation();
+                loc2 = rightChest.getLocation();
+            }
+        }
+        return new Location[]{loc1, loc2};
+    }
+
+    /**
+     * Adds a player to the list of trusted players to access the container.
+     *
+     * @param uuidToAdd The UUID of the player being added to the container.
+     * @param location  The location of the container.
+     */
+    public static void addPlayerToContainer(UUID uuidToAdd, Location location) {
+        List<UUID> trusted = null;
+        for (LockedContainer container : getLockedContainers()) {
+            Location loc1 = container.getLocations()[0];
+            Location loc2 = container.getLocations()[1];
+            if (loc2 == null) {
+                if (isSameLocation(loc1, location)) {
+                    trusted = container.getTrusted();
+                    // If the UUID is already there, do nothing
+                    if (!trusted.contains(uuidToAdd)) {
+                        trusted.add(uuidToAdd);
+                    }
+                }
+            } else {
+                if (isSameLocation(loc1, location) || isSameLocation(loc2, location)) {
+                    trusted = container.getTrusted();
+                    // If the UUID is already there, do nothing
+                    if (!trusted.contains(uuidToAdd)) {
+                        trusted.add(uuidToAdd);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Removes a player from the list of trusted players to access the container.
+     *
+     * @param uuidToRemove The UUID of the player being removed from the container.
+     * @param location     The location of the container.
+     */
+    public static boolean removePlayerFromContainer(UUID uuidToRemove, Location location) {
+        List<UUID> trusted = null;
+        for (LockedContainer container : getLockedContainers()) {
+            Location loc1 = container.getLocations()[0];
+            Location loc2 = container.getLocations()[1];
+            if (loc2 == null) {
+                if (isSameLocation(loc1, location)) {
+                    trusted = container.getTrusted();
+                    if (trusted.contains(uuidToRemove)) {
+                        trusted.remove(uuidToRemove);
+                        return true;
+                    }
+                }
+            } else {
+                if (isSameLocation(loc1, location) || isSameLocation(loc2, location)) {
+                    trusted = container.getTrusted();
+                    if (trusted.contains(uuidToRemove)) {
+                        trusted.remove(uuidToRemove);
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Confirms if the input block is a container block.
+     *
+     * @param block The block being verified.
+     * @return Confirmation whether the input block is a container block.
+     */
+    public static boolean isContainerBlock(Block block) {
+        if (block == null) {
+            return false;
+        }
+
+        return block.getType() == Material.CHEST
+                || block.getType() == Material.TRAPPED_CHEST
+                || block.getType() == Material.BARREL
+                || block.getType() == Material.COPPER_CHEST
+                || block.getType() == Material.EXPOSED_COPPER_CHEST
+                || block.getType() == Material.WEATHERED_COPPER_CHEST
+                || block.getType() == Material.OXIDIZED_COPPER_CHEST
+                || block.getType() == Material.WAXED_COPPER_CHEST
+                || block.getType() == Material.WAXED_EXPOSED_COPPER_CHEST
+                || block.getType() == Material.WAXED_WEATHERED_COPPER_CHEST
+                || block.getType() == Material.WAXED_OXIDIZED_COPPER_CHEST
+                || block.getType().name().endsWith("SHULKER_BOX");
+    }
+
+    /**
+     * Helper method to determine if the input locations are the same.
+     *
+     * @param loc1 The first location.
+     * @param loc2 The second location.
+     * @return Confirmation whether the input locations are the same.
+     */
+    private static boolean isSameLocation(Location loc1, Location loc2) {
+        return loc1.getBlockX() == loc2.getBlockX()
+                && loc1.getBlockY() == loc2.getBlockY()
+                && loc1.getBlockZ() == loc2.getBlockZ();
+    }
+
+    /**
+     * Provides the LockedContainer at the given block, if it is indeed a locked container.
+     *
+     * @param block The block being searched.
+     * @return The LockedContainer object if found, or null if not.
+     */
+    public static LockedContainer getLockedContainerAtBlock(Block block) {
+        if (getLockedContainers() == null || getLockedContainers().isEmpty()) {
+            return null;
+        }
+
+        if (isContainerBlock(block)) {
+            for (LockedContainer container : getLockedContainers()) {
+                Location loc1 = container.getLocations()[0];
+                Location loc2 = container.getLocations()[1];
+                // If it is a single chest/container
+                if (loc2 == null) {
+                    if (isSameLocation(loc1, block.getLocation())) {
+                        return container;
+                    }
+                } else {
+                    if (isSameLocation(loc1, block.getLocation()) || isSameLocation(loc2, block.getLocation())) {
+                        return container;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Confirms whether the player is trusted to the container they are interacting with.
+     *
+     * @param player The player clicking the block.
+     * @param block  The block that was clicked.
+     * @return Confirmation whether the player is trusted to the container.
+     */
+    public static boolean canOpenContainer(Player player, Block block) {
+        List<LockedContainer> lockedContainers = getLockedContainers();
+
+        if (lockedContainers == null || lockedContainers.isEmpty()) {
+            return true;
+        }
+
+        if (isContainerBlock(block)) {
+            LockedContainer lockedContainer = getLockedContainerAtBlock(block);
+            if (lockedContainer != null) {
+                List<UUID> trusted = lockedContainer.getTrusted();
+                if (trusted.contains(player.getUniqueId())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Verifies if the launched arrow and the arrow from the Quiver are the same.
+     *
+     * @param launchedArrow The launched arrow.
+     * @param quiverArrow   The arrow in the quiver.
+     * @return The arrow if it matches.
+     */
+    public static ItemStack verifyIsSameArrow(ItemStack launchedArrow, ItemStack quiverArrow) {
+        // Basic or special arrow
+        if (launchedArrow.getType() == Material.ARROW) {
+            if (quiverArrow.getType() == Material.ARROW) {
+                if (launchedArrow.hasItemMeta()) {
+                    if (quiverArrow.hasItemMeta()) {
+                        // Both have meta
+                        ItemMeta launchedMeta = launchedArrow.getItemMeta();
+                        ItemMeta quiverMeta = quiverArrow.getItemMeta();
+                        if (launchedMeta.getPersistentDataContainer().has(ARROW)) {
+                            if (quiverMeta.getPersistentDataContainer().has(ARROW)) {
+                                String launchedType = launchedMeta.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
+                                String quiverType = quiverMeta.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
+                                if (launchedType.equals(quiverType)) {
+                                    return launchedArrow;
+                                } else {
+                                    return null;
+                                }
+                            }
+                        }
+                        // One of them is not a Special arrow but has meta somehow
+                        Bukkit.getLogger().info("[AC] Something went wrong with identifying the arrows...");
+                        return null;
+                    } else {
+                        return null;
+                    }
+                } else {
+                    if (quiverArrow.hasItemMeta()) {
+                        return null;
+                    } else {
+                        // Both are regular arrows
+                        return launchedArrow;
+                    }
+                }
+            } else {
+                return null;
+            }
+        }
+        // Spectral arrow
+        else if (launchedArrow.getType() == Material.SPECTRAL_ARROW) {
+            if (quiverArrow.getType() == Material.SPECTRAL_ARROW) {
+                return launchedArrow;
+            }
+        }
+        // Tipped arrow
+        else {
+            if (quiverArrow.hasItemMeta()) {
+                if (launchedArrow.getItemMeta() instanceof PotionMeta launchedMeta
+                        && quiverArrow.getItemMeta() instanceof PotionMeta quiverMeta) {
+                    if (launchedMeta.getBasePotionType() == quiverMeta.getBasePotionType()) {
+                        return launchedArrow;
+                    } else {
+                        return null;
+                    }
+                }
+            } else {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Provides the ItemStack with a single quantity of the input arrow type.
+     *
+     * @param arrowType The type of custom arrow.
+     * @return The arrow with a single quantity.
+     */
+    public static ItemStack getArrowFromType(String arrowType) {
+        return switch (arrowType) {
+            case "arrowhead" -> new ItemStack(Material.ARROW, 4);
+            case "iron" -> new ArrowIron().getItem();
+            case "gold" -> new ArrowGold().getItem();
+            case "amethyst" -> new ArrowAmethyst().getItem();
+            case "obsidian" -> new ArrowObsidian().getItem();
+            case "diamond" -> new ArrowDiamond().getItem();
+            case "explosive" -> new ArrowExplosive().getItem();
+            case "lightning" -> new ArrowLightning().getItem();
+            case "spectral" -> new ItemStack(Material.SPECTRAL_ARROW, 4);
+            case "rooting" -> new ArrowRooting().getItem();
+            case "gust" -> new ArrowGust().getItem();
+            case "dragon" -> new ArrowDragon().getItem();
+            case "bone" -> new ArrowBone().getItem();
+            default -> null;
+        };
+    }
+
+    /**
+     * Provides the UUID associated to the given username.
+     *
+     * @param username The username being verified.
+     * @return The UUID of the associated player.
+     */
+    public static UUID getUUIDFromUsername(String username) {
+        for (UUID uuid : players.keySet()) {
+            if (getPlayer(uuid).getUsername() == null) {
+                continue;
+            }
+
+            if (getPlayer(uuid).getUsername().equalsIgnoreCase(username)) {
+                return uuid;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Provides the UUID associated to the given username or nickname.
+     * Searches usernames first, then nicknames if no username match is found.
+     *
+     * @param input The username or nickname being searched.
+     * @return The UUID of the associated player, or null if not found.
+     */
+    public static UUID getUUIDFromUsernameOrNickname(String input) {
+        UUID uuid = getUUIDFromUsername(input);
+        if (uuid != null) {
+            return uuid;
+        }
+
+        // Cycles through nicknames second
+        for (Map.Entry<UUID, AranarthPlayer> entry : players.entrySet()) {
+            AranarthPlayer aranarthPlayer = entry.getValue();
+            if (aranarthPlayer.getNickname() == null || aranarthPlayer.getNickname().isEmpty()) {
+                continue;
+            }
+            if (ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()).equalsIgnoreCase(input)) {
+                return entry.getKey();
+            }
+        }
+
+        // Fall back to the network roster for players on other servers
+        if (NetworkManager.isActive()) {
+            for (NetworkPlayer np : NetworkManager.getInstance().getRemoteRoster().values()) {
+                if (np.getUsername().equalsIgnoreCase(input)) {
+                    return np.getUuid();
+                }
+                if (np.getNickname().equalsIgnoreCase(input)) {
+                    return np.getUuid();
+                }
+                // Also check if input matches the stored nickname stripped of colour codes
+                if (ChatUtils.stripColorFormatting(np.getNickname()).equalsIgnoreCase(input)) {
+                    return np.getUuid();
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Provides the combined total number of homes that a given player can set.
+     * Includes homes from both the in-game rank, and Saint ranks.
+     *
+     * @param player The player.
+     * @return The combined total number of homes that a given player can set.
+     */
+    public static int getMaxHomeNum(Player player) {
+        AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+        int rankHomeNum = 0;
+        int saintHomeNum = 0;
+        int perksHomeNum = 0;
+
+        int rank = aranarthPlayer.getRank();
+        if (rank == 0 || rank == 1) {
+            rankHomeNum = 1;
+        } else if (rank == 2 || rank == 3) {
+            rankHomeNum = 2;
+        } else if (rank == 4 || rank == 5) {
+            rankHomeNum = 3;
+        } else if (rank == 6 || rank == 7) {
+            rankHomeNum = 4;
+        } else if (rank == 8) {
+            rankHomeNum = 5;
+        }
+
+        if (aranarthPlayer.getSaintRank() == 1 || aranarthPlayer.getCouncilRank() == 1) {
+            saintHomeNum = 1;
+        }
+        if (aranarthPlayer.getSaintRank() == 2 || aranarthPlayer.getCouncilRank() == 2) {
+            saintHomeNum = 3;
+        }
+        if (aranarthPlayer.getSaintRank() == 3 || aranarthPlayer.getCouncilRank() == 3) {
+            saintHomeNum = 5;
+        }
+
+        int perksHomeAmount = 0;
+        if (aranarthPlayer.getPerks() != null) {
+            if (aranarthPlayer.getPerks().containsKey(Perk.HOMES)) {
+                perksHomeAmount = aranarthPlayer.getPerks().get(Perk.HOMES);
+            }
+        }
+
+        return rankHomeNum + saintHomeNum + perksHomeAmount;
+    }
+
+    /**
+     * Adds a new home to the player.
+     * Assumes validation was done.
+     *
+     * @param player The player.
+     * @param home   The player's home.
+     */
+    public static void addPlayerHome(Player player, Home home) {
+        AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+        aranarthPlayer.getHomes().add(home);
+        setPlayer(player.getUniqueId(), aranarthPlayer);
+    }
+
+    /**
+     * Deletes one of the player's homes.
+     *
+     * @param player   The player.
+     * @param homeName The player's home name that they will be deleting.
+     */
+    public static void deletePlayerHome(Player player, String homeName) {
+        AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+        Home homeToDelete = null;
+        for (Home home : aranarthPlayer.getHomes()) {
+            if (homeName.equalsIgnoreCase(ChatUtils.stripColorFormatting(home.getName()))) {
+                homeToDelete = home;
+            }
+        }
+        aranarthPlayer.getHomes().remove(homeToDelete);
+        setPlayer(player.getUniqueId(), aranarthPlayer);
+    }
+
+    /**
+     * Provides the Location with a solid block that is directly underneath the player.
+     *
+     * @param loc The teleport location.
+     * @return The Location.
+     */
+    public static Location getSafeTeleportLocation(Location loc) {
+        World world = loc.getWorld();
+		if (world == null) {
 			return null;
 		}
-		return surfaceLoc;
-	}
 
-	/**
-	 * Refreshes all muted players.
-	 */
-	public static void refreshMutes() {
-		// Initial startup of server
-		if (mutedPlayers.isEmpty()) {
-			for (UUID uuid : players.keySet()) {
-				AranarthPlayer aranarthPlayer = getPlayer(uuid);
-				if (!aranarthPlayer.getMuteEndDate().isEmpty()) {
-					mutedPlayers.add(uuid);
-				}
-			}
-		} else {
-			LocalDateTime currentDate = LocalDateTime.now();
-			List<UUID> toRemove = new ArrayList<>();
-			for (UUID uuid : mutedPlayers) {
-				AranarthPlayer aranarthPlayer = getPlayer(uuid);
-				String muteEndDate = aranarthPlayer.getMuteEndDate();
+        // Start from the player's current Y position and go downward
+        int x = loc.getBlockX();
+        int z = loc.getBlockZ();
+        int y = loc.getBlockY();
 
-				if (muteEndDate.isEmpty()) {
-					continue;
-				}
+        Block solidBlock = null;
 
-				LocalDateTime definedMuteDate = null;
-				if (!muteEndDate.equals("none")) {
-					try {
-						int year = Integer.parseInt("20" + muteEndDate.substring(0, 2));
-						int month = Integer.parseInt(trimZero(muteEndDate.substring(2, 4)));
-						int day = Integer.parseInt(trimZero(muteEndDate.substring(4, 6)));
-						int hour = Integer.parseInt(trimZero(muteEndDate.substring(6, 8)));
-						int minute = Integer.parseInt(trimZero(muteEndDate.substring(8, 10)));
-						definedMuteDate = LocalDateTime.of(year, month, day, hour, minute);
-					} catch (NumberFormatException e) {
-						Bukkit.getLogger().info("[AC] Something went wrong with parsing the player's mute date...");
-						return;
-					}
-				} else {
-					// Always will be after the current date if "none" is the end date
-					definedMuteDate = LocalDateTime.of(9999, 1, 1, 1, 1);
-				}
+        for (int currentY = y; currentY >= world.getMinHeight(); currentY--) {
+            Block currentBlock = world.getBlockAt(x, currentY, z);
+            Material type = currentBlock.getType();
 
-				if (definedMuteDate.isBefore(currentDate)) {
-					toRemove.add(uuid);
-				}
-			}
+            // Check if this block is solid and not water/lava
+            if (type.isSolid() && type != Material.WATER && type != Material.LAVA) {
+                solidBlock = currentBlock;
+                break;
+            }
+        }
 
-			for (UUID uuid : toRemove) {
-				AranarthPlayer aranarthPlayer = getPlayer(uuid);
-				AranarthUtils.removeMutedPlayer(uuid);
-				aranarthPlayer.setMuteEndDate("");
-				AranarthUtils.setPlayer(uuid, aranarthPlayer);
+        // If a solid block was found, place the player just above it.
+        // Preserve the original X,Z so admin-set locations (warps, homes) land exactly
+        // where they were placed rather than being snapped to block centres.
+        Location surfaceLoc = null;
+        if (solidBlock != null) {
+            surfaceLoc = new Location(world, loc.getX(), solidBlock.getY() + 1, loc.getZ(),
+                    loc.getYaw(), loc.getPitch());
+        } else {
+            return null;
+        }
+        return surfaceLoc;
+    }
 
-				Punishment punishment = new Punishment(
-						uuid, LocalDateTime.now(), "UNMUTE", "The player's mute has automatically ended", null);
-				DiscordUtils.addPunishmentToDiscord(punishment);
+    /**
+     * Refreshes all muted players.
+     */
+    public static void refreshMutes() {
+        // Initial startup of server
+        if (mutedPlayers.isEmpty()) {
+            for (UUID uuid : players.keySet()) {
+                AranarthPlayer aranarthPlayer = getPlayer(uuid);
+                if (!aranarthPlayer.getMuteEndDate().isEmpty()) {
+                    mutedPlayers.add(uuid);
+                }
+            }
+        } else {
+            LocalDateTime currentDate = LocalDateTime.now();
+            List<UUID> toRemove = new ArrayList<>();
+            for (UUID uuid : mutedPlayers) {
+                AranarthPlayer aranarthPlayer = getPlayer(uuid);
+                String muteEndDate = aranarthPlayer.getMuteEndDate();
 
-				OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-				if (offlinePlayer.isOnline()) {
-					Player player = Bukkit.getPlayer(uuid);
-					player.sendMessage(ChatUtils.chatMessage("&7You are no longer muted"));
-				}
-			}
+                if (muteEndDate.isEmpty()) {
+                    continue;
+                }
+
+                LocalDateTime definedMuteDate = null;
+                if (!muteEndDate.equals("none")) {
+                    try {
+                        int year = Integer.parseInt("20" + muteEndDate.substring(0, 2));
+                        int month = Integer.parseInt(trimZero(muteEndDate.substring(2, 4)));
+                        int day = Integer.parseInt(trimZero(muteEndDate.substring(4, 6)));
+                        int hour = Integer.parseInt(trimZero(muteEndDate.substring(6, 8)));
+                        int minute = Integer.parseInt(trimZero(muteEndDate.substring(8, 10)));
+                        definedMuteDate = LocalDateTime.of(year, month, day, hour, minute);
+                    } catch (NumberFormatException e) {
+                        Bukkit.getLogger().info("[AC] Something went wrong with parsing the player's mute date...");
+                        return;
+                    }
+                } else {
+                    // Always will be after the current date if "none" is the end date
+                    definedMuteDate = LocalDateTime.of(9999, 1, 1, 1, 1);
+                }
+
+                if (definedMuteDate.isBefore(currentDate)) {
+                    toRemove.add(uuid);
+                }
+            }
+
+            for (UUID uuid : toRemove) {
+                AranarthPlayer aranarthPlayer = getPlayer(uuid);
+                AranarthUtils.removeMutedPlayer(uuid);
+                aranarthPlayer.setMuteEndDate("");
+                AranarthUtils.setPlayer(uuid, aranarthPlayer);
+
+                Punishment punishment = new Punishment(
+                        uuid, LocalDateTime.now(), "UNMUTE", "The player's mute has automatically ended", null);
+                DiscordUtils.addPunishmentToDiscord(punishment);
+
+                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+                if (offlinePlayer.isOnline()) {
+                    Player player = Bukkit.getPlayer(uuid);
+                    player.sendMessage(ChatUtils.chatMessage("&7You are no longer muted"));
+                }
+            }
+        }
+    }
+
+    /**
+     * Refreshes all banned players.
+     */
+    public static void refreshBans() {
+        ProfileBanList profileBanList = Bukkit.getBanList(BanList.Type.PROFILE);
+        List<BanEntry<PlayerProfile>> toRemove = new ArrayList<>();
+        for (BanEntry<? super com.destroystokyo.paper.profile.PlayerProfile> entry : profileBanList.getEntries()) {
+            PlayerProfile profile = (PlayerProfile) entry.getBanTarget();
+            UUID uuid = profile.getUniqueId();
+            // If the player's ban is temporary
+            if (entry.getExpiration() != null) {
+                // If they are no longer banned
+                if (entry.getExpiration().before(new Date())) {
+                    Punishment punishment = new Punishment(
+                            uuid, LocalDateTime.now(), "UNBAN", "The player's ban has automatically ended", null);
+                    DiscordUtils.addPunishmentToDiscord(punishment);
+                    entry.remove();
+                }
+            }
+
+
+        }
+    }
+
+    /**
+     * Trims the leading zero if the value is only one digit.
+     *
+     * @param value The value.
+     * @return The trimmed value.
+     */
+    private static String trimZero(String value) {
+        if (value.startsWith("0")) {
+            return value.substring(1);
+        } else {
+            return value;
+        }
+    }
+
+    /**
+     * Adds the player's UUID to the list of muted players.
+     *
+     * @param uuid The player's UUID.
+     */
+    public static void addMutedPlayer(UUID uuid) {
+        mutedPlayers.add(uuid);
+        DiscordUtils.toggleMuteRole(uuid, true);
+    }
+
+    /**
+     * Removes the player's UUID from the list of muted players.
+     *
+     * @param uuid The player's UUID.
+     */
+    public static void removeMutedPlayer(UUID uuid) {
+        mutedPlayers.remove(uuid);
+        DiscordUtils.toggleMuteRole(uuid, false);
+    }
+
+    /**
+     * Provides the String portion of the player's rank.
+     *
+     * @param aranarthPlayer The AranarthPlayer that is being analyzed.
+     * @return The String portion of the player's rank.
+     */
+    public static String getRank(AranarthPlayer aranarthPlayer) {
+        int rank = aranarthPlayer.getRank();
+        if (aranarthPlayer.getPronouns() == Pronouns.MALE) {
+            switch (rank) {
+                case 1:
+                    return "&d&l[&a&lEsquire&d&l] &r";
+                case 2:
+                    return "&7&l[&f&lKnight&7&l] &r";
+                case 3:
+                    return "&5&l[&d&lBaron&5&l] &r";
+                case 4:
+                    return "&8&l[&7&lCount&8&l] &r";
+                case 5:
+                    return "&6&l[&e&lDuke&6&l] &r";
+                case 6:
+                    return "&6&l[&b&lPrince&6&l] &r";
+                case 7:
+                    return "&6&l[&9&lKing&6&l] &r";
+                case 8:
+                    return "&6&l[&4&lEmperor&6&l] &r";
+            }
+        } else {
+            switch (rank) {
+                case 1:
+                    return "&d&l[&a&lEsquire&d&l] &r";
+                case 2:
+                    return "&7&l[&f&lKnight&7&l] &r";
+                case 3:
+                    return "&5&l[&d&lBaroness&5&l] &r";
+                case 4:
+                    return "&8&l[&7&lCountess&8&l] &r";
+                case 5:
+                    return "&6&l[&e&lDuchess&6&l] &r";
+                case 6:
+                    return "&6&l[&b&lPrincess&6&l] &r";
+                case 7:
+                    return "&6&l[&9&lQueen&6&l] &r";
+                case 8:
+                    return "&6&l[&4&lEmpress&6&l] &r";
+            }
+        }
+        return "&8&l[&a&lPeasant&8&l] &r";
+    }
+
+    /**
+     * Provides the String portion of the player's Saint rank.
+     *
+     * @param aranarthPlayer The AranarthPlayer that is being analyzed.
+     * @return The String portion of the player's Saint rank.
+     */
+    public static String getSaintRank(AranarthPlayer aranarthPlayer) {
+        int saintRank = aranarthPlayer.getSaintRank();
+        return switch (saintRank) {
+            case 1 -> "&b⚜&r";
+            case 2 -> "&e⚜&r";
+            case 3 -> "&c⚜&r";
+            default -> "";
+        };
+    }
+
+    /**
+     * Provides the String portion of the player's Council rank.
+     *
+     * @param aranarthPlayer The AranarthPlayer that is being analyzed.
+     * @return The String portion of the player's Council rank.
+     */
+    public static String getCouncilRank(AranarthPlayer aranarthPlayer) {
+        int councilRank = aranarthPlayer.getCouncilRank();
+        return switch (councilRank) {
+            case 1 -> "&3۞&r";
+            case 2 -> "&6۞&r";
+            case 3 -> "&4۞&r";
+            default -> "";
+        };
+    }
+
+    /**
+     * Provides the String portion of the player's Architect rank.
+     *
+     * @param aranarthPlayer The AranarthPlayer that is being analyzed.
+     * @return The String portion of the player's Architect rank.
+     */
+    public static String getArchitectRank(AranarthPlayer aranarthPlayer) {
+        int architectRank = aranarthPlayer.getArchitectRank();
+        return switch (architectRank) {
+            case 1 -> "&a&l\uD83D\uDD28&r"; // Hammer emoji
+            default -> "";
+        };
+    }
+
+    /**
+     * Provides the String portion of the player's Architect rank.
+     *
+     * @param aranarthPlayer The AranarthPlayer that is being analyzed.
+     * @return The String portion of the player's Architect rank.
+     */
+    public static String getAvatarRank(AranarthPlayer aranarthPlayer) {
+        if (AvatarUtils.getCurrentAvatar() != null) {
+            UUID uuid = AvatarUtils.getCurrentAvatar().getUuid();
+            if (uuid != null && getUUIDFromUsername(aranarthPlayer.getUsername()) != null && uuid.equals(getUUIDFromUsername(aranarthPlayer.getUsername()))) {
+                return "&5✵";
+            }
+        }
+
+        return "";
+    }
+
+    /**
+     * Confirms if the input coordinate is within the server Spawn world.
+     *
+     * @param loc The location of the block or entity.
+     * @return Confirmation if the input coordinate is within the server Spawn world.
+     */
+    public static boolean isSpawnLocation(Location loc) {
+        return loc.getWorld().getName().equals("spawn");
+    }
+
+    /**
+     * Handles creating the teleport task timer and initializing the callback method.
+     *
+     * @param player              The player that is being teleported.
+     * @param from                The location that the player is teleporting from.
+     * @param to                  The location that the player is teleporting to.
+     * @param isImmediateTeleport Whether the teleportation should be immediate or not.
+     * @param teleportTitle       The main title text shown on success, e.g. the destination name.
+     * @param teleportSubtitle    The smaller subtitle text shown on success.
+     * @param resultCallback      Confirmation whether the teleportation was successful or not.
+     */
+    public static void teleportPlayer(Player player, Location from, Location to, boolean isImmediateTeleport, String teleportTitle, String teleportSubtitle, Consumer<Boolean> resultCallback) {
+        if (isImmediateTeleport) {
+            boolean result = handleTeleportLogic(player, from, to);
+            if (result) {
+                sendTeleportTitle(player, teleportTitle, teleportSubtitle);
+            }
+            resultCallback.accept(result);
+        } else {
+            AranarthPlayer aranarthPlayerCheck = getPlayer(player.getUniqueId());
+            if (aranarthPlayerCheck != null && !aranarthPlayerCheck.getCombatLogTime().isEmpty()) {
+                player.sendMessage(ChatUtils.chatMessage("&cYou cannot teleport while in combat!"));
+                resultCallback.accept(false);
+                return;
+            }
+            player.sendMessage(ChatUtils.chatMessage("&7You will be teleported in &e3 seconds!"));
+            initiateTeleport(player, () -> {
+                boolean result = handleTeleportLogic(player, from, to);
+                if (result) {
+                    sendTeleportTitle(player, teleportTitle, teleportSubtitle);
+                }
+                resultCallback.accept(result);
+            });
+        }
+    }
+
+    /**
+     * Prepares the player to be teleported by creating the teleport task.
+     *
+     * @param player    The player.
+     * @param onSuccess The method to be called once the timer ends to handle the actual teleportation.
+     */
+    public static void initiateTeleport(Player player, Runnable onSuccess) {
+        // Cancel and override the previous task if exists with the new one
+        BukkitTask existingTask = teleportingPlayers.remove(player.getUniqueId());
+        if (existingTask != null) {
+            existingTask.cancel();
+        }
+
+        // Initiate the teleportation after a 3 second delay, storing the task for the duration
+        BukkitTask task = new BukkitRunnable() {
+            @Override
+            public void run() {
+                teleportingPlayers.remove(player.getUniqueId());
+                onSuccess.run();
+            }
+        }.runTaskLater(AranarthCore.getInstance(), 60);
+
+        // This is run before the above task itself due to the delay
+        teleportingPlayers.put(player.getUniqueId(), task);
+    }
+
+    /**
+     * Handles the actual teleportation of the player.
+     *
+     * @param player The player that is being teleported.
+     * @param from   The location that the player is teleporting from.
+     * @param to     The location that the player is teleporting to.
+     * @return Confirmation if the teleportation was successful.
+     */
+    private static boolean handleTeleportLogic(Player player, Location from, Location to) {
+        Location locToTeleportTo = getSafeTeleportLocation(to);
+        // If i.e over the void
+        if (locToTeleportTo == null) {
+            player.sendMessage(ChatUtils.chatMessage("&cThis teleport location is unsafe!"));
+            return false;
+        }
+
+        List<LivingEntity> leashedEntities = new ArrayList<>();
+        for (Entity nearby : from.getNearbyEntities(25, 25, 25)) {
+            if (nearby instanceof LivingEntity mob) {
+                if (mob.isLeashed()) {
+                    if (mob.getLeashHolder() instanceof Player holder) {
+                        if (holder.getUniqueId().equals(player.getUniqueId())) {
+                            boolean isFromSurvivalWorld = from.getWorld().getName().startsWith("world")
+                                    || isSmpWorld(from.getWorld().getName())
+                                    || from.getWorld().getName().startsWith("resource");
+                            boolean isToSurvivalWorld = to.getWorld().getName().startsWith("world")
+                                    || isSmpWorld(to.getWorld().getName())
+                                    || to.getWorld().getName().startsWith("resource");
+                            if (isFromSurvivalWorld && isToSurvivalWorld) {
+                                leashedEntities.add(mob);
+                            } else {
+                                mob.setLeashHolder(null);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Capture the player's actual current world before teleporting; the `from` parameter
+        // may be stale (captured at /tpaccept time) if the player changed worlds during the delay.
+        String actualFromWorld = player.getLocation().getWorld() != null
+                ? player.getLocation().getWorld().getName()
+                : from.getWorld().getName();
+
+        player.teleport(locToTeleportTo);
+        for (Entity leashed : leashedEntities) {
+            leashed.teleport(locToTeleportTo);
+        }
+
+        AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+        int tpVol = aranarthPlayer.getTeleportSoundVolume();
+		if (tpVol > 0) {
+			player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, tpVol / 100f, 0.9F);
 		}
-	}
 
-	/**
-	 * Refreshes all banned players.
-	 */
-	public static void refreshBans() {
-		ProfileBanList profileBanList = Bukkit.getBanList(BanList.Type.PROFILE);
-		List<BanEntry<PlayerProfile>> toRemove = new ArrayList<>();
-		for (BanEntry<? super com.destroystokyo.paper.profile.PlayerProfile> entry : profileBanList.getEntries()) {
-			PlayerProfile profile = (PlayerProfile) entry.getBanTarget();
-			UUID uuid = profile.getUniqueId();
-			// If the player's ban is temporary
-			if (entry.getExpiration() != null) {
-				// If they are no longer banned
-				if (entry.getExpiration().before(new Date())) {
-					Punishment punishment = new Punishment(
-							uuid, LocalDateTime.now(), "UNBAN", "The player's ban has automatically ended", null);
-					DiscordUtils.addPunishmentToDiscord(punishment);
-					entry.remove();
-				}
-			}
+        // Saves the player's last location for /ac back
+        aranarthPlayer.setLastKnownTeleportLocation(from);
 
+        // Keep survival stats in sync on every teleport so the data is always current in memory
+        // (and therefore in the next periodic DB write). For cross-server transfers this snapshot
+        // is what saveInventoryAndTransfer() will flush to MySQL before the BungeeCord handoff.
+        if (isSurvivalWorld(actualFromWorld)) {
+            try {
+                aranarthPlayer.setSurvivalInventory(ItemUtils.itemStackArrayToBase64(player.getInventory().getContents()));
+            } catch (Exception e) {
+                Bukkit.getLogger().warning("[AC] Failed to serialize inventory for " + player.getName());
+            }
+            try {
+                aranarthPlayer.setSurvivalEnderChest(ItemUtils.itemStackArrayToBase64(player.getEnderChest().getContents()));
+            } catch (Exception e) {
+                Bukkit.getLogger().warning("[AC] Failed to serialize ender chest for " + player.getName());
+            }
+            aranarthPlayer.setSurvivalHealth(player.getHealth());
+            aranarthPlayer.setSurvivalFoodLevel(player.getFoodLevel());
+            aranarthPlayer.setSurvivalSaturation(player.getSaturation());
+            aranarthPlayer.setSurvivalExpLevel(player.getLevel());
+            aranarthPlayer.setSurvivalExpProgress(player.getExp());
+        }
 
-		}
-	}
+        setPlayer(player.getUniqueId(), aranarthPlayer);
 
-	/**
-	 * Trims the leading zero if the value is only one digit.
-	 * @param value The value.
-	 * @return The trimmed value.
-	 */
-	private static String trimZero(String value) {
-		if (value.startsWith("0")) {
-			return value.substring(1);
-		} else {
-			return value;
-		}
-	}
+        try {
+            AranarthUtils.switchInventory(player, actualFromWorld, to.getWorld().getName());
 
-	/**
-	 * Adds the player's UUID to the list of muted players.
-	 * @param uuid The player's UUID.
-	 */
-	public static void addMutedPlayer(UUID uuid) {
-		mutedPlayers.add(uuid);
-		DiscordUtils.toggleMuteRole(uuid, true);
-	}
+            for (LivingEntity leashed : leashedEntities) {
+                leashed.setLeashHolder(player);
+            }
 
-	/**
-	 * Removes the player's UUID from the list of muted players.
-	 * @param uuid The player's UUID.
-	 */
-	public static void removeMutedPlayer(UUID uuid) {
-		mutedPlayers.remove(uuid);
-		DiscordUtils.toggleMuteRole(uuid, false);
-	}
+            return true;
+        } catch (IOException e) {
+            player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
+            return false;
+        }
+    }
 
-	/**
-	 * Provides the String portion of the player's rank.
-	 * @param aranarthPlayer The AranarthPlayer that is being analyzed.
-	 * @return The String portion of the player's rank.
-	 */
-	public static String getRank(AranarthPlayer aranarthPlayer) {
-		int rank = aranarthPlayer.getRank();
-		if (aranarthPlayer.getPronouns() == Pronouns.MALE) {
-			switch (rank) {
-				case 1: return "&d&l[&a&lEsquire&d&l] &r";
-				case 2: return "&7&l[&f&lKnight&7&l] &r";
-				case 3: return "&5&l[&d&lBaron&5&l] &r";
-				case 4: return "&8&l[&7&lCount&8&l] &r";
-				case 5: return "&6&l[&e&lDuke&6&l] &r";
-				case 6: return "&6&l[&b&lPrince&6&l] &r";
-				case 7: return "&6&l[&9&lKing&6&l] &r";
-				case 8: return "&6&l[&4&lEmperor&6&l] &r";
-			}
-		} else {
-			switch (rank) {
-				case 1: return "&d&l[&a&lEsquire&d&l] &r";
-				case 2: return "&7&l[&f&lKnight&7&l] &r";
-				case 3: return "&5&l[&d&lBaroness&5&l] &r";
-				case 4: return "&8&l[&7&lCountess&8&l] &r";
-				case 5: return "&6&l[&e&lDuchess&6&l] &r";
-				case 6: return "&6&l[&b&lPrincess&6&l] &r";
-				case 7: return "&6&l[&9&lQueen&6&l] &r";
-				case 8: return "&6&l[&4&lEmpress&6&l] &r";
-			}
-		}
-		return "&8&l[&a&lPeasant&8&l] &r";
-	}
+    /**
+     * Provides the BukkitTask associated to the player's teleportation.
+     *
+     * @param uuid The player's UUID.
+     * @return The BukkitTask associated to the player's teleportation.
+     */
+    public static BukkitTask getTeleportTask(UUID uuid) {
+        return teleportingPlayers.get(uuid);
+    }
 
-	/**
-	 * Provides the String portion of the player's Saint rank.
-	 * @param aranarthPlayer The AranarthPlayer that is being analyzed.
-	 * @return The String portion of the player's Saint rank.
-	 */
-	public static String getSaintRank(AranarthPlayer aranarthPlayer) {
-		int saintRank = aranarthPlayer.getSaintRank();
-		return switch (saintRank) {
-			case 1 -> "&b⚜&r";
-			case 2 -> "&e⚜&r";
-			case 3 -> "&c⚜&r";
-			default -> "";
-		};
-	}
+    /**
+     * Provides the BukkitTask associated to the player's teleportation.
+     *
+     * @param uuid The player's UUID.
+     */
+    public static void removeTeleportTask(UUID uuid) {
+        teleportingPlayers.remove(uuid);
+    }
 
-	/**
-	 * Provides the String portion of the player's Council rank.
-	 * @param aranarthPlayer The AranarthPlayer that is being analyzed.
-	 * @return The String portion of the player's Council rank.
-	 */
-	public static String getCouncilRank(AranarthPlayer aranarthPlayer) {
-		int councilRank = aranarthPlayer.getCouncilRank();
-		return switch (councilRank) {
-			case 1 -> "&3۞&r";
-			case 2 -> "&6۞&r";
-			case 3 -> "&4۞&r";
-			default -> "";
-		};
-	}
+    /**
+     * Displays a teleport confirmation popup to the player.
+     *
+     * @param player   The player.
+     * @param title    The main (large) title text, e.g. the destination name (supports color codes).
+     * @param subtitle The smaller subtitle text, e.g. "You have teleported to your home" (supports color codes).
+     */
+    private static void sendTeleportTitle(Player player, String title, String subtitle) {
+        player.sendTitle(ChatUtils.translateToColor("&e" + title), ChatUtils.translateToColor(subtitle));
+    }
 
-	/**
-	 * Provides the String portion of the player's Architect rank.
-	 * @param aranarthPlayer The AranarthPlayer that is being analyzed.
-	 * @return The String portion of the player's Architect rank.
-	 */
-	public static String getArchitectRank(AranarthPlayer aranarthPlayer) {
-		int architectRank = aranarthPlayer.getArchitectRank();
-		return switch (architectRank) {
-			case 1 -> "&a&l\uD83D\uDD28&r"; // Hammer emoji
-			default -> "";
-		};
-	}
+    /**
+     * Calculates the number of particles to be displayed based on the player's particle value.
+     *
+     * @param particleNum       The particle amount from the calculated server functionality.
+     * @param playerParticleNum The amount of particles the player has set to be displayed.
+     * @return The number of particles to display for the player.
+     */
+    public static int calculateParticlesForPlayer(int particleNum, int playerParticleNum) {
+        double calculatedDouble = particleNum;
+        calculatedDouble = particleNum * ((double) playerParticleNum / 100);
+        int calculatedInt = (int) Math.floor(calculatedDouble);
 
-	/**
-	 * Provides the String portion of the player's Architect rank.
-	 * @param aranarthPlayer The AranarthPlayer that is being analyzed.
-	 * @return The String portion of the player's Architect rank.
-	 */
-	public static String getAvatarRank(AranarthPlayer aranarthPlayer) {
-		if (AvatarUtils.getCurrentAvatar() != null) {
-			UUID uuid = AvatarUtils.getCurrentAvatar().getUuid();
-			if (uuid != null && getUUIDFromUsername(aranarthPlayer.getUsername()) != null && uuid.equals(getUUIDFromUsername(aranarthPlayer.getUsername()))) {
-				return "&5✵";
-			}
-		}
+        // If the calculated amount yields a value lower than 0 yet the player has particles enabled
+        if (calculatedInt == 0 && playerParticleNum != 0) {
+            return 1;
+        } else {
+            return calculatedInt;
+        }
+    }
 
-		return "";
-	}
+    /**
+     * Provides the player's timezone.
+     *
+     * @param player   The player.
+     * @param callback The player's timezone.
+     */
+    public static void getPlayerTimezone(Player player, Consumer<ZoneId> callback) {
+        String ip = player.getAddress().getAddress().getHostAddress();
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+            try {
+                URL url = new URL("http://ip-api.com/json/" + ip + "?fields=timezone");
+                BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+                String[] lineSplit = reader.readLine().split("\"");
+                ZoneId zoneId = ZoneId.of(lineSplit[3]);
+                reader.close();
 
-	/**
-	 * Confirms if the input coordinate is within the server Spawn world.
-	 * @param loc The location of the block or entity.
-	 * @return Confirmation if the input coordinate is within the server Spawn world.
-	 */
-	public static boolean isSpawnLocation(Location loc) {
-		return loc.getWorld().getName().equals("spawn");
-	}
+                // Switch back to main thread for player messaging
+                Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> callback.accept(zoneId));
+            } catch (Exception e) {
+                Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> callback.accept(null));
+            }
+        });
+    }
 
-	/**
-	 * Handles creating the teleport task timer and initializing the callback method.
-	 * @param player The player that is being teleported.
-	 * @param from The location that the player is teleporting from.
-	 * @param to The location that the player is teleporting to.
-	 * @param isImmediateTeleport Whether the teleportation should be immediate or not.
-	 * @param teleportTitle The main title text shown on success, e.g. the destination name.
-	 * @param teleportSubtitle The smaller subtitle text shown on success.
-	 * @param resultCallback Confirmation whether the teleportation was successful or not.
-	 */
-	public static void teleportPlayer(Player player, Location from, Location to, boolean isImmediateTeleport, String teleportTitle, String teleportSubtitle, Consumer<Boolean> resultCallback) {
-		if (isImmediateTeleport) {
-			boolean result = handleTeleportLogic(player, from, to);
-			if (result) {
-				sendTeleportTitle(player, teleportTitle, teleportSubtitle);
-			}
-			resultCallback.accept(result);
-		} else {
-			AranarthPlayer aranarthPlayerCheck = getPlayer(player.getUniqueId());
-			if (aranarthPlayerCheck != null && !aranarthPlayerCheck.getCombatLogTime().isEmpty()) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou cannot teleport while in combat!"));
-				resultCallback.accept(false);
-				return;
-			}
-			player.sendMessage(ChatUtils.chatMessage("&7You will be teleported in &e3 seconds!"));
-			initiateTeleport(player, () -> {
-				boolean result = handleTeleportLogic(player, from, to);
-				if (result) {
-					sendTeleportTitle(player, teleportTitle, teleportSubtitle);
-				}
-				resultCallback.accept(result);
-			});
-		}
-	}
+    /**
+     * Provides the list of warps.
+     *
+     * @return The list of warps.
+     */
+    public static List<Home> getWarps() {
+        return warps;
+    }
 
-	/**
-	 * Prepares the player to be teleported by creating the teleport task.
-	 * @param player The player.
-	 * @param onSuccess The method to be called once the timer ends to handle the actual teleportation.
-	 */
-	public static void initiateTeleport(Player player, Runnable onSuccess) {
-		// Cancel and override the previous task if exists with the new one
-		BukkitTask existingTask = teleportingPlayers.remove(player.getUniqueId());
-		if (existingTask != null) {
-			existingTask.cancel();
-		}
+    /**
+     * Updates the list of warps.
+     *
+     * @param newWarps The list of warps.
+     */
+    public static void setWarps(List<Home> newWarps) {
+        warps = newWarps;
+    }
 
-		// Initiate the teleportation after a 3 second delay, storing the task for the duration
-		BukkitTask task = new BukkitRunnable() {
-			@Override
-			public void run() {
-				teleportingPlayers.remove(player.getUniqueId());
-				onSuccess.run();
-			}
-		}.runTaskLater(AranarthCore.getInstance(), 60);
+    /**
+     * Adds a new warp to the list of warps.
+     *
+     * @param warp The new warp.
+     */
+    public static void addWarp(Home warp) {
+        warps.add(warp);
+    }
 
-		// This is run before the above task itself due to the delay
-		teleportingPlayers.put(player.getUniqueId(), task);
-	}
+    /**
+     * Removes a warp from the list of warps.
+     *
+     * @param warp The warp to be removed.
+     */
+    public static void removeWarp(Home warp) {
+        warps.remove(warp);
+    }
 
-	/**
-	 * Handles the actual teleportation of the player.
-	 * @param player The player that is being teleported.
-	 * @param from The location that the player is teleporting from.
-	 * @param to The location that the player is teleporting to.
-	 * @return Confirmation if the teleportation was successful.
-	 */
-	private static boolean handleTeleportLogic(Player player, Location from, Location to) {
-		Location locToTeleportTo = getSafeTeleportLocation(to);
-		// If i.e over the void
-		if (locToTeleportTo == null) {
-			player.sendMessage(ChatUtils.chatMessage("&cThis teleport location is unsafe!"));
-			return false;
-		}
+    /**
+     * Provides the HashMap of all punishments for all players.
+     *
+     * @return The HashMap of all punishments for all players.
+     */
+    public static HashMap<UUID, List<Punishment>> getAllPunishments() {
+        return punishments;
+    }
 
-		List<LivingEntity> leashedEntities = new ArrayList<>();
-		for (Entity nearby : from.getNearbyEntities(25, 25, 25)) {
-			if (nearby instanceof LivingEntity mob) {
-				if (mob.isLeashed()) {
-					if (mob.getLeashHolder() instanceof Player holder) {
-						if (holder.getUniqueId().equals(player.getUniqueId())) {
-							boolean isFromSurvivalWorld = from.getWorld().getName().startsWith("world")
-									|| isSmpWorld(from.getWorld().getName())
-									|| from.getWorld().getName().startsWith("resource");
-							boolean isToSurvivalWorld = to.getWorld().getName().startsWith("world")
-									|| isSmpWorld(to.getWorld().getName())
-									|| to.getWorld().getName().startsWith("resource");
-							if (isFromSurvivalWorld && isToSurvivalWorld) {
-								leashedEntities.add(mob);
-							} else {
-								mob.setLeashHolder(null);
-							}
+    /**
+     * Provides the HashMap of all punishments for a given player's UUID.
+     *
+     * @param uuid The player's UUID.
+     * @return The HashMap of all punishments for a given player's UUID.
+     */
+    public static List<Punishment> getPunishments(UUID uuid) {
+        return punishments.get(uuid);
+    }
+
+    /**
+     * Adds a new punishment to the player's List.
+     *
+     * @param uuid          The player's UUID.
+     * @param punishment    The new punishment.
+     * @param isFromStartup Whether the punishment is added from server startup or a true new punishment.
+     */
+    public static void addPunishment(UUID uuid, Punishment punishment, boolean isFromStartup) {
+        if (punishments.get(uuid) == null) {
+            punishments.put(uuid, new ArrayList<>());
+        }
+
+        // Send message to #punishment-history in Discord if it's a new punishment being added
+        if (!isFromStartup) {
+            DiscordUtils.addPunishmentToDiscord(punishment);
+        }
+
+        punishments.get(uuid).add(punishment);
+    }
+
+    /**
+     * Removes an existing punishment from the player.
+     *
+     * @param uuid       The player's UUID.
+     * @param punishment The punishment being removed.
+     */
+    public static void removePunishment(UUID uuid, Punishment punishment) {
+        punishments.get(uuid).remove(punishment);
+    }
+
+    /**
+     * Applies passive effects to all players that are in Spawn.
+     */
+    public static void applySpawnBuffs() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (isSpawnLocation(player.getLocation())) {
+                if (AranarthUtils.getPlayer(player.getUniqueId()).isUsingSpawnBoost()) {
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 4));
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 100, 2));
+                }
+            }
+        }
+    }
+
+    /**
+     * Provides the names for the potions that a player has.
+     * Note the inner HashMap reflects only one single potion per outer HashMap.
+     *
+     * @param player The player.
+     * @return The HashMap of names and the quantities of the associated potion.
+     */
+    public static HashMap<String, HashMap<ItemStack, Integer>> getPlayerPotionNames(Player player) {
+        AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+        HashMap<ItemStack, Integer> potions = aranarthPlayer.getPotions();
+        HashMap<String, HashMap<ItemStack, Integer>> nameToPotionAmount = new HashMap<>();
+
+        for (ItemStack potion : potions.keySet()) {
+            String potionName = null;
+            if (potion.getType() == Material.AIR) {
+                potions.remove(potion);
+                continue;
+            }
+
+            // If it is an mcMMO potion
+            if (potion.hasItemMeta() && potion.getItemMeta().hasCustomName()) {
+                Component customName = potion.getItemMeta().customName();
+                potionName = PlainTextComponentSerializer.plainText().serialize(customName);
+                if (potionName.isBlank()) {
+                    Bukkit.getLogger().warning("Potion could not be serialized correctly - " + customName);
+                    continue;
+                }
+            } else {
+                PotionMeta meta = (PotionMeta) potion.getItemMeta();
+                if (meta != null) {
+                    potionName = addPotionConsumptionMethodToName(potion, ChatUtils.getFormattedItemName(meta.getBasePotionType().name()));
+                }
+            }
+            HashMap<ItemStack, Integer> potionToAdd = new HashMap<>();
+            potionToAdd.put(potion, potions.get(potion));
+            nameToPotionAmount.put(potionName, potionToAdd);
+        }
+        return nameToPotionAmount;
+    }
+
+    /**
+     * Provides the formatted name for a given potion.
+     *
+     * @param potion     The potion item.
+     * @param potionName The base name for the potion.
+     * @return The formatted name for a given potion.
+     */
+    private static String addPotionConsumptionMethodToName(ItemStack potion, String potionName) {
+        String[] partsOfName = potionName.split(" ");
+        StringBuilder finalName = new StringBuilder();
+
+        if (potionName.startsWith("Long")) {
+            if (potion.getType() == Material.POTION) {
+                finalName = new StringBuilder("Extended Potion of ");
+            } else if (potion.getType() == Material.SPLASH_POTION) {
+                finalName = new StringBuilder("Extended Splash Potion of ");
+            } else if (potion.getType() == Material.LINGERING_POTION) {
+                finalName = new StringBuilder("Extended Lingering Potion of ");
+            }
+        } else {
+            if (potion.getType() == Material.POTION) {
+                finalName = new StringBuilder("Potion of ");
+            } else if (potion.getType() == Material.SPLASH_POTION) {
+                finalName = new StringBuilder("Splash Potion of ");
+            } else if (potion.getType() == Material.LINGERING_POTION) {
+                finalName = new StringBuilder("Lingering Potion of ");
+            }
+        }
+
+        // Handles formatting the actual potion name
+        for (int i = 0; i < partsOfName.length; i++) {
+            if (partsOfName[i].equals("Long") || partsOfName[i].equals("Strong") || partsOfName[i].equals("of")) {
+                continue;
+            } else {
+                if (i == partsOfName.length - 1) {
+                    finalName.append(partsOfName[i]);
+                } else {
+                    finalName.append(partsOfName[i]).append(" ");
+                }
+            }
+        }
+
+        if (potionName.startsWith("Strong")) {
+            finalName.append(" II");
+        }
+
+        return finalName.toString();
+    }
+
+    /**
+     * Provides the combined total number of potions that a given player has.
+     * Includes potion from both the in-game rank, and Saint ranks.
+     *
+     * @param player The player.
+     * @return The combined total number of potions that a given player has.
+     */
+    public static int getMaxPotionNum(Player player) {
+        AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+        int rankPotionNum = 0;
+        int saintPotionNum = 0;
+
+        if (aranarthPlayer.getRank() == 1) {
+            rankPotionNum = 100;
+        } else if (aranarthPlayer.getRank() == 2) {
+            rankPotionNum = 200;
+        } else if (aranarthPlayer.getRank() == 3) {
+            rankPotionNum = 350;
+        } else if (aranarthPlayer.getRank() == 4) {
+            rankPotionNum = 500;
+        } else if (aranarthPlayer.getRank() == 5) {
+            rankPotionNum = 750;
+        } else if (aranarthPlayer.getRank() == 6) {
+            rankPotionNum = 1000;
+        } else if (aranarthPlayer.getRank() == 7) {
+            rankPotionNum = 1500;
+        } else if (aranarthPlayer.getRank() == 8) {
+            rankPotionNum = 2500;
+        } else {
+            rankPotionNum = 50;
+        }
+
+        if (aranarthPlayer.getSaintRank() == 1 || aranarthPlayer.getCouncilRank() == 1) {
+            saintPotionNum = 500;
+        }
+        if (aranarthPlayer.getSaintRank() == 2 || aranarthPlayer.getCouncilRank() == 2) {
+            saintPotionNum = 1000;
+        }
+        if (aranarthPlayer.getSaintRank() == 3 || aranarthPlayer.getCouncilRank() == 3) {
+            saintPotionNum = 2500;
+        }
+
+        return rankPotionNum + saintPotionNum;
+    }
+
+    /**
+     * Provides the current number of potions that the player has stored in their potions pouch.
+     *
+     * @param player The player.
+     * @return The number of potions that the player has stored in their potions pouch.
+     */
+    public static int getPlayerStoredPotionNum(Player player) {
+        AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+        if (aranarthPlayer.getPotions() == null || aranarthPlayer.getPotions().isEmpty()) {
+            return 0;
+        }
+
+        int storedPotionNum = 0;
+        for (int amount : aranarthPlayer.getPotions().values()) {
+            storedPotionNum += amount;
+        }
+        return storedPotionNum;
+    }
+
+    /**
+     * Provides the combined total number of Quiver slots that a given player has.
+     * Includes quiver slots from both the in-game rank, and Saint ranks.
+     *
+     * @param player The player.
+     * @return The combined total number of Quiver slots that a given player has.
+     */
+    public static int getMaxQuiverSize(Player player) {
+        AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+        int rankQuiverSlotNum = 0;
+        int saintQuiverSlotNum = 0;
+
+        if (aranarthPlayer.getRank() == 1) {
+            rankQuiverSlotNum = 5;
+        } else if (aranarthPlayer.getRank() == 2) {
+            rankQuiverSlotNum = 9;
+        } else if (aranarthPlayer.getRank() == 3) {
+            rankQuiverSlotNum = 12;
+        } else if (aranarthPlayer.getRank() == 4) {
+            rankQuiverSlotNum = 18;
+        } else if (aranarthPlayer.getRank() == 5) {
+            rankQuiverSlotNum = 25;
+        } else if (aranarthPlayer.getRank() == 6) {
+            rankQuiverSlotNum = 30;
+        } else if (aranarthPlayer.getRank() == 7) {
+            rankQuiverSlotNum = 36;
+        } else if (aranarthPlayer.getRank() == 8) {
+            rankQuiverSlotNum = 45;
+        } else {
+            rankQuiverSlotNum = 3;
+        }
+
+        if (aranarthPlayer.getSaintRank() == 1 || aranarthPlayer.getCouncilRank() == 1) {
+            saintQuiverSlotNum = 3;
+        }
+        if (aranarthPlayer.getSaintRank() == 2 || aranarthPlayer.getCouncilRank() == 2) {
+            saintQuiverSlotNum = 6;
+        }
+        if (aranarthPlayer.getSaintRank() == 3 || aranarthPlayer.getCouncilRank() == 3) {
+            saintQuiverSlotNum = 9;
+        }
+
+        return rankQuiverSlotNum + saintQuiverSlotNum;
+    }
+
+    /**
+     * Provides the total number of player shops that a given player can create.
+     *
+     * @param player The player.
+     * @return The total number of player shops that a given player can create.
+     */
+    public static int getMaxShopNum(Player player) {
+        AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+        int rankShopNum = 0;
+
+        if (aranarthPlayer.getRank() == 3) {
+            rankShopNum = 3;
+        } else if (aranarthPlayer.getRank() == 4) {
+            rankShopNum = 7;
+        } else if (aranarthPlayer.getRank() == 5) {
+            rankShopNum = 15;
+        } else if (aranarthPlayer.getRank() == 6) {
+            rankShopNum = 30;
+        } else if (aranarthPlayer.getRank() == 7) {
+            rankShopNum = 50;
+        } else if (aranarthPlayer.getRank() == 8) {
+            return -1;
+        } else {
+            rankShopNum = 0;
+        }
+
+        return rankShopNum;
+    }
+
+    /**
+     * Determines if the player is currently blacklisting the given item.
+     *
+     * @param aranarthPlayer The aranarth player.
+     * @param item           The item that is attempting to be picked up.
+     * @return 0 if the item should be deleted, 1 if the item should be ignored, -1 if the item is not blacklisted.
+     */
+    public static int getBlacklistMethod(Player player, AranarthPlayer aranarthPlayer, ItemStack item) {
+        if (!player.hasPermission("aranarth.blacklist")) {
+            return -1;
+        }
+
+        List<ItemStack> blacklistedItems = aranarthPlayer.getBlacklist();
+        if (blacklistedItems == null || blacklistedItems.isEmpty()) {
+            return -1;
+        }
+
+        for (ItemStack is : blacklistedItems) {
+            if (is.isSimilar(item) || (item.getType() == is.getType() && CropUtils.isCropSeed(item.getType()))) {
+                return aranarthPlayer.getBlacklistingMethod();
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Provides the value for the manual spawning of phantoms during the month of Obscurvor.
+     *
+     * @return The value for the manual spawning of phantoms during the month of Obscurvor.
+     */
+    public static int getPhantomSpawnDelay() {
+        return phantomSpawnDelay;
+    }
+
+    /**
+     * Updates the value for the manual spawning of phantoms during the month of Obscurvor.
+     *
+     * @param newPhantomSpawnDelay The new value for the manual spawning of phantoms during the month of Obscurvor.
+     */
+    public static void setPhantomSpawnDelay(int newPhantomSpawnDelay) {
+        phantomSpawnDelay = newPhantomSpawnDelay;
+    }
+
+    /**
+     * Provides all server boosts that are currently active.
+     *
+     * @return The HashMap of server boosts that are currently active.
+     */
+    public static HashMap<Boost, LocalDateTime> getServerBoosts() {
+        return serverBoosts;
+    }
+
+    /**
+     * Applies a new server boost or increases the duration of an existing server boost.
+     *
+     * @param boost    The type of boost being applied. A null value signifies 24 hours.
+     * @param duration The duration of the boost being applied.
+     * @param uuid     The username of the player that is applying the boost.
+     */
+    public static void addServerBoost(Boost boost, LocalDateTime duration, UUID uuid, boolean fromVoteShop) {
+        String name = "";
+        if (boost == Boost.MINER) {
+            name = "&8&lBoost of the Miner";
+        } else if (boost == Boost.HARVEST) {
+            name = "&6&lBoost of the Harvest";
+        } else if (boost == Boost.HUNTER) {
+            name = "&c&lBoost of the Hunter";
+        } else if (boost == Boost.CHI) {
+            name = "&f&lBoost of Chi";
+        } else {
+            name = "&7&lUnspecified Boost";
+        }
+
+        // A new boost will automatically apply for 24 hours
+        if (duration == null) {
+            // Increase by 24 hours if it already exists i.e the same boost was purchased twice
+            if (serverBoosts.get(boost) != null) {
+                LocalDateTime currentBoostEnd = serverBoosts.get(boost);
+                LocalDateTime newBoostEnd = currentBoostEnd.plusDays(1);
+                serverBoosts.put(boost, newBoostEnd);
+            }
+            // Create a new boost as it doesn't exist yet
+            else {
+                LocalDateTime now = LocalDateTime.now();
+                LocalDateTime newBoostEnd = now.plusDays(1);
+                serverBoosts.put(boost, newBoostEnd);
+            }
+
+            // Clear reminders so they fire again for the new/extended duration
+            sentBoostReminders.remove(boost.name() + "_60");
+            sentBoostReminders.remove(boost.name() + "_30");
+            sentBoostReminders.remove(boost.name() + "_10");
+            sentBoostReminders.remove(boost.name() + "_1");
+
+            // Handles messages — only broadcast and notify Discord on the primary (Survival) server
+            // to avoid duplicate messages when both servers independently receive a boost event.
+            if (!AranarthCore.isSmpServer()) {
+                if (uuid == null) {
+                    Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied"));
+                    if (AranarthCore.isPublicServer()) {
+                        DiscordUtils.updateBoostInDiscord(null, boost, true, fromVoteShop);
+                    }
+                } else {
+                    AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+                    if (fromVoteShop) {
+                        Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " &7used vote points to purchase the " + name));
+                    } else {
+                        Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied by &e" + aranarthPlayer.getNickname()));
+                    }
+                    if (AranarthCore.isPublicServer()) {
+                        DiscordUtils.updateBoostInDiscord(uuid, boost, true, fromVoteShop);
+                    }
+                }
+                // Sync boost end-time to other servers so they apply effects without re-broadcasting
+                if (NetworkManager.isActive()) {
+                    LocalDateTime endTime = serverBoosts.get(boost);
+                    if (endTime != null) {
+                        NetworkManager.getInstance().publishBoostSync(boost.name(), endTime.toString(), false);
+                    }
+                }
+            }
+        }
+        // Should only be called during server startup
+        else {
+            serverBoosts.put(boost, duration);
+        }
+    }
+
+    /**
+     * Removes the specified server boost.
+     *
+     * @param boost The boost being removed.
+     */
+    public static void removeServerBoost(Boost boost) {
+        if (AranarthUtils.getServerBoosts().containsKey(boost)) {
+            String name = "";
+            if (boost == Boost.MINER) {
+                name = "&8&lBoost of the Miner";
+            } else if (boost == Boost.HARVEST) {
+                name = "&6&lBoost of the Harvest";
+            } else if (boost == Boost.HUNTER) {
+                name = "&c&lBoost of the Hunter";
+            } else if (boost == Boost.CHI) {
+                name = "&f&lBoost of Chi";
+            } else {
+                name = "&7&lUnspecified Boost";
+            }
+            if (!AranarthCore.isSmpServer()) {
+                Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
+                if (AranarthCore.isPublicServer()) {
+                    DiscordUtils.updateBoostInDiscord(null, boost, false, false);
+                    DiscordUtils.sendBoostExpiredToDiscord(boost);
+                }
+                if (NetworkManager.isActive()) {
+                    NetworkManager.getInstance().publishBoostSync(boost.name(), "", true);
+                }
+            }
+            serverBoosts.remove(boost);
+            sentBoostReminders.remove(boost.name() + "_60");
+            sentBoostReminders.remove(boost.name() + "_30");
+            sentBoostReminders.remove(boost.name() + "_10");
+            sentBoostReminders.remove(boost.name() + "_1");
+        }
+    }
+
+    /**
+     * Provides the messages for all active server boosts, specifying the name and the remaining duration of the boost
+     *
+     * @return The formatted name of the boost as the key, and the remaining duration of the boost as the value.
+     */
+    public static HashMap<String, String> getActiveServerBoostsMessages() {
+        HashMap<String, String> boostMessages = new HashMap<>();
+        for (Boost boost : serverBoosts.keySet()) {
+            LocalDateTime ldt = serverBoosts.get(boost);
+            String name = "";
+            if (boost == Boost.MINER) {
+                name = "&8&lBoost of the Miner";
+            } else if (boost == Boost.HARVEST) {
+                name = "&6&lBoost of the Harvest";
+            } else if (boost == Boost.HUNTER) {
+                name = "&c&lBoost of the Hunter";
+            } else if (boost == Boost.CHI) {
+                name = "&f&lBoost of Chi";
+            } else {
+                name = "&7&lUnspecified Boost";
+            }
+            boostMessages.put(ChatUtils.translateToColor(name), getRemainingBoostDuration(boost));
+        }
+        return boostMessages;
+    }
+
+    /**
+     * Provides a String containing the text value of the remaining amount of time for the currently applied boost.
+     *
+     * @param boost The boost.
+     * @return The String containing the text value of the remaining amount of time for the currently applied boost.
+     */
+    private static String getRemainingBoostDuration(Boost boost) {
+        LocalDateTime expiry = AranarthUtils.getServerBoosts().get(boost);
+
+        Duration duration = Duration.between(LocalDateTime.now(), expiry);
+        int minutes = (int) duration.toMinutes();
+        int hours = minutes / 60;
+        int days = minutes / 1440;
+
+        int remainingHours = hours % 24;
+        int remainingMinutes = minutes % 60;
+
+        if (days > 0) {
+            return "&e" + days + "d " + remainingHours + "h " + remainingMinutes + "m";
+        } else if (hours > 0) {
+            return "&e" + hours + "h " + remainingMinutes + "m";
+        } else {
+            return "&e" + minutes + "m";
+        }
+    }
+
+    /**
+     * Refreshes server boost functionality and deactivates them once they are no longer active.
+     */
+    public static void refreshServerBoosts() {
+        List<Boost> toRemove = new ArrayList<>();
+        for (Boost boost : serverBoosts.keySet()) {
+            if (serverBoosts.get(boost).isBefore(LocalDateTime.now())) {
+                toRemove.add(boost);
+            }
+        }
+        for (Boost boost : toRemove) {
+            String name = "";
+            if (boost == Boost.MINER) {
+                name = "&8&lBoost of the Miner";
+            } else if (boost == Boost.HARVEST) {
+                name = "&6&lBoost of the Harvest";
+            } else if (boost == Boost.HUNTER) {
+                name = "&c&lBoost of the Hunter";
+            } else if (boost == Boost.CHI) {
+                name = "&f&lBoost of Chi";
+            } else {
+                name = "&7&lUnspecified Boost";
+            }
+            if (!AranarthCore.isSmpServer()) {
+                Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
+                if (AranarthCore.isPublicServer()) {
+                    DiscordUtils.updateBoostInDiscord(null, boost, false, false);
+                    DiscordUtils.sendBoostExpiredToDiscord(boost);
+                }
+                if (NetworkManager.isActive()) {
+                    NetworkManager.getInstance().publishBoostSync(boost.name(), "", true);
+                }
+                serverBoosts.remove(boost);
+                sentBoostReminders.remove(boost.name() + "_60");
+                sentBoostReminders.remove(boost.name() + "_30");
+                sentBoostReminders.remove(boost.name() + "_10");
+                sentBoostReminders.remove(boost.name() + "_1");
+            }
+        }
+
+        // Send reminder messages at 60, 30, and 1 minute remaining
+        for (Boost boost : serverBoosts.keySet()) {
+            String name = "";
+            if (boost == Boost.MINER) {
+                name = "&8&lBoost of the Miner";
+            } else if (boost == Boost.HARVEST) {
+                name = "&6&lBoost of the Harvest";
+            } else if (boost == Boost.HUNTER) {
+                name = "&c&lBoost of the Hunter";
+            } else if (boost == Boost.CHI) {
+                name = "&f&lBoost of Chi";
+            } else {
+                name = "&7&lUnspecified Boost";
+            }
+
+            Duration remaining = Duration.between(LocalDateTime.now(), serverBoosts.get(boost));
+            long minutesLeft = remaining.toMinutes();
+
+            int[] thresholds = {60, 30, 10, 1};
+            String[] labels = {"&e1 hour", "&e30 minutes", "&e10 minutes", "&e1 minute"};
+            String[] discordLabels = {"1 hour", "30 minutes", "10 minutes", null};
+            for (int i = 0; i < thresholds.length; i++) {
+                String key = boost.name() + "_" + thresholds[i];
+                if (minutesLeft == thresholds[i] && !sentBoostReminders.contains(key)) {
+                    sentBoostReminders.add(key);
+                    if (!AranarthCore.isSmpServer()) {
+                        Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7expires in " + labels[i] + "&7!"));
+                        if (discordLabels[i] != null && AranarthCore.isPublicServer()) {
+                            DiscordUtils.sendBoostReminderToDiscord(boost, discordLabels[i]);
+                        }
+                    }
+                    for (Player player : Bukkit.getOnlinePlayers()) {
+                        int domVol = getPlayer(player.getUniqueId()).getDominionSoundVolume();
+						if (domVol > 0) {
+							player.playSound(player.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 0.7f);
 						}
-					}
-				}
-			}
-		}
-
-		// Capture the player's actual current world before teleporting; the `from` parameter
-		// may be stale (captured at /tpaccept time) if the player changed worlds during the delay.
-		String actualFromWorld = player.getLocation().getWorld() != null
-				? player.getLocation().getWorld().getName()
-				: from.getWorld().getName();
-
-		player.teleport(locToTeleportTo);
-		for (Entity leashed : leashedEntities) {
-			leashed.teleport(locToTeleportTo);
-		}
-
-		player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
-
-		// Saves the player's last location for /ac back
-		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
-		aranarthPlayer.setLastKnownTeleportLocation(from);
-
-		// Keep survival stats in sync on every teleport so the data is always current in memory
-		// (and therefore in the next periodic DB write). For cross-server transfers this snapshot
-		// is what saveInventoryAndTransfer() will flush to MySQL before the BungeeCord handoff.
-		if (isSurvivalWorld(actualFromWorld)) {
-			try {
-				aranarthPlayer.setSurvivalInventory(ItemUtils.itemStackArrayToBase64(player.getInventory().getContents()));
-			} catch (Exception e) {
-				Bukkit.getLogger().warning("[AC] Failed to serialize inventory for " + player.getName());
-			}
-			try {
-				aranarthPlayer.setSurvivalEnderChest(ItemUtils.itemStackArrayToBase64(player.getEnderChest().getContents()));
-			} catch (Exception e) {
-				Bukkit.getLogger().warning("[AC] Failed to serialize ender chest for " + player.getName());
-			}
-			aranarthPlayer.setSurvivalHealth(player.getHealth());
-			aranarthPlayer.setSurvivalFoodLevel(player.getFoodLevel());
-			aranarthPlayer.setSurvivalSaturation(player.getSaturation());
-			aranarthPlayer.setSurvivalExpLevel(player.getLevel());
-			aranarthPlayer.setSurvivalExpProgress(player.getExp());
-		}
-
-		setPlayer(player.getUniqueId(), aranarthPlayer);
-
-		try {
-			AranarthUtils.switchInventory(player, actualFromWorld, to.getWorld().getName());
-
-			for (LivingEntity leashed : leashedEntities) {
-				leashed.setLeashHolder(player);
-			}
-
-			return true;
-		} catch (IOException e) {
-			player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
-			return false;
-		}
-	}
-
-	/**
-	 * Provides the BukkitTask associated to the player's teleportation.
-	 * @param uuid The player's UUID.
-	 * @return The BukkitTask associated to the player's teleportation.
-	 */
-	public static BukkitTask getTeleportTask(UUID uuid) {
-		return teleportingPlayers.get(uuid);
-	}
-
-	/**
-	 * Provides the BukkitTask associated to the player's teleportation.
-	 * @param uuid The player's UUID.
-	 */
-	public static void removeTeleportTask(UUID uuid) {
-		teleportingPlayers.remove(uuid);
-	}
-
-	/**
-	 * Displays a teleport confirmation popup to the player.
-	 * @param player The player.
-	 * @param title The main (large) title text, e.g. the destination name (supports color codes).
-	 * @param subtitle The smaller subtitle text, e.g. "You have teleported to your home" (supports color codes).
-	 */
-	private static void sendTeleportTitle(Player player, String title, String subtitle) {
-		player.sendTitle(ChatUtils.translateToColor("&e" + title), ChatUtils.translateToColor(subtitle));
-	}
-
-	/**
-	 * Calculates the number of particles to be displayed based on the player's particle value.
-	 * @param particleNum The particle amount from the calculated server functionality.
-	 * @param playerParticleNum The amount of particles the player has set to be displayed.
-	 * @return The number of particles to display for the player.
-	 */
-	public static int calculateParticlesForPlayer(int particleNum, int playerParticleNum) {
-		double calculatedDouble = particleNum;
-		calculatedDouble = particleNum * ((double) playerParticleNum / 100);
-		int calculatedInt = (int) Math.floor(calculatedDouble);
-
-		// If the calculated amount yields a value lower than 0 yet the player has particles enabled
-		if (calculatedInt == 0 && playerParticleNum != 0) {
-			return 1;
-		} else {
-			return calculatedInt;
-		}
-	}
-
-	/**
-	 * Provides the player's timezone.
-	 * @param player The player.
-	 * @param callback The player's timezone.
-	 */
-	public static void getPlayerTimezone(Player player, Consumer<ZoneId> callback) {
-		String ip = player.getAddress().getAddress().getHostAddress();
-		Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
-			try {
-				URL url = new URL("http://ip-api.com/json/" + ip + "?fields=timezone");
-				BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
-				String[] lineSplit = reader.readLine().split("\"");
-				ZoneId zoneId = ZoneId.of(lineSplit[3]);
-				reader.close();
-
-				// Switch back to main thread for player messaging
-				Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> callback.accept(zoneId));
-			} catch (Exception e) {
-				Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> callback.accept(null));
-			}
-		});
-	}
-
-	/**
-	 * Provides the list of warps.
-	 * @return The list of warps.
-	 */
-	public static List<Home> getWarps() {
-		return warps;
-	}
-
-	/**
-	 * Updates the list of warps.
-	 * @param newWarps The list of warps.
-	 */
-	public static void setWarps(List<Home> newWarps) {
-		warps = newWarps;
-	}
-
-	/**
-	 * Adds a new warp to the list of warps.
-	 * @param warp The new warp.
-	 */
-	public static void addWarp(Home warp) {
-		warps.add(warp);
-	}
-
-	/**
-	 * Removes a warp from the list of warps.
-	 * @param warp The warp to be removed.
-	 */
-	public static void removeWarp(Home warp) {
-		warps.remove(warp);
-	}
-
-	/**
-	 * Provides the HashMap of all punishments for all players.
-	 * @return The HashMap of all punishments for all players.
-	 */
-	public static HashMap<UUID, List<Punishment>> getAllPunishments() {
-		return punishments;
-	}
-
-	/**
-	 * Provides the HashMap of all punishments for a given player's UUID.
-	 * @param uuid The player's UUID.
-	 * @return The HashMap of all punishments for a given player's UUID.
-	 */
-	public static List<Punishment> getPunishments(UUID uuid) {
-		return punishments.get(uuid);
-	}
-
-	/**
-	 * Adds a new punishment to the player's List.
-	 * @param uuid The player's UUID.
-	 * @param punishment The new punishment.
-	 * @param isFromStartup Whether the punishment is added from server startup or a true new punishment.
-	 */
-	public static void addPunishment(UUID uuid, Punishment punishment, boolean isFromStartup) {
-		if (punishments.get(uuid) == null) {
-			punishments.put(uuid, new ArrayList<>());
-		}
-
-		// Send message to #punishment-history in Discord if it's a new punishment being added
-		if (!isFromStartup) {
-			DiscordUtils.addPunishmentToDiscord(punishment);
-		}
-
-		punishments.get(uuid).add(punishment);
-	}
-
-	/**
-	 * Removes an existing punishment from the player.
-	 * @param uuid The player's UUID.
-	 * @param punishment The punishment being removed.
-	 */
-	public static void removePunishment(UUID uuid, Punishment punishment) {
-		punishments.get(uuid).remove(punishment);
-	}
-
-	/**
-	 * Applies passive effects to all players that are in Spawn.
-	 */
-	public static void applySpawnBuffs() {
-		for (Player player : Bukkit.getOnlinePlayers()) {
-			if (isSpawnLocation(player.getLocation())) {
-				if (AranarthUtils.getPlayer(player.getUniqueId()).isUsingSpawnBoost()) {
-					player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 4));
-					player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 100, 2));
-				}
-			}
-		}
-	}
-
-	/**
-	 * Provides the names for the potions that a player has.
-	 * Note the inner HashMap reflects only one single potion per outer HashMap.
-	 * @param player The player.
-	 * @return The HashMap of names and the quantities of the associated potion.
-	 */
-	public static HashMap<String, HashMap<ItemStack, Integer>> getPlayerPotionNames(Player player) {
-		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
-		HashMap<ItemStack, Integer> potions = aranarthPlayer.getPotions();
-		HashMap<String, HashMap<ItemStack, Integer>> nameToPotionAmount = new HashMap<>();
-
-		for (ItemStack potion : potions.keySet()) {
-			String potionName = null;
-			if (potion.getType() == Material.AIR) {
-				potions.remove(potion);
-				continue;
-			}
-
-			// If it is an mcMMO potion
-			if (potion.hasItemMeta() && potion.getItemMeta().hasCustomName()) {
-				Component customName = potion.getItemMeta().customName();
-				potionName = PlainTextComponentSerializer.plainText().serialize(customName);
-				if (potionName.isBlank()) {
-					Bukkit.getLogger().warning("Potion could not be serialized correctly - " + customName);
-					continue;
-				}
-			} else {
-				PotionMeta meta = (PotionMeta) potion.getItemMeta();
-				if (meta != null) {
-					potionName = addPotionConsumptionMethodToName(potion, ChatUtils.getFormattedItemName(meta.getBasePotionType().name()));
-				}
-			}
-			HashMap<ItemStack, Integer> potionToAdd = new HashMap<>();
-			potionToAdd.put(potion, potions.get(potion));
-			nameToPotionAmount.put(potionName, potionToAdd);
-		}
-		return nameToPotionAmount;
-	}
-
-	/**
-	 * Provides the formatted name for a given potion.
-	 * @param potion The potion item.
-	 * @param potionName The base name for the potion.
-	 * @return The formatted name for a given potion.
-	 */
-	private static String addPotionConsumptionMethodToName(ItemStack potion, String potionName) {
-		String[] partsOfName = potionName.split(" ");
-		StringBuilder finalName = new StringBuilder();
-
-		if (potionName.startsWith("Long")) {
-			if (potion.getType() == Material.POTION) {
-				finalName = new StringBuilder("Extended Potion of ");
-			} else if (potion.getType() == Material.SPLASH_POTION) {
-				finalName = new StringBuilder("Extended Splash Potion of ");
-			} else if (potion.getType() == Material.LINGERING_POTION) {
-				finalName = new StringBuilder("Extended Lingering Potion of ");
-			}
-		} else {
-			if (potion.getType() == Material.POTION) {
-				finalName = new StringBuilder("Potion of ");
-			} else if (potion.getType() == Material.SPLASH_POTION) {
-				finalName = new StringBuilder("Splash Potion of ");
-			} else if (potion.getType() == Material.LINGERING_POTION) {
-				finalName = new StringBuilder("Lingering Potion of ");
-			}
-		}
-
-		// Handles formatting the actual potion name
-		for (int i = 0; i < partsOfName.length; i++) {
-			if (partsOfName[i].equals("Long") || partsOfName[i].equals("Strong") || partsOfName[i].equals("of")) {
-				continue;
-			} else {
-				if (i == partsOfName.length - 1) {
-					finalName.append(partsOfName[i]);
-				} else {
-					finalName.append(partsOfName[i]).append(" ");
-				}
-			}
-		}
-
-		if (potionName.startsWith("Strong")) {
-			finalName.append(" II");
-		}
-
-		return finalName.toString();
-	}
-
-	/**
-	 * Provides the combined total number of potions that a given player has.
-	 * Includes potion from both the in-game rank, and Saint ranks.
-	 * @param player The player.
-	 * @return The combined total number of potions that a given player has.
-	 */
-	public static int getMaxPotionNum(Player player) {
-		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
-		int rankPotionNum = 0;
-		int saintPotionNum = 0;
-
-		if (aranarthPlayer.getRank() == 1) {
-			rankPotionNum = 100;
-		} else if (aranarthPlayer.getRank() == 2) {
-			rankPotionNum = 200;
-		} else if (aranarthPlayer.getRank() == 3) {
-			rankPotionNum = 350;
-		} else if (aranarthPlayer.getRank() == 4) {
-			rankPotionNum = 500;
-		} else if (aranarthPlayer.getRank() == 5) {
-			rankPotionNum = 750;
-		} else if (aranarthPlayer.getRank() == 6) {
-			rankPotionNum = 1000;
-		} else if (aranarthPlayer.getRank() == 7) {
-			rankPotionNum = 1500;
-		} else if (aranarthPlayer.getRank() == 8) {
-			rankPotionNum = 2500;
-		} else {
-			rankPotionNum = 50;
-		}
-
-		if (aranarthPlayer.getSaintRank() == 1 || aranarthPlayer.getCouncilRank() == 1) {
-			saintPotionNum = 500;
-		}
-		if (aranarthPlayer.getSaintRank() == 2 || aranarthPlayer.getCouncilRank() == 2) {
-			saintPotionNum = 1000;
-		}
-		if (aranarthPlayer.getSaintRank() == 3 || aranarthPlayer.getCouncilRank() == 3) {
-			saintPotionNum = 2500;
-		}
-
-		return rankPotionNum + saintPotionNum;
-	}
-
-	/**
-	 * Provides the current number of potions that the player has stored in their potions pouch.
-	 * @param player The player.
-	 * @return The number of potions that the player has stored in their potions pouch.
-	 */
-	public static int getPlayerStoredPotionNum(Player player) {
-		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
-		if (aranarthPlayer.getPotions() == null || aranarthPlayer.getPotions().isEmpty()) {
-			return 0;
-		}
-
-		int storedPotionNum = 0;
-		for (int amount : aranarthPlayer.getPotions().values()) {
-			storedPotionNum += amount;
-		}
-		return storedPotionNum;
-	}
-
-	/**
-	 * Provides the combined total number of Quiver slots that a given player has.
-	 * Includes quiver slots from both the in-game rank, and Saint ranks.
-	 * @param player The player.
-	 * @return The combined total number of Quiver slots that a given player has.
-	 */
-	public static int getMaxQuiverSize(Player player) {
-		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
-		int rankQuiverSlotNum = 0;
-		int saintQuiverSlotNum = 0;
-
-		if (aranarthPlayer.getRank() == 1) {
-			rankQuiverSlotNum = 5;
-		} else if (aranarthPlayer.getRank() == 2) {
-			rankQuiverSlotNum = 9;
-		} else if (aranarthPlayer.getRank() == 3) {
-			rankQuiverSlotNum = 12;
-		} else if (aranarthPlayer.getRank() == 4) {
-			rankQuiverSlotNum = 18;
-		} else if (aranarthPlayer.getRank() == 5) {
-			rankQuiverSlotNum = 25;
-		} else if (aranarthPlayer.getRank() == 6) {
-			rankQuiverSlotNum = 30;
-		} else if (aranarthPlayer.getRank() == 7) {
-			rankQuiverSlotNum = 36;
-		} else if (aranarthPlayer.getRank() == 8) {
-			rankQuiverSlotNum = 45;
-		} else {
-			rankQuiverSlotNum = 3;
-		}
-
-		if (aranarthPlayer.getSaintRank() == 1 || aranarthPlayer.getCouncilRank() == 1) {
-			saintQuiverSlotNum = 3;
-		}
-		if (aranarthPlayer.getSaintRank() == 2 || aranarthPlayer.getCouncilRank() == 2) {
-			saintQuiverSlotNum = 6;
-		}
-		if (aranarthPlayer.getSaintRank() == 3 || aranarthPlayer.getCouncilRank() == 3) {
-			saintQuiverSlotNum = 9;
-		}
-
-		return rankQuiverSlotNum + saintQuiverSlotNum;
-	}
-
-	/**
-	 * Provides the total number of player shops that a given player can create.
-	 * @param player The player.
-	 * @return The total number of player shops that a given player can create.
-	 */
-	public static int getMaxShopNum(Player player) {
-		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
-		int rankShopNum = 0;
-
-		if (aranarthPlayer.getRank() == 3) {
-			rankShopNum = 3;
-		} else if (aranarthPlayer.getRank() == 4) {
-			rankShopNum = 7;
-		} else if (aranarthPlayer.getRank() == 5) {
-			rankShopNum = 15;
-		} else if (aranarthPlayer.getRank() == 6) {
-			rankShopNum = 30;
-		} else if (aranarthPlayer.getRank() == 7) {
-			rankShopNum = 50;
-		} else if (aranarthPlayer.getRank() == 8) {
-			return -1;
-		} else {
-			rankShopNum = 0;
-		}
-
-		return rankShopNum;
-	}
-
-	/**
-	 * Determines if the player is currently blacklisting the given item.
-	 * @param aranarthPlayer The aranarth player.
-	 * @param item The item that is attempting to be picked up.
-	 * @return 0 if the item should be deleted, 1 if the item should be ignored, -1 if the item is not blacklisted.
-	 */
-	public static int getBlacklistMethod(Player player, AranarthPlayer aranarthPlayer, ItemStack item) {
-		if (!player.hasPermission("aranarth.blacklist")) {
-			return -1;
-		}
-
-		List<ItemStack> blacklistedItems = aranarthPlayer.getBlacklist();
-		if (blacklistedItems == null || blacklistedItems.isEmpty()) {
-			return -1;
-		}
-
-		for (ItemStack is : blacklistedItems) {
-			if (is.isSimilar(item) || (item.getType() == is.getType() && CropUtils.isCropSeed(item.getType()))) {
-				return aranarthPlayer.getBlacklistingMethod();
-			}
-		}
-		return -1;
-	}
-
-	/**
-	 * Provides the value for the manual spawning of phantoms during the month of Obscurvor.
-	 * @return The value for the manual spawning of phantoms during the month of Obscurvor.
-	 */
-	public static int getPhantomSpawnDelay() {
-		return phantomSpawnDelay;
-	}
-
-	/**
-	 * Updates the value for the manual spawning of phantoms during the month of Obscurvor.
-	 * @param newPhantomSpawnDelay The new value for the manual spawning of phantoms during the month of Obscurvor.
-	 */
-	public static void setPhantomSpawnDelay(int newPhantomSpawnDelay) {
-		phantomSpawnDelay = newPhantomSpawnDelay;
-	}
-
-	/**
-	 * Provides all server boosts that are currently active.
-	 * @return The HashMap of server boosts that are currently active.
-	 */
-	public static HashMap<Boost, LocalDateTime> getServerBoosts() {
-		return serverBoosts;
-	}
-
-	/**
-	 * Applies a new server boost or increases the duration of an existing server boost.
-	 * @param boost The type of boost being applied. A null value signifies 24 hours.
-	 * @param duration The duration of the boost being applied.
-	 * @param uuid The username of the player that is applying the boost.
-	 */
-	public static void addServerBoost(Boost boost, LocalDateTime duration, UUID uuid, boolean fromVoteShop) {
-		String name = "";
-		if (boost == Boost.MINER) {
-			name = "&8&lBoost of the Miner";
-		} else if (boost == Boost.HARVEST) {
-			name = "&6&lBoost of the Harvest";
-		} else if (boost == Boost.HUNTER) {
-			name = "&c&lBoost of the Hunter";
-		} else if (boost == Boost.CHI) {
-			name = "&f&lBoost of Chi";
-		} else {
-			name = "&7&lUnspecified Boost";
-		}
-
-		// A new boost will automatically apply for 24 hours
-		if (duration == null) {
-			// Increase by 24 hours if it already exists i.e the same boost was purchased twice
-			if (serverBoosts.get(boost) != null) {
-				LocalDateTime currentBoostEnd = serverBoosts.get(boost);
-				LocalDateTime newBoostEnd = currentBoostEnd.plusDays(1);
-				serverBoosts.put(boost, newBoostEnd);
-			}
-			// Create a new boost as it doesn't exist yet
-			else {
-				LocalDateTime now = LocalDateTime.now();
-				LocalDateTime newBoostEnd = now.plusDays(1);
-				serverBoosts.put(boost, newBoostEnd);
-			}
-
-			// Clear reminders so they fire again for the new/extended duration
-			sentBoostReminders.remove(boost.name() + "_60");
-			sentBoostReminders.remove(boost.name() + "_30");
-			sentBoostReminders.remove(boost.name() + "_10");
-			sentBoostReminders.remove(boost.name() + "_1");
-
-			// Handles messages — only broadcast and notify Discord on the primary (Survival) server
-			// to avoid duplicate messages when both servers independently receive a boost event.
-			if (!AranarthCore.isSmpServer()) {
-				if (uuid == null) {
-					Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied"));
-					if (AranarthCore.isPublicServer()) {
-						DiscordUtils.updateBoostInDiscord(null, boost, true, fromVoteShop);
-					}
-				} else {
-					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-					if (fromVoteShop) {
-						Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " &7used vote points to purchase the " + name));
-					} else {
-						Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied by &e" + aranarthPlayer.getNickname()));
-					}
-					if (AranarthCore.isPublicServer()) {
-						DiscordUtils.updateBoostInDiscord(uuid, boost, true, fromVoteShop);
-					}
-				}
-				// Sync boost end-time to other servers so they apply effects without re-broadcasting
-				if (NetworkManager.isActive()) {
-					LocalDateTime endTime = serverBoosts.get(boost);
-					if (endTime != null) {
-						NetworkManager.getInstance().publishBoostSync(boost.name(), endTime.toString(), false);
-					}
-				}
-			}
-		}
-		// Should only be called during server startup
-		else {
-			serverBoosts.put(boost, duration);
-		}
-	}
-
-	/**
-	 * Removes the specified server boost.
-	 * @param boost The boost being removed.
-	 */
-	public static void removeServerBoost(Boost boost) {
-		if (AranarthUtils.getServerBoosts().containsKey(boost)) {
-			String name = "";
-			if (boost == Boost.MINER) {
-				name = "&8&lBoost of the Miner";
-			} else if (boost == Boost.HARVEST) {
-				name = "&6&lBoost of the Harvest";
-			} else if (boost == Boost.HUNTER) {
-				name = "&c&lBoost of the Hunter";
-			} else if (boost == Boost.CHI) {
-				name = "&f&lBoost of Chi";
-			} else {
-				name = "&7&lUnspecified Boost";
-			}
-			if (!AranarthCore.isSmpServer()) {
-				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
-				if (AranarthCore.isPublicServer()) {
-					DiscordUtils.updateBoostInDiscord(null, boost, false, false);
-					DiscordUtils.sendBoostExpiredToDiscord(boost);
-				}
-				if (NetworkManager.isActive()) {
-					NetworkManager.getInstance().publishBoostSync(boost.name(), "", true);
-				}
-			}
-			serverBoosts.remove(boost);
-			sentBoostReminders.remove(boost.name() + "_60");
-			sentBoostReminders.remove(boost.name() + "_30");
-			sentBoostReminders.remove(boost.name() + "_10");
-			sentBoostReminders.remove(boost.name() + "_1");
-		}
-	}
-
-	/**
-	 * Provides the messages for all active server boosts, specifying the name and the remaining duration of the boost
-	 * @return The formatted name of the boost as the key, and the remaining duration of the boost as the value.
-	 */
-	public static HashMap<String, String> getActiveServerBoostsMessages() {
-		HashMap<String, String> boostMessages = new HashMap<>();
-		for (Boost boost : serverBoosts.keySet()) {
-			LocalDateTime ldt = serverBoosts.get(boost);
-			String name = "";
-			if (boost == Boost.MINER) {
-				name = "&8&lBoost of the Miner";
-			} else if (boost == Boost.HARVEST) {
-				name = "&6&lBoost of the Harvest";
-			} else if (boost == Boost.HUNTER) {
-				name = "&c&lBoost of the Hunter";
-			} else if (boost == Boost.CHI) {
-				name = "&f&lBoost of Chi";
-			} else {
-				name = "&7&lUnspecified Boost";
-			}
-			boostMessages.put(ChatUtils.translateToColor(name), getRemainingBoostDuration(boost));
-		}
-		return boostMessages;
-	}
-
-	/**
-	 * Provides a String containing the text value of the remaining amount of time for the currently applied boost.
-	 * @param boost The boost.
-	 * @return The String containing the text value of the remaining amount of time for the currently applied boost.
-	 */
-	private static String getRemainingBoostDuration(Boost boost) {
-		LocalDateTime expiry = AranarthUtils.getServerBoosts().get(boost);
-
-		Duration duration = Duration.between(LocalDateTime.now(), expiry);
-		int minutes = (int) duration.toMinutes();
-		int hours = minutes / 60;
-		int days = minutes / 1440;
-
-		int remainingHours = hours % 24;
-		int remainingMinutes = minutes % 60;
-
-		if (days > 0) {
-			return "&e" + days + "d " + remainingHours + "h " + remainingMinutes + "m";
-		} else if (hours > 0) {
-			return "&e" + hours + "h " + remainingMinutes + "m";
-		} else {
-			return "&e" + minutes + "m";
-		}
-	}
-
-	/**
-	 * Refreshes server boost functionality and deactivates them once they are no longer active.
-	 */
-	public static void refreshServerBoosts() {
-		List<Boost> toRemove = new ArrayList<>();
-		for (Boost boost : serverBoosts.keySet()) {
-			if (serverBoosts.get(boost).isBefore(LocalDateTime.now())) {
-				toRemove.add(boost);
-			}
-		}
-		for (Boost boost : toRemove) {
-			String name = "";
-			if (boost == Boost.MINER) {
-				name = "&8&lBoost of the Miner";
-			} else if (boost == Boost.HARVEST) {
-				name = "&6&lBoost of the Harvest";
-			} else if (boost == Boost.HUNTER) {
-				name = "&c&lBoost of the Hunter";
-			} else if (boost == Boost.CHI) {
-				name = "&f&lBoost of Chi";
-			} else {
-				name = "&7&lUnspecified Boost";
-			}
-			if (!AranarthCore.isSmpServer()) {
-				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
-				if (AranarthCore.isPublicServer()) {
-					DiscordUtils.updateBoostInDiscord(null, boost, false, false);
-					DiscordUtils.sendBoostExpiredToDiscord(boost);
-				}
-				if (NetworkManager.isActive()) {
-					NetworkManager.getInstance().publishBoostSync(boost.name(), "", true);
-				}
-				serverBoosts.remove(boost);
-				sentBoostReminders.remove(boost.name() + "_60");
-				sentBoostReminders.remove(boost.name() + "_30");
-				sentBoostReminders.remove(boost.name() + "_10");
-				sentBoostReminders.remove(boost.name() + "_1");
-			}
-		}
-
-		// Send reminder messages at 60, 30, and 1 minute remaining
-		for (Boost boost : serverBoosts.keySet()) {
-			String name = "";
-			if (boost == Boost.MINER) {
-				name = "&8&lBoost of the Miner";
-			} else if (boost == Boost.HARVEST) {
-				name = "&6&lBoost of the Harvest";
-			} else if (boost == Boost.HUNTER) {
-				name = "&c&lBoost of the Hunter";
-			} else if (boost == Boost.CHI) {
-				name = "&f&lBoost of Chi";
-			} else {
-				name = "&7&lUnspecified Boost";
-			}
-
-			Duration remaining = Duration.between(LocalDateTime.now(), serverBoosts.get(boost));
-			long minutesLeft = remaining.toMinutes();
-
-			int[] thresholds = {60, 30, 10, 1};
-			String[] labels = {"&e1 hour", "&e30 minutes", "&e10 minutes", "&e1 minute"};
-			String[] discordLabels = {"1 hour", "30 minutes", "10 minutes", null};
-			for (int i = 0; i < thresholds.length; i++) {
-				String key = boost.name() + "_" + thresholds[i];
-				if (minutesLeft == thresholds[i] && !sentBoostReminders.contains(key)) {
-					sentBoostReminders.add(key);
-					if (!AranarthCore.isSmpServer()) {
-						Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7expires in " + labels[i] + "&7!"));
-						if (discordLabels[i] != null && AranarthCore.isPublicServer()) {
-							DiscordUtils.sendBoostReminderToDiscord(boost, discordLabels[i]);
-						}
-					}
-					for (Player player : Bukkit.getOnlinePlayers()) {
-						player.playSound(player.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_0, 1.0f, 0.7f);
-					}
-				}
-			}
-		}
-
-		if (serverBoosts.containsKey(Boost.MINER)) {
-			for (Player player : Bukkit.getOnlinePlayers()) {
-				player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 220, 1));
-			}
-		} else if (serverBoosts.containsKey(Boost.HUNTER) || serverBoosts.containsKey(Boost.CHI)) {
-			for (Player player : Bukkit.getOnlinePlayers()) {
-				player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 220, 1));
-			}
-		}
-	}
-
-	/**
-	 * Provides the HashMap of all UUIDs and the lists of Materials that they are compressing.
-	 * @return The HashMap of all UUIDs and the lists of Materials that they are compressing.
-	 */
-	public static HashMap<UUID, List<Material>> getCompressibleTypes() {
-		return compressibleTypes;
-	}
-
-	/**
-	 * Adds the material to the player's list of compressible items.
-	 * @param uuid The UUID of the player.
-	 * @param material The Material that is being added to their list.
-	 */
-	public static void addCompressibleItem(UUID uuid, Material material) {
-		List<Material> materials = new ArrayList<>();
-		if (compressibleTypes.containsKey(uuid)) {
-			materials = compressibleTypes.get(uuid);
-		}
-		// Avoid duplicate entry of materials
-		if (materials.contains(material)) {
-			return;
-		}
-		materials.add(material);
-		compressibleTypes.put(uuid, materials);
-	}
-
-	/**
-	 * Removes the material from the player's list of compressible items.
-	 * @param uuid The UUID of the player.
-	 * @param material The Material that is being removed to their list.
-	 */
-	public static void removeCompressibleItem(UUID uuid, Material material) {
-		if (compressibleTypes.containsKey(uuid)) {
-			List<Material> materials = compressibleTypes.get(uuid);
+                    }
+                }
+            }
+        }
+
+        if (serverBoosts.containsKey(Boost.MINER)) {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 220, 1));
+            }
+        } else if (serverBoosts.containsKey(Boost.HUNTER) || serverBoosts.containsKey(Boost.CHI)) {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 220, 1));
+            }
+        }
+    }
+
+    /**
+     * Provides the HashMap of all UUIDs and the lists of Materials that they are compressing.
+     *
+     * @return The HashMap of all UUIDs and the lists of Materials that they are compressing.
+     */
+    public static HashMap<UUID, List<Material>> getCompressibleTypes() {
+        return compressibleTypes;
+    }
+
+    /**
+     * Adds the material to the player's list of compressible items.
+     *
+     * @param uuid     The UUID of the player.
+     * @param material The Material that is being added to their list.
+     */
+    public static void addCompressibleItem(UUID uuid, Material material) {
+        List<Material> materials = new ArrayList<>();
+        if (compressibleTypes.containsKey(uuid)) {
+            materials = compressibleTypes.get(uuid);
+        }
+        // Avoid duplicate entry of materials
+        if (materials.contains(material)) {
+            return;
+        }
+        materials.add(material);
+        compressibleTypes.put(uuid, materials);
+    }
+
+    /**
+     * Removes the material from the player's list of compressible items.
+     *
+     * @param uuid     The UUID of the player.
+     * @param material The Material that is being removed to their list.
+     */
+    public static void removeCompressibleItem(UUID uuid, Material material) {
+        if (compressibleTypes.containsKey(uuid)) {
+            List<Material> materials = compressibleTypes.get(uuid);
             materials.remove(material);
-			compressibleTypes.put(uuid, materials);
-		}
-	}
+            compressibleTypes.put(uuid, materials);
+        }
+    }
 
-	/**
-	 * Determines if the Material is in the player's list of compressible items.
-	 * @param uuid The UUID of the player.
-	 * @param material The Material that is being verified.
-	 */
-	public static boolean isItemBeingCompressed(UUID uuid, Material material) {
-		if (compressibleTypes.containsKey(uuid)) {
-			if (compressibleTypes.get(uuid).contains(material)) {
-				return true;
+    /**
+     * Determines if the Material is in the player's list of compressible items.
+     *
+     * @param uuid     The UUID of the player.
+     * @param material The Material that is being verified.
+     */
+    public static boolean isItemBeingCompressed(UUID uuid, Material material) {
+        if (compressibleTypes.containsKey(uuid)) {
+            if (compressibleTypes.get(uuid).contains(material)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Confirms if the input ItemStack is a compressible item.
+     *
+     * @param item                The item that is being verified.
+     * @param shouldCheckItemMeta Whether the method should be checking itemMeta.
+     * @return Confirmation if the input item is compressible.
+     */
+    public static boolean isCompressible(ItemStack item, boolean shouldCheckItemMeta) {
+        if (shouldCheckItemMeta) {
+            if (item.hasItemMeta() && !item.getItemMeta().getPersistentDataContainer().getKeys().isEmpty()) {
+                return false;
+            }
+        }
+
+        Material type = item.getType();
+        return type == Material.COAL || type == Material.RAW_COPPER || type == Material.COPPER_NUGGET
+                || type == Material.COPPER_INGOT || type == Material.RAW_IRON || type == Material.IRON_NUGGET
+                || type == Material.IRON_INGOT || type == Material.RAW_GOLD || type == Material.GOLD_NUGGET
+                || type == Material.GOLD_INGOT || type == Material.REDSTONE || type == Material.LAPIS_LAZULI
+                || type == Material.DIAMOND || type == Material.EMERALD || type == Material.NETHERITE_INGOT
+                || type == Material.AMETHYST_SHARD || type == Material.RESIN_CLUMP || type == Material.GLOWSTONE_DUST
+                || type == Material.WHEAT || type == Material.MELON_SLICE || type == Material.DRIED_KELP
+                || type == Material.SUGAR_CANE || type == Material.HONEYCOMB || type == Material.SLIME_BALL
+                || type == Material.BONE_MEAL || type == Material.SNOWBALL || type == Material.CLAY_BALL
+                || type == Material.QUARTZ || type == Material.BAMBOO;
+    }
+
+    /**
+     * Enables the compressor for all Materials.
+     *
+     * @param uuid The player's UUID.
+     */
+    public static void compressAllMaterials(UUID uuid) {
+        addCompressibleItem(uuid, Material.COAL);
+        addCompressibleItem(uuid, Material.RAW_COPPER);
+        addCompressibleItem(uuid, Material.COPPER_NUGGET);
+        addCompressibleItem(uuid, Material.COPPER_INGOT);
+        addCompressibleItem(uuid, Material.RAW_IRON);
+        addCompressibleItem(uuid, Material.IRON_NUGGET);
+        addCompressibleItem(uuid, Material.IRON_INGOT);
+        addCompressibleItem(uuid, Material.RAW_GOLD);
+        addCompressibleItem(uuid, Material.GOLD_NUGGET);
+        addCompressibleItem(uuid, Material.GOLD_INGOT);
+        addCompressibleItem(uuid, Material.REDSTONE);
+        addCompressibleItem(uuid, Material.LAPIS_LAZULI);
+        addCompressibleItem(uuid, Material.DIAMOND);
+        addCompressibleItem(uuid, Material.EMERALD);
+        addCompressibleItem(uuid, Material.NETHERITE_INGOT);
+        addCompressibleItem(uuid, Material.AMETHYST_SHARD);
+        addCompressibleItem(uuid, Material.RESIN_CLUMP);
+        addCompressibleItem(uuid, Material.GLOWSTONE_DUST);
+        addCompressibleItem(uuid, Material.WHEAT);
+        addCompressibleItem(uuid, Material.MELON_SLICE);
+        addCompressibleItem(uuid, Material.DRIED_KELP);
+        addCompressibleItem(uuid, Material.SUGAR_CANE);
+        addCompressibleItem(uuid, Material.HONEYCOMB);
+        addCompressibleItem(uuid, Material.SLIME_BALL);
+        addCompressibleItem(uuid, Material.BONE_MEAL);
+        addCompressibleItem(uuid, Material.SNOWBALL);
+        addCompressibleItem(uuid, Material.CLAY_BALL);
+        addCompressibleItem(uuid, Material.QUARTZ);
+        addCompressibleItem(uuid, Material.BAMBOO);
+    }
+
+    /**
+     * Disables the compressor for all Materials.
+     *
+     * @param uuid The player's UUID.
+     */
+    public static void stopCompressingAllMaterials(UUID uuid) {
+        removeCompressibleItem(uuid, Material.COAL);
+        removeCompressibleItem(uuid, Material.RAW_COPPER);
+        removeCompressibleItem(uuid, Material.COPPER_NUGGET);
+        removeCompressibleItem(uuid, Material.COPPER_INGOT);
+        removeCompressibleItem(uuid, Material.RAW_IRON);
+        removeCompressibleItem(uuid, Material.IRON_NUGGET);
+        removeCompressibleItem(uuid, Material.IRON_INGOT);
+        removeCompressibleItem(uuid, Material.RAW_GOLD);
+        removeCompressibleItem(uuid, Material.GOLD_NUGGET);
+        removeCompressibleItem(uuid, Material.GOLD_INGOT);
+        removeCompressibleItem(uuid, Material.REDSTONE);
+        removeCompressibleItem(uuid, Material.LAPIS_LAZULI);
+        removeCompressibleItem(uuid, Material.DIAMOND);
+        removeCompressibleItem(uuid, Material.EMERALD);
+        removeCompressibleItem(uuid, Material.NETHERITE_INGOT);
+        removeCompressibleItem(uuid, Material.AMETHYST_SHARD);
+        removeCompressibleItem(uuid, Material.RESIN_CLUMP);
+        removeCompressibleItem(uuid, Material.GLOWSTONE_DUST);
+        removeCompressibleItem(uuid, Material.WHEAT);
+        removeCompressibleItem(uuid, Material.MELON_SLICE);
+        removeCompressibleItem(uuid, Material.DRIED_KELP);
+        removeCompressibleItem(uuid, Material.SUGAR_CANE);
+        removeCompressibleItem(uuid, Material.HONEYCOMB);
+        removeCompressibleItem(uuid, Material.SLIME_BALL);
+        removeCompressibleItem(uuid, Material.BONE_MEAL);
+        removeCompressibleItem(uuid, Material.SNOWBALL);
+        removeCompressibleItem(uuid, Material.CLAY_BALL);
+        removeCompressibleItem(uuid, Material.QUARTZ);
+        removeCompressibleItem(uuid, Material.BAMBOO);
+    }
+
+    /**
+     * Provides the list of crates that are currently in use.
+     *
+     * @return The list of crates that are currently in use.
+     */
+    public static List<CrateType> getCratesInUse() {
+        return cratesInUse;
+    }
+
+    /**
+     * Adds the crate to be in use.
+     *
+     * @param type The type of crate.
+     */
+    public static void addCrateInUse(CrateType type) {
+        cratesInUse.add(type);
+    }
+
+    /**
+     * Removes the crate from being in use.
+     *
+     * @param type The type of crate.
+     */
+    public static void removeCrateFromUse(CrateType type) {
+        cratesInUse.remove(type);
+    }
+
+    /**
+     * Updates the name, location, and/or icon of an existing warp.
+     *
+     * @param warpName  The new name to be used for the warp.
+     * @param direction The Location containing the direction of the warp to be used.
+     * @param icon      The Material that will be displayed for the warp.
+     */
+    public static void updateWarp(String warpName, Location direction, Material icon) {
+        for (int i = 0; i < warps.size(); i++) {
+            if (warps.get(i).getLocation().getBlockX() == direction.getBlockX()
+                    && warps.get(i).getLocation().getBlockY() == direction.getBlockY()
+                    && warps.get(i).getLocation().getBlockZ() == direction.getBlockZ()) {
+                if (!warps.get(i).getName().equals(warpName)) {
+                    continue;
+                }
+
+                Home updatedWarp = new Home(warpName, direction, icon);
+                warps.set(i, updatedWarp);
+            }
+        }
+    }
+
+    /**
+     * Updates the name, location, and/or icon of an existing home.
+     *
+     * @param player    The player updating the home.
+     * @param homeName  The new name to be used for the home.
+     * @param direction The Location containing the direction of the home to be used.
+     * @param icon      The Material that will be displayed for the home.
+     */
+    public static void updateHome(Player player, String homeName, Location direction, Material icon) {
+        AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+        List<Home> homes = aranarthPlayer.getHomes();
+        for (int i = 0; i < homes.size(); i++) {
+            if (homes.get(i).getLocation().getBlockX() == direction.getBlockX()
+                    && homes.get(i).getLocation().getBlockY() == direction.getBlockY()
+                    && homes.get(i).getLocation().getBlockZ() == direction.getBlockZ()) {
+
+                // Prevents bug where incorrect home icon updates when they share the same location
+                if (!homes.get(i).getName().equals(homeName)) {
+                    continue;
+                }
+
+                // Preserve the existing worldName so cross-server homes are not reset to "world"
+                Home updatedHome = new Home(homeName, direction, icon, homes.get(i).getWorldName());
+                homes.set(i, updatedHome);
+                aranarthPlayer.setHomes(homes);
+                setPlayer(player.getUniqueId(), aranarthPlayer);
+            }
+        }
+    }
+
+    /**
+     * Removes all LockedContainers for players that have been inactive for 90 days.
+     */
+    public static void removeInactiveLockedContainers() {
+        List<Integer> toRemove = new ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
+        if (lockedContainers == null) {
+            return;
+        }
+
+        for (int i = 0; i < lockedContainers.size(); i++) {
+            LockedContainer locked = lockedContainers.get(i);
+            OfflinePlayer player = Bukkit.getOfflinePlayer(locked.getOwner());
+            LocalDateTime localDateTime = null;
+            Instant lastPlayed = Instant.ofEpochMilli(player.getLastPlayed());
+            localDateTime = LocalDateTime.ofInstant(lastPlayed, ZoneId.systemDefault());
+            if (!player.isOnline() && localDateTime.isBefore(now.minusDays(90))) {
+                toRemove.add(i);
+            }
+        }
+
+        // Going in reverse to avoid deleting incorrect ones
+        for (int i = lockedContainers.size() - 1; i > 0; i--) {
+            if (toRemove.contains(i)) {
+                lockedContainers.remove(i);
+            }
+        }
+    }
+
+    /**
+     * Provides the HashMap of Shop Locations.
+     *
+     * @return The HashMap of Shop Locations.
+     */
+    public static HashMap<UUID, Location> getShopLocations() {
+        return shopLocations;
+    }
+
+    /**
+     * Creates a new Shop Location that can be teleported to.
+     *
+     * @param uuid     The shop owner's UUID.
+     * @param location The location of the shop's home.
+     */
+    public static void createShopLocation(UUID uuid, Location location) {
+        shopLocations.put(uuid, location);
+    }
+
+    /**
+     * Deletes an existing Shop Location.
+     *
+     * @param uuid The shop owner's UUID.
+     */
+    public static void deleteShopLocation(UUID uuid) {
+        shopLocations.remove(uuid);
+    }
+
+    /**
+     * Provides the HashMap of shop island centers (UUID → {centerX, centerZ}).
+     *
+     * @return The HashMap of shop island centers.
+     */
+    public static HashMap<UUID, int[]> getShopIslandCenters() {
+        return shopIslandCenters;
+    }
+
+    /**
+     * Registers the island center coordinates for the given player.
+     *
+     * @param uuid    The shop owner's UUID.
+     * @param centerX The X coordinate of the island center in the shops world.
+     * @param centerZ The Z coordinate of the island center in the shops world.
+     */
+    public static void addShopIslandCenter(UUID uuid, int centerX, int centerZ) {
+        shopIslandCenters.put(uuid, new int[]{centerX, centerZ});
+    }
+
+    /**
+     * Removes the island center registration for the given player.
+     *
+     * @param uuid The shop owner's UUID.
+     */
+    public static void removeShopIslandCenter(UUID uuid) {
+        shopIslandCenters.remove(uuid);
+    }
+
+    /**
+     * Returns the full shop names map.
+     */
+    public static HashMap<UUID, String> getShopNames() {
+        return shopNames;
+    }
+
+    /**
+     * Returns the custom name for the given shop owner, or the provided default if none is set.
+     */
+    public static String getShopName(UUID uuid, String defaultName) {
+        return shopNames.getOrDefault(uuid, defaultName);
+    }
+
+    /**
+     * Sets a custom display name for the given player's shop.
+     */
+    public static void setShopName(UUID uuid, String name) {
+        shopNames.put(uuid, name);
+    }
+
+    /**
+     * Removes the custom shop name for the given player.
+     */
+    public static void removeShopName(UUID uuid) {
+        shopNames.remove(uuid);
+    }
+
+    /**
+     * Provides the current island counter (total islands ever created, never decremented on deletion).
+     *
+     * @return The island counter.
+     */
+    public static int getShopIslandCounter() {
+        return shopIslandCounter;
+    }
+
+    /**
+     * Sets the island counter (used during persistence load).
+     *
+     * @param counter The counter value to restore.
+     */
+    public static void setShopIslandCounter(int counter) {
+        shopIslandCounter = counter;
+    }
+
+    /**
+     * Increments and returns the next island index, then advances the counter.
+     *
+     * @return The island index to use for the new island.
+     */
+    public static int claimNextShopIslandIndex() {
+        return shopIslandCounter++;
+    }
+
+    /**
+     * Returns the full collaborator map.
+     */
+    public static HashMap<UUID, Set<UUID>> getShopCollaborators() {
+        return shopCollaborators;
+    }
+
+    /**
+     * Returns the set of collaborator UUIDs for the given shop owner.
+     */
+    public static Set<UUID> getCollaboratorsForOwner(UUID ownerUuid) {
+        return shopCollaborators.getOrDefault(ownerUuid, new HashSet<>());
+    }
+
+    /**
+     * Adds a collaborator to the given owner's shop and updates the reverse lookup.
+     */
+    public static void addShopCollaborator(UUID ownerUuid, UUID collaboratorUuid) {
+        shopCollaborators.computeIfAbsent(ownerUuid, k -> new HashSet<>()).add(collaboratorUuid);
+        collaboratorShop.put(collaboratorUuid, ownerUuid);
+    }
+
+    /**
+     * Removes a collaborator from the given owner's shop and clears the reverse lookup.
+     */
+    public static boolean removeShopCollaborator(UUID ownerUuid, UUID collaboratorUuid) {
+        Set<UUID> collaborators = shopCollaborators.get(ownerUuid);
+        if (collaborators == null) {
+            return false;
+        }
+        boolean removed = collaborators.remove(collaboratorUuid);
+        if (removed) {
+            collaboratorShop.remove(collaboratorUuid);
+        }
+        if (collaborators.isEmpty()) {
+            shopCollaborators.remove(ownerUuid);
+        }
+        return removed;
+    }
+
+    /**
+     * Returns whether the given player UUID is a collaborator on the given owner's shop.
+     */
+    public static boolean isShopCollaborator(UUID ownerUuid, UUID playerUuid) {
+        Set<UUID> collaborators = shopCollaborators.get(ownerUuid);
+        return collaborators != null && collaborators.contains(playerUuid);
+    }
+
+    /**
+     * Returns the owner UUID of the shop the given player is a collaborator on, or null if none.
+     */
+    public static UUID getCollaboratorShopOwner(UUID playerUuid) {
+        return collaboratorShop.get(playerUuid);
+    }
+
+    /**
+     * Returns whether the given player is a collaborator on any shop.
+     */
+    public static boolean isCollaboratorOnAnyShop(UUID playerUuid) {
+        return collaboratorShop.containsKey(playerUuid);
+    }
+
+    /**
+     * Removes all collaborator entries for the given owner and clears their reverse lookups.
+     */
+    public static void removeAllShopCollaborators(UUID ownerUuid) {
+        Set<UUID> collaborators = shopCollaborators.remove(ownerUuid);
+        if (collaborators != null) {
+            for (UUID collab : collaborators) {
+                collaboratorShop.remove(collab);
+            }
+        }
+    }
+
+    /**
+     * Returns the owner UUID that has a pending invite for the given invitee, or null if none.
+     */
+    public static UUID getPendingShopInvite(UUID inviteeUuid) {
+        return pendingShopInvites.get(inviteeUuid);
+    }
+
+    /**
+     * Records a pending shop invite from the given owner to the given invitee.
+     */
+    public static void setPendingShopInvite(UUID inviteeUuid, UUID ownerUuid) {
+        pendingShopInvites.put(inviteeUuid, ownerUuid);
+    }
+
+    /**
+     * Removes the pending shop invite for the given invitee.
+     */
+    public static void removePendingShopInvite(UUID inviteeUuid) {
+        pendingShopInvites.remove(inviteeUuid);
+    }
+
+    /**
+     * Plays the jingle when a player sends or receives a teleport request.
+     *
+     * @param player The player that sent or received the request.
+     */
+    public static void playTeleportSound(Player player) {
+        Sound sound = Sound.BLOCK_NOTE_BLOCK_HARP;
+        new BukkitRunnable() {
+            int runs = 0;
+
+            @Override
+            public void run() {
+                float pitch = 1.5F;
+
+                switch (runs) {
+                    case 0 -> pitch = 1.5F;
+                    case 1 -> pitch = 1.25F;
+                    case 2 -> pitch = 1.5F;
+                    case 3 -> pitch = 2F;
+                    default -> {
+                        pitch = 0;
+                    }
+                }
+
+                // No sound
+                if (pitch != 0) {
+                    player.playSound(player, sound, 1F, pitch);
+                }
+
+                if (runs == 5) {
+                    cancel();
+                }
+                runs++;
+            }
+        }.runTaskTimer(AranarthCore.getInstance(), 0, 3); // Runs every 3 ticks
+    }
+
+    /**
+     * Handles logic to update how the tab list displays
+     */
+    public static void updateTab() {
+        List<Player> onlinePlayers = new ArrayList<>(Bukkit.getOnlinePlayers());
+
+        int onlineNum = (int) onlinePlayers.stream()
+                .filter(player -> {
+                    AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+                    return !aranarthPlayer.isVanished();
+                })
+                .count();
+
+        // Include non-vanished players on other servers in the displayed count
+        if (NetworkManager.isActive()) {
+            onlineNum += (int) NetworkManager.getInstance().getRemoteRoster().values().stream()
+                    .filter(np -> !np.isVanished())
+                    .count();
+        }
+
+        int day = AranarthUtils.getDay();
+        String weekday = DateUtils.provideWeekdayName(AranarthUtils.getWeekday());
+        String month = DateUtils.provideMonthName(AranarthUtils.getMonth());
+        int year = AranarthUtils.getYear();
+        String dateLine = DateUtils.determineServerDate(day, weekday, month, year)[1];
+        String[] parts = ChatUtils.stripColorFormatting(dateLine).split(" ");
+        dateLine = "&e" + parts[0] + " &f" + parts[1] + " " + parts[2] + " " + parts[3] + " " + parts[4] + " &e" + parts[5];
+
+        String playerOrPlayers = onlineNum == 1 ? "player" : "players";
+        String tps = String.format("%.1f", Bukkit.getServer().getTPS()[0]);
+        String infoLine = "&e" + onlineNum + " " + playerOrPlayers + " online &7&l| &eTPS " + tps;
+
+        // Header / Footer
+        for (Player player : onlinePlayers) {
+            player.setPlayerListHeader(ChatUtils.translateToColor(
+                    "&8&l---------------------\n&6&lThe Realm of Aranarth\n" + dateLine + "\n" + infoLine));
+            player.setPlayerListFooter(ChatUtils.translateToColor("&8&l---------------------"));
+        }
+
+        // Handle vanish visibility
+        for (Player player : onlinePlayers) {
+            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+
+            for (Player hiddenPlayer : onlinePlayers) {
+                AranarthPlayer hiddenAranarthPlayer = AranarthUtils.getPlayer(hiddenPlayer.getUniqueId());
+
+                if (hiddenAranarthPlayer.isVanished()) {
+                    if (aranarthPlayer.getCouncilRank() == 3) {
+                        player.showPlayer(AranarthCore.getInstance(), hiddenPlayer);
+                    } else {
+                        player.hidePlayer(AranarthCore.getInstance(), hiddenPlayer);
+                    }
+                } else {
+                    // Always show non-vanished players
+                    player.showPlayer(AranarthCore.getInstance(), hiddenPlayer);
+                }
+            }
+        }
+
+        // Remove vanished players from tab
+        onlinePlayers.removeIf(player -> {
+            AranarthPlayer data = AranarthUtils.getPlayer(player.getUniqueId());
+            return data.isVanished();
+        });
+
+        // Collect non-vanished remote players for the combined sort
+        List<NetworkPlayer> remotePlayers = new ArrayList<>();
+        if (NetworkManager.isActive()) {
+            for (NetworkPlayer np : NetworkManager.getInstance().getRemoteRoster().values()) {
+                if (!np.isVanished()) {
+                    remotePlayers.add(np);
+                }
+            }
+        }
+
+        // Build a unified sorted list so that both local and remote players share
+        // a single rank-ordered sequence. Sort keys (all descending):
+        //   1. roleGroup  — council(5) > architect(4) > saint(3) > avatar(2) > regular(1)
+        //   2. roleTier   — councilRank/saintRank/architectRank within the same group
+        //   3. playerRank — game rank (8–0) as tiebreaker within the same role+tier
+        record SortEntry(int roleGroup, int roleTier, int playerRank, Player localPlayer, NetworkPlayer remotePlayer) {
+        }
+
+        List<SortEntry> combined = new ArrayList<>();
+        for (Player p : onlinePlayers) {
+            AranarthPlayer ap = getPlayer(p.getUniqueId());
+            if (ap != null) {
+                int[] fields = computeSortFields(p.getUniqueId(), ap.getCouncilRank(), ap.getArchitectRank(), ap.getSaintRank(), ap.getRank());
+                combined.add(new SortEntry(fields[0], fields[1], fields[2], p, null));
+            }
+        }
+        for (NetworkPlayer np : remotePlayers) {
+            int[] fields = computeSortFields(np.getUuid(), np.getCouncilRank(), np.getArchitectRank(), np.getSaintRank(), np.getRank());
+            combined.add(new SortEntry(fields[0], fields[1], fields[2], null, np));
+        }
+
+        // Sort highest priority first across all servers combined
+        combined.sort((a, b) -> {
+			if (a.roleGroup() != b.roleGroup()) {
+				return Integer.compare(b.roleGroup(), a.roleGroup());
 			}
-		}
-		return false;
-	}
-
-	/**
-	 * Confirms if the input ItemStack is a compressible item.
-	 * @param item The item that is being verified.
-	 * @param shouldCheckItemMeta Whether the method should be checking itemMeta.
-	 * @return Confirmation if the input item is compressible.
-	 */
-	public static boolean isCompressible(ItemStack item, boolean shouldCheckItemMeta) {
-		if (shouldCheckItemMeta) {
-			if (item.hasItemMeta() && !item.getItemMeta().getPersistentDataContainer().getKeys().isEmpty()) {
-				return false;
+			if (a.roleTier() != b.roleTier()) {
+				return Integer.compare(b.roleTier(), a.roleTier());
 			}
+            return Integer.compare(b.playerRank(), a.playerRank());
+        });
+
+        // Apply display names and list order.  Local players can be ordered directly;
+        // remote players get an NMS list-order packet via NetworkTabManager.
+        int total = combined.size();
+        for (int i = 0; i < total; i++) {
+            SortEntry entry = combined.get(i);
+            int order = total - 1 - i;
+            if (entry.localPlayer() != null) {
+                Player player = entry.localPlayer();
+                UUID uuid = player.getUniqueId();
+                String display = ChatUtils.providePrefixAndName(uuid);
+                AranarthPlayer aranarthPlayer = getPlayer(uuid);
+                if (aranarthPlayer.getAfkLocation() != null
+                        && aranarthPlayer.getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount()) {
+                    display += " &7[AFK]";
+                }
+                int ping = player.getPing();
+                if (ping <= 150) {
+                    display += " &8[&a" + ping + "ms&8]";
+                } else if (ping <= 250) {
+                    display += " &8[&e" + ping + "ms&8]";
+                } else {
+                    display += " &8[&c" + ping + "ms&8]";
+                }
+                player.setPlayerListName(ChatUtils.translateToColor(display));
+                player.setPlayerListOrder(order);
+            } else {
+                // Send a list-order packet for the remote fake entry so it slots in at
+                // the correct combined position instead of floating at the bottom.
+                NetworkTabManager.sendListOrder(
+                        entry.remotePlayer().getUuid(), order, onlinePlayers);
+            }
+        }
+
+    }
+
+    /**
+     * Returns the three sort keys used for tab-list ordering: [roleGroup, roleTier, playerRank].
+     * Role groups (descending priority): council=5, architect=4, saint=3, avatar=2, regular=1.
+     * Within the same group, roleTier distinguishes council/saint tiers.
+     * playerRank is used as the final tiebreaker.
+     */
+    private static int[] computeSortFields(UUID uuid, int councilRank, int architectRank, int saintRank, int rank) {
+		if (councilRank >= 1) {
+			return new int[]{5, councilRank, rank};
 		}
-
-		Material type = item.getType();
-		return type == Material.COAL || type ==  Material.RAW_COPPER || type ==  Material.COPPER_NUGGET
-				|| type ==  Material.COPPER_INGOT || type == Material.RAW_IRON || type == Material.IRON_NUGGET
-				|| type == Material.IRON_INGOT || type == Material.RAW_GOLD || type == Material.GOLD_NUGGET
-				|| type == Material.GOLD_INGOT || type == Material.REDSTONE || type == Material.LAPIS_LAZULI
-				|| type == Material.DIAMOND || type == Material.EMERALD || type == Material.NETHERITE_INGOT
-				|| type == Material.AMETHYST_SHARD || type == Material.RESIN_CLUMP || type == Material.GLOWSTONE_DUST
-				|| type == Material.WHEAT || type == Material.MELON_SLICE || type == Material.DRIED_KELP
-				|| type == Material.SUGAR_CANE || type == Material.HONEYCOMB || type == Material.SLIME_BALL
-				|| type == Material.BONE_MEAL || type == Material.SNOWBALL || type == Material.CLAY_BALL
-				|| type == Material.QUARTZ || type == Material.BAMBOO;
-	}
-
-	/**
-	 * Enables the compressor for all Materials.
-	 * @param uuid The player's UUID.
-	 */
-	public static void compressAllMaterials(UUID uuid) {
-		addCompressibleItem(uuid, Material.COAL);
-		addCompressibleItem(uuid, Material.RAW_COPPER);
-		addCompressibleItem(uuid, Material.COPPER_NUGGET);
-		addCompressibleItem(uuid, Material.COPPER_INGOT);
-		addCompressibleItem(uuid, Material.RAW_IRON);
-		addCompressibleItem(uuid, Material.IRON_NUGGET);
-		addCompressibleItem(uuid, Material.IRON_INGOT);
-		addCompressibleItem(uuid, Material.RAW_GOLD);
-		addCompressibleItem(uuid, Material.GOLD_NUGGET);
-		addCompressibleItem(uuid, Material.GOLD_INGOT);
-		addCompressibleItem(uuid, Material.REDSTONE);
-		addCompressibleItem(uuid, Material.LAPIS_LAZULI);
-		addCompressibleItem(uuid, Material.DIAMOND);
-		addCompressibleItem(uuid, Material.EMERALD);
-		addCompressibleItem(uuid, Material.NETHERITE_INGOT);
-		addCompressibleItem(uuid, Material.AMETHYST_SHARD);
-		addCompressibleItem(uuid, Material.RESIN_CLUMP);
-		addCompressibleItem(uuid, Material.GLOWSTONE_DUST);
-		addCompressibleItem(uuid, Material.WHEAT);
-		addCompressibleItem(uuid, Material.MELON_SLICE);
-		addCompressibleItem(uuid, Material.DRIED_KELP);
-		addCompressibleItem(uuid, Material.SUGAR_CANE);
-		addCompressibleItem(uuid, Material.HONEYCOMB);
-		addCompressibleItem(uuid, Material.SLIME_BALL);
-		addCompressibleItem(uuid, Material.BONE_MEAL);
-		addCompressibleItem(uuid, Material.SNOWBALL);
-		addCompressibleItem(uuid, Material.CLAY_BALL);
-		addCompressibleItem(uuid, Material.QUARTZ);
-		addCompressibleItem(uuid, Material.BAMBOO);
-	}
-
-	/**
-	 * Disables the compressor for all Materials.
-	 * @param uuid The player's UUID.
-	 */
-	public static void stopCompressingAllMaterials(UUID uuid) {
-		removeCompressibleItem(uuid, Material.COAL);
-		removeCompressibleItem(uuid, Material.RAW_COPPER);
-		removeCompressibleItem(uuid, Material.COPPER_NUGGET);
-		removeCompressibleItem(uuid, Material.COPPER_INGOT);
-		removeCompressibleItem(uuid, Material.RAW_IRON);
-		removeCompressibleItem(uuid, Material.IRON_NUGGET);
-		removeCompressibleItem(uuid, Material.IRON_INGOT);
-		removeCompressibleItem(uuid, Material.RAW_GOLD);
-		removeCompressibleItem(uuid, Material.GOLD_NUGGET);
-		removeCompressibleItem(uuid, Material.GOLD_INGOT);
-		removeCompressibleItem(uuid, Material.REDSTONE);
-		removeCompressibleItem(uuid, Material.LAPIS_LAZULI);
-		removeCompressibleItem(uuid, Material.DIAMOND);
-		removeCompressibleItem(uuid, Material.EMERALD);
-		removeCompressibleItem(uuid, Material.NETHERITE_INGOT);
-		removeCompressibleItem(uuid, Material.AMETHYST_SHARD);
-		removeCompressibleItem(uuid, Material.RESIN_CLUMP);
-		removeCompressibleItem(uuid, Material.GLOWSTONE_DUST);
-		removeCompressibleItem(uuid, Material.WHEAT);
-		removeCompressibleItem(uuid, Material.MELON_SLICE);
-		removeCompressibleItem(uuid, Material.DRIED_KELP);
-		removeCompressibleItem(uuid, Material.SUGAR_CANE);
-		removeCompressibleItem(uuid, Material.HONEYCOMB);
-		removeCompressibleItem(uuid, Material.SLIME_BALL);
-		removeCompressibleItem(uuid, Material.BONE_MEAL);
-		removeCompressibleItem(uuid, Material.SNOWBALL);
-		removeCompressibleItem(uuid, Material.CLAY_BALL);
-		removeCompressibleItem(uuid, Material.QUARTZ);
-		removeCompressibleItem(uuid, Material.BAMBOO);
-	}
-
-	/**
-	 * Provides the list of crates that are currently in use.
-	 * @return The list of crates that are currently in use.
-	 */
-	public static List<CrateType> getCratesInUse() {
-		return cratesInUse;
-	}
-
-	/**
-	 * Adds the crate to be in use.
-	 * @param type The type of crate.
-	 */
-	public static void addCrateInUse(CrateType type) {
-		cratesInUse.add(type);
-	}
-
-	/**
-	 * Removes the crate from being in use.
-	 * @param type The type of crate.
-	 */
-	public static void removeCrateFromUse(CrateType type) {
-		cratesInUse.remove(type);
-	}
-
-	/**
-	 * Updates the name, location, and/or icon of an existing warp.
-	 *
-	 * @param warpName The new name to be used for the warp.
-	 * @param direction The Location containing the direction of the warp to be used.
-	 * @param icon The Material that will be displayed for the warp.
-	 */
-	public static void updateWarp(String warpName, Location direction, Material icon) {
-		for (int i = 0; i < warps.size(); i++) {
-			if (warps.get(i).getLocation().getBlockX() == direction.getBlockX()
-					&& warps.get(i).getLocation().getBlockY() == direction.getBlockY()
-					&& warps.get(i).getLocation().getBlockZ() == direction.getBlockZ()) {
-				if (!warps.get(i).getName().equals(warpName)) {
-					continue;
-				}
-
-				Home updatedWarp = new Home(warpName, direction, icon);
-				warps.set(i, updatedWarp);
-			}
+		if (architectRank >= 1) {
+			return new int[]{4, architectRank, rank};
 		}
-	}
-
-	/**
-	 * Updates the name, location, and/or icon of an existing home.
-	 *
-	 * @param player The player updating the home.
-	 * @param homeName The new name to be used for the home.
-	 * @param direction The Location containing the direction of the home to be used.
-	 * @param icon The Material that will be displayed for the home.
-	 */
-	public static void updateHome(Player player, String homeName, Location direction, Material icon) {
-		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
-		List<Home> homes = aranarthPlayer.getHomes();
-		for (int i = 0; i < homes.size(); i++) {
-			if (homes.get(i).getLocation().getBlockX() == direction.getBlockX()
-					&& homes.get(i).getLocation().getBlockY() == direction.getBlockY()
-					&& homes.get(i).getLocation().getBlockZ() == direction.getBlockZ()) {
-
-				// Prevents bug where incorrect home icon updates when they share the same location
-				if (!homes.get(i).getName().equals(homeName)) {
-					continue;
-				}
-
-				// Preserve the existing worldName so cross-server homes are not reset to "world"
-				Home updatedHome = new Home(homeName, direction, icon, homes.get(i).getWorldName());
-				homes.set(i, updatedHome);
-				aranarthPlayer.setHomes(homes);
-				setPlayer(player.getUniqueId(), aranarthPlayer);
-			}
+		if (saintRank >= 1) {
+			return new int[]{3, saintRank, rank};
 		}
-	}
+        Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
+		if (currentAvatar != null && uuid.equals(currentAvatar.getUuid())) {
+			return new int[]{2, 0, rank};
+		}
+        return new int[]{1, 0, rank};
+    }
 
-	/**
-	 * Removes all LockedContainers for players that have been inactive for 90 days.
-	 */
-	public static void removeInactiveLockedContainers() {
-		List<Integer> toRemove = new ArrayList<>();
-		LocalDateTime now = LocalDateTime.now();
-		if (lockedContainers == null) {
+    /**
+     * Provides the roman numeral equivalent of the input level.
+     *
+     * @param level The level of the incantation.
+     * @return The roman numeral equivalent of the input level.
+     */
+    public static String getIncantationLevelInNumerals(int level) {
+        String levelLetter = "I";
+        if (level == 2) {
+            return "II";
+        } else if (level == 3) {
+            return "III";
+        } else if (level == 4) {
+            return "IV";
+        } else if (level == 5) {
+            return "V";
+        }
+        return levelLetter;
+    }
+
+    /**
+     * Determines whether the input item contains an Aranarth incantation.
+     *
+     * @param item        The item.
+     * @param incantation The incantation name.
+     * @return Whether the input item contains an Aranarth incantation.
+     */
+    public static boolean hasIncantation(ItemStack item, String incantation) {
+        if (item.hasItemMeta()) {
+            if (item.getItemMeta().getPersistentDataContainer().has(INCANTATION_TYPE, PersistentDataType.STRING)) {
+                if (item.getItemMeta().getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING).equals(incantation)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Provides
+     *
+     * @param item The item.
+     * @return The level of the applied incantation. -1 if the level is not determined.
+     */
+    public static int getIncantationLevel(ItemStack item) {
+        if (item.hasItemMeta()) {
+            if (item.getItemMeta().getPersistentDataContainer().has(INCANTATION_LEVEL, PersistentDataType.INTEGER)) {
+                return item.getItemMeta().getPersistentDataContainer().get(INCANTATION_LEVEL, PersistentDataType.INTEGER);
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Attempts to use the given horn based on the previous use of the horn.
+     *
+     * @param player The player.
+     * @param horn   The type of horn.
+     */
+    public static boolean canUseHornSuccessfully(Player player, MusicInstrument horn) {
+        AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+        HashMap<MusicInstrument, Long> horns = aranarthPlayer.getHorns();
+        long lastHornUse = 0;
+        long cooldown = getHornCooldown(horn);
+
+        if (horn.equals(MusicInstrument.PONDER_GOAT_HORN)) {
+            lastHornUse = horns.get(MusicInstrument.PONDER_GOAT_HORN) != null ? horns.get(MusicInstrument.PONDER_GOAT_HORN) : -1;
+        } else if (horn.equals(MusicInstrument.SING_GOAT_HORN)) {
+            lastHornUse = horns.get(MusicInstrument.SING_GOAT_HORN) != null ? horns.get(MusicInstrument.SING_GOAT_HORN) : -1;
+        } else if (horn.equals(MusicInstrument.SEEK_GOAT_HORN)) {
+            lastHornUse = horns.get(MusicInstrument.SEEK_GOAT_HORN) != null ? horns.get(MusicInstrument.SEEK_GOAT_HORN) : -1;
+        } else if (horn.equals(MusicInstrument.FEEL_GOAT_HORN)) {
+            lastHornUse = horns.get(MusicInstrument.FEEL_GOAT_HORN) != null ? horns.get(MusicInstrument.FEEL_GOAT_HORN) : -1;
+        } else if (horn.equals(MusicInstrument.ADMIRE_GOAT_HORN)) {
+            lastHornUse = horns.get(MusicInstrument.ADMIRE_GOAT_HORN) != null ? horns.get(MusicInstrument.ADMIRE_GOAT_HORN) : -1;
+        } else if (horn.equals(MusicInstrument.CALL_GOAT_HORN)) {
+            lastHornUse = horns.get(MusicInstrument.CALL_GOAT_HORN) != null ? horns.get(MusicInstrument.CALL_GOAT_HORN) : -1;
+        } else if (horn.equals(MusicInstrument.YEARN_GOAT_HORN)) {
+            lastHornUse = horns.get(MusicInstrument.YEARN_GOAT_HORN) != null ? horns.get(MusicInstrument.YEARN_GOAT_HORN) : -1;
+        } else if (horn.equals(MusicInstrument.DREAM_GOAT_HORN)) {
+            lastHornUse = horns.get(MusicInstrument.DREAM_GOAT_HORN) != null ? horns.get(MusicInstrument.DREAM_GOAT_HORN) : -1;
+        }
+
+        MusicInstrument hornWithLongestCooldown = null;
+        // Ensures only one horn can be used at a time (limiting stacking)
+        for (MusicInstrument hornOnCooldown : horns.keySet()) {
+            long lastUse = horns.get(hornOnCooldown) != null ? horns.get(hornOnCooldown) : -1;
+
+            // If the horn is actively on cooldown
+            if (lastUse + getHornCooldown(hornOnCooldown) > System.currentTimeMillis()) {
+                if (hornWithLongestCooldown == null) {
+                    hornWithLongestCooldown = hornOnCooldown;
+                }
+
+                if (horns.get(hornOnCooldown) >= horns.get(hornWithLongestCooldown)) {
+                    hornWithLongestCooldown = hornOnCooldown;
+                }
+            }
+        }
+
+        // If there are no horns on cooldown
+        if (hornWithLongestCooldown == null) {
+            horns.put(horn, System.currentTimeMillis());
+            aranarthPlayer.setHorns(horns);
+            setPlayer(player.getUniqueId(), aranarthPlayer);
+            String hornName = getHornName(horn);
+
+            // Goat horns are heard up to 256 blocks away, inform nearby players
+            for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                if (player.getWorld().getName().equals(onlinePlayer.getWorld().getName())) {
+                    if (onlinePlayer.getName().equals(player.getName())) {
+                        onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You have used the &eHorn of " + hornName));
+                        continue;
+                    }
+
+                    if (player.getWorld().equals(onlinePlayer.getWorld())) {
+                        if (player.getLocation().distance(onlinePlayer.getLocation()) <= 256) {
+                            onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has used the &eHorn of " + hornName));
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+        // If there was a horn on cooldown
+        else {
+            // Goat horns are heard up to 256 blocks away, this is to prevent it from being heard again
+            for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                if (player.getWorld().getName().equals(onlinePlayer.getWorld().getName())) {
+                    if (player.getLocation().distance(onlinePlayer.getLocation()) <= 256) {
+                        onlinePlayer.stopSound(SoundCategory.RECORDS);
+                    }
+                }
+            }
+            long remainder = (horns.get(hornWithLongestCooldown) + getHornCooldown(hornWithLongestCooldown)) - System.currentTimeMillis();
+            remainder = remainder / 1000;
+            int seconds = (int) remainder;
+            player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a horn again for another &e" + seconds + " &cseconds!"));
+            return false;
+        }
+    }
+
+    /**
+     * Provides the cooldown of the input horn.
+     *
+     * @param horn The horn.
+     * @return The cooldown of the input horn.
+     */
+    private static long getHornCooldown(MusicInstrument horn) {
+        long cooldown = 60000;
+        if (horn.equals(MusicInstrument.PONDER_GOAT_HORN)) {
+            cooldown = 60000;
+        } else if (horn.equals(MusicInstrument.SING_GOAT_HORN)) {
+            cooldown = 5000;
+        } else if (horn.equals(MusicInstrument.SEEK_GOAT_HORN)) {
+            cooldown = 60000;
+        } else if (horn.equals(MusicInstrument.FEEL_GOAT_HORN)) {
+            cooldown = 90000;
+        } else if (horn.equals(MusicInstrument.ADMIRE_GOAT_HORN)) {
+            cooldown = 180000;
+        } else if (horn.equals(MusicInstrument.CALL_GOAT_HORN)) {
+            cooldown = 150000;
+        } else if (horn.equals(MusicInstrument.YEARN_GOAT_HORN)) {
+            cooldown = 120000;
+        } else if (horn.equals(MusicInstrument.DREAM_GOAT_HORN)) {
+            cooldown = 30000;
+        }
+        return cooldown;
+    }
+
+    /**
+     * Provides the custom name for each horn.
+     *
+     * @param horn The horn.
+     * @return The name of the horn.
+     */
+    private static String getHornName(MusicInstrument horn) {
+        String name = "Horns";
+        if (horn.equals(MusicInstrument.PONDER_GOAT_HORN)) {
+            name = "the Traveller";
+        } else if (horn.equals(MusicInstrument.SING_GOAT_HORN)) {
+            name = "the Target";
+        } else if (horn.equals(MusicInstrument.SEEK_GOAT_HORN)) {
+            name = "the Brute";
+        } else if (horn.equals(MusicInstrument.FEEL_GOAT_HORN)) {
+            name = "the Resilient";
+        } else if (horn.equals(MusicInstrument.ADMIRE_GOAT_HORN)) {
+            name = "the Armored";
+        } else if (horn.equals(MusicInstrument.CALL_GOAT_HORN)) {
+            name = "the Beasts";
+        } else if (horn.equals(MusicInstrument.YEARN_GOAT_HORN)) {
+            name = "the Stallion";
+        } else if (horn.equals(MusicInstrument.DREAM_GOAT_HORN)) {
+            name = "the Pure";
+        }
+        return name;
+    }
+
+    /**
+     * Refreshes the Locations of all sentinels.
+     */
+    public static void refreshSentinels() {
+        for (AranarthPlayer aranarthPlayer : players.values()) {
+            UUID uuid = AranarthUtils.getUuidOfAranarthPlayer(aranarthPlayer);
+            HashMap<EntityType, List<Sentinel>> sentinels = aranarthPlayer.getSentinels();
+            List<Integer> sentinelsToRemove = new ArrayList<>();
+            for (EntityType type : sentinels.keySet()) {
+                for (int i = 0; i < sentinels.get(type).size(); i++) {
+                    Sentinel sentinel = sentinels.get(type).get(i);
+
+                    // Skip sentinels that belong to a different server — they won't have entities here
+                    String sentinelServer = sentinel.getServerName();
+                    if (!sentinelServer.isEmpty()
+                            && com.aearost.aranarthcore.network.NetworkManager.isActive()
+                            && !sentinelServer.equals(com.aearost.aranarthcore.network.NetworkManager.getInstance().getThisServer())) {
+                        continue;
+                    }
+
+                    // Must manually load the chunk to allow the entity to teleport
+					if (sentinel.getLocation().getWorld() == null) {
+						continue;
+					}
+                    Chunk chunk = sentinel.getLocation().getChunk();
+                    if (chunk.isLoaded()) {
+                        Entity entity = Bukkit.getEntity(sentinel.getUuid());
+                        // Cleans up any sentinels that have died
+                        if (entity == null) {
+                            sentinelsToRemove.add(i);
+                        }
+                        // Updates the location of the sentinel
+                        else {
+                            sentinel.setLocation(entity.getLocation());
+                            sentinels.get(type).set(i, sentinel);
+                        }
+                    }
+                }
+
+                // Remove in reverse order to avoid shifting indexes
+                for (int i = sentinelsToRemove.size() - 1; i >= 0; i--) {
+                    int index = sentinelsToRemove.get(i);
+                    sentinels.get(type).remove(index);
+                }
+                sentinelsToRemove.clear();
+            }
+            aranarthPlayer.setSentinels(sentinels);
+            AranarthUtils.setPlayer(uuid, aranarthPlayer);
+        }
+    }
+
+    /**
+     * Provides the UUID of the AranarthPlayer.
+     *
+     * @param aranarthPlayer The AranarthPlayer.
+     * @return The UUID of the AranarthPlayer.
+     */
+    public static UUID getUuidOfAranarthPlayer(AranarthPlayer aranarthPlayer) {
+        for (UUID uuid : players.keySet()) {
+            if (players.get(uuid).equals(aranarthPlayer)) {
+                return uuid;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Toggles the player's AFK status.
+     *
+     * @param uuid          The UUID of the player.
+     * @param isEnablingAfk Whether the player is enabling their AFK status.
+     */
+    public static void toggleAfkStatus(UUID uuid, boolean isEnablingAfk) {
+        Player player = Bukkit.getPlayer(uuid);
+        AranarthPlayer aranarthPlayer = getPlayer(uuid);
+        if (isEnablingAfk) {
+            if (aranarthPlayer.getAfkLocation() == null) {
+                AfkLocation afkLocation = new AfkLocation(player.getLocation(), getAfkSecondsAmount());
+                aranarthPlayer.setAfkLocation(afkLocation);
+            }
+
+            for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You are now AFK"));
+                } else {
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is now AFK"));
+                }
+            }
+            Bukkit.getLogger().info("[AC] " + ChatUtils.translateToColor(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " is now AFK"));
+            if (NetworkManager.isActive()) {
+                NetworkManager.getInstance().publishAfkStatus(uuid, aranarthPlayer.getNickname(), true);
+            }
+        } else {
+            if (aranarthPlayer.getAfkLocation() == null) {
+                return;
+            }
+            aranarthPlayer.setAfkLocation(null);
+            for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You are no longer AFK"));
+                } else {
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is no longer AFK"));
+                }
+            }
+            Bukkit.getLogger().info("[AC] " + ChatUtils.translateToColor(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " is no longer AFK"));
+            if (NetworkManager.isActive()) {
+                NetworkManager.getInstance().publishAfkStatus(uuid, aranarthPlayer.getNickname(), false);
+            }
+        }
+        AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+    }
+
+    /**
+     * Updates all players' current AFK Locations.
+     */
+    public static void updateAfkLocations() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+            AfkLocation afkLocation = aranarthPlayer.getAfkLocation();
+            if (afkLocation == null) {
+                afkLocation = new AfkLocation(player.getLocation(), 0);
+                aranarthPlayer.setAfkLocation(afkLocation);
+                setPlayer(player.getUniqueId(), aranarthPlayer);
+            } else {
+                // If the player hasn't moved and isn't afk yet
+                if (isSameLocation(player.getLocation(), afkLocation.getLocation())) {
+                    if (afkLocation.getSeconds() < getAfkSecondsAmount()) {
+                        afkLocation.setSeconds(afkLocation.getSeconds() + 5);
+                        aranarthPlayer.setAfkLocation(afkLocation);
+                        setPlayer(player.getUniqueId(), aranarthPlayer);
+                    }
+                    // Auto-afk after 5 minutes
+                    else if (afkLocation.getSeconds() == getAfkSecondsAmount()) {
+                        toggleAfkStatus(player.getUniqueId(), true);
+                        // Prevents further calls
+                        afkLocation.setSeconds(AranarthUtils.getAfkSecondsAmount() + 5);
+                        aranarthPlayer.setAfkLocation(afkLocation);
+                        setPlayer(player.getUniqueId(), aranarthPlayer);
+                    }
+                }
+                // The player has moved
+                else {
+                    if (afkLocation.getSeconds() >= getAfkSecondsAmount()) {
+                        toggleAfkStatus(player.getUniqueId(), false);
+                    } else {
+                        aranarthPlayer.setAfkLocation(null);
+                        setPlayer(player.getUniqueId(), aranarthPlayer);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Increases the amount of drops from a mob in an EntityDeathEvent.
+     *
+     * @param e The event.
+     */
+    public static void increaseMobDrops(EntityDeathEvent e) {
+        EntityEquipment equipment = e.getEntity().getEquipment();
+        List<ItemStack> equipmentList = new ArrayList<>();
+        equipmentList.addAll(Arrays.asList(equipment.getArmorContents()));
+        equipmentList.add(equipment.getItemInMainHand());
+        equipmentList.add(equipment.getItemInOffHand());
+
+        for (ItemStack drop : e.getDrops()) {
+            // Avoid duplication of held items or worn armor
+            if (equipmentList.contains(drop)) {
+                continue;
+            }
+
+            // Avoids duplication of saddles and armor on mounts
+            if (drop.getType() == Material.SADDLE || drop.getType().name().contains("_ARMOR") || drop.getType() == Material.ARMOR_STAND) {
+                continue;
+            }
+
+            int rand = new Random().nextInt(4);
+            // 50% chance to increase the drop by 1
+            if (rand <= 1) {
+                drop.setAmount(drop.getAmount() + 1);
+            }
+            // 25% chance to increase the drop by 2
+            else if (rand == 3) {
+                drop.setAmount(drop.getAmount() + 2);
+            }
+        }
+    }
+
+    /**
+     * Adds a vote to the list of votes.
+     *
+     * @param vote The vote being added.
+     */
+    public static void addVote(AranarthVote vote) {
+        votes.add(vote);
+    }
+
+    /**
+     * Provides the list of votes.
+     *
+     * @return The list of votes.
+     */
+    public static List<AranarthVote> getVotes() {
+        return votes;
+    }
+
+    /**
+     * Provides the number of times a player has voted - not the vote points.
+     *
+     * @param uuid The UUID of the player.
+     * @return The number of times a player has voted - not the vote points.
+     */
+    public static int getVoteNum(UUID uuid) {
+        int voteNum = 0;
+        for (AranarthVote vote : votes) {
+            if (vote.getUuid().equals(uuid)) {
+                voteNum++;
+            }
+        }
+        return voteNum;
+    }
+
+    /**
+     * Provides the number of vote points a player has - not necessarily usable.
+     *
+     * @param uuid The UUID of the player.
+     * @return The number of vote points a player has - not necessarily usable.
+     */
+    public static int getVotePoints(UUID uuid) {
+        int pointsNum = 0;
+        for (AranarthVote vote : votes) {
+            if (vote.getUuid().equals(uuid)) {
+                pointsNum += vote.getPointsRewarded();
+            }
+        }
+        return pointsNum;
+    }
+
+    /**
+     * Provides the number of vote points a player has available.
+     *
+     * @param uuid The UUID of the player.
+     * @return The number of vote points a player has available.
+     */
+    public static int getAvailableVotePoints(UUID uuid) {
+        int totalPoints = getVotePoints(uuid);
+        return totalPoints - AranarthUtils.getPlayer(uuid).getVotePointsSpent();
+    }
+
+    /**
+     * Provides the number of seconds that a player is AFK to automatically be placed in the AFK status.
+     *
+     * @return The number of seconds that a player is AFK to automatically be placed in the AFK status.
+     */
+    public static int getAfkSecondsAmount() {
+        return AranarthCore.getInstance().getConfig().getInt("players.afk-timeout-seconds", 300);
+    }
+
+    /**
+     * Provides the HashMap of the kills and deaths of all players across all worlds.
+     *
+     * @return The HashMap of the kills and deaths of all players across all worlds.
+     */
+    public static HashMap<UUID, List<PlayerKillDeathScore>> getKillDeathScores() {
+        return killDeathScores;
+    }
+
+    /**
+     * Adds the player's kills and deaths to the HashMap.
+     *
+     * @param pkds The player's kills and deaths to be added to the HashMap.
+     */
+    public static void addPlayerKillDeathScore(PlayerKillDeathScore pkds) {
+        List<PlayerKillDeathScore> list = killDeathScores.get(pkds.getUuid());
+        if (list == null) {
+            list = new ArrayList<>();
+        }
+
+        for (int i = 0; i < list.size(); i++) {
+            PlayerKillDeathScore inList = list.get(i);
+            if (inList.getWorldPrefix().equals(pkds.getWorldPrefix())) {
+                // Combines the two
+                inList.setKills(inList.getKills() + pkds.getKills());
+                inList.setDeaths(inList.getDeaths() + pkds.getDeaths());
+                list.set(i, inList);
+                killDeathScores.put(pkds.getUuid(), list);
+                return;
+            }
+        }
+
+        // Only adds if it isn't already in the list
+        list.add(pkds);
+        killDeathScores.put(pkds.getUuid(), list);
+    }
+
+    /**
+     * Returns true if the given world prefix belongs to the Survival server group.
+     */
+    private static boolean isSurvivalWorldPrefix(String prefix) {
+        return SURVIVAL_WORLD_PREFIXES.contains(prefix.toLowerCase());
+    }
+
+    /**
+     * Provides the number of kills/deaths the player has in the input world.
+     *
+     * @param uuid           The UUID of the player.
+     * @param world          The world to verify the number of kills/deaths in.
+     * @param isGettingKills Whether the method is getting the player's kills/deaths. False if getting deaths.
+     * @return The number of kills/deaths the player has in the input world.
+     */
+    public static int getKillsOrDeathsInWorld(UUID uuid, World world, boolean isGettingKills) {
+        if (killDeathScores.get(uuid) == null) {
+            killDeathScores.put(uuid, new ArrayList<>());
+            return 0;
+        }
+
+        String worldPrefix = world.getName().split("_")[0];
+        List<PlayerKillDeathScore> scores = killDeathScores.get(uuid);
+
+        if (isSurvivalWorldPrefix(worldPrefix)) {
+            int total = 0;
+            for (PlayerKillDeathScore pkds : scores) {
+                if (isSurvivalWorldPrefix(pkds.getWorldPrefix())) {
+                    total += isGettingKills ? pkds.getKills() : pkds.getDeaths();
+                }
+            }
+            return total;
+        }
+
+        for (PlayerKillDeathScore pkds : scores) {
+            if (pkds.getWorldPrefix().equals(worldPrefix)) {
+                return isGettingKills ? pkds.getKills() : pkds.getDeaths();
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Updates the number of kills and deaths of the input players based on who was the killer and who was the victim.
+     *
+     * @param killer The player who did the killing.
+     * @param victim The player who died.
+     * @param world  The world that the player was killed in.
+     */
+    public static void updateKillAndDeath(Player killer, Player victim, World world) {
+        String deathWorld = victim.getWorld().getName().split("_")[0];
+
+        boolean wasKillerScoreUpdated = false;
+        if (killer != null && killDeathScores.get(killer.getUniqueId()) == null) {
+            PlayerKillDeathScore pkds = new PlayerKillDeathScore(killer.getUniqueId(), deathWorld, 1, 0);
+            List<PlayerKillDeathScore> list = new ArrayList<>();
+            list.add(pkds);
+            killDeathScores.put(killer.getUniqueId(), list);
+            wasKillerScoreUpdated = true;
+        }
+
+        boolean wasVictimScoreUpdated = false;
+        if (killDeathScores.get(victim.getUniqueId()) == null) {
+            PlayerKillDeathScore pkds = new PlayerKillDeathScore(victim.getUniqueId(), deathWorld, 0, 1);
+            List<PlayerKillDeathScore> list = new ArrayList<>();
+            list.add(pkds);
+            killDeathScores.put(victim.getUniqueId(), list);
+            wasVictimScoreUpdated = true;
+        }
+
+        // Increases the killer's kill count by 1 in the world
+        if (killer != null && !wasKillerScoreUpdated) {
+            List<PlayerKillDeathScore> list = killDeathScores.get(killer.getUniqueId());
+            boolean foundKillerWorld = false;
+            for (int i = 0; i < list.size(); i++) {
+                PlayerKillDeathScore pkds = list.get(i);
+                if (deathWorld.equals(pkds.getWorldPrefix())) {
+                    pkds.setKills(pkds.getKills() + 1);
+                    list.set(i, pkds);
+                    foundKillerWorld = true;
+                    break;
+                }
+            }
+            if (!foundKillerWorld) {
+                list.add(new PlayerKillDeathScore(killer.getUniqueId(), deathWorld, 1, 0));
+            }
+            killDeathScores.put(killer.getUniqueId(), list);
+        }
+        // Increases the victim's death count by 1 in the world
+        if (!wasVictimScoreUpdated) {
+            List<PlayerKillDeathScore> list = killDeathScores.get(victim.getUniqueId());
+            boolean foundVictimWorld = false;
+            for (int i = 0; i < list.size(); i++) {
+                PlayerKillDeathScore pkds = list.get(i);
+                if (deathWorld.equals(pkds.getWorldPrefix())) {
+                    pkds.setDeaths(pkds.getDeaths() + 1);
+                    list.set(i, pkds);
+                    foundVictimWorld = true;
+                    break;
+                }
+            }
+            if (!foundVictimWorld) {
+                list.add(new PlayerKillDeathScore(victim.getUniqueId(), deathWorld, 0, 1));
+            }
+            killDeathScores.put(victim.getUniqueId(), list);
+        }
+
+    }
+
+    /**
+     * Provides a list of the UUIDs of the players with the most kills, sorted by kills.
+     *
+     * @param world The world to verify the kills in.
+     * @return The list of the UUIDs of the players with the most kills, sorted by kills.
+     */
+    public static List<UUID> getTopKills(World world) {
+        String worldName = world.getName().split("_")[0];
+        boolean isSurvival = isSurvivalWorldPrefix(worldName);
+        Map<UUID, Integer> totalKills = new HashMap<>();
+        for (Map.Entry<UUID, List<PlayerKillDeathScore>> entry : killDeathScores.entrySet()) {
+            int sum = 0;
+
+            for (PlayerKillDeathScore score : entry.getValue()) {
+                if (isSurvival ? isSurvivalWorldPrefix(score.getWorldPrefix()) : score.getWorldPrefix().equalsIgnoreCase(worldName)) {
+                    sum += score.getKills();
+                }
+            }
+
+            // Only include players who actually have kills
+            if (sum > 0) {
+                totalKills.put(entry.getKey(), sum);
+            }
+        }
+
+        // Sort by kills descending and return UUIDs
+        return totalKills.entrySet()
+                .stream()
+                .sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
+                .map(Map.Entry::getKey)
+                .toList();
+    }
+
+    /**
+     * Provides a list of the UUIDs of the players with the most deaths, sorted by deaths.
+     *
+     * @param world The world to verify the deaths in.
+     * @return The list of the UUIDs of the players with the most deaths, sorted by deaths.
+     */
+    public static List<UUID> getTopDeaths(World world) {
+        String worldName = world.getName().split("_")[0];
+        boolean isSurvival = isSurvivalWorldPrefix(worldName);
+        Map<UUID, Integer> totalDeaths = new HashMap<>();
+        for (Map.Entry<UUID, List<PlayerKillDeathScore>> entry : killDeathScores.entrySet()) {
+            int sum = 0;
+
+            for (PlayerKillDeathScore score : entry.getValue()) {
+                if (isSurvival ? isSurvivalWorldPrefix(score.getWorldPrefix()) : score.getWorldPrefix().equalsIgnoreCase(worldName)) {
+                    sum += score.getDeaths();
+                }
+            }
+
+            // Only include players who actually have deaths
+            if (sum > 0) {
+                totalDeaths.put(entry.getKey(), sum);
+            }
+        }
+
+        // Sort by deaths descending and return UUIDs
+        return totalDeaths.entrySet()
+                .stream()
+                .sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
+                .map(Map.Entry::getKey)
+                .toList();
+    }
+
+    /**
+     * Provides the map of chat game guess counts for all players.
+     */
+    public static HashMap<UUID, Integer> getChatGameGuesses() {
+        return chatGameGuesses;
+    }
+
+    /**
+     * Increments the chat game guess count for the given player by 1.
+     */
+    public static void addChatGameGuess(UUID uuid) {
+        chatGameGuesses.merge(uuid, 1, Integer::sum);
+    }
+
+    /**
+     * Provides the map of all-time chat game earnings for all players.
+     */
+    public static HashMap<UUID, Double> getChatGameEarnings() {
+        return chatGameEarnings;
+    }
+
+    /**
+     * Adds to the all-time chat game earnings for the given player.
+     */
+    public static void addChatGameEarnings(UUID uuid, double amount) {
+        chatGameEarnings.merge(uuid, amount, Double::sum);
+    }
+
+    /**
+     * Sets the all-time chat game earnings for the given player directly (used during load).
+     */
+    public static void setChatGameEarnings(UUID uuid, double amount) {
+        chatGameEarnings.put(uuid, amount);
+    }
+
+    /**
+     * Provides the map of personal best unscramble times for all players (0 = unset).
+     */
+    public static HashMap<UUID, Double> getChatGameBestTimes() {
+        return chatGameBestTimes;
+    }
+
+    /**
+     * Returns the player's personal best unscramble time in seconds, or 0 if never set.
+     */
+    public static double getChatGameBestTime(UUID uuid) {
+        return chatGameBestTimes.getOrDefault(uuid, 0.0);
+    }
+
+    /**
+     * Sets the personal best unscramble time for the given player (used during load and on record).
+     */
+    public static void setChatGameBestTime(UUID uuid, double time) {
+        chatGameBestTimes.put(uuid, time);
+    }
+
+    /**
+     * Provides the map of personal best chat game streaks for all players.
+     */
+    public static HashMap<UUID, Integer> getChatGameHighestStreaks() {
+        return chatGameHighestStreaks;
+    }
+
+    /**
+     * Returns the player's personal best chat game streak, or 0 if never set.
+     */
+    public static int getChatGameHighestStreak(UUID uuid) {
+        return chatGameHighestStreaks.getOrDefault(uuid, 0);
+    }
+
+    /**
+     * Sets the personal best chat game streak for the given player (used during load and on record).
+     */
+    public static void setChatGameHighestStreak(UUID uuid, int streak) {
+        chatGameHighestStreaks.put(uuid, streak);
+    }
+
+    /**
+     * Provides a list of UUIDs sorted by total chat game earnings descending.
+     */
+    public static List<UUID> getTopGuesses() {
+        return chatGameGuesses.entrySet()
+                .stream()
+                .filter(e -> e.getValue() > 0)
+                .sorted((a, b) -> Double.compare(
+                        chatGameEarnings.getOrDefault(b.getKey(), 0.0),
+                        chatGameEarnings.getOrDefault(a.getKey(), 0.0)))
+                .map(Map.Entry::getKey)
+                .toList();
+    }
+
+    /**
+     * Provides the map of pending vote keys awaiting claim.
+     *
+     * @return The HashMap of UUID to pending key count.
+     */
+    public static HashMap<UUID, Integer> getPendingVoteKeys() {
+        return pendingVoteKeys;
+    }
+
+    /**
+     * Adds pending vote keys for a player.
+     *
+     * @param uuid   The UUID of the player.
+     * @param amount The number of keys to add.
+     */
+    public static void addPendingVoteKeys(UUID uuid, int amount) {
+        pendingVoteKeys.merge(uuid, amount, Integer::sum);
+    }
+
+    /**
+     * Sets the pending vote key count for a player.
+     *
+     * @param uuid   The UUID of the player.
+     * @param amount The number of pending keys.
+     */
+    public static void setPendingVoteKeys(UUID uuid, int amount) {
+        pendingVoteKeys.put(uuid, amount);
+    }
+
+    /**
+     * Removes a player's pending vote key entry entirely.
+     *
+     * @param uuid The UUID of the player.
+     */
+    public static void removePendingVoteKeys(UUID uuid) {
+        pendingVoteKeys.remove(uuid);
+    }
+
+    public static HashMap<UUID, Integer> getPendingRareKeys() {
+        return pendingRareKeys;
+    }
+
+    public static void addPendingRareKeys(UUID uuid, int amount) {
+        pendingRareKeys.merge(uuid, amount, Integer::sum);
+    }
+
+    public static void setPendingRareKeys(UUID uuid, int amount) {
+        pendingRareKeys.put(uuid, amount);
+    }
+
+    public static void removePendingRareKeys(UUID uuid) {
+        pendingRareKeys.remove(uuid);
+    }
+
+    public static HashMap<UUID, Integer> getPendingEpicKeys() {
+        return pendingEpicKeys;
+    }
+
+    public static void addPendingEpicKeys(UUID uuid, int amount) {
+        pendingEpicKeys.merge(uuid, amount, Integer::sum);
+    }
+
+    public static void setPendingEpicKeys(UUID uuid, int amount) {
+        pendingEpicKeys.put(uuid, amount);
+    }
+
+    public static void removePendingEpicKeys(UUID uuid) {
+        pendingEpicKeys.remove(uuid);
+    }
+
+    public static HashMap<UUID, Integer> getPendingGodlyKeys() {
+        return pendingGodlyKeys;
+    }
+
+    public static void addPendingGodlyKeys(UUID uuid, int amount) {
+        pendingGodlyKeys.merge(uuid, amount, Integer::sum);
+    }
+
+    public static void setPendingGodlyKeys(UUID uuid, int amount) {
+        pendingGodlyKeys.put(uuid, amount);
+    }
+
+    public static void removePendingGodlyKeys(UUID uuid) {
+        pendingGodlyKeys.remove(uuid);
+    }
+
+    /**
+     * Stores a crate key ItemStack as pending for the given player, routing to the
+     * correct map based on the key's PDC type tag.
+     */
+    public static void addPendingKey(UUID uuid, ItemStack keyItem, int amount) {
+		if (keyItem == null || !keyItem.hasItemMeta()) {
 			return;
 		}
+        String keyType = keyItem.getItemMeta().getPersistentDataContainer()
+                .get(CustomKeys.CRATE_KEY, PersistentDataType.STRING);
+		if (keyType == null) {
+			return;
+		}
+        switch (keyType) {
+            case "key_vote" -> addPendingVoteKeys(uuid, amount);
+            case "key_rare" -> addPendingRareKeys(uuid, amount);
+            case "key_epic" -> addPendingEpicKeys(uuid, amount);
+            case "key_godly" -> addPendingGodlyKeys(uuid, amount);
+        }
+    }
 
-		for (int i = 0; i < lockedContainers.size(); i++) {
-			LockedContainer locked = lockedContainers.get(i);
-			OfflinePlayer player = Bukkit.getOfflinePlayer(locked.getOwner());
-			LocalDateTime localDateTime = null;
-			Instant lastPlayed = Instant.ofEpochMilli(player.getLastPlayed());
-			localDateTime = LocalDateTime.ofInstant(lastPlayed, ZoneId.systemDefault());
-			if (!player.isOnline() && localDateTime.isBefore(now.minusDays(90))) {
-				toRemove.add(i);
+    /**
+     * Returns the subset of the three time/weather-synced worlds ("world", SMP main, "resource")
+     * that actually exist on this server. Worlds that are hosted on a different server in the
+     * network return null from Bukkit.getWorld() and are silently skipped.
+     */
+    public static List<World> getSyncWorlds() {
+        // Use a set to deduplicate: on the SMP server getSmpMainWorldName() returns "world",
+        // which is the same as the survival main world name.
+        Set<String> names = new LinkedHashSet<>(Arrays.asList("world", AranarthCore.getSmpMainWorldName(), "resource"));
+        List<World> worlds = new ArrayList<>();
+        for (String name : names) {
+            World w = Bukkit.getWorld(name);
+			if (w != null) {
+				worlds.add(w);
 			}
-		}
-
-		// Going in reverse to avoid deleting incorrect ones
-		for (int i = lockedContainers.size() - 1; i > 0; i--) {
-			if (toRemove.contains(i)) {
-				lockedContainers.remove(i);
-			}
-		}
-	}
-
-	/**
-	 * Provides the HashMap of Shop Locations.
-	 * @return The HashMap of Shop Locations.
-	 */
-	public static HashMap<UUID, Location> getShopLocations() {
-		return shopLocations;
-	}
-
-	/**
-	 * Creates a new Shop Location that can be teleported to.
-	 * @param uuid The shop owner's UUID.
-	 * @param location The location of the shop's home.
-	 */
-	public static void createShopLocation(UUID uuid, Location location) {
-		shopLocations.put(uuid, location);
-	}
-
-	/**
-	 * Deletes an existing Shop Location.
-	 * @param uuid The shop owner's UUID.
-	 */
-	public static void deleteShopLocation(UUID uuid) {
-		shopLocations.remove(uuid);
-	}
-
-	/**
-	 * Provides the HashMap of shop island centers (UUID → {centerX, centerZ}).
-	 * @return The HashMap of shop island centers.
-	 */
-	public static HashMap<UUID, int[]> getShopIslandCenters() {
-		return shopIslandCenters;
-	}
-
-	/**
-	 * Registers the island center coordinates for the given player.
-	 * @param uuid The shop owner's UUID.
-	 * @param centerX The X coordinate of the island center in the shops world.
-	 * @param centerZ The Z coordinate of the island center in the shops world.
-	 */
-	public static void addShopIslandCenter(UUID uuid, int centerX, int centerZ) {
-		shopIslandCenters.put(uuid, new int[]{centerX, centerZ});
-	}
-
-	/**
-	 * Removes the island center registration for the given player.
-	 * @param uuid The shop owner's UUID.
-	 */
-	public static void removeShopIslandCenter(UUID uuid) {
-		shopIslandCenters.remove(uuid);
-	}
-
-	/**
-	 * Returns the full shop names map.
-	 */
-	public static HashMap<UUID, String> getShopNames() {
-		return shopNames;
-	}
-
-	/**
-	 * Returns the custom name for the given shop owner, or the provided default if none is set.
-	 */
-	public static String getShopName(UUID uuid, String defaultName) {
-		return shopNames.getOrDefault(uuid, defaultName);
-	}
-
-	/**
-	 * Sets a custom display name for the given player's shop.
-	 */
-	public static void setShopName(UUID uuid, String name) {
-		shopNames.put(uuid, name);
-	}
-
-	/**
-	 * Removes the custom shop name for the given player.
-	 */
-	public static void removeShopName(UUID uuid) {
-		shopNames.remove(uuid);
-	}
-
-	/**
-	 * Provides the current island counter (total islands ever created, never decremented on deletion).
-	 * @return The island counter.
-	 */
-	public static int getShopIslandCounter() {
-		return shopIslandCounter;
-	}
-
-	/**
-	 * Sets the island counter (used during persistence load).
-	 * @param counter The counter value to restore.
-	 */
-	public static void setShopIslandCounter(int counter) {
-		shopIslandCounter = counter;
-	}
-
-	/**
-	 * Increments and returns the next island index, then advances the counter.
-	 * @return The island index to use for the new island.
-	 */
-	public static int claimNextShopIslandIndex() {
-		return shopIslandCounter++;
-	}
-
-	/**
-	 * Returns the full collaborator map.
-	 */
-	public static HashMap<UUID, Set<UUID>> getShopCollaborators() {
-		return shopCollaborators;
-	}
-
-	/**
-	 * Returns the set of collaborator UUIDs for the given shop owner.
-	 */
-	public static Set<UUID> getCollaboratorsForOwner(UUID ownerUuid) {
-		return shopCollaborators.getOrDefault(ownerUuid, new HashSet<>());
-	}
-
-	/**
-	 * Adds a collaborator to the given owner's shop and updates the reverse lookup.
-	 */
-	public static void addShopCollaborator(UUID ownerUuid, UUID collaboratorUuid) {
-		shopCollaborators.computeIfAbsent(ownerUuid, k -> new HashSet<>()).add(collaboratorUuid);
-		collaboratorShop.put(collaboratorUuid, ownerUuid);
-	}
-
-	/**
-	 * Removes a collaborator from the given owner's shop and clears the reverse lookup.
-	 */
-	public static boolean removeShopCollaborator(UUID ownerUuid, UUID collaboratorUuid) {
-		Set<UUID> collaborators = shopCollaborators.get(ownerUuid);
-		if (collaborators == null) {
-			return false;
-		}
-		boolean removed = collaborators.remove(collaboratorUuid);
-		if (removed) {
-			collaboratorShop.remove(collaboratorUuid);
-		}
-		if (collaborators.isEmpty()) {
-			shopCollaborators.remove(ownerUuid);
-		}
-		return removed;
-	}
-
-	/**
-	 * Returns whether the given player UUID is a collaborator on the given owner's shop.
-	 */
-	public static boolean isShopCollaborator(UUID ownerUuid, UUID playerUuid) {
-		Set<UUID> collaborators = shopCollaborators.get(ownerUuid);
-		return collaborators != null && collaborators.contains(playerUuid);
-	}
-
-	/**
-	 * Returns the owner UUID of the shop the given player is a collaborator on, or null if none.
-	 */
-	public static UUID getCollaboratorShopOwner(UUID playerUuid) {
-		return collaboratorShop.get(playerUuid);
-	}
-
-	/**
-	 * Returns whether the given player is a collaborator on any shop.
-	 */
-	public static boolean isCollaboratorOnAnyShop(UUID playerUuid) {
-		return collaboratorShop.containsKey(playerUuid);
-	}
-
-	/**
-	 * Removes all collaborator entries for the given owner and clears their reverse lookups.
-	 */
-	public static void removeAllShopCollaborators(UUID ownerUuid) {
-		Set<UUID> collaborators = shopCollaborators.remove(ownerUuid);
-		if (collaborators != null) {
-			for (UUID collab : collaborators) {
-				collaboratorShop.remove(collab);
-			}
-		}
-	}
-
-	/**
-	 * Returns the owner UUID that has a pending invite for the given invitee, or null if none.
-	 */
-	public static UUID getPendingShopInvite(UUID inviteeUuid) {
-		return pendingShopInvites.get(inviteeUuid);
-	}
-
-	/**
-	 * Records a pending shop invite from the given owner to the given invitee.
-	 */
-	public static void setPendingShopInvite(UUID inviteeUuid, UUID ownerUuid) {
-		pendingShopInvites.put(inviteeUuid, ownerUuid);
-	}
-
-	/**
-	 * Removes the pending shop invite for the given invitee.
-	 */
-	public static void removePendingShopInvite(UUID inviteeUuid) {
-		pendingShopInvites.remove(inviteeUuid);
-	}
-
-	/**
-	 * Plays the jingle when a player sends or receives a teleport request.
-	 * @param player The player that sent or received the request.
-	 */
-	public static void playTeleportSound(Player player) {
-		Sound sound = Sound.BLOCK_NOTE_BLOCK_HARP;
-		new BukkitRunnable() {
-			int runs = 0;
-			@Override
-			public void run() {
-				float pitch = 1.5F;
-
-				switch (runs) {
-					case 0 -> pitch = 1.5F;
-					case 1 -> pitch = 1.25F;
-					case 2 -> pitch = 1.5F;
-					case 3 -> pitch = 2F;
-					default -> {
-						pitch = 0;
-					}
-				}
-
-				// No sound
-				if (pitch != 0) {
-					player.playSound(player, sound, 1F, pitch);
-				}
-
-				if (runs == 5) {
-					cancel();
-				}
-				runs++;
-			}
-		}.runTaskTimer(AranarthCore.getInstance(), 0, 3); // Runs every 3 ticks
-	}
-
-	/**
-	 * Handles logic to update how the tab list displays
-	 */
-	public static void updateTab() {
-		List<Player> onlinePlayers = new ArrayList<>(Bukkit.getOnlinePlayers());
-
-		int onlineNum = (int) onlinePlayers.stream()
-				.filter(player -> {
-					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-					return !aranarthPlayer.isVanished();
-				})
-				.count();
-
-		// Include non-vanished players on other servers in the displayed count
-		if (NetworkManager.isActive()) {
-			onlineNum += (int) NetworkManager.getInstance().getRemoteRoster().values().stream()
-					.filter(np -> !np.isVanished())
-					.count();
-		}
-
-		int day = AranarthUtils.getDay();
-		String weekday = DateUtils.provideWeekdayName(AranarthUtils.getWeekday());
-		String month = DateUtils.provideMonthName(AranarthUtils.getMonth());
-		int year = AranarthUtils.getYear();
-		String dateLine = DateUtils.determineServerDate(day, weekday, month, year)[1];
-		String[] parts = ChatUtils.stripColorFormatting(dateLine).split(" ");
-		dateLine = "&e" + parts[0] + " &f" + parts[1] + " " + parts[2] + " " + parts[3] + " " + parts[4] + " &e" + parts[5];
-
-		String playerOrPlayers = onlineNum == 1 ? "player" : "players";
-		String tps = String.format("%.1f", Bukkit.getServer().getTPS()[0]);
-		String infoLine = "&e" + onlineNum + " " + playerOrPlayers + " online &7&l| &eTPS " + tps;
-
-		// Header / Footer
-		for (Player player : onlinePlayers) {
-			player.setPlayerListHeader(ChatUtils.translateToColor(
-					"&8&l---------------------\n&6&lThe Realm of Aranarth\n" + dateLine + "\n" + infoLine));
-			player.setPlayerListFooter(ChatUtils.translateToColor("&8&l---------------------"));
-		}
-
-		// Handle vanish visibility
-		for (Player player : onlinePlayers) {
-			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-
-			for (Player hiddenPlayer : onlinePlayers) {
-				AranarthPlayer hiddenAranarthPlayer = AranarthUtils.getPlayer(hiddenPlayer.getUniqueId());
-
-				if (hiddenAranarthPlayer.isVanished()) {
-					if (aranarthPlayer.getCouncilRank() == 3) {
-						player.showPlayer(AranarthCore.getInstance(), hiddenPlayer);
-					} else {
-						player.hidePlayer(AranarthCore.getInstance(), hiddenPlayer);
-					}
-				} else {
-					// Always show non-vanished players
-					player.showPlayer(AranarthCore.getInstance(), hiddenPlayer);
-				}
-			}
-		}
-
-		// Remove vanished players from tab
-		onlinePlayers.removeIf(player -> {
-			AranarthPlayer data = AranarthUtils.getPlayer(player.getUniqueId());
-			return data.isVanished();
-		});
-
-		// Collect non-vanished remote players for the combined sort
-		List<NetworkPlayer> remotePlayers = new ArrayList<>();
-		if (NetworkManager.isActive()) {
-			for (NetworkPlayer np : NetworkManager.getInstance().getRemoteRoster().values()) {
-				if (!np.isVanished()) {
-					remotePlayers.add(np);
-				}
-			}
-		}
-
-		// Build a unified sorted list so that both local and remote players share
-		// a single rank-ordered sequence. Sort keys (all descending):
-		//   1. roleGroup  — council(5) > architect(4) > saint(3) > avatar(2) > regular(1)
-		//   2. roleTier   — councilRank/saintRank/architectRank within the same group
-		//   3. playerRank — game rank (8–0) as tiebreaker within the same role+tier
-		record SortEntry(int roleGroup, int roleTier, int playerRank, Player localPlayer, NetworkPlayer remotePlayer) {}
-
-		List<SortEntry> combined = new ArrayList<>();
-		for (Player p : onlinePlayers) {
-			AranarthPlayer ap = getPlayer(p.getUniqueId());
-			if (ap != null) {
-				int[] fields = computeSortFields(p.getUniqueId(), ap.getCouncilRank(), ap.getArchitectRank(), ap.getSaintRank(), ap.getRank());
-				combined.add(new SortEntry(fields[0], fields[1], fields[2], p, null));
-			}
-		}
-		for (NetworkPlayer np : remotePlayers) {
-			int[] fields = computeSortFields(np.getUuid(), np.getCouncilRank(), np.getArchitectRank(), np.getSaintRank(), np.getRank());
-			combined.add(new SortEntry(fields[0], fields[1], fields[2], null, np));
-		}
-
-		// Sort highest priority first across all servers combined
-		combined.sort((a, b) -> {
-			if (a.roleGroup() != b.roleGroup()) return Integer.compare(b.roleGroup(), a.roleGroup());
-			if (a.roleTier() != b.roleTier()) return Integer.compare(b.roleTier(), a.roleTier());
-			return Integer.compare(b.playerRank(), a.playerRank());
-		});
-
-		// Apply display names and list order.  Local players can be ordered directly;
-		// remote players get an NMS list-order packet via NetworkTabManager.
-		int total = combined.size();
-		for (int i = 0; i < total; i++) {
-			SortEntry entry = combined.get(i);
-			int order = total - 1 - i;
-			if (entry.localPlayer() != null) {
-				Player player = entry.localPlayer();
-				UUID uuid = player.getUniqueId();
-				String display = ChatUtils.providePrefixAndName(uuid);
-				AranarthPlayer aranarthPlayer = getPlayer(uuid);
-				if (aranarthPlayer.getAfkLocation() != null
-						&& aranarthPlayer.getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount()) {
-					display += " &7[AFK]";
-				}
-				int ping = player.getPing();
-				if (ping <= 150) {
-					display += " &8[&a" + ping + "ms&8]";
-				} else if (ping <= 250) {
-					display += " &8[&e" + ping + "ms&8]";
-				} else {
-					display += " &8[&c" + ping + "ms&8]";
-				}
-				player.setPlayerListName(ChatUtils.translateToColor(display));
-				player.setPlayerListOrder(order);
-			} else {
-				// Send a list-order packet for the remote fake entry so it slots in at
-				// the correct combined position instead of floating at the bottom.
-				NetworkTabManager.sendListOrder(
-						entry.remotePlayer().getUuid(), order, onlinePlayers);
-			}
-		}
-
-	}
-
-	/**
-	 * Returns the three sort keys used for tab-list ordering: [roleGroup, roleTier, playerRank].
-	 * Role groups (descending priority): council=5, architect=4, saint=3, avatar=2, regular=1.
-	 * Within the same group, roleTier distinguishes council/saint tiers.
-	 * playerRank is used as the final tiebreaker.
-	 */
-	private static int[] computeSortFields(UUID uuid, int councilRank, int architectRank, int saintRank, int rank) {
-		if (councilRank >= 1) return new int[]{5, councilRank, rank};
-		if (architectRank >= 1) return new int[]{4, architectRank, rank};
-		if (saintRank >= 1) return new int[]{3, saintRank, rank};
-		Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
-		if (currentAvatar != null && uuid.equals(currentAvatar.getUuid())) return new int[]{2, 0, rank};
-		return new int[]{1, 0, rank};
-	}
-
-
-	/**
-	 * Provides the roman numeral equivalent of the input level.
-	 * @param level The level of the incantation.
-	 * @return The roman numeral equivalent of the input level.
-	 */
-	public static String getIncantationLevelInNumerals(int level) {
-		String levelLetter = "I";
-		if (level == 2) {
-			return "II";
-		} else if (level == 3) {
-			return "III";
-		} else if (level == 4) {
-			return "IV";
-		} else if (level == 5) {
-			return "V";
-		}
-		return levelLetter;
-	}
-
-	/**
-	 * Determines whether the input item contains an Aranarth incantation.
-	 * @param item The item.
-	 * @param incantation The incantation name.
-	 * @return Whether the input item contains an Aranarth incantation.
-	 */
-	public static boolean hasIncantation(ItemStack item, String incantation) {
-		if (item.hasItemMeta()) {
-			if (item.getItemMeta().getPersistentDataContainer().has(INCANTATION_TYPE, PersistentDataType.STRING)) {
-				if (item.getItemMeta().getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING).equals(incantation)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Provides
-	 * @param item The item.
-	 * @return The level of the applied incantation. -1 if the level is not determined.
-	 */
-	public static int getIncantationLevel(ItemStack item) {
-		if (item.hasItemMeta()) {
-			if (item.getItemMeta().getPersistentDataContainer().has(INCANTATION_LEVEL, PersistentDataType.INTEGER)) {
-				return item.getItemMeta().getPersistentDataContainer().get(INCANTATION_LEVEL, PersistentDataType.INTEGER);
-			}
-		}
-		return -1;
-	}
-
-	/**
-	 * Attempts to use the given horn based on the previous use of the horn.
-	 * @param player The player.
-	 * @param horn The type of horn.
-	 */
-	public static boolean canUseHornSuccessfully(Player player, MusicInstrument horn) {
-		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
-		HashMap<MusicInstrument, Long> horns = aranarthPlayer.getHorns();
-		long lastHornUse = 0;
-		long cooldown = getHornCooldown(horn);
-
-		if (horn.equals(MusicInstrument.PONDER_GOAT_HORN)) {
-			lastHornUse = horns.get(MusicInstrument.PONDER_GOAT_HORN) != null ? horns.get(MusicInstrument.PONDER_GOAT_HORN) : -1;
-		} else if (horn.equals(MusicInstrument.SING_GOAT_HORN)) {
-			lastHornUse = horns.get(MusicInstrument.SING_GOAT_HORN) != null ? horns.get(MusicInstrument.SING_GOAT_HORN) : -1;
-		} else if (horn.equals(MusicInstrument.SEEK_GOAT_HORN)) {
-			lastHornUse = horns.get(MusicInstrument.SEEK_GOAT_HORN) != null ? horns.get(MusicInstrument.SEEK_GOAT_HORN) : -1;
-		} else if (horn.equals(MusicInstrument.FEEL_GOAT_HORN)) {
-			lastHornUse = horns.get(MusicInstrument.FEEL_GOAT_HORN) != null ? horns.get(MusicInstrument.FEEL_GOAT_HORN) : -1;
-		} else if (horn.equals(MusicInstrument.ADMIRE_GOAT_HORN)) {
-			lastHornUse = horns.get(MusicInstrument.ADMIRE_GOAT_HORN) != null ? horns.get(MusicInstrument.ADMIRE_GOAT_HORN) : -1;
-		} else if (horn.equals(MusicInstrument.CALL_GOAT_HORN)) {
-			lastHornUse = horns.get(MusicInstrument.CALL_GOAT_HORN) != null ? horns.get(MusicInstrument.CALL_GOAT_HORN) : -1;
-		} else if (horn.equals(MusicInstrument.YEARN_GOAT_HORN)) {
-			lastHornUse = horns.get(MusicInstrument.YEARN_GOAT_HORN) != null ? horns.get(MusicInstrument.YEARN_GOAT_HORN) : -1;
-		} else if (horn.equals(MusicInstrument.DREAM_GOAT_HORN)) {
-			lastHornUse = horns.get(MusicInstrument.DREAM_GOAT_HORN) != null ? horns.get(MusicInstrument.DREAM_GOAT_HORN) : -1;
-		}
-
-		MusicInstrument hornWithLongestCooldown = null;
-		// Ensures only one horn can be used at a time (limiting stacking)
-		for (MusicInstrument hornOnCooldown : horns.keySet()) {
-			long lastUse = horns.get(hornOnCooldown) != null ? horns.get(hornOnCooldown) : -1;
-
-			// If the horn is actively on cooldown
-			if (lastUse + getHornCooldown(hornOnCooldown) > System.currentTimeMillis()) {
-				if (hornWithLongestCooldown == null) {
-					hornWithLongestCooldown = hornOnCooldown;
-				}
-
-				if (horns.get(hornOnCooldown) >= horns.get(hornWithLongestCooldown)) {
-					hornWithLongestCooldown = hornOnCooldown;
-				}
-			}
-		}
-
-		// If there are no horns on cooldown
-		if (hornWithLongestCooldown == null) {
-			horns.put(horn, System.currentTimeMillis());
-			aranarthPlayer.setHorns(horns);
-			setPlayer(player.getUniqueId(), aranarthPlayer);
-			String hornName = getHornName(horn);
-
-			// Goat horns are heard up to 256 blocks away, inform nearby players
-			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-				if (player.getWorld().getName().equals(onlinePlayer.getWorld().getName())) {
-					if (onlinePlayer.getName().equals(player.getName())) {
-						onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You have used the &eHorn of " + hornName));
-						continue;
-					}
-
-					if (player.getWorld().equals(onlinePlayer.getWorld())) {
-						if (player.getLocation().distance(onlinePlayer.getLocation()) <= 256) {
-							onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has used the &eHorn of " + hornName));
-						}
-					}
-				}
-			}
-
-			return true;
-		}
-		// If there was a horn on cooldown
-		else {
-			// Goat horns are heard up to 256 blocks away, this is to prevent it from being heard again
-			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-				if (player.getWorld().getName().equals(onlinePlayer.getWorld().getName())) {
-					if (player.getLocation().distance(onlinePlayer.getLocation()) <= 256) {
-						onlinePlayer.stopSound(SoundCategory.RECORDS);
-					}
-				}
-			}
-			long remainder = (horns.get(hornWithLongestCooldown) + getHornCooldown(hornWithLongestCooldown)) - System.currentTimeMillis();
-			remainder = remainder / 1000;
-			int seconds = (int) remainder;
-			player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a horn again for another &e" + seconds + " &cseconds!"));
-			return false;
-		}
-	}
-
-	/**
-	 * Provides the cooldown of the input horn.
-	 * @param horn The horn.
-	 * @return The cooldown of the input horn.
-	 */
-	private static long getHornCooldown(MusicInstrument horn) {
-		long cooldown = 60000;
-		if (horn.equals(MusicInstrument.PONDER_GOAT_HORN)) {
-			cooldown = 60000;
-		} else if (horn.equals(MusicInstrument.SING_GOAT_HORN)) {
-			cooldown = 5000;
-		} else if (horn.equals(MusicInstrument.SEEK_GOAT_HORN)) {
-			cooldown = 60000;
-		} else if (horn.equals(MusicInstrument.FEEL_GOAT_HORN)) {
-			cooldown = 90000;
-		} else if (horn.equals(MusicInstrument.ADMIRE_GOAT_HORN)) {
-			cooldown = 180000;
-		} else if (horn.equals(MusicInstrument.CALL_GOAT_HORN)) {
-			cooldown = 150000;
-		} else if (horn.equals(MusicInstrument.YEARN_GOAT_HORN)) {
-			cooldown = 120000;
-		} else if (horn.equals(MusicInstrument.DREAM_GOAT_HORN)) {
-			cooldown = 30000;
-		}
-		return cooldown;
-	}
-
-	/**
-	 * Provides the custom name for each horn.
-	 * @param horn The horn.
-	 * @return The name of the horn.
-	 */
-	private static String getHornName(MusicInstrument horn) {
-		String name = "Horns";
-		if (horn.equals(MusicInstrument.PONDER_GOAT_HORN)) {
-			name = "the Traveller";
-		} else if (horn.equals(MusicInstrument.SING_GOAT_HORN)) {
-			name = "the Target";
-		} else if (horn.equals(MusicInstrument.SEEK_GOAT_HORN)) {
-			name = "the Brute";
-		} else if (horn.equals(MusicInstrument.FEEL_GOAT_HORN)) {
-			name = "the Resilient";
-		} else if (horn.equals(MusicInstrument.ADMIRE_GOAT_HORN)) {
-			name = "the Armored";
-		} else if (horn.equals(MusicInstrument.CALL_GOAT_HORN)) {
-			name = "the Beasts";
-		} else if (horn.equals(MusicInstrument.YEARN_GOAT_HORN)) {
-			name = "the Stallion";
-		} else if (horn.equals(MusicInstrument.DREAM_GOAT_HORN)) {
-			name = "the Pure";
-		}
-		return name;
-	}
-
-	/**
-	 * Refreshes the Locations of all sentinels.
-	 */
-	public static void refreshSentinels() {
-		for (AranarthPlayer aranarthPlayer : players.values()) {
-			UUID uuid = AranarthUtils.getUuidOfAranarthPlayer(aranarthPlayer);
-			HashMap<EntityType, List<Sentinel>> sentinels = aranarthPlayer.getSentinels();
-			List<Integer> sentinelsToRemove = new ArrayList<>();
-			for (EntityType type : sentinels.keySet()) {
-				for (int i = 0; i < sentinels.get(type).size(); i++) {
-					Sentinel sentinel = sentinels.get(type).get(i);
-
-					// Skip sentinels that belong to a different server — they won't have entities here
-					String sentinelServer = sentinel.getServerName();
-					if (!sentinelServer.isEmpty()
-							&& com.aearost.aranarthcore.network.NetworkManager.isActive()
-							&& !sentinelServer.equals(com.aearost.aranarthcore.network.NetworkManager.getInstance().getThisServer())) {
-						continue;
-					}
-
-					// Must manually load the chunk to allow the entity to teleport
-					if (sentinel.getLocation().getWorld() == null) continue;
-					Chunk chunk = sentinel.getLocation().getChunk();
-					if (chunk.isLoaded()) {
-						Entity entity = Bukkit.getEntity(sentinel.getUuid());
-						// Cleans up any sentinels that have died
-						if (entity == null) {
-							sentinelsToRemove.add(i);
-						}
-						// Updates the location of the sentinel
-						else {
-							sentinel.setLocation(entity.getLocation());
-							sentinels.get(type).set(i, sentinel);
-						}
-					}
-				}
-
-				// Remove in reverse order to avoid shifting indexes
-				for (int i = sentinelsToRemove.size() - 1; i >= 0; i--) {
-					int index = sentinelsToRemove.get(i);
-					sentinels.get(type).remove(index);
-				}
-				sentinelsToRemove.clear();
-			}
-			aranarthPlayer.setSentinels(sentinels);
-			AranarthUtils.setPlayer(uuid, aranarthPlayer);
-		}
-	}
-
-	/**
-	 * Provides the UUID of the AranarthPlayer.
-	 * @param aranarthPlayer The AranarthPlayer.
-	 * @return The UUID of the AranarthPlayer.
-	 */
-	public static UUID getUuidOfAranarthPlayer(AranarthPlayer aranarthPlayer) {
-		for (UUID uuid : players.keySet()) {
-			if (players.get(uuid).equals(aranarthPlayer)) {
-				return uuid;
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Toggles the player's AFK status.
-	 * @param uuid The UUID of the player.
-	 * @param isEnablingAfk Whether the player is enabling their AFK status.
-	 */
-	public static void toggleAfkStatus(UUID uuid, boolean isEnablingAfk) {
-		Player player = Bukkit.getPlayer(uuid);
-		AranarthPlayer aranarthPlayer = getPlayer(uuid);
-		if (isEnablingAfk) {
-			if (aranarthPlayer.getAfkLocation() == null) {
-				AfkLocation afkLocation = new AfkLocation(player.getLocation(),getAfkSecondsAmount());
-				aranarthPlayer.setAfkLocation(afkLocation);
-			}
-
-			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-				if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
-					onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You are now AFK"));
-				} else {
-					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is now AFK"));
-				}
-			}
-			Bukkit.getLogger().info("[AC] " + ChatUtils.translateToColor(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " is now AFK"));
-			if (NetworkManager.isActive()) {
-				NetworkManager.getInstance().publishAfkStatus(uuid, aranarthPlayer.getNickname(), true);
-			}
-		} else {
-			if (aranarthPlayer.getAfkLocation() == null) {
-				return;
-			}
-			aranarthPlayer.setAfkLocation(null);
-			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-				if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
-					onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You are no longer AFK"));
-				} else {
-					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is no longer AFK"));
-				}
-			}
-			Bukkit.getLogger().info("[AC] " + ChatUtils.translateToColor(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " is no longer AFK"));
-			if (NetworkManager.isActive()) {
-				NetworkManager.getInstance().publishAfkStatus(uuid, aranarthPlayer.getNickname(), false);
-			}
-		}
-		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-	}
-
-	/**
-	 * Updates all players' current AFK Locations.
-	 */
-	public static void updateAfkLocations() {
-		for (Player player : Bukkit.getOnlinePlayers()) {
-			AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
-			AfkLocation afkLocation = aranarthPlayer.getAfkLocation();
-			if (afkLocation == null) {
-				afkLocation = new AfkLocation(player.getLocation(), 0);
-				aranarthPlayer.setAfkLocation(afkLocation);
-				setPlayer(player.getUniqueId(), aranarthPlayer);
-			} else {
-				// If the player hasn't moved and isn't afk yet
-				if (isSameLocation(player.getLocation(), afkLocation.getLocation())) {
-					if (afkLocation.getSeconds() < getAfkSecondsAmount()) {
-						afkLocation.setSeconds(afkLocation.getSeconds() + 5);
-						aranarthPlayer.setAfkLocation(afkLocation);
-						setPlayer(player.getUniqueId(), aranarthPlayer);
-					}
-					// Auto-afk after 5 minutes
-					else if (afkLocation.getSeconds() == getAfkSecondsAmount()) {
-						toggleAfkStatus(player.getUniqueId(), true);
-						// Prevents further calls
-						afkLocation.setSeconds(AranarthUtils.getAfkSecondsAmount() + 5);
-						aranarthPlayer.setAfkLocation(afkLocation);
-						setPlayer(player.getUniqueId(), aranarthPlayer);
-					}
-				}
-				// The player has moved
-				else {
-					if (afkLocation.getSeconds() >= getAfkSecondsAmount()) {
-						toggleAfkStatus(player.getUniqueId(), false);
-					} else {
-						aranarthPlayer.setAfkLocation(null);
-						setPlayer(player.getUniqueId(), aranarthPlayer);
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Increases the amount of drops from a mob in an EntityDeathEvent.
-	 * @param e The event.
-	 */
-	public static void increaseMobDrops(EntityDeathEvent e) {
-		EntityEquipment equipment = e.getEntity().getEquipment();
-		List<ItemStack> equipmentList = new ArrayList<>();
-		equipmentList.addAll(Arrays.asList(equipment.getArmorContents()));
-		equipmentList.add(equipment.getItemInMainHand());
-		equipmentList.add(equipment.getItemInOffHand());
-
-		for (ItemStack drop : e.getDrops()) {
-			// Avoid duplication of held items or worn armor
-			if (equipmentList.contains(drop)) {
-				continue;
-			}
-
-			// Avoids duplication of saddles and armor on mounts
-			if (drop.getType() == Material.SADDLE || drop.getType().name().contains("_ARMOR") || drop.getType() == Material.ARMOR_STAND) {
-				continue;
-			}
-
-			int rand = new Random().nextInt(4);
-			// 50% chance to increase the drop by 1
-			if (rand <= 1) {
-				drop.setAmount(drop.getAmount() + 1);
-			}
-			// 25% chance to increase the drop by 2
-			else if (rand == 3) {
-				drop.setAmount(drop.getAmount() + 2);
-			}
-		}
-	}
-
-	/**
-	 * Adds a vote to the list of votes.
-	 * @param vote The vote being added.
-	 */
-	public static void addVote(AranarthVote vote) {
-		votes.add(vote);
-	}
-
-	/**
-	 * Provides the list of votes.
-	 * @return The list of votes.
-	 */
-	public static List<AranarthVote> getVotes() {
-		return votes;
-	}
-
-	/**
-	 * Provides the number of times a player has voted - not the vote points.
-	 * @param uuid The UUID of the player.
-	 * @return The number of times a player has voted - not the vote points.
-	 */
-	public static int getVoteNum(UUID uuid) {
-		int voteNum = 0;
-		for (AranarthVote vote : votes) {
-			if (vote.getUuid().equals(uuid)) {
-				voteNum++;
-			}
-		}
-		return voteNum;
-	}
-
-	/**
-	 * Provides the number of vote points a player has - not necessarily usable.
-	 * @param uuid The UUID of the player.
-	 * @return The number of vote points a player has - not necessarily usable.
-	 */
-	public static int getVotePoints(UUID uuid) {
-		int pointsNum = 0;
-		for (AranarthVote vote : votes) {
-			if (vote.getUuid().equals(uuid)) {
-				pointsNum += vote.getPointsRewarded();
-			}
-		}
-		return pointsNum;
-	}
-
-	/**
-	 * Provides the number of vote points a player has available.
-	 * @param uuid The UUID of the player.
-	 * @return The number of vote points a player has available.
-	 */
-	public static int getAvailableVotePoints(UUID uuid) {
-		int totalPoints = getVotePoints(uuid);
-		return totalPoints - AranarthUtils.getPlayer(uuid).getVotePointsSpent();
-	}
-
-	/**
-	 * Provides the number of seconds that a player is AFK to automatically be placed in the AFK status.
-	 * @return The number of seconds that a player is AFK to automatically be placed in the AFK status.
-	 */
-	public static int getAfkSecondsAmount() {
-		return AranarthCore.getInstance().getConfig().getInt("players.afk-timeout-seconds", 300);
-	}
-
-	/**
-	 * Provides the HashMap of the kills and deaths of all players across all worlds.
-	 * @return The HashMap of the kills and deaths of all players across all worlds.
-	 */
-	public static HashMap<UUID, List<PlayerKillDeathScore>> getKillDeathScores() {
-		return killDeathScores;
-	}
-
-	/**
-	 * Adds the player's kills and deaths to the HashMap.
-	 * @param pkds The player's kills and deaths to be added to the HashMap.
-	 */
-	public static void addPlayerKillDeathScore(PlayerKillDeathScore pkds) {
-		List<PlayerKillDeathScore> list = killDeathScores.get(pkds.getUuid());
-		if (list == null) {
-			list = new ArrayList<>();
-		}
-
-		for (int i = 0; i < list.size(); i++) {
-			PlayerKillDeathScore inList = list.get(i);
-			if (inList.getWorldPrefix().equals(pkds.getWorldPrefix())) {
-				// Combines the two
-				inList.setKills(inList.getKills() + pkds.getKills());
-				inList.setDeaths(inList.getDeaths() + pkds.getDeaths());
-				list.set(i, inList);
-				killDeathScores.put(pkds.getUuid(), list);
-				return;
-			}
-		}
-
-		// Only adds if it isn't already in the list
-		list.add(pkds);
-		killDeathScores.put(pkds.getUuid(), list);
-	}
-
-	private static final Set<String> SURVIVAL_WORLD_PREFIXES = Set.of("world", "resource", "spawn");
-
-	/**
-	 * Returns true if the given world prefix belongs to the Survival server group.
-	 */
-	private static boolean isSurvivalWorldPrefix(String prefix) {
-		return SURVIVAL_WORLD_PREFIXES.contains(prefix.toLowerCase());
-	}
-
-	/**
-	 * Provides the number of kills/deaths the player has in the input world.
-	 * @param uuid The UUID of the player.
-	 * @param world The world to verify the number of kills/deaths in.
-	 * @param isGettingKills Whether the method is getting the player's kills/deaths. False if getting deaths.
-	 * @return The number of kills/deaths the player has in the input world.
-	 */
-	public static int getKillsOrDeathsInWorld(UUID uuid, World world, boolean isGettingKills) {
-		if (killDeathScores.get(uuid) == null) {
-			killDeathScores.put(uuid, new ArrayList<>());
-			return 0;
-		}
-
-		String worldPrefix = world.getName().split("_")[0];
-		List<PlayerKillDeathScore> scores = killDeathScores.get(uuid);
-
-		if (isSurvivalWorldPrefix(worldPrefix)) {
-			int total = 0;
-			for (PlayerKillDeathScore pkds : scores) {
-				if (isSurvivalWorldPrefix(pkds.getWorldPrefix())) {
-					total += isGettingKills ? pkds.getKills() : pkds.getDeaths();
-				}
-			}
-			return total;
-		}
-
-		for (PlayerKillDeathScore pkds : scores) {
-			if (pkds.getWorldPrefix().equals(worldPrefix)) {
-				return isGettingKills ? pkds.getKills() : pkds.getDeaths();
-			}
-		}
-		return 0;
-	}
-
-	/**
-	 * Updates the number of kills and deaths of the input players based on who was the killer and who was the victim.
-	 * @param killer The player who did the killing.
-	 * @param victim The player who died.
-	 * @param world The world that the player was killed in.
-	 */
-	public static void updateKillAndDeath(Player killer, Player victim, World world) {
-		String deathWorld = victim.getWorld().getName().split("_")[0];
-
-		boolean wasKillerScoreUpdated = false;
-		if (killer != null && killDeathScores.get(killer.getUniqueId()) == null) {
-			PlayerKillDeathScore pkds = new PlayerKillDeathScore(killer.getUniqueId(), deathWorld, 1, 0);
-			List<PlayerKillDeathScore> list = new ArrayList<>();
-			list.add(pkds);
-			killDeathScores.put(killer.getUniqueId(), list);
-			wasKillerScoreUpdated = true;
-		}
-
-		boolean wasVictimScoreUpdated = false;
-		if (killDeathScores.get(victim.getUniqueId()) == null) {
-			PlayerKillDeathScore pkds = new PlayerKillDeathScore(victim.getUniqueId(), deathWorld, 0, 1);
-			List<PlayerKillDeathScore> list = new ArrayList<>();
-			list.add(pkds);
-			killDeathScores.put(victim.getUniqueId(), list);
-			wasVictimScoreUpdated = true;
-		}
-
-		// Increases the killer's kill count by 1 in the world
-		if (killer != null && !wasKillerScoreUpdated) {
-			List<PlayerKillDeathScore> list = killDeathScores.get(killer.getUniqueId());
-			boolean foundKillerWorld = false;
-			for (int i = 0; i < list.size(); i++) {
-				PlayerKillDeathScore pkds = list.get(i);
-				if (deathWorld.equals(pkds.getWorldPrefix())) {
-					pkds.setKills(pkds.getKills() + 1);
-					list.set(i, pkds);
-					foundKillerWorld = true;
-					break;
-				}
-			}
-			if (!foundKillerWorld) {
-				list.add(new PlayerKillDeathScore(killer.getUniqueId(), deathWorld, 1, 0));
-			}
-			killDeathScores.put(killer.getUniqueId(), list);
-		}
-		// Increases the victim's death count by 1 in the world
-		if (!wasVictimScoreUpdated) {
-			List<PlayerKillDeathScore> list = killDeathScores.get(victim.getUniqueId());
-			boolean foundVictimWorld = false;
-			for (int i = 0; i < list.size(); i++) {
-				PlayerKillDeathScore pkds = list.get(i);
-				if (deathWorld.equals(pkds.getWorldPrefix())) {
-					pkds.setDeaths(pkds.getDeaths() + 1);
-					list.set(i, pkds);
-					foundVictimWorld = true;
-					break;
-				}
-			}
-			if (!foundVictimWorld) {
-				list.add(new PlayerKillDeathScore(victim.getUniqueId(), deathWorld, 0, 1));
-			}
-			killDeathScores.put(victim.getUniqueId(), list);
-		}
-
-	}
-
-	/**
-	 * Provides a list of the UUIDs of the players with the most kills, sorted by kills.
-	 * @param world The world to verify the kills in.
-	 * @return The list of the UUIDs of the players with the most kills, sorted by kills.
-	 */
-	public static List<UUID> getTopKills(World world) {
-		String worldName = world.getName().split("_")[0];
-		boolean isSurvival = isSurvivalWorldPrefix(worldName);
-		Map<UUID, Integer> totalKills = new HashMap<>();
-		for (Map.Entry<UUID, List<PlayerKillDeathScore>> entry : killDeathScores.entrySet()) {
-			int sum = 0;
-
-			for (PlayerKillDeathScore score : entry.getValue()) {
-				if (isSurvival ? isSurvivalWorldPrefix(score.getWorldPrefix()) : score.getWorldPrefix().equalsIgnoreCase(worldName)) {
-					sum += score.getKills();
-				}
-			}
-
-			// Only include players who actually have kills
-			if (sum > 0) {
-				totalKills.put(entry.getKey(), sum);
-			}
-		}
-
-		// Sort by kills descending and return UUIDs
-		return totalKills.entrySet()
-				.stream()
-				.sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
-				.map(Map.Entry::getKey)
-				.toList();
-	}
-
-	/**
-	 * Provides a list of the UUIDs of the players with the most deaths, sorted by deaths.
-	 * @param world The world to verify the deaths in.
-	 * @return The list of the UUIDs of the players with the most deaths, sorted by deaths.
-	 */
-	public static List<UUID> getTopDeaths(World world) {
-		String worldName = world.getName().split("_")[0];
-		boolean isSurvival = isSurvivalWorldPrefix(worldName);
-		Map<UUID, Integer> totalDeaths = new HashMap<>();
-		for (Map.Entry<UUID, List<PlayerKillDeathScore>> entry : killDeathScores.entrySet()) {
-			int sum = 0;
-
-			for (PlayerKillDeathScore score : entry.getValue()) {
-				if (isSurvival ? isSurvivalWorldPrefix(score.getWorldPrefix()) : score.getWorldPrefix().equalsIgnoreCase(worldName)) {
-					sum += score.getDeaths();
-				}
-			}
-
-			// Only include players who actually have deaths
-			if (sum > 0) {
-				totalDeaths.put(entry.getKey(), sum);
-			}
-		}
-
-		// Sort by deaths descending and return UUIDs
-		return totalDeaths.entrySet()
-				.stream()
-				.sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
-				.map(Map.Entry::getKey)
-				.toList();
-	}
-
-	/**
-	 * Provides the map of chat game guess counts for all players.
-	 */
-	public static HashMap<UUID, Integer> getChatGameGuesses() {
-		return chatGameGuesses;
-	}
-
-	/**
-	 * Increments the chat game guess count for the given player by 1.
-	 */
-	public static void addChatGameGuess(UUID uuid) {
-		chatGameGuesses.merge(uuid, 1, Integer::sum);
-	}
-
-	/**
-	 * Provides the map of all-time chat game earnings for all players.
-	 */
-	public static HashMap<UUID, Double> getChatGameEarnings() {
-		return chatGameEarnings;
-	}
-
-	/**
-	 * Adds to the all-time chat game earnings for the given player.
-	 */
-	public static void addChatGameEarnings(UUID uuid, double amount) {
-		chatGameEarnings.merge(uuid, amount, Double::sum);
-	}
-
-	/**
-	 * Sets the all-time chat game earnings for the given player directly (used during load).
-	 */
-	public static void setChatGameEarnings(UUID uuid, double amount) {
-		chatGameEarnings.put(uuid, amount);
-	}
-
-	/**
-	 * Provides the map of personal best unscramble times for all players (0 = unset).
-	 */
-	public static HashMap<UUID, Double> getChatGameBestTimes() {
-		return chatGameBestTimes;
-	}
-
-	/**
-	 * Returns the player's personal best unscramble time in seconds, or 0 if never set.
-	 */
-	public static double getChatGameBestTime(UUID uuid) {
-		return chatGameBestTimes.getOrDefault(uuid, 0.0);
-	}
-
-	/**
-	 * Sets the personal best unscramble time for the given player (used during load and on record).
-	 */
-	public static void setChatGameBestTime(UUID uuid, double time) {
-		chatGameBestTimes.put(uuid, time);
-	}
-
-	/**
-	 * Provides the map of personal best chat game streaks for all players.
-	 */
-	public static HashMap<UUID, Integer> getChatGameHighestStreaks() {
-		return chatGameHighestStreaks;
-	}
-
-	/**
-	 * Returns the player's personal best chat game streak, or 0 if never set.
-	 */
-	public static int getChatGameHighestStreak(UUID uuid) {
-		return chatGameHighestStreaks.getOrDefault(uuid, 0);
-	}
-
-	/**
-	 * Sets the personal best chat game streak for the given player (used during load and on record).
-	 */
-	public static void setChatGameHighestStreak(UUID uuid, int streak) {
-		chatGameHighestStreaks.put(uuid, streak);
-	}
-
-	/**
-	 * Provides a list of UUIDs sorted by total chat game earnings descending.
-	 */
-	public static List<UUID> getTopGuesses() {
-		return chatGameGuesses.entrySet()
-				.stream()
-				.filter(e -> e.getValue() > 0)
-				.sorted((a, b) -> Double.compare(
-						chatGameEarnings.getOrDefault(b.getKey(), 0.0),
-						chatGameEarnings.getOrDefault(a.getKey(), 0.0)))
-				.map(Map.Entry::getKey)
-				.toList();
-	}
-
-	/**
-	 * Provides the map of pending vote keys awaiting claim.
-	 * @return The HashMap of UUID to pending key count.
-	 */
-	public static HashMap<UUID, Integer> getPendingVoteKeys() {
-		return pendingVoteKeys;
-	}
-
-	/**
-	 * Adds pending vote keys for a player.
-	 * @param uuid The UUID of the player.
-	 * @param amount The number of keys to add.
-	 */
-	public static void addPendingVoteKeys(UUID uuid, int amount) {
-		pendingVoteKeys.merge(uuid, amount, Integer::sum);
-	}
-
-	/**
-	 * Sets the pending vote key count for a player.
-	 * @param uuid The UUID of the player.
-	 * @param amount The number of pending keys.
-	 */
-	public static void setPendingVoteKeys(UUID uuid, int amount) {
-		pendingVoteKeys.put(uuid, amount);
-	}
-
-	/**
-	 * Removes a player's pending vote key entry entirely.
-	 * @param uuid The UUID of the player.
-	 */
-	public static void removePendingVoteKeys(UUID uuid) {
-		pendingVoteKeys.remove(uuid);
-	}
-
-	public static HashMap<UUID, Integer> getPendingRareKeys() { return pendingRareKeys; }
-	public static void addPendingRareKeys(UUID uuid, int amount) { pendingRareKeys.merge(uuid, amount, Integer::sum); }
-	public static void setPendingRareKeys(UUID uuid, int amount) { pendingRareKeys.put(uuid, amount); }
-	public static void removePendingRareKeys(UUID uuid) { pendingRareKeys.remove(uuid); }
-
-	public static HashMap<UUID, Integer> getPendingEpicKeys() { return pendingEpicKeys; }
-	public static void addPendingEpicKeys(UUID uuid, int amount) { pendingEpicKeys.merge(uuid, amount, Integer::sum); }
-	public static void setPendingEpicKeys(UUID uuid, int amount) { pendingEpicKeys.put(uuid, amount); }
-	public static void removePendingEpicKeys(UUID uuid) { pendingEpicKeys.remove(uuid); }
-
-	public static HashMap<UUID, Integer> getPendingGodlyKeys() { return pendingGodlyKeys; }
-	public static void addPendingGodlyKeys(UUID uuid, int amount) { pendingGodlyKeys.merge(uuid, amount, Integer::sum); }
-	public static void setPendingGodlyKeys(UUID uuid, int amount) { pendingGodlyKeys.put(uuid, amount); }
-	public static void removePendingGodlyKeys(UUID uuid) { pendingGodlyKeys.remove(uuid); }
-
-	/**
-	 * Stores a crate key ItemStack as pending for the given player, routing to the
-	 * correct map based on the key's PDC type tag.
-	 */
-	public static void addPendingKey(UUID uuid, ItemStack keyItem, int amount) {
-		if (keyItem == null || !keyItem.hasItemMeta()) return;
-		String keyType = keyItem.getItemMeta().getPersistentDataContainer()
-				.get(CustomKeys.CRATE_KEY, PersistentDataType.STRING);
-		if (keyType == null) return;
-		switch (keyType) {
-			case "key_vote"  -> addPendingVoteKeys(uuid, amount);
-			case "key_rare"  -> addPendingRareKeys(uuid, amount);
-			case "key_epic"  -> addPendingEpicKeys(uuid, amount);
-			case "key_godly" -> addPendingGodlyKeys(uuid, amount);
-		}
-	}
-
-	/**
-	 * Returns the subset of the three time/weather-synced worlds ("world", SMP main, "resource")
-	 * that actually exist on this server. Worlds that are hosted on a different server in the
-	 * network return null from Bukkit.getWorld() and are silently skipped.
-	 */
-	public static List<World> getSyncWorlds() {
-		// Use a set to deduplicate: on the SMP server getSmpMainWorldName() returns "world",
-		// which is the same as the survival main world name.
-		Set<String> names = new LinkedHashSet<>(Arrays.asList("world", AranarthCore.getSmpMainWorldName(), "resource"));
-		List<World> worlds = new ArrayList<>();
-		for (String name : names) {
-			World w = Bukkit.getWorld(name);
-			if (w != null) worlds.add(w);
-		}
-		return worlds;
-	}
-
-	/**
-	 * Converts a Bukkit world name to the canonical stored form used in the dominion database row.
-	 * On the SMP server, worlds are named "world", "world_nether", "world_the_end", which clash with
-	 * the Survival server's world names. We prefix them with "smp:" so the stored value is unambiguous
-	 * (matching the convention already used by the homepad system).
-	 */
-	public static String toStoredDominionWorldName(String worldName) {
-		if (AranarthCore.isSmpServer() && isSmpWorld(worldName)) {
-			return "smp:" + worldName;
-		}
-		return worldName;
-	}
-
-	/**
-	 * Returns true if the world is one of the SMP worlds on whichever server is currently running.
-	 * On the test server or survival server: "smp", "smp_nether", "smp_the_end".
-	 * On the SMP server: "overworld", "the_nether", "the_end".
-	 */
-	public static boolean isSmpWorld(String worldName) {
-		if (AranarthCore.isSmpServer()) {
-			return worldName.equals("world") || worldName.equals("world_nether") || worldName.equals("world_the_end");
-		}
-		return worldName.startsWith("smp");
-	}
-
-	/**
-	 * Returns true if the world is a valid survival world for quest progress.
-	 */
-	public static boolean isSurvivalWorld(String worldName) {
-		return worldName.equals("world") || worldName.equals("world_nether") || worldName.equals("world_the_end")
-				|| isSmpWorld(worldName)
-				|| worldName.equals("resource") || worldName.equals("resource_nether") || worldName.equals("resource_the_end")
-				|| worldName.equals("spawn") || worldName.equals("shops");
-	}
-
-	/**
-	 * Determines if the destroyed block is a flower.
-	 * @param type The Material.
-	 * @return Whether the destroyed block is a flower.
-	 */
-	public static boolean isFlower(Material type) {
-		return type == Material.DANDELION || type == Material.POPPY || type == Material.BLUE_ORCHID || type == Material.ALLIUM
-				|| type == Material.AZURE_BLUET || type == Material.RED_TULIP || type == Material.ORANGE_TULIP
-				|| type == Material.WHITE_TULIP || type == Material.PINK_TULIP || type == Material.OXEYE_DAISY
-				|| type == Material.CORNFLOWER || type == Material.LILY_OF_THE_VALLEY || type == Material.TORCHFLOWER
-				|| type == Material.PITCHER_PLANT || type == Material.CACTUS_FLOWER || type == Material.OPEN_EYEBLOSSOM
-				|| type == Material.CLOSED_EYEBLOSSOM || type == Material.WITHER_ROSE || type == Material.PINK_PETALS
-				|| type == Material.WILDFLOWERS || type == Material.SPORE_BLOSSOM || type == Material.SUNFLOWER || type == Material.LILAC
-				|| type == Material.ROSE_BUSH || type == Material.PEONY || type == Material.CHORUS_FLOWER;
-	}
+        }
+        return worlds;
+    }
+
+    /**
+     * Converts a Bukkit world name to the canonical stored form used in the dominion database row.
+     * On the SMP server, worlds are named "world", "world_nether", "world_the_end", which clash with
+     * the Survival server's world names. We prefix them with "smp:" so the stored value is unambiguous
+     * (matching the convention already used by the homepad system).
+     */
+    public static String toStoredDominionWorldName(String worldName) {
+        if (AranarthCore.isSmpServer() && isSmpWorld(worldName)) {
+            return "smp:" + worldName;
+        }
+        return worldName;
+    }
+
+    /**
+     * Returns true if the world is one of the SMP worlds on whichever server is currently running.
+     * On the test server or survival server: "smp", "smp_nether", "smp_the_end".
+     * On the SMP server: "overworld", "the_nether", "the_end".
+     */
+    public static boolean isSmpWorld(String worldName) {
+        if (AranarthCore.isSmpServer()) {
+            return worldName.equals("world") || worldName.equals("world_nether") || worldName.equals("world_the_end");
+        }
+        return worldName.startsWith("smp");
+    }
+
+    /**
+     * Returns true if the world is a valid survival world for quest progress.
+     */
+    public static boolean isSurvivalWorld(String worldName) {
+        return worldName.equals("world") || worldName.equals("world_nether") || worldName.equals("world_the_end")
+                || isSmpWorld(worldName)
+                || worldName.equals("resource") || worldName.equals("resource_nether") || worldName.equals("resource_the_end")
+                || worldName.equals("spawn") || worldName.equals("shops");
+    }
+
+    /**
+     * Determines if the destroyed block is a flower.
+     *
+     * @param type The Material.
+     * @return Whether the destroyed block is a flower.
+     */
+    public static boolean isFlower(Material type) {
+        return type == Material.DANDELION || type == Material.POPPY || type == Material.BLUE_ORCHID || type == Material.ALLIUM
+                || type == Material.AZURE_BLUET || type == Material.RED_TULIP || type == Material.ORANGE_TULIP
+                || type == Material.WHITE_TULIP || type == Material.PINK_TULIP || type == Material.OXEYE_DAISY
+                || type == Material.CORNFLOWER || type == Material.LILY_OF_THE_VALLEY || type == Material.TORCHFLOWER
+                || type == Material.PITCHER_PLANT || type == Material.CACTUS_FLOWER || type == Material.OPEN_EYEBLOSSOM
+                || type == Material.CLOSED_EYEBLOSSOM || type == Material.WITHER_ROSE || type == Material.PINK_PETALS
+                || type == Material.WILDFLOWERS || type == Material.SPORE_BLOSSOM || type == Material.SUNFLOWER || type == Material.LILAC
+                || type == Material.ROSE_BUSH || type == Material.PEONY || type == Material.CHORUS_FLOWER;
+    }
 
 }

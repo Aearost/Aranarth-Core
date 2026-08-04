@@ -13,11 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Provides a large variety of utility methods for everything related to items and inventory.
@@ -485,6 +481,7 @@ public class PermissionUtils {
         perms.setPermission("aranarth.sethome", true);
         perms.setPermission("aranarth.shop", true);
         perms.setPermission("aranarth.smp", true);
+        perms.setPermission("aranarth.sounds", true);
         perms.setPermission("aranarth.spawn", true);
         perms.setPermission("aranarth.store", true);
         perms.setPermission("aranarth.streak", true);

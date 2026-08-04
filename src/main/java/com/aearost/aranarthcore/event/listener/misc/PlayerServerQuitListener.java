@@ -24,200 +24,224 @@ import java.util.HashMap;
  */
 public class PlayerServerQuitListener implements Listener {
 
-	public PlayerServerQuitListener(AranarthCore plugin) {
-		Bukkit.getPluginManager().registerEvents(this, plugin);
-	}
+    public PlayerServerQuitListener(AranarthCore plugin) {
+        Bukkit.getPluginManager().registerEvents(this, plugin);
+    }
 
-	/**
-	 * Grants discordsrv.silentquit before DiscordSRV's LOW-priority listener fires so that
-	 * cross-server transfers don't produce a Discord leave message.
-	 * DiscordSRV explicitly checks this permission and returns early when it's present.
-	 */
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void onPlayerQuitEarly(final PlayerQuitEvent e) {
-		if (!NetworkManager.isActive()) return;
-		if (!NetworkManager.getInstance().isTransferring(e.getPlayer().getUniqueId())) return;
-		e.getPlayer().addAttachment(AranarthCore.getInstance(), "discordsrv.silentquit", true);
-	}
+    /**
+     * Grants discordsrv.silentquit before DiscordSRV's LOW-priority listener fires so that
+     * cross-server transfers don't produce a Discord leave message.
+     * DiscordSRV explicitly checks this permission and returns early when it's present.
+     */
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerQuitEarly(final PlayerQuitEvent e) {
+        if (!NetworkManager.isActive()) {
+            return;
+        }
+        if (!NetworkManager.getInstance().isTransferring(e.getPlayer().getUniqueId())) {
+            return;
+        }
+        e.getPlayer().addAttachment(AranarthCore.getInstance(), "discordsrv.silentquit", true);
+    }
 
-	@EventHandler
-	public void onPlayerQuit(final PlayerQuitEvent e) {
-		Player player = e.getPlayer();
+    @EventHandler
+    public void onPlayerQuit(final PlayerQuitEvent e) {
+        Player player = e.getPlayer();
 
-		boolean isCrossServerTransfer = NetworkManager.isActive()
-				&& NetworkManager.getInstance().consumeTransferring(player.getUniqueId());
+        boolean isCrossServerTransfer = NetworkManager.isActive()
+                && NetworkManager.getInstance().consumeTransferring(player.getUniqueId());
 
-		// Persist the player's logout location so they are returned here on next login.
-		// Skipped for cross-server transfers; the receiving server will track their location.
-		// Saved synchronously (not async) to prevent a race with DatabaseManager.shutdown():
-		// an async task queued here may never run if the connection pool closes first, leaving
-		// a stale location in MySQL that causes the player to spawn at the wrong position.
-		if (!isCrossServerTransfer && DatabaseManager.isActive()) {
-			final String server = NetworkManager.isActive() ? NetworkManager.getInstance().getThisServer() : "survival";
-			final Location loc = player.getLocation();
-			final String world = loc.getWorld().getName();
-			final double x = loc.getX(), y = loc.getY(), z = loc.getZ();
-			final float yaw = loc.getYaw(), pitch = loc.getPitch();
-			Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName()
-					+ " — saving last location: server=" + server + " world=" + world
-					+ " pos=(" + String.format("%.1f", x) + "," + String.format("%.1f", y) + "," + String.format("%.1f", z) + ")");
-			DatabaseManager.getInstance().saveLastLocation(player.getUniqueId(), server, world, x, y, z, yaw, pitch);
-			Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName() + " — last location saved to MySQL.");
-		}
+        // Persist the player's logout location so they are returned here on next login.
+        // Skipped for cross-server transfers; the receiving server will track their location.
+        // Saved synchronously (not async) to prevent a race with DatabaseManager.shutdown():
+        // an async task queued here may never run if the connection pool closes first, leaving
+        // a stale location in MySQL that causes the player to spawn at the wrong position.
+        if (!isCrossServerTransfer && DatabaseManager.isActive()) {
+            final String server = NetworkManager.isActive() ? NetworkManager.getInstance().getThisServer() : "survival";
+            final Location loc = player.getLocation();
+            final String world = loc.getWorld().getName();
+            final double x = loc.getX(), y = loc.getY(), z = loc.getZ();
+            final float yaw = loc.getYaw(), pitch = loc.getPitch();
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName()
+                    + " — saving last location: server=" + server + " world=" + world
+                    + " pos=(" + String.format("%.1f", x) + "," + String.format("%.1f", y) + "," + String.format("%.1f", z) + ")");
+            DatabaseManager.getInstance().saveLastLocation(player.getUniqueId(), server, world, x, y, z, yaw, pitch);
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName() + " — last location saved to MySQL.");
+        }
 
-		if (NetworkManager.isActive()) {
-			// Pass the formatted quit message so the other server can display it.
-			// Cross-server transfers suppress the message (null → empty string in the JSON).
-			AranarthPlayer apForQuit = AranarthUtils.getPlayer(player.getUniqueId());
-			boolean isVanished = apForQuit != null && apForQuit.isVanished();
-			String crossServerQuitMsg = null;
-			if (!isCrossServerTransfer && !isVanished) {
-				DateUtils dateUtils = new DateUtils();
-				String nameToDisplay = "&7" + AranarthUtils.getNickname(player);
-				if (dateUtils.isValentinesDay()) {
-					crossServerQuitMsg = ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.VALENTINES));
-				} else if (dateUtils.isEaster()) {
-					crossServerQuitMsg = ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.EASTER));
-				} else if (dateUtils.isHalloween()) {
-					crossServerQuitMsg = ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.HALLOWEEN));
-				} else if (dateUtils.isChristmas()) {
-					crossServerQuitMsg = ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.CHRISTMAS));
-				} else {
-					crossServerQuitMsg = ChatUtils.translateToColor("&8[&c-&8] &7" + nameToDisplay);
-				}
-			}
-			NetworkManager.getInstance().publishPlayerQuit(player.getUniqueId(), crossServerQuitMsg, isVanished);
-		}
-		PersistenceUtils.saveQuestProgress();
-		// For cross-server transfers, also write the quest progress synchronously so the receiving
-		// server's reloadQuestProgressForPlayer() call sees the current data immediately.
-		// The async write inside saveQuestProgress() may not complete before the other server reads.
-		if (isCrossServerTransfer && DatabaseManager.isActive()) {
-			PersistenceUtils.syncQuestProgressForPlayerSync(player.getUniqueId());
-		}
-		// Use synchronous save to avoid racing with DatabaseManager.shutdown(), which can close
-		// the connection pool before an async-dispatched save task gets a chance to execute.
-		PersistenceUtils.saveJobDataSync(player.getUniqueId());
-		// Prevent this player's stale in-memory quest data from being written to the shared DB
-		// after they leave — the other server owns their quest state from this point on.
-		QuestUtils.getLocallyModifiedUuids().remove(player.getUniqueId());
-		// Also remove from sessionModifiedUuids so that if THIS server restarts while the player
-		// is on the other server, onDisable()'s syncAllQuestDataToDatabase() doesn't overwrite
-		// the other server's more recent DB data with this server's stale in-memory snapshot.
-		if (isCrossServerTransfer) {
-			QuestUtils.getSessionModifiedUuids().remove(player.getUniqueId());
-		}
-		// Record today as the player's last login day before saving. This ensures that if the
-		// player crashes before claiming their streak, the saved data captures that they were
-		// online today, preventing a false reset when they reconnect after midnight.
-		LoginStreakUtils.refreshLastLogin(player.getUniqueId());
-		PersistenceUtils.saveLoginStreaks();
-		PermissionUtils.clearPlayerAttachments(player.getUniqueId());
-		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		aranarthPlayer.setAfkLocation(null);
-		if (!aranarthPlayer.getCombatLogTime().isEmpty()) {
-			player.setHealth(0);
-		}
+        if (NetworkManager.isActive()) {
+            // Pass the formatted quit message so the other server can display it.
+            // Cross-server transfers suppress the message (null → empty string in the JSON).
+            AranarthPlayer apForQuit = AranarthUtils.getPlayer(player.getUniqueId());
+            boolean isVanished = apForQuit != null && apForQuit.isVanished();
+            String crossServerQuitMsg = null;
+            if (!isCrossServerTransfer && !isVanished) {
+                DateUtils dateUtils = new DateUtils();
+                String nameToDisplay = "&7" + AranarthUtils.getNickname(player);
+                if (dateUtils.isValentinesDay()) {
+                    crossServerQuitMsg = ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.VALENTINES));
+                } else if (dateUtils.isEaster()) {
+                    crossServerQuitMsg = ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.EASTER));
+                } else if (dateUtils.isHalloween()) {
+                    crossServerQuitMsg = ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.HALLOWEEN));
+                } else if (dateUtils.isChristmas()) {
+                    crossServerQuitMsg = ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.CHRISTMAS));
+                } else {
+                    crossServerQuitMsg = ChatUtils.translateToColor("&8[&c-&8] &7" + nameToDisplay);
+                }
+            }
+            NetworkManager.getInstance().publishPlayerQuit(player.getUniqueId(), crossServerQuitMsg, isVanished);
+        }
+        PersistenceUtils.saveQuestProgress();
+        // For cross-server transfers, also write the quest progress synchronously so the receiving
+        // server's reloadQuestProgressForPlayer() call sees the current data immediately.
+        // The async write inside saveQuestProgress() may not complete before the other server reads.
+        if (isCrossServerTransfer && DatabaseManager.isActive()) {
+            PersistenceUtils.syncQuestProgressForPlayerSync(player.getUniqueId());
+        }
+        // Use synchronous save to avoid racing with DatabaseManager.shutdown(), which can close
+        // the connection pool before an async-dispatched save task gets a chance to execute.
+        PersistenceUtils.saveJobDataSync(player.getUniqueId());
+        // Prevent this player's stale in-memory quest data from being written to the shared DB
+        // after they leave — the other server owns their quest state from this point on.
+        QuestUtils.getLocallyModifiedUuids().remove(player.getUniqueId());
+        // Also remove from sessionModifiedUuids so that if THIS server restarts while the player
+        // is on the other server, onDisable()'s syncAllQuestDataToDatabase() doesn't overwrite
+        // the other server's more recent DB data with this server's stale in-memory snapshot.
+        if (isCrossServerTransfer) {
+            QuestUtils.getSessionModifiedUuids().remove(player.getUniqueId());
+        }
+        // Record today as the player's last login day before saving. This ensures that if the
+        // player crashes before claiming their streak, the saved data captures that they were
+        // online today, preventing a false reset when they reconnect after midnight.
+        LoginStreakUtils.refreshLastLogin(player.getUniqueId());
+        PersistenceUtils.saveLoginStreaks();
+        PermissionUtils.clearPlayerAttachments(player.getUniqueId());
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        aranarthPlayer.setAfkLocation(null);
+        if (!aranarthPlayer.getCombatLogTime().isEmpty()) {
+            player.setHealth(0);
+        }
 
-		aranarthPlayer.setCombatLogTime(new HashMap<>());
-		// Snapshot survival inventory so MySQL is current at logout time.
-		// The same-server login path uses this as a fallback if player.dat is stale
-		// (e.g. the server crashed on the previous session without saving player.dat).
-		if (!isCrossServerTransfer) {
-			String quitWorld = player.getWorld() != null ? player.getWorld().getName() : "";
-			if (AranarthUtils.isSurvivalWorld(quitWorld)) {
-				try { aranarthPlayer.setSurvivalInventory(ItemUtils.itemStackArrayToBase64(player.getInventory().getContents())); } catch (Exception ignored) {}
-				try { aranarthPlayer.setSurvivalEnderChest(ItemUtils.itemStackArrayToBase64(player.getEnderChest().getContents())); } catch (Exception ignored) {}
-				aranarthPlayer.setSurvivalHealth(player.getHealth());
-				aranarthPlayer.setSurvivalFoodLevel(player.getFoodLevel());
-				aranarthPlayer.setSurvivalSaturation(player.getSaturation());
-				aranarthPlayer.setSurvivalExpLevel(player.getLevel());
-				aranarthPlayer.setSurvivalExpProgress(player.getExp());
-				int nonNullItems = 0;
-				for (org.bukkit.inventory.ItemStack is : player.getInventory().getContents()) { if (is != null) nonNullItems++; }
-				Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName()
-						+ " — inventory snapshot taken: " + nonNullItems + " item(s) in world=" + quitWorld);
-			} else {
-				Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName()
-						+ " — world=" + quitWorld + " is not a survival world; inventory snapshot skipped.");
-			}
-		}
-		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-		// Flush the updated player row to MySQL so the snapshot is durable before the next periodic save.
-		// Saved synchronously (matching saveJobDataSync above) to prevent the same shutdown race:
-		// if this were async, the connection pool could close before the task executes, leaving
-		// a stale inventory snapshot that causes inventory rollbacks on next login.
-		if (!isCrossServerTransfer && DatabaseManager.isActive()) {
-			final String rawRow = PersistenceUtils.buildPlayerRowForTransfer(player.getUniqueId());
-			if (rawRow != null) {
-				DatabaseManager.getInstance().saveAranarthPlayerRaw(player.getUniqueId(), rawRow);
-				Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName() + " — player row (inventory/stats) flushed to MySQL.");
-			} else {
-				Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName() + " — WARNING: rawRow was null, player row NOT flushed to MySQL.");
-			}
-		}
+        aranarthPlayer.setCombatLogTime(new HashMap<>());
+        // Snapshot survival inventory so MySQL is current at logout time.
+        // The same-server login path uses this as a fallback if player.dat is stale
+        // (e.g. the server crashed on the previous session without saving player.dat).
+        if (!isCrossServerTransfer) {
+            String quitWorld = player.getWorld() != null ? player.getWorld().getName() : "";
+            if (AranarthUtils.isSurvivalWorld(quitWorld)) {
+                try {
+                    aranarthPlayer.setSurvivalInventory(ItemUtils.itemStackArrayToBase64(player.getInventory().getContents()));
+                } catch (Exception ignored) {
+                }
+                try {
+                    aranarthPlayer.setSurvivalEnderChest(ItemUtils.itemStackArrayToBase64(player.getEnderChest().getContents()));
+                } catch (Exception ignored) {
+                }
+                aranarthPlayer.setSurvivalHealth(player.getHealth());
+                aranarthPlayer.setSurvivalFoodLevel(player.getFoodLevel());
+                aranarthPlayer.setSurvivalSaturation(player.getSaturation());
+                aranarthPlayer.setSurvivalExpLevel(player.getLevel());
+                aranarthPlayer.setSurvivalExpProgress(player.getExp());
+                int nonNullItems = 0;
+                for (org.bukkit.inventory.ItemStack is : player.getInventory().getContents()) {
+                    if (is != null) {
+                        nonNullItems++;
+                    }
+                }
+                Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName()
+                        + " — inventory snapshot taken: " + nonNullItems + " item(s) in world=" + quitWorld);
+            } else {
+                Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName()
+                        + " — world=" + quitWorld + " is not a survival world; inventory snapshot skipped.");
+            }
+        }
+        AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+        // Flush the updated player row to MySQL so the snapshot is durable before the next periodic save.
+        // Saved synchronously (matching saveJobDataSync above) to prevent the same shutdown race:
+        // if this were async, the connection pool could close before the task executes, leaving
+        // a stale inventory snapshot that causes inventory rollbacks on next login.
+        if (!isCrossServerTransfer && DatabaseManager.isActive()) {
+            final String rawRow = PersistenceUtils.buildPlayerRowForTransfer(player.getUniqueId());
+            if (rawRow != null) {
+                DatabaseManager.getInstance().saveAranarthPlayerRaw(player.getUniqueId(), rawRow);
+                Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName() + " — player row (inventory/stats) flushed to MySQL.");
+            } else {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName() + " — WARNING: rawRow was null, player row NOT flushed to MySQL.");
+            }
+        }
 
-		// Called to save the Avatar's abilities to prevent loss of avatar abilities
-		if (AvatarUtils.getCurrentAvatar() != null) {
-			if (AvatarUtils.getCurrentAvatar().getUuid().equals(player.getUniqueId())) {
-				PersistenceUtils.saveAvatarBinds();
-			}
-		}
+        // Called to save the Avatar's abilities to prevent loss of avatar abilities
+        if (AvatarUtils.getCurrentAvatar() != null) {
+            if (AvatarUtils.getCurrentAvatar().getUuid().equals(player.getUniqueId())) {
+                PersistenceUtils.saveAvatarBinds();
+            }
+        }
 
-		if (isCrossServerTransfer) {
-			e.setQuitMessage(null);
-			// Suppress DiscordSRV leave announcement for server-switch departures
-			if (NetworkManager.isActive()) {
-				NetworkManager.getInstance().markCrossServerQuit(player.getUniqueId());
-			}
-		} else {
-			DateUtils dateUtils = new DateUtils();
-			String nameToDisplay;
-			nameToDisplay = "&7" + AranarthUtils.getNickname(player);
+        if (isCrossServerTransfer) {
+            e.setQuitMessage(null);
+            // Suppress DiscordSRV leave announcement for server-switch departures
+            if (NetworkManager.isActive()) {
+                NetworkManager.getInstance().markCrossServerQuit(player.getUniqueId());
+            }
+        } else {
+            DateUtils dateUtils = new DateUtils();
+            String nameToDisplay;
+            nameToDisplay = "&7" + AranarthUtils.getNickname(player);
 
-			if (dateUtils.isValentinesDay()) {
-				e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.VALENTINES)));
-			} else if (dateUtils.isEaster()) {
-				e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.EASTER)));
-			} else if (dateUtils.isHalloween()) {
-				e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.HALLOWEEN)));
-			} else if (dateUtils.isChristmas()) {
-				e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.CHRISTMAS)));
-			} else {
-				e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + nameToDisplay));
-			}
+            if (dateUtils.isValentinesDay()) {
+                e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.VALENTINES)));
+            } else if (dateUtils.isEaster()) {
+                e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.EASTER)));
+            } else if (dateUtils.isHalloween()) {
+                e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.HALLOWEEN)));
+            } else if (dateUtils.isChristmas()) {
+                e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.CHRISTMAS)));
+            } else {
+                e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + nameToDisplay));
+            }
 
-			playQuitSound();
-		}
+            playQuitSound();
+        }
 
-		AranarthUtils.updateTab();
-	}
+        AranarthUtils.updateTab();
+    }
 
-	/**
-	 * Plays a sound effect when a player quits the server.
-	 */
-	private void playQuitSound() {
-		new BukkitRunnable() {
-			int runs = 0;
-			@Override
-			public void run() {
-				if (runs == 0) {
-					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-						onlinePlayer.playSound(onlinePlayer, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1.6F);
-					}
-					runs++;
-				} else if (runs == 1){
-					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-						onlinePlayer.playSound(onlinePlayer, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1.2F);
-					}
-					runs++;
-				} else {
-					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-						onlinePlayer.playSound(onlinePlayer, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 0.8F);
-					}
-					cancel();
-				}
-			}
-		}.runTaskTimer(AranarthCore.getInstance(), 0, 5); // Runs every 5 ticks
-	}
+    /**
+     * Plays a sound effect when a player quits the server.
+     */
+    private void playQuitSound() {
+        new BukkitRunnable() {
+            int runs = 0;
+
+            @Override
+            public void run() {
+                if (runs == 0) {
+                    for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                        int vol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getLeaveSoundVolume();
+                        if (vol > 0) {
+                            onlinePlayer.playSound(onlinePlayer, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, vol / 100f, 1.6F);
+                        }
+                    }
+                    runs++;
+                } else if (runs == 1) {
+                    for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                        int vol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getLeaveSoundVolume();
+                        if (vol > 0) {
+                            onlinePlayer.playSound(onlinePlayer, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, vol / 100f, 1.2F);
+                        }
+                    }
+                    runs++;
+                } else {
+                    for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                        int vol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getLeaveSoundVolume();
+                        if (vol > 0) {
+                            onlinePlayer.playSound(onlinePlayer, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, vol / 100f, 0.8F);
+                        }
+                    }
+                    cancel();
+                }
+            }
+        }.runTaskTimer(AranarthCore.getInstance(), 0, 5); // Runs every 5 ticks
+    }
 }

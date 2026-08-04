@@ -32,14 +32,14 @@ import java.util.List;
  */
 public class PlayerChatListener implements Listener {
 
-	private final AranarthCore plugin;
+    private final AranarthCore plugin;
 
-	public PlayerChatListener(AranarthCore plugin) {
-		this.plugin = plugin;
-		Bukkit.getPluginManager().registerEvents(this, plugin);
-	}
+    public PlayerChatListener(AranarthCore plugin) {
+        this.plugin = plugin;
+        Bukkit.getPluginManager().registerEvents(this, plugin);
+    }
 
-	@EventHandler
+    @EventHandler
     public void chatEvent(final AsyncPlayerChatEvent e) {
         Player player = e.getPlayer();
         String message = e.getMessage();
@@ -114,7 +114,10 @@ public class PlayerChatListener implements Listener {
             String strippedNickname = ChatUtils.stripColorFormatting(recipientAranarthPlayer.getNickname());
             if (!isSenderTheRecipient && (message.toLowerCase().contains(recipient.getDisplayName().toLowerCase())
                     || message.toLowerCase().contains(strippedNickname.toLowerCase()))) {
-                recipient.playSound(recipient, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 5f, 1f);
+                int pmVol = AranarthUtils.getPlayer(recipient.getUniqueId()).getPrivateMsgSoundVolume();
+                if (pmVol > 0) {
+                    recipient.playSound(recipient, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 5f * (pmVol / 100f), 1f);
+                }
             }
         }
         e.getRecipients().removeAll(toRemove);
@@ -194,9 +197,10 @@ public class PlayerChatListener implements Listener {
 
     /**
      * Claims the resources of the Dominion for the given biome.
+     *
      * @param dominion The Dominion.
-     * @param player The player claiming the resources.
-     * @param biome The biome whose resources should be distributed.
+     * @param player   The player claiming the resources.
+     * @param biome    The biome whose resources should be distributed.
      */
     private void claimDominionResources(Dominion dominion, Player player, Biome biome) {
         List<ItemStack> resourcesToClaim = DominionUtils.getResourcesByDominionAndBiome(dominion, biome);

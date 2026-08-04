@@ -16,7 +16,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.*;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPlaceEvent;
@@ -70,7 +73,10 @@ public class ShopProtectionListener implements Listener {
                     new Location(Bukkit.getWorld("spawn"), 0.5, 100, 0.5, 180, 0));
         }
         player.teleport(dest);
-        player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
+        int tpVol = AranarthUtils.getPlayer(player.getUniqueId()).getTeleportSoundVolume();
+        if (tpVol > 0) {
+            player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, tpVol / 100f, 0.9F);
+        }
     }
 
     @EventHandler

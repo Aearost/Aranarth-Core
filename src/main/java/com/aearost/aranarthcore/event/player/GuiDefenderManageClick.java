@@ -1,17 +1,8 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.gui.GuiDefenderManage;
-import com.aearost.aranarthcore.objects.DefenderMode;
-import com.aearost.aranarthcore.objects.DefenderType;
-import com.aearost.aranarthcore.objects.Dominion;
-import com.aearost.aranarthcore.objects.DominionPermission;
-import com.aearost.aranarthcore.objects.Outpost;
-import com.aearost.aranarthcore.utils.ChatUtils;
-import com.aearost.aranarthcore.utils.DefenderUtils;
-import com.aearost.aranarthcore.utils.DominionUtils;
-import com.aearost.aranarthcore.utils.OutpostUtils;
-
-import java.util.List;
+import com.aearost.aranarthcore.objects.*;
+import com.aearost.aranarthcore.utils.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -22,6 +13,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -139,7 +131,10 @@ public class GuiDefenderManageClick {
             DefenderUtils.setDefenderMode(defenderUUID, DefenderMode.PATROL, null, null);
             player.sendMessage(ChatUtils.chatMessage(
                     "&7The defender has been teleported to &e" + homeName + "&7's home"));
-            player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 0.5F, 1F);
+            int tpVol = AranarthUtils.getPlayer(player.getUniqueId()).getTeleportSoundVolume();
+            if (tpVol > 0) {
+                player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 0.5F * (tpVol / 100f), 1F);
+            }
             GuiDefenderManage.clearSession(player.getUniqueId());
             player.closeInventory();
 
@@ -171,7 +166,7 @@ public class GuiDefenderManageClick {
             String assignMsg = nextOutpostId == null
                     ? "&7This defender is now assigned to &e" + dominion.getName() + "&7's main territory"
                     : "&7This defender is now assigned to outpost &e"
-                      + OutpostUtils.getOutpostById(nextOutpostId).getName();
+                    + OutpostUtils.getOutpostById(nextOutpostId).getName();
             player.sendMessage(ChatUtils.chatMessage(assignMsg));
             player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
             GuiDefenderManage.open(player, defenderUUID);

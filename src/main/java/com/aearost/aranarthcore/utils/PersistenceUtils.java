@@ -2,30 +2,20 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
-import com.aearost.aranarthcore.enums.JobType;
-import com.aearost.aranarthcore.enums.Month;
-import com.aearost.aranarthcore.objects.JobData;
+import com.aearost.aranarthcore.enums.*;
+import com.aearost.aranarthcore.objects.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.aearost.aranarthcore.enums.Pronouns;
-import com.aearost.aranarthcore.enums.QuestTaskType;
-import com.aearost.aranarthcore.enums.QuestType;
-import com.aearost.aranarthcore.objects.*;
-import com.aearost.aranarthcore.objects.DefenderType;
-import com.aearost.aranarthcore.objects.Quest;
 import com.projectkorra.projectkorra.BendingPlayer;
-
-import java.util.stream.Collectors;
-
 import com.projectkorra.projectkorra.OfflineBendingPlayer;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -37,6 +27,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Provides utility methods to facilitate the reading and writing of json and
@@ -45,6 +36,9 @@ import java.util.*;
 public class PersistenceUtils {
 
     private static final Gson GSON = new Gson();
+    private static final Gson JOB_GSON = new Gson();
+    // Used for one-time migration.
+    private static final long[] OLD_CUMULATIVE_XP = {0, 500, 2500, 8500, 23500, 63500, 153500, 328500, 628500, 1128500};
 
     /**
      * Converts a stored homepad worldName (e.g. "smp:world") to the actual Bukkit world name
@@ -742,6 +736,134 @@ public class PersistenceUtils {
                     aranarthPlayer.setDominionMsgCompact(!fields[16].equals("0"));
                 }
 
+                // Join Sound volume (index 17)
+                if (fields.length > 17) {
+                    try {
+                        aranarthPlayer.setJoinSoundVolume(Integer.parseInt(fields[17]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Leave Sound volume (index 18)
+                if (fields.length > 18) {
+                    try {
+                        aranarthPlayer.setLeaveSoundVolume(Integer.parseInt(fields[18]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Vote Sound volume (index 19)
+                if (fields.length > 19) {
+                    try {
+                        aranarthPlayer.setVoteSoundVolume(Integer.parseInt(fields[19]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Crate Sound volume (index 20)
+                if (fields.length > 20) {
+                    try {
+                        aranarthPlayer.setCrateSoundVolume(Integer.parseInt(fields[20]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Weather Sound volume (index 21)
+                if (fields.length > 21) {
+                    try {
+                        aranarthPlayer.setWeatherSoundVolume(Integer.parseInt(fields[21]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // New Day Sound volume (index 22)
+                if (fields.length > 22) {
+                    try {
+                        aranarthPlayer.setNewDaySoundVolume(Integer.parseInt(fields[22]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // New Month Sound volume (index 23)
+                if (fields.length > 23) {
+                    try {
+                        aranarthPlayer.setNewMonthSoundVolume(Integer.parseInt(fields[23]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Private Msg Sound volume (index 24)
+                if (fields.length > 24) {
+                    try {
+                        aranarthPlayer.setPrivateMsgSoundVolume(Integer.parseInt(fields[24]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Teleport Sound volume (index 25)
+                if (fields.length > 25) {
+                    try {
+                        aranarthPlayer.setTeleportSoundVolume(Integer.parseInt(fields[25]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Avatar Sound volume (index 26)
+                if (fields.length > 26) {
+                    try {
+                        aranarthPlayer.setAvatarSoundVolume(Integer.parseInt(fields[26]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Dominion Sound volume (index 27)
+                if (fields.length > 27) {
+                    try {
+                        aranarthPlayer.setDominionSoundVolume(Integer.parseInt(fields[27]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Aranarthium Sound volume (index 28)
+                if (fields.length > 28) {
+                    try {
+                        aranarthPlayer.setAranarthiumSoundVolume(Integer.parseInt(fields[28]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Chat Game Sound volume (index 29)
+                if (fields.length > 29) {
+                    try {
+                        aranarthPlayer.setChatGameSoundVolume(Integer.parseInt(fields[29]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Chest Sort Sound volume (index 30)
+                if (fields.length > 30) {
+                    try {
+                        aranarthPlayer.setChestSortSoundVolume(Integer.parseInt(fields[30]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Jobs Sound volume (index 31)
+                if (fields.length > 31) {
+                    try {
+                        aranarthPlayer.setJobsSoundVolume(Integer.parseInt(fields[31]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Exp Store Sound volume (index 32)
+                if (fields.length > 32) {
+                    try {
+                        aranarthPlayer.setExpStoreSoundVolume(Integer.parseInt(fields[32]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
                 AranarthUtils.setPlayer(uuid, aranarthPlayer);
             }
             Bukkit.getLogger().info("[AC] All toggled features have been initialized");
@@ -781,7 +903,7 @@ public class PersistenceUtils {
                 try {
                     FileWriter writer = new FileWriter(filePath);
                     // Template line
-                    writer.write("#uuid|chat|messages|teleport|spawnboost|changeclaim|inventory|shulker|blacklist|compressing|chestlock|bluefire|gradientchatenabled|gradientchatcolors|daymessage|weathermessage\n");
+                    writer.write("#uuid|chat|messages|teleport|spawnboost|changeclaim|inventory|shulker|blacklist|compressing|chestlock|bluefire|gradientchatenabled|gradientchatcolors|daymessage|weathermessage|dominionmsgcompact|joinsound|leavesound|votesound|cratesound|weathersound|newdaysound\n");
 
                     for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
                         AranarthPlayer aranarthPlayer = entry.getValue();
@@ -804,10 +926,30 @@ public class PersistenceUtils {
                         String weatherMessage = aranarthPlayer.isWeatherMessageDisabled() ? "1" : "0";
                         String dominionMsgCompact = aranarthPlayer.isDominionMsgCompact() ? "1" : "0";
 
+                        String joinSound = aranarthPlayer.getJoinSoundVolume() + "";
+                        String leaveSound = aranarthPlayer.getLeaveSoundVolume() + "";
+                        String voteSound = aranarthPlayer.getVoteSoundVolume() + "";
+                        String crateSound = aranarthPlayer.getCrateSoundVolume() + "";
+                        String weatherSound = aranarthPlayer.getWeatherSoundVolume() + "";
+                        String newDaySound = aranarthPlayer.getNewDaySoundVolume() + "";
+                        String newMonthSound = aranarthPlayer.getNewMonthSoundVolume() + "";
+                        String privateMsgSound = aranarthPlayer.getPrivateMsgSoundVolume() + "";
+                        String teleportSound = aranarthPlayer.getTeleportSoundVolume() + "";
+                        String avatarSound = aranarthPlayer.getAvatarSoundVolume() + "";
+                        String dominionSound = aranarthPlayer.getDominionSoundVolume() + "";
+                        String aranarthiumSound = aranarthPlayer.getAranarthiumSoundVolume() + "";
+                        String chatGameSound = aranarthPlayer.getChatGameSoundVolume() + "";
+                        String chestSortSound = aranarthPlayer.getChestSortSoundVolume() + "";
+                        String jobsSound = aranarthPlayer.getJobsSoundVolume() + "";
+                        String expStoreSound = aranarthPlayer.getExpStoreSoundVolume() + "";
+
                         String row = uuid + "|" + chat + "|" + messages + "|" + teleport + "|" + spawnboost + "|" + changeClaim
                                 + "|" + inventory + "|" + shulker + "|" + blacklist + "|" + compressing + "|" + chestLock + "|"
                                 + bluefire + "|" + gradientEnabled + "|" + gradientColors + "|" + dayMessage + "|" + weatherMessage
-                                + "|" + dominionMsgCompact + "\n";
+                                + "|" + dominionMsgCompact + "|" + joinSound + "|" + leaveSound + "|" + voteSound + "|" + crateSound
+                                + "|" + weatherSound + "|" + newDaySound + "|" + newMonthSound + "|" + privateMsgSound
+                                + "|" + teleportSound + "|" + avatarSound + "|" + dominionSound + "|" + aranarthiumSound
+                                + "|" + chatGameSound + "|" + chestSortSound + "|" + jobsSound + "|" + expStoreSound + "\n";
                         writer.write(row);
                     }
                     writer.close();
@@ -3686,6 +3828,10 @@ public class PersistenceUtils {
         }
     }
 
+    // -------------------------------------------------------------------------
+    // Quest State Persistence
+    // -------------------------------------------------------------------------
+
     public static void loadGodlyKeys() {
         String currentPath = System.getProperty("user.dir");
         String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
@@ -3746,7 +3892,7 @@ public class PersistenceUtils {
     }
 
     // -------------------------------------------------------------------------
-    // Quest State Persistence
+    // Quest Progress Persistence
     // -------------------------------------------------------------------------
 
     /**
@@ -3829,10 +3975,6 @@ public class PersistenceUtils {
             runDbSync(() -> syncQuestDataToDatabase(snapshot));
         }
     }
-
-    // -------------------------------------------------------------------------
-    // Quest Progress Persistence
-    // -------------------------------------------------------------------------
 
     /**
      * Loads per-player quest progress (including active quest assignments) from quest_progress.txt.
@@ -3932,6 +4074,10 @@ public class PersistenceUtils {
             Bukkit.getLogger().info("[AC] Something went wrong with loading quest progress!");
         }
     }
+
+    // -------------------------------------------------------------------------
+    // Login Streak Persistence
+    // -------------------------------------------------------------------------
 
     /**
      * Resolves Quest objects from the quest pool using stored task type names and rewards.
@@ -4071,10 +4217,6 @@ public class PersistenceUtils {
             runDbSync(() -> syncQuestDataToDatabase(snapshot));
         }
     }
-
-    // -------------------------------------------------------------------------
-    // Login Streak Persistence
-    // -------------------------------------------------------------------------
 
     /**
      * Loads per-player login streak data from login_streaks.txt.
@@ -4736,6 +4878,12 @@ public class PersistenceUtils {
         }
     }
 
+    // =========================================================================
+    // MySQL sync helpers — called from existing save/load methods when DB is active.
+    // All MySQL operations run synchronously here; callers may wrap in async tasks.
+    // The file-based code is always executed first; MySQL is purely supplemental.
+    // =========================================================================
+
     /**
      * Loads defenders from defenders.txt and spawns each one at its saved location.
      */
@@ -4945,12 +5093,6 @@ public class PersistenceUtils {
             runDbSync(PersistenceUtils::syncDefendersToDatabase);
         }
     }
-
-    // =========================================================================
-    // MySQL sync helpers — called from existing save/load methods when DB is active.
-    // All MySQL operations run synchronously here; callers may wrap in async tasks.
-    // The file-based code is always executed first; MySQL is purely supplemental.
-    // =========================================================================
 
     /**
      * Syncs all AranarthPlayer data to MySQL. Call after the file has been saved.
@@ -5749,6 +5891,22 @@ public class PersistenceUtils {
             obj.addProperty("weatherMessageDisabled", ap.isWeatherMessageDisabled());
             obj.addProperty("dominionMsgCompact", ap.isDominionMsgCompact());
             obj.addProperty("bulkSellShulker", ap.isBulkSellShulkerEnabled());
+            obj.addProperty("joinSoundVolume", ap.getJoinSoundVolume());
+            obj.addProperty("leaveSoundVolume", ap.getLeaveSoundVolume());
+            obj.addProperty("voteSoundVolume", ap.getVoteSoundVolume());
+            obj.addProperty("crateSoundVolume", ap.getCrateSoundVolume());
+            obj.addProperty("weatherSoundVolume", ap.getWeatherSoundVolume());
+            obj.addProperty("newDaySoundVolume", ap.getNewDaySoundVolume());
+            obj.addProperty("newMonthSoundVolume", ap.getNewMonthSoundVolume());
+            obj.addProperty("privateMsgSoundVolume", ap.getPrivateMsgSoundVolume());
+            obj.addProperty("teleportSoundVolume", ap.getTeleportSoundVolume());
+            obj.addProperty("avatarSoundVolume", ap.getAvatarSoundVolume());
+            obj.addProperty("dominionSoundVolume", ap.getDominionSoundVolume());
+            obj.addProperty("aranarthiumSoundVolume", ap.getAranarthiumSoundVolume());
+            obj.addProperty("chatGameSoundVolume", ap.getChatGameSoundVolume());
+            obj.addProperty("chestSortSoundVolume", ap.getChestSortSoundVolume());
+            obj.addProperty("jobsSoundVolume", ap.getJobsSoundVolume());
+            obj.addProperty("expStoreSoundVolume", ap.getExpStoreSoundVolume());
             try {
                 db.savePlayerToggles(uuid, GSON.toJson(obj));
             } catch (Exception e) {
@@ -6429,6 +6587,10 @@ public class PersistenceUtils {
         }
     }
 
+    // =========================================================================
+    // DB-primary load methods (called from AranarthCore.initializeUtils when DB active)
+    // =========================================================================
+
     public static void syncOutpostsToDatabase() {
         if (!DatabaseManager.isActive()) {
             return;
@@ -6544,10 +6706,6 @@ public class PersistenceUtils {
             }
         }
     }
-
-    // =========================================================================
-    // DB-primary load methods (called from AranarthCore.initializeUtils when DB active)
-    // =========================================================================
 
     /**
      * Shared parser — same logic as the while-loop body in loadAranarthPlayers().
@@ -7259,6 +7417,54 @@ public class PersistenceUtils {
                 if (obj.has("bulkSellShulker")) {
                     ap.setBulkSellShulkerEnabled(obj.get("bulkSellShulker").getAsBoolean());
                 }
+                if (obj.has("joinSoundVolume")) {
+                    ap.setJoinSoundVolume(obj.get("joinSoundVolume").getAsInt());
+                }
+                if (obj.has("leaveSoundVolume")) {
+                    ap.setLeaveSoundVolume(obj.get("leaveSoundVolume").getAsInt());
+                }
+                if (obj.has("voteSoundVolume")) {
+                    ap.setVoteSoundVolume(obj.get("voteSoundVolume").getAsInt());
+                }
+                if (obj.has("crateSoundVolume")) {
+                    ap.setCrateSoundVolume(obj.get("crateSoundVolume").getAsInt());
+                }
+                if (obj.has("weatherSoundVolume")) {
+                    ap.setWeatherSoundVolume(obj.get("weatherSoundVolume").getAsInt());
+                }
+                if (obj.has("newDaySoundVolume")) {
+                    ap.setNewDaySoundVolume(obj.get("newDaySoundVolume").getAsInt());
+                }
+                if (obj.has("newMonthSoundVolume")) {
+                    ap.setNewMonthSoundVolume(obj.get("newMonthSoundVolume").getAsInt());
+                }
+                if (obj.has("privateMsgSoundVolume")) {
+                    ap.setPrivateMsgSoundVolume(obj.get("privateMsgSoundVolume").getAsInt());
+                }
+                if (obj.has("teleportSoundVolume")) {
+                    ap.setTeleportSoundVolume(obj.get("teleportSoundVolume").getAsInt());
+                }
+                if (obj.has("avatarSoundVolume")) {
+                    ap.setAvatarSoundVolume(obj.get("avatarSoundVolume").getAsInt());
+                }
+                if (obj.has("dominionSoundVolume")) {
+                    ap.setDominionSoundVolume(obj.get("dominionSoundVolume").getAsInt());
+                }
+                if (obj.has("aranarthiumSoundVolume")) {
+                    ap.setAranarthiumSoundVolume(obj.get("aranarthiumSoundVolume").getAsInt());
+                }
+                if (obj.has("chatGameSoundVolume")) {
+                    ap.setChatGameSoundVolume(obj.get("chatGameSoundVolume").getAsInt());
+                }
+                if (obj.has("chestSortSoundVolume")) {
+                    ap.setChestSortSoundVolume(obj.get("chestSortSoundVolume").getAsInt());
+                }
+                if (obj.has("jobsSoundVolume")) {
+                    ap.setJobsSoundVolume(obj.get("jobsSoundVolume").getAsInt());
+                }
+                if (obj.has("expStoreSoundVolume")) {
+                    ap.setExpStoreSoundVolume(obj.get("expStoreSoundVolume").getAsInt());
+                }
                 AranarthUtils.setPlayer(uuid, ap);
             } catch (Exception e) {
                 Bukkit.getLogger().warning("[AC] Failed to parse toggles for " + uuid + ": " + e.getMessage());
@@ -7294,6 +7500,22 @@ public class PersistenceUtils {
         obj.addProperty("weatherMessageDisabled", ap.isWeatherMessageDisabled());
         obj.addProperty("dominionMsgCompact", ap.isDominionMsgCompact());
         obj.addProperty("bulkSellShulker", ap.isBulkSellShulkerEnabled());
+        obj.addProperty("joinSoundVolume", ap.getJoinSoundVolume());
+        obj.addProperty("leaveSoundVolume", ap.getLeaveSoundVolume());
+        obj.addProperty("voteSoundVolume", ap.getVoteSoundVolume());
+        obj.addProperty("crateSoundVolume", ap.getCrateSoundVolume());
+        obj.addProperty("weatherSoundVolume", ap.getWeatherSoundVolume());
+        obj.addProperty("newDaySoundVolume", ap.getNewDaySoundVolume());
+        obj.addProperty("newMonthSoundVolume", ap.getNewMonthSoundVolume());
+        obj.addProperty("privateMsgSoundVolume", ap.getPrivateMsgSoundVolume());
+        obj.addProperty("teleportSoundVolume", ap.getTeleportSoundVolume());
+        obj.addProperty("avatarSoundVolume", ap.getAvatarSoundVolume());
+        obj.addProperty("dominionSoundVolume", ap.getDominionSoundVolume());
+        obj.addProperty("aranarthiumSoundVolume", ap.getAranarthiumSoundVolume());
+        obj.addProperty("chatGameSoundVolume", ap.getChatGameSoundVolume());
+        obj.addProperty("chestSortSoundVolume", ap.getChestSortSoundVolume());
+        obj.addProperty("jobsSoundVolume", ap.getJobsSoundVolume());
+        obj.addProperty("expStoreSoundVolume", ap.getExpStoreSoundVolume());
         obj.addProperty("adminMode", ap.isInAdminMode());
         return GSON.toJson(obj);
     }
@@ -7366,6 +7588,54 @@ public class PersistenceUtils {
             }
             if (obj.has("bulkSellShulker")) {
                 ap.setBulkSellShulkerEnabled(obj.get("bulkSellShulker").getAsBoolean());
+            }
+            if (obj.has("joinSoundVolume")) {
+                ap.setJoinSoundVolume(obj.get("joinSoundVolume").getAsInt());
+            }
+            if (obj.has("leaveSoundVolume")) {
+                ap.setLeaveSoundVolume(obj.get("leaveSoundVolume").getAsInt());
+            }
+            if (obj.has("voteSoundVolume")) {
+                ap.setVoteSoundVolume(obj.get("voteSoundVolume").getAsInt());
+            }
+            if (obj.has("crateSoundVolume")) {
+                ap.setCrateSoundVolume(obj.get("crateSoundVolume").getAsInt());
+            }
+            if (obj.has("weatherSoundVolume")) {
+                ap.setWeatherSoundVolume(obj.get("weatherSoundVolume").getAsInt());
+            }
+            if (obj.has("newDaySoundVolume")) {
+                ap.setNewDaySoundVolume(obj.get("newDaySoundVolume").getAsInt());
+            }
+            if (obj.has("newMonthSoundVolume")) {
+                ap.setNewMonthSoundVolume(obj.get("newMonthSoundVolume").getAsInt());
+            }
+            if (obj.has("privateMsgSoundVolume")) {
+                ap.setPrivateMsgSoundVolume(obj.get("privateMsgSoundVolume").getAsInt());
+            }
+            if (obj.has("teleportSoundVolume")) {
+                ap.setTeleportSoundVolume(obj.get("teleportSoundVolume").getAsInt());
+            }
+            if (obj.has("avatarSoundVolume")) {
+                ap.setAvatarSoundVolume(obj.get("avatarSoundVolume").getAsInt());
+            }
+            if (obj.has("dominionSoundVolume")) {
+                ap.setDominionSoundVolume(obj.get("dominionSoundVolume").getAsInt());
+            }
+            if (obj.has("aranarthiumSoundVolume")) {
+                ap.setAranarthiumSoundVolume(obj.get("aranarthiumSoundVolume").getAsInt());
+            }
+            if (obj.has("chatGameSoundVolume")) {
+                ap.setChatGameSoundVolume(obj.get("chatGameSoundVolume").getAsInt());
+            }
+            if (obj.has("chestSortSoundVolume")) {
+                ap.setChestSortSoundVolume(obj.get("chestSortSoundVolume").getAsInt());
+            }
+            if (obj.has("jobsSoundVolume")) {
+                ap.setJobsSoundVolume(obj.get("jobsSoundVolume").getAsInt());
+            }
+            if (obj.has("expStoreSoundVolume")) {
+                ap.setExpStoreSoundVolume(obj.get("expStoreSoundVolume").getAsInt());
             }
             if (obj.has("adminMode")) {
                 ap.setInAdminMode(obj.get("adminMode").getAsBoolean());
@@ -8314,6 +8584,10 @@ public class PersistenceUtils {
         }
     }
 
+    // -------------------------------------------------------------------------
+    // Job Data (MySQL only — shared across servers)
+    // -------------------------------------------------------------------------
+
     /**
      * Loads outposts from MySQL. Must be called after loadDominionsFromDatabase().
      * Falls back to file if empty.
@@ -8437,12 +8711,6 @@ public class PersistenceUtils {
         Bukkit.getLogger().info("[AC] Defenders scheduled to spawn from MySQL");
     }
 
-    // -------------------------------------------------------------------------
-    // Job Data (MySQL only — shared across servers)
-    // -------------------------------------------------------------------------
-
-    private static final Gson JOB_GSON = new Gson();
-
     public static void loadJobDataForPlayer(UUID uuid) {
         if (!DatabaseManager.isActive()) {
             return;
@@ -8565,9 +8833,6 @@ public class PersistenceUtils {
         obj.add("totalXp", totalXp);
         return obj.toString();
     }
-
-    // Used for one-time migration.
-    private static final long[] OLD_CUMULATIVE_XP = {0, 500, 2500, 8500, 23500, 63500, 153500, 328500, 628500, 1128500};
 
     private static JobData deserializeJobData(String json) {
         JobData jobData = new JobData();

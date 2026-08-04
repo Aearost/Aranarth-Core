@@ -28,123 +28,126 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class VotifierListener implements Listener {
 
-	public VotifierListener(AranarthCore plugin) {
-		Bukkit.getPluginManager().registerEvents(this, plugin);
-	}
+    public VotifierListener(AranarthCore plugin) {
+        Bukkit.getPluginManager().registerEvents(this, plugin);
+    }
 
-	@EventHandler
-	public void onPlayerVote(VotifierEvent e) {
-		String username = e.getVote().getUsername();
-		UUID uuid = AranarthUtils.getUUIDFromUsername(username);
-		if (uuid != null) {
-			Vote vote = e.getVote();
-			// If it was a test vote, do not increase the number of votes the player has
-			if (vote.getServiceName().equals("AranarthCore") && vote.getAddress().equals("127.0.0.1")) {
-				return;
-			}
+    @EventHandler
+    public void onPlayerVote(VotifierEvent e) {
+        String username = e.getVote().getUsername();
+        UUID uuid = AranarthUtils.getUUIDFromUsername(username);
+        if (uuid != null) {
+            Vote vote = e.getVote();
+            // If it was a test vote, do not increase the number of votes the player has
+            if (vote.getServiceName().equals("AranarthCore") && vote.getAddress().equals("127.0.0.1")) {
+                return;
+            }
 
-			OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-			ItemStack key = new KeyVote().getItem();
-			int amount = 1;
-			int random = new Random().nextInt(1000);
-			// 0.1% chance
-			if (random == 0) {
-				amount = 25;
-			}
-			// 0.5% chance
-			else if (random == 5) {
-				amount = 10;
-			}
-			// 1.2% chance
-			else if (random < 12) {
-				amount = 5;
-			}
-			// 5% chance
-			else if (random < 50) {
-				amount = 3;
-			}
-			// 15% chance
-			else if (random < 150) {
-				amount = 2;
-			}
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+            ItemStack key = new KeyVote().getItem();
+            int amount = 1;
+            int random = new Random().nextInt(1000);
+            // 0.1% chance
+            if (random == 0) {
+                amount = 25;
+            }
+            // 0.5% chance
+            else if (random == 5) {
+                amount = 10;
+            }
+            // 1.2% chance
+            else if (random < 12) {
+                amount = 5;
+            }
+            // 5% chance
+            else if (random < 50) {
+                amount = 3;
+            }
+            // 15% chance
+            else if (random < 150) {
+                amount = 2;
+            }
 
-			String voterNickname = AranarthUtils.getPlayer(offlinePlayer.getUniqueId()).getNickname();
-			String announcementMsg = ChatUtils.chatMessage("&e" + voterNickname + " &7has voted and received &a" + amount + " vote points!");
+            String voterNickname = AranarthUtils.getPlayer(offlinePlayer.getUniqueId()).getNickname();
+            String announcementMsg = ChatUtils.chatMessage("&e" + voterNickname + " &7has voted and received &a" + amount + " vote points!");
 
-			// Announce to all locally-online players
-			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-				if (onlinePlayer.getUniqueId().equals(offlinePlayer.getUniqueId())) {
-					onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You voted and received &a" + amount + " vote points!"));
-				} else {
-					onlinePlayer.sendMessage(announcementMsg);
-				}
-				onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1F, ThreadLocalRandom.current().nextFloat(1.4F, 1.7F));
-			}
+            // Announce to all locally-online players
+            for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                if (onlinePlayer.getUniqueId().equals(offlinePlayer.getUniqueId())) {
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You voted and received &a" + amount + " vote points!"));
+                } else {
+                    onlinePlayer.sendMessage(announcementMsg);
+                }
+                int voteVol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getVoteSoundVolume();
+                if (voteVol > 0) {
+                    onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, voteVol / 100f, ThreadLocalRandom.current().nextFloat(1.4F, 1.7F));
+                }
+            }
 
-			// Relay announcement and sound to other servers so SMP players are notified.
-			// publishBroadcast only delivers to remote servers (originServer guard in handleBroadcast),
-			// so local players won't see a duplicate.
-			if (NetworkManager.isActive()) {
-				NetworkManager.getInstance().publishBroadcast(announcementMsg);
-				NetworkManager.getInstance().publishSoundAll("minecraft:entity.experience_orb.pickup", 1F, 1.55F);
-			}
+            // Relay announcement and sound to other servers so SMP players are notified.
+            // publishBroadcast only delivers to remote servers (originServer guard in handleBroadcast),
+            // so local players won't see a duplicate.
+            if (NetworkManager.isActive()) {
+                NetworkManager.getInstance().publishBroadcast(announcementMsg);
+                NetworkManager.getInstance().publishSoundAll("minecraft:entity.experience_orb.pickup", 1F, 1.55F);
+            }
 
-			// Adds their vote
-			AranarthUtils.addVote(new AranarthVote(offlinePlayer.getUniqueId(), amount, System.currentTimeMillis()));
-			int totalVotePoints = AranarthUtils.getVotePoints(uuid);
-			int totalVoteNum = AranarthUtils.getVoteNum(uuid);
-			Bukkit.getLogger().info("[AC] [VOTE] Vote recorded for " + username + " (" + uuid + "): +"
-					+ amount + " points. In-memory totals — votes: " + totalVoteNum + ", points: " + totalVotePoints);
+            // Adds their vote
+            AranarthUtils.addVote(new AranarthVote(offlinePlayer.getUniqueId(), amount, System.currentTimeMillis()));
+            int totalVotePoints = AranarthUtils.getVotePoints(uuid);
+            int totalVoteNum = AranarthUtils.getVoteNum(uuid);
+            Bukkit.getLogger().info("[AC] [VOTE] Vote recorded for " + username + " (" + uuid + "): +"
+                    + amount + " points. In-memory totals — votes: " + totalVoteNum + ", points: " + totalVotePoints);
 
-			if (!offlinePlayer.isOnline()) {
-				// Player is offline or on a remote server — store as pending and immediately persist
-				// to DB so that /keyclaim on any server picks it up without waiting 30 minutes.
-				AranarthUtils.addPendingVoteKeys(uuid, 1);
-				Bukkit.getLogger().info("[AC] [VOTE] " + username + " is offline — storing pending key and syncing to DB");
-				if (DatabaseManager.isActive()) {
-					Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
-							() -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(uuid));
-				} else {
-					Bukkit.getLogger().warning("[AC] [VOTE] DB is not active — vote for " + username + " will only persist on next scheduled save");
-				}
-				return;
-			} else {
-				Player player = Bukkit.getPlayer(uuid);
-				// Give the key if the player is online and in a valid world, otherwise store it as pending
-				String worldName = player.getWorld().getName();
-				boolean validWorld = worldName.startsWith("world") || AranarthUtils.isSmpWorld(worldName)
-						|| worldName.startsWith("resource") || worldName.startsWith("spawn");
-				if (offlinePlayer.isOnline() && validWorld) {
-					HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(key);
-					if (!remainder.isEmpty()) {
-						AranarthUtils.addPendingVoteKeys(uuid, 1);
-						player.sendMessage(ChatUtils.chatMessage("&7Your inventory was full! &7Use &e/keyclaim &7in a Survival world to obtain your key!"));
-						Bukkit.getLogger().info("[AC] [VOTE] " + username + " inventory full — key stored as pending");
-					} else {
-						Bukkit.getLogger().info("[AC] [VOTE] " + username + " is online in valid world (" + worldName + ") — key given directly");
-					}
-					if (DatabaseManager.isActive()) {
-						Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
-								() -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(uuid));
-					} else {
-						Bukkit.getLogger().warning("[AC] [VOTE] DB is not active — vote for " + username + " will only persist on next scheduled save");
-					}
-				} else {
-					AranarthUtils.addPendingVoteKeys(uuid, 1);
-					Bukkit.getLogger().info("[AC] [VOTE] " + username + " is online in invalid world (" + worldName + ") — key stored as pending");
-					if (player != null) {
-						player.sendMessage(ChatUtils.chatMessage("&7You cannot receive crate keys here! &7Use &e/keyclaim &7in a Survival world to obtain your key!"));
-					}
-					if (DatabaseManager.isActive()) {
-						Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
-								() -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(uuid));
-					} else {
-						Bukkit.getLogger().warning("[AC] [VOTE] DB is not active — vote for " + username + " will only persist on next scheduled save");
-					}
-				}
-			}
-		} else {
-			Bukkit.getLogger().info("[AC] Player " + username + " voted but has never joined the server before");
-		}
-	}
+            if (!offlinePlayer.isOnline()) {
+                // Player is offline or on a remote server — store as pending and immediately persist
+                // to DB so that /keyclaim on any server picks it up without waiting 30 minutes.
+                AranarthUtils.addPendingVoteKeys(uuid, 1);
+                Bukkit.getLogger().info("[AC] [VOTE] " + username + " is offline — storing pending key and syncing to DB");
+                if (DatabaseManager.isActive()) {
+                    Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                            () -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(uuid));
+                } else {
+                    Bukkit.getLogger().warning("[AC] [VOTE] DB is not active — vote for " + username + " will only persist on next scheduled save");
+                }
+                return;
+            } else {
+                Player player = Bukkit.getPlayer(uuid);
+                // Give the key if the player is online and in a valid world, otherwise store it as pending
+                String worldName = player.getWorld().getName();
+                boolean validWorld = worldName.startsWith("world") || AranarthUtils.isSmpWorld(worldName)
+                        || worldName.startsWith("resource") || worldName.startsWith("spawn");
+                if (offlinePlayer.isOnline() && validWorld) {
+                    HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(key);
+                    if (!remainder.isEmpty()) {
+                        AranarthUtils.addPendingVoteKeys(uuid, 1);
+                        player.sendMessage(ChatUtils.chatMessage("&7Your inventory was full! &7Use &e/keyclaim &7in a Survival world to obtain your key!"));
+                        Bukkit.getLogger().info("[AC] [VOTE] " + username + " inventory full — key stored as pending");
+                    } else {
+                        Bukkit.getLogger().info("[AC] [VOTE] " + username + " is online in valid world (" + worldName + ") — key given directly");
+                    }
+                    if (DatabaseManager.isActive()) {
+                        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                                () -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(uuid));
+                    } else {
+                        Bukkit.getLogger().warning("[AC] [VOTE] DB is not active — vote for " + username + " will only persist on next scheduled save");
+                    }
+                } else {
+                    AranarthUtils.addPendingVoteKeys(uuid, 1);
+                    Bukkit.getLogger().info("[AC] [VOTE] " + username + " is online in invalid world (" + worldName + ") — key stored as pending");
+                    if (player != null) {
+                        player.sendMessage(ChatUtils.chatMessage("&7You cannot receive crate keys here! &7Use &e/keyclaim &7in a Survival world to obtain your key!"));
+                    }
+                    if (DatabaseManager.isActive()) {
+                        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                                () -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(uuid));
+                    } else {
+                        Bukkit.getLogger().warning("[AC] [VOTE] DB is not active — vote for " + username + " will only persist on next scheduled save");
+                    }
+                }
+            }
+        } else {
+            Bukkit.getLogger().info("[AC] Player " + username + " voted but has never joined the server before");
+        }
+    }
 }

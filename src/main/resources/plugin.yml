@@ -1,12 +1,12 @@
 name: AranarthCore
 version: 1.11
-authors: [Aearost]
+authors: [ Aearost ]
 main: com.aearost.aranarthcore.AranarthCore
 api-version: 26.2
-depend: [mcMMO, ProjectKorra, DiscordSRV]
-softdepend: [VotifierPlus, BreweryX, squaremap]
+depend: [ mcMMO, ProjectKorra, DiscordSRV ]
+softdepend: [ VotifierPlus, BreweryX, squaremap ]
 description: A core plugin to incorporate any features we desire into our Minecraft world
-loadbefore: [mcMMO]
+loadbefore: [ mcMMO ]
 # BungeeCord plugin messaging channel used to transfer players between servers via Velocity.
 # Only active when is-public-server: true.
 messaging-channels:
@@ -39,35 +39,35 @@ commands:
     permission: aranarth.brewbook
   balance:
     description: Provides the balance of the player or the input player
-    aliases: [bal]
+    aliases: [ bal ]
     permission: aranarth.balance
   balancetop:
     description: Provides a list of the players with the highest to lowest balances
-    aliases: [baltop]
+    aliases: [ baltop ]
     permission: aranarth.balancetop
   blacklist:
     description: Provides the player's blacklist
-    aliases: [bl]
+    aliases: [ bl ]
     permission: aranarth.blacklist
   boosts:
     description: Lists the active boosts on the server
     permission: aranarth.boosts
   calendar:
     description: Provides a written book containing information about the calendar system
-    aliases: [cal]
+    aliases: [ cal ]
     permission: aranarth.calendar
   cartography:
     description: Opens a cartography table GUI
     permission: aranarth.tables
   compressor:
     description: Opens the compressor GUI to toggle compressible items
-    aliases: [comp, compress]
+    aliases: [ comp, compress ]
     permission: aranarth.compressor
   countdown:
     description: Starts a mutual countdown with another player
   craft:
     description: Opens a crafting table GUI
-    aliases: [workbench, wb, ct]
+    aliases: [ workbench, wb, ct ]
     permission: aranarth.tables
   creative:
     description: Teleports the player to the Creative world
@@ -83,11 +83,11 @@ commands:
     permission: aranarth.delhome
   dominion:
     description: The master command for Aranarth dominions
-    aliases: [d]
+    aliases: [ d ]
     permission: aranarth.dominion
   enderchest:
     description: Opens the player's ender chest remotely
-    aliases: [ec]
+    aliases: [ ec ]
     permission: aranarth.enderchest
   fletching:
     description: Opens a fletching table GUI
@@ -140,14 +140,14 @@ commands:
     permission: aranarth.smpmap
   message:
     description: Messages the input player the provided message
-    aliases: [msg, tell]
+    aliases: [ msg, tell ]
     permission: aranarth.message
   motd:
     description: Displays the server MOTD
     permission: aranarth.motd
   nickname:
     description: Updates the player's nickname
-    aliases: [nick]
+    aliases: [ nick ]
     permission: aranarth.nick
   particles:
     description: Controls the number of Aranarth particles that will be displayed
@@ -157,7 +157,7 @@ commands:
     permission: aranarth.pay
   mctop:
     description: Opens a GUI showing the top players in a given mcMMO skill
-    aliases: [skilltop]
+    aliases: [ skilltop ]
     permission: aranarth.mctop
   mount:
     description: Calls or dismisses the player's current mount
@@ -179,7 +179,7 @@ commands:
     permission: aranarth.quests
   randomizer:
     description: Randomizes placed blocks
-    aliases: [rand]
+    aliases: [ rand ]
     permission: aranarth.randomizer
   ranks:
     description: Lists the in-game upgradable ranks
@@ -189,7 +189,7 @@ commands:
     permission: aranarth.rankup
   reply:
     description: Replies to the last received message
-    aliases: [r]
+    aliases: [ r ]
     permission: aranarth.reply
   resource:
     description: Teleports the player to the Resource world
@@ -212,6 +212,9 @@ commands:
   smp:
     description: Teleports the player to the SMP world
     permission: aranarth.smp
+  sounds:
+    description: Opens the sounds GUI to toggle custom sound effects
+    permission: aranarth.sounds
   spawn:
     description: Teleports the player to the Spawn world
     permission: aranarth.spawn
@@ -226,46 +229,46 @@ commands:
     permission: aranarth.store
   streak:
     description: Opens the Login Streak GUI to view and claim daily streak rewards
-    aliases: [daily]
+    aliases: [ daily ]
     permission: aranarth.streak
   survival:
     description: Survival
-    aliases: [rtp]
+    aliases: [ rtp ]
     permission: aranarth.survival
   tables:
     description: Provides the player with access to a GUI with all forms of crafting tables
     permission: aranarth.tables
   toggle:
     description: Allows the player to toggle different functionality
-    aliases: [t]
+    aliases: [ t ]
     permission: aranarth.toggle
   teleport:
     description: Sends a teleport request to the input player
-    aliases: [tp]
+    aliases: [ tp ]
     permission: aranarth.teleport
   topkills:
     description: Shows the players with the most kills
-    aliases: [tk]
+    aliases: [ tk ]
     permission: aranarth.topkills
   topdeaths:
     description: Shows the players with the most deaths
-    aliases: [td]
+    aliases: [ td ]
     permission: aranarth.topdeaths
   topguesses:
     description: Shows the players with the most correct chat game guesses
-    aliases: [tg]
+    aliases: [ tg ]
     permission: aranarth.topguesses
   tpaccept:
     description: Allows the player to accept a teleport request
-    aliases: [tpa]
+    aliases: [ tpa ]
     permission: aranarth.tpaccept
   tpdeny:
     description: Allows the player to deny a teleport request
-    aliases: [tpd]
+    aliases: [ tpd ]
     permission: aranarth.tpdeny
   tphere:
     description: Allows the player to request another player teleports to them
-    aliases: [tph]
+    aliases: [ tph ]
     permission: aranarth.tphere
   trash:
     description: Allows players to dispense of items
@@ -281,15 +284,15 @@ commands:
     permission: aranarth.untrust
   vote:
     description: Provides the player with a list of vote links
-    aliases: [v]
+    aliases: [ v ]
     permission: aranarth.vote
   votetop:
     description: Lists the top 10 players by vote count
-    aliases: [vtop]
+    aliases: [ vtop ]
     permission: aranarth.votetop
   voteshop:
     description: Opens the vote shop GUI to spend vote points
-    aliases: [vshop, vs]
+    aliases: [ vshop, vs ]
     permission: aranarth.voteshop
   warp:
     description: Warps the player to the input warp

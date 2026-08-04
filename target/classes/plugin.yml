@@ -212,6 +212,9 @@ commands:
   smp:
     description: Teleports the player to the SMP world
     permission: aranarth.smp
+  sounds:
+    description: Opens the sounds GUI to toggle custom sound effects
+    permission: aranarth.sounds
   spawn:
     description: Teleports the player to the Spawn world
     permission: aranarth.spawn
