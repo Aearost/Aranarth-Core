@@ -24,6 +24,7 @@ Minor Features
 [~] Added missing functionality where Saints bypass all bending change cooldowns
 [~] Fixed issue where shops were not allowing bulk sale of shulkers due to recent change with bending sourcing in restricted locations/worlds
 [~] Fixed issue where AirBlast was sourceable in restricted locations/worlds
+[~] Fixed issue where vote points were not being saved due to cross-server voting
 
 Backend Code Changes
 -

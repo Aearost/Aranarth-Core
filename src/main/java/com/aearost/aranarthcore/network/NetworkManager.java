@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.AranarthVote;
 import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.Outpost;
@@ -85,6 +86,7 @@ public class NetworkManager {
     public static final String CH_OUTPOST_CREATE = "aranarth:outpost_create";
     public static final String CH_OUTPOST_UPDATE = "aranarth:outpost_update";
     public static final String CH_JOB_UPDATE = "aranarth:job_update";
+    public static final String CH_VOTE_AWARD = "aranarth:vote_award";
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
     private static final String KEY_RETURN_LOC = "return_loc:";
@@ -331,6 +333,7 @@ public class NetworkManager {
             case CH_OUTPOST_CREATE -> handleOutpostCreate(json);
             case CH_OUTPOST_UPDATE -> handleOutpostUpdate(json);
             case CH_JOB_UPDATE -> handleJobUpdate(json);
+            case CH_VOTE_AWARD -> handleVoteAward(json);
         }
     }
 
@@ -2114,6 +2117,27 @@ public class NetworkManager {
             Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
                     () -> PersistenceUtils.loadJobDataForPlayer(uuid));
         }
+    }
+
+    /**
+     * Notifies other servers that a vote was awarded so they can update their in-memory vote list.
+     * Called after addVote() and the DB sync on the server that received the VotifierEvent.
+     */
+    public void publishVoteAward(UUID uuid, int amount, long timestamp) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", uuid.toString());
+        json.addProperty("amount", amount);
+        json.addProperty("timestamp", timestamp);
+        publish(CH_VOTE_AWARD, json);
+    }
+
+    private void handleVoteAward(JsonObject json) {
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        int amount = json.get("amount").getAsInt();
+        long timestamp = json.get("timestamp").getAsLong();
+        AranarthUtils.addVote(new AranarthVote(uuid, amount, timestamp));
+        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[VOTE] Received cross-server vote award for " + uuid + ": +" + amount + " points");
     }
 
     /**

@@ -38,10 +38,6 @@ public class VotifierListener implements Listener {
         UUID uuid = AranarthUtils.getUUIDFromUsername(username);
         if (uuid != null) {
             Vote vote = e.getVote();
-            // If it was a test vote, do not increase the number of votes the player has
-            if (vote.getServiceName().equals("AranarthCore") && vote.getAddress().equals("127.0.0.1")) {
-                return;
-            }
 
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
             ItemStack key = new KeyVote().getItem();
@@ -93,11 +89,17 @@ public class VotifierListener implements Listener {
             }
 
             // Adds their vote
-            AranarthUtils.addVote(new AranarthVote(offlinePlayer.getUniqueId(), amount, System.currentTimeMillis()));
+            long voteTimestamp = System.currentTimeMillis();
+            AranarthUtils.addVote(new AranarthVote(offlinePlayer.getUniqueId(), amount, voteTimestamp));
             int totalVotePoints = AranarthUtils.getVotePoints(uuid);
             int totalVoteNum = AranarthUtils.getVoteNum(uuid);
             Bukkit.getLogger().info("[AC] [VOTE] Vote recorded for " + username + " (" + uuid + "): +"
                     + amount + " points. In-memory totals — votes: " + totalVoteNum + ", points: " + totalVotePoints);
+
+            // Relay the vote to the other server so its in-memory vote list stays in sync
+            if (NetworkManager.isActive()) {
+                NetworkManager.getInstance().publishVoteAward(offlinePlayer.getUniqueId(), amount, voteTimestamp);
+            }
 
             if (!offlinePlayer.isOnline()) {
                 // Player is offline or on a remote server — store as pending and immediately persist
