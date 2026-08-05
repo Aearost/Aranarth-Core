@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
+import com.aearost.aranarthcore.enums.FireType;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Avatar;
 import com.aearost.aranarthcore.objects.Perk;
@@ -124,7 +125,7 @@ public class PermissionUtils {
                             if (currentAvatar.getUuid().equals(player.getUniqueId())) {
                                 if (subElement == Element.SubElement.BLUE_FIRE) {
                                     AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                                    if (aranarthPlayer.hasBlueFireDisabled()) {
+                                    if (aranarthPlayer.getFireType() != FireType.BLUE) {
                                         bendingPlayer.getSubElements().remove(Element.SubElement.BLUE_FIRE);
                                     }
                                 }
@@ -145,6 +146,31 @@ public class PermissionUtils {
                     }
                 } else {
                     bendingPlayer.getSubElements().remove(SoundAbility.SOUND);
+                }
+            }
+
+            // Custom fire sub-elements (cosmetic)
+            if (bendingPlayer.getElements().contains(Element.FIRE)) {
+                if (player.hasPermission("aranarth.whitefire")) {
+                    if (!bendingPlayer.hasSubElement(FireParticleRegistry.WHITE_FIRE_SUB)) {
+                        bendingPlayer.addSubElement(FireParticleRegistry.WHITE_FIRE_SUB);
+                    }
+                } else {
+                    bendingPlayer.getSubElements().remove(FireParticleRegistry.WHITE_FIRE_SUB);
+                }
+                if (player.hasPermission("aranarth.rainbowfire")) {
+                    if (!bendingPlayer.hasSubElement(FireParticleRegistry.RAINBOW_FIRE_SUB)) {
+                        bendingPlayer.addSubElement(FireParticleRegistry.RAINBOW_FIRE_SUB);
+                    }
+                } else {
+                    bendingPlayer.getSubElements().remove(FireParticleRegistry.RAINBOW_FIRE_SUB);
+                }
+                if (player.hasPermission("aranarth.iridescentfire")) {
+                    if (!bendingPlayer.hasSubElement(FireParticleRegistry.IRIDESCENT_FIRE_SUB)) {
+                        bendingPlayer.addSubElement(FireParticleRegistry.IRIDESCENT_FIRE_SUB);
+                    }
+                } else {
+                    bendingPlayer.getSubElements().remove(FireParticleRegistry.IRIDESCENT_FIRE_SUB);
                 }
             }
 
@@ -561,6 +587,9 @@ public class PermissionUtils {
         perms.setPermission("aranarth.chat.gradientbold", false);
         perms.setPermission("aranarth.gate", false);
         perms.setPermission("aranarth.mount", false);
+        perms.setPermission("aranarth.whitefire", false);
+        perms.setPermission("aranarth.rainbowfire", false);
+        perms.setPermission("aranarth.iridescentfire", false);
 
         // Armor stand
         perms.setPermission("aranarth.armorstand.lock", false);
@@ -856,16 +885,20 @@ public class PermissionUtils {
         }
         // Blue Fire
         if (perks.get(Perk.BLUEFIRE) == 1) {
-            if (aranarthPlayer.hasBlueFireDisabled()) {
+            if (aranarthPlayer.getFireType() != FireType.BLUE) {
                 perms.setPermission("bending.fire.bluefirebending", false);
-            }
-            // Will default to be enabled, must be manually toggled off via /toggle bluefire
-            else {
+            } else {
                 perms.setPermission("bending.fire.bluefirebending", true);
             }
         } else if (perks.get(Perk.BLUEFIRE) == 0) {
             perms.setPermission("bending.fire.bluefirebending", false);
         }
+        // White Fire
+        perms.setPermission("aranarth.whitefire", perks.get(Perk.WHITEFIRE) == 1);
+        // Rainbow Fire
+        perms.setPermission("aranarth.rainbowfire", perks.get(Perk.RAINBOWFIRE) == 1);
+        // Iridescent Fire
+        perms.setPermission("aranarth.iridescentfire", perks.get(Perk.IRIDESCENTFIRE) == 1);
     }
 
     /**

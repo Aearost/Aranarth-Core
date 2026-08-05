@@ -706,9 +706,16 @@ public class PersistenceUtils {
                 // Fields from index 11 onward are optional - checked with fields.length > N so that
                 // existing files without the field load fine and use the default from the constructor.
 
-                // Blue Fire (index 11)
+                // Fire Type (index 11) — old format: "0"=blue enabled, "1"=blue disabled
                 if (fields.length > 11) {
-                    aranarthPlayer.setBlueFireDisabled(!fields[11].equals("0"));
+                    String fireField = fields[11];
+                    if (fireField.equals("0")) {
+                        aranarthPlayer.setFireType(FireType.BLUE);
+                    } else if (fireField.equals("1")) {
+                        aranarthPlayer.setFireType(FireType.DEFAULT);
+                    } else {
+                        aranarthPlayer.setFireType(FireType.fromString(fireField));
+                    }
                 }
 
                 // Gradient Chat Enabled (index 12)
@@ -903,7 +910,7 @@ public class PersistenceUtils {
                 try {
                     FileWriter writer = new FileWriter(filePath);
                     // Template line
-                    writer.write("#uuid|chat|messages|teleport|spawnboost|changeclaim|inventory|shulker|blacklist|compressing|chestlock|bluefire|gradientchatenabled|gradientchatcolors|daymessage|weathermessage|dominionmsgcompact|joinsound|leavesound|votesound|cratesound|weathersound|newdaysound\n");
+                    writer.write("#uuid|chat|messages|teleport|spawnboost|changeclaim|inventory|shulker|blacklist|compressing|chestlock|firetype|gradientchatenabled|gradientchatcolors|daymessage|weathermessage|dominionmsgcompact|joinsound|leavesound|votesound|cratesound|weathersound|newdaysound\n");
 
                     for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
                         AranarthPlayer aranarthPlayer = entry.getValue();
@@ -919,7 +926,7 @@ public class PersistenceUtils {
                         String blacklist = aranarthPlayer.getBlacklistingMethod() + "";
                         String compressing = aranarthPlayer.isCompressingItems() ? "0" : "1";
                         String chestLock = aranarthPlayer.isAutoLockingChests() ? "0" : "1";
-                        String bluefire = aranarthPlayer.hasBlueFireDisabled() ? "1" : "0";
+                        String bluefire = aranarthPlayer.getFireType().name();
                         String gradientEnabled = aranarthPlayer.isGradientChatEnabled() ? "1" : "0";
                         String gradientColors = aranarthPlayer.getGradientChatColors().isEmpty() ? "none" : aranarthPlayer.getGradientChatColors();
                         String dayMessage = aranarthPlayer.isDayMessageDisabled() ? "1" : "0";
@@ -5890,7 +5897,7 @@ public class PersistenceUtils {
             obj.addProperty("blacklistMethod", ap.getBlacklistingMethod());
             obj.addProperty("compressing", ap.isCompressingItems());
             obj.addProperty("chestLock", ap.isAutoLockingChests());
-            obj.addProperty("blueFireDisabled", ap.hasBlueFireDisabled());
+            obj.addProperty("fireType", ap.getFireType().name());
             obj.addProperty("gradientChatEnabled", ap.isGradientChatEnabled());
             obj.addProperty("gradientChatColors", ap.getGradientChatColors());
             obj.addProperty("dayMessageDisabled", ap.isDayMessageDisabled());
@@ -7402,8 +7409,11 @@ public class PersistenceUtils {
                 if (obj.has("chestLock")) {
                     ap.setAutoLockingChests(obj.get("chestLock").getAsBoolean());
                 }
-                if (obj.has("blueFireDisabled")) {
-                    ap.setBlueFireDisabled(obj.get("blueFireDisabled").getAsBoolean());
+                if (obj.has("fireType")) {
+                    ap.setFireType(FireType.fromString(obj.get("fireType").getAsString()));
+                } else if (obj.has("blueFireDisabled")) {
+                    // Backward compat: old boolean field
+                    ap.setFireType(obj.get("blueFireDisabled").getAsBoolean() ? FireType.DEFAULT : FireType.BLUE);
                 }
                 if (obj.has("gradientChatEnabled")) {
                     ap.setGradientChatEnabled(obj.get("gradientChatEnabled").getAsBoolean());
@@ -7499,7 +7509,7 @@ public class PersistenceUtils {
         obj.addProperty("blacklistMethod", ap.getBlacklistingMethod());
         obj.addProperty("compressing", ap.isCompressingItems());
         obj.addProperty("chestLock", ap.isAutoLockingChests());
-        obj.addProperty("blueFireDisabled", ap.hasBlueFireDisabled());
+        obj.addProperty("fireType", ap.getFireType().name());
         obj.addProperty("gradientChatEnabled", ap.isGradientChatEnabled());
         obj.addProperty("gradientChatColors", ap.getGradientChatColors());
         obj.addProperty("dayMessageDisabled", ap.isDayMessageDisabled());
@@ -7574,8 +7584,11 @@ public class PersistenceUtils {
             if (obj.has("chestLock")) {
                 ap.setAutoLockingChests(obj.get("chestLock").getAsBoolean());
             }
-            if (obj.has("blueFireDisabled")) {
-                ap.setBlueFireDisabled(obj.get("blueFireDisabled").getAsBoolean());
+            if (obj.has("fireType")) {
+                ap.setFireType(FireType.fromString(obj.get("fireType").getAsString()));
+            } else if (obj.has("blueFireDisabled")) {
+                // Backward compat: old boolean field
+                ap.setFireType(obj.get("blueFireDisabled").getAsBoolean() ? FireType.DEFAULT : FireType.BLUE);
             }
             if (obj.has("gradientChatEnabled")) {
                 ap.setGradientChatEnabled(obj.get("gradientChatEnabled").getAsBoolean());

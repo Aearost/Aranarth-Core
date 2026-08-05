@@ -297,3 +297,14 @@ commands:
   warp:
     description: Warps the player to the input warp
     permission: aranarth.warp
+
+permissions:
+  aranarth.whitefire:
+    description: Allows the player to use White Fire
+    default: false
+  aranarth.rainbowfire:
+    description: Allows the player to use Rainbow Fire
+    default: false
+  aranarth.iridescentfire:
+    description: Allows the player to use Iridescent Fire
+    default: false

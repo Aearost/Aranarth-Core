@@ -12,5 +12,8 @@ public enum Perk {
     HOMES,
     ITEMFRAME,
     BLUEFIRE,
+    WHITEFIRE,
+    RAINBOWFIRE,
+    IRIDESCENTFIRE,
     DISCORD
 }

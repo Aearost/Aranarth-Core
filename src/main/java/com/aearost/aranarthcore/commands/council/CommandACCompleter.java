@@ -68,8 +68,8 @@ public class CommandACCompleter implements TabCompleter {
 
     private static final List<String> PERK_OPTIONS = List.of(
             "blacklist", "bluefire", "chat", "compressor", "discord",
-            "homes", "inventory", "itemframe", "itemname", "randomizer",
-            "shulker", "tables"
+            "homes", "inventory", "iridescentfire", "itemframe", "itemname",
+            "rainbowfire", "randomizer", "shulker", "tables", "whitefire"
     );
 
     /**

@@ -19,6 +19,9 @@ import com.aearost.aranarthcore.integration.SquaremapIntegration;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.utils.FireParticleRegistry;
+import com.github.retrooper.packetevents.PacketEvents;
+import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import com.aearost.aranarthcore.objects.VoidChunkGenerator;
 import com.aearost.aranarthcore.recipes.*;
 import com.aearost.aranarthcore.recipes.aranarthium.*;
@@ -52,6 +55,7 @@ public class AranarthCore extends JavaPlugin {
     private static AranarthCore plugin;
     private DiscordChatListener discordChatListener;
     private RoleReactionListener roleReactionListener;
+    private FireParticleListener fireParticleListener;
     private volatile boolean savedOnDisable = false;
     private SquaremapIntegration squaremapIntegration;
 
@@ -67,6 +71,10 @@ public class AranarthCore extends JavaPlugin {
 
     public static AranarthCore getInstance() {
         return plugin;
+    }
+
+    public FireParticleListener getFireParticleListener() {
+        return fireParticleListener;
     }
 
     public static boolean isPublicServer() {
@@ -418,6 +426,11 @@ public class AranarthCore extends JavaPlugin {
         return null;
     }
 
+    @Override
+    public void onLoad() {
+        FireParticleRegistry.register();
+    }
+
     /**
      * Called when the plugin is first enabled on server startup.
      * Responsible for initializing all functionality of AranarthCore.
@@ -426,6 +439,15 @@ public class AranarthCore extends JavaPlugin {
     public void onEnable() {
         plugin = this;
         saveDefaultConfig();
+
+        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
+        PacketEvents.getAPI().getSettings().reEncodeByDefault(false).checkForUpdates(false);
+        PacketEvents.getAPI().load();
+        PacketEvents.getAPI().init();
+        fireParticleListener = new FireParticleListener();
+        PacketEvents.getAPI().getEventManager().registerListeners(fireParticleListener);
+        FireParticleListener.initReflection();
+
         initializeWorlds();
 
         // Initialize MySQL before loading data so DB-primary loads can activate.
@@ -459,13 +481,19 @@ public class AranarthCore extends JavaPlugin {
         AranarthUtils.setStormDelay(new Random().nextInt(18000));
 
         SoundAbility.SOUND = new Element.SubElement("Sound", Element.AIR, Element.ElementType.NO_SUFFIX, this);
+        FireParticleRegistry.WHITE_FIRE_SUB = new Element.SubElement("White Fire", Element.FIRE, Element.ElementType.NO_SUFFIX, this);
+        FireParticleRegistry.RAINBOW_FIRE_SUB = new Element.SubElement("Rainbow Fire", Element.FIRE, Element.ElementType.NO_SUFFIX, this);
+        FireParticleRegistry.IRIDESCENT_FIRE_SUB = new Element.SubElement("Iridescent Fire", Element.FIRE, Element.ElementType.NO_SUFFIX, this);
         try {
             Field colorField = Element.class.getDeclaredField("color");
             colorField.setAccessible(true);
             colorField.set(SoundAbility.SOUND, net.md_5.bungee.api.ChatColor.of("#6644CC"));
             colorField.set(Element.LIGHTNING, net.md_5.bungee.api.ChatColor.of("#FFF050"));
+            colorField.set(FireParticleRegistry.WHITE_FIRE_SUB, net.md_5.bungee.api.ChatColor.of("#FFFFFF"));
+            colorField.set(FireParticleRegistry.RAINBOW_FIRE_SUB, net.md_5.bungee.api.ChatColor.of("#FF00FF"));
+            colorField.set(FireParticleRegistry.IRIDESCENT_FIRE_SUB, net.md_5.bungee.api.ChatColor.of("#FFB3C6"));
         } catch (Exception e) {
-            Bukkit.getLogger().warning("Failed to set Sound sub-element color: " + e.getMessage());
+            Bukkit.getLogger().warning("Failed to set sub-element colors: " + e.getMessage());
         }
         CoreAbility.registerPluginAbilities(AranarthCore.getInstance(), "com.aearost.aranarthcore.abilities");
         Bukkit.getLogger().info(LOG_PREFIX + "AranarthCore Bending has been loaded");
@@ -1488,6 +1516,7 @@ public class AranarthCore extends JavaPlugin {
             discordChatListener.unsubscribe();
         }
 
+        PacketEvents.getAPI().terminate();
     }
 
     /**

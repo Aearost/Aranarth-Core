@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.gui;
 
+import com.aearost.aranarthcore.enums.FireType;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Perk;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -59,11 +60,11 @@ public class GuiToggle {
             gui.setItem(9, buildLockedItem(Material.LAVA_BUCKET, "&f&lBlacklist"));
         }
 
-        // Blue Fire
-        if (aranarthPlayer.getPerks().containsKey(Perk.BLUEFIRE) && aranarthPlayer.getPerks().get(Perk.BLUEFIRE) == 1) {
-            gui.setItem(10, buildToggleItem(Material.SOUL_CAMPFIRE, "&f&lBlue Fire", !aranarthPlayer.hasBlueFireDisabled()));
+        // Fire Type
+        if (hasAnyFirePerk(aranarthPlayer)) {
+            gui.setItem(10, buildFireTypeItem(aranarthPlayer.getFireType()));
         } else {
-            gui.setItem(10, buildLockedItem(Material.SOUL_CAMPFIRE, "&f&lBlue Fire"));
+            gui.setItem(10, buildLockedItem(Material.CAMPFIRE, "&f&lFire Type"));
         }
 
         // Bulk Sell Shulker
@@ -152,6 +153,30 @@ public class GuiToggle {
         gui.setItem(26, buildToggleItem(Material.COMPASS, "&f&lDominion Msg Compact", aranarthPlayer.isDominionMsgCompact()));
 
         return gui;
+    }
+
+    private boolean hasAnyFirePerk(AranarthPlayer aranarthPlayer) {
+        return (aranarthPlayer.getPerks().getOrDefault(Perk.BLUEFIRE, 0) == 1)
+                || (aranarthPlayer.getPerks().getOrDefault(Perk.WHITEFIRE, 0) == 1)
+                || (aranarthPlayer.getPerks().getOrDefault(Perk.RAINBOWFIRE, 0) == 1)
+                || (aranarthPlayer.getPerks().getOrDefault(Perk.IRIDESCENTFIRE, 0) == 1);
+    }
+
+    private ItemStack buildFireTypeItem(FireType type) {
+        ItemStack item = new ItemStack(Material.CAMPFIRE);
+        ItemMeta meta = item.getItemMeta();
+        String displayName = switch (type) {
+            case DEFAULT -> ChatUtils.translateToColor("&c&lRegular Fire");
+            case BLUE -> ChatUtils.translateToColor("&b&lBlue Fire");
+            case WHITE -> ChatUtils.translateToColor("&f&lWhite Fire");
+            case RAINBOW -> ChatUtils.translateToGradient(
+                    "#FF0000,#FF7F00,#FFFF00,#00FF00,#0000FF,#8B00FF", "Rainbow Fire", true);
+            case IRIDESCENT -> ChatUtils.translateToGradient(
+                    "#FFB3C6,#B3D9FF,#B3FFD9,#E0B3FF,#FFCBA4,#FFFACD", "Iridescent Fire", true);
+        };
+        meta.setDisplayName(displayName);
+        item.setItemMeta(meta);
+        return item;
     }
 
     private ItemStack buildToggleItem(Material material, String name, boolean active) {

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.database.DatabaseManager;
+import com.aearost.aranarthcore.enums.FireType;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
@@ -243,8 +244,8 @@ public class CommandInfo implements CommandExecutor {
 		if (!aranarthPlayer.isAutoLockingChests()) {
 			toggling.add("&eChest Locks");
 		}
-		if (aranarthPlayer.hasBlueFireDisabled()) {
-			toggling.add("&eBlue Fire");
+		if (aranarthPlayer.getFireType() != FireType.DEFAULT) {
+			toggling.add("&eFire Type: " + aranarthPlayer.getFireType().getDisplayName());
 		}
 		if (aranarthPlayer.isDayMessageDisabled()) {
 			toggling.add("&eDay Message");

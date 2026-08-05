@@ -47,6 +47,7 @@ public class PlayerServerQuitListener implements Listener {
     @EventHandler
     public void onPlayerQuit(final PlayerQuitEvent e) {
         Player player = e.getPlayer();
+        AranarthCore.getInstance().getFireParticleListener().clearPlayer(player.getUniqueId());
 
         boolean isCrossServerTransfer = NetworkManager.isActive()
                 && NetworkManager.getInstance().consumeTransferring(player.getUniqueId());

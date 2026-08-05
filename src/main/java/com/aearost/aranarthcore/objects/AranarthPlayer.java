@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.objects;
 
+import com.aearost.aranarthcore.enums.FireType;
 import com.aearost.aranarthcore.enums.Pronouns;
 import org.bukkit.Location;
 import org.bukkit.MusicInstrument;
@@ -75,7 +76,7 @@ public class AranarthPlayer {
     private boolean isTogglingChat = false;
     private boolean isTogglingTp = false;
     private boolean isTogglingChangeClaim = false;
-    private boolean hasBlueFireDisabled = false;
+    private FireType fireType = FireType.DEFAULT;
     private boolean isUsingGoatHorn = false;
     private HashMap<MusicInstrument, Long> horns = new HashMap<>();
     private long lastWorldCommandUse = 0;
@@ -179,7 +180,7 @@ public class AranarthPlayer {
         this.isTogglingChat = false;
         this.isTogglingTp = false;
         this.isTogglingChangeClaim = false;
-        this.hasBlueFireDisabled = false;
+        this.fireType = FireType.DEFAULT;
         this.isUsingGoatHorn = false;
         this.horns = new HashMap<>();
         this.lastWorldCommandUse = 0;
@@ -258,7 +259,7 @@ public class AranarthPlayer {
         this.isTogglingChat = false;
         this.isTogglingTp = false;
         this.isTogglingChangeClaim = false;
-        this.hasBlueFireDisabled = false;
+        this.fireType = FireType.DEFAULT;
         this.isUsingGoatHorn = false;
         this.horns = new HashMap<>();
         this.lastWorldCommandUse = 0;
@@ -1262,19 +1263,19 @@ public class AranarthPlayer {
     /**
      * Provides the value tracking whether the player currently has blue fire disabled.
      *
-     * @return The value tracking whether the player currently has blue fire disabled.
+     * @return The player's current fire type.
      */
-    public boolean hasBlueFireDisabled() {
-        return hasBlueFireDisabled;
+    public FireType getFireType() {
+        return fireType;
     }
 
     /**
-     * Updates the value tracking whether the player currently has blue fire disabled.
+     * Updates the player's current fire type.
      *
-     * @param hasBlueFireDisabled The value tracking whether the player currently has blue fire disabled.
+     * @param fireType The fire type.
      */
-    public void setBlueFireDisabled(boolean hasBlueFireDisabled) {
-        this.hasBlueFireDisabled = hasBlueFireDisabled;
+    public void setFireType(FireType fireType) {
+        this.fireType = fireType;
     }
 
     /**

@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
+import com.aearost.aranarthcore.enums.FireType;
 import com.aearost.aranarthcore.enums.SpecialDay;
 import com.aearost.aranarthcore.items.HoneyGlazedHam;
 import com.aearost.aranarthcore.items.Quiver;
@@ -88,8 +89,8 @@ public class PlayerServerJoinListener implements Listener {
         if (!aranarthPlayer.isAutoLockingChests()) {
             toggling.add("&e&oChest Locks");
         }
-        if (aranarthPlayer.hasBlueFireDisabled()) {
-            toggling.add("&e&oBlue Fire");
+        if (aranarthPlayer.getFireType() != FireType.DEFAULT) {
+            toggling.add("&e&oFire Type: " + aranarthPlayer.getFireType().getDisplayName());
         }
         if (aranarthPlayer.isDayMessageDisabled()) {
             toggling.add("&e&oDay Message");

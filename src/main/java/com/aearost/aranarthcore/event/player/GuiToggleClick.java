@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.enums.FireType;
 import com.aearost.aranarthcore.gui.GuiToggle;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Perk;
@@ -50,20 +51,22 @@ public class GuiToggleClick {
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 refreshGui(player);
             }
-            // Blue Fire
+            // Fire Type
             case 10 -> {
-				if (!aranarthPlayer.getPerks().containsKey(Perk.BLUEFIRE) || aranarthPlayer.getPerks().get(Perk.BLUEFIRE) != 1) {
+				if (!hasAnyFirePerk(aranarthPlayer)) {
 					return;
 				}
-                if (aranarthPlayer.hasBlueFireDisabled()) {
-                    aranarthPlayer.setBlueFireDisabled(false);
-                    player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7your blue fire"));
-                } else {
-                    aranarthPlayer.setBlueFireDisabled(true);
-                    player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7your blue fire"));
+                FireType oldType = aranarthPlayer.getFireType();
+                FireType newType = nextAvailableType(oldType, aranarthPlayer);
+                if (newType == oldType) {
+                    return;
                 }
+                aranarthPlayer.setFireType(newType);
+                player.sendMessage(ChatUtils.chatMessage("&7Fire type set to &e" + newType.getDisplayName()));
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                PermissionUtils.evaluatePlayerPermissions(player);
+                if (oldType == FireType.BLUE || newType == FireType.BLUE) {
+                    PermissionUtils.evaluatePlayerPermissions(player);
+                }
                 refreshGui(player);
             }
             // Bulk Sell Shulker
@@ -292,6 +295,35 @@ public class GuiToggleClick {
                 refreshGui(player);
             }
         }
+    }
+
+    private boolean hasAnyFirePerk(AranarthPlayer aranarthPlayer) {
+        return aranarthPlayer.getPerks().getOrDefault(Perk.BLUEFIRE, 0) == 1
+                || aranarthPlayer.getPerks().getOrDefault(Perk.WHITEFIRE, 0) == 1
+                || aranarthPlayer.getPerks().getOrDefault(Perk.RAINBOWFIRE, 0) == 1
+                || aranarthPlayer.getPerks().getOrDefault(Perk.IRIDESCENTFIRE, 0) == 1;
+    }
+
+    private FireType nextAvailableType(FireType current, AranarthPlayer aranarthPlayer) {
+        FireType[] values = FireType.values();
+        int start = current.ordinal();
+        for (int i = 1; i < values.length; i++) {
+            FireType candidate = values[(start + i) % values.length];
+            if (canUseFireType(candidate, aranarthPlayer)) {
+                return candidate;
+            }
+        }
+        return current;
+    }
+
+    private boolean canUseFireType(FireType type, AranarthPlayer aranarthPlayer) {
+        return switch (type) {
+            case DEFAULT -> true;
+            case BLUE -> aranarthPlayer.getPerks().getOrDefault(Perk.BLUEFIRE, 0) == 1;
+            case WHITE -> aranarthPlayer.getPerks().getOrDefault(Perk.WHITEFIRE, 0) == 1;
+            case RAINBOW -> aranarthPlayer.getPerks().getOrDefault(Perk.RAINBOWFIRE, 0) == 1;
+            case IRIDESCENT -> aranarthPlayer.getPerks().getOrDefault(Perk.IRIDESCENTFIRE, 0) == 1;
+        };
     }
 
     private void refreshGui(Player player) {

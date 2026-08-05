@@ -49,6 +49,9 @@ public class CommandPerks {
 				sender.sendMessage(ChatUtils.translateToColor("&6Homes: &e" + perks.get(Perk.HOMES)));
 				sender.sendMessage(ChatUtils.translateToColor("&6ItemFrame: &e" + perks.get(Perk.ITEMFRAME)));
 				sender.sendMessage(ChatUtils.translateToColor("&6BlueFire: &e" + perks.get(Perk.BLUEFIRE)));
+				sender.sendMessage(ChatUtils.translateToColor("&6WhiteFire: &e" + perks.get(Perk.WHITEFIRE)));
+				sender.sendMessage(ChatUtils.translateToColor("&6RainbowFire: &e" + perks.get(Perk.RAINBOWFIRE)));
+				sender.sendMessage(ChatUtils.translateToColor("&6IridescentFire: &e" + perks.get(Perk.IRIDESCENTFIRE)));
 				sender.sendMessage(ChatUtils.translateToColor("&6Discord: &e" + perks.get(Perk.DISCORD)));
 				return true;
 			} else {
@@ -112,7 +115,8 @@ public class CommandPerks {
 					if (args[2].equals("compressor") || args[2].equals("randomizer") || args[2].equals("blacklist")
 							|| args[2].equals("tables") || args[2].equals("itemname") || args[2].equals("chat")
 							|| args[2].equals("shulker") || args[2].equals("inventory") || args[2].equals("itemframe")
-							|| args[2].equals("bluefire")) {
+							|| args[2].equals("bluefire") || args[2].equals("whitefire")
+							|| args[2].equals("rainbowfire") || args[2].equals("iridescentfire")) {
 						if (args[3].equals("0") || args[3].equals("1")) {
 							// Updates the perk value based on the input
 							perks.put(Perk.valueOf(args[2].toUpperCase()), Integer.parseInt(args[3]));
@@ -129,6 +133,9 @@ public class CommandPerks {
 								case "inventory" -> perk = "&3&lInventory Assist";
 								case "itemframe" -> perk = "&f&lInvisible Item Frames";
 								case "bluefire" -> perk = "&b&lBlue Fire";
+								case "whitefire" -> perk = "&f&lWhite Fire";
+								case "rainbowfire" -> perk = "&5&lRainbow Fire";
+								case "iridescentfire" -> perk = "&d&lIridescent Fire";
 							}
 
 							aranarthPlayer.setPerks(perks);
@@ -222,7 +229,8 @@ public class CommandPerks {
 	private static boolean isValidPerk(String perk) {
 		return perk.equals("compressor") || perk.equals("randomizer") || perk.equals("blacklist") || perk.equals("tables")
 				|| perk.equals("itemname") || perk.equals("chat") || perk.equals("shulker") || perk.equals("inventory")
-				|| perk.equals("homes") || perk.equals("itemframe") || perk.equals("bluefire") || perk.equals("discord");
+				|| perk.equals("homes") || perk.equals("itemframe") || perk.equals("bluefire") || perk.equals("discord")
+				|| perk.equals("whitefire") || perk.equals("rainbowfire") || perk.equals("iridescentfire");
 	}
 
 }
