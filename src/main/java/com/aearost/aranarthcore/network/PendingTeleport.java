@@ -37,6 +37,7 @@ public class PendingTeleport {
      * is already authoritative and the async DB write from the quit event may not have finished.
      */
     private boolean loginRouting = false;
+    private long createdAt = 0;
 
     public PendingTeleport() {}
 
@@ -52,6 +53,7 @@ public class PendingTeleport {
         this.pitch = pitch;
         this.titleMain = titleMain;
         this.titleSub = titleSub;
+        this.createdAt = System.currentTimeMillis();
     }
 
     /** Constructor for a player-target pending teleport (teleport to wherever that player is). */
@@ -60,6 +62,7 @@ public class PendingTeleport {
         this.targetUuid = targetUuid;
         this.titleMain = titleMain;
         this.titleSub = titleSub;
+        this.createdAt = System.currentTimeMillis();
     }
 
     /** Factory method for a command-dispatch pending teleport (dispatches the command on arrival). */
@@ -69,7 +72,13 @@ public class PendingTeleport {
         pt.command = command;
         pt.titleMain = titleMain;
         pt.titleSub = titleSub;
+        pt.createdAt = System.currentTimeMillis();
         return pt;
+    }
+
+    /** Returns true if this pending teleport is too old to be valid (older than 30 seconds). */
+    public boolean isStale() {
+        return createdAt == 0 || System.currentTimeMillis() - createdAt > 30_000;
     }
 
     public String getType() { return type; }

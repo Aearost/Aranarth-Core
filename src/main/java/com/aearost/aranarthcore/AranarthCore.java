@@ -426,11 +426,6 @@ public class AranarthCore extends JavaPlugin {
         return null;
     }
 
-    @Override
-    public void onLoad() {
-        FireParticleRegistry.register();
-    }
-
     /**
      * Called when the plugin is first enabled on server startup.
      * Responsible for initializing all functionality of AranarthCore.

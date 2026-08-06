@@ -747,7 +747,13 @@ public class NetworkManager {
             if (data == null) {
                 return null;
             }
-            return gson.fromJson(data, PendingTeleport.class);
+            PendingTeleport pending = gson.fromJson(data, PendingTeleport.class);
+            if (pending.isStale()) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Net] Discarding stale pending TP for " + uuid + " (survived server restart)");
+                clearPendingTeleport(uuid);
+                return null;
+            }
+            return pending;
         } catch (Exception e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "DB: failed to get pending TP for " + uuid);
             return null;

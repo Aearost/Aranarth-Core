@@ -363,7 +363,13 @@
       "Bash(zcat $f)",
       "Bash(done 2)",
       "Bash(1 grep:*)",
-      "Bash(head -20 grep -i \"notasocial\\\\|Breathtaking\" C:/Users/liamh/Downloads/Logs/Survival/2026-08-03-5.log.gz)"
+      "Bash(head -20 grep -i \"notasocial\\\\|Breathtaking\" C:/Users/liamh/Downloads/Logs/Survival/2026-08-03-5.log.gz)",
+      "Bash(find C:UsersliamhIdeaProjectsAranarthCorediscord-bot -type f -name *.js)",
+      "Bash(tr '|' '\\\\n')",
+      "Bash(mkdir -p \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/resources/pack/assets/aranarth/particles\")",
+      "Bash(mkdir -p \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/resources/pack/assets/aranarth/textures/particle\")",
+      "Bash(find C:Usersliamh.gradle -name packetevents*.jar)",
+      "Bash(find C:Usersliamh.m2 -name packetevents*.jar)"
     ]
   }
 }

@@ -330,7 +330,7 @@ public class PersistenceUtils {
                     String[] perksValues = fields[17].split("\\*");
                     Perk[] perkArray = Perk.values();
                     HashMap<Perk, Integer> perks = new HashMap<>();
-                    for (int i = 0; i < perkArray.length; i++) {
+                    for (int i = 0; i < perkArray.length && i < perksValues.length; i++) {
                         Perk perk = perkArray[i];
                         perks.put(perk, Integer.parseInt(perksValues[i]));
                     }
@@ -378,6 +378,8 @@ public class PersistenceUtils {
                     AranarthUtils.getPlayer(uuid).setSurvivalExpProgress(survivalExpProgress);
                 } catch (Exception e) {
                     // Skip malformed rows without aborting the rest of the load
+                    Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Load] Skipping malformed player row (first 40 chars: "
+                            + (row.length() > 40 ? row.substring(0, 40) : row) + "): " + e.getMessage());
                 }
             }
             Bukkit.getLogger().info("[AC] All aranarth players have been initialized");
@@ -6762,12 +6764,12 @@ public class PersistenceUtils {
         double balance = Double.parseDouble(fields[9]);
         int rank = Integer.parseInt(fields[10]);
         int saintRank = Integer.parseInt(fields[11]);
-        int councilRank = Integer.parseInt(fields[12]);
-        int architectRank = Integer.parseInt(fields[13]);
+        int councilRank    = fields.length > 12 ? Integer.parseInt(fields[12]) : 0;
+        int architectRank  = fields.length > 13 ? Integer.parseInt(fields[13]) : 0;
 
         List<Home> homes = new ArrayList<>();
         String[] homesStrings = null;
-        if (!fields[14].isEmpty()) {
+        if (fields.length > 14 && !fields[14].isEmpty()) {
             homesStrings = fields[14].split("\\*\\*\\*");
         }
 
@@ -6824,25 +6826,26 @@ public class PersistenceUtils {
             }
         }
 
-        String muteEndDate = fields[15];
-        int particles = Integer.parseInt(fields[16]);
+        String muteEndDate = fields.length > 15 ? fields[15] : "none";
+        int particles = fields.length > 16 ? Integer.parseInt(fields[16]) : 0;
 
-        String[] perksValues = fields[17].split("\\*");
-        Perk[] perkArray = Perk.values();
         HashMap<Perk, Integer> perks = new HashMap<>();
-        for (int i = 0; i < perkArray.length; i++) {
-            Perk perk = perkArray[i];
-            perks.put(perk, Integer.parseInt(perksValues[i]));
+        if (fields.length > 17 && !fields[17].isEmpty()) {
+            String[] perksValues = fields[17].split("\\*");
+            Perk[] perkArray = Perk.values();
+            for (int i = 0; i < perkArray.length && i < perksValues.length; i++) {
+                perks.put(perkArray[i], Integer.parseInt(perksValues[i]));
+            }
         }
 
-        long saintExpireDate = Long.parseLong(fields[18]);
-        boolean isCompressingItems = fields[19].equals("1");
+        long saintExpireDate = fields.length > 18 ? Long.parseLong(fields[18]) : 0L;
+        boolean isCompressingItems = fields.length > 19 && fields[19].equals("1");
 
-        int votePointsSpent = Integer.parseInt(fields[20]);
-        int spawnBoostValue = Integer.parseInt(fields[21]);
+        int votePointsSpent = fields.length > 20 ? Integer.parseInt(fields[20]) : 0;
+        int spawnBoostValue = fields.length > 21 ? Integer.parseInt(fields[21]) : 0;
         boolean isUsingSpawnBoost = spawnBoostValue == 1;
 
-        String firstJoinDate = fields[22];
+        String firstJoinDate = fields.length > 22 ? fields[22] : "";
 
         Pronouns pronouns = Pronouns.MALE;
         if (fields[lastIndex].equals("F")) {
@@ -6893,12 +6896,23 @@ public class PersistenceUtils {
             return;
         }
         Bukkit.getLogger().info("[AC] Loading " + rawRows.size() + " players from MySQL...");
+        int failCount = 0;
         for (Map.Entry<UUID, String> entry : rawRows.entrySet()) {
             try {
                 parseAndAddAranarthPlayer(entry.getValue());
             } catch (Exception e) {
+                failCount++;
                 Bukkit.getLogger().warning("[AC] Failed to parse DB player row for " + entry.getKey() + ": " + e.getMessage());
             }
+        }
+        // If the majority of rows failed to parse, the raw_data is likely in an incompatible
+        // format. Fall back to the flat file so startup isn't crippled.
+        if (failCount > 0 && failCount >= rawRows.size() / 2) {
+            Bukkit.getLogger().severe("[AC] " + failCount + "/" + rawRows.size()
+                    + " player rows failed to parse — raw_data format is incompatible. Falling back to flat file.");
+            AranarthUtils.getAranarthPlayers().clear();
+            loadAranarthPlayers();
+            return;
         }
         Bukkit.getLogger().info("[AC] All aranarth players have been initialized from MySQL");
     }

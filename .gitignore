@@ -44,3 +44,6 @@ build/
 
 ### Discord Bot ###
 discord-bot/scp_commands.txt
+
+### Local libs ###
+libs/
