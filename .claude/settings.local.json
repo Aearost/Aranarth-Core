@@ -369,7 +369,8 @@
       "Bash(mkdir -p \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/resources/pack/assets/aranarth/particles\")",
       "Bash(mkdir -p \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/resources/pack/assets/aranarth/textures/particle\")",
       "Bash(find C:Usersliamh.gradle -name packetevents*.jar)",
-      "Bash(find C:Usersliamh.m2 -name packetevents*.jar)"
+      "Bash(find C:Usersliamh.m2 -name packetevents*.jar)",
+      "Bash(find C:UsersliamhIdeaProjectsAranarthCore -type f \\\\\\(-name *.yml -o -name *.yaml -o -name *.properties \\\\\\))"
     ]
   }
 }

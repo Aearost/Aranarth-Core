@@ -322,11 +322,15 @@ public class PlayerServerJoinListener implements Listener {
 
         if (isCrossServerTransfer) {
             e.setJoinMessage(null);
-            // Suppress DiscordSRV join announcement for server-switch arrivals.
-            // DiscordSRV fires at MONITOR priority and checks discordsrv.silentjoin before posting.
-            player.addAttachment(AranarthCore.getInstance(), "discordsrv.silentjoin", true);
-            if (NetworkManager.isActive()) {
-                NetworkManager.getInstance().markCrossServerJoin(player.getUniqueId());
+            PendingTeleport pendingForDiscord = NetworkManager.isActive()
+                    ? NetworkManager.getInstance().getPendingTeleport(player.getUniqueId()) : null;
+            boolean isLoginRoutingArrival = pendingForDiscord != null && pendingForDiscord.isLoginRouting();
+            if (!isLoginRoutingArrival) {
+                // Suppress DiscordSRV join announcement for server-switch arrivals
+                player.addAttachment(AranarthCore.getInstance(), "discordsrv.silentjoin", true);
+                if (NetworkManager.isActive()) {
+                    NetworkManager.getInstance().markCrossServerJoin(player.getUniqueId());
+                }
             }
         } else {
             if (!isNewPlayer) {
@@ -474,6 +478,35 @@ public class PlayerServerJoinListener implements Listener {
                                 AranarthPlayer freshAp = AranarthUtils.getPlayer(player.getUniqueId());
                                 if (freshAp != null) {
                                     NetworkManager.getInstance().publishPlayerJoin(player.getUniqueId(), freshAp);
+                                }
+                            }
+                            // Publish the join announcement when this isApplyInventory transfer was
+                            // also a login-routing transfer (player logged off on this server, Velocity
+                            // routed them through the other server which suppressed the join message).
+                            if (isLoginRouting) {
+                                AranarthPlayer apJoin = AranarthUtils.getPlayer(player.getUniqueId());
+                                if (apJoin != null && !apJoin.isVanished()) {
+                                    String routedName = "&7" + AranarthUtils.getNickname(player);
+                                    DateUtils routedDateUtils = new DateUtils();
+                                    String routedJoinMsg;
+                                    if (routedDateUtils.isValentinesDay()) {
+                                        routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.VALENTINES));
+                                    } else if (routedDateUtils.isEaster()) {
+                                        routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.EASTER));
+                                    } else if (routedDateUtils.isHalloween()) {
+                                        routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.HALLOWEEN));
+                                    } else if (routedDateUtils.isChristmas()) {
+                                        routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.CHRISTMAS));
+                                    } else {
+                                        routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + routedName);
+                                    }
+                                    for (Player online : Bukkit.getOnlinePlayers()) {
+                                        online.sendMessage(routedJoinMsg);
+                                    }
+                                    if (NetworkManager.isActive()) {
+                                        NetworkManager.getInstance().publishJoinMsg(routedJoinMsg, false);
+                                    }
+                                    PlayerServerJoinListener.this.playJoinSound();
                                 }
                             }
                         } else if (hadPendingTp) {
