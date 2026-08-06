@@ -1089,8 +1089,8 @@ public class DateUtils {
         // Applies delay to first snow storm
         if (!AranarthUtils.getHasStormedInMonth()) {
             AranarthUtils.setHasStormedInMonth(true);
-            // TESTING: instant start
-            AranarthUtils.setStormDelay(100);
+            // At least 0.25 days, no more than 1.5 days
+            AranarthUtils.setStormDelay(new Random().nextInt(36000) + 6000);
         }
         applySnow(200, 4000);
     }
@@ -1229,8 +1229,8 @@ public class DateUtils {
                                         // At least 0.5 days, no more than 2 days
                                             delay = random.nextInt(48000) + 12000;
                                     case Month.FRIGORVOR ->
-                                        // TESTING: instant restart
-                                            delay = 100;
+                                        // At least 0.25 days, no more than 1.5 days
+                                            delay = random.nextInt(36000) + 6000;
                                     case Month.OBSCURVOR ->
                                         // At least 0.5 days, no more than 1.5 days
                                             delay = random.nextInt(36000) + 12000;

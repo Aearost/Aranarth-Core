@@ -30,6 +30,7 @@ Minor Features
 [~] Fixed issue where crops were not going into shulkers correctly due to lore issues
 [~] Fixed issue where gradient chat was not persisting correctly across server restarts
 [~] Fixed issue where server join messages were not being properly sent to discord chat
+[~] Reverted old temporary code that was causing endless snowstorms during Frigorvor
 
 Backend Code Changes
 -
