@@ -52,15 +52,13 @@ public class GuiCompressorClick {
 			else if (slot == 45) {
 				AranarthUtils.compressAllMaterials(player.getUniqueId());
 				player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 0.5F, 1.75F);
-				GuiCompressor gui = new GuiCompressor(player);
-				gui.openGui();
+				GuiCompressor.populate(player.getOpenInventory().getTopInventory(), player);
 			}
 			// Disable All
 			else if (slot == 53) {
 				AranarthUtils.stopCompressingAllMaterials(player.getUniqueId());
 				player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 0.5F, 1.75F);
-				GuiCompressor gui = new GuiCompressor(player);
-				gui.openGui();
+				GuiCompressor.populate(player.getOpenInventory().getTopInventory(), player);
 			}
 			return;
 		}
@@ -81,7 +79,6 @@ public class GuiCompressorClick {
 			AranarthUtils.addCompressibleItem(player.getUniqueId(), material);
 		}
 		player.playSound(player, Sound.UI_BUTTON_CLICK, 1F, 0.8F);
-		GuiCompressor gui = new GuiCompressor(player);
-		gui.openGui();
+		GuiCompressor.populate(player.getOpenInventory().getTopInventory(), player);
 	}
 }

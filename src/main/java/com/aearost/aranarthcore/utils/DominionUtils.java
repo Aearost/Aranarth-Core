@@ -11,7 +11,6 @@ import org.bukkit.block.Biome;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.awt.*;
 import java.awt.Color;
 import java.util.*;
 import java.util.List;
@@ -32,7 +31,6 @@ public class DominionUtils {
     private static final Map<String, Dominion> chunkKeyToDominion = new HashMap<>();
     private static final Map<UUID, Dominion> playerToDominion = new HashMap<>();
     private static final Map<UUID, UUID> foodInventoryLocks = new HashMap<>();
-    private static final Set<UUID> foodNavigating = new HashSet<>();
     /**
      * Tracks the last in-game date on which the daily food/tax cycle ran, to prevent double-firing.
      */
@@ -1016,27 +1014,6 @@ public class DominionUtils {
     public static boolean isFoodInventoryLockedByOther(UUID dominionId, UUID playerUUID) {
         UUID holder = foodInventoryLocks.get(dominionId);
         return holder != null && !holder.equals(playerUUID);
-    }
-
-    /**
-     * Marks a player as mid-page-flip so the close event is treated as navigation, not a real close.
-     */
-    public static void markFoodNavigating(UUID playerUUID) {
-        foodNavigating.add(playerUUID);
-    }
-
-    /**
-     * Clears the navigation flag for a player.
-     */
-    public static void clearFoodNavigating(UUID playerUUID) {
-        foodNavigating.remove(playerUUID);
-    }
-
-    /**
-     * Returns true if the player is currently mid-page-flip in the food GUI.
-     */
-    public static boolean isFoodNavigating(UUID playerUUID) {
-        return foodNavigating.contains(playerUUID);
     }
 
     /**

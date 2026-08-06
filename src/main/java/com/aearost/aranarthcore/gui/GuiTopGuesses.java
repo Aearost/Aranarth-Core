@@ -86,9 +86,94 @@ public class GuiTopGuesses {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                 aranarthPlayer.setCurrentGuiPageNum(pageNum);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                new GuiTopGuesses(player, pageNum, sortedUuids, dbData, profiles).openGui();
+                String openTitle = ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
+                if (player.isOnline() && openTitle.equals("Top Guesses")) {
+                    populate(player.getOpenInventory().getTopInventory(), pageNum, sortedUuids, dbData, profiles);
+                } else {
+                    new GuiTopGuesses(player, pageNum, sortedUuids, dbData, profiles).openGui();
+                }
             });
         });
+    }
+
+    private static void populate(Inventory gui, int pageNum, List<UUID> sortedUuids,
+                                 Map<UUID, DatabaseManager.ChatGameEntry> dbData,
+                                 Map<UUID, PlayerProfile> profiles) {
+        int startIndex = pageNum * 45;
+
+        ItemStack blank = new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE);
+        ItemMeta blankMeta = blank.getItemMeta();
+        if (Objects.nonNull(blankMeta)) {
+            blankMeta.setDisplayName(ChatUtils.translateToColor("&f"));
+            blank.setItemMeta(blankMeta);
+        }
+
+        NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
+        nf.setMaximumFractionDigits(0);
+
+        for (int i = 0; i < 45; i++) {
+            if (startIndex + i >= sortedUuids.size()) {
+                gui.setItem(i, blank);
+                continue;
+            }
+
+            UUID uuid = sortedUuids.get(startIndex + i);
+            ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+            SkullMeta skullMeta = (SkullMeta) head.getItemMeta();
+
+            PlayerProfile profile = profiles.get(uuid);
+            if (profile != null) {
+                skullMeta.setPlayerProfile(profile);
+            }
+
+            String displayName;
+            AranarthPlayer localPlayer = AranarthUtils.getPlayer(uuid);
+            if (localPlayer != null) {
+                displayName = localPlayer.getNickname();
+            } else {
+                NetworkPlayer remote = NetworkManager.isActive()
+                        ? NetworkManager.getInstance().getRemotePlayer(uuid) : null;
+                if (remote != null && !remote.getNickname().isEmpty()) {
+                    displayName = remote.getNickname();
+                } else {
+                    DatabaseManager.ChatGameEntry entry = dbData.get(uuid);
+                    if (entry != null && !entry.nickname().isEmpty()) {
+                        displayName = ChatUtils.stripColorFormatting(entry.nickname());
+                    } else if (entry != null && !entry.username().isEmpty()) {
+                        displayName = entry.username();
+                    } else {
+                        displayName = uuid.toString();
+                    }
+                }
+            }
+
+            final int guessCount;
+            final double earnings;
+            final double bestTime;
+            final int highestStreak;
+            if (!dbData.isEmpty()) {
+                DatabaseManager.ChatGameEntry entry = dbData.get(uuid);
+                guessCount = entry != null ? entry.guessCount() : 0;
+                earnings = entry != null ? entry.totalEarnings() : 0.0;
+                bestTime = entry != null ? entry.bestTime() : 0.0;
+                highestStreak = entry != null ? entry.highestStreak() : 0;
+            } else {
+                guessCount = AranarthUtils.getChatGameGuesses().getOrDefault(uuid, 0);
+                earnings = AranarthUtils.getChatGameEarnings().getOrDefault(uuid, 0.0);
+                bestTime = AranarthUtils.getChatGameBestTimes().getOrDefault(uuid, 0.0);
+                highestStreak = AranarthUtils.getChatGameHighestStreak(uuid);
+            }
+
+            skullMeta.setDisplayName(ChatUtils.translateToColor("&e" + displayName));
+            List<String> lore = new ArrayList<>();
+            lore.add(ChatUtils.translateToColor("&7&oCorrect guesses - &e&o" + guessCount));
+            lore.add(ChatUtils.translateToColor("&7&oFastest guess - &e&o" + (bestTime > 0 ? String.format("%.2f", bestTime) + "s" : "N/A")));
+            lore.add(ChatUtils.translateToColor("&7&oLongest streak - &e&o" + (highestStreak > 0 ? highestStreak + "x" : "N/A")));
+            lore.add(ChatUtils.translateToColor("&7&oTotal earned - &6&o$" + nf.format(Math.round(earnings))));
+            skullMeta.setLore(lore);
+            head.setItemMeta(skullMeta);
+            gui.setItem(i, head);
+        }
     }
 
     private Inventory initializeGui(int pageNum, List<UUID> sortedUuids,

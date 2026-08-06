@@ -39,6 +39,15 @@ public class GuiJobsJoin {
         player.openInventory(gui);
     }
 
+    /**
+     * Updates an already-open join-jobs inventory in-place without closing it.
+     */
+    public void populateInto(org.bukkit.inventory.Inventory inv) {
+        for (int i = 0; i < gui.getSize(); i++) {
+            inv.setItem(i, gui.getItem(i));
+        }
+    }
+
     private Inventory initializeGui() {
         Inventory inv = Bukkit.createInventory(player, 45, ChatUtils.translateToColor("&8&lJoin a Job"));
 

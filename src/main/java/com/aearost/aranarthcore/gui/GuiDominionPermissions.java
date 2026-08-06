@@ -411,7 +411,7 @@ public class GuiDominionPermissions {
         };
     }
 
-    private static ItemStack buildPermissionItem(DominionPermission permission, boolean enabled) {
+    public static ItemStack buildPermissionItem(DominionPermission permission, boolean enabled) {
         ItemStack item = new ItemStack(getPermissionMaterial(permission));
         ItemMeta meta = item.getItemMeta();
         String statusColor = enabled ? "&a" : "&c";

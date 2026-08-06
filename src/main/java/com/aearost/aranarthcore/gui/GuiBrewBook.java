@@ -112,5 +112,17 @@ public class GuiBrewBook {
         player.openInventory(gui);
     }
 
+    /**
+     * Updates an already-open brew book inventory in-place without closing it.
+     */
+    public void populateInto(org.bukkit.inventory.Inventory inv) {
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        aranarthPlayer.setCurrentGuiPageNum(page);
+        AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+        for (int i = 0; i < gui.getSize(); i++) {
+            inv.setItem(i, gui.getItem(i));
+        }
+    }
+
     public int getPage() { return page; }
 }

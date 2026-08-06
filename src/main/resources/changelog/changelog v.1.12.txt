@@ -31,6 +31,7 @@ Minor Features
 [~] Fixed issue where gradient chat was not persisting correctly across server restarts
 [~] Fixed issue where server join messages were not being properly sent to discord chat
 [~] Reverted old temporary code that was causing endless snowstorms during Frigorvor
+[~] Fixed issue where clicking in most GUIs would relocate the player's mouse to the center of the screen
 
 Backend Code Changes
 -

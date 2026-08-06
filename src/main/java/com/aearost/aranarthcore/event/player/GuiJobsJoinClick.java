@@ -81,8 +81,7 @@ public class GuiJobsJoinClick {
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, jobsVol / 100f, 1.0f);
         }
 
-        player.closeInventory();
-        new GuiJobsJoin(player).openGui();
+        new GuiJobsJoin(player).populateInto(player.getOpenInventory().getTopInventory());
     }
 
     private JobType getJobForSlot(int slot) {

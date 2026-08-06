@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -34,24 +35,20 @@ public class GuiDominionFoodClick {
 
 				if (slot == 45) { // Previous
 					int newPage = (currentPage - 1 + totalPages) % totalPages;
-					// Mark as navigating so the close event skips compact/unlock
-					DominionUtils.markFoodNavigating(player.getUniqueId());
-					new GuiDominionFood(player, newPage).openGui();
-					DominionUtils.clearFoodNavigating(player.getUniqueId());
+					saveCurrentPageToDb(player, dominion, currentPage, e.getClickedInventory());
 					aranarthPlayer.setCurrentGuiPageNum(newPage);
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+					GuiDominionFood.populatePage(e.getClickedInventory(), dominion, newPage);
 					player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
 				} else if (slot == 49) { // Exit
 					player.closeInventory();
 					player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
 				} else if (slot == 53) { // Next
 					int newPage = (currentPage + 1) % totalPages;
-					// Mark as navigating so the close event skips compact/unlock
-					DominionUtils.markFoodNavigating(player.getUniqueId());
-					new GuiDominionFood(player, newPage).openGui();
-					DominionUtils.clearFoodNavigating(player.getUniqueId());
+					saveCurrentPageToDb(player, dominion, currentPage, e.getClickedInventory());
 					aranarthPlayer.setCurrentGuiPageNum(newPage);
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+					GuiDominionFood.populatePage(e.getClickedInventory(), dominion, newPage);
 					player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
 				}
 				return;
@@ -72,6 +69,20 @@ public class GuiDominionFoodClick {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Saves the current page's items from the open inventory into the dominion food array and persists it.
+	 * Used when navigating pages without closing the inventory.
+	 */
+	private void saveCurrentPageToDb(Player player, Dominion dominion, int currentPage, Inventory inv) {
+		int foodOffset = currentPage * GuiDominionFood.FOOD_SLOTS_PER_PAGE;
+		ItemStack[] food = dominion.getFood();
+		for (int i = 0; i < GuiDominionFood.FOOD_SLOTS_PER_PAGE && foodOffset + i < food.length; i++) {
+			food[foodOffset + i] = inv.getItem(i);
+		}
+		dominion.setFood(food);
+		DominionUtils.updateDominion(dominion);
 	}
 
 	/**

@@ -46,8 +46,8 @@ public class GuiHomepadClick {
             if (currentPage > 0) {
                 currentPage--;
                 aranarthPlayer.setCurrentGuiPageNum(currentPage);
-                GuiTeleport gui = new GuiTeleport(player, currentPage);
-                gui.openGui();
+                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                new GuiTeleport(player, currentPage).populateInto(e.getClickedInventory());
                 player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
             } else if (currentPage == 0) {
                 int numOfHomes = AranarthUtils.getHomepads().size();
@@ -60,8 +60,8 @@ public class GuiHomepadClick {
                 }
                 if (maxPages > 1) {
                     aranarthPlayer.setCurrentGuiPageNum(maxPages - 1);
-                    GuiTeleport gui = new GuiTeleport(player, maxPages - 1);
-                    gui.openGui();
+                    AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    new GuiTeleport(player, maxPages - 1).populateInto(e.getClickedInventory());
                     player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
                 }
             }
@@ -88,13 +88,13 @@ public class GuiHomepadClick {
             if (currentPage + 1 < maxPages) {
                 currentPage++;
                 aranarthPlayer.setCurrentGuiPageNum(currentPage);
-                GuiTeleport gui = new GuiTeleport(player, currentPage);
-                gui.openGui();
+                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                new GuiTeleport(player, currentPage).populateInto(e.getClickedInventory());
                 player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
             } else {
                 aranarthPlayer.setCurrentGuiPageNum(0);
-                GuiTeleport gui = new GuiTeleport(player, 0);
-                gui.openGui();
+                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                new GuiTeleport(player, 0).populateInto(e.getClickedInventory());
                 player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
             }
         } else {

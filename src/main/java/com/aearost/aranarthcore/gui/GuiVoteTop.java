@@ -111,13 +111,61 @@ public class GuiVoteTop {
                 profiles.put(uuid, profile);
             }
 
+            final Map<UUID, PlayerProfile> finalProfiles = profiles;
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                 aranarthPlayer.setCurrentGuiPageNum(pageNum);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                new GuiVoteTop(player, finalTitle, finalPageEntries, profiles).openGui();
+                String openTitle = com.aearost.aranarthcore.utils.ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
+                if (player.isOnline() && openTitle.equals(com.aearost.aranarthcore.utils.ChatUtils.stripColorFormatting(finalTitle))) {
+                    populate(player.getOpenInventory().getTopInventory(), finalPageEntries, finalProfiles);
+                } else {
+                    new GuiVoteTop(player, finalTitle, finalPageEntries, finalProfiles).openGui();
+                }
             });
         });
+    }
+
+    private static void populate(Inventory gui, List<Map.Entry<UUID, Integer>> pageEntries,
+                                 Map<UUID, PlayerProfile> profiles) {
+        ItemStack blank = new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE);
+        ItemMeta blankMeta = blank.getItemMeta();
+        if (Objects.nonNull(blankMeta)) {
+            blankMeta.setDisplayName(ChatUtils.translateToColor("&f"));
+            blank.setItemMeta(blankMeta);
+        }
+
+        for (int i = 0; i < 45; i++) {
+            if (i >= pageEntries.size()) {
+                gui.setItem(i, blank);
+                continue;
+            }
+
+            Map.Entry<UUID, Integer> entry = pageEntries.get(i);
+            UUID uuid = entry.getKey();
+            int voteCount = entry.getValue();
+
+            ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+            SkullMeta skullMeta = (SkullMeta) head.getItemMeta();
+
+            PlayerProfile profile = profiles.get(uuid);
+            if (profile != null) {
+                skullMeta.setPlayerProfile(profile);
+            }
+
+            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+            String displayName = aranarthPlayer != null
+                    ? aranarthPlayer.getNickname()
+                    : (profile != null && profile.getName() != null ? profile.getName() : uuid.toString());
+            skullMeta.setDisplayName(ChatUtils.translateToColor("&e" + displayName));
+
+            List<String> lore = new ArrayList<>();
+            String voteWord = voteCount == 1 ? "vote" : "votes";
+            lore.add(ChatUtils.translateToColor("&6" + voteCount + " &e" + voteWord));
+            skullMeta.setLore(lore);
+            head.setItemMeta(skullMeta);
+            gui.setItem(i, head);
+        }
     }
 
     private Inventory initializeGui(String title, List<Map.Entry<UUID, Integer>> pageEntries,

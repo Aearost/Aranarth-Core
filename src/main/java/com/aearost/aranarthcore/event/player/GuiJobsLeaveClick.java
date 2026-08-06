@@ -106,8 +106,7 @@ public class GuiJobsLeaveClick {
                     player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, jobsVol / 100f, 1.0f);
                 }
 
-                player.closeInventory();
-                new GuiJobsLeave(player).openGui();
+                new GuiJobsLeave(player).populateInto(player.getOpenInventory().getTopInventory());
                 return;
             }
         }

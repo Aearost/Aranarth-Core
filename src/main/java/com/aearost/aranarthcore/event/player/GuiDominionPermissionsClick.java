@@ -129,9 +129,9 @@ public class GuiDominionPermissionsClick {
                     dominion.getDominionPermissions().restoreDefaults(rank);
                     DominionUtils.updateDominion(dominion);
                     if (isRelationRank(rank)) {
-                        GuiDominionPermissions.openRelationGui(player, rank);
+                        repopulateRelation(e.getClickedInventory(), player, rank);
                     } else {
-                        GuiDominionPermissions.openRankGui(player, rank);
+                        repopulateRank(e.getClickedInventory(), player, rank);
                     }
                     player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5F, 1F);
                 }
@@ -163,11 +163,9 @@ public class GuiDominionPermissionsClick {
             dominion.getDominionPermissions().togglePermission(rank, perm);
             DominionUtils.updateDominion(dominion);
 
-            if (isRelation) {
-                GuiDominionPermissions.openRelationGui(player, rank);
-            } else {
-                GuiDominionPermissions.openRankGui(player, rank);
-            }
+            boolean newState = dominion.getDominionPermissions().getPermissions(rank).contains(perm);
+            e.getClickedInventory().setItem(e.getSlot(), GuiDominionPermissions.buildPermissionItem(perm, newState));
+            player.updateInventory();
             player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 0.5F, 1.5F);
         }
     }
@@ -189,5 +187,33 @@ public class GuiDominionPermissionsClick {
         return rank == DominionRank.ALLIED || rank == DominionRank.TRUCED
                 || rank == DominionRank.NEUTRAL || rank == DominionRank.WANDERER
                 || rank == DominionRank.ENEMIED;
+    }
+
+    /**
+     * Repopulates all rank permission slots in the open inventory without closing it.
+     */
+    private void repopulateRank(org.bukkit.inventory.Inventory inv, Player player, DominionRank rank) {
+        Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+        if (dominion == null) return;
+        java.util.Set<DominionPermission> enabled = dominion.getDominionPermissions().getPermissions(rank);
+        for (Map.Entry<Integer, DominionPermission> entry : GuiDominionPermissions.getRankSlotPermissions().entrySet()) {
+            inv.setItem(entry.getKey(), GuiDominionPermissions.buildPermissionItem(entry.getValue(), enabled.contains(entry.getValue())));
+        }
+        player.updateInventory();
+    }
+
+    /**
+     * Repopulates all relation permission slots in the open inventory without closing it.
+     */
+    private void repopulateRelation(org.bukkit.inventory.Inventory inv, Player player, DominionRank rank) {
+        Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+        if (dominion == null) return;
+        java.util.Set<DominionPermission> enabled = dominion.getDominionPermissions().getPermissions(rank);
+        boolean omitPvp = rank == DominionRank.NEUTRAL || rank == DominionRank.ENEMIED || rank == DominionRank.WANDERER;
+        for (Map.Entry<Integer, DominionPermission> entry : GuiDominionPermissions.getRelationSlotPermissions().entrySet()) {
+            if (omitPvp && entry.getValue() == DominionPermission.PVP) continue;
+            inv.setItem(entry.getKey(), GuiDominionPermissions.buildPermissionItem(entry.getValue(), enabled.contains(entry.getValue())));
+        }
+        player.updateInventory();
     }
 }

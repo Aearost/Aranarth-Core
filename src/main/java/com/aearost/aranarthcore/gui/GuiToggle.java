@@ -155,14 +155,14 @@ public class GuiToggle {
         return gui;
     }
 
-    private boolean hasAnyFirePerk(AranarthPlayer aranarthPlayer) {
+    public static boolean hasAnyFirePerk(AranarthPlayer aranarthPlayer) {
         return (aranarthPlayer.getPerks().getOrDefault(Perk.BLUEFIRE, 0) == 1)
                 || (aranarthPlayer.getPerks().getOrDefault(Perk.WHITEFIRE, 0) == 1)
                 || (aranarthPlayer.getPerks().getOrDefault(Perk.RAINBOWFIRE, 0) == 1)
                 || (aranarthPlayer.getPerks().getOrDefault(Perk.IRIDESCENTFIRE, 0) == 1);
     }
 
-    private ItemStack buildFireTypeItem(FireType type) {
+    public static ItemStack buildFireTypeItem(FireType type) {
         ItemStack item = new ItemStack(Material.CAMPFIRE);
         ItemMeta meta = item.getItemMeta();
         String displayName = switch (type) {
@@ -179,7 +179,7 @@ public class GuiToggle {
         return item;
     }
 
-    private ItemStack buildToggleItem(Material material, String name, boolean active) {
+    public static ItemStack buildToggleItem(Material material, String name, boolean active) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         String status = active ? "&a&lActive" : "&c&lInactive";
@@ -188,7 +188,7 @@ public class GuiToggle {
         return item;
     }
 
-    private ItemStack buildLockedItem(Material material, String name) {
+    public static ItemStack buildLockedItem(Material material, String name) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(ChatUtils.translateToColor(name + " &7&l- &8&lLocked"));

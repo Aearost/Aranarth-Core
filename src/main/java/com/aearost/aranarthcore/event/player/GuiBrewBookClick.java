@@ -33,7 +33,7 @@ public class GuiBrewBookClick {
         if (slot == 45 && clicked.getType() == Material.RED_WOOL) {
             int currentPage = getCurrentPage(player);
             if (currentPage > 0) {
-                new GuiBrewBook(player, currentPage - 1).openGui();
+                new GuiBrewBook(player, currentPage - 1).populateInto(e.getView().getTopInventory());
             }
             return;
         }
@@ -41,7 +41,7 @@ public class GuiBrewBookClick {
         // Next page
         if (slot == 53 && clicked.getType() == Material.LIME_WOOL) {
             int currentPage = getCurrentPage(player);
-            new GuiBrewBook(player, currentPage + 1).openGui();
+            new GuiBrewBook(player, currentPage + 1).populateInto(e.getView().getTopInventory());
             return;
         }
 

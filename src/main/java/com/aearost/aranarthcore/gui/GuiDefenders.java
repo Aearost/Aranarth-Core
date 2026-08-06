@@ -59,6 +59,16 @@ public class GuiDefenders {
         player.openInventory(gui);
     }
 
+    /**
+     * Updates only the defender-type item slots in an already-open inventory.
+     */
+    public static void populate(Inventory inv, Dominion dominion) {
+        DefenderType[] types = DefenderType.values();
+        for (int i = 0; i < types.length && i < DEFENDER_SLOTS.length; i++) {
+            inv.setItem(DEFENDER_SLOTS[i], buildDefenderItem(types[i], dominion));
+        }
+    }
+
     private static ItemStack buildDefenderItem(DefenderType type, Dominion dominion) {
         int count = DefenderUtils.getDefenderCount(dominion.getId(), type);
         int total = DefenderUtils.getTotalDefenderCount(dominion.getId());

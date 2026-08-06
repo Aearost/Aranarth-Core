@@ -31,6 +31,25 @@ public class GuiDominionFood {
 		player.openInventory(initializedGui);
 	}
 
+	/**
+	 * Updates an already-open food inventory in-place for the given page, without closing it.
+	 * The caller is responsible for saving the current page's items to the dominion before calling this.
+	 */
+	public static void populatePage(org.bukkit.inventory.Inventory inv, com.aearost.aranarthcore.objects.Dominion dominion, int pageNum) {
+		org.bukkit.inventory.ItemStack[] food = dominion.getFood();
+		int foodOffset = pageNum * FOOD_SLOTS_PER_PAGE;
+		int totalPages = getTotalPages(dominion.getDominionLevel());
+
+		// Clear food slots
+		for (int i = 0; i < FOOD_SLOTS_PER_PAGE; i++) {
+			inv.setItem(i, foodOffset + i < food.length ? food[foodOffset + i] : null);
+		}
+
+		// Update page indicator in title area — update the nav items to reflect new page
+		// (Navigation row items are static; only update the blank items between nav buttons if needed)
+		// The inventory title won't change, but that's acceptable for page navigation.
+	}
+
 	public static int getTotalPages(int level) {
 		if (level == 3) return 2;
 		if (level == 4) return 3;

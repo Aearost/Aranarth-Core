@@ -1,18 +1,13 @@
 package com.aearost.aranarthcore.event.player;
 
-import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiDominionPermissions;
 import com.aearost.aranarthcore.gui.GuiDominionPlayerPermissions;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.DominionRank;
-import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
-import com.destroystokyo.paper.profile.PlayerProfile;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -69,7 +64,34 @@ public class GuiDominionPlayerPermissionsClick {
         if (e.getSlot() == 4 && clicked.getType() == Material.ENDER_PEARL) {
             dominion.clearPlayerPermissionOverrides(targetUuid);
             DominionUtils.updateDominion(dominion);
-            reopenForTarget(player, dominion, targetUuid);
+            // Update all permission slots in-place (no overrides remain, effective = inherited)
+            boolean isMemberForRestore = dominion.getMembers().contains(targetUuid);
+            boolean isRelationForRestore;
+            DominionRank rankForRestore;
+            if (isMemberForRestore) {
+                rankForRestore = dominion.getMemberRank(targetUuid);
+                if (rankForRestore == null) rankForRestore = DominionRank.NEWCOMER;
+                isRelationForRestore = false;
+            } else {
+                com.aearost.aranarthcore.objects.Dominion targetDominion = DominionUtils.getPlayerDominion(targetUuid);
+                rankForRestore = DominionUtils.getRelationKey(targetDominion, dominion);
+                isRelationForRestore = true;
+            }
+            Set<DominionPermission> inheritedPermsForRestore = dominion.getDominionPermissions().getPermissions(rankForRestore);
+            Map<Integer, DominionPermission> slotMapForRestore = isRelationForRestore
+                    ? GuiDominionPermissions.getRelationSlotPermissions()
+                    : GuiDominionPermissions.getRankSlotPermissions();
+            for (Map.Entry<Integer, DominionPermission> entry : slotMapForRestore.entrySet()) {
+                if (isRelationForRestore && entry.getValue() == DominionPermission.PVP
+                        && (rankForRestore == DominionRank.NEUTRAL || rankForRestore == DominionRank.ENEMIED
+                        || rankForRestore == DominionRank.WANDERER)) {
+                    continue;
+                }
+                boolean eff = inheritedPermsForRestore.contains(entry.getValue());
+                e.getClickedInventory().setItem(entry.getKey(),
+                        GuiDominionPlayerPermissions.buildPlayerPermissionItem(entry.getValue(), eff, false));
+            }
+            player.updateInventory();
             player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5F, 1F);
             return;
         }
@@ -115,25 +137,15 @@ public class GuiDominionPlayerPermissionsClick {
         dominion.togglePlayerPermissionOverride(targetUuid, perm, inheritedValue);
         DominionUtils.updateDominion(dominion);
 
-        reopenForTarget(player, dominion, targetUuid);
+        // Recompute effective value after the override toggle
+        Map<DominionPermission, Boolean> overrides = dominion.getPlayerPermissionOverrides()
+                .getOrDefault(targetUuid, java.util.Collections.emptyMap());
+        boolean effective = overrides.containsKey(perm) ? overrides.get(perm) : inheritedValue;
+        boolean isOverridden = overrides.containsKey(perm);
+        e.getClickedInventory().setItem(e.getSlot(),
+                GuiDominionPlayerPermissions.buildPlayerPermissionItem(perm, effective, isOverridden));
+        player.updateInventory();
         player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 0.5F, 1.5F);
     }
 
-    /**
-     * Re-opens the player permission GUI for the same target, loading their profile asynchronously.
-     */
-    private void reopenForTarget(Player leader, Dominion dominion, UUID targetUuid) {
-        OfflinePlayer offlineTarget = Bukkit.getOfflinePlayer(targetUuid);
-        String targetName = offlineTarget.getName() != null
-                ? offlineTarget.getName()
-                : AranarthUtils.getNickname(offlineTarget);
-
-        AranarthCore plugin = AranarthCore.getInstance();
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            PlayerProfile profile = Bukkit.createProfile(targetUuid, targetName);
-            profile.complete(true);
-            Bukkit.getScheduler().runTask(plugin,
-                    () -> GuiDominionPlayerPermissions.open(leader, dominion, targetUuid, targetName, profile));
-        });
-    }
 }

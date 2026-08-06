@@ -86,7 +86,7 @@ public class GuiDefenderManage {
         playerToDefender.remove(playerUUID);
     }
 
-    private static ItemStack buildModeButton(DefenderMode mode, UUID defenderEntityUUID) {
+    public static ItemStack buildModeButton(DefenderMode mode, UUID defenderEntityUUID) {
         ItemStack item = new ItemStack(modeToMaterial(mode));
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(ChatUtils.translateToColor("&b&lMode: &f" + mode.getDisplayName()));
@@ -131,7 +131,7 @@ public class GuiDefenderManage {
         };
     }
 
-    private static ItemStack buildLockedModeButton(UUID defenderEntityUUID) {
+    public static ItemStack buildLockedModeButton(UUID defenderEntityUUID) {
         UUID followId = DefenderUtils.getFollowPlayerId(defenderEntityUUID);
         String name = followId != null
                 ? (Bukkit.getOfflinePlayer(followId).getName() != null
@@ -166,7 +166,7 @@ public class GuiDefenderManage {
         return item;
     }
 
-    private static ItemStack buildLocationButton(UUID defenderEntityUUID, Dominion dominion) {
+    public static ItemStack buildLocationButton(UUID defenderEntityUUID, Dominion dominion) {
         UUID assignedOutpostId = DefenderUtils.getAssignedOutpostId(defenderEntityUUID);
         String locationName;
         String description;
@@ -195,7 +195,7 @@ public class GuiDefenderManage {
         return item;
     }
 
-    private static ItemStack buildInfoItem(DefenderType type, UUID entityUUID, Dominion dominion, DefenderMode mode) {
+    public static ItemStack buildInfoItem(DefenderType type, UUID entityUUID, Dominion dominion, DefenderMode mode) {
         NumberFormat fmt = NumberFormat.getInstance();
 
         double currentHp = 0;

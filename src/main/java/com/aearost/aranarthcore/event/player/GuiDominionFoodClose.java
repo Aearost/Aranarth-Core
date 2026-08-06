@@ -40,13 +40,7 @@ public class GuiDominionFoodClose {
 			dominion.setFood(inventory.getContents());
 		}
 
-		// If this is just a page flip, persist the current state but skip compact and unlock
-		if (DominionUtils.isFoodNavigating(player.getUniqueId())) {
-			DominionUtils.updateDominion(dominion);
-			return;
-		}
-
-		// Real closure - compact the full food array and release the lock
+		// Compact the full food array and release the lock
 		ItemStack[] compacted = DominionUtils.compactFoodArray(dominion.getFood());
 		dominion.setFood(compacted);
 		DominionUtils.unlockFoodInventory(dominion.getId());

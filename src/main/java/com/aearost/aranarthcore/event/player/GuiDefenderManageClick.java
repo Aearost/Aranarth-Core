@@ -104,7 +104,13 @@ public class GuiDefenderManageClick {
             };
             player.sendMessage(ChatUtils.chatMessage(modeMsg));
             player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
-            GuiDefenderManage.open(player, defenderUUID);
+            DefenderType type = DefenderUtils.getDefenderType(defenderUUID);
+            boolean nowFollowLocked = DefenderUtils.isFollowLockedFor(defenderUUID, player.getUniqueId(), dominion.getLeader());
+            org.bukkit.inventory.Inventory inv = player.getOpenInventory().getTopInventory();
+            inv.setItem(GuiDefenderManage.SLOT_MODE, nowFollowLocked
+                    ? GuiDefenderManage.buildLockedModeButton(defenderUUID)
+                    : GuiDefenderManage.buildModeButton(nextMode, defenderUUID));
+            inv.setItem(13, GuiDefenderManage.buildInfoItem(type, defenderUUID, dominion, nextMode));
 
         } else if (slot == GuiDefenderManage.SLOT_TELEPORT_HOME) {
             Entity defender = Bukkit.getEntity(defenderUUID);
@@ -169,7 +175,8 @@ public class GuiDefenderManageClick {
                     + OutpostUtils.getOutpostById(nextOutpostId).getName();
             player.sendMessage(ChatUtils.chatMessage(assignMsg));
             player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
-            GuiDefenderManage.open(player, defenderUUID);
+            player.getOpenInventory().getTopInventory().setItem(GuiDefenderManage.SLOT_LOCATION,
+                    GuiDefenderManage.buildLocationButton(defenderUUID, dominion));
 
         } else if (slot == GuiDefenderManage.SLOT_SELL) {
             DefenderType type = DefenderUtils.getDefenderType(defenderUUID);
