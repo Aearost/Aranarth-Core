@@ -7137,6 +7137,7 @@ public class PersistenceUtils {
         }
         Bukkit.getLogger().info("[AC] Loading quest progress from MySQL...");
         UUID stateKey = new UUID(0L, 0L);
+        int loaded = 0, staleDaily = 0, staleWeekly = 0;
         for (Map.Entry<UUID, String[]> entry : all.entrySet()) {
             UUID uuid = entry.getKey();
             if (uuid.equals(stateKey)) {
@@ -7161,24 +7162,18 @@ public class PersistenceUtils {
                 boolean dailyCurrent = dailyPeriod >= QuestUtils.getLastDailyReset();
                 boolean weeklyCurrent = weeklyPeriod >= QuestUtils.getLastWeeklyReset();
                 if (!dailyCurrent) {
-                    Bukkit.getLogger().info("[AC] [Quest] Discarding stale daily data for " + uuid
-                            + " (savedPeriod=" + dailyPeriod + ", lastDailyReset=" + QuestUtils.getLastDailyReset() + ")");
+                    staleDaily++;
                     dp = new int[3];
                     dc = new boolean[3];
                     dClaim = new boolean[3];
                 }
                 if (!weeklyCurrent) {
-                    Bukkit.getLogger().info("[AC] [Quest] Discarding stale weekly data for " + uuid
-                            + " (savedPeriod=" + weeklyPeriod + ", lastWeeklyReset=" + QuestUtils.getLastWeeklyReset() + ")");
+                    staleWeekly++;
                     wp = new int[3];
                     wc = new boolean[3];
                     wClaim = new boolean[3];
                 }
-                Bukkit.getLogger().info("[AC] [Quest] Loaded from DB for " + uuid
-                        + " daily=" + java.util.Arrays.toString(dp)
-                        + " weekly=" + java.util.Arrays.toString(wp)
-                        + " rank=" + rank
-                        + " dailyCurrent=" + dailyCurrent + " weeklyCurrent=" + weeklyCurrent);
+                loaded++;
                 QuestUtils.getPlayerDailyProgress().put(uuid, dp);
                 QuestUtils.getPlayerDailyCompleted().put(uuid, dc);
                 QuestUtils.getPlayerDailyClaimed().put(uuid, dClaim);
@@ -7213,7 +7208,8 @@ public class PersistenceUtils {
                 Bukkit.getLogger().warning("[AC] Failed to parse quest progress for " + uuid + " from DB: " + e.getMessage());
             }
         }
-        Bukkit.getLogger().info("[AC] Quest progress initialized from MySQL");
+        Bukkit.getLogger().info("[AC] Quest progress loaded from MySQL: " + loaded + " players"
+                + " (" + staleDaily + " stale daily, " + staleWeekly + " stale weekly discarded)");
     }
 
     /**
