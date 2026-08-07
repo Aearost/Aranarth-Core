@@ -11,17 +11,28 @@ import com.github.retrooper.packetevents.util.Vector3d;
 import com.github.retrooper.packetevents.util.Vector3f;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerParticle;
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
+import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Intercepts outgoing flame particle packets and substitutes soul fire flame for blue fire players.
+ * Intercepts outgoing flame particle packets and substitutes replacements for fire-type players.
+ * Blue fire: client-side only (soul fire flame visible only to the caster).
+ * White fire: server-side (replacement particles visible to all; original flame suppressed for bystanders).
  */
 public class FireParticleListener extends PacketListenerAbstract {
+
+    private final JavaPlugin plugin;
 
     private static Object SOUL_FIRE_FLAME_NMS;
     private static Constructor<?> PARTICLES_PACKET_CTOR;
@@ -29,6 +40,19 @@ public class FireParticleListener extends PacketListenerAbstract {
     private static Field CONNECTION_FIELD;
     private static Method SEND_METHOD;
     private static boolean reflectionReady = false;
+
+    private static final Particle.DustOptions WHITE_DUST = new Particle.DustOptions(Color.WHITE, 1.2f);
+
+    /**
+     * Tracks positions where white fire particles were just spawned, so bystander FLAME packets
+     * at the same location can be suppressed. Keys are encoded block positions; values are timestamps.
+     */
+    private static final ConcurrentHashMap<Long, Long> whiteFirePositions = new ConcurrentHashMap<>();
+    private static final long WHITE_FIRE_TTL_MS = 200;
+
+    public FireParticleListener(JavaPlugin plugin) {
+        this.plugin = plugin;
+    }
 
     /**
      * Call once from AranarthCore.onEnable() after PacketEvents is initialised.
@@ -88,15 +112,6 @@ public class FireParticleListener extends PacketListenerAbstract {
             return;
         }
 
-        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-        if (aranarthPlayer == null) {
-            return;
-        }
-
-        if (aranarthPlayer.getFireType() != FireType.BLUE) {
-            return;
-        }
-
         WrapperPlayServerParticle packet;
         try {
             packet = new WrapperPlayServerParticle(event);
@@ -107,8 +122,72 @@ public class FireParticleListener extends PacketListenerAbstract {
             return;
         }
 
-        event.setCancelled(true);
-        sendNmsParticle(player, SOUL_FIRE_FLAME_NMS, packet);
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        FireType fireType = (aranarthPlayer != null) ? aranarthPlayer.getFireType() : FireType.DEFAULT;
+
+        if (fireType == FireType.BLUE) {
+            event.setCancelled(true);
+            sendNmsParticle(player, SOUL_FIRE_FLAME_NMS, packet);
+            return;
+        }
+
+        if (fireType == FireType.WHITE) {
+            // Record this position so bystanders' packets at the same location are suppressed
+            long posKey = encodePosition(packet.getPosition());
+            whiteFirePositions.put(posKey, System.currentTimeMillis());
+            event.setCancelled(true);
+            sendWhiteFireParticles(player.getWorld(), packet);
+            return;
+        }
+
+        // For all other players - suppress FLAME if a white fire player already spawned replacements here
+        long posKey = encodePosition(packet.getPosition());
+        Long stamp = whiteFirePositions.get(posKey);
+        if (stamp != null) {
+            if (System.currentTimeMillis() - stamp < WHITE_FIRE_TTL_MS) {
+                event.setCancelled(true);
+            } else {
+                whiteFirePositions.remove(posKey);
+            }
+        }
+    }
+
+    private void sendWhiteFireParticles(World world, WrapperPlayServerParticle orig) {
+        Vector3d pos = orig.getPosition();
+        Vector3f off = orig.getOffset();
+        int count = orig.getParticleCount();
+        float speed = orig.getMaxSpeed();
+        Location loc = new Location(world, pos.x, pos.y, pos.z);
+
+        float spreadX = off.x * 1.8f;
+        float spreadY = off.y * 1.8f;
+        float spreadZ = off.z * 1.8f;
+        double roll = ThreadLocalRandom.current().nextDouble();
+        for (long delay = 0; delay <= 2; delay++) {
+            if (roll < 0.125) {
+                // 1/8 end rod
+                Bukkit.getScheduler().runTaskLater(plugin, () ->
+                        world.spawnParticle(Particle.END_ROD, loc, count, spreadX, spreadY, spreadZ, speed), delay);
+            } else if (roll < 0.325) {
+                // 1/5 white dust
+                Bukkit.getScheduler().runTaskLater(plugin, () ->
+                        world.spawnParticle(Particle.DUST, loc, count, spreadX, spreadY, spreadZ, 0, WHITE_DUST), delay);
+            } else {
+                // 67.5% electric spark
+                Bukkit.getScheduler().runTaskLater(plugin, () ->
+                        world.spawnParticle(Particle.ELECTRIC_SPARK, loc, count, spreadX, spreadY, spreadZ, speed), delay);
+            }
+        }
+    }
+
+    /**
+     * Encodes a particle's center position to a long key at block precision.
+     */
+    private static long encodePosition(Vector3d pos) {
+        int x = (int) Math.floor(pos.x);
+        int y = (int) Math.floor(pos.y);
+        int z = (int) Math.floor(pos.z);
+        return ((long)(x & 0xFFFFF) << 40) | ((long)(y & 0xFFFFF) << 20) | (long)(z & 0xFFFFF);
     }
 
     private void sendNmsParticle(Player player, Object nmsType, WrapperPlayServerParticle orig) {

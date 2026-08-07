@@ -439,7 +439,7 @@ public class AranarthCore extends JavaPlugin {
         PacketEvents.getAPI().getSettings().reEncodeByDefault(false).checkForUpdates(false);
         PacketEvents.getAPI().load();
         PacketEvents.getAPI().init();
-        fireParticleListener = new FireParticleListener();
+        fireParticleListener = new FireParticleListener(this);
         PacketEvents.getAPI().getEventManager().registerListeners(fireParticleListener);
         FireParticleListener.initReflection();
 
@@ -476,9 +476,9 @@ public class AranarthCore extends JavaPlugin {
         AranarthUtils.setStormDelay(new Random().nextInt(18000));
 
         SoundAbility.SOUND = new Element.SubElement("Sound", Element.AIR, Element.ElementType.NO_SUFFIX, this);
-        FireParticleRegistry.WHITE_FIRE_SUB = new Element.SubElement("White Fire", Element.FIRE, Element.ElementType.NO_SUFFIX, this);
-        FireParticleRegistry.RAINBOW_FIRE_SUB = new Element.SubElement("Rainbow Fire", Element.FIRE, Element.ElementType.NO_SUFFIX, this);
-        FireParticleRegistry.IRIDESCENT_FIRE_SUB = new Element.SubElement("Iridescent Fire", Element.FIRE, Element.ElementType.NO_SUFFIX, this);
+        FireParticleRegistry.WHITE_FIRE_SUB = new Element.SubElement("WhiteFire", Element.FIRE, Element.ElementType.NO_SUFFIX, this);
+        FireParticleRegistry.RAINBOW_FIRE_SUB = new Element.SubElement("RainbowFire", Element.FIRE, Element.ElementType.NO_SUFFIX, this);
+        FireParticleRegistry.IRIDESCENT_FIRE_SUB = new Element.SubElement("IridescentFire", Element.FIRE, Element.ElementType.NO_SUFFIX, this);
         try {
             Field colorField = Element.class.getDeclaredField("color");
             colorField.setAccessible(true);
