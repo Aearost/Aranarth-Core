@@ -24,11 +24,12 @@ import java.lang.reflect.Method;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Intercepts outgoing flame particle packets and substitutes replacements for fire-type players.
  * Blue fire: client-side only (soul fire flame visible only to the caster).
- * White fire: server-side (replacement particles visible to all; original flame suppressed for bystanders).
+ * White/Rainbow fire: server-side (replacement particles visible to all; original flame suppressed for bystanders).
  */
 public class FireParticleListener extends PacketListenerAbstract {
 
@@ -41,17 +42,39 @@ public class FireParticleListener extends PacketListenerAbstract {
     private static Method SEND_METHOD;
     private static boolean reflectionReady = false;
 
+    // White fire particles
     private static final Particle.DustOptions WHITE_DUST = new Particle.DustOptions(Color.WHITE, 1.2f);
 
+    // Rainbow fire
+    private static final Particle.DustTransition[] RAINBOW_PAIRS = {
+        new Particle.DustTransition(Color.fromRGB(235,  40,  40), Color.fromRGB(235, 140,  40), 1.1f), // red → orange
+        new Particle.DustTransition(Color.fromRGB(235, 140,  40), Color.fromRGB(235, 235,  40), 1.1f), // orange → yellow
+        new Particle.DustTransition(Color.fromRGB(235, 235,  40), Color.fromRGB( 40, 210,  40), 1.1f), // yellow → green
+        new Particle.DustTransition(Color.fromRGB( 40, 210,  40), Color.fromRGB( 40, 210, 235), 1.1f), // green → cyan
+        new Particle.DustTransition(Color.fromRGB( 40, 210, 235), Color.fromRGB( 40,  70, 235), 1.1f), // cyan → blue
+        new Particle.DustTransition(Color.fromRGB( 40,  70, 235), Color.fromRGB(150,  40, 210), 1.1f), // blue → violet
+        new Particle.DustTransition(Color.fromRGB(150,  40, 210), Color.fromRGB(235,  40, 185), 1.1f), // violet → magenta
+        new Particle.DustTransition(Color.fromRGB(235,  40, 185), Color.fromRGB(235,  40,  40), 1.1f), // magenta → red
+    };
+
+    // Cycles through RAINBOW_PAIRS in order
+    private static final AtomicInteger rainbowPairIndex = new AtomicInteger(0);
+
+    // Per-player flame packet counter for even flame distribution
+    private static final ConcurrentHashMap<UUID, AtomicInteger> rainbowFlameCounters = new ConcurrentHashMap<>();
+    private static final int FLAME_EVERY_N = 7;
+
     /**
-     * Tracks positions where white fire particles were just spawned, so bystander FLAME packets
-     * at the same location can be suppressed. Keys are encoded block positions; values are timestamps.
+     * Shared position tracker for server-side fire types (WHITE, RAINBOW).
      */
-    private static final ConcurrentHashMap<Long, Long> whiteFirePositions = new ConcurrentHashMap<>();
-    private static final long WHITE_FIRE_TTL_MS = 200;
+    private static final ConcurrentHashMap<Long, Long> replacedFirePositions = new ConcurrentHashMap<>();
+    private static final long REPLACED_FIRE_TTL_MS = 200;
 
     public FireParticleListener(JavaPlugin plugin) {
         this.plugin = plugin;
+        // Advance the rainbow color pair every 30 ticks (1.5 s), cycling through all 8 pairs
+        Bukkit.getScheduler().runTaskTimer(plugin, () ->
+                rainbowPairIndex.set((rainbowPairIndex.get() + 1) % RAINBOW_PAIRS.length), 20L, 20L);
     }
 
     /**
@@ -132,22 +155,34 @@ public class FireParticleListener extends PacketListenerAbstract {
         }
 
         if (fireType == FireType.WHITE) {
-            // Record this position so bystanders' packets at the same location are suppressed
             long posKey = encodePosition(packet.getPosition());
-            whiteFirePositions.put(posKey, System.currentTimeMillis());
+            replacedFirePositions.put(posKey, System.currentTimeMillis());
             event.setCancelled(true);
             sendWhiteFireParticles(player.getWorld(), packet);
             return;
         }
 
-        // For all other players - suppress FLAME if a white fire player already spawned replacements here
+        if (fireType == FireType.RAINBOW) {
+            // Every Nth packet lets the original flame through for even distribution
+            AtomicInteger counter = rainbowFlameCounters.computeIfAbsent(player.getUniqueId(), k -> new AtomicInteger(0));
+            if (counter.incrementAndGet() % FLAME_EVERY_N == 0) {
+                return;
+            }
+            long posKey = encodePosition(packet.getPosition());
+            replacedFirePositions.put(posKey, System.currentTimeMillis());
+            event.setCancelled(true);
+            sendRainbowFireParticles(player.getWorld(), packet);
+            return;
+        }
+
+        // For all other players - suppress FLAME if a server-side fire type already spawned replacements here
         long posKey = encodePosition(packet.getPosition());
-        Long stamp = whiteFirePositions.get(posKey);
+        Long stamp = replacedFirePositions.get(posKey);
         if (stamp != null) {
-            if (System.currentTimeMillis() - stamp < WHITE_FIRE_TTL_MS) {
+            if (System.currentTimeMillis() - stamp < REPLACED_FIRE_TTL_MS) {
                 event.setCancelled(true);
             } else {
-                whiteFirePositions.remove(posKey);
+                replacedFirePositions.remove(posKey);
             }
         }
     }
@@ -165,18 +200,35 @@ public class FireParticleListener extends PacketListenerAbstract {
         double roll = ThreadLocalRandom.current().nextDouble();
         for (long delay = 0; delay <= 2; delay++) {
             if (roll < 0.125) {
-                // 1/8 end rod
+                // ~1/8 end rod
                 Bukkit.getScheduler().runTaskLater(plugin, () ->
                         world.spawnParticle(Particle.END_ROD, loc, count, spreadX, spreadY, spreadZ, speed), delay);
             } else if (roll < 0.325) {
-                // 1/5 white dust
+                // ~1/5 white dust
                 Bukkit.getScheduler().runTaskLater(plugin, () ->
                         world.spawnParticle(Particle.DUST, loc, count, spreadX, spreadY, spreadZ, 0, WHITE_DUST), delay);
             } else {
-                // 67.5% electric spark
+                // ~67.5% electric spark
                 Bukkit.getScheduler().runTaskLater(plugin, () ->
                         world.spawnParticle(Particle.ELECTRIC_SPARK, loc, count, spreadX, spreadY, spreadZ, speed), delay);
             }
+        }
+    }
+
+    private void sendRainbowFireParticles(World world, WrapperPlayServerParticle orig) {
+        Vector3d pos = orig.getPosition();
+        Vector3f off = orig.getOffset();
+        int count = orig.getParticleCount();
+        Location loc = new Location(world, pos.x, pos.y, pos.z);
+
+        float spreadX = off.x * 1.8f;
+        float spreadY = off.y * 1.8f;
+        float spreadZ = off.z * 1.8f;
+        int spawnCount = Math.max(1, count / 2);
+        Particle.DustTransition colorPair = RAINBOW_PAIRS[rainbowPairIndex.get()];
+        for (long delay = 0; delay <= 2; delay++) {
+            Bukkit.getScheduler().runTaskLater(plugin, () ->
+                    world.spawnParticle(Particle.DUST_COLOR_TRANSITION, loc, spawnCount, spreadX, spreadY, spreadZ, 0, colorPair), delay);
         }
     }
 
@@ -224,6 +276,6 @@ public class FireParticleListener extends PacketListenerAbstract {
     }
 
     public void clearPlayer(UUID playerId) {
-        // No per-player state to clear currently
+        rainbowFlameCounters.remove(playerId);
     }
 }
