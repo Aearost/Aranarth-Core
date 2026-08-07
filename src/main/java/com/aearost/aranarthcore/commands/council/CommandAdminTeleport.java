@@ -61,7 +61,7 @@ public class CommandAdminTeleport {
 			player = (Player) sender;
 			aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
-			if (aranarthPlayer.getCouncilRank() != 3) {
+			if (aranarthPlayer.getCouncilRank() < 2) {
 				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
 				return true;
 			}
@@ -78,6 +78,10 @@ public class CommandAdminTeleport {
 
 		if (args[0].equalsIgnoreCase("tpw")) {
 			// /ac tpw <worldname> — teleport self to surface of 0,0 in the specified world
+			if (isSenderPlayer && aranarthPlayer.getCouncilRank() < 3) {
+				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+				return true;
+			}
 			if (!isSenderPlayer) {
 				sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
 				return true;
@@ -96,6 +100,10 @@ public class CommandAdminTeleport {
 			player.sendMessage(ChatUtils.chatMessage("&7You have teleported to world &e" + world.getName()));
 			return true;
 		} else if (args[0].equalsIgnoreCase("tpf")) {
+			if (isSenderPlayer && aranarthPlayer.getCouncilRank() < 3) {
+				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+				return true;
+			}
 			// /ac tpf x y z [<yaw> <pitch>] — self teleport, player only
 			if (args.length == 4 || args.length == 6) {
 				if (!isSenderPlayer) {
