@@ -6914,7 +6914,56 @@ public class PersistenceUtils {
             loadAranarthPlayers();
             return;
         }
+        // Supplement with flat file entries for any players whose raw_data is still null
+        loadFlatFilePlayersForMissing();
         Bukkit.getLogger().info("[AC] All aranarth players have been initialized from MySQL");
+    }
+
+    /**
+     * Reads aranarth_players.txt and adds any player whose UUID is not already present
+     * in the in-memory players map.
+     */
+    private static void loadFlatFilePlayersForMissing() {
+        String filePath = System.getProperty("user.dir") + File.separator + "plugins"
+                + File.separator + "AranarthCore" + File.separator + "aranarth_players.txt";
+        File file = new File(filePath);
+        if (!file.exists()) {
+            return;
+        }
+        int recovered = 0;
+        try (Scanner reader = new Scanner(file)) {
+            while (reader.hasNextLine()) {
+                String row = reader.nextLine();
+                if (row.startsWith("#") || row.isEmpty()) {
+                    continue;
+                }
+                String[] fields = row.split("\\|");
+                if (fields.length == 0) {
+                    continue;
+                }
+                try {
+                    UUID uuid = UUID.fromString(fields[0]);
+                    if (!AranarthUtils.getAranarthPlayers().containsKey(uuid)) {
+                        parseAndAddAranarthPlayer(row);
+                        // Immediately persist to MySQL so /baltop and future startups
+                        // don't require this player to log in first.
+                        if (DatabaseManager.isActive()) {
+                            DatabaseManager.getInstance().saveAranarthPlayerRaw(uuid, row);
+                        }
+                        recovered++;
+                    }
+                } catch (Exception ignored) {
+                    // Malformed row - skip silently as loadAranarthPlayers() already logs these
+                }
+            }
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+                    + "[Load] Error reading flat file for missing-player recovery: " + e.getMessage());
+        }
+        if (recovered > 0) {
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Load] Recovered " + recovered
+                    + " player(s) from flat file (raw_data was null in MySQL)");
+        }
     }
 
     /**
