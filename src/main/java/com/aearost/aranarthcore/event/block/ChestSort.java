@@ -214,6 +214,10 @@ public class ChestSort {
         if (e.getPlayer().getGameMode() != GameMode.SURVIVAL || !e.getPlayer().isSneaking()) {
             return;
         }
+        // Handled by ShulkerDump instead
+        if (e.getItem() != null && e.getItem().getType().name().contains("SHULKER_BOX")) {
+            return;
+        }
 
         Player player = e.getPlayer();
         Block block = e.getClickedBlock();

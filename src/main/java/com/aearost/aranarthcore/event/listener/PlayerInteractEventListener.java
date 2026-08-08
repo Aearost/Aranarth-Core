@@ -107,6 +107,7 @@ public class PlayerInteractEventListener implements Listener {
             new ExpStore().execute(e);
             new CrateOpen().execute(e);
         } else if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
+            new ShulkerDump().execute(e);
             new ChestSort().execute(e);
             new SingleDoorOpen().execute(e);
         } else if (e.getAction() == Action.RIGHT_CLICK_AIR) {

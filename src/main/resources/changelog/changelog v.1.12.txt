@@ -36,6 +36,7 @@ Minor Features
 [~] Removed stale quest logs and combined them into one
 [~] Removed resource world preloading logic and replaced with calls to Chunky
 [+] Added dominion permission of chest locking in dominion lands
+[+] Added support to mass empty shulker box contents to containers via Shulker Assist
 
 Backend Code Changes
 -
