@@ -34,6 +34,7 @@ Minor Features
 [~] Fixed issue where clicking in most GUIs would relocate the player's mouse to the center of the screen
 [~] Added /ac tp to Moderators
 [~] Removed stale quest logs and combined them into one
+[~] Removed resource world preloading logic and replaced with calls to Chunky
 
 Backend Code Changes
 -
