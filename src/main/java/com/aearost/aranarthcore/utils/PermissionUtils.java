@@ -158,20 +158,14 @@ public class PermissionUtils {
                 } else {
                     bendingPlayer.getSubElements().remove(FireParticleRegistry.WHITE_FIRE_SUB);
                 }
-                if (player.hasPermission("aranarth.rainbowfire")) {
-                    if (!bendingPlayer.hasSubElement(FireParticleRegistry.RAINBOW_FIRE_SUB)) {
-                        bendingPlayer.addSubElement(FireParticleRegistry.RAINBOW_FIRE_SUB);
+                if (player.hasPermission("aranarth.prismaticfire")) {
+                    if (!bendingPlayer.hasSubElement(FireParticleRegistry.PRISMATIC_FIRE_SUB)) {
+                        bendingPlayer.addSubElement(FireParticleRegistry.PRISMATIC_FIRE_SUB);
                     }
                 } else {
-                    bendingPlayer.getSubElements().remove(FireParticleRegistry.RAINBOW_FIRE_SUB);
+                    bendingPlayer.getSubElements().remove(FireParticleRegistry.PRISMATIC_FIRE_SUB);
                 }
-                if (player.hasPermission("aranarth.iridescentfire")) {
-                    if (!bendingPlayer.hasSubElement(FireParticleRegistry.IRIDESCENT_FIRE_SUB)) {
-                        bendingPlayer.addSubElement(FireParticleRegistry.IRIDESCENT_FIRE_SUB);
-                    }
-                } else {
-                    bendingPlayer.getSubElements().remove(FireParticleRegistry.IRIDESCENT_FIRE_SUB);
-                }
+
             }
 
 
@@ -588,8 +582,7 @@ public class PermissionUtils {
         perms.setPermission("aranarth.gate", false);
         perms.setPermission("aranarth.mount", false);
         perms.setPermission("aranarth.whitefire", false);
-        perms.setPermission("aranarth.rainbowfire", false);
-        perms.setPermission("aranarth.iridescentfire", false);
+        perms.setPermission("aranarth.prismaticfire", false);
 
         // Armor stand
         perms.setPermission("aranarth.armorstand.lock", false);
@@ -895,10 +888,8 @@ public class PermissionUtils {
         }
         // White Fire
         perms.setPermission("aranarth.whitefire", perks.get(Perk.WHITEFIRE) == 1);
-        // Rainbow Fire
-        perms.setPermission("aranarth.rainbowfire", perks.get(Perk.RAINBOWFIRE) == 1);
-        // Iridescent Fire
-        perms.setPermission("aranarth.iridescentfire", perks.get(Perk.IRIDESCENTFIRE) == 1);
+        // Prismatic Fire
+        perms.setPermission("aranarth.prismaticfire", perks.get(Perk.PRISMATICFIRE) == 1);
     }
 
     /**

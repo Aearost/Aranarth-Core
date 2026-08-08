@@ -316,8 +316,7 @@ public class GuiToggleClick {
             case DEFAULT -> true;
             case BLUE -> aranarthPlayer.getPerks().getOrDefault(com.aearost.aranarthcore.objects.Perk.BLUEFIRE, 0) == 1;
             case WHITE -> aranarthPlayer.getPerks().getOrDefault(com.aearost.aranarthcore.objects.Perk.WHITEFIRE, 0) == 1;
-            case RAINBOW -> aranarthPlayer.getPerks().getOrDefault(com.aearost.aranarthcore.objects.Perk.RAINBOWFIRE, 0) == 1;
-            case IRIDESCENT -> aranarthPlayer.getPerks().getOrDefault(com.aearost.aranarthcore.objects.Perk.IRIDESCENTFIRE, 0) == 1;
+            case PRISMATIC -> aranarthPlayer.getPerks().getOrDefault(com.aearost.aranarthcore.objects.Perk.PRISMATICFIRE, 0) == 1;
         };
     }
 

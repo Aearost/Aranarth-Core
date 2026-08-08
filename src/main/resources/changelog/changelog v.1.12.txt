@@ -1,7 +1,7 @@
 AranarthCore v. 1.12
 
 Major Features
-[+] Implemented backend for white, rainbow, and iridescent fire
+[+] Implemented white fire and prismatic fire
 [+] Added the sawmill functionality
 [+] Implemented the Wrench item
 [+] Did a full overhaul of wandering traders, providing each with their own theme

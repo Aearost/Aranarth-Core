@@ -166,7 +166,7 @@ public class CommandToggle implements CommandExecutor {
 						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7automatic chest locking"));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-				} else if (args[0].equalsIgnoreCase("bluefire") || args[0].equalsIgnoreCase("firetype")) {
+				} else if (args[0].equalsIgnoreCase("firetype")) {
 					if (hasAnyFirePerk(aranarthPlayer)) {
 						FireType oldType = aranarthPlayer.getFireType();
 						FireType newType = nextAvailableType(oldType, aranarthPlayer);
@@ -181,7 +181,7 @@ public class CommandToggle implements CommandExecutor {
 							PermissionUtils.evaluatePlayerPermissions(player);
 						}
 					} else {
-						player.sendMessage(ChatUtils.chatMessage("&cYou do not have the Blue Fire perk"));
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have any fire type perks"));
 					}
 				} else if (args[0].equalsIgnoreCase("pethurt")) {
 					if (aranarthPlayer.isHurtingOwnPets()) {
@@ -320,8 +320,8 @@ public class CommandToggle implements CommandExecutor {
 	private boolean hasAnyFirePerk(AranarthPlayer aranarthPlayer) {
 		return aranarthPlayer.getPerks().getOrDefault(Perk.BLUEFIRE, 0) == 1
 				|| aranarthPlayer.getPerks().getOrDefault(Perk.WHITEFIRE, 0) == 1
-				|| aranarthPlayer.getPerks().getOrDefault(Perk.RAINBOWFIRE, 0) == 1
-				|| aranarthPlayer.getPerks().getOrDefault(Perk.IRIDESCENTFIRE, 0) == 1;
+				|| aranarthPlayer.getPerks().getOrDefault(Perk.PRISMATICFIRE, 0) == 1
+;
 	}
 
 	private FireType nextAvailableType(FireType current, AranarthPlayer aranarthPlayer) {
@@ -341,8 +341,7 @@ public class CommandToggle implements CommandExecutor {
 			case DEFAULT -> true;
 			case BLUE -> aranarthPlayer.getPerks().getOrDefault(Perk.BLUEFIRE, 0) == 1;
 			case WHITE -> aranarthPlayer.getPerks().getOrDefault(Perk.WHITEFIRE, 0) == 1;
-			case RAINBOW -> aranarthPlayer.getPerks().getOrDefault(Perk.RAINBOWFIRE, 0) == 1;
-			case IRIDESCENT -> aranarthPlayer.getPerks().getOrDefault(Perk.IRIDESCENTFIRE, 0) == 1;
+			case PRISMATIC -> aranarthPlayer.getPerks().getOrDefault(Perk.PRISMATICFIRE, 0) == 1;
 		};
 	}
 

@@ -28,8 +28,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Intercepts outgoing flame particle packets and substitutes replacements for fire-type players.
- * Blue fire: client-side only (soul fire flame visible only to the caster).
- * White/Rainbow fire: server-side (replacement particles visible to all; original flame suppressed for bystanders).
  */
 public class FireParticleListener extends PacketListenerAbstract {
 
@@ -45,8 +43,8 @@ public class FireParticleListener extends PacketListenerAbstract {
     // White fire particles
     private static final Particle.DustOptions WHITE_DUST = new Particle.DustOptions(Color.WHITE, 1.2f);
 
-    // Rainbow fire
-    private static final Particle.DustTransition[] RAINBOW_PAIRS = {
+    // Prismatic fire
+    private static final Particle.DustTransition[] PRISMATIC_PAIRS = {
         new Particle.DustTransition(Color.fromRGB(235,  40,  40), Color.fromRGB(235, 140,  40), 1.1f), // red → orange
         new Particle.DustTransition(Color.fromRGB(235, 140,  40), Color.fromRGB(235, 235,  40), 1.1f), // orange → yellow
         new Particle.DustTransition(Color.fromRGB(235, 235,  40), Color.fromRGB( 40, 210,  40), 1.1f), // yellow → green
@@ -57,24 +55,24 @@ public class FireParticleListener extends PacketListenerAbstract {
         new Particle.DustTransition(Color.fromRGB(235,  40, 185), Color.fromRGB(235,  40,  40), 1.1f), // magenta → red
     };
 
-    // Cycles through RAINBOW_PAIRS in order
-    private static final AtomicInteger rainbowPairIndex = new AtomicInteger(0);
+    // Cycles through PRISMATIC_PAIRS in order
+    private static final AtomicInteger prismaticPairIndex = new AtomicInteger(0);
 
     // Per-player flame packet counter for even flame distribution
-    private static final ConcurrentHashMap<UUID, AtomicInteger> rainbowFlameCounters = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<UUID, AtomicInteger> prismaticFlameCounters = new ConcurrentHashMap<>();
     private static final int FLAME_EVERY_N = 7;
 
     /**
-     * Shared position tracker for server-side fire types (WHITE, RAINBOW).
+     * Shared position tracker for server-side fire types (WHITE, PRISMATIC).
      */
     private static final ConcurrentHashMap<Long, Long> replacedFirePositions = new ConcurrentHashMap<>();
     private static final long REPLACED_FIRE_TTL_MS = 200;
 
     public FireParticleListener(JavaPlugin plugin) {
         this.plugin = plugin;
-        // Advance the rainbow color pair every 30 ticks (1.5 s), cycling through all 8 pairs
+        // Advance the prismatic color pair every 20 ticks (1 s), cycling through all 8 pairs
         Bukkit.getScheduler().runTaskTimer(plugin, () ->
-                rainbowPairIndex.set((rainbowPairIndex.get() + 1) % RAINBOW_PAIRS.length), 20L, 20L);
+                prismaticPairIndex.set((prismaticPairIndex.get() + 1) % PRISMATIC_PAIRS.length), 20L, 20L);
     }
 
     /**
@@ -162,16 +160,16 @@ public class FireParticleListener extends PacketListenerAbstract {
             return;
         }
 
-        if (fireType == FireType.RAINBOW) {
+        if (fireType == FireType.PRISMATIC) {
             // Every Nth packet lets the original flame through for even distribution
-            AtomicInteger counter = rainbowFlameCounters.computeIfAbsent(player.getUniqueId(), k -> new AtomicInteger(0));
+            AtomicInteger counter = prismaticFlameCounters.computeIfAbsent(player.getUniqueId(), k -> new AtomicInteger(0));
             if (counter.incrementAndGet() % FLAME_EVERY_N == 0) {
                 return;
             }
             long posKey = encodePosition(packet.getPosition());
             replacedFirePositions.put(posKey, System.currentTimeMillis());
             event.setCancelled(true);
-            sendRainbowFireParticles(player.getWorld(), packet);
+            sendPrismaticFireParticles(player.getWorld(), packet);
             return;
         }
 
@@ -215,7 +213,7 @@ public class FireParticleListener extends PacketListenerAbstract {
         }
     }
 
-    private void sendRainbowFireParticles(World world, WrapperPlayServerParticle orig) {
+    private void sendPrismaticFireParticles(World world, WrapperPlayServerParticle orig) {
         Vector3d pos = orig.getPosition();
         Vector3f off = orig.getOffset();
         int count = orig.getParticleCount();
@@ -225,7 +223,7 @@ public class FireParticleListener extends PacketListenerAbstract {
         float spreadY = off.y * 1.8f;
         float spreadZ = off.z * 1.8f;
         int spawnCount = Math.max(1, count / 2);
-        Particle.DustTransition colorPair = RAINBOW_PAIRS[rainbowPairIndex.get()];
+        Particle.DustTransition colorPair = PRISMATIC_PAIRS[prismaticPairIndex.get()];
         for (long delay = 0; delay <= 2; delay++) {
             Bukkit.getScheduler().runTaskLater(plugin, () ->
                     world.spawnParticle(Particle.DUST_COLOR_TRANSITION, loc, spawnCount, spreadX, spreadY, spreadZ, 0, colorPair), delay);
@@ -276,6 +274,6 @@ public class FireParticleListener extends PacketListenerAbstract {
     }
 
     public void clearPlayer(UUID playerId) {
-        rainbowFlameCounters.remove(playerId);
+        prismaticFlameCounters.remove(playerId);
     }
 }

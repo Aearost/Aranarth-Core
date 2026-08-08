@@ -5,8 +5,7 @@ public enum FireType {
     DEFAULT("Default"),
     BLUE("Blue"),
     WHITE("White"),
-    RAINBOW("Rainbow"),
-    IRIDESCENT("Iridescent");
+    PRISMATIC("Prismatic");
 
     private final String displayName;
 

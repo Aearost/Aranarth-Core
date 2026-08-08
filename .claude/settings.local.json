@@ -375,7 +375,9 @@
       "Bash(zcat \"C:/Users/liamh/Downloads/Logs/SMP/2026-08-06-5.log.gz\")",
       "Bash(zcat \"C:/Users/liamh/Downloads/Logs/Survival/2026-08-06-$f.log.gz\")",
       "Bash(zcat \"C:/Users/liamh/Downloads/Logs/SMP/2026-08-06-$f.log.gz\")",
-      "Bash(zcat \"C:/Users/liamh/Downloads/Logs/Survival/latest.log\")"
+      "Bash(zcat \"C:/Users/liamh/Downloads/Logs/Survival/latest.log\")",
+      "Bash(zcat C:/Users/liamh/Downloads/Logs/Survival/2026-08-08-1.log.gz)",
+      "Bash(zcat C:/Users/liamh/Downloads/Logs/SMP/2026-08-08-1.log.gz)"
     ]
   }
 }

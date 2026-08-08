@@ -13,7 +13,7 @@ public enum Perk {
     ITEMFRAME,
     BLUEFIRE,
     WHITEFIRE,
-    RAINBOWFIRE,
-    IRIDESCENTFIRE,
+    PRISMATICFIRE,
+    IRIDESCENTFIRE, // tombstone — positional slot preserved for persistence, do not remove
     DISCORD
 }

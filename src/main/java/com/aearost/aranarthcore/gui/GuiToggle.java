@@ -158,8 +158,8 @@ public class GuiToggle {
     public static boolean hasAnyFirePerk(AranarthPlayer aranarthPlayer) {
         return (aranarthPlayer.getPerks().getOrDefault(Perk.BLUEFIRE, 0) == 1)
                 || (aranarthPlayer.getPerks().getOrDefault(Perk.WHITEFIRE, 0) == 1)
-                || (aranarthPlayer.getPerks().getOrDefault(Perk.RAINBOWFIRE, 0) == 1)
-                || (aranarthPlayer.getPerks().getOrDefault(Perk.IRIDESCENTFIRE, 0) == 1);
+                || (aranarthPlayer.getPerks().getOrDefault(Perk.PRISMATICFIRE, 0) == 1)
+;
     }
 
     public static ItemStack buildFireTypeItem(FireType type) {
@@ -169,10 +169,8 @@ public class GuiToggle {
             case DEFAULT -> ChatUtils.translateToColor("&c&lRegular Fire");
             case BLUE -> ChatUtils.translateToColor("&b&lBlue Fire");
             case WHITE -> ChatUtils.translateToColor("&f&lWhite Fire");
-            case RAINBOW -> ChatUtils.translateToGradient(
-                    "#FF0000,#FF7F00,#FFFF00,#00FF00,#0000FF,#8B00FF", "Rainbow Fire", true);
-            case IRIDESCENT -> ChatUtils.translateToGradient(
-                    "#FFB3C6,#B3D9FF,#B3FFD9,#E0B3FF,#FFCBA4,#FFFACD", "Iridescent Fire", true);
+            case PRISMATIC -> ChatUtils.translateToGradient(
+                    "#EB5A5A,#EB8C5A,#EBEB5A,#5ACA5A,#5A6EEB,#9B5ACA", "Prismatic Fire", true);
         };
         meta.setDisplayName(displayName);
         item.setItemMeta(meta);

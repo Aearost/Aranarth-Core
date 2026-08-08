@@ -477,16 +477,14 @@ public class AranarthCore extends JavaPlugin {
 
         SoundAbility.SOUND = new Element.SubElement("Sound", Element.AIR, Element.ElementType.NO_SUFFIX, this);
         FireParticleRegistry.WHITE_FIRE_SUB = new Element.SubElement("WhiteFire", Element.FIRE, Element.ElementType.NO_SUFFIX, this);
-        FireParticleRegistry.RAINBOW_FIRE_SUB = new Element.SubElement("RainbowFire", Element.FIRE, Element.ElementType.NO_SUFFIX, this);
-        FireParticleRegistry.IRIDESCENT_FIRE_SUB = new Element.SubElement("IridescentFire", Element.FIRE, Element.ElementType.NO_SUFFIX, this);
+        FireParticleRegistry.PRISMATIC_FIRE_SUB = new Element.SubElement("PrismaticFire", Element.FIRE, Element.ElementType.NO_SUFFIX, this);
         try {
             Field colorField = Element.class.getDeclaredField("color");
             colorField.setAccessible(true);
             colorField.set(SoundAbility.SOUND, net.md_5.bungee.api.ChatColor.of("#6644CC"));
             colorField.set(Element.LIGHTNING, net.md_5.bungee.api.ChatColor.of("#FFF050"));
             colorField.set(FireParticleRegistry.WHITE_FIRE_SUB, net.md_5.bungee.api.ChatColor.of("#FFFFFF"));
-            colorField.set(FireParticleRegistry.RAINBOW_FIRE_SUB, net.md_5.bungee.api.ChatColor.of("#FF00FF"));
-            colorField.set(FireParticleRegistry.IRIDESCENT_FIRE_SUB, net.md_5.bungee.api.ChatColor.of("#FFB3C6"));
+            colorField.set(FireParticleRegistry.PRISMATIC_FIRE_SUB, net.md_5.bungee.api.ChatColor.of("#FFB3C6"));
         } catch (Exception e) {
             Bukkit.getLogger().warning("Failed to set sub-element colors: " + e.getMessage());
         }

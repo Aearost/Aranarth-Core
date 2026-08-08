@@ -302,8 +302,8 @@ permissions:
   aranarth.whitefire:
     description: Allows the player to use White Fire
     default: false
-  aranarth.rainbowfire:
-    description: Allows the player to use Rainbow Fire
+  aranarth.prismaticfire:
+    description: Allows the player to use Prismatic Fire
     default: false
   aranarth.iridescentfire:
     description: Allows the player to use Iridescent Fire
