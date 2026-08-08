@@ -377,7 +377,10 @@
       "Bash(zcat \"C:/Users/liamh/Downloads/Logs/SMP/2026-08-06-$f.log.gz\")",
       "Bash(zcat \"C:/Users/liamh/Downloads/Logs/Survival/latest.log\")",
       "Bash(zcat C:/Users/liamh/Downloads/Logs/Survival/2026-08-08-1.log.gz)",
-      "Bash(zcat C:/Users/liamh/Downloads/Logs/SMP/2026-08-08-1.log.gz)"
+      "Bash(zcat C:/Users/liamh/Downloads/Logs/SMP/2026-08-08-1.log.gz)",
+      "Bash(/c/Users/liamh/.local/share/JetBrains/Toolbox/apps/intellij-idea-community-edition/jbr/bin/javac --version)",
+      "Read(//c/ProgramData/scoop/**)",
+      "Bash(\"/c/Program Files/JetBrains/IntelliJ IDEA Community Edition 2024.3.4/plugins/maven/lib/maven3/bin/mvn\" compile -q)"
     ]
   }
 }

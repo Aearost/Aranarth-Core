@@ -35,6 +35,7 @@ Minor Features
 [~] Added /ac tp to Moderators
 [~] Removed stale quest logs and combined them into one
 [~] Removed resource world preloading logic and replaced with calls to Chunky
+[+] Added dominion permission of chest locking in dominion lands
 
 Backend Code Changes
 -

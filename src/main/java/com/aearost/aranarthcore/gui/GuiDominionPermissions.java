@@ -75,6 +75,7 @@ public class GuiDominionPermissions {
         map.put(23, DominionPermission.BUTTON);
         map.put(24, DominionPermission.PRESSURE_PLATE);
         map.put(25, DominionPermission.CONTAINER);
+        map.put(26, DominionPermission.LOCK_CONTAINER);
         map.put(28, DominionPermission.HOME);
         map.put(29, DominionPermission.FOOD);
         map.put(30, DominionPermission.RESOURCES);
@@ -115,6 +116,7 @@ public class GuiDominionPermissions {
         map.put(23, DominionPermission.BUTTON);
         map.put(24, DominionPermission.PRESSURE_PLATE);
         map.put(25, DominionPermission.CONTAINER);
+        map.put(26, DominionPermission.LOCK_CONTAINER);
         map.put(28, DominionPermission.HOME);
         map.put(29, DominionPermission.OUTPOST_HOME);
         return map;
@@ -390,6 +392,7 @@ public class GuiDominionPermissions {
             case LEVER -> Material.LEVER;
             case PRESSURE_PLATE -> Material.OAK_PRESSURE_PLATE;
             case CONTAINER -> Material.CHEST;
+            case LOCK_CONTAINER -> Material.TRIAL_KEY;
             case MISC_INTERACT -> Material.MAGENTA_GLAZED_TERRACOTTA;
             case ARMOR_STAND -> Material.ARMOR_STAND;
             case ITEM_FRAME -> Material.ITEM_FRAME;
@@ -479,6 +482,7 @@ public class GuiDominionPermissions {
      */
     public static String formatPermissionName(DominionPermission permission) {
         if (permission == DominionPermission.FENCE_GATE) return "Gates";
+        if (permission == DominionPermission.LOCK_CONTAINER) return "Lock Containers";
         String raw = permission.name().replace("_", " ");
         StringBuilder formatted = new StringBuilder();
         for (String word : raw.split(" ")) {

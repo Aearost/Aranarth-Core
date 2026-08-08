@@ -229,6 +229,7 @@ public class GuiDominionPlayerPermissions {
             case LEVER -> Material.LEVER;
             case PRESSURE_PLATE -> Material.OAK_PRESSURE_PLATE;
             case CONTAINER -> Material.CHEST;
+            case LOCK_CONTAINER -> Material.TRIAL_KEY;
             case MISC_INTERACT -> Material.MAGENTA_GLAZED_TERRACOTTA;
             case ARMOR_STAND -> Material.ARMOR_STAND;
             case ITEM_FRAME -> Material.ITEM_FRAME;

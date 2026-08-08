@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.block;
 import com.aearost.aranarthcore.commands.general.CommandLock;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -143,8 +144,11 @@ public class ContainerInteract {
         CommandLock.scheduleToggleExpiry(uuid);
         LockedContainer container = AranarthUtils.getLockedContainerAtBlock(block);
 
+        Dominion chunkDominion = DominionUtils.getDominionOfChunk(block.getChunk());
         if (!AranarthUtils.isSurvivalWorld(block.getWorld().getName()) || AranarthUtils.isSpawnLocation(block.getLocation())) {
             player.sendMessage(ChatUtils.chatMessage("&cContainers cannot be locked here!"));
+        } else if (chunkDominion != null && !DominionUtils.hasPermission(player, chunkDominion, DominionPermission.LOCK_CONTAINER)) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to lock containers in this dominion!"));
         } else if (container != null) {
             player.sendMessage(ChatUtils.chatMessage("&cThis container is already locked!"));
         } else {

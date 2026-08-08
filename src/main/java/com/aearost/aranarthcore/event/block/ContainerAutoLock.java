@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -29,6 +30,9 @@ public class ContainerAutoLock {
         Dominion blockDominion = DominionUtils.getDominionOfChunk(e.getBlock().getChunk());
         if (blockDominion != null) {
             if (playerDominion == null || !playerDominion.isSameDominion(blockDominion)) {
+                return;
+            }
+            if (!DominionUtils.hasPermission(e.getPlayer(), blockDominion, DominionPermission.LOCK_CONTAINER)) {
                 return;
             }
         }

@@ -15,6 +15,7 @@ public enum DominionPermission {
     LEVER,
     PRESSURE_PLATE,
     CONTAINER,
+    LOCK_CONTAINER,
     MISC_INTERACT,
 
     // Entity interaction permissions
