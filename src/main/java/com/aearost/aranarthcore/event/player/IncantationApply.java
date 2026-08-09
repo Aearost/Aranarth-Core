@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.items.incantation.IncantationBeheading;
 import com.aearost.aranarthcore.items.incantation.IncantationLifesteal;
 import com.aearost.aranarthcore.items.incantation.IncantationMagnetism;
 import com.aearost.aranarthcore.items.incantation.IncantationPlentiful;
+import com.aearost.aranarthcore.items.incantation.IncantationResilience;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
@@ -115,6 +116,25 @@ public class IncantationApply {
 									}
 								}
 							}
+							itemMeta.setLore(lore);
+							item.setItemMeta(itemMeta);
+							incantationFloorItem.remove();
+							floorItem.setItemStack(item);
+							player.sendMessage(ChatUtils.chatMessage("&5You have applied the " + incantation.getItem().getItemMeta().getDisplayName()));
+							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
+						}
+					} else if (incantationType.equals("incantation_resilience")) {
+						if (isDamageable(item) && !itemMeta.getPersistentDataContainer().has(INCANTATION_TYPE)) {
+							Incantation incantation = new IncantationResilience();
+							String fullIncantationName = ChatUtils.translateToColor(incantation.getColor() + incantation.getIncantationName());
+
+							List<String> lore = itemMeta.getLore();
+							if (lore == null) {
+								lore = new ArrayList<>();
+							}
+							lore.add(fullIncantationName);
+							itemMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_resilience");
+							itemMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, 1);
 							itemMeta.setLore(lore);
 							item.setItemMeta(itemMeta);
 							incantationFloorItem.remove();
@@ -292,6 +312,15 @@ public class IncantationApply {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Determines if the input item has durability (i.e., tools, weapons, armor).
+	 * @param item The item.
+	 * @return Whether the item can take durability damage.
+	 */
+	private boolean isDamageable(ItemStack item) {
+		return item.getType().getMaxDurability() > 0;
 	}
 
 	/**

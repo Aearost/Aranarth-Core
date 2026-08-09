@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.event.mob.PetHurtPrevent;
 import com.aearost.aranarthcore.event.player.*;
+import com.aearost.aranarthcore.event.player.IncantationResilienceProtect;
 import com.aearost.aranarthcore.event.world.FireDamageIncrease;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DefenderUtils;
@@ -27,6 +28,9 @@ public class EntityDamageEventListener implements Listener {
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityDamage(EntityDamageEvent e) {
+        new IncantationResilienceProtect().executeFireLava(e);
+        if (e.isCancelled()) return;
+
         if (DefenderUtils.isDefender(e.getEntity().getUniqueId())
                 && e.getCause() == EntityDamageEvent.DamageCause.FALL) {
             e.setCancelled(true);

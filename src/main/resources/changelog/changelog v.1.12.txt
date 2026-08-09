@@ -6,6 +6,7 @@ Major Features
 [+] Added the sawmill functionality
 [+] Implemented the Wrench item
 [+] Did a full overhaul of wandering traders, providing each with their own theme
+[+] Implemented the Incantation of Resilience
 [+] Added support for Plentiful to be applied to shears
 [~] Slowness will only apply while "outdoors" during snowstorms in Winter months, not year-round
 

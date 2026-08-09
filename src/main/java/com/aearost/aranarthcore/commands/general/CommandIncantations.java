@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.items.incantation.IncantationBeheading;
 import com.aearost.aranarthcore.items.incantation.IncantationLifesteal;
 import com.aearost.aranarthcore.items.incantation.IncantationMagnetism;
 import com.aearost.aranarthcore.items.incantation.IncantationPlentiful;
+import com.aearost.aranarthcore.items.incantation.IncantationResilience;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -41,6 +42,7 @@ public class CommandIncantations implements CommandExecutor {
 			meta.addPage(lifesteal());
 			meta.addPage(plentiful());
 			meta.addPage(magnetism());
+			meta.addPage(resilience());
 
 			book.setItemMeta(meta);
 			player.getInventory().addItem(book);
@@ -62,11 +64,12 @@ public class CommandIncantations implements CommandExecutor {
 
 	private static String introduction2() {
 		return ChatUtils.translateToColor(
-				"There are four different Incantations that are currently found on Aranarth:\n"
+				"There are five different Incantations that are currently found on Aranarth:\n"
 					+ "- " + new IncantationBeheading().getColor() + "&lBeheading&r\n"
 					+ "- " + new IncantationLifesteal().getColor() + "&lLifesteal&r\n"
 					+ "- " + new IncantationPlentiful().getColor() + "&lPlentiful&r\n"
-					+ "- " + new IncantationMagnetism().getColor() + "&lMagnetism&r\n\n"
+					+ "- " + new IncantationMagnetism().getColor() + "&lMagnetism&r\n"
+					+ "- " + new IncantationResilience().getColor() + "&lResilience&r\n\n"
 					+ "Note that only &oone incantation&r may be applied per item."
 		);
 	}
@@ -120,6 +123,15 @@ public class CommandIncantations implements CommandExecutor {
 						"&oPulls harvested items to you\n\n" +
 						"&rApplies to: pickaxes, axes, shovels, hoes\n\n" +
 						"Drop the incantation onto the tool to apply it. There is only one level of Magnetism."
+		);
+	}
+
+	private static String resilience() {
+		return ChatUtils.translateToColor(
+				new IncantationResilience().getColor() + "&lResilience&r\n" +
+						"&oMakes your item indestructible\n\n" +
+						"&rApplies to: any tool, weapon, or armor\n\n" +
+						"Drop the incantation onto the item to apply it. The item will never lose durability and cannot be destroyed by fire or lava"
 		);
 	}
 
