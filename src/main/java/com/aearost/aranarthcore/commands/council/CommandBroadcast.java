@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.council;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -32,7 +33,9 @@ public class CommandBroadcast {
 						messageBuilder.append(" ");
 					}
 				}
-				Bukkit.broadcastMessage(ChatUtils.chatMessage(messageBuilder.toString()));
+				if (sender instanceof Player || !AranarthCore.isSmpServer()) {
+					Bukkit.broadcastMessage(ChatUtils.chatMessage(messageBuilder.toString()));
+				}
 				for (Player online : Bukkit.getOnlinePlayers()) {
 					online.playSound(online, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1F, 1F);
 				}

@@ -1,7 +1,9 @@
 package com.aearost.aranarthcore.commands.council;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Perk;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
@@ -82,9 +84,18 @@ public class CommandPerks {
 
 								boolean isSilent = args.length == 4 && args[3].equalsIgnoreCase("silent");
 								String message = "&e" + aranarthPlayer.getNickname() + " &7has purchased the &4&lAdditional 3 Homes &7perk!";
-								Bukkit.broadcastMessage(ChatUtils.chatMessage(message));
-								if (!isSilent) {
-									DiscordUtils.donationNotification(message, uuid, Color.CYAN);
+								if (sender instanceof Player || !AranarthCore.isSmpServer()) {
+									String formatted = ChatUtils.chatMessage(message);
+									for (Player online : Bukkit.getOnlinePlayers()) {
+										online.sendMessage(formatted);
+									}
+									Bukkit.getConsoleSender().sendMessage(formatted);
+									if (NetworkManager.isActive()) {
+										NetworkManager.getInstance().publishBroadcast(formatted);
+									}
+									if (!isSilent) {
+										DiscordUtils.donationNotification(message, uuid, Color.CYAN);
+									}
 								}
 
 								return true;
@@ -152,9 +163,18 @@ public class CommandPerks {
 							boolean isSilent = args.length >= 5 && args[4].equalsIgnoreCase("silent");
 							if (!args[3].equals("0")) {
 								String message = "&e" + aranarthPlayer.getNickname() + " &7has purchased the " + perk + " &7perk!";
-								Bukkit.broadcastMessage(ChatUtils.chatMessage(message));
-								if (!isSilent) {
-									DiscordUtils.donationNotification(ChatUtils.stripColorFormatting(message), uuid, Color.CYAN);
+								if (sender instanceof Player || !AranarthCore.isSmpServer()) {
+									String formatted = ChatUtils.chatMessage(message);
+									for (Player online : Bukkit.getOnlinePlayers()) {
+										online.sendMessage(formatted);
+									}
+									Bukkit.getConsoleSender().sendMessage(formatted);
+									if (NetworkManager.isActive()) {
+										NetworkManager.getInstance().publishBroadcast(formatted);
+									}
+									if (!isSilent) {
+										DiscordUtils.donationNotification(ChatUtils.stripColorFormatting(message), uuid, Color.CYAN);
+									}
 								}
 							} else {
 								sender.sendMessage(ChatUtils.chatMessage("&7The " + perk + " &7perk has been removed from &e" + aranarthPlayer.getNickname()));
@@ -183,9 +203,18 @@ public class CommandPerks {
 							boolean isSilent = args.length >= 5 && args[4].equalsIgnoreCase("silent");
 							if (!args[3].equals("0")) {
 								String message = "&e" + aranarthPlayer.getNickname() + " &7has purchased the &4&lAdditional 3 Homes &7perk!";
-								Bukkit.broadcastMessage(ChatUtils.chatMessage(message));
-								if (!isSilent) {
-									DiscordUtils.donationNotification(ChatUtils.stripColorFormatting(message), uuid, Color.CYAN);
+								if (sender instanceof Player || !AranarthCore.isSmpServer()) {
+									String formatted = ChatUtils.chatMessage(message);
+									for (Player online : Bukkit.getOnlinePlayers()) {
+										online.sendMessage(formatted);
+									}
+									Bukkit.getConsoleSender().sendMessage(formatted);
+									if (NetworkManager.isActive()) {
+										NetworkManager.getInstance().publishBroadcast(formatted);
+									}
+									if (!isSilent) {
+										DiscordUtils.donationNotification(ChatUtils.stripColorFormatting(message), uuid, Color.CYAN);
+									}
 								}
 							}
 						} else {
@@ -202,9 +231,18 @@ public class CommandPerks {
 						boolean isSilent = args.length >= 5 && args[4].equalsIgnoreCase("silent");
 						if (!args[3].equals("0")) {
 							String message = "&e" + aranarthPlayer.getNickname() + " &7has purchased the &5&lDiscord Chat &7perk!";
-							Bukkit.broadcastMessage(ChatUtils.chatMessage(message));
-							if (!isSilent) {
-								DiscordUtils.donationNotification(ChatUtils.stripColorFormatting(message), uuid, Color.CYAN);
+							if (sender instanceof Player || !AranarthCore.isSmpServer()) {
+								String formatted = ChatUtils.chatMessage(message);
+								for (Player online : Bukkit.getOnlinePlayers()) {
+									online.sendMessage(formatted);
+								}
+								Bukkit.getConsoleSender().sendMessage(formatted);
+								if (NetworkManager.isActive()) {
+									NetworkManager.getInstance().publishBroadcast(formatted);
+								}
+								if (!isSilent) {
+									DiscordUtils.donationNotification(ChatUtils.stripColorFormatting(message), uuid, Color.CYAN);
+								}
 							}
 						}
 

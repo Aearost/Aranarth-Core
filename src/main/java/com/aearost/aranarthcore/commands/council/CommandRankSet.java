@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.council;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -140,7 +141,7 @@ public class CommandRankSet {
 								AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 							}
 							DiscordUtils.updateSaint(player, rank, !silent);
-							if (silent && rank > 0) {
+							if (silent && rank > 0 && (sender instanceof Player || !AranarthCore.isSmpServer())) {
 								String[] saintRankNames = {"", "&5&lAcolyte", "&5&lDisciple", "&5&lSeraph"};
 								Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + name + " &7used vote points to purchase " + saintRankNames[rank]));
 								DiscordUtils.voteShopNotification(name + " used vote points to purchase " + saintRankNames[rank], player.getUniqueId(), Color.MAGENTA);
@@ -168,18 +169,20 @@ public class CommandRankSet {
 							rankName = "Saint";
 						}
 
-						if (args[1].equals("saint")) {
-							Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has donated and become a &d&lSaint!"));
-						} else if (args[1].equals("council")) {
-							if (args[3].equals("1")) {
-								Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become a &3&lHelper &7of &e&lThe Council!"));
-							} else if (args[3].equals("2")) {
-								Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become a &6&lModerator &7of &e&lThe Council!"));
-							} else if (args[3].equals("3")) {
-								Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become an &4&lAdmin &7of &e&lThe Council!"));
+						if (sender instanceof Player || !AranarthCore.isSmpServer()) {
+							if (args[1].equals("saint")) {
+								Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has donated and become a &d&lSaint!"));
+							} else if (args[1].equals("council")) {
+								if (args[3].equals("1")) {
+									Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become a &3&lHelper &7of &e&lThe Council!"));
+								} else if (args[3].equals("2")) {
+									Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become a &6&lModerator &7of &e&lThe Council!"));
+								} else if (args[3].equals("3")) {
+									Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become an &4&lAdmin &7of &e&lThe Council!"));
+								}
+							} else if (args[1].equals("architect")) {
+								Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become an &a&lArchitect &7of &6&lAranarth!"));
 							}
-						} else if (args[1].equals("architect")) {
-							Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become an &a&lArchitect &7of &6&lAranarth!"));
 						}
 					}
 				} else {

@@ -41,6 +41,7 @@ Minor Features
 [+] Added dominion permission of chest locking in dominion lands
 [+] Added support to mass empty shulker box contents to containers via Shulker Assist
 [+] Implemented custom mcMMO level broadcast messages
+[~] Fixed issues with doubled messages in chat from both server consoles running commands publicly
 
 Backend Code Changes
 -

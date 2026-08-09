@@ -13,7 +13,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.awt.*;
 import java.awt.Color;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -878,7 +877,10 @@ public class CommandDominion implements CommandExecutor {
                             DominionUtils.updateDominion(dominionFromList);
 
                             String allyMsg = ChatUtils.chatMessage("&7The Dominion of &e" + dominion.getName() + " &7is now &5allied &7with &e" + dominionFromList.getName());
-                            Bukkit.broadcastMessage(allyMsg);
+                            for (Player online : Bukkit.getOnlinePlayers()) {
+                                online.sendMessage(allyMsg);
+                            }
+                            Bukkit.getConsoleSender().sendMessage(allyMsg);
                             DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " is now allied with " + dominionFromList.getName(), new Color(170, 0, 170));
                             if (NetworkManager.isActive()) {
                                 NetworkManager.getInstance().publishBroadcast(allyMsg);
@@ -988,7 +990,10 @@ public class CommandDominion implements CommandExecutor {
                             DominionUtils.updateDominion(dominionFromList);
 
                             String truceMsg = ChatUtils.chatMessage("&7The Dominion of &e" + dominion.getName() + " &7is now &dtruced &7with &e" + dominionFromList.getName());
-                            Bukkit.broadcastMessage(truceMsg);
+                            for (Player online : Bukkit.getOnlinePlayers()) {
+                                online.sendMessage(truceMsg);
+                            }
+                            Bukkit.getConsoleSender().sendMessage(truceMsg);
                             DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " is now truced with " + dominionFromList.getName(), new Color(255, 85, 255));
                             if (NetworkManager.isActive()) {
                                 NetworkManager.getInstance().publishBroadcast(truceMsg);
@@ -1090,7 +1095,10 @@ public class CommandDominion implements CommandExecutor {
                             }
 
                             String enemyMsg = ChatUtils.chatMessage("&7The Dominion of &e" + dominion.getName() + " &7has enemied &e" + dominionFromList.getName());
-                            Bukkit.broadcastMessage(enemyMsg);
+                            for (Player online : Bukkit.getOnlinePlayers()) {
+                                online.sendMessage(enemyMsg);
+                            }
+                            Bukkit.getConsoleSender().sendMessage(enemyMsg);
                             DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " has enemied " + dominionFromList.getName(), new Color(255, 85, 85));
                             if (NetworkManager.isActive()) {
                                 NetworkManager.getInstance().publishBroadcast(enemyMsg);
@@ -1163,7 +1171,10 @@ public class CommandDominion implements CommandExecutor {
                             resetDominionRelations(dominion, dominionFromList);
 
                             String neutralMsg = ChatUtils.chatMessage("&7The Dominions &e" + dominion.getName() + " &7and &e" + dominionFromList.getName() + " &7are now &fneutral");
-                            Bukkit.broadcastMessage(neutralMsg);
+                            for (Player online : Bukkit.getOnlinePlayers()) {
+                                online.sendMessage(neutralMsg);
+                            }
+                            Bukkit.getConsoleSender().sendMessage(neutralMsg);
                             DiscordUtils.dominionMessage(dominion, "The Dominions " + dominion.getName() + " and " + dominionFromList.getName() + " are now neutral", Color.WHITE);
                             if (NetworkManager.isActive()) {
                                 NetworkManager.getInstance().publishBroadcast(neutralMsg);
@@ -1440,7 +1451,10 @@ public class CommandDominion implements CommandExecutor {
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), PersistenceUtils::saveOutposts);
 
         String foundedMsg = ChatUtils.chatMessage("&e" + dominion.getName() + " &7has founded the outpost, &e" + outpostName);
-        Bukkit.broadcastMessage(foundedMsg);
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            online.sendMessage(foundedMsg);
+        }
+        Bukkit.getConsoleSender().sendMessage(foundedMsg);
         DiscordUtils.dominionMessage(dominion, dominion.getName() + " has founded the outpost, " + outpostName, new Color(245, 197, 66));
         NetworkManager nm = NetworkManager.getInstance();
         if (nm != null) {
@@ -1479,7 +1493,10 @@ public class CommandDominion implements CommandExecutor {
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), PersistenceUtils::saveOutposts);
         player.sendMessage(ChatUtils.chatMessage("&7Outpost renamed to &e" + newName));
         String renamedMsg = ChatUtils.chatMessage("&e" + dominion.getName() + "&7's outpost, &e" + oldName + "&7, has been renamed to &e" + newName);
-        Bukkit.broadcastMessage(renamedMsg);
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            online.sendMessage(renamedMsg);
+        }
+        Bukkit.getConsoleSender().sendMessage(renamedMsg);
         DiscordUtils.dominionMessage(dominion, dominion.getName() + "'s outpost, " + oldName + ", has been renamed to " + newName, new Color(135, 245, 220));
         NetworkManager nm = NetworkManager.getInstance();
         if (nm != null) {
