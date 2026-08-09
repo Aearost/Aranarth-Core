@@ -70,7 +70,7 @@ public class CrateOpen {
                         // Vote Crate
                         if (x == -71 && y == 110 && z == -5) {
                             // Previews the contents of the crate
-                            if (player.isSneaking()) {
+                            if (AranarthUtils.isPhysicallySneaking(player.getUniqueId())) {
                                 player.playSound(block.getLocation(), Sound.BLOCK_CHEST_OPEN, 1, 0.6F);
                                 aranarthPlayer.setOpeningCrateWithCyclingItem(true);
                                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
@@ -129,7 +129,7 @@ public class CrateOpen {
                         // Rare Crate
                         else if (x == -81 && y == 112 && z == -11) {
                             // Previews the contents of the crate
-                            if (player.isSneaking()) {
+                            if (AranarthUtils.isPhysicallySneaking(player.getUniqueId())) {
                                 player.playSound(block.getLocation(), Sound.BLOCK_CHEST_OPEN, 1, 0.6F);
                                 aranarthPlayer.setOpeningCrateWithCyclingItem(true);
                                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
@@ -194,7 +194,7 @@ public class CrateOpen {
                         // Epic Crate
                         else if (x == -69 && y == 112 && z == -18) {
                             // Previews the contents of the crate
-                            if (player.isSneaking()) {
+                            if (AranarthUtils.isPhysicallySneaking(player.getUniqueId())) {
                                 player.playSound(block.getLocation(), Sound.BLOCK_CHEST_OPEN, 1, 0.6F);
                                 aranarthPlayer.setOpeningCrateWithCyclingItem(true);
                                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
@@ -277,7 +277,7 @@ public class CrateOpen {
                         // Godly Crate
                         else if (x == -81 && y == 115 && z == -26) {
                             // Previews the contents of the crate
-                            if (player.isSneaking()) {
+                            if (AranarthUtils.isPhysicallySneaking(player.getUniqueId())) {
                                 player.playSound(block.getLocation(), Sound.BLOCK_CHEST_OPEN, 1, 0.6F);
                                 aranarthPlayer.setOpeningCrateWithCyclingItem(true);
                                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
