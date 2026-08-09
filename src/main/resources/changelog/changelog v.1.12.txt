@@ -40,6 +40,7 @@ Minor Features
 [~] Removed resource world preloading logic and replaced with calls to Chunky
 [+] Added dominion permission of chest locking in dominion lands
 [+] Added support to mass empty shulker box contents to containers via Shulker Assist
+[+] Implemented custom mcMMO level broadcast messages
 
 Backend Code Changes
 -

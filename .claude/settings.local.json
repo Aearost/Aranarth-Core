@@ -381,7 +381,13 @@
       "Bash(/c/Users/liamh/.local/share/JetBrains/Toolbox/apps/intellij-idea-community-edition/jbr/bin/javac --version)",
       "Read(//c/ProgramData/scoop/**)",
       "Bash(\"/c/Program Files/JetBrains/IntelliJ IDEA Community Edition 2024.3.4/plugins/maven/lib/maven3/bin/mvn\" compile -q)",
-      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -type f -name *[Cc]rate*)"
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -type f -name *[Cc]rate*)",
+      "Bash(find /c/Users/liamh/.m2/repository/com/gmail/nossr50 -name *.jar)",
+      "Bash(cmd.exe /c \"mvn compile -q 2>&1 | tail -20\")",
+      "Bash(find /c/Users/liamh/Downloads/Logs -name *.yml)",
+      "Bash(find /c/Users/liamh -name advanced.yml -path *mcmmo*)",
+      "Bash(find /c/Users/liamh -name config.yml -path *mcmmo*)",
+      "Bash(find /c/Users/liamh -name *.yml -path *mcmmo*)"
     ]
   }
 }
