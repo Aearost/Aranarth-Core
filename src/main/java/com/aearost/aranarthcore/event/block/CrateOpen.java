@@ -11,6 +11,7 @@ import com.aearost.aranarthcore.items.incantation.IncantationBeheading;
 import com.aearost.aranarthcore.items.incantation.IncantationLifesteal;
 import com.aearost.aranarthcore.items.incantation.IncantationMagnetism;
 import com.aearost.aranarthcore.items.incantation.IncantationPlentiful;
+import com.aearost.aranarthcore.items.incantation.IncantationResilience;
 import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
 import com.aearost.aranarthcore.items.key.KeyRare;
@@ -286,18 +287,20 @@ public class CrateOpen {
                                 indexes.add(0);
                                 indexes.add(0);
                                 indexes.add(0);
+                                indexes.add(0); // heavy core / resilience index
                                 GuiCrate gui = new GuiCrate(player, CrateType.GODLY, indexes);
                                 gui.openGui();
                                 // Updates to next slot so task can update it accordingly
                                 indexes.set(0, 1);
                                 indexes.set(1, 1);
                                 indexes.set(2, 1);
+                                indexes.set(3, 1);
 
                                 scheduledSkipTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(AranarthCore.getInstance(), new Runnable() {
                                     @Override
                                     public void run() {
                                         if (aranarthPlayer.isOpeningCrateWithCyclingItem()) {
-                                            gui.updateGodlyCrateItems(indexes.get(0), indexes.get(1), indexes.get(2));
+                                            gui.updateGodlyCrateItems(indexes.get(0), indexes.get(1), indexes.get(2), indexes.get(3));
 
                                             // Cycle through the next enhanced aranarthium iteration
                                             if (indexes.get(0) < 5) {
@@ -319,6 +322,9 @@ public class CrateOpen {
                                             } else {
                                                 indexes.set(2, 0);
                                             }
+
+                                            // Alternate between Heavy Core and Incantation of Resilience
+                                            indexes.set(3, indexes.get(3) == 0 ? 1 : 0);
                                         } else {
                                             Bukkit.getScheduler().cancelTask(scheduledSkipTask);
                                         }
@@ -924,8 +930,13 @@ public class CrateOpen {
                     reward = new ItemStack(Material.NETHER_STAR, 1);
                     name = "&#d8d6fb&lNether Star x1";
                 } else if (chance <= 80) {
-                    reward = new ItemStack(Material.HEAVY_CORE, 1);
-                    name = "&#4d5158&lHeavy Core x1";
+                    if (new Random().nextBoolean()) {
+                        reward = new ItemStack(Material.HEAVY_CORE, 1);
+                        name = "&#4d5158&lHeavy Core x1";
+                    } else {
+                        reward = new IncantationResilience().getItem();
+                        name = new IncantationResilience().getColor() + "&lIncantation of Resilience x1";
+                    }
                 } else if (chance <= 85) {
                     reward = new KeyGodly().getItem();
                     reward.setAmount(2);

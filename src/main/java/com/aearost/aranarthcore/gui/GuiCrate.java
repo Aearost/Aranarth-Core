@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.items.incantation.IncantationBeheading;
 import com.aearost.aranarthcore.items.incantation.IncantationLifesteal;
 import com.aearost.aranarthcore.items.incantation.IncantationMagnetism;
 import com.aearost.aranarthcore.items.incantation.IncantationPlentiful;
+import com.aearost.aranarthcore.items.incantation.IncantationResilience;
 import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
 import com.aearost.aranarthcore.items.key.KeyRare;
@@ -44,8 +45,8 @@ public class GuiCrate {
 			updateEpicCrateItems(indexes.get(0), indexes.get(1), indexes.get(2), indexes.get(3));
 		} else if (type == CrateType.GODLY) {
 			this.initializedGui = initializeGodlyCrate(player);
-			// Updating the enhanced aranarthium and spawn eggs to allow for dynamic updates
-			updateGodlyCrateItems(indexes.get(0), indexes.get(1), indexes.get(2));
+			// Updating the enhanced aranarthium, spawn eggs, and alternating items to allow for dynamic updates
+			updateGodlyCrateItems(indexes.get(0), indexes.get(1), indexes.get(2), indexes.get(3));
 		} else {
 			this.initializedGui = initializeVoteCrate(player);
 			if (indexes != null) {
@@ -450,7 +451,7 @@ public class GuiCrate {
 		ItemMeta heavyCoreMeta = heavyCore.getItemMeta();
 		heavyCoreMeta.setDisplayName(ChatUtils.translateToColor("&#4d5158&lHeavy Core"));
 		List<String> heavyCoreLore = new ArrayList<>();
-		heavyCoreLore.add(ChatUtils.translateToColor("&e8% Chance"));
+		heavyCoreLore.add(ChatUtils.translateToColor("&e4% Chance"));
 		heavyCoreMeta.setLore(heavyCoreLore);
 		heavyCore.setItemMeta(heavyCoreMeta);
 		gui.setItem(15, heavyCore);
@@ -691,8 +692,9 @@ public class GuiCrate {
 	 * @param ingotIndex The index of the cluster.
 	 * @param eggIndex The index of the spawn egg.
 	 * @param diamondShulkerIndex The index of the diamond blocks/shulker shells.
+	 * @param heavyCoreResilienceIndex The index of the heavy core/resilience toggle (0=heavy core, 1=resilience).
 	 */
-	public void updateGodlyCrateItems(int ingotIndex, int eggIndex, int diamondShulkerIndex) {
+	public void updateGodlyCrateItems(int ingotIndex, int eggIndex, int diamondShulkerIndex, int heavyCoreResilienceIndex) {
 		ItemStack ingot = null;
 		switch (ingotIndex) {
 			case 1 -> ingot = new AranarthiumAquatic().getItem();
@@ -750,6 +752,26 @@ public class GuiCrate {
 			diamondShulker.setItemMeta(diamondMeta);
 		}
 		initializedGui.setItem(3, diamondShulker);
+
+		// Alternate between Heavy Core and Incantation of Resilience
+		ItemStack heavyCoreResilience;
+		if (heavyCoreResilienceIndex == 1) {
+			heavyCoreResilience = new IncantationResilience().getItem();
+			ItemMeta resilienceMeta = heavyCoreResilience.getItemMeta();
+			List<String> resilienceLore = new ArrayList<>();
+			resilienceLore.add(ChatUtils.translateToColor("&e4% Chance"));
+			resilienceMeta.setLore(resilienceLore);
+			heavyCoreResilience.setItemMeta(resilienceMeta);
+		} else {
+			heavyCoreResilience = new ItemStack(Material.HEAVY_CORE, 1);
+			ItemMeta heavyCoreMeta = heavyCoreResilience.getItemMeta();
+			heavyCoreMeta.setDisplayName(ChatUtils.translateToColor("&#4d5158&lHeavy Core"));
+			List<String> heavyCoreLore = new ArrayList<>();
+			heavyCoreLore.add(ChatUtils.translateToColor("&e4% Chance"));
+			heavyCoreMeta.setLore(heavyCoreLore);
+			heavyCoreResilience.setItemMeta(heavyCoreMeta);
+		}
+		initializedGui.setItem(15, heavyCoreResilience);
 	}
 
 }
