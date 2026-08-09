@@ -56,6 +56,11 @@ public class InventoryClickEventListener implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent e) {
+        // Chat snapshot GUIs are purely view-only
+        if (GuiChatSnapshot.isSnapshotGui(ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
+            e.setCancelled(true);
+            return;
+        }
         if (e.getView().getType() == InventoryType.CHEST) {
             if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiWrench.TITLE)) {
                 new GuiWrenchClick().execute(e);

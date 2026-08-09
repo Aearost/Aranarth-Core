@@ -9,7 +9,10 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.InteractiveChatManager;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -25,6 +28,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Handles formatting chat messages.
@@ -33,6 +39,10 @@ import java.util.List;
 public class PlayerChatListener implements Listener {
 
     private final AranarthCore plugin;
+
+    /** Matches [item], [inv], [ec], [coords], [pos] case-insensitively. */
+    private static final Pattern INTERACTIVE_PATTERN =
+            Pattern.compile("\\[item]|\\[inv]|\\[ec]|\\[coords?]|\\[pos]", Pattern.CASE_INSENSITIVE);
 
     public PlayerChatListener(AranarthCore plugin) {
         this.plugin = plugin;
@@ -151,12 +161,20 @@ public class PlayerChatListener implements Listener {
         Component prefixComponent = LegacyComponentSerializer.legacySection().deserialize(prefix);
         prefixComponent = ChatUtils.clickableCommand(prefixComponent, hoverMsg, "/info " + player.getName(), true);
 
-        // Build the message component. For gradient chat, build directly from the raw message so
-        // that URL characters receive their own per-character gradient colors rather than a flat color.
+        // Build the message component, injecting interactive chat keywords where applicable.
         Component messageComponent = null;
-        if (aranarthPlayer.isGradientChatEnabled() && !aranarthPlayer.getGradientChatColors().isEmpty()) {
-            messageComponent = ChatUtils.buildGradientMessageWithUrls(
-                    aranarthPlayer.getGradientChatColors(), ChatUtils.stripColorFormatting(message), aranarthPlayer.isGradientChatBold());
+        boolean canUseInteractiveChat = InteractiveChatManager.hasInteractiveChatPerm(aranarthPlayer)
+                && aranarthPlayer.isInteractiveChatEnabled()
+                && INTERACTIVE_PATTERN.matcher(message).find();
+        if (canUseInteractiveChat) {
+            messageComponent = buildInteractiveChatComponent(player, aranarthPlayer, message, chatMessage);
+        }
+        // Fall back to standard gradient or plain message building.
+        if (messageComponent == null) {
+            if (aranarthPlayer.isGradientChatEnabled() && !aranarthPlayer.getGradientChatColors().isEmpty()) {
+                messageComponent = ChatUtils.buildGradientMessageWithUrls(
+                        aranarthPlayer.getGradientChatColors(), ChatUtils.stripColorFormatting(message), aranarthPlayer.isGradientChatBold());
+            }
         }
         if (messageComponent == null) {
             messageComponent = ChatUtils.buildMessageWithUrls(chatMessage);
@@ -193,6 +211,149 @@ public class PlayerChatListener implements Listener {
                 NetworkManager.getInstance().publishChat(prefix, chatMessage);
             }
         }
+    }
+
+    /**
+     * Builds a Component for the player's message.
+     */
+    private Component buildInteractiveChatComponent(Player player, AranarthPlayer ap, String rawMessage, String chatMessage) {
+        String nickname = ap.getNickname().isEmpty() ? player.getName() : ChatUtils.stripColorFormatting(ap.getNickname());
+        Location loc = player.getLocation();
+        Component result = Component.empty();
+
+        Matcher matcher = INTERACTIVE_PATTERN.matcher(rawMessage);
+        int lastEnd = 0;
+
+        while (matcher.find()) {
+            // Append the text segment before this keyword
+            if (matcher.start() > lastEnd) {
+                String rawSegment = rawMessage.substring(lastEnd, matcher.start());
+                result = result.append(buildSegment(player, ap, rawSegment, chatMessage, lastEnd));
+            }
+
+            String keyword = matcher.group().toLowerCase();
+            Component interactiveComp = buildKeywordComponent(player, ap, nickname, loc, keyword);
+            result = result.append(interactiveComp);
+            lastEnd = matcher.end();
+        }
+
+        // Append any remaining text after the last keyword
+        if (lastEnd < rawMessage.length()) {
+            String rawSegment = rawMessage.substring(lastEnd);
+            result = result.append(buildSegment(player, ap, rawSegment, chatMessage, lastEnd));
+        }
+
+        return result;
+    }
+
+    /**
+     * Formats a plain text segment using the player's chat permissions (gradient or color).
+     */
+    private Component buildSegment(Player player, AranarthPlayer ap, String rawSegment, String chatMessage, int rawOffset) {
+        if (rawSegment.isEmpty()) return Component.empty();
+
+        if (ap.isGradientChatEnabled() && !ap.getGradientChatColors().isEmpty()) {
+            String stripped = ChatUtils.stripColorFormatting(rawSegment);
+            Component gradComp = ChatUtils.buildGradientMessageWithUrls(
+                    ap.getGradientChatColors(), stripped, ap.isGradientChatBold());
+            if (gradComp != null) return gradComp;
+        }
+
+        // Non-gradient
+        String formattedSegment = applySegmentFormatting(player, rawSegment);
+        return ChatUtils.buildMessageWithUrls(formattedSegment);
+    }
+
+    private String applySegmentFormatting(Player player, String segment) {
+        if (player.hasPermission("aranarth.chat.hex")) {
+            return ChatUtils.translateToColor(segment);
+        } else if (player.hasPermission("aranarth.chat.color")) {
+            String result = ChatUtils.playerColorChat(segment);
+            return result != null ? result : segment;
+        }
+        return segment;
+    }
+
+    /**
+     * Builds the interactive Component for a single keyword ([item], [inv], [ec], [coords]/[pos]).
+     */
+    private Component buildKeywordComponent(Player player, AranarthPlayer ap, String nickname, Location loc, String keyword) {
+        return switch (keyword) {
+            case "[item]" -> buildItemComponent(player, nickname);
+            case "[inv]"  -> buildInvComponent(player, nickname);
+            case "[ec]"   -> buildEcComponent(player, nickname);
+            default       -> buildCoordsComponent(nickname, loc); // [coords], [coord], [pos]
+        };
+    }
+
+    private Component buildItemComponent(Player player, String nickname) {
+        ItemStack held = player.getInventory().getItemInMainHand().clone();
+        ItemStack[] items = new ItemStack[]{held.getType().isAir() ? null : held};
+        UUID snapshotId = InteractiveChatManager.storeSnapshot(
+                player.getUniqueId(), nickname, InteractiveChatManager.SnapshotType.ITEM, items);
+
+        String displayName = ChatUtils.translateToColor("&6&l[" + nickname + "'s Item]");
+        Component display = LegacyComponentSerializer.legacySection().deserialize(displayName);
+        String hoverMsg = ChatUtils.translateToColor("&7Click to view &e" + nickname + "&7's held item");
+        return ChatUtils.clickableCommand(display, hoverMsg, "/ichat view " + snapshotId, false);
+    }
+
+    private Component buildInvComponent(Player player, String nickname) {
+        ItemStack[] invItems = new ItemStack[41];
+        invItems[0] = cloneOrNull(player.getInventory().getHelmet());
+        invItems[1] = cloneOrNull(player.getInventory().getChestplate());
+        invItems[2] = cloneOrNull(player.getInventory().getLeggings());
+        invItems[3] = cloneOrNull(player.getInventory().getBoots());
+        invItems[4] = cloneOrNull(player.getInventory().getItemInOffHand());
+        for (int i = 0; i < 27; i++) {
+            invItems[5 + i] = cloneOrNull(player.getInventory().getItem(9 + i));
+        }
+        for (int i = 0; i < 9; i++) {
+            invItems[32 + i] = cloneOrNull(player.getInventory().getItem(i));
+        }
+        UUID snapshotId = InteractiveChatManager.storeSnapshot(
+                player.getUniqueId(), nickname, InteractiveChatManager.SnapshotType.INV, invItems);
+
+        String displayName = ChatUtils.translateToColor("&6&l[" + nickname + "'s Inventory]");
+        Component display = LegacyComponentSerializer.legacySection().deserialize(displayName);
+        String hoverMsg = ChatUtils.translateToColor("&7Click to view &e" + nickname + "&7's inventory");
+        return ChatUtils.clickableCommand(display, hoverMsg, "/ichat view " + snapshotId, false);
+    }
+
+    private Component buildEcComponent(Player player, String nickname) {
+        ItemStack[] ecItems = new ItemStack[27];
+        for (int i = 0; i < 27; i++) {
+            ecItems[i] = cloneOrNull(player.getEnderChest().getItem(i));
+        }
+        UUID snapshotId = InteractiveChatManager.storeSnapshot(
+                player.getUniqueId(), nickname, InteractiveChatManager.SnapshotType.EC, ecItems);
+
+        String displayName = ChatUtils.translateToColor("&6&l[" + nickname + "'s Ender Chest]");
+        Component display = LegacyComponentSerializer.legacySection().deserialize(displayName);
+        String hoverMsg = ChatUtils.translateToColor("&7Click to view &e" + nickname + "&7's ender chest");
+        return ChatUtils.clickableCommand(display, hoverMsg, "/ichat view " + snapshotId, false);
+    }
+
+    private Component buildCoordsComponent(String nickname, Location loc) {
+        String worldName = loc.getWorld() != null ? loc.getWorld().getName() : "unknown";
+        int x = loc.getBlockX();
+        int y = loc.getBlockY();
+        int z = loc.getBlockZ();
+
+        String displayName = ChatUtils.translateToColor("&b&l[" + nickname + "'s Coords]");
+        Component display = LegacyComponentSerializer.legacySection().deserialize(displayName);
+
+        String hoverMsg = ChatUtils.translateToColor(
+                "&7X: &e" + x + " &7Y: &e" + y + " &7Z: &e" + z + "\n&7World: &e" + worldName);
+        Component hover = LegacyComponentSerializer.legacySection().deserialize(hoverMsg);
+
+        return display
+                .hoverEvent(HoverEvent.showText(hover))
+                .clickEvent(ClickEvent.suggestCommand("/tp " + x + " " + y + " " + z));
+    }
+
+    private static ItemStack cloneOrNull(ItemStack item) {
+        return (item != null && !item.getType().isAir()) ? item.clone() : null;
     }
 
     /**

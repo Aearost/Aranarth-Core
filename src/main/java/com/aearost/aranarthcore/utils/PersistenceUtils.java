@@ -873,6 +873,11 @@ public class PersistenceUtils {
                     }
                 }
 
+                // Interactive Chat (index 33)
+                if (fields.length > 33) {
+                    aranarthPlayer.setInteractiveChatEnabled(!fields[33].equals("0"));
+                }
+
                 AranarthUtils.setPlayer(uuid, aranarthPlayer);
             }
             Bukkit.getLogger().info("[AC] All toggled features have been initialized");
@@ -912,7 +917,7 @@ public class PersistenceUtils {
                 try {
                     FileWriter writer = new FileWriter(filePath);
                     // Template line
-                    writer.write("#uuid|chat|messages|teleport|spawnboost|changeclaim|inventory|shulker|blacklist|compressing|chestlock|firetype|gradientchatenabled|gradientchatcolors|daymessage|weathermessage|dominionmsgcompact|joinsound|leavesound|votesound|cratesound|weathersound|newdaysound\n");
+                    writer.write("#uuid|chat|messages|teleport|spawnboost|changeclaim|inventory|shulker|blacklist|compressing|chestlock|firetype|gradientchatenabled|gradientchatcolors|daymessage|weathermessage|dominionmsgcompact|joinsound|leavesound|votesound|cratesound|weathersound|newdaysound|newmonthsound|privatemsgsound|teleportsound|avatarsound|dominionSound|aranarthiumsound|chatgamesound|chestsortsound|jobssound|expstoresponud|interactivechat\n");
 
                     for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
                         AranarthPlayer aranarthPlayer = entry.getValue();
@@ -952,13 +957,15 @@ public class PersistenceUtils {
                         String jobsSound = aranarthPlayer.getJobsSoundVolume() + "";
                         String expStoreSound = aranarthPlayer.getExpStoreSoundVolume() + "";
 
+                        String interactiveChat = aranarthPlayer.isInteractiveChatEnabled() ? "1" : "0";
                         String row = uuid + "|" + chat + "|" + messages + "|" + teleport + "|" + spawnboost + "|" + changeClaim
                                 + "|" + inventory + "|" + shulker + "|" + blacklist + "|" + compressing + "|" + chestLock + "|"
                                 + bluefire + "|" + gradientEnabled + "|" + gradientColors + "|" + dayMessage + "|" + weatherMessage
                                 + "|" + dominionMsgCompact + "|" + joinSound + "|" + leaveSound + "|" + voteSound + "|" + crateSound
                                 + "|" + weatherSound + "|" + newDaySound + "|" + newMonthSound + "|" + privateMsgSound
                                 + "|" + teleportSound + "|" + avatarSound + "|" + dominionSound + "|" + aranarthiumSound
-                                + "|" + chatGameSound + "|" + chestSortSound + "|" + jobsSound + "|" + expStoreSound + "\n";
+                                + "|" + chatGameSound + "|" + chestSortSound + "|" + jobsSound + "|" + expStoreSound
+                                + "|" + interactiveChat + "\n";
                         writer.write(row);
                     }
                     writer.close();
@@ -5922,6 +5929,7 @@ public class PersistenceUtils {
             obj.addProperty("chestSortSoundVolume", ap.getChestSortSoundVolume());
             obj.addProperty("jobsSoundVolume", ap.getJobsSoundVolume());
             obj.addProperty("expStoreSoundVolume", ap.getExpStoreSoundVolume());
+            obj.addProperty("interactiveChat", ap.isInteractiveChatEnabled());
             try {
                 db.savePlayerToggles(uuid, GSON.toJson(obj));
             } catch (Exception e) {
@@ -7540,6 +7548,9 @@ public class PersistenceUtils {
                 if (obj.has("expStoreSoundVolume")) {
                     ap.setExpStoreSoundVolume(obj.get("expStoreSoundVolume").getAsInt());
                 }
+                if (obj.has("interactiveChat")) {
+                    ap.setInteractiveChatEnabled(obj.get("interactiveChat").getAsBoolean());
+                }
                 AranarthUtils.setPlayer(uuid, ap);
             } catch (Exception e) {
                 Bukkit.getLogger().warning("[AC] Failed to parse toggles for " + uuid + ": " + e.getMessage());
@@ -7591,6 +7602,7 @@ public class PersistenceUtils {
         obj.addProperty("chestSortSoundVolume", ap.getChestSortSoundVolume());
         obj.addProperty("jobsSoundVolume", ap.getJobsSoundVolume());
         obj.addProperty("expStoreSoundVolume", ap.getExpStoreSoundVolume());
+        obj.addProperty("interactiveChat", ap.isInteractiveChatEnabled());
         obj.addProperty("adminMode", ap.isInAdminMode());
         return GSON.toJson(obj);
     }
@@ -7717,6 +7729,9 @@ public class PersistenceUtils {
             }
             if (obj.has("adminMode")) {
                 ap.setInAdminMode(obj.get("adminMode").getAsBoolean());
+            }
+            if (obj.has("interactiveChat")) {
+                ap.setInteractiveChatEnabled(obj.get("interactiveChat").getAsBoolean());
             }
             AranarthUtils.setPlayer(uuid, ap);
         } catch (Exception e) {

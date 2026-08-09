@@ -303,6 +303,20 @@ public class CommandToggle implements CommandExecutor {
 						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7compact dominion messages"));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				} else if (args[0].equalsIgnoreCase("interactivechat")) {
+					boolean hasPerm = aranarthPlayer.getSaintRank() >= 2 || aranarthPlayer.getCouncilRank() > 0;
+					if (!hasPerm) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this!"));
+						return true;
+					}
+					if (aranarthPlayer.isInteractiveChatEnabled()) {
+						aranarthPlayer.setInteractiveChatEnabled(false);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7interactive chat"));
+					} else {
+						aranarthPlayer.setInteractiveChatEnabled(true);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7interactive chat"));
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/toggle <option>"));
 				}

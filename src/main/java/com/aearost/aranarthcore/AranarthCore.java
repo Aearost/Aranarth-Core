@@ -737,6 +737,10 @@ public class AranarthCore extends JavaPlugin {
             }
         }, 6000, 6000);
 
+        // Purge expired interactive chat snapshots every 10 minutes
+        long tenMinutes = 20L * 60 * 10;
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, InteractiveChatManager::purgeExpired, tenMinutes, tenMinutes);
+
         // Remind players every hour if their chat is toggled off
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             @Override
@@ -1237,6 +1241,7 @@ public class AranarthCore extends JavaPlugin {
         getCommand("tables").setExecutor(new CommandTables());
         getCommand("teleport").setExecutor(new CommandTeleport());
         getCommand("teleport").setTabCompleter(new CommandTeleportCompleter());
+        getCommand("ichat").setExecutor(new CommandInteractiveChat());
         getCommand("toggle").setExecutor(new CommandToggle());
         getCommand("toggle").setTabCompleter(new CommandToggleCompleter());
         getCommand("topdeaths").setExecutor(new CommandTopDeaths());

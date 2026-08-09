@@ -238,6 +238,9 @@ commands:
   tables:
     description: Provides the player with access to a GUI with all forms of crafting tables
     permission: aranarth.tables
+  ichat:
+    description: Opens interactive chat snapshots (item/inv/ec) from clickable chat messages
+    permission: aranarth.default
   toggle:
     description: Allows the player to toggle different functionality
     aliases: [ t ]

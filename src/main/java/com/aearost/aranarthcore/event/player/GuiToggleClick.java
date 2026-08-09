@@ -34,7 +34,7 @@ public class GuiToggleClick {
 
         switch (slot) {
             // Exit
-            case 31 -> {
+            case 40 -> {
                 player.closeInventory();
                 player.playSound(player, Sound.UI_BUTTON_CLICK, 1F, 0.8F);
             }
@@ -295,6 +295,22 @@ public class GuiToggleClick {
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.COMPASS, "&f&lDominion Msg Compact", aranarthPlayer.isDominionMsgCompact()));
+            }
+            // Interactive Chat
+            case 31 -> {
+                boolean hasPerm = aranarthPlayer.getSaintRank() >= 2 || aranarthPlayer.getCouncilRank() > 0;
+                if (!hasPerm) {
+                    return;
+                }
+                if (aranarthPlayer.isInteractiveChatEnabled()) {
+                    aranarthPlayer.setInteractiveChatEnabled(false);
+                    player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7interactive chat"));
+                } else {
+                    aranarthPlayer.setInteractiveChatEnabled(true);
+                    player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7interactive chat"));
+                }
+                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.RECOVERY_COMPASS, "&f&lInteractive Chat", aranarthPlayer.isInteractiveChatEnabled()));
             }
         }
     }

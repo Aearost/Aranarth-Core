@@ -32,17 +32,23 @@ public class GuiToggle {
 
     private Inventory initializeGui(Player player) {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-        Inventory gui = Bukkit.getServer().createInventory(player, 36, "Player Toggles");
+        Inventory gui = Bukkit.getServer().createInventory(player, 45, "Player Toggles");
 
         ItemStack blank = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta blankMeta = blank.getItemMeta();
         blankMeta.setDisplayName(ChatUtils.translateToColor("&f"));
         blank.setItemMeta(blankMeta);
 
+        // Top filler row
         for (int i = 0; i <= 8; i++) {
             gui.setItem(i, blank);
         }
+        // Interactive Chat row filler (row 3, slots 27–35)
         for (int i = 27; i <= 35; i++) {
+            gui.setItem(i, blank);
+        }
+        // Bottom filler row (row 4, slots 36–44)
+        for (int i = 36; i <= 44; i++) {
             gui.setItem(i, blank);
         }
 
@@ -50,7 +56,7 @@ public class GuiToggle {
         ItemMeta exitMeta = exit.getItemMeta();
         exitMeta.setDisplayName(ChatUtils.translateToColor("&4&lExit"));
         exit.setItemMeta(exitMeta);
-        gui.setItem(31, exit);
+        gui.setItem(40, exit);
 
         // Blacklist
         if (player.hasPermission("aranarth.blacklist")) {
@@ -151,6 +157,14 @@ public class GuiToggle {
 
         // Dominion Msg Compact
         gui.setItem(26, buildToggleItem(Material.COMPASS, "&f&lDominion Msg Compact", aranarthPlayer.isDominionMsgCompact()));
+
+        // Interactive Chat (centered in its own row at slot 31)
+        boolean hasInteractivePerm = aranarthPlayer.getSaintRank() >= 2 || aranarthPlayer.getCouncilRank() > 0;
+        if (hasInteractivePerm) {
+            gui.setItem(31, buildToggleItem(Material.RECOVERY_COMPASS, "&f&lInteractive Chat", aranarthPlayer.isInteractiveChatEnabled()));
+        } else {
+            gui.setItem(31, buildLockedItem(Material.RECOVERY_COMPASS, "&f&lInteractive Chat"));
+        }
 
         return gui;
     }
