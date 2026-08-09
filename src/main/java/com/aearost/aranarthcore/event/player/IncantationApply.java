@@ -129,10 +129,10 @@ public class IncantationApply {
 
 					Item toolItem = null;
 					Item aranarthiumItem = null;
-					if ((isTool(first.getItemStack()) || isMeleeWeapon(first.getItemStack())) && second.getItemStack().isSimilar(new AranarthiumIngot().getItem())) {
+					if ((isTool(first.getItemStack()) || isMeleeWeapon(first.getItemStack()) || first.getItemStack().getType() == Material.SHEARS) && second.getItemStack().isSimilar(new AranarthiumIngot().getItem())) {
 						toolItem = first;
 						aranarthiumItem = second;
-					} else if (first.getItemStack().isSimilar(new AranarthiumIngot().getItem()) && (isTool(second.getItemStack()) || isMeleeWeapon(second.getItemStack()))) {
+					} else if (first.getItemStack().isSimilar(new AranarthiumIngot().getItem()) && (isTool(second.getItemStack()) || isMeleeWeapon(second.getItemStack()) || second.getItemStack().getType() == Material.SHEARS)) {
 						aranarthiumItem = first;
 						toolItem = second;
 					}
