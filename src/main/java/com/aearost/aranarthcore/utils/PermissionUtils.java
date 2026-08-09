@@ -890,6 +890,23 @@ public class PermissionUtils {
         perms.setPermission("aranarth.whitefire", perks.get(Perk.WHITEFIRE) == 1);
         // Prismatic Fire
         perms.setPermission("aranarth.prismaticfire", perks.get(Perk.PRISMATICFIRE) == 1);
+
+        // Reset fireType to DEFAULT if the player no longer has the perk for their active type.
+        // This handles cases where a perk was revoked but the stored fireType wasn't cleared.
+        FireType currentType = aranarthPlayer.getFireType();
+        boolean typeStillValid = switch (currentType) {
+            case DEFAULT -> true;
+            case BLUE -> perks.get(Perk.BLUEFIRE) == 1;
+            case WHITE -> perks.get(Perk.WHITEFIRE) == 1;
+            case PRISMATIC -> perks.get(Perk.PRISMATICFIRE) == 1;
+        };
+        if (!typeStillValid) {
+            aranarthPlayer.setFireType(FireType.DEFAULT);
+            AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+            if (currentType == FireType.BLUE) {
+                perms.setPermission("bending.fire.bluefirebending", false);
+            }
+        }
     }
 
     /**
