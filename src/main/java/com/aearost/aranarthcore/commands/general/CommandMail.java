@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Mail;
@@ -85,8 +86,13 @@ public class CommandMail implements CommandExecutor {
                     target.sendMessage(ChatUtils.chatMessage("&7View it with &e/mail read"));
                 } else if (NetworkManager.isActive()
                         && NetworkManager.getInstance().getRemotePlayer(targetUUID) != null) {
-                    // Recipient is on a remote server - relay the notification there
-                    NetworkManager.getInstance().publishMailNotification(targetUUID, senderPlayer.getNickname());
+                    // Recipient is on a remote server
+                    final UUID recipientUUID = targetUUID;
+                    final String senderNickname = senderPlayer.getNickname();
+                    Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+                        PersistenceUtils.syncPlayerMailToDatabaseNow(recipientUUID);
+                        NetworkManager.getInstance().publishMailNotification(recipientUUID, senderNickname);
+                    });
                 }
             }
             case "read" -> {

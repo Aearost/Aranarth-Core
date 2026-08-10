@@ -5670,6 +5670,31 @@ public class PersistenceUtils {
     }
 
     /**
+     * Writes a single player's mail to MySQL synchronously.
+     */
+    public static void syncPlayerMailToDatabaseNow(UUID uuid) {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        List<Mail> mailList = MailUtils.getMail(uuid);
+        JsonArray arr = new JsonArray();
+        for (Mail mail : mailList) {
+            JsonObject m = new JsonObject();
+            m.addProperty("sender", mail.getSenderUUID().toString());
+            m.addProperty("recipient", uuid.toString());
+            m.addProperty("timestamp", mail.getTimestamp());
+            m.addProperty("message", mail.getMessage());
+            arr.add(m);
+        }
+        try {
+            DatabaseManager.getInstance().saveAllMail(uuid, GSON.toJson(arr));
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Mail] Immediate MySQL sync complete for " + uuid + " (" + mailList.size() + " message(s))");
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync mail for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    /**
      * Immediately syncs a single player's mail to MySQL.
      * Call right after the player clears or removes mail so the change is durable
      * before the next periodic save, and is visible to other servers in the network.
