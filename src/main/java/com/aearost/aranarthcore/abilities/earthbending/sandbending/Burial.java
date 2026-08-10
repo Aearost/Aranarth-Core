@@ -184,6 +184,9 @@ public class Burial extends SandAbility implements AddonAbility {
             remove();
             return;
         }
+        if (phase != Phase.CASTING && burialCenter != null) {
+            enforceBurialZone();
+        }
         switch (phase) {
             case CASTING   -> progressCasting();
             case OPENING   -> progressOpening();
@@ -412,6 +415,43 @@ public class Burial extends SandAbility implements AddonAbility {
 
         if (now - phaseStartTime >= duration) {
             startReleasing();
+        }
+    }
+
+    /**
+     * Returns true if the given location is a block that Burial recorded and owns
+     * (i.e. it will be managed by Burial's own sealing/releasing animations).
+     */
+    private boolean isOwnedBlock(Location loc) {
+        if (surfaceBlockData.containsKey(loc)) return true;
+        for (Map<Location, BlockData> layer : pitLayers) {
+            if (layer.containsKey(loc)) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Enforces the burial zone every tick: any solid block in the 3x3 column from the
+     * pit floor up to 5 blocks above the surface that Burial did not place is immediately
+     * cleared. The block is not restored here - the ability that placed it retains
+     * responsibility for its own cleanup.
+     */
+    private void enforceBurialZone() {
+        World world = burialCenter.getWorld();
+        int bx = burialCenter.getBlockX();
+        int bz = burialCenter.getBlockZ();
+        int fromY = burialCenter.getBlockY() - PIT_DEPTH - 1;
+        int toY = burialCenter.getBlockY() + 5;
+
+        for (int y = fromY; y <= toY; y++) {
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    Block block = world.getBlockAt(bx + dx, y, bz + dz);
+                    if (block.getType().isSolid() && !isOwnedBlock(block.getLocation())) {
+                        block.setType(Material.AIR, false);
+                    }
+                }
+            }
         }
     }
 

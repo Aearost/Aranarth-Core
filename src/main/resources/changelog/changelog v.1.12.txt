@@ -46,6 +46,7 @@ Minor Features
 [~] Fixed per-player PvP overrides not taking precedence over relation flags for defenders and combat
 [~] Fix NPE in updateDiscordRole when DISCORD perk is absent from player perks map
 [~] Fix cross-server mail not being received - sync to MySQL before publishing network notification
+[~] Mitigated effects of Burial suffocating targets when blocks are on top of the exit hole
 
 Backend Code Changes
 -
