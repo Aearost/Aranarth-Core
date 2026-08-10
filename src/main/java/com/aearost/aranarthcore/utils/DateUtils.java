@@ -3,6 +3,8 @@ package com.aearost.aranarthcore.utils;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Weather;
+import com.aearost.aranarthcore.enums.WorldEvent;
+import com.aearost.aranarthcore.event.world.WorldEventManager;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Boost;
@@ -33,6 +35,7 @@ public class DateUtils {
 
     private static final Set<Material> INVALID_SURFACE_BLOCKS;
     private static boolean spawnBasesCached = false;
+    private static boolean startupEventCheckDone = false;
     private static int baseAnimalLimit = 0;
     private static int baseMonsterLimit = 0;
     private static long baseAnimalTicks = 0;
@@ -599,9 +602,9 @@ public class DateUtils {
      */
     public void calculateServerDate() {
         World _mainWorld = Bukkit.getWorld("world");
-		if (_mainWorld == null) {
-			return;
-		}
+        if (_mainWorld == null) {
+            return;
+        }
         int time = (int) (_mainWorld.getTime() / 20);
 
         // Gets current server year
@@ -610,6 +613,12 @@ public class DateUtils {
         Month month = AranarthUtils.getMonth();
         int yearNum = AranarthUtils.getYear();
         boolean isNewMonth = false;
+
+        // On first run after startup, restore any world event that should be active today
+        if (!startupEventCheckDone && WorldEventManager.getInstance() != null) {
+            startupEventCheckDone = true;
+            checkWorldEventForDay(dayNum, month, yearNum);
+        }
 
         // If it is a new day
         // First 5 seconds of a new day
@@ -757,8 +766,15 @@ public class DateUtils {
             // reEvaluateFoodInventory() skips dominions belonging to the other server,
             // so running it on both Survival and SMP is safe.
             DominionUtils.reEvaluateFoodInventory();
+            // Check for world event start/end on this new day
+            checkWorldEventForDay(dayNum, month, yearNum);
+            // Reset Lunaris Obscura blindness counter each new day
+            if (WorldEventManager.getInstance() != null) {
+                WorldEventManager.getInstance().resetNightBlindness();
+            }
         }
         determineMonthEffects();
+        applyWorldEventEffects();
     }
 
     /**
@@ -878,6 +894,25 @@ public class DateUtils {
             case FRIGORVOR -> 1.65;
         };
 
+        // World event overrides
+        WorldEvent activeWorldEvent = AranarthUtils.getActiveWorldEvent();
+        if (activeWorldEvent == WorldEvent.SOLARIS) {
+            int intensity = AranarthUtils.getActiveWorldEventIntensity();
+            double suppressFactor = switch (intensity) {
+                case 0 -> 0.50;
+                case 2 -> 0.10;
+                default -> 0.25;
+            };
+            monsterMultiplier *= suppressFactor;
+        } else if (activeWorldEvent == WorldEvent.LUNARIS) {
+            int intensity = AranarthUtils.getActiveWorldEventIntensity();
+            monsterMultiplier = switch (intensity) {
+                case 0 -> 2.0;
+                case 2 -> 4.0;
+                default -> 3.0;
+            };
+        }
+
         int animalLimit = Math.max(5, (int) Math.round(baseAnimalLimit * animalMultiplier));
         int monsterLimit = Math.max(20, (int) Math.round(baseMonsterLimit * monsterMultiplier));
 
@@ -889,9 +924,9 @@ public class DateUtils {
 
         for (String worldName : new String[]{"world", AranarthCore.getSmpMainWorldName(), "resource"}) {
             World world = Bukkit.getWorld(worldName);
-			if (world == null) {
-				continue;
-			}
+            if (world == null) {
+                continue;
+            }
 
             world.setSpawnLimit(SpawnCategory.ANIMAL, animalLimit);
             world.setSpawnLimit(SpawnCategory.MONSTER, monsterLimit);
@@ -1430,14 +1465,14 @@ public class DateUtils {
 
                 // Selects a random block in the radius either positive or negative from the current location of the player
                 int randomX = tlr.nextInt(snowRadius);
-				if (tlr.nextBoolean()) {
-					randomX = -randomX;
-				}
+                if (tlr.nextBoolean()) {
+                    randomX = -randomX;
+                }
                 locToCreateSnow.setX(locToCreateSnow.getX() + randomX);
                 int randomZ = tlr.nextInt(snowRadius);
-				if (tlr.nextBoolean()) {
-					randomZ = -randomZ;
-				}
+                if (tlr.nextBoolean()) {
+                    randomZ = -randomZ;
+                }
                 locToCreateSnow.setZ(locToCreateSnow.getZ() + randomZ);
 
                 if (!locToCreateSnow.isChunkLoaded()) {
@@ -1461,9 +1496,9 @@ public class DateUtils {
                     for (int[] dir : new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
                         for (int dist = 1; dist <= 7; dist++) {
                             if (scanWorld.getTemperature(bx + dir[0] * dist, by, bz + dir[1] * dist) < 0.85) {
-								if (dist < distToCold) {
-									distToCold = dist;
-								}
+                                if (dist < distToCold) {
+                                    distToCold = dist;
+                                }
                                 break;
                             }
                         }
@@ -1608,14 +1643,14 @@ public class DateUtils {
 
                 // Selects a random block in the radius either positive or negative from the current location of the player
                 int randomX = tlr.nextInt(iceRadius);
-				if (tlr.nextBoolean()) {
-					randomX = -randomX;
-				}
+                if (tlr.nextBoolean()) {
+                    randomX = -randomX;
+                }
                 locToCreateIce.setX(locToCreateIce.getX() + randomX);
                 int randomZ = tlr.nextInt(iceRadius);
-				if (tlr.nextBoolean()) {
-					randomZ = -randomZ;
-				}
+                if (tlr.nextBoolean()) {
+                    randomZ = -randomZ;
+                }
                 locToCreateIce.setZ(locToCreateIce.getZ() + randomZ);
 
                 if (!locToCreateIce.isChunkLoaded()) {
@@ -1638,9 +1673,9 @@ public class DateUtils {
                     for (int[] dir : new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
                         for (int dist = 1; dist <= 7; dist++) {
                             if (scanWorld.getTemperature(bx + dir[0] * dist, by, bz + dir[1] * dist) <= 0.85) {
-								if (dist < distToCold) {
-									distToCold = dist;
-								}
+                                if (dist < distToCold) {
+                                    distToCold = dist;
+                                }
                                 break;
                             }
                         }
@@ -1742,14 +1777,14 @@ public class DateUtils {
 
                                 // Selects a random block in the radius either positive or negative from the current location of the player
                                 int randomX = tlr.nextInt(meltRadius);
-								if (tlr.nextBoolean()) {
-									randomX = -randomX;
-								}
+                                if (tlr.nextBoolean()) {
+                                    randomX = -randomX;
+                                }
                                 locToMelt.setX(locToMelt.getX() + randomX);
                                 int randomZ = tlr.nextInt(meltRadius);
-								if (tlr.nextBoolean()) {
-									randomZ = -randomZ;
-								}
+                                if (tlr.nextBoolean()) {
+                                    randomZ = -randomZ;
+                                }
                                 locToMelt.setZ(locToMelt.getZ() + randomZ);
 
                                 if (!locToMelt.isChunkLoaded()) {
@@ -1801,9 +1836,9 @@ public class DateUtils {
 
                                                     for (String _wn : new String[]{"world", AranarthCore.getSmpMainWorldName(), "resource"}) {
                                                         World _pw = Bukkit.getWorld(_wn);
-														if (_pw != null) {
-															_pw.spawnParticle(Particle.CHERRY_LEAVES, spawnLoc, 1);
-														}
+                                                        if (_pw != null) {
+                                                            _pw.spawnParticle(Particle.CHERRY_LEAVES, spawnLoc, 1);
+                                                        }
                                                     }
                                                 }
                                             }
@@ -2082,9 +2117,9 @@ public class DateUtils {
      * Only runs on the Survival server - the SMP server receives weather changes via network sync.
      */
     private void applyRain() {
-		if (AranarthCore.isSmpServer()) {
-			return;
-		}
+        if (AranarthCore.isSmpServer()) {
+            return;
+        }
 
         // If it is currently storming
         if (AranarthUtils.getWeather() != Weather.CLEAR) {
@@ -2114,9 +2149,9 @@ public class DateUtils {
         // If it is not storming
         else {
             World world = Bukkit.getWorld("world");
-			if (world == null) {
-				return;
-			}
+            if (world == null) {
+                return;
+            }
             // Raining from previous server restart
             if (world.hasStorm() && AranarthUtils.getWeather() == Weather.CLEAR && AranarthUtils.getStormDuration() == 0) {
                 int weatherDuration = world.getWeatherDuration();
@@ -2203,9 +2238,9 @@ public class DateUtils {
     private void updateStorm(Weather type, int duration) {
         String message = null;
         World mainWorld = Bukkit.getWorld("world");
-		if (mainWorld == null) {
-			return; // survival main world must always exist
-		}
+        if (mainWorld == null) {
+            return; // survival main world must always exist
+        }
 
         List<World> weatherWorlds = AranarthUtils.getSyncWorlds();
 
@@ -2225,13 +2260,13 @@ public class DateUtils {
                 if (!isNewDay) {
                     for (Player player : Bukkit.getOnlinePlayers()) {
                         String playerWorld = player.getWorld().getName();
-						if (playerWorld.equals("arena") || playerWorld.equals("creative")) {
-							continue;
-						}
+                        if (playerWorld.equals("arena") || playerWorld.equals("creative")) {
+                            continue;
+                        }
                         int vol = AranarthUtils.getPlayer(player.getUniqueId()).getWeatherSoundVolume();
-						if (vol > 0) {
-							playRainStartSound(player, vol / 100f);
-						}
+                        if (vol > 0) {
+                            playRainStartSound(player, vol / 100f);
+                        }
                     }
                 }
                 message = ChatUtils.chatMessage("&7&oIt has started to rain...");
@@ -2246,13 +2281,13 @@ public class DateUtils {
                 if (!isNewDay) {
                     for (Player player : Bukkit.getOnlinePlayers()) {
                         String playerWorld = player.getWorld().getName();
-						if (playerWorld.equals("arena") || playerWorld.equals("creative")) {
-							continue;
-						}
+                        if (playerWorld.equals("arena") || playerWorld.equals("creative")) {
+                            continue;
+                        }
                         int vol = AranarthUtils.getPlayer(player.getUniqueId()).getWeatherSoundVolume();
-						if (vol > 0) {
-							playThunderStartSound(player, vol / 100f);
-						}
+                        if (vol > 0) {
+                            playThunderStartSound(player, vol / 100f);
+                        }
                     }
                 }
                 message = ChatUtils.chatMessage("&7&oA thunderstorm has started...");
@@ -2267,13 +2302,13 @@ public class DateUtils {
                 if (!isNewDay) {
                     for (Player player : Bukkit.getOnlinePlayers()) {
                         String playerWorld = player.getWorld().getName();
-						if (playerWorld.equals("arena") || playerWorld.equals("creative")) {
-							continue;
-						}
+                        if (playerWorld.equals("arena") || playerWorld.equals("creative")) {
+                            continue;
+                        }
                         int vol = AranarthUtils.getPlayer(player.getUniqueId()).getWeatherSoundVolume();
-						if (vol > 0) {
-							playSnowStartSound(player, vol / 100f);
-						}
+                        if (vol > 0) {
+                            playSnowStartSound(player, vol / 100f);
+                        }
                     }
                 }
                 message = ChatUtils.chatMessage("&7&oIt has started to snow...");
@@ -2294,25 +2329,25 @@ public class DateUtils {
             if (!isNewDay) {
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     String playerWorld = player.getWorld().getName();
-					if (playerWorld.equals("arena") || playerWorld.equals("creative")) {
-						continue;
-					}
+                    if (playerWorld.equals("arena") || playerWorld.equals("creative")) {
+                        continue;
+                    }
                     int vol = AranarthUtils.getPlayer(player.getUniqueId()).getWeatherSoundVolume();
-					if (vol > 0) {
-						playClearSound(player, vol / 100f);
-					}
+                    if (vol > 0) {
+                        playClearSound(player, vol / 100f);
+                    }
                 }
             }
             message = ChatUtils.chatMessage("&7&oThe storm has subsided...");
         }
         for (Player player : Bukkit.getOnlinePlayers()) {
             String playerWorld = player.getWorld().getName();
-			if (playerWorld.equals("arena") || playerWorld.equals("creative")) {
-				continue;
-			}
-			if (AranarthUtils.getPlayer(player.getUniqueId()).isWeatherMessageDisabled()) {
-				continue;
-			}
+            if (playerWorld.equals("arena") || playerWorld.equals("creative")) {
+                continue;
+            }
+            if (AranarthUtils.getPlayer(player.getUniqueId()).isWeatherMessageDisabled()) {
+                continue;
+            }
             player.sendMessage(message);
         }
     }
@@ -2419,6 +2454,114 @@ public class DateUtils {
                 } else {
                     AranarthUtils.setPhantomSpawnDelay(AranarthUtils.getPhantomSpawnDelay() + 1);
                 }
+            }
+        }
+    }
+
+    /**
+     * Checks whether a world event should start or end on the current new day.
+     */
+    private void checkWorldEventForDay(int dayNum, Month month, int yearNum) {
+        // End active event if its window has passed
+        WorldEvent active = AranarthUtils.getActiveWorldEvent();
+        if (active != null && !isWithinEventWindow(active, dayNum, month, yearNum)) {
+            WorldEventManager.getInstance().endEvent();
+        }
+
+        // Start a new event if one begins today
+        if (AranarthUtils.getActiveWorldEvent() == null) {
+            for (WorldEvent event : WorldEvent.values()) {
+                if (event.getMonth() == month) {
+                    int[] window = getEventWindow(event, yearNum);
+                    if (dayNum >= window[0] && dayNum <= window[1]) {
+                        int intensity = getEventIntensity(event, yearNum);
+                        WorldEventManager.getInstance().startEvent(event, intensity);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean isWithinEventWindow(WorldEvent event, int dayNum, Month month, int yearNum) {
+        if (event.getMonth() != month) {
+            return false;
+        }
+        int[] window = getEventWindow(event, yearNum);
+        return dayNum >= window[0] && dayNum <= window[1];
+    }
+
+    private int[] getEventWindow(WorldEvent event, int yearNum) {
+        Random rng = new Random((long) yearNum * 31 + event.ordinal());
+        int startDay = event.getMinDay() + rng.nextInt(event.getDayRange());
+        int duration = getEventDuration(event, yearNum);
+        return new int[]{startDay, startDay + duration - 1};
+    }
+
+    private int getEventIntensity(WorldEvent event, int yearNum) {
+        if (event.isElementalEvent()) {
+            int cyclePosition = ((yearNum - 1) + event.getCycleOffset()) % 4;
+            return switch (cyclePosition) {
+                case 0 -> 2; // Strong
+                case 2 -> 0; // Weak
+                default -> 1; // Normal
+            };
+        }
+        int[] solsticeCycle = switch (event) {
+            case SOLARIS -> new int[]{0, 1, 2, 1};
+            case LUNARIS -> new int[]{2, 1, 0, 1};
+            default -> new int[]{1, 1, 1, 1};
+        };
+        return solsticeCycle[(yearNum - 1) % 4];
+    }
+
+    private int getEventDuration(WorldEvent event, int yearNum) {
+        int intensity = getEventIntensity(event, yearNum);
+        return switch (intensity) {
+            case 2 -> 3;
+            case 0 -> 1;
+            default -> 2;
+        };
+    }
+
+    /**
+     * Applies potion effects for active world events. Called every 100 ticks.
+     */
+    private void applyWorldEventEffects() {
+        WorldEvent active = AranarthUtils.getActiveWorldEvent();
+        if (active == null) {
+            return;
+        }
+        int intensity = AranarthUtils.getActiveWorldEventIntensity();
+
+        if (active == WorldEvent.SOLARIS) {
+            List<PotionEffect> effects = new ArrayList<>();
+            int strengthAmp = (intensity == 2) ? 1 : 0;
+            effects.add(new PotionEffect(PotionEffectType.STRENGTH, 320, strengthAmp));
+            if (intensity > 0) {
+                effects.add(new PotionEffect(PotionEffectType.SATURATION, 40, 0));
+            }
+            if (intensity == 2) {
+                effects.add(new PotionEffect(PotionEffectType.HASTE, 320, 0));
+            }
+            applyWeatherEffectsToAllPlayers(effects);
+
+        } else if (active == WorldEvent.LUNARIS && intensity > 0) {
+            // Weakness at night for Normal and Obscura tiers
+            int weaknessAmp = (intensity == 2) ? 1 : 0;
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                String worldName = player.getWorld().getName();
+                if (!AranarthUtils.isSurvivalWorld(worldName) || worldName.equals("spawn") || worldName.equals("shops")) {
+                    continue;
+                }
+                long time = player.getWorld().getTime();
+                if (time >= 12300 && time <= 23960) {
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 320, weaknessAmp));
+                }
+            }
+            // Sparse Blindness for Obscura
+            if (intensity == 2 && WorldEventManager.getInstance() != null) {
+                WorldEventManager.getInstance().tryApplyLunarisObscuraBlindness();
             }
         }
     }

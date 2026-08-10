@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.enums.WorldEvent;
 import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
@@ -8,6 +9,10 @@ import com.gmail.nossr50.events.experience.McMMOPlayerXpGainEvent;
 import com.gmail.nossr50.mcMMO;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.ability.Ability;
+import com.projectkorra.projectkorra.ability.AirAbility;
+import com.projectkorra.projectkorra.ability.EarthAbility;
+import com.projectkorra.projectkorra.ability.FireAbility;
+import com.projectkorra.projectkorra.ability.WaterAbility;
 import com.projectkorra.projectkorra.event.AbilityDamageEntityEvent;
 import com.projectkorra.projectkorra.event.AbilityEndEvent;
 import org.bukkit.Bukkit;
@@ -151,6 +156,27 @@ public class BoostEffectsListener implements Listener {
 
 			if (AranarthUtils.getServerBoosts().containsKey(Boost.CHI)) {
 				e.setDamage(e.getDamage() * 1.5);
+			}
+
+			// Elemental world event damage boost
+			WorldEvent activeEvent = AranarthUtils.getActiveWorldEvent();
+			if (activeEvent != null && activeEvent.isElementalEvent()) {
+				Ability ability = e.getAbility();
+				boolean isMatchingElement = switch (activeEvent) {
+					case SEIKOS_COMET -> ability instanceof FireAbility;
+					case BLUE_MOON_OF_LEIKS -> ability instanceof WaterAbility;
+					case HARMONIC_CONVERGENCE_OF_SACHSI -> ability instanceof AirAbility;
+					case AEAROSTS_METEORITE -> ability instanceof EarthAbility;
+					default -> false;
+				};
+				if (isMatchingElement) {
+					double multiplier = switch (AranarthUtils.getActiveWorldEventIntensity()) {
+						case 0 -> 1.5;
+						case 2 -> 2.5;
+						default -> 2.0;
+					};
+					e.setDamage(e.getDamage() * multiplier);
+				}
 			}
 		}
 	}

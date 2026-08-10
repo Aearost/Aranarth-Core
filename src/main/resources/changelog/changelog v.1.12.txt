@@ -1,6 +1,7 @@
 AranarthCore v. 1.12
 
 Major Features
+[+] Add World Events system
 [+] Implemented white fire and prismatic fire
 [+] Added interactive chat - [item], [inv], [ec], and [coords]/[pos]
 [+] Added the sawmill functionality

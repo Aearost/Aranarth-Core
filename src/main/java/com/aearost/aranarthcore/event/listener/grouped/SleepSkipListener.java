@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.listener.grouped;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Weather;
+import com.aearost.aranarthcore.enums.WorldEvent;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import net.md_5.bungee.api.ChatMessageType;
@@ -39,6 +40,14 @@ public class SleepSkipListener implements Listener {
 	 */
 	@EventHandler
 	public void onPlayerSleep(final PlayerBedEnterEvent e) {
+		// Lunaris blocks sleeping - we also need to prevent tracking this player as sleeping
+		if (AranarthUtils.getActiveWorldEvent() == WorldEvent.LUNARIS) {
+			long time = e.getPlayer().getWorld().getTime();
+			if (time >= 12300 && time <= 23960) {
+				return;
+			}
+		}
+
 		if (e.getBedEnterResult() == PlayerBedEnterEvent.BedEnterResult.OK) {
 			sleepingPlayers.add(e.getPlayer().getUniqueId());
 			updateSleepMessage();

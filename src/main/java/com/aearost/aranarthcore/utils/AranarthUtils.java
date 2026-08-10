@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.enums.Weather;
+import com.aearost.aranarthcore.enums.WorldEvent;
 import com.aearost.aranarthcore.event.listener.misc.PotionEffectListener;
 import com.aearost.aranarthcore.items.arrow.*;
 import com.aearost.aranarthcore.network.NetworkManager;
@@ -96,6 +97,8 @@ public class AranarthUtils {
     private static int weekday;
     private static Month month;
     private static int year;
+    private static WorldEvent activeWorldEvent = null;
+    private static int activeWorldEventIntensity = 1;
     private static long lastResourceWorldResetTime = 0L;
     private static int stormDuration;
     private static int stormDelay;
@@ -2526,6 +2529,22 @@ public class AranarthUtils {
      */
     public static HashMap<Boost, LocalDateTime> getServerBoosts() {
         return serverBoosts;
+    }
+
+    public static WorldEvent getActiveWorldEvent() {
+        return activeWorldEvent;
+    }
+
+    public static void setActiveWorldEvent(WorldEvent event) {
+        activeWorldEvent = event;
+    }
+
+    public static int getActiveWorldEventIntensity() {
+        return activeWorldEventIntensity;
+    }
+
+    public static void setActiveWorldEventIntensity(int intensity) {
+        activeWorldEventIntensity = intensity;
     }
 
     /**

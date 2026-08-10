@@ -4,6 +4,8 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.FireType;
 import com.aearost.aranarthcore.enums.SpecialDay;
+import com.aearost.aranarthcore.enums.WorldEvent;
+import com.aearost.aranarthcore.event.world.WorldEventManager;
 import com.aearost.aranarthcore.items.HoneyGlazedHam;
 import com.aearost.aranarthcore.items.Quiver;
 import com.aearost.aranarthcore.items.arrow.ArrowIron;
@@ -903,6 +905,13 @@ public class PlayerServerJoinListener implements Listener {
             return;
         }
         PermissionUtils.updateSubElements(player);
+
+        // Apply active elemental world event permissions now that BendingPlayer is loaded
+        WorldEvent activeWorldEvent = AranarthUtils.getActiveWorldEvent();
+        if (activeWorldEvent != null && activeWorldEvent.isElementalEvent()
+                && WorldEventManager.getInstance() != null) {
+            WorldEventManager.getInstance().applyElementalEventToPlayer(player, activeWorldEvent);
+        }
     }
 
     /**

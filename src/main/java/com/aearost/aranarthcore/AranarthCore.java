@@ -13,6 +13,7 @@ import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.event.block.IncantationMagnetismBlockBreak;
 import com.aearost.aranarthcore.event.listener.*;
 import com.aearost.aranarthcore.event.listener.grouped.*;
+import com.aearost.aranarthcore.event.world.WorldEventManager;
 import com.aearost.aranarthcore.event.listener.misc.*;
 import com.aearost.aranarthcore.event.mob.MountListener;
 import com.aearost.aranarthcore.integration.SquaremapIntegration;
@@ -977,6 +978,7 @@ public class AranarthCore extends JavaPlugin {
         new CropInfoEventListener(this);
         new QuestEventListener(this);
         new JobEventListener(this);
+        new WorldEventManager(this);
 
         // General listeners
         new BlockBreakEventListener(this);

@@ -3,6 +3,8 @@ package com.aearost.aranarthcore.utils;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
 import com.aearost.aranarthcore.enums.FireType;
+import com.aearost.aranarthcore.enums.WorldEvent;
+import com.aearost.aranarthcore.event.world.WorldEventManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Avatar;
 import com.aearost.aranarthcore.objects.Perk;
@@ -91,6 +93,14 @@ public class PermissionUtils {
         // Must update arena permissions after base permissions apply
         toggleArenaBendingPermissions(player, player.getWorld().getName().equalsIgnoreCase("arena"));
         updateSubElements(player);
+
+        // Re-apply active elemental world event permissions so rank-ups/reloads don't strip them
+        WorldEvent activeWorldEvent = AranarthUtils.getActiveWorldEvent();
+        if (activeWorldEvent != null && activeWorldEvent.isElementalEvent()
+                && WorldEventManager.getInstance() != null) {
+            WorldEventManager.getInstance().applyElementalEventToPlayer(player, activeWorldEvent);
+        }
+
         AranarthUtils.updateTab();
         player.updateCommands();
         Bukkit.getLogger().info("[AC] " + player.getName() + "'s permissions have been evaluated");
