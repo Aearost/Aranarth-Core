@@ -1267,7 +1267,11 @@ public class DominionUtils {
         String[] parts = biome.toString().split("/");
         String nameWithExtra = parts[2].substring(11);
         String name = nameWithExtra.split("]")[0];
-        return ChatUtils.getFormattedItemName(name);
+        String formatted = ChatUtils.getFormattedItemName(name);
+        if (biome == Biome.THE_END) {
+            formatted = "The" + formatted.substring(3);
+        }
+        return formatted;
     }
 
     /**
@@ -1285,7 +1289,8 @@ public class DominionUtils {
 
         // Scaled odds per rank (higher the rank, the higher the odds)
         int[] commonOdds = {10, 8, 5, 3, 1};  // nautilus, armadillo, netherite scrap, mushroom diamond, nether tear
-        int[] rareOdds = {20, 15, 10, 5, 2}; // turtle scute, elytra, desert fossil
+        int[] rareOdds = {20, 15, 10, 5, 2}; // turtle scute, desert fossil
+        int[] elytraOdds = {40, 20, 13, 10, 8}; // elytra (0.5%/1%/1.54%/2%/2.5% per claim)
         int[] godAppleOdds = {16, 12, 8, 4, 1};  // god apple fragment (divided by 4 during SOLARVOR)
 
         // Dirts
@@ -2192,8 +2197,8 @@ public class DominionUtils {
             items.add(new ItemStack(Material.END_STONE, 64));
             items.add(new ItemStack(Material.END_STONE, 64));
             items.add(new ItemStack(Material.OBSIDIAN, 16));
-            items.add(new ItemStack(Material.CHORUS_PLANT, 16));
-            items.add(new ItemStack(Material.CHORUS_FLOWER, 4));
+            items.add(new ItemStack(Material.CHORUS_FRUIT, 16));
+            items.add(new ItemStack(Material.PURPUR_BLOCK, 4));
 
             // Simulates an end city
             if (random.nextInt(5) == 0) {
@@ -2203,7 +2208,7 @@ public class DominionUtils {
                 items.add(new ItemStack(Material.PURPUR_PILLAR, 64));
                 items.add(new ItemStack(Material.END_ROD, 16));
 
-                if (random.nextInt(rareOdds[rank - 1]) == 0) {
+                if (random.nextInt(elytraOdds[rank - 1]) == 0) {
                     items.add(new ItemStack(Material.ELYTRA, 1));
                 }
             }

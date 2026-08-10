@@ -48,6 +48,9 @@ Minor Features
 [~] Fix NPE in updateDiscordRole when DISCORD perk is absent from player perks map
 [~] Fix cross-server mail not being received - sync to MySQL before publishing network notification
 [~] Mitigated effects of Burial suffocating targets when blocks are on top of the exit hole
+[~] Reduced odds of getting elytras in dominion resource claims in biomes from The End
+[~] Replaced chorus plant/flower dominion resource claims with chorus fruit and purpur blocks
+[~] Fixed capitalization of "The End" in dominion resource claims
 
 Backend Code Changes
 -
