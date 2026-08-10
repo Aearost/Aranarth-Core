@@ -739,10 +739,12 @@ public class ChatUtils {
             }
         }
 
-        int msgLength = msg.length();
-		if (msgLength == 0) {
-			return Component.empty();
-		}
+        // Precompute codepoints so emoji (surrogate pairs) are treated as one unit each
+        int[] codepoints = msg.codePoints().toArray();
+        int cpCount = codepoints.length;
+        if (cpCount == 0) {
+            return Component.empty();
+        }
 
         Matcher urlMatcher = URL_PATTERN.matcher(msg);
         List<int[]> urlRanges = new ArrayList<>();
@@ -757,34 +759,42 @@ public class ChatUtils {
 
         Component result = Component.empty();
         int urlIdx = 0;
-        int i = 0;
+        // charOff tracks position in msg (char-based, for URL boundary detection)
+        // cpOff tracks position in codepoints[] (one per visible unit, for gradient coloring)
+        int charOff = 0;
+        int cpOff = 0;
 
-        while (i < msgLength) {
-            if (urlIdx < urlRanges.size() && i == urlRanges.get(urlIdx)[0]) {
-                int urlEnd = urlRanges.get(urlIdx)[1];
+        while (cpOff < cpCount) {
+            if (urlIdx < urlRanges.size() && charOff == urlRanges.get(urlIdx)[0]) {
+                // URLs are ASCII so char count == codepoint count within them
+                int urlCharEnd = urlRanges.get(urlIdx)[1];
                 Component urlComp = Component.empty();
-                for (int j = i; j < urlEnd; j++) {
-                    Component charComp = Component.text(String.valueOf(msg.charAt(j)))
-                            .color(getGradientTextColor(colors, numColors, msgLength, j));
-					if (isBold) {
-						charComp = charComp.decorate(net.kyori.adventure.text.format.TextDecoration.BOLD);
-					}
+                while (charOff < urlCharEnd) {
+                    int cp = codepoints[cpOff];
+                    Component charComp = Component.text(new String(Character.toChars(cp)))
+                            .color(getGradientTextColor(colors, numColors, cpCount, cpOff));
+                    if (isBold) {
+                        charComp = charComp.decorate(net.kyori.adventure.text.format.TextDecoration.BOLD);
+                    }
                     urlComp = urlComp.append(charComp);
+                    charOff += Character.charCount(cp);
+                    cpOff++;
                 }
                 urlComp = urlComp
                         .hoverEvent(HoverEvent.showText(hoverComponent))
                         .clickEvent(ClickEvent.openUrl(urlStrings.get(urlIdx)));
                 result = result.append(urlComp);
-                i = urlEnd;
                 urlIdx++;
             } else {
-                Component charComp = Component.text(String.valueOf(msg.charAt(i)))
-                        .color(getGradientTextColor(colors, numColors, msgLength, i));
-				if (isBold) {
-					charComp = charComp.decorate(net.kyori.adventure.text.format.TextDecoration.BOLD);
-				}
+                int cp = codepoints[cpOff];
+                Component charComp = Component.text(new String(Character.toChars(cp)))
+                        .color(getGradientTextColor(colors, numColors, cpCount, cpOff));
+                if (isBold) {
+                    charComp = charComp.decorate(net.kyori.adventure.text.format.TextDecoration.BOLD);
+                }
                 result = result.append(charComp);
-                i++;
+                charOff += Character.charCount(cp);
+                cpOff++;
             }
         }
 

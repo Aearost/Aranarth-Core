@@ -514,6 +514,11 @@ public class AranarthCore extends JavaPlugin {
                                     p.getUniqueId(), server, loc.getWorld().getName(),
                                     loc.getX(), loc.getY(), loc.getZ(),
                                     loc.getYaw(), loc.getPitch());
+                            // Write raw_data (inventory snapshot) synchronously, immediately after snapshotting
+                            String rawRow = PersistenceUtils.buildPlayerRowForTransfer(p.getUniqueId());
+                            if (rawRow != null) {
+                                DatabaseManager.getInstance().saveAranarthPlayerRaw(p.getUniqueId(), rawRow);
+                            }
                         }
                     } catch (Exception e) {
                         Bukkit.getLogger().warning(LOG_PREFIX + "Failed to snapshot inventory for " + p.getName() + " during periodic save: " + e.getMessage());
@@ -1505,6 +1510,14 @@ public class AranarthCore extends JavaPlugin {
                         ap.setSurvivalExpLevel(p.getLevel());
                         ap.setSurvivalExpProgress(p.getExp());
                         AranarthUtils.setPlayer(p.getUniqueId(), ap);
+                        // Write raw_data synchronously during shutdown so MySQL is current even if
+                        // syncAranarthPlayersToDatabase's async path never fires (plugin disabled).
+                        if (DatabaseManager.isActive()) {
+                            String rawRow = PersistenceUtils.buildPlayerRowForTransfer(p.getUniqueId());
+                            if (rawRow != null) {
+                                DatabaseManager.getInstance().saveAranarthPlayerRaw(p.getUniqueId(), rawRow);
+                            }
+                        }
                     }
                 }
                 p.saveData();

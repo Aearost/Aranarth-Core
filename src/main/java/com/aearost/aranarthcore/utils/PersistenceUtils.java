@@ -878,6 +878,11 @@ public class PersistenceUtils {
                     aranarthPlayer.setInteractiveChatEnabled(!fields[33].equals("0"));
                 }
 
+                // Emoji Enabled (index 34)
+                if (fields.length > 34) {
+                    aranarthPlayer.setEmojiEnabled(!fields[34].equals("0"));
+                }
+
                 AranarthUtils.setPlayer(uuid, aranarthPlayer);
             }
             Bukkit.getLogger().info("[AC] All toggled features have been initialized");
@@ -958,6 +963,7 @@ public class PersistenceUtils {
                         String expStoreSound = aranarthPlayer.getExpStoreSoundVolume() + "";
 
                         String interactiveChat = aranarthPlayer.isInteractiveChatEnabled() ? "1" : "0";
+                        String emojiEnabled = aranarthPlayer.isEmojiEnabled() ? "1" : "0";
                         String row = uuid + "|" + chat + "|" + messages + "|" + teleport + "|" + spawnboost + "|" + changeClaim
                                 + "|" + inventory + "|" + shulker + "|" + blacklist + "|" + compressing + "|" + chestLock + "|"
                                 + bluefire + "|" + gradientEnabled + "|" + gradientColors + "|" + dayMessage + "|" + weatherMessage
@@ -965,7 +971,7 @@ public class PersistenceUtils {
                                 + "|" + weatherSound + "|" + newDaySound + "|" + newMonthSound + "|" + privateMsgSound
                                 + "|" + teleportSound + "|" + avatarSound + "|" + dominionSound + "|" + aranarthiumSound
                                 + "|" + chatGameSound + "|" + chestSortSound + "|" + jobsSound + "|" + expStoreSound
-                                + "|" + interactiveChat + "\n";
+                                + "|" + interactiveChat + "|" + emojiEnabled + "\n";
                         writer.write(row);
                     }
                     writer.close();
@@ -5152,14 +5158,7 @@ public class PersistenceUtils {
             json.addProperty("conquestDisbandCooldownEnd", ap.getConquestDisbandCooldownEnd());
             try {
                 db.saveAranarthPlayer(uuid, username, GSON.toJson(json));
-                // Only write the full raw row for players currently online on this server.
-                // Offline players may have transferred to another server and made inventory
-                // changes there; writing our stale in-memory snapshot would overwrite the
-                // other server's correct quit-time save.
-                if (Bukkit.getPlayer(uuid) != null) {
-                    String rawRow = buildAranarthPlayerRow(uuid, ap);
-                    db.saveAranarthPlayerRaw(uuid, rawRow);
-                }
+                // raw_data (inventory) is intentionally NOT written here
             } catch (Exception e) {
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync player " + uuid + ": " + e.getMessage());
             }
@@ -5199,7 +5198,12 @@ public class PersistenceUtils {
         try {
             String rawRow = DatabaseManager.getInstance().loadAranarthPlayerRaw(uuid);
             if (rawRow != null) {
+                Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[DB] reloadPlayerFromDatabase " + uuid
+                        + " - raw_data length=" + rawRow.length() + " (non-null, will parse)");
                 parseAndAddAranarthPlayer(rawRow);
+            } else {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] reloadPlayerFromDatabase " + uuid
+                        + " - raw_data is NULL in MySQL; in-memory snapshot unchanged");
             }
         } catch (Exception e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to reload player " + uuid + ": " + e.getMessage());
@@ -5930,6 +5934,7 @@ public class PersistenceUtils {
             obj.addProperty("jobsSoundVolume", ap.getJobsSoundVolume());
             obj.addProperty("expStoreSoundVolume", ap.getExpStoreSoundVolume());
             obj.addProperty("interactiveChat", ap.isInteractiveChatEnabled());
+            obj.addProperty("emojiEnabled", ap.isEmojiEnabled());
             try {
                 db.savePlayerToggles(uuid, GSON.toJson(obj));
             } catch (Exception e) {
@@ -7551,6 +7556,9 @@ public class PersistenceUtils {
                 if (obj.has("interactiveChat")) {
                     ap.setInteractiveChatEnabled(obj.get("interactiveChat").getAsBoolean());
                 }
+                if (obj.has("emojiEnabled")) {
+                    ap.setEmojiEnabled(obj.get("emojiEnabled").getAsBoolean());
+                }
                 AranarthUtils.setPlayer(uuid, ap);
             } catch (Exception e) {
                 Bukkit.getLogger().warning("[AC] Failed to parse toggles for " + uuid + ": " + e.getMessage());
@@ -7603,6 +7611,7 @@ public class PersistenceUtils {
         obj.addProperty("jobsSoundVolume", ap.getJobsSoundVolume());
         obj.addProperty("expStoreSoundVolume", ap.getExpStoreSoundVolume());
         obj.addProperty("interactiveChat", ap.isInteractiveChatEnabled());
+        obj.addProperty("emojiEnabled", ap.isEmojiEnabled());
         obj.addProperty("adminMode", ap.isInAdminMode());
         return GSON.toJson(obj);
     }
@@ -7732,6 +7741,9 @@ public class PersistenceUtils {
             }
             if (obj.has("interactiveChat")) {
                 ap.setInteractiveChatEnabled(obj.get("interactiveChat").getAsBoolean());
+            }
+            if (obj.has("emojiEnabled")) {
+                ap.setEmojiEnabled(obj.get("emojiEnabled").getAsBoolean());
             }
             AranarthUtils.setPlayer(uuid, ap);
         } catch (Exception e) {

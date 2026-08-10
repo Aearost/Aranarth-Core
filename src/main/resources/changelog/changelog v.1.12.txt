@@ -9,6 +9,7 @@ Major Features
 [+] Implemented the Incantation of Resilience
 [+] Added support for Plentiful to be applied to shears
 [~] Slowness will only apply while "outdoors" during snowstorms in Winter months, not year-round
+[+] Implemented emoji shorthand translation in chat with /toggle emoji support
 
 Minor Features
 [~] Fixed issue where the alchemist job was not providing xp when shift-clicking ingredients into a brewing stand
@@ -43,6 +44,7 @@ Minor Features
 [+] Implemented custom mcMMO level broadcast messages
 [~] Fixed issues with doubled messages in chat from both server consoles running commands publicly
 [~] Fixed per-player PvP overrides not taking precedence over relation flags for defenders and combat
+[~]  Fix NPE in updateDiscordRole when DISCORD perk is absent from player perks map
 
 Backend Code Changes
 -

@@ -303,6 +303,15 @@ public class CommandToggle implements CommandExecutor {
 						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7compact dominion messages"));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				} else if (args[0].equalsIgnoreCase("emoji")) {
+					if (aranarthPlayer.isEmojiEnabled()) {
+						aranarthPlayer.setEmojiEnabled(false);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7emoji translation"));
+					} else {
+						aranarthPlayer.setEmojiEnabled(true);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7emoji translation"));
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("interactivechat")) {
 					boolean hasPerm = aranarthPlayer.getSaintRank() >= 2 || aranarthPlayer.getCouncilRank() > 0;
 					if (!hasPerm) {

@@ -9,6 +9,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.EmojiUtils;
 import com.aearost.aranarthcore.utils.InteractiveChatManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -148,6 +149,10 @@ public class PlayerChatListener implements Listener {
             player.sendMessage(ChatUtils.chatMessage("&cYou cannot send any messages as you are muted!"));
             e.setCancelled(true);
             return;
+        }
+
+        if (aranarthPlayer.isEmojiEnabled()) {
+            message = EmojiUtils.translateEmojis(message);
         }
 
         String prefix = ChatUtils.formatChatPrefix(player);

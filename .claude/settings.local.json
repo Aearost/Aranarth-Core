@@ -393,7 +393,13 @@
       "Read(//c/Users/liamh/.claude/projects/C--Users-liamh-IdeaProjects-AranarthCore/memory/**)",
       "Bash(xargs sed:*)",
       "Bash(while IFS= read -r f)",
-      "Bash(do sed:*)"
+      "Bash(do sed:*)",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -type f -name PersistenceUtils.java -o -name AranarthPlayer.java -o -name *Event*.java)",
+      "Bash(gunzip -c 2026-08-09-5.log.gz)",
+      "Bash(gunzip -c 2026-08-10-2.log.gz)",
+      "Bash(gunzip -c 2026-08-10-1.log.gz)",
+      "Bash(gunzip -c \"$f\")",
+      "Bash(gunzip -c 2026-08-09-3.log.gz)"
     ]
   }
 }

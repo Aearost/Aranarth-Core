@@ -158,13 +158,16 @@ public class GuiToggle {
         // Dominion Msg Compact
         gui.setItem(26, buildToggleItem(Material.COMPASS, "&f&lDominion Msg Compact", aranarthPlayer.isDominionMsgCompact()));
 
-        // Interactive Chat (centered in its own row at slot 31)
+        // Interactive Chat (slot 31)
         boolean hasInteractivePerm = aranarthPlayer.getSaintRank() >= 2 || aranarthPlayer.getCouncilRank() > 0;
         if (hasInteractivePerm) {
             gui.setItem(31, buildToggleItem(Material.RECOVERY_COMPASS, "&f&lInteractive Chat", aranarthPlayer.isInteractiveChatEnabled()));
         } else {
             gui.setItem(31, buildLockedItem(Material.RECOVERY_COMPASS, "&f&lInteractive Chat"));
         }
+
+        // Emoji (slot 32)
+        gui.setItem(32, buildToggleItem(Material.HEART_OF_THE_SEA, "&f&lEmoji", aranarthPlayer.isEmojiEnabled()));
 
         return gui;
     }

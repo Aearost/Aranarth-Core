@@ -312,6 +312,18 @@ public class GuiToggleClick {
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.RECOVERY_COMPASS, "&f&lInteractive Chat", aranarthPlayer.isInteractiveChatEnabled()));
             }
+            // Emoji
+            case 32 -> {
+                if (aranarthPlayer.isEmojiEnabled()) {
+                    aranarthPlayer.setEmojiEnabled(false);
+                    player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7emoji translation"));
+                } else {
+                    aranarthPlayer.setEmojiEnabled(true);
+                    player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7emoji translation"));
+                }
+                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.HEART_OF_THE_SEA, "&f&lEmoji", aranarthPlayer.isEmojiEnabled()));
+            }
         }
     }
 

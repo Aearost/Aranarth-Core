@@ -166,7 +166,8 @@ public class PlayerServerQuitListener implements Listener {
             final String rawRow = PersistenceUtils.buildPlayerRowForTransfer(player.getUniqueId());
             if (rawRow != null) {
                 DatabaseManager.getInstance().saveAranarthPlayerRaw(player.getUniqueId(), rawRow);
-                Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName() + " - player row (inventory/stats) flushed to MySQL.");
+                Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName()
+                        + " - player row (inventory/stats) flushed to MySQL (raw_data length=" + rawRow.length() + ").");
             } else {
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName() + " - WARNING: rawRow was null, player row NOT flushed to MySQL.");
             }

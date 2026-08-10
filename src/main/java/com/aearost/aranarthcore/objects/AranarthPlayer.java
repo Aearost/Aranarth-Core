@@ -105,6 +105,7 @@ public class AranarthPlayer {
     private boolean isBulkSellShulkerEnabled = false;
     private boolean isDominionMsgCompact = false;
     private boolean isInteractiveChatEnabled = true;
+    private boolean isEmojiEnabled = true;
     private int joinSoundVolume = 100;
     private int leaveSoundVolume = 100;
     private int voteSoundVolume = 100;
@@ -1917,5 +1918,13 @@ public class AranarthPlayer {
 
     public void setInteractiveChatEnabled(boolean interactiveChatEnabled) {
         this.isInteractiveChatEnabled = interactiveChatEnabled;
+    }
+
+    public boolean isEmojiEnabled() {
+        return isEmojiEnabled;
+    }
+
+    public void setEmojiEnabled(boolean emojiEnabled) {
+        this.isEmojiEnabled = emojiEnabled;
     }
 }
