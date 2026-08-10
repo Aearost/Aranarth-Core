@@ -10,6 +10,7 @@ Major Features
 [+] Added support for Plentiful to be applied to shears
 [~] Slowness will only apply while "outdoors" during snowstorms in Winter months, not year-round
 [+] Implemented emoji shorthand translation in chat with /toggle emoji support
+[~] Increased meat food power values and added meat/fish drops to more biome resource claims
 
 Minor Features
 [~] Fixed issue where the alchemist job was not providing xp when shift-clicking ingredients into a brewing stand
