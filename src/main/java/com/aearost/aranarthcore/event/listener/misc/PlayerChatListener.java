@@ -300,7 +300,7 @@ public class PlayerChatListener implements Listener {
         String displayName = ChatUtils.translateToColor("&6&l[" + nickname + "'s Item]");
         Component display = LegacyComponentSerializer.legacySection().deserialize(displayName);
         String hoverMsg = ChatUtils.translateToColor("&7Click to view &e" + nickname + "&7's held item");
-        return ChatUtils.clickableCommand(display, hoverMsg, "/ichat view " + snapshotId, false);
+        return ChatUtils.clickableCommand(display, hoverMsg, "/ichat view " + snapshotId, true);
     }
 
     private Component buildInvComponent(Player player, String nickname) {
@@ -322,7 +322,7 @@ public class PlayerChatListener implements Listener {
         String displayName = ChatUtils.translateToColor("&6&l[" + nickname + "'s Inventory]");
         Component display = LegacyComponentSerializer.legacySection().deserialize(displayName);
         String hoverMsg = ChatUtils.translateToColor("&7Click to view &e" + nickname + "&7's inventory");
-        return ChatUtils.clickableCommand(display, hoverMsg, "/ichat view " + snapshotId, false);
+        return ChatUtils.clickableCommand(display, hoverMsg, "/ichat view " + snapshotId, true);
     }
 
     private Component buildEcComponent(Player player, String nickname) {
@@ -336,7 +336,7 @@ public class PlayerChatListener implements Listener {
         String displayName = ChatUtils.translateToColor("&6&l[" + nickname + "'s Ender Chest]");
         Component display = LegacyComponentSerializer.legacySection().deserialize(displayName);
         String hoverMsg = ChatUtils.translateToColor("&7Click to view &e" + nickname + "&7's ender chest");
-        return ChatUtils.clickableCommand(display, hoverMsg, "/ichat view " + snapshotId, false);
+        return ChatUtils.clickableCommand(display, hoverMsg, "/ichat view " + snapshotId, true);
     }
 
     private Component buildCoordsComponent(String nickname, Location loc) {
