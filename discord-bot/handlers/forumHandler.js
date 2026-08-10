@@ -5,6 +5,47 @@ const forumDeletionManager = require('../utils/forumDeletionManager');
 const commentMapManager = require('../utils/commentMapManager');
 const { addComment, deleteComment } = require('../github/githubManager');
 
+const TEXT_EXTENSIONS = new Set(['.txt', '.log', '.json', '.yaml', '.yml', '.xml', '.ini', '.cfg', '.toml', '.sh', '.bat', '.properties', '.csv']);
+const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp']);
+const MAX_EMBED_BYTES = 20 * 1024; // 20 KB
+
+/**
+ * Returns GitHub-flavoured markdown for a single Discord attachment.
+ * - Images: inline image syntax so GitHub proxies/caches them permanently.
+ * - Small text files: fetched immediately and embedded as a code block.
+ * - Everything else: plain hyperlink.
+ */
+async function buildAttachmentMarkdown(att) {
+  const ext = (att.name.match(/\.[^.]+$/) || [''])[0].toLowerCase();
+
+  if (IMAGE_EXTENSIONS.has(ext)) {
+    return `![${att.name}](${att.url})`;
+  }
+
+  if (TEXT_EXTENSIONS.has(ext) && att.size <= MAX_EMBED_BYTES) {
+    try {
+      const res = await fetch(att.url);
+      if (res.ok) {
+        let text = await res.text();
+        if (text.length > 3000) text = text.substring(0, 3000) + '\n... (truncated)';
+        const lang = ext === '.json' ? 'json' : (ext === '.yaml' || ext === '.yml') ? 'yaml' : ext === '.sh' ? 'bash' : '';
+        return `**${att.name}:**\n\`\`\`${lang}\n${text}\n\`\`\``;
+      }
+    } catch { /* fall through to link */ }
+  }
+
+  return `[${att.name}](${att.url})`;
+}
+
+/**
+ * Ensures a forum thread is unarchived so messages can be sent to it.
+ */
+async function ensureUnarchived(thread) {
+  if (thread.archived) {
+    await thread.setArchived(false);
+  }
+}
+
 /**
  * Creates a Discord forum thread for a newly approved GitHub issue.
  * @param {Client} client
@@ -94,8 +135,8 @@ async function handleForumMessage(message) {
   }
 
   if (message.attachments.size > 0) {
-    const links = [...message.attachments.values()].map(a => `[${a.name}](${a.url})`).join('\n');
-    commentBody += `\n\n**Attachments:**\n${links}`;
+    const lines = await Promise.all([...message.attachments.values()].map(buildAttachmentMarkdown));
+    commentBody += `\n\n**Attachments:**\n${lines.join('\n')}`;
   }
 
   try {
@@ -130,6 +171,7 @@ async function postNoteToForum(client, issueNumber, note, authorName) {
   const thread = await client.channels.fetch(threadId).catch(() => null);
   if (!thread) return;
 
+  await ensureUnarchived(thread);
   await thread.send({
     embeds: [
       new EmbedBuilder()
@@ -153,6 +195,8 @@ async function postTagChangeToForum(client, issueNumber, newStatus, markedBy) {
 
   const thread = await client.channels.fetch(threadId).catch(() => null);
   if (!thread) return;
+
+  await ensureUnarchived(thread);
 
   const statusConfig = {
     wip: {
