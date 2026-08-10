@@ -458,7 +458,7 @@ public class DominionLevelUtils {
                 }
             }
 
-            // Only snapshot dominions where all chunks are loaded — calling getChunkSnapshot()
+            // Only snapshot dominions where all chunks are loaded - calling getChunkSnapshot()
             // on an unloaded chunk force-loads it, which then causes the next livestock scan
             // to see isLoaded()=true but find empty entity lists (Paper async entity loading),
             // collapsing the cached count to 0 and triggering a false level drop.
@@ -502,7 +502,7 @@ public class DominionLevelUtils {
             }
         }
 
-        // No chunks accessible on this server (cross-server stub or world not loaded) —
+        // No chunks accessible on this server (cross-server stub or world not loaded) -
         // retain the previous cached count rather than collapsing it to 0.
         if (chunksByWorld.isEmpty()) {
             return dominion.getCachedLivestockCount();
@@ -534,7 +534,7 @@ public class DominionLevelUtils {
                 cachedByWorld.put(worldName, worldCount);
                 total += worldCount;
             } else if (cachedByWorld.containsKey(worldName)) {
-                // We have a prior scan result for this world — use it
+                // We have a prior scan result for this world - use it
                 int cached = cachedByWorld.get(worldName);
                 total += cached;
             } else {

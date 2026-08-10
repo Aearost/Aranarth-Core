@@ -125,7 +125,7 @@ public class DominionUtils {
         Dominion attackerDominion = getPlayerDominion(attacker.getUniqueId());
         Dominion targetDominion = getPlayerDominion(target.getUniqueId());
 
-        // Same dominion — respect the member PvP flag
+        // Same dominion - respect the member PvP flag
         if (attackerDominion != null && targetDominion != null
                 && attackerDominion.isSameDominion(targetDominion)) {
             return attackerDominion.isMemberPvpEnabled();
@@ -137,8 +137,9 @@ public class DominionUtils {
             Dominion chunkDominion = getDominionOfChunk(target.getLocation().getChunk());
 
             if (relation == DominionRank.ALLIED || relation == DominionRank.TRUCED) {
-                boolean attackerPvp = attackerDominion.getDominionPermissions().hasPermission(relation, DominionPermission.PVP);
-                boolean targetPvp = targetDominion.getDominionPermissions().hasPermission(relation, DominionPermission.PVP);
+                // Per-player overrides take precedence; either side allowing PvP permits the attack
+                boolean attackerPvp = hasPermission(target, attackerDominion, DominionPermission.PVP);
+                boolean targetPvp = hasPermission(attacker, targetDominion, DominionPermission.PVP);
                 return attackerPvp || targetPvp;
             }
 
@@ -147,16 +148,16 @@ public class DominionUtils {
                 return chunkDominion == null || !chunkDominion.isSameDominion(targetDominion);
             }
 
-            // ENEMIED — always allowed
+            // ENEMIED - always allowed
             return true;
         }
 
-        // Attacker has a dominion, target is a wanderer — always allowed
+        // Attacker has a dominion, target is a wanderer - always allowed
         if (attackerDominion != null) {
             return true;
         }
 
-        // Attacker is a wanderer, target has a dominion — blocked in target's own land
+        // Attacker is a wanderer, target has a dominion - blocked in target's own land
         if (targetDominion != null) {
             Dominion chunkDominion = getDominionOfChunk(target.getLocation().getChunk());
             if (chunkDominion != null && chunkDominion.isSameDominion(targetDominion)) {
@@ -640,7 +641,7 @@ public class DominionUtils {
     }
 
     /**
-     * Determines if the player is a wanderer — not a member of any Dominion.
+     * Determines if the player is a wanderer - not a member of any Dominion.
      *
      * @param uuid The player's UUID.
      * @return True if the player has no Dominion.
@@ -1185,7 +1186,7 @@ public class DominionUtils {
 
     /**
      * Samples biomes from a list of chunks, restricted to the specified world.
-     * Chunks belonging to a different world are skipped to prevent cross-world biome contamination —
+     * Chunks belonging to a different world are skipped to prevent cross-world biome contamination -
      * for example, an outpost in the nether should never pick up overworld biomes at the same chunk
      * coordinates, even if a different world happens to have claims there.
      * Overworld chunks are sampled at the surface height of each column so that underground biome

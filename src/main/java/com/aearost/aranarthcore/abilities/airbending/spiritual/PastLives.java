@@ -140,7 +140,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
     // 50% HP = 10 hearts = 20 half-hearts
     private static final double KURUK_LOW_HP_FRACTION = 0.5;
 
-    // Aang state — speed level 3–10 (amplifier = level - 1)
+    // Aang state - speed level 3–10 (amplifier = level - 1)
     private int aangSpeedLevel = 3; // Speed III minimum
     private int aangSecondTimer = 0; // counts ticks toward next 1-second step
     private static final long AANG_END_COOLDOWN_MS = 10_000L;

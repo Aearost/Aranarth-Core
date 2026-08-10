@@ -122,7 +122,7 @@ public class CommandShop implements CommandExecutor {
                 return true;
             }
 
-            // Shops only exist on Survival — transfer the player there and re-run the command on arrival.
+            // Shops only exist on Survival - transfer the player there and re-run the command on arrival.
             if (AranarthCore.isSmpServer() && NetworkManager.isActive()) {
                 String survivalServerName = AranarthCore.getInstance().getConfig()
                         .getString("network.servers.survival", "survival");
@@ -173,7 +173,7 @@ public class CommandShop implements CommandExecutor {
                 player.sendMessage(ChatUtils.chatMessage("&cYou do not have a shop. Create one with &e/shop create"));
                 return true;
             }
-            // Shops world only exists on Survival — transfer the player there if on SMP.
+            // Shops world only exists on Survival - transfer the player there if on SMP.
             if (AranarthCore.isSmpServer() && NetworkManager.isActive() && shopHome.getWorld() == null) {
                 String survivalServerName = AranarthCore.getInstance().getConfig()
                         .getString("network.servers.survival", "survival");
@@ -306,7 +306,7 @@ public class CommandShop implements CommandExecutor {
                 return true;
             }
 
-            // Send the invite — the target must accept it
+            // Send the invite - the target must accept it
             AranarthUtils.setPendingShopInvite(targetUuid, player.getUniqueId());
             AranarthPlayer ownerAranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
             player.sendMessage(ChatUtils.chatMessage("&7A shop invitation has been sent to &e" + args[1]));

@@ -708,7 +708,7 @@ public class PersistenceUtils {
                 // Fields from index 11 onward are optional - checked with fields.length > N so that
                 // existing files without the field load fine and use the default from the constructor.
 
-                // Fire Type (index 11) — old format: "0"=blue enabled, "1"=blue disabled
+                // Fire Type (index 11) - old format: "0"=blue enabled, "1"=blue disabled
                 if (fields.length > 11) {
                     String fireField = fields[11];
                     if (fireField.equals("0")) {
@@ -6917,7 +6917,7 @@ public class PersistenceUtils {
         // format. Fall back to the flat file so startup isn't crippled.
         if (failCount > 0 && failCount >= rawRows.size() / 2) {
             Bukkit.getLogger().severe("[AC] " + failCount + "/" + rawRows.size()
-                    + " player rows failed to parse — raw_data format is incompatible. Falling back to flat file.");
+                    + " player rows failed to parse - raw_data format is incompatible. Falling back to flat file.");
             AranarthUtils.getAranarthPlayers().clear();
             loadAranarthPlayers();
             return;

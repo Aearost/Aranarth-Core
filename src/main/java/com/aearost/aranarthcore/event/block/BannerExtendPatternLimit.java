@@ -44,7 +44,7 @@ public class BannerExtendPatternLimit {
     }
 
     // -------------------------------------------------------------------------
-    // Slot 0 — banner input
+    // Slot 0 - banner input
     // -------------------------------------------------------------------------
 
     private void handleBannerSlot(InventoryClickEvent e) {
@@ -66,7 +66,7 @@ public class BannerExtendPatternLimit {
     /**
      * A banner with extra patterns is being placed into slot 0.
      * Cancel the event, build a stripped copy with extras stored in PDC, and place it
-     * in slot 0 right now — all in this tick. Then defer the cursor clear to the next tick.
+     * in slot 0 right now - all in this tick. Then defer the cursor clear to the next tick.
      */
     private void onBannerPlaced(InventoryClickEvent e, BannerMeta meta) {
         if (meta.getPatterns().size() <= STRIP_TO) {
@@ -83,7 +83,7 @@ public class BannerExtendPatternLimit {
         }
         stripped.getPersistentDataContainer().set(EXTRA_PATTERNS_KEY, PersistentDataType.STRING, encode(extras));
 
-        // Build the item, cancel, and place directly — same tick, no scheduler
+        // Build the item, cancel, and place directly - same tick, no scheduler
         ItemStack strippedBanner = e.getCursor().clone();
         strippedBanner.setItemMeta(stripped);
 
@@ -111,7 +111,7 @@ public class BannerExtendPatternLimit {
     }
 
     // -------------------------------------------------------------------------
-    // Slot 3 — result
+    // Slot 3 - result
     // -------------------------------------------------------------------------
 
     /**
@@ -130,7 +130,7 @@ public class BannerExtendPatternLimit {
             return;
         }
 
-        // Read extras from slot 0 NOW — vanilla will consume this item after the event
+        // Read extras from slot 0 NOW - vanilla will consume this item after the event
         ItemStack bannerInSlot = e.getClickedInventory().getItem(0);
         if (bannerInSlot == null || !(bannerInSlot.getItemMeta() instanceof BannerMeta slotMeta)) {
             return;

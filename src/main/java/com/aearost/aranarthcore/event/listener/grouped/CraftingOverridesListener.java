@@ -239,7 +239,7 @@ public class CraftingOverridesListener implements Listener {
 		CraftingOverridesMap mapHandler = new CraftingOverridesMap();
 		mapHandler.onCartographyCraft(e);
 		if (!e.isCancelled()) {
-			// Bukkit consumes slot 0 as part of the recipe — restore it on the next tick
+			// Bukkit consumes slot 0 as part of the recipe - restore it on the next tick
 			ItemStack originalMap = inv.getItem(0).clone();
 			mapHandler.tagAsOriginal(originalMap);
 			Bukkit.getScheduler().runTask(plugin, () -> inv.setItem(0, originalMap));

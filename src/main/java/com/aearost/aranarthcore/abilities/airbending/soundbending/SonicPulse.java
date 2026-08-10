@@ -153,7 +153,7 @@ public class SonicPulse extends SoundAbility implements AddonAbility {
                 shatterGlass(player, block);
             }
 
-            // Block collision — pulse stops; close enough to the caster triggers recoil
+            // Block collision - pulse stops; close enough to the caster triggers recoil
             if (block.getType().isSolid()) {
                 if (pulse.distanceTraveled <= MAX_RECOIL_DISTANCE) {
                     applyPlayerRecoil(pulse);

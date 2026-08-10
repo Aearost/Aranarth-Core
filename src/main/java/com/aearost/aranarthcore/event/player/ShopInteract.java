@@ -502,7 +502,7 @@ public class ShopInteract {
                 result.put(true, leaveOneResult.values().iterator().next());
             } else if (useLeaveOneLogic) {
                 // Leave-one logic was active but nothing could be sold (only 1 item per shulker slot).
-                // Do NOT fall back to checkIfContentsHasShopItems — that would consume the kept items.
+                // Do NOT fall back to checkIfContentsHasShopItems - that would consume the kept items.
                 player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough of this item!"));
                 clickUser.setBulkTransactionNum(-1);
                 AranarthUtils.setPlayer(player.getUniqueId(), clickUser);

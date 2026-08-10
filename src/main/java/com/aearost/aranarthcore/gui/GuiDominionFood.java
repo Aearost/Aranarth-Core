@@ -45,7 +45,7 @@ public class GuiDominionFood {
 			inv.setItem(i, foodOffset + i < food.length ? food[foodOffset + i] : null);
 		}
 
-		// Update page indicator in title area — update the nav items to reflect new page
+		// Update page indicator in title area - update the nav items to reflect new page
 		// (Navigation row items are static; only update the blank items between nav buttons if needed)
 		// The inventory title won't change, but that's acceptable for page navigation.
 	}

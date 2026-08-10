@@ -241,49 +241,49 @@ public class AranarthCore extends JavaPlugin {
 
     private static Color[] getMonthFireworkColors(Month month) {
         return switch (month) {
-            // #ffe082 — warm gold; lighter pastel gold + deeper amber
+            // #ffe082 - warm gold; lighter pastel gold + deeper amber
             case IGNIVOR ->
                     new Color[]{Color.fromRGB(255, 224, 130), Color.fromRGB(255, 242, 185), Color.fromRGB(200, 162, 75)};
-            // &3 (#00AAAA) — dark aqua; brighter teal + deep teal
+            // &3 (#00AAAA) - dark aqua; brighter teal + deep teal
             case AQUINVOR ->
                     new Color[]{Color.fromRGB(0, 170, 170), Color.fromRGB(50, 215, 215), Color.fromRGB(0, 105, 105)};
-            // #d1e5f4 — very light sky blue; only darken
+            // #d1e5f4 - very light sky blue; only darken
             case VENTIVOR ->
                     new Color[]{Color.fromRGB(209, 229, 244), Color.fromRGB(155, 188, 222), Color.fromRGB(95, 140, 185)};
-            // #FDA4BA — soft pink; lighter blush + deeper rose
+            // #FDA4BA - soft pink; lighter blush + deeper rose
             case FLORIVOR ->
                     new Color[]{Color.fromRGB(253, 164, 186), Color.fromRGB(255, 205, 218), Color.fromRGB(200, 95, 128)};
-            // &e (#FFFF55) — bright yellow; lighter cream + deeper golden yellow
+            // &e (#FFFF55) - bright yellow; lighter cream + deeper golden yellow
             case AESTIVOR ->
                     new Color[]{Color.fromRGB(255, 255, 85), Color.fromRGB(255, 255, 165), Color.fromRGB(195, 195, 0)};
-            // &6 (#FFAA00) — gold; lighter golden + deep amber
+            // &6 (#FFAA00) - gold; lighter golden + deep amber
             case CALORVOR ->
                     new Color[]{Color.fromRGB(255, 170, 0), Color.fromRGB(255, 208, 75), Color.fromRGB(185, 115, 0)};
-            // #ff4500 — orange-red; lighter orange + deep scarlet
+            // #ff4500 - orange-red; lighter orange + deep scarlet
             case ARDORVOR ->
                     new Color[]{Color.fromRGB(255, 69, 0), Color.fromRGB(255, 125, 55), Color.fromRGB(175, 25, 0)};
-            // #BD5745 — muted terracotta; lighter salmon + deep rust
+            // #BD5745 - muted terracotta; lighter salmon + deep rust
             case SOLARVOR ->
                     new Color[]{Color.fromRGB(189, 87, 69), Color.fromRGB(230, 135, 112), Color.fromRGB(125, 42, 32)};
-            // #a17100 — dark amber; lighter ochre + deep brown-gold
+            // #a17100 - dark amber; lighter ochre + deep brown-gold
             case FOLLIVOR ->
                     new Color[]{Color.fromRGB(161, 113, 0), Color.fromRGB(210, 158, 45), Color.fromRGB(95, 60, 0)};
-            // #8a00c2 — vibrant purple; lighter violet + deep indigo-purple
+            // #8a00c2 - vibrant purple; lighter violet + deep indigo-purple
             case STRIGAVOR ->
                     new Color[]{Color.fromRGB(138, 0, 194), Color.fromRGB(182, 55, 242), Color.fromRGB(78, 0, 125)};
-            // #5b0001 — very dark crimson; only lighten
+            // #5b0001 - very dark crimson; only lighten
             case FAUNIVOR ->
                     new Color[]{Color.fromRGB(91, 0, 1), Color.fromRGB(145, 28, 28), Color.fromRGB(205, 72, 72)};
-            // #2B3856 — dark navy-grey; only lighten
+            // #2B3856 - dark navy-grey; only lighten
             case UMBRAVOR ->
                     new Color[]{Color.fromRGB(43, 56, 86), Color.fromRGB(78, 100, 142), Color.fromRGB(118, 148, 202)};
-            // #DBE9FA — very pale ice blue; only darken
+            // #DBE9FA - very pale ice blue; only darken
             case GLACIVOR ->
                     new Color[]{Color.fromRGB(219, 233, 250), Color.fromRGB(155, 188, 228), Color.fromRGB(92, 138, 195)};
-            // #79BAEC — medium cornflower blue; lighter sky + deeper cerulean
+            // #79BAEC - medium cornflower blue; lighter sky + deeper cerulean
             case FRIGORVOR ->
                     new Color[]{Color.fromRGB(121, 186, 236), Color.fromRGB(178, 220, 255), Color.fromRGB(55, 128, 190)};
-            // #2C041C — very dark maroon-purple; only lighten
+            // #2C041C - very dark maroon-purple; only lighten
             case OBSCURVOR ->
                     new Color[]{Color.fromRGB(44, 4, 28), Color.fromRGB(102, 18, 68), Color.fromRGB(162, 58, 118)};
         };
@@ -451,7 +451,7 @@ public class AranarthCore extends JavaPlugin {
 
         runRepeatingTasks();
 
-        // Initialize SquareMap dominion layer (soft-depend — only if squaremap is loaded)
+        // Initialize SquareMap dominion layer (soft-depend - only if squaremap is loaded)
         if (Bukkit.getPluginManager().isPluginEnabled("squaremap")) {
             squaremapIntegration = new SquaremapIntegration();
             squaremapIntegration.enable();
@@ -488,7 +488,7 @@ public class AranarthCore extends JavaPlugin {
             @Override
             public void run() {
                 // Snapshot online players' survival inventory into their AranarthPlayer so MySQL
-                // has a recent copy — limits inventory loss to at most 30 minutes on ungraceful shutdown.
+                // has a recent copy - limits inventory loss to at most 30 minutes on ungraceful shutdown.
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     try {
                         if (AranarthUtils.isSurvivalWorld(p.getWorld().getName())) {
@@ -568,7 +568,7 @@ public class AranarthCore extends JavaPlugin {
                 DiscordUtils.updateAllDiscordRoles();
                 Bukkit.getLogger().info(LOG_PREFIX + "Aranarth data has been saved");
 
-                // Resets the two bending arenas (Survival server only — arena world doesn't exist on SMP)
+                // Resets the two bending arenas (Survival server only - arena world doesn't exist on SMP)
                 if (!isSmpServer()) {
                     Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "arenas reset arena1");
                     Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "arenas reset arena2");
@@ -678,12 +678,12 @@ public class AranarthCore extends JavaPlugin {
                         AranarthUtils.playerInFaeBiome.put(player.getUniqueId(), inFaeBiome);
                         int arVol = AranarthUtils.getPlayer(player.getUniqueId()).getAranarthiumSoundVolume();
                         if (inFaeBiome) {
-                            // Entered Fae biome — magical sound
+                            // Entered Fae biome - magical sound
                             if (arVol > 0) {
                                 player.playSound(loc, Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM, 0.9f * (arVol / 100f), 1.2f);
                             }
                         } else if (wasInFaeBiome != null) {
-                            // Left Fae biome — dimming sound
+                            // Left Fae biome - dimming sound
                             if (arVol > 0) {
                                 player.playSound(loc, Sound.ENTITY_ALLAY_AMBIENT_WITH_ITEM, 0.9f * (arVol / 100f), 0.6f);
                             }
@@ -723,7 +723,7 @@ public class AranarthCore extends JavaPlugin {
             }
         }, 0, 3);
 
-        // Flower trail for Fae Aranarthium in Fae biomes — random 1-10 tick interval, only when moving
+        // Flower trail for Fae Aranarthium in Fae biomes - random 1-10 tick interval, only when moving
         scheduleFaeFlowerTrail();
 
         // Periodically broadcast world time from the Survival server so the SMP server
@@ -1310,7 +1310,7 @@ public class AranarthCore extends JavaPlugin {
             return;
         }
 
-        // Survival server (public or test) — load all survival-side worlds.
+        // Survival server (public or test) - load all survival-side worlds.
 
         // Main survival worlds
         if (Bukkit.getWorld("world") == null) {
@@ -1332,7 +1332,7 @@ public class AranarthCore extends JavaPlugin {
             wc.createWorld();
         }
 
-        // SMP worlds — only on the test server (single-server setup).
+        // SMP worlds - only on the test server (single-server setup).
         // On the public survival server the SMP worlds live on the separate SMP server.
         if (!isPublicServer()) {
             if (Bukkit.getWorld("smp") == null) {
@@ -1427,7 +1427,7 @@ public class AranarthCore extends JavaPlugin {
         }
 
         // Apply world borders (always set so they survive world resets)
-        // Skip on SMP server — "world", "world_nether", "world_the_end" are SMP worlds there and have no border
+        // Skip on SMP server - "world", "world_nether", "world_the_end" are SMP worlds there and have no border
         if (!isSmpServer()) {
             for (String worldName : new String[]{"world", "world_nether", "world_the_end"}) {
                 World w = Bukkit.getWorld(worldName);
@@ -1485,13 +1485,13 @@ public class AranarthCore extends JavaPlugin {
         // Flush all online players' Bukkit data (inventory, ender chest, XP, health, etc.) to
         // player.dat files before we exit. This is a no-op for graceful /stop (Paper already
         // saved them while kicking players), but it protects against restart scripts that call
-        // System.exit() directly and bypass Paper's normal shutdown sequence — the JVM shutdown
+        // System.exit() directly and bypass Paper's normal shutdown sequence - the JVM shutdown
         // hook fires but Paper never got to write player.dat, causing inventory/EC rollbacks.
         // We also snapshot each online player's live inventory into AranarthPlayer.survivalInventory
         // so that MySQL stays in sync (avoids stale data if they transfer cross-server shortly
         // after the restart).
         Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
-        Bukkit.getLogger().info(LOG_PREFIX + "[Shutdown] saveAll() called — " + onlinePlayers.size() + " player(s) still online.");
+        Bukkit.getLogger().info(LOG_PREFIX + "[Shutdown] saveAll() called - " + onlinePlayers.size() + " player(s) still online.");
         for (Player p : onlinePlayers) {
             try {
                 if (AranarthUtils.isSurvivalWorld(p.getWorld().getName())) {
@@ -1517,7 +1517,7 @@ public class AranarthCore extends JavaPlugin {
                     Location loc = p.getLocation();
                     String server = NetworkManager.isActive() ? NetworkManager.getInstance().getThisServer() : "survival";
                     Bukkit.getLogger().info(LOG_PREFIX + "[Shutdown] Saving last location for " + p.getName()
-                            + " — server=" + server + " world=" + loc.getWorld().getName()
+                            + " - server=" + server + " world=" + loc.getWorld().getName()
                             + " pos=(" + String.format("%.1f", loc.getX()) + "," + String.format("%.1f", loc.getY()) + "," + String.format("%.1f", loc.getZ()) + ")");
                     DatabaseManager.getInstance().saveLastLocation(
                             p.getUniqueId(), server, loc.getWorld().getName(),

@@ -59,7 +59,7 @@ public class QuestUtils {
     // Only these are synced to the shared DB so each server doesn't stomp the other's data.
     private static final Set<UUID> locallyModifiedUuids = new HashSet<>();
 
-    // Superset of locallyModifiedUuids — never cleared during the session, only reset on startup.
+    // Superset of locallyModifiedUuids - never cleared during the session, only reset on startup.
     // Used at shutdown to safely write back all player data this server touched, even after
     // locallyModifiedUuids has been cleared by quit events.
     private static final Set<UUID> sessionModifiedUuids = new HashSet<>();
@@ -529,7 +529,7 @@ public class QuestUtils {
         long nowMillis = System.currentTimeMillis();
 
         if (nowMillis >= todayReset3amMillis && lastDailyReset < todayReset3amMillis) {
-            // Sync from DB first — the other server may have already reset this period.
+            // Sync from DB first - the other server may have already reset this period.
             // Only runs when a reset is imminent (once per day), so the synchronous DB read is acceptable.
             if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
                 try {
@@ -649,7 +649,7 @@ public class QuestUtils {
 
     /**
      * Updates a player's quest progress for the given task type by the given amount.
-     * Rewards are NOT granted automatically — the player must click the quest in the GUI.
+     * Rewards are NOT granted automatically - the player must click the quest in the GUI.
      */
     public static void updateProgress(Player player, QuestTaskType taskType, int amount) {
         UUID uuid = player.getUniqueId();
@@ -664,7 +664,7 @@ public class QuestUtils {
         Integer storedRank = playerQuestRank.get(uuid);
         if (storedRank == null || storedRank != rank) {
             Bukkit.getLogger().info("[AC] [Quest] Rank change for " + uuid
-                    + " (stored=" + storedRank + " current=" + rank + ") — wiping quest data and assigning new quests");
+                    + " (stored=" + storedRank + " current=" + rank + ") - wiping quest data and assigning new quests");
             playerActiveDailyQuests.remove(uuid);
             playerActiveWeeklyQuests.remove(uuid);
             playerDailyProgress.remove(uuid);

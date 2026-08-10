@@ -157,7 +157,7 @@ public class MagmaWave extends LavaAbility implements AddonAbility {
             if (!waveBlocks.contains(b)) {
                 originalData.putIfAbsent(b, b.getBlockData().clone());
                 Levelled lava = (Levelled) Material.LAVA.createBlockData();
-                lava.setLevel(0); // full source lava — consistent, opaque
+                lava.setLevel(0); // full source lava - consistent, opaque
                 b.setBlockData(lava, false);
                 waveBlocks.add(b);
             }

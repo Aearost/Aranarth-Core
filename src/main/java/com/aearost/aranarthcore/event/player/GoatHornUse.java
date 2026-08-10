@@ -286,7 +286,7 @@ public class GoatHornUse {
             String sentinelServer = sentinel.getServerName();
 
             if (NetworkManager.isActive() && !sentinelServer.isEmpty() && !sentinelServer.equals(thisServer)) {
-                // Sentinel is on a different server — request cross-server transfer
+                // Sentinel is on a different server - request cross-server transfer
                 Location loc = player.getLocation();
                 List<UUID> uuids = new ArrayList<>();
                 uuids.add(sentinel.getUuid());

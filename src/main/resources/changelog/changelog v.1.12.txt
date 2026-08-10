@@ -42,6 +42,7 @@ Minor Features
 [+] Added support to mass empty shulker box contents to containers via Shulker Assist
 [+] Implemented custom mcMMO level broadcast messages
 [~] Fixed issues with doubled messages in chat from both server consoles running commands publicly
+[~] Fixed per-player PvP overrides not taking precedence over relation flags for defenders and combat
 
 Backend Code Changes
 -

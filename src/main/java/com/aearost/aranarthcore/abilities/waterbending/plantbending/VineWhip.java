@@ -154,7 +154,7 @@ public class VineWhip extends PlantAbility implements AddonAbility {
     /**
      * Searches every vine block for the nearest LivingEntity within a 3-block radius,
      * making it easy to latch on as long as the vine passes anywhere near the target.
-     * No damage is dealt — the entity is pulled toward the player via velocity.
+     * No damage is dealt - the entity is pulled toward the player via velocity.
      */
     private void pullNearbyEntity() {
         if (vineBlocks.isEmpty()) return;
@@ -197,7 +197,7 @@ public class VineWhip extends PlantAbility implements AddonAbility {
         double targetDistance = Math.min((double) elapsed / fullExtendDuration * range, range);
 
         // Sample the player's look direction once per tick so all sub-steps this tick
-        // share the same direction — direction only changes at tick boundaries, creating
+        // share the same direction - direction only changes at tick boundaries, creating
         // smooth curves as the player moves their mouse between ticks.
         Vector dir = player.getEyeLocation().getDirection().normalize();
 
@@ -214,13 +214,13 @@ public class VineWhip extends PlantAbility implements AddonAbility {
                 continue;
             }
 
-            // Solid block collision — begin retraction
+            // Solid block collision - begin retraction
             if (block.getType().isSolid()) {
                 startRetracting();
                 return;
             }
 
-            // Entity hit — deal damage and retract
+            // Entity hit - deal damage and retract
             LivingEntity hit = findNearbyLivingEntity(tipPosition, 2.0);
             if (hit != null) {
                 hit.damage(damage, player);

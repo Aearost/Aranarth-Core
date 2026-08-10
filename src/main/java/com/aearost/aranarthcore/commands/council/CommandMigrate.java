@@ -8,7 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 
 /**
- * /ac migrate — one-time command to push all in-memory data into MySQL.
+ * /ac migrate - one-time command to push all in-memory data into MySQL.
  * Run this once on the Survival server after first deploying the network setup.
  */
 public class CommandMigrate {
@@ -40,7 +40,7 @@ public class CommandMigrate {
             } catch (Exception e) {
                 Bukkit.getScheduler().runTask(
                         AranarthCore.getInstance(),
-                        () -> sender.sendMessage(ChatUtils.chatMessage("&cMigration failed — check console for details.")));
+                        () -> sender.sendMessage(ChatUtils.chatMessage("&cMigration failed - check console for details.")));
                 AranarthCore.getInstance().getLogger().severe("Migration error: " + e.getMessage());
             }
         });

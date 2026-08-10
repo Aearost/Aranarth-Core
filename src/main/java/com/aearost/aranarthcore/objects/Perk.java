@@ -14,6 +14,6 @@ public enum Perk {
     BLUEFIRE,
     WHITEFIRE,
     PRISMATICFIRE,
-    IRIDESCENTFIRE, // tombstone — positional slot preserved for persistence, do not remove
+    IRIDESCENTFIRE, // tombstone - positional slot preserved for persistence, do not remove
     DISCORD
 }

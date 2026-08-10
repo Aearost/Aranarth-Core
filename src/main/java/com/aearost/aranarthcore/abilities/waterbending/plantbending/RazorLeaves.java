@@ -112,7 +112,7 @@ public class RazorLeaves extends PlantAbility implements AddonAbility {
         // Progress all in-flight projectiles
         projectiles.removeIf(this::progressProjectile);
 
-        // All leaves fired and all projectiles resolved — end the ability
+        // All leaves fired and all projectiles resolved - end the ability
         if (leavesRemaining <= 0 && projectiles.isEmpty() && phase == Phase.CASTING) {
             finishAbility();
         }
@@ -194,7 +194,7 @@ public class RazorLeaves extends PlantAbility implements AddonAbility {
                 return true;
             }
 
-            // Solid block collision — skip the source block so the leaf can exit it
+            // Solid block collision - skip the source block so the leaf can exit it
             Block currentBlock = proj.position.getBlock();
             if (!currentBlock.equals(sourceBlock) && currentBlock.getType().isSolid()) {
                 return true;
@@ -371,7 +371,7 @@ public class RazorLeaves extends PlantAbility implements AddonAbility {
     public String getDescription() {
         return "Source from a nearby plant and launch a volley of razor-sharp leaves at your foes. " +
                 "Each leaf travels in a straight line and strikes hard on impact. " +
-                "Stay close to your source — stray too far and the leaves will be lost.\n" +
+                "Stay close to your source - stray too far and the leaves will be lost.\n" +
                 ChatUtils.translateToColor("&fUsage: Tap Sneak (plant source) > Left-click (up to 5 times)");
     }
 }

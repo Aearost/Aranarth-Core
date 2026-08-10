@@ -368,7 +368,7 @@ public class NetworkManager {
             textureValue = tex[0];
             textureSignature = tex[1];
             if (textureValue.isEmpty()) {
-                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Net] publishPlayerJoin: texture extraction returned empty for " + ap.getUsername() + " — remote tab may show default skin");
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Net] publishPlayerJoin: texture extraction returned empty for " + ap.getUsername() + " - remote tab may show default skin");
             }
         }
 
@@ -506,7 +506,7 @@ public class NetworkManager {
      * Returns the number of remote players that should count toward the sleep threshold.
      */
     public int getRemoteSleepEligibleCount() {
-        // All remote players count — they are on survival/SMP gameplay servers
+        // All remote players count - they are on survival/SMP gameplay servers
         return remoteRoster.size();
     }
 
@@ -904,7 +904,7 @@ public class NetworkManager {
                     }
                 }
             } else {
-                // Back location is on a different server — store for CommandBack to route cross-server.
+                // Back location is on a different server - store for CommandBack to route cross-server.
                 // Also clear the local lastKnownTeleportLocation (set by the pending-TP spawn teleport)
                 // so /back falls through to the cross-server routing instead of going to the spawn point.
                 crossServerBackLocations.put(uuid, server + "|" + worldName + "|" + x + "|" + y + "|" + z + "|" + yaw + "|" + pitch);
@@ -1032,7 +1032,7 @@ public class NetworkManager {
                 }
             } else {
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv]   → WARNING: world '" + transferFromWorld
-                        + "' matched no inventory branch for " + player.getName() + " — inventory NOT saved before transfer");
+                        + "' matched no inventory branch for " + player.getName() + " - inventory NOT saved before transfer");
             }
             AranarthUtils.setPlayer(uuid, ap);
         }
@@ -1060,7 +1060,7 @@ public class NetworkManager {
 
         // NOTE: transferringPlayers is NOT set here. It is set only just before sendPluginMessage
         // so that a crash or disconnect during the async DB write does NOT suppress the quit
-        // message — the server still needs to broadcast the player's departure in that case.
+        // message - the server still needs to broadcast the player's departure in that case.
 
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
             boolean dbWriteSucceeded = true;
@@ -1087,7 +1087,7 @@ public class NetworkManager {
             // Send the BungeeCord Connect message on the main thread after both writes complete.
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                 if (!player.isOnline()) {
-                    // Player disconnected during the async write — quit message was not suppressed
+                    // Player disconnected during the async write - quit message was not suppressed
                     // (flag was never set), so no cleanup needed here.
                     return;
                 }
@@ -1124,7 +1124,7 @@ public class NetworkManager {
     public void setPendingAndTransfer(Player player, String targetServer, PendingTeleport pending) {
         UUID uuid = player.getUniqueId();
         final String pendingJson = gson.toJson(pending);
-        // NOTE: transferringPlayers is NOT set here — see saveInventoryAndTransfer for rationale.
+        // NOTE: transferringPlayers is NOT set here - see saveInventoryAndTransfer for rationale.
 
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
             boolean dbWriteSucceeded = true;
@@ -1300,7 +1300,7 @@ public class NetworkManager {
         }
         boolean isNewPlayer = json.has("isNewPlayer") && json.get("isNewPlayer").getAsBoolean();
         if (isNewPlayer) {
-            // New player first join — play the challenge-complete fanfare
+            // New player first join - play the challenge-complete fanfare
             for (Player p : Bukkit.getOnlinePlayers()) {
                 int vol = AranarthUtils.getPlayer(p.getUniqueId()).getJoinSoundVolume();
                 if (vol > 0) {
@@ -1308,7 +1308,7 @@ public class NetworkManager {
                 }
             }
         } else {
-            // Regular join — play the ascending note-block xylophone
+            // Regular join - play the ascending note-block xylophone
             new BukkitRunnable() {
                 int runs = 0;
 
@@ -1353,7 +1353,7 @@ public class NetworkManager {
         UUID uuid = UUID.fromString(json.get("uuid").getAsString());
         remoteRoster.remove(uuid);
         // Guard: if the player just transferred to THIS server, their vanilla tab entry is
-        // already present — removing it would blank their skin and hide them from their own tab.
+        // already present - removing it would blank their skin and hide them from their own tab.
         if (Bukkit.getPlayer(uuid) == null) {
             NetworkTabManager.removeFromTab(uuid);
         }
@@ -1427,7 +1427,7 @@ public class NetworkManager {
 
         storeCrossServerTpContext(toUuid, new CrossServerTpContext(fromUuid, fromNickname, fromServer, isTpHere));
 
-        // Do NOT set teleportToUuid/teleportFromUuid here — those fields resolve the UUID via
+        // Do NOT set teleportToUuid/teleportFromUuid here - those fields resolve the UUID via
         // Bukkit.getPlayer(), which only works for locally-online players. The remote requester is
         // on a different server, so that lookup returns null and /tpaccept would falsely report
         // "player is no longer online". The CrossServerTpContext above is the sole routing
@@ -1456,7 +1456,7 @@ public class NetworkManager {
 
         if (isTpHere) {
             // The accepter (remote player) is coming TO the requester (local player).
-            // The subtitle must name the requester, not the accepter — otherwise the
+            // The subtitle must name the requester, not the accepter - otherwise the
             // accepter sees "You have teleported to [yourself]".
             Player requester = Bukkit.getPlayer(requesterUuid);
             String requesterNick = requester != null
@@ -2081,7 +2081,7 @@ public class NetworkManager {
             java.util.UUID outpostId = java.util.UUID.fromString(data.get("id").getAsString());
             Outpost existing = OutpostUtils.getOutpostById(outpostId);
             if (existing == null) {
-                // Not yet in memory — register it as a new stub
+                // Not yet in memory - register it as a new stub
                 PersistenceUtils.loadSingleOutpostFromJson(data);
                 return;
             }
@@ -2239,7 +2239,7 @@ public class NetworkManager {
      * @param dominionAId  UUID of the first dominion.
      * @param dominionBId  UUID of the second dominion.
      * @param relationType "ally", "truce", "enemy", "neutral", or "neutral_members"
-     *                     ("neutral_members" means immediate neutrality from ally/truce — sends
+     *                     ("neutral_members" means immediate neutrality from ally/truce - sends
      *                     member-specific notifications instead of a global broadcast).
      */
     public void publishDominionRelationUpdate(UUID dominionAId, UUID dominionBId, String relationType) {
@@ -2328,9 +2328,9 @@ public class NetworkManager {
      *
      * <p>The {@code type} string identifies the event for cross-server member notifications:
      * <ul>
-     *   <li>"conquer_request" — a=conqueror, b=defender</li>
-     *   <li>"rebel_request"   — a=rebel,     b=conqueror</li>
-     *   <li>All other types  — no extra notifications (global broadcast is sent via publishBroadcast)</li>
+     *   <li>"conquer_request" - a=conqueror, b=defender</li>
+     *   <li>"rebel_request"   - a=rebel,     b=conqueror</li>
+     *   <li>All other types  - no extra notifications (global broadcast is sent via publishBroadcast)</li>
      * </ul>
      *
      * @param type Event type string.

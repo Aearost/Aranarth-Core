@@ -33,7 +33,7 @@ public class PendingTeleport {
     /**
      * True when this pending teleport was created purely to route a player back to the server
      * they last logged off on at login. In that case the receiving server should NOT reload
-     * quest progress from the database — the in-memory (or startup-loaded) data for that server
+     * quest progress from the database - the in-memory (or startup-loaded) data for that server
      * is already authoritative and the async DB write from the quit event may not have finished.
      */
     private boolean loginRouting = false;

@@ -17,7 +17,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.*;
 
 /**
- * Manages the Dominion Hub GUI — the main menu opened by /dominion (no args).
+ * Manages the Dominion Hub GUI - the main menu opened by /dominion (no args).
  *
  * <p>The hub screen shows rank/relation permission groups, toggles (Mob Spawning, Member PvP),
  * and navigation buttons for Members, User Search, Guardians, and Outposts.
@@ -52,12 +52,12 @@ public class GuiDominionPermissions {
     /**
      * Returns the slot-to-permission map for a rank sub-screen (27-slot grouped layout).
      * <pre>
-     * Row 0 — Buffer:              slots 0-8  (gray panes)
-     * Row 1 — Interactions:       slots 10-14 (BUILD, MISC_INTERACT, ARMOR_STAND, ITEM_FRAME, VILLAGER)
-     * Row 2 — Block Interactions: slots 19-25 (DOOR, TRAPDOOR, FENCE_GATE, LEVER, BUTTON, PRESSURE_PLATE, CONTAINER)
-     * Row 3 — Commands:           slots 28-35 (HOME, FOOD, RESOURCES, INVITE, REMOVE_MEMBER, SURRENDER, REBEL, RETREAT)
-     * Row 4 — (no section header) slots 36-37 (OUTPOST_HOME, MANAGE_OUTPOSTS)
-     * Row 5 — Buffer:             slots 45-53 (gray panes)
+     * Row 0 - Buffer:              slots 0-8  (gray panes)
+     * Row 1 - Interactions:       slots 10-14 (BUILD, MISC_INTERACT, ARMOR_STAND, ITEM_FRAME, VILLAGER)
+     * Row 2 - Block Interactions: slots 19-25 (DOOR, TRAPDOOR, FENCE_GATE, LEVER, BUTTON, PRESSURE_PLATE, CONTAINER)
+     * Row 3 - Commands:           slots 28-35 (HOME, FOOD, RESOURCES, INVITE, REMOVE_MEMBER, SURRENDER, REBEL, RETREAT)
+     * Row 4 - (no section header) slots 36-37 (OUTPOST_HOME, MANAGE_OUTPOSTS)
+     * Row 5 - Buffer:             slots 45-53 (gray panes)
      * </pre>
      * The rank sub-screen uses 54 slots to accommodate the extra row.
      */
@@ -94,11 +94,11 @@ public class GuiDominionPermissions {
     /**
      * Returns the slot-to-permission map for a relation sub-screen (27-slot grouped layout).
      * <pre>
-     * Row 0 — Buffer:              slots 0-8  (gray panes)
-     * Row 1 — Interactions:       slots 10-15 (BUILD, MISC_INTERACT, ARMOR_STAND, ITEM_FRAME, VILLAGER, PVP)
-     * Row 2 — Block Interactions: slots 19-25 (DOOR, TRAPDOOR, FENCE_GATE, LEVER, BUTTON, PRESSURE_PLATE, CONTAINER)
-     * Row 3 — Commands:           slots 28-29 (HOME, OUTPOST_HOME)
-     * Row 4 — Buffer:             slots 36-44 (gray panes)
+     * Row 0 - Buffer:              slots 0-8  (gray panes)
+     * Row 1 - Interactions:       slots 10-15 (BUILD, MISC_INTERACT, ARMOR_STAND, ITEM_FRAME, VILLAGER, PVP)
+     * Row 2 - Block Interactions: slots 19-25 (DOOR, TRAPDOOR, FENCE_GATE, LEVER, BUTTON, PRESSURE_PLATE, CONTAINER)
+     * Row 3 - Commands:           slots 28-29 (HOME, OUTPOST_HOME)
+     * Row 4 - Buffer:             slots 36-44 (gray panes)
      * </pre>
      */
     public static Map<Integer, DominionPermission> getRelationSlotPermissions() {

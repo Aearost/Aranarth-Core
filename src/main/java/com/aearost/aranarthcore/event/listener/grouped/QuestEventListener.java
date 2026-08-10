@@ -100,7 +100,7 @@ public class QuestEventListener implements Listener {
     }
 
     // -------------------------------------------------------------------------
-    // Block Break — logs, stone, ores, sand, dirt, gravel, crops, ancient debris
+    // Block Break - logs, stone, ores, sand, dirt, gravel, crops, ancient debris
     // -------------------------------------------------------------------------
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
@@ -180,7 +180,7 @@ public class QuestEventListener implements Listener {
             return;
         }
 
-        // Crop harvest — check if mature
+        // Crop harvest - check if mature
         if (HARVESTABLE_CROP_MATERIALS.contains(type)) {
             if (isMatureCrop(e.getBlock())) {
                 QuestUtils.updateProgress(player, QuestTaskType.HARVEST_CROPS, 1);
@@ -189,7 +189,7 @@ public class QuestEventListener implements Listener {
     }
 
     // -------------------------------------------------------------------------
-    // Block Place — planting crops
+    // Block Place - planting crops
     // -------------------------------------------------------------------------
 
     @EventHandler
@@ -207,7 +207,7 @@ public class QuestEventListener implements Listener {
     }
 
     // -------------------------------------------------------------------------
-    // Entity Death — mob kills
+    // Entity Death - mob kills
     // -------------------------------------------------------------------------
 
     @EventHandler
@@ -409,7 +409,7 @@ public class QuestEventListener implements Listener {
      */
     private boolean isMatureCrop(Block block) {
         Material type = block.getType();
-        // Melon and pumpkin blocks don't have Ageable — they are always harvestable
+        // Melon and pumpkin blocks don't have Ageable - they are always harvestable
         if (type == Material.MELON || type == Material.PUMPKIN) {
             return true;
         }

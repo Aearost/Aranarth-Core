@@ -91,7 +91,7 @@ public class LoginStreakUtils {
      */
     public static boolean ensureStreakValid(UUID uuid) {
         long lastClaim = getLastClaimEpochDay(uuid);
-        if (lastClaim == 0) return false; // never claimed — already at day 1, no reset needed
+        if (lastClaim == 0) return false; // never claimed - already at day 1, no reset needed
 
         long today = getTodayEpochDay();
         int day = getStreakDay(uuid);

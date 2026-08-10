@@ -318,7 +318,7 @@ public class ChatGameUtils {
             }
         }
 
-        // This server did not originate the game — publish claim immediately from the async chat
+        // This server did not originate the game - publish claim immediately from the async chat
         // thread (AranarthUtils.getPlayer is a plain map lookup and publish() dispatches its own
         // async task, so no main-thread hop is needed here).
         if (!isOrigin) {

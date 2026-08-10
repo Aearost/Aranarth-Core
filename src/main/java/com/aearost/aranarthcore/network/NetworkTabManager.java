@@ -136,7 +136,7 @@ public class NetworkTabManager {
             try {
                 updateOrderAction = Enum.valueOf((Class<Enum>) actionClass, "UPDATE_LIST_ORDER");
             } catch (IllegalArgumentException ignored) {
-                return; // Action not present in this server version — skip silently
+                return; // Action not present in this server version - skip silently
             }
             // For UPDATE_LIST_ORDER only the UUID and listOrder fields are read by the codec;
             // all other Entry fields can be null / default.
@@ -367,7 +367,7 @@ public class NetworkTabManager {
             Object connection = connectionField.get(serverPlayer);
             if (connection == null) return;
 
-            // Find send(Packet) by name — avoids needing the Packet interface at compile time
+            // Find send(Packet) by name - avoids needing the Packet interface at compile time
             for (Method m : connection.getClass().getMethods()) {
                 if (m.getName().equals("send") && m.getParameterCount() == 1) {
                     m.invoke(connection, packet);

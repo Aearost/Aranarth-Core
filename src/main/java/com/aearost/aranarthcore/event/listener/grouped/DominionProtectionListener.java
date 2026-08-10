@@ -313,9 +313,9 @@ public class DominionProtectionListener implements Listener {
             Dominion chunkDominion = DominionUtils.getDominionOfChunk(target.getLocation().getChunk());
 
             if (relation == DominionRank.ALLIED || relation == DominionRank.TRUCED) {
-                // Either dominion having PvP enabled for this relation allows the attack
-                boolean attackerPvp = attackerDominion.getDominionPermissions().hasPermission(relation, DominionPermission.PVP);
-                boolean targetPvp = targetDominion.getDominionPermissions().hasPermission(relation, DominionPermission.PVP);
+                // Per-player overrides take precedence; either side allowing PvP permits the attack
+                boolean attackerPvp = DominionUtils.hasPermission(target, attackerDominion, DominionPermission.PVP);
+                boolean targetPvp = DominionUtils.hasPermission(attacker, targetDominion, DominionPermission.PVP);
                 if (!attackerPvp && !targetPvp) {
                     e.setCancelled(true);
                     attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthTarget.getNickname()
@@ -341,12 +341,12 @@ public class DominionProtectionListener implements Listener {
             return;
         }
 
-        // Attacker has a dominion, target is a wanderer — always allowed
+        // Attacker has a dominion, target is a wanderer - always allowed
         if (attackerDominion != null) {
             return;
         }
 
-        // Attacker is a wanderer, target has a dominion — blocked in target's own land
+        // Attacker is a wanderer, target has a dominion - blocked in target's own land
         if (targetDominion != null) {
             Dominion chunkDominion = DominionUtils.getDominionOfChunk(target.getLocation().getChunk());
             if (chunkDominion != null && chunkDominion.isSameDominion(targetDominion)) {
@@ -427,7 +427,7 @@ public class DominionProtectionListener implements Listener {
                 ? MountUtils.getDisplayName(mountOwner.getUniqueId(), mountInfo[1])
                 : ChatUtils.getFormattedItemName(e.getEntity().getType().name());
 
-        // Same dominion — check the dominion-wide PvP flag
+        // Same dominion - check the dominion-wide PvP flag
         if (attackerDominion != null && ownerDominion != null
                 && attackerDominion.isSameDominion(ownerDominion)) {
             if (!attackerDominion.isMemberPvpEnabled()) {
@@ -513,7 +513,7 @@ public class DominionProtectionListener implements Listener {
         if (perm == DominionPermission.CONTAINER) {
             Dominion chunkDominion = DominionUtils.getDominionOfChunk(block.getChunk());
             if (chunkDominion == null) {
-                return; // unclaimed land — no restriction here
+                return; // unclaimed land - no restriction here
             }
             // Only show error if it is not a shop
             if (ShopUtils.getShopFromLocation(block.getLocation()) != null) {

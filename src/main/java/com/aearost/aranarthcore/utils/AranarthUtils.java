@@ -453,12 +453,12 @@ public class AranarthUtils {
                 if (hasSurvival) {
                     player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));
                 } else {
-                    // survivalInventory is empty — this should not happen for a player who has
+                    // survivalInventory is empty - this should not happen for a player who has
                     // previously played in survival. Skipping clear to avoid wiping items that
                     // were not properly persisted (MySQL race condition on restart). Logging so
                     // admins can investigate and use /invswap to correct if needed.
                     Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] survivalInventory empty for "
-                            + player.getName() + " during arena→world switch — skipping clear to protect items");
+                            + player.getName() + " during arena→world switch - skipping clear to protect items");
                 }
                 player.setGameMode(GameMode.SURVIVAL);
                 PermissionUtils.toggleArenaBendingPermissions(player, false);
@@ -490,12 +490,12 @@ public class AranarthUtils {
                 if (hasSurvival) {
                     player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));
                 } else {
-                    // survivalInventory is empty — this should not happen for a player who has
+                    // survivalInventory is empty - this should not happen for a player who has
                     // previously played in survival. Skipping clear to avoid wiping items that
                     // were not properly persisted (MySQL race condition on restart). Logging so
                     // admins can investigate and use /invswap to correct if needed.
                     Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] survivalInventory empty for "
-                            + player.getName() + " during creative→world switch — skipping clear to protect items");
+                            + player.getName() + " during creative→world switch - skipping clear to protect items");
                 }
                 player.setGameMode(GameMode.SURVIVAL);
                 return;
@@ -521,7 +521,7 @@ public class AranarthUtils {
             }
             player.getInventory().clear();
         } else {
-            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] switchInventory: unrecognised currentWorld \"" + currentWorld + "\" for " + player.getName() + " — no inventory action taken");
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] switchInventory: unrecognised currentWorld \"" + currentWorld + "\" for " + player.getName() + " - no inventory action taken");
             return;
         }
         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
@@ -636,7 +636,7 @@ public class AranarthUtils {
     }
 
     /**
-     * Returns true if the given block is a valid spot for the Fae Aranarthium flower trail —
+     * Returns true if the given block is a valid spot for the Fae Aranarthium flower trail -
      * i.e. the block itself is air and sits on valid soil.
      */
     public static boolean isValidTrailSpot(Block feetBlock) {
@@ -1048,7 +1048,7 @@ public class AranarthUtils {
                                     }
                                 }
                             } else if (!below.getType().isAir()) {
-                                // Hit something solid or non-water — stop
+                                // Hit something solid or non-water - stop
                                 break;
                             }
                         }
@@ -2570,7 +2570,7 @@ public class AranarthUtils {
             sentBoostReminders.remove(boost.name() + "_10");
             sentBoostReminders.remove(boost.name() + "_1");
 
-            // Handles messages — only broadcast and notify Discord on the primary (Survival) server
+            // Handles messages - only broadcast and notify Discord on the primary (Survival) server
             // to avoid duplicate messages when both servers independently receive a boost event.
             if (!AranarthCore.isSmpServer()) {
                 if (uuid == null) {
@@ -3372,9 +3372,9 @@ public class AranarthUtils {
 
         // Build a unified sorted list so that both local and remote players share
         // a single rank-ordered sequence. Sort keys (all descending):
-        //   1. roleGroup  — council(5) > architect(4) > saint(3) > avatar(2) > regular(1)
-        //   2. roleTier   — councilRank/saintRank/architectRank within the same group
-        //   3. playerRank — game rank (8–0) as tiebreaker within the same role+tier
+        //   1. roleGroup  - council(5) > architect(4) > saint(3) > avatar(2) > regular(1)
+        //   2. roleTier   - councilRank/saintRank/architectRank within the same group
+        //   3. playerRank - game rank (8–0) as tiebreaker within the same role+tier
         record SortEntry(int roleGroup, int roleTier, int playerRank, Player localPlayer, NetworkPlayer remotePlayer) {
         }
 
@@ -3671,7 +3671,7 @@ public class AranarthUtils {
                 for (int i = 0; i < sentinels.get(type).size(); i++) {
                     Sentinel sentinel = sentinels.get(type).get(i);
 
-                    // Skip sentinels that belong to a different server — they won't have entities here
+                    // Skip sentinels that belong to a different server - they won't have entities here
                     String sentinelServer = sentinel.getServerName();
                     if (!sentinelServer.isEmpty()
                             && com.aearost.aranarthcore.network.NetworkManager.isActive()

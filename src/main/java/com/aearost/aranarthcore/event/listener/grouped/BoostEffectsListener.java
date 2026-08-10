@@ -86,7 +86,7 @@ public class BoostEffectsListener implements Listener {
 				if (AranarthUtils.getServerBoosts().containsKey(Boost.HARVEST)) {
 					Material type = e.getBlock().getType();
 					Location loc = e.getBlock().getLocation();
-					// Increase drops by 1.5x — use the block's actual loot table drops so blocks
+					// Increase drops by 1.5x - use the block's actual loot table drops so blocks
 					// like grass (which drop dirt, not the block itself) are handled correctly.
 					if (AranarthUtils.isHarvestableWithShovel(type) || AranarthUtils.isHarvestableWithAxe(type)) {
 						if (new Random().nextInt(2) == 0) {

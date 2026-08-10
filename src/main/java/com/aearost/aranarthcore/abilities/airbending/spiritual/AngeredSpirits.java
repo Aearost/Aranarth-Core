@@ -139,7 +139,7 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
 
     private void handleReady() {
         if (player.getInventory().getHeldItemSlot() != heldSlot) {
-            remove(); // No cooldown — player never fired
+            remove(); // No cooldown - player never fired
             return;
         }
 

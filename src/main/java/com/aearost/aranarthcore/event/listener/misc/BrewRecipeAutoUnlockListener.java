@@ -25,7 +25,7 @@ import static com.aearost.aranarthcore.objects.CustomKeys.BREW_BREWER;
  */
 public class BrewRecipeAutoUnlockListener implements Listener {
 
-    /** BreweryX quality required to trigger a recipe unlock — 10 means every criterion was met exactly. */
+    /** BreweryX quality required to trigger a recipe unlock - 10 means every criterion was met exactly. */
     private static final int PERFECT_QUALITY = 10;
 
     public BrewRecipeAutoUnlockListener(AranarthCore plugin) {
@@ -82,7 +82,7 @@ public class BrewRecipeAutoUnlockListener implements Listener {
 
         UUID uuid = player.getUniqueId();
         if (BrewRecipeUtils.isMastered(uuid, recipe)) {
-            return; // Already mastered — nothing new to do
+            return; // Already mastered - nothing new to do
         }
 
         boolean wasAlreadyUnlocked = BrewRecipeUtils.isUnlocked(uuid, recipe);

@@ -77,7 +77,7 @@ public class CommandAdminTeleport {
 		boolean isSenderPlayer = player != null;
 
 		if (args[0].equalsIgnoreCase("tpw")) {
-			// /ac tpw <worldname> — teleport self to surface of 0,0 in the specified world
+			// /ac tpw <worldname> - teleport self to surface of 0,0 in the specified world
 			if (isSenderPlayer && aranarthPlayer.getCouncilRank() < 3) {
 				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
 				return true;
@@ -104,7 +104,7 @@ public class CommandAdminTeleport {
 				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
 				return true;
 			}
-			// /ac tpf x y z [<yaw> <pitch>] — self teleport, player only
+			// /ac tpf x y z [<yaw> <pitch>] - self teleport, player only
 			if (args.length == 4 || args.length == 6) {
 				if (!isSenderPlayer) {
 					sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
@@ -134,7 +134,7 @@ public class CommandAdminTeleport {
 				player.teleport(loc);
 				player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the input coordinates"));
 			}
-			// /ac tpf username x y z [<yaw> <pitch>] — command blocks supported, @p resolved
+			// /ac tpf username x y z [<yaw> <pitch>] - command blocks supported, @p resolved
 			else if (args.length == 5 || args.length == 7) {
 				double x, y, z;
 				float yaw = 0;
@@ -289,7 +289,7 @@ public class CommandAdminTeleport {
 				return true;
 			}
 			// Teleports the target player to the input coordinates
-			// /ac tp username x y z [<yaw> <pitch>] — command blocks supported, @p resolved
+			// /ac tp username x y z [<yaw> <pitch>] - command blocks supported, @p resolved
 			else if (args.length == 5 || args.length == 7) {
 				double x, y, z;
 				float yaw = 0;

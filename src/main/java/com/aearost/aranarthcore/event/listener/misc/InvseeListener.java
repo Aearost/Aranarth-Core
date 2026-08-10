@@ -139,7 +139,7 @@ public class InvseeListener implements Listener {
         if (!GuiInvsee.isBeingWatched(player.getUniqueId())) {
             return;
         }
-        // Skip clicks the viewer makes inside an invsee GUI — already handled above
+        // Skip clicks the viewer makes inside an invsee GUI - already handled above
         if (isInvsee(e.getView().getTitle())) {
             return;
         }

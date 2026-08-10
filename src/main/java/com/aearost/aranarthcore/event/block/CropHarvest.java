@@ -72,7 +72,7 @@ public class CropHarvest {
 			return;
 		}
 
-		// Award Farmer job pay and quest progress — CropHarvest cancels the BlockBreakEvent so those listeners never see crop breaks
+		// Award Farmer job pay and quest progress - CropHarvest cancels the BlockBreakEvent so those listeners never see crop breaks
 		JobUtils.awardFarmerCropHarvest(player, block.getType());
 		QuestUtils.updateProgress(player, QuestTaskType.HARVEST_CROPS, 1);
 

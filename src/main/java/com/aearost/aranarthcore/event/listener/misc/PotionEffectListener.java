@@ -304,7 +304,7 @@ public class PotionEffectListener implements Listener {
                     }
                     return DominionUtils.isPositivelyAligned(faePlayer, targetPlayer);
                 }
-                // Mobs are always negatively-aligned — cancel beneficial effects
+                // Mobs are always negatively-aligned - cancel beneficial effects
                 e.setCancelled(true);
                 return false;
             } else if (category == PotionEffectTypeCategory.HARMFUL) {
@@ -315,7 +315,7 @@ public class PotionEffectListener implements Listener {
                     }
                     return DominionUtils.isNegativelyAligned(faePlayer, targetPlayer);
                 }
-                // Mobs are always negatively-aligned — apply Fae harmful boost
+                // Mobs are always negatively-aligned - apply Fae harmful boost
                 return true;
             }
             return false;

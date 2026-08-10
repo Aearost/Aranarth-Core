@@ -211,7 +211,7 @@ public class SandWave extends SandAbility implements AddonAbility {
 
     /**
      * Stops the wave when the terrain rises by more than 1 block in a half-block
-     * span — catches steep walls while allowing gentle uphill slopes.
+     * span - catches steep walls while allowing gentle uphill slopes.
      */
     private boolean isBlocked(double dist) {
         if (dist < 0.5) {

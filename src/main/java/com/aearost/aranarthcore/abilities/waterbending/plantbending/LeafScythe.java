@@ -74,7 +74,7 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
 
         cooldown = 6000;
         selectRange = 8;
-        damage = 4.0; // 2 hearts (blade hits deal 1.5× — 3 hearts)
+        damage = 4.0; // 2 hearts (blade hits deal 1.5× - 3 hearts)
 
         Block found = BlockSource.getWaterSourceBlock(player, selectRange, ClickType.LEFT_CLICK, false, false, bPlayer.canPlantbend());
         if (found == null || !isValidPlantSource(found)) {

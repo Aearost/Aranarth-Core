@@ -27,7 +27,7 @@ import static com.aearost.aranarthcore.objects.CustomKeys.BREWING_COPY;
 /**
  * Tags potions in brewing stand output slots when a brew completes to avoid potion duplication.
  * Potions that were themselves produced by the double-brew bonus (BREWING_COPY) are ineligible
- * to trigger further duplication rolls — their outputs are not tagged with BREWED_POTION.
+ * to trigger further duplication rolls - their outputs are not tagged with BREWED_POTION.
  */
 public class BrewingListener implements Listener {
 

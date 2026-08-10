@@ -68,7 +68,7 @@ public class ShulkerDump {
 
         // === Block interaction checks ===
 
-        // Dominion CONTAINER permission — check explicitly since DominionProtectionListener
+        // Dominion CONTAINER permission - check explicitly since DominionProtectionListener
         // targets RIGHT_CLICK_BLOCK for container access and would not cover this left-click.
         Dominion chunkDominion = DominionUtils.getDominionOfChunk(block.getChunk());
         if (chunkDominion != null && !DominionUtils.hasPermission(player, chunkDominion, DominionPermission.CONTAINER)) {
@@ -77,7 +77,7 @@ public class ShulkerDump {
             return;
         }
 
-        // Locked container check (unclaimed land only — mirrors ContainerInteract.attemptOpen)
+        // Locked container check (unclaimed land only - mirrors ContainerInteract.attemptOpen)
         if (chunkDominion == null) {
             LockedContainer lockedContainer = AranarthUtils.getLockedContainerAtBlock(block);
             if (lockedContainer != null) {
@@ -91,7 +91,7 @@ public class ShulkerDump {
             }
         }
 
-        // Shop container check — mirrors ContainerInteract.attemptOpen
+        // Shop container check - mirrors ContainerInteract.attemptOpen
         if (ShopUtils.getShopFromLocation(block.getRelative(BlockFace.UP).getLocation()) != null) {
             e.setCancelled(true);
             return;
@@ -121,7 +121,7 @@ public class ShulkerDump {
             containerInventory = doubleChest.getInventory();
         }
 
-        // === Transfer items — addItem() stacks into partial stacks before using empty slots ===
+        // === Transfer items - addItem() stacks into partial stacks before using empty slots ===
         boolean anyLeftover = false;
         for (int i = 0; i < shulkerContents.length; i++) {
             ItemStack item = shulkerContents[i];
@@ -145,7 +145,7 @@ public class ShulkerDump {
         e.setCancelled(true);
         player.playSound(player, Sound.BLOCK_SHULKER_BOX_CLOSE, 1F, 1F);
         if (anyLeftover) {
-            player.sendMessage(ChatUtils.chatMessage("&eNot all items fit — remaining items are still in your shulker box."));
+            player.sendMessage(ChatUtils.chatMessage("&eNot all items fit - remaining items are still in your shulker box."));
         } else {
             player.sendMessage(ChatUtils.chatMessage("&7Items emptied from your shulker box into the container!"));
         }

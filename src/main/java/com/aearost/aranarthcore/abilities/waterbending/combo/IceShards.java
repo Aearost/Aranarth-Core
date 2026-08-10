@@ -70,7 +70,7 @@ public class IceShards extends IceAbility implements AddonAbility, ComboAbility 
     private final Set<UUID> hitEntities = new HashSet<>();
 
     // -----------------------------------------------------------------------
-    // Shard — wraps a BlockDisplay with a manually-tracked velocity.
+    // Shard - wraps a BlockDisplay with a manually-tracked velocity.
     // BlockDisplay entities are purely visual; they can never trigger
     // EntityChangeBlockEvent or place any block in the world.
     // -----------------------------------------------------------------------
@@ -110,7 +110,7 @@ public class IceShards extends IceAbility implements AddonAbility, ComboAbility 
             return;
         }
 
-        // Must be standing on solid ground — not mid-air and not in water.
+        // Must be standing on solid ground - not mid-air and not in water.
         final Block feetBlock = player.getLocation().getBlock();
         final Block blockBelow = player.getLocation().clone().subtract(0, 0.1, 0).getBlock();
         if (feetBlock.getType() == Material.WATER || blockBelow.isPassable()) {

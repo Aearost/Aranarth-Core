@@ -550,6 +550,11 @@ public class DefenderUtils {
 
         if (targetDominion != null
                 && (relation == DominionRank.ALLIED || relation == DominionRank.TRUCED)) {
+            // Per-player override on the defender's dominion takes precedence over the relation-level flag
+            Boolean perPlayerOverride = defenderDominion.getPlayerPermissionOverride(target.getUniqueId(), DominionPermission.PVP);
+            if (perPlayerOverride != null) {
+                return perPlayerOverride;
+            }
             boolean defenderPvp = defenderDominion.getDominionPermissions()
                     .hasPermission(relation, DominionPermission.PVP);
             boolean targetPvp = targetDominion.getDominionPermissions()
@@ -820,7 +825,7 @@ public class DefenderUtils {
                         continue;
                     }
 
-                    // No target — stop any ongoing pathfinding so the defender stands still
+                    // No target - stop any ongoing pathfinding so the defender stands still
                     mob.getPathfinder().stopPathfinding();
                     clearStuckState(entityUUID);
                 }

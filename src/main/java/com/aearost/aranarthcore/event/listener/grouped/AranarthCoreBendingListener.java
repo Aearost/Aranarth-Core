@@ -365,7 +365,7 @@ public class AranarthCoreBendingListener implements Listener {
         CoreAbility ability = bendingPlayer.getBoundAbility();
         String abilityName = bendingPlayer.getBoundAbilityName();
 
-        // Sneak press during FIRING — cancel so PK cannot activate IceSpike via SHIFT_DOWN
+        // Sneak press during FIRING - cancel so PK cannot activate IceSpike via SHIFT_DOWN
         if (e.isSneaking()) {
             IceDiscs iceDiscs = IceDiscs.getActiveInstance(player.getUniqueId());
             if (iceDiscs != null && iceDiscs.getPhase() == IceDiscs.Phase.FIRING) {
@@ -424,7 +424,7 @@ public class AranarthCoreBendingListener implements Listener {
             }
         } else if (isBendingRestricted(player, player.getLocation()) && !player.isSneaking()) {
             // When the sneak-press was cancelled, the server never set isSneaking=true.
-            // On release, player.isSneaking() is therefore still false — PK's handler
+            // On release, player.isSneaking() is therefore still false - PK's handler
             // (ignoreCancelled=true) would see sneaking=false and call AirBlast.setOrigin.
             // Cancel the release event too to prevent this.
             airBlastClearOrigin(player);
@@ -885,14 +885,14 @@ public class AranarthCoreBendingListener implements Listener {
             return;
         }
 
-        // DaggerVolley: instant left-click fire — advances the 3 → 6 → 9 arrow cycle
+        // DaggerVolley: instant left-click fire - advances the 3 → 6 → 9 arrow cycle
         BendingPlayer bpDaggerVolley = BendingPlayer.getBendingPlayer(player);
         if (bpDaggerVolley != null && bpDaggerVolley.getBoundAbilityName().equalsIgnoreCase("daggervolley")) {
             new DaggerVolley(player);
             return;
         }
 
-        // MetalStrips: instant left-click fire — one iron ingot per shot
+        // MetalStrips: instant left-click fire - one iron ingot per shot
         BendingPlayer bpMetal = BendingPlayer.getBendingPlayer(player);
         if (bpMetal != null && bpMetal.getBoundAbilityName().equalsIgnoreCase("metalstrips")
                 && bpMetal.isElementToggled(Element.EARTH)) {
@@ -1806,7 +1806,7 @@ public class AranarthCoreBendingListener implements Listener {
             return;
         }
 
-        // Owner is collecting their ingot — swap the tagged stack for a clean stack of the
+        // Owner is collecting their ingot - swap the tagged stack for a clean stack of the
         // correct metal type so the player never receives the internal instance-ID metadata.
         e.getItem().setItemStack(new ItemStack(MetalStrips.getStoredMaterial(e.getItem()), 1));
         MetalStrips.removeTrackedItem(e.getItem(), player.getUniqueId());
@@ -2053,7 +2053,7 @@ public class AranarthCoreBendingListener implements Listener {
      */
     @EventHandler
     public void onFangInteract(final PlayerInteractEntityEvent e) {
-        // Resolve the clicked entity to the main EnderDragon — the player often
+        // Resolve the clicked entity to the main EnderDragon - the player often
         // clicks a body part (head, wing, tail) which is a ComplexEntityPart, not the dragon itself.
         EnderDragon dragon;
         if (e.getRightClicked() instanceof EnderDragon d) {
@@ -2173,7 +2173,7 @@ public class AranarthCoreBendingListener implements Listener {
         if ("PastLives".equals(e.getAbility())) {
             return;
         }
-        e.setCooldown(e.getCooldown() / 3); // 2/3 reduction — ability runs at 1/3 of normal cooldown
+        e.setCooldown(e.getCooldown() / 3); // 2/3 reduction - ability runs at 1/3 of normal cooldown
     }
 
 }

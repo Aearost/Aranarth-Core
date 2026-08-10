@@ -47,7 +47,7 @@ public class GateListener implements Listener {
             return;
         }
 
-        // Route through GateUtils — it decides whether to register the block as a gate
+        // Route through GateUtils - it decides whether to register the block as a gate
         // block based on placement mode / sneaking state, and validates axis alignment.
         String error = GateUtils.handleBlockPlaced(e.getBlockPlaced(), player);
         if (error != null) {
@@ -66,7 +66,7 @@ public class GateListener implements Listener {
 
     @EventHandler
     public void onEntityExplode(EntityExplodeEvent e) {
-        // Gate blocks are indestructible — remove them from the explosion block list.
+        // Gate blocks are indestructible - remove them from the explosion block list.
         e.blockList().removeIf(block ->
                 GateUtils.isGateMaterial(block.getType()) && GateUtils.getGateAt(block.getLocation()) != null
         );
@@ -74,7 +74,7 @@ public class GateListener implements Listener {
 
     @EventHandler
     public void onBlockExplode(BlockExplodeEvent e) {
-        // Gate blocks are indestructible — remove them from the explosion block list.
+        // Gate blocks are indestructible - remove them from the explosion block list.
         e.blockList().removeIf(block ->
                 GateUtils.isGateMaterial(block.getType()) && GateUtils.getGateAt(block.getLocation()) != null
         );

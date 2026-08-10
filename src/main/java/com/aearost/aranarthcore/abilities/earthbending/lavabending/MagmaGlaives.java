@@ -38,7 +38,7 @@ public class MagmaGlaives extends LavaAbility implements AddonAbility {
     private static final int PASSIVE_SOUND_INTERVAL = 16;
 
     // -------------------------------------------------------------------------
-    // Lava colour palette — dark red at center, bright orange at tips
+    // Lava colour palette - dark red at center, bright orange at tips
     // -------------------------------------------------------------------------
 
     private static final Particle.DustOptions LAVA_DEEP_RED = new Particle.DustOptions(Color.fromRGB(140, 10, 0), 1.1f);
@@ -76,7 +76,7 @@ public class MagmaGlaives extends LavaAbility implements AddonAbility {
     private final Random random = new Random();
 
     // -------------------------------------------------------------------------
-    // Inner class — flying glaive
+    // Inner class - flying glaive
     // -------------------------------------------------------------------------
 
     private static class FlyingGlaive {

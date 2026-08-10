@@ -65,7 +65,7 @@ public class GuiJobsJoinClick {
         ap.setJobDataLoaded(true);
         AranarthUtils.setPlayer(player.getUniqueId(), ap);
         Bukkit.getLogger().info("[AC][Jobs] " + player.getName() + " joined job " + job.name()
-                + " — active=" + jobData.getActiveJobs());
+                + " - active=" + jobData.getActiveJobs());
         // Sync save ensures the DB row is committed before the player can switch servers.
         // An async save would race with Velocity's join-before-quit ordering: the destination
         // server loads from DB before the source server's quit handler fires, so an async

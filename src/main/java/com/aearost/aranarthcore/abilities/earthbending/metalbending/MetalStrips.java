@@ -241,7 +241,7 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
             final Location checkPos = this.startLocation.clone()
                     .add(this.direction.clone().multiply(this.distanceTraveled));
 
-            // Range exceeded — arc forward and down
+            // Range exceeded - arc forward and down
             if (this.distanceTraveled > this.range) {
                 this.firedItem.setVelocity(this.direction.clone().multiply(0.25).setY(-0.15));
                 landItem();
@@ -249,7 +249,7 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
                 return;
             }
 
-            // Solid, non-passable block in the path — drop in place (no forward push into the wall)
+            // Solid, non-passable block in the path - drop in place (no forward push into the wall)
             if (checkPos.getBlock().getType().isSolid() && !checkPos.getBlock().isPassable()) {
                 this.firedItem.setVelocity(new Vector(0, -0.15, 0));
                 landItem();
@@ -257,7 +257,7 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
                 return;
             }
 
-            // Living entity in the path — continue forward slightly and arc down after impact
+            // Living entity in the path - continue forward slightly and arc down after impact
             for (final Entity entity : checkPos.getWorld().getNearbyEntities(checkPos, HIT_RADIUS, HIT_RADIUS, HIT_RADIUS)) {
                 if (!(entity instanceof LivingEntity)) {
                     continue;
@@ -434,7 +434,7 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
         if (task != null) {
             task.cancel();
         }
-        // Restore gravity on tracked strips — don't touch velocity so recall momentum arcs them naturally
+        // Restore gravity on tracked strips - don't touch velocity so recall momentum arcs them naturally
         final List<Item> strips = trackedStrips.get(player.getUniqueId());
         if (strips != null) {
             for (final Item item : strips) {

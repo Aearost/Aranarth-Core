@@ -61,7 +61,7 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
     private static final int BASE_EFFECT_DURATION_TICKS = 60; // +20 ticks per 0.5s interval in fumes
 
     private static final Map<UUID, NoxiousFumes> activeInstances  = new HashMap<>();
-    // Tracks when a player's NoxiousFumes reached full charge — consumed by JetFumes activation.
+    // Tracks when a player's NoxiousFumes reached full charge - consumed by JetFumes activation.
     private static final Map<UUID, Long>         chargeTimestamps = new HashMap<>();
     private static final long                    CHARGE_VALID_MS  = 15000L;
     private final Random random = new Random();
@@ -199,7 +199,7 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
             clearChargeTimestamp(player.getUniqueId());
             consumeSource();
         }
-        // If already DISPERSING, do nothing — let it finish naturally.
+        // If already DISPERSING, do nothing - let it finish naturally.
     }
 
     // -------------------------------------------------------------------------
@@ -230,7 +230,7 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
         // Re-derive source each tick so it stays valid
         if (selfOnFire) {
             if (!selfFireExtinguished && player.getFireTicks() <= 0) {
-                // Player's fire was extinguished externally before charge — cancel
+                // Player's fire was extinguished externally before charge - cancel
                 remove();
                 return;
             }
@@ -686,7 +686,7 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
 
     /**
      * Returns true once the ability has been in the READY phase for at least the
-     * full charge duration — i.e., the smoke path has fully reached the player's hand.
+     * full charge duration - i.e., the smoke path has fully reached the player's hand.
      */
     public boolean isCharged() {
         return phase == Phase.READY && System.currentTimeMillis() - readyStartTime >= CHARGE_DURATION_MS;

@@ -93,14 +93,14 @@ public class GuiJobsLeaveClick {
                 ap.setJobDataLoaded(true);
                 AranarthUtils.setPlayer(player.getUniqueId(), ap);
                 Bukkit.getLogger().info("[AC][Jobs] " + player.getName() + " left job " + job.name()
-                        + " — active=" + jobData.getActiveJobs());
+                        + " - active=" + jobData.getActiveJobs());
                 PersistenceUtils.saveJobDataSync(player.getUniqueId());
                 if (NetworkManager.isActive()) {
                     NetworkManager.getInstance().publishJobUpdate(player.getUniqueId());
                 }
                 applyCooldown(player.getUniqueId());
 
-                player.sendMessage(ChatUtils.chatMessage("&7You have left the &e" + job.getDisplayName() + " &7job &8— &7your progress has been saved"));
+                player.sendMessage(ChatUtils.chatMessage("&7You have left the &e" + job.getDisplayName() + " &7job &8- &7your progress has been saved"));
                 int jobsVol = AranarthUtils.getPlayer(player.getUniqueId()).getJobsSoundVolume();
                 if (jobsVol > 0) {
                     player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, jobsVol / 100f, 1.0f);

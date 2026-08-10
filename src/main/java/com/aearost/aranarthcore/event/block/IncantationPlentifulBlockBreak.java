@@ -48,7 +48,7 @@ public class IncantationPlentifulBlockBreak {
 			heldItem = player.getInventory().getItemInMainHand();
 		}
 
-		// Remove the directly broken block — it is always broken by the original event,
+		// Remove the directly broken block - it is always broken by the original event,
 		// which we do not cancel. The loop below handles only the surrounding blocks.
 		Block brokenBlock = e.getBlock();
 		blocks.removeIf(b -> b.getX() == brokenBlock.getX()

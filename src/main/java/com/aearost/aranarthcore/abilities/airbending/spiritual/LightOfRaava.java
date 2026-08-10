@@ -166,7 +166,7 @@ public class LightOfRaava extends AvatarAbility implements AddonAbility {
                 entity.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 200, 1));
                 entity.addPotionEffect(new PotionEffect(PotionEffectType.INSTANT_DAMAGE, 1, 1));
             } else {
-                // Undead mobs (zombies, skeletons, etc.) are harmed by instant health — use instant damage instead
+                // Undead mobs (zombies, skeletons, etc.) are harmed by instant health - use instant damage instead
                 if (UNDEAD_TYPES.contains(entity.getType())) {
                     entity.addPotionEffect(new PotionEffect(PotionEffectType.INSTANT_DAMAGE, 1, 2));
                 } else {

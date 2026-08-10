@@ -38,7 +38,7 @@ public class DominionPermissions {
         // LEADER gets all permissions
         perms.put(DominionRank.LEADER, new HashSet<>(Arrays.asList(DominionPermission.values())));
 
-        // LIEUTENANT gets most permissions — excluded: WITHDRAW
+        // LIEUTENANT gets most permissions - excluded: WITHDRAW
         Set<DominionPermission> lieutenantPerms = new HashSet<>(fullInteraction);
         lieutenantPerms.addAll(Arrays.asList(
                 DominionPermission.BUILD, DominionPermission.LOCK_CONTAINER,
@@ -58,7 +58,7 @@ public class DominionPermissions {
         ));
         perms.put(DominionRank.CITIZEN, citizenPerms);
 
-        // NEWCOMER gets very restricted permissions — no interaction
+        // NEWCOMER gets very restricted permissions - no interaction
         perms.put(DominionRank.NEWCOMER, new HashSet<>(List.of(
                 DominionPermission.HOME, DominionPermission.OUTPOST_HOME
         )));

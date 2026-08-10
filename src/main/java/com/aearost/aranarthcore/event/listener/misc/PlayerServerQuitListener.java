@@ -64,10 +64,10 @@ public class PlayerServerQuitListener implements Listener {
             final double x = loc.getX(), y = loc.getY(), z = loc.getZ();
             final float yaw = loc.getYaw(), pitch = loc.getPitch();
             Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName()
-                    + " — saving last location: server=" + server + " world=" + world
+                    + " - saving last location: server=" + server + " world=" + world
                     + " pos=(" + String.format("%.1f", x) + "," + String.format("%.1f", y) + "," + String.format("%.1f", z) + ")");
             DatabaseManager.getInstance().saveLastLocation(player.getUniqueId(), server, world, x, y, z, yaw, pitch);
-            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName() + " — last location saved to MySQL.");
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName() + " - last location saved to MySQL.");
         }
 
         if (NetworkManager.isActive()) {
@@ -104,7 +104,7 @@ public class PlayerServerQuitListener implements Listener {
         // the connection pool before an async-dispatched save task gets a chance to execute.
         PersistenceUtils.saveJobDataSync(player.getUniqueId());
         // Prevent this player's stale in-memory quest data from being written to the shared DB
-        // after they leave — the other server owns their quest state from this point on.
+        // after they leave - the other server owns their quest state from this point on.
         QuestUtils.getLocallyModifiedUuids().remove(player.getUniqueId());
         // Also remove from sessionModifiedUuids so that if THIS server restarts while the player
         // is on the other server, onDisable()'s syncAllQuestDataToDatabase() doesn't overwrite
@@ -151,10 +151,10 @@ public class PlayerServerQuitListener implements Listener {
                     }
                 }
                 Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName()
-                        + " — inventory snapshot taken: " + nonNullItems + " item(s) in world=" + quitWorld);
+                        + " - inventory snapshot taken: " + nonNullItems + " item(s) in world=" + quitWorld);
             } else {
                 Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName()
-                        + " — world=" + quitWorld + " is not a survival world; inventory snapshot skipped.");
+                        + " - world=" + quitWorld + " is not a survival world; inventory snapshot skipped.");
             }
         }
         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
@@ -166,9 +166,9 @@ public class PlayerServerQuitListener implements Listener {
             final String rawRow = PersistenceUtils.buildPlayerRowForTransfer(player.getUniqueId());
             if (rawRow != null) {
                 DatabaseManager.getInstance().saveAranarthPlayerRaw(player.getUniqueId(), rawRow);
-                Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName() + " — player row (inventory/stats) flushed to MySQL.");
+                Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName() + " - player row (inventory/stats) flushed to MySQL.");
             } else {
-                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName() + " — WARNING: rawRow was null, player row NOT flushed to MySQL.");
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName() + " - WARNING: rawRow was null, player row NOT flushed to MySQL.");
             }
         }
 

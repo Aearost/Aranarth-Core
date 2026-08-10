@@ -35,7 +35,7 @@ public class CommandArena implements CommandExecutor {
 
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
-			// On the SMP server: arena world lives on Survival — count down then transfer.
+			// On the SMP server: arena world lives on Survival - count down then transfer.
 			if (AranarthCore.isSmpServer() && NetworkManager.isActive()) {
 				AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
 						aranarthPlayer.isInAdminMode(), "&e&lArena", "&7Transferring to the Arena...", success -> {

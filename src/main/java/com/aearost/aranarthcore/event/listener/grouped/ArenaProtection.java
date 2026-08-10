@@ -166,7 +166,7 @@ public class ArenaProtection implements Listener {
 
 		double reducedHp;
 		if (hearts <= 0.5) {
-			reducedHp = e.getDamage(); // 0.5 hearts or less — keep as is
+			reducedHp = e.getDamage(); // 0.5 hearts or less - keep as is
 		} else if (hearts <= 1.5) {
 			reducedHp = 2.0;       // cap at 1 heart
 		} else if (hearts <= 3.0) {
@@ -179,7 +179,7 @@ public class ArenaProtection implements Listener {
 			reducedHp = 6.0;       // cap at 3 hearts (hard max)
 		}
 
-		// Store the intended cap — enforced at HIGHEST in onBendingEntityDamageInArena
+		// Store the intended cap - enforced at HIGHEST in onBendingEntityDamageInArena
 		// since another plugin inflates the EntityDamageByEntityEvent after LOWEST
 		pendingArenaCap = reducedHp;
 		e.setDamage(reducedHp);

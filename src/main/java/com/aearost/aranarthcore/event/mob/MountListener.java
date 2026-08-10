@@ -112,7 +112,7 @@ public class MountListener implements Listener {
 
         @Override
         public void stop(UUID mountId) {
-            // Passive ability — always active while mounted; space-bar release is ignored.
+            // Passive ability - always active while mounted; space-bar release is ignored.
         }
 
         @Override
@@ -167,7 +167,7 @@ public class MountListener implements Listener {
             long now = System.currentTimeMillis();
             long end = cooldownEnds.getOrDefault(id, 0L);
             if (now < end) {
-                // Still on cooldown — give the player a quiet hint via action bar
+                // Still on cooldown - give the player a quiet hint via action bar
                 long remaining = (end - now + 999) / 1000;
                 rider.sendActionBar(LegacyComponentSerializer.legacySection().deserialize(
                         ChatUtils.translateToColor("&7Bellow is ready in &e" + remaining + "s")));
@@ -569,7 +569,7 @@ public class MountListener implements Listener {
 
         UUID mountId = mount.getUniqueId();
 
-        // Owner dismounting from AIR mount — eject any remaining passengers
+        // Owner dismounting from AIR mount - eject any remaining passengers
         AranarthMount aMount = activeMounts.get(mountId);
         if (aMount != null && player.getUniqueId().equals(aMount.getOwnerUUID())) {
             Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {

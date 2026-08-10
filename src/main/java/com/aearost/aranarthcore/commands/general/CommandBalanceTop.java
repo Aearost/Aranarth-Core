@@ -101,7 +101,7 @@ public class CommandBalanceTop implements CommandExecutor {
 			if (aranarthPlayer != null) {
 				displayedName = ChatUtils.providePrefixAndName(uuid);
 			} else {
-				// Player is not loaded on this server — use DB nickname/username for display.
+				// Player is not loaded on this server - use DB nickname/username for display.
 				// If they are currently online on another server, prefer the remote roster entry.
 				NetworkPlayer remote = NetworkManager.isActive()
 						? NetworkManager.getInstance().getRemotePlayer(uuid) : null;

@@ -387,7 +387,13 @@
       "Bash(find /c/Users/liamh/Downloads/Logs -name *.yml)",
       "Bash(find /c/Users/liamh -name advanced.yml -path *mcmmo*)",
       "Bash(find /c/Users/liamh -name config.yml -path *mcmmo*)",
-      "Bash(find /c/Users/liamh -name *.yml -path *mcmmo*)"
+      "Bash(find /c/Users/liamh -name *.yml -path *mcmmo*)",
+      "Bash(do)",
+      "Bash(echo \"=== $f ===\")",
+      "Read(//c/Users/liamh/.claude/projects/C--Users-liamh-IdeaProjects-AranarthCore/memory/**)",
+      "Bash(xargs sed:*)",
+      "Bash(while IFS= read -r f)",
+      "Bash(do sed:*)"
     ]
   }
 }
