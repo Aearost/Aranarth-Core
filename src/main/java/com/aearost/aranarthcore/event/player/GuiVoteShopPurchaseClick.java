@@ -128,7 +128,7 @@ public class GuiVoteShopPurchaseClick {
                     }
                     // Discord perk
                     else if (clicked.getType() == Material.PURPLE_GLAZED_TERRACOTTA) {
-                        if (aranarthPlayer.getPerks().get(Perk.DISCORD) == 0) {
+                        if (aranarthPlayer.getPerks().getOrDefault(Perk.DISCORD, 0) == 0) {
                             Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " discord 1 silent");
                         } else {
                             player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
@@ -139,7 +139,7 @@ public class GuiVoteShopPurchaseClick {
                     }
                     // Tables perk
                     else if (clicked.getType() == Material.CRAFTING_TABLE) {
-                        if (aranarthPlayer.getPerks().get(Perk.TABLES) == 0) {
+                        if (aranarthPlayer.getPerks().getOrDefault(Perk.TABLES, 0) == 0) {
                             Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " tables 1 silent");
                         } else {
                             player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
@@ -150,7 +150,7 @@ public class GuiVoteShopPurchaseClick {
                     }
                     // Invisible Item Frames perk
                     else if (clicked.getType() == Material.GLOW_ITEM_FRAME) {
-                        if (aranarthPlayer.getPerks().get(Perk.ITEMFRAME) == 0) {
+                        if (aranarthPlayer.getPerks().getOrDefault(Perk.ITEMFRAME, 0) == 0) {
                             Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " itemframe 1 silent");
                         } else {
                             player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
@@ -161,7 +161,7 @@ public class GuiVoteShopPurchaseClick {
                     }
                     // Colored chat perk
                     else if (clicked.getType() == Material.WRITABLE_BOOK) {
-                        if (aranarthPlayer.getPerks().get(Perk.CHAT) == 0) {
+                        if (aranarthPlayer.getPerks().getOrDefault(Perk.CHAT, 0) == 0) {
                             Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " chat 1 silent");
                         } else {
                             player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
@@ -172,7 +172,7 @@ public class GuiVoteShopPurchaseClick {
                     }
                     // Item name perk
                     else if (clicked.getType() == Material.NAME_TAG) {
-                        if (aranarthPlayer.getPerks().get(Perk.ITEMNAME) == 0) {
+                        if (aranarthPlayer.getPerks().getOrDefault(Perk.ITEMNAME, 0) == 0) {
                             Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " itemname 1 silent");
                         } else {
                             player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
@@ -183,7 +183,7 @@ public class GuiVoteShopPurchaseClick {
                     }
                     // Blacklist perk
                     else if (clicked.getType() == Material.LAVA_BUCKET) {
-                        if (aranarthPlayer.getPerks().get(Perk.BLACKLIST) == 0) {
+                        if (aranarthPlayer.getPerks().getOrDefault(Perk.BLACKLIST, 0) == 0) {
                             Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " blacklist 1 silent");
                         } else {
                             player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
@@ -194,7 +194,7 @@ public class GuiVoteShopPurchaseClick {
                     }
                     // Homes perk
                     else if (clicked.getType() == Material.RED_BED) {
-                        if (aranarthPlayer.getPerks().get(Perk.HOMES) <= 12) {
+                        if (aranarthPlayer.getPerks().getOrDefault(Perk.HOMES, 0) <= 12) {
                             Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " homes silent");
                         } else {
                             player.sendMessage(ChatUtils.chatMessage("&cYou already have the maximum amount of additional homes!"));

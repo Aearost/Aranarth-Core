@@ -450,7 +450,7 @@ public class DiscordUtils {
 			return;
 		}
 
-		if (aranarthPlayer.getPerks().get(Perk.DISCORD) == 1) {
+		if (aranarthPlayer.getPerks().getOrDefault(Perk.DISCORD, 0) == 1) {
 			guild.addRoleToMember(playerDiscordId, guild.getRoleById(discordRole("discord-linked"))).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
 		} else {
 			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById(discordRole("discord-linked"))).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
