@@ -149,23 +149,28 @@ public class PermissionUtils {
                 }
             }
 
-            // Custom fire sub-elements (cosmetic)
+            // Custom fire sub-elements (cosmetic) - only the active FireType sub-element should be present
             if (bendingPlayer.getElements().contains(Element.FIRE)) {
-                if (player.hasPermission("aranarth.whitefire")) {
+                AranarthPlayer apForFire = AranarthUtils.getPlayer(player.getUniqueId());
+                FireType activeFireType = apForFire != null ? apForFire.getFireType() : FireType.DEFAULT;
+
+                boolean wantWhite = player.hasPermission("aranarth.whitefire") && activeFireType == FireType.WHITE;
+                if (wantWhite) {
                     if (!bendingPlayer.hasSubElement(FireParticleRegistry.WHITE_FIRE_SUB)) {
                         bendingPlayer.addSubElement(FireParticleRegistry.WHITE_FIRE_SUB);
                     }
                 } else {
                     bendingPlayer.getSubElements().remove(FireParticleRegistry.WHITE_FIRE_SUB);
                 }
-                if (player.hasPermission("aranarth.prismaticfire")) {
+
+                boolean wantPrismatic = player.hasPermission("aranarth.prismaticfire") && activeFireType == FireType.PRISMATIC;
+                if (wantPrismatic) {
                     if (!bendingPlayer.hasSubElement(FireParticleRegistry.PRISMATIC_FIRE_SUB)) {
                         bendingPlayer.addSubElement(FireParticleRegistry.PRISMATIC_FIRE_SUB);
                     }
                 } else {
                     bendingPlayer.getSubElements().remove(FireParticleRegistry.PRISMATIC_FIRE_SUB);
                 }
-
             }
 
 
