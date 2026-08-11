@@ -21,6 +21,7 @@ import com.aearost.aranarthcore.integration.SquaremapIntegration;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.FireParticleRegistry;
 import com.github.retrooper.packetevents.PacketEvents;
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
@@ -769,6 +770,65 @@ public class AranarthCore extends JavaPlugin {
                 IncantationMagnetismBlockBreak.tickMagnetismPull();
             }
         }, 2L, 2L);
+
+        // Autoclaim chunk particles - show colored dust on surface blocks of nearby chunks while autoclaim is active
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+                if (aranarthPlayer == null || !aranarthPlayer.isAutoClaimEnabled()) {
+                    continue;
+                }
+                String worldName = player.getWorld().getName();
+                if (!worldName.startsWith("world") && !worldName.startsWith("smp")) {
+                    continue;
+                }
+
+                Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+                Chunk playerChunk = player.getLocation().getChunk();
+                World world = player.getWorld();
+
+                for (int dx = -2; dx <= 2; dx++) {
+                    for (int dz = -2; dz <= 2; dz++) {
+                        Chunk chunk = world.getChunkAt(playerChunk.getX() + dx, playerChunk.getZ() + dz);
+                        Dominion chunkDominion = DominionUtils.getDominionOfChunk(chunk);
+
+                        Color particleColor;
+                        if (chunkDominion == null) {
+                            // Unclaimed - white
+                            particleColor = Color.WHITE;
+                        } else if (playerDominion != null && chunkDominion.isSameDominion(playerDominion)) {
+                            // Own dominion - lime green
+                            particleColor = Color.LIME;
+                        } else if (playerDominion != null && playerDominion.isAllied(chunkDominion)) {
+                            // Ally - purple
+                            particleColor = Color.PURPLE;
+                        } else if (playerDominion != null && playerDominion.isTruced(chunkDominion)) {
+                            // Truce - pink
+                            particleColor = Color.fromRGB(255, 105, 180);
+                        } else if (playerDominion != null && playerDominion.isEnemied(chunkDominion)) {
+                            // Enemy - red
+                            particleColor = Color.RED;
+                        } else {
+                            // Neutral (unrelated dominion) - orange
+                            particleColor = Color.ORANGE;
+                        }
+
+                        Particle.DustOptions dust = new Particle.DustOptions(particleColor, 1.2f);
+                        int baseX = chunk.getX() * 16;
+                        int baseZ = chunk.getZ() * 16;
+
+                        for (int x = 2; x < 16; x += 4) {
+                            for (int z = 2; z < 16; z += 4) {
+                                int bx = baseX + x;
+                                int bz = baseZ + z;
+                                int by = world.getHighestBlockYAt(bx, bz, HeightMap.MOTION_BLOCKING_NO_LEAVES);
+                                player.spawnParticle(Particle.DUST, bx + 0.5, by + 1.25, bz + 0.5, 1, 0, 0, 0, 0, dust);
+                            }
+                        }
+                    }
+                }
+            }
+        }, 10L, 10L);
 
 //		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 //			@Override
