@@ -752,7 +752,9 @@ public class DateUtils {
 
             // Will display once and only once regardless of online players
             if (isNewMonth) {
-                DiscordUtils.monthMessage(month, description);
+                if (!AranarthCore.isSmpServer()) {
+                    DiscordUtils.monthMessage(month, description);
+                }
                 AranarthCore.launchMonthFireworks(month);
                 if (month == Month.IGNIVOR) {
                     AranarthCore.resetResourceWorlds();

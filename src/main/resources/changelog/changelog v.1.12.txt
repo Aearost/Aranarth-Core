@@ -53,6 +53,7 @@ Minor Features
 [~] Replaced chorus plant/flower dominion resource claims with chorus fruit and purpur blocks
 [~] Fixed capitalization of "The End" in dominion resource claims
 [~] Fixed repeated weather change message issue
+[~] Fix new month Discord message sending twice
 
 Backend Code Changes
 -
