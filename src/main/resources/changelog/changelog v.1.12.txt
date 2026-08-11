@@ -60,6 +60,7 @@ Minor Features
 [~] Fix /boosts remove doing nothing when run from SMP
 [~] Fix potted flowers being stealable in Dominions
 [~] Fix first-time SMP players getting blank AranarthPlayer instead of DB data
+[+] Added player search relation display in /d's User Search
 
 Backend Code Changes
 -

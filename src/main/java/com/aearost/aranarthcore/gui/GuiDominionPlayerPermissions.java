@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.*;
 
@@ -119,6 +120,7 @@ public class GuiDominionPlayerPermissions {
         boolean isMember = dominion.getMembers().contains(targetUuid);
         DominionRank effectiveRank;
         boolean isRelation;
+        Dominion targetDominion = null;
 
         if (isMember) {
             effectiveRank = dominion.getMemberRank(targetUuid);
@@ -127,7 +129,7 @@ public class GuiDominionPlayerPermissions {
             }
             isRelation = false;
         } else {
-            Dominion targetDominion = DominionUtils.getPlayerDominion(targetUuid);
+            targetDominion = DominionUtils.getPlayerDominion(targetUuid);
             effectiveRank = DominionUtils.getRelationKey(targetDominion, dominion);
             isRelation = true;
         }
@@ -151,6 +153,28 @@ public class GuiDominionPlayerPermissions {
             gui.setItem(i, filler);
             gui.setItem(36 + i, filler);
         }
+
+        // Skull item at slot 0 showing the player's effective rank or relation
+        ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
+        SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
+        if (profile != null) {
+            skullMeta.setPlayerProfile(profile);
+        }
+        skullMeta.setDisplayName(ChatUtils.translateToColor("&f" + nickname));
+        List<String> skullLore = new ArrayList<>();
+        if (isRelation) {
+            if (targetDominion == null) {
+                skullLore.add(ChatUtils.translateToColor("&7Relation: &fWanderer &8(no dominion)"));
+            } else {
+                skullLore.add(ChatUtils.translateToColor("&7Dominion: &f" + targetDominion.getName()));
+                skullLore.add(ChatUtils.translateToColor("&7Relation: " + DominionUtils.getFormattedRankName(effectiveRank)));
+            }
+        } else {
+            skullLore.add(ChatUtils.translateToColor("&7Rank: " + DominionUtils.getFormattedRankName(effectiveRank)));
+        }
+        skullMeta.setLore(skullLore);
+        skull.setItemMeta(skullMeta);
+        gui.setItem(0, skull);
 
         // Section headers
         gui.setItem(9, buildSectionHeader(Material.LIGHT_BLUE_STAINED_GLASS_PANE, "&b&lInteractions"));

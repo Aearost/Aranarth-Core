@@ -115,7 +115,7 @@ public class DominionPermissions {
      * @return The mutable set of permissions for that rank.
      */
     public Set<DominionPermission> getPermissions(DominionRank rank) {
-        return permissions.getOrDefault(rank, new HashSet<>());
+        return Collections.unmodifiableSet(permissions.getOrDefault(rank, Collections.emptySet()));
     }
 
     /**

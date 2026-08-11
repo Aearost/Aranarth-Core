@@ -261,10 +261,15 @@ public class Dominion {
 	 */
 	public void togglePlayerPermissionOverride(UUID playerUuid, DominionPermission permission, boolean inheritedValue) {
 		Map<DominionPermission, Boolean> overrides = getPlayerPermissionOverrides().computeIfAbsent(playerUuid, k -> new HashMap<>());
-		if (overrides.containsKey(permission)) {
-			overrides.put(permission, !overrides.get(permission));
+		boolean newValue = overrides.containsKey(permission) ? !overrides.get(permission) : !inheritedValue;
+		if (newValue == inheritedValue) {
+			// Toggled back to inherited - remove the override so no stale * marker remains
+			overrides.remove(permission);
+			if (overrides.isEmpty()) {
+				getPlayerPermissionOverrides().remove(playerUuid);
+			}
 		} else {
-			overrides.put(permission, !inheritedValue);
+			overrides.put(permission, newValue);
 		}
 	}
 
