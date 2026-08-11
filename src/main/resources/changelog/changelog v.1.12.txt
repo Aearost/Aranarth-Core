@@ -58,6 +58,7 @@ Minor Features
 [~] Fix new month Discord message sending twice
 [+] NoxiousFumes can now source fire from nearby positively-aligned players and extinguish them
 [~] Fix /boosts remove doing nothing when run from SMP
+[~] Fix potted flowers being stealable in Dominions
 
 Backend Code Changes
 -

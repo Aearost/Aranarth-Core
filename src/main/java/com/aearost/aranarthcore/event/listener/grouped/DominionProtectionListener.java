@@ -571,6 +571,7 @@ public class DominionProtectionListener implements Listener {
                 || type == Material.NOTE_BLOCK
                 || name.endsWith("_SHELF")
                 || type == Material.FLOWER_POT
+                || name.startsWith("POTTED_")
                 || type == Material.SWEET_BERRY_BUSH
                 || type == Material.CAVE_VINES
                 || type == Material.CAVE_VINES_PLANT
