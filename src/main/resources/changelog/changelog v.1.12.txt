@@ -59,6 +59,7 @@ Minor Features
 [+] NoxiousFumes can now source fire from nearby positively-aligned players and extinguish them
 [~] Fix /boosts remove doing nothing when run from SMP
 [~] Fix potted flowers being stealable in Dominions
+[~] Fix first-time SMP players getting blank AranarthPlayer instead of DB data
 
 Backend Code Changes
 -

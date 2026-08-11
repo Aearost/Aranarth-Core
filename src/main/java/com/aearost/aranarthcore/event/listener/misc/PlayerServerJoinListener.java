@@ -248,13 +248,21 @@ public class PlayerServerJoinListener implements Listener {
 
         boolean isNewPlayer = false;
         if (!AranarthUtils.hasPlayedBefore(player)) {
-            AranarthUtils.addPlayer(player.getUniqueId(), new AranarthPlayer(player.getName()));
-            LocalDateTime now = LocalDateTime.now();
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-            aranarthPlayer.setFirstJoinDate(now.getMonthValue() + "/" + now.getDayOfMonth() + "/" + now.getYear());
-            AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-            player.teleport(new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0));
-            isNewPlayer = true;
+            // Player is not in this server's memory - try loading from the shared DB first.
+            // They may have played on Survival (or the other server) but never joined this one.
+            if (DatabaseManager.isActive()) {
+                PersistenceUtils.reloadPlayerFromDatabase(player.getUniqueId());
+            }
+            if (!AranarthUtils.hasPlayedBefore(player)) {
+                // Truly new to the network - no data anywhere
+                AranarthUtils.addPlayer(player.getUniqueId(), new AranarthPlayer(player.getName()));
+                LocalDateTime now = LocalDateTime.now();
+                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+                aranarthPlayer.setFirstJoinDate(now.getMonthValue() + "/" + now.getDayOfMonth() + "/" + now.getYear());
+                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                player.teleport(new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0));
+                isNewPlayer = true;
+            }
         }
         // If the player changed their username
         else if (AranarthUtils.getUsername(player) != null && !AranarthUtils.getUsername(player).equals(player.getName())) {
