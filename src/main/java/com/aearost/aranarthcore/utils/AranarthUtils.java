@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.enums.WorldEvent;
 import com.aearost.aranarthcore.event.listener.misc.PotionEffectListener;
+import com.aearost.aranarthcore.items.SugarcaneBlock;
 import com.aearost.aranarthcore.items.arrow.*;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.NetworkPlayer;
@@ -26,6 +27,7 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
+import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.permissions.PermissionAttachment;
@@ -4415,6 +4417,370 @@ public class AranarthUtils {
                 || type == Material.CLOSED_EYEBLOSSOM || type == Material.WITHER_ROSE || type == Material.PINK_PETALS
                 || type == Material.WILDFLOWERS || type == Material.SPORE_BLOSSOM || type == Material.SUNFLOWER || type == Material.LILAC
                 || type == Material.ROSE_BUSH || type == Material.PEONY || type == Material.CHORUS_FLOWER;
+    }
+
+    /**
+     * Compresses a player's inventory, including an optional extra item (e.g. a picked-up item).
+     * Pass null for additionalItem when compressing from a command rather than a pickup event.
+     *
+     * @param player          The player whose inventory is being compressed.
+     * @param aranarthPlayer  The AranarthPlayer data for the player.
+     * @param additionalItem  An extra item to include in compression, or null if none.
+     */
+    public static void compressPlayerInventory(Player player, AranarthPlayer aranarthPlayer, ItemStack additionalItem) {
+        boolean isIncludingShulkers = player.hasPermission("aranarth.shulker");
+        HashMap<Material, List<ItemStack>> compressibleItems = new HashMap<>();
+        ItemStack[] allContents = player.getInventory().getContents();
+
+        for (int ii = 0; ii < allContents.length; ii++) {
+            ItemStack inventoryItem = allContents[ii];
+            if (inventoryItem == null || inventoryItem.getType() == Material.AIR) {
+                continue;
+            }
+
+            int result = getBlacklistMethod(player, aranarthPlayer, inventoryItem);
+            if (result >= 0) {
+                continue;
+            }
+
+            if (inventoryItem.hasItemMeta()) {
+                if (inventoryItem.getItemMeta() instanceof BlockStateMeta im) {
+                    if (im.getBlockState() instanceof ShulkerBox shulker) {
+                        if (isIncludingShulkers) {
+                            boolean shulkerModified = false;
+                            ItemStack[] shulkerContents = shulker.getInventory().getContents();
+                            for (int si = 0; si < shulkerContents.length; si++) {
+                                ItemStack shulkerItem = shulkerContents[si];
+                                if (shulkerItem == null || shulkerItem.getType() == Material.AIR) {
+                                    continue;
+                                }
+
+                                int shulkerResult = getBlacklistMethod(player, aranarthPlayer, shulkerItem);
+                                if (shulkerResult >= 0) {
+                                    continue;
+                                }
+
+                                if (isCompressible(shulkerItem, true)) {
+                                    if (!isItemBeingCompressed(player.getUniqueId(), shulkerItem.getType())) {
+                                        continue;
+                                    }
+
+                                    Material type = shulkerItem.getType();
+                                    if (compressibleItems.containsKey(type)) {
+                                        compressibleItems.get(type).add(shulkerItem.clone());
+                                    } else {
+                                        List<ItemStack> stacks = new ArrayList<>();
+                                        stacks.add(shulkerItem.clone());
+                                        compressibleItems.put(type, stacks);
+                                    }
+                                    shulker.getInventory().setItem(si, null);
+                                    shulkerModified = true;
+                                }
+                            }
+                            if (shulkerModified) {
+                                im.setBlockState(shulker);
+                                inventoryItem.setItemMeta(im);
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (isCompressible(inventoryItem, true)) {
+                    if (!isItemBeingCompressed(player.getUniqueId(), inventoryItem.getType())) {
+                        continue;
+                    }
+
+                    Material type = inventoryItem.getType();
+                    if (compressibleItems.containsKey(type)) {
+                        compressibleItems.get(type).add(inventoryItem.clone());
+                    } else {
+                        List<ItemStack> stacks = new ArrayList<>();
+                        stacks.add(inventoryItem.clone());
+                        compressibleItems.put(type, stacks);
+                    }
+                    player.getInventory().setItem(ii, null);
+                }
+            }
+        }
+
+        if (additionalItem != null && isCompressible(additionalItem, true)
+                && isItemBeingCompressed(player.getUniqueId(), additionalItem.getType())) {
+            Material type = additionalItem.getType();
+            if (compressibleItems.containsKey(type)) {
+                compressibleItems.get(type).add(additionalItem);
+            } else {
+                List<ItemStack> stacks = new ArrayList<>();
+                stacks.add(additionalItem);
+                compressibleItems.put(type, stacks);
+            }
+        }
+
+        for (Material type : compressibleItems.keySet()) {
+            switch (type) {
+                case Material.COAL -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
+                case Material.RAW_COPPER -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
+                case Material.COPPER_NUGGET -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
+                case Material.COPPER_INGOT -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
+                case Material.RAW_IRON -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
+                case Material.IRON_NUGGET -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
+                case Material.IRON_INGOT -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
+                case Material.RAW_GOLD -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
+                case Material.GOLD_NUGGET -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
+                case Material.GOLD_INGOT -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
+                case Material.REDSTONE -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
+                case Material.LAPIS_LAZULI -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
+                case Material.DIAMOND -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
+                case Material.EMERALD -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
+                case Material.NETHERITE_INGOT -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
+                case Material.AMETHYST_SHARD -> calculateCompressedAmounts(player, compressibleItems.get(type), 4);
+                case Material.RESIN_CLUMP -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
+                case Material.GLOWSTONE_DUST -> calculateCompressedAmounts(player, compressibleItems.get(type), 4);
+                case Material.WHEAT -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
+                case Material.MELON_SLICE -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
+                case Material.DRIED_KELP -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
+                case Material.SUGAR_CANE -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
+                case Material.HONEYCOMB -> calculateCompressedAmounts(player, compressibleItems.get(type), 4);
+                case Material.SLIME_BALL -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
+                case Material.BONE_MEAL -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
+                case Material.SNOWBALL -> calculateCompressedAmounts(player, compressibleItems.get(type), 4);
+                case Material.CLAY_BALL -> calculateCompressedAmounts(player, compressibleItems.get(type), 4);
+                case Material.QUARTZ -> calculateCompressedAmounts(player, compressibleItems.get(type), 4);
+                case Material.BAMBOO -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
+            }
+        }
+
+        player.updateInventory();
+    }
+
+    private static void calculateCompressedAmounts(Player player, List<ItemStack> allStacksOfUncompressedItem, int amountRequiredToCompress) {
+        int totalAmountOfItem = 0;
+        for (ItemStack stack : allStacksOfUncompressedItem) {
+            totalAmountOfItem += stack.getAmount();
+        }
+
+        int totalAmountOfCompressedItem = totalAmountOfItem / amountRequiredToCompress;
+        int remainder = totalAmountOfItem % amountRequiredToCompress;
+
+        addCompressedToInventory(player, allStacksOfUncompressedItem.getFirst().getType(), totalAmountOfCompressedItem, remainder);
+    }
+
+    private static void addCompressedToInventory(Player player, Material type, int totalAmountOfCompressedItem, int remainder) {
+        Material compressedType = getCompressedMaterialType(type);
+
+        if (totalAmountOfCompressedItem > 0) {
+            ItemStack compressedItemToAdd;
+            if (type == Material.SUGAR_CANE) {
+                compressedItemToAdd = new SugarcaneBlock().getItem();
+                compressedItemToAdd.setAmount(totalAmountOfCompressedItem);
+            } else {
+                compressedItemToAdd = new ItemStack(compressedType, totalAmountOfCompressedItem);
+            }
+
+            if (player.hasPermission("aranarth.shulker")) {
+                for (ItemStack inventoryItem : player.getInventory().getContents()) {
+                    if (inventoryItem == null || inventoryItem.getType() == Material.AIR) {
+                        continue;
+                    }
+
+                    if (inventoryItem.hasItemMeta()) {
+                        if (inventoryItem.getItemMeta() instanceof BlockStateMeta im) {
+                            if (im.getBlockState() instanceof ShulkerBox shulker) {
+                                for (ItemStack shulkerItem : shulker.getInventory().getContents()) {
+                                    if (shulkerItem == null || shulkerItem.getType() == Material.AIR) {
+                                        continue;
+                                    }
+
+                                    if (shulkerItem.isSimilar(compressedItemToAdd)) {
+                                        while (shulkerItem.getAmount() < shulkerItem.getMaxStackSize()) {
+                                            if (totalAmountOfCompressedItem > 0) {
+                                                shulkerItem.setAmount(shulkerItem.getAmount() + 1);
+                                                totalAmountOfCompressedItem--;
+                                            } else {
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                im.setBlockState(shulker);
+                                inventoryItem.setItemMeta(im);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (totalAmountOfCompressedItem > 0) {
+                compressedItemToAdd.setAmount(totalAmountOfCompressedItem);
+                addCompressedResultsToInventory(player, compressedItemToAdd, false);
+            }
+        }
+
+        if (remainder > 0) {
+            addCompressedResultsToInventory(player, new ItemStack(type, remainder), true);
+        }
+    }
+
+    /**
+     * Adds the results of the compressed and remaining items to the inventory.
+     *
+     * @param player      The player.
+     * @param item        The compressed or remaining item being added to the inventory.
+     * @param hotbarFirst When true, empty hotbar slots are filled before empty main-inventory slots.
+     */
+    public static void addCompressedResultsToInventory(Player player, ItemStack item, boolean hotbarFirst) {
+        int remainingToAdd = item.getAmount();
+
+        if (player.hasPermission("aranarth.shulker")) {
+            for (int i = 0; i < player.getInventory().getStorageContents().length; i++) {
+                ItemStack inventoryItem = player.getInventory().getStorageContents()[i];
+                if (inventoryItem != null && inventoryItem.getType() != Material.AIR) {
+                    if (inventoryItem.getType().name().contains("SHULKER_BOX")) {
+                        ItemMeta meta = inventoryItem.getItemMeta();
+                        if (meta instanceof BlockStateMeta im) {
+                            if (im.getBlockState() instanceof ShulkerBox shulker) {
+                                for (ItemStack shulkerItem : shulker.getInventory().getContents()) {
+                                    if (shulkerItem != null && shulkerItem.getType() != Material.AIR) {
+                                        if (shulkerItem.isSimilar(item)) {
+                                            while (remainingToAdd > 0) {
+                                                if (shulkerItem.getAmount() == shulkerItem.getMaxStackSize()) {
+                                                    break;
+                                                }
+                                                shulkerItem.setAmount(shulkerItem.getAmount() + 1);
+                                                remainingToAdd--;
+                                                if (remainingToAdd == 0) {
+                                                    break;
+                                                }
+                                            }
+                                            if (remainingToAdd == 0) {
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                im.setBlockState(shulker);
+                                inventoryItem.setItemMeta(im);
+                                if (remainingToAdd == 0) {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < player.getInventory().getStorageContents().length; i++) {
+            ItemStack inventoryItem = player.getInventory().getStorageContents()[i];
+            if (inventoryItem != null && inventoryItem.getType() != Material.AIR) {
+                while (remainingToAdd > 0) {
+                    if (inventoryItem.isSimilar(item)) {
+                        if (inventoryItem.getAmount() == inventoryItem.getMaxStackSize()) {
+                            break;
+                        }
+                        inventoryItem.setAmount(inventoryItem.getAmount() + 1);
+                        remainingToAdd--;
+                        if (remainingToAdd == 0) {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                }
+
+                if (remainingToAdd == 0) {
+                    player.getInventory().setItem(i, inventoryItem);
+                    break;
+                }
+            }
+        }
+
+        int[] slotOrder;
+        if (hotbarFirst) {
+            slotOrder = new int[36];
+            for (int i = 0; i < 36; i++) slotOrder[i] = i;
+        } else {
+            slotOrder = new int[27];
+            for (int i = 0; i < 27; i++) slotOrder[i] = i + 9;
+        }
+        for (int idx = 0; idx < slotOrder.length && remainingToAdd > 0; idx++) {
+            int i = slotOrder[idx];
+            ItemStack inventoryItem = player.getInventory().getStorageContents()[i];
+            if (inventoryItem == null || inventoryItem.getType() == Material.AIR) {
+                ItemStack filling = null;
+                while (remainingToAdd > 0) {
+                    if (filling == null || filling.getType() == Material.AIR) {
+                        if (item.hasItemMeta()) {
+                            filling = item.clone();
+                            filling.setAmount(1);
+                        } else {
+                            filling = new ItemStack(item.getType(), 1);
+                        }
+                        remainingToAdd--;
+                    } else {
+                        filling.setAmount(filling.getAmount() + 1);
+                        remainingToAdd--;
+                    }
+
+                    if (filling.getAmount() == filling.getMaxStackSize()) {
+                        player.getInventory().setItem(i, filling);
+                        filling = null;
+                        break;
+                    }
+                }
+
+                if (filling != null) {
+                    player.getInventory().setItem(i, filling);
+                }
+            }
+        }
+
+        item.setAmount(remainingToAdd);
+
+        HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(item);
+        if (!leftover.isEmpty()) {
+            player.getLocation().getWorld().dropItemNaturally(player.getLocation(), leftover.get(0));
+        }
+    }
+
+    /**
+     * Returns the compressed equivalent of the given material.
+     *
+     * @param type The uncompressed material.
+     * @return The compressed material, or null for sugar cane (uses a custom item).
+     */
+    public static Material getCompressedMaterialType(Material type) {
+        return switch (type) {
+            case Material.COAL -> Material.COAL_BLOCK;
+            case Material.RAW_COPPER -> Material.RAW_COPPER_BLOCK;
+            case Material.COPPER_NUGGET -> Material.COPPER_INGOT;
+            case Material.COPPER_INGOT -> Material.COPPER_BLOCK;
+            case Material.RAW_IRON -> Material.RAW_IRON_BLOCK;
+            case Material.IRON_NUGGET -> Material.IRON_INGOT;
+            case Material.IRON_INGOT -> Material.IRON_BLOCK;
+            case Material.RAW_GOLD -> Material.RAW_GOLD_BLOCK;
+            case Material.GOLD_NUGGET -> Material.GOLD_INGOT;
+            case Material.GOLD_INGOT -> Material.GOLD_BLOCK;
+            case Material.REDSTONE -> Material.REDSTONE_BLOCK;
+            case Material.LAPIS_LAZULI -> Material.LAPIS_BLOCK;
+            case Material.DIAMOND -> Material.DIAMOND_BLOCK;
+            case Material.EMERALD -> Material.EMERALD_BLOCK;
+            case Material.NETHERITE_INGOT -> Material.NETHERITE_BLOCK;
+            case Material.AMETHYST_SHARD -> Material.AMETHYST_BLOCK;
+            case Material.RESIN_CLUMP -> Material.RESIN_BLOCK;
+            case Material.GLOWSTONE_DUST -> Material.GLOWSTONE;
+            case Material.WHEAT -> Material.HAY_BLOCK;
+            case Material.MELON_SLICE -> Material.MELON;
+            case Material.DRIED_KELP -> Material.DRIED_KELP_BLOCK;
+            case Material.SUGAR_CANE -> null;
+            case Material.HONEYCOMB -> Material.HONEYCOMB_BLOCK;
+            case Material.SLIME_BALL -> Material.SLIME_BLOCK;
+            case Material.BONE_MEAL -> Material.BONE_BLOCK;
+            case Material.SNOWBALL -> Material.SNOW_BLOCK;
+            case Material.CLAY_BALL -> Material.CLAY;
+            case Material.QUARTZ -> Material.QUARTZ_BLOCK;
+            case Material.BAMBOO -> Material.BAMBOO_BLOCK;
+            default -> null;
+        };
     }
 
 }

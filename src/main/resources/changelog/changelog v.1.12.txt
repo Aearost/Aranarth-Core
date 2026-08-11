@@ -13,6 +13,7 @@ Major Features
 [+] Implemented emoji shorthand translation in chat with /toggle emoji support
 [~] Increased meat food power values and added meat/fish drops to more biome resource claims
 [+] Implemented cave spider poison extraction
+[+] Implemented /condense to auto-condense your inventory
 
 Minor Features
 [~] Fixed issue where the alchemist job was not providing xp when shift-clicking ingredients into a brewing stand

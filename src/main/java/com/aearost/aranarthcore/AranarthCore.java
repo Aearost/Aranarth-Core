@@ -1180,6 +1180,7 @@ public class AranarthCore extends JavaPlugin {
         getCommand("calendar").setExecutor(new CommandCalendar());
         getCommand("cartography").setExecutor(new CommandCartography());
         getCommand("compressor").setExecutor(new CommandCompressor());
+        getCommand("condense").setExecutor(new CommandCondense());
         getCommand("craft").setExecutor(new CommandCraft());
         getCommand("countdown").setExecutor(new CommandCountdown());
         getCommand("countdown").setTabCompleter(new CommandCountdownCompleter());
