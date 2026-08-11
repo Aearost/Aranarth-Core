@@ -56,6 +56,7 @@ Minor Features
 [~] Fixed capitalization of "The End" in dominion resource claims
 [~] Fixed repeated weather change message issue
 [~] Fix new month Discord message sending twice
+[+] NoxiousFumes can now source fire from nearby positively-aligned players and extinguish them
 
 Backend Code Changes
 -
