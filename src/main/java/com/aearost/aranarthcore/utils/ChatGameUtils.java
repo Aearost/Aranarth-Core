@@ -365,9 +365,6 @@ public class ChatGameUtils {
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     p.sendMessage(streakMsg);
                 }
-                if (NetworkManager.isActive()) {
-                    NetworkManager.getInstance().publishBroadcast(streakMsg);
-                }
             }
 
             // Personal best speed check
@@ -499,7 +496,6 @@ public class ChatGameUtils {
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     p.sendMessage(streakMsg);
                 }
-                NetworkManager.getInstance().publishBroadcast(streakMsg);
             }
 
             final boolean newGlobalRecord;
