@@ -15,6 +15,7 @@ import com.aearost.aranarthcore.event.listener.*;
 import com.aearost.aranarthcore.event.listener.grouped.*;
 import com.aearost.aranarthcore.event.world.WorldEventManager;
 import com.aearost.aranarthcore.event.listener.misc.*;
+import com.aearost.aranarthcore.event.mob.CaveSpiderPoisonExtract;
 import com.aearost.aranarthcore.event.mob.MountListener;
 import com.aearost.aranarthcore.integration.SquaremapIntegration;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
@@ -621,6 +622,7 @@ public class AranarthCore extends JavaPlugin {
                 }
                 // Each server scans only its own dominions
                 DominionLevelUtils.runPeriodicScan();
+                CaveSpiderPoisonExtract.resetExtractionCounts();
             }
         }, 12000, 12000);
 

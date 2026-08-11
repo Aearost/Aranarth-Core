@@ -59,6 +59,8 @@ public class PlayerInteractEntityEventListener implements Listener {
                         || e.getRightClicked() instanceof Ravager || e.getRightClicked() instanceof HappyGhast
                         || e.getRightClicked() instanceof PolarBear) {
                 new MountStats().execute(e);
+            } else if (e.getRightClicked() instanceof CaveSpider) {
+                new CaveSpiderPoisonExtract().execute(e);
             }
 
             if (e.getRightClicked() instanceof Tameable) {
