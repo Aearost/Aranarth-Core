@@ -1881,7 +1881,7 @@ public class NetworkManager {
             return;
         }
         if (removing) {
-            AranarthUtils.getServerBoosts().remove(boost);
+            AranarthUtils.removeServerBoost(boost, true);
         } else {
             String endTimeStr = json.get("endTime").getAsString();
             try {

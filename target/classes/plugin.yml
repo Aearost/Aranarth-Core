@@ -63,6 +63,9 @@ commands:
     description: Opens the compressor GUI to toggle compressible items
     aliases: [ comp, compress ]
     permission: aranarth.compressor
+  condense:
+    description: Manually compresses all compressible items in your inventory
+    permission: aranarth.compressor
   countdown:
     description: Starts a mutual countdown with another player
   craft:

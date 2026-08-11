@@ -2631,6 +2631,17 @@ public class AranarthUtils {
      * @param boost The boost being removed.
      */
     public static void removeServerBoost(Boost boost) {
+        removeServerBoost(boost, false);
+    }
+
+    /**
+     * Removes the specified server boost.
+     *
+     * @param boost The boost being removed.
+     * @param fromNetwork True when called as a result of a network sync (prevents SMP from
+     *                    re-forwarding a removal that Survival already initiated).
+     */
+    public static void removeServerBoost(Boost boost, boolean fromNetwork) {
         if (AranarthUtils.getServerBoosts().containsKey(boost)) {
             String name = "";
             if (boost == Boost.MINER) {
@@ -2650,6 +2661,11 @@ public class AranarthUtils {
                     DiscordUtils.updateBoostInDiscord(null, boost, false, false);
                     DiscordUtils.sendBoostExpiredToDiscord(boost);
                 }
+                if (NetworkManager.isActive()) {
+                    NetworkManager.getInstance().publishBoostSync(boost.name(), "", true);
+                }
+            } else if (!fromNetwork) {
+                // SMP: forward the removal to Survival so it handles broadcast/Discord/persistence
                 if (NetworkManager.isActive()) {
                     NetworkManager.getInstance().publishBoostSync(boost.name(), "", true);
                 }

@@ -57,6 +57,7 @@ Minor Features
 [~] Fixed repeated weather change message issue
 [~] Fix new month Discord message sending twice
 [+] NoxiousFumes can now source fire from nearby positively-aligned players and extinguish them
+[~] Fix /boosts remove doing nothing when run from SMP
 
 Backend Code Changes
 -
