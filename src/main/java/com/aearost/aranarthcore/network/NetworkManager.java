@@ -1555,6 +1555,7 @@ public class NetworkManager {
         World mainWorld = Bukkit.getWorld("world");
         boolean isNewDay = mainWorld != null && (int) (mainWorld.getTime() / 20) < 5;
 
+        Weather prevWeather = AranarthUtils.getWeather();
         switch (weatherType) {
             case "CLEAR" -> {
                 AranarthUtils.setStormDuration(0);
@@ -1567,6 +1568,9 @@ public class NetworkManager {
                     w.setClearWeatherDuration(duration);
                 }
                 AranarthUtils.setStormDelay(stormDelay);
+                if (prevWeather == Weather.CLEAR) {
+                    return;
+                }
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     String pWorld = p.getWorld().getName();
                     if (pWorld.equals("arena") || pWorld.equals("creative")) {
@@ -1599,6 +1603,9 @@ public class NetworkManager {
                     }
                 }
                 AranarthUtils.setStormDuration(stormDuration);
+                if (prevWeather == type) {
+                    return;
+                }
                 String broadcastMsg = isThunder ? "&7&oA thunderstorm has started..." : "&7&oIt has started to rain...";
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     String pWorld = p.getWorld().getName();
@@ -1634,6 +1641,9 @@ public class NetworkManager {
                     w.setClearWeatherDuration(duration);
                 }
                 AranarthUtils.setStormDuration(stormDuration);
+                if (prevWeather == Weather.SNOW) {
+                    return;
+                }
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     String pWorld = p.getWorld().getName();
                     if (pWorld.equals("arena") || pWorld.equals("creative")) {

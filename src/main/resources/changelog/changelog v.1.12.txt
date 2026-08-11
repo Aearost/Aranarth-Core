@@ -52,6 +52,7 @@ Minor Features
 [~] Reduced odds of getting elytras in dominion resource claims in biomes from The End
 [~] Replaced chorus plant/flower dominion resource claims with chorus fruit and purpur blocks
 [~] Fixed capitalization of "The End" in dominion resource claims
+[~] Fixed repeated weather change message issue
 
 Backend Code Changes
 -
