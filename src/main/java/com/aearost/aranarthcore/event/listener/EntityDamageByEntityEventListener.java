@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.event.mob.DefenderFollowAssist;
 import com.aearost.aranarthcore.event.player.ArenaPlayerKill;
 import com.aearost.aranarthcore.event.player.CombatLog;
 import com.aearost.aranarthcore.event.player.FaunivorExtraAttackDamage;
+import com.aearost.aranarthcore.event.player.InvisibilityBreakOnDamage;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Villager;
@@ -43,6 +44,7 @@ public class EntityDamageByEntityEventListener implements Listener {
         new DefenderFollowAssist().execute(e);
 
         // Regardless of world
+        new InvisibilityBreakOnDamage().execute(e);
         new CombatLog().execute(e);
     }
 }

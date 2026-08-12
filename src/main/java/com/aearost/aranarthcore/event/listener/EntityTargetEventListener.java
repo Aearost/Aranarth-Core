@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.mob.DefenderIdlePathfindCancel;
 import com.aearost.aranarthcore.event.mob.DefenderTarget;
 import com.aearost.aranarthcore.event.mob.GuardianTargetPrevent;
+import com.aearost.aranarthcore.event.mob.InvisibilityMobTargetPrevent;
 import com.aearost.aranarthcore.event.mob.PetTargetPrevent;
 import com.aearost.aranarthcore.event.mob.PhantomSpawnNotify;
 import com.aearost.aranarthcore.event.mob.PhantomTargetPrevent;
@@ -33,6 +34,7 @@ public class EntityTargetEventListener implements Listener {
     public void onEntityTarget(EntityTargetEvent e) {
         new DefenderTarget().execute(e);
         new GuardianTargetPrevent().execute(e);
+        new InvisibilityMobTargetPrevent().execute(e);
         new PiglinTargetPrevent().execute(e);
         new PetTargetPrevent().execute(e);
         new RavagerTargetPrevent().execute(e);

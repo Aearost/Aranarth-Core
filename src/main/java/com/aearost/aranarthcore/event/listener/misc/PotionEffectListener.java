@@ -186,6 +186,11 @@ public class PotionEffectListener implements Listener {
                 }
             }
 
+            // Invisibility has no meaningful amplifier difference
+            if (newEffect != null && newEffect.getType() == PotionEffectType.INVISIBILITY) {
+                return;
+            }
+
             // Do not proceed if there is not a new effect being applied
             if (newEffect == null) {
                 // Allow proceeding only for instant health arrows

@@ -41,6 +41,7 @@ import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -653,7 +654,8 @@ public class AranarthCore extends JavaPlugin {
                     CropUtils.refreshInventory(player.getInventory(), player.getWorld());
                     // Fallback if the player goes offline while vanished
                     AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                    if (!aranarthPlayer.isVanished() && player.isInvisible()) {
+                    if (!aranarthPlayer.isVanished() && player.isInvisible()
+                            && !player.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
                         player.setInvisible(false);
                     }
                 }
@@ -1117,6 +1119,7 @@ public class AranarthCore extends JavaPlugin {
         new ExpGainPreventListener(this);
         new VillagerCamelDismountListener(this);
         new PotionEffectListener(this);
+        new InvisibilityListener(this);
         new BrewingListener(this);
         new BrewRecipeUnlockListener(this);
         new BrewRecipeAutoUnlockListener(this);

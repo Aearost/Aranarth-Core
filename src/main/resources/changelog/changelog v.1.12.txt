@@ -4,6 +4,7 @@ Major Features
 [+] Add World Events system
 [+] Implemented white fire and prismatic fire
 [+] Added interactive chat - [item], [inv], [ec], and [coords]/[pos]
+[+] Implemented new invisibility mechanics where it breaks on PvP hit, mobs can't target, and armor is hidden from others
 [+] Added the sawmill functionality
 [+] Implemented the Wrench item
 [+] Did a full overhaul of wandering traders, providing each with their own theme
