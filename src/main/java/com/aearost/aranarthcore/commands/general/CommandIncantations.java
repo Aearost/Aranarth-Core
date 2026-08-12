@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.items.incantation.IncantationBeheading;
 import com.aearost.aranarthcore.items.incantation.IncantationLifesteal;
 import com.aearost.aranarthcore.items.incantation.IncantationMagnetism;
 import com.aearost.aranarthcore.items.incantation.IncantationPlentiful;
+import com.aearost.aranarthcore.items.incantation.IncantationPreservation;
 import com.aearost.aranarthcore.items.incantation.IncantationResilience;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
@@ -43,6 +44,7 @@ public class CommandIncantations implements CommandExecutor {
 			meta.addPage(plentiful());
 			meta.addPage(magnetism());
 			meta.addPage(resilience());
+			meta.addPage(preservation());
 
 			book.setItemMeta(meta);
 			player.getInventory().addItem(book);
@@ -64,12 +66,13 @@ public class CommandIncantations implements CommandExecutor {
 
 	private static String introduction2() {
 		return ChatUtils.translateToColor(
-				"There are five different Incantations that are currently found on Aranarth:\n"
+				"There are six different Incantations that are currently found on Aranarth:\n"
 					+ "- " + new IncantationBeheading().getColor() + "&lBeheading&r\n"
 					+ "- " + new IncantationLifesteal().getColor() + "&lLifesteal&r\n"
 					+ "- " + new IncantationPlentiful().getColor() + "&lPlentiful&r\n"
 					+ "- " + new IncantationMagnetism().getColor() + "&lMagnetism&r\n"
-					+ "- " + new IncantationResilience().getColor() + "&lResilience&r\n\n"
+					+ "- " + new IncantationResilience().getColor() + "&lResilience&r\n"
+					+ "- " + new IncantationPreservation().getColor() + "&lPreservation&r\n\n"
 					+ "Note that only &oone incantation&r may be applied per item."
 		);
 	}
@@ -122,7 +125,8 @@ public class CommandIncantations implements CommandExecutor {
 				new IncantationMagnetism().getColor() + "&lMagnetism&r\n" +
 						"&oPulls harvested items to you\n\n" +
 						"&rApplies to: pickaxes, axes, shovels, hoes\n\n" +
-						"Drop the incantation onto the tool to apply it. There is only one level of Magnetism."
+						"You must drop an " + new AranarthiumIngot().getName() +
+						" &ringot onto the tool, as well as the incantation. There is only one level of Magnetism."
 		);
 	}
 
@@ -132,6 +136,16 @@ public class CommandIncantations implements CommandExecutor {
 						"&oMakes your item indestructible\n\n" +
 						"&rApplies to: any tool, weapon, or armor\n\n" +
 						"Drop the incantation onto the item to apply it. The item will never lose durability and cannot be destroyed by fire or lava"
+		);
+	}
+
+	private static String preservation() {
+		return ChatUtils.translateToColor(
+				new IncantationPreservation().getColor() + "&lPreservation&r\n" +
+						"&oCollection of unharvestable blocks\n\n" +
+						"&rApplies to: pickaxes (no Fortune)\n\n" +
+						"You must drop an " + new AranarthiumIngot().getName() +
+						" &ringot onto the tool, as well as the incantation. There is only one level of Preservation."
 		);
 	}
 

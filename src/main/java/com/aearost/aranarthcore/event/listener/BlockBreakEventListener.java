@@ -51,6 +51,8 @@ public class BlockBreakEventListener implements Listener {
         handlePlentifulBreak(e);
         if (e.isCancelled()) return;
         handleMagnetismBreak(e);
+        handlePreservationBreak(e);
+        if (e.isCancelled()) return;
 
         // Track farmland breaks for dominion level criteria
         if (e.getBlock().getType() == Material.FARMLAND) {
@@ -136,6 +138,23 @@ public class BlockBreakEventListener implements Listener {
                 }
             }
             AranarthUtils.setPlayer(uuid, aranarthPlayer);
+        }
+    }
+
+    /**
+     * Handles the logic for an Incantation of Preservation block break.
+     * @param e The event.
+     */
+    private void handlePreservationBreak(BlockBreakEvent e) {
+        String worldName = e.getBlock().getWorld().getName();
+        if (worldName.startsWith("world") || AranarthUtils.isSmpWorld(worldName) || worldName.startsWith("resource")) {
+            ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
+            if (heldItem.hasItemMeta() && heldItem.getItemMeta().getPersistentDataContainer().has(INCANTATION_TYPE)) {
+                String type = heldItem.getItemMeta().getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
+                if (type.equals("incantation_preservation")) {
+                    new IncantationPreservationBlockBreak().execute(e);
+                }
+            }
         }
     }
 

@@ -2,21 +2,30 @@ package com.aearost.aranarthcore.event.block;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
+
+import static com.aearost.aranarthcore.objects.CustomKeys.INCANTATION_TYPE;
 
 /**
- * If harvested with a silk touch pickaxe, the Budding Amethyst block will drop.
+ * If harvested with a pickaxe bearing the Incantation of Preservation, the Budding Amethyst block will drop.
  */
 public class BuddingAmethystBreak {
 	public void execute(BlockBreakEvent e) {
 		ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
-		if (heldItem.containsEnchantment(Enchantment.SILK_TOUCH) && isHoldingPickaxe(heldItem)) {
+		if (hasPreservation(heldItem) && isHoldingPickaxe(heldItem)) {
 			Location location = e.getBlock().getLocation();
+			e.setDropItems(false);
 			location.getWorld().dropItemNaturally(location, new ItemStack(Material.BUDDING_AMETHYST, 1));
-			location.getBlock().setType(Material.AIR);
 		}
+	}
+
+	private boolean hasPreservation(ItemStack item) {
+		if (!item.hasItemMeta()) return false;
+		var pdc = item.getItemMeta().getPersistentDataContainer();
+		return pdc.has(INCANTATION_TYPE) &&
+				"incantation_preservation".equals(pdc.get(INCANTATION_TYPE, PersistentDataType.STRING));
 	}
 
 	private boolean isHoldingPickaxe(ItemStack heldItem) {

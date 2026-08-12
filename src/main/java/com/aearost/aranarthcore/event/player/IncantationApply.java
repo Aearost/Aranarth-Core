@@ -7,12 +7,14 @@ import com.aearost.aranarthcore.items.incantation.IncantationBeheading;
 import com.aearost.aranarthcore.items.incantation.IncantationLifesteal;
 import com.aearost.aranarthcore.items.incantation.IncantationMagnetism;
 import com.aearost.aranarthcore.items.incantation.IncantationPlentiful;
+import com.aearost.aranarthcore.items.incantation.IncantationPreservation;
 import com.aearost.aranarthcore.items.incantation.IncantationResilience;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -256,6 +258,35 @@ public class IncantationApply {
 							player.sendMessage(ChatUtils.chatMessage("&5You have applied the " + incantation.getItem().getItemMeta().getDisplayName()));
 							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 						}
+					} else if (incantationType.equals("incantation_preservation")) {
+						if (isPickaxe(toolItem.getItemStack())) {
+							if (hasFortune(toolItem.getItemStack())) {
+								player.sendMessage(ChatUtils.chatMessage("&cPreservation cannot be applied to a tool with Fortune!"));
+								return;
+							}
+							Incantation incantation = new IncantationPreservation();
+							ItemStack tool = toolItem.getItemStack();
+							ItemMeta toolMeta = tool.getItemMeta();
+							String fullIncantationName = ChatUtils.translateToColor(incantation.getColor() + incantation.getIncantationName());
+
+							List<String> lore = toolMeta.getLore();
+							if (lore == null) {
+								lore = new ArrayList<>();
+								lore.add(fullIncantationName);
+							} else {
+								lore.add(fullIncantationName);
+							}
+							toolMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_preservation");
+							toolMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, 1);
+							toolMeta.addEnchant(Enchantment.SILK_TOUCH, 1, true);
+							toolMeta.setLore(lore);
+							tool.setItemMeta(toolMeta);
+							toolItem.setItemStack(tool);
+							aranarthiumItem.remove();
+							incantationFloorItem.remove();
+							player.sendMessage(ChatUtils.chatMessage("&5You have applied the " + incantation.getItem().getItemMeta().getDisplayName()));
+							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
+						}
 					}
 				}
 			}
@@ -334,5 +365,23 @@ public class IncantationApply {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Determines if the item is a pickaxe.
+	 * @param item The item.
+	 * @return Whether the item is a pickaxe.
+	 */
+	private boolean isPickaxe(ItemStack item) {
+		return item.getType().name().endsWith("_PICKAXE");
+	}
+
+	/**
+	 * Determines if the item has the Fortune enchantment.
+	 * @param item The item.
+	 * @return Whether the item has Fortune.
+	 */
+	private boolean hasFortune(ItemStack item) {
+		return item.containsEnchantment(Enchantment.FORTUNE);
 	}
 }
