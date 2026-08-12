@@ -66,14 +66,15 @@ public class CommandIncantations implements CommandExecutor {
 
 	private static String introduction2() {
 		return ChatUtils.translateToColor(
-				"There are six different Incantations that are currently found on Aranarth:\n"
+				"There are 6 different Incantations found in the Realm of Aranarth:\n"
 					+ "- " + new IncantationBeheading().getColor() + "&lBeheading&r\n"
 					+ "- " + new IncantationLifesteal().getColor() + "&lLifesteal&r\n"
 					+ "- " + new IncantationPlentiful().getColor() + "&lPlentiful&r\n"
 					+ "- " + new IncantationMagnetism().getColor() + "&lMagnetism&r\n"
 					+ "- " + new IncantationResilience().getColor() + "&lResilience&r\n"
-					+ "- " + new IncantationPreservation().getColor() + "&lPreservation&r\n\n"
-					+ "Note that only &oone incantation&r may be applied per item."
+					+ "- " + new IncantationPreservation().getColor() + "&lPreservation&r\n"
+					+ "Note that only &oone incantation&r may be applied per item. " +
+						"Some additionally require an " + new AranarthiumIngot().getName() + " &ringot."
 		);
 	}
 
@@ -100,10 +101,8 @@ public class CommandIncantations implements CommandExecutor {
 	private static String lifesteal() {
 		return ChatUtils.translateToColor(
 				new IncantationLifesteal().getColor() + "&lLifesteal&r\n\n" +
-						"&oHeal off of your dealt damage\n\n" +
+						"&oHeal off of your dealt damage. Requires an " + new AranarthiumIngot().getName() + "&r&o ingot\n\n" +
 						"&rApplies to: swords, axes, maces, tridents, spears\n\n" +
-						"You must drop an " + new AranarthiumIngot().getName() +
-						" &ringot onto the weapon, as well as the incantation.\n\n" +
 						"- 15% heal at I\n" +
 						"- 30% heal at II\n" +
 						"- 50% heal at III\n"
@@ -112,40 +111,39 @@ public class CommandIncantations implements CommandExecutor {
 
 	private static String plentiful() {
 		return ChatUtils.translateToColor(
-				new IncantationPlentiful().getColor() + "&lPlentiful&r\n" +
-						"&oIncreased block harvest size\n\n" +
+				new IncantationPlentiful().getColor() + "&lPlentiful&r\n\n" +
+						"&oIncreased block harvest size. Requires an " + new AranarthiumIngot().getName() + "&r&o ingot\n\n" +
 						"&rApplies to: pickaxes, axes, shovels, hoes\n\n" +
-						"You must drop an " + new AranarthiumIngot().getName() +
-						" &ringot onto the tool, as well as the incantation. There is only one level of Plentiful."
+						"- Only one level\n"
 		);
 	}
 
 	private static String magnetism() {
 		return ChatUtils.translateToColor(
-				new IncantationMagnetism().getColor() + "&lMagnetism&r\n" +
-						"&oPulls harvested items to you\n\n" +
+				new IncantationMagnetism().getColor() + "&lMagnetism&r\n\n" +
+						"&oPulls harvested items to you. Requires an " + new AranarthiumIngot().getName() + "&r&o ingot\n\n" +
 						"&rApplies to: pickaxes, axes, shovels, hoes\n\n" +
-						"You must drop an " + new AranarthiumIngot().getName() +
-						" &ringot onto the tool, as well as the incantation. There is only one level of Magnetism."
+						"- Only one level\n"
 		);
 	}
 
 	private static String resilience() {
 		return ChatUtils.translateToColor(
-				new IncantationResilience().getColor() + "&lResilience&r\n" +
+				new IncantationResilience().getColor() + "&lResilience&r\n\n" +
 						"&oMakes your item indestructible\n\n" +
 						"&rApplies to: any tool, weapon, or armor\n\n" +
-						"Drop the incantation onto the item to apply it. The item will never lose durability and cannot be destroyed by fire or lava"
+						"- Item never loses durability\n" +
+						"- Cannot be destroyed by fire or lava\n" +
+						"- Only one level\n"
 		);
 	}
 
 	private static String preservation() {
 		return ChatUtils.translateToColor(
-				new IncantationPreservation().getColor() + "&lPreservation&r\n" +
-						"&oCollection of unharvestable blocks\n\n" +
+				new IncantationPreservation().getColor() + "&lPreservation&r\n\n" +
+						"&oCollection of unharvestable blocks. Requires an " + new AranarthiumIngot().getName() + "&r&o ingot\n\n" +
 						"&rApplies to: pickaxes (no Fortune)\n\n" +
-						"You must drop an " + new AranarthiumIngot().getName() +
-						" &ringot onto the tool, as well as the incantation. There is only one level of Preservation."
+						"- Only one level\n"
 		);
 	}
 
