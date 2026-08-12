@@ -55,6 +55,11 @@ public class PlayerChatListener implements Listener {
         Player player = e.getPlayer();
         String message = e.getMessage();
 
+        // Remove a leading period when the message starts with "./" followed by a letter (e.g. "./calendar" -> "/calendar")
+        if (message.length() >= 3 && message.charAt(0) == '.' && message.charAt(1) == '/' && Character.isLetter(message.charAt(2))) {
+            message = message.substring(1);
+        }
+
         // If the player is awaiting a user-search input for the player permission GUI, handle it first
         if (GuiDominionPlayerPermissions.isAwaitingSearch(player.getUniqueId())) {
             e.setCancelled(true);
