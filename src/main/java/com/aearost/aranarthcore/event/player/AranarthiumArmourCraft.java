@@ -13,6 +13,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -341,7 +342,18 @@ public class AranarthiumArmourCraft {
      */
     private ItemStack determineArmourResult(ItemStack armor, ItemStack ingot) {
         if (ingot.getType() == Material.NETHERITE_INGOT) {
-            return new NetheriteElytra().getItem();
+            ItemStack netheriteElytra = new NetheriteElytra().getItem();
+            // Transfer enchantments from the source elytra
+            armor.getEnchantments().forEach((enchantment, level) -> netheriteElytra.addEnchantment(enchantment, level));
+            // Transfer durability from the source elytra
+            if (armor.hasItemMeta() && netheriteElytra.hasItemMeta()) {
+                ItemMeta resultMeta = netheriteElytra.getItemMeta();
+                if (armor.getItemMeta() instanceof Damageable damagedArmor && resultMeta instanceof Damageable damagedResult) {
+                    damagedResult.setDamage(damagedArmor.getDamage());
+                }
+                netheriteElytra.setItemMeta(resultMeta);
+            }
+            return netheriteElytra;
         }
         String ingotName = ingot.getItemMeta().getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING);
         Material type = armor.getType();
@@ -456,6 +468,14 @@ public class AranarthiumArmourCraft {
             }
         }
 
+        // Transfer durability from the source armor
+        if (armor.hasItemMeta() && enhancedAranarthiumArmor.hasItemMeta()) {
+            ItemMeta resultMeta = enhancedAranarthiumArmor.getItemMeta();
+            if (armor.getItemMeta() instanceof Damageable damagedArmor && resultMeta instanceof Damageable damagedResult) {
+                damagedResult.setDamage(damagedArmor.getDamage());
+            }
+            enhancedAranarthiumArmor.setItemMeta(resultMeta);
+        }
 
         return enhancedAranarthiumArmor;
     }
