@@ -67,6 +67,7 @@ Minor Features
 [+] Added player search relation display in /d's User Search
 [~] Fixed double broadcast of chat unscrambler messages when cross-server
 [~] Restructured the book of /incantations
+[~] Fix homepads being placeable on Survival and losing nether/end homepads after restart
 
 Backend Code Changes
 -

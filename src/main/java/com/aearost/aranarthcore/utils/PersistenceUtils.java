@@ -5883,7 +5883,7 @@ public class PersistenceUtils {
      * Syncs server homepads to MySQL.
      */
     public static void syncHomepadsToDatabase() {
-        if (!DatabaseManager.isActive()) {
+        if (!DatabaseManager.isActive() || !AranarthCore.isSmpServer()) {
             return;
         }
         DatabaseManager db = DatabaseManager.getInstance();

@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.block;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Location;
@@ -17,13 +18,12 @@ public class HomepadPlace {
 		if (e.getItemInHand().hasItemMeta()) {
 			ItemMeta meta = e.getItemInHand().getItemMeta();
 			if (meta.getPersistentDataContainer().has(HOMEPAD)) {
-				Location location = e.getBlockPlaced().getLocation();
-				if (!AranarthUtils.isSmpWorld(location.getWorld().getName())) {
-					e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou can only place this in the SMP" +
-							"!"));
+				if (!AranarthCore.isSmpServer()) {
+					e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou can only place this in the SMP!"));
 					e.setCancelled(true);
 					return;
 				}
+				Location location = e.getBlockPlaced().getLocation();
 				AranarthUtils.addNewHomepad(location);
 			}
 		}
