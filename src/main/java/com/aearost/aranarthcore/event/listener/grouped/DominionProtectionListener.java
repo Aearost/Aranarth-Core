@@ -341,20 +341,46 @@ public class DominionProtectionListener implements Listener {
             return;
         }
 
-        // Attacker has a dominion, target is a wanderer - always allowed
+        // Attacker has a dominion, target is a wanderer - blocked if target is not a barbarian
         if (attackerDominion != null) {
+            if (!aranarthTarget.isBarbarian()) {
+                e.setCancelled(true);
+                attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthTarget.getNickname()
+                        + " &7as they are a wanderer"));
+            }
             return;
         }
 
-        // Attacker is a wanderer, target has a dominion - blocked in target's own land
+        // Attacker is a wanderer, target has a dominion
         if (targetDominion != null) {
+            AranarthPlayer aranarthAttacker = AranarthUtils.getPlayer(attacker.getUniqueId());
+            if (!aranarthAttacker.isBarbarian()) {
+                e.setCancelled(true);
+                attacker.sendMessage(ChatUtils.chatMessage("&7Wanderers cannot deal damage to players. Use &e/toggle barbarian &7to become a Barbarian"));
+                return;
+            }
             Dominion chunkDominion = DominionUtils.getDominionOfChunk(target.getLocation().getChunk());
             if (chunkDominion != null && chunkDominion.isSameDominion(targetDominion)) {
                 e.setCancelled(true);
                 attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthTarget.getNickname()
-                        + " &7in their dominion's lands as a wanderer"));
+                        + " &7in their dominion's lands"));
             }
+            return;
         }
+
+        // Both are wanderers (neither has a dominion)
+        AranarthPlayer aranarthAttacker = AranarthUtils.getPlayer(attacker.getUniqueId());
+        if (!aranarthAttacker.isBarbarian()) {
+            e.setCancelled(true);
+            attacker.sendMessage(ChatUtils.chatMessage("&7Wanderers cannot deal damage to players. Use &e/toggle barbarian &7to become a Barbarian"));
+            return;
+        }
+        if (!aranarthTarget.isBarbarian()) {
+            e.setCancelled(true);
+            attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthTarget.getNickname()
+                    + " &7as they are a wanderer"));
+        }
+        // Both are barbarians - allowed
     }
 
     /**
@@ -365,7 +391,46 @@ public class DominionProtectionListener implements Listener {
         boolean petHasOwner = pet.getOwner() != null;
         Dominion targetDominion = petHasOwner ? DominionUtils.getPlayerDominion(pet.getOwner().getUniqueId()) : null;
 
-        if (attackerDominion == null || targetDominion == null) {
+        // Attacker has a dominion, pet owner is a wanderer - blocked if owner is not a barbarian
+        if (attackerDominion != null && targetDominion == null) {
+            if (petHasOwner) {
+                AranarthPlayer aranarthOwnerPlayer = AranarthUtils.getPlayer(pet.getOwner().getUniqueId());
+                if (!aranarthOwnerPlayer.isBarbarian()) {
+                    e.setCancelled(true);
+                    String petType = ChatUtils.getFormattedItemName(pet.getType().name());
+                    attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthOwnerPlayer.getNickname()
+                            + "'s &e" + petType + " &7as they are a wanderer"));
+                }
+            }
+            return;
+        }
+
+        // Attacker is a wanderer, pet owner has a dominion - blocked if attacker is not a barbarian
+        if (attackerDominion == null && targetDominion != null) {
+            AranarthPlayer aranarthAttacker = AranarthUtils.getPlayer(attacker.getUniqueId());
+            if (!aranarthAttacker.isBarbarian()) {
+                e.setCancelled(true);
+                return;
+            }
+            // Barbarian wanderer attacking a dominion member's pet - fall through to relation-based logic below
+        }
+
+        // Both are wanderers (neither has a dominion) - apply barbarian rules
+        if (attackerDominion == null && targetDominion == null) {
+            AranarthPlayer aranarthAttacker = AranarthUtils.getPlayer(attacker.getUniqueId());
+            if (!aranarthAttacker.isBarbarian()) {
+                e.setCancelled(true);
+                return;
+            }
+            if (petHasOwner) {
+                AranarthPlayer aranarthOwnerPlayer = AranarthUtils.getPlayer(pet.getOwner().getUniqueId());
+                if (!aranarthOwnerPlayer.isBarbarian()) {
+                    e.setCancelled(true);
+                    String petType = ChatUtils.getFormattedItemName(pet.getType().name());
+                    attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthOwnerPlayer.getNickname()
+                            + "'s &e" + petType + " &7as they are a wanderer"));
+                }
+            }
             return;
         }
 
@@ -472,20 +537,44 @@ public class DominionProtectionListener implements Listener {
             return;
         }
 
-        // Attacker has a dominion, mount owner is a wanderer
+        // Attacker has a dominion, mount owner is a wanderer - blocked if owner is not a barbarian
         if (attackerDominion != null) {
+            if (!aranarthOwner.isBarbarian()) {
+                e.setCancelled(true);
+                attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthOwner.getNickname()
+                        + "'s &e" + mountTypeName + " &7as they are a wanderer"));
+            }
             return;
         }
 
         // Attacker is a wanderer, mount owner has a dominion
         if (ownerDominion != null) {
+            AranarthPlayer aranarthAttacker = AranarthUtils.getPlayer(attacker.getUniqueId());
+            if (!aranarthAttacker.isBarbarian()) {
+                e.setCancelled(true);
+                return;
+            }
             Dominion chunkDominion = DominionUtils.getDominionOfChunk(e.getEntity().getLocation().getChunk());
             if (chunkDominion != null && chunkDominion.isSameDominion(ownerDominion)) {
                 e.setCancelled(true);
                 attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthOwner.getNickname()
-                        + "'s &e" + mountTypeName + " &7in their dominion's lands as a wanderer"));
+                        + "'s &e" + mountTypeName + " &7in their dominion's lands"));
             }
+            return;
         }
+
+        // Both are wanderers (neither has a dominion)
+        AranarthPlayer aranarthAttacker = AranarthUtils.getPlayer(attacker.getUniqueId());
+        if (!aranarthAttacker.isBarbarian()) {
+            e.setCancelled(true);
+            return;
+        }
+        if (!aranarthOwner.isBarbarian()) {
+            e.setCancelled(true);
+            attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthOwner.getNickname()
+                    + "'s &e" + mountTypeName + " &7as they are a wanderer"));
+        }
+        // Both are barbarians - allowed
     }
 
     /**

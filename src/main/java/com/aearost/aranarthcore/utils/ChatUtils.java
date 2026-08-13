@@ -491,6 +491,7 @@ public class ChatUtils {
             tips.add("&7&oMake sure to use your &e&o/mount &7&oto level them up!");
             tips.add("&7&oNeed some money? Join up to 5 with &e&o/jobs");
             tips.add("&7&oCheck out the different brewable drinks with &e&o/brewbook");
+            tips.add("&7&oReady to PvP? Use &e&o/toggle barbarian");
 
             Collections.shuffle(tips);
         }

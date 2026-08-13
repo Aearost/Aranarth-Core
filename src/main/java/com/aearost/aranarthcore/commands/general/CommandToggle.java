@@ -13,10 +13,18 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 /**
  * Centralizes the logic for toggling different functionality in Aranarth.
  */
 public class CommandToggle implements CommandExecutor {
+
+    private static final Map<UUID, Long> pendingBarbarianToggle = new HashMap<>();
+    private static final long BARBARIAN_CONFIRM_TIMEOUT_MS = 30_000L;
+    private static final long BARBARIAN_COOLDOWN_MS = 72L * 60 * 60 * 1000; // 72 hours
 
 	/**
 	 * @param sender The user that entered the command.
@@ -326,6 +334,41 @@ public class CommandToggle implements CommandExecutor {
 						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7interactive chat"));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				} else if (args[0].equalsIgnoreCase("barbarian")) {
+					long now = System.currentTimeMillis();
+					long cooldownEnd = aranarthPlayer.getBarbarianCooldownEnd();
+					if (cooldownEnd > now) {
+						long remainingMs = cooldownEnd - now;
+						long hours = remainingMs / 3_600_000L;
+						long minutes = (remainingMs % 3_600_000L) / 60_000L;
+						player.sendMessage(ChatUtils.chatMessage("&cYou cannot change your Barbarian status for another &e"
+								+ hours + "h " + minutes + "m"));
+						return true;
+					}
+					boolean becomingBarbarian = !aranarthPlayer.isBarbarian();
+					Long pendingExpiry = pendingBarbarianToggle.get(player.getUniqueId());
+					if (pendingExpiry == null || now > pendingExpiry) {
+						// First run - show confirmation prompt
+						pendingBarbarianToggle.put(player.getUniqueId(), now + BARBARIAN_CONFIRM_TIMEOUT_MS);
+						if (becomingBarbarian) {
+							player.sendMessage(ChatUtils.chatMessage("&eWarning: &7Becoming a Barbarian means you can both &edeal/take &7damage from other players"));
+							player.sendMessage(ChatUtils.chatMessage("&7This cannot be changed for &e3 days&7. Run &e/toggle barbarian &7again to confirm"));
+						} else {
+							player.sendMessage(ChatUtils.chatMessage("&eWarning: &7Becoming a Wanderer means you will be &aimmune &7to player damage, but cannot deal damage to players either"));
+							player.sendMessage(ChatUtils.chatMessage("&7This cannot be changed for &e3 days&7. Run &e/toggle barbarian &7again to confirm"));
+						}
+						return true;
+					}
+					// Second run within window - execute the toggle
+					pendingBarbarianToggle.remove(player.getUniqueId());
+					aranarthPlayer.setBarbarian(becomingBarbarian);
+					aranarthPlayer.setBarbarianCooldownEnd(now + BARBARIAN_COOLDOWN_MS);
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+					if (becomingBarbarian) {
+						player.sendMessage(ChatUtils.chatMessage("&7You are now a &cBarbarian&7. You can deal and take damage from other players"));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&7You are now a &aWanderer&7. You are immune to player damage"));
+					}
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/toggle <option>"));
 				}

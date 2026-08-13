@@ -19,6 +19,7 @@ Major Features
 [+] Implemented particles to visualize dominion border lands while auto-claiming land
 [+] Stripped period from chat messages starting with """/ to clean up command references in chat
 [+] Added a dominion-wide Explosion permission to Dominions
+[+] Implemented Barbarian toggle system for Wanderers
 
 Minor Features
 [~] Fixed issue where the alchemist job was not providing xp when shift-clicking ingredients into a brewing stand

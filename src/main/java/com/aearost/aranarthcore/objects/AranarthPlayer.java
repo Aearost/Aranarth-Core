@@ -128,6 +128,8 @@ public class AranarthPlayer {
     private double bulkTransactionPrice = 0;
     private JobData jobData = new JobData();
     private boolean jobDataLoaded = false;
+    private boolean isBarbarian = false;
+    private long barbarianCooldownEnd = 0;
 
     public AranarthPlayer(String username) {
         this.username = username;
@@ -1926,5 +1928,21 @@ public class AranarthPlayer {
 
     public void setEmojiEnabled(boolean emojiEnabled) {
         this.isEmojiEnabled = emojiEnabled;
+    }
+
+    public boolean isBarbarian() {
+        return isBarbarian;
+    }
+
+    public void setBarbarian(boolean isBarbarian) {
+        this.isBarbarian = isBarbarian;
+    }
+
+    public long getBarbarianCooldownEnd() {
+        return barbarianCooldownEnd;
+    }
+
+    public void setBarbarianCooldownEnd(long barbarianCooldownEnd) {
+        this.barbarianCooldownEnd = barbarianCooldownEnd;
     }
 }
