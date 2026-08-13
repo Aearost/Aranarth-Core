@@ -28,7 +28,7 @@ public class ExplosionListener implements Listener {
 	@EventHandler
 	public void onExplodeBlock(final EntityExplodeEvent e) {
 		if (!(e.getEntity() instanceof WindCharge) && !(e.getEntity() instanceof BreezeWindCharge)) {
-			// Always prevent these explosions
+			// Always prevent creeper explosions
 			if (e.getEntity() instanceof Creeper) {
 				e.setCancelled(true);
 				return;
@@ -36,14 +36,17 @@ public class ExplosionListener implements Listener {
 
 			Dominion chunkDominion = DominionUtils.getDominionOfChunk(e.getEntity().getLocation().getChunk());
 			if (chunkDominion != null) {
-				e.setCancelled(true);
+				if (chunkDominion.isExplosionEnabled()) {
+					e.blockList().removeIf(block -> AranarthUtils.getLockedContainerAtBlock(block) != null);
+				} else {
+					e.setCancelled(true);
+				}
 			} else {
 				e.blockList().removeIf(block -> AranarthUtils.getLockedContainerAtBlock(block) != null);
 			}
 		}
 	}
-	
-	
+
 	/**
 	 * Deals with cancelling explosion item damage.
 	 * @param e The event.
@@ -52,7 +55,10 @@ public class ExplosionListener implements Listener {
 	public void onExplodeItem(final EntityDamageEvent e) {
 		if (e.getEntity() instanceof Item) {
 			if (e.getCause() == DamageCause.BLOCK_EXPLOSION || e.getCause() == DamageCause.ENTITY_EXPLOSION) {
-				e.setCancelled(true);
+				Dominion chunkDominion = DominionUtils.getDominionOfChunk(e.getEntity().getLocation().getChunk());
+				if (chunkDominion != null && !chunkDominion.isExplosionEnabled()) {
+					e.setCancelled(true);
+				}
 			}
 		}
 	}

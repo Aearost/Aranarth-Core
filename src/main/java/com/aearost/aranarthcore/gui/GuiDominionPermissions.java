@@ -253,8 +253,9 @@ public class GuiDominionPermissions {
         gui.setItem(16, buildMemberPvpToggleItem(dominion.isMemberPvpEnabled()));
         gui.setItem(17, buildBendingToggleItem(dominion.isBendingEnabled()));
 
-        // Row 4 toggle
-        gui.setItem(31, buildMobSpawningToggleItem(dominion.isMobSpawningEnabled()));
+        // Row 4 toggles
+        gui.setItem(30, buildMobSpawningToggleItem(dominion.isMobSpawningEnabled()));
+        gui.setItem(32, buildExplosionToggleItem(dominion.isExplosionEnabled()));
 
         // Row 3: navigation and new hub sections
         gui.setItem(GUARDIANS_SLOT, buildDefendersItem());
@@ -292,6 +293,20 @@ public class GuiDominionPermissions {
                 index[0]++;
             }
         }.runTaskTimer(AranarthCore.getInstance(), 0L, 20L);
+    }
+
+    /**
+     * Builds the Explosion toggle item for the main screen.
+     */
+    public static ItemStack buildExplosionToggleItem(boolean enabled) {
+        ItemStack item = new ItemStack(Material.TNT);
+        ItemMeta meta = item.getItemMeta();
+        String statusColor = enabled ? "&a" : "&c";
+        String statusText = enabled ? "Enabled" : "Disabled";
+        meta.setDisplayName(ChatUtils.translateToColor("&6&lExplosions &7&l- " + statusColor + "&l" + statusText));
+        meta.setLore(List.of(ChatUtils.translateToColor("&7Allows explosions to damage blocks in dominion chunks")));
+        item.setItemMeta(meta);
+        return item;
     }
 
     /**

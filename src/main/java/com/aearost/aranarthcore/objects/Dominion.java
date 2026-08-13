@@ -47,6 +47,7 @@ public class Dominion {
 
 	private boolean memberPvpEnabled;
 	private boolean mobSpawningEnabled;
+	private boolean explosionEnabled;
 	private boolean bendingEnabled;
 	private int boughtChunks;
 
@@ -489,6 +490,14 @@ public class Dominion {
 	 */
 	public void setMobSpawningEnabled(boolean mobSpawningEnabled) {
 		this.mobSpawningEnabled = mobSpawningEnabled;
+	}
+
+	public boolean isExplosionEnabled() {
+		return explosionEnabled;
+	}
+
+	public void setExplosionEnabled(boolean explosionEnabled) {
+		this.explosionEnabled = explosionEnabled;
 	}
 
 	/**

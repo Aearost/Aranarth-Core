@@ -1497,6 +1497,7 @@ public class PersistenceUtils {
 
                 boolean memberPvpEnabled = fields.length > 19 && fields[19].equals("1");
                 boolean mobSpawningEnabled = fields.length > 20 && fields[20].equals("1");
+                boolean explosionEnabled = fields.length > 40 && fields[40].equals("1");
                 long conqueredRequestTimestamp = fields.length > 21 ? Long.parseLong(fields[21]) : 0L;
                 long lastConquerAttemptTimestamp = fields.length > 22 ? Long.parseLong(fields[22]) : 0L;
                 long rebelRequestTimestamp = fields.length > 23 ? Long.parseLong(fields[23]) : 0L;
@@ -1534,6 +1535,7 @@ public class PersistenceUtils {
                         balance);
                 dominion.setMemberPvpEnabled(memberPvpEnabled);
                 dominion.setMobSpawningEnabled(mobSpawningEnabled);
+                dominion.setExplosionEnabled(explosionEnabled);
                 dominion.setConqueredRequestTimestamp(conqueredRequestTimestamp);
                 dominion.setLastConquerAttemptTimestamp(lastConquerAttemptTimestamp);
                 dominion.setRebelRequestTimestamp(rebelRequestTimestamp);
@@ -1751,7 +1753,8 @@ public class PersistenceUtils {
                 + "|" + (dominion.isBendingEnabled() ? "1" : "0")
                 + "|" + (dominion.getConqueredRequest() != null ? dominion.getConqueredRequest().toString() : "")
                 + "|" + (dominion.getRebelRequest() != null ? dominion.getRebelRequest().toString() : "")
-                + "|" + dominion.getMapColor();
+                + "|" + dominion.getMapColor()
+                + "|" + (dominion.isExplosionEnabled() ? "1" : "0");
     }
 
     /**
@@ -8026,6 +8029,7 @@ public class PersistenceUtils {
 
         boolean memberPvpEnabled = fields.length > 19 && fields[19].equals("1");
         boolean mobSpawningEnabled = fields.length > 20 && fields[20].equals("1");
+        boolean explosionEnabled = fields.length > 40 && fields[40].equals("1");
         long conqueredRequestTimestamp = fields.length > 21 ? Long.parseLong(fields[21]) : 0L;
         long lastConquerAttemptTimestamp = fields.length > 22 ? Long.parseLong(fields[22]) : 0L;
         long rebelRequestTimestamp = fields.length > 23 ? Long.parseLong(fields[23]) : 0L;
@@ -8059,6 +8063,7 @@ public class PersistenceUtils {
                 x, y, z, yaw, pitch, food, claimableResources, conquered, null, balance);
         dominion.setMemberPvpEnabled(memberPvpEnabled);
         dominion.setMobSpawningEnabled(mobSpawningEnabled);
+        dominion.setExplosionEnabled(explosionEnabled);
         dominion.setConqueredRequestTimestamp(conqueredRequestTimestamp);
         dominion.setLastConquerAttemptTimestamp(lastConquerAttemptTimestamp);
         dominion.setRebelRequestTimestamp(rebelRequestTimestamp);

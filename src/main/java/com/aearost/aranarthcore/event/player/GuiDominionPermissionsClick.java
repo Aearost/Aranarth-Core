@@ -74,6 +74,15 @@ public class GuiDominionPermissionsClick {
                 player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 0.5F, 1.5F);
                 return;
             }
+            if (itemName.startsWith("Explosions")) {
+                boolean newState = !dominion.isExplosionEnabled();
+                dominion.setExplosionEnabled(newState);
+                DominionUtils.updateDominion(dominion);
+                e.getClickedInventory().setItem(e.getSlot(), GuiDominionPermissions.buildExplosionToggleItem(newState));
+                player.updateInventory();
+                player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 0.5F, 1.5F);
+                return;
+            }
             if (itemName.startsWith("Member PvP")) {
                 boolean newState = !dominion.isMemberPvpEnabled();
                 dominion.setMemberPvpEnabled(newState);

@@ -18,6 +18,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPlaceEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
@@ -611,6 +612,16 @@ public class SpawnProtectionListener implements Listener {
                     player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to " + finalAdjustedName));
                 }
             });
+        }
+    }
+
+    /**
+     * Prevents explosions from destroying blocks in the spawn world.
+     */
+    @EventHandler
+    public void onExplode(EntityExplodeEvent e) {
+        if (e.getEntity().getWorld().getName().equals("spawn")) {
+            e.setCancelled(true);
         }
     }
 
