@@ -70,6 +70,7 @@ Minor Features
 [~] Fixed double broadcast of chat unscrambler messages when cross-server
 [~] Restructured the book of /incantations
 [~] Fix homepads being placeable on Survival and losing nether/end homepads after restart
+[+] Added support for /pay for offline players
 
 Backend Code Changes
 -

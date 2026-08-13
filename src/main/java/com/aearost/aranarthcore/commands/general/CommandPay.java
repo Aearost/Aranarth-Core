@@ -82,7 +82,20 @@ public class CommandPay implements CommandExecutor {
 									? NetworkManager.getInstance().getRemoteRoster().get(target.getUniqueId())
 									: null;
 							if (networkReceiver == null) {
-								player.sendMessage(ChatUtils.chatMessage("&e" + args[0] + " &ccould not be found"));
+								// Target is fully offline - pay using local in-memory data and persist
+								if (aranarthPlayerReceiver == null) {
+									player.sendMessage(ChatUtils.chatMessage("&e" + args[0] + " &ccould not be found"));
+									return true;
+								}
+								if (aranarthPlayerSender.getBalance() >= amount) {
+									aranarthPlayerSender.setBalance(aranarthPlayerSender.getBalance() - amount);
+									aranarthPlayerReceiver.setBalance(aranarthPlayerReceiver.getBalance() + amount);
+									PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
+									PersistenceUtils.saveAranarthPlayerImmediately(target.getUniqueId());
+									player.sendMessage(ChatUtils.chatMessage("&7You have paid &e" + aranarthPlayerReceiver.getNickname() + " &6" + formattedAmount));
+								} else {
+									player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough money for this!"));
+								}
 								return true;
 							}
 							if (aranarthPlayerSender.getBalance() >= amount) {
