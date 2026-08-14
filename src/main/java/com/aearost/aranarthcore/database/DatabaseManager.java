@@ -98,7 +98,7 @@ public class DatabaseManager {
     private DatabaseManager(String host, int port, String database, String username, String password) {
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + database
-                + "?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=UTF-8"
+                + "?useSSL=false&allowPublicKeyRetrieval=true"
                 + "&serverTimezone=UTC&rewriteBatchedStatements=true");
         config.setUsername(username);
         config.setPassword(password);
@@ -109,6 +109,7 @@ public class DatabaseManager {
         config.setIdleTimeout(300_000);
         config.setMaxLifetime(600_000);
         config.setPoolName("AranarthCore-Pool");
+        config.setConnectionInitSql("SET NAMES utf8mb4");
         config.addDataSourceProperty("cachePrepStmts", "true");
         config.addDataSourceProperty("prepStmtCacheSize", "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
