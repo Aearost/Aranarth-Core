@@ -935,14 +935,102 @@ public class DominionUtils {
         }
 
         // Provides different yields based on the input
-        return switch (amplifier) {
-            case -1 -> power = (int) (power * 0.75);
-            case 1 -> power = (int) (power * 1.25);
-            case 2 -> power = (int) (power * 1.5);
-            case 3 -> power = (int) (power * 1.75);
-            case 4 -> power = power * 2;
-            case 5 -> power = (int) (power * 2.5);
+        power = switch (amplifier) {
+            case -1 -> (int) (power * 0.75);
+            case 1 -> (int) (power * 1.25);
+            case 2 -> (int) (power * 1.5);
+            case 3 -> (int) (power * 1.75);
+            case 4 -> power * 2;
+            case 5 -> (int) (power * 2.5);
             default -> power;
+        };
+
+        // Apply seasonal multiplier based on food source (crop yield, animal spawn rate, or apple drop rate)
+        double seasonalMult = getSeasonalFoodMultiplier(type, AranarthUtils.getMonth());
+        return (int) Math.round(power * seasonalMult);
+    }
+
+    /**
+     * Returns the seasonal multiplier for a food item based on the current month.
+     * Crop-based foods scale with their crop's yield multiplier (at half-strength).
+     * Meat and fish scale with passive mob spawn rates (at half-strength).
+     * Apples and golden apples are buffed during Solarvor when apple drop rates are increased.
+     *
+     * @param type  The food material.
+     * @param month The current month.
+     * @return The seasonal multiplier to apply to the food's power.
+     */
+    private static double getSeasonalFoodMultiplier(Material type, Month month) {
+        // Crop-based foods: scale with yield multiplier at half-strength
+        Material cropSource = getCropSourceForFood(type);
+        if (cropSource != null) {
+            double yieldMult = CropUtils.getCropYieldMultiplier(month, cropSource);
+            return 1.0 + (yieldMult - 1.0) * 0.5;
+        }
+
+        // Meat and fish: scale with passive mob spawn rates at half-strength
+        if (isMeatOrFish(type)) {
+            double animalMult = getAnimalSpawnMultiplier(month);
+            return 1.0 + (animalMult - 1.0) * 0.5;
+        }
+
+        // Apples and golden apples: buffed in Solarvor when apple drop rates are 10x
+        if (type == Material.APPLE || type == Material.GOLDEN_APPLE || type == Material.ENCHANTED_GOLDEN_APPLE) {
+            return month == Month.SOLARVOR ? 1.5 : 1.0;
+        }
+
+        return 1.0;
+    }
+
+    /**
+     * Maps a food item to its primary crop source for seasonal scaling.
+     * Returns null if the item has no crop source.
+     */
+    private static Material getCropSourceForFood(Material type) {
+        return switch (type) {
+            case WHEAT, BREAD, HAY_BLOCK, CAKE -> Material.WHEAT_SEEDS;
+            case CARROT, GOLDEN_CARROT -> Material.CARROT;
+            case POTATO, BAKED_POTATO, POISONOUS_POTATO -> Material.POTATO;
+            case BEETROOT, BEETROOT_SOUP -> Material.BEETROOT_SEEDS;
+            case MELON_SLICE -> Material.MELON_SEEDS;
+            case PUMPKIN_PIE -> Material.PUMPKIN_SEEDS;
+            case SWEET_BERRIES -> Material.SWEET_BERRIES;
+            case COOKIE -> Material.COCOA_BEANS;
+            default -> null;
+        };
+    }
+
+    /**
+     * Returns true if the item is a meat or fish product (raw or cooked), or rabbit stew.
+     */
+    private static boolean isMeatOrFish(Material type) {
+        return switch (type) {
+            case PORKCHOP, COOKED_PORKCHOP,
+                 MUTTON, COOKED_MUTTON,
+                 BEEF, COOKED_BEEF,
+                 CHICKEN, COOKED_CHICKEN,
+                 RABBIT, COOKED_RABBIT, RABBIT_STEW,
+                 COD, COOKED_COD,
+                 SALMON, COOKED_SALMON -> true;
+            default -> false;
+        };
+    }
+
+    /**
+     * Returns the passive animal spawn multiplier for the given month.
+     * Mirrors the values used in DateUtils.applyMobSpawnRates().
+     */
+    private static double getAnimalSpawnMultiplier(Month month) {
+        return switch (month) {
+            case FAUNIVOR -> 3.00;
+            case FOLLIVOR, STRIGAVOR -> 2.00;
+            case ARDORVOR, SOLARVOR, CALORVOR -> 1.50;
+            case AESTIVOR -> 1.25;
+            case AQUINVOR, VENTIVOR, FLORIVOR, UMBRAVOR -> 1.00;
+            case IGNIVOR -> 0.60;
+            case GLACIVOR -> 0.50;
+            case OBSCURVOR -> 0.40;
+            case FRIGORVOR -> 0.25;
         };
     }
 
