@@ -72,6 +72,7 @@ Minor Features
 [~] Restructured the book of /incantations
 [~] Fix homepads being placeable on Survival and losing nether/end homepads after restart
 [+] Added support for /pay for offline players
+[~] Fixed issue where homepads couldn't be reordered due to them using the indexes from old command format
 
 Backend Code Changes
 -

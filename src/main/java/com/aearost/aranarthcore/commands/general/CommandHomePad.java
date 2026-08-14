@@ -70,8 +70,8 @@ public class CommandHomePad implements CommandExecutor {
                     case "reorder" -> {
                         if (args.length >= 3) {
                             try {
-                                final int homeNumber = Integer.parseInt(args[2]);
-                                final int newNumber = Integer.parseInt(args[3]);
+                                final int homeNumber = Integer.parseInt(args[1]);
+                                final int newNumber = Integer.parseInt(args[2]);
                                 if (newNumber == homeNumber) {
                                     sender.sendMessage(ChatUtils.chatMessage("&cPlease enter a different number to reorder!"));
                                     return false;
