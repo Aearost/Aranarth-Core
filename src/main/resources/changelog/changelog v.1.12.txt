@@ -75,6 +75,7 @@ Minor Features
 [+] Added support for /pay for offline players
 [~] Fixed issue where homepads couldn't be reordered due to them using the indexes from old command format
 [+] Add /homepad delete to unregister a homepad without breaking the block
+[+] Added tab completion for /homepad
 
 Backend Code Changes
 -
