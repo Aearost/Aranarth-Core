@@ -21,6 +21,7 @@ Major Features
 [+] Added a dominion-wide Explosion permission to Dominions
 [+] Implemented Barbarian toggle system for Wanderers
 [+] Implemented seasonal food power multipliers for dominion food
+[~] Updated Rare/Epic/Godly crate rewards - money, ham, netherite, heavy core, incantation rotations
 
 Minor Features
 [~] Fixed issue where the alchemist job was not providing xp when shift-clicking ingredients into a brewing stand

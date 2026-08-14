@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.items.incantation.IncantationBeheading;
 import com.aearost.aranarthcore.items.incantation.IncantationLifesteal;
 import com.aearost.aranarthcore.items.incantation.IncantationMagnetism;
 import com.aearost.aranarthcore.items.incantation.IncantationPlentiful;
+import com.aearost.aranarthcore.items.incantation.IncantationPreservation;
 import com.aearost.aranarthcore.items.incantation.IncantationResilience;
 import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
@@ -41,8 +42,8 @@ public class GuiCrate {
 			updateRareCrateItems(indexes.get(0), indexes.get(1));
 		} else if (type == CrateType.EPIC) {
 			this.initializedGui = initializeEpicCrate(player);
-			// Updating the weapons, spawn eggs, clusters, and incantation here to allow for dynamic updates
-			updateEpicCrateItems(indexes.get(0), indexes.get(1), indexes.get(2), indexes.get(3));
+			// Updating the weapons, spawn eggs, clusters, incantation, and ham/sniffer/shulker here to allow for dynamic updates
+			updateEpicCrateItems(indexes.get(0), indexes.get(1), indexes.get(2), indexes.get(3), indexes.get(4));
 		} else if (type == CrateType.GODLY) {
 			this.initializedGui = initializeGodlyCrate(player);
 			// Updating the enhanced aranarthium, spawn eggs, and alternating items to allow for dynamic updates
@@ -199,7 +200,7 @@ public class GuiCrate {
 
 		ItemStack money1000 = new ItemStack(Material.GOLD_INGOT);
 		ItemMeta money1000Meta = money1000.getItemMeta();
-		money1000Meta.setDisplayName(ChatUtils.translateToColor("&6&l$5,000 of In-Game Currency"));
+		money1000Meta.setDisplayName(ChatUtils.translateToColor("&6&l$10,000 of In-Game Currency"));
 		List<String> money1000Lore = new ArrayList<>();
 		money1000Lore.add(ChatUtils.translateToColor("&a12% Chance"));
 		money1000Meta.setLore(money1000Lore);
@@ -216,14 +217,14 @@ public class GuiCrate {
 		mending.setItemMeta(mendingMeta);
 		gui.setItem(3, mending);
 
-		ItemStack goldenCarrot = new ItemStack(Material.GOLDEN_CARROT, 32);
-		ItemMeta goldenCarrotMeta = goldenCarrot.getItemMeta();
-		goldenCarrotMeta.setDisplayName(ChatUtils.translateToColor("&#fcd34d&lGolden Carrot"));
-		List<String> goldenCarrotLore = new ArrayList<>();
-		goldenCarrotLore.add(ChatUtils.translateToColor("&a12% Chance"));
-		goldenCarrotMeta.setLore(goldenCarrotLore);
-		goldenCarrot.setItemMeta(goldenCarrotMeta);
-		gui.setItem(5, goldenCarrot);
+		ItemStack honeyGlazedHamRare = new HoneyGlazedHam().getItem();
+		honeyGlazedHamRare.setAmount(32);
+		ItemMeta honeyGlazedHamRareMeta = honeyGlazedHamRare.getItemMeta();
+		List<String> honeyGlazedHamRareLore = new ArrayList<>();
+		honeyGlazedHamRareLore.add(ChatUtils.translateToColor("&a12% Chance"));
+		honeyGlazedHamRareMeta.setLore(honeyGlazedHamRareLore);
+		honeyGlazedHamRare.setItemMeta(honeyGlazedHamRareMeta);
+		gui.setItem(5, honeyGlazedHamRare);
 
 		ItemStack diamond = new ItemStack(Material.DIAMOND, 16);
 		ItemMeta diamondMeta = diamond.getItemMeta();
@@ -269,13 +270,14 @@ public class GuiCrate {
 		beheading.setItemMeta(beheadingMeta);
 		gui.setItem(20, beheading);
 
-		ItemStack magnetism = new IncantationMagnetism().getItem();
-		ItemMeta magnetismMeta = magnetism.getItemMeta();
-		List<String> magnetismLore = new ArrayList<>();
-		magnetismLore.add(ChatUtils.translateToColor("&c5% Chance"));
-		magnetismMeta.setLore(magnetismLore);
-		magnetism.setItemMeta(magnetismMeta);
-		gui.setItem(21, magnetism);
+		ItemStack netherite2 = new ItemStack(Material.NETHERITE_INGOT, 2);
+		ItemMeta netherite2Meta = netherite2.getItemMeta();
+		netherite2Meta.setDisplayName(ChatUtils.translateToColor("&#3a383a&lNetherite Ingot"));
+		List<String> netherite2Lore = new ArrayList<>();
+		netherite2Lore.add(ChatUtils.translateToColor("&c5% Chance"));
+		netherite2Meta.setLore(netherite2Lore);
+		netherite2.setItemMeta(netherite2Meta);
+		gui.setItem(21, netherite2);
 
 		ItemStack epicKey = new KeyEpic().getItem();
 		ItemMeta epicKeyMeta = epicKey.getItemMeta();
@@ -316,16 +318,7 @@ public class GuiCrate {
 		money5000.setItemMeta(money5000Meta);
 		gui.setItem(2, money5000);
 
-		ItemStack honeyGlazedHam = new HoneyGlazedHam().getItem();
-		honeyGlazedHam.setAmount(64);
-		ItemMeta honeyGlazedHamMeta = honeyGlazedHam.getItemMeta();
-		List<String> honeyGlazedHamLore = new ArrayList<>();
-		honeyGlazedHamLore.add(ChatUtils.translateToColor("&a12% Chance"));
-		honeyGlazedHamMeta.setLore(honeyGlazedHamLore);
-		honeyGlazedHam.setItemMeta(honeyGlazedHamMeta);
-		gui.setItem(3, honeyGlazedHam);
-
-		ItemStack netherite = new ItemStack(Material.NETHERITE_INGOT, 2);
+		ItemStack netherite = new ItemStack(Material.NETHERITE_INGOT, 4);
 		ItemMeta netheriteMeta = netherite.getItemMeta();
 		netheriteMeta.setDisplayName(ChatUtils.translateToColor("&#3a383a&lNetherite Ingot"));
 		List<String> netheriteLore = new ArrayList<>();
@@ -447,14 +440,13 @@ public class GuiCrate {
 		netherStar.setItemMeta(netherStarMeta);
 		gui.setItem(6, netherStar);
 
-		ItemStack heavyCore = new ItemStack(Material.HEAVY_CORE, 1);
-		ItemMeta heavyCoreMeta = heavyCore.getItemMeta();
-		heavyCoreMeta.setDisplayName(ChatUtils.translateToColor("&#4d5158&lHeavy Core"));
-		List<String> heavyCoreLore = new ArrayList<>();
-		heavyCoreLore.add(ChatUtils.translateToColor("&e4% Chance"));
-		heavyCoreMeta.setLore(heavyCoreLore);
-		heavyCore.setItemMeta(heavyCoreMeta);
-		gui.setItem(15, heavyCore);
+		ItemStack resilienceDefault = new IncantationResilience().getItem();
+		ItemMeta resilienceDefaultMeta = resilienceDefault.getItemMeta();
+		List<String> resilienceDefaultLore = new ArrayList<>();
+		resilienceDefaultLore.add(ChatUtils.translateToColor("&e8% Chance"));
+		resilienceDefaultMeta.setLore(resilienceDefaultLore);
+		resilienceDefault.setItemMeta(resilienceDefaultMeta);
+		gui.setItem(15, resilienceDefault);
 
 		ItemStack aranarthium = new AranarthiumIngot().getItem();
 		ItemMeta aranarthiumMeta = aranarthium.getItemMeta();
@@ -606,21 +598,21 @@ public class GuiCrate {
 	}
 
 	/**
-	 * Provides the weapon, spawn egg, cluster, and incantation that are associated to the input indexes for an Epic Crate.
+	 * Provides the weapon, spawn egg, cluster, incantation, and ham/sniffer/shulker that are associated to the input indexes for an Epic Crate.
 	 * @param eggIndex The index of the spawn egg.
 	 * @param clusterIndex The index of the cluster.
 	 * @param incantationIndex The index of the incantation.
 	 * @param weaponIndex The index of the cycling weapon.
+	 * @param hamSnifferShulkerIndex The index of the ham/sniffer egg/shulker shell rotation.
 	 */
-	public void updateEpicCrateItems(int eggIndex, int clusterIndex, int incantationIndex, int weaponIndex) {
-		// Cycle through weapons (trident, elytra, sniffer egg, conduit, shulker shells)
+	public void updateEpicCrateItems(int eggIndex, int clusterIndex, int incantationIndex, int weaponIndex, int hamSnifferShulkerIndex) {
+		// Cycle through weapons (trident, elytra, conduit, heavy core)
 		ItemStack weapon = null;
 		String weaponName = "";
 		switch (weaponIndex) {
 			case 1 -> { weapon = new ItemStack(Material.ELYTRA, 1); weaponName = "&#7d7d96&lElytra"; }
-			case 2 -> { weapon = new ItemStack(Material.SNIFFER_EGG, 1); weaponName = "&#6ab567&lSniffer Egg"; }
-			case 3 -> { weapon = new ItemStack(Material.CONDUIT, 1); weaponName = "&#4dcfcf&lConduit"; }
-			case 4 -> { weapon = new ItemStack(Material.SHULKER_SHELL, 8); weaponName = "&#946794&lShulker Shell"; }
+			case 2 -> { weapon = new ItemStack(Material.CONDUIT, 1); weaponName = "&#4dcfcf&lConduit"; }
+			case 3 -> { weapon = new ItemStack(Material.HEAVY_CORE, 1); weaponName = "&#4d5158&lHeavy Core"; }
 			default -> { weapon = new ItemStack(Material.TRIDENT, 1); weaponName = "&#579b8c&lTrident"; }
 		}
 		ItemMeta cycledWeaponMeta = weapon.getItemMeta();
@@ -677,14 +669,36 @@ public class GuiCrate {
 		cluster.setItemMeta(cycledClusterMeta);
 		initializedGui.setItem(15, cluster);
 
-		// Cycle through the incantations
-		ItemStack incantation = incantationIndex == 1 ? new IncantationLifesteal().getItem() : new IncantationPlentiful().getItem();
+		// Cycle through the incantations (Magnetism, Lifesteal)
+		ItemStack incantation = incantationIndex == 1 ? new IncantationLifesteal().getItem() : new IncantationMagnetism().getItem();
 		ItemMeta cycledIncantationMeta = incantation.getItemMeta();
 		List<String> cycledIncantationLore = new ArrayList<>();
 		cycledIncantationLore.add(ChatUtils.translateToColor("&c5% Chance"));
 		cycledIncantationMeta.setLore(cycledIncantationLore);
 		incantation.setItemMeta(cycledIncantationMeta);
 		initializedGui.setItem(23, incantation);
+
+		// Cycle through ham/sniffer egg/shulker shells
+		ItemStack hamSnifferShulker = null;
+		String hamSnifferShulkerName = "";
+		if (hamSnifferShulkerIndex == 1) {
+			hamSnifferShulker = new ItemStack(Material.SNIFFER_EGG, 1);
+			hamSnifferShulkerName = "&#6ab567&lSniffer Egg";
+		} else if (hamSnifferShulkerIndex == 2) {
+			hamSnifferShulker = new ItemStack(Material.SHULKER_SHELL, 8);
+			hamSnifferShulkerName = "&#946794&lShulker Shell";
+		} else {
+			hamSnifferShulker = new HoneyGlazedHam().getItem();
+			hamSnifferShulker.setAmount(64);
+			hamSnifferShulkerName = "&6&lHoney Glazed Ham";
+		}
+		ItemMeta hamSnifferShulkerMeta = hamSnifferShulker.getItemMeta();
+		hamSnifferShulkerMeta.setDisplayName(ChatUtils.translateToColor(hamSnifferShulkerName));
+		List<String> hamSnifferShulkerLore = new ArrayList<>();
+		hamSnifferShulkerLore.add(ChatUtils.translateToColor("&a12% Chance"));
+		hamSnifferShulkerMeta.setLore(hamSnifferShulkerLore);
+		hamSnifferShulker.setItemMeta(hamSnifferShulkerMeta);
+		initializedGui.setItem(3, hamSnifferShulker);
 	}
 
 	/**
@@ -692,9 +706,9 @@ public class GuiCrate {
 	 * @param ingotIndex The index of the cluster.
 	 * @param eggIndex The index of the spawn egg.
 	 * @param diamondShulkerIndex The index of the diamond blocks/shulker shells.
-	 * @param heavyCoreResilienceIndex The index of the heavy core/resilience toggle (0=heavy core, 1=resilience).
+	 * @param incantationIndex The index of the incantation rotation (0=Resilience, 1=Preservation, 2=Plentiful).
 	 */
-	public void updateGodlyCrateItems(int ingotIndex, int eggIndex, int diamondShulkerIndex, int heavyCoreResilienceIndex) {
+	public void updateGodlyCrateItems(int ingotIndex, int eggIndex, int diamondShulkerIndex, int incantationIndex) {
 		ItemStack ingot = null;
 		switch (ingotIndex) {
 			case 1 -> ingot = new AranarthiumAquatic().getItem();
@@ -753,25 +767,21 @@ public class GuiCrate {
 		}
 		initializedGui.setItem(3, diamondShulker);
 
-		// Alternate between Heavy Core and Incantation of Resilience
-		ItemStack heavyCoreResilience;
-		if (heavyCoreResilienceIndex == 1) {
-			heavyCoreResilience = new IncantationResilience().getItem();
-			ItemMeta resilienceMeta = heavyCoreResilience.getItemMeta();
-			List<String> resilienceLore = new ArrayList<>();
-			resilienceLore.add(ChatUtils.translateToColor("&e4% Chance"));
-			resilienceMeta.setLore(resilienceLore);
-			heavyCoreResilience.setItemMeta(resilienceMeta);
+		// Cycle through incantations (Resilience, Preservation, Plentiful)
+		ItemStack incantationItem;
+		if (incantationIndex == 1) {
+			incantationItem = new IncantationPreservation().getItem();
+		} else if (incantationIndex == 2) {
+			incantationItem = new IncantationPlentiful().getItem();
 		} else {
-			heavyCoreResilience = new ItemStack(Material.HEAVY_CORE, 1);
-			ItemMeta heavyCoreMeta = heavyCoreResilience.getItemMeta();
-			heavyCoreMeta.setDisplayName(ChatUtils.translateToColor("&#4d5158&lHeavy Core"));
-			List<String> heavyCoreLore = new ArrayList<>();
-			heavyCoreLore.add(ChatUtils.translateToColor("&e4% Chance"));
-			heavyCoreMeta.setLore(heavyCoreLore);
-			heavyCoreResilience.setItemMeta(heavyCoreMeta);
+			incantationItem = new IncantationResilience().getItem();
 		}
-		initializedGui.setItem(15, heavyCoreResilience);
+		ItemMeta cycledIncantationMeta = incantationItem.getItemMeta();
+		List<String> cycledIncantationLore = new ArrayList<>();
+		cycledIncantationLore.add(ChatUtils.translateToColor("&e8% Chance"));
+		cycledIncantationMeta.setLore(cycledIncantationLore);
+		incantationItem.setItemMeta(cycledIncantationMeta);
+		initializedGui.setItem(15, incantationItem);
 	}
 
 }

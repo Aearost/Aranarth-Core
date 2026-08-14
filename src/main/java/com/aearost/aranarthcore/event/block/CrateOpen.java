@@ -11,6 +11,7 @@ import com.aearost.aranarthcore.items.incantation.IncantationBeheading;
 import com.aearost.aranarthcore.items.incantation.IncantationLifesteal;
 import com.aearost.aranarthcore.items.incantation.IncantationMagnetism;
 import com.aearost.aranarthcore.items.incantation.IncantationPlentiful;
+import com.aearost.aranarthcore.items.incantation.IncantationPreservation;
 import com.aearost.aranarthcore.items.incantation.IncantationResilience;
 import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
@@ -205,6 +206,7 @@ public class CrateOpen {
                                 indexes.add(0); // cluster index
                                 indexes.add(0); // incantation index
                                 indexes.add(0); // weapon index
+                                indexes.add(0); // ham/sniffer/shulker index
                                 GuiCrate gui = new GuiCrate(player, CrateType.EPIC, indexes);
                                 gui.openGui();
                                 // Updates to next slot so task can update it accordingly
@@ -212,12 +214,13 @@ public class CrateOpen {
                                 indexes.set(1, 1);
                                 indexes.set(2, 1);
                                 indexes.set(3, 1);
+                                indexes.set(4, 1);
 
                                 scheduledSkipTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(AranarthCore.getInstance(), new Runnable() {
                                     @Override
                                     public void run() {
                                         if (aranarthPlayer.isOpeningCrateWithCyclingItem()) {
-                                            gui.updateEpicCrateItems(indexes.get(0), indexes.get(1), indexes.get(2), indexes.get(3));
+                                            gui.updateEpicCrateItems(indexes.get(0), indexes.get(1), indexes.get(2), indexes.get(3), indexes.get(4));
 
                                             // Cycle through the next spawn egg iteration
                                             if (indexes.get(0) < 3) {
@@ -240,11 +243,18 @@ public class CrateOpen {
                                                 indexes.set(2, 0);
                                             }
 
-                                            // Cycle through the next weapon iteration
-                                            if (indexes.get(3) < 4) {
+                                            // Cycle through the next weapon iteration (trident, elytra, conduit, heavy core)
+                                            if (indexes.get(3) < 3) {
                                                 indexes.set(3, indexes.get(3) + 1);
                                             } else {
                                                 indexes.set(3, 0);
+                                            }
+
+                                            // Cycle through the next ham/sniffer/shulker iteration
+                                            if (indexes.get(4) < 2) {
+                                                indexes.set(4, indexes.get(4) + 1);
+                                            } else {
+                                                indexes.set(4, 0);
                                             }
                                         } else {
                                             Bukkit.getScheduler().cancelTask(scheduledSkipTask);
@@ -287,7 +297,7 @@ public class CrateOpen {
                                 indexes.add(0);
                                 indexes.add(0);
                                 indexes.add(0);
-                                indexes.add(0); // heavy core / resilience index
+                                indexes.add(0); // incantation index (Resilience, Preservation, Plentiful)
                                 GuiCrate gui = new GuiCrate(player, CrateType.GODLY, indexes);
                                 gui.openGui();
                                 // Updates to next slot so task can update it accordingly
@@ -323,8 +333,12 @@ public class CrateOpen {
                                                 indexes.set(2, 0);
                                             }
 
-                                            // Alternate between Heavy Core and Incantation of Resilience
-                                            indexes.set(3, indexes.get(3) == 0 ? 1 : 0);
+                                            // Cycle through incantations (Resilience, Preservation, Plentiful)
+                                            if (indexes.get(3) < 2) {
+                                                indexes.set(3, indexes.get(3) + 1);
+                                            } else {
+                                                indexes.set(3, 0);
+                                            }
                                         } else {
                                             Bukkit.getScheduler().cancelTask(scheduledSkipTask);
                                         }
@@ -577,17 +591,17 @@ public class CrateOpen {
 
                 if (chance <= 12) {
                     player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
-                    aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 5000);
+                    aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 10000);
                     if (NetworkManager.isActive()) {
-                        NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), 5000);
+                        NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), 10000);
                     }
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.RARE);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                     PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
-                    broadcastRewardToNearbyPlayers(player, aranarthPlayer, "&6$5,000 of In-Game Currency", "&6Rare Crate");
-                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$5,000 of In-Game Currency"));
-                    Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled $5,000 of In-Game Currency in a Rare Crate"));
+                    broadcastRewardToNearbyPlayers(player, aranarthPlayer, "&6$10,000 of In-Game Currency", "&6Rare Crate");
+                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$10,000 of In-Game Currency"));
+                    Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled $10,000 of In-Game Currency in a Rare Crate"));
                     return;
                 } else if (chance <= 24) {
                     reward = new ItemStack(Material.ENCHANTED_BOOK, 1);
@@ -596,8 +610,9 @@ public class CrateOpen {
                     reward.setItemMeta(mendingMeta);
                     name = "&#9f1c43&lMending Book x1";
                 } else if (chance <= 36) {
-                    reward = new ItemStack(Material.GOLDEN_CARROT, 32);
-                    name = "&#fcd34d&lGolden Carrot x32";
+                    reward = new HoneyGlazedHam().getItem();
+                    reward.setAmount(32);
+                    name = "&6&lHoney Glazed Ham x32";
                 } else if (chance <= 48) {
                     reward = new ItemStack(Material.DIAMOND, 16);
                     name = "&#a0f0ed&lDiamond x16";
@@ -626,8 +641,8 @@ public class CrateOpen {
                     reward = new IncantationBeheading().getItem();
                     name = reward.getItemMeta().getDisplayName() + " x1";
                 } else if (chance <= 90) {
-                    reward = new IncantationMagnetism().getItem();
-                    name = reward.getItemMeta().getDisplayName() + " x1";
+                    reward = new ItemStack(Material.NETHERITE_INGOT, 2);
+                    name = "&#3a383a&lNetherite Ingot x2";
                 } else if (chance <= 95) {
                     reward = getCycledCluster(new Random().nextInt(8));
                     name = reward.getItemMeta().getDisplayName() + " x1";
@@ -697,17 +712,26 @@ public class CrateOpen {
                     Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled $25,000 of In-Game Currency in an Epic Crate"));
                     return;
                 } else if (chance <= 24) {
-                    reward = new HoneyGlazedHam().getItem();
-                    reward.setAmount(64);
-                    name = "&6&lHoney Glazed Ham x64";
+                    int hamRoll = new Random().nextInt(3);
+                    if (hamRoll == 0) {
+                        reward = new HoneyGlazedHam().getItem();
+                        reward.setAmount(64);
+                        name = "&6&lHoney Glazed Ham x64";
+                    } else if (hamRoll == 1) {
+                        reward = new ItemStack(Material.SNIFFER_EGG, 1);
+                        name = "&#6ab567&lSniffer Egg x1";
+                    } else {
+                        reward = new ItemStack(Material.SHULKER_SHELL, 8);
+                        name = "&#946794&lShulker Shell x8";
+                    }
                 } else if (chance <= 36) {
-                    reward = new ItemStack(Material.NETHERITE_INGOT, 2);
-                    name = "&#3a383a&lNetherite Ingot x2";
+                    reward = new ItemStack(Material.NETHERITE_INGOT, 4);
+                    name = "&#3a383a&lNetherite Ingot x4";
                 } else if (chance <= 48) {
                     reward = new ItemStack(Material.DIAMOND, 64);
                     name = "&#a0f0ed&lDiamond x64";
                 } else if (chance <= 56) {
-                    int weaponRoll = new Random().nextInt(5);
+                    int weaponRoll = new Random().nextInt(4);
                     switch (weaponRoll) {
                         case 0 -> {
                             reward = new ItemStack(Material.TRIDENT, 1);
@@ -718,16 +742,12 @@ public class CrateOpen {
                             name = "&#7d7d96&lElytra x1";
                         }
                         case 2 -> {
-                            reward = new ItemStack(Material.SNIFFER_EGG, 1);
-                            name = "&#6ab567&lSniffer Egg x1";
-                        }
-                        case 3 -> {
                             reward = new ItemStack(Material.CONDUIT, 1);
                             name = "&#4dcfcf&lConduit x1";
                         }
                         default -> {
-                            reward = new ItemStack(Material.SHULKER_SHELL, 8);
-                            name = "&#946794&lShulker Shell x8";
+                            reward = new ItemStack(Material.HEAVY_CORE, 1);
+                            name = "&#4d5158&lHeavy Core x1";
                         }
                     }
                 } else if (chance <= 64) {
@@ -814,9 +834,9 @@ public class CrateOpen {
                     reward.setAmount(2);
                     name = "&3&lEpic Crate Key x2";
                 } else if (chance <= 95) {
-                    // 50/50 between Plentiful and Lifesteal
+                    // 50/50 between Magnetism and Lifesteal
                     if (new Random().nextInt(2) == 0) {
-                        reward = new IncantationPlentiful().getItem();
+                        reward = new IncantationMagnetism().getItem();
                     } else {
                         reward = new IncantationLifesteal().getItem();
                     }
@@ -930,12 +950,16 @@ public class CrateOpen {
                     reward = new ItemStack(Material.NETHER_STAR, 1);
                     name = "&#d8d6fb&lNether Star x1";
                 } else if (chance <= 80) {
-                    if (new Random().nextBoolean()) {
-                        reward = new ItemStack(Material.HEAVY_CORE, 1);
-                        name = "&#4d5158&lHeavy Core x1";
-                    } else {
+                    int incantRoll = new Random().nextInt(3);
+                    if (incantRoll == 0) {
                         reward = new IncantationResilience().getItem();
-                        name = new IncantationResilience().getColor() + "&lIncantation of Resilience x1";
+                        name = reward.getItemMeta().getDisplayName() + " x1";
+                    } else if (incantRoll == 1) {
+                        reward = new IncantationPreservation().getItem();
+                        name = reward.getItemMeta().getDisplayName() + " x1";
+                    } else {
+                        reward = new IncantationPlentiful().getItem();
+                        name = reward.getItemMeta().getDisplayName() + " x1";
                     }
                 } else if (chance <= 85) {
                     reward = new KeyGodly().getItem();
