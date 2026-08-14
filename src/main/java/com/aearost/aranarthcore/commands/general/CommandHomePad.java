@@ -67,6 +67,30 @@ public class CommandHomePad implements CommandExecutor {
                                     ChatUtils.chatMessage("&cYou must be standing on a Home Pad to use this command!"));
                         }
                     }
+                    case "delete" -> {
+                        if (args.length >= 2) {
+                            try {
+                                final int homeIndex = Integer.parseInt(args[1]);
+                                List<Home> homes = AranarthUtils.getHomepads();
+                                if (Objects.isNull(homes) || homes.isEmpty()) {
+                                    player.sendMessage(ChatUtils.chatMessage("&cThere are no homes!"));
+                                    return false;
+                                }
+                                if (homeIndex < 0 || homeIndex >= homes.size()) {
+                                    player.sendMessage(ChatUtils.chatMessage("&cThat home index does not exist!"));
+                                    return false;
+                                }
+                                String homeName = homes.get(homeIndex).getName();
+                                homes.remove(homeIndex);
+                                player.sendMessage(ChatUtils.chatMessage("&7Home &e" + homeName + " &7has been deleted"));
+                                return true;
+                            } catch (NumberFormatException e) {
+                                player.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid index!"));
+                            }
+                        } else {
+                            player.sendMessage(ChatUtils.chatMessage("&cPlease enter an index to delete!"));
+                        }
+                    }
                     case "reorder" -> {
                         if (args.length >= 3) {
                             try {
