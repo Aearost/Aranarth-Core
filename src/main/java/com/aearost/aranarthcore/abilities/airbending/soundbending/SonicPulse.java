@@ -58,7 +58,7 @@ public class SonicPulse extends SoundAbility implements AddonAbility {
     public SonicPulse(Player player) {
         super(player);
 
-        this.cooldown = 10000L;
+        this.cooldown = 6000L;
         this.range = 10.0;
         this.numPulses = 4;
 

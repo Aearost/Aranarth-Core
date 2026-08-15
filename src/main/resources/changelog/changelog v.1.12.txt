@@ -81,6 +81,7 @@ Minor Features
 [~] Fixed null pointer due to reference to resource world in SMP server weather change listener
 [+] Added rewards from milking, shearing, etc animals to the Farmer job
 [+] Added nether forest biomes to Fae Aranarthium boosts
+[~] Decreased cooldown of SonicPulse from 10 to 6 seconds
 
 Backend Code Changes
 -
