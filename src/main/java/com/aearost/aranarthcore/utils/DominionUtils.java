@@ -1379,7 +1379,7 @@ public class DominionUtils {
         // Scaled odds per rank (higher the rank, the higher the odds)
         int[] commonOdds = {10, 8, 5, 3, 1};  // nautilus, armadillo, netherite scrap, mushroom diamond, nether tear
         int[] rareOdds = {20, 15, 10, 5, 2}; // turtle scute, desert fossil
-        int[] elytraOdds = {40, 20, 13, 10, 8}; // elytra (0.5%/1%/1.54%/2%/2.5% per claim)
+        int[] elytraOdds = {200, 100, 65, 50, 40}; // elytra (0.1%/0.2%/0.31%/0.4%/0.5% per claim)
         int[] godAppleOdds = {16, 12, 8, 4, 1};  // god apple fragment (divided by 4 during SOLARVOR)
 
         // Dirts
