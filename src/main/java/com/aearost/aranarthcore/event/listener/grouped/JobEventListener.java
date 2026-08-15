@@ -33,8 +33,10 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerFishEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
@@ -91,6 +93,10 @@ public class JobEventListener implements Listener {
             EntityType.TURTLE, EntityType.GLOW_SQUID, EntityType.SQUID, EntityType.PANDA,
             EntityType.POLAR_BEAR, EntityType.ARMADILLO, EntityType.BOGGED
     );
+
+    // Farmer: per-entity cooldown for infinitely-repeatable animal interactions (milking, stew)
+    private static final Map<UUID, Long> milkingCooldowns = new HashMap<>();
+    private static final long MILKING_COOLDOWN_MS = 10 * 1000L; // 10 seconds
 
     // Alchemist: track brewing stand ownership
     private static final Map<Location, UUID> activeBrewing = new HashMap<>();
@@ -390,6 +396,98 @@ public class JobEventListener implements Listener {
                 JobUtils.awardJob(player, JobType.EXCAVATOR, 2.50);
             }
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // FARMER - Animal husbandry (milking, mushroom stew)
+    // -------------------------------------------------------------------------
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerInteractEntityFarmer(PlayerInteractEntityEvent e) {
+        Player player = e.getPlayer();
+        String worldName = player.getWorld().getName();
+        if (!AranarthUtils.isSurvivalWorld(worldName)) {
+            return;
+        }
+
+        AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
+        if (ap == null || !ap.getJobData().hasJob(JobType.FARMER)) {
+            return;
+        }
+
+        Entity entity = e.getRightClicked();
+        ItemStack inHand = player.getInventory().getItem(e.getHand());
+        if (inHand == null) {
+            return;
+        }
+
+        double pay = 0;
+        // Milking: cow, mooshroom (Cow subclass), or goat with empty bucket
+        if ((entity instanceof Cow || entity instanceof Goat) && inHand.getType() == Material.BUCKET) {
+            pay = 0.20;
+        }
+        // Mushroom stew: mooshroom with empty bowl
+        else if (entity instanceof MushroomCow && inHand.getType() == Material.BOWL) {
+            pay = 0.40;
+        }
+
+        if (pay <= 0) {
+            return;
+        }
+
+        if (!hasChunkPermission(player, entity.getLocation().getChunk(), DominionPermission.MISC_INTERACT)) {
+            return;
+        }
+
+        // Per-entity cooldown to prevent repeatedly milking the same animal
+        UUID entityId = entity.getUniqueId();
+        long now = System.currentTimeMillis();
+        Long last = milkingCooldowns.get(entityId);
+        if (last != null && now - last < MILKING_COOLDOWN_MS) {
+            return;
+        }
+        milkingCooldowns.put(entityId, now);
+
+        JobUtils.awardJob(player, JobType.FARMER, pay);
+    }
+
+    // -------------------------------------------------------------------------
+    // FARMER - Shearing (sheep, mooshroom)
+    // -------------------------------------------------------------------------
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerShearFarmer(PlayerShearEntityEvent e) {
+        Player player = e.getPlayer();
+        String worldName = player.getWorld().getName();
+        if (!AranarthUtils.isSurvivalWorld(worldName)) {
+            return;
+        }
+
+        AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
+        if (ap == null || !ap.getJobData().hasJob(JobType.FARMER)) {
+            return;
+        }
+
+        Entity entity = e.getEntity();
+        double pay;
+
+        if (entity instanceof Sheep sheep) {
+            // isSheared() means it has no wool yet - skip
+            if (sheep.isSheared()) {
+                return;
+            }
+            pay = 0.25;
+        } else if (entity instanceof MushroomCow) {
+            pay = 0.50;
+        } else {
+            return;
+        }
+
+        if (!hasChunkPermission(player, entity.getLocation().getChunk(), DominionPermission.MISC_INTERACT)) {
+            return;
+        }
+
+        JobUtils.awardJob(player, JobType.FARMER, pay);
     }
 
     // -------------------------------------------------------------------------

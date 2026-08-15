@@ -79,6 +79,7 @@ Minor Features
 [+] Add /homepad delete to unregister a homepad without breaking the block
 [+] Added tab completion for /homepad
 [~] Fixed null pointer due to reference to resource world in SMP server weather change listener
+[+] Added rewards from milking, shearing, etc animals to the Farmer job
 
 Backend Code Changes
 -
