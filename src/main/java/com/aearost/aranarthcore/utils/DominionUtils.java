@@ -826,6 +826,7 @@ public class DominionUtils {
 
             if (totalFoodPower >= powerBeingConsumed) {
                 consumeFood(dominion, powerBeingConsumed);
+                PersistenceUtils.saveSingleDominionToDatabase(dominion);
                 if (Bukkit.getOfflinePlayer(dominion.getLeader()).isOnline()) {
                     Player onlineLeader = Bukkit.getPlayer(dominion.getLeader());
                     onlineLeader.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + "'s &7daily food rations have been consumed"));

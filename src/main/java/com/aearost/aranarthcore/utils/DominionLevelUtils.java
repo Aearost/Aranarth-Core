@@ -76,12 +76,12 @@ public class DominionLevelUtils {
      * Daily balance cost (in dollars) consumed when a dominion lacks sufficient food,
      * indexed by dominion level (index 0 = Level 1, ..., index 4 = Level 5).
      */
-    private static final double[] DAILY_BALANCE_COST = {150, 500, 2_000, 7_500, 25_000};
+    private static final double[] DAILY_BALANCE_COST = {12, 40, 160, 600, 2_000};
 
     /**
      * Daily food power consumed per dominion level.
      */
-    private static final int[] DAILY_FOOD_POWER = {18, 44, 88, 175, 350};
+    private static final int[] DAILY_FOOD_POWER = {13, 22, 36, 60, 100};
 
     /**
      * Returns the daily balance cost for a dominion based on its current level.
@@ -723,6 +723,7 @@ public class DominionLevelUtils {
             int totalFoodPower = DominionUtils.getTotalFoodPower(dominion);
             if (totalFoodPower > 0) {
                 DominionUtils.consumeFood(dominion, Math.min(foodPenalty, totalFoodPower));
+                PersistenceUtils.saveSingleDominionToDatabase(dominion);
                 notifyMembers(dominion, "&e" + dominion.getName()
                         + " &chad food reserves drained as a penalty for failing to maintain &6Level "
                         + failedLevel);
