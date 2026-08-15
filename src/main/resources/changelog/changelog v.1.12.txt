@@ -80,6 +80,7 @@ Minor Features
 [+] Added tab completion for /homepad
 [~] Fixed null pointer due to reference to resource world in SMP server weather change listener
 [+] Added rewards from milking, shearing, etc animals to the Farmer job
+[+] Added nether forest biomes to Fae Aranarthium boosts
 
 Backend Code Changes
 -

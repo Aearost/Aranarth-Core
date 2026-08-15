@@ -430,7 +430,9 @@ public class DateUtils {
                 || biome == Biome.DARK_FOREST
                 || biome == Biome.FLOWER_FOREST
                 || biome == Biome.CHERRY_GROVE
-                || biome == Biome.MEADOW;
+                || biome == Biome.MEADOW
+                || biome == Biome.CRIMSON_FOREST
+                || biome == Biome.WARPED_FOREST;
     }
 
     /**
