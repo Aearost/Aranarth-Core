@@ -2493,7 +2493,7 @@ public class AranarthUtils {
             return -1;
         }
 
-        List<ItemStack> blacklistedItems = aranarthPlayer.getBlacklist();
+        List<ItemStack> blacklistedItems = aranarthPlayer.getActivePresetItems();
         if (blacklistedItems == null || blacklistedItems.isEmpty()) {
             return -1;
         }

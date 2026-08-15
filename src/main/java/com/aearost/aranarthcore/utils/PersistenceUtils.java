@@ -388,6 +388,7 @@ public class PersistenceUtils {
             }
             Bukkit.getLogger().info("[AC] All aranarth players have been initialized");
             reader.close();
+            loadAllBlacklistPresetsFromDatabase();
         } catch (Exception e) {
             Bukkit.getLogger().info("[AC] Something went wrong with loading the aranarth players!");
         }
@@ -5215,6 +5216,7 @@ public class PersistenceUtils {
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] reloadPlayerFromDatabase " + uuid
                         + " - raw_data is NULL in MySQL; in-memory snapshot unchanged");
             }
+            loadBlacklistPresetsForPlayer(uuid);
         } catch (Exception e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to reload player " + uuid + ": " + e.getMessage());
         }
@@ -6812,8 +6814,8 @@ public class PersistenceUtils {
         double balance = Double.parseDouble(fields[9]);
         int rank = Integer.parseInt(fields[10]);
         int saintRank = Integer.parseInt(fields[11]);
-        int councilRank    = fields.length > 12 ? Integer.parseInt(fields[12]) : 0;
-        int architectRank  = fields.length > 13 ? Integer.parseInt(fields[13]) : 0;
+        int councilRank = fields.length > 12 ? Integer.parseInt(fields[12]) : 0;
+        int architectRank = fields.length > 13 ? Integer.parseInt(fields[13]) : 0;
 
         List<Home> homes = new ArrayList<>();
         String[] homesStrings = null;
@@ -6969,6 +6971,7 @@ public class PersistenceUtils {
         // Supplement with flat file entries for any players whose raw_data is still null
         loadFlatFilePlayersForMissing();
         Bukkit.getLogger().info("[AC] All aranarth players have been initialized from MySQL");
+        loadAllBlacklistPresetsFromDatabase();
     }
 
     /**
@@ -9060,6 +9063,146 @@ public class PersistenceUtils {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Jobs: Failed to parse job data JSON: " + e.getMessage());
         }
         return jobData;
+    }
+
+    /**
+     * Saves the blacklist presets for a player asynchronously to MySQL.
+     */
+    public static void saveBlacklistPresetsAsync(UUID uuid) {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+        if (ap == null) {
+            return;
+        }
+
+        int activeIndex = ap.getActivePresetIndex();
+        JsonObject presetsJson = new JsonObject();
+        List<BlacklistPreset> presets = ap.getBlacklistPresets();
+        for (int i = 0; i < presets.size(); i++) {
+            BlacklistPreset preset = presets.get(i);
+            JsonObject p = new JsonObject();
+            p.addProperty("name", preset.getName());
+            String itemsBase64 = "";
+            if (!preset.getItems().isEmpty()) {
+                try {
+                    itemsBase64 = ItemUtils.itemStackArrayToBase64(preset.getItems().toArray(new ItemStack[0]));
+                } catch (Exception ex) {
+                    Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Blacklist] Failed to encode items for preset " + i + " of " + uuid + ": " + ex.getMessage());
+                }
+            }
+            p.addProperty("items", itemsBase64);
+            presetsJson.add(String.valueOf(i), p);
+        }
+        String json = presetsJson.toString();
+
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
+                DatabaseManager.getInstance().saveBlacklistPresets(uuid, activeIndex, json));
+    }
+
+    /**
+     * Loads all blacklist presets from MySQL at startup.
+     */
+    public static void loadAllBlacklistPresetsFromDatabase() {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        Map<UUID, Object[]> rows = DatabaseManager.getInstance().loadAllBlacklistPresets();
+        for (Map.Entry<UUID, Object[]> entry : rows.entrySet()) {
+            UUID uuid = entry.getKey();
+            AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+            if (ap == null) {
+                continue;
+            }
+            applyBlacklistPresetRow(ap, uuid, entry.getValue());
+        }
+        // Migrate any players who have old blacklist data but no preset row
+        for (Map.Entry<UUID, AranarthPlayer> entry : AranarthUtils.getAranarthPlayers().entrySet()) {
+            UUID uuid = entry.getKey();
+            AranarthPlayer ap = entry.getValue();
+            if (!ap.getBlacklistPresets().isEmpty()) {
+                continue; // Already loaded
+            }
+            if (ap.getBlacklist() != null && !ap.getBlacklist().isEmpty()) {
+                // Migrate to preset 0
+                List<BlacklistPreset> presets = new ArrayList<>();
+                presets.add(new BlacklistPreset("Default", new ArrayList<>(ap.getBlacklist())));
+                ap.setBlacklistPresets(presets);
+                ap.setActivePresetIndex(0);
+                saveBlacklistPresetsAsync(uuid);
+                Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Blacklist] Migrated legacy blacklist for " + uuid + " to Preset 1");
+            }
+        }
+    }
+
+    /**
+     * Loads blacklist presets for a single player from MySQL (used on cross-server transfer).
+     */
+    public static void loadBlacklistPresetsForPlayer(UUID uuid) {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+        if (ap == null) {
+            return;
+        }
+        Object[] row = DatabaseManager.getInstance().loadBlacklistPresets(uuid);
+        if (row == null) {
+            // Migrate if they have legacy data
+            if (ap.getBlacklist() != null && !ap.getBlacklist().isEmpty() && ap.getBlacklistPresets().isEmpty()) {
+                List<BlacklistPreset> presets = new ArrayList<>();
+                presets.add(new BlacklistPreset("Default", new ArrayList<>(ap.getBlacklist())));
+                ap.setBlacklistPresets(presets);
+                ap.setActivePresetIndex(0);
+                saveBlacklistPresetsAsync(uuid);
+            }
+            return;
+        }
+        applyBlacklistPresetRow(ap, uuid, row);
+    }
+
+    private static void applyBlacklistPresetRow(AranarthPlayer ap, UUID uuid, Object[] row) {
+        int activeIndex = (int) row[0];
+        String json = (String) row[1];
+
+        List<BlacklistPreset> presets = new ArrayList<>();
+        if (json != null && !json.isEmpty() && !json.equals("{}")) {
+            try {
+                JsonObject presetsJson = GSON.fromJson(json, JsonObject.class);
+                // Find max index
+                int maxIndex = -1;
+                for (String key : presetsJson.keySet()) {
+                    try {
+                        maxIndex = Math.max(maxIndex, Integer.parseInt(key));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+                for (int i = 0; i <= maxIndex; i++) {
+                    presets.add(new BlacklistPreset("", new ArrayList<>()));
+                }
+                for (String key : presetsJson.keySet()) {
+                    try {
+                        int idx = Integer.parseInt(key);
+                        JsonObject p = presetsJson.getAsJsonObject(key);
+                        String name = p.has("name") ? p.get("name").getAsString() : "";
+                        String itemsBase64 = p.has("items") ? p.get("items").getAsString() : "";
+                        List<ItemStack> items = new ArrayList<>();
+                        if (!itemsBase64.isEmpty()) {
+                            ItemStack[] arr = ItemUtils.itemStackArrayFromBase64(itemsBase64);
+                            items = new LinkedList<>(Arrays.asList(arr));
+                        }
+                        presets.set(idx, new BlacklistPreset(name, items));
+                    } catch (Exception ex) {
+                        Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Blacklist] Failed to parse preset key for " + uuid + ": " + ex.getMessage());
+                    }
+                }
+            } catch (Exception ex) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Blacklist] Failed to parse preset JSON for " + uuid + ": " + ex.getMessage());
+            }
+        }
+        ap.setBlacklistPresets(presets);
+        ap.setActivePresetIndex(activeIndex);
     }
 
 }

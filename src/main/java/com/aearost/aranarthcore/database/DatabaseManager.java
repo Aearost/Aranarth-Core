@@ -419,6 +419,13 @@ public class DatabaseManager {
                 job_data_json TEXT NOT NULL,
                 PRIMARY KEY (uuid)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS player_blacklist_presets (
+                uuid VARCHAR(36) PRIMARY KEY,
+                active_preset_index INT NOT NULL DEFAULT -1,
+                preset_data_json MEDIUMTEXT NOT NULL DEFAULT '{}'
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """
         };
 
@@ -2211,5 +2218,60 @@ public class DatabaseManager {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load job data for " + uuid + ": " + e.getMessage());
         }
         return null;
+    }
+
+    // -------------------------------------------------------------------------
+    // player_blacklist_presets
+    // -------------------------------------------------------------------------
+
+    public void saveBlacklistPresets(UUID uuid, int activePresetIndex, String presetDataJson) {
+        String sql = """
+            INSERT INTO player_blacklist_presets (uuid, active_preset_index, preset_data_json)
+            VALUES (?, ?, ?)
+            ON DUPLICATE KEY UPDATE active_preset_index=VALUES(active_preset_index), preset_data_json=VALUES(preset_data_json)
+            """;
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            ps.setInt(2, activePresetIndex);
+            ps.setString(3, presetDataJson);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save blacklist presets for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    /** Returns [activePresetIndex, presetDataJson] or null if not found. */
+    public Object[] loadBlacklistPresets(UUID uuid) {
+        String sql = "SELECT active_preset_index, preset_data_json FROM player_blacklist_presets WHERE uuid = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new Object[]{ rs.getInt("active_preset_index"), rs.getString("preset_data_json") };
+                }
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load blacklist presets for " + uuid + ": " + e.getMessage());
+        }
+        return null;
+    }
+
+    /** Returns uuid -> [activePresetIndex, presetDataJson] for all rows. */
+    public Map<UUID, Object[]> loadAllBlacklistPresets() {
+        String sql = "SELECT uuid, active_preset_index, preset_data_json FROM player_blacklist_presets";
+        Map<UUID, Object[]> result = new HashMap<>();
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                result.put(UUID.fromString(rs.getString("uuid")),
+                        new Object[]{ rs.getInt("active_preset_index"), rs.getString("preset_data_json") });
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all blacklist presets: " + e.getMessage());
+        }
+        return result;
     }
 }

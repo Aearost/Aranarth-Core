@@ -1,9 +1,11 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.gui.GuiBlacklistEditor;
 import com.aearost.aranarthcore.gui.GuiDominionPlayerPermissions;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.BlacklistPreset;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -11,6 +13,7 @@ import com.aearost.aranarthcore.utils.DiscordUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.EmojiUtils;
 import com.aearost.aranarthcore.utils.InteractiveChatManager;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -67,6 +70,54 @@ public class PlayerChatListener implements Listener {
             return;
         }
 
+        // If the player is awaiting a blacklist preset rename, handle it
+        if (GuiBlacklistEditor.isAwaitingRename(player.getUniqueId())) {
+            e.setCancelled(true);
+            UUID uuid = player.getUniqueId();
+            int renameIndex = GuiBlacklistEditor.getAwaitingRenameIndex(uuid);
+            GuiBlacklistEditor.clearAwaitingRename(uuid);
+
+            if (message.equalsIgnoreCase("cancel")) {
+                player.sendMessage(ChatUtils.chatMessage("&7Preset rename cancelled."));
+                return;
+            }
+
+            if (message.contains("&") && !player.hasPermission("aranarth.nick.color")) {
+                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use color codes!"));
+                GuiBlacklistEditor.setAwaitingRename(uuid, renameIndex);
+                return;
+            }
+            if (message.contains("#") && !player.hasPermission("aranarth.nick.hex")) {
+                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use hex color codes!"));
+                GuiBlacklistEditor.setAwaitingRename(uuid, renameIndex);
+                return;
+            }
+            if (ChatUtils.stripColorFormatting(message).length() > 30) {
+                player.sendMessage(ChatUtils.chatMessage("&cPreset name cannot exceed 30 characters! Please try again."));
+                GuiBlacklistEditor.setAwaitingRename(uuid, renameIndex);
+                return;
+            }
+            if (ChatUtils.stripColorFormatting(message).isEmpty()) {
+                player.sendMessage(ChatUtils.chatMessage("&cPreset name cannot be empty! Please try again."));
+                GuiBlacklistEditor.setAwaitingRename(uuid, renameIndex);
+                return;
+            }
+
+            final String presetName = message;
+            final int finalIndex = renameIndex;
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+                while (ap.getBlacklistPresets().size() <= finalIndex) {
+                    ap.getBlacklistPresets().add(new BlacklistPreset("", new ArrayList<>()));
+                }
+                ap.getBlacklistPresets().get(finalIndex).setName(presetName);
+                PersistenceUtils.saveBlacklistPresetsAsync(uuid);
+                player.sendMessage(ChatUtils.chatMessage("&7Preset renamed to &r" + ChatUtils.translateToColor(presetName)));
+                new GuiBlacklistEditor(player, finalIndex).openGui();
+            });
+            return;
+        }
+
         Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
         // If resources are actively being claimed by the Dominion, prioritize this above all other chat functionality
         if (dominion != null) {
@@ -105,7 +156,7 @@ public class PlayerChatListener implements Listener {
             }
         }
 
-        // If another listener (e.g. chat game) already cancelled this event, don't send it to chat
+        // If another listener already cancelled this event, don't send it to chat
         if (e.isCancelled()) {
             return;
         }

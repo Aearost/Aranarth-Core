@@ -66,6 +66,12 @@ public class InventoryClickEventListener implements Listener {
                 new GuiWrenchClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Teleport")) {
                 new GuiHomepadClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiBlacklistSelect.TITLE_CLEAR)
+                    || ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiBlacklistSelect.TITLE_USE)) {
+                new GuiBlacklistSelectClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(GuiBlacklistEditor.TITLE_PREFIX)
+                    && e.getView().getTopInventory().getSize() == 54) {
+                new GuiBlacklistEditorClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Blacklist")) {
                 new GuiBlacklistClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Villager")) {

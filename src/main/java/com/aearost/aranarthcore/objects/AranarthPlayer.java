@@ -35,6 +35,8 @@ public class AranarthPlayer {
     private HashMap<ItemStack, Integer> potions;
     private List<ItemStack> arrows;
     private List<ItemStack> blacklist;
+    private List<BlacklistPreset> blacklistPresets = new ArrayList<>();
+    private int activePresetIndex = -1;
     private boolean isHitByTippedArrow;
     private float expBeforeDeath;
     private int levelBeforeDeath;
@@ -542,6 +544,39 @@ public class AranarthPlayer {
      */
     public void setBlacklist(List<ItemStack> blacklist) {
         this.blacklist = blacklist;
+    }
+
+    public List<BlacklistPreset> getBlacklistPresets() {
+        return blacklistPresets;
+    }
+
+    public void setBlacklistPresets(List<BlacklistPreset> blacklistPresets) {
+        this.blacklistPresets = blacklistPresets != null ? blacklistPresets : new ArrayList<>();
+    }
+
+    public int getActivePresetIndex() {
+        return activePresetIndex;
+    }
+
+    public void setActivePresetIndex(int activePresetIndex) {
+        this.activePresetIndex = activePresetIndex;
+    }
+
+    /**
+     * Returns the items from the currently active preset, or null.
+     */
+    public List<ItemStack> getActivePresetItems() {
+        if (activePresetIndex < 0 || blacklistPresets == null || blacklistPresets.isEmpty()) {
+            return null;
+        }
+        if (activePresetIndex >= blacklistPresets.size()) {
+            return null;
+        }
+        BlacklistPreset preset = blacklistPresets.get(activePresetIndex);
+        if (preset == null || preset.getItems() == null || preset.getItems().isEmpty()) {
+            return null;
+        }
+        return preset.getItems();
     }
 
     /**
