@@ -408,7 +408,8 @@
       "Bash(gunzip -c /c/Users/liamh/Downloads/Logs/Survival/2026-08-15-3.log.gz)",
       "Bash(/c/Users/liamh/.m2/wrapper/dists/apache-maven-3.9.9-bin/*/apache-maven-*/bin/mvn)",
       "Bash(compile -q)",
-      "Bash(find /c/Users/liamh -name paper-api-*.jar)"
+      "Bash(find /c/Users/liamh -name paper-api-*.jar)",
+      "Bash(find C:/Users/liamh/Downloads/Logs/Files/ -name spigot.yml -o -name paper*.yml -o -name paper-global.yml)"
     ]
   }
 }

@@ -87,6 +87,7 @@ Minor Features
 [~] Decreased cooldown of SonicPulse from 10 to 6 seconds
 [+] Added EnergyBurst fall proc with scaled damage
 [~] Fixed CorruptingHelix not finding targets due to incorrect Dominion check
+[+] Added mixing of hex and & codes in gradient chat
 
 Backend Code Changes
 -

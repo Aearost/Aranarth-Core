@@ -228,18 +228,18 @@ public class CommandToggle implements CommandExecutor {
 						String colors = args[1];
 						String[] colorArray = colors.split(",");
 						if (colorArray.length < 2) {
-							player.sendMessage(ChatUtils.chatMessage("&cAt least 2 colors are required! Use: &e/toggle gradientchat #hex1,#hex2,..."));
+							player.sendMessage(ChatUtils.chatMessage("&cAt least 2 colors are required"));
 							return true;
 						}
 						boolean validColors = true;
 						for (String color : colorArray) {
-							if (!color.startsWith("#") || color.length() != 7 || !color.substring(1).matches("[0-9A-Fa-f]+")) {
+							if (!ChatUtils.isValidGradientColor(color)) {
 								validColors = false;
 								break;
 							}
 						}
 						if (!validColors) {
-							player.sendMessage(ChatUtils.chatMessage("&cThe entered hex codes are not valid"));
+							player.sendMessage(ChatUtils.chatMessage("&cThis color is invalid"));
 							return true;
 						}
 						aranarthPlayer.setGradientChatColors(colors);

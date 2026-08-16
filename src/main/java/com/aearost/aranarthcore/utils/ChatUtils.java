@@ -29,6 +29,47 @@ public class ChatUtils {
     private static final Pattern URL_PATTERN = Pattern.compile("https?://[^\\s\u00A7]+");
     private static int tipIndex = 0;
 
+    // Maps &0-&f color codes to their Minecraft hex equivalents
+    private static final Map<Character, String> COLOR_CODE_TO_HEX = new HashMap<>();
+    static {
+        COLOR_CODE_TO_HEX.put('0', "#000000");
+        COLOR_CODE_TO_HEX.put('1', "#0000AA");
+        COLOR_CODE_TO_HEX.put('2', "#00AA00");
+        COLOR_CODE_TO_HEX.put('3', "#00AAAA");
+        COLOR_CODE_TO_HEX.put('4', "#AA0000");
+        COLOR_CODE_TO_HEX.put('5', "#AA00AA");
+        COLOR_CODE_TO_HEX.put('6', "#FFAA00");
+        COLOR_CODE_TO_HEX.put('7', "#AAAAAA");
+        COLOR_CODE_TO_HEX.put('8', "#555555");
+        COLOR_CODE_TO_HEX.put('9', "#5555FF");
+        COLOR_CODE_TO_HEX.put('a', "#55FF55");
+        COLOR_CODE_TO_HEX.put('b', "#55FFFF");
+        COLOR_CODE_TO_HEX.put('c', "#FF5555");
+        COLOR_CODE_TO_HEX.put('d', "#FF55FF");
+        COLOR_CODE_TO_HEX.put('e', "#FFFF55");
+        COLOR_CODE_TO_HEX.put('f', "#FFFFFF");
+    }
+
+    /**
+     * Returns true if the token is a valid gradient color - either "#RRGGBB" or "&X" (0-9, a-f).
+     */
+    public static boolean isValidGradientColor(String color) {
+        if (color.startsWith("#") && color.length() == 7) {
+            return color.substring(1).matches("[0-9A-Fa-f]+");
+        }
+        if (color.startsWith("&") && color.length() == 2) {
+            return COLOR_CODE_TO_HEX.containsKey(Character.toLowerCase(color.charAt(1)));
+        }
+        return false;
+    }
+
+    private static String colorTokenToHex(String color) {
+        if (color.startsWith("#")) {
+            return color.toUpperCase();
+        }
+        return COLOR_CODE_TO_HEX.get(Character.toLowerCase(color.charAt(1)));
+    }
+
     /**
      * Allows messages to contain color codes and begin with the AranarthCore prefix.
      *
@@ -81,11 +122,12 @@ public class ChatUtils {
         int numColors = colors.length;
         int msgLength = msg.length();
 
-        // Ensure colors are valid hex codes
-        for (String color : colors) {
-            if (!color.startsWith("#") || color.length() != 7 || !color.substring(1).matches("[0-9A-Fa-f]+")) {
+        // Validate and normalize all color tokens to hex
+        for (int ci = 0; ci < numColors; ci++) {
+            if (!isValidGradientColor(colors[ci])) {
                 return null;
             }
+            colors[ci] = colorTokenToHex(colors[ci]);
         }
 
         // If the message has fewer characters than colors, use the first color for all characters
@@ -183,12 +225,21 @@ public class ChatUtils {
         String[] colorArray = gradientColors.split(",");
         StringBuilder formatted = new StringBuilder();
         for (int i = 0; i < colorArray.length; i++) {
-            String color = colorArray[i]; // e.g. "#FF0000"
-            String escape = ChatColor.of(color) + "";
-            // escape is the §-prefixed sequence; inserting it between "#" and the hex digits
-            // means checkForHex won't re-match the display text (pattern needs # followed
-            // immediately by 6 hex chars, but here it's followed by a § escape char).
-            formatted.append(escape).append("#").append(escape).append(color.substring(1));
+            String color = colorArray[i]; // e.g. "#FF0000" or "&4"
+            if (color.startsWith("&") && color.length() == 2) {
+                // Display "&X" literally in its own color. We output: §X&§XX so that
+                // translateAlternateColorCodes sees & followed by § (not a valid color char)
+                // and leaves the & as a literal character, while the surrounding §X sequences
+                // set the correct color.
+                char colorChar = color.charAt(1);
+                String escape = ChatColor.getByChar(colorChar) + "";
+                formatted.append(escape).append("&").append(escape).append(colorChar);
+            } else {
+                // Hex code display: insert escape between "#" and the hex digits so that
+                // checkForHex won't re-match the display text.
+                String escape = ChatColor.of(color) + "";
+                formatted.append(escape).append("#").append(escape).append(color.substring(1));
+            }
             if (i < colorArray.length - 1) {
                 formatted.append(ChatColor.GRAY).append(", ");
             }
