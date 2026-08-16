@@ -9,6 +9,7 @@ Major Features
 [+] Added the sawmill functionality
 [+] Implemented the Wrench item
 [+] Did a full overhaul of wandering traders, providing each with their own theme
+[+] Implemented potion duration extension at max amplifier cap
 [+] Implemented the Incantation of Resilience
 [+] Implemented the Incantation of Preservation
 [+] Added support for Plentiful to be applied to shears

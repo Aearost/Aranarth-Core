@@ -210,6 +210,7 @@ public class PotionEffectListener implements Listener {
             // If the player currently has that same effect and is re-applying it
             if (oldEffect != null && newEffect != null) {
                 int stackedAmplifier = getStackedAmplifier(oldEffect, newEffect);
+                int uncappedAmplifier = stackedAmplifier;
 
                 // Do not apply aranarthium armor or beacon effects if player already has the effect
                 // If the effect is coming from an arrow, allow it to stack
@@ -232,8 +233,9 @@ public class PotionEffectListener implements Listener {
                 // Adds amplifier restrictions based on the potion's type
                 stackedAmplifier = determineEffectAmplifierRestriction(stackedAmplifier, newEffect.getType(), effectiveFae);
                 stackedAmplifier = applySzetoBoost(entity, e.getCause(), newEffect.getType(), stackedAmplifier, effectiveFae);
+                int duration = getExtendedDuration(oldEffect, newEffect, uncappedAmplifier, stackedAmplifier);
                 // This will call the event recursively
-                entity.addPotionEffect(new PotionEffect(newEffect.getType(), newEffect.getDuration(), stackedAmplifier));
+                entity.addPotionEffect(new PotionEffect(newEffect.getType(), duration, stackedAmplifier));
             } else {
                 // Must disable the hit by tipped arrow variable and manually apply instant health
                 if (entity instanceof Player player) {
@@ -427,6 +429,30 @@ public class PotionEffectListener implements Listener {
         } else {
             return false;
         }
+    }
+
+    /**
+     * If the stacked amplifier exceeds the cap, extends the existing effect's duration by
+     * 50% of the new effect's base duration instead, capped at 4x the base duration.
+     *
+     * @param oldEffect   The existing effect on the entity.
+     * @param newEffect   The new effect being applied.
+     * @param uncappedAmp The stacked amplifier before the cap was applied.
+     * @param cappedAmp   The stacked amplifier after the cap was applied.
+     * @return The duration to use for the new effect application.
+     */
+    private int getExtendedDuration(PotionEffect oldEffect, PotionEffect newEffect, int uncappedAmp, int cappedAmp) {
+        if (cappedAmp >= uncappedAmp) {
+            return newEffect.getDuration();
+        }
+        if (newEffect.getType() == PotionEffectType.INSTANT_HEALTH || newEffect.getType() == PotionEffectType.INSTANT_DAMAGE) {
+            return newEffect.getDuration();
+        }
+        int baseDuration = newEffect.getDuration();
+        int extension = (int) (baseDuration * 0.5);
+        int newDuration = Math.max(oldEffect.getDuration(), baseDuration) + extension;
+        int maxDuration = baseDuration * 4;
+        return Math.min(newDuration, maxDuration);
     }
 
     /**
