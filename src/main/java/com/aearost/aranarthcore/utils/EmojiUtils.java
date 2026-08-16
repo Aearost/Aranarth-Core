@@ -17,6 +17,7 @@ public class EmojiUtils {
 
     static {
         DISCORD_SHORTHANDS.put(":sob:", "\uD83D\uDE2D");            // 😭
+        DISCORD_SHORTHANDS.put(":cry:", "\uD83D\uDE22");            // 😢
         DISCORD_SHORTHANDS.put(":pleading_face:", "\uD83E\uDD7A");  // 🥺
         DISCORD_SHORTHANDS.put(":joy:", "\uD83D\uDE02");            // 😂
         DISCORD_SHORTHANDS.put(":rofl:", "\uD83E\uDD23");           // 🤣
@@ -48,6 +49,7 @@ public class EmojiUtils {
         TEXT_EMOTICONS.put(":)", "\uD83D\uDE0A");    // 😊
         TEXT_EMOTICONS.put("=)", "\uD83D\uDE0A");    // 😊
         TEXT_EMOTICONS.put(":-(", "\uD83D\uDE22");   // 😢
+        TEXT_EMOTICONS.put(":'(", "\uD83D\uDE22");   // 😢
         TEXT_EMOTICONS.put(":(", "\uD83D\uDE22");    // 😢
         TEXT_EMOTICONS.put(":-D", "\uD83D\uDE04");   // 😄
         TEXT_EMOTICONS.put(":D", "\uD83D\uDE04");    // 😄

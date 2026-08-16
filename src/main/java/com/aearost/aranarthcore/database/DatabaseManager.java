@@ -99,7 +99,8 @@ public class DatabaseManager {
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + database
                 + "?useSSL=false&allowPublicKeyRetrieval=true"
-                + "&serverTimezone=UTC&rewriteBatchedStatements=true");
+                + "&serverTimezone=UTC&rewriteBatchedStatements=true"
+                + "&useUnicode=true&characterEncoding=UTF-8");
         config.setUsername(username);
         config.setPassword(password);
         config.setDriverClassName("com.mysql.cj.jdbc.Driver");
