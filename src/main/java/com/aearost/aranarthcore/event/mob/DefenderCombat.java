@@ -1,10 +1,18 @@
 package com.aearost.aranarthcore.event.mob;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.DefenderType;
+import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.DefenderUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Tameable;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
@@ -64,6 +72,30 @@ public class DefenderCombat {
                 double damage = defType.getMinDamage()
                         + RANDOM.nextDouble() * (defType.getMaxDamage() - defType.getMinDamage());
                 e.setDamage(damage);
+
+                // Spider: place a cobweb at the target's feet for 10 seconds
+                if (defType == DefenderType.SPIDER) {
+                    Block webBlock = target.getLocation().getBlock();
+                    if (webBlock.getType().isAir() || webBlock.isPassable()) {
+                        webBlock.setType(Material.COBWEB);
+                        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
+                            if (webBlock.getType() == Material.COBWEB) {
+                                webBlock.setType(Material.AIR);
+                            }
+                        }, 200L);
+                    }
+                }
+
+                // Enderman: 10% chance to teleport target to dominion border
+                if (defType == DefenderType.ENDERMAN && RANDOM.nextInt(10) == 0) {
+                    Dominion defDominion = DominionUtils.getDominionById(dominionId);
+                    if (defDominion != null) {
+                        Location teleportLoc = DefenderUtils.findEndermanTeleportLocation(defDominion);
+                        if (teleportLoc != null) {
+                            target.teleport(teleportLoc);
+                        }
+                    }
+                }
             }
         }
 
@@ -104,6 +136,12 @@ public class DefenderCombat {
         // Arrow shot by a Defender skeleton
         if (e.getDamager() instanceof AbstractArrow arrow
                 && arrow.getShooter() instanceof LivingEntity shooter
+                && DefenderUtils.isDefender(shooter.getUniqueId())) {
+            return shooter.getUniqueId();
+        }
+        // Projectile (fireball, wind charge) fired by a Defender
+        if (e.getDamager() instanceof Projectile proj
+                && proj.getShooter() instanceof LivingEntity shooter
                 && DefenderUtils.isDefender(shooter.getUniqueId())) {
             return shooter.getUniqueId();
         }

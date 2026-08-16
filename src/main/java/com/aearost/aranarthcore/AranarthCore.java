@@ -1028,6 +1028,8 @@ public class AranarthCore extends JavaPlugin {
         DefenderUtils.startTargetingTask();
         DefenderUtils.startFollowTask();
         DefenderUtils.startGuardTask();
+        DefenderUtils.startBlazeBreezeFiringTask();
+        DefenderUtils.startElderGuardianMiningFatigueTask();
         // Only Survival runs the game; its broadcast is relayed to SMP via BroadcastRelayListener.
         if (!isSmpServer()) {
             ChatGameUtils.initialize(this);

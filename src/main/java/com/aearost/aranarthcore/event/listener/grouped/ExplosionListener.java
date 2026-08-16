@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.listener.grouped;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.DefenderUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.*;
@@ -28,8 +29,13 @@ public class ExplosionListener implements Listener {
 	@EventHandler
 	public void onExplodeBlock(final EntityExplodeEvent e) {
 		if (!(e.getEntity() instanceof WindCharge) && !(e.getEntity() instanceof BreezeWindCharge)) {
-			// Always prevent creeper explosions
-			if (e.getEntity() instanceof Creeper) {
+			if (e.getEntity() instanceof Creeper creeper) {
+				// Defender creepers: allow explosion entity damage but clear block list
+				if (DefenderUtils.isDefender(creeper.getUniqueId())) {
+					e.blockList().clear();
+					return;
+				}
+				// Non-defender creepers: cancel entirely (existing behavior)
 				e.setCancelled(true);
 				return;
 			}

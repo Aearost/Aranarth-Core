@@ -21,6 +21,8 @@ public enum DefenderType {
             100.0,   // 50 full hearts
             6.0,     // 3 full hearts min damage
             12.0,    // 6 full hearts max damage
+            0,
+            null,
             List.of(
                     new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 0, false, false),        // Speed I
                     new PotionEffect(PotionEffectType.RESISTANCE, Integer.MAX_VALUE, 2, false, false)     // Resistance III
@@ -36,10 +38,110 @@ public enum DefenderType {
             50.0,    // 25 full hearts
             8.0,    // 4 full hearts min arrow damage
             16.0,    // 8 full hearts max arrow damage
+            0,
+            null,
             List.of(
                     new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 1, false, false),      // Speed II
                     new PotionEffect(PotionEffectType.RESISTANCE, Integer.MAX_VALUE, 0, false, false)   // Resistance I
             )
+    ),
+
+    CREEPER(
+            "Creeper",
+            EntityType.CREEPER,
+            Material.CREEPER_SPAWN_EGG,
+            "Bomber",
+            7_500.0,
+            100.0,
+            30.0,
+            50.0,
+            0,
+            "One-time use. Explosion deals devastating area damage.",
+            List.of(new PotionEffect(PotionEffectType.SLOWNESS, Integer.MAX_VALUE, 0, false, false))
+    ),
+
+    SPIDER(
+            "Spider",
+            EntityType.SPIDER,
+            Material.SPIDER_SPAWN_EGG,
+            "Trapper",
+            10_000.0,
+            40.0,
+            6.0,
+            10.0,
+            0,
+            "Traps targets in cobwebs for 10 seconds on each hit.",
+            List.of()
+    ),
+
+    ENDERMAN(
+            "Enderman",
+            EntityType.ENDERMAN,
+            Material.ENDERMAN_SPAWN_EGG,
+            "Exile",
+            20_000.0,
+            40.0,
+            8.0,
+            14.0,
+            0,
+            "10% chance to exile targets to the edge of the Dominion on hit.",
+            List.of()
+    ),
+
+    BLAZE(
+            "Blaze",
+            EntityType.BLAZE,
+            Material.BLAZE_SPAWN_EGG,
+            "Pyromancer",
+            12_000.0,
+            50.0,
+            6.0,
+            12.0,
+            0,
+            "Flies at increased speed. Fires at 1.5x rate.",
+            List.of(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 0, false, false))
+    ),
+
+    BREEZE(
+            "Breeze",
+            EntityType.BREEZE,
+            Material.BREEZE_SPAWN_EGG,
+            "Windcaster",
+            12_000.0,
+            50.0,
+            6.0,
+            12.0,
+            0,
+            "Flies at increased speed. Fires wind charges at 1.5x rate.",
+            List.of(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 0, false, false))
+    ),
+
+    GUARDIAN(
+            "Guardian",
+            EntityType.GUARDIAN,
+            Material.GUARDIAN_SPAWN_EGG,
+            "Sentinel",
+            12_000.0,
+            40.0,
+            10.0,
+            16.0,
+            0,
+            "Targets frequently using ranged laser. Deals increased damage.",
+            List.of()
+    ),
+
+    ELDER_GUARDIAN(
+            "Elder Guardian",
+            EntityType.ELDER_GUARDIAN,
+            Material.ELDER_GUARDIAN_SPAWN_EGG,
+            "Warden",
+            50_000.0,
+            200.0,
+            12.0,
+            20.0,
+            3,
+            "Applies Mining Fatigue to enemies. Exempt: Aquatic Aranarthium wearers.",
+            List.of()
     );
 
     private final String displayName;
@@ -50,11 +152,13 @@ public enum DefenderType {
     private final double maxHealth;
     private final double minDamage;
     private final double maxDamage;
+    private final int perRankLimit;
+    private final String specialAbility;
     private final List<PotionEffect> permanentEffects;
 
     DefenderType(String displayName, EntityType entityType, Material spawnEgg, String role,
                  double purchasePrice, double maxHealth, double minDamage, double maxDamage,
-                 List<PotionEffect> permanentEffects) {
+                 int perRankLimit, String specialAbility, List<PotionEffect> permanentEffects) {
         this.displayName = displayName;
         this.entityType = entityType;
         this.spawnEgg = spawnEgg;
@@ -63,6 +167,8 @@ public enum DefenderType {
         this.maxHealth = maxHealth;
         this.minDamage = minDamage;
         this.maxDamage = maxDamage;
+        this.perRankLimit = perRankLimit;
+        this.specialAbility = specialAbility;
         this.permanentEffects = permanentEffects;
     }
 
@@ -100,6 +206,14 @@ public enum DefenderType {
 
     public double getMaxDamage() {
         return maxDamage;
+    }
+
+    public int getPerRankLimit() {
+        return perRankLimit;
+    }
+
+    public String getSpecialAbility() {
+        return specialAbility;
     }
 
     public List<PotionEffect> getPermanentEffects() {

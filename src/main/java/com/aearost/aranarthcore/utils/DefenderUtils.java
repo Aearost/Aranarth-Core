@@ -13,19 +13,24 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -34,6 +39,7 @@ import java.util.UUID;
 public class DefenderUtils {
 
     private static final int[] DEFENDER_LIMITS = {5, 15, 30, 60, 100};
+    private static final Random RANDOM = new Random();
 
     // Core tracking
     private static final Map<UUID, Map<DefenderType, Integer>> counts = new HashMap<>();
@@ -377,6 +383,12 @@ public class DefenderUtils {
         int current = getTotalDefenderCount(dominion.getId());
         if (current >= limit) {
             return "&cYour dominion cannot purchase any more defenders";
+        }
+        if (type.getPerRankLimit() > 0) {
+            int typeMax = type.getPerRankLimit() * dominion.getDominionLevel();
+            if (getDefenderCount(dominion.getId(), type) >= typeMax) {
+                return "&cYour dominion cannot purchase any more Elder Guardian defenders at this dominion rank";
+            }
         }
         double price = type.getPurchasePrice();
         if (dominion.getBalance() < price) {
@@ -831,6 +843,132 @@ public class DefenderUtils {
                 }
             }
         }.runTaskTimer(AranarthCore.getInstance(), 60L, 60L);
+    }
+
+    /**
+     * Fires projectiles from BLAZE and BREEZE defenders toward their current target every 3 seconds.
+     */
+    public static void startBlazeBreezeFiringTask() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (Map.Entry<UUID, DefenderType> entry : new HashMap<>(entityToType).entrySet()) {
+                    DefenderType type = entry.getValue();
+                    if (type != DefenderType.BLAZE && type != DefenderType.BREEZE) {
+                        continue;
+                    }
+                    Entity entity = Bukkit.getEntity(entry.getKey());
+                    if (!(entity instanceof Mob mob) || mob.isDead()) {
+                        continue;
+                    }
+                    LivingEntity mobTarget = mob.getTarget();
+                    if (mobTarget == null || mobTarget.isDead()) {
+                        continue;
+                    }
+
+                    Location eyeLoc = mob.getLocation().add(0, 1, 0);
+                    Location targetEye = mobTarget.getEyeLocation();
+                    org.bukkit.util.Vector direction = targetEye.toVector()
+                            .subtract(eyeLoc.toVector()).normalize();
+
+                    if (type == DefenderType.BLAZE) {
+                        SmallFireball fireball = mob.getWorld().spawn(eyeLoc, SmallFireball.class);
+                        fireball.setShooter(mob);
+                        fireball.setDirection(direction);
+                    } else {
+                        BreezeWindCharge wc = mob.getWorld().spawn(eyeLoc, BreezeWindCharge.class);
+                        wc.setShooter(mob);
+                        wc.setVelocity(direction.multiply(1.5));
+                    }
+                }
+            }
+        }.runTaskTimer(AranarthCore.getInstance(), 60L, 60L);
+    }
+
+    /**
+     * Finds a random border chunk location (adjacent to but outside the dominion) to teleport a player to.
+     *
+     * @param dominion The owning dominion.
+     * @return A Location on the edge of the dominion, or null if none could be found.
+     */
+    public static Location findEndermanTeleportLocation(Dominion dominion) {
+        List<Chunk> dominionChunks = dominion.getChunks();
+        if (dominionChunks == null || dominionChunks.isEmpty()) {
+            return null;
+        }
+
+        // Build a set of dominion chunk keys for fast lookup
+        Set<String> dominionKeys = new HashSet<>();
+        for (Chunk chunk : dominionChunks) {
+            dominionKeys.add(chunk.getWorld().getName() + "," + chunk.getX() + "," + chunk.getZ());
+        }
+
+        // Collect border chunks - adjacent to dominion but not within it
+        List<Chunk> borderChunks = new ArrayList<>();
+        Set<String> seenBorder = new HashSet<>();
+        for (Chunk chunk : dominionChunks) {
+            World world = chunk.getWorld();
+            int cx = chunk.getX();
+            int cz = chunk.getZ();
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    if (dx == 0 && dz == 0) {
+                        continue;
+                    }
+                    int nx = cx + dx;
+                    int nz = cz + dz;
+                    String key = world.getName() + "," + nx + "," + nz;
+                    if (!dominionKeys.contains(key) && seenBorder.add(key)) {
+                        borderChunks.add(world.getChunkAt(nx, nz));
+                    }
+                }
+            }
+        }
+
+        if (borderChunks.isEmpty()) {
+            return null;
+        }
+
+        Chunk chosen = borderChunks.get(RANDOM.nextInt(borderChunks.size()));
+        int x = (chosen.getX() << 4) + RANDOM.nextInt(16);
+        int z = (chosen.getZ() << 4) + RANDOM.nextInt(16);
+        int y = chosen.getWorld().getHighestBlockYAt(x, z) + 1;
+        return new Location(chosen.getWorld(), x + 0.5, y, z + 0.5);
+    }
+
+    /**
+     * Periodically removes Mining Fatigue from players near an Elder Guardian defender who are
+     * exempt - either positively aligned with the defender's dominion or wearing Aquatic Aranarthium.
+     */
+    public static void startElderGuardianMiningFatigueTask() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    if (!player.hasPotionEffect(PotionEffectType.MINING_FATIGUE)) {
+                        continue;
+                    }
+                    UUID defenderDominionId = null;
+                    for (Entity nearby : player.getNearbyEntities(60, 60, 60)) {
+                        if (!(nearby instanceof ElderGuardian)) {
+                            continue;
+                        }
+                        if (!isDefender(nearby.getUniqueId())) {
+                            continue;
+                        }
+                        defenderDominionId = getDefenderDominionId(nearby.getUniqueId());
+                        break;
+                    }
+                    if (defenderDominionId == null) {
+                        continue;
+                    }
+                    if (AranarthUtils.isWearingArmorType(player, "aquatic")
+                            || !shouldDefenderTarget(defenderDominionId, player)) {
+                        player.removePotionEffect(PotionEffectType.MINING_FATIGUE);
+                    }
+                }
+            }
+        }.runTaskTimer(AranarthCore.getInstance(), 40L, 40L);
     }
 
     /**

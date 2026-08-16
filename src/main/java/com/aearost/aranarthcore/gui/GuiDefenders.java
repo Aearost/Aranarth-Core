@@ -22,7 +22,7 @@ import java.util.List;
 public class GuiDefenders {
 
     public static final String TITLE_PREFIX = "Defenders (";
-    private static final int[] DEFENDER_SLOTS = {20, 24};
+    private static final int[] DEFENDER_SLOTS = {11, 13, 15, 20, 22, 24, 29, 31, 33};
 
     public static void open(Player player) {
         Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
@@ -31,18 +31,18 @@ public class GuiDefenders {
         int total = DefenderUtils.getTotalDefenderCount(dominion.getId());
         int limit = DefenderUtils.getDefenderLimit(dominion.getDominionLevel());
         String title = ChatUtils.translateToColor(TITLE_PREFIX + total + "/" + limit + ")");
-        Inventory gui = Bukkit.createInventory(player, 54, title);
+        Inventory gui = Bukkit.createInventory(player, 45, title);
 
         // Top and bottom border rows
         ItemStack border = buildBorder();
         for (int i = 0; i < 9; i++) {
             gui.setItem(i, border);
-            gui.setItem(45 + i, border);
+            gui.setItem(36 + i, border);
         }
 
         // Fill middle rows with gray panes
         ItemStack filler = buildFiller();
-        for (int slot = 9; slot < 45; slot++) {
+        for (int slot = 9; slot < 36; slot++) {
             gui.setItem(slot, filler);
         }
 
@@ -53,7 +53,7 @@ public class GuiDefenders {
         }
 
         // Back button in the centre of the bottom border row
-        gui.setItem(49, buildBackButton());
+        gui.setItem(40, buildBackButton());
 
         player.closeInventory();
         player.openInventory(gui);
@@ -84,6 +84,14 @@ public class GuiDefenders {
         lore.add(ChatUtils.translateToColor("&6Role: &e" + type.getRole()));
         lore.add(ChatUtils.translateToColor("&7Max Health: &e" + (int) (type.getMaxHealth() / 2) + " hearts"));
         lore.add(ChatUtils.translateToColor("&7Damage: &e" + (int) (type.getMinDamage() / 2) + "–" + (int) (type.getMaxDamage() / 2) + " hearts"));
+        if (type.getSpecialAbility() != null) {
+            lore.add(ChatUtils.translateToColor("&7Special: &f" + type.getSpecialAbility()));
+        }
+        if (type.getPerRankLimit() > 0) {
+            int typeCount = DefenderUtils.getDefenderCount(dominion.getId(), type);
+            int typeMax = type.getPerRankLimit() * dominion.getDominionLevel();
+            lore.add(ChatUtils.translateToColor("&7Type Limit: &e" + typeCount + "/" + typeMax));
+        }
         lore.add("");
         lore.add(ChatUtils.translateToColor(
                 "&a▶ Right-Click &7to purchase &e($" + fmt.format((long) type.getPurchasePrice()) + ")"));
