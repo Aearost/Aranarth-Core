@@ -369,6 +369,16 @@ public class CommandToggle implements CommandExecutor {
 					} else {
 						player.sendMessage(ChatUtils.chatMessage("&7You are now a &aWanderer&7. You are immune to player damage"));
 					}
+				} else if (args[0].equalsIgnoreCase("size")) {
+					if (aranarthPlayer.isSizeScaleEnabled()) {
+						aranarthPlayer.setSizeScaleEnabled(false);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7Aranarthium size scaling"));
+					} else {
+						aranarthPlayer.setSizeScaleEnabled(true);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7Aranarthium size scaling"));
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+					AranarthUtils.applyAranarthiumScale(player);
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/toggle <option>"));
 				}

@@ -324,6 +324,19 @@ public class GuiToggleClick {
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.HEART_OF_THE_SEA, "&f&lEmoji", aranarthPlayer.isEmojiEnabled()));
             }
+            // Size Scale
+            case 33 -> {
+                if (aranarthPlayer.isSizeScaleEnabled()) {
+                    aranarthPlayer.setSizeScaleEnabled(false);
+                    player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7Aranarthium size scaling"));
+                } else {
+                    aranarthPlayer.setSizeScaleEnabled(true);
+                    player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7Aranarthium size scaling"));
+                }
+                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                AranarthUtils.applyAranarthiumScale(player);
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.POPPED_CHORUS_FRUIT, "&f&lAranarthium Size Scale", aranarthPlayer.isSizeScaleEnabled()));
+            }
         }
     }
 

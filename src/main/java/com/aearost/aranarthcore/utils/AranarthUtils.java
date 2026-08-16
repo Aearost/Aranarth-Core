@@ -30,6 +30,7 @@ import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
@@ -544,6 +545,7 @@ public class AranarthUtils {
                     if (armor[0] != null && armor[1] != null && armor[2] != null && armor[3] != null) {
                         verifyAndApplyAranarthiumArmourEffects(player);
                     }
+                    applyAranarthiumScale(player);
                 }
             }
         }
@@ -638,6 +640,41 @@ public class AranarthUtils {
         }
         // Ensures that all 4 pieces of armour are Dwarven
         return counter == 4;
+    }
+
+    /**
+     * Applies or resets the player's scale and step height based on their Aranarthium set and size toggle.
+     */
+    public static void applyAranarthiumScale(Player player) {
+        AranarthPlayer ap = getPlayer(player.getUniqueId());
+        if (ap != null && ap.isSizeScaleEnabled()) {
+            if (isWearingArmorType(player, "dwarven")) {
+                setPlayerScale(player, 0.75, 0.6);
+                return;
+            } else if (isWearingArmorType(player, "elven")) {
+                setPlayerScale(player, 1.25, 1.0);
+                return;
+            } else if (isWearingArmorType(player, "fae")) {
+                setPlayerScale(player, 0.25, 0.6);
+                return;
+            }
+        }
+        resetAranarthiumScale(player);
+    }
+
+    public static void resetAranarthiumScale(Player player) {
+        setPlayerScale(player, 1.0, 0.6);
+    }
+
+    private static void setPlayerScale(Player player, double scale, double stepHeight) {
+        var scaleAttr = player.getAttribute(Attribute.SCALE);
+        if (scaleAttr != null) {
+            scaleAttr.setBaseValue(scale);
+        }
+        var stepAttr = player.getAttribute(Attribute.STEP_HEIGHT);
+        if (stepAttr != null) {
+            stepAttr.setBaseValue(stepHeight);
+        }
     }
 
     /**

@@ -169,6 +169,9 @@ public class GuiToggle {
         // Emoji (slot 32)
         gui.setItem(32, buildToggleItem(Material.HEART_OF_THE_SEA, "&f&lEmoji", aranarthPlayer.isEmojiEnabled()));
 
+        // Size Scale
+        gui.setItem(33, buildToggleItem(Material.POPPED_CHORUS_FRUIT, "&f&lAranarthium Size Scale", aranarthPlayer.isSizeScaleEnabled()));
+
         return gui;
     }
 
