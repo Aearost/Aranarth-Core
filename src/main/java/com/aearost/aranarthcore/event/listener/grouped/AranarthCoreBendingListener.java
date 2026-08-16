@@ -1420,6 +1420,31 @@ public class AranarthCoreBendingListener implements Listener {
     }
 
     /**
+     * Triggers EnergyBurst as a fall proc when the player lands with EnergyBurst bound.
+     * Damage scales from 0.5 hearts at the vanilla fall-damage threshold to full damage at 75 blocks.
+     */
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onEnergyBurstFallProc(final EntityDamageEvent e) {
+        if (e.getCause() != EntityDamageEvent.DamageCause.FALL) {
+            return;
+        }
+        if (!(e.getEntity() instanceof Player player)) {
+            return;
+        }
+        final BendingPlayer bPlayer = BendingPlayer.getBendingPlayer(player);
+        if (bPlayer == null || bPlayer.isChiBlocked()) {
+            return;
+        }
+        if (!bPlayer.getBoundAbilityName().equalsIgnoreCase("EnergyBurst")) {
+            return;
+        }
+        if (bPlayer.isOnCooldown("EnergyBurst") || EnergyBurst.hasActiveInstance(player.getUniqueId())) {
+            return;
+        }
+        new EnergyBurst(player, player.getFallDistance());
+    }
+
+    /**
      * Cancels an active LifeRip immediately when the user takes damage.
      */
     @EventHandler(ignoreCancelled = true)

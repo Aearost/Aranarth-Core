@@ -83,6 +83,7 @@ Minor Features
 [+] Added rewards from milking, shearing, etc animals to the Farmer job
 [+] Added nether forest biomes to Fae Aranarthium boosts
 [~] Decreased cooldown of SonicPulse from 10 to 6 seconds
+[+] Added EnergyBurst fall proc with scaled damage
 
 Backend Code Changes
 -

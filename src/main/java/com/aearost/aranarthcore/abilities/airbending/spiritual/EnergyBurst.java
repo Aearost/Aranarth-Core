@@ -25,6 +25,11 @@ public class EnergyBurst extends SpiritualAbility implements AddonAbility {
     private static final long BURST_DURATION = 1500L; // 30 ticks
     private static final int BOLTS_PER_TICK = 7;
 
+    // Fall burst scaling: 0.5 hearts (1.0 HP) at the vanilla fall-damage threshold, full damage at 75 blocks
+    static final double FALL_BURST_MIN_DISTANCE = 3.0;
+    static final double FALL_BURST_MAX_DISTANCE = 75.0;
+    private static final double FALL_BURST_MIN_DAMAGE = 1.0; // 0.5 hearts
+
     private static final Map<UUID, EnergyBurst> activeInstances = new HashMap<>();
 
     @Attribute(Attribute.COOLDOWN)
@@ -53,6 +58,37 @@ public class EnergyBurst extends SpiritualAbility implements AddonAbility {
             return;
         }
 
+        start();
+        activeInstances.put(player.getUniqueId(), this);
+    }
+
+    /**
+     * Fall-proc constructor. Immediately fires the burst with damage scaled by fall distance:
+     * 0.5 hearts at the vanilla fall threshold, full damage at FALL_BURST_MAX_DISTANCE blocks.
+     */
+    public EnergyBurst(final Player player, final float fallDistance) {
+        super(player);
+
+        this.cooldown = 12000L;
+        this.chargeDuration = 3000L;
+        this.damage = 10.0;
+        this.heldSlot = player.getInventory().getHeldItemSlot();
+
+        if (!bPlayer.canBend(this)) {
+            return;
+        }
+
+        final double t = Math.min(1.0, Math.max(0.0,
+                (fallDistance - FALL_BURST_MIN_DISTANCE) / (FALL_BURST_MAX_DISTANCE - FALL_BURST_MIN_DISTANCE)));
+        final double scaledDamage = FALL_BURST_MIN_DAMAGE + t * (this.damage - FALL_BURST_MIN_DAMAGE);
+
+        applyBurstEffects(scaledDamage);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.5f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_VEX_DEATH, 1.5f, 0.3f);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 0.8f, 0.4f);
+
+        this.state = State.BURSTING;
+        this.burstStart = System.currentTimeMillis();
         start();
         activeInstances.put(player.getUniqueId(), this);
     }
@@ -107,7 +143,7 @@ public class EnergyBurst extends SpiritualAbility implements AddonAbility {
     private void triggerBurst() {
         state = State.BURSTING;
         burstStart = System.currentTimeMillis();
-        applyBurstEffects();
+        applyBurstEffects(this.damage);
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.5f);
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_VEX_DEATH, 1.5f, 0.3f);
         player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 0.8f, 0.4f);
@@ -126,7 +162,7 @@ public class EnergyBurst extends SpiritualAbility implements AddonAbility {
     // Damage / effect application
     // -------------------------------------------------------------------------
 
-    private void applyBurstEffects() {
+    private void applyBurstEffects(final double damageAmount) {
         final Location center = player.getLocation().add(0, 1, 0);
         for (final LivingEntity entity : player.getWorld().getLivingEntities()) {
             if (entity.equals(player)) {
@@ -141,7 +177,7 @@ public class EnergyBurst extends SpiritualAbility implements AddonAbility {
                 continue;
             }
 
-            DamageHandler.damageEntity(entity, damage, this);
+            DamageHandler.damageEntity(entity, damageAmount, this);
             AranarthBendingUtils.applyRandomSpiritEffect(entity);
             entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_VEX_HURT, 1.0f, 1.0f);
         }
