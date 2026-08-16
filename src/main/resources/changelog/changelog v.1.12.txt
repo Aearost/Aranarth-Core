@@ -84,6 +84,7 @@ Minor Features
 [+] Added nether forest biomes to Fae Aranarthium boosts
 [~] Decreased cooldown of SonicPulse from 10 to 6 seconds
 [+] Added EnergyBurst fall proc with scaled damage
+[~] Fixed CorruptingHelix not finding targets due to incorrect Dominion check
 
 Backend Code Changes
 -
