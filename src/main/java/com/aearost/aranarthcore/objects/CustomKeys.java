@@ -45,4 +45,6 @@ public class CustomKeys {
     public static final NamespacedKey WRENCH_LAST_BLOCK = new NamespacedKey(AranarthCore.getInstance(), "wrench_last_block");
     public static final NamespacedKey WANDERING_TRADER_TYPE = new NamespacedKey(AranarthCore.getInstance(), "wandering_trader_type");
     public static final NamespacedKey ENCHANTER_LOCKOUT = new NamespacedKey(AranarthCore.getInstance(), "enchanter_lockout");
+    public static final NamespacedKey HEAD_TEXTURE = new NamespacedKey(AranarthCore.getInstance(), "head_texture");
+    public static final NamespacedKey HEAD_REQUIRED_MATERIAL = new NamespacedKey(AranarthCore.getInstance(), "head_required_material");
 }

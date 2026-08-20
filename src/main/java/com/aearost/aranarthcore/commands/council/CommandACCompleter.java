@@ -34,7 +34,7 @@ public class CommandACCompleter implements TabCompleter {
             "admin", "ban", "broadcast", "clearchat", "dateset", "discordreload", "give",
             "home", "invsee", "invswap", "msg", "mute", "og", "perks", "punishments", "questnpc", "rankset",
             "resetquest", "speed", "spy", "sudo", "time", "tp", "tpf", "tpw", "unban", "unmute",
-            "unscramble", "vanish", "vpedit", "warn", "weather", "whereis", "skull"
+            "unscramble", "vanish", "vpedit", "warn", "weather", "whereis"
     );
 
     private static final List<String> ITEM_NAMES;
@@ -120,7 +120,7 @@ public class CommandACCompleter implements TabCompleter {
                 yield List.of();
             }
             case "whereis", "give", "mute", "unmute", "ban", "unban", "invsee", "warn", "punishments", "perks",
-                 "sudo", "skull" -> {
+                 "sudo" -> {
                 if (args.length == 2) {
                     yield filterPlayers(args[1]);
                 }

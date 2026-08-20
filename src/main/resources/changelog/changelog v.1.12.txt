@@ -2,6 +2,7 @@ AranarthCore v. 1.12
 
 Major Features
 [+] Add World Events system
+[+] Implemented mob head drops with Beheading, and /heads to exchange resources for head items
 [+] Implemented white fire and prismatic fire
 [+] Added interactive chat - [item], [inv], [ec], and [coords]/[pos]
 [+] Overhauled blacklist functionality to have 6 unique nameable presets
@@ -9,7 +10,7 @@ Major Features
 [+] Added the sawmill functionality
 [+] Implemented the Wrench item
 [+] Did a full overhaul of wandering traders, providing each with their own theme
-[+]  Implemented additional Dominion Defender types (Creeper, Spider, Enderman, Blaze, Breeze, Guardian, Elder Guardian) with unique special abilities
+[+] Implemented additional Dominion Defender types (Creeper, Spider, Enderman, Blaze, Breeze, Guardian, Elder Guardian) with unique special abilities
 [+] Implemented Aranarthium size scaling with /toggle size
 [+] Implemented potion duration extension at max amplifier cap
 [+] Implemented the Incantation of Resilience
@@ -21,7 +22,7 @@ Major Features
 [+] Implemented cave spider poison extraction
 [+] Implemented /condense to auto-condense your inventory
 [+] Implemented particles to visualize dominion border lands while auto-claiming land
-[+] Stripped period from chat messages starting with """/ to clean up command references in chat
+[+] Stripped period from chat messages starting with ./ to clean up command references in chat
 [+] Added a dominion-wide Explosion permission to Dominions
 [+] Implemented Barbarian toggle system for Wanderers
 [+] Implemented seasonal food power multipliers for dominion food

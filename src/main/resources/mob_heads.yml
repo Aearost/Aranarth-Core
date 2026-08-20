@@ -1,0 +1,263 @@
+# Mob head drop configuration for the Beheading incantation
+#
+# Textures are fetched automatically from minecraft-heads.com at server startup.
+#
+# Fields per entry:
+#   name:        Display name of the dropped head (supports & color codes)
+#   texture:     (optional) Hardcoded base64 texture override - paste from minecraft-heads.com
+#                Leave empty to use automatic API lookup.
+#   search-name: (optional) Override the API search term (default: entity type in Title Case)
+#                Use this to pin to a more specific head, e.g. "Sheep Minecraft" instead of "Sheep"
+#
+# Drop rates with Beheading:
+#   Level 1: 10% (1/10)
+#   Level 2: 25% (1/4)
+#   Level 3: 50% (1/2)
+#   No Beheading: 0% (mob heads never drop without Beheading)
+#   Wither Skeleton: L1=5%, L2=10%, L3=20% (kept rare to match vanilla skull rarity)
+#
+# The entity type keys must match Bukkit EntityType enum names exactly.
+# Vanilla head blocks (Creeper, Zombie, Skeleton, Wither Skeleton, Piglin, Ender Dragon)
+# are handled separately and do not need entries here.
+
+mob-heads:
+
+  ALLAY:
+    name: "&eAllay Head"
+
+  ARMADILLO:
+    name: "&eArmadillo Head"
+
+  AXOLOTL:
+    name: "&eAxolotl Head"
+
+  BAT:
+    name: "&eBat Head"
+
+  BEE:
+    name: "&eBee Head"
+
+  BLAZE:
+    name: "&eBlaze Head"
+
+  BOGGED:
+    name: "&eBogged Head"
+
+  BREEZE:
+    name: "&eBreeze Head"
+
+  CAMEL:
+    name: "&eCamel Head"
+
+  CAMEL_HUSK:
+    name: "&eCamel Husk Head"
+
+  CAT:
+    name: "&eCat Head"
+
+  CAVE_SPIDER:
+    name: "&eCave Spider Head"
+
+  COD:
+    name: "&eCod Head"
+
+  COPPER_GOLEM:
+    name: "&eCopper Golem Head"
+
+  COW:
+    name: "&eCow Head"
+
+  CREAKING:
+    name: "&eCreaking Head"
+
+  DOLPHIN:
+    name: "&eDolphin Head"
+
+  DONKEY:
+    name: "&eDonkey Head"
+
+  DROWNED:
+    name: "&eDrowned Head"
+
+  ELDER_GUARDIAN:
+    name: "&eElder Guardian Head"
+
+  ENDERMAN:
+    name: "&eEnderman Head"
+
+  ENDERMITE:
+    name: "&eEndermite Head"
+
+  EVOKER:
+    name: "&eEvoker Head"
+
+  FOX:
+    name: "&eFox Head"
+
+  FROG:
+    name: "&eFrog Head"
+
+  GHAST:
+    name: "&eGhast Head"
+
+  GLOW_SQUID:
+    name: "&eGlow Squid Head"
+
+  GOAT:
+    name: "&eGoat Head"
+
+  GUARDIAN:
+    name: "&eGuardian Head"
+
+  HAPPY_GHAST:
+    name: "&eHappy Ghast Head"
+
+  HOGLIN:
+    name: "&eHoglin Head"
+
+  HORSE:
+    name: "&eHorse Head"
+
+  HUSK:
+    name: "&eHusk Head"
+
+  IRON_GOLEM:
+    name: "&eIron Golem Head"
+
+  LLAMA:
+    name: "&eLlama Head"
+
+  MAGMA_CUBE:
+    name: "&eMagma Cube Head"
+
+  MOOSHROOM:
+    name: "&eMooshroom Head"
+
+  MULE:
+    name: "&eMule Head"
+
+  NAUTILUS:
+    name: "&eNautilus Head"
+
+  OCELOT:
+    name: "&eOcelot Head"
+
+  PANDA:
+    name: "&ePanda Head"
+
+  PARCHED:
+    name: "&eParched Head"
+
+  PARROT:
+    name: "&eParrot Head"
+
+  PHANTOM:
+    name: "&ePhantom Head"
+
+  PIG:
+    name: "&ePig Head"
+
+  PIGLIN_BRUTE:
+    name: "&ePiglin Brute Head"
+
+  PILLAGER:
+    name: "&ePillager Head"
+
+  POLAR_BEAR:
+    name: "&ePolar Bear Head"
+
+  PUFFERFISH:
+    name: "&ePufferfish Head"
+
+  RABBIT:
+    name: "&eRabbit Head"
+
+  RAVAGER:
+    name: "&eRavager Head"
+
+  SALMON:
+    name: "&eSalmon Head"
+
+  SHEEP:
+    name: "&eSheep Head"
+
+  SHULKER:
+    name: "&eShulker Head"
+
+  SILVERFISH:
+    name: "&eSilverfish Head"
+
+  SKELETON_HORSE:
+    name: "&eSkeleton Horse Head"
+
+  SLIME:
+    name: "&eSlime Head"
+
+  SNIFFER:
+    name: "&eSniffer Head"
+
+  SNOW_GOLEM:
+    name: "&eSnow Golem Head"
+
+  SPIDER:
+    name: "&eSpider Head"
+
+  SQUID:
+    name: "&eSquid Head"
+
+  STRAY:
+    name: "&eStray Head"
+
+  STRIDER:
+    name: "&eStrider Head"
+
+  SULFUR_CUBE:
+    name: "&eSulfur Cube Head"
+
+  TADPOLE:
+    name: "&eTadpole Head"
+
+  TRADER_LLAMA:
+    name: "&eTrader Llama Head"
+
+  TROPICAL_FISH:
+    name: "&eTropical Fish Head"
+
+  TURTLE:
+    name: "&eTurtle Head"
+
+  VEX:
+    name: "&eVex Head"
+
+  VILLAGER:
+    name: "&eVillager Head"
+
+  VINDICATOR:
+    name: "&eVindicator Head"
+
+  WANDERING_TRADER:
+    name: "&eWandering Trader Head"
+
+  WARDEN:
+    name: "&eWarden Head"
+
+  WITCH:
+    name: "&eWitch Head"
+
+  WOLF:
+    name: "&eWolf Head"
+
+  ZOGLIN:
+    name: "&eZoglin Head"
+
+  ZOMBIE_HORSE:
+    name: "&eZombie Horse Head"
+
+  ZOMBIE_NAUTILUS:
+    name: "&eZombie Nautilus Head"
+
+  ZOMBIE_VILLAGER:
+    name: "&eZombie Villager Head"
+
+  ZOMBIFIED_PIGLIN:
+    name: "&eZombified Piglin Head"

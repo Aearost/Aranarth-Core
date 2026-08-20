@@ -69,6 +69,7 @@ public class EntityDeathEventListener implements Listener {
 
         if (e.getEntityType() != EntityType.PLAYER) {
             new ArdentArmorMobDrops().execute(e);
+            new MobHeadDrop().execute(e);
         }
 
         if (DefenderUtils.isDefender(e.getEntity().getUniqueId())) {

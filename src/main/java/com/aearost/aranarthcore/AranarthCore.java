@@ -983,6 +983,8 @@ public class AranarthCore extends JavaPlugin {
         }
         QuestUtils.initialize(this);
         BrewRecipeUtils.initialize(this);
+        MobHeadUtils.initialize(this);
+        HeadsDatabaseManager.initialize(this);
         // Load shared quest reset timestamps from DB so both servers stay synchronized
         if (db) {
             try {
@@ -1261,6 +1263,7 @@ public class AranarthCore extends JavaPlugin {
         getCommand("fletching").setExecutor(new CommandFletching());
         getCommand("grindstone").setExecutor(new CommandGrindstone());
         getCommand("hat").setExecutor(new CommandHat());
+        getCommand("heads").setExecutor(new CommandHeads());
         getCommand("home").setExecutor(new CommandHome());
         getCommand("home").setTabCompleter(new CommandHomeCompleter());
         getCommand("homepad").setExecutor(new CommandHomePad());

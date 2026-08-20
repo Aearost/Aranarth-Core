@@ -73,6 +73,17 @@ players:
   # Number of seconds without movement before a player is marked AFK automatically.
   afk-timeout-seconds: 300
 
+head-exchange:
+  # Categories to fetch from the minecraft-heads.com API.
+  # Valid values: blocks, food-drinks, animals, monsters, humanoid, other, decoration
+  categories:
+    - blocks
+    - food-drinks
+  # Manual material overrides for heads whose display name doesn't auto-match a Minecraft material.
+  # Key = exact head name as returned by the API, Value = Bukkit Material enum name (uppercase).
+  # Unmatched heads are logged to console on startup with suggested keys to add here.
+  material-overrides: {}
+
 # Cross-server network settings. Only used when is-public-server: true.
 # On the test server these are ignored entirely.
 network:

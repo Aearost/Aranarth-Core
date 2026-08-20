@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.listener;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.player.*;
 import com.aearost.aranarthcore.gui.GuiChatSnapshot;
+import com.aearost.aranarthcore.gui.GuiHeadExchange;
 import com.aearost.aranarthcore.gui.GuiPetFood;
 import com.aearost.aranarthcore.gui.GuiWrench;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -42,6 +43,8 @@ public class InventoryCloseEventListener implements Listener {
                 new GuiDominionFoodClose().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiPetFood.TITLE)) {
                 new GuiPetFoodClose().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiHeadExchange.TITLE)) {
+                new GuiHeadExchangeClose().execute(e);
             }
         } else if (e.getView().getType() == InventoryType.ANVIL) {
             if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarthium Anvil")) {
