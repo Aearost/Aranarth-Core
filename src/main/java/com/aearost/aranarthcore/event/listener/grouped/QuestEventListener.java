@@ -23,7 +23,6 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.projectiles.ProjectileSource;
 
 import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * Tracks all in-game events needed to advance quest progress.
@@ -350,46 +349,12 @@ public class QuestEventListener implements Listener {
      * Handles direct melee kills, arrow/projectile kills, and spear lunge kills.
      */
     private Player getPlayerKiller(LivingEntity entity) {
-        Logger log = AranarthCore.getInstance().getLogger();
-        String heldItem = "unknown";
-
         Player directKiller = entity.getKiller();
-
-        EntityDamageEvent lastDamage = entity.getLastDamageCause();
-        String causeClass = lastDamage == null ? "null" : lastDamage.getClass().getSimpleName();
-        String damageCause = lastDamage == null ? "null" : lastDamage.getCause().name();
-        String damageType = "null";
-        String causingEntity = "null";
-        String directDamager = "null";
-        try {
-            if (lastDamage != null) {
-                damageType = lastDamage.getDamageSource().getDamageType().key().asString();
-                causingEntity = lastDamage.getDamageSource().getCausingEntity() == null
-                        ? "null" : lastDamage.getDamageSource().getCausingEntity().getClass().getSimpleName();
-            }
-            if (lastDamage instanceof EntityDamageByEntityEvent byEntity) {
-                directDamager = byEntity.getDamager().getClass().getSimpleName();
-            }
-            if (directKiller != null) {
-                heldItem = directKiller.getInventory().getItemInMainHand().getType().name();
-            } else if (lastDamage != null && lastDamage.getDamageSource().getCausingEntity() instanceof Player p) {
-                heldItem = p.getInventory().getItemInMainHand().getType().name();
-            }
-        } catch (Exception ignored) {}
-
-        log.info("[SpearDebug] entity=" + entity.getType()
-                + " | getKiller=" + (directKiller == null ? "null" : directKiller.getName())
-                + " | heldItem=" + heldItem
-                + " | eventClass=" + causeClass
-                + " | cause=" + damageCause
-                + " | damageType=" + damageType
-                + " | causingEntity=" + causingEntity
-                + " | directDamager=" + directDamager);
-
         if (directKiller != null) {
             return directKiller;
         }
 
+        EntityDamageEvent lastDamage = entity.getLastDamageCause();
         if (lastDamage instanceof EntityDamageByEntityEvent dmgByEntity) {
             Entity damager = dmgByEntity.getDamager();
             if (damager instanceof Player p) {
