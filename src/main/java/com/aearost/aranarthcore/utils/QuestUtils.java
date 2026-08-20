@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.utils;
 
+import com.aearost.aranarthcore.enums.JobType;
 import com.aearost.aranarthcore.enums.QuestTaskType;
 import com.aearost.aranarthcore.enums.QuestType;
 import com.aearost.aranarthcore.items.brew.BrewRecipe;
@@ -220,6 +221,8 @@ public class QuestUtils {
         long dailySeed = uuid.getLeastSignificantBits() ^ lastDailyReset;
         Random dailyRandom = new Random(dailySeed);
         Collections.shuffle(shuffled, dailyRandom);
+        // Prioritize quests matching the player's active jobs; fill remaining slots with general quests
+        shuffled = prioritizeJobQuests(uuid, shuffled);
         List<Quest> selected = shuffled.subList(0, Math.min(3, shuffled.size()));
         List<Quest> assigned = new ArrayList<>();
         for (Quest q : selected) {
@@ -246,6 +249,8 @@ public class QuestUtils {
         long weeklySeed = uuid.getLeastSignificantBits() ^ lastWeeklyReset;
         Random weeklyRandom = new Random(weeklySeed);
         Collections.shuffle(shuffled, weeklyRandom);
+        // Prioritize quests matching the player's active jobs; fill remaining slots with general quests
+        shuffled = prioritizeJobQuests(uuid, shuffled);
         List<Quest> selected = shuffled.subList(0, Math.min(3, shuffled.size()));
         List<Quest> assigned = new ArrayList<>();
         for (Quest q : selected) {
@@ -276,6 +281,72 @@ public class QuestUtils {
         }
 
         playerActiveWeeklyQuests.put(uuid, assigned);
+    }
+
+    /**
+     * Reorders a shuffled quest list so that quests matching the player's active jobs come first.
+     */
+    private static List<Quest> prioritizeJobQuests(UUID uuid, List<Quest> shuffled) {
+        Set<QuestTaskType> jobTypes = getActiveJobTaskTypes(uuid);
+        if (jobTypes.isEmpty()) {
+            return shuffled;
+        }
+        List<Quest> jobQuests = new ArrayList<>();
+        List<Quest> generalQuests = new ArrayList<>();
+        for (Quest q : shuffled) {
+            if (jobTypes.contains(q.getTaskType())) {
+                jobQuests.add(q);
+            } else {
+                generalQuests.add(q);
+            }
+        }
+        List<Quest> result = new ArrayList<>(jobQuests);
+        result.addAll(generalQuests);
+        return result;
+    }
+
+    /**
+     * Returns the set of QuestTaskTypes that correspond to the given player's active jobs.
+     */
+    private static Set<QuestTaskType> getActiveJobTaskTypes(UUID uuid) {
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+        if (aranarthPlayer == null || !aranarthPlayer.isJobDataLoaded()) {
+            return Collections.emptySet();
+        }
+        Set<QuestTaskType> types = new HashSet<>();
+        for (JobType job : aranarthPlayer.getJobData().getActiveJobs()) {
+            types.addAll(getJobQuestTaskTypes(job));
+        }
+        return types;
+    }
+
+    /**
+     * Returns the QuestTaskTypes that are associated with the given job.
+     */
+    private static List<QuestTaskType> getJobQuestTaskTypes(JobType job) {
+        return switch (job) {
+            case FARMER -> List.of(
+                    QuestTaskType.HARVEST_CROPS, QuestTaskType.PLANT_CROPS, QuestTaskType.BREED_ANIMALS,
+                    QuestTaskType.KILL_COW, QuestTaskType.KILL_PIG, QuestTaskType.KILL_CHICKEN,
+                    QuestTaskType.KILL_SHEEP, QuestTaskType.KILL_RABBIT);
+            case MINER -> List.of(
+                    QuestTaskType.MINE_STONE, QuestTaskType.MINE_COAL_ORE, QuestTaskType.MINE_IRON_ORE,
+                    QuestTaskType.MINE_GOLD_ORE, QuestTaskType.MINE_DIAMOND, QuestTaskType.MINE_ANCIENT_DEBRIS);
+            case EXCAVATOR -> List.of(
+                    QuestTaskType.BREAK_SAND, QuestTaskType.BREAK_DIRT, QuestTaskType.BREAK_GRAVEL);
+            case LUMBERJACK -> List.of(QuestTaskType.BREAK_LOG);
+            case EXPLORER -> List.of(QuestTaskType.TRAVEL_BLOCKS);
+            case HUNTER -> List.of(
+                    QuestTaskType.KILL_HOSTILE_MOB, QuestTaskType.KILL_PASSIVE_MOB,
+                    QuestTaskType.KILL_WITH_SWORD, QuestTaskType.KILL_WITH_BOW,
+                    QuestTaskType.KILL_WITH_MELEE, QuestTaskType.KILL_WITH_RANGED,
+                    QuestTaskType.KILL_SKELETON, QuestTaskType.KILL_ZOMBIE, QuestTaskType.KILL_CREEPER,
+                    QuestTaskType.KILL_ENDERMAN, QuestTaskType.KILL_SPIDER, QuestTaskType.KILL_WITCH,
+                    QuestTaskType.KILL_BLAZE, QuestTaskType.KILL_GHAST, QuestTaskType.KILL_PLAYER,
+                    QuestTaskType.FISH);
+            // Builder, Smith, and Alchemist have no matching quest task types
+            case BUILDER, SMITH, ALCHEMIST -> List.of();
+        };
     }
 
     /**

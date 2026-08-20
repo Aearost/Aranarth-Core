@@ -29,6 +29,7 @@ Major Features
 [~] Updated Rare/Epic/Godly crate rewards - money, ham, netherite, heavy core, incantation rotations
 [~] Decreased dominion food/balance costs and fixed food persistence after daily/penalty consumption
 [+] Added colored nickname perk to vote shop and store
+[+] Quest selection now prioritizes quests that match the player's active jobs, filling with general quests when needed
 
 Minor Features
 [~] Fixed issue where the alchemist job was not providing xp when shift-clicking ingredients into a brewing stand
