@@ -6,16 +6,14 @@ import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
 import com.aearost.aranarthcore.items.key.KeyRare;
 import com.aearost.aranarthcore.items.key.KeyVote;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.objects.Perk;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.AvatarUtils;
-import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
-import org.bukkit.NamespacedKey;
-import org.bukkit.persistence.PersistentDataType;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
 import com.gmail.nossr50.datatypes.player.PlayerProfile;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
@@ -24,10 +22,12 @@ import com.gmail.nossr50.util.skills.SkillTools;
 import com.projectkorra.projectkorra.BendingPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.HashMap;
 
@@ -170,14 +170,25 @@ public class GuiVoteShopPurchaseClick {
                         }
                         return;
                     }
-                    // Item name perk
+                    // Nickname perk or Item name perk (both NAME_TAG - differentiated by tag)
                     else if (clicked.getType() == Material.NAME_TAG) {
-                        if (aranarthPlayer.getPerks().getOrDefault(Perk.ITEMNAME, 0) == 0) {
-                            Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " itemname 1 silent");
+                        NamespacedKey nicknamePerkNSKey = new NamespacedKey(AranarthCore.getInstance(), "nickname_perk");
+                        if (clicked.getItemMeta().getPersistentDataContainer().has(nicknamePerkNSKey, PersistentDataType.STRING)) {
+                            if (aranarthPlayer.getPerks().getOrDefault(Perk.NICKNAME, 0) == 0) {
+                                Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " nickname 1 silent");
+                            } else {
+                                player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
+                                aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() - requiredPoints);
+                                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                            }
                         } else {
-                            player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
-                            aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() - requiredPoints);
-                            AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                            if (aranarthPlayer.getPerks().getOrDefault(Perk.ITEMNAME, 0) == 0) {
+                                Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " itemname 1 silent");
+                            } else {
+                                player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
+                                aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() - requiredPoints);
+                                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                            }
                         }
                         return;
                     }

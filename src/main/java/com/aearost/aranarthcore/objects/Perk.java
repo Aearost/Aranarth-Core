@@ -15,5 +15,6 @@ public enum Perk {
     WHITEFIRE,
     PRISMATICFIRE,
     IRIDESCENTFIRE, // tombstone - positional slot preserved for persistence, do not remove
-    DISCORD
+    DISCORD,
+    NICKNAME
 }

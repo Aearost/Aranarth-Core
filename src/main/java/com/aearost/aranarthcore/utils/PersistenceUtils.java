@@ -470,7 +470,7 @@ public class PersistenceUtils {
             } else {
                 perks += aranarthPlayer.getPerks().get(perk);
             }
-            if (i < aranarthPlayer.getPerks().size() - 1) {
+            if (i < Perk.values().length - 1) {
                 perks += "*";
             }
         }

@@ -1,9 +1,9 @@
 package com.aearost.aranarthcore.commands.council;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Perk;
-import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
@@ -21,252 +21,254 @@ import java.util.UUID;
  */
 public class CommandPerks {
 
-	/**
-	 * @param sender The user that entered the command.
-	 * @param args The arguments of the command.
-	 */
-	public static boolean onCommand(CommandSender sender, String[] args) {
-		if (sender instanceof Player player) {
-			if (!player.hasPermission("aranarth.perk.modify")) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
-				return true;
-			}
-		}
+    /**
+     * @param sender The user that entered the command.
+     * @param args   The arguments of the command.
+     */
+    public static boolean onCommand(CommandSender sender, String[] args) {
+        if (sender instanceof Player player) {
+            if (!player.hasPermission("aranarth.perk.modify")) {
+                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+                return true;
+            }
+        }
 
-		// Lists the player's perks
-		if (args.length == 2) {
-			UUID uuid = AranarthUtils.getUUIDFromUsername(args[1]);
-			if (AranarthUtils.getPlayer(uuid) != null) {
-				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-				HashMap<Perk, Integer> perks = aranarthPlayer.getPerks();
-				sender.sendMessage(ChatUtils.translateToColor("&8      - - - &e" + aranarthPlayer.getNickname() + "&e's &6&lPerks &8- - -"));
-				sender.sendMessage(ChatUtils.translateToColor("&6Compressor: &e" + perks.get(Perk.COMPRESSOR)));
-				sender.sendMessage(ChatUtils.translateToColor("&6Randomizer: &e" + perks.get(Perk.RANDOMIZER)));
-				sender.sendMessage(ChatUtils.translateToColor("&6Blacklist: &e" + perks.get(Perk.BLACKLIST)));
-				sender.sendMessage(ChatUtils.translateToColor("&6Tables: &e" + perks.get(Perk.TABLES)));
-				sender.sendMessage(ChatUtils.translateToColor("&6ItemName: &e" + perks.get(Perk.ITEMNAME)));
-				sender.sendMessage(ChatUtils.translateToColor("&6Chat: &e" + perks.get(Perk.CHAT)));
-				sender.sendMessage(ChatUtils.translateToColor("&6Shulker: &e" + perks.get(Perk.SHULKER)));
-				sender.sendMessage(ChatUtils.translateToColor("&6Inventory: &e" + perks.get(Perk.INVENTORY)));
-				sender.sendMessage(ChatUtils.translateToColor("&6Homes: &e" + perks.get(Perk.HOMES)));
-				sender.sendMessage(ChatUtils.translateToColor("&6ItemFrame: &e" + perks.get(Perk.ITEMFRAME)));
-				sender.sendMessage(ChatUtils.translateToColor("&6BlueFire: &e" + perks.get(Perk.BLUEFIRE)));
-				sender.sendMessage(ChatUtils.translateToColor("&6WhiteFire: &e" + perks.get(Perk.WHITEFIRE)));
-				sender.sendMessage(ChatUtils.translateToColor("&6PrismaticFire: &e" + perks.get(Perk.PRISMATICFIRE)));
-				sender.sendMessage(ChatUtils.translateToColor("&6Discord: &e" + perks.get(Perk.DISCORD)));
-				return true;
-			} else {
-				sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found"));
-				return true;
-			}
-		}
+        // Lists the player's perks
+        if (args.length == 2) {
+            UUID uuid = AranarthUtils.getUUIDFromUsername(args[1]);
+            if (AranarthUtils.getPlayer(uuid) != null) {
+                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+                HashMap<Perk, Integer> perks = aranarthPlayer.getPerks();
+                sender.sendMessage(ChatUtils.translateToColor("&8      - - - &e" + aranarthPlayer.getNickname() + "&e's &6&lPerks &8- - -"));
+                sender.sendMessage(ChatUtils.translateToColor("&6Compressor: &e" + perks.get(Perk.COMPRESSOR)));
+                sender.sendMessage(ChatUtils.translateToColor("&6Randomizer: &e" + perks.get(Perk.RANDOMIZER)));
+                sender.sendMessage(ChatUtils.translateToColor("&6Blacklist: &e" + perks.get(Perk.BLACKLIST)));
+                sender.sendMessage(ChatUtils.translateToColor("&6Tables: &e" + perks.get(Perk.TABLES)));
+                sender.sendMessage(ChatUtils.translateToColor("&6ItemName: &e" + perks.get(Perk.ITEMNAME)));
+                sender.sendMessage(ChatUtils.translateToColor("&6Chat: &e" + perks.get(Perk.CHAT)));
+                sender.sendMessage(ChatUtils.translateToColor("&6Shulker: &e" + perks.get(Perk.SHULKER)));
+                sender.sendMessage(ChatUtils.translateToColor("&6Inventory: &e" + perks.get(Perk.INVENTORY)));
+                sender.sendMessage(ChatUtils.translateToColor("&6Homes: &e" + perks.get(Perk.HOMES)));
+                sender.sendMessage(ChatUtils.translateToColor("&6ItemFrame: &e" + perks.get(Perk.ITEMFRAME)));
+                sender.sendMessage(ChatUtils.translateToColor("&6BlueFire: &e" + perks.get(Perk.BLUEFIRE)));
+                sender.sendMessage(ChatUtils.translateToColor("&6WhiteFire: &e" + perks.get(Perk.WHITEFIRE)));
+                sender.sendMessage(ChatUtils.translateToColor("&6PrismaticFire: &e" + perks.get(Perk.PRISMATICFIRE)));
+                sender.sendMessage(ChatUtils.translateToColor("&6Discord: &e" + perks.get(Perk.DISCORD)));
+                sender.sendMessage(ChatUtils.translateToColor("&6Nickname: &e" + perks.get(Perk.NICKNAME)));
+                return true;
+            } else {
+                sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found"));
+                return true;
+            }
+        }
 
-		boolean isHomesIncrement = args.length >= 3 && args[2].equals("homes") && (args.length == 3 || (args.length == 4 && args[3].equalsIgnoreCase("silent")));
-		if (args.length < 4 || isHomesIncrement) {
-			// To increase the amount of homes by 3
-			if (args.length == 3 || isHomesIncrement) {
-				if (args[2].equals("homes")) {
-					UUID uuid = AranarthUtils.getUUIDFromUsername(args[1]);
-					if (AranarthUtils.getPlayer(uuid) != null) {
-						if (isValidPerk(args[2].toLowerCase())) {
-							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-							HashMap<Perk, Integer> perks = aranarthPlayer.getPerks();
+        boolean isHomesIncrement = args.length >= 3 && args[2].equals("homes") && (args.length == 3 || (args.length == 4 && args[3].equalsIgnoreCase("silent")));
+        if (args.length < 4 || isHomesIncrement) {
+            // To increase the amount of homes by 3
+            if (args.length == 3 || isHomesIncrement) {
+                if (args[2].equals("homes")) {
+                    UUID uuid = AranarthUtils.getUUIDFromUsername(args[1]);
+                    if (AranarthUtils.getPlayer(uuid) != null) {
+                        if (isValidPerk(args[2].toLowerCase())) {
+                            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+                            HashMap<Perk, Integer> perks = aranarthPlayer.getPerks();
 
-							if (perks.get(Perk.HOMES) <= 12) {
-								perks.put(Perk.HOMES, perks.get(Perk.HOMES) + 3);
+                            if (perks.get(Perk.HOMES) <= 12) {
+                                perks.put(Perk.HOMES, perks.get(Perk.HOMES) + 3);
 
-								aranarthPlayer.setPerks(perks);
-								AranarthUtils.setPlayer(uuid, aranarthPlayer);
-								if (Bukkit.getOfflinePlayer(uuid).isOnline()) {
-									Player player = Bukkit.getPlayer(uuid);
-									PermissionUtils.evaluatePlayerPermissions(player);
-								}
+                                aranarthPlayer.setPerks(perks);
+                                AranarthUtils.setPlayer(uuid, aranarthPlayer);
+                                if (Bukkit.getOfflinePlayer(uuid).isOnline()) {
+                                    Player player = Bukkit.getPlayer(uuid);
+                                    PermissionUtils.evaluatePlayerPermissions(player);
+                                }
 
-								boolean isSilent = args.length == 4 && args[3].equalsIgnoreCase("silent");
-								String message = "&e" + aranarthPlayer.getNickname() + " &7has purchased the &4&lAdditional 3 Homes &7perk!";
-								if (sender instanceof Player || !AranarthCore.isSmpServer()) {
-									String formatted = ChatUtils.chatMessage(message);
-									for (Player online : Bukkit.getOnlinePlayers()) {
-										online.sendMessage(formatted);
-									}
-									Bukkit.getConsoleSender().sendMessage(formatted);
-									if (NetworkManager.isActive()) {
-										NetworkManager.getInstance().publishBroadcast(formatted);
-									}
-									if (!isSilent) {
-										DiscordUtils.donationNotification(message, uuid, Color.CYAN);
-									}
-								}
+                                boolean isSilent = args.length == 4 && args[3].equalsIgnoreCase("silent");
+                                String message = "&e" + aranarthPlayer.getNickname() + " &7has purchased the &4&lAdditional 3 Homes &7perk!";
+                                if (sender instanceof Player || !AranarthCore.isSmpServer()) {
+                                    String formatted = ChatUtils.chatMessage(message);
+                                    for (Player online : Bukkit.getOnlinePlayers()) {
+                                        online.sendMessage(formatted);
+                                    }
+                                    Bukkit.getConsoleSender().sendMessage(formatted);
+                                    if (NetworkManager.isActive()) {
+                                        NetworkManager.getInstance().publishBroadcast(formatted);
+                                    }
+                                    if (!isSilent) {
+                                        DiscordUtils.donationNotification(message, uuid, Color.CYAN);
+                                    }
+                                }
 
-								return true;
-							} else {
-								sender.sendMessage(ChatUtils.chatMessage("&cThis player already has 15 homes!"));
-								return true;
-							}
-						} else {
-							sender.sendMessage(ChatUtils.chatMessage("&cThis is not a valid perk!"));
-							return true;
-						}
-					} else {
-						sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found"));
-						return true;
-					}
-				}
-			}
-			sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac perks <player> <perk> <value>"));
-			return true;
-		} else {
-			UUID uuid = AranarthUtils.getUUIDFromUsername(args[1]);
-			if (AranarthUtils.getPlayer(uuid) != null) {
-				if (isValidPerk(args[2].toLowerCase())) {
-					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+                                return true;
+                            } else {
+                                sender.sendMessage(ChatUtils.chatMessage("&cThis player already has 15 homes!"));
+                                return true;
+                            }
+                        } else {
+                            sender.sendMessage(ChatUtils.chatMessage("&cThis is not a valid perk!"));
+                            return true;
+                        }
+                    } else {
+                        sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found"));
+                        return true;
+                    }
+                }
+            }
+            sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac perks <player> <perk> <value>"));
+            return true;
+        } else {
+            UUID uuid = AranarthUtils.getUUIDFromUsername(args[1]);
+            if (AranarthUtils.getPlayer(uuid) != null) {
+                if (isValidPerk(args[2].toLowerCase())) {
+                    AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
 
-					HashMap<Perk, Integer> perks = aranarthPlayer.getPerks();
-					if (args[2].equals("compressor") || args[2].equals("randomizer") || args[2].equals("blacklist")
-							|| args[2].equals("tables") || args[2].equals("itemname") || args[2].equals("chat")
-							|| args[2].equals("shulker") || args[2].equals("inventory") || args[2].equals("itemframe")
-							|| args[2].equals("bluefire") || args[2].equals("whitefire")
-							|| args[2].equals("prismaticfire")) {
-						if (args[3].equals("0") || args[3].equals("1")) {
-							// Updates the perk value based on the input
-							perks.put(Perk.valueOf(args[2].toUpperCase()), Integer.parseInt(args[3]));
+                    HashMap<Perk, Integer> perks = aranarthPlayer.getPerks();
+                    if (args[2].equals("compressor") || args[2].equals("randomizer") || args[2].equals("blacklist")
+                            || args[2].equals("tables") || args[2].equals("itemname") || args[2].equals("chat")
+                            || args[2].equals("shulker") || args[2].equals("inventory") || args[2].equals("itemframe")
+                            || args[2].equals("bluefire") || args[2].equals("whitefire")
+                            || args[2].equals("prismaticfire") || args[2].equals("nickname")) {
+                        if (args[3].equals("0") || args[3].equals("1")) {
+                            // Updates the perk value based on the input
+                            perks.put(Perk.valueOf(args[2].toUpperCase()), Integer.parseInt(args[3]));
 
-							String perk = "";
-							switch (args[2]) {
-								case "compressor" -> perk = "&6&lCompressor";
-								case "randomizer" -> perk = "&a&lRandomizer";
-								case "blacklist" -> perk = "&8&lBlacklist";
-								case "tables" -> perk = "&6&lTables";
-								case "itemname" -> perk = "&c&lItem Name";
-								case "chat" -> perk = "&e&lColored Chat";
-								case "shulker" -> perk = "&5&lShulker Assist";
-								case "inventory" -> perk = "&3&lInventory Assist";
-								case "itemframe" -> perk = "&f&lInvisible Item Frames";
-								case "bluefire" -> perk = "&b&lBlue Fire";
-								case "whitefire" -> perk = "&f&lWhite Fire";
-								case "prismaticfire" -> perk = "&5&lPrismatic Fire";
-							}
+                            String perk = "";
+                            switch (args[2]) {
+                                case "compressor" -> perk = "&6&lCompressor";
+                                case "randomizer" -> perk = "&a&lRandomizer";
+                                case "blacklist" -> perk = "&8&lBlacklist";
+                                case "tables" -> perk = "&6&lTables";
+                                case "itemname" -> perk = "&c&lItem Name";
+                                case "chat" -> perk = "&e&lColored Chat";
+                                case "shulker" -> perk = "&5&lShulker Assist";
+                                case "inventory" -> perk = "&3&lInventory Assist";
+                                case "itemframe" -> perk = "&f&lInvisible Item Frames";
+                                case "bluefire" -> perk = "&b&lBlue Fire";
+                                case "whitefire" -> perk = "&f&lWhite Fire";
+                                case "prismaticfire" -> perk = "&5&lPrismatic Fire";
+                                case "nickname" -> perk = "&6&lColored Nickname";
+                            }
 
-							aranarthPlayer.setPerks(perks);
-							AranarthUtils.setPlayer(uuid, aranarthPlayer);
+                            aranarthPlayer.setPerks(perks);
+                            AranarthUtils.setPlayer(uuid, aranarthPlayer);
 
-							// Enables all materials to be compressed by default
-							if (args[2].equalsIgnoreCase("compressor") && args[3].equals("1")) {
-								AranarthUtils.compressAllMaterials(uuid);
-							}
+                            // Enables all materials to be compressed by default
+                            if (args[2].equalsIgnoreCase("compressor") && args[3].equals("1")) {
+                                AranarthUtils.compressAllMaterials(uuid);
+                            }
 
-							if (Bukkit.getOfflinePlayer(uuid).isOnline()) {
-								Player player = Bukkit.getPlayer(uuid);
-								PermissionUtils.evaluatePlayerPermissions(player);
-							}
+                            if (Bukkit.getOfflinePlayer(uuid).isOnline()) {
+                                Player player = Bukkit.getPlayer(uuid);
+                                PermissionUtils.evaluatePlayerPermissions(player);
+                            }
 
-							boolean isSilent = args.length >= 5 && args[4].equalsIgnoreCase("silent");
-							if (!args[3].equals("0")) {
-								String message = "&e" + aranarthPlayer.getNickname() + " &7has purchased the " + perk + " &7perk!";
-								if (sender instanceof Player || !AranarthCore.isSmpServer()) {
-									String formatted = ChatUtils.chatMessage(message);
-									for (Player online : Bukkit.getOnlinePlayers()) {
-										online.sendMessage(formatted);
-									}
-									Bukkit.getConsoleSender().sendMessage(formatted);
-									if (NetworkManager.isActive()) {
-										NetworkManager.getInstance().publishBroadcast(formatted);
-									}
-									if (!isSilent) {
-										DiscordUtils.donationNotification(ChatUtils.stripColorFormatting(message), uuid, Color.CYAN);
-									}
-								}
-							} else {
-								sender.sendMessage(ChatUtils.chatMessage("&7The " + perk + " &7perk has been removed from &e" + aranarthPlayer.getNickname()));
-								// If the sender is either console or if the sender player is not the one the perk is being applied to
-								if (Bukkit.getOfflinePlayer(uuid).isOnline() &&
-										(!(sender instanceof Player) || sender instanceof Player senderPlayer && !senderPlayer.getUniqueId().equals(uuid))) {
-									Player player = Bukkit.getPlayer(uuid);
-									player.sendMessage(ChatUtils.chatMessage("&7Your " + perk + " &7has been removed"));
-								}
-							}
-						} else {
-							sender.sendMessage(ChatUtils.chatMessage("&cThat is not an appropriate value!"));
-						}
-						return true;
-					} else if (args[2].equals("homes")) {
-						if (args[3].equals("0") || args[3].equals("3") || args[3].equals("6") || args[3].equals("9")
-								|| args[3].equals("12") || args[3].equals("15")) {
-							perks.put(Perk.HOMES, Integer.parseInt(args[3]));
-							aranarthPlayer.setPerks(perks);
-							AranarthUtils.setPlayer(uuid, aranarthPlayer);
-							if (Bukkit.getOfflinePlayer(uuid).isOnline()) {
-								Player player = Bukkit.getPlayer(uuid);
-								PermissionUtils.evaluatePlayerPermissions(player);
-							}
+                            boolean isSilent = args.length >= 5 && args[4].equalsIgnoreCase("silent");
+                            if (!args[3].equals("0")) {
+                                String message = "&e" + aranarthPlayer.getNickname() + " &7has purchased the " + perk + " &7perk!";
+                                if (sender instanceof Player || !AranarthCore.isSmpServer()) {
+                                    String formatted = ChatUtils.chatMessage(message);
+                                    for (Player online : Bukkit.getOnlinePlayers()) {
+                                        online.sendMessage(formatted);
+                                    }
+                                    Bukkit.getConsoleSender().sendMessage(formatted);
+                                    if (NetworkManager.isActive()) {
+                                        NetworkManager.getInstance().publishBroadcast(formatted);
+                                    }
+                                    if (!isSilent) {
+                                        DiscordUtils.donationNotification(ChatUtils.stripColorFormatting(message), uuid, Color.CYAN);
+                                    }
+                                }
+                            } else {
+                                sender.sendMessage(ChatUtils.chatMessage("&7The " + perk + " &7perk has been removed from &e" + aranarthPlayer.getNickname()));
+                                // If the sender is either console or if the sender player is not the one the perk is being applied to
+                                if (Bukkit.getOfflinePlayer(uuid).isOnline() &&
+                                        (!(sender instanceof Player) || sender instanceof Player senderPlayer && !senderPlayer.getUniqueId().equals(uuid))) {
+                                    Player player = Bukkit.getPlayer(uuid);
+                                    player.sendMessage(ChatUtils.chatMessage("&7Your " + perk + " &7has been removed"));
+                                }
+                            }
+                        } else {
+                            sender.sendMessage(ChatUtils.chatMessage("&cThat is not an appropriate value!"));
+                        }
+                        return true;
+                    } else if (args[2].equals("homes")) {
+                        if (args[3].equals("0") || args[3].equals("3") || args[3].equals("6") || args[3].equals("9")
+                                || args[3].equals("12") || args[3].equals("15")) {
+                            perks.put(Perk.HOMES, Integer.parseInt(args[3]));
+                            aranarthPlayer.setPerks(perks);
+                            AranarthUtils.setPlayer(uuid, aranarthPlayer);
+                            if (Bukkit.getOfflinePlayer(uuid).isOnline()) {
+                                Player player = Bukkit.getPlayer(uuid);
+                                PermissionUtils.evaluatePlayerPermissions(player);
+                            }
 
-							boolean isSilent = args.length >= 5 && args[4].equalsIgnoreCase("silent");
-							if (!args[3].equals("0")) {
-								String message = "&e" + aranarthPlayer.getNickname() + " &7has purchased the &4&lAdditional 3 Homes &7perk!";
-								if (sender instanceof Player || !AranarthCore.isSmpServer()) {
-									String formatted = ChatUtils.chatMessage(message);
-									for (Player online : Bukkit.getOnlinePlayers()) {
-										online.sendMessage(formatted);
-									}
-									Bukkit.getConsoleSender().sendMessage(formatted);
-									if (NetworkManager.isActive()) {
-										NetworkManager.getInstance().publishBroadcast(formatted);
-									}
-									if (!isSilent) {
-										DiscordUtils.donationNotification(ChatUtils.stripColorFormatting(message), uuid, Color.CYAN);
-									}
-								}
-							}
-						} else {
-							sender.sendMessage(ChatUtils.chatMessage("&cThat is not an appropriate value!"));
-						}
-						return true;
-					} else if (args[2].equals("discord")) {
-						perks.put(Perk.DISCORD, Integer.parseInt(args[3]));
-						aranarthPlayer.setPerks(perks);
-						AranarthUtils.setPlayer(uuid, aranarthPlayer);
+                            boolean isSilent = args.length >= 5 && args[4].equalsIgnoreCase("silent");
+                            if (!args[3].equals("0")) {
+                                String message = "&e" + aranarthPlayer.getNickname() + " &7has purchased the &4&lAdditional 3 Homes &7perk!";
+                                if (sender instanceof Player || !AranarthCore.isSmpServer()) {
+                                    String formatted = ChatUtils.chatMessage(message);
+                                    for (Player online : Bukkit.getOnlinePlayers()) {
+                                        online.sendMessage(formatted);
+                                    }
+                                    Bukkit.getConsoleSender().sendMessage(formatted);
+                                    if (NetworkManager.isActive()) {
+                                        NetworkManager.getInstance().publishBroadcast(formatted);
+                                    }
+                                    if (!isSilent) {
+                                        DiscordUtils.donationNotification(ChatUtils.stripColorFormatting(message), uuid, Color.CYAN);
+                                    }
+                                }
+                            }
+                        } else {
+                            sender.sendMessage(ChatUtils.chatMessage("&cThat is not an appropriate value!"));
+                        }
+                        return true;
+                    } else if (args[2].equals("discord")) {
+                        perks.put(Perk.DISCORD, Integer.parseInt(args[3]));
+                        aranarthPlayer.setPerks(perks);
+                        AranarthUtils.setPlayer(uuid, aranarthPlayer);
 
-						DiscordUtils.updateDiscordRole(Bukkit.getOfflinePlayer(uuid), aranarthPlayer);
+                        DiscordUtils.updateDiscordRole(Bukkit.getOfflinePlayer(uuid), aranarthPlayer);
 
-						boolean isSilent = args.length >= 5 && args[4].equalsIgnoreCase("silent");
-						if (!args[3].equals("0")) {
-							String message = "&e" + aranarthPlayer.getNickname() + " &7has purchased the &5&lDiscord Chat &7perk!";
-							if (sender instanceof Player || !AranarthCore.isSmpServer()) {
-								String formatted = ChatUtils.chatMessage(message);
-								for (Player online : Bukkit.getOnlinePlayers()) {
-									online.sendMessage(formatted);
-								}
-								Bukkit.getConsoleSender().sendMessage(formatted);
-								if (NetworkManager.isActive()) {
-									NetworkManager.getInstance().publishBroadcast(formatted);
-								}
-								if (!isSilent) {
-									DiscordUtils.donationNotification(ChatUtils.stripColorFormatting(message), uuid, Color.CYAN);
-								}
-							}
-						}
+                        boolean isSilent = args.length >= 5 && args[4].equalsIgnoreCase("silent");
+                        if (!args[3].equals("0")) {
+                            String message = "&e" + aranarthPlayer.getNickname() + " &7has purchased the &5&lDiscord Chat &7perk!";
+                            if (sender instanceof Player || !AranarthCore.isSmpServer()) {
+                                String formatted = ChatUtils.chatMessage(message);
+                                for (Player online : Bukkit.getOnlinePlayers()) {
+                                    online.sendMessage(formatted);
+                                }
+                                Bukkit.getConsoleSender().sendMessage(formatted);
+                                if (NetworkManager.isActive()) {
+                                    NetworkManager.getInstance().publishBroadcast(formatted);
+                                }
+                                if (!isSilent) {
+                                    DiscordUtils.donationNotification(ChatUtils.stripColorFormatting(message), uuid, Color.CYAN);
+                                }
+                            }
+                        }
 
-						return true;
-					} else {
-						sender.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with this sub-command..."));
-						return true;
-					}
-				} else {
-					sender.sendMessage(ChatUtils.chatMessage("&cThis is not a valid perk!"));
-					return true;
-				}
-			} else {
-				sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found"));
-				return true;
-			}
-		}
-	}
+                        return true;
+                    } else {
+                        sender.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with this sub-command..."));
+                        return true;
+                    }
+                } else {
+                    sender.sendMessage(ChatUtils.chatMessage("&cThis is not a valid perk!"));
+                    return true;
+                }
+            } else {
+                sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found"));
+                return true;
+            }
+        }
+    }
 
-	private static boolean isValidPerk(String perk) {
-		return perk.equals("compressor") || perk.equals("randomizer") || perk.equals("blacklist") || perk.equals("tables")
-				|| perk.equals("itemname") || perk.equals("chat") || perk.equals("shulker") || perk.equals("inventory")
-				|| perk.equals("homes") || perk.equals("itemframe") || perk.equals("bluefire") || perk.equals("discord")
-				|| perk.equals("whitefire") || perk.equals("prismaticfire");
-	}
+    private static boolean isValidPerk(String perk) {
+        return perk.equals("compressor") || perk.equals("randomizer") || perk.equals("blacklist") || perk.equals("tables")
+                || perk.equals("itemname") || perk.equals("chat") || perk.equals("shulker") || perk.equals("inventory")
+                || perk.equals("homes") || perk.equals("itemframe") || perk.equals("bluefire") || perk.equals("discord")
+                || perk.equals("whitefire") || perk.equals("prismaticfire") || perk.equals("nickname");
+    }
 
 }

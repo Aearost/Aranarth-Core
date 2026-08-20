@@ -905,6 +905,13 @@ public class PermissionUtils {
         perms.setPermission("aranarth.whitefire", perks.get(Perk.WHITEFIRE) == 1);
         // Prismatic Fire
         perms.setPermission("aranarth.prismaticfire", perks.get(Perk.PRISMATICFIRE) == 1);
+        // Nickname
+        if (perks.getOrDefault(Perk.NICKNAME, 0) == 1) {
+            perms.setPermission("aranarth.nick", true);
+            perms.setPermission("aranarth.nick.color", true);
+            perms.setPermission("aranarth.nick.hex", true);
+            perms.setPermission("aranarth.nick.gradient", true);
+        }
 
         // Reset fireType to DEFAULT if the player no longer has the perk for their active type.
         // This handles cases where a perk was revoked but the stored fireType wasn't cleared.
