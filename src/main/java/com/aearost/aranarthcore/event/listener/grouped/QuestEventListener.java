@@ -23,6 +23,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.projectiles.ProjectileSource;
 
 import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Tracks all in-game events needed to advance quest progress.
@@ -94,6 +95,7 @@ public class QuestEventListener implements Listener {
     // Material name suffixes for melee weapon detection
     private static final String SWORD_SUFFIX = "_SWORD";
     private static final String AXE_SUFFIX = "_AXE";
+    private static final String SPEAR_SUFFIX = "_SPEAR";
 
     public QuestEventListener(AranarthCore plugin) {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -345,15 +347,49 @@ public class QuestEventListener implements Listener {
 
     /**
      * Attempts to find the player who killed the entity.
-     * Handles both direct melee kills and arrow/projectile kills.
+     * Handles direct melee kills, arrow/projectile kills, and spear lunge kills.
      */
     private Player getPlayerKiller(LivingEntity entity) {
+        Logger log = AranarthCore.getInstance().getLogger();
+        String heldItem = "unknown";
+
         Player directKiller = entity.getKiller();
+
+        EntityDamageEvent lastDamage = entity.getLastDamageCause();
+        String causeClass = lastDamage == null ? "null" : lastDamage.getClass().getSimpleName();
+        String damageCause = lastDamage == null ? "null" : lastDamage.getCause().name();
+        String damageType = "null";
+        String causingEntity = "null";
+        String directDamager = "null";
+        try {
+            if (lastDamage != null) {
+                damageType = lastDamage.getDamageSource().getDamageType().key().asString();
+                causingEntity = lastDamage.getDamageSource().getCausingEntity() == null
+                        ? "null" : lastDamage.getDamageSource().getCausingEntity().getClass().getSimpleName();
+            }
+            if (lastDamage instanceof EntityDamageByEntityEvent byEntity) {
+                directDamager = byEntity.getDamager().getClass().getSimpleName();
+            }
+            if (directKiller != null) {
+                heldItem = directKiller.getInventory().getItemInMainHand().getType().name();
+            } else if (lastDamage != null && lastDamage.getDamageSource().getCausingEntity() instanceof Player p) {
+                heldItem = p.getInventory().getItemInMainHand().getType().name();
+            }
+        } catch (Exception ignored) {}
+
+        log.info("[SpearDebug] entity=" + entity.getType()
+                + " | getKiller=" + (directKiller == null ? "null" : directKiller.getName())
+                + " | heldItem=" + heldItem
+                + " | eventClass=" + causeClass
+                + " | cause=" + damageCause
+                + " | damageType=" + damageType
+                + " | causingEntity=" + causingEntity
+                + " | directDamager=" + directDamager);
+
         if (directKiller != null) {
             return directKiller;
         }
 
-        EntityDamageEvent lastDamage = entity.getLastDamageCause();
         if (lastDamage instanceof EntityDamageByEntityEvent dmgByEntity) {
             Entity damager = dmgByEntity.getDamager();
             if (damager instanceof Player p) {
@@ -365,6 +401,10 @@ public class QuestEventListener implements Listener {
                     return p;
                 }
             }
+        }
+        // Spear lunges fire EntityDamageEvent (not ByEntity) with the player as causingEntity
+        if (lastDamage != null && lastDamage.getDamageSource().getCausingEntity() instanceof Player p) {
+            return p;
         }
         return null;
     }
@@ -386,7 +426,7 @@ public class QuestEventListener implements Listener {
 
     /**
      * Returns true if the entity's killing blow was delivered by a melee weapon:
-     * sword, axe, mace, or trident (used in melee, not thrown).
+     * sword, axe, mace, spear, or trident (used in melee, not thrown).
      */
     private boolean isMeleeKill(LivingEntity entity, Player killer) {
         EntityDamageEvent lastDamage = entity.getLastDamageCause();
@@ -400,6 +440,7 @@ public class QuestEventListener implements Listener {
         String matName = killer.getInventory().getItemInMainHand().getType().name();
         return matName.endsWith(SWORD_SUFFIX)
                 || matName.endsWith(AXE_SUFFIX)
+                || matName.endsWith(SPEAR_SUFFIX)
                 || matName.equals("MACE")
                 || matName.equals("TRIDENT");
     }

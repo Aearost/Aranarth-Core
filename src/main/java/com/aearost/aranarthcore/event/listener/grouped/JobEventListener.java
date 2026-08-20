@@ -581,6 +581,10 @@ public class JobEventListener implements Listener {
                 }
             }
         }
+        // Spear lunges fire EntityDamageEvent (not ByEntity) with the player as causingEntity
+        if (lastDamage != null && lastDamage.getDamageSource().getCausingEntity() instanceof Player p) {
+            return p;
+        }
         return null;
     }
 

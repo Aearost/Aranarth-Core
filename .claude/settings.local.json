@@ -411,7 +411,15 @@
       "Bash(find /c/Users/liamh -name paper-api-*.jar)",
       "Bash(find C:/Users/liamh/Downloads/Logs/Files/ -name spigot.yml -o -name paper*.yml -o -name paper-global.yml)",
       "Bash(/c/Users/liamh/AppData/Local/Programs/Maven/bin/mvn.cmd compile:*)",
-      "WebFetch(domain:minecraft-heads.com)"
+      "WebFetch(domain:minecraft-heads.com)",
+      "Bash(find C:/Users/liamh/.gradle -name mcmmo*.jar)",
+      "Bash(find C:/Users/liamh/IdeaProjects -name mcmmo*.jar)",
+      "Bash(find ~/.gradle/caches -name mcMMO*.jar)",
+      "Bash(find ~/.gradle/caches -name *.jar)",
+      "Bash(xargs -I {} basename {})",
+      "Bash(find ~/.gradle -path */mcMMO* -name *.jar)",
+      "Bash(awk 'NR>=1000 && NR<=1200')",
+      "Bash(find ~/.m2 -name paper-*.jar -not -name paperclip*)"
     ]
   }
 }

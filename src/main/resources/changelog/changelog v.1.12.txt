@@ -89,6 +89,7 @@ Minor Features
 [+] Added EnergyBurst fall proc with scaled damage
 [~] Fixed CorruptingHelix not finding targets due to incorrect Dominion check
 [+] Added mixing of hex and & codes in gradient chat
+[~] Fix spear kills not counting towards quest/job progress
 
 Backend Code Changes
 -
