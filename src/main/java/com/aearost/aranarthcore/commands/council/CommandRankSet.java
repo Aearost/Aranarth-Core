@@ -170,8 +170,9 @@ public class CommandRankSet {
 						}
 
 						if (sender instanceof Player || !AranarthCore.isSmpServer()) {
-							if (args[1].equals("saint")) {
-								Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has donated and become a &d&lSaint!"));
+							if (args[1].equals("saint") && rank > 0) {
+								String[] saintRankNames = {"", "an &d&lAcolyte", "a &d&lDisciple", "a &d&lSeraph"};
+								Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has donated and become " + saintRankNames[rank] + "&7!"));
 							} else if (args[1].equals("council")) {
 								if (args[3].equals("1")) {
 									Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become a &3&lHelper &7of &e&lThe Council!"));

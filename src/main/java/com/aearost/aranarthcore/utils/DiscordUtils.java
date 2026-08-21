@@ -266,13 +266,15 @@ public class DiscordUtils {
 		// Only display intentional changes in Discord, not auto-assign
 		if (isIntentionalChange) {
 			if (isSaint) {
-				donationNotification(player.getName() + " has donated and become a Saint!", player.getUniqueId(), Color.MAGENTA);
+				String[] saintRankNames = {"", "an Acolyte", "a Disciple", "a Seraph"};
+				String saintRankName = saintRankNames[newRankNum];
+				donationNotification(player.getName() + " has donated and become " + saintRankName + "!", player.getUniqueId(), Color.MAGENTA);
 
 				// Must manually be sent for role changes
 				String uuidNoDashes = player.getUniqueId().toString().replaceAll("-", "");
 				String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
 				EmbedBuilder embed = new EmbedBuilder()
-						.setAuthor(player.getName() + " has donated and become a Saint!", null, url)
+						.setAuthor(player.getName() + " has donated and become " + saintRankName + "!", null, url)
 						.setColor(Color.MAGENTA);
 				roleChangesChannel.sendMessageEmbeds(embed.build()).queue(message -> {
 					message.addReaction("⚜").queue();

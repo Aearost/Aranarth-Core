@@ -95,6 +95,7 @@ Minor Features
 [~] Fixed spear kills not counting towards quest/job progress
 [~] Updated Beheading description in /incantations to reflect new head drop rates
 [~] Updated /incantations formatting
+[~] Saint donation messages now display the specific Saint rank name
 
 Backend Code Changes
 -
