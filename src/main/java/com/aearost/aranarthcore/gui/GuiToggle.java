@@ -39,15 +39,20 @@ public class GuiToggle {
         blankMeta.setDisplayName(ChatUtils.translateToColor("&f"));
         blank.setItemMeta(blankMeta);
 
-        // Top filler row
+        // Top filler row (0-8)
         for (int i = 0; i <= 8; i++) {
             gui.setItem(i, blank);
         }
-        // Interactive Chat row filler (row 3, slots 27–35)
-        for (int i = 27; i <= 35; i++) {
-            gui.setItem(i, blank);
-        }
-        // Bottom filler row (row 4, slots 36–44)
+        // Row 1 edge fillers (9, 17)
+        gui.setItem(9, blank);
+        gui.setItem(17, blank);
+        // Row 2 edge fillers (18, 26)
+        gui.setItem(18, blank);
+        gui.setItem(26, blank);
+        // Row 3 edge fillers (27, 35)
+        gui.setItem(27, blank);
+        gui.setItem(35, blank);
+        // Bottom filler row (36-44)
         for (int i = 36; i <= 44; i++) {
             gui.setItem(i, blank);
         }
@@ -58,119 +63,122 @@ public class GuiToggle {
         exit.setItemMeta(exitMeta);
         gui.setItem(40, exit);
 
+        // Row 1: slots 10-16
         // Blacklist
         if (player.hasPermission("aranarth.blacklist")) {
             boolean active = aranarthPlayer.getBlacklistingMethod() != -1;
-            gui.setItem(9, buildToggleItem(Material.LAVA_BUCKET, "&f&lBlacklist", active));
+            gui.setItem(10, buildToggleItem(Material.LAVA_BUCKET, "&f&lBlacklist", active));
         } else {
-            gui.setItem(9, buildLockedItem(Material.LAVA_BUCKET, "&f&lBlacklist"));
+            gui.setItem(10, buildLockedItem(Material.LAVA_BUCKET, "&f&lBlacklist"));
         }
 
         // Fire Type
         if (hasAnyFirePerk(aranarthPlayer)) {
-            gui.setItem(10, buildFireTypeItem(aranarthPlayer.getFireType()));
+            gui.setItem(11, buildFireTypeItem(aranarthPlayer.getFireType()));
         } else {
-            gui.setItem(10, buildLockedItem(Material.CAMPFIRE, "&f&lFire Type"));
+            gui.setItem(11, buildLockedItem(Material.CAMPFIRE, "&f&lFire Type"));
         }
 
         // Bulk Sell Shulker
         if (player.hasPermission("aranarth.shulker")) {
-            gui.setItem(11, buildToggleItem(Material.PURPLE_SHULKER_BOX, "&f&lBulk Sell Shulker", aranarthPlayer.isBulkSellShulkerEnabled()));
+            gui.setItem(12, buildToggleItem(Material.PURPLE_SHULKER_BOX, "&f&lBulk Sell Shulker", aranarthPlayer.isBulkSellShulkerEnabled()));
         } else {
-            gui.setItem(11, buildLockedItem(Material.PURPLE_SHULKER_BOX, "&f&lBulk Sell Shulker"));
+            gui.setItem(12, buildLockedItem(Material.PURPLE_SHULKER_BOX, "&f&lBulk Sell Shulker"));
         }
 
         // Dominion Claim Messages
-        gui.setItem(12, buildToggleItem(Material.WHITE_BANNER, "&f&lDominion Claim Messages", !aranarthPlayer.isTogglingChangeClaim()));
+        gui.setItem(13, buildToggleItem(Material.WHITE_BANNER, "&f&lDominion Claim Messages", !aranarthPlayer.isTogglingChangeClaim()));
 
         // Chat
         if (player.hasPermission("aranarth.toggle.chat")) {
-            gui.setItem(13, buildToggleItem(Material.WRITTEN_BOOK, "&f&lChat", !aranarthPlayer.isTogglingChat()));
+            gui.setItem(14, buildToggleItem(Material.WRITTEN_BOOK, "&f&lChat", !aranarthPlayer.isTogglingChat()));
         } else {
-            gui.setItem(13, buildLockedItem(Material.WRITTEN_BOOK, "&f&lChat"));
+            gui.setItem(14, buildLockedItem(Material.WRITTEN_BOOK, "&f&lChat"));
         }
 
         // Chest Lock
-        gui.setItem(14, buildToggleItem(Material.TRIAL_KEY, "&f&lChest Lock", aranarthPlayer.isAutoLockingChests()));
+        gui.setItem(15, buildToggleItem(Material.TRIAL_KEY, "&f&lChest Lock", aranarthPlayer.isAutoLockingChests()));
 
         // Compressor
         if (player.hasPermission("aranarth.compressor")) {
-            gui.setItem(15, buildToggleItem(Material.PISTON, "&f&lCompressor", aranarthPlayer.isCompressingItems()));
+            gui.setItem(16, buildToggleItem(Material.PISTON, "&f&lCompressor", aranarthPlayer.isCompressingItems()));
         } else {
-            gui.setItem(15, buildLockedItem(Material.PISTON, "&f&lCompressor"));
+            gui.setItem(16, buildLockedItem(Material.PISTON, "&f&lCompressor"));
         }
 
+        // Row 2: slots 19-25
         // Day Message
-        gui.setItem(16, buildToggleItem(Material.CLOCK, "&f&lNew Day Message", !aranarthPlayer.isDayMessageDisabled()));
+        gui.setItem(19, buildToggleItem(Material.CLOCK, "&f&lNew Day Message", !aranarthPlayer.isDayMessageDisabled()));
 
         // Gate Creation
         if (player.hasPermission("aranarth.gate")) {
-            gui.setItem(17, buildToggleItem(Material.IRON_BARS, "&f&lGate Creation", GateUtils.isInGatePlacementMode(player.getUniqueId())));
+            gui.setItem(20, buildToggleItem(Material.IRON_BARS, "&f&lGate Creation", GateUtils.isInGatePlacementMode(player.getUniqueId())));
         } else {
-            gui.setItem(17, buildLockedItem(Material.IRON_BARS, "&f&lGate Creation"));
+            gui.setItem(20, buildLockedItem(Material.IRON_BARS, "&f&lGate Creation"));
         }
 
         // Gradient Chat
         boolean hasGradientAccess = aranarthPlayer.getPerks().containsKey(Perk.CHAT) || aranarthPlayer.getSaintRank() >= 2;
         if (hasGradientAccess) {
-            gui.setItem(18, buildToggleItem(Material.ORANGE_GLAZED_TERRACOTTA, "&f&lGradient Chat", aranarthPlayer.isGradientChatEnabled()));
+            gui.setItem(21, buildToggleItem(Material.ORANGE_GLAZED_TERRACOTTA, "&f&lGradient Chat", aranarthPlayer.isGradientChatEnabled()));
         } else {
-            gui.setItem(18, buildLockedItem(Material.ORANGE_GLAZED_TERRACOTTA, "&f&lGradient Chat"));
+            gui.setItem(21, buildLockedItem(Material.ORANGE_GLAZED_TERRACOTTA, "&f&lGradient Chat"));
         }
 
         // Inventory Assist
         if (player.hasPermission("aranarth.inventory")) {
-            gui.setItem(19, buildToggleItem(Material.CHEST, "&f&lInventory Assist", !aranarthPlayer.isTogglingInventoryAssist()));
+            gui.setItem(22, buildToggleItem(Material.CHEST, "&f&lInventory Assist", !aranarthPlayer.isTogglingInventoryAssist()));
         } else {
-            gui.setItem(19, buildLockedItem(Material.CHEST, "&f&lInventory Assist"));
+            gui.setItem(22, buildLockedItem(Material.CHEST, "&f&lInventory Assist"));
         }
 
         // Private Messages
         if (player.hasPermission("aranarth.toggle.msg")) {
-            gui.setItem(20, buildToggleItem(Material.PAPER, "&f&lPrivate Messages", !aranarthPlayer.isTogglingMessages()));
+            gui.setItem(23, buildToggleItem(Material.PAPER, "&f&lPrivate Messages", !aranarthPlayer.isTogglingMessages()));
         } else {
-            gui.setItem(20, buildLockedItem(Material.PAPER, "&f&lPrivate Messages"));
+            gui.setItem(23, buildLockedItem(Material.PAPER, "&f&lPrivate Messages"));
         }
 
         // Pet Hurt
-        gui.setItem(21, buildToggleItem(Material.NAME_TAG, "&f&lPet Hurt", aranarthPlayer.isHurtingOwnPets()));
+        gui.setItem(24, buildToggleItem(Material.NAME_TAG, "&f&lPet Hurt", aranarthPlayer.isHurtingOwnPets()));
 
         // Shulker Assist
         if (player.hasPermission("aranarth.shulker")) {
-            gui.setItem(22, buildToggleItem(Material.SHULKER_BOX, "&f&lShulker Assist", aranarthPlayer.isAddingToShulker()));
+            gui.setItem(25, buildToggleItem(Material.SHULKER_BOX, "&f&lShulker Assist", aranarthPlayer.isAddingToShulker()));
         } else {
-            gui.setItem(22, buildLockedItem(Material.SHULKER_BOX, "&f&lShulker Assist"));
+            gui.setItem(25, buildLockedItem(Material.SHULKER_BOX, "&f&lShulker Assist"));
         }
 
+        // Row 3: slots 28-34
         // Spawn Boost
-        gui.setItem(23, buildToggleItem(Material.FEATHER, "&f&lSpawn Boost", aranarthPlayer.isUsingSpawnBoost()));
+        gui.setItem(28, buildToggleItem(Material.FEATHER, "&f&lSpawn Boost", aranarthPlayer.isUsingSpawnBoost()));
 
         // Teleport Requests
         if (player.hasPermission("aranarth.toggle.tp")) {
-            gui.setItem(24, buildToggleItem(Material.ENDER_PEARL, "&f&lTeleport Requests", !aranarthPlayer.isTogglingTp()));
+            gui.setItem(29, buildToggleItem(Material.ENDER_PEARL, "&f&lTeleport Requests", !aranarthPlayer.isTogglingTp()));
         } else {
-            gui.setItem(24, buildLockedItem(Material.ENDER_PEARL, "&f&lTeleport Requests"));
+            gui.setItem(29, buildLockedItem(Material.ENDER_PEARL, "&f&lTeleport Requests"));
         }
 
         // Weather Messages
-        gui.setItem(25, buildToggleItem(Material.WIND_CHARGE, "&f&lWeather Messages", !aranarthPlayer.isWeatherMessageDisabled()));
+        gui.setItem(30, buildToggleItem(Material.WIND_CHARGE, "&f&lWeather Messages", !aranarthPlayer.isWeatherMessageDisabled()));
 
         // Dominion Msg Compact
-        gui.setItem(26, buildToggleItem(Material.COMPASS, "&f&lDominion Msg Compact", aranarthPlayer.isDominionMsgCompact()));
+        gui.setItem(31, buildToggleItem(Material.COMPASS, "&f&lDominion Msg Compact", aranarthPlayer.isDominionMsgCompact()));
 
-        // Interactive Chat (slot 31)
+        // Interactive Chat
         boolean hasInteractivePerm = aranarthPlayer.getSaintRank() >= 2 || aranarthPlayer.getCouncilRank() > 0;
         if (hasInteractivePerm) {
-            gui.setItem(31, buildToggleItem(Material.RECOVERY_COMPASS, "&f&lInteractive Chat", aranarthPlayer.isInteractiveChatEnabled()));
+            gui.setItem(32, buildToggleItem(Material.RECOVERY_COMPASS, "&f&lInteractive Chat", aranarthPlayer.isInteractiveChatEnabled()));
         } else {
-            gui.setItem(31, buildLockedItem(Material.RECOVERY_COMPASS, "&f&lInteractive Chat"));
+            gui.setItem(32, buildLockedItem(Material.RECOVERY_COMPASS, "&f&lInteractive Chat"));
         }
 
-        // Emoji (slot 32)
-        gui.setItem(32, buildToggleItem(Material.HEART_OF_THE_SEA, "&f&lEmoji", aranarthPlayer.isEmojiEnabled()));
+        // Emoji
+        gui.setItem(33, buildToggleItem(Material.HEART_OF_THE_SEA, "&f&lEmoji", aranarthPlayer.isEmojiEnabled()));
 
         // Size Scale
-        gui.setItem(33, buildToggleItem(Material.POPPED_CHORUS_FRUIT, "&f&lAranarthium Size Scale", aranarthPlayer.isSizeScaleEnabled()));
+        gui.setItem(34, buildToggleItem(Material.POPPED_CHORUS_FRUIT, "&f&lAranarthium Size Scale", aranarthPlayer.isSizeScaleEnabled()));
 
         return gui;
     }
