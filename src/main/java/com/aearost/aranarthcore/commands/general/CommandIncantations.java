@@ -89,12 +89,11 @@ public class CommandIncantations implements CommandExecutor {
 
 	private static String beheading() {
 		return ChatUtils.translateToColor(
-				new IncantationBeheading().getColor() + "&lBeheading&r\n\n" +
-						"&oIncreases the drop rates of player heads\n\n" +
-						"&rApplies to: swords, axes, maces, tridents, spears\n\n" +
-						"- 25% chance at I\n" +
-						"- 50% chance at II\n" +
-						"- 75% chance at III\n"
+				new IncantationBeheading().getColor() + "&lBeheading&r\n" +
+						"&oIncreases the drop rates of heads\n\n" +
+						"&rApplies to: swords, axes, maces, tridents, and spears\n\n" +
+						"Players: 25% at I, 50% at II, 75% at III\n\n" +
+						"Mobs: 10% at I, 20% at II, 30% at III\n"
 		);
 	}
 

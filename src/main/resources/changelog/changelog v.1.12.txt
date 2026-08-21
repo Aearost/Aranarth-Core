@@ -92,6 +92,7 @@ Minor Features
 [~] Fixed CorruptingHelix not finding targets due to incorrect Dominion check
 [+] Added mixing of hex and & codes in gradient chat
 [~] Fixed spear kills not counting towards quest/job progress
+[~] Updated Beheading description in /incantations to reflect new head drop rates
 
 Backend Code Changes
 -

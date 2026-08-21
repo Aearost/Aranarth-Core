@@ -57,7 +57,7 @@ public class CommandHeads implements CommandExecutor {
         }
 
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-        if (aranarthPlayer.getSaintRank() < 1 || aranarthPlayer.getCouncilRank() < 1) {
+        if (aranarthPlayer.getSaintRank() < 1 && aranarthPlayer.getCouncilRank() < 1) {
             player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
             return true;
         }

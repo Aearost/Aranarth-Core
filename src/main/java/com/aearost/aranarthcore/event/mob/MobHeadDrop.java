@@ -34,24 +34,29 @@ public class MobHeadDrop {
         }
 
         ItemStack weapon = attacker.getInventory().getItemInMainHand();
-        if (!AranarthUtils.hasIncantation(weapon, "incantation_beheading")) {
-            return;
-        }
+        boolean hasBeheading = AranarthUtils.hasIncantation(weapon, "incantation_beheading");
 
-        int level = AranarthUtils.getIncantationLevel(weapon);
         int threshold;
         int range;
         if (type == EntityType.WITHER_SKELETON) {
             // Wither skeleton skulls are already rare in vanilla - keep Beheading rates lower
-            if (level == 1) { threshold = 1; range = 20; }      // 5%
-            else if (level == 2) { threshold = 1; range = 10; } // 10%
-            else if (level == 3) { threshold = 1; range = 5; }  // 20%
-            else return;
+            if (!hasBeheading)                                      { threshold = 1; range = 200; } // 0.5%
+            else {
+                int level = AranarthUtils.getIncantationLevel(weapon);
+                if (level == 1)      { threshold = 1; range = 20; }  // 5%
+                else if (level == 2) { threshold = 1; range = 10; }  // 10%
+                else if (level == 3) { threshold = 1; range = 5; }   // 20%
+                else return;
+            }
         } else {
-            if (level == 1) { threshold = 1; range = 10; }      // 10%
-            else if (level == 2) { threshold = 1; range = 4; }  // 25%
-            else if (level == 3) { threshold = 1; range = 2; }  // 50%
-            else return;
+            if (!hasBeheading)                                      { threshold = 1; range = 200; } // 0.5%
+            else {
+                int level = AranarthUtils.getIncantationLevel(weapon);
+                if (level == 1)      { threshold = 1; range = 10; }  // 10%
+                else if (level == 2) { threshold = 1; range = 5; }   // 20%
+                else if (level == 3) { threshold = 3; range = 10; }  // 30%
+                else return;
+            }
         }
 
         int roll = RANDOM.nextInt(range) + 1;
