@@ -93,6 +93,7 @@ Minor Features
 [+] Added mixing of hex and & codes in gradient chat
 [~] Fixed spear kills not counting towards quest/job progress
 [~] Updated Beheading description in /incantations to reflect new head drop rates
+[~] Updated /incantations formatting
 
 Backend Code Changes
 -

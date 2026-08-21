@@ -91,9 +91,9 @@ public class CommandIncantations implements CommandExecutor {
 		return ChatUtils.translateToColor(
 				new IncantationBeheading().getColor() + "&lBeheading&r\n" +
 						"&oIncreases the drop rates of heads\n\n" +
-						"&rApplies to: swords, axes, maces, tridents, and spears\n\n" +
-						"Players: 25% at I, 50% at II, 75% at III\n\n" +
-						"Mobs: 10% at I, 20% at II, 30% at III\n"
+						"&r&lApplies to: &rswords, axes, maces, tridents, and spears\n\n" +
+						"&r&lPlayers: &r25% at I, 50% at II, 75% at III\n\n" +
+						"&r&lMobs: &r10% at I, 20% at II, 30% at III\n"
 		);
 	}
 
@@ -101,7 +101,7 @@ public class CommandIncantations implements CommandExecutor {
 		return ChatUtils.translateToColor(
 				new IncantationLifesteal().getColor() + "&lLifesteal&r\n\n" +
 						"&oHeal off of your dealt damage. Requires an " + new AranarthiumIngot().getName() + "&r&o ingot\n\n" +
-						"&rApplies to: swords, axes, maces, tridents, spears\n\n" +
+						"&r&lApplies to: &rswords, axes, maces, tridents, spears\n\n" +
 						"- 15% heal at I\n" +
 						"- 30% heal at II\n" +
 						"- 50% heal at III\n"
@@ -112,8 +112,8 @@ public class CommandIncantations implements CommandExecutor {
 		return ChatUtils.translateToColor(
 				new IncantationPlentiful().getColor() + "&lPlentiful&r\n\n" +
 						"&oIncreased block harvest size. Requires an " + new AranarthiumIngot().getName() + "&r&o ingot\n\n" +
-						"&rApplies to: pickaxes, axes, shovels, hoes\n\n" +
-						"- Only one level\n"
+						"&r&lApplies to: &rpickaxes, axes, shovels, hoes\n\n" +
+						"&o**Only one level\n"
 		);
 	}
 
@@ -121,8 +121,8 @@ public class CommandIncantations implements CommandExecutor {
 		return ChatUtils.translateToColor(
 				new IncantationMagnetism().getColor() + "&lMagnetism&r\n\n" +
 						"&oPulls harvested items to you. Requires an " + new AranarthiumIngot().getName() + "&r&o ingot\n\n" +
-						"&rApplies to: pickaxes, axes, shovels, hoes\n\n" +
-						"- Only one level\n"
+						"&r&lApplies to: &rpickaxes, axes, shovels, hoes\n\n" +
+						"&o**Only one level\n"
 		);
 	}
 
@@ -130,10 +130,10 @@ public class CommandIncantations implements CommandExecutor {
 		return ChatUtils.translateToColor(
 				new IncantationResilience().getColor() + "&lResilience&r\n\n" +
 						"&oMakes your item indestructible\n\n" +
-						"&rApplies to: any tool, weapon, or armor\n\n" +
-						"- Item never loses durability\n" +
-						"- Cannot be destroyed by fire or lava\n" +
-						"- Only one level\n"
+						"&r&lApplies to: &rany tool, weapon, or armor\n\n" +
+						"- Items have infinite durability\n" +
+						"- Indestructible by fire & lava\n" +
+						"&o**Only one level\n"
 		);
 	}
 
@@ -141,8 +141,8 @@ public class CommandIncantations implements CommandExecutor {
 		return ChatUtils.translateToColor(
 				new IncantationPreservation().getColor() + "&lPreservation&r\n\n" +
 						"&oCollection of unharvestable blocks. Requires an " + new AranarthiumIngot().getName() + "&r&o ingot\n\n" +
-						"&rApplies to: pickaxes (no Fortune)\n\n" +
-						"- Only one level\n"
+						"&r&lApplies to: &rpickaxes (no Fortune)\n\n" +
+						"&o**Only one level\n"
 		);
 	}
 
