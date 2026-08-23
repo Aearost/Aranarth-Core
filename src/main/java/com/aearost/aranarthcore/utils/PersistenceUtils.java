@@ -57,7 +57,10 @@ public class PersistenceUtils {
      * "Plugin attempted to register task while disabled" error.
      */
     private static void runDbSync(Runnable task) {
-        if (AranarthCore.getInstance().isEnabled()) {
+        // Run synchronously when: plugin is disabled (onDisable path) OR we are in the JVM
+        // shutdown hook (System.exit() path where isEnabled() may still return true but the
+        // Bukkit scheduler cannot guarantee the async task will complete before JVM exit).
+        if (AranarthCore.getInstance().isEnabled() && !AranarthCore.isShutdownHookMode()) {
             Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), task);
         } else {
             task.run();
@@ -1625,8 +1628,7 @@ public class PersistenceUtils {
                 }
 
                 List<Dominion> dominions = DominionUtils.getDominions();
-                try {
-                    FileWriter writer = new FileWriter(filePath);
+                try (FileWriter writer = new FileWriter(filePath)) {
                     writer.write("#id|name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance|memberRanks|memberPvpEnabled|mobSpawningEnabled|conqueredRequestTimestamp|lastConquerAttemptTimestamp|rebelRequestTimestamp|conqueredRequestDefenderLastSeen|rebelRequestConquerorLastSeen|lastRebelAttemptTimestamp|conqueredTimestamp|boughtChunks|dominionLevel|cachedFarmlandCount|cachedLivestockCount|foundedTimestamp|levelDropTimestamp|boughtOutpostChunks|cachedLivestockByWorld|bendingEnabled|conqueredRequest|rebelRequest\n");
 
                     if (dominions != null && !dominions.isEmpty()) {
@@ -1635,13 +1637,17 @@ public class PersistenceUtils {
                             if (dominion.getChunks().isEmpty()) {
                                 continue;
                             }
-                            String row = buildDominionRow(dominion) + "\n";
-                            writer.write(row);
+                            try {
+                                String row = buildDominionRow(dominion) + "\n";
+                                writer.write(row);
+                            } catch (Exception rowEx) {
+                                Bukkit.getLogger().warning("[AC] Failed to serialize dominion "
+                                        + dominion.getId() + " (" + dominion.getName() + ") to file: " + rowEx.getMessage());
+                            }
                         }
                     }
-                    writer.close();
                 } catch (IOException e) {
-                    Bukkit.getLogger().info("[AC] There was an error in saving the dominions!");
+                    Bukkit.getLogger().warning("[AC] There was an error saving dominions.txt: " + e.getMessage());
                 }
             }
         }
@@ -7986,8 +7992,10 @@ public class PersistenceUtils {
         UUID leader = UUID.fromString(fields[2]);
         List<UUID> members = new ArrayList<>();
         String[] memberParts = fields[3].split("\\*\\*\\*");
-        for (String member : memberParts) {
-            members.add(UUID.fromString(member));
+        if (!memberParts[0].isEmpty()) {
+            for (String member : memberParts) {
+                members.add(UUID.fromString(member));
+            }
         }
 
         List<UUID> allies = new ArrayList<>();
@@ -8009,11 +8017,26 @@ public class PersistenceUtils {
         }
 
         String worldName = fields[7];
-        // Strip "smp:" prefix only on the SMP server where those worlds actually exist as "world" etc.
-        // On other servers, keep the raw name so Bukkit.getWorld() returns null (cross-server stub with empty chunks).
-        String lookupName = (worldName.startsWith("smp:") && AranarthCore.isSmpServer())
-                ? worldName.substring(4) : worldName;
-        World world = Bukkit.getWorld(lookupName);
+        // Resolve the world on the current server. Stored names use a "smp:" prefix for SMP worlds
+        // so the two servers' "world" (both named "world" in Bukkit) don't collide:
+        //   Survival stores its own worlds as "world", "resource", etc.  (no prefix)
+        //   SMP stores its own worlds as "smp:world", "smp:world_nether", etc.
+        //
+        // On SMP: only resolve chunks for rows with "smp:" prefix (our own dominions).
+        //   Rows without the prefix belong to Survival - treat as stubs (null world).
+        //   Without this guard, Bukkit.getWorld("world") on SMP returns SMP's own overworld,
+        //   making Survival's dominions appear as non-stubs. SMP's periodic saves and shutdown
+        //   save then write those stale in-memory copies back to MySQL, overwriting Survival's
+        //   fresh shutdown save and causing data loss (claims, reserves, members all reset).
+        //
+        // On Survival: "smp:*" names return null from Bukkit.getWorld() naturally (no such world),
+        //   so no special handling needed.
+        World world;
+        if (AranarthCore.isSmpServer()) {
+            world = worldName.startsWith("smp:") ? Bukkit.getWorld(worldName.substring(4)) : null;
+        } else {
+            world = Bukkit.getWorld(worldName);
+        }
 
         List<Chunk> chunks = new ArrayList<>();
         String[] claimedChunks = fields[8].split("\\*\\*\\*");
@@ -8155,7 +8178,12 @@ public class PersistenceUtils {
             try {
                 parseAndAddDominionRow(entry.getValue());
             } catch (Exception e) {
-                Bukkit.getLogger().warning("[AC] Failed to parse DB dominion row for " + entry.getKey() + ": " + e.getMessage());
+                // Log enough detail to diagnose the root cause - the raw row is
+                // included so the data can be recovered manually if needed.
+                String raw = entry.getValue();
+                String preview = raw != null && raw.length() > 200 ? raw.substring(0, 200) + "..." : raw;
+                Bukkit.getLogger().warning("[AC] Failed to parse DB dominion row for " + entry.getKey()
+                        + ": " + e.getMessage() + " | row preview: " + preview);
             }
         }
         Bukkit.getLogger().info("[AC] All dominions initialized from MySQL");
@@ -9016,7 +9044,7 @@ public class PersistenceUtils {
         return obj.toString();
     }
 
-    private static JobData deserializeJobData(String json) {
+    public static JobData deserializeJobData(String json) {
         JobData jobData = new JobData();
         try {
             JsonObject obj = JOB_GSON.fromJson(json, JsonObject.class);

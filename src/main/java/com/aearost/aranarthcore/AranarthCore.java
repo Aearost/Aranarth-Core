@@ -60,6 +60,11 @@ public class AranarthCore extends JavaPlugin {
     private RoleReactionListener roleReactionListener;
     private FireParticleListener fireParticleListener;
     private volatile boolean savedOnDisable = false;
+    private static volatile boolean shutdownHookMode = false;
+
+    public static boolean isShutdownHookMode() {
+        return shutdownHookMode;
+    }
     private SquaremapIntegration squaremapIntegration;
 
     /**
@@ -479,6 +484,10 @@ public class AranarthCore extends JavaPlugin {
         // terminate the JVM via System.exit() without triggering onDisable()
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (!savedOnDisable) {
+                // Force runDbSync() to execute synchronously: isEnabled() may still return true
+                // here if Paper never called onDisable() (e.g. bare System.exit()). Without this
+                // flag, runDbSync() would schedule async tasks that never run before the JVM dies.
+                shutdownHookMode = true;
                 saveAll();
                 NetworkManager.shutdown();
                 DatabaseManager.shutdown();

@@ -291,6 +291,13 @@ public class DominionUtils {
         for (Chunk chunk : dominion.getChunks()) {
             chunkKeyToDominion.put(getChunkKey(chunk), dominion);
         }
+
+        // Hot-save to MySQL immediately so changes are not lost between 30-minute periodic saves.
+        // Skip during shutdown - saveAll()/saveDominions() handles that path synchronously.
+        if (!dominion.getChunks().isEmpty()
+                && AranarthCore.getInstance() != null && AranarthCore.getInstance().isEnabled()) {
+            PersistenceUtils.saveSingleDominionToDatabase(dominion);
+        }
     }
 
     /**

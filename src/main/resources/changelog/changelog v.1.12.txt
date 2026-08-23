@@ -98,6 +98,7 @@ Minor Features
 [~] Saint donation messages now display the specific Saint rank name
 [~] Home GUI title now shows current vs total homes
 [~] Reformatted toggle GUI
+[~] Fixed SMP overwriting Survival dominion data on shutdown, causing data loss on restart
 
 Backend Code Changes
 -
