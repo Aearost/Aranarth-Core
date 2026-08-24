@@ -107,6 +107,7 @@ Minor Features
 [~] Capitalized the first letter of each word when displaying unscrambled answers
 [~] Added cross-server /ac invsee support
 [~] Fixed VineWhip bypassing arena damage cap by using DamageHandler.damageEntity()
+[+] Added incantation names to the chat unscrambler
 
 Backend Code Changes
 -

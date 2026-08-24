@@ -169,6 +169,14 @@ bundle
 pumpkin
 melon
 
+# Incantations
+plentiful
+lifesteal
+magnetism
+beheading
+resilience
+preservation
+
 # Aranarth calendar months
 ignivor
 aquinvor
