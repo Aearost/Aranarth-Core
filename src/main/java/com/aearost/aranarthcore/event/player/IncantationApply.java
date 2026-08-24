@@ -32,6 +32,7 @@ import java.util.UUID;
 import static com.aearost.aranarthcore.objects.CustomKeys.INCANTATION_LEVEL;
 import static com.aearost.aranarthcore.objects.CustomKeys.INCANTATION_TYPE;
 import static com.aearost.aranarthcore.objects.CustomKeys.MAGNETISM_TOOL_ID;
+import static com.aearost.aranarthcore.objects.CustomKeys.PRESERVATION_USES;
 
 /**
  * Handles the logic behind applying an incantation.
@@ -278,6 +279,7 @@ public class IncantationApply {
 							}
 							toolMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_preservation");
 							toolMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, 1);
+							toolMeta.getPersistentDataContainer().set(PRESERVATION_USES, PersistentDataType.INTEGER, 3);
 							toolMeta.addEnchant(Enchantment.SILK_TOUCH, 1, true);
 							toolMeta.setLore(lore);
 							tool.setItemMeta(toolMeta);

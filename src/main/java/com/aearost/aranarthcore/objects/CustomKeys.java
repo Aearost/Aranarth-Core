@@ -47,4 +47,5 @@ public class CustomKeys {
     public static final NamespacedKey ENCHANTER_LOCKOUT = new NamespacedKey(AranarthCore.getInstance(), "enchanter_lockout");
     public static final NamespacedKey HEAD_TEXTURE = new NamespacedKey(AranarthCore.getInstance(), "head_texture");
     public static final NamespacedKey HEAD_REQUIRED_MATERIAL = new NamespacedKey(AranarthCore.getInstance(), "head_required_material");
+    public static final NamespacedKey PRESERVATION_USES = new NamespacedKey(AranarthCore.getInstance(), "preservation_uses");
 }
