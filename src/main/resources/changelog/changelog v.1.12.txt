@@ -102,6 +102,7 @@ Minor Features
 [~] Fixed SMP overwriting Survival dominion data on shutdown, causing data loss on restart
 [+] Added the missing IceSkate passive to waterbenders
 [~] Fixed stacking potion effects applying in the arena world
+[+] Add 3-hit cap per target for JetBolt damage ticks
 
 Backend Code Changes
 -

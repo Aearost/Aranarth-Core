@@ -56,7 +56,10 @@ public class JetBolt extends LightningAbility implements AddonAbility, ComboAbil
     private boolean started;
     private boolean flightEnded;
 
+    private static final int MAX_STRIKES_PER_TARGET = 3;
+
     private final Map<UUID, Long> entityLastStrikeTime = new HashMap<>();
+    private final Map<UUID, Integer> entityStrikeCount = new HashMap<>();
     private final List<TrailNode> trailNodes = new ArrayList<>();
     private static final Map<UUID, JetBolt> ACTIVE_INSTANCES = new HashMap<>();
     private final Random random = new Random();
@@ -331,6 +334,10 @@ public class JetBolt extends LightningAbility implements AddonAbility, ComboAbil
             }
 
             UUID id = entity.getUniqueId();
+            if (entityStrikeCount.getOrDefault(id, 0) >= MAX_STRIKES_PER_TARGET) {
+                continue;
+            }
+
             Long lastStrike = entityLastStrikeTime.get(id);
             if (lastStrike != null && now - lastStrike < STRIKE_INTERVAL_MS) {
                 continue;
@@ -340,6 +347,7 @@ public class JetBolt extends LightningAbility implements AddonAbility, ComboAbil
             if (living instanceof Player targetPlayer && !DominionUtils.canAttackPlayer(player, targetPlayer)) {
                 continue;
             }
+            entityStrikeCount.merge(id, 1, Integer::sum);
             DamageHandler.damageEntity(living, damage, this);
             AranarthBendingUtils.applyElectrocution(living, ELECTROCUTION_DURATION_MS, 0.75);
 
