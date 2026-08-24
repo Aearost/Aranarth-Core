@@ -411,6 +411,7 @@ public class PermissionUtils {
         // Aranarth abilities available at same rank as their sub-element unlock
         perms.setPermission("bending.ability.razorleaves", true);    // plant - Esquire
         perms.setPermission("bending.ability.icediscs", true);       // water combo - always
+        perms.setPermission("bending.ability.IceSkate", true);        // JedCore ice passive - always
         perms.setPermission("bending.ability.noxiousfumes", true);   // combustion - King
         perms.setPermission("bending.ability.sandwave", true);       // sand - Esquire
         perms.setPermission("bending.ability.amplification", true);  // sound - Duke

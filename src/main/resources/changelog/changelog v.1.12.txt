@@ -99,6 +99,7 @@ Minor Features
 [~] Home GUI title now shows current vs total homes
 [~] Reformatted toggle GUI
 [~] Fixed SMP overwriting Survival dominion data on shutdown, causing data loss on restart
+[+] Added the missing IceSkate passive to waterbenders
 
 Backend Code Changes
 -
