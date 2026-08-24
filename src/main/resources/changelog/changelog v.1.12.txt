@@ -106,6 +106,7 @@ Minor Features
 [+] Allowed HealingHelix, CorruptingHelix, and MendingWaters to be sourced from plants
 [~] Capitalized the first letter of each word when displaying unscrambled answers
 [~] Added cross-server /ac invsee support
+[~] Fixed VineWhip bypassing arena damage cap by using DamageHandler.damageEntity()
 
 Backend Code Changes
 -

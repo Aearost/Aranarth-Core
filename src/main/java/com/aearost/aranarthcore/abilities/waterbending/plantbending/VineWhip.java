@@ -6,6 +6,7 @@ import com.projectkorra.projectkorra.ability.PlantAbility;
 import com.projectkorra.projectkorra.attribute.Attribute;
 import com.projectkorra.projectkorra.util.BlockSource;
 import com.projectkorra.projectkorra.util.ClickType;
+import com.projectkorra.projectkorra.util.DamageHandler;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
@@ -223,7 +224,7 @@ public class VineWhip extends PlantAbility implements AddonAbility {
             // Entity hit - deal damage and retract
             LivingEntity hit = findNearbyLivingEntity(tipPosition, 2.0);
             if (hit != null) {
-                hit.damage(damage, player);
+                DamageHandler.damageEntity(hit, damage, this);
                 startRetracting();
                 return;
             }
