@@ -253,7 +253,7 @@ public class ChatGameUtils {
             streakWinnerUUID = null;
             streakCount = 0;
         }
-        String expireMsg = ChatUtils.chatMessage("&7Nobody guessed! The word was &e" + expectedAnswer);
+        String expireMsg = ChatUtils.chatMessage("&7Nobody guessed! The word was &e" + toTitleCase(expectedAnswer));
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.sendMessage(expireMsg);
             int cgVol = AranarthUtils.getPlayer(p.getUniqueId()).getChatGameSoundVolume();
@@ -351,7 +351,7 @@ public class ChatGameUtils {
 
             String winnerNickname = ap.getNickname();
             String timeStr = String.format("%.2f", elapsedSeconds);
-            String winMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7guessed &e" + answer + " &7correctly in &e" + timeStr + "s!");
+            String winMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7guessed &e" + toTitleCase(answer) + " &7correctly in &e" + timeStr + "s!");
             for (Player p : Bukkit.getOnlinePlayers()) {
                 p.sendMessage(winMsg);
                 int cgVol = AranarthUtils.getPlayer(p.getUniqueId()).getChatGameSoundVolume();
@@ -482,7 +482,7 @@ public class ChatGameUtils {
 
         Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
             String timeStr = String.format("%.2f", elapsedSeconds);
-            String winMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7guessed &e" + answer + " &7correctly in &e" + timeStr + "s!");
+            String winMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7guessed &e" + toTitleCase(answer) + " &7correctly in &e" + timeStr + "s!");
             for (Player p : Bukkit.getOnlinePlayers()) {
                 p.sendMessage(winMsg);
                 int cgVol = AranarthUtils.getPlayer(p.getUniqueId()).getChatGameSoundVolume();
@@ -585,7 +585,7 @@ public class ChatGameUtils {
             updateGlobalBestCache(newHolderUUID, newHolderNickname, newGlobalBestTime);
         }
         String timeStr = String.format("%.2f", elapsedSeconds);
-        String winMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7guessed &e" + answer + " &7correctly in &e" + timeStr + "s!");
+        String winMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7guessed &e" + toTitleCase(answer) + " &7correctly in &e" + timeStr + "s!");
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.sendMessage(winMsg);
             int cgVol = AranarthUtils.getPlayer(p.getUniqueId()).getChatGameSoundVolume();
@@ -680,7 +680,7 @@ public class ChatGameUtils {
             streakWinnerUUID = null;
             streakCount = 0;
         }
-        String expireMsg = ChatUtils.chatMessage("&7Nobody guessed! The word was &e" + answer);
+        String expireMsg = ChatUtils.chatMessage("&7Nobody guessed! The word was &e" + toTitleCase(answer));
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.sendMessage(expireMsg);
             int cgVol = AranarthUtils.getPlayer(p.getUniqueId()).getChatGameSoundVolume();
@@ -707,6 +707,23 @@ public class ChatGameUtils {
      */
     public static String getCurrentScrambled() {
         return currentScrambled;
+    }
+
+    private static String toTitleCase(String word) {
+        if (word == null || word.isEmpty()) {
+            return word;
+        }
+        String[] parts = word.split(" ");
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < parts.length; i++) {
+            if (i > 0) sb.append(' ');
+            String part = parts[i];
+            if (!part.isEmpty()) {
+                sb.append(Character.toUpperCase(part.charAt(0)));
+                if (part.length() > 1) sb.append(part.substring(1));
+            }
+        }
+        return sb.toString();
     }
 
     private static String scramble(String word) {

@@ -104,6 +104,7 @@ Minor Features
 [~] Fixed stacking potion effects applying in the arena world
 [+] Add 3-hit cap per target for JetBolt damage ticks
 [+] Allowed HealingHelix, CorruptingHelix, and MendingWaters to be sourced from plants
+[~] Capitalized the first letter of each word when displaying unscrambled answers
 
 Backend Code Changes
 -
