@@ -298,6 +298,12 @@ public class PlayerAutoReplenishSlot {
             // If the slot is another one of the same item, switch it
             if (i != slot && matcher.test(itemStack, referenceItem)) {
                 if (!(itemStack.getItemMeta() instanceof BlockStateMeta)) {
+                    // Preserve any item currently occupying the slot (e.g. glass bottle after
+                    // drinking a water bottle) before overwriting it with the replenished stack
+                    ItemStack displaced = inventory.getItem(slot);
+                    if (displaced != null && displaced.getType() != Material.AIR) {
+                        inventory.addItem(displaced);
+                    }
                     inventory.setItem(slot, new ItemStack(contents[i]));
                     inventory.setItem(i, null);
                     player.updateInventory();
