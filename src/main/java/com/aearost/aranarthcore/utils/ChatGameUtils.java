@@ -729,15 +729,11 @@ public class ChatGameUtils {
     private static String scramble(String word) {
         String[] parts = word.split(" ");
         StringBuilder result = new StringBuilder();
-        for (int i = 0; i < parts.length; i++) {
-            String scrambledPart = scramblePart(parts[i]);
-            if (i == 0) {
-                result.append(scrambledPart);
-            } else {
-                // Capitalize the first letter of each subsequent word component
-                result.append(Character.toUpperCase(scrambledPart.charAt(0)));
-                if (scrambledPart.length() > 1) result.append(scrambledPart.substring(1));
-            }
+        for (String part : parts) {
+            String scrambledPart = scramblePart(part);
+            // Capitalize the first letter of each word so players can see word boundaries and first letter
+            result.append(Character.toUpperCase(scrambledPart.charAt(0)));
+            if (scrambledPart.length() > 1) result.append(scrambledPart.substring(1));
         }
         // Retry if the scramble is identical to the original joined word
         String joined = word.replaceAll("\\s+", "");
