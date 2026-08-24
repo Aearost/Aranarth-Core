@@ -457,6 +457,10 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
                 UUID id = entity.getUniqueId();
                 inFumes.add(id);
 
+                if (living.getWorld().getName().startsWith("arena")) {
+                    continue;
+                }
+
                 boolean firstContact = !entityEntryTime.containsKey(id);
                 entityEntryTime.putIfAbsent(id, now);
                 entityLastEffectTime.putIfAbsent(id, now);
