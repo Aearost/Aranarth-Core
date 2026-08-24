@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class ChatGameUtils {
 
     // Each value is proportional to the cost to reach the next rank from that tier
-    private static final double[] RANK_REWARDS = {50, 100, 200, 500, 1000, 2000, 4000, 7000, 10000};
+    private static final double[] RANK_REWARDS = {50, 100, 200, 400, 700, 1000, 1500, 2000, 2500};
 
     private static final List<String> wordPool = new ArrayList<>();
     private static final List<String> remainingWords = new ArrayList<>();

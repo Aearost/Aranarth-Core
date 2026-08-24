@@ -108,6 +108,7 @@ Minor Features
 [~] Added cross-server /ac invsee support
 [~] Fixed VineWhip bypassing arena damage cap by using DamageHandler.damageEntity()
 [+] Added incantation names to the chat unscrambler
+[~] Decreased chat unscrambler reward amount at later ranks
 
 Backend Code Changes
 -
