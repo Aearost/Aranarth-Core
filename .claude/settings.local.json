@@ -419,7 +419,14 @@
       "Bash(xargs -I {} basename {})",
       "Bash(find ~/.gradle -path */mcMMO* -name *.jar)",
       "Bash(awk 'NR>=1000 && NR<=1200')",
-      "Bash(find ~/.m2 -name paper-*.jar -not -name paperclip*)"
+      "Bash(find ~/.m2 -name paper-*.jar -not -name paperclip*)",
+      "Bash(gh auth:*)",
+      "Bash(gunzip -c Survival/2026-08-23-1.log.gz)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(gunzip -c SMP/2026-08-23-1.log.gz)",
+      "Bash(gunzip -c Survival/2026-08-22-3.log.gz)",
+      "Bash(find /c/Users/liamh -name ProjectKorra*.jar -o -name projectkorra*.jar)",
+      "Bash(find /c/Users/liamh/IdeaProjects/ProjectKorra-wip -name *.java -newer /c/Users/liamh/IdeaProjects/ProjectKorra-wip/core/src/com/projectkorra/projectkorra/waterbending/passive/FastSwim.java)"
     ]
   }
 }

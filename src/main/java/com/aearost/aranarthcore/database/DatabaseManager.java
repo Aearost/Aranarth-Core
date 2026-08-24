@@ -80,8 +80,11 @@ public class DatabaseManager {
         public LastLocation(String server, String world, double x, double y, double z, float yaw, float pitch) {
             this.server = server;
             this.world = world;
-            this.x = x; this.y = y; this.z = z;
-            this.yaw = yaw; this.pitch = pitch;
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.yaw = yaw;
+            this.pitch = pitch;
         }
     }
 
@@ -146,7 +149,7 @@ public class DatabaseManager {
 
     private void createTables() {
         String[] ddl = {
-            """
+                """
             CREATE TABLE IF NOT EXISTS network_messages (
                 id BIGINT AUTO_INCREMENT PRIMARY KEY,
                 channel VARCHAR(64) NOT NULL,
@@ -156,7 +159,7 @@ public class DatabaseManager {
                 INDEX idx_created (created_at)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS network_roster (
                 uuid VARCHAR(36) PRIMARY KEY,
                 username VARCHAR(64) NOT NULL,
@@ -170,7 +173,7 @@ public class DatabaseManager {
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS aranarth_players (
                 uuid VARCHAR(36) PRIMARY KEY,
                 username VARCHAR(64) NOT NULL,
@@ -178,7 +181,7 @@ public class DatabaseManager {
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS player_kill_death (
                 uuid VARCHAR(36) NOT NULL,
                 target_uuid VARCHAR(36) NOT NULL,
@@ -187,13 +190,13 @@ public class DatabaseManager {
                 PRIMARY KEY (uuid, target_uuid)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS player_chat_game_guesses (
                 uuid VARCHAR(36) PRIMARY KEY,
                 guess_count INT NOT NULL DEFAULT 0
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS player_votes (
                 uuid VARCHAR(36) PRIMARY KEY,
                 vote_count INT DEFAULT 0,
@@ -203,7 +206,7 @@ public class DatabaseManager {
                 pending_godly_keys INT DEFAULT 0
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS player_quest_data (
                 uuid VARCHAR(36) PRIMARY KEY,
                 quest_state_json MEDIUMTEXT,
@@ -211,14 +214,14 @@ public class DatabaseManager {
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS player_login_streaks (
                 uuid VARCHAR(36) PRIMARY KEY,
                 data_json MEDIUMTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS player_mail (
                 id BIGINT AUTO_INCREMENT PRIMARY KEY,
                 recipient_uuid VARCHAR(36) NOT NULL,
@@ -227,28 +230,28 @@ public class DatabaseManager {
                 INDEX idx_recipient (recipient_uuid)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS player_mounts (
                 uuid VARCHAR(36) PRIMARY KEY,
                 data_json MEDIUMTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS server_punishments (
                 uuid VARCHAR(36) PRIMARY KEY,
                 data_json MEDIUMTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS server_boosts (
                 data_json MEDIUMTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 id INT DEFAULT 1 PRIMARY KEY
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS network_temp_data (
                 key_name VARCHAR(128) PRIMARY KEY,
                 value_json TEXT NOT NULL,
@@ -256,140 +259,140 @@ public class DatabaseManager {
                 INDEX idx_expires (expires_at)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS server_date (
                 id INT DEFAULT 1 PRIMARY KEY,
                 data_json MEDIUMTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS server_homepads (
                 id INT DEFAULT 1 PRIMARY KEY,
                 data_json MEDIUMTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS server_warps (
                 id INT DEFAULT 1 PRIMARY KEY,
                 data_json MEDIUMTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS server_locked_containers (
                 id INT DEFAULT 1 PRIMARY KEY,
                 data_json LONGTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS server_gates (
                 id INT DEFAULT 1 PRIMARY KEY,
                 data_json LONGTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS server_avatars (
                 id INT DEFAULT 1 PRIMARY KEY,
                 data_json MEDIUMTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS server_dominions (
                 id VARCHAR(36) PRIMARY KEY,
                 raw_data LONGTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS server_dominion_permissions (
                 dominion_id VARCHAR(36) PRIMARY KEY,
                 data_json MEDIUMTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS server_dominion_player_perms (
                 dominion_id VARCHAR(36) PRIMARY KEY,
                 data_json MEDIUMTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS server_dominion_plots (
                 dominion_id VARCHAR(36) PRIMARY KEY,
                 data_json MEDIUMTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS server_outposts (
                 id VARCHAR(36) PRIMARY KEY,
                 data_json MEDIUMTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS server_defenders (
                 dominion_id VARCHAR(36) PRIMARY KEY,
                 data_json MEDIUMTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS player_toggles (
                 uuid VARCHAR(36) PRIMARY KEY,
                 data_json MEDIUMTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS player_compressible (
                 uuid VARCHAR(36) PRIMARY KEY,
                 data_json MEDIUMTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS player_sentinels (
                 uuid VARCHAR(36) PRIMARY KEY,
                 data_json MEDIUMTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS server_shops (
                 id INT DEFAULT 1 PRIMARY KEY,
                 data_json MEDIUMTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS player_shops (
                 uuid VARCHAR(36) PRIMARY KEY,
                 data_json MEDIUMTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS player_shop_locations (
                 uuid VARCHAR(36) PRIMARY KEY,
                 data_json MEDIUMTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS player_shop_collaborators (
                 uuid VARCHAR(36) PRIMARY KEY,
                 data_json MEDIUMTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS player_last_location (
                 uuid      VARCHAR(36) PRIMARY KEY,
                 server    VARCHAR(64) NOT NULL,
@@ -402,26 +405,26 @@ public class DatabaseManager {
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS server_original_players (
                 uuid VARCHAR(36) PRIMARY KEY
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS player_brew_unlocks (
                 uuid VARCHAR(36) NOT NULL,
                 recipe_id VARCHAR(64) NOT NULL,
                 PRIMARY KEY (uuid, recipe_id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS player_jobs (
                 uuid VARCHAR(36) NOT NULL,
                 job_data_json TEXT NOT NULL,
                 PRIMARY KEY (uuid)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
-            """
+                """
             CREATE TABLE IF NOT EXISTS player_blacklist_presets (
                 uuid VARCHAR(36) PRIMARY KEY,
                 active_preset_index INT NOT NULL DEFAULT -1,
@@ -447,16 +450,19 @@ public class DatabaseManager {
 
     private void migrateSchema() {
         String[] migrations = {
-            "ALTER TABLE aranarth_players ADD COLUMN IF NOT EXISTS raw_data LONGTEXT",
-            "ALTER TABLE player_votes ADD COLUMN IF NOT EXISTS history_json MEDIUMTEXT",
-            "ALTER TABLE network_roster MODIFY COLUMN nickname TEXT DEFAULT ''",
-            "ALTER TABLE player_chat_game_guesses ADD COLUMN IF NOT EXISTS total_earnings DOUBLE NOT NULL DEFAULT 0",
-            "ALTER TABLE player_chat_game_guesses ADD COLUMN IF NOT EXISTS best_time DOUBLE NOT NULL DEFAULT 0",
-            "ALTER TABLE player_chat_game_guesses ADD COLUMN IF NOT EXISTS highest_streak INT NOT NULL DEFAULT 0"
+                "ALTER TABLE aranarth_players ADD COLUMN IF NOT EXISTS raw_data LONGTEXT",
+                "ALTER TABLE player_votes ADD COLUMN IF NOT EXISTS history_json MEDIUMTEXT",
+                "ALTER TABLE network_roster MODIFY COLUMN nickname TEXT DEFAULT ''",
+                "ALTER TABLE player_chat_game_guesses ADD COLUMN IF NOT EXISTS total_earnings DOUBLE NOT NULL DEFAULT 0",
+                "ALTER TABLE player_chat_game_guesses ADD COLUMN IF NOT EXISTS best_time DOUBLE NOT NULL DEFAULT 0",
+                "ALTER TABLE player_chat_game_guesses ADD COLUMN IF NOT EXISTS highest_streak INT NOT NULL DEFAULT 0"
         };
         try (Connection conn = dataSource.getConnection(); Statement stmt = conn.createStatement()) {
             for (String sql : migrations) {
-                try { stmt.execute(sql); } catch (SQLException ignored) {}
+                try {
+                    stmt.execute(sql);
+                } catch (SQLException ignored) {
+                }
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Schema migration error: " + e.getMessage());
@@ -467,7 +473,9 @@ public class DatabaseManager {
     // Bulk-load methods (DB-primary loading on startup)
     // -------------------------------------------------------------------------
 
-    /** Returns uuid -> raw pipe-delimited player row. */
+    /**
+     * Returns uuid -> raw pipe-delimited player row.
+     */
     public Map<UUID, String> loadAllAranarthPlayersRaw() {
         String sql = "SELECT uuid, raw_data FROM aranarth_players WHERE raw_data IS NOT NULL AND raw_data != ''";
         Map<UUID, String> result = new HashMap<>();
@@ -483,8 +491,11 @@ public class DatabaseManager {
         return result;
     }
 
-    /** Row returned by {@link #loadAllPlayerBalances()}. */
-    public record BalanceEntry(double balance, String username, String nickname) {}
+    /**
+     * Row returned by {@link #loadAllPlayerBalances()}.
+     */
+    public record BalanceEntry(double balance, String username, String nickname) {
+    }
 
     /**
      * Returns a map of UUID -> BalanceEntry for all players by parsing raw_data.
@@ -514,10 +525,12 @@ public class DatabaseManager {
         return result;
     }
 
-    /** Saves the raw pipe-delimited player row to raw_data column. */
+    /**
+     * Saves the raw pipe-delimited player row to raw_data column.
+     */
     public void saveAranarthPlayerRaw(UUID uuid, String rawData) {
         String sql = "INSERT INTO aranarth_players (uuid, username, data_json, raw_data) VALUES (?, '', '', ?) " +
-                     "ON DUPLICATE KEY UPDATE raw_data=VALUES(raw_data)";
+                "ON DUPLICATE KEY UPDATE raw_data=VALUES(raw_data)";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
@@ -528,14 +541,18 @@ public class DatabaseManager {
         }
     }
 
-    /** Returns the raw pipe-delimited row for the given uuid, or null if not found. */
+    /**
+     * Returns the raw pipe-delimited row for the given uuid, or null if not found.
+     */
     public String loadAranarthPlayerRaw(UUID uuid) {
         String sql = "SELECT raw_data FROM aranarth_players WHERE uuid = ? AND raw_data IS NOT NULL AND raw_data != ''";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getString("raw_data");
+                if (rs.next()) {
+                    return rs.getString("raw_data");
+                }
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load raw player data for " + uuid + ": " + e.getMessage());
@@ -543,7 +560,9 @@ public class DatabaseManager {
         return null;
     }
 
-    /** Returns uuid -> {worldPrefix -> int[]{kills, deaths}} for all players. */
+    /**
+     * Returns uuid -> {worldPrefix -> int[]{kills, deaths}} for all players.
+     */
     public Map<UUID, Map<String, int[]>> loadAllKillDeathData() {
         String sql = "SELECT uuid, target_uuid, kill_count, death_count FROM player_kill_death";
         Map<UUID, Map<String, int[]>> result = new HashMap<>();
@@ -553,7 +572,7 @@ public class DatabaseManager {
             while (rs.next()) {
                 UUID uuid = UUID.fromString(rs.getString("uuid"));
                 result.computeIfAbsent(uuid, k -> new HashMap<>())
-                      .put(rs.getString("target_uuid"), new int[]{rs.getInt("kill_count"), rs.getInt("death_count")});
+                        .put(rs.getString("target_uuid"), new int[]{rs.getInt("kill_count"), rs.getInt("death_count")});
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all kill/death data: " + e.getMessage());
@@ -561,22 +580,32 @@ public class DatabaseManager {
         return result;
     }
 
-    /** Holds a player's chat game stats loaded from the database. */
-    public record ChatGameEntry(int guessCount, double totalEarnings, String username, String nickname, double bestTime, int highestStreak) {
-        /** Constructor used during startup load (no display info needed). */
+    /**
+     * Holds a player's chat game stats loaded from the database.
+     */
+    public record ChatGameEntry(int guessCount, double totalEarnings, String username, String nickname, double bestTime,
+                                int highestStreak) {
+        /**
+         * Constructor used during startup load (no display info needed).
+         */
         public ChatGameEntry(int guessCount, double totalEarnings) {
             this(guessCount, totalEarnings, "", "", 0.0, 0);
         }
+
         public ChatGameEntry(int guessCount, double totalEarnings, String username, String nickname) {
             this(guessCount, totalEarnings, username, nickname, 0.0, 0);
         }
+
         public ChatGameEntry(int guessCount, double totalEarnings, String username, String nickname, double bestTime) {
             this(guessCount, totalEarnings, username, nickname, bestTime, 0);
         }
     }
 
-    /** Holds the global all-time best unscramble speed record. */
-    public record GlobalBestEntry(UUID holderUUID, double time, String nickname) {}
+    /**
+     * Holds the global all-time best unscramble speed record.
+     */
+    public record GlobalBestEntry(UUID holderUUID, double time, String nickname) {
+    }
 
     /**
      * Upserts the guess count, total earnings, and personal best time for a single player.
@@ -584,12 +613,12 @@ public class DatabaseManager {
      */
     public void saveChatGameGuessCount(UUID uuid, int guessCount, double totalEarnings, double bestTime, int highestStreak) {
         String sql = """
-            INSERT INTO player_chat_game_guesses (uuid, guess_count, total_earnings, best_time, highest_streak)
-            VALUES (?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE guess_count = VALUES(guess_count), total_earnings = VALUES(total_earnings),
-                best_time = IF(VALUES(best_time) > 0 AND (best_time = 0 OR VALUES(best_time) < best_time), VALUES(best_time), best_time),
-                highest_streak = IF(VALUES(highest_streak) > highest_streak, VALUES(highest_streak), highest_streak)
-            """;
+                INSERT INTO player_chat_game_guesses (uuid, guess_count, total_earnings, best_time, highest_streak)
+                VALUES (?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE guess_count = VALUES(guess_count), total_earnings = VALUES(total_earnings),
+                    best_time = IF(VALUES(best_time) > 0 AND (best_time = 0 OR VALUES(best_time) < best_time), VALUES(best_time), best_time),
+                    highest_streak = IF(VALUES(highest_streak) > highest_streak, VALUES(highest_streak), highest_streak)
+                """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
@@ -608,10 +637,10 @@ public class DatabaseManager {
      */
     public void updateHighestStreak(UUID uuid, int streak) {
         String sql = """
-            INSERT INTO player_chat_game_guesses (uuid, guess_count, total_earnings, highest_streak)
-            VALUES (?, 0, 0, ?)
-            ON DUPLICATE KEY UPDATE highest_streak = IF(VALUES(highest_streak) > highest_streak, VALUES(highest_streak), highest_streak)
-            """;
+                INSERT INTO player_chat_game_guesses (uuid, guess_count, total_earnings, highest_streak)
+                VALUES (?, 0, 0, ?)
+                ON DUPLICATE KEY UPDATE highest_streak = IF(VALUES(highest_streak) > highest_streak, VALUES(highest_streak), highest_streak)
+                """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
@@ -627,10 +656,10 @@ public class DatabaseManager {
      */
     public void updatePersonalBestTime(UUID uuid, double time) {
         String sql = """
-            INSERT INTO player_chat_game_guesses (uuid, guess_count, total_earnings, best_time)
-            VALUES (?, 0, 0, ?)
-            ON DUPLICATE KEY UPDATE best_time = IF(best_time = 0 OR VALUES(best_time) < best_time, VALUES(best_time), best_time)
-            """;
+                INSERT INTO player_chat_game_guesses (uuid, guess_count, total_earnings, best_time)
+                VALUES (?, 0, 0, ?)
+                ON DUPLICATE KEY UPDATE best_time = IF(best_time = 0 OR VALUES(best_time) < best_time, VALUES(best_time), best_time)
+                """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
@@ -646,13 +675,13 @@ public class DatabaseManager {
      */
     public GlobalBestEntry loadGlobalBestTime() {
         String sql = """
-            SELECT g.uuid, g.best_time, COALESCE(p.raw_data, '') AS raw_data
-            FROM player_chat_game_guesses g
-            LEFT JOIN aranarth_players p ON p.uuid = g.uuid
-            WHERE g.best_time > 0
-            ORDER BY g.best_time ASC
-            LIMIT 1
-            """;
+                SELECT g.uuid, g.best_time, COALESCE(p.raw_data, '') AS raw_data
+                FROM player_chat_game_guesses g
+                LEFT JOIN aranarth_players p ON p.uuid = g.uuid
+                WHERE g.best_time > 0
+                ORDER BY g.best_time ASC
+                LIMIT 1
+                """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -661,7 +690,9 @@ public class DatabaseManager {
                 String nickname = "";
                 if (rawData != null && !rawData.isEmpty()) {
                     String[] fields = rawData.split("\\|");
-                    if (fields.length > 1) nickname = fields[1];
+                    if (fields.length > 1) {
+                        nickname = fields[1];
+                    }
                 }
                 return new GlobalBestEntry(UUID.fromString(rs.getString("uuid")), rs.getDouble("best_time"), nickname);
             }
@@ -677,10 +708,10 @@ public class DatabaseManager {
      */
     public void incrementChatGameGuessCount(UUID uuid, double earnedAmount) {
         String sql = """
-            INSERT INTO player_chat_game_guesses (uuid, guess_count, total_earnings)
-            VALUES (?, 1, ?)
-            ON DUPLICATE KEY UPDATE guess_count = guess_count + 1, total_earnings = total_earnings + VALUES(total_earnings)
-            """;
+                INSERT INTO player_chat_game_guesses (uuid, guess_count, total_earnings)
+                VALUES (?, 1, ?)
+                ON DUPLICATE KEY UPDATE guess_count = guess_count + 1, total_earnings = total_earnings + VALUES(total_earnings)
+                """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
@@ -694,16 +725,17 @@ public class DatabaseManager {
     /**
      * Loads all chat game stats (guess count, total earnings, username, nickname) across all
      * servers by joining with aranarth_players. Sorted descending by guess count.
+     *
      * @return Map of UUID to ChatGameEntry.
      */
     public Map<UUID, ChatGameEntry> loadAllChatGameGuesses() {
         String sql = """
-            SELECT g.uuid, g.guess_count, g.total_earnings, g.best_time, g.highest_streak,
-                   COALESCE(p.username, '') AS username,
-                   COALESCE(p.raw_data, '') AS raw_data
-            FROM player_chat_game_guesses g
-            LEFT JOIN aranarth_players p ON p.uuid = g.uuid
-            """;
+                SELECT g.uuid, g.guess_count, g.total_earnings, g.best_time, g.highest_streak,
+                       COALESCE(p.username, '') AS username,
+                       COALESCE(p.raw_data, '') AS raw_data
+                FROM player_chat_game_guesses g
+                LEFT JOIN aranarth_players p ON p.uuid = g.uuid
+                """;
         Map<UUID, ChatGameEntry> result = new HashMap<>();
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -727,10 +759,12 @@ public class DatabaseManager {
         return result;
     }
 
-    /** Saves the vote history JSON blob for a player. */
+    /**
+     * Saves the vote history JSON blob for a player.
+     */
     public void saveVoteHistory(UUID uuid, String historyJson) {
         String sql = "INSERT INTO player_votes (uuid, vote_count, pending_vote_keys, pending_rare_keys, pending_epic_keys, pending_godly_keys, history_json) " +
-                     "VALUES (?, 0, 0, 0, 0, 0, ?) ON DUPLICATE KEY UPDATE history_json=VALUES(history_json)";
+                "VALUES (?, 0, 0, 0, 0, 0, ?) ON DUPLICATE KEY UPDATE history_json=VALUES(history_json)";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
@@ -752,11 +786,11 @@ public class DatabaseManager {
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 result.put(UUID.fromString(rs.getString("uuid")), new int[]{
-                    rs.getInt("vote_count"),
-                    rs.getInt("pending_vote_keys"),
-                    rs.getInt("pending_rare_keys"),
-                    rs.getInt("pending_epic_keys"),
-                    rs.getInt("pending_godly_keys")
+                        rs.getInt("vote_count"),
+                        rs.getInt("pending_vote_keys"),
+                        rs.getInt("pending_rare_keys"),
+                        rs.getInt("pending_epic_keys"),
+                        rs.getInt("pending_godly_keys")
                 });
             }
         } catch (SQLException e) {
@@ -766,7 +800,9 @@ public class DatabaseManager {
         return result;
     }
 
-    /** Returns uuid -> history_json for players that have vote history stored. */
+    /**
+     * Returns uuid -> history_json for players that have vote history stored.
+     */
     public Map<UUID, String> loadAllVoteHistories() {
         String sql = "SELECT uuid, history_json FROM player_votes WHERE history_json IS NOT NULL AND history_json != ''";
         Map<UUID, String> result = new HashMap<>();
@@ -783,7 +819,9 @@ public class DatabaseManager {
         return result;
     }
 
-    /** Returns uuid -> [quest_state_json, quest_progress_json] for all rows in player_quest_data. */
+    /**
+     * Returns uuid -> [quest_state_json, quest_progress_json] for all rows in player_quest_data.
+     */
     public Map<UUID, String[]> loadAllQuestData() {
         String sql = "SELECT uuid, quest_state_json, quest_progress_json FROM player_quest_data";
         Map<UUID, String[]> result = new HashMap<>();
@@ -792,7 +830,7 @@ public class DatabaseManager {
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 result.put(UUID.fromString(rs.getString("uuid")),
-                    new String[]{rs.getString("quest_state_json"), rs.getString("quest_progress_json")});
+                        new String[]{rs.getString("quest_state_json"), rs.getString("quest_progress_json")});
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all quest data: " + e.getMessage());
@@ -800,7 +838,9 @@ public class DatabaseManager {
         return result;
     }
 
-    /** Returns uuid -> data_json for all login streak rows. */
+    /**
+     * Returns uuid -> data_json for all login streak rows.
+     */
     public Map<UUID, String> loadAllLoginStreaks() {
         String sql = "SELECT uuid, data_json FROM player_login_streaks";
         Map<UUID, String> result = new HashMap<>();
@@ -837,7 +877,9 @@ public class DatabaseManager {
         return result;
     }
 
-    /** Returns uuid -> data_json for all mount rows. */
+    /**
+     * Returns uuid -> data_json for all mount rows.
+     */
     public Map<UUID, String> loadAllMountsData() {
         String sql = "SELECT uuid, data_json FROM player_mounts";
         Map<UUID, String> result = new HashMap<>();
@@ -853,7 +895,9 @@ public class DatabaseManager {
         return result;
     }
 
-    /** Returns uuid -> data_json for all punishment rows. */
+    /**
+     * Returns uuid -> data_json for all punishment rows.
+     */
     public Map<UUID, String> loadAllPunishmentsData() {
         String sql = "SELECT uuid, data_json FROM server_punishments";
         Map<UUID, String> result = new HashMap<>();
@@ -907,20 +951,26 @@ public class DatabaseManager {
         return rows;
     }
 
-    /** Returns the current max message id (0 if table is empty). Used on startup to avoid replaying old messages. */
+    /**
+     * Returns the current max message id (0 if table is empty). Used on startup to avoid replaying old messages.
+     */
     public long getMaxMessageId() {
         String sql = "SELECT COALESCE(MAX(id), 0) FROM network_messages";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) return rs.getLong(1);
+            if (rs.next()) {
+                return rs.getLong(1);
+            }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to get max message id: " + e.getMessage());
         }
         return 0L;
     }
 
-    /** Deletes messages older than 5 minutes to keep the table small. */
+    /**
+     * Deletes messages older than 5 minutes to keep the table small.
+     */
     public void cleanupMessages() {
         String sql = "DELETE FROM network_messages WHERE created_at < DATE_SUB(NOW(3), INTERVAL 5 MINUTE)";
         try (Connection conn = dataSource.getConnection();
@@ -938,18 +988,20 @@ public class DatabaseManager {
     public void upsertRosterEntry(UUID uuid, String username, String nickname, String server,
                                   int rank, int councilRank, int saintRank, int architectRank, boolean vanished) {
         String sql = """
-            INSERT INTO network_roster (uuid, username, nickname, server, rank, council_rank, saint_rank, architect_rank, vanished)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE username=VALUES(username), nickname=VALUES(nickname), server=VALUES(server),
-            rank=VALUES(rank), council_rank=VALUES(council_rank), saint_rank=VALUES(saint_rank),
-            architect_rank=VALUES(architect_rank), vanished=VALUES(vanished)
-            """;
+                INSERT INTO network_roster (uuid, username, nickname, server, rank, council_rank, saint_rank, architect_rank, vanished)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE username=VALUES(username), nickname=VALUES(nickname), server=VALUES(server),
+                rank=VALUES(rank), council_rank=VALUES(council_rank), saint_rank=VALUES(saint_rank),
+                architect_rank=VALUES(architect_rank), vanished=VALUES(vanished)
+                """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
             ps.setString(2, username);
             String safeNick = nickname != null ? nickname : "";
-            if (safeNick.length() > 750) safeNick = safeNick.substring(0, 750);
+            if (safeNick.length() > 750) {
+                safeNick = safeNick.substring(0, 750);
+            }
             ps.setString(3, safeNick);
             ps.setString(4, server);
             ps.setInt(5, rank);
@@ -974,7 +1026,9 @@ public class DatabaseManager {
         }
     }
 
-    /** Removes all roster entries for the given server. Used on startup/shutdown to prevent stale entries. */
+    /**
+     * Removes all roster entries for the given server. Used on startup/shutdown to prevent stale entries.
+     */
     public void clearRosterForServer(String server) {
         try (java.sql.Connection conn = dataSource.getConnection();
              java.sql.PreparedStatement stmt = conn.prepareStatement(
@@ -986,7 +1040,9 @@ public class DatabaseManager {
         }
     }
 
-    /** Loads all roster entries NOT from thisServer. */
+    /**
+     * Loads all roster entries NOT from thisServer.
+     */
     public Map<UUID, NetworkPlayer> loadRemoteRoster(String thisServer) {
         String sql = "SELECT uuid, username, nickname, server, rank, council_rank, saint_rank, architect_rank, vanished FROM network_roster WHERE server != ?";
         Map<UUID, NetworkPlayer> roster = new HashMap<>();
@@ -1022,10 +1078,10 @@ public class DatabaseManager {
 
     public void saveAranarthPlayer(UUID uuid, String username, String dataJson) {
         String sql = """
-            INSERT INTO aranarth_players (uuid, username, data_json)
-            VALUES (?, ?, ?)
-            ON DUPLICATE KEY UPDATE username=VALUES(username), data_json=VALUES(data_json)
-            """;
+                INSERT INTO aranarth_players (uuid, username, data_json)
+                VALUES (?, ?, ?)
+                ON DUPLICATE KEY UPDATE username=VALUES(username), data_json=VALUES(data_json)
+                """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
@@ -1037,14 +1093,18 @@ public class DatabaseManager {
         }
     }
 
-    /** Returns the data_json for the given uuid, or null if not found. */
+    /**
+     * Returns the data_json for the given uuid, or null if not found.
+     */
     public String loadAranarthPlayerJson(UUID uuid) {
         String sql = "SELECT data_json FROM aranarth_players WHERE uuid = ?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getString("data_json");
+                if (rs.next()) {
+                    return rs.getString("data_json");
+                }
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load aranarth player " + uuid + ": " + e.getMessage());
@@ -1085,7 +1145,9 @@ public class DatabaseManager {
         }
     }
 
-    /** Returns worldPrefix -> int[]{kills, deaths} */
+    /**
+     * Returns worldPrefix -> int[]{kills, deaths}
+     */
     public Map<String, int[]> loadKillDeathData(UUID uuid) {
         String sql = "SELECT target_uuid, kill_count, death_count FROM player_kill_death WHERE uuid = ?";
         Map<String, int[]> data = new HashMap<>();
@@ -1109,12 +1171,12 @@ public class DatabaseManager {
 
     public void saveVoteData(UUID uuid, int voteCount, int voteKeys, int rareKeys, int epicKeys, int godlyKeys) {
         String sql = """
-            INSERT INTO player_votes (uuid, vote_count, pending_vote_keys, pending_rare_keys, pending_epic_keys, pending_godly_keys)
-            VALUES (?, ?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE vote_count=VALUES(vote_count), pending_vote_keys=VALUES(pending_vote_keys),
-            pending_rare_keys=VALUES(pending_rare_keys), pending_epic_keys=VALUES(pending_epic_keys),
-            pending_godly_keys=VALUES(pending_godly_keys)
-            """;
+                INSERT INTO player_votes (uuid, vote_count, pending_vote_keys, pending_rare_keys, pending_epic_keys, pending_godly_keys)
+                VALUES (?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE vote_count=VALUES(vote_count), pending_vote_keys=VALUES(pending_vote_keys),
+                pending_rare_keys=VALUES(pending_rare_keys), pending_epic_keys=VALUES(pending_epic_keys),
+                pending_godly_keys=VALUES(pending_godly_keys)
+                """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
@@ -1136,10 +1198,10 @@ public class DatabaseManager {
      */
     public void saveVoteCountOnly(UUID uuid, int voteCount) {
         String sql = """
-            INSERT INTO player_votes (uuid, vote_count, pending_vote_keys, pending_rare_keys, pending_epic_keys, pending_godly_keys)
-            VALUES (?, ?, 0, 0, 0, 0)
-            ON DUPLICATE KEY UPDATE vote_count=VALUES(vote_count)
-            """;
+                INSERT INTO player_votes (uuid, vote_count, pending_vote_keys, pending_rare_keys, pending_epic_keys, pending_godly_keys)
+                VALUES (?, ?, 0, 0, 0, 0)
+                ON DUPLICATE KEY UPDATE vote_count=VALUES(vote_count)
+                """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
@@ -1150,7 +1212,9 @@ public class DatabaseManager {
         }
     }
 
-    /** Returns [voteCount, voteKeys, rareKeys, epicKeys, godlyKeys], or null if not found. */
+    /**
+     * Returns [voteCount, voteKeys, rareKeys, epicKeys, godlyKeys], or null if not found.
+     */
     public int[] loadVoteData(UUID uuid) {
         String sql = "SELECT vote_count, pending_vote_keys, pending_rare_keys, pending_epic_keys, pending_godly_keys FROM player_votes WHERE uuid = ?";
         try (Connection conn = dataSource.getConnection();
@@ -1159,11 +1223,11 @@ public class DatabaseManager {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return new int[]{
-                        rs.getInt("vote_count"),
-                        rs.getInt("pending_vote_keys"),
-                        rs.getInt("pending_rare_keys"),
-                        rs.getInt("pending_epic_keys"),
-                        rs.getInt("pending_godly_keys")
+                            rs.getInt("vote_count"),
+                            rs.getInt("pending_vote_keys"),
+                            rs.getInt("pending_rare_keys"),
+                            rs.getInt("pending_epic_keys"),
+                            rs.getInt("pending_godly_keys")
                     };
                 }
             }
@@ -1179,10 +1243,10 @@ public class DatabaseManager {
 
     public void saveQuestData(UUID uuid, String questStateJson, String questProgressJson) {
         String sql = """
-            INSERT INTO player_quest_data (uuid, quest_state_json, quest_progress_json)
-            VALUES (?, ?, ?)
-            ON DUPLICATE KEY UPDATE quest_state_json=VALUES(quest_state_json), quest_progress_json=VALUES(quest_progress_json)
-            """;
+                INSERT INTO player_quest_data (uuid, quest_state_json, quest_progress_json)
+                VALUES (?, ?, ?)
+                ON DUPLICATE KEY UPDATE quest_state_json=VALUES(quest_state_json), quest_progress_json=VALUES(quest_progress_json)
+                """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
@@ -1194,7 +1258,9 @@ public class DatabaseManager {
         }
     }
 
-    /** Returns [questStateJson, questProgressJson], or null if not found. */
+    /**
+     * Returns [questStateJson, questProgressJson], or null if not found.
+     */
     public String[] loadQuestData(UUID uuid) {
         String sql = "SELECT quest_state_json, quest_progress_json FROM player_quest_data WHERE uuid = ?";
         try (Connection conn = dataSource.getConnection();
@@ -1217,10 +1283,10 @@ public class DatabaseManager {
 
     public void saveLoginStreak(UUID uuid, String dataJson) {
         String sql = """
-            INSERT INTO player_login_streaks (uuid, data_json)
-            VALUES (?, ?)
-            ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)
-            """;
+                INSERT INTO player_login_streaks (uuid, data_json)
+                VALUES (?, ?)
+                ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)
+                """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
@@ -1237,7 +1303,9 @@ public class DatabaseManager {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getString("data_json");
+                if (rs.next()) {
+                    return rs.getString("data_json");
+                }
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load login streak for " + uuid + ": " + e.getMessage());
@@ -1278,7 +1346,9 @@ public class DatabaseManager {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, recipientUuid.toString());
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getString("data_json");
+                if (rs.next()) {
+                    return rs.getString("data_json");
+                }
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load mail for " + recipientUuid + ": " + e.getMessage());
@@ -1292,10 +1362,10 @@ public class DatabaseManager {
 
     public void saveMountData(UUID uuid, String dataJson) {
         String sql = """
-            INSERT INTO player_mounts (uuid, data_json)
-            VALUES (?, ?)
-            ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)
-            """;
+                INSERT INTO player_mounts (uuid, data_json)
+                VALUES (?, ?)
+                ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)
+                """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
@@ -1312,7 +1382,9 @@ public class DatabaseManager {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getString("data_json");
+                if (rs.next()) {
+                    return rs.getString("data_json");
+                }
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load mount data for " + uuid + ": " + e.getMessage());
@@ -1326,10 +1398,10 @@ public class DatabaseManager {
 
     public void savePunishments(UUID uuid, String dataJson) {
         String sql = """
-            INSERT INTO server_punishments (uuid, data_json)
-            VALUES (?, ?)
-            ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)
-            """;
+                INSERT INTO server_punishments (uuid, data_json)
+                VALUES (?, ?)
+                ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)
+                """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
@@ -1346,7 +1418,9 @@ public class DatabaseManager {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getString("data_json");
+                if (rs.next()) {
+                    return rs.getString("data_json");
+                }
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load punishments for " + uuid + ": " + e.getMessage());
@@ -1360,10 +1434,10 @@ public class DatabaseManager {
 
     public void saveBoosts(String dataJson) {
         String sql = """
-            INSERT INTO server_boosts (id, data_json)
-            VALUES (1, ?)
-            ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)
-            """;
+                INSERT INTO server_boosts (id, data_json)
+                VALUES (1, ?)
+                ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)
+                """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, dataJson);
@@ -1378,7 +1452,9 @@ public class DatabaseManager {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) return rs.getString("data_json");
+            if (rs.next()) {
+                return rs.getString("data_json");
+            }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load boosts: " + e.getMessage());
         }
@@ -1391,10 +1467,10 @@ public class DatabaseManager {
 
     public void saveTempData(String key, String valueJson, int ttlSeconds) {
         String sql = """
-            INSERT INTO network_temp_data (key_name, value_json, expires_at)
-            VALUES (?, ?, DATE_ADD(NOW(), INTERVAL ? SECOND))
-            ON DUPLICATE KEY UPDATE value_json=VALUES(value_json), expires_at=VALUES(expires_at)
-            """;
+                INSERT INTO network_temp_data (key_name, value_json, expires_at)
+                VALUES (?, ?, DATE_ADD(NOW(), INTERVAL ? SECOND))
+                ON DUPLICATE KEY UPDATE value_json=VALUES(value_json), expires_at=VALUES(expires_at)
+                """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, key);
@@ -1406,14 +1482,18 @@ public class DatabaseManager {
         }
     }
 
-    /** Returns value_json or null if key not found or expired. */
+    /**
+     * Returns value_json or null if key not found or expired.
+     */
     public String loadTempData(String key) {
         String sql = "SELECT value_json FROM network_temp_data WHERE key_name = ? AND expires_at > NOW()";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, key);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getString("value_json");
+                if (rs.next()) {
+                    return rs.getString("value_json");
+                }
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load temp data key=" + key + ": " + e.getMessage());
@@ -1432,7 +1512,9 @@ public class DatabaseManager {
         }
     }
 
-    /** Cleans up expired temp data rows. */
+    /**
+     * Cleans up expired temp data rows.
+     */
     public void cleanupTempData() {
         String sql = "DELETE FROM network_temp_data WHERE expires_at <= NOW()";
         try (Connection conn = dataSource.getConnection();
@@ -1450,7 +1532,8 @@ public class DatabaseManager {
     public void saveServerDate(String dataJson) {
         String sql = "INSERT INTO server_date (id, data_json) VALUES (1, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, dataJson); ps.executeUpdate();
+            ps.setString(1, dataJson);
+            ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save server_date: " + e.getMessage());
         }
@@ -1460,7 +1543,9 @@ public class DatabaseManager {
         String sql = "SELECT data_json FROM server_date WHERE id = 1";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) return rs.getString("data_json");
+            if (rs.next()) {
+                return rs.getString("data_json");
+            }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load server_date: " + e.getMessage());
         }
@@ -1474,7 +1559,8 @@ public class DatabaseManager {
     public void saveHomepads(String dataJson) {
         String sql = "INSERT INTO server_homepads (id, data_json) VALUES (1, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, dataJson); ps.executeUpdate();
+            ps.setString(1, dataJson);
+            ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save homepads: " + e.getMessage());
         }
@@ -1484,7 +1570,9 @@ public class DatabaseManager {
         String sql = "SELECT data_json FROM server_homepads WHERE id = 1";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) return rs.getString("data_json");
+            if (rs.next()) {
+                return rs.getString("data_json");
+            }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load homepads: " + e.getMessage());
         }
@@ -1498,7 +1586,8 @@ public class DatabaseManager {
     public void saveWarps(String dataJson) {
         String sql = "INSERT INTO server_warps (id, data_json) VALUES (1, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, dataJson); ps.executeUpdate();
+            ps.setString(1, dataJson);
+            ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save warps: " + e.getMessage());
         }
@@ -1508,7 +1597,9 @@ public class DatabaseManager {
         String sql = "SELECT data_json FROM server_warps WHERE id = 1";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) return rs.getString("data_json");
+            if (rs.next()) {
+                return rs.getString("data_json");
+            }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load warps: " + e.getMessage());
         }
@@ -1522,7 +1613,8 @@ public class DatabaseManager {
     public void saveLockedContainers(String dataJson) {
         String sql = "INSERT INTO server_locked_containers (id, data_json) VALUES (1, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, dataJson); ps.executeUpdate();
+            ps.setString(1, dataJson);
+            ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save locked containers: " + e.getMessage());
         }
@@ -1532,7 +1624,9 @@ public class DatabaseManager {
         String sql = "SELECT data_json FROM server_locked_containers WHERE id = 1";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) return rs.getString("data_json");
+            if (rs.next()) {
+                return rs.getString("data_json");
+            }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load locked containers: " + e.getMessage());
         }
@@ -1546,7 +1640,8 @@ public class DatabaseManager {
     public void saveGates(String dataJson) {
         String sql = "INSERT INTO server_gates (id, data_json) VALUES (1, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, dataJson); ps.executeUpdate();
+            ps.setString(1, dataJson);
+            ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save gates: " + e.getMessage());
         }
@@ -1556,7 +1651,9 @@ public class DatabaseManager {
         String sql = "SELECT data_json FROM server_gates WHERE id = 1";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) return rs.getString("data_json");
+            if (rs.next()) {
+                return rs.getString("data_json");
+            }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load gates: " + e.getMessage());
         }
@@ -1570,7 +1667,8 @@ public class DatabaseManager {
     public void saveAvatars(String dataJson) {
         String sql = "INSERT INTO server_avatars (id, data_json) VALUES (1, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, dataJson); ps.executeUpdate();
+            ps.setString(1, dataJson);
+            ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save avatars: " + e.getMessage());
         }
@@ -1580,7 +1678,9 @@ public class DatabaseManager {
         String sql = "SELECT data_json FROM server_avatars WHERE id = 1";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) return rs.getString("data_json");
+            if (rs.next()) {
+                return rs.getString("data_json");
+            }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load avatars: " + e.getMessage());
         }
@@ -1594,7 +1694,9 @@ public class DatabaseManager {
     public void saveDominion(UUID id, String rawData) {
         String sql = "INSERT INTO server_dominions (id, raw_data) VALUES (?, ?) ON DUPLICATE KEY UPDATE raw_data=VALUES(raw_data)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, id.toString()); ps.setString(2, rawData); ps.executeUpdate();
+            ps.setString(1, id.toString());
+            ps.setString(2, rawData);
+            ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save dominion " + id + ": " + e.getMessage());
         }
@@ -1605,7 +1707,9 @@ public class DatabaseManager {
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, id.toString());
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getString("raw_data");
+                if (rs.next()) {
+                    return rs.getString("raw_data");
+                }
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load dominion " + id + ": " + e.getMessage());
@@ -1630,7 +1734,8 @@ public class DatabaseManager {
     public void deleteDominion(UUID id) {
         String sql = "DELETE FROM server_dominions WHERE id = ?";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, id.toString()); ps.executeUpdate();
+            ps.setString(1, id.toString());
+            ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to delete dominion " + id + ": " + e.getMessage());
         }
@@ -1639,7 +1744,8 @@ public class DatabaseManager {
     public void deleteDominionPermissions(UUID dominionId) {
         String sql = "DELETE FROM server_dominion_permissions WHERE dominion_id = ?";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, dominionId.toString()); ps.executeUpdate();
+            ps.setString(1, dominionId.toString());
+            ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to delete dominion permissions for " + dominionId + ": " + e.getMessage());
         }
@@ -1648,7 +1754,8 @@ public class DatabaseManager {
     public void deleteDominionPlayerPerms(UUID dominionId) {
         String sql = "DELETE FROM server_dominion_player_perms WHERE dominion_id = ?";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, dominionId.toString()); ps.executeUpdate();
+            ps.setString(1, dominionId.toString());
+            ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to delete dominion player perms for " + dominionId + ": " + e.getMessage());
         }
@@ -1657,7 +1764,8 @@ public class DatabaseManager {
     public void deleteDefendersForDominion(UUID dominionId) {
         String sql = "DELETE FROM server_defenders WHERE dominion_id = ?";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, dominionId.toString()); ps.executeUpdate();
+            ps.setString(1, dominionId.toString());
+            ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to delete defenders for dominion " + dominionId + ": " + e.getMessage());
         }
@@ -1666,7 +1774,9 @@ public class DatabaseManager {
     public void saveDominionPermissions(UUID dominionId, String dataJson) {
         String sql = "INSERT INTO server_dominion_permissions (dominion_id, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, dominionId.toString()); ps.setString(2, dataJson); ps.executeUpdate();
+            ps.setString(1, dominionId.toString());
+            ps.setString(2, dataJson);
+            ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save dominion permissions for " + dominionId + ": " + e.getMessage());
         }
@@ -1691,7 +1801,9 @@ public class DatabaseManager {
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, dominionId.toString());
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getString("data_json");
+                if (rs.next()) {
+                    return rs.getString("data_json");
+                }
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load permissions for dominion " + dominionId + ": " + e.getMessage());
@@ -1704,7 +1816,9 @@ public class DatabaseManager {
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, dominionId.toString());
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getString("data_json");
+                if (rs.next()) {
+                    return rs.getString("data_json");
+                }
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load player perms for dominion " + dominionId + ": " + e.getMessage());
@@ -1715,7 +1829,9 @@ public class DatabaseManager {
     public void saveDominionPlayerPerms(UUID dominionId, String dataJson) {
         String sql = "INSERT INTO server_dominion_player_perms (dominion_id, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, dominionId.toString()); ps.setString(2, dataJson); ps.executeUpdate();
+            ps.setString(1, dominionId.toString());
+            ps.setString(2, dataJson);
+            ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save dominion player perms for " + dominionId + ": " + e.getMessage());
         }
@@ -1738,7 +1854,8 @@ public class DatabaseManager {
     public void deleteDominionPlots(UUID dominionId) {
         String sql = "DELETE FROM server_dominion_plots WHERE dominion_id = ?";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, dominionId.toString()); ps.executeUpdate();
+            ps.setString(1, dominionId.toString());
+            ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to delete dominion plots for " + dominionId + ": " + e.getMessage());
         }
@@ -1747,7 +1864,9 @@ public class DatabaseManager {
     public void saveDominionPlots(UUID dominionId, String dataJson) {
         String sql = "INSERT INTO server_dominion_plots (dominion_id, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, dominionId.toString()); ps.setString(2, dataJson); ps.executeUpdate();
+            ps.setString(1, dominionId.toString());
+            ps.setString(2, dataJson);
+            ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save dominion plots for " + dominionId + ": " + e.getMessage());
         }
@@ -1758,7 +1877,9 @@ public class DatabaseManager {
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, dominionId.toString());
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getString("data_json");
+                if (rs.next()) {
+                    return rs.getString("data_json");
+                }
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load plots for dominion " + dominionId + ": " + e.getMessage());
@@ -1783,7 +1904,9 @@ public class DatabaseManager {
     public void saveOutpost(UUID id, String dataJson) {
         String sql = "INSERT INTO server_outposts (id, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, id.toString()); ps.setString(2, dataJson); ps.executeUpdate();
+            ps.setString(1, id.toString());
+            ps.setString(2, dataJson);
+            ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save outpost " + id + ": " + e.getMessage());
         }
@@ -1806,7 +1929,8 @@ public class DatabaseManager {
     public void deleteOutpost(UUID id) {
         String sql = "DELETE FROM server_outposts WHERE id = ?";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, id.toString()); ps.executeUpdate();
+            ps.setString(1, id.toString());
+            ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to delete outpost " + id + ": " + e.getMessage());
         }
@@ -1815,7 +1939,9 @@ public class DatabaseManager {
     public void saveDefendersForDominion(UUID dominionId, String dataJson) {
         String sql = "INSERT INTO server_defenders (dominion_id, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, dominionId.toString()); ps.setString(2, dataJson); ps.executeUpdate();
+            ps.setString(1, dominionId.toString());
+            ps.setString(2, dataJson);
+            ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save defenders for dominion " + dominionId + ": " + e.getMessage());
         }
@@ -1838,7 +1964,9 @@ public class DatabaseManager {
     public void savePlayerToggles(UUID uuid, String dataJson) {
         String sql = "INSERT INTO player_toggles (uuid, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, uuid.toString()); ps.setString(2, dataJson); ps.executeUpdate();
+            ps.setString(1, uuid.toString());
+            ps.setString(2, dataJson);
+            ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save player toggles for " + uuid + ": " + e.getMessage());
         }
@@ -1863,7 +1991,9 @@ public class DatabaseManager {
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getString("data_json");
+                if (rs.next()) {
+                    return rs.getString("data_json");
+                }
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load player toggles for " + uuid + ": " + e.getMessage());
@@ -1874,7 +2004,9 @@ public class DatabaseManager {
     public void savePlayerCompressible(UUID uuid, String dataJson) {
         String sql = "INSERT INTO player_compressible (uuid, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, uuid.toString()); ps.setString(2, dataJson); ps.executeUpdate();
+            ps.setString(1, uuid.toString());
+            ps.setString(2, dataJson);
+            ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save player compressible for " + uuid + ": " + e.getMessage());
         }
@@ -1897,7 +2029,9 @@ public class DatabaseManager {
     public void savePlayerSentinels(UUID uuid, String dataJson) {
         String sql = "INSERT INTO player_sentinels (uuid, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, uuid.toString()); ps.setString(2, dataJson); ps.executeUpdate();
+            ps.setString(1, uuid.toString());
+            ps.setString(2, dataJson);
+            ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save player sentinels for " + uuid + ": " + e.getMessage());
         }
@@ -1922,7 +2056,9 @@ public class DatabaseManager {
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getString("data_json");
+                if (rs.next()) {
+                    return rs.getString("data_json");
+                }
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load player sentinels for " + uuid + ": " + e.getMessage());
@@ -1933,7 +2069,8 @@ public class DatabaseManager {
     public void saveServerShops(String dataJson) {
         String sql = "INSERT INTO server_shops (id, data_json) VALUES (1, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, dataJson); ps.executeUpdate();
+            ps.setString(1, dataJson);
+            ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save server shops: " + e.getMessage());
         }
@@ -1943,7 +2080,9 @@ public class DatabaseManager {
         String sql = "SELECT data_json FROM server_shops WHERE id = 1";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) return rs.getString("data_json");
+            if (rs.next()) {
+                return rs.getString("data_json");
+            }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load server shops: " + e.getMessage());
         }
@@ -1953,7 +2092,9 @@ public class DatabaseManager {
     public void savePlayerShops(UUID uuid, String dataJson) {
         String sql = "INSERT INTO player_shops (uuid, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, uuid.toString()); ps.setString(2, dataJson); ps.executeUpdate();
+            ps.setString(1, uuid.toString());
+            ps.setString(2, dataJson);
+            ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save player shops for " + uuid + ": " + e.getMessage());
         }
@@ -1976,7 +2117,9 @@ public class DatabaseManager {
     public void savePlayerShopLocation(UUID uuid, String dataJson) {
         String sql = "INSERT INTO player_shop_locations (uuid, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, uuid.toString()); ps.setString(2, dataJson); ps.executeUpdate();
+            ps.setString(1, uuid.toString());
+            ps.setString(2, dataJson);
+            ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save player shop location for " + uuid + ": " + e.getMessage());
         }
@@ -1985,7 +2128,8 @@ public class DatabaseManager {
     public void deletePlayerShopLocation(UUID uuid) {
         String sql = "DELETE FROM player_shop_locations WHERE uuid = ?";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, uuid.toString()); ps.executeUpdate();
+            ps.setString(1, uuid.toString());
+            ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to delete player shop location for " + uuid + ": " + e.getMessage());
         }
@@ -2008,7 +2152,9 @@ public class DatabaseManager {
     public void savePlayerShopCollaborators(UUID uuid, String dataJson) {
         String sql = "INSERT INTO player_shop_collaborators (uuid, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, uuid.toString()); ps.setString(2, dataJson); ps.executeUpdate();
+            ps.setString(1, uuid.toString());
+            ps.setString(2, dataJson);
+            ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save player shop collaborators for " + uuid + ": " + e.getMessage());
         }
@@ -2031,11 +2177,11 @@ public class DatabaseManager {
     public void saveLastLocation(UUID uuid, String server, String world,
                                  double x, double y, double z, float yaw, float pitch) {
         String sql = """
-            INSERT INTO player_last_location (uuid, server, world, x, y, z, yaw, pitch)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE server=VALUES(server), world=VALUES(world),
-            x=VALUES(x), y=VALUES(y), z=VALUES(z), yaw=VALUES(yaw), pitch=VALUES(pitch)
-            """;
+                INSERT INTO player_last_location (uuid, server, world, x, y, z, yaw, pitch)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE server=VALUES(server), world=VALUES(world),
+                x=VALUES(x), y=VALUES(y), z=VALUES(z), yaw=VALUES(yaw), pitch=VALUES(pitch)
+                """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
@@ -2056,7 +2202,9 @@ public class DatabaseManager {
     // server_original_players
     // -------------------------------------------------------------------------
 
-    /** Returns all UUIDs in the original players table. */
+    /**
+     * Returns all UUIDs in the original players table.
+     */
     public List<UUID> loadAllOriginalPlayers() {
         String sql = "SELECT uuid FROM server_original_players";
         List<UUID> result = new ArrayList<>();
@@ -2072,7 +2220,9 @@ public class DatabaseManager {
         return result;
     }
 
-    /** Replaces all rows in server_original_players with the given list. */
+    /**
+     * Replaces all rows in server_original_players with the given list.
+     */
     public void saveAllOriginalPlayers(List<UUID> uuids) {
         try (Connection conn = dataSource.getConnection()) {
             conn.setAutoCommit(false);
@@ -2095,9 +2245,13 @@ public class DatabaseManager {
         }
     }
 
-    /** Adds any UUIDs not already present in server_original_players. Used for one-time file migration. */
+    /**
+     * Adds any UUIDs not already present in server_original_players. Used for one-time file migration.
+     */
     public void mergeOriginalPlayers(List<UUID> uuids) {
-        if (uuids.isEmpty()) return;
+        if (uuids.isEmpty()) {
+            return;
+        }
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(
                      "INSERT IGNORE INTO server_original_players (uuid) VALUES (?)")) {
@@ -2111,7 +2265,9 @@ public class DatabaseManager {
         }
     }
 
-    /** Returns the player's last logout location, or null if none recorded yet. */
+    /**
+     * Returns the player's last logout location, or null if none recorded yet.
+     */
     public LastLocation loadLastLocation(UUID uuid) {
         String sql = "SELECT server, world, x, y, z, yaw, pitch FROM player_last_location WHERE uuid = ?";
         try (Connection conn = dataSource.getConnection();
@@ -2140,7 +2296,9 @@ public class DatabaseManager {
     // Brew unlocks (shared across servers)
     // -------------------------------------------------------------------------
 
-    /** Loads all brew unlocks for all players from MySQL. */
+    /**
+     * Loads all brew unlocks for all players from MySQL.
+     */
     public Map<UUID, Set<String>> loadAllBrewUnlocks() {
         String sql = "SELECT uuid, recipe_id FROM player_brew_unlocks";
         Map<UUID, Set<String>> result = new HashMap<>();
@@ -2157,7 +2315,9 @@ public class DatabaseManager {
         return result;
     }
 
-    /** Persists a single brew unlock for the given player. Uses INSERT IGNORE so duplicates are silently skipped. */
+    /**
+     * Persists a single brew unlock for the given player. Uses INSERT IGNORE so duplicates are silently skipped.
+     */
     public void saveBrewUnlock(UUID uuid, String recipeId) {
         String sql = "INSERT IGNORE INTO player_brew_unlocks (uuid, recipe_id) VALUES (?, ?)";
         try (Connection conn = dataSource.getConnection();
@@ -2170,9 +2330,13 @@ public class DatabaseManager {
         }
     }
 
-    /** Batch-inserts a set of brew unlocks for one player. Used for one-time YAML→DB migration. */
+    /**
+     * Batch-inserts a set of brew unlocks for one player. Used for one-time YAML→DB migration.
+     */
     public void saveBrewUnlocksBulk(UUID uuid, Set<String> recipeIds) {
-        if (recipeIds.isEmpty()) return;
+        if (recipeIds.isEmpty()) {
+            return;
+        }
         String sql = "INSERT IGNORE INTO player_brew_unlocks (uuid, recipe_id) VALUES (?, ?)";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -2193,10 +2357,10 @@ public class DatabaseManager {
 
     public void saveJobData(UUID uuid, String json) {
         String sql = """
-            INSERT INTO player_jobs (uuid, job_data_json)
-            VALUES (?, ?)
-            ON DUPLICATE KEY UPDATE job_data_json=VALUES(job_data_json)
-            """;
+                INSERT INTO player_jobs (uuid, job_data_json)
+                VALUES (?, ?)
+                ON DUPLICATE KEY UPDATE job_data_json=VALUES(job_data_json)
+                """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
@@ -2213,10 +2377,68 @@ public class DatabaseManager {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getString("job_data_json");
+                if (rs.next()) {
+                    return rs.getString("job_data_json");
+                }
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load job data for " + uuid + ": " + e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * Row returned by {@link #loadAllJobEntries()}.
+     */
+    public record JobTopEntry(UUID uuid, String username, String jobDataJson) {
+    }
+
+    /**
+     * Returns all job rows joined with player usernames for the /jobs top command.
+     */
+    public List<JobTopEntry> loadAllJobEntries() {
+        String sql = "SELECT pj.uuid, COALESCE(ap.username, '') AS username, pj.job_data_json " +
+                "FROM player_jobs pj " +
+                "LEFT JOIN aranarth_players ap ON ap.uuid = pj.uuid";
+        List<JobTopEntry> result = new ArrayList<>();
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                String uuidStr = rs.getString("uuid");
+                String json = rs.getString("job_data_json");
+                if (uuidStr == null || json == null || json.isEmpty()) {
+                    continue;
+                }
+                String username = rs.getString("username");
+                try {
+                    result.add(new JobTopEntry(UUID.fromString(uuidStr), username != null ? username : "", json));
+                } catch (IllegalArgumentException ignored) {
+                }
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load job entries: " + e.getMessage());
+        }
+        return result;
+    }
+
+    /**
+     * Returns the job_data_json for the given username (case-insensitive), or null if not found.
+     */
+    public String loadJobDataByUsername(String username) {
+        String sql = "SELECT pj.job_data_json FROM player_jobs pj " +
+                "JOIN aranarth_players ap ON ap.uuid = pj.uuid " +
+                "WHERE LOWER(ap.username) = LOWER(?)";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, username);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("job_data_json");
+                }
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load job data for username " + username + ": " + e.getMessage());
         }
         return null;
     }
@@ -2227,10 +2449,10 @@ public class DatabaseManager {
 
     public void saveBlacklistPresets(UUID uuid, int activePresetIndex, String presetDataJson) {
         String sql = """
-            INSERT INTO player_blacklist_presets (uuid, active_preset_index, preset_data_json)
-            VALUES (?, ?, ?)
-            ON DUPLICATE KEY UPDATE active_preset_index=VALUES(active_preset_index), preset_data_json=VALUES(preset_data_json)
-            """;
+                INSERT INTO player_blacklist_presets (uuid, active_preset_index, preset_data_json)
+                VALUES (?, ?, ?)
+                ON DUPLICATE KEY UPDATE active_preset_index=VALUES(active_preset_index), preset_data_json=VALUES(preset_data_json)
+                """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
@@ -2242,7 +2464,9 @@ public class DatabaseManager {
         }
     }
 
-    /** Returns [activePresetIndex, presetDataJson] or null if not found. */
+    /**
+     * Returns [activePresetIndex, presetDataJson] or null if not found.
+     */
     public Object[] loadBlacklistPresets(UUID uuid) {
         String sql = "SELECT active_preset_index, preset_data_json FROM player_blacklist_presets WHERE uuid = ?";
         try (Connection conn = dataSource.getConnection();
@@ -2250,7 +2474,7 @@ public class DatabaseManager {
             ps.setString(1, uuid.toString());
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return new Object[]{ rs.getInt("active_preset_index"), rs.getString("preset_data_json") };
+                    return new Object[]{rs.getInt("active_preset_index"), rs.getString("preset_data_json")};
                 }
             }
         } catch (SQLException e) {
@@ -2259,7 +2483,9 @@ public class DatabaseManager {
         return null;
     }
 
-    /** Returns uuid -> [activePresetIndex, presetDataJson] for all rows. */
+    /**
+     * Returns uuid -> [activePresetIndex, presetDataJson] for all rows.
+     */
     public Map<UUID, Object[]> loadAllBlacklistPresets() {
         String sql = "SELECT uuid, active_preset_index, preset_data_json FROM player_blacklist_presets";
         Map<UUID, Object[]> result = new HashMap<>();
@@ -2268,7 +2494,7 @@ public class DatabaseManager {
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 result.put(UUID.fromString(rs.getString("uuid")),
-                        new Object[]{ rs.getInt("active_preset_index"), rs.getString("preset_data_json") });
+                        new Object[]{rs.getInt("active_preset_index"), rs.getString("preset_data_json")});
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all blacklist presets: " + e.getMessage());

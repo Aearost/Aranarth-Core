@@ -31,6 +31,7 @@ Major Features
 [~] Decreased dominion food/balance costs and fixed food persistence after daily/penalty consumption
 [+] Added colored nickname perk to vote shop and store
 [+] Quest selection now prioritizes quests that match the player's active jobs, filling with general quests when needed
+[+] Implemented /jobs top, /jobs who, and admin job commands
 
 Minor Features
 [~] Fixed issue where the alchemist job was not providing xp when shift-clicking ingredients into a brewing stand
