@@ -450,11 +450,15 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
     }
 
     /**
-     * Attempts to register the block as the pending water source for the player.
-     * Must be water, ice, or snow.
+     * Attempts to register the block as the pending water or plant source for the player.
+     * Must be water, ice, snow, or a plant material (if the player can plantbend).
      */
     public static void trySelectSource(final Player player, final Block block) {
-        if (!VALID_SOURCES.contains(block.getType())) {
+        BendingPlayer bp = BendingPlayer.getBendingPlayer(player);
+        boolean isWater = VALID_SOURCES.contains(block.getType());
+        boolean isPlant = !isWater && bp != null && bp.canPlantbend()
+                && AranarthBendingUtils.isPlantSource(block.getType());
+        if (!isWater && !isPlant) {
             return;
         }
         if (!block.getWorld().equals(player.getWorld())) {
@@ -463,7 +467,6 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
         if (block.getLocation().distance(player.getLocation()) > SOURCE_RANGE) {
             return;
         }
-        BendingPlayer bp = BendingPlayer.getBendingPlayer(player);
         if (bp != null && bp.isOnCooldown("CorruptingHelix")) {
             return;
         }

@@ -321,11 +321,15 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
     }
 
     /**
-     * Attempts to register the block as the pending water source for the player.
-     * Must be a water, ice, or snow block within range.
+     * Attempts to register the block as the pending water or plant source for the player.
+     * Must be a water, ice, snow, or plant block within range (plant requires canPlantbend).
      */
     public static void trySelectSource(final Player player, final Block block) {
-        if (!VALID_SOURCES.contains(block.getType())) {
+        final BendingPlayer bp = BendingPlayer.getBendingPlayer(player);
+        boolean isWater = VALID_SOURCES.contains(block.getType());
+        boolean isPlant = !isWater && bp != null && bp.canPlantbend()
+                && AranarthBendingUtils.isPlantSource(block.getType());
+        if (!isWater && !isPlant) {
             return;
         }
         if (!block.getWorld().equals(player.getWorld())) {
@@ -335,7 +339,6 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
             return;
         }
 
-        final BendingPlayer bp = BendingPlayer.getBendingPlayer(player);
         if (bp != null && bp.isOnCooldown("MendingWaters")) {
             return;
         }

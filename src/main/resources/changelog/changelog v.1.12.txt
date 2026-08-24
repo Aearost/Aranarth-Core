@@ -103,6 +103,7 @@ Minor Features
 [+] Added the missing IceSkate passive to waterbenders
 [~] Fixed stacking potion effects applying in the arena world
 [+] Add 3-hit cap per target for JetBolt damage ticks
+[+] Allowed HealingHelix, CorruptingHelix, and MendingWaters to be sourced from plants
 
 Backend Code Changes
 -
