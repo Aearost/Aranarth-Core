@@ -1,64 +1,37 @@
 package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.abilities.airbending.soundbending.Amplification;
-import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralProjection;
-import com.aearost.aranarthcore.abilities.airbending.soundbending.DeafeningScream;
-import com.aearost.aranarthcore.abilities.airbending.soundbending.SonicClap;
-import com.aearost.aranarthcore.abilities.airbending.soundbending.SonicPulse;
-import com.aearost.aranarthcore.abilities.airbending.soundbending.SonicBoom;
-import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
-import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralShot;
+import com.aearost.aranarthcore.abilities.airbending.soundbending.*;
+import com.aearost.aranarthcore.abilities.airbending.spiritual.*;
+import com.aearost.aranarthcore.abilities.chiblocking.DaggerThrow;
+import com.aearost.aranarthcore.abilities.chiblocking.DaggerVolley;
+import com.aearost.aranarthcore.abilities.chiblocking.HighJump;
+import com.aearost.aranarthcore.abilities.earthbending.combo.CableSlash;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.Eruption;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.MagmaGlaives;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.MagmaWave;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.combo.MoltenBlast;
-import com.aearost.aranarthcore.abilities.chiblocking.DaggerThrow;
-import com.aearost.aranarthcore.abilities.chiblocking.DaggerVolley;
-import com.aearost.aranarthcore.abilities.chiblocking.HighJump;
-import com.aearost.aranarthcore.abilities.earthbending.metalbending.CableWhip;
-import com.aearost.aranarthcore.abilities.earthbending.metalbending.CableThrash;
-import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalBlade;
-import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalShots;
-import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalShred;
-import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalStrips;
+import com.aearost.aranarthcore.abilities.earthbending.metalbending.*;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.Burial;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.SandWave;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.Sandstorm;
-import com.aearost.aranarthcore.abilities.earthbending.combo.CableSlash;
 import com.aearost.aranarthcore.abilities.firebending.combustion.Barrage;
 import com.aearost.aranarthcore.abilities.firebending.combustion.CombustionStrike;
 import com.aearost.aranarthcore.abilities.firebending.combustion.JetFumes;
 import com.aearost.aranarthcore.abilities.firebending.combustion.NoxiousFumes;
-import com.aearost.aranarthcore.abilities.firebending.lightningbending.Discharge;
-import com.aearost.aranarthcore.abilities.firebending.lightningbending.ElectricStrike;
-import com.aearost.aranarthcore.abilities.firebending.lightningbending.JetBolt;
-import com.aearost.aranarthcore.abilities.firebending.lightningbending.Jolt;
-import com.aearost.aranarthcore.abilities.firebending.lightningbending.Lightning;
-import com.aearost.aranarthcore.abilities.firebending.lightningbending.LightningBurst;
-import com.aearost.aranarthcore.abilities.firebending.lightningbending.Static;
-import com.aearost.aranarthcore.abilities.airbending.spiritual.AngeredSpirits;
-import com.aearost.aranarthcore.abilities.airbending.spiritual.EnergyBurst;
-import com.aearost.aranarthcore.abilities.airbending.spiritual.LightOfRaava;
-import com.aearost.aranarthcore.abilities.airbending.spiritual.PastLives;
+import com.aearost.aranarthcore.abilities.firebending.lightningbending.*;
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.BloodFreeze;
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.BloodGrip;
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.Disalignment;
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.LifeRip;
+import com.aearost.aranarthcore.abilities.waterbending.combo.IceDiscs;
+import com.aearost.aranarthcore.abilities.waterbending.combo.IceShards;
 import com.aearost.aranarthcore.abilities.waterbending.healing.CorruptingHelix;
 import com.aearost.aranarthcore.abilities.waterbending.healing.HealingHelix;
 import com.aearost.aranarthcore.abilities.waterbending.healing.MendingWaters;
-import com.projectkorra.projectkorra.airbending.AirBlast;
-import com.projectkorra.projectkorra.ability.BloodAbility;
-import com.projectkorra.projectkorra.ability.HealingAbility;
-import com.aearost.aranarthcore.abilities.waterbending.plantbending.LeafScythe;
-import com.aearost.aranarthcore.abilities.waterbending.plantbending.RazorLeaves;
-import com.aearost.aranarthcore.abilities.waterbending.plantbending.Regrowth;
-import com.aearost.aranarthcore.abilities.waterbending.plantbending.RootSnare;
-import com.aearost.aranarthcore.abilities.waterbending.plantbending.ToxicSpores;
-import com.aearost.aranarthcore.abilities.waterbending.plantbending.VineWhip;
-import com.aearost.aranarthcore.abilities.waterbending.combo.IceDiscs;
-import com.aearost.aranarthcore.abilities.waterbending.combo.IceShards;
+import com.aearost.aranarthcore.abilities.waterbending.plantbending.*;
+import com.aearost.aranarthcore.enums.FireType;
+import com.aearost.aranarthcore.event.listener.misc.FireParticleListener;
 import com.aearost.aranarthcore.event.mob.MountListener;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
@@ -67,33 +40,13 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.ShopIslandUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
-import com.projectkorra.projectkorra.ability.Ability;
-import com.projectkorra.projectkorra.ability.AirAbility;
-import com.projectkorra.projectkorra.ability.AvatarAbility;
-import com.projectkorra.projectkorra.ability.ChiAbility;
-import com.projectkorra.projectkorra.ability.CoreAbility;
-import com.projectkorra.projectkorra.ability.EarthAbility;
-import com.projectkorra.projectkorra.ability.FireAbility;
-import com.projectkorra.projectkorra.ability.LavaAbility;
-import com.projectkorra.projectkorra.ability.PassiveAbility;
-import com.projectkorra.projectkorra.ability.PlantAbility;
-import com.projectkorra.projectkorra.ability.SandAbility;
-import com.projectkorra.projectkorra.ability.SpiritualAbility;
-import com.projectkorra.projectkorra.ability.WaterAbility;
-import com.projectkorra.projectkorra.event.AbilityDamageEntityEvent;
-import com.projectkorra.projectkorra.event.AbilityProgressEvent;
-import com.projectkorra.projectkorra.event.AbilityStartEvent;
-import com.projectkorra.projectkorra.event.BendingReloadEvent;
-import com.projectkorra.projectkorra.event.PlayerCooldownChangeEvent;
+import com.projectkorra.projectkorra.ability.*;
+import com.projectkorra.projectkorra.airbending.AirBlast;
+import com.projectkorra.projectkorra.event.*;
 import com.projectkorra.projectkorra.util.TempBlock;
-import org.bukkit.Bukkit;
-import org.bukkit.FluidCollisionMode;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -102,16 +55,12 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.EntityPickupItemEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.*;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.*;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.lang.reflect.Field;
@@ -125,6 +74,7 @@ import java.util.UUID;
 public class AranarthCoreBendingListener implements Listener {
 
     private static Field airBlastOriginsField;
+
     static {
         try {
             airBlastOriginsField = AirBlast.class.getDeclaredField("ORIGINS");
@@ -136,7 +86,9 @@ public class AranarthCoreBendingListener implements Listener {
 
     @SuppressWarnings("unchecked")
     private static Map<Player, Location> getAirBlastOrigins() {
-        if (airBlastOriginsField == null) return null;
+        if (airBlastOriginsField == null) {
+            return null;
+        }
         try {
             return (Map<Player, Location>) airBlastOriginsField.get(null);
         } catch (IllegalAccessException e) {
@@ -151,7 +103,9 @@ public class AranarthCoreBendingListener implements Listener {
 
     private static void airBlastClearOrigin(Player player) {
         Map<Player, Location> origins = getAirBlastOrigins();
-        if (origins != null) origins.remove(player);
+        if (origins != null) {
+            origins.remove(player);
+        }
     }
 
     public AranarthCoreBendingListener(AranarthCore plugin) {
@@ -298,6 +252,34 @@ public class AranarthCoreBendingListener implements Listener {
         }
         if (isBendingRestricted(player, player.getLocation())) {
             e.setCancelled(true);
+        }
+    }
+
+    /**
+     * Registers the initial position of a fire ability as a fire source immediately on start,
+     * before the per-tick scheduler can pick it up. This eliminates the 1-tick gap on the
+     * first frame of a new ability.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onFireAbilityStart(final AbilityStartEvent e) {
+        if (!(e.getAbility() instanceof FireAbility)) {
+            return;
+        }
+        Player player = e.getAbility().getPlayer();
+        if (player == null) {
+            return;
+        }
+        AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
+        if (ap == null || ap.getFireType() == FireType.DEFAULT) {
+            return;
+        }
+        FireType ft = ap.getFireType();
+        for (Location loc : ((FireAbility) e.getAbility()).getLocations()) {
+            if (loc == null) {
+                continue;
+            }
+            FireParticleListener.registerFireSource(loc, ft);
+            FireParticleListener.registerFireSource(loc.clone().add(0, 1, 0), ft);
         }
     }
 
