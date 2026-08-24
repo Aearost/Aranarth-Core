@@ -1046,6 +1046,42 @@ public class QuestUtils {
         sessionModifiedUuids.add(uuid);
     }
 
+    /**
+     * If the player has an active weekly quest that rewards the given brew recipe and has not yet
+     * been claimed, replaces that quest's item reward with a randomly generated money reward.
+     * Progress and completion state for the slot are preserved.
+     *
+     * @return true if a quest was updated, false if no matching unclaimed quest was found in memory
+     */
+    public static boolean regenerateWeeklyQuestIfBrewReward(UUID uuid, int rank, String recipeId) {
+        List<Quest> active = playerActiveWeeklyQuests.get(uuid);
+        if (active == null) return false;
+
+        boolean[] claimed = playerWeeklyClaimed.get(uuid);
+
+        for (int i = 0; i < active.size(); i++) {
+            Quest quest = active.get(i);
+            if (!quest.hasItemReward()) continue;
+            if (claimed != null && i < claimed.length && claimed[i]) continue;
+
+            String questRecipeId = quest.getItemReward().hasItemMeta()
+                    ? quest.getItemReward().getItemMeta().getPersistentDataContainer()
+                            .get(BREW_RECIPE, PersistentDataType.STRING)
+                    : null;
+            if (!recipeId.equals(questRecipeId)) continue;
+
+            Quest regenerated = quest.withItemReward(null)
+                    .withReward(generateRandomReward(rank, QuestType.WEEKLY, quest.getTaskType()));
+            List<Quest> updated = new ArrayList<>(active);
+            updated.set(i, regenerated);
+            playerActiveWeeklyQuests.put(uuid, updated);
+            locallyModifiedUuids.add(uuid);
+            sessionModifiedUuids.add(uuid);
+            return true;
+        }
+        return false;
+    }
+
     public static void setPlayerActiveDailyQuests(UUID uuid, List<Quest> quests) {
         playerActiveDailyQuests.put(uuid, quests);
     }

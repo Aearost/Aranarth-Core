@@ -109,6 +109,8 @@ Minor Features
 [~] Fixed VineWhip bypassing arena damage cap by using DamageHandler.damageEntity()
 [+] Added incantation names to the chat unscrambler
 [~] Decreased chat unscrambler reward amount at later ranks
+[~] Separated "ming hua" into two words for chat unscrambler
+[+] Added /brewbook unlock as an admin command
 
 Backend Code Changes
 -
