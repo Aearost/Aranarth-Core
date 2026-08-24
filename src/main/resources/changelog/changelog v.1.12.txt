@@ -111,6 +111,7 @@ Minor Features
 [~] Decreased chat unscrambler reward amount at later ranks
 [~] Separated "ming hua" into two words for chat unscrambler
 [+] Added /brewbook unlock as an admin command
+[+] Added the missing fire resistance to all Aranarthium armour pieces
 
 Backend Code Changes
 -
