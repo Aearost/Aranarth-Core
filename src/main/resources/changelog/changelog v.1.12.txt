@@ -105,6 +105,7 @@ Minor Features
 [+] Add 3-hit cap per target for JetBolt damage ticks
 [+] Allowed HealingHelix, CorruptingHelix, and MendingWaters to be sourced from plants
 [~] Capitalized the first letter of each word when displaying unscrambled answers
+[~] Added cross-server /ac invsee support
 
 Backend Code Changes
 -

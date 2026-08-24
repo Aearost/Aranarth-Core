@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiInvsee;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -13,6 +14,7 @@ import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
@@ -51,8 +53,10 @@ public class InvseeListener implements Listener {
         Player target = Bukkit.getPlayer(targetUUID);
         if (target == null) {
             e.setCancelled(true);
-            viewer.closeInventory();
-            viewer.sendMessage(ChatUtils.chatMessage("&cThis player is no longer online"));
+            if (!GuiInvsee.isRemote(e.getInventory())) {
+                viewer.closeInventory();
+                viewer.sendMessage(ChatUtils.chatMessage("&cThis player is no longer online"));
+            }
             return;
         }
 
@@ -127,7 +131,15 @@ public class InvseeListener implements Listener {
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent e) {
         if (isInvsee(e.getView().getTitle())) {
-            GuiInvsee.close(e.getInventory());
+            Inventory inv = e.getInventory();
+            if (GuiInvsee.isRemote(inv) && NetworkManager.isActive()) {
+                UUID targetUuid = GuiInvsee.getOpenInvsees().get(inv);
+                if (targetUuid != null) {
+                    NetworkManager.getInstance().publishInvseeUnwatch(
+                            e.getPlayer().getUniqueId(), targetUuid);
+                }
+            }
+            GuiInvsee.close(inv);
         }
     }
 
@@ -174,7 +186,12 @@ public class InvseeListener implements Listener {
     }
 
     private void scheduleRefresh(Player target) {
-        Bukkit.getScheduler().runTask(plugin, () -> GuiInvsee.refreshForTarget(target));
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            GuiInvsee.refreshForTarget(target);
+            if (NetworkManager.isActive()) {
+                NetworkManager.getInstance().publishRemoteInvseeUpdate(target);
+            }
+        });
     }
 
     private void handleLeft(InventoryClickEvent e, Player target, int slot,

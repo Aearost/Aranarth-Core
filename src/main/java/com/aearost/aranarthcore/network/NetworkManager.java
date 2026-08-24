@@ -87,6 +87,10 @@ public class NetworkManager {
     public static final String CH_OUTPOST_UPDATE = "aranarth:outpost_update";
     public static final String CH_JOB_UPDATE = "aranarth:job_update";
     public static final String CH_VOTE_AWARD = "aranarth:vote_award";
+    public static final String CH_INVSEE_REQUEST = "aranarth:invsee_request";
+    public static final String CH_INVSEE_RESPONSE = "aranarth:invsee_response";
+    public static final String CH_INVSEE_UPDATE = "aranarth:invsee_update";
+    public static final String CH_INVSEE_UNWATCH = "aranarth:invsee_unwatch";
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
     private static final String KEY_RETURN_LOC = "return_loc:";
@@ -122,6 +126,12 @@ public class NetworkManager {
      * Pending cross-server TP requests received from another server.
      */
     private final Map<UUID, CrossServerTpContext> pendingCrossServerRequests = new ConcurrentHashMap<>();
+    /**
+     * Tracks viewer UUIDs watching each local target player's inventory from another server.
+     * Keyed by target UUID. Populated by handleInvseeRequest, cleared on unwatch or target quit.
+     */
+    private final Map<UUID, Set<UUID>> remoteInvseeWatchers = new ConcurrentHashMap<>();
+
     /**
      * Cross-server /back locations for players who arrived from another server.
      * Format: "serverKey|world|x|y|z|yaw|pitch"
@@ -334,6 +344,10 @@ public class NetworkManager {
             case CH_OUTPOST_UPDATE -> handleOutpostUpdate(json);
             case CH_JOB_UPDATE -> handleJobUpdate(json);
             case CH_VOTE_AWARD -> handleVoteAward(json);
+            case CH_INVSEE_REQUEST -> handleInvseeRequest(json);
+            case CH_INVSEE_RESPONSE -> handleInvseeResponse(json);
+            case CH_INVSEE_UPDATE -> handleInvseeUpdate(json);
+            case CH_INVSEE_UNWATCH -> handleInvseeUnwatch(json);
         }
     }
 
@@ -414,6 +428,9 @@ public class NetworkManager {
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
                 db.removeRosterEntry(uuid)
         );
+
+        // Clear any remote invsee watchers for this player
+        remoteInvseeWatchers.remove(uuid);
 
         JsonObject json = new JsonObject();
         json.addProperty("uuid", uuid.toString());
@@ -1352,6 +1369,9 @@ public class NetworkManager {
 
         UUID uuid = UUID.fromString(json.get("uuid").getAsString());
         remoteRoster.remove(uuid);
+
+        // Close any remote invsee GUIs local players have open for this player
+        com.aearost.aranarthcore.gui.GuiInvsee.closeAllRemoteFor(uuid);
         // Guard: if the player just transferred to THIS server, their vanilla tab entry is
         // already present - removing it would blank their skin and hide them from their own tab.
         if (Bukkit.getPlayer(uuid) == null) {
@@ -2154,6 +2174,185 @@ public class NetworkManager {
         long timestamp = json.get("timestamp").getAsLong();
         AranarthUtils.addVote(new AranarthVote(uuid, amount, timestamp));
         Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[VOTE] Received cross-server vote award for " + uuid + ": +" + amount + " points");
+    }
+
+    /**
+     * Requests a snapshot of a remote player's inventory and registers the viewer as a live watcher.
+     */
+    public void publishInvseeRequest(UUID viewerUuid, UUID targetUuid) {
+        JsonObject json = new JsonObject();
+        json.addProperty("fromServer", thisServer);
+        json.addProperty("viewerUuid", viewerUuid.toString());
+        json.addProperty("targetUuid", targetUuid.toString());
+        publish(CH_INVSEE_REQUEST, json);
+    }
+
+    /**
+     * Notifies the target's server that a viewer has closed their remote invsee GUI.
+     */
+    public void publishInvseeUnwatch(UUID viewerUuid, UUID targetUuid) {
+        JsonObject json = new JsonObject();
+        json.addProperty("viewerUuid", viewerUuid.toString());
+        json.addProperty("targetUuid", targetUuid.toString());
+        publish(CH_INVSEE_UNWATCH, json);
+    }
+
+    /**
+     * Publishes a live inventory update for all remote viewers watching the given target.
+     * Must be called on the main thread.
+     */
+    public void publishRemoteInvseeUpdate(Player target) {
+        Set<UUID> watchers = remoteInvseeWatchers.get(target.getUniqueId());
+        if (watchers == null || watchers.isEmpty()) return;
+        if (!target.isOnline()) {
+            remoteInvseeWatchers.remove(target.getUniqueId());
+            return;
+        }
+
+        try {
+            String serialized = com.aearost.aranarthcore.utils.ItemUtils.itemStackArrayToBase64(snapshotGuiItems(target));
+            JsonObject json = new JsonObject();
+            json.addProperty("targetUuid", target.getUniqueId().toString());
+            json.addProperty("items", serialized);
+            publish(CH_INVSEE_UPDATE, json);
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+                    + "Failed to serialize remote invsee update for " + target.getName() + ": " + e.getMessage());
+        }
+    }
+
+    public boolean hasRemoteWatchers(UUID targetUuid) {
+        Set<UUID> watchers = remoteInvseeWatchers.get(targetUuid);
+        return watchers != null && !watchers.isEmpty();
+    }
+
+    /**
+     * Received on the server that holds the target player.
+     * Registers the viewer, serializes the current inventory, and sends it back.
+     */
+    private void handleInvseeRequest(JsonObject json) {
+        String fromServer = json.get("fromServer").getAsString();
+        if (fromServer.equals(thisServer)) {
+            return;
+        }
+
+        UUID viewerUuid = UUID.fromString(json.get("viewerUuid").getAsString());
+        UUID targetUuid = UUID.fromString(json.get("targetUuid").getAsString());
+
+        Player target = Bukkit.getPlayer(targetUuid);
+        if (target == null) {
+            return;
+        }
+
+        // Register as a live watcher
+        remoteInvseeWatchers.computeIfAbsent(targetUuid, k -> ConcurrentHashMap.newKeySet()).add(viewerUuid);
+
+        try {
+            String serialized = com.aearost.aranarthcore.utils.ItemUtils.itemStackArrayToBase64(snapshotGuiItems(target));
+            JsonObject response = new JsonObject();
+            response.addProperty("targetServer", fromServer);
+            response.addProperty("viewerUuid", viewerUuid.toString());
+            response.addProperty("targetUuid", targetUuid.toString());
+            response.addProperty("targetName", target.getName());
+            response.addProperty("items", serialized);
+            publish(CH_INVSEE_RESPONSE, response);
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+                    + "Failed to serialize inventory for remote invsee: " + e.getMessage());
+        }
+    }
+
+    /** Received on the target's server when a viewer closes their remote invsee GUI. */
+    private void handleInvseeUnwatch(JsonObject json) {
+        UUID viewerUuid = UUID.fromString(json.get("viewerUuid").getAsString());
+        UUID targetUuid = UUID.fromString(json.get("targetUuid").getAsString());
+        Set<UUID> watchers = remoteInvseeWatchers.get(targetUuid);
+        if (watchers != null) {
+            watchers.remove(viewerUuid);
+            if (watchers.isEmpty()) {
+                remoteInvseeWatchers.remove(targetUuid);
+            }
+        }
+    }
+
+    /** Received on the viewer's server. Deserializes the inventory snapshot and opens the GUI. */
+    private void handleInvseeResponse(JsonObject json) {
+        String targetServer = json.get("targetServer").getAsString();
+        if (!targetServer.equals(thisServer)) {
+            return;
+        }
+
+        UUID viewerUuid = UUID.fromString(json.get("viewerUuid").getAsString());
+        UUID targetUuid = UUID.fromString(json.get("targetUuid").getAsString());
+        String targetName = json.get("targetName").getAsString();
+        String serialized = json.get("items").getAsString();
+
+        deserializeAndApply(serialized, targetUuid, guiItems -> {
+            Player viewer = Bukkit.getPlayer(viewerUuid);
+            if (viewer != null) {
+                com.aearost.aranarthcore.gui.GuiInvsee.openRemote(viewer, targetUuid, targetName, guiItems);
+            } else {
+                // Viewer left before response arrived - send unwatch so target's server cleans up
+                publishInvseeUnwatch(viewerUuid, targetUuid);
+            }
+        }, () -> {
+            Player viewer = Bukkit.getPlayer(viewerUuid);
+            if (viewer != null) {
+                viewer.sendMessage(com.aearost.aranarthcore.utils.ChatUtils.chatMessage(
+                        "&cFailed to load that player's inventory"));
+            }
+        });
+    }
+
+    /** Received on the viewer's server. Updates the open remote invsee GUI in-place. */
+    private void handleInvseeUpdate(JsonObject json) {
+        UUID targetUuid = UUID.fromString(json.get("targetUuid").getAsString());
+        if (!com.aearost.aranarthcore.gui.GuiInvsee.hasRemoteInvseeOpen(targetUuid)) {
+            return;
+        }
+        String serialized = json.get("items").getAsString();
+        deserializeAndApply(serialized, targetUuid,
+                guiItems -> com.aearost.aranarthcore.gui.GuiInvsee.refreshRemoteForTarget(targetUuid, guiItems),
+                null);
+    }
+
+    /** Deserializes a base64 inventory snapshot async, then calls onSuccess/onError on the main thread. */
+    private void deserializeAndApply(String serialized, UUID targetUuid,
+                                     java.util.function.Consumer<org.bukkit.inventory.ItemStack[]> onSuccess,
+                                     Runnable onError) {
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+            try {
+                org.bukkit.inventory.ItemStack[] guiItems =
+                        com.aearost.aranarthcore.utils.ItemUtils.itemStackArrayFromBase64(serialized);
+                Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> onSuccess.accept(guiItems));
+            } catch (Exception e) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+                        + "Failed to deserialize remote invsee for " + targetUuid + ": " + e.getMessage());
+                if (onError != null) {
+                    Bukkit.getScheduler().runTask(AranarthCore.getInstance(), onError);
+                }
+            }
+        });
+    }
+
+    /**
+     * Builds the 45-slot GUI item array from a player's current inventory.
+     * Items are cloned to produce a safe snapshot. Must be called on the main thread.
+     */
+    private static org.bukkit.inventory.ItemStack[] snapshotGuiItems(Player target) {
+        org.bukkit.inventory.ItemStack[] items = new org.bukkit.inventory.ItemStack[45];
+        items[1] = clone(target.getInventory().getHelmet());
+        items[2] = clone(target.getInventory().getChestplate());
+        items[3] = clone(target.getInventory().getLeggings());
+        items[4] = clone(target.getInventory().getBoots());
+        items[6] = clone(target.getInventory().getItemInOffHand());
+        for (int i = 9; i <= 35; i++) items[i] = clone(target.getInventory().getItem(i));
+        for (int i = 0; i <= 8; i++) items[i + 36] = clone(target.getInventory().getItem(i));
+        return items;
+    }
+
+    private static org.bukkit.inventory.ItemStack clone(org.bukkit.inventory.ItemStack item) {
+        return (item == null) ? null : item.clone();
     }
 
     /**
