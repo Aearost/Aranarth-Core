@@ -284,7 +284,7 @@ public class ChatGameUtils {
             if (currentAnswer == null) {
                 return false;
             }
-            if (!message.equalsIgnoreCase(currentAnswer)) {
+            if (!message.replaceAll("\\s+", "").equalsIgnoreCase(currentAnswer.replaceAll("\\s+", ""))) {
                 return false;
             }
 
@@ -727,8 +727,29 @@ public class ChatGameUtils {
     }
 
     private static String scramble(String word) {
+        String[] parts = word.split(" ");
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < parts.length; i++) {
+            String scrambledPart = scramblePart(parts[i]);
+            if (i == 0) {
+                result.append(scrambledPart);
+            } else {
+                // Capitalize the first letter of each subsequent word component
+                result.append(Character.toUpperCase(scrambledPart.charAt(0)));
+                if (scrambledPart.length() > 1) result.append(scrambledPart.substring(1));
+            }
+        }
+        // Retry if the scramble is identical to the original joined word
+        String joined = word.replaceAll("\\s+", "");
+        if (result.toString().equalsIgnoreCase(joined) && joined.length() > 1) {
+            return scramble(word);
+        }
+        return result.toString();
+    }
+
+    private static String scramblePart(String part) {
         List<Character> chars = new ArrayList<>();
-        for (char c : word.toCharArray()) {
+        for (char c : part.toCharArray()) {
             chars.add(c);
         }
         String scrambled;
@@ -741,7 +762,7 @@ public class ChatGameUtils {
             }
             scrambled = sb.toString();
             attempts++;
-        } while (scrambled.equals(word) && attempts < 20);
+        } while (scrambled.equals(part) && attempts < 20);
         return scrambled;
     }
 }

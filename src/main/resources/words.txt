@@ -71,7 +71,7 @@ healing
 spirit
 chakra
 avatar
-avatarstate
+avatar state
 
 # Aranarth armor sets
 aranarth
@@ -108,12 +108,12 @@ vindicator
 evoker
 pillager
 silverfish
-magmacube
+magma cube
 slime
-flyingbison
-polarbeardog
-komodorhino
-badgermole
+flying bison
+polar bear dog
+komodo rhino
+badger mole
 
 # Minecraft blocks and materials
 obsidian
