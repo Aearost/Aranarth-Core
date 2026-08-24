@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.network;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
+import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.AranarthVote;
@@ -57,6 +58,7 @@ public class NetworkManager {
     public static final String CH_TRANSFER = "aranarth:transfer";
     public static final String CH_SYNC_TIME = "aranarth:sync_time";
     public static final String CH_SYNC_WEATHER = "aranarth:sync_weather";
+    public static final String CH_NEW_DAY = "aranarth:new_day";
     public static final String CH_DM = "aranarth:dm";
     public static final String CH_SLEEP = "aranarth:sleep";
     public static final String CH_AFK = "aranarth:afk";
@@ -314,6 +316,7 @@ public class NetworkManager {
             case CH_TRANSFER -> handleTransfer(json);
             case CH_SYNC_TIME -> handleSyncTime(json);
             case CH_SYNC_WEATHER -> handleSyncWeather(json);
+            case CH_NEW_DAY -> handleNewDay(json);
             case CH_DM -> handleDirectMessage(json);
             case CH_SLEEP -> handleSleepMessage(json);
             case CH_AFK -> handleAfkStatus(json);
@@ -488,6 +491,21 @@ public class NetworkManager {
         json.addProperty("server", thisServer);
         json.addProperty("time", time);
         publish(CH_SYNC_TIME, json);
+    }
+
+    /**
+     * Broadcasts the new server date to SMP so it can apply all new-day effects
+     * without independently computing the date transition.
+     */
+    public void publishNewDay(int dayNum, int weekdayNum, Month month, int yearNum, boolean isNewMonth) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("day", dayNum);
+        json.addProperty("weekday", weekdayNum);
+        json.addProperty("month", month.name());
+        json.addProperty("year", yearNum);
+        json.addProperty("isNewMonth", isNewMonth);
+        publish(CH_NEW_DAY, json);
     }
 
     /**
@@ -1556,6 +1574,23 @@ public class NetworkManager {
                 w.setWeatherDuration(0);
             }
         }
+    }
+
+    private void handleNewDay(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+
+        int dayNum = json.get("day").getAsInt();
+        int weekdayNum = json.get("weekday").getAsInt();
+        Month month = Month.valueOf(json.get("month").getAsString());
+        int yearNum = json.get("year").getAsInt();
+        boolean isNewMonth = json.get("isNewMonth").getAsBoolean();
+
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () ->
+                DateUtils.applyNewDay(dayNum, weekdayNum, month, yearNum, isNewMonth)
+        );
     }
 
     private void handleSyncWeather(JsonObject json) {

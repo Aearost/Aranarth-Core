@@ -426,7 +426,11 @@
       "Bash(gunzip -c SMP/2026-08-23-1.log.gz)",
       "Bash(gunzip -c Survival/2026-08-22-3.log.gz)",
       "Bash(find /c/Users/liamh -name ProjectKorra*.jar -o -name projectkorra*.jar)",
-      "Bash(find /c/Users/liamh/IdeaProjects/ProjectKorra-wip -name *.java -newer /c/Users/liamh/IdeaProjects/ProjectKorra-wip/core/src/com/projectkorra/projectkorra/waterbending/passive/FastSwim.java)"
+      "Bash(find /c/Users/liamh/IdeaProjects/ProjectKorra-wip -name *.java -newer /c/Users/liamh/IdeaProjects/ProjectKorra-wip/core/src/com/projectkorra/projectkorra/waterbending/passive/FastSwim.java)",
+      "Bash(zcat \"2026-08-23-1.log.gz\")",
+      "Bash(zcat C:/Users/liamh/Downloads/Logs/Survival/2026-08-23-1.log.gz)",
+      "Bash(zcat \"C:/Users/liamh/Downloads/Logs/Survival/2026-08-22-3.log.gz\")",
+      "Bash(zcat \"C:/Users/liamh/Downloads/Logs/SMP/2026-08-22-3.log.gz\")"
     ]
   }
 }

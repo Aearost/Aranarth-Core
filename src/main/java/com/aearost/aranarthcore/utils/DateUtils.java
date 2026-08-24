@@ -622,9 +622,9 @@ public class DateUtils {
             checkWorldEventForDay(dayNum, month, yearNum);
         }
 
-        // If it is a new day
+        // If it is a new day - only Survival computes the new date and publishes it to SMP
         // First 5 seconds of a new day
-        if (time >= 0 && time < 5) {
+        if (time >= 0 && time < 5 && !AranarthCore.isSmpServer()) {
             // Calculates day number based on length of month
             if (checkIfExceedsMonth(dayNum, month)) {
                 dayNum = 1;
@@ -642,143 +642,155 @@ public class DateUtils {
 
             if (weekdayNum == 7) {
                 weekdayNum = 0;
-                // Each server accrues rewards for its own dominions
-                DominionUtils.provideDominionRewards();
             } else {
                 weekdayNum++;
             }
 
-            AranarthUtils.setDay(dayNum);
-            AranarthUtils.setWeekday(weekdayNum);
-            AranarthUtils.setMonth(month);
-            AranarthUtils.setYear(yearNum);
+            applyNewDay(dayNum, weekdayNum, month, yearNum, isNewMonth);
 
-            String monthName = provideMonthName(month);
-            if (monthName == null) {
-                Bukkit.getLogger().info("[AC] Something went wrong with calculating the month name!");
-                return;
-            }
-
-            String weekdayName = provideWeekdayName(weekdayNum);
-            if (weekdayName == null) {
-                Bukkit.getLogger().info("[AC] Something went wrong with calculating the weekday name!");
-                return;
-            }
-
-            String[] messages = determineServerDate(dayNum, weekdayName, monthName, yearNum);
-
-            String dayNumAsString = getDayNumWithSuffix(dayNum);
-            for (Player player : Bukkit.getOnlinePlayers()) {
-                String worldName = player.getWorld().getName();
-                boolean skipDayMessage = worldName.equals("arena") || worldName.equals("creative");
-                if (!skipDayMessage) {
-                    AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                    skipDayMessage = aranarthPlayer.isDayMessageDisabled();
-                }
-                if (!skipDayMessage) {
-                    String mainTitle = ChatUtils.translateToColor("&e&l" + weekdayName);
-                    String subTitle = ChatUtils.translateToColor("&f&lThe " + dayNumAsString + " of " + monthName + ", &e&l" + yearNum);
-                    player.sendTitle(mainTitle, subTitle);
-                }
-                for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                    if (onlinePlayer.isSleeping()) {
-                        onlinePlayer.setHealth(onlinePlayer.getHealth() - 1);
-                        onlinePlayer.setHealth(onlinePlayer.getHealth() + 1);
-                    }
-                }
-            }
-
-            Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(messages[0]));
-            Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(messages[1]));
-            Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(messages[2]));
-
-            String description = "";
-            if (isNewMonth) {
-                switch (month) {
-                    case Month.IGNIVOR -> description = DateUtils.getIgnivorDescription();
-                    case Month.AQUINVOR -> description = DateUtils.getAquinvorDescription();
-                    case Month.VENTIVOR -> description = DateUtils.getVentivorDescription();
-                    case Month.FLORIVOR -> description = DateUtils.getFlorivorDescription();
-                    case Month.AESTIVOR -> description = DateUtils.getAestivorDescription();
-                    case Month.CALORVOR -> description = DateUtils.getCalorvorDescription();
-                    case Month.ARDORVOR -> description = DateUtils.getArdorvorDescription();
-                    case Month.SOLARVOR -> description = DateUtils.getSolarvorDescription();
-                    case Month.FOLLIVOR -> description = DateUtils.getFollivorDescription();
-                    case Month.STRIGAVOR -> description = DateUtils.getStrigavorDescription();
-                    case Month.FAUNIVOR -> description = DateUtils.getFaunivorDescription();
-                    case Month.UMBRAVOR -> description = DateUtils.getUmbravorDescription();
-                    case Month.GLACIVOR -> description = DateUtils.getGlacivorDescription();
-                    case Month.FRIGORVOR -> description = DateUtils.getFrigorvorDescription();
-                    case Month.OBSCURVOR -> description = DateUtils.getObscurvorDescription();
-                }
-            }
-
-            for (Player player : Bukkit.getOnlinePlayers()) {
-                String worldName = player.getWorld().getName();
-                if (worldName.equals("arena") || worldName.equals("creative")) {
-                    continue;
-                }
-                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                if (isNewMonth) {
-                    int monthSoundVol = aranarthPlayer.getNewMonthSoundVolume();
-                    if (monthSoundVol > 0) {
-                        player.playSound(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, 3f * (monthSoundVol / 100f), 0.25f);
-                    }
-                } else {
-                    int daySoundVol = aranarthPlayer.getNewDaySoundVolume();
-                    if (daySoundVol > 0) {
-                        float dayVf = daySoundVol / 100f;
-                        player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f * dayVf, 0.5f);
-                        player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f * dayVf, 1f);
-
-                        // 0.2s later
-                        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
-                                player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f * dayVf, 0.667f), 4L);
-                        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
-                                player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f * dayVf, 1.26f), 4L);
-
-                        // 0.4s later
-                        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
-                                player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f * dayVf, 0.75f), 8L);
-                        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
-                                player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f * dayVf, 1.5f), 8L);
-
-                        // 0.6s later
-                        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
-                                player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f * dayVf, 1f), 12L);
-                        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
-                                player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f * dayVf, 2f), 12L);
-                    }
-                }
-            }
-
-            // Will display once and only once regardless of online players
-            if (isNewMonth) {
-                if (!AranarthCore.isSmpServer()) {
-                    DiscordUtils.monthMessage(month, description);
-                }
-                AranarthCore.launchMonthFireworks(month);
-                if (month == Month.IGNIVOR) {
-                    AranarthCore.resetResourceWorlds();
-                    for (Boost boost : Boost.values()) {
-                        AranarthUtils.addServerBoost(boost, null, null, false);
-                    }
-                }
-            }
-
-            // Each server handles food/tax cycles for its own dominions only.
-            // reEvaluateFoodInventory() skips dominions belonging to the other server,
-            // so running it on both Survival and SMP is safe.
-            DominionUtils.reEvaluateFoodInventory();
-            // Check for world event start/end on this new day
-            checkWorldEventForDay(dayNum, month, yearNum);
-            // Reset Lunaris Obscura blindness counter each new day
-            if (WorldEventManager.getInstance() != null) {
-                WorldEventManager.getInstance().resetNightBlindness();
+            if (NetworkManager.isActive()) {
+                NetworkManager.getInstance().publishNewDay(dayNum, weekdayNum, month, yearNum, isNewMonth);
             }
         }
         determineMonthEffects();
         applyWorldEventEffects();
+    }
+
+    /**
+     * Applies all new-day effects for the given date values on this server.
+     * Called by Survival after computing the new date, and by SMP upon receiving
+     * the new-day network message from Survival.
+     */
+    public static void applyNewDay(int dayNum, int weekdayNum, Month month, int yearNum, boolean isNewMonth) {
+        AranarthUtils.setDay(dayNum);
+        AranarthUtils.setWeekday(weekdayNum);
+        AranarthUtils.setMonth(month);
+        AranarthUtils.setYear(yearNum);
+
+        String monthName = provideMonthName(month);
+        if (monthName == null) {
+            Bukkit.getLogger().info("[AC] Something went wrong with calculating the month name!");
+            return;
+        }
+
+        String weekdayName = provideWeekdayName(weekdayNum);
+        if (weekdayName == null) {
+            Bukkit.getLogger().info("[AC] Something went wrong with calculating the weekday name!");
+            return;
+        }
+
+        String[] messages = determineServerDate(dayNum, weekdayName, monthName, yearNum);
+
+        String dayNumAsString = getDayNumWithSuffix(dayNum);
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            String worldName = player.getWorld().getName();
+            boolean skipDayMessage = worldName.equals("arena") || worldName.equals("creative");
+            if (!skipDayMessage) {
+                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+                skipDayMessage = aranarthPlayer.isDayMessageDisabled();
+            }
+            if (!skipDayMessage) {
+                String mainTitle = ChatUtils.translateToColor("&e&l" + weekdayName);
+                String subTitle = ChatUtils.translateToColor("&f&lThe " + dayNumAsString + " of " + monthName + ", &e&l" + yearNum);
+                player.sendTitle(mainTitle, subTitle);
+            }
+            for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                if (onlinePlayer.isSleeping()) {
+                    onlinePlayer.setHealth(onlinePlayer.getHealth() - 1);
+                    onlinePlayer.setHealth(onlinePlayer.getHealth() + 1);
+                }
+            }
+        }
+
+        Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(messages[0]));
+        Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(messages[1]));
+        Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(messages[2]));
+
+        String description = "";
+        if (isNewMonth) {
+            switch (month) {
+                case Month.IGNIVOR -> description = DateUtils.getIgnivorDescription();
+                case Month.AQUINVOR -> description = DateUtils.getAquinvorDescription();
+                case Month.VENTIVOR -> description = DateUtils.getVentivorDescription();
+                case Month.FLORIVOR -> description = DateUtils.getFlorivorDescription();
+                case Month.AESTIVOR -> description = DateUtils.getAestivorDescription();
+                case Month.CALORVOR -> description = DateUtils.getCalorvorDescription();
+                case Month.ARDORVOR -> description = DateUtils.getArdorvorDescription();
+                case Month.SOLARVOR -> description = DateUtils.getSolarvorDescription();
+                case Month.FOLLIVOR -> description = DateUtils.getFollivorDescription();
+                case Month.STRIGAVOR -> description = DateUtils.getStrigavorDescription();
+                case Month.FAUNIVOR -> description = DateUtils.getFaunivorDescription();
+                case Month.UMBRAVOR -> description = DateUtils.getUmbravorDescription();
+                case Month.GLACIVOR -> description = DateUtils.getGlacivorDescription();
+                case Month.FRIGORVOR -> description = DateUtils.getFrigorvorDescription();
+                case Month.OBSCURVOR -> description = DateUtils.getObscurvorDescription();
+            }
+        }
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            String worldName = player.getWorld().getName();
+            if (worldName.equals("arena") || worldName.equals("creative")) {
+                continue;
+            }
+            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+            if (isNewMonth) {
+                int monthSoundVol = aranarthPlayer.getNewMonthSoundVolume();
+                if (monthSoundVol > 0) {
+                    player.playSound(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, 3f * (monthSoundVol / 100f), 0.25f);
+                }
+            } else {
+                int daySoundVol = aranarthPlayer.getNewDaySoundVolume();
+                if (daySoundVol > 0) {
+                    float dayVf = daySoundVol / 100f;
+                    player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f * dayVf, 0.5f);
+                    player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f * dayVf, 1f);
+
+                    // 0.2s later
+                    Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+                            player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f * dayVf, 0.667f), 4L);
+                    Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+                            player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f * dayVf, 1.26f), 4L);
+
+                    // 0.4s later
+                    Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+                            player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f * dayVf, 0.75f), 8L);
+                    Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+                            player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f * dayVf, 1.5f), 8L);
+
+                    // 0.6s later
+                    Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+                            player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f * dayVf, 1f), 12L);
+                    Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+                            player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f * dayVf, 2f), 12L);
+                }
+            }
+        }
+
+        // Will display once and only once regardless of online players
+        if (isNewMonth) {
+            if (!AranarthCore.isSmpServer()) {
+                DiscordUtils.monthMessage(month, description);
+            }
+            AranarthCore.launchMonthFireworks(month);
+            if (month == Month.IGNIVOR) {
+                AranarthCore.resetResourceWorlds();
+                for (Boost boost : Boost.values()) {
+                    AranarthUtils.addServerBoost(boost, null, null, false);
+                }
+            }
+        }
+
+        // Each server handles food/tax cycles for its own dominions only
+        if (weekdayNum == 0) {
+            DominionUtils.provideDominionRewards();
+        }
+        DominionUtils.reEvaluateFoodInventory();
+        // Check for world event start/end on this new day
+        new DateUtils().checkWorldEventForDay(dayNum, month, yearNum);
+        // Reset Lunaris Obscura blindness counter each new day
+        if (WorldEventManager.getInstance() != null) {
+            WorldEventManager.getInstance().resetNightBlindness();
+        }
     }
 
     /**

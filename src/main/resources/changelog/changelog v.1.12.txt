@@ -112,6 +112,7 @@ Minor Features
 [~] Separated "ming hua" into two words for chat unscrambler
 [+] Added /brewbook unlock as an admin command
 [+] Added the missing fire resistance to all Aranarthium armour pieces
+[~] Fixed doubled new day message due to both Survival and SMP servers evaluating it
 
 Backend Code Changes
 -
