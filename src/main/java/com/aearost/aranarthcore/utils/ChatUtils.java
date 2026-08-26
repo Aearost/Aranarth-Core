@@ -120,7 +120,6 @@ public class ChatUtils {
 
         String[] colors = gradientColors.split(",");
         int numColors = colors.length;
-        int msgLength = msg.length();
 
         // Validate and normalize all color tokens to hex
         for (int ci = 0; ci < numColors; ci++) {
@@ -130,23 +129,27 @@ public class ChatUtils {
             colors[ci] = colorTokenToHex(colors[ci]);
         }
 
-        // If the message has fewer characters than colors, use the first color for all characters
-        if (msgLength < numColors) {
+        // Use code points so emoji (surrogate pairs) are treated as one unit
+        int[] codepoints = msg.codePoints().toArray();
+        int cpCount = codepoints.length;
+
+        // If the message has fewer code points than colors, use the first color for all
+        if (cpCount < numColors) {
             StringBuilder result = new StringBuilder();
             String firstColor = colors[0];
             if (isBold) {
                 firstColor += "&l";
             }
-            for (char c : msg.toCharArray()) {
-                result.append(firstColor).append(c); // Apply the first color to all characters
+            for (int cp : codepoints) {
+                result.append(firstColor).append(new String(Character.toChars(cp)));
             }
             msg = result.toString();
         } else {
             // Calculate the transition points based on the number of colors and message length
-            int sectionSize = msgLength / (numColors - 1); // Number of characters per gradient section
+            int sectionSize = cpCount / (numColors - 1); // Number of code points per gradient section
             StringBuilder result = new StringBuilder();
 
-            for (int i = 0; i < msgLength; i++) {
+            for (int i = 0; i < cpCount; i++) {
                 // Determine which two colors we're interpolating between
                 int colorIndex = Math.min(i / sectionSize, numColors - 2); // Index for the left color
                 String startColor = colors[colorIndex];
@@ -162,7 +165,7 @@ public class ChatUtils {
                 if (isBold) {
                     interpolatedColor += "&l";
                 }
-                result.append(interpolatedColor).append(msg.charAt(i)); // Apply color to the character
+                result.append(interpolatedColor).append(new String(Character.toChars(codepoints[i])));
             }
             msg = result.toString();
         }

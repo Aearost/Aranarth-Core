@@ -1280,8 +1280,9 @@ public class NetworkManager {
         String message = json.get("message").getAsString();
 
         String formatted = ChatUtils.translateToColor(prefix + message);
+        Component component = LegacyComponentSerializer.legacySection().deserialize(formatted);
         for (Player player : Bukkit.getOnlinePlayers()) {
-            player.sendMessage(formatted);
+            player.sendMessage(component);
         }
         Bukkit.getConsoleSender().sendMessage(ChatUtils.translateToColor(
                 "&8[" + originServer.toUpperCase() + "] " + prefix + message));
