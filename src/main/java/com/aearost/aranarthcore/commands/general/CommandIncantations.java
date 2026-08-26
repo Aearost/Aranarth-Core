@@ -142,6 +142,7 @@ public class CommandIncantations implements CommandExecutor {
 				new IncantationPreservation().getColor() + "&lPreservation&r\n\n" +
 						"&oCollection of unharvestable blocks. Requires an " + new AranarthiumIngot().getName() + "&r&o ingot\n\n" +
 						"&r&lApplies to: &rpickaxes (no Fortune)\n\n" +
+						"&o**Only 3 uses\n" +
 						"&o**Only one level\n"
 		);
 	}
