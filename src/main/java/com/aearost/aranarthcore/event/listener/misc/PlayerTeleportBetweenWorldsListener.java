@@ -5,59 +5,89 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.IOException;
 
 public class PlayerTeleportBetweenWorldsListener implements Listener {
 
-	public PlayerTeleportBetweenWorldsListener(AranarthCore plugin) {
-		Bukkit.getPluginManager().registerEvents(this, plugin);
-	}
+    public PlayerTeleportBetweenWorldsListener(AranarthCore plugin) {
+        Bukkit.getPluginManager().registerEvents(this, plugin);
+    }
 
-	/**
-	 * Ensures that a player's inventory is updated when teleported manually via /tp.
-	 * @param e The event.
-	 */
-	@EventHandler
-	public void onTeleport(PlayerTeleportEvent e) {
-		if (e.getCause() == TeleportCause.COMMAND) {
-			Player player = e.getPlayer();
-			String currentWorld = e.getFrom().getWorld().getName();
-			String destinationWorld = e.getTo().getWorld().getName();
-			if (!currentWorld.equals(destinationWorld)) {
-				GameMode newMode = GameMode.SURVIVAL;
-				if (destinationWorld.equalsIgnoreCase("creative")) {
-					newMode = GameMode.CREATIVE;
-				}
-				// Shops world uses the survival game mode
-				if (destinationWorld.equalsIgnoreCase("shops")) {
-					newMode = GameMode.SURVIVAL;
-				}
+    /**
+     * Ensures that a player's inventory is updated when teleported manually via /tp.
+     *
+     * @param e The event.
+     */
+    @EventHandler
+    public void onTeleport(PlayerTeleportEvent e) {
+        if (e.getCause() == TeleportCause.COMMAND) {
+            Player player = e.getPlayer();
+            String currentWorld = e.getFrom().getWorld().getName();
+            String destinationWorld = e.getTo().getWorld().getName();
+            if (!currentWorld.equals(destinationWorld)) {
+                GameMode newMode = GameMode.SURVIVAL;
+                if (destinationWorld.equalsIgnoreCase("creative")) {
+                    newMode = GameMode.CREATIVE;
+                }
+                // Shops world uses the survival game mode
+                if (destinationWorld.equalsIgnoreCase("shops")) {
+                    newMode = GameMode.SURVIVAL;
+                }
 
-				try {
-					AranarthUtils.switchInventory(player, currentWorld, destinationWorld);
-					player.setGameMode(newMode);
-					for (PotionEffect effect : player.getActivePotionEffects()) {
-						player.removePotionEffect(effect.getType());
-					}
-				} catch (IOException exception) {
-					player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
-					e.setCancelled(true);
-				}
-			} else {
-				try {
-					AranarthUtils.switchInventory(player, currentWorld, currentWorld);
-				} catch (IOException exception) {
-					player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
-					e.setCancelled(true);
-				}
-			}
-		}
-	}
+                try {
+                    AranarthUtils.switchInventory(player, currentWorld, destinationWorld);
+                    player.setGameMode(newMode);
+                    for (PotionEffect effect : player.getActivePotionEffects()) {
+                        player.removePotionEffect(effect.getType());
+                    }
+                } catch (IOException exception) {
+                    player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
+                    e.setCancelled(true);
+                }
+            } else {
+                try {
+                    AranarthUtils.switchInventory(player, currentWorld, currentWorld);
+                } catch (IOException exception) {
+                    player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
+                    e.setCancelled(true);
+                }
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onSoulboundTeleport(PlayerTeleportEvent e) {
+        if (e.getCause() == TeleportCause.SPECTATE || e.getCause() == TeleportCause.DISMOUNT) {
+            return;
+        }
+        Player player = e.getPlayer();
+        if (!AranarthUtils.isWearingArmorType(player, "soulbound")) {
+            return;
+        }
+        int arVol = AranarthUtils.getPlayer(player.getUniqueId()).getAranarthiumSoundVolume();
+        if (arVol == 0) {
+            return;
+        }
+        Location dest = e.getTo();
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (player.isOnline()) {
+                    player.playSound(dest, Sound.ENTITY_ENDERMAN_TELEPORT, 0.7f * (arVol / 100f), 0.6f);
+                    player.playSound(dest, Sound.ENTITY_VEX_AMBIENT, 0.25f * (arVol / 100f), 0.5f);
+                }
+            }
+        }.runTaskLater(AranarthCore.getInstance(), 1L);
+    }
 }

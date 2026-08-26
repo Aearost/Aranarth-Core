@@ -13,25 +13,24 @@ import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.event.block.IncantationMagnetismBlockBreak;
 import com.aearost.aranarthcore.event.listener.*;
 import com.aearost.aranarthcore.event.listener.grouped.*;
-import com.aearost.aranarthcore.event.world.WorldEventManager;
 import com.aearost.aranarthcore.event.listener.misc.*;
 import com.aearost.aranarthcore.event.mob.CaveSpiderPoisonExtract;
 import com.aearost.aranarthcore.event.mob.MountListener;
+import com.aearost.aranarthcore.event.world.WorldEventManager;
 import com.aearost.aranarthcore.integration.SquaremapIntegration;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
-import com.aearost.aranarthcore.utils.FireParticleRegistry;
-import com.github.retrooper.packetevents.PacketEvents;
-import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import com.aearost.aranarthcore.objects.VoidChunkGenerator;
 import com.aearost.aranarthcore.recipes.*;
 import com.aearost.aranarthcore.recipes.aranarthium.*;
 import com.aearost.aranarthcore.utils.*;
+import com.github.retrooper.packetevents.PacketEvents;
 import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.util.TempBlock;
+import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Biome;
@@ -41,9 +40,9 @@ import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.FireworkMeta;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
@@ -65,6 +64,7 @@ public class AranarthCore extends JavaPlugin {
     public static boolean isShutdownHookMode() {
         return shutdownHookMode;
     }
+
     private SquaremapIntegration squaremapIntegration;
 
     /**
@@ -680,6 +680,12 @@ public class AranarthCore extends JavaPlugin {
                         && world.getName().endsWith("_nether")) {
                     world.spawnParticle(Particle.FLAME, loc, 3, 0.3, 0.15, 0.3, 0.02);
                     world.spawnParticle(Particle.LAVA, loc, 1, 0.25, 0.1, 0.25, 0);
+                    if (new Random().nextInt(20) == 0) {
+                        int arVol = AranarthUtils.getPlayer(player.getUniqueId()).getAranarthiumSoundVolume();
+                        if (arVol > 0) {
+                            player.playSound(loc, Sound.BLOCK_FIRE_AMBIENT, 0.3f * (arVol / 100f), 1.0f);
+                        }
+                    }
                 } else if (AranarthUtils.isWearingArmorType(player, "aquatic")) {
                     boolean isRaining = AranarthUtils.getWeather() == Weather.RAIN
                             || AranarthUtils.getWeather() == Weather.THUNDER;
@@ -687,6 +693,12 @@ public class AranarthCore extends JavaPlugin {
                         Location above = loc.clone().add(0, 0.3, 0);
                         world.spawnParticle(Particle.DRIPPING_WATER, above, 5, 0.3, 0.2, 0.3, 0);
                         world.spawnParticle(Particle.RAIN, above, 3, 0.3, 0.2, 0.3, 0);
+                        if (new Random().nextInt(20) == 0) {
+                            int arVol = AranarthUtils.getPlayer(player.getUniqueId()).getAranarthiumSoundVolume();
+                            if (arVol > 0) {
+                                player.playSound(loc, Sound.BLOCK_WATER_AMBIENT, 0.3f * (arVol / 100f), 1.0f);
+                            }
+                        }
                     }
                 } else if (AranarthUtils.isWearingArmorType(player, "fae")) {
                     Biome biome = loc.getBlock().getBiome();
@@ -737,6 +749,44 @@ public class AranarthCore extends JavaPlugin {
                             }
                             world.spawnParticle(Particle.DUST, trailLoc, 1, 0.15, 0.12, 0.15,
                                     new Particle.DustOptions(particleColor, particleSize));
+                        }
+                    }
+                } else if (AranarthUtils.isWearingArmorType(player, "dwarven")) {
+                    boolean underground = loc.getY() < 0;
+                    Boolean wasUnderground = AranarthUtils.playerUnderground.get(player.getUniqueId());
+                    if (wasUnderground == null || wasUnderground != underground) {
+                        AranarthUtils.playerUnderground.put(player.getUniqueId(), underground);
+                        int arVol = AranarthUtils.getPlayer(player.getUniqueId()).getAranarthiumSoundVolume();
+                        if (arVol > 0) {
+                            if (underground) {
+                                player.playSound(loc, Sound.BLOCK_DEEPSLATE_BREAK, 0.7f * (arVol / 100f), 1.0f);
+                                new BukkitRunnable() {
+                                    @Override
+                                    public void run() {
+                                        player.playSound(loc, Sound.BLOCK_DEEPSLATE_BREAK, 0.4f * (arVol / 100f), 0.9f);
+                                    }
+                                }.runTaskLater(this, 2L);
+                                new BukkitRunnable() {
+                                    @Override
+                                    public void run() {
+                                        player.playSound(loc, Sound.BLOCK_DEEPSLATE_BREAK, 0.2f * (arVol / 100f), 0.85f);
+                                    }
+                                }.runTaskLater(this, 5L);
+                            } else if (wasUnderground != null) {
+                                player.playSound(loc, Sound.BLOCK_GRASS_STEP, 0.6f * (arVol / 100f), 1.1f);
+                                new BukkitRunnable() {
+                                    @Override
+                                    public void run() {
+                                        player.playSound(loc, Sound.BLOCK_GRASS_STEP, 0.4f * (arVol / 100f), 1.0f);
+                                    }
+                                }.runTaskLater(this, 3L);
+                                new BukkitRunnable() {
+                                    @Override
+                                    public void run() {
+                                        player.playSound(loc, Sound.BLOCK_GRASS_STEP, 0.25f * (arVol / 100f), 1.2f);
+                                    }
+                                }.runTaskLater(this, 6L);
+                            }
                         }
                     }
                 }

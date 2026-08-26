@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.potion.PotionEffect;
@@ -48,6 +49,12 @@ public class RespawnSurvival {
                     player.setLevel(level);
                     player.setExp(exp);
                     player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 220, 4));
+                    int arVol = AranarthUtils.getPlayer(player.getUniqueId()).getAranarthiumSoundVolume();
+                    if (arVol > 0) {
+                        Location spawnLoc = player.getLocation();
+                        player.playSound(spawnLoc, Sound.ITEM_TOTEM_USE, 0.9f * (arVol / 100f), 1.0f);
+                        player.playSound(spawnLoc, Sound.ENTITY_ENDERMAN_TELEPORT, 0.7f * (arVol / 100f), 0.6f);
+                    }
                 }
             }.runTaskLater(AranarthCore.getInstance(), 1L);
             aranarthPlayer.setLevelBeforeDeath(0);

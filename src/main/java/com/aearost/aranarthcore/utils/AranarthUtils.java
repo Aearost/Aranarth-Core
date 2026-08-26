@@ -15,6 +15,7 @@ import com.aearost.aranarthcore.objects.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.ban.ProfileBanList;
 import org.bukkit.block.*;
 import org.bukkit.block.data.Levelled;
@@ -30,7 +31,6 @@ import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
@@ -59,6 +59,8 @@ import static com.aearost.aranarthcore.objects.CustomKeys.*;
 public class AranarthUtils {
 
     public static final Map<UUID, Boolean> playerInFaeBiome = new HashMap<>();
+    public static final Map<UUID, Boolean> playerUnderground = new HashMap<>();
+    public static final Map<UUID, Boolean> playerWasOnGround = new HashMap<>();
     public static final Map<UUID, Location> playerLastFlowerLocation = new HashMap<>();
     private static final HashMap<UUID, AranarthPlayer> players = new HashMap<>();
     private static final HashMap<Location, Integer> dragonHeads = new HashMap<>();
@@ -372,9 +374,9 @@ public class AranarthUtils {
     private static int invSize(Player player) {
         int count = 0;
         for (ItemStack s : player.getInventory().getContents()) {
-			if (s != null) {
-				count++;
-			}
+            if (s != null) {
+                count++;
+            }
         }
         return count;
     }
@@ -1061,9 +1063,9 @@ public class AranarthUtils {
                         Block start = world.getBlockAt(px + x, y, pz + z);
 
                         // Only check flowing water blocks (NOT source blocks)
-						if (start.getType() != Material.WATER) {
-							continue;
-						}
+                        if (start.getType() != Material.WATER) {
+                            continue;
+                        }
 
                         if (start.getBlockData() instanceof Levelled startLevel) {
                             if (startLevel.getLevel() == 0) {
@@ -1679,9 +1681,9 @@ public class AranarthUtils {
      */
     public static Location getSafeTeleportLocation(Location loc) {
         World world = loc.getWorld();
-		if (world == null) {
-			return null;
-		}
+        if (world == null) {
+            return null;
+        }
 
         // Start from the player's current Y position and go downward
         int x = loc.getBlockX();
@@ -2074,9 +2076,9 @@ public class AranarthUtils {
 
         AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
         int tpVol = aranarthPlayer.getTeleportSoundVolume();
-		if (tpVol > 0) {
-			player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, tpVol / 100f, 0.9F);
-		}
+        if (tpVol > 0) {
+            player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, tpVol / 100f, 0.9F);
+        }
 
         // Saves the player's last location for /ac back
         aranarthPlayer.setLastKnownTeleportLocation(from);
@@ -2674,7 +2676,7 @@ public class AranarthUtils {
     /**
      * Removes the specified server boost.
      *
-     * @param boost The boost being removed.
+     * @param boost       The boost being removed.
      * @param fromNetwork True when called as a result of a network sync (prevents SMP from
      *                    re-forwarding a removal that Survival already initiated).
      */
@@ -2840,9 +2842,9 @@ public class AranarthUtils {
                     }
                     for (Player player : Bukkit.getOnlinePlayers()) {
                         int domVol = getPlayer(player.getUniqueId()).getDominionSoundVolume();
-						if (domVol > 0) {
-							player.playSound(player.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 0.7f);
-						}
+                        if (domVol > 0) {
+                            player.playSound(player.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 0.7f);
+                        }
                     }
                 }
             }
@@ -3467,12 +3469,12 @@ public class AranarthUtils {
 
         // Sort highest priority first across all servers combined
         combined.sort((a, b) -> {
-			if (a.roleGroup() != b.roleGroup()) {
-				return Integer.compare(b.roleGroup(), a.roleGroup());
-			}
-			if (a.roleTier() != b.roleTier()) {
-				return Integer.compare(b.roleTier(), a.roleTier());
-			}
+            if (a.roleGroup() != b.roleGroup()) {
+                return Integer.compare(b.roleGroup(), a.roleGroup());
+            }
+            if (a.roleTier() != b.roleTier()) {
+                return Integer.compare(b.roleTier(), a.roleTier());
+            }
             return Integer.compare(b.playerRank(), a.playerRank());
         });
 
@@ -3518,19 +3520,19 @@ public class AranarthUtils {
      * playerRank is used as the final tiebreaker.
      */
     private static int[] computeSortFields(UUID uuid, int councilRank, int architectRank, int saintRank, int rank) {
-		if (councilRank >= 1) {
-			return new int[]{5, councilRank, rank};
-		}
-		if (architectRank >= 1) {
-			return new int[]{4, architectRank, rank};
-		}
-		if (saintRank >= 1) {
-			return new int[]{3, saintRank, rank};
-		}
+        if (councilRank >= 1) {
+            return new int[]{5, councilRank, rank};
+        }
+        if (architectRank >= 1) {
+            return new int[]{4, architectRank, rank};
+        }
+        if (saintRank >= 1) {
+            return new int[]{3, saintRank, rank};
+        }
         Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
-		if (currentAvatar != null && uuid.equals(currentAvatar.getUuid())) {
-			return new int[]{2, 0, rank};
-		}
+        if (currentAvatar != null && uuid.equals(currentAvatar.getUuid())) {
+            return new int[]{2, 0, rank};
+        }
         return new int[]{1, 0, rank};
     }
 
@@ -3754,9 +3756,9 @@ public class AranarthUtils {
                     }
 
                     // Must manually load the chunk to allow the entity to teleport
-					if (sentinel.getLocation().getWorld() == null) {
-						continue;
-					}
+                    if (sentinel.getLocation().getWorld() == null) {
+                        continue;
+                    }
                     Chunk chunk = sentinel.getLocation().getChunk();
                     if (chunk.isLoaded()) {
                         Entity entity = Bukkit.getEntity(sentinel.getUuid());
@@ -4385,14 +4387,14 @@ public class AranarthUtils {
      * correct map based on the key's PDC type tag.
      */
     public static void addPendingKey(UUID uuid, ItemStack keyItem, int amount) {
-		if (keyItem == null || !keyItem.hasItemMeta()) {
-			return;
-		}
+        if (keyItem == null || !keyItem.hasItemMeta()) {
+            return;
+        }
         String keyType = keyItem.getItemMeta().getPersistentDataContainer()
                 .get(CustomKeys.CRATE_KEY, PersistentDataType.STRING);
-		if (keyType == null) {
-			return;
-		}
+        if (keyType == null) {
+            return;
+        }
         switch (keyType) {
             case "key_vote" -> addPendingVoteKeys(uuid, amount);
             case "key_rare" -> addPendingRareKeys(uuid, amount);
@@ -4413,9 +4415,9 @@ public class AranarthUtils {
         List<World> worlds = new ArrayList<>();
         for (String name : names) {
             World w = Bukkit.getWorld(name);
-			if (w != null) {
-				worlds.add(w);
-			}
+            if (w != null) {
+                worlds.add(w);
+            }
         }
         return worlds;
     }
@@ -4476,9 +4478,9 @@ public class AranarthUtils {
      * Compresses a player's inventory, including an optional extra item (e.g. a picked-up item).
      * Pass null for additionalItem when compressing from a command rather than a pickup event.
      *
-     * @param player          The player whose inventory is being compressed.
-     * @param aranarthPlayer  The AranarthPlayer data for the player.
-     * @param additionalItem  An extra item to include in compression, or null if none.
+     * @param player         The player whose inventory is being compressed.
+     * @param aranarthPlayer The AranarthPlayer data for the player.
+     * @param additionalItem An extra item to include in compression, or null if none.
      */
     public static void compressPlayerInventory(Player player, AranarthPlayer aranarthPlayer, ItemStack additionalItem) {
         boolean isIncludingShulkers = player.hasPermission("aranarth.shulker");
