@@ -116,6 +116,7 @@ Minor Features
 [~] Fixed drinking water bottle deleting the glass bottle when auto-replenish overwrote the slot
 [+] Added sound effects to all Aranarthium armor
 [~] Fixed issue where Roku's form of Fang was causing block damage when flown in PastLives
+[~] Fixed locked containers being openable in dominions by untrusted players with Container permission
 
 Backend Code Changes
 -

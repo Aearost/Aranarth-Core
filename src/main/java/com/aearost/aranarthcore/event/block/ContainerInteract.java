@@ -202,13 +202,7 @@ public class ContainerInteract {
     private void attemptOpen(PlayerInteractEvent e) {
         Block block = e.getClickedBlock();
         Player player = e.getPlayer();
-        Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
         Dominion chunkDominion = DominionUtils.getDominionOfChunk(block.getChunk());
-
-        // Message is sent in DominionProtection already
-        if (chunkDominion != null) {
-            return;
-        }
 
         // Message is sent in ShopInteract already
         if (ShopUtils.getShopFromLocation(block.getRelative(BlockFace.UP).getLocation()) != null) {
@@ -229,6 +223,9 @@ public class ContainerInteract {
                 e.setCancelled(true);
                 player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to open this container!"));
             }
+        } else if (chunkDominion != null) {
+            // No lock - apply normal dominion permission check instead
+            return;
         }
     }
 }
