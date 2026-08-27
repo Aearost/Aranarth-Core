@@ -117,6 +117,7 @@ Minor Features
 [+] Added sound effects to all Aranarthium armor
 [~] Fixed issue where Roku's form of Fang was causing block damage when flown in PastLives
 [~] Fixed locked containers being openable in dominions by untrusted players with Container permission
+[~] Added /sounds reminder in the server tips
 
 Backend Code Changes
 -
