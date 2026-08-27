@@ -766,6 +766,28 @@ public class MountListener implements Listener {
             if (moveLen > 0.001) {
                 moveVec.multiply(speed / moveLen);
                 Location newLoc = dragon.getLocation().clone().add(moveVec);
+                if (!newLoc.getBlock().isPassable()) {
+                    // 3D target is blocked - try horizontal-only (ground-skim when looking down)
+                    Location horizontal = dragon.getLocation().clone().add(moveVec.getX(), 0, moveVec.getZ());
+                    if (horizontal.getBlock().isPassable()) {
+                        newLoc = horizontal;
+                    } else {
+                        // Horizontal is also blocked - try stepping up 1 then 2 blocks
+                        Location up1 = horizontal.clone().add(0, 1, 0);
+                        Location up2 = horizontal.clone().add(0, 2, 0);
+                        if (up1.getBlock().isPassable()) {
+                            newLoc = up1;
+                        } else if (up2.getBlock().isPassable()) {
+                            newLoc = up2;
+                        } else {
+                            // Fully blocked - don't move
+                            if (distanceMoved > 0.05) {
+                                MountUtils.accumulateSpeedXp(mountId, distanceMoved);
+                            }
+                            return;
+                        }
+                    }
+                }
                 newLoc.setYaw(riderYaw + 180); // EnderDragon model is rotated 180 degrees relative to standard yaw
                 newLoc.setPitch(0);
                 dragon.teleport(newLoc);

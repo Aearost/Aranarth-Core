@@ -115,6 +115,7 @@ Minor Features
 [~] Fixed doubled new day message due to both Survival and SMP servers evaluating it
 [~] Fixed drinking water bottle deleting the glass bottle when auto-replenish overwrote the slot
 [+] Added sound effects to all Aranarthium armor
+[~] Fixed issue where Roku's form of Fang was causing block damage when flown in PastLives
 
 Backend Code Changes
 -

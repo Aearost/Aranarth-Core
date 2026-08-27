@@ -430,7 +430,9 @@
       "Bash(zcat \"2026-08-23-1.log.gz\")",
       "Bash(zcat C:/Users/liamh/Downloads/Logs/Survival/2026-08-23-1.log.gz)",
       "Bash(zcat \"C:/Users/liamh/Downloads/Logs/Survival/2026-08-22-3.log.gz\")",
-      "Bash(zcat \"C:/Users/liamh/Downloads/Logs/SMP/2026-08-22-3.log.gz\")"
+      "Bash(zcat \"C:/Users/liamh/Downloads/Logs/SMP/2026-08-22-3.log.gz\")",
+      "Bash(find C:/Users/liamh/IdeaProjects/AranarthCore -name *.json -path */assets/*)",
+      "Bash(head -15 grep -n \"setItemModel\\\\|NamespacedKey\" \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/items/SugarcaneBlock.java\")"
     ]
   }
 }
