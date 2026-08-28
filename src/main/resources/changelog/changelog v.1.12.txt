@@ -111,6 +111,7 @@ Minor Features
 [+] Added incantation names to the chat unscrambler
 [~] Decreased chat unscrambler reward amount at later ranks
 [~] Separated "ming hua" into two words for chat unscrambler
+[+] Added a feature to search for your unlocked brews in /brewbook
 [+] Added /brewbook unlock as an admin command
 [+] Added the missing fire resistance to all Aranarthium armour pieces
 [~] Fixed doubled new day message due to both Survival and SMP servers evaluating it

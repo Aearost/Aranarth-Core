@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.gui;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.brew.BrewRecipe;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -13,7 +14,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * GUI displaying all brewery recipes the player has unlocked.
@@ -24,13 +30,22 @@ public class GuiBrewBook {
     private static final int PAGE_SIZE = 36;
     private static final int CONTENT_START = 9;
 
+    private static final Set<UUID> awaitingSearch = new HashSet<>();
+    private static final Map<UUID, String> activeFilters = new HashMap<>();
+
     private final Player player;
     private final int page;
+    private final String filter;
     private final Inventory gui;
 
     public GuiBrewBook(Player player, int page) {
+        this(player, page, null);
+    }
+
+    public GuiBrewBook(Player player, int page, String filter) {
         this.player = player;
         this.page = page;
+        this.filter = filter;
         this.gui = build();
     }
 
@@ -44,11 +59,40 @@ public class GuiBrewBook {
         }
 
         List<BrewRecipe> unlocked = BrewRecipeUtils.getUnlockedRecipes(player.getUniqueId());
+        if (filter != null && !filter.isEmpty()) {
+            String lowerFilter = filter.toLowerCase();
+            unlocked = unlocked.stream()
+                    .filter(r -> r.getDisplayName().toLowerCase().contains(lowerFilter))
+                    .toList();
+        }
+
         int start = page * PAGE_SIZE;
         int end   = Math.min(start + PAGE_SIZE, unlocked.size());
 
         for (int i = start; i < end; i++) {
             inv.setItem(CONTENT_START + (i - start), BrewRecipeUtils.createPotionDisplay(unlocked.get(i), player.getUniqueId()));
+        }
+
+        // Search and Back button
+        if (filter != null) {
+            ItemStack back = new ItemStack(Material.ARROW);
+            ItemMeta backMeta = back.getItemMeta();
+            backMeta.setDisplayName(ChatUtils.translateToColor("&c&lBack"));
+            List<String> backLore = new ArrayList<>();
+            backLore.add(ChatUtils.translateToColor("&7Searching: &f" + filter));
+            backLore.add(ChatUtils.translateToColor("&7Click to return to all recipes"));
+            backMeta.setLore(backLore);
+            back.setItemMeta(backMeta);
+            inv.setItem(4, back);
+        } else {
+            ItemStack search = new ItemStack(Material.SPYGLASS);
+            ItemMeta searchMeta = search.getItemMeta();
+            searchMeta.setDisplayName(ChatUtils.translateToColor("&b&lSearch"));
+            List<String> searchLore = new ArrayList<>();
+            searchLore.add(ChatUtils.translateToColor("&7Search for a brew by name"));
+            searchMeta.setLore(searchLore);
+            search.setItemMeta(searchMeta);
+            inv.setItem(4, search);
         }
 
         // Previous page
@@ -94,6 +138,36 @@ public class GuiBrewBook {
         inv.setItem(53, end < unlocked.size() ? next : glass);
 
         return inv;
+    }
+
+    public static void initiateSearch(Player player) {
+        awaitingSearch.add(player.getUniqueId());
+        player.closeInventory();
+        player.sendMessage(ChatUtils.chatMessage("&7Enter a brew name to search for"));
+        player.sendMessage(ChatUtils.chatMessage("&7Type &ccancel &7to abort"));
+    }
+
+    public static boolean isAwaitingSearch(UUID uuid) {
+        return awaitingSearch.contains(uuid);
+    }
+
+    public static void handleSearchInput(Player player, String query) {
+        awaitingSearch.remove(player.getUniqueId());
+        if (query.equalsIgnoreCase("cancel")) {
+            player.sendMessage(ChatUtils.chatMessage("&7Search cancelled"));
+            Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> new GuiBrewBook(player, 0).openGui());
+            return;
+        }
+        activeFilters.put(player.getUniqueId(), query);
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> new GuiBrewBook(player, 0, query).openGui());
+    }
+
+    public static void clearFilter(UUID uuid) {
+        activeFilters.remove(uuid);
+    }
+
+    public static String getActiveFilter(UUID uuid) {
+        return activeFilters.get(uuid);
     }
 
     private ItemStack makeGlass() {

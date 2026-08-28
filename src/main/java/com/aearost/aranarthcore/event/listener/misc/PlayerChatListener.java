@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiBlacklistEditor;
+import com.aearost.aranarthcore.gui.GuiBrewBook;
 import com.aearost.aranarthcore.gui.GuiDominionPlayerPermissions;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
@@ -61,6 +62,13 @@ public class PlayerChatListener implements Listener {
         // Remove a leading period when the message starts with "./" followed by a letter (e.g. "./calendar" -> "/calendar")
         if (message.length() >= 3 && message.charAt(0) == '.' && message.charAt(1) == '/' && Character.isLetter(message.charAt(2))) {
             message = message.substring(1);
+        }
+
+        // If the player is awaiting a brew book search input, handle it first
+        if (GuiBrewBook.isAwaitingSearch(player.getUniqueId())) {
+            e.setCancelled(true);
+            GuiBrewBook.handleSearchInput(player, message);
+            return;
         }
 
         // If the player is awaiting a user-search input for the player permission GUI, handle it first

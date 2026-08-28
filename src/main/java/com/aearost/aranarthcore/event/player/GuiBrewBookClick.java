@@ -29,11 +29,25 @@ public class GuiBrewBookClick {
 
         int slot = e.getSlot();
 
+        // Search button
+        if (slot == 4 && clicked.getType() == Material.SPYGLASS) {
+            GuiBrewBook.initiateSearch(player);
+            return;
+        }
+
+        // Back button (from search results)
+        if (slot == 4 && clicked.getType() == Material.ARROW) {
+            GuiBrewBook.clearFilter(player.getUniqueId());
+            new GuiBrewBook(player, 0).populateInto(e.getView().getTopInventory());
+            return;
+        }
+
         // Previous page
         if (slot == 45 && clicked.getType() == Material.RED_WOOL) {
             int currentPage = getCurrentPage(player);
             if (currentPage > 0) {
-                new GuiBrewBook(player, currentPage - 1).populateInto(e.getView().getTopInventory());
+                String filter = GuiBrewBook.getActiveFilter(player.getUniqueId());
+                new GuiBrewBook(player, currentPage - 1, filter).populateInto(e.getView().getTopInventory());
             }
             return;
         }
@@ -41,7 +55,8 @@ public class GuiBrewBookClick {
         // Next page
         if (slot == 53 && clicked.getType() == Material.LIME_WOOL) {
             int currentPage = getCurrentPage(player);
-            new GuiBrewBook(player, currentPage + 1).populateInto(e.getView().getTopInventory());
+            String filter = GuiBrewBook.getActiveFilter(player.getUniqueId());
+            new GuiBrewBook(player, currentPage + 1, filter).populateInto(e.getView().getTopInventory());
             return;
         }
 
