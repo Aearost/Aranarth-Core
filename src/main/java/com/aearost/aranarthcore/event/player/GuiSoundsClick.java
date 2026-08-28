@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.gui.GuiSounds;
+import com.aearost.aranarthcore.items.key.KeyVote;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -9,6 +10,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.ItemStack;
 
 public class GuiSoundsClick {
 
@@ -51,7 +53,7 @@ public class GuiSoundsClick {
                 aranarthPlayer.setVoteSoundVolume(vol);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 player.sendMessage(ChatUtils.chatMessage("&7Vote sound volume set to &e" + vol + "%"));
-                refreshGui(player, slot, Material.EXPERIENCE_BOTTLE, "&f&lVote Sound", vol);
+                refreshGui(player, slot, new KeyVote().getItem(), "&f&lVote Sound", vol);
             }
             case 12 -> {
                 int vol = adjustVolume(aranarthPlayer.getCrateSoundVolume(), e.isLeftClick(), e.isShiftClick());
@@ -161,6 +163,11 @@ public class GuiSoundsClick {
     private void refreshGui(Player player, int slot, Material material, String name, int vol) {
         player.playSound(player, Sound.UI_BUTTON_CLICK, 1F, 0.8F);
         player.getOpenInventory().getTopInventory().setItem(slot, GuiSounds.buildVolumeItem(material, name, vol));
+    }
+
+    private void refreshGui(Player player, int slot, ItemStack item, String name, int vol) {
+        player.playSound(player, Sound.UI_BUTTON_CLICK, 1F, 0.8F);
+        player.getOpenInventory().getTopInventory().setItem(slot, GuiSounds.buildVolumeItem(item, name, vol));
     }
 
 }

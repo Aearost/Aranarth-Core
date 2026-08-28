@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.gui;
 
+import com.aearost.aranarthcore.items.key.KeyVote;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -22,6 +23,21 @@ public class GuiSounds {
     public GuiSounds(Player player) {
         this.player = player;
         this.initializedGui = initializeGui(player);
+    }
+
+    public static ItemStack buildVolumeItem(ItemStack item, String name, int volume) {
+        ItemMeta meta = item.getItemMeta();
+
+        String volumeColor = volume == 100 ? "&a&l" : (volume == 0 ? "&c&l" : "&e&l");
+        meta.setDisplayName(ChatUtils.translateToColor(name + " &7&l- " + volumeColor + volume + "%"));
+        meta.setLore(List.of(
+                ChatUtils.translateToColor("&7Left Click: &c-10%"),
+                ChatUtils.translateToColor("&7Right Click: &a+10%"),
+                ChatUtils.translateToColor("&7Shift+Left: &cMute (0%)"),
+                ChatUtils.translateToColor("&7Shift+Right: &aMax (100%)")
+        ));
+        item.setItemMeta(meta);
+        return item;
     }
 
     public static ItemStack buildVolumeItem(Material material, String name, int volume) {
@@ -71,7 +87,7 @@ public class GuiSounds {
 
         gui.setItem(9, buildVolumeItem(Material.BELL, "&f&lJoin Sound", aranarthPlayer.getJoinSoundVolume()));
         gui.setItem(10, buildVolumeItem(Material.NOTE_BLOCK, "&f&lLeave Sound", aranarthPlayer.getLeaveSoundVolume()));
-        gui.setItem(11, buildVolumeItem(Material.EXPERIENCE_BOTTLE, "&f&lVote Sound", aranarthPlayer.getVoteSoundVolume()));
+        gui.setItem(11, buildVolumeItem(new KeyVote().getItem(), "&f&lVote Sound", aranarthPlayer.getVoteSoundVolume()));
         gui.setItem(12, buildVolumeItem(Material.CHEST, "&f&lCrate Sound", aranarthPlayer.getCrateSoundVolume()));
         gui.setItem(13, buildVolumeItem(Material.WATER_BUCKET, "&f&lWeather Sound", aranarthPlayer.getWeatherSoundVolume()));
         gui.setItem(14, buildVolumeItem(Material.CLOCK, "&f&lNew Day Sound", aranarthPlayer.getNewDaySoundVolume()));
