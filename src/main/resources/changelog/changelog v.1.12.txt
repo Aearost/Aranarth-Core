@@ -121,6 +121,7 @@ Minor Features
 [~] Fixed locked containers being openable in dominions by untrusted players with Container permission
 [~] Added /sounds reminder in the server tips
 [~] Changed the vote sound icon from experience bottle to vote key in /sounds GUI
+[-] Removed redundant "Sound" keyword from items in /sounds
 
 Backend Code Changes
 -

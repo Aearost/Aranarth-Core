@@ -85,22 +85,22 @@ public class GuiSounds {
         exit.setItemMeta(exitMeta);
         gui.setItem(31, exit);
 
-        gui.setItem(9, buildVolumeItem(Material.BELL, "&f&lJoin Sound", aranarthPlayer.getJoinSoundVolume()));
-        gui.setItem(10, buildVolumeItem(Material.NOTE_BLOCK, "&f&lLeave Sound", aranarthPlayer.getLeaveSoundVolume()));
-        gui.setItem(11, buildVolumeItem(new KeyVote().getItem(), "&f&lVote Sound", aranarthPlayer.getVoteSoundVolume()));
-        gui.setItem(12, buildVolumeItem(Material.CHEST, "&f&lCrate Sound", aranarthPlayer.getCrateSoundVolume()));
-        gui.setItem(13, buildVolumeItem(Material.WATER_BUCKET, "&f&lWeather Sound", aranarthPlayer.getWeatherSoundVolume()));
-        gui.setItem(14, buildVolumeItem(Material.CLOCK, "&f&lNew Day Sound", aranarthPlayer.getNewDaySoundVolume()));
-        gui.setItem(15, buildVolumeItem(Material.FIREWORK_ROCKET, "&f&lNew Month Sound", aranarthPlayer.getNewMonthSoundVolume()));
-        gui.setItem(16, buildVolumeItem(Material.PAPER, "&f&lMessage Sound", aranarthPlayer.getPrivateMsgSoundVolume()));
-        gui.setItem(17, buildVolumeItem(Material.ENDER_PEARL, "&f&lTeleport Sound", aranarthPlayer.getTeleportSoundVolume()));
-        gui.setItem(18, buildVolumeItem(Material.NETHER_STAR, "&f&lAvatar Sound", aranarthPlayer.getAvatarSoundVolume()));
-        gui.setItem(19, buildVolumeItem(Material.IRON_SWORD, "&f&lDominion Sound", aranarthPlayer.getDominionSoundVolume()));
-        gui.setItem(20, buildVolumeItem(Material.AMETHYST_SHARD, "&f&lAranarthium Sound", aranarthPlayer.getAranarthiumSoundVolume()));
-        gui.setItem(21, buildVolumeItem(Material.BOOK, "&f&lChat Game Sound", aranarthPlayer.getChatGameSoundVolume()));
-        gui.setItem(22, buildVolumeItem(Material.CHEST, "&f&lChest Sort Sound", aranarthPlayer.getChestSortSoundVolume()));
-        gui.setItem(23, buildVolumeItem(Material.IRON_PICKAXE, "&f&lJobs Sound", aranarthPlayer.getJobsSoundVolume()));
-        gui.setItem(24, buildVolumeItem(Material.EXPERIENCE_BOTTLE, "&f&lExp Store Sound", aranarthPlayer.getExpStoreSoundVolume()));
+        gui.setItem(9, buildVolumeItem(Material.BELL, "&f&lJoin", aranarthPlayer.getJoinSoundVolume()));
+        gui.setItem(10, buildVolumeItem(Material.NOTE_BLOCK, "&f&lLeave", aranarthPlayer.getLeaveSoundVolume()));
+        gui.setItem(11, buildVolumeItem(new KeyVote().getItem(), "&f&lVote", aranarthPlayer.getVoteSoundVolume()));
+        gui.setItem(12, buildVolumeItem(Material.CHEST, "&f&lCrate", aranarthPlayer.getCrateSoundVolume()));
+        gui.setItem(13, buildVolumeItem(Material.WATER_BUCKET, "&f&lWeather", aranarthPlayer.getWeatherSoundVolume()));
+        gui.setItem(14, buildVolumeItem(Material.CLOCK, "&f&lNew Day", aranarthPlayer.getNewDaySoundVolume()));
+        gui.setItem(15, buildVolumeItem(Material.FIREWORK_ROCKET, "&f&lNew Month", aranarthPlayer.getNewMonthSoundVolume()));
+        gui.setItem(16, buildVolumeItem(Material.PAPER, "&f&lMessage", aranarthPlayer.getPrivateMsgSoundVolume()));
+        gui.setItem(17, buildVolumeItem(Material.ENDER_PEARL, "&f&lTeleport", aranarthPlayer.getTeleportSoundVolume()));
+        gui.setItem(18, buildVolumeItem(Material.NETHER_STAR, "&f&lAvatar", aranarthPlayer.getAvatarSoundVolume()));
+        gui.setItem(19, buildVolumeItem(Material.IRON_SWORD, "&f&lDominion", aranarthPlayer.getDominionSoundVolume()));
+        gui.setItem(20, buildVolumeItem(Material.AMETHYST_SHARD, "&f&lAranarthium", aranarthPlayer.getAranarthiumSoundVolume()));
+        gui.setItem(21, buildVolumeItem(Material.BOOK, "&f&lChat Game", aranarthPlayer.getChatGameSoundVolume()));
+        gui.setItem(22, buildVolumeItem(Material.CHEST, "&f&lChest Sort", aranarthPlayer.getChestSortSoundVolume()));
+        gui.setItem(23, buildVolumeItem(Material.IRON_PICKAXE, "&f&lJobs", aranarthPlayer.getJobsSoundVolume()));
+        gui.setItem(24, buildVolumeItem(Material.EXPERIENCE_BOTTLE, "&f&lExp Store", aranarthPlayer.getExpStoreSoundVolume()));
 
         return gui;
     }
