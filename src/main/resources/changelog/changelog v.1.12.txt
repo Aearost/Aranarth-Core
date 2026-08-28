@@ -122,6 +122,7 @@ Minor Features
 [~] Added /sounds reminder in the server tips
 [~] Changed the vote sound icon from experience bottle to vote key in /sounds GUI
 [-] Removed redundant "Sound" keyword from items in /sounds
+[~] Fixed cross-server sleep count double-counting sleeping players
 
 Backend Code Changes
 -

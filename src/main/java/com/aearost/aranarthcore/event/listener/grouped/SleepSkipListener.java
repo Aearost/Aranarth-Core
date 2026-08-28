@@ -26,7 +26,9 @@ public class SleepSkipListener implements Listener {
 	public SleepSkipListener(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 		if (NetworkManager.isActive()) {
-			NetworkManager.getInstance().setRemoteSleepCallback(this::updateSleepMessage);
+			// Pass isRemoteUpdate=true so the callback re-evaluates the skip condition
+			// and updates the local action bar without re-publishing back to the remote server.
+			NetworkManager.getInstance().setRemoteSleepCallback(() -> updateSleepMessage(true));
 		}
 	}
 
@@ -70,6 +72,15 @@ public class SleepSkipListener implements Listener {
 	 * Handles updating the boss bar with the current number of players sleeping in a bed.
 	 */
 	private void updateSleepMessage() {
+		updateSleepMessage(false);
+	}
+
+	/**
+	 * Handles updating the action bar with the current number of players sleeping in a bed.
+	 * @param isRemoteUpdate True when triggered by a remote-server sleep event. Skips re-publishing
+	 *                       to the remote server to prevent a count feedback loop.
+	 */
+	private void updateSleepMessage(boolean isRemoteUpdate) {
 		int onlinePlayersInSurvivalWorlds = 0;
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			String worldName = player.getLocation().getWorld().getName();
@@ -89,7 +100,10 @@ public class SleepSkipListener implements Listener {
 		}
 
 		amountRequiredToSkip = (int) Math.ceil(onlinePlayersInSurvivalWorlds * percentRequiredToSkip);
-		int sleepingPlayerNum = sleepingPlayers.size();
+		// Capture the local-only count before combining - this is what gets published so the
+		// receiving server stores the correct per-server count (not a combined total).
+		final int localSleepingCount = sleepingPlayers.size();
+		int sleepingPlayerNum = localSleepingCount;
 		// Include players sleeping on the other server so the combined count is accurate
 		if (NetworkManager.isActive()) {
 			sleepingPlayerNum += NetworkManager.getInstance().getRemoteSleepingCount();
@@ -107,9 +121,11 @@ public class SleepSkipListener implements Listener {
 					}
 				}
 			}
-			// Publish to the other server so their players also see the sleep count
-			if (NetworkManager.isActive()) {
-				NetworkManager.getInstance().publishSleepMessage(message, totalSleepingPlayerNum, amountRequiredToSkip);
+			// Publish local-only sleeping count to the remote server. Do not publish when this
+			// update was itself triggered by a remote message - that would echo the count back
+			// and cause the remote server to double-count it.
+			if (!isRemoteUpdate && NetworkManager.isActive()) {
+				NetworkManager.getInstance().publishSleepMessage(message, localSleepingCount, amountRequiredToSkip);
 			}
 		}, 1L);
 
