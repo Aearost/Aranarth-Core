@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.abilities.chiblocking.DaggerThrow;
 import com.aearost.aranarthcore.abilities.chiblocking.DaggerVolley;
 import com.aearost.aranarthcore.abilities.chiblocking.HighJump;
 import com.aearost.aranarthcore.abilities.earthbending.combo.CableSlash;
+import com.aearost.aranarthcore.abilities.earthbending.combo.EarthRush;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.Eruption;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.MagmaGlaives;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.MagmaWave;
@@ -125,6 +126,7 @@ public class AranarthCoreBendingListener implements Listener {
         PastLives.endAllInstances();
         new ArrayList<>(CoreAbility.getAbilities(AstralShot.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(CableSlash.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(EarthRush.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(CableWhip.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(CableThrash.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(MetalShred.class)).forEach(CoreAbility::remove);
@@ -384,6 +386,11 @@ public class AranarthCoreBendingListener implements Listener {
             if (abilityName.equalsIgnoreCase("earthsmash")) {
                 MoltenBlast.markEarthSmashSneak(player.getUniqueId());
             }
+            if (abilityName.equalsIgnoreCase("raiseearth")
+                    && EarthRush.hasRecentShockwaveSneak(player.getUniqueId())
+                    && !EarthRush.hasActiveInstance(player.getUniqueId())) {
+                EarthRush.markRaiseEarthTransition(player.getUniqueId());
+            }
             PastLives pastLivesRelease = PastLives.getActiveInstance(player.getUniqueId());
             if (pastLivesRelease != null) {
                 pastLivesRelease.onSneakRelease();
@@ -622,6 +629,16 @@ public class AranarthCoreBendingListener implements Listener {
                     if (!CableThrash.hasActiveInstance(player.getUniqueId())) {
                         new CableThrash(player);
                     }
+                } else if (abilityName.equalsIgnoreCase("shockwave")) {
+                    EarthRush.markShockwaveSneak(player.getUniqueId());
+                } else if (abilityName.equalsIgnoreCase("raiseearth")
+                        && !EarthRush.hasActiveInstance(player.getUniqueId())
+                        && EarthRush.canCreateShot(player.getUniqueId())) {
+                    // Add cooldown before constructing so PK cannot activate RaiseEarth this tick
+                    bendingPlayer.addCooldown("RaiseEarth", 1000L);
+                    EarthRush.markListenerTriggered(player.getUniqueId());
+                    new EarthRush(player);
+                    return;
                 } else if (abilityName.equalsIgnoreCase("earthtunnel") || abilityName.equalsIgnoreCase("collapse")) {
                     e.setCancelled(AranarthBendingUtils.preventAbilityNearDominion(player));
                 }
@@ -806,6 +823,13 @@ public class AranarthCoreBendingListener implements Listener {
         MagmaGlaives magmaGlaives = MagmaGlaives.getActiveInstance(player.getUniqueId());
         if (magmaGlaives != null) {
             magmaGlaives.onLeftClick();
+            return;
+        }
+
+        // EarthRush: left-click with RaiseEarth equipped fires the loaded boulder
+        EarthRush earthRush = EarthRush.getActiveInstance(player.getUniqueId());
+        if (earthRush != null && earthRush.getPhase() == EarthRush.Phase.LOADED) {
+            earthRush.fire();
             return;
         }
 
