@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.enums.FireType;
+import com.aearost.aranarthcore.event.listener.misc.InvisibleArmorManager;
 import com.aearost.aranarthcore.gui.GuiToggle;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Perk;
@@ -34,7 +35,7 @@ public class GuiToggleClick {
 
         switch (slot) {
             // Exit
-            case 40 -> {
+            case 49 -> {
                 player.closeInventory();
                 player.playSound(player, Sound.UI_BUTTON_CLICK, 1F, 0.8F);
             }
@@ -323,6 +324,20 @@ public class GuiToggleClick {
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.HEART_OF_THE_SEA, "&f&lEmoji", aranarthPlayer.isEmojiEnabled()));
+            }
+            // Invisible Armor
+            case 37 -> {
+                if (!player.hasPermission("aranarth.invisiblearmor")) {
+                    return;
+                }
+                if (InvisibleArmorManager.isArmorHidden(player.getUniqueId())) {
+                    InvisibleArmorManager.showArmor(player);
+                    player.sendMessage(ChatUtils.chatMessage("&7Your armor is now &rvisible"));
+                } else {
+                    InvisibleArmorManager.hideArmor(player);
+                    player.sendMessage(ChatUtils.chatMessage("&7Your armor is now &ehidden"));
+                }
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.IRON_CHESTPLATE, "&f&lInvisible Armor", InvisibleArmorManager.isArmorHidden(player.getUniqueId())));
             }
             // Size Scale
             case 34 -> {

@@ -35,6 +35,7 @@ Major Features
 [+] Implemented /jobs top, /jobs who, and admin job commands
 [+] Added clickable navigation buttons to /baltop
 [+] Now displaying food power and estimated duration in dominion food GUI title, updating as items are added/removed
+[+] Added Invisible Armor perk
 
 Minor Features
 [~] Fixed issue where the alchemist job was not providing xp when shift-clicking ingredients into a brewing stand

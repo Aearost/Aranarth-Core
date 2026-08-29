@@ -251,7 +251,6 @@ public class GuiStore {
         gui.setItem(27, blank);
         gui.setItem(28, blank);
         gui.setItem(29, blank);
-        gui.setItem(33, blank);
         gui.setItem(34, blank);
         gui.setItem(35, blank);
 
@@ -362,7 +361,7 @@ public class GuiStore {
         invisibleItemFrameLore.add(ChatUtils.translateToColor("&eUnlocks the crafting of invisible item frames"));
         invisibleItemFrameMeta.setLore(invisibleItemFrameLore);
         invisibleItemFrame.setItemMeta(invisibleItemFrameMeta);
-        gui.setItem(30, invisibleItemFrame);
+        gui.setItem(29, invisibleItemFrame);
 
         ItemStack homes = new ItemStack(Material.RED_BED);
         ItemMeta homesMeta = homes.getItemMeta();
@@ -371,7 +370,7 @@ public class GuiStore {
         homesLore.add(ChatUtils.translateToColor("&cProvides 3 additional homes (capped at 15)"));
         homesMeta.setLore(homesLore);
         homes.setItemMeta(homesMeta);
-        gui.setItem(31, homes);
+        gui.setItem(30, homes);
 
         ItemStack discord = new ItemStack(Material.PURPLE_GLAZED_TERRACOTTA);
         ItemMeta discordMeta = discord.getItemMeta();
@@ -381,6 +380,15 @@ public class GuiStore {
         discordMeta.setLore(discordLore);
         discord.setItemMeta(discordMeta);
         gui.setItem(32, discord);
+
+        ItemStack invisibleArmor = new ItemStack(Material.IRON_CHESTPLATE);
+        ItemMeta invisibleArmorMeta = invisibleArmor.getItemMeta();
+        invisibleArmorMeta.setDisplayName(ChatUtils.translateToColor("&7&lInvisible Armor - $3.99"));
+        List<String> invisibleArmorLore = new ArrayList<>();
+        invisibleArmorLore.add(ChatUtils.translateToColor("&fHide your armor but keep its benefits"));
+        invisibleArmorMeta.setLore(invisibleArmorLore);
+        invisibleArmor.setItemMeta(invisibleArmorMeta);
+        gui.setItem(33, invisibleArmor);
 
         gui.setItem(gui.getSize() - 5, previous);
 

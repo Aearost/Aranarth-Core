@@ -139,14 +139,17 @@ public class GuiStoreClick {
         } else if (slot == 25) {
             player.sendMessage(ChatUtils.chatMessage("&3&lBlue Fire: &bhttps://aranarth.craftingstore.net/package/1475696"));
             player.closeInventory();
-        } else if (slot == 30) {
+        } else if (slot == 29) {
             player.sendMessage(ChatUtils.chatMessage("&7&lInvisible Item Frames: &fhttps://aranarth.craftingstore.net/package/1475081"));
             player.closeInventory();
-        } else if (slot == 31) {
+        } else if (slot == 30) {
             player.sendMessage(ChatUtils.chatMessage("&4&lAdditional 3 Homes: &chttps://aranarth.craftingstore.net/package/1475006"));
             player.closeInventory();
         } else if (slot == 32) {
             player.sendMessage(ChatUtils.chatMessage("&5&lDiscord Chat: &dhttps://aranarth.craftingstore.net/package/1477059"));
+            player.closeInventory();
+        } else if (slot == 33) {
+            player.sendMessage(ChatUtils.chatMessage("&7&lInvisible Armor: &fhttps://aranarth.craftingstore.net/package/TODO"));
             player.closeInventory();
         }
 

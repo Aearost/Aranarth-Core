@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.enums.FireType;
+import com.aearost.aranarthcore.event.listener.misc.InvisibleArmorManager;
 import com.aearost.aranarthcore.gui.GuiToggle;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Perk;
@@ -368,6 +369,18 @@ public class CommandToggle implements CommandExecutor {
 						player.sendMessage(ChatUtils.chatMessage("&7You are now a &cBarbarian&7. You can deal and take damage from other players"));
 					} else {
 						player.sendMessage(ChatUtils.chatMessage("&7You are now a &aWanderer&7. You are immune to player damage"));
+					}
+				} else if (args[0].equalsIgnoreCase("invisiblearmor")) {
+					if (!player.hasPermission("aranarth.invisiblearmor")) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have the Invisible Armor perk!"));
+						return true;
+					}
+					if (InvisibleArmorManager.isArmorHidden(player.getUniqueId())) {
+						InvisibleArmorManager.showArmor(player);
+						player.sendMessage(ChatUtils.chatMessage("&7Your armor is now &evisible"));
+					} else {
+						InvisibleArmorManager.hideArmor(player);
+						player.sendMessage(ChatUtils.chatMessage("&7Your armor is now &ehidden"));
 					}
 				} else if (args[0].equalsIgnoreCase("size")) {
 					if (aranarthPlayer.isSizeScaleEnabled()) {

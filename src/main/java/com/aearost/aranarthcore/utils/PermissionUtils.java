@@ -914,6 +914,10 @@ public class PermissionUtils {
             perms.setPermission("aranarth.nick.hex", true);
             perms.setPermission("aranarth.nick.gradient", true);
         }
+        // Invisible Armor
+        if (perks.getOrDefault(Perk.INVISIBLEARMOR, 0) == 1) {
+            perms.setPermission("aranarth.invisiblearmor", true);
+        }
 
         // Reset fireType to DEFAULT if the player no longer has the perk for their active type.
         // This handles cases where a perk was revoked but the stored fireType wasn't cleared.
@@ -1144,6 +1148,7 @@ public class PermissionUtils {
             perms.setPermission("aranarthcore.armorstand.salute", true);
             perms.setPermission("aranarthcore.armorstand.zombie", true);
             perms.setPermission("aranarth.gate", true);
+            perms.setPermission("aranarth.invisiblearmor", true);
         } else {
             return;
         }

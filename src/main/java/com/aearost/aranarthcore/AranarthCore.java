@@ -1183,6 +1183,7 @@ public class AranarthCore extends JavaPlugin {
         new VillagerCamelDismountListener(this);
         new PotionEffectListener(this);
         new InvisibilityListener(this);
+        new InvisibleArmorManager(this);
         new BrewingListener(this);
         new BrewRecipeUnlockListener(this);
         new BrewRecipeAutoUnlockListener(this);

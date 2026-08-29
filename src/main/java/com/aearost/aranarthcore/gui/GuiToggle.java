@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.enums.FireType;
+import com.aearost.aranarthcore.event.listener.misc.InvisibleArmorManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Perk;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -32,7 +33,7 @@ public class GuiToggle {
 
     private Inventory initializeGui(Player player) {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-        Inventory gui = Bukkit.getServer().createInventory(player, 45, "Player Toggles");
+        Inventory gui = Bukkit.getServer().createInventory(player, 54, "Player Toggles");
 
         ItemStack blank = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta blankMeta = blank.getItemMeta();
@@ -52,8 +53,11 @@ public class GuiToggle {
         // Row 3 edge fillers (27, 35)
         gui.setItem(27, blank);
         gui.setItem(35, blank);
-        // Bottom filler row (36-44)
-        for (int i = 36; i <= 44; i++) {
+        // Row 4 edge fillers (36, 44)
+        gui.setItem(36, blank);
+        gui.setItem(44, blank);
+        // Bottom filler row (45-53)
+        for (int i = 45; i <= 53; i++) {
             gui.setItem(i, blank);
         }
 
@@ -61,7 +65,7 @@ public class GuiToggle {
         ItemMeta exitMeta = exit.getItemMeta();
         exitMeta.setDisplayName(ChatUtils.translateToColor("&4&lExit"));
         exit.setItemMeta(exitMeta);
-        gui.setItem(40, exit);
+        gui.setItem(49, exit);
 
         // Row 1: slots 10-16
         // Blacklist
@@ -179,6 +183,13 @@ public class GuiToggle {
 
         // Size Scale
         gui.setItem(34, buildToggleItem(Material.POPPED_CHORUS_FRUIT, "&f&lAranarthium Size Scale", aranarthPlayer.isSizeScaleEnabled()));
+
+        // Invisible Armor
+        if (player.hasPermission("aranarth.invisiblearmor")) {
+            gui.setItem(37, buildToggleItem(Material.IRON_CHESTPLATE, "&f&lInvisible Armor", InvisibleArmorManager.isArmorHidden(player.getUniqueId())));
+        } else {
+            gui.setItem(37, buildLockedItem(Material.IRON_CHESTPLATE, "&f&lInvisible Armor"));
+        }
 
         return gui;
     }

@@ -55,6 +55,7 @@ public class CommandPerks {
                 sender.sendMessage(ChatUtils.translateToColor("&6PrismaticFire: &e" + perks.get(Perk.PRISMATICFIRE)));
                 sender.sendMessage(ChatUtils.translateToColor("&6Discord: &e" + perks.get(Perk.DISCORD)));
                 sender.sendMessage(ChatUtils.translateToColor("&6Nickname: &e" + perks.get(Perk.NICKNAME)));
+                sender.sendMessage(ChatUtils.translateToColor("&6InvisibleArmor: &e" + perks.get(Perk.INVISIBLEARMOR)));
                 return true;
             } else {
                 sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found"));
@@ -127,7 +128,8 @@ public class CommandPerks {
                             || args[2].equals("tables") || args[2].equals("itemname") || args[2].equals("chat")
                             || args[2].equals("shulker") || args[2].equals("inventory") || args[2].equals("itemframe")
                             || args[2].equals("bluefire") || args[2].equals("whitefire")
-                            || args[2].equals("prismaticfire") || args[2].equals("nickname")) {
+                            || args[2].equals("prismaticfire") || args[2].equals("nickname")
+                            || args[2].equals("invisiblearmor")) {
                         if (args[3].equals("0") || args[3].equals("1")) {
                             // Updates the perk value based on the input
                             perks.put(Perk.valueOf(args[2].toUpperCase()), Integer.parseInt(args[3]));
@@ -147,6 +149,7 @@ public class CommandPerks {
                                 case "whitefire" -> perk = "&f&lWhite Fire";
                                 case "prismaticfire" -> perk = "&5&lPrismatic Fire";
                                 case "nickname" -> perk = "&6&lColored Nickname";
+                                case "invisiblearmor" -> perk = "&7&lInvisible Armor";
                             }
 
                             aranarthPlayer.setPerks(perks);
@@ -268,7 +271,8 @@ public class CommandPerks {
         return perk.equals("compressor") || perk.equals("randomizer") || perk.equals("blacklist") || perk.equals("tables")
                 || perk.equals("itemname") || perk.equals("chat") || perk.equals("shulker") || perk.equals("inventory")
                 || perk.equals("homes") || perk.equals("itemframe") || perk.equals("bluefire") || perk.equals("discord")
-                || perk.equals("whitefire") || perk.equals("prismaticfire") || perk.equals("nickname");
+                || perk.equals("whitefire") || perk.equals("prismaticfire") || perk.equals("nickname")
+                || perk.equals("invisiblearmor");
     }
 
 }
