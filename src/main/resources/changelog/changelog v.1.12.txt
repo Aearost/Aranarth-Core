@@ -125,6 +125,8 @@ Minor Features
 [~] Changed the vote sound icon from experience bottle to vote key in /sounds GUI
 [-] Removed redundant "Sound" keyword from items in /sounds
 [~] Fixed cross-server sleep count double-counting sleeping players
+[~] Delayed the Dominion death penalty messages by 1 tick so they appear after the vanilla death message
+[~] Fixed issue where dominion death penalty message, un-afk chat messages were displayed in the incorrect order, and new player server join was in the incorrect order
 
 Backend Code Changes
 -

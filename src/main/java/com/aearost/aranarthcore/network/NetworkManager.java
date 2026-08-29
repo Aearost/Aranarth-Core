@@ -30,6 +30,8 @@ import java.io.DataOutputStream;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 
 /**
@@ -143,6 +145,7 @@ public class NetworkManager {
     private long lastProcessedMessageId;
     private BukkitTask pollingTask;
     private BukkitTask cleanupTask;
+    private final ExecutorService publishExecutor = Executors.newSingleThreadExecutor();
     /**
      * Number of players currently sleeping on other servers. Updated by handleSleepMessage.
      */
@@ -295,6 +298,7 @@ public class NetworkManager {
             cleanupTask.cancel();
             cleanupTask = null;
         }
+        publishExecutor.shutdown();
         // Clear this server's roster entries from the DB so stale entries don't appear on other servers
         try {
             db.clearRosterForServer(thisServer);
@@ -2992,7 +2996,7 @@ public class NetworkManager {
 
     private void publish(String channel, JsonObject json) {
         final String payload = json.toString();
-        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+        publishExecutor.submit(() -> {
             try {
                 db.publishMessage(channel, payload, thisServer);
             } catch (Exception e) {
