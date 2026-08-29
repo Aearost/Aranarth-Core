@@ -435,7 +435,8 @@
       "Bash(head -15 grep -n \"setItemModel\\\\|NamespacedKey\" \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/items/SugarcaneBlock.java\")",
       "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore/src -type f -name \"*.java\" -exec grep -l \"extends.*Ability\\\\|extends.*ComboAbility\" {})",
       "Bash(cmd //c \"mvn compile -q 2>&1\")",
-      "Bash(find ../ProjectKorra-wip -name *.java)"
+      "Bash(find ../ProjectKorra-wip -name *.java)",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/commands -name *.java -type f -exec grep -l \"page\\\\|pag\" {})"
     ]
   }
 }

@@ -33,6 +33,7 @@ Major Features
 [+] Added colored nickname perk to vote shop and store
 [+] Quest selection now prioritizes quests that match the player's active jobs, filling with general quests when needed
 [+] Implemented /jobs top, /jobs who, and admin job commands
+[+] Added clickable navigation buttons to /baltop
 
 Minor Features
 [~] Fixed issue where the alchemist job was not providing xp when shift-clicking ingredients into a brewing stand

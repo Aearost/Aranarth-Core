@@ -6,6 +6,8 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.NetworkPlayer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -41,7 +43,6 @@ public class CommandBalanceTop implements CommandExecutor {
 			totalPageNumber++;
 		}
 
-		sender.sendMessage(ChatUtils.translateToColor("&8      - - - &6&lAranarth Balances &8- - -"));
 		int page = 1;
 
 		if (args.length > 0) {
@@ -61,6 +62,26 @@ public class CommandBalanceTop implements CommandExecutor {
 				page = totalPageNumber;
 			}
 		}
+
+		// Build navigation header with clickable navigation buttons
+		Component prevButton;
+		if (page > 1) {
+			Component prevDisplay = LegacyComponentSerializer.legacyAmpersand().deserialize("&8[&6&l<<&8]");
+			prevButton = ChatUtils.clickableCommand(prevDisplay, ChatUtils.translateToColor("&7Go to page &6" + (page - 1)), "/baltop " + (page - 1), false);
+		} else {
+			prevButton = LegacyComponentSerializer.legacyAmpersand().deserialize("&8[&7<<&8]");
+		}
+
+		Component nextButton;
+		if (page < totalPageNumber) {
+			Component nextDisplay = LegacyComponentSerializer.legacyAmpersand().deserialize("&8[&6&l>>&8]");
+			nextButton = ChatUtils.clickableCommand(nextDisplay, ChatUtils.translateToColor("&7Go to page &6" + (page + 1)), "/baltop " + (page + 1), false);
+		} else {
+			nextButton = LegacyComponentSerializer.legacyAmpersand().deserialize("&8[&7>>&8]");
+		}
+
+		Component titleMiddle = LegacyComponentSerializer.legacyAmpersand().deserialize("&8 - - - &6&lAranarth Balances &8- - - ");
+		sender.sendMessage(prevButton.append(titleMiddle).append(nextButton));
 
 		sender.sendMessage(ChatUtils.translateToColor("&7Showing page &6" + page + " &7of &6" + totalPageNumber));
 
