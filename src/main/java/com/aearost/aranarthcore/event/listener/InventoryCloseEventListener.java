@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.listener;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.player.*;
 import com.aearost.aranarthcore.gui.GuiChatSnapshot;
+import com.aearost.aranarthcore.gui.GuiDominionFood;
 import com.aearost.aranarthcore.gui.GuiHeadExchange;
 import com.aearost.aranarthcore.gui.GuiPetFood;
 import com.aearost.aranarthcore.gui.GuiWrench;
@@ -58,7 +59,6 @@ public class InventoryCloseEventListener implements Listener {
     }
 
     private static boolean isDominionFoodTitle(String title) {
-        return (title.endsWith(" Food") && !title.equals(GuiPetFood.TITLE))
-                || title.matches(".+'s Food \\(\\d+/\\d+\\)");
+        return title.startsWith(GuiDominionFood.TITLE_PREFIX);
     }
 }

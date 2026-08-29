@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DominionLevelUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -13,6 +14,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class GuiDominionFood {
 
 	public static final int FOOD_SLOTS_PER_PAGE = 45;
+	public static final String TITLE_PREFIX = "Power - ";
 
 	private final Player player;
 	private final Inventory initializedGui;
@@ -38,16 +40,81 @@ public class GuiDominionFood {
 	public static void populatePage(org.bukkit.inventory.Inventory inv, com.aearost.aranarthcore.objects.Dominion dominion, int pageNum) {
 		org.bukkit.inventory.ItemStack[] food = dominion.getFood();
 		int foodOffset = pageNum * FOOD_SLOTS_PER_PAGE;
-		int totalPages = getTotalPages(dominion.getDominionLevel());
 
 		// Clear food slots
 		for (int i = 0; i < FOOD_SLOTS_PER_PAGE; i++) {
 			inv.setItem(i, foodOffset + i < food.length ? food[foodOffset + i] : null);
 		}
+	}
 
-		// Update page indicator in title area - update the nav items to reflect new page
-		// (Navigation row items are static; only update the blank items between nav buttons if needed)
-		// The inventory title won't change, but that's acceptable for page navigation.
+	/**
+	 * Builds the inventory title string including the current food power, max capacity, and estimated duration.
+	 */
+	public static String buildFoodTitle(Dominion dominion, int totalPower) {
+		int amplifier = dominion.getConquered().size();
+		if (amplifier == 0 && DominionUtils.getConquerorOfDominion(dominion) != null) {
+			amplifier = -1;
+		}
+		int maxPower = DominionUtils.getClaimFoodPower(Material.ENCHANTED_GOLDEN_APPLE, amplifier) * 64 * DominionUtils.getFoodArraySize(dominion);
+		int dailyFoodPower = DominionLevelUtils.getDailyFoodPower(dominion.getDominionLevel());
+		String duration = formatDuration(totalPower, dailyFoodPower);
+		double percentage = maxPower > 0 ? (totalPower * 100.0 / maxPower) : 0.0;
+		String percentageStr = percentage == Math.floor(percentage)
+				? String.valueOf((int) percentage)
+				: String.format("%.2f", percentage).replaceAll("0+$", "");
+		return "Power - " + percentageStr + "% (" + duration + ")";
+	}
+
+	/**
+	 * Formats the estimated duration that the given food power will last based on daily consumption.
+	 */
+	public static String formatDuration(int totalPower, int dailyFoodPower) {
+		if (dailyFoodPower <= 0) return "0d";
+		long totalMinutes = (long) totalPower * 24 * 60 / dailyFoodPower;
+		long days = totalMinutes / (24 * 60);
+		long hours = (totalMinutes % (24 * 60)) / 60;
+		long minutes = totalMinutes % 60;
+		return days + "d " + hours + "h " + minutes + "m";
+	}
+
+	/**
+	 * Calculates the total food power from the currently open inventory combined with stored pages in the dominion.
+	 */
+	public static int calculatePowerFromOpenGui(Dominion dominion, Inventory openTop, int currentPage) {
+		int amplifier = dominion.getConquered().size();
+		if (amplifier == 0 && DominionUtils.getConquerorOfDominion(dominion) != null) {
+			amplifier = -1;
+		}
+
+		int totalPower = 0;
+		boolean multiPage = dominion.getDominionLevel() >= 3;
+		int foodSlotsInView = multiPage ? FOOD_SLOTS_PER_PAGE : openTop.getSize();
+
+		// Power from the current page shown in the open inventory
+		for (int i = 0; i < foodSlotsInView; i++) {
+			ItemStack item = openTop.getItem(i);
+			if (item != null && item.getType() != Material.AIR) {
+				totalPower += DominionUtils.getClaimFoodPower(item.getType(), amplifier) * item.getAmount();
+			}
+		}
+
+		// Power from other pages stored in the dominion
+		if (multiPage) {
+			ItemStack[] storedFood = dominion.getFood();
+			int totalPages = getTotalPages(dominion.getDominionLevel());
+			for (int page = 0; page < totalPages; page++) {
+				if (page == currentPage) continue;
+				int offset = page * FOOD_SLOTS_PER_PAGE;
+				for (int i = 0; i < FOOD_SLOTS_PER_PAGE && offset + i < storedFood.length; i++) {
+					ItemStack food = storedFood[offset + i];
+					if (food != null && food.getType() != Material.AIR) {
+						totalPower += DominionUtils.getClaimFoodPower(food.getType(), amplifier) * food.getAmount();
+					}
+				}
+			}
+		}
+
+		return totalPower;
 	}
 
 	public static int getTotalPages(int level) {
@@ -63,12 +130,8 @@ public class GuiDominionFood {
 		boolean multiPage = level >= 3;
 
 		int inventorySize = multiPage ? 54 : DominionUtils.getFoodArraySize(dominion);
-		int totalPages = getTotalPages(level);
-		String title = multiPage
-				? "&e" + dominion.getName() + "'s &rFood &r(" + (pageNum + 1) + "/" + totalPages + ")"
-				: "&e" + dominion.getName() + "'s &rFood";
-		Inventory gui = Bukkit.getServer().createInventory(player, inventorySize,
-				ChatUtils.translateToColor(title));
+		int totalPower = DominionUtils.getTotalFoodPower(dominion);
+		Inventory gui = Bukkit.getServer().createInventory(player, inventorySize, buildFoodTitle(dominion, totalPower));
 
 		ItemStack[] food = dominion.getFood();
 		int foodOffset = pageNum * FOOD_SLOTS_PER_PAGE;

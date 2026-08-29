@@ -1,10 +1,12 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiDominionFood;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -39,6 +41,8 @@ public class GuiDominionFoodClick {
 					aranarthPlayer.setCurrentGuiPageNum(newPage);
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					GuiDominionFood.populatePage(e.getClickedInventory(), dominion, newPage);
+					int totalPowerPrev = DominionUtils.getTotalFoodPower(dominion);
+					e.getView().setTitle(GuiDominionFood.buildFoodTitle(dominion, totalPowerPrev));
 					player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
 				} else if (slot == 49) { // Exit
 					player.closeInventory();
@@ -49,6 +53,8 @@ public class GuiDominionFoodClick {
 					aranarthPlayer.setCurrentGuiPageNum(newPage);
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					GuiDominionFood.populatePage(e.getClickedInventory(), dominion, newPage);
+					int totalPowerNext = DominionUtils.getTotalFoodPower(dominion);
+					e.getView().setTitle(GuiDominionFood.buildFoodTitle(dominion, totalPowerNext));
 					player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
 				}
 				return;
@@ -68,6 +74,18 @@ public class GuiDominionFoodClick {
 					}
 				}
 			}
+		}
+
+		if (!e.isCancelled()) {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			int currentPage = aranarthPlayer.getCurrentGuiPageNum();
+			Inventory top = e.getView().getTopInventory();
+			Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+				if (player.getOpenInventory().getTopInventory().equals(top)) {
+					int totalPower = GuiDominionFood.calculatePowerFromOpenGui(dominion, top, currentPage);
+					e.getView().setTitle(GuiDominionFood.buildFoodTitle(dominion, totalPower));
+				}
+			});
 		}
 	}
 
