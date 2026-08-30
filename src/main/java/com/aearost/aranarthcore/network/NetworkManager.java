@@ -4,11 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Weather;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
-import com.aearost.aranarthcore.objects.AranarthVote;
-import com.aearost.aranarthcore.objects.Boost;
-import com.aearost.aranarthcore.objects.Dominion;
-import com.aearost.aranarthcore.objects.Outpost;
+import com.aearost.aranarthcore.objects.*;
 import com.aearost.aranarthcore.utils.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -95,6 +91,7 @@ public class NetworkManager {
     public static final String CH_INVSEE_RESPONSE = "aranarth:invsee_response";
     public static final String CH_INVSEE_UPDATE = "aranarth:invsee_update";
     public static final String CH_INVSEE_UNWATCH = "aranarth:invsee_unwatch";
+    public static final String CH_RANK_UPDATE = "aranarth:rank_update";
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
     private static final String KEY_RETURN_LOC = "return_loc:";
@@ -355,6 +352,7 @@ public class NetworkManager {
             case CH_INVSEE_RESPONSE -> handleInvseeResponse(json);
             case CH_INVSEE_UPDATE -> handleInvseeUpdate(json);
             case CH_INVSEE_UNWATCH -> handleInvseeUnwatch(json);
+            case CH_RANK_UPDATE -> handleRankUpdate(json);
         }
     }
 
@@ -685,8 +683,20 @@ public class NetworkManager {
     }
 
     /**
-     * Broadcasts an AFK status change for a local player to all other servers.
+     * Notifies other servers that a player's rank has changed so they can update the remote roster
+     * and refresh the TAB list immediately.
      */
+    public void publishRankUpdate(UUID uuid, int rank, int councilRank, int saintRank, int architectRank) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", uuid.toString());
+        json.addProperty("rank", rank);
+        json.addProperty("councilRank", councilRank);
+        json.addProperty("saintRank", saintRank);
+        json.addProperty("architectRank", architectRank);
+        publish(CH_RANK_UPDATE, json);
+    }
+
     public void publishAfkStatus(UUID uuid, String nickname, boolean isAfk) {
         JsonObject json = new JsonObject();
         json.addProperty("server", thisServer);
@@ -1782,6 +1792,47 @@ public class NetworkManager {
         }
     }
 
+    private void handleRankUpdate(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        int rank = json.get("rank").getAsInt();
+        int councilRank = json.get("councilRank").getAsInt();
+        int saintRank = json.get("saintRank").getAsInt();
+        int architectRank = json.get("architectRank").getAsInt();
+
+        NetworkPlayer np = remoteRoster.get(uuid);
+        if (np != null) {
+            // Player is on a remote server - update the remote roster entry and refresh TAB
+            np.setRank(rank);
+            np.setCouncilRank(councilRank);
+            np.setSaintRank(saintRank);
+            np.setArchitectRank(architectRank);
+            if (!np.isVanished()) {
+                NetworkTabManager.addToTab(np);
+            }
+            AranarthUtils.updateTab();
+        } else {
+            // Player is locally online on this server - update their local state and re-evaluate
+            Player localPlayer = Bukkit.getPlayer(uuid);
+            if (localPlayer != null) {
+                AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+                if (ap != null) {
+                    ap.setRank(rank);
+                    ap.setCouncilRank(councilRank);
+                    ap.setSaintRank(saintRank);
+                    ap.setArchitectRank(architectRank);
+                    AranarthUtils.setPlayer(uuid, ap);
+                    Bukkit.getScheduler().runTask(AranarthCore.getInstance(),
+                            () -> PermissionUtils.evaluatePlayerPermissions(localPlayer));
+                }
+            }
+        }
+    }
+
     private void handleBroadcast(JsonObject json) {
         String originServer = json.get("server").getAsString();
         if (originServer.equals(thisServer)) {
@@ -2243,7 +2294,9 @@ public class NetworkManager {
      */
     public void publishRemoteInvseeUpdate(Player target) {
         Set<UUID> watchers = remoteInvseeWatchers.get(target.getUniqueId());
-        if (watchers == null || watchers.isEmpty()) return;
+        if (watchers == null || watchers.isEmpty()) {
+            return;
+        }
         if (!target.isOnline()) {
             remoteInvseeWatchers.remove(target.getUniqueId());
             return;
@@ -2302,7 +2355,9 @@ public class NetworkManager {
         }
     }
 
-    /** Received on the target's server when a viewer closes their remote invsee GUI. */
+    /**
+     * Received on the target's server when a viewer closes their remote invsee GUI.
+     */
     private void handleInvseeUnwatch(JsonObject json) {
         UUID viewerUuid = UUID.fromString(json.get("viewerUuid").getAsString());
         UUID targetUuid = UUID.fromString(json.get("targetUuid").getAsString());
@@ -2315,7 +2370,9 @@ public class NetworkManager {
         }
     }
 
-    /** Received on the viewer's server. Deserializes the inventory snapshot and opens the GUI. */
+    /**
+     * Received on the viewer's server. Deserializes the inventory snapshot and opens the GUI.
+     */
     private void handleInvseeResponse(JsonObject json) {
         String targetServer = json.get("targetServer").getAsString();
         if (!targetServer.equals(thisServer)) {
@@ -2344,7 +2401,9 @@ public class NetworkManager {
         });
     }
 
-    /** Received on the viewer's server. Updates the open remote invsee GUI in-place. */
+    /**
+     * Received on the viewer's server. Updates the open remote invsee GUI in-place.
+     */
     private void handleInvseeUpdate(JsonObject json) {
         UUID targetUuid = UUID.fromString(json.get("targetUuid").getAsString());
         if (!com.aearost.aranarthcore.gui.GuiInvsee.hasRemoteInvseeOpen(targetUuid)) {
@@ -2356,7 +2415,9 @@ public class NetworkManager {
                 null);
     }
 
-    /** Deserializes a base64 inventory snapshot async, then calls onSuccess/onError on the main thread. */
+    /**
+     * Deserializes a base64 inventory snapshot async, then calls onSuccess/onError on the main thread.
+     */
     private void deserializeAndApply(String serialized, UUID targetUuid,
                                      java.util.function.Consumer<org.bukkit.inventory.ItemStack[]> onSuccess,
                                      Runnable onError) {

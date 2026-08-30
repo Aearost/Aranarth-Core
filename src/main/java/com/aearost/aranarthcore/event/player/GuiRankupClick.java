@@ -1,13 +1,9 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
-import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
-import com.aearost.aranarthcore.utils.DiscordUtils;
 import com.aearost.aranarthcore.network.NetworkManager;
-import com.aearost.aranarthcore.utils.PermissionUtils;
-import com.aearost.aranarthcore.utils.PersistenceUtils;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.utils.*;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
 import com.gmail.nossr50.util.EventUtils;
@@ -23,131 +19,136 @@ import java.util.List;
  * Handles logic for clicking in the Rank-Up GUI
  */
 public class GuiRankupClick {
-	public void execute(InventoryClickEvent e) {
-		// If the user did not click a slot
-		if (e.getClickedInventory() == null) {
-			return;
-		}
+    public void execute(InventoryClickEvent e) {
+        // If the user did not click a slot
+        if (e.getClickedInventory() == null) {
+            return;
+        }
 
-		e.setCancelled(true);
+        e.setCancelled(true);
 
-		int slot = e.getSlot();
-		// Rankup
-		if (slot == 14) {
-			Player player = (Player) e.getWhoClicked();
-			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        int slot = e.getSlot();
+        // Rankup
+        if (slot == 14) {
+            Player player = (Player) e.getWhoClicked();
+            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
-			double balance = aranarthPlayer.getBalance();
-			String clickedItem = e.getClickedInventory().getItem(slot).getItemMeta().getDisplayName();
-			String[] parts = clickedItem.split(" ");
+            double balance = aranarthPlayer.getBalance();
+            String clickedItem = e.getClickedInventory().getItem(slot).getItemMeta().getDisplayName();
+            String[] parts = clickedItem.split(" ");
 
-			String priceWithoutDollarSign = ChatUtils.stripColorFormatting(parts[parts.length - 1]).substring(1);
-			String priceWithoutCommas = priceWithoutDollarSign.replaceAll(",", "");
-			double price = Double.parseDouble(priceWithoutCommas);
+            String priceWithoutDollarSign = ChatUtils.stripColorFormatting(parts[parts.length - 1]).substring(1);
+            String priceWithoutCommas = priceWithoutDollarSign.replaceAll(",", "");
+            double price = Double.parseDouble(priceWithoutCommas);
 
-			if (balance >= price) {
-				if (hasMinimumMcmmoTotal(player)) {
-					if (hasMinimumMcmmoPerSkill(player)) {
-						String rankDisplay = clickedItem.split(" ")[2];
-						String aOrAn = "a";
+            if (balance >= price) {
+                if (hasMinimumMcmmoTotal(player)) {
+                    if (hasMinimumMcmmoPerSkill(player)) {
+                        String rankDisplay = clickedItem.split(" ")[2];
+                        String aOrAn = "a";
 
-						NumberFormat formatter = NumberFormat.getCurrencyInstance();
-						aranarthPlayer.setBalance(balance - price);
-						if (NetworkManager.isActive()) {
-							NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), -price);
-						}
-						aranarthPlayer.setRank(aranarthPlayer.getRank() + 1);
-						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-						PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
+                        NumberFormat formatter = NumberFormat.getCurrencyInstance();
+                        aranarthPlayer.setBalance(balance - price);
+                        if (NetworkManager.isActive()) {
+                            NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), -price);
+                        }
+                        aranarthPlayer.setRank(aranarthPlayer.getRank() + 1);
+                        AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                        PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
 
-						if (ChatUtils.stripColorFormatting(rankDisplay).equals("Esquire")
-								|| ChatUtils.stripColorFormatting(rankDisplay).equals("Emperor")
-								|| ChatUtils.stripColorFormatting(rankDisplay).equals("Empress")) {
-							aOrAn = "an";
-						}
-						DiscordUtils.updateRank(player, aranarthPlayer.getRank(), true);
+                        if (ChatUtils.stripColorFormatting(rankDisplay).equals("Esquire")
+                                || ChatUtils.stripColorFormatting(rankDisplay).equals("Emperor")
+                                || ChatUtils.stripColorFormatting(rankDisplay).equals("Empress")) {
+                            aOrAn = "an";
+                        }
+                        DiscordUtils.updateRank(player, aranarthPlayer.getRank(), true);
 
-						Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has become " + aOrAn + " " + rankDisplay + "&7!"));
-						PermissionUtils.evaluatePlayerPermissions(player);
-						player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
-						player.closeInventory();
-					} else {
-						player.sendMessage(ChatUtils.chatMessage("&cYou do not meet the mcMMO requirements per category!"));
-						player.closeInventory();
-					}
-				} else {
-					player.sendMessage(ChatUtils.chatMessage("&cYou do not meet the overall mcMMO level requirements!"));
-					player.closeInventory();
-				}
-			} else {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough money to rankup!"));
-				player.closeInventory();
-			}
-		}
-		// Cancel
-		else if (slot == 12) {
-			Player player = (Player) e.getWhoClicked();
-			player.playSound(player, Sound.ENTITY_ENDER_EYE_DEATH, 0.8F, 0.5F);
-			e.getWhoClicked().closeInventory();
-		}
-	}
+                        Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has become " + aOrAn + " " + rankDisplay + "&7!"));
+                        PermissionUtils.evaluatePlayerPermissions(player);
+                        if (NetworkManager.isActive()) {
+                            NetworkManager.getInstance().publishRankUpdate(player.getUniqueId(), aranarthPlayer.getRank(), aranarthPlayer.getCouncilRank(), aranarthPlayer.getSaintRank(), aranarthPlayer.getArchitectRank());
+                        }
+                        player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
+                        player.closeInventory();
+                    } else {
+                        player.sendMessage(ChatUtils.chatMessage("&cYou do not meet the mcMMO requirements per category!"));
+                        player.closeInventory();
+                    }
+                } else {
+                    player.sendMessage(ChatUtils.chatMessage("&cYou do not meet the overall mcMMO level requirements!"));
+                    player.closeInventory();
+                }
+            } else {
+                player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough money to rankup!"));
+                player.closeInventory();
+            }
+        }
+        // Cancel
+        else if (slot == 12) {
+            Player player = (Player) e.getWhoClicked();
+            player.playSound(player, Sound.ENTITY_ENDER_EYE_DEATH, 0.8F, 0.5F);
+            e.getWhoClicked().closeInventory();
+        }
+    }
 
-	/**
-	 * Determines if the player has the minimum amount of overall mcMMO levels to rank up.
-	 * @param player The player attempting to rank up.
-	 * @return Confirmation if the player has the minimum amount of overall mcMMO levels to rank up.
-	 */
-	private boolean hasMinimumMcmmoTotal(Player player) {
-		McMMOPlayer mcMMOPlayer = EventUtils.getMcMMOPlayer(player);
+    /**
+     * Determines if the player has the minimum amount of overall mcMMO levels to rank up.
+     *
+     * @param player The player attempting to rank up.
+     * @return Confirmation if the player has the minimum amount of overall mcMMO levels to rank up.
+     */
+    private boolean hasMinimumMcmmoTotal(Player player) {
+        McMMOPlayer mcMMOPlayer = EventUtils.getMcMMOPlayer(player);
 
-		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		List<Integer> requirements = AranarthCore.getInstance().getConfig().getIntegerList("mcmmo.total-level-requirements");
-		int rank = aranarthPlayer.getRank();
-		int minimum = rank < requirements.size() ? requirements.get(rank) : requirements.get(requirements.size() - 1);
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        List<Integer> requirements = AranarthCore.getInstance().getConfig().getIntegerList("mcmmo.total-level-requirements");
+        int rank = aranarthPlayer.getRank();
+        int minimum = rank < requirements.size() ? requirements.get(rank) : requirements.get(requirements.size() - 1);
 
-		return mcMMOPlayer.getPowerLevel() >= minimum;
-	}
+        return mcMMOPlayer.getPowerLevel() >= minimum;
+    }
 
-	/**
-	 * Determines if the player has the minimum sum of mcMMO levels per category to rank up.
-	 * Each of the three categories (Gathering, Combat, Miscellaneous) must independently meet the minimum.
-	 * @param player The player attempting to rank up.
-	 * @return Confirmation if the player has the minimum sum of mcMMO levels per category to rank up.
-	 */
-	private boolean hasMinimumMcmmoPerSkill(Player player) {
-		McMMOPlayer mcMMOPlayer = EventUtils.getMcMMOPlayer(player);
+    /**
+     * Determines if the player has the minimum sum of mcMMO levels per category to rank up.
+     * Each of the three categories (Gathering, Combat, Miscellaneous) must independently meet the minimum.
+     *
+     * @param player The player attempting to rank up.
+     * @return Confirmation if the player has the minimum sum of mcMMO levels per category to rank up.
+     */
+    private boolean hasMinimumMcmmoPerSkill(Player player) {
+        McMMOPlayer mcMMOPlayer = EventUtils.getMcMMOPlayer(player);
 
-		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		List<Integer> requirements = AranarthCore.getInstance().getConfig().getIntegerList("mcmmo.per-category-requirements");
-		int rank = aranarthPlayer.getRank();
-		int minimum = rank < requirements.size() ? requirements.get(rank) : requirements.get(requirements.size() - 1);
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        List<Integer> requirements = AranarthCore.getInstance().getConfig().getIntegerList("mcmmo.per-category-requirements");
+        int rank = aranarthPlayer.getRank();
+        int minimum = rank < requirements.size() ? requirements.get(rank) : requirements.get(requirements.size() - 1);
 
-		if (minimum == 0) {
-			return true;
-		}
+        if (minimum == 0) {
+            return true;
+        }
 
-		int gatheringSkillsLevelTotal = mcMMOPlayer.getSkillLevel(PrimarySkillType.EXCAVATION)
-				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.FISHING)
-				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.HERBALISM)
-				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.MINING)
-				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.WOODCUTTING);
+        int gatheringSkillsLevelTotal = mcMMOPlayer.getSkillLevel(PrimarySkillType.EXCAVATION)
+                + mcMMOPlayer.getSkillLevel(PrimarySkillType.FISHING)
+                + mcMMOPlayer.getSkillLevel(PrimarySkillType.HERBALISM)
+                + mcMMOPlayer.getSkillLevel(PrimarySkillType.MINING)
+                + mcMMOPlayer.getSkillLevel(PrimarySkillType.WOODCUTTING);
 
-		int combatSkillsLevelTotal = mcMMOPlayer.getSkillLevel(PrimarySkillType.ARCHERY)
-				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.AXES)
-				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.CROSSBOWS)
-				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.MACES)
-				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.SWORDS)
-				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.SPEARS)
-				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.TAMING)
-				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.TRIDENTS)
-				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.UNARMED);
+        int combatSkillsLevelTotal = mcMMOPlayer.getSkillLevel(PrimarySkillType.ARCHERY)
+                + mcMMOPlayer.getSkillLevel(PrimarySkillType.AXES)
+                + mcMMOPlayer.getSkillLevel(PrimarySkillType.CROSSBOWS)
+                + mcMMOPlayer.getSkillLevel(PrimarySkillType.MACES)
+                + mcMMOPlayer.getSkillLevel(PrimarySkillType.SWORDS)
+                + mcMMOPlayer.getSkillLevel(PrimarySkillType.SPEARS)
+                + mcMMOPlayer.getSkillLevel(PrimarySkillType.TAMING)
+                + mcMMOPlayer.getSkillLevel(PrimarySkillType.TRIDENTS)
+                + mcMMOPlayer.getSkillLevel(PrimarySkillType.UNARMED);
 
-		int miscSkillsLevelTotal = mcMMOPlayer.getSkillLevel(PrimarySkillType.ACROBATICS)
-				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.ALCHEMY)
-				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.REPAIR)
-				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.SALVAGE)
-				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.SMELTING);
+        int miscSkillsLevelTotal = mcMMOPlayer.getSkillLevel(PrimarySkillType.ACROBATICS)
+                + mcMMOPlayer.getSkillLevel(PrimarySkillType.ALCHEMY)
+                + mcMMOPlayer.getSkillLevel(PrimarySkillType.REPAIR)
+                + mcMMOPlayer.getSkillLevel(PrimarySkillType.SALVAGE)
+                + mcMMOPlayer.getSkillLevel(PrimarySkillType.SMELTING);
 
-		return gatheringSkillsLevelTotal >= minimum && combatSkillsLevelTotal >= minimum && miscSkillsLevelTotal >= minimum;
-	}
+        return gatheringSkillsLevelTotal >= minimum && combatSkillsLevelTotal >= minimum && miscSkillsLevelTotal >= minimum;
+    }
 }

@@ -132,6 +132,7 @@ Minor Features
 [~] Fixed issue where dominion death penalty message, un-afk chat messages were displayed in the incorrect order, and new player server join was in the incorrect order
 [~] Blocked new dominion and outpost creation in Survival's main end island
 [~] Fixed architects being unable to use /ac msg
+[~] Fixed rank changes not updating cross-server for TAB and permissions
 
 Backend Code Changes
 -
