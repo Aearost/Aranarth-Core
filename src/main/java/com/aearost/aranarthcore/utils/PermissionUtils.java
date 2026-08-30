@@ -58,6 +58,7 @@ public class PermissionUtils {
         reEvaluateMonthlySaints(player);
         setSaintPermissions(perms, aranarthPlayer.getSaintRank());
         setCouncilPermissions(perms, aranarthPlayer.getCouncilRank());
+        setArchitectPermissions(perms, aranarthPlayer.getArchitectRank());
         refreshPlayerPerks(perms, player);
 
         Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
