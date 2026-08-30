@@ -37,6 +37,7 @@ Major Features
 [+] Now displaying food power and estimated duration in dominion food GUI title, updating as items are added/removed
 [+] Added Invisible Armor perk
 [+] Added crop growth buff to the Regrowth ability
+[+] Added crop harvest functionality to LeafScythe
 
 Minor Features
 [~] Fixed issue where the alchemist job was not providing xp when shift-clicking ingredients into a brewing stand

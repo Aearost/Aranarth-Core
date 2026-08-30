@@ -1,6 +1,19 @@
 package com.aearost.aranarthcore.abilities.waterbending.plantbending;
 
+import com.aearost.aranarthcore.enums.Month;
+import com.aearost.aranarthcore.enums.QuestTaskType;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Boost;
+import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.CropUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.JobUtils;
+import com.aearost.aranarthcore.utils.QuestUtils;
+import com.gmail.nossr50.datatypes.player.McMMOPlayer;
+import com.gmail.nossr50.skills.herbalism.HerbalismManager;
+import com.gmail.nossr50.util.EventUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.PlantAbility;
 import com.projectkorra.projectkorra.attribute.Attribute;
@@ -8,12 +21,15 @@ import com.projectkorra.projectkorra.util.BlockSource;
 import com.projectkorra.projectkorra.util.ClickType;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.Ageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class LeafScythe extends PlantAbility implements AddonAbility {
 
@@ -34,6 +50,17 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
     private int noMovementTicks;
 
     private final Set<UUID> hitEntities = new HashSet<>();
+    private final Set<Block> harvestedCrops = new HashSet<>();
+    private boolean hitLivingEntity = false;
+
+    private static final Set<Material> HARVESTABLE_CROPS = Set.of(
+            Material.WHEAT,
+            Material.CARROTS,
+            Material.POTATOES,
+            Material.BEETROOTS,
+            Material.NETHER_WART,
+            Material.COCOA
+    );
 
     private static final Particle.DustOptions SCYTHE_DUST =
             new Particle.DustOptions(Color.fromRGB(0, 90, 10), 0.6f);
@@ -158,6 +185,7 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
                     .add(curDirection.clone().subtract(prevDirection).multiply(t))
                     .normalize();
             checkEntityHits(dir);
+            checkCropHits(dir);
         }
 
         prevDirection = curDirection;
@@ -185,6 +213,8 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
         slashTick = 0;
         noMovementTicks = 0;
         hitEntities.clear();
+        harvestedCrops.clear();
+        hitLivingEntity = false;
 
         phase = Phase.SWINGING;
     }
@@ -232,9 +262,120 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
                 }
                 if (hitEntities.add(living.getUniqueId())) {
                     living.damage(isBlade ? damage * 1.5 : damage, player);
+                    hitLivingEntity = true;
                 }
             }
         }
+    }
+
+    private void checkCropHits(Vector handleDir) {
+        Location origin = player.getEyeLocation().add(0, -0.5, 0);
+        World world = player.getWorld();
+        Vector bladeDir = computeBladeDir(handleDir, prevYawDelta);
+
+        for (int[] offset : SCYTHE_SHAPE) {
+            Vector pos = origin.toVector()
+                    .add(handleDir.clone().multiply(offset[0]))
+                    .add(bladeDir.clone().multiply(offset[1]));
+            Block block = pos.toLocation(world).getBlock();
+            if (!HARVESTABLE_CROPS.contains(block.getType())) {
+                continue;
+            }
+            if (!CropUtils.getIsMature(block)) {
+                continue;
+            }
+            if (!harvestedCrops.add(block)) {
+                continue;
+            }
+            harvestCrop(block);
+        }
+    }
+
+    private void harvestCrop(Block block) {
+        if (!(block.getBlockData() instanceof Ageable crop)) {
+            return;
+        }
+
+        // Dominion protection check
+        if (AranarthUtils.isSpawnLocation(block.getLocation())) {
+            return;
+        }
+        Dominion blockDominion = DominionUtils.getDominionOfChunk(block.getChunk());
+        if (blockDominion != null) {
+            Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+            if (playerDominion == null || !playerDominion.isSameDominion(blockDominion)) {
+                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+                boolean isEnemied = playerDominion != null && playerDominion.isEnemied(blockDominion);
+                if (!aranarthPlayer.isInAdminMode() && !isEnemied) {
+                    return;
+                }
+            }
+        }
+
+        JobUtils.awardFarmerCropHarvest(player, block.getType());
+        QuestUtils.updateProgress(player, QuestTaskType.HARVEST_CROPS, 1);
+
+        // Get vanilla fortune-based drops, then scale by seasonal yield multiplier
+        ArrayList<ItemStack> drops = new ArrayList<>(block.getDrops(player.getInventory().getItemInMainHand()));
+        Month month = AranarthUtils.getMonth();
+        double multiplier = CropUtils.getCropYieldMultiplier(month, CropUtils.getSeedMaterial(block.getType()));
+
+        if (block.getType() == Material.NETHER_WART && block.getWorld().getName().endsWith("_nether")) {
+            if (multiplier < 1) {
+                multiplier = 1;
+            }
+        }
+
+        boolean hasHarvestBoost = AranarthUtils.getServerBoosts().containsKey(Boost.HARVEST);
+        boolean hasElvenArmor = AranarthUtils.isWearingArmorType(player, "elven");
+
+        for (ItemStack drop : drops) {
+            int amount = drop.getAmount();
+            if (isMainCropDrop(drop.getType())) {
+                if (hasHarvestBoost && ThreadLocalRandom.current().nextBoolean()) {
+                    amount += 1;
+                }
+                if (hasElvenArmor && ThreadLocalRandom.current().nextBoolean()) {
+                    amount += 1;
+                }
+            }
+            double scaled = amount * multiplier;
+            int base = (int) scaled;
+            double frac = scaled - base;
+            drop.setAmount(Math.max(1, base + (ThreadLocalRandom.current().nextDouble() < frac ? 1 : 0)));
+        }
+
+        // Auto-replant
+        Material seedMaterial = CropUtils.getSeedMaterial(block.getType());
+        for (ItemStack drop : drops) {
+            if (drop.getType() == seedMaterial) {
+                drop.setAmount(drop.getAmount() - 1);
+                break;
+            }
+        }
+
+        for (ItemStack drop : drops) {
+            if (drop.getAmount() > 0) {
+                block.getWorld().dropItemNaturally(block.getLocation(), drop);
+            }
+        }
+
+        block.getWorld().playSound(block.getLocation(), Sound.BLOCK_CROP_BREAK, 1.0f, 1.5f);
+
+        crop.setAge(0);
+        block.setBlockData(crop);
+
+        McMMOPlayer mcmmoPlayer = EventUtils.getMcMMOPlayer(player);
+        if (mcmmoPlayer != null) {
+            HerbalismManager herbalismManager = new HerbalismManager(mcmmoPlayer);
+            HashSet<Block> brokenBlocks = new HashSet<>();
+            brokenBlocks.add(block);
+            herbalismManager.awardXPForPlantBlocks(brokenBlocks);
+        }
+    }
+
+    private boolean isMainCropDrop(Material type) {
+        return type != Material.WHEAT_SEEDS && type != Material.BEETROOT_SEEDS;
     }
 
     /**
@@ -258,6 +399,9 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
     }
 
     private void finishAbility() {
+        if (!harvestedCrops.isEmpty() && !hitLivingEntity) {
+            cooldown = 500;
+        }
         bPlayer.addCooldown(this);
         remove();
     }
