@@ -171,6 +171,10 @@ public class CommandDominion implements CommandExecutor {
                                     player.sendMessage(ChatUtils.chatMessage("&cYou cannot create a Dominion here!"));
                                     return;
                                 }
+                                if (isInEndSpawnProtectedZone(player.getLocation())) {
+                                    player.sendMessage(ChatUtils.chatMessage("&cYou cannot create a Dominion on the End's main island or surrounding void!"));
+                                    return;
+                                }
 
                                 List<UUID> members = new ArrayList<>();
                                 members.add(player.getUniqueId());
@@ -1392,6 +1396,10 @@ public class CommandDominion implements CommandExecutor {
         }
         if (AranarthUtils.isSpawnLocation(player.getLocation())) {
             player.sendMessage(ChatUtils.chatMessage("&cYou cannot create an outpost here!"));
+            return;
+        }
+        if (isInEndSpawnProtectedZone(player.getLocation())) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou cannot create an outpost on the End's main island or surrounding void!"));
             return;
         }
         if (args.length < 3) {
@@ -2952,6 +2960,27 @@ public class CommandDominion implements CommandExecutor {
 
     private static boolean isGameplayWorld(String worldName) {
         return worldName.startsWith("world") || worldName.startsWith("smp");
+    }
+
+    // Radius (in blocks) from (0, 0) in the Survival End world that cannot be claimed.
+    // Covers the main End island (~60 blocks) and the surrounding void before outer islands (~1000+ blocks).
+    private static final double END_SPAWN_PROTECTED_RADIUS = 1000.0;
+
+    /**
+     * Returns true if the location is within the protected End spawn zone on the Survival server.
+     * The zone covers the main island and surrounding void; outer End islands beyond this radius can be claimed.
+     * This restriction does not apply to the SMP server.
+     */
+    private static boolean isInEndSpawnProtectedZone(Location location) {
+        if (AranarthCore.isSmpServer()) {
+            return false;
+        }
+        if (!"world_the_end".equals(location.getWorld().getName())) {
+            return false;
+        }
+        double dx = location.getX();
+        double dz = location.getZ();
+        return dx * dx + dz * dz <= END_SPAWN_PROTECTED_RADIUS * END_SPAWN_PROTECTED_RADIUS;
     }
 
     private static String getServerForWorld(String worldName) {

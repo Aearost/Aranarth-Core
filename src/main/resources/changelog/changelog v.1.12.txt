@@ -129,6 +129,7 @@ Minor Features
 [~] Fixed cross-server sleep count double-counting sleeping players
 [~] Delayed the Dominion death penalty messages by 1 tick so they appear after the vanilla death message
 [~] Fixed issue where dominion death penalty message, un-afk chat messages were displayed in the incorrect order, and new player server join was in the incorrect order
+[~] Blocked new dominion and outpost creation in Survival's main end island
 
 Backend Code Changes
 -
