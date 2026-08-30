@@ -975,6 +975,17 @@ public class AranarthCoreBendingListener implements Listener {
                 }
             }
         }
+
+        // Regrowth (crop growth)
+        if (!Regrowth.hasActiveInstance(player.getUniqueId())) {
+            BendingPlayer bpRegrowth = BendingPlayer.getBendingPlayer(player);
+            if (bpRegrowth != null && bpRegrowth.getBoundAbilityName().equalsIgnoreCase("regrowth")) {
+                Block sourceBlock = player.getTargetBlockExact(6, FluidCollisionMode.ALWAYS);
+                if (sourceBlock != null) {
+                    Regrowth.trySelectSource(player, sourceBlock);
+                }
+            }
+        }
     }
 
     /**
@@ -1188,6 +1199,7 @@ public class AranarthCoreBendingListener implements Listener {
         if (regrowth != null) {
             regrowth.remove();
         }
+        Regrowth.clearPendingSource(e.getPlayer().getUniqueId());
         AngeredSpirits angeredSpirits = AngeredSpirits.getActiveInstance(e.getPlayer().getUniqueId());
         if (angeredSpirits != null) {
             angeredSpirits.onSlotChange();
