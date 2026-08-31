@@ -38,6 +38,7 @@ Major Features
 [+] Added Invisible Armor perk
 [+] Added crop growth buff to the Regrowth ability
 [+] Added crop harvest functionality to LeafScythe
+[+] Added Reaper Inventory system to purchase back your last death's inventory within 24 hours
 
 Minor Features
 [~] Fixed issue where the alchemist job was not providing xp when shift-clicking ingredients into a brewing stand

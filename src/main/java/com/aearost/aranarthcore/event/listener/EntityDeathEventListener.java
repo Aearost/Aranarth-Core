@@ -3,15 +3,10 @@ package com.aearost.aranarthcore.event.listener;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.event.mob.*;
-import com.aearost.aranarthcore.event.player.DefenderKillDeathMessage;
-import com.aearost.aranarthcore.event.player.DominionDeath;
-import com.aearost.aranarthcore.utils.DefenderUtils;
-import com.aearost.aranarthcore.event.player.MountKillDeathMessage;
-import com.aearost.aranarthcore.event.player.PlayerHeadDrop;
-import com.aearost.aranarthcore.event.player.PlayerKillDeathStats;
-import com.aearost.aranarthcore.event.player.PlayerKillMoneySteal;
+import com.aearost.aranarthcore.event.player.*;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.DefenderUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.EntityType;
@@ -46,6 +41,7 @@ public class EntityDeathEventListener implements Listener {
             new PlayerKillMoneySteal().execute(e);
             new MountKillDeathMessage().execute((PlayerDeathEvent) e);
             new DefenderKillDeathMessage().execute((PlayerDeathEvent) e);
+            new PlayerReaperCapture().execute((PlayerDeathEvent) e);
             PlayerDeathEvent playerDeath = (PlayerDeathEvent) e;
             String deathMessage = playerDeath.getDeathMessage();
             if (deathMessage != null && NetworkManager.isActive()) {

@@ -5,7 +5,6 @@ import com.aearost.aranarthcore.event.block.BannerExtendPatternLimit;
 import com.aearost.aranarthcore.event.mob.GuiVillagerClick;
 import com.aearost.aranarthcore.event.player.*;
 import com.aearost.aranarthcore.gui.*;
-import com.aearost.aranarthcore.event.player.GuiHeadExchangeClick;
 import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
@@ -168,6 +167,8 @@ public class InventoryClickEventListener implements Listener {
                 new GuiPetFoodClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiHeadExchange.TITLE)) {
                 new GuiHeadExchangeClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiReaper.TITLE)) {
+                new GuiReaperClick().execute(e);
             }
         } else {
             if (e.getClickedInventory() != null) {

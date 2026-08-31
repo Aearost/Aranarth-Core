@@ -438,6 +438,14 @@ public class AranarthCore extends JavaPlugin {
             commandMap.getKnownCommands().put("aranarthcore:mctop", getCommand("mctop"));
         });
 
+        // Purge expired reaper inventories once on startup, then every hour
+        if (isPublicServer()) {
+            long expiryMs = 24L * 60 * 60 * 1000;
+            long oneHourTicks = 20L * 60 * 60;
+            Bukkit.getScheduler().runTaskTimerAsynchronously(this, () ->
+                    DatabaseManager.getInstance().deleteExpiredReaperInventories(expiryMs), 0L, oneHourTicks);
+        }
+
         // Sets default storm values
         AranarthUtils.setWeather(Weather.CLEAR);
         AranarthUtils.setStormDelay(new Random().nextInt(18000));
@@ -1403,6 +1411,7 @@ public class AranarthCore extends JavaPlugin {
         getCommand("warp").setExecutor(new CommandWarp());
         getCommand("warp").setTabCompleter(new CommandWarpCompleter());
         getCommand("quests").setExecutor(new CommandQuests());
+        getCommand("reaper").setExecutor(new CommandReaper());
         getCommand("streak").setExecutor(new CommandStreak());
         getCommand("mount").setExecutor(new CommandMount());
         getCommand("mount").setTabCompleter(new CommandMountCompleter());

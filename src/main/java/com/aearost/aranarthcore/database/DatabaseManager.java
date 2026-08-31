@@ -430,6 +430,13 @@ public class DatabaseManager {
                 active_preset_index INT NOT NULL DEFAULT -1,
                 preset_data_json MEDIUMTEXT NOT NULL DEFAULT '{}'
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+                """
+            CREATE TABLE IF NOT EXISTS player_reaper (
+                uuid VARCHAR(36) NOT NULL PRIMARY KEY,
+                drops_b64 MEDIUMTEXT NOT NULL,
+                death_time BIGINT NOT NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """
         };
 
@@ -2481,6 +2488,71 @@ public class DatabaseManager {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load blacklist presets for " + uuid + ": " + e.getMessage());
         }
         return null;
+    }
+
+    // -------------------------------------------------------------------------
+    // player_reaper
+    // -------------------------------------------------------------------------
+
+    public void upsertReaperInventory(UUID uuid, String dropsB64, long deathTime) {
+        String sql = """
+                INSERT INTO player_reaper (uuid, drops_b64, death_time)
+                VALUES (?, ?, ?)
+                ON DUPLICATE KEY UPDATE drops_b64=VALUES(drops_b64), death_time=VALUES(death_time)
+                """;
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            ps.setString(2, dropsB64);
+            ps.setLong(3, deathTime);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to upsert reaper inventory for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Returns {dropsB64, deathTimeString} or null if not found.
+     */
+    public String[] loadReaperInventory(UUID uuid) {
+        String sql = "SELECT drops_b64, death_time FROM player_reaper WHERE uuid = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new String[]{rs.getString("drops_b64"), String.valueOf(rs.getLong("death_time"))};
+                }
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load reaper inventory for " + uuid + ": " + e.getMessage());
+        }
+        return null;
+    }
+
+    public void deleteReaperInventory(UUID uuid) {
+        String sql = "DELETE FROM player_reaper WHERE uuid = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to delete reaper inventory for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    public void deleteExpiredReaperInventories(long expiryMs) {
+        String sql = "DELETE FROM player_reaper WHERE death_time < ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, System.currentTimeMillis() - expiryMs);
+            int deleted = ps.executeUpdate();
+            if (deleted > 0) {
+                Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "Purged " + deleted + " expired reaper inventories");
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to purge expired reaper inventories: " + e.getMessage());
+        }
     }
 
     /**
