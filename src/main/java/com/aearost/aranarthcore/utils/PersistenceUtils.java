@@ -2837,6 +2837,11 @@ public class PersistenceUtils {
 
                 Boost boost = Boost.valueOf(parts[0]);
                 LocalDateTime end = LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(parts[1])), ZoneId.systemDefault());
+                if (end.isBefore(LocalDateTime.now())) {
+                    Bukkit.getLogger().info("[AC] Skipping expired boost on load: " + boost.name() + " (expired=" + end + ")");
+                    continue;
+                }
+                Bukkit.getLogger().info("[AC] Loading boost from file: " + boost.name() + " expires=" + end);
                 AranarthUtils.addServerBoost(boost, end, null, false);
             }
             Bukkit.getLogger().info("[AC] The server boosts have been initialized");
@@ -5883,9 +5888,10 @@ public class PersistenceUtils {
 
     /**
      * Syncs server boost data to MySQL. Call after the file has been saved.
+     * Only Survival writes to the DB - SMP must not overwrite Survival's state.
      */
     public static void syncBoostsToDatabase() {
-        if (!DatabaseManager.isActive()) {
+        if (!DatabaseManager.isActive() || AranarthCore.isSmpServer()) {
             return;
         }
         DatabaseManager db = DatabaseManager.getInstance();
@@ -5897,7 +5903,9 @@ public class PersistenceUtils {
             arr.add(bo);
         }
         try {
-            db.saveBoosts(GSON.toJson(arr));
+            String json = GSON.toJson(arr);
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[DB] Saving boosts to MySQL: " + json);
+            db.saveBoosts(json);
         } catch (Exception e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync boosts: " + e.getMessage());
         }
@@ -7432,21 +7440,28 @@ public class PersistenceUtils {
         DatabaseManager db = DatabaseManager.getInstance();
         String json = db.loadBoosts();
         if (json == null || json.isEmpty()) {
+            Bukkit.getLogger().info("[AC] Loading boosts from MySQL... DB returned empty, falling back to file");
             loadBoosts();
             return;
         }
-        Bukkit.getLogger().info("[AC] Loading boosts from MySQL...");
+        Bukkit.getLogger().info("[AC] Loading boosts from MySQL... raw=" + json);
         try {
             JsonArray arr = GSON.fromJson(json, JsonArray.class);
+            int loaded = 0;
             for (com.google.gson.JsonElement el : arr) {
                 JsonObject bo = el.getAsJsonObject();
                 Boost boost = Boost.valueOf(bo.get("boost").getAsString());
                 java.time.LocalDateTime end = java.time.LocalDateTime.ofInstant(
                         java.time.Instant.ofEpochMilli(bo.get("end").getAsLong()),
                         java.time.ZoneId.systemDefault());
+                if (end.isBefore(java.time.LocalDateTime.now())) {
+                    Bukkit.getLogger().info("[AC] Skipping expired boost on load: " + boost.name() + " (expired=" + end + ")");
+                    continue;
+                }
                 AranarthUtils.addServerBoost(boost, end, null, false);
+                loaded++;
             }
-            Bukkit.getLogger().info("[AC] Boosts initialized from MySQL");
+            Bukkit.getLogger().info("[AC] Boosts initialized from MySQL: " + loaded + " active");
         } catch (Exception e) {
             Bukkit.getLogger().warning("[AC] Failed to parse boosts from DB: " + e.getMessage());
             loadBoosts();

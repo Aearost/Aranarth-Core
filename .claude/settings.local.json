@@ -439,7 +439,11 @@
       "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/commands -name *.java -type f -exec grep -l \"page\\\\|pag\" {})",
       "Bash(cp:*)",
       "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore/src -name *Cluster* -o -name *cluster*)",
-      "Bash(find C:/Users/liamh/IdeaProjects/AranarthCore -maxdepth 1 -name *.bat -o -name mvnw*)"
+      "Bash(find C:/Users/liamh/IdeaProjects/AranarthCore -maxdepth 1 -name *.bat -o -name mvnw*)",
+      "Bash(gunzip -c 2026-09-01-1.log.gz)",
+      "Bash(gunzip -c 2026-09-01-3.log.gz)",
+      "Bash(gunzip -c 2026-09-01-4.log.gz)",
+      "Bash(gunzip -c 2026-09-01-2.log.gz)"
     ]
   }
 }

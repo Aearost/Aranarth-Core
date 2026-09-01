@@ -2656,6 +2656,8 @@ public class AranarthUtils {
                         NetworkManager.getInstance().publishBoostSync(boost.name(), endTime.toString(), false);
                     }
                 }
+                // Immediately persist to DB so the boost survives a crash within the 30-minute save window
+                PersistenceUtils.saveBoosts();
             }
         }
         // Should only be called during server startup
@@ -2792,6 +2794,13 @@ public class AranarthUtils {
             } else {
                 name = "&7&lUnspecified Boost";
             }
+            // Always clean up memory on every server
+            serverBoosts.remove(boost);
+            sentBoostReminders.remove(boost.name() + "_60");
+            sentBoostReminders.remove(boost.name() + "_30");
+            sentBoostReminders.remove(boost.name() + "_10");
+            sentBoostReminders.remove(boost.name() + "_1");
+            // Only Survival broadcasts and notifies Discord/network
             if (!AranarthCore.isSmpServer()) {
                 Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
                 if (AranarthCore.isPublicServer()) {
@@ -2801,11 +2810,6 @@ public class AranarthUtils {
                 if (NetworkManager.isActive()) {
                     NetworkManager.getInstance().publishBoostSync(boost.name(), "", true);
                 }
-                serverBoosts.remove(boost);
-                sentBoostReminders.remove(boost.name() + "_60");
-                sentBoostReminders.remove(boost.name() + "_30");
-                sentBoostReminders.remove(boost.name() + "_10");
-                sentBoostReminders.remove(boost.name() + "_1");
             }
         }
 
