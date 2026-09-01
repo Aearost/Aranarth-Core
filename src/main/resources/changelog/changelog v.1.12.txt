@@ -134,6 +134,7 @@ Minor Features
 [~] Blocked new dominion and outpost creation in Survival's main end island
 [~] Fixed architects being unable to use /ac msg
 [~] Fixed rank changes not updating cross-server for TAB and permissions
+[~] Stopped applying MySQL snapshot on unplanned cross-server landing which was causing inventory corruption on server shutdown
 
 Backend Code Changes
 -

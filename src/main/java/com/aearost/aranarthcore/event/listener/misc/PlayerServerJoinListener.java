@@ -680,97 +680,49 @@ public class PlayerServerJoinListener implements Listener {
                     } else {
                         // Unplanned cross-server landing: the player's last known location is on
                         // another server (e.g. that server shut down and Velocity routed them here
-                        // as a fallback). Reload AranarthPlayer state from MySQL so that balance,
-                        // rank, and other non-inventory fields are current, then route the player
-                        // back immediately.
+                        // as a fallback). Route the player back without applying the MySQL inventory
+                        // snapshot.
                         //
-                        // We deliberately do NOT apply the MySQL survivalInventory snapshot here.
-                        // The 2-second window is not long enough to guarantee the source server's
-                        // shutdown save has committed to MySQL, so the snapshot may be stale. A
-                        // stale apply would clear the player's main inventory and, if this server
-                        // then kicks the player (e.g. its own restart), it would write the stale
-                        // data back to MySQL - corrupting the snapshot permanently. The receiving
-                        // server loads from its own player.dat which is authoritative for inventory.
+                        // We do NOT apply the MySQL survivalInventory snapshot here, and we do NOT
+                        // set applyInventory on the pending teleport. This lets the source server
+                        // load the player's inventory from its own player.dat, which is more
+                        // reliable than MySQL after a crash: MySQL is only updated when
+                        // onPlayerQuit fires, which crashes can skip entirely, leaving a snapshot
+                        // from a previous Survival session. Paper autosaves player.dat on a
+                        // regular cycle regardless of how the server stops, so player.dat on the
+                        // source server is always at least as fresh as MySQL and usually more so.
+                        //
+                        // The onPlayerQuit here is treated as a transfer (isCrossServerTransfer=true)
+                        // because setPendingAndTransfer adds the player to transferringPlayers, so
+                        // this server will NOT write a new inventory snapshot or last_loc to MySQL -
+                        // MySQL retains whatever the source server last wrote.
                         final String velocityTarget = AranarthCore.getInstance().getConfig()
                                 .getString("network.servers." + lastLoc.server, lastLoc.server);
                         final String locWorld = lastLoc.world;
                         final double locX = lastLoc.x, locY = lastLoc.y, locZ = lastLoc.z;
                         final float locYaw = lastLoc.yaw, locPitch = lastLoc.pitch;
-                        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Inv] Unplanned cross-server landing for "
-                                + player.getName() + " - last server: " + lastLoc.server
-                                + ", routing to: " + velocityTarget + ". Reloading from MySQL in 2s.");
+                        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
+                                + " - unplanned landing from " + lastLoc.server
+                                + ", routing to: " + velocityTarget + " without applying MySQL inventory (player.dat on source server is authoritative).");
                         new BukkitRunnable() {
                             @Override
                             public void run() {
-								if (!player.isOnline()) {
-									return;
-								}
+                                if (!player.isOnline()) {
+                                    return;
+                                }
                                 if (DatabaseManager.isActive()) {
                                     PersistenceUtils.reloadPlayerFromDatabase(player.getUniqueId());
                                     PersistenceUtils.loadPlayerTogglesFromDatabase(player.getUniqueId());
-                                    // reloadPlayerFromDatabase() creates a fresh AranarthPlayer from the
-                                    // main DB row, which does not include job data (stored separately).
-                                    // Restore it immediately so the quit-time sync save doesn't write []
-                                    // to the jobs table and corrupt the next server's load.
                                     PersistenceUtils.loadJobDataForPlayer(player.getUniqueId());
                                 }
-                                AranarthPlayer apSnapshot = AranarthUtils.getPlayer(player.getUniqueId());
-                                String snapState = apSnapshot == null ? "no AranarthPlayer in memory"
-                                        : apSnapshot.getSurvivalInventory().isEmpty() ? "EMPTY"
-                                        : "length=" + apSnapshot.getSurvivalInventory().length();
-                                Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Inv] Unplanned landing state for "
-                                        + player.getName() + " - MySQL survivalInventory snapshot: " + snapState
-                                        + ". Applying snapshot now (quit saves are synchronous so MySQL is authoritative).");
-                                // Apply the MySQL inventory snapshot so the player sees their correct items
-                                // while on this server. Quit-time saves are now synchronous, so MySQL is
-                                // reliable. If routing back to the source server succeeds, that server will
-                                // override inventory from its own player.dat; if it fails (source down),
-                                // the player retains the correct items here instead of reverting to a stale
-                                // player.dat from their last visit to this server.
-                                if (apSnapshot != null && !apSnapshot.getSurvivalInventory().isEmpty()) {
-                                    try {
-                                        player.getInventory().setContents(
-                                                ItemUtils.itemStackArrayFromBase64(apSnapshot.getSurvivalInventory()));
-                                        int nonNull = 0;
-                                        for (org.bukkit.inventory.ItemStack is : player.getInventory().getContents()) {
-											if (is != null) {
-												nonNull++;
-											}
-                                        }
-                                        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
-                                                + " - unplanned-landing MySQL inventory applied: " + nonNull + " item(s).");
-                                    } catch (Exception ex) {
-                                        Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] Failed to apply unplanned-landing inventory for " + player.getName() + ": " + ex.getMessage());
-                                    }
-                                } else {
-                                    Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] survivalInventory is empty for " + player.getName() + " on unplanned landing - leaving player.dat inventory intact.");
-                                }
-                                if (apSnapshot != null && !apSnapshot.getSurvivalEnderChest().isEmpty()) {
-                                    try {
-                                        player.getEnderChest().setContents(
-                                                ItemUtils.itemStackArrayFromBase64(apSnapshot.getSurvivalEnderChest()));
-                                    } catch (Exception ex) {
-                                        Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] Failed to apply unplanned-landing ender chest for " + player.getName() + ": " + ex.getMessage());
-                                    }
-                                }
-                                if (apSnapshot != null) {
-                                    if (apSnapshot.getSurvivalHealth() > 0) {
-                                        player.setHealth(Math.min(apSnapshot.getSurvivalHealth(), player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH).getValue()));
-                                    }
-                                    player.setFoodLevel(apSnapshot.getSurvivalFoodLevel());
-                                    player.setSaturation(apSnapshot.getSurvivalSaturation());
-                                    player.setLevel(apSnapshot.getSurvivalExpLevel());
-                                    player.setExp(apSnapshot.getSurvivalExpProgress());
-                                }
-                                Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Inv] Routing " + player.getName()
-                                        + " back to " + velocityTarget + " after unplanned landing.");
+                                Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
+                                        + " - routing to " + velocityTarget + " after unplanned landing.");
                                 PendingTeleport pt = new PendingTeleport(
                                         locWorld, locX, locY, locZ, locYaw, locPitch, "", "");
                                 pt.setLoginRouting(true);
-                                pt.setApplyInventory(true);
                                 NetworkManager.getInstance().setPendingAndTransfer(player, velocityTarget, pt);
                             }
-                        }.runTaskLater(AranarthCore.getInstance(), 40L); // 2s - brief delay before routing; keeps player visible on this server momentarily
+                        }.runTaskLater(AranarthCore.getInstance(), 40L); // 2s - brief delay before routing
                     }
                 }
 
