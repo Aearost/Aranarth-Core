@@ -138,6 +138,7 @@ Minor Features
 [~] Inventory Assist replenishment now prioritizes direct inventory items over shulker box contents
 [-] CamelHusk mounts no longer receive custom speed on spawn
 [+] Added custom /enchant to support unsafe enchantment levels
+[~] Changed recipe of homepads to be more expensive
 
 Backend Code Changes
 -
