@@ -382,6 +382,15 @@ public class CommandToggle implements CommandExecutor {
 						InvisibleArmorManager.hideArmor(player);
 						player.sendMessage(ChatUtils.chatMessage("&7Your armor is now &ehidden"));
 					}
+				} else if (args[0].equalsIgnoreCase("reaper")) {
+					if (aranarthPlayer.isReaperDisabled()) {
+						aranarthPlayer.setReaperDisabled(false);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7the Reaper system"));
+					} else {
+						aranarthPlayer.setReaperDisabled(true);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7the Reaper system"));
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("size")) {
 					if (aranarthPlayer.isSizeScaleEnabled()) {
 						aranarthPlayer.setSizeScaleEnabled(false);

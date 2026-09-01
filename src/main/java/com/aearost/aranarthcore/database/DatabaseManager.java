@@ -435,7 +435,11 @@ public class DatabaseManager {
             CREATE TABLE IF NOT EXISTS player_reaper (
                 uuid VARCHAR(36) NOT NULL PRIMARY KEY,
                 drops_b64 MEDIUMTEXT NOT NULL,
-                death_time BIGINT NOT NULL
+                death_time BIGINT NOT NULL,
+                death_world VARCHAR(64) NOT NULL DEFAULT 'world',
+                death_x DOUBLE NOT NULL DEFAULT 0,
+                death_y DOUBLE NOT NULL DEFAULT 64,
+                death_z DOUBLE NOT NULL DEFAULT 0
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
                 """
@@ -471,7 +475,11 @@ public class DatabaseManager {
                 "ALTER TABLE network_roster MODIFY COLUMN nickname TEXT DEFAULT ''",
                 "ALTER TABLE player_chat_game_guesses ADD COLUMN IF NOT EXISTS total_earnings DOUBLE NOT NULL DEFAULT 0",
                 "ALTER TABLE player_chat_game_guesses ADD COLUMN IF NOT EXISTS best_time DOUBLE NOT NULL DEFAULT 0",
-                "ALTER TABLE player_chat_game_guesses ADD COLUMN IF NOT EXISTS highest_streak INT NOT NULL DEFAULT 0"
+                "ALTER TABLE player_chat_game_guesses ADD COLUMN IF NOT EXISTS highest_streak INT NOT NULL DEFAULT 0",
+                "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_world VARCHAR(64) NOT NULL DEFAULT 'world'",
+                "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_x DOUBLE NOT NULL DEFAULT 0",
+                "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_y DOUBLE NOT NULL DEFAULT 64",
+                "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_z DOUBLE NOT NULL DEFAULT 0"
         };
         try (Connection conn = dataSource.getConnection(); Statement stmt = conn.createStatement()) {
             for (String sql : migrations) {
@@ -2549,17 +2557,22 @@ public class DatabaseManager {
     // player_reaper
     // -------------------------------------------------------------------------
 
-    public void upsertReaperInventory(UUID uuid, String dropsB64, long deathTime) {
+    public void upsertReaperInventory(UUID uuid, String dropsB64, long deathTime, String deathWorld, double deathX, double deathY, double deathZ) {
         String sql = """
-                INSERT INTO player_reaper (uuid, drops_b64, death_time)
-                VALUES (?, ?, ?)
-                ON DUPLICATE KEY UPDATE drops_b64=VALUES(drops_b64), death_time=VALUES(death_time)
+                INSERT INTO player_reaper (uuid, drops_b64, death_time, death_world, death_x, death_y, death_z)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE drops_b64=VALUES(drops_b64), death_time=VALUES(death_time),
+                death_world=VALUES(death_world), death_x=VALUES(death_x), death_y=VALUES(death_y), death_z=VALUES(death_z)
                 """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
             ps.setString(2, dropsB64);
             ps.setLong(3, deathTime);
+            ps.setString(4, deathWorld);
+            ps.setDouble(5, deathX);
+            ps.setDouble(6, deathY);
+            ps.setDouble(7, deathZ);
             ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to upsert reaper inventory for " + uuid + ": " + e.getMessage());
@@ -2567,16 +2580,23 @@ public class DatabaseManager {
     }
 
     /**
-     * Returns {dropsB64, deathTimeString} or null if not found.
+     * Returns {dropsB64, deathTimeString, deathWorld, deathXStr, deathYStr, deathZStr} or null if not found.
      */
     public String[] loadReaperInventory(UUID uuid) {
-        String sql = "SELECT drops_b64, death_time FROM player_reaper WHERE uuid = ?";
+        String sql = "SELECT drops_b64, death_time, death_world, death_x, death_y, death_z FROM player_reaper WHERE uuid = ?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return new String[]{rs.getString("drops_b64"), String.valueOf(rs.getLong("death_time"))};
+                    return new String[]{
+                            rs.getString("drops_b64"),
+                            String.valueOf(rs.getLong("death_time")),
+                            rs.getString("death_world"),
+                            String.valueOf(rs.getDouble("death_x")),
+                            String.valueOf(rs.getDouble("death_y")),
+                            String.valueOf(rs.getDouble("death_z"))
+                    };
                 }
             }
         } catch (SQLException e) {

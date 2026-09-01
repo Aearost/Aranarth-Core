@@ -5985,6 +5985,7 @@ public class PersistenceUtils {
             obj.addProperty("interactiveChat", ap.isInteractiveChatEnabled());
             obj.addProperty("emojiEnabled", ap.isEmojiEnabled());
             obj.addProperty("sizeScaleEnabled", ap.isSizeScaleEnabled());
+            obj.addProperty("reaperDisabled", ap.isReaperDisabled());
             try {
                 db.savePlayerToggles(uuid, GSON.toJson(obj));
             } catch (Exception e) {
@@ -7617,6 +7618,9 @@ public class PersistenceUtils {
                 if (obj.has("sizeScaleEnabled")) {
                     ap.setSizeScaleEnabled(obj.get("sizeScaleEnabled").getAsBoolean());
                 }
+                if (obj.has("reaperDisabled")) {
+                    ap.setReaperDisabled(obj.get("reaperDisabled").getAsBoolean());
+                }
                 AranarthUtils.setPlayer(uuid, ap);
             } catch (Exception e) {
                 Bukkit.getLogger().warning("[AC] Failed to parse toggles for " + uuid + ": " + e.getMessage());
@@ -7674,6 +7678,7 @@ public class PersistenceUtils {
         obj.addProperty("adminMode", ap.isInAdminMode());
         obj.addProperty("isBarbarian", ap.isBarbarian());
         obj.addProperty("barbarianCooldownEnd", ap.getBarbarianCooldownEnd());
+        obj.addProperty("reaperDisabled", ap.isReaperDisabled());
         return GSON.toJson(obj);
     }
 
@@ -7814,6 +7819,9 @@ public class PersistenceUtils {
             }
             if (obj.has("barbarianCooldownEnd")) {
                 ap.setBarbarianCooldownEnd(obj.get("barbarianCooldownEnd").getAsLong());
+            }
+            if (obj.has("reaperDisabled")) {
+                ap.setReaperDisabled(obj.get("reaperDisabled").getAsBoolean());
             }
             AranarthUtils.setPlayer(uuid, ap);
         } catch (Exception e) {

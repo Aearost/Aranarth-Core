@@ -109,6 +109,7 @@ public class AranarthPlayer {
     private boolean isInteractiveChatEnabled = true;
     private boolean isEmojiEnabled = true;
     private boolean isSizeScaleEnabled = true;
+    private boolean isReaperDisabled = false;
     private int joinSoundVolume = 100;
     private int leaveSoundVolume = 100;
     private int voteSoundVolume = 100;
@@ -1988,5 +1989,13 @@ public class AranarthPlayer {
 
     public void setBarbarianCooldownEnd(long barbarianCooldownEnd) {
         this.barbarianCooldownEnd = barbarianCooldownEnd;
+    }
+
+    public boolean isReaperDisabled() {
+        return isReaperDisabled;
+    }
+
+    public void setReaperDisabled(boolean reaperDisabled) {
+        this.isReaperDisabled = reaperDisabled;
     }
 }

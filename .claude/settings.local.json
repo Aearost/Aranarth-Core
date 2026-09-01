@@ -438,7 +438,8 @@
       "Bash(find ../ProjectKorra-wip -name *.java)",
       "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/commands -name *.java -type f -exec grep -l \"page\\\\|pag\" {})",
       "Bash(cp:*)",
-      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore/src -name *Cluster* -o -name *cluster*)"
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore/src -name *Cluster* -o -name *cluster*)",
+      "Bash(find C:/Users/liamh/IdeaProjects/AranarthCore -maxdepth 1 -name *.bat -o -name mvnw*)"
     ]
   }
 }

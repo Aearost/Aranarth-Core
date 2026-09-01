@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -20,11 +21,11 @@ public class GuiReaper {
 
     private final Inventory inventory;
 
-    public GuiReaper(Player player, ItemStack[] drops, double cost, long deathTime) {
-        this.inventory = initializeGui(player, drops, cost, deathTime);
+    public GuiReaper(Player player, ItemStack[] drops, double cost, long deathTime, Location deathLocation) {
+        this.inventory = initializeGui(player, drops, cost, deathTime, deathLocation);
     }
 
-    private Inventory initializeGui(Player player, ItemStack[] drops, double cost, long deathTime) {
+    private Inventory initializeGui(Player player, ItemStack[] drops, double cost, long deathTime, Location deathLocation) {
         Inventory inv = Bukkit.createInventory(null, 54, ChatUtils.translateToColor("&4" + TITLE));
 
         // Display the drop items
@@ -56,6 +57,18 @@ public class GuiReaper {
         ));
         purchase.setItemMeta(purchaseMeta);
         inv.setItem(49, purchase);
+
+        // Drop to death location button (slot 47)
+        ItemStack dropButton = new ItemStack(Material.RED_CONCRETE);
+        ItemMeta dropMeta = dropButton.getItemMeta();
+        dropMeta.setDisplayName(ChatUtils.translateToColor("&c&lDrop to Death Location"));
+        String worldName = deathLocation.getWorld() != null ? deathLocation.getWorld().getName() : "world";
+        dropMeta.setLore(Arrays.asList(
+                ChatUtils.translateToColor("&7Drops your items at your death location"),
+                ChatUtils.translateToColor("&7and discards this Reaper Inventory")
+        ));
+        dropButton.setItemMeta(dropMeta);
+        inv.setItem(47, dropButton);
 
         // Close button (slot 45)
         ItemStack close = new ItemStack(Material.BARRIER);

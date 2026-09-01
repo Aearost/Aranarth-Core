@@ -9,6 +9,8 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.ItemUtils;
 import com.aearost.aranarthcore.utils.ReaperManager;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -35,7 +37,9 @@ public class CommandReaper implements CommandExecutor {
 
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
             String[] cached = ReaperManager.get(player.getUniqueId());
-            String[] data = cached != null ? cached : DatabaseManager.getInstance().loadReaperInventory(player.getUniqueId());
+            String[] data = cached != null ? cached
+                    : DatabaseManager.isActive() ? DatabaseManager.getInstance().loadReaperInventory(player.getUniqueId())
+                    : null;
 
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                 if (data == null) {
@@ -61,10 +65,25 @@ public class CommandReaper implements CommandExecutor {
                     return;
                 }
 
+                // Parse death location - fall back to player's current location for old entries without location data
+                Location deathLocation = player.getLocation();
+                if (data.length >= 6 && data[2] != null && !data[2].isEmpty()) {
+                    World deathWorld = Bukkit.getWorld(data[2]);
+                    if (deathWorld != null) {
+                        try {
+                            double x = Double.parseDouble(data[3]);
+                            double y = Double.parseDouble(data[4]);
+                            double z = Double.parseDouble(data[5]);
+                            deathLocation = new Location(deathWorld, x, y, z);
+                        } catch (NumberFormatException ignored) {
+                        }
+                    }
+                }
+
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                 double cost = getReaperCost(aranarthPlayer.getRank());
 
-                GuiReaper gui = new GuiReaper(player, drops, cost, deathTime);
+                GuiReaper gui = new GuiReaper(player, drops, cost, deathTime, deathLocation);
                 gui.openGui(player);
             });
         });
