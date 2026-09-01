@@ -284,8 +284,38 @@ public class PlayerAutoReplenishSlot {
         PlayerInventory inventory = player.getInventory();
         ItemStack[] contents = inventory.getContents();
 
+        // Prioritize direct inventory matches before looking inside shulker boxes
         for (int i = 0; i < inventory.getSize(); i++) {
             // Skip armor slots (36-39) and off-hand slot (40) to avoid pulling equipped gear
+            if (i >= 36) {
+                continue;
+            }
+
+            ItemStack itemStack = contents[i];
+            if (itemStack == null || itemStack.getItemMeta() instanceof BlockStateMeta) {
+                continue;
+            }
+
+            if (i != slot && matcher.test(itemStack, referenceItem)) {
+                // Preserve any item currently occupying the slot (e.g. glass bottle after
+                // drinking a water bottle) before overwriting it with the replenished stack
+                ItemStack displaced = inventory.getItem(slot);
+                if (displaced != null && displaced.getType() != Material.AIR) {
+                    inventory.addItem(displaced);
+                }
+                inventory.setItem(slot, new ItemStack(contents[i]));
+                inventory.setItem(i, null);
+                player.updateInventory();
+                player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1.0F, 1.5F);
+                return;
+            }
+        }
+
+        // No direct match found - check inside shulker boxes
+        if (!player.hasPermission("aranarth.shulker")) {
+            return;
+        }
+        for (int i = 0; i < inventory.getSize(); i++) {
             if (i >= 36) {
                 continue;
             }
@@ -295,44 +325,22 @@ public class PlayerAutoReplenishSlot {
                 continue;
             }
 
-            // If the slot is another one of the same item, switch it
-            if (i != slot && matcher.test(itemStack, referenceItem)) {
-                if (!(itemStack.getItemMeta() instanceof BlockStateMeta)) {
-                    // Preserve any item currently occupying the slot (e.g. glass bottle after
-                    // drinking a water bottle) before overwriting it with the replenished stack
-                    ItemStack displaced = inventory.getItem(slot);
-                    if (displaced != null && displaced.getType() != Material.AIR) {
-                        inventory.addItem(displaced);
-                    }
-                    inventory.setItem(slot, new ItemStack(contents[i]));
-                    inventory.setItem(i, null);
-                    player.updateInventory();
-                    player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1.0F, 1.5F);
-                    return;
-                }
-            }
-
-            // If that slot is a shulker box, cycle through it as well
             if (itemStack.getItemMeta() instanceof BlockStateMeta im) {
                 if (im.getBlockState() instanceof ShulkerBox shulker) {
-                    if (player.hasPermission("aranarth.shulker")) {
-                        Inventory shulkerInventory = shulker.getInventory();
-                        ItemStack[] shulkerContents = shulkerInventory.getContents();
-                        for (int j = 0; j < shulkerInventory.getSize(); j++) {
-                            if (shulkerContents[j] != null) {
-                                if (matcher.test(shulkerContents[j], referenceItem)) {
-                                    inventory.setItem(slot, new ItemStack(shulkerContents[j]));
-                                    shulkerInventory.setItem(j, null);
-                                    shulker.update();
-                                    im.setBlockState(shulker);
-                                    itemStack.setItemMeta(im);
-                                    inventory.setItem(i, itemStack);
-                                    contents[i].setItemMeta(im);
-                                    player.updateInventory();
-                                    player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1.0F, 1.5F);
-                                    return;
-                                }
-                            }
+                    Inventory shulkerInventory = shulker.getInventory();
+                    ItemStack[] shulkerContents = shulkerInventory.getContents();
+                    for (int j = 0; j < shulkerInventory.getSize(); j++) {
+                        if (shulkerContents[j] != null && matcher.test(shulkerContents[j], referenceItem)) {
+                            inventory.setItem(slot, new ItemStack(shulkerContents[j]));
+                            shulkerInventory.setItem(j, null);
+                            shulker.update();
+                            im.setBlockState(shulker);
+                            itemStack.setItemMeta(im);
+                            inventory.setItem(i, itemStack);
+                            contents[i].setItemMeta(im);
+                            player.updateInventory();
+                            player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1.0F, 1.5F);
+                            return;
                         }
                     }
                 }
