@@ -117,6 +117,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandInvSwap.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("discordreload")) {
 			commandResult = CommandDiscordReload.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("reloadperms")) {
+			commandResult = CommandReloadPerms.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("migrate")) {
 			commandResult = CommandMigrate.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("unscramble")) {

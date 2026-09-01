@@ -33,7 +33,7 @@ public class CommandACCompleter implements TabCompleter {
     private static final List<String> COUNCIL_OPTIONS = List.of(
             "admin", "ban", "broadcast", "clearchat", "dateset", "discordreload", "give",
             "home", "invsee", "invswap", "msg", "mute", "og", "perks", "punishments", "questnpc", "rankset",
-            "reloadshops", "resetquest", "speed", "spy", "sudo", "time", "tp", "tpf", "tpw", "unban", "unmute",
+            "reloadperms", "reloadshops", "resetquest", "speed", "spy", "sudo", "time", "tp", "tpf", "tpw", "unban", "unmute",
             "unscramble", "vanish", "vpedit", "warn", "weather", "whereis"
     );
 
@@ -119,6 +119,7 @@ public class CommandACCompleter implements TabCompleter {
                 }
                 yield List.of();
             }
+            case "reloadperms" -> args.length == 2 ? filterPlayers(args[1]) : List.of();
             case "whereis", "give", "mute", "unmute", "ban", "unban", "invsee", "warn", "punishments", "perks",
                  "sudo" -> {
                 if (args.length == 2) {

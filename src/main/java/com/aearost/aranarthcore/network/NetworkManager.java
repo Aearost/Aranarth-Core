@@ -93,6 +93,7 @@ public class NetworkManager {
     public static final String CH_INVSEE_UNWATCH = "aranarth:invsee_unwatch";
     public static final String CH_RANK_UPDATE = "aranarth:rank_update";
     public static final String CH_MARKET_UPDATE = "aranarth:market_update";
+    public static final String CH_PERM_RELOAD = "aranarth:perm_reload";
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
     private static final String KEY_RETURN_LOC = "return_loc:";
@@ -355,6 +356,7 @@ public class NetworkManager {
             case CH_INVSEE_UNWATCH -> handleInvseeUnwatch(json);
             case CH_RANK_UPDATE -> handleRankUpdate(json);
             case CH_MARKET_UPDATE -> handleMarketUpdate(json);
+            case CH_PERM_RELOAD -> handlePermReload(json);
         }
     }
 
@@ -697,6 +699,19 @@ public class NetworkManager {
         json.addProperty("saintRank", saintRank);
         json.addProperty("architectRank", architectRank);
         publish(CH_RANK_UPDATE, json);
+    }
+
+    /**
+     * Tells the other server to re-evaluate permissions for all its online players,
+     * or for a specific player if uuid is non-null.
+     */
+    public void publishPermReload(UUID uuid) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        if (uuid != null) {
+            json.addProperty("uuid", uuid.toString());
+        }
+        publish(CH_PERM_RELOAD, json);
     }
 
     /**
@@ -1843,6 +1858,29 @@ public class NetworkManager {
                 }
             }
         }
+    }
+
+    private void handlePermReload(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+            if (json.has("uuid")) {
+                // Reload a specific player if they happen to be online on this server
+                UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+                Player player = Bukkit.getPlayer(uuid);
+                if (player != null) {
+                    PermissionUtils.evaluatePlayerPermissions(player);
+                }
+            } else {
+                // Reload all online players
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    PermissionUtils.evaluatePlayerPermissions(player);
+                }
+            }
+        });
     }
 
     private void handleMarketUpdate(JsonObject json) {

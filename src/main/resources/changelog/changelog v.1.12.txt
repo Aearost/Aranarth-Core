@@ -144,6 +144,7 @@ Minor Features
 [+] Added custom /enchant to support unsafe enchantment levels
 [~] Changed recipe of homepads to be more expensive
 [+] Added /ac reloadshops
+[+] Added /ac reloadperms [player] to force permission re-evaluation for all online players across both servers
 
 Backend Code Changes
 -
