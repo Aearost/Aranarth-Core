@@ -5,6 +5,8 @@ import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralProjection;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.PastLives;
 import com.aearost.aranarthcore.commands.council.CommandAC;
 import com.aearost.aranarthcore.commands.council.CommandACCompleter;
+import com.aearost.aranarthcore.commands.council.CommandEnchant;
+import com.aearost.aranarthcore.commands.council.CommandEnchantCompleter;
 import com.aearost.aranarthcore.commands.council.CommandTrash;
 import com.aearost.aranarthcore.commands.general.*;
 import com.aearost.aranarthcore.database.DatabaseManager;
@@ -436,6 +438,8 @@ public class AranarthCore extends JavaPlugin {
             commandMap.getKnownCommands().put("aranarthcore:ac", getCommand("ac"));
             commandMap.getKnownCommands().put("mctop", getCommand("mctop"));
             commandMap.getKnownCommands().put("aranarthcore:mctop", getCommand("mctop"));
+            commandMap.getKnownCommands().put("enchant", getCommand("enchant"));
+            commandMap.getKnownCommands().put("aranarthcore:enchant", getCommand("enchant"));
         });
 
         // Purge expired reaper inventories once on startup, then every hour
@@ -1327,6 +1331,8 @@ public class AranarthCore extends JavaPlugin {
         getCommand("delhome").setTabCompleter(new CommandDelhomeCompleter());
         getCommand("dominion").setExecutor(new CommandDominion());
         getCommand("dominion").setTabCompleter(new CommandDominionCompleter());
+        getCommand("enchant").setExecutor(new CommandEnchant());
+        getCommand("enchant").setTabCompleter(new CommandEnchantCompleter());
         getCommand("enderchest").setExecutor(new CommandEnderchest());
         getCommand("fletching").setExecutor(new CommandFletching());
         getCommand("grindstone").setExecutor(new CommandGrindstone());

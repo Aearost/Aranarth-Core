@@ -88,6 +88,9 @@ commands:
     description: The master command for Aranarth dominions
     aliases: [ d ]
     permission: aranarth.dominion
+  enchant:
+    description: Applies an unsafe enchantment to the target player's held item
+    permission: aranarth.enchant
   enderchest:
     description: Opens the player's ender chest remotely
     aliases: [ ec ]
