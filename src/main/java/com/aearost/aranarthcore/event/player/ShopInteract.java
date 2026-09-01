@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.CropUtils;
+import com.aearost.aranarthcore.utils.MarketUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.*;
@@ -522,6 +523,10 @@ public class ShopInteract {
 
                 // Logic to update balances and chest inventory
                 clickUser.setBalance(clickUser.getBalance() + shop.getSellPrice());
+                // Track sell pressure for dynamic market pricing (server shops only)
+                if (shop.getUuid() == null) {
+                    MarketUtils.addSellPressure(shop, shop.getQuantity());
+                }
                 PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
                 if (NetworkManager.isActive()) {
                     NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), shop.getSellPrice());

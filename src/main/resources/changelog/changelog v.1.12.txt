@@ -39,6 +39,10 @@ Major Features
 [+] Added crop growth buff to the Regrowth ability
 [+] Added crop harvest functionality to LeafScythe
 [+] Added Reaper Inventory system to purchase back your last death's inventory within 24 hours
+[+] Added dynamic economy system
+[~] Decreased all market sell prices
+[~] Significantly increased all job pays
+[-] Removed the Smith job
 
 Minor Features
 [~] Fixed issue where the alchemist job was not providing xp when shift-clicking ingredients into a brewing stand
@@ -139,6 +143,7 @@ Minor Features
 [-] CamelHusk mounts no longer receive custom speed on spawn
 [+] Added custom /enchant to support unsafe enchantment levels
 [~] Changed recipe of homepads to be more expensive
+[+] Added /ac reloadshops
 
 Backend Code Changes
 -

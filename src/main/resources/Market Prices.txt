@@ -1,6 +1,6 @@
 **__Collector Shop__**
-Diamond - Selling 1 for 100
-Netherite Scrap - Selling 1 for 500
+Diamond - Selling 1 for 33
+Netherite Scrap - Selling 1 for 167
 Heart of the Sea - Selling 1 for 2500
 Aranarthium Cluster - Selling 1 for 1500
 Echo Shard - Selling 1 for 7500
@@ -8,67 +8,67 @@ Enchanted Golden Apple - Selling 1 for 500
 
 
 **__Farmer Shop__**
-Wheat - Selling 16 for 120
-Hay Bales - Selling 16 for 1250
-Beetroot - Selling 16 for 150
-Carrots - Selling 32 for 75
-Potatoes - Selling 32 for 75
-Melon - Selling 1 for 40
-Pumpkin - Selling 1 for 40
+Wheat - Selling 16 for 40
+Hay Bales - Selling 16 for 417
+Beetroot - Selling 16 for 50
+Carrots - Selling 32 for 25
+Potatoes - Selling 32 for 25
+Melon - Selling 1 for 13
+Pumpkin - Selling 1 for 13
 
 
 **__Scavenger Shop__**
-Rotten Flesh - Selling 8 for 100
-Bone - Selling 8 for 250
-Spider Eye - Selling 8 for 150
-String - Selling 8 for 50
-Gunpowder - Selling 8 for 350
-Ender pearl - Selling 16 for 100
-Magma Cream - Selling 8 for 350
-Slimeball - Selling 8 for 250
-Blaze rod - Selling 4 for 250
-Phantom Membrane - Selling 1 for 500
-Breeze rod - Selling 4 for 250
+Rotten Flesh - Selling 8 for 33
+Bone - Selling 8 for 83
+Spider Eye - Selling 8 for 50
+String - Selling 8 for 17
+Gunpowder - Selling 8 for 117
+Ender pearl - Selling 16 for 33
+Magma Cream - Selling 8 for 117
+Slimeball - Selling 8 for 83
+Blaze rod - Selling 4 for 83
+Phantom Membrane - Selling 1 for 167
+Breeze rod - Selling 4 for 83
 
 
 __**Fisherman's Shop**__
-Cod - Selling 8 for 250
-Salmon - Selling 8 for 250
-Pufferfish - Selling 8 for 500
-Tropical Fish - Selling 8 for 300
+Cod - Selling 8 for 83
+Salmon - Selling 8 for 83
+Pufferfish - Selling 8 for 167
+Tropical Fish - Selling 8 for 100
 Prismarine Shard - Buying 16 for 50
 Prismarine Crystal- Buying 16 for 50
 
 
 __**Butcher Shop**__
-Raw beef - Selling 8 for 250
-Pork chop - Selling 8 for 325
-Chicken - Selling 8 for 300
-Mutton - Selling 8 for 250
-Rabbit - Selling 8 for 400
-Honey Glazed Ham - Selling 8 for 500
-Rabbit Foot  - Selling 1 for 1000
-Leather - Selling 8 for 250
-Feather - Selling 8 for 250
+Raw beef - Selling 8 for 83
+Pork chop - Selling 8 for 108
+Chicken - Selling 8 for 100
+Mutton - Selling 8 for 83
+Rabbit - Selling 8 for 133
+Honey Glazed Ham - Selling 8 for 250
+Rabbit Foot  - Selling 1 for 333
+Leather - Selling 8 for 83
+Feather - Selling 8 for 83
 
 
 __**Smith Shop**__
-Glowberries - Selling 16 for 100
-Raw Copper - Selling 16 for 10
-Raw Iron - Selling 8 for 100
-Raw Gold - Selling 8 for 250
-Golden Carrots - Selling 16 for 150
+Glowberries - Selling 16 for 33
+Raw Copper - Selling 16 for 3
+Raw Iron - Selling 8 for 33
+Raw Gold - Selling 8 for 83
+Golden Carrots - Selling 16 for 75
 
 
 __**Baker Shop**__
-Bread - Selling 16 for 400
-Cake - Selling 1 for 500
-Pumpkin Pie - Selling 4 for 750
-Cookies - Selling 32 for 225
-Sweet Berries - Selling 16 for 75
-Sugar - Selling 16 for 150
-Cocoa Beans - Selling 16 for 125
-Honey Block - Selling 1 for 150
-Egg - Selling 8 for 200
-Brown Egg - Selling 8 for 200
-Blue Egg - Selling 8 for 200
+Bread - Selling 16 for 200
+Cake - Selling 1 for 250
+Pumpkin Pie - Selling 4 for 375
+Cookies - Selling 32 for 113
+Sweet Berries - Selling 16 for 25
+Sugar - Selling 16 for 50
+Cocoa Beans - Selling 16 for 42
+Honey Block - Selling 1 for 50
+Egg - Selling 8 for 67
+Brown Egg - Selling 8 for 67
+Blue Egg - Selling 8 for 67

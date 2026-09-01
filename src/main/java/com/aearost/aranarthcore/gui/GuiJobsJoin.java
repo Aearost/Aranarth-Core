@@ -20,11 +20,11 @@ public class GuiJobsJoin {
 
     public static final String TITLE = "Join a Job";
 
-    public static final int[] JOB_SLOTS = {11, 13, 15, 20, 22, 24, 31, 29, 33};
+    public static final int[] JOB_SLOTS = {11, 13, 15, 20, 22, 24, 29, 31};
     public static final JobType[] JOB_ORDER = {
         JobType.BUILDER, JobType.MINER, JobType.EXCAVATOR,
         JobType.LUMBERJACK, JobType.FARMER, JobType.HUNTER,
-        JobType.ALCHEMIST, JobType.SMITH, JobType.EXPLORER
+        JobType.ALCHEMIST, JobType.EXPLORER
     };
 
     private final Player player;
@@ -131,15 +131,14 @@ public class GuiJobsJoin {
 
     private List<String> getJobActions(JobType job) {
         return switch (job) {
-            case BUILDER -> List.of("Place buildable blocks &8($0.10)");
-            case FARMER -> List.of("Harvest crops &8($0.05-$0.20)", "Collect honey &8($0.50)", "Kill passive mobs &8($0.10)");
-            case MINER -> List.of("Mine stone/ores &8($0.02-$3.00)", "Harvest amethyst &8($0.10)");
-            case EXCAVATOR -> List.of("Dig dirts, sands, etc &8($0.02-$0.04)", "Brush artifacts &8($2.50)");
-            case LUMBERJACK -> List.of("Chop logs &8($0.08)", "Craft wood items &8($0.02-$0.10)");
-            case SMITH -> List.of("Craft tools/armor &8($0.35-$2.50)", "Smith netherite &8($5.00)");
-            case EXPLORER -> List.of("Walk/ride &8($0.003-$0.004/block)", "Open natural chests &8($3-$8)");
-            case ALCHEMIST -> List.of("Brew potions &8($0.80-$1.00)", "Enchant items &8($0.50)");
-            case HUNTER -> List.of("Kill mobs &8($0.15-$15.00)", "Catch fish &8($0.20-$1.50)");
+            case BUILDER -> List.of("Place buildable blocks &8($1.00)");
+            case FARMER -> List.of("Harvest crops &8($0.60-$2.40)", "Collect honey &8($9.60-$12.00)", "Kill passive mobs &8($1.20)");
+            case MINER -> List.of("Mine stone &8($0.03-$0.07)", "Mine ores &8($1.90-$75.00)", "Harvest amethyst &8($4.80)");
+            case EXCAVATOR -> List.of("Dig dirts, sands, etc &8($0.05-$0.10)", "Brush artifacts &8($25.00)");
+            case LUMBERJACK -> List.of("Chop logs &8($1.45-$2.90)", "Craft/saw wood items &8($1.20-$6.00)");
+            case EXPLORER -> List.of("Walk/ride &8($0.25-$0.50/block)", "Open natural chests &8($100-$250)");
+            case ALCHEMIST -> List.of("Brew potions &8($19.20-$48.00)", "Enchant items &8($24.00)");
+            case HUNTER -> List.of("Kill mobs &8($4.80-$250.00)", "Catch fish &8($4.80-$36.00)");
         };
     }
 

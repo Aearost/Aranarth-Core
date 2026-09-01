@@ -437,7 +437,8 @@
       "Bash(cmd //c \"mvn compile -q 2>&1\")",
       "Bash(find ../ProjectKorra-wip -name *.java)",
       "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/commands -name *.java -type f -exec grep -l \"page\\\\|pag\" {})",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore/src -name *Cluster* -o -name *cluster*)"
     ]
   }
 }

@@ -24,6 +24,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
+import org.bukkit.ChatColor;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -198,53 +200,53 @@ public class JobEventListener implements Listener {
 
     private double getMinerPay(Material type) {
         return switch (type) {
-            case STONE, ANDESITE, GRANITE, DIORITE -> 0.003;
-            case DEEPSLATE, COBBLESTONE, COBBLED_DEEPSLATE -> 0.003;
-            case TUFF, CALCITE, BASALT, BLACKSTONE, NETHERRACK -> 0.002;
-            case DRIPSTONE_BLOCK, MUD -> 0.002;
-            case COPPER_ORE, DEEPSLATE_COPPER_ORE -> 0.04;
-            case COAL_ORE, DEEPSLATE_COAL_ORE -> 0.04;
-            case IRON_ORE, DEEPSLATE_IRON_ORE -> 0.08;
-            case GOLD_ORE, DEEPSLATE_GOLD_ORE, NETHER_GOLD_ORE -> 0.12;
-            case LAPIS_ORE, DEEPSLATE_LAPIS_ORE -> 0.06;
-            case REDSTONE_ORE, DEEPSLATE_REDSTONE_ORE -> 0.05;
-            case NETHER_QUARTZ_ORE -> 0.05;
-            case EMERALD_ORE, DEEPSLATE_EMERALD_ORE -> 0.80;
-            case DIAMOND_ORE, DEEPSLATE_DIAMOND_ORE -> 0.50;
-            case ANCIENT_DEBRIS -> 3.00;
-            case LARGE_AMETHYST_BUD -> 0.10;
+            case STONE, DEEPSLATE, COBBLESTONE, COBBLED_DEEPSLATE -> 0.05;
+            case ANDESITE, DIORITE, GRANITE, TUFF, CALCITE, DRIPSTONE_BLOCK,
+                 BASALT, SMOOTH_BASALT, BLACKSTONE, END_STONE, SULFUR, CINNABAR -> 0.07;
+            case NETHERRACK -> 0.03;
+            case COPPER_ORE, DEEPSLATE_COPPER_ORE -> 1.90;
+            case COAL_ORE, DEEPSLATE_COAL_ORE -> 1.90;
+            case IRON_ORE, DEEPSLATE_IRON_ORE -> 3.85;
+            case GOLD_ORE, DEEPSLATE_GOLD_ORE, NETHER_GOLD_ORE -> 5.75;
+            case LAPIS_ORE, DEEPSLATE_LAPIS_ORE -> 2.90;
+            case REDSTONE_ORE, DEEPSLATE_REDSTONE_ORE -> 2.40;
+            case NETHER_QUARTZ_ORE -> 2.40;
+            case EMERALD_ORE, DEEPSLATE_EMERALD_ORE -> 38.00;
+            case DIAMOND_ORE, DEEPSLATE_DIAMOND_ORE -> 24.00;
+            case ANCIENT_DEBRIS -> 75.00;
+            case LARGE_AMETHYST_BUD -> 4.80;
             default -> 0;
         };
     }
 
     private double getExcavatorBlockBreakPay(Material type) {
         return switch (type) {
-            case DIRT, COARSE_DIRT, ROOTED_DIRT, PODZOL, MYCELIUM -> 0.002;
-            case SAND, RED_SAND -> 0.002;
-            case GRAVEL -> 0.002;
-            case CLAY -> 0.004;
-            case MUD -> 0.002;
-            case SOUL_SAND, SOUL_SOIL -> 0.003;
-            case SNOW_BLOCK -> 0.002;
+            case DIRT, COARSE_DIRT, ROOTED_DIRT, PODZOL, MYCELIUM -> 0.05;
+            case SAND, RED_SAND -> 0.05;
+            case GRAVEL -> 0.05;
+            case CLAY -> 0.10;
+            case MUD, MUDDY_MANGROVE_ROOTS -> 0.05;
+            case SOUL_SAND, SOUL_SOIL -> 0.07;
+            case SNOW_BLOCK -> 0.05;
             default -> 0;
         };
     }
 
     private double getLumberjackBreakPay(Material type) {
         if (LOG_MATERIALS.contains(type)) {
-            return 0.18;
+            return 2.90;
         }
         if (STRIPPED_LOG_MATERIALS.contains(type)) {
-            return 0.12;
+            return 1.90;
         }
         if (type == Material.BAMBOO_BLOCK) {
-            return 0.09;
+            return 1.45;
         }
         if (MUSHROOM_BLOCK_MATERIALS.contains(type)) {
-            return 0.12;
+            return 1.90;
         }
         if (LEAF_MATERIALS.contains(type)) {
-            return 0.005;
+            return 0.08;
         }
         return 0;
     }
@@ -252,21 +254,21 @@ public class JobEventListener implements Listener {
     private double getFarmerBreakPay(Block block) {
         Material type = block.getType();
         return switch (type) {
-            case WHEAT -> isMature(block) ? 0.10 : 0;
-            case CARROTS -> isMature(block) ? 0.05 : 0;
-            case POTATOES -> isMature(block) ? 0.05 : 0;
-            case BEETROOTS -> isMature(block) ? 0.12 : 0;
-            case NETHER_WART -> isMature(block) ? 0.15 : 0;
-            case COCOA -> isMature(block) ? 0.10 : 0;
-            case MELON -> 0.20;
-            case PUMPKIN -> 0.20;
-            case SWEET_BERRY_BUSH -> isMature(block) ? 0.08 : 0;
-            case CAVE_VINES, CAVE_VINES_PLANT -> hasGlowBerries(block) ? 0.06 : 0;
+            case WHEAT -> isMature(block) ? 1.20 : 0;
+            case CARROTS -> isMature(block) ? 0.60 : 0;
+            case POTATOES -> isMature(block) ? 0.60 : 0;
+            case BEETROOTS -> isMature(block) ? 1.45 : 0;
+            case NETHER_WART -> isMature(block) ? 1.80 : 0;
+            case COCOA -> isMature(block) ? 1.20 : 0;
+            case MELON -> 2.40;
+            case PUMPKIN -> 2.40;
+            case SWEET_BERRY_BUSH -> isMature(block) ? 0.95 : 0;
+            case CAVE_VINES, CAVE_VINES_PLANT -> hasGlowBerries(block) ? 0.73 : 0;
             case SUGAR_CANE ->
-                    !JobUtils.isRecentlyPlaced(JobUtils.toLocationKey(block.getX(), block.getY(), block.getZ())) ? 0.04 : 0;
+                    !JobUtils.isRecentlyPlaced(JobUtils.toLocationKey(block.getX(), block.getY(), block.getZ())) ? 1.90 : 0;
             case CACTUS ->
-                    !JobUtils.isRecentlyPlaced(JobUtils.toLocationKey(block.getX(), block.getY(), block.getZ())) ? 0.04 : 0;
-            case HAY_BLOCK -> mcMMO.getChunkManager().isEligible(block) ? 0.10 : 0;
+                    !JobUtils.isRecentlyPlaced(JobUtils.toLocationKey(block.getX(), block.getY(), block.getZ())) ? 1.90 : 0;
+            case HAY_BLOCK -> mcMMO.getChunkManager().isEligible(block) ? 1.20 : 0;
             default -> 0;
         };
     }
@@ -327,7 +329,7 @@ public class JobEventListener implements Listener {
 
         Material mat = block.getType();
         if (isBuildableBlock(mat)) {
-            JobUtils.awardJob(player, JobType.BUILDER, 0.10);
+            JobUtils.awardJob(player, JobType.BUILDER, 1.00);
         }
     }
 
@@ -376,9 +378,9 @@ public class JobEventListener implements Listener {
                 && ap.getJobData().hasJob(JobType.FARMER)
                 && hasChunkPermission(player, clickedBlock.getChunk(), DominionPermission.MISC_INTERACT)) {
             if (inHand.getType() == Material.GLASS_BOTTLE) {
-                JobUtils.awardJob(player, JobType.FARMER, 0.50);
+                JobUtils.awardJob(player, JobType.FARMER, 12.00);
             } else if (inHand.getType() == Material.SHEARS) {
-                JobUtils.awardJob(player, JobType.FARMER, 0.40);
+                JobUtils.awardJob(player, JobType.FARMER, 9.60);
             }
         }
 
@@ -424,11 +426,11 @@ public class JobEventListener implements Listener {
         double pay = 0;
         // Milking: cow, mooshroom (Cow subclass), or goat with empty bucket
         if ((entity instanceof Cow || entity instanceof Goat) && inHand.getType() == Material.BUCKET) {
-            pay = 0.20;
+            pay = 4.80;
         }
         // Mushroom stew: mooshroom with empty bowl
         else if (entity instanceof MushroomCow && inHand.getType() == Material.BOWL) {
-            pay = 0.40;
+            pay = 9.60;
         }
 
         if (pay <= 0) {
@@ -476,9 +478,9 @@ public class JobEventListener implements Listener {
             if (sheep.isSheared()) {
                 return;
             }
-            pay = 0.25;
+            pay = 6.00;
         } else if (entity instanceof MushroomCow) {
-            pay = 0.50;
+            pay = 12.00;
         } else {
             return;
         }
@@ -513,13 +515,17 @@ public class JobEventListener implements Listener {
         }
         JobData jobData = ap.getJobData();
 
-        // Passive mob: both FARMER and HUNTER get $0.05
+        boolean fromSpawner = entity.getEntitySpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER;
+
+        // Passive mob: both FARMER and HUNTER
         if (entity instanceof Animals || PASSIVE_MOB_TYPES.contains(entity.getType())) {
             if (jobData.hasJob(JobType.FARMER)) {
-                JobUtils.awardJob(killer, JobType.FARMER, 0.05);
+                double pay = fromSpawner ? 1.20 * 0.25 : 1.20;
+                JobUtils.awardJob(killer, JobType.FARMER, pay);
             }
             if (jobData.hasJob(JobType.HUNTER)) {
-                JobUtils.awardJob(killer, JobType.HUNTER, 0.05);
+                double pay = fromSpawner ? 2.40 * 0.25 : 2.40;
+                JobUtils.awardJob(killer, JobType.HUNTER, pay);
             }
             return;
         }
@@ -527,7 +533,7 @@ public class JobEventListener implements Listener {
         // Player kill
         if (entity instanceof Player) {
             if (jobData.hasJob(JobType.HUNTER)) {
-                JobUtils.awardJob(killer, JobType.HUNTER, 2.50);
+                JobUtils.awardJob(killer, JobType.HUNTER, 120.00);
             }
             return;
         }
@@ -539,26 +545,28 @@ public class JobEventListener implements Listener {
 
         double pay = getHunterMobPay(entity.getType());
         if (pay > 0) {
-            JobUtils.awardJob(killer, JobType.HUNTER, pay);
+            double finalPay = fromSpawner ? pay * 0.25 : pay;
+            JobUtils.awardJob(killer, JobType.HUNTER, finalPay);
         }
     }
 
     private double getHunterMobPay(EntityType type) {
         return switch (type) {
-            case ZOMBIE, ZOMBIE_VILLAGER, HUSK, DROWNED -> 0.10;
-            case SKELETON, STRAY -> 0.125;
-            case SPIDER, CAVE_SPIDER -> 0.10;
-            case CREEPER -> 0.175;
-            case WITCH -> 0.25;
-            case BLAZE -> 0.40;
-            case GHAST -> 0.50;
-            case ENDERMAN -> 0.075;
-            case PIGLIN, ZOMBIFIED_PIGLIN, PIGLIN_BRUTE -> 0.10;
-            case WITHER_SKELETON -> 0.75;
-            case GUARDIAN, ELDER_GUARDIAN -> 0.375;
-            case SHULKER -> 0.30;
-            case BREEZE -> 0.60;
-            case WARDEN -> 7.50;
+            case ZOMBIE, ZOMBIE_VILLAGER, HUSK, DROWNED -> 4.80;
+            case SKELETON, STRAY -> 6.00;
+            case SPIDER, CAVE_SPIDER -> 4.80;
+            case CREEPER -> 8.40;
+            case WITCH -> 12.00;
+            case BLAZE -> 19.20;
+            case GHAST -> 24.00;
+            case ENDERMAN -> 3.60;
+            case PIGLIN, ZOMBIFIED_PIGLIN, PIGLIN_BRUTE -> 4.80;
+            case WITHER_SKELETON -> 36.00;
+            case GUARDIAN -> 18.00;
+            case ELDER_GUARDIAN -> 250.00;
+            case SHULKER -> 14.40;
+            case BREEZE -> 28.80;
+            case WARDEN -> 100.00;
             default -> 0;
         };
     }
@@ -616,13 +624,13 @@ public class JobEventListener implements Listener {
         Material mat = caught.getType();
 
         if (isTreasureItem(mat)) {
-            JobUtils.awardJob(player, JobType.HUNTER, 0.75);
+            JobUtils.awardJob(player, JobType.HUNTER, 36.00);
         } else if (mat == Material.COD || mat == Material.SALMON) {
-            JobUtils.awardJob(player, JobType.HUNTER, 0.10);
+            JobUtils.awardJob(player, JobType.HUNTER, 4.80);
         } else if (mat == Material.PUFFERFISH) {
-            JobUtils.awardJob(player, JobType.HUNTER, 0.175);
+            JobUtils.awardJob(player, JobType.HUNTER, 8.40);
         } else if (mat == Material.TROPICAL_FISH) {
-            JobUtils.awardJob(player, JobType.HUNTER, 0.125);
+            JobUtils.awardJob(player, JobType.HUNTER, 6.00);
         }
     }
 
@@ -669,45 +677,74 @@ public class JobEventListener implements Listener {
             }
         }
 
-        // SMITH crafting
-        if (jobData.hasJob(JobType.SMITH)) {
-            double pay = getSmithCraftPay(mat, amount);
-            if (pay > 0) {
-                JobUtils.awardJob(player, JobType.SMITH, pay);
-            }
+    }
+
+    @EventHandler
+    public void onStonecutterResultTaken(InventoryClickEvent e) {
+        if (!(e.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+        if (e.getView().getType() != InventoryType.STONECUTTER) {
+            return;
+        }
+        // Only award for Sawmill (stonecutter placed on wood block), identified by title
+        String title = ChatColor.stripColor(e.getView().getTitle());
+        if (!title.equals("Sawmill")) {
+            return;
+        }
+        if (e.getRawSlot() != 1) {
+            return; // slot 1 is the output slot in stonecutter
+        }
+        ItemStack result = e.getCurrentItem();
+        if (result == null || result.getType() == Material.AIR) {
+            return;
+        }
+        String worldName = player.getWorld().getName();
+        if (!AranarthUtils.isSurvivalWorld(worldName)) {
+            return;
+        }
+        AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
+        if (ap == null || !ap.getJobData().hasJob(JobType.LUMBERJACK)) {
+            return;
+        }
+        Material mat = result.getType();
+        int amount = result.getAmount();
+        double pay = getLumberjackCraftPay(mat, amount);
+        if (pay > 0) {
+            JobUtils.awardJob(player, JobType.LUMBERJACK, pay);
         }
     }
 
     private double getLumberjackCraftPay(Material mat, int amount) {
         if (isWoodenPlanks(mat)) {
-            return 0.05 * amount;
+            return 1.20 * amount;
         }
         if (isWoodenStairs(mat)) {
-            return 0.10 * amount;
+            return 2.40 * amount;
         }
         if (isWoodenSlab(mat)) {
-            return 0.05 * amount;
+            return 1.20 * amount;
         }
         if (isWoodenDoor(mat)) {
-            return 0.20;
+            return 4.80;
         }
         if (isWoodenTrapdoor(mat)) {
-            return 0.15;
+            return 3.60;
         }
         if (isFence(mat)) {
-            return 0.12;
+            return 2.90;
         }
         if (isFenceGate(mat)) {
-            return 0.12;
+            return 2.90;
         }
         if (isWoodenPressurePlate(mat)) {
-            return 0.10;
+            return 2.40;
         }
         if (isWoodenButton(mat)) {
-            return 0.08;
+            return 1.90;
         }
         if (mat == Material.CHISELED_BOOKSHELF) {
-            return 0.25;
+            return 6.00;
         }
         return 0;
     }
@@ -762,81 +799,8 @@ public class JobEventListener implements Listener {
                 || name.startsWith("CRIMSON") || name.startsWith("WARPED");
     }
 
-    private double getSmithCraftPay(Material mat, int amount) {
-        if (isIronTool(mat)) {
-            return 0.50;
-        }
-        if (isIronArmor(mat)) {
-            return 0.60;
-        }
-        if (isGoldTool(mat)) {
-            return 0.35;
-        }
-        if (isGoldArmor(mat)) {
-            return 0.40;
-        }
-        if (isDiamondTool(mat)) {
-            return 6.00;
-        }
-        if (isDiamondArmor(mat)) {
-            return 8.00;
-        }
-        if (isChainArmor(mat)) {
-            return 0.80;
-        }
-        if (mat == Material.COPPER_BLOCK) {
-            return 0.15;
-        }
-        if (mat == Material.IRON_BLOCK) {
-            return 0.25;
-        }
-        if (mat == Material.GOLD_BLOCK) {
-            return 0.30;
-        }
-        if (mat.name().endsWith("_CHAIN") || mat == Material.LANTERN || mat == Material.SOUL_LANTERN
-                || mat == Material.IRON_BARS) {
-            return 0.20;
-        }
-        return 0;
-    }
-
-    private boolean isIronTool(Material mat) {
-        return mat == Material.IRON_PICKAXE || mat == Material.IRON_SHOVEL
-                || mat == Material.IRON_HOE || mat == Material.IRON_SWORD || mat == Material.IRON_AXE;
-    }
-
-    private boolean isIronArmor(Material mat) {
-        return mat == Material.IRON_HELMET || mat == Material.IRON_CHESTPLATE
-                || mat == Material.IRON_LEGGINGS || mat == Material.IRON_BOOTS;
-    }
-
-    private boolean isGoldTool(Material mat) {
-        return mat == Material.GOLDEN_PICKAXE || mat == Material.GOLDEN_SHOVEL
-                || mat == Material.GOLDEN_HOE || mat == Material.GOLDEN_SWORD || mat == Material.GOLDEN_AXE;
-    }
-
-    private boolean isGoldArmor(Material mat) {
-        return mat == Material.GOLDEN_HELMET || mat == Material.GOLDEN_CHESTPLATE
-                || mat == Material.GOLDEN_LEGGINGS || mat == Material.GOLDEN_BOOTS;
-    }
-
-    private boolean isDiamondTool(Material mat) {
-        return mat == Material.DIAMOND_PICKAXE || mat == Material.DIAMOND_SHOVEL
-                || mat == Material.DIAMOND_HOE || mat == Material.DIAMOND_SWORD || mat == Material.DIAMOND_AXE;
-    }
-
-    private boolean isDiamondArmor(Material mat) {
-        return mat == Material.DIAMOND_HELMET || mat == Material.DIAMOND_CHESTPLATE
-                || mat == Material.DIAMOND_LEGGINGS || mat == Material.DIAMOND_BOOTS;
-    }
-
-    private boolean isChainArmor(Material mat) {
-        return mat == Material.CHAINMAIL_HELMET || mat == Material.CHAINMAIL_CHESTPLATE
-                || mat == Material.CHAINMAIL_LEGGINGS || mat == Material.CHAINMAIL_BOOTS;
-    }
-
     // -------------------------------------------------------------------------
-    // SMITH - Smithing table (InventoryClickEvent)
+    // ALCHEMIST - Smithing table, Grindstone, Anvil (InventoryClickEvent)
     // -------------------------------------------------------------------------
 
     @EventHandler
@@ -855,22 +819,6 @@ public class JobEventListener implements Listener {
         }
         JobData jobData = ap.getJobData();
 
-        if (e.getView().getType() == InventoryType.SMITHING && e.getRawSlot() == 3) {
-            ItemStack result = e.getCurrentItem();
-            if (result == null || result.getType() == Material.AIR) {
-                return;
-            }
-            if (jobData.hasJob(JobType.SMITH)) {
-                // Check if netherite upgrade or armor trim
-                ItemStack template = e.getView().getTopInventory().getItem(0);
-                if (template != null && template.getType() == Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE) {
-                    JobUtils.awardJob(player, JobType.SMITH, 20.00);
-                } else if (isArmorTrimTemplate(template)) {
-                    JobUtils.awardJob(player, JobType.SMITH, 10.00);
-                }
-            }
-        }
-
         // ALCHEMIST - Grindstone
         if (e.getView().getType() == InventoryType.GRINDSTONE && e.getRawSlot() == 2) {
             ItemStack result = e.getCurrentItem();
@@ -884,7 +832,7 @@ public class JobEventListener implements Listener {
                 boolean hadEnchants = (input1 != null && !input1.getEnchantments().isEmpty())
                         || (input2 != null && !input2.getEnchantments().isEmpty());
                 if (hadEnchants) {
-                    JobUtils.awardJob(player, JobType.ALCHEMIST, 0.30);
+                    JobUtils.awardJob(player, JobType.ALCHEMIST, 14.40);
                 }
             }
         }
@@ -898,24 +846,15 @@ public class JobEventListener implements Listener {
             if (jobData.hasJob(JobType.ALCHEMIST)) {
                 ItemStack sacrifice = e.getView().getTopInventory().getItem(1);
                 if (sacrifice != null && sacrifice.getType() == Material.ENCHANTED_BOOK) {
-                    JobUtils.awardJob(player, JobType.ALCHEMIST, 0.40);
+                    JobUtils.awardJob(player, JobType.ALCHEMIST, 19.20);
                 } else if (!result.getEnchantments().isEmpty()) {
-                    JobUtils.awardJob(player, JobType.ALCHEMIST, 0.40);
+                    JobUtils.awardJob(player, JobType.ALCHEMIST, 19.20);
                 } else {
                     // Rename only
-                    JobUtils.awardJob(player, JobType.ALCHEMIST, 0.10);
+                    JobUtils.awardJob(player, JobType.ALCHEMIST, 4.80);
                 }
             }
         }
-    }
-
-    private boolean isArmorTrimTemplate(ItemStack template) {
-        if (template == null) {
-            return false;
-        }
-        String name = template.getType().name();
-        return name.endsWith("_SMITHING_TEMPLATE")
-                && !name.equals("NETHERITE_UPGRADE_SMITHING_TEMPLATE");
     }
 
     // -------------------------------------------------------------------------
@@ -935,7 +874,7 @@ public class JobEventListener implements Listener {
             return;
         }
 
-        JobUtils.awardJob(player, JobType.ALCHEMIST, 0.50);
+        JobUtils.awardJob(player, JobType.ALCHEMIST, 24.00);
     }
 
     // -------------------------------------------------------------------------
@@ -993,7 +932,7 @@ public class JobEventListener implements Listener {
             }
         }
         for (int i = 0; i < bottles; i++) {
-            JobUtils.awardJob(player, JobType.ALCHEMIST, 0.80);
+            JobUtils.awardJob(player, JobType.ALCHEMIST, 19.20);
         }
     }
 
@@ -1020,7 +959,7 @@ public class JobEventListener implements Listener {
             return;
         }
 
-        JobUtils.awardJob(player, JobType.ALCHEMIST, 1.00);
+        JobUtils.awardJob(player, JobType.ALCHEMIST, 48.00);
     }
 
     // -------------------------------------------------------------------------
@@ -1058,9 +997,9 @@ public class JobEventListener implements Listener {
 
         Entity vehicle = player.getVehicle();
         if (vehicle instanceof AbstractHorse) {
-            JobUtils.awardJob(player, JobType.EXPLORER, 0.004);
+            JobUtils.awardJob(player, JobType.EXPLORER, 0.50);
         } else if (vehicle == null) {
-            JobUtils.awardJob(player, JobType.EXPLORER, 0.003);
+            JobUtils.awardJob(player, JobType.EXPLORER, 0.25);
         }
     }
 
@@ -1118,11 +1057,11 @@ public class JobEventListener implements Listener {
         String world = worldName.toLowerCase();
         double pay;
         if (world.contains("nether")) {
-            pay = 5.00;
+            pay = 150.00;
         } else if (world.contains("end") || world.contains("the_end")) {
-            pay = 8.00;
+            pay = 250.00;
         } else {
-            pay = 3.00;
+            pay = 100.00;
         }
 
         JobUtils.awardJob(player, JobType.EXPLORER, pay);

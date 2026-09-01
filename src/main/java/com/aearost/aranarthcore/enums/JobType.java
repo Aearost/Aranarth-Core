@@ -6,13 +6,11 @@ public enum JobType {
     MINER,
     EXCAVATOR,
     LUMBERJACK,
-    SMITH,
     EXPLORER,
     ALCHEMIST,
     HUNTER;
 
     public String getDisplayName() {
-        String name = name().charAt(0) + name().substring(1).toLowerCase();
-        return name;
+        return name().charAt(0) + name().substring(1).toLowerCase();
     }
 }

@@ -7902,6 +7902,54 @@ public class PersistenceUtils {
     }
 
     /**
+     * Loads market dynamics from MySQL and populates the in-memory MarketUtils map.
+     */
+    public static void loadMarketDynamicsFromDatabase() {
+        DatabaseManager db = DatabaseManager.getInstance();
+        List<Object[]> rows = db.loadAllMarketDynamics();
+        for (Object[] row : rows) {
+            String shopKey = (String) row[0];
+            double defaultSellPrice = (double) row[1];
+            double modifier = (double) row[2];
+            double pressure = (double) row[3];
+            MarketDynamics data = new MarketDynamics(shopKey, defaultSellPrice, modifier, pressure);
+            MarketUtils.addMarketData(data);
+        }
+
+        // Auto-create entries for any server shop that has no market dynamics row yet
+        List<Shop> serverShops = ShopUtils.getShops().get(null);
+        if (serverShops != null) {
+            for (Shop shop : serverShops) {
+                if (shop.getSellPrice() <= 0) {
+                    continue;
+                }
+                String key = MarketUtils.getShopKey(shop);
+                if (MarketUtils.getMarketData(key) == null) {
+                    MarketDynamics data = new MarketDynamics(key, shop.getSellPrice(), 1.0, 0.0);
+                    MarketUtils.addMarketData(data);
+                }
+            }
+        }
+
+        Bukkit.getLogger().info("[AC] Market dynamics initialized from MySQL");
+    }
+
+    /**
+     * Saves all in-memory market dynamics to the database asynchronously.
+     */
+    public static void syncMarketDynamicsToDatabase() {
+        DatabaseManager db = DatabaseManager.getInstance();
+        Map<String, MarketDynamics> all = MarketUtils.getAllMarketData();
+        runDbSync(() -> {
+            for (Map.Entry<String, MarketDynamics> entry : all.entrySet()) {
+                MarketDynamics data = entry.getValue();
+                db.saveMarketDynamic(data.getShopKey(), data.getDefaultSellPrice(),
+                        data.getCurrentPriceModifier(), data.getSellPressure());
+            }
+        });
+    }
+
+    /**
      * Loads server date from MySQL. Falls back to file if empty.
      */
     public static void loadServerDateFromDatabase() {

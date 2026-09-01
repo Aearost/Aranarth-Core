@@ -92,6 +92,7 @@ public class NetworkManager {
     public static final String CH_INVSEE_UPDATE = "aranarth:invsee_update";
     public static final String CH_INVSEE_UNWATCH = "aranarth:invsee_unwatch";
     public static final String CH_RANK_UPDATE = "aranarth:rank_update";
+    public static final String CH_MARKET_UPDATE = "aranarth:market_update";
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
     private static final String KEY_RETURN_LOC = "return_loc:";
@@ -353,6 +354,7 @@ public class NetworkManager {
             case CH_INVSEE_UPDATE -> handleInvseeUpdate(json);
             case CH_INVSEE_UNWATCH -> handleInvseeUnwatch(json);
             case CH_RANK_UPDATE -> handleRankUpdate(json);
+            case CH_MARKET_UPDATE -> handleMarketUpdate(json);
         }
     }
 
@@ -695,6 +697,16 @@ public class NetworkManager {
         json.addProperty("saintRank", saintRank);
         json.addProperty("architectRank", architectRank);
         publish(CH_RANK_UPDATE, json);
+    }
+
+    /**
+     * Notifies all other servers that server shop sell prices have been updated
+     * so they can reload market data from the database and refresh signs.
+     */
+    public void publishMarketUpdate() {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        publish(CH_MARKET_UPDATE, json);
     }
 
     public void publishAfkStatus(UUID uuid, String nickname, boolean isAfk) {
@@ -1831,6 +1843,23 @@ public class NetworkManager {
                 }
             }
         }
+    }
+
+    private void handleMarketUpdate(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        // Reload market dynamics from DB and refresh signs on main thread
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+            PersistenceUtils.loadMarketDynamicsFromDatabase();
+            List<Shop> serverShops = ShopUtils.getShops().get(null);
+            if (serverShops != null) {
+                for (Shop shop : serverShops) {
+                    MarketUtils.refreshServerShopSign(shop);
+                }
+            }
+        });
     }
 
     private void handleBroadcast(JsonObject json) {

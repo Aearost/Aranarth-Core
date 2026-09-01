@@ -344,8 +344,8 @@ public class QuestUtils {
                     QuestTaskType.KILL_ENDERMAN, QuestTaskType.KILL_SPIDER, QuestTaskType.KILL_WITCH,
                     QuestTaskType.KILL_BLAZE, QuestTaskType.KILL_GHAST, QuestTaskType.KILL_PLAYER,
                     QuestTaskType.FISH);
-            // Builder, Smith, and Alchemist have no matching quest task types
-            case BUILDER, SMITH, ALCHEMIST -> List.of();
+            // Builder and Alchemist have no matching quest task types
+            case BUILDER, ALCHEMIST -> List.of();
         };
     }
 

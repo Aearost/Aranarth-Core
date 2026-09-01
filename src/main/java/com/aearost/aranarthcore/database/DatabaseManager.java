@@ -437,6 +437,15 @@ public class DatabaseManager {
                 drops_b64 MEDIUMTEXT NOT NULL,
                 death_time BIGINT NOT NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+                """
+            CREATE TABLE IF NOT EXISTS market_dynamics (
+                shop_key VARCHAR(192) PRIMARY KEY,
+                default_sell_price DOUBLE NOT NULL,
+                current_price_modifier DOUBLE NOT NULL DEFAULT 1.0,
+                sell_pressure DOUBLE NOT NULL DEFAULT 0.0,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """
         };
 
@@ -2094,6 +2103,52 @@ public class DatabaseManager {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load server shops: " + e.getMessage());
         }
         return null;
+    }
+
+    public void saveMarketDynamic(String shopKey, double defaultSellPrice, double modifier, double pressure) {
+        String sql = "INSERT INTO market_dynamics (shop_key, default_sell_price, current_price_modifier, sell_pressure) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE default_sell_price=VALUES(default_sell_price), current_price_modifier=VALUES(current_price_modifier), sell_pressure=VALUES(sell_pressure)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, shopKey);
+            ps.setDouble(2, defaultSellPrice);
+            ps.setDouble(3, modifier);
+            ps.setDouble(4, pressure);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save market dynamic for " + shopKey + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Increments the sell_pressure for a shop by the given delta.
+     */
+    public void addMarketSellPressure(String shopKey, double delta) {
+        String sql = "UPDATE market_dynamics SET sell_pressure = sell_pressure + ? WHERE shop_key = ?";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDouble(1, delta);
+            ps.setString(2, shopKey);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to add market sell pressure for " + shopKey + ": " + e.getMessage());
+        }
+    }
+
+    public List<Object[]> loadAllMarketDynamics() {
+        String sql = "SELECT shop_key, default_sell_price, current_price_modifier, sell_pressure FROM market_dynamics";
+        List<Object[]> result = new ArrayList<>();
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                result.add(new Object[]{
+                        rs.getString("shop_key"),
+                        rs.getDouble("default_sell_price"),
+                        rs.getDouble("current_price_modifier"),
+                        rs.getDouble("sell_pressure")
+                });
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load market dynamics: " + e.getMessage());
+        }
+        return result;
     }
 
     public void savePlayerShops(UUID uuid, String dataJson) {

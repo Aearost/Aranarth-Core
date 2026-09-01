@@ -170,27 +170,23 @@ public class JobUtils {
      */
     public static void awardFarmerCropHarvest(Player player, org.bukkit.Material cropType) {
         double pay = switch (cropType) {
-            case WHEAT -> 0.10;
-            case CARROTS -> 0.05;
-            case POTATOES -> 0.05;
-            case BEETROOTS -> 0.12;
-            case NETHER_WART -> 0.15;
-            case COCOA -> 0.10;
-            case MELON -> 0.20;
-            case PUMPKIN -> 0.20;
-            case SWEET_BERRY_BUSH -> 0.08;
-            case CAVE_VINES, CAVE_VINES_PLANT -> 0.06;
-            case SUGAR_CANE -> 0.04;
-            case CACTUS -> 0.04;
+            case WHEAT -> 1.20;
+            case CARROTS -> 0.60;
+            case POTATOES -> 0.60;
+            case BEETROOTS -> 1.45;
+            case NETHER_WART -> 1.80;
+            case COCOA -> 1.20;
+            case MELON -> 2.40;
+            case PUMPKIN -> 2.40;
+            case SWEET_BERRY_BUSH -> 0.95;
+            case CAVE_VINES, CAVE_VINES_PLANT -> 0.73;
+            case SUGAR_CANE -> 1.90;
+            case CACTUS -> 1.90;
             default -> 0;
         };
         if (pay > 0) {
             awardJob(player, JobType.FARMER, pay);
         }
-    }
-
-    public static String formatPay(double amount) {
-        return String.format("$%.2f", amount);
     }
 
     public static String getJobDescription(JobType job) {
@@ -200,7 +196,6 @@ public class JobUtils {
             case MINER -> "Mine ores, stone, and precious materials underground";
             case EXCAVATOR -> "Dig up dirt, sand, gravel, clay, and ancient artifacts";
             case LUMBERJACK -> "Chop wood, strip logs, and craft wooden items";
-            case SMITH -> "Craft tools, armor, and metallic items";
             case EXPLORER -> "Travel the world, ride horses, and open new chests";
             case ALCHEMIST -> "Brew potions, enchant items, and visit the grindstone";
             case HUNTER -> "Hunt mobs, catch fish, and take on powerful enemies";
@@ -215,7 +210,6 @@ public class JobUtils {
             case LUMBERJACK -> "&4&l";
             case FARMER -> "&e&l";
             case HUNTER -> "&c&l";
-            case SMITH -> "&7&l";
             case ALCHEMIST -> "&5&l";
             case EXPLORER -> "&b&l";
         };
@@ -228,7 +222,6 @@ public class JobUtils {
             case MINER -> org.bukkit.Material.IRON_PICKAXE;
             case EXCAVATOR -> org.bukkit.Material.IRON_SHOVEL;
             case LUMBERJACK -> org.bukkit.Material.OAK_LOG;
-            case SMITH -> org.bukkit.Material.ANVIL;
             case EXPLORER -> org.bukkit.Material.COMPASS;
             case ALCHEMIST -> org.bukkit.Material.BREWING_STAND;
             case HUNTER -> org.bukkit.Material.BOW;

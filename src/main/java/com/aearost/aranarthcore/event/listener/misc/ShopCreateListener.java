@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.MarketUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -134,10 +135,24 @@ public class ShopCreateListener implements Listener {
 									}
 									// Both buying and selling
 									else if (priceParts.length == 5) {
-										ShopUtils.createOrUpdateShop(e, null, heldItem, getShopQuantity(lines[1]), getDecimalShopPrice(priceParts[1]), getDecimalShopPrice(priceParts[4]));
+										double adminSellPrice = getDecimalShopPrice(priceParts[4]);
+										ShopUtils.createOrUpdateShop(e, null, heldItem, getShopQuantity(lines[1]), getDecimalShopPrice(priceParts[1]), adminSellPrice);
+										Shop created = ShopUtils.getShopFromLocation(e.getBlock().getLocation());
+										if (created != null && adminSellPrice > 0) {
+											MarketUtils.initOrUpdateServerShop(created, adminSellPrice);
+											// Refresh sign next tick - SignChangeEvent writes its lines after this handler returns
+											Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> MarketUtils.refreshServerShopSign(created));
+										}
 									}
 								} else {
-									ShopUtils.createOrUpdateShop(e, null, heldItem, getShopQuantity(lines[1]), 0, getDecimalShopPrice(priceParts[1]));
+									double adminSellPrice = getDecimalShopPrice(priceParts[1]);
+									ShopUtils.createOrUpdateShop(e, null, heldItem, getShopQuantity(lines[1]), 0, adminSellPrice);
+									Shop created = ShopUtils.getShopFromLocation(e.getBlock().getLocation());
+									if (created != null && adminSellPrice > 0) {
+										MarketUtils.initOrUpdateServerShop(created, adminSellPrice);
+										// Refresh sign next tick - SignChangeEvent writes its lines after this handler returns
+										Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> MarketUtils.refreshServerShopSign(created));
+									}
 								}
 							} else {
 								// Forceful display of the shop in error

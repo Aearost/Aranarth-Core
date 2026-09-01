@@ -836,6 +836,10 @@ public class AranarthCore extends JavaPlugin {
             }
         }, 72000, 72000);
 
+        // Dynamic market pricing - adjust server shop sell prices hourly
+        long oneHour = 20L * 60 * 60;
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> MarketUtils.runPriceTick(this), oneHour, oneHour);
+
         // Pull drops harvested with Magnetism
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             @Override
@@ -938,6 +942,9 @@ public class AranarthCore extends JavaPlugin {
             PersistenceUtils.loadServerShopsFromDatabase();
         } else {
             PersistenceUtils.loadShops();
+        }
+        if (db) {
+            PersistenceUtils.loadMarketDynamicsFromDatabase();
         }
         ShopUtils.initializeAllHolograms();
         if (db) {
