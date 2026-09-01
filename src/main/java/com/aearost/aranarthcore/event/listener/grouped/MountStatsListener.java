@@ -169,24 +169,27 @@ public class MountStatsListener implements Listener {
 			camel.getAttribute(JUMP_STRENGTH).setBaseValue(jumpValue);
 			camel.getPersistentDataContainer().set(MOUNT_JUMP, PersistentDataType.DOUBLE, jumpValue);
 
-			// A maximum limit of 18 m/s --> 0.428
-			// A minimum limit of 8 m/s --> 0.19
-			final int speedBracket = r.nextInt(10) + 1;
-			final double speedMin;
-			final double speedMax;
-			if (speedBracket < 5) {
-				speedMin = minCamelSpeed;
-				speedMax = 0.24;
-			} else if (speedBracket < 9) {
-				speedMin = 0.25;
-				speedMax = 0.34;
-			} else {
-				speedMin = 0.35;
-				speedMax = maxCamelSpeed;
+			// CamelHusks (hostile mobs) are not given custom speeds - they carry spears and vanilla speed is appropriate
+			if (!(camel instanceof CamelHusk)) {
+				// A maximum limit of 18 m/s --> 0.428
+				// A minimum limit of 8 m/s --> 0.19
+				final int speedBracket = r.nextInt(10) + 1;
+				final double speedMin;
+				final double speedMax;
+				if (speedBracket < 5) {
+					speedMin = minCamelSpeed;
+					speedMax = 0.24;
+				} else if (speedBracket < 9) {
+					speedMin = 0.25;
+					speedMax = 0.34;
+				} else {
+					speedMin = 0.35;
+					speedMax = maxCamelSpeed;
+				}
+				final double speedValue = speedMin + (speedMax - speedMin) * r.nextDouble();
+				camel.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(speedValue);
+				camel.getPersistentDataContainer().set(MOUNT_SPEED, PersistentDataType.DOUBLE, speedValue);
 			}
-			final double speedValue = speedMin + (speedMax - speedMin) * r.nextDouble();
-			camel.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(speedValue);
-			camel.getPersistentDataContainer().set(MOUNT_SPEED, PersistentDataType.DOUBLE, speedValue);
 		}
 	}
 

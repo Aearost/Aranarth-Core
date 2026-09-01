@@ -136,6 +136,7 @@ Minor Features
 [~] Fixed rank changes not updating cross-server for TAB and permissions
 [~] Stopped applying MySQL snapshot on unplanned cross-server landing which was causing inventory corruption on server shutdown
 [~] Inventory Assist replenishment now prioritizes direct inventory items over shulker box contents
+[-] CamelHusk mounts no longer receive custom speed on spawn
 
 Backend Code Changes
 -
