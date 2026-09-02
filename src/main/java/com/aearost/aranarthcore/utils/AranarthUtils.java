@@ -3430,11 +3430,41 @@ public class AranarthUtils {
         String tps = String.format("%.1f", Bukkit.getServer().getTPS()[0]);
         String infoLine = "&e" + onlineNum + " " + playerOrPlayers + " online &7&l| &eTPS " + tps;
 
+        // Build boost footer section
+        StringBuilder boostFooter = new StringBuilder();
+        if (!serverBoosts.isEmpty()) {
+            for (Boost boost : serverBoosts.keySet()) {
+                String color;
+                String name;
+                if (boost == Boost.MINER) {
+                    color = "&8";
+                    name = "Boost of the Miner";
+                } else if (boost == Boost.HARVEST) {
+                    color = "&6";
+                    name = "Boost of the Harvest";
+                } else if (boost == Boost.HUNTER) {
+                    color = "&c";
+                    name = "Boost of the Hunter";
+                } else if (boost == Boost.CHI) {
+                    color = "&f";
+                    name = "Boost of Chi";
+                } else {
+                    color = "&7";
+                    name = "Unspecified Boost";
+                }
+                String duration = getRemainingBoostDuration(boost).replace("&e", "&e&o");
+                boostFooter.append(color).append("&o").append(name)
+                        .append(" ").append(color).append("&o(").append(duration).append(color).append("&o)\n");
+            }
+        }
+        boostFooter.append("&8&l---------------------");
+
         // Header / Footer
+        String footer = boostFooter.toString();
         for (Player player : onlinePlayers) {
             player.setPlayerListHeader(ChatUtils.translateToColor(
                     "&8&l---------------------\n&6&lThe Realm of Aranarth\n" + dateLine + "\n" + infoLine));
-            player.setPlayerListFooter(ChatUtils.translateToColor("&8&l---------------------"));
+            player.setPlayerListFooter(ChatUtils.translateToColor(footer));
         }
 
         // Handle vanish visibility

@@ -45,7 +45,8 @@ Major Features
 [-] Removed the Smith job
 [+] Added Structure Wraiths when first opening of structure chests
 [+] Added /t servertips toggle to hide periodic server tip messages
-[~] Added overrides for snow and ice in certain biomes such as jungles, swamps, deserts, etc, regardless of temperature
+[+] Added overrides for snow and ice in certain biomes such as jungles, swamps, deserts, etc, regardless of temperature
+[+] Added active boosts to tab footer
 
 Minor Features
 [~] Fixed issue where the alchemist job was not providing xp when shift-clicking ingredients into a brewing stand
