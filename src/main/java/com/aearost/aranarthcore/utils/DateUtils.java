@@ -34,6 +34,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class DateUtils {
 
     private static final Set<Material> INVALID_SURFACE_BLOCKS;
+    private static final Set<Biome> SNOW_IMMUNE_BIOMES;
     private static boolean spawnBasesCached = false;
     private static boolean startupEventCheckDone = false;
     private static int baseAnimalLimit = 0;
@@ -73,6 +74,20 @@ public class DateUtils {
                 INVALID_SURFACE_BLOCKS.add(material);
             }
         }
+
+        // Biomes that are always immune to snow and ice generation regardless of altitude-adjusted temperature.
+        // Vanilla temperature values drop ~0.00167/block above Y=64, so normally-hot biomes (e.g. jungle,
+        // savanna) can fall below the 0.85 threshold at high elevations. Swamp/mangrove swamp have a base
+        // temperature of 0.8 and are already below the threshold at sea level.
+        SNOW_IMMUNE_BIOMES = Set.of(
+                Biome.JUNGLE, Biome.SPARSE_JUNGLE, Biome.BAMBOO_JUNGLE,
+                Biome.BADLANDS, Biome.WOODED_BADLANDS, Biome.ERODED_BADLANDS,
+                Biome.SAVANNA, Biome.SAVANNA_PLATEAU, Biome.WINDSWEPT_SAVANNA,
+                Biome.DESERT,
+                Biome.WARM_OCEAN,
+                Biome.SWAMP, Biome.MANGROVE_SWAMP,
+                Biome.MUSHROOM_FIELDS
+        );
     }
 
     private final int irlMonth;
@@ -1436,6 +1451,10 @@ public class DateUtils {
         if (!isExposedToSky) {
             return;
         }
+        // Biome override - always immune regardless of altitude-adjusted temperature
+        if (SNOW_IMMUNE_BIOMES.contains(loc.getBlock().getBiome())) {
+            return;
+        }
         // If it is a warm biome, do not apply snow logic
         if (loc.getWorld().getTemperature(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()) < 0.85) {
             // If it is a temperate or cold biome
@@ -1500,6 +1519,12 @@ public class DateUtils {
                 }
 
                 Block surfaceBlock = world.getHighestBlockAt(locToCreateSnow.getBlockX(), locToCreateSnow.getBlockZ());
+
+                // Biome override - always immune regardless of altitude-adjusted temperature
+                if (SNOW_IMMUNE_BIOMES.contains(surfaceBlock.getBiome())) {
+                    snowAmountToCreate--;
+                    continue;
+                }
 
                 double temperature = surfaceBlock.getWorld().getTemperature(surfaceBlock.getX(), surfaceBlock.getY(), surfaceBlock.getZ());
 
@@ -1678,6 +1703,12 @@ public class DateUtils {
                 }
 
                 Block surfaceBlock = world.getHighestBlockAt(locToCreateIce.getBlockX(), locToCreateIce.getBlockZ());
+
+                // Biome override - always immune regardless of altitude-adjusted temperature
+                if (SNOW_IMMUNE_BIOMES.contains(surfaceBlock.getBiome())) {
+                    iceAmountToCreate--;
+                    continue;
+                }
 
                 double temperature = surfaceBlock.getWorld().getTemperature(surfaceBlock.getX(), surfaceBlock.getY(), surfaceBlock.getZ());
                 // Hot biomes do not get ice, but allow seeping up to 7 blocks into warm biomes
