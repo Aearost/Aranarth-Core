@@ -148,6 +148,7 @@ Minor Features
 [+] Added /ac reloadperms [player] to force permission re-evaluation for all online players across both servers
 [~] Mitigations to boosts being unintentionally removed on server restart
 [~] Fix Chi boost lengthening bending cooldowns instead of shortening them
+[~] Fixed chat unscramble win not removing AFK status
 
 Backend Code Changes
 -
