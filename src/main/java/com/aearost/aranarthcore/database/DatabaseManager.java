@@ -846,6 +846,25 @@ public class DatabaseManager {
     }
 
     /**
+     * Returns the history_json blob for a single player, or null if not found / on error.
+     */
+    public String loadVoteHistoryForPlayer(UUID uuid) {
+        String sql = "SELECT history_json FROM player_votes WHERE uuid = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("history_json");
+                }
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load vote history for " + uuid + ": " + e.getMessage());
+        }
+        return null;
+    }
+
+    /**
      * Returns uuid -> history_json for players that have vote history stored.
      */
     public Map<UUID, String> loadAllVoteHistories() {

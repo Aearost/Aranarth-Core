@@ -5391,10 +5391,22 @@ public class PersistenceUtils {
         }
         DatabaseManager db = DatabaseManager.getInstance();
 
-        // Aggregate vote counts per player
-        Map<UUID, Integer> voteCounts = new HashMap<>();
+        // Aggregate in-memory vote counts per player
+        Map<UUID, Integer> inMemoryCounts = new HashMap<>();
         for (AranarthVote vote : AranarthUtils.getVotes()) {
-            voteCounts.merge(vote.getUuid(), 1, Integer::sum);
+            inMemoryCounts.merge(vote.getUuid(), 1, Integer::sum);
+        }
+
+        if (inMemoryCounts.isEmpty()) {
+            return;
+        }
+
+        // Load existing DB histories to merge against. This prevents a server with a stale
+        // in-memory list from clobbering entries the other server already committed to the DB.
+        Map<UUID, String> dbHistories = db.loadAllVoteHistories();
+        if (dbHistories == null) {
+            dbHistories = new HashMap<>();
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] syncVotesToDatabase: loadAllVoteHistories failed - writing in-memory only without merge");
         }
 
         // Only iterate players who have votes - key counts are intentionally excluded from
@@ -5402,21 +5414,46 @@ public class PersistenceUtils {
         // syncVoteKeysForPlayerToDatabase (called on vote receipt and after /keyclaim),
         // which is the authoritative source. Writing in-memory key counts here would race
         // against a claim on the other server and silently restore claimed keys in the DB.
-        for (UUID uuid : voteCounts.keySet()) {
-            int vc = voteCounts.get(uuid);
+        for (UUID uuid : inMemoryCounts.keySet()) {
             try {
-                db.saveVoteCountOnly(uuid, vc);
-                // Also save individual vote history
-                JsonArray history = new JsonArray();
+                // Merge: start from DB history (preserves entries the other server wrote),
+                // then overlay in-memory entries (in-memory wins same-timestamp conflicts).
+                Map<Long, Integer> merged = new LinkedHashMap<>();
+                String dbJson = dbHistories.get(uuid);
+                if (dbJson != null && !dbJson.isEmpty()) {
+                    try {
+                        JsonArray dbArr = GSON.fromJson(dbJson, JsonArray.class);
+                        for (com.google.gson.JsonElement el : dbArr) {
+                            JsonObject v = el.getAsJsonObject();
+                            merged.put(v.get("timestamp").getAsLong(), v.get("keyNum").getAsInt());
+                        }
+                    } catch (Exception parseEx) {
+                        Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to parse DB vote history for " + uuid + " during merge: " + parseEx.getMessage());
+                    }
+                }
                 for (AranarthVote vote : AranarthUtils.getVotes()) {
                     if (!vote.getUuid().equals(uuid)) {
                         continue;
                     }
+                    merged.put(vote.getTimestamp(), vote.getPointsRewarded());
+                }
+                int mergedTotal = merged.size();
+                int inMemTotal = inMemoryCounts.get(uuid);
+                if (mergedTotal > inMemTotal) {
+                    Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[VOTE] Merge preserved " + (mergedTotal - inMemTotal)
+                            + " DB-only entry(s) for " + uuid + " (in-memory=" + inMemTotal + ", merged=" + mergedTotal + ")");
+                }
+                // Sort by timestamp for a stable, readable order
+                List<Map.Entry<Long, Integer>> sorted = new ArrayList<>(merged.entrySet());
+                sorted.sort(Map.Entry.comparingByKey());
+                JsonArray history = new JsonArray();
+                for (Map.Entry<Long, Integer> entry : sorted) {
                     JsonObject v = new JsonObject();
-                    v.addProperty("keyNum", vote.getPointsRewarded());
-                    v.addProperty("timestamp", vote.getTimestamp());
+                    v.addProperty("keyNum", entry.getValue());
+                    v.addProperty("timestamp", entry.getKey());
                     history.add(v);
                 }
+                db.saveVoteCountOnly(uuid, history.size());
                 db.saveVoteHistory(uuid, GSON.toJson(history));
             } catch (Exception e) {
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync vote data for " + uuid + ": " + e.getMessage());
@@ -5435,17 +5472,38 @@ public class PersistenceUtils {
             return;
         }
         DatabaseManager db = DatabaseManager.getInstance();
-        int vc = 0;
-        JsonArray history = new JsonArray();
-        for (AranarthVote vote : AranarthUtils.getVotes()) {
-            if (vote.getUuid().equals(uuid)) {
-                vc++;
-                JsonObject v = new JsonObject();
-                v.addProperty("keyNum", vote.getPointsRewarded());
-                v.addProperty("timestamp", vote.getTimestamp());
-                history.add(v);
+
+        // Merge: start from DB history (preserves entries the other server wrote),
+        // then overlay in-memory entries (in-memory wins same-timestamp conflicts).
+        Map<Long, Integer> merged = new LinkedHashMap<>();
+        String dbHistoryJson = db.loadVoteHistoryForPlayer(uuid);
+        if (dbHistoryJson != null && !dbHistoryJson.isEmpty()) {
+            try {
+                JsonArray dbArr = GSON.fromJson(dbHistoryJson, JsonArray.class);
+                for (com.google.gson.JsonElement el : dbArr) {
+                    JsonObject v = el.getAsJsonObject();
+                    merged.put(v.get("timestamp").getAsLong(), v.get("keyNum").getAsInt());
+                }
+            } catch (Exception parseEx) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to parse DB vote history for " + uuid + " during merge: " + parseEx.getMessage());
             }
         }
+        for (AranarthVote vote : AranarthUtils.getVotes()) {
+            if (vote.getUuid().equals(uuid)) {
+                merged.put(vote.getTimestamp(), vote.getPointsRewarded());
+            }
+        }
+        // Sort by timestamp for a stable, readable order
+        List<Map.Entry<Long, Integer>> sorted = new ArrayList<>(merged.entrySet());
+        sorted.sort(Map.Entry.comparingByKey());
+        JsonArray history = new JsonArray();
+        for (Map.Entry<Long, Integer> entry : sorted) {
+            JsonObject v = new JsonObject();
+            v.addProperty("keyNum", entry.getValue());
+            v.addProperty("timestamp", entry.getKey());
+            history.add(v);
+        }
+        int vc = history.size();
         int vk = AranarthUtils.getPendingVoteKeys().getOrDefault(uuid, 0);
         int rk = AranarthUtils.getPendingRareKeys().getOrDefault(uuid, 0);
         int ek = AranarthUtils.getPendingEpicKeys().getOrDefault(uuid, 0);
