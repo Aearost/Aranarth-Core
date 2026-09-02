@@ -542,7 +542,7 @@ public class AranarthCore extends JavaPlugin {
                             // Write raw_data (inventory snapshot) synchronously, immediately after snapshotting
                             String rawRow = PersistenceUtils.buildPlayerRowForTransfer(p.getUniqueId());
                             if (rawRow != null) {
-                                DatabaseManager.getInstance().saveAranarthPlayerRaw(p.getUniqueId(), rawRow);
+                                DatabaseManager.getInstance().saveAranarthPlayerRaw(p.getUniqueId(), p.getName(), rawRow);
                             }
                         }
                     } catch (Exception e) {
@@ -1672,7 +1672,7 @@ public class AranarthCore extends JavaPlugin {
                         if (DatabaseManager.isActive()) {
                             String rawRow = PersistenceUtils.buildPlayerRowForTransfer(p.getUniqueId());
                             if (rawRow != null) {
-                                DatabaseManager.getInstance().saveAranarthPlayerRaw(p.getUniqueId(), rawRow);
+                                DatabaseManager.getInstance().saveAranarthPlayerRaw(p.getUniqueId(), p.getName(), rawRow);
                             }
                         }
                     }

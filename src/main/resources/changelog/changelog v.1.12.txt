@@ -154,6 +154,7 @@ Minor Features
 [~] Fixed vote keys not being delivered immediately when player is on SMP
 [~] Allowing dominion renaming to the same name with different color codes
 [~] Fixed Discord role/notification updates silently skipping non-cached guild members by switching from getMemberById to retrieveMemberById
+[~] Fixed null player names in command results due to cross-server player lookup
 
 Backend Code Changes
 -

@@ -1251,11 +1251,12 @@ public class NetworkManager {
         // so that a crash or disconnect during the async DB write does NOT suppress the quit
         // message - the server still needs to broadcast the player's departure in that case.
 
+        final String playerUsername = player.getName();
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
             boolean dbWriteSucceeded = true;
             try {
                 if (rawRow != null && DatabaseManager.isActive()) {
-                    DatabaseManager.getInstance().saveAranarthPlayerRaw(uuid, rawRow);
+                    DatabaseManager.getInstance().saveAranarthPlayerRaw(uuid, playerUsername, rawRow);
                 }
                 if (toggleJson != null && DatabaseManager.isActive()) {
                     DatabaseManager.getInstance().savePlayerToggles(uuid, toggleJson);

@@ -550,15 +550,36 @@ public class DatabaseManager {
     }
 
     /**
+     * Returns the UUID of the player with the given username (case-insensitive), or null if not found.
+     */
+    public UUID getUUIDByUsername(String username) {
+        String sql = "SELECT uuid FROM aranarth_players WHERE LOWER(username) = LOWER(?) AND username != '' AND username IS NOT NULL LIMIT 1";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, username);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return UUID.fromString(rs.getString("uuid"));
+                }
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to look up UUID for username " + username + ": " + e.getMessage());
+        }
+        return null;
+    }
+
+    /**
      * Saves the raw pipe-delimited player row to raw_data column.
      */
-    public void saveAranarthPlayerRaw(UUID uuid, String rawData) {
-        String sql = "INSERT INTO aranarth_players (uuid, username, data_json, raw_data) VALUES (?, '', '', ?) " +
-                "ON DUPLICATE KEY UPDATE raw_data=VALUES(raw_data)";
+    public void saveAranarthPlayerRaw(UUID uuid, String username, String rawData) {
+        String sql = "INSERT INTO aranarth_players (uuid, username, data_json, raw_data) VALUES (?, ?, '', ?) " +
+                "ON DUPLICATE KEY UPDATE raw_data=VALUES(raw_data), " +
+                "username=IF(COALESCE(username,'')='', VALUES(username), username)";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
-            ps.setString(2, rawData);
+            ps.setString(2, username != null ? username : "");
+            ps.setString(3, rawData);
             ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save raw player data for " + uuid + ": " + e.getMessage());

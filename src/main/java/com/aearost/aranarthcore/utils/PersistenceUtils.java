@@ -5214,9 +5214,10 @@ public class PersistenceUtils {
         String rawRow = buildAranarthPlayerRow(uuid, ap);
         // Advance the snapshot to reflect what we are about to write
         ap.setBalanceSnapshot(ap.getBalance());
+        String apUsername = ap.getUsername() != null ? ap.getUsername() : "";
         DatabaseManager db = DatabaseManager.getInstance();
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
-                db.saveAranarthPlayerRaw(uuid, rawRow)
+                db.saveAranarthPlayerRaw(uuid, apUsername, rawRow)
         );
     }
 
@@ -7032,7 +7033,9 @@ public class PersistenceUtils {
                         // Immediately persist to MySQL so /baltop and future startups
                         // don't require this player to log in first.
                         if (DatabaseManager.isActive()) {
-                            DatabaseManager.getInstance().saveAranarthPlayerRaw(uuid, row);
+                            AranarthPlayer recoveredAp = AranarthUtils.getPlayer(uuid);
+                            String recoveredUsername = recoveredAp != null && recoveredAp.getUsername() != null ? recoveredAp.getUsername() : "";
+                            DatabaseManager.getInstance().saveAranarthPlayerRaw(uuid, recoveredUsername, row);
                         }
                         recovered++;
                     }

@@ -165,7 +165,7 @@ public class PlayerServerQuitListener implements Listener {
         if (!isCrossServerTransfer && DatabaseManager.isActive()) {
             final String rawRow = PersistenceUtils.buildPlayerRowForTransfer(player.getUniqueId());
             if (rawRow != null) {
-                DatabaseManager.getInstance().saveAranarthPlayerRaw(player.getUniqueId(), rawRow);
+                DatabaseManager.getInstance().saveAranarthPlayerRaw(player.getUniqueId(), player.getName(), rawRow);
                 Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName()
                         + " - player row (inventory/stats) flushed to MySQL (raw_data length=" + rawRow.length() + ").");
             } else {

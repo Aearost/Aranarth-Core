@@ -127,13 +127,20 @@ public class CommandBalanceTop implements CommandExecutor {
 				NetworkPlayer remote = NetworkManager.isActive()
 						? NetworkManager.getInstance().getRemotePlayer(uuid) : null;
 				if (remote != null) {
-					displayedName = remote.getNickname().isEmpty()
+					String remoteNick = remote.getNickname();
+					displayedName = (remoteNick == null || remoteNick.isEmpty())
 							? remote.getUsername()
-							: ChatUtils.stripColorFormatting(remote.getNickname());
+							: ChatUtils.stripColorFormatting(remoteNick);
 				} else {
 					String nick = balanceEntry.nickname();
+					String username = balanceEntry.username();
+					if (username == null || username.isEmpty()) {
+						// DB username column missing - fall back to Bukkit's cached player name
+						String bukkit = org.bukkit.Bukkit.getOfflinePlayer(uuid).getName();
+						username = bukkit != null ? bukkit : "Unknown";
+					}
 					displayedName = (nick == null || nick.isEmpty())
-							? balanceEntry.username()
+							? username
 							: ChatUtils.stripColorFormatting(nick);
 				}
 			}

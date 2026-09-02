@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.enums.Weather;
@@ -263,8 +264,22 @@ public class AranarthUtils {
      * @return The nickname of the player, or username if no nickname was found.
      */
     public static String getNickname(OfflinePlayer player) {
-        String nickname = players.get(player.getUniqueId()).getNickname();
-        return (nickname == null || nickname.isEmpty()) ? getUsername(player) : nickname;
+        AranarthPlayer ap = players.get(player.getUniqueId());
+        if (ap != null) {
+            String nickname = ap.getNickname();
+            return (nickname == null || nickname.isEmpty()) ? getUsername(player) : nickname;
+        }
+        // Fall back to remote roster for players on another server
+        if (NetworkManager.isActive()) {
+            NetworkPlayer remote = NetworkManager.getInstance().getRemotePlayer(player.getUniqueId());
+            if (remote != null) {
+                String nick = remote.getNickname();
+                return (nick == null || nick.isEmpty()) ? remote.getUsername() : ChatUtils.stripColorFormatting(nick);
+            }
+        }
+        // Fall back to Bukkit's cached name
+        String name = player.getName();
+        return name != null ? name : "Unknown";
     }
 
     /**
@@ -1590,6 +1605,14 @@ public class AranarthUtils {
                 if (ChatUtils.stripColorFormatting(np.getNickname()).equalsIgnoreCase(input)) {
                     return np.getUuid();
                 }
+            }
+        }
+
+        // Final fallback
+        if (DatabaseManager.isActive()) {
+            UUID dbUuid = DatabaseManager.getInstance().getUUIDByUsername(input);
+            if (dbUuid != null) {
+                return dbUuid;
             }
         }
 
