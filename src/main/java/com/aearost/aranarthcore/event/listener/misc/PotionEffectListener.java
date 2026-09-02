@@ -5,12 +5,16 @@ import com.aearost.aranarthcore.abilities.airbending.spiritual.PastLives;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
+import com.aearost.aranarthcore.utils.DefenderUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.MusicInstrument;
+import org.bukkit.entity.ElderGuardian;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -140,10 +144,35 @@ public class PotionEffectListener implements Listener {
         }
 
         if (newEffect != null && newEffect.getType().getCategory() == PotionEffectTypeCategory.HARMFUL) {
-            // Do not apply mining fatigue from Elder guardians
+            // Do not apply mining fatigue from Elder guardians to exempt players
             if (e.getEntity() instanceof Player player) {
-                if (AranarthUtils.isWearingArmorType(player, "aquatic")) {
-                    if (newEffect.getType() == PotionEffectType.MINING_FATIGUE && e.getCause() == Cause.ATTACK) {
+                if (newEffect.getType() == PotionEffectType.MINING_FATIGUE && e.getCause() == Cause.ATTACK) {
+                    if (AranarthUtils.isWearingArmorType(player, "aquatic")) {
+                        e.setCancelled(true);
+                        player.removePotionEffect(PotionEffectType.MINING_FATIGUE);
+                        return;
+                    }
+                    // Cancel if all nearby Elder Guardian defenders have PvP disabled for this player
+                    boolean shouldBlock = false;
+                    for (Entity nearby : player.getNearbyEntities(60, 60, 60)) {
+                        if (!(nearby instanceof ElderGuardian)) {
+                            continue;
+                        }
+                        if (!DefenderUtils.isDefender(nearby.getUniqueId())) {
+                            // Wild Elder Guardian - effect is legitimate
+                            shouldBlock = false;
+                            break;
+                        }
+                        UUID dominionId = DefenderUtils.getDefenderDominionId(nearby.getUniqueId());
+                        Dominion defenderDominion = DominionUtils.getDominionById(dominionId);
+                        if (defenderDominion == null || DominionUtils.hasPermission(player, defenderDominion, DominionPermission.PVP)) {
+                            // PvP is enabled against this player - effect is legitimate
+                            shouldBlock = false;
+                            break;
+                        }
+                        shouldBlock = true;
+                    }
+                    if (shouldBlock) {
                         e.setCancelled(true);
                         player.removePotionEffect(PotionEffectType.MINING_FATIGUE);
                         return;
