@@ -51,6 +51,13 @@ public class InteractiveChatManager {
     }
 
     /**
+     * Stores a snapshot using a pre-determined UUID (used when replicating a snapshot from another server).
+     */
+    public static void storeSnapshotWithId(UUID id, UUID ownerId, String ownerDisplayName, SnapshotType type, ItemStack[] items) {
+        snapshots.put(id, new Snapshot(id, ownerId, ownerDisplayName, type, items));
+    }
+
+    /**
      * Returns the snapshot for the given ID, or null if it has expired or never existed.
      */
     public static Snapshot getSnapshot(UUID id) {

@@ -19,6 +19,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import java.util.Objects;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -232,11 +233,12 @@ public class PlayerChatListener implements Listener {
 
         // Build the message component, injecting interactive chat keywords where applicable.
         Component messageComponent = null;
+        List<UUID> createdSnapshotIds = new ArrayList<>();
         boolean canUseInteractiveChat = InteractiveChatManager.hasInteractiveChatPerm(aranarthPlayer)
                 && aranarthPlayer.isInteractiveChatEnabled()
                 && INTERACTIVE_PATTERN.matcher(message).find();
         if (canUseInteractiveChat) {
-            messageComponent = buildInteractiveChatComponent(player, aranarthPlayer, message, chatMessage);
+            messageComponent = buildInteractiveChatComponent(player, aranarthPlayer, message, chatMessage, createdSnapshotIds);
         }
         // Fall back to standard gradient or plain message building.
         if (messageComponent == null) {
@@ -275,17 +277,27 @@ public class PlayerChatListener implements Listener {
 
         if (!aranarthPlayer.isInCouncilChat() && !aranarthPlayer.isInDominionChat()) {
             DiscordUtils.sendChatMessage(prefix + chatMessage);
-            // Relay to SMP server so its players see public chat
+            // Relay to the other server so its players see public chat
             if (NetworkManager.isActive()) {
-                NetworkManager.getInstance().publishChat(prefix, chatMessage);
+                if (!createdSnapshotIds.isEmpty()) {
+                    List<InteractiveChatManager.Snapshot> snapshots = createdSnapshotIds.stream()
+                            .map(InteractiveChatManager::getSnapshot)
+                            .filter(Objects::nonNull)
+                            .collect(java.util.stream.Collectors.toList());
+                    NetworkManager.getInstance().publishInteractiveChat(prefix, chatMessage, fullMessage, snapshots);
+                } else {
+                    NetworkManager.getInstance().publishChat(prefix, chatMessage);
+                }
             }
         }
     }
 
     /**
      * Builds a Component for the player's message.
+     * Snapshot IDs created for interactive keywords are added to {@code createdSnapshotIds}.
      */
-    private Component buildInteractiveChatComponent(Player player, AranarthPlayer ap, String rawMessage, String chatMessage) {
+    private Component buildInteractiveChatComponent(Player player, AranarthPlayer ap, String rawMessage,
+                                                    String chatMessage, List<UUID> createdSnapshotIds) {
         String nickname = ap.getNickname().isEmpty() ? player.getName() : ChatUtils.stripColorFormatting(ap.getNickname());
         Location loc = player.getLocation();
         Component result = Component.empty();
@@ -301,7 +313,7 @@ public class PlayerChatListener implements Listener {
             }
 
             String keyword = matcher.group().toLowerCase();
-            Component interactiveComp = buildKeywordComponent(player, ap, nickname, loc, keyword);
+            Component interactiveComp = buildKeywordComponent(player, ap, nickname, loc, keyword, createdSnapshotIds);
             result = result.append(interactiveComp);
             lastEnd = matcher.end();
         }
@@ -345,21 +357,24 @@ public class PlayerChatListener implements Listener {
 
     /**
      * Builds the interactive Component for a single keyword ([item], [inv], [ec], [coords]/[pos]).
+     * Snapshot IDs created here are added to {@code createdSnapshotIds}.
      */
-    private Component buildKeywordComponent(Player player, AranarthPlayer ap, String nickname, Location loc, String keyword) {
+    private Component buildKeywordComponent(Player player, AranarthPlayer ap, String nickname, Location loc,
+                                            String keyword, List<UUID> createdSnapshotIds) {
         return switch (keyword) {
-            case "[item]" -> buildItemComponent(player, nickname);
-            case "[inv]"  -> buildInvComponent(player, nickname);
-            case "[ec]"   -> buildEcComponent(player, nickname);
+            case "[item]" -> buildItemComponent(player, nickname, createdSnapshotIds);
+            case "[inv]"  -> buildInvComponent(player, nickname, createdSnapshotIds);
+            case "[ec]"   -> buildEcComponent(player, nickname, createdSnapshotIds);
             default       -> buildCoordsComponent(nickname, loc); // [coords], [coord], [pos]
         };
     }
 
-    private Component buildItemComponent(Player player, String nickname) {
+    private Component buildItemComponent(Player player, String nickname, List<UUID> createdSnapshotIds) {
         ItemStack held = player.getInventory().getItemInMainHand().clone();
         ItemStack[] items = new ItemStack[]{held.getType().isAir() ? null : held};
         UUID snapshotId = InteractiveChatManager.storeSnapshot(
                 player.getUniqueId(), nickname, InteractiveChatManager.SnapshotType.ITEM, items);
+        createdSnapshotIds.add(snapshotId);
 
         String displayName = ChatUtils.translateToColor("&6&l[" + nickname + "'s Item]");
         Component display = LegacyComponentSerializer.legacySection().deserialize(displayName);
@@ -367,7 +382,7 @@ public class PlayerChatListener implements Listener {
         return ChatUtils.clickableCommand(display, hoverMsg, "/ichat view " + snapshotId, true);
     }
 
-    private Component buildInvComponent(Player player, String nickname) {
+    private Component buildInvComponent(Player player, String nickname, List<UUID> createdSnapshotIds) {
         ItemStack[] invItems = new ItemStack[41];
         invItems[0] = cloneOrNull(player.getInventory().getHelmet());
         invItems[1] = cloneOrNull(player.getInventory().getChestplate());
@@ -382,6 +397,7 @@ public class PlayerChatListener implements Listener {
         }
         UUID snapshotId = InteractiveChatManager.storeSnapshot(
                 player.getUniqueId(), nickname, InteractiveChatManager.SnapshotType.INV, invItems);
+        createdSnapshotIds.add(snapshotId);
 
         String displayName = ChatUtils.translateToColor("&6&l[" + nickname + "'s Inventory]");
         Component display = LegacyComponentSerializer.legacySection().deserialize(displayName);
@@ -389,13 +405,14 @@ public class PlayerChatListener implements Listener {
         return ChatUtils.clickableCommand(display, hoverMsg, "/ichat view " + snapshotId, true);
     }
 
-    private Component buildEcComponent(Player player, String nickname) {
+    private Component buildEcComponent(Player player, String nickname, List<UUID> createdSnapshotIds) {
         ItemStack[] ecItems = new ItemStack[27];
         for (int i = 0; i < 27; i++) {
             ecItems[i] = cloneOrNull(player.getEnderChest().getItem(i));
         }
         UUID snapshotId = InteractiveChatManager.storeSnapshot(
                 player.getUniqueId(), nickname, InteractiveChatManager.SnapshotType.EC, ecItems);
+        createdSnapshotIds.add(snapshotId);
 
         String displayName = ChatUtils.translateToColor("&6&l[" + nickname + "'s Ender Chest]");
         Component display = LegacyComponentSerializer.legacySection().deserialize(displayName);

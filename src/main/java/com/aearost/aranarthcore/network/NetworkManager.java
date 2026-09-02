@@ -11,7 +11,10 @@ import org.bukkit.inventory.ItemStack;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.aearost.aranarthcore.utils.InteractiveChatManager;
+import com.google.gson.JsonArray;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -45,6 +48,7 @@ public class NetworkManager {
     // -------------------------------------------------------------------------
 
     public static final String CH_CHAT = "aranarth:chat";
+    public static final String CH_CHAT_INTERACTIVE = "aranarth:chat_interactive";
     public static final String CH_JOIN = "aranarth:join";
     public static final String CH_JOIN_MSG = "aranarth:join_msg";
     public static final String CH_QUIT = "aranarth:quit";
@@ -313,6 +317,7 @@ public class NetworkManager {
     private void dispatch(String channel, JsonObject json) {
         switch (channel) {
             case CH_CHAT -> handleChat(json);
+            case CH_CHAT_INTERACTIVE -> handleInteractiveChat(json);
             case CH_JOIN -> handleJoin(json);
             case CH_JOIN_MSG -> handleJoinMsg(json);
             case CH_QUIT -> handleQuit(json);
@@ -373,6 +378,99 @@ public class NetworkManager {
         json.addProperty("prefix", prefix);
         json.addProperty("message", chatMessage);
         publish(CH_CHAT, json);
+    }
+
+    /**
+     * Publishes an interactive chat message (one containing [item]/[inv]/[ec]/[coords]) so the
+     * other server can display the same clickable component and serve /ichat view clicks locally.
+     *
+     * @param prefix       the formatted prefix string (legacy colour codes already applied)
+     * @param chatMessage  the plain-text version of the message (for console/discord fallback)
+     * @param fullMessage  the fully assembled Adventure Component including prefix and interactive parts
+     * @param snapshots    every snapshot that was created while building the message
+     */
+    public void publishInteractiveChat(String prefix, String chatMessage, Component fullMessage,
+                                       List<InteractiveChatManager.Snapshot> snapshots) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("prefix", prefix);
+        json.addProperty("message", chatMessage);
+        json.addProperty("componentJson", GsonComponentSerializer.gson().serialize(fullMessage));
+
+        JsonArray snapshotArray = new JsonArray();
+        for (InteractiveChatManager.Snapshot snap : snapshots) {
+            JsonObject snapObj = new JsonObject();
+            snapObj.addProperty("id", snap.getId().toString());
+            snapObj.addProperty("ownerId", snap.getOwnerId().toString());
+            snapObj.addProperty("ownerDisplay", snap.getOwnerDisplayName());
+            snapObj.addProperty("type", snap.getType().name());
+
+            JsonArray itemsArray = new JsonArray();
+            for (ItemStack item : snap.getItems()) {
+                if (item == null || item.getType().isAir()) {
+                    itemsArray.add((String) null);
+                } else {
+                    itemsArray.add(java.util.Base64.getEncoder().encodeToString(item.serializeAsBytes()));
+                }
+            }
+            snapObj.add("items", itemsArray);
+            snapshotArray.add(snapObj);
+        }
+        json.add("snapshots", snapshotArray);
+        publish(CH_CHAT_INTERACTIVE, json);
+    }
+
+    private void handleInteractiveChat(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+
+        String prefix = json.get("prefix").getAsString();
+        String message = json.get("message").getAsString();
+
+        // Rebuild snapshots locally so /ichat view works on this server
+        JsonArray snapshotArray = json.getAsJsonArray("snapshots");
+        for (int i = 0; i < snapshotArray.size(); i++) {
+            JsonObject snapObj = snapshotArray.get(i).getAsJsonObject();
+            UUID snapId = UUID.fromString(snapObj.get("id").getAsString());
+            UUID ownerId = UUID.fromString(snapObj.get("ownerId").getAsString());
+            String ownerDisplay = snapObj.get("ownerDisplay").getAsString();
+            InteractiveChatManager.SnapshotType type =
+                    InteractiveChatManager.SnapshotType.valueOf(snapObj.get("type").getAsString());
+
+            JsonArray itemsArray = snapObj.getAsJsonArray("items");
+            ItemStack[] items = new ItemStack[itemsArray.size()];
+            for (int j = 0; j < itemsArray.size(); j++) {
+                if (itemsArray.get(j).isJsonNull()) {
+                    items[j] = null;
+                } else {
+                    try {
+                        byte[] bytes = java.util.Base64.getDecoder().decode(itemsArray.get(j).getAsString());
+                        items[j] = ItemStack.deserializeBytes(bytes);
+                    } catch (Exception ex) {
+                        items[j] = null;
+                    }
+                }
+            }
+            InteractiveChatManager.storeSnapshotWithId(snapId, ownerId, ownerDisplay, type, items);
+        }
+
+        // Deserialize the full Component (prefix + interactive message) and send it
+        Component component;
+        try {
+            component = GsonComponentSerializer.gson().deserialize(json.get("componentJson").getAsString());
+        } catch (Exception ex) {
+            // Fallback to plain text if component JSON is malformed
+            component = LegacyComponentSerializer.legacySection().deserialize(
+                    ChatUtils.translateToColor(prefix + message));
+        }
+        final Component finalComponent = component;
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.sendMessage(finalComponent);
+        }
+        Bukkit.getConsoleSender().sendMessage(ChatUtils.translateToColor(
+                "&8[" + originServer.toUpperCase() + "] " + prefix + message));
     }
 
     /**
