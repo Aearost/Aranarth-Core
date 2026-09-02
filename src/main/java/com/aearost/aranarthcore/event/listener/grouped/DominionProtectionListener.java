@@ -282,6 +282,49 @@ public class DominionProtectionListener implements Listener {
                 }
             }
         }
+        // Passive mobs in dominion land
+        else if (e.getEntity() instanceof Animals) {
+            if (e.getDamageSource().getCausingEntity() instanceof Player attacker) {
+                handlePassiveMobDamage(attacker, e);
+            }
+        }
+    }
+
+    /**
+     * Handles damage to passive mobs in dominion land.
+     * Only dominion members and enemied dominions may harm passive mobs in claimed land.
+     */
+    private void handlePassiveMobDamage(Player attacker, EntityDamageEvent e) {
+        Dominion chunkDominion = DominionUtils.getDominionOfChunk(e.getEntity().getLocation().getChunk());
+        if (chunkDominion == null) {
+            return;
+        }
+
+        AranarthPlayer aranarthAttacker = AranarthUtils.getPlayer(attacker.getUniqueId());
+        if (aranarthAttacker.isInAdminMode()) {
+            return;
+        }
+
+        Dominion attackerDominion = DominionUtils.getPlayerDominion(attacker.getUniqueId());
+
+        // Same dominion - always allowed
+        if (attackerDominion != null && attackerDominion.isSameDominion(chunkDominion)) {
+            return;
+        }
+
+        // Enemied dominion - allowed
+        if (attackerDominion != null && attackerDominion.isEnemied(chunkDominion)) {
+            return;
+        }
+
+        // All other outsiders (neutral, allied, truced, wanderers) - blocked
+        e.setCancelled(true);
+        long now = System.currentTimeMillis();
+        Long last = lastDenyMessageTime.get(attacker.getUniqueId());
+        if (last == null || now - last >= DENY_MESSAGE_COOLDOWN_MS) {
+            attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm passive mobs in &e" + chunkDominion.getName()));
+            lastDenyMessageTime.put(attacker.getUniqueId(), now);
+        }
     }
 
     /**
