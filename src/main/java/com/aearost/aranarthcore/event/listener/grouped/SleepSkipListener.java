@@ -6,12 +6,17 @@ import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.enums.WorldEvent;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.DefenderUtils;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
@@ -35,6 +40,24 @@ public class SleepSkipListener implements Listener {
 	private int amountRequiredToSkip = 0;
 	private int scheduledSkipTask = -1;
 	private final List<UUID> sleepingPlayers = new ArrayList<>();
+
+	/**
+	 * Allows sleeping when the only nearby hostile mobs are defenders.
+	 */
+	@EventHandler(priority = EventPriority.HIGH)
+	public void onPlayerBedEnterNotSafe(final PlayerBedEnterEvent e) {
+		if (e.getBedEnterResult() != PlayerBedEnterEvent.BedEnterResult.NOT_SAFE) {
+			return;
+		}
+		// Check all nearby monsters within vanilla sleep-check radius (8 blocks)
+		for (Entity nearby : e.getPlayer().getNearbyEntities(8, 5, 8)) {
+			if (nearby instanceof Monster && !DefenderUtils.isDefender(nearby.getUniqueId())) {
+				return; // Real hostile mob present - keep the block
+			}
+		}
+		// Only defenders (if any) are nearby - allow sleeping
+		e.setUseBed(Event.Result.ALLOW);
+	}
 
 	/**
 	 * Allows for players to skip the day cycle in-game

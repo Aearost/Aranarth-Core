@@ -158,6 +158,7 @@ Minor Features
 [~] Protected passive mobs in dominion land from outsider damage unless enemied
 [+] Added brewing stand bubble sound at world location on brew complete
 [~] Merged database and in-memory vote history on sync to prevent cross-server overwrite
+[~] Defenders no longer block sleep if nearby the bed
 
 Backend Code Changes
 -
