@@ -71,5 +71,7 @@ public class EntityDeathEventListener implements Listener {
         if (DefenderUtils.isDefender(e.getEntity().getUniqueId())) {
             new DefenderDeath().execute(e);
         }
+
+        new WraithDeath().execute(e);
     }
 }

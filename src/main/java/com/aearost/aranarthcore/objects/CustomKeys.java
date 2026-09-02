@@ -48,4 +48,6 @@ public class CustomKeys {
     public static final NamespacedKey HEAD_TEXTURE = new NamespacedKey(AranarthCore.getInstance(), "head_texture");
     public static final NamespacedKey HEAD_REQUIRED_MATERIAL = new NamespacedKey(AranarthCore.getInstance(), "head_required_material");
     public static final NamespacedKey PRESERVATION_USES = new NamespacedKey(AranarthCore.getInstance(), "preservation_uses");
+    public static final NamespacedKey WRAITH_TRIGGERED = new NamespacedKey(AranarthCore.getInstance(), "wraith_triggered");
+    public static final NamespacedKey WRAITH_TYPE = new NamespacedKey(AranarthCore.getInstance(), "wraith_type");
 }

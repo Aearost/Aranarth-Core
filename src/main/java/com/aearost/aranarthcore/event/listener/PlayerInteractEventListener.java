@@ -103,6 +103,7 @@ public class PlayerInteractEventListener implements Listener {
             new DoubleDoorOpen().execute(e);
             new EnderChestOpenPrevent().execute(e);
             new FletchingTableClick().execute(e);
+            new StructureWraith().execute(e);
             new ContainerInteract().execute(e);
             new ExpStore().execute(e);
             new CrateOpen().execute(e);
