@@ -4,8 +4,10 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Weather;
+import com.aearost.aranarthcore.items.key.KeyVote;
 import com.aearost.aranarthcore.objects.*;
 import com.aearost.aranarthcore.utils.*;
+import org.bukkit.inventory.ItemStack;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -87,6 +89,7 @@ public class NetworkManager {
     public static final String CH_OUTPOST_UPDATE = "aranarth:outpost_update";
     public static final String CH_JOB_UPDATE = "aranarth:job_update";
     public static final String CH_VOTE_AWARD = "aranarth:vote_award";
+    public static final String CH_VOTE_KEY = "aranarth:vote_key";
     public static final String CH_INVSEE_REQUEST = "aranarth:invsee_request";
     public static final String CH_INVSEE_RESPONSE = "aranarth:invsee_response";
     public static final String CH_INVSEE_UPDATE = "aranarth:invsee_update";
@@ -350,6 +353,7 @@ public class NetworkManager {
             case CH_OUTPOST_UPDATE -> handleOutpostUpdate(json);
             case CH_JOB_UPDATE -> handleJobUpdate(json);
             case CH_VOTE_AWARD -> handleVoteAward(json);
+            case CH_VOTE_KEY -> handleVoteKey(json);
             case CH_INVSEE_REQUEST -> handleInvseeRequest(json);
             case CH_INVSEE_RESPONSE -> handleInvseeResponse(json);
             case CH_INVSEE_UPDATE -> handleInvseeUpdate(json);
@@ -2332,6 +2336,69 @@ public class NetworkManager {
         long timestamp = json.get("timestamp").getAsLong();
         AranarthUtils.addVote(new AranarthVote(uuid, amount, timestamp));
         Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[VOTE] Received cross-server vote award for " + uuid + ": +" + amount + " points");
+    }
+
+    /**
+     * Tells the remote server to deliver a vote key directly to the player's inventory.
+     */
+    public void publishVoteKey(UUID uuid) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", uuid.toString());
+        publish(CH_VOTE_KEY, json);
+    }
+
+    private void handleVoteKey(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        Player player = Bukkit.getPlayer(uuid);
+        if (player == null || !player.isOnline()) {
+            AranarthUtils.addPendingVoteKeys(uuid, 1);
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[VOTE] Received cross-server vote key for " + uuid + " but player is not online - stored as pending");
+            if (DatabaseManager.isActive()) {
+                Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                        () -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(uuid));
+            }
+            return;
+        }
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+            // Re-check on main thread - player may have logged off between the initial check and now
+            Player onlinePlayer = Bukkit.getPlayer(uuid);
+            if (onlinePlayer == null || !onlinePlayer.isOnline()) {
+                AranarthUtils.addPendingVoteKeys(uuid, 1);
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[VOTE] Remote key delivery: player " + uuid + " logged off before key could be given - stored as pending");
+                if (DatabaseManager.isActive()) {
+                    Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                            () -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(uuid));
+                }
+                return;
+            }
+            String worldName = onlinePlayer.getWorld().getName();
+            boolean validWorld = worldName.startsWith("world") || AranarthUtils.isSmpWorld(worldName)
+                    || worldName.startsWith("resource") || worldName.startsWith("spawn");
+            if (validWorld) {
+                ItemStack key = new KeyVote().getItem();
+                HashMap<Integer, ItemStack> remainder = onlinePlayer.getInventory().addItem(key);
+                if (!remainder.isEmpty()) {
+                    AranarthUtils.addPendingVoteKeys(uuid, 1);
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage("&7Your inventory was full! &7Use &e/keyclaim &7to obtain your vote key!"));
+                    Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[VOTE] Remote key delivery: inventory full for " + onlinePlayer.getName() + " - stored as pending");
+                } else {
+                    Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[VOTE] Remote key delivery: key given directly to " + onlinePlayer.getName() + " in " + worldName);
+                }
+            } else {
+                AranarthUtils.addPendingVoteKeys(uuid, 1);
+                onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You cannot receive crate keys here! &7Use &e/keyclaim &7to obtain your vote key!"));
+                Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[VOTE] Remote key delivery: " + onlinePlayer.getName() + " is in invalid world (" + worldName + ") - stored as pending");
+            }
+            if (DatabaseManager.isActive()) {
+                Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                        () -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(uuid));
+            }
+        });
     }
 
     /**

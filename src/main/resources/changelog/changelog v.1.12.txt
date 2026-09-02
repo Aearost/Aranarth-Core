@@ -150,6 +150,7 @@ Minor Features
 [~] Fix Chi boost lengthening bending cooldowns instead of shortening them
 [~] Fixed chat unscramble win not removing AFK status
 [+] Added Discord dominion-relations crumble/recovery messages on auto-unclaim
+[~] Fixed vote keys not being delivered immediately when player is on SMP
 
 Backend Code Changes
 -

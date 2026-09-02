@@ -102,7 +102,13 @@ public class VotifierListener implements Listener {
             }
 
             if (!offlinePlayer.isOnline()) {
-                // Player is offline or on a remote server - store as pending and immediately persist
+                // Check if the player is on the remote server (e.g. SMP) before marking as pending
+                if (NetworkManager.isActive() && NetworkManager.getInstance().getRemoteRoster().containsKey(uuid)) {
+                    NetworkManager.getInstance().publishVoteKey(uuid);
+                    Bukkit.getLogger().info("[AC] [VOTE] " + username + " is on remote server - key delivery published cross-server");
+                    return;
+                }
+                // Player is truly offline - store as pending and immediately persist
                 // to DB so that /keyclaim on any server picks it up without waiting 30 minutes.
                 AranarthUtils.addPendingVoteKeys(uuid, 1);
                 Bukkit.getLogger().info("[AC] [VOTE] " + username + " is offline - storing pending key and syncing to DB");
