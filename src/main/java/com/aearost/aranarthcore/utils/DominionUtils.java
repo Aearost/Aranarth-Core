@@ -35,6 +35,15 @@ public class DominionUtils {
      * Tracks the last in-game date on which the daily food/tax cycle ran, to prevent double-firing.
      */
     private static String lastFoodEvalDate = null;
+    /**
+     * Dominion IDs that lost a chunk to auto-unclaim during yesterday's food evaluation cycle.
+     * Used to detect recovery (no chunk lost today after losing one yesterday).
+     */
+    private static Set<UUID> yesterdayCrumblingDominionIds = new HashSet<>();
+    /**
+     * Dominion IDs that lost a chunk to auto-unclaim during today's food evaluation cycle.
+     */
+    private static final Set<UUID> todayCrumblingDominionIds = new HashSet<>();
 
     /**
      * Provides the list of Dominions.
@@ -779,6 +788,10 @@ public class DominionUtils {
         }
         lastFoodEvalDate = today;
 
+        // Rotate crumbling sets
+        yesterdayCrumblingDominionIds = new HashSet<>(todayCrumblingDominionIds);
+        todayCrumblingDominionIds.clear();
+
         // Close all inventories before evaluating
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             String foodTitle = ChatUtils.stripColorFormatting(onlinePlayer.getOpenInventory().getTitle());
@@ -816,6 +829,10 @@ public class DominionUtils {
                 }
                 if (chunkToRemove != null) {
                     removePenaltyChunk(dominion, chunkToRemove);
+                    if (!todayCrumblingDominionIds.contains(dominion.getId())) {
+                        todayCrumblingDominionIds.add(dominion.getId());
+                        DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " is starting to crumble", new Color(180, 70, 0));
+                    }
                     for (UUID memberUuid : dominion.getMembers()) {
                         if (Bukkit.getOfflinePlayer(memberUuid).isOnline()) {
                             Player member = Bukkit.getPlayer(memberUuid);
@@ -838,12 +855,25 @@ public class DominionUtils {
                     Player onlineLeader = Bukkit.getPlayer(dominion.getLeader());
                     onlineLeader.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + "'s &7daily food rations have been consumed"));
                 }
+                // No chunk lost today but lost one yesterday
+                if (yesterdayCrumblingDominionIds.contains(dominion.getId())) {
+                    DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " has recovered and prevented their demise", new Color(50, 180, 50));
+                }
             } else {
                 double dailyCost = DominionLevelUtils.getDailyBalanceCost(dominion.getDominionLevel());
                 int result = consumeMoneyOrLand(dominion, dailyCost);
                 if (result == -1) {
                     updateDominionLeader(dominion, null, true);
                 } else {
+                    // Land was consumed - mark as crumbling
+                    if (result == 0 && !todayCrumblingDominionIds.contains(dominion.getId())) {
+                        todayCrumblingDominionIds.add(dominion.getId());
+                        DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " is starting to crumble", new Color(180, 70, 0));
+                    }
+                    // Money was consumed - check recovery
+                    if (result == 1 && yesterdayCrumblingDominionIds.contains(dominion.getId())) {
+                        DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " has recovered and prevented their demise", new Color(50, 180, 50));
+                    }
                     for (UUID memberUuid : dominion.getMembers()) {
                         if (Bukkit.getOfflinePlayer(memberUuid).isOnline()) {
                             Player member = Bukkit.getPlayer(memberUuid);

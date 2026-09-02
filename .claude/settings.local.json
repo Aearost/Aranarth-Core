@@ -443,7 +443,8 @@
       "Bash(gunzip -c 2026-09-01-1.log.gz)",
       "Bash(gunzip -c 2026-09-01-3.log.gz)",
       "Bash(gunzip -c 2026-09-01-4.log.gz)",
-      "Bash(gunzip -c 2026-09-01-2.log.gz)"
+      "Bash(gunzip -c 2026-09-01-2.log.gz)",
+      "Bash(/c/Program Files/JetBrains/IntelliJ IDEA Community Edition 2025.1/plugins/maven/lib/maven3/bin/mvn compile -q)"
     ]
   }
 }

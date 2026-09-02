@@ -149,6 +149,7 @@ Minor Features
 [~] Mitigations to boosts being unintentionally removed on server restart
 [~] Fix Chi boost lengthening bending cooldowns instead of shortening them
 [~] Fixed chat unscramble win not removing AFK status
+[+] Added Discord dominion-relations crumble/recovery messages on auto-unclaim
 
 Backend Code Changes
 -
