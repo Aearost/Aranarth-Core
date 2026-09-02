@@ -5,6 +5,7 @@ import com.dre.brewery.api.events.brew.BrewModifyEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -43,6 +44,11 @@ public class BrewingListener implements Listener {
         BrewerInventory brewer = e.getContents();
         Location loc = brewer.getLocation();
         boolean hasCopyInput = copyInputStands.remove(loc);
+
+        // Play the brewing bubble sound at the stand's world location for nearby players
+        if (loc != null && loc.getWorld() != null) {
+            loc.getWorld().playSound(loc, Sound.BLOCK_BREWING_STAND_BREW, 1.0F, 1.0F);
+        }
 
         if (hasCopyInput) {
             // Outputs brewed from a BREWING_COPY input do not receive the duplication-eligible tag

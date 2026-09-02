@@ -156,6 +156,7 @@ Minor Features
 [~] Fixed Discord role/notification updates silently skipping non-cached guild members by switching from getMemberById to retrieveMemberById
 [~] Fixed null player names in command results due to cross-server player lookup
 [~] Protected passive mobs in dominion land from outsider damage unless enemied
+[~] Play brewing stand bubble sound at world location on brew complete
 
 Backend Code Changes
 -
