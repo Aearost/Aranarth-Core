@@ -151,6 +151,7 @@ Minor Features
 [~] Fixed chat unscramble win not removing AFK status
 [+] Added Discord dominion-relations crumble/recovery messages on auto-unclaim
 [~] Fixed vote keys not being delivered immediately when player is on SMP
+[~] Allowing dominion renaming to the same name with different color codes
 
 Backend Code Changes
 -

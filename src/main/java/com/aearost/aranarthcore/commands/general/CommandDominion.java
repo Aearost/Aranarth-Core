@@ -2083,6 +2083,10 @@ public class CommandDominion implements CommandExecutor {
      * @return The Dominion's name.
      */
     private static String verifyDominionName(String[] args, Player player) {
+        return verifyDominionName(args, player, null);
+    }
+
+    private static String verifyDominionName(String[] args, Player player, Dominion dominionToSkip) {
         StringBuilder parts = new StringBuilder();
         for (int i = 1; i < args.length; i++) {
             if (i == args.length - 1) {
@@ -2110,6 +2114,9 @@ public class CommandDominion implements CommandExecutor {
         dominionName = ChatUtils.removeSpecialCharacters(dominionName);
 
         for (Dominion dominionInList : DominionUtils.getDominions()) {
+            if (dominionToSkip != null && dominionInList.getId().equals(dominionToSkip.getId())) {
+                continue;
+            }
             if (ChatUtils.stripColorFormatting(dominionInList.getName()).equalsIgnoreCase(ChatUtils.stripColorFormatting(dominionName))) {
                 player.sendMessage(ChatUtils.chatMessage("&cThis name is already used by another Dominion!"));
                 return null;
@@ -3213,13 +3220,16 @@ public class CommandDominion implements CommandExecutor {
                 } else if (args[0].equalsIgnoreCase("rename")) {
                     if (dominion != null) {
                         if (dominion.getLeader().equals(player.getUniqueId())) {
-                            String dominionName = verifyDominionName(args, player);
+                            String dominionName = verifyDominionName(args, player, dominion);
                             if (dominionName != null) {
                                 String oldName = dominion.getName();
+                                boolean colorOnly = ChatUtils.stripColorFormatting(oldName).equalsIgnoreCase(ChatUtils.stripColorFormatting(dominionName));
                                 dominion.setName(dominionName);
                                 DominionUtils.updateDominion(dominion);
                                 Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The Dominion of &e" + oldName + " &7has been renamed to &e" + dominionName));
-                                DiscordUtils.dominionMessage(dominion, "&7The Dominion of &e" + oldName + " &7has been renamed to &e" + dominionName, Color.CYAN);
+                                if (!colorOnly) {
+                                    DiscordUtils.dominionMessage(dominion, "&7The Dominion of &e" + oldName + " &7has been renamed to &e" + dominionName, Color.CYAN);
+                                }
                                 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                                     onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_PLAYER_LEVELUP, 1.2F, 1.5F);
                                 }
