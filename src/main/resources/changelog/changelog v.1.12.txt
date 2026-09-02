@@ -44,6 +44,7 @@ Major Features
 [~] Significantly increased all job pays
 [-] Removed the Smith job
 [+] Added Structure Wraiths when first opening of structure chests
+[+] Added /t servertips toggle to hide periodic server tip messages
 
 Minor Features
 [~] Fixed issue where the alchemist job was not providing xp when shift-clicking ingredients into a brewing stand

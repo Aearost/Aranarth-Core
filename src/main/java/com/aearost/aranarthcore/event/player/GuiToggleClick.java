@@ -352,6 +352,18 @@ public class GuiToggleClick {
                 AranarthUtils.applyAranarthiumScale(player);
                 refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.POPPED_CHORUS_FRUIT, "&f&lAranarthium Size Scale", aranarthPlayer.isSizeScaleEnabled()));
             }
+            // Server Tips
+            case 38 -> {
+                if (aranarthPlayer.isServerTipsDisabled()) {
+                    aranarthPlayer.setServerTipsDisabled(false);
+                    player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7server tips"));
+                } else {
+                    aranarthPlayer.setServerTipsDisabled(true);
+                    player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7server tips"));
+                }
+                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.KNOWLEDGE_BOOK, "&f&lServer Tips", !aranarthPlayer.isServerTipsDisabled()));
+            }
         }
     }
 

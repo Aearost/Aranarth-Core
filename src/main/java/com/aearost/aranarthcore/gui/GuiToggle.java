@@ -191,6 +191,9 @@ public class GuiToggle {
             gui.setItem(37, buildLockedItem(Material.IRON_CHESTPLATE, "&f&lInvisible Armor"));
         }
 
+        // Server Tips
+        gui.setItem(38, buildToggleItem(Material.KNOWLEDGE_BOOK, "&f&lServer Tips", !aranarthPlayer.isServerTipsDisabled()));
+
         return gui;
     }
 

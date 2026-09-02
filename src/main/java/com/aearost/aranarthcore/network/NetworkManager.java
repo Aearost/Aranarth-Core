@@ -589,6 +589,17 @@ public class NetworkManager {
     }
 
     /**
+     * Relays a server tip message to all other servers.
+     */
+    public void publishServerTip(String rawMessage) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("message", rawMessage);
+        json.addProperty("type", "server_tip");
+        publish(CH_BROADCAST, json);
+    }
+
+    /**
      * Notifies all other servers that a player has unlocked a brew recipe so their in-memory
      * caches stay in sync. The DB write is handled by the originating server before this publish.
      */
@@ -1910,7 +1921,14 @@ public class NetworkManager {
             return;
         }
         String message = json.get("message").getAsString();
+        boolean isServerTip = json.has("type") && json.get("type").getAsString().equals("server_tip");
         for (Player player : Bukkit.getOnlinePlayers()) {
+            if (isServerTip) {
+                AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
+                if (ap != null && ap.isServerTipsDisabled()) {
+                    continue;
+                }
+            }
             player.sendMessage(message);
         }
         Bukkit.getConsoleSender().sendMessage(message);

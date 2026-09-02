@@ -401,6 +401,15 @@ public class CommandToggle implements CommandExecutor {
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					AranarthUtils.applyAranarthiumScale(player);
+				} else if (args[0].equalsIgnoreCase("servertips")) {
+					if (aranarthPlayer.isServerTipsDisabled()) {
+						aranarthPlayer.setServerTipsDisabled(false);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7server tips"));
+					} else {
+						aranarthPlayer.setServerTipsDisabled(true);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7server tips"));
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/toggle <option>"));
 				}

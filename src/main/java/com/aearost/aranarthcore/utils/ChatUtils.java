@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.enums.SpecialDay;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionRank;
@@ -551,7 +552,17 @@ public class ChatUtils {
             Collections.shuffle(tips);
         }
 
-        Bukkit.broadcastMessage(ChatUtils.chatMessage(tips.get(tipIndex)));
+        String message = ChatUtils.chatMessage(tips.get(tipIndex));
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
+            if (ap == null || !ap.isServerTipsDisabled()) {
+                player.sendMessage(message);
+            }
+        }
+        Bukkit.getConsoleSender().sendMessage(message);
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishServerTip(message);
+        }
         tipIndex++;
 
         if (tipIndex == tips.size()) {

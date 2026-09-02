@@ -899,6 +899,11 @@ public class PersistenceUtils {
                     aranarthPlayer.setSizeScaleEnabled(!fields[35].equals("0"));
                 }
 
+                // Server Tips Disabled (index 36)
+                if (fields.length > 36) {
+                    aranarthPlayer.setServerTipsDisabled(!fields[36].equals("0"));
+                }
+
                 AranarthUtils.setPlayer(uuid, aranarthPlayer);
             }
             Bukkit.getLogger().info("[AC] All toggled features have been initialized");
@@ -938,7 +943,7 @@ public class PersistenceUtils {
                 try {
                     FileWriter writer = new FileWriter(filePath);
                     // Template line
-                    writer.write("#uuid|chat|messages|teleport|spawnboost|changeclaim|inventory|shulker|blacklist|compressing|chestlock|firetype|gradientchatenabled|gradientchatcolors|daymessage|weathermessage|dominionmsgcompact|joinsound|leavesound|votesound|cratesound|weathersound|newdaysound|newmonthsound|privatemsgsound|teleportsound|avatarsound|dominionSound|aranarthiumsound|chatgamesound|chestsortsound|jobssound|expstoresponud|interactivechat\n");
+                    writer.write("#uuid|chat|messages|teleport|spawnboost|changeclaim|inventory|shulker|blacklist|compressing|chestlock|firetype|gradientchatenabled|gradientchatcolors|daymessage|weathermessage|dominionmsgcompact|joinsound|leavesound|votesound|cratesound|weathersound|newdaysound|newmonthsound|privatemsgsound|teleportsound|avatarsound|dominionSound|aranarthiumsound|chatgamesound|chestsortsound|jobssound|expstoresponud|interactivechat|emojienabled|sizescaleenabled|servertipsdisabled\n");
 
                     for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
                         AranarthPlayer aranarthPlayer = entry.getValue();
@@ -981,6 +986,7 @@ public class PersistenceUtils {
                         String interactiveChat = aranarthPlayer.isInteractiveChatEnabled() ? "1" : "0";
                         String emojiEnabled = aranarthPlayer.isEmojiEnabled() ? "1" : "0";
                         String sizeScaleEnabled = aranarthPlayer.isSizeScaleEnabled() ? "1" : "0";
+                        String serverTipsDisabled = aranarthPlayer.isServerTipsDisabled() ? "1" : "0";
                         String row = uuid + "|" + chat + "|" + messages + "|" + teleport + "|" + spawnboost + "|" + changeClaim
                                 + "|" + inventory + "|" + shulker + "|" + blacklist + "|" + compressing + "|" + chestLock + "|"
                                 + bluefire + "|" + gradientEnabled + "|" + gradientColors + "|" + dayMessage + "|" + weatherMessage
@@ -988,7 +994,7 @@ public class PersistenceUtils {
                                 + "|" + weatherSound + "|" + newDaySound + "|" + newMonthSound + "|" + privateMsgSound
                                 + "|" + teleportSound + "|" + avatarSound + "|" + dominionSound + "|" + aranarthiumSound
                                 + "|" + chatGameSound + "|" + chestSortSound + "|" + jobsSound + "|" + expStoreSound
-                                + "|" + interactiveChat + "|" + emojiEnabled + "|" + sizeScaleEnabled + "\n";
+                                + "|" + interactiveChat + "|" + emojiEnabled + "|" + sizeScaleEnabled + "|" + serverTipsDisabled + "\n";
                         writer.write(row);
                     }
                     writer.close();
@@ -5994,6 +6000,7 @@ public class PersistenceUtils {
             obj.addProperty("emojiEnabled", ap.isEmojiEnabled());
             obj.addProperty("sizeScaleEnabled", ap.isSizeScaleEnabled());
             obj.addProperty("reaperDisabled", ap.isReaperDisabled());
+            obj.addProperty("serverTipsDisabled", ap.isServerTipsDisabled());
             try {
                 db.savePlayerToggles(uuid, GSON.toJson(obj));
             } catch (Exception e) {
@@ -7636,6 +7643,9 @@ public class PersistenceUtils {
                 if (obj.has("reaperDisabled")) {
                     ap.setReaperDisabled(obj.get("reaperDisabled").getAsBoolean());
                 }
+                if (obj.has("serverTipsDisabled")) {
+                    ap.setServerTipsDisabled(obj.get("serverTipsDisabled").getAsBoolean());
+                }
                 AranarthUtils.setPlayer(uuid, ap);
             } catch (Exception e) {
                 Bukkit.getLogger().warning("[AC] Failed to parse toggles for " + uuid + ": " + e.getMessage());
@@ -7694,6 +7704,7 @@ public class PersistenceUtils {
         obj.addProperty("isBarbarian", ap.isBarbarian());
         obj.addProperty("barbarianCooldownEnd", ap.getBarbarianCooldownEnd());
         obj.addProperty("reaperDisabled", ap.isReaperDisabled());
+        obj.addProperty("serverTipsDisabled", ap.isServerTipsDisabled());
         return GSON.toJson(obj);
     }
 
@@ -7837,6 +7848,9 @@ public class PersistenceUtils {
             }
             if (obj.has("reaperDisabled")) {
                 ap.setReaperDisabled(obj.get("reaperDisabled").getAsBoolean());
+            }
+            if (obj.has("serverTipsDisabled")) {
+                ap.setServerTipsDisabled(obj.get("serverTipsDisabled").getAsBoolean());
             }
             AranarthUtils.setPlayer(uuid, ap);
         } catch (Exception e) {
