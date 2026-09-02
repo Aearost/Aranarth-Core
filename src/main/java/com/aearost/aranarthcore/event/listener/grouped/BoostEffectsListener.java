@@ -194,9 +194,19 @@ public class BoostEffectsListener implements Listener {
 
 			if (AranarthUtils.getServerBoosts().containsKey(Boost.CHI)) {
 				Ability ability = e.getAbility();
-				BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(e.getAbility().getPlayer());
-				bendingPlayer.removeCooldown(ability.getName());
-				bendingPlayer.addCooldown(ability, ability.getCooldown() / 2);
+				Player player = ability.getPlayer();
+				String abilityName = ability.getName();
+				long halfCooldown = ability.getCooldown() / 2;
+				// Delay 1 tick so PK has finished applying its full cooldown before we halve it.
+				// Without the delay, PK's addCooldown fires after ours and stacks on top,
+				// resulting in 1.5x the normal cooldown instead of 0.5x.
+				Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
+					BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+					if (bendingPlayer != null) {
+						bendingPlayer.removeCooldown(abilityName);
+						bendingPlayer.addCooldown(abilityName, halfCooldown);
+					}
+				}, 1L);
 			}
 		}
 	}

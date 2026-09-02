@@ -146,6 +146,7 @@ Minor Features
 [+] Added /ac reloadshops
 [+] Added /ac reloadperms [player] to force permission re-evaluation for all online players across both servers
 [~] Mitigations to boosts being unintentionally removed on server restart
+[~] Fix Chi boost lengthening bending cooldowns instead of shortening them
 
 Backend Code Changes
 -
