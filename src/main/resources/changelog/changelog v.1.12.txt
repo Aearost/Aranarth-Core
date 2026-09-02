@@ -153,6 +153,7 @@ Minor Features
 [+] Added Discord dominion-relations crumble/recovery messages on auto-unclaim
 [~] Fixed vote keys not being delivered immediately when player is on SMP
 [~] Allowing dominion renaming to the same name with different color codes
+[~] Fixed Discord role/notification updates silently skipping non-cached guild members by switching from getMemberById to retrieveMemberById
 
 Backend Code Changes
 -
