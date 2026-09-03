@@ -448,7 +448,9 @@
       "Bash(/c/Users/liamh/AppData/Local/Programs/Eclipse Adoptium/jdk-21.0.7.6-hotspot/bin/java -version)",
       "Bash(JAVA_HOME=\"/c/Program Files/Eclipse Adoptium/jdk-25.0.3.9-hotspot\" \"/c/Program Files/JetBrains/IntelliJ IDEA Community Edition 2024.3.4/plugins/maven/lib/maven3/bin/mvn\" compile -q -f /c/Users/liamh/IdeaProjects/AranarthCore/pom.xml)",
       "Bash(/c/Users/liamh/AppData/Local/Programs/Maven/apache-maven-3.9.9/bin/mvn compile:*)",
-      "Bash(find /c/Users/liamh/Downloads -name *.yml)"
+      "Bash(find /c/Users/liamh/Downloads -name *.yml)",
+      "Bash(cmd /c \"mvn compile -q 2>&1\")",
+      "Bash(C:/ProgramData/chocolatey/bin/mvn.cmd compile:*)"
     ]
   }
 }

@@ -308,6 +308,9 @@ commands:
     description: Opens the vote shop GUI to spend vote points
     aliases: [ vshop, vs ]
     permission: aranarth.voteshop
+  vptransfer:
+    description: Transfers vote points to another player
+    aliases: [ vpt ]
   warp:
     description: Warps the player to the input warp
     permission: aranarth.warp

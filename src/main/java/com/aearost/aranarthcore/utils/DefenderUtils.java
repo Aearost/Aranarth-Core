@@ -621,8 +621,20 @@ public class DefenderUtils {
                         continue;
                     }
 
-                    // Out of bounds - pathfind back
+                    // Out of bounds - pathfind back (or teleport for mobs with non-standard navigation)
                     if (entity instanceof Mob mob) {
+                        DefenderType outOfBoundsType = getDefenderType(entityUUID);
+                        if (outOfBoundsType == DefenderType.BREEZE) {
+                            // Teleport directly as Breeze AI conflicts otherwise
+                            Location home = getDefenderHomeLocation(entityUUID);
+                            if (home != null) {
+                                entity.teleport(home);
+                                setDefenderMode(entityUUID, DefenderMode.PATROL, null, null);
+                            }
+                            clearStuckState(entityUUID);
+                            continue;
+                        }
+
                         // Teleport home if unable to pathfind back within 30 seconds
                         if (checkStuck(entityUUID, entity, 6)) {
                             Location home = getDefenderHomeLocation(entityUUID);
@@ -667,30 +679,49 @@ public class DefenderUtils {
 
                     // Validate and clear the current target
                     LivingEntity currentTarget = mob.getTarget();
-                    if (currentTarget != null && !currentTarget.isDead()
-                            && currentTarget instanceof Monster) {
-                        UUID tUUID = currentTarget.getUniqueId();
-                        boolean isSameDominionDefender = isDefender(tUUID)
-                                && myDominionId.equals(entityToDominion.get(tUUID));
-                        if (!isSameDominionDefender) {
-                            if (mode == DefenderMode.GUARD) {
-                                // Drop target if it has wandered outside the 30-block guard radius
-                                Location guardPos = entityToGuardPosition.get(entityUUID);
-                                if (guardPos != null && guardPos.getWorld() != null
-                                        && guardPos.getWorld().equals(currentTarget.getLocation().getWorld())
-                                        && guardPos.distanceSquared(currentTarget.getLocation()) > 900) {
+                    if (currentTarget != null && !currentTarget.isDead()) {
+                        if (currentTarget instanceof Player currentPlayerTarget) {
+                            // Keep the existing player target unless it should no longer be targeted
+                            UUID dominionId = entityToDominion.get(entityUUID);
+                            if (dominionId != null && shouldDefenderTarget(dominionId, currentPlayerTarget)) {
+                                if (mode == DefenderMode.GUARD) {
+                                    Location guardPos = entityToGuardPosition.get(entityUUID);
+                                    if (guardPos == null || !guardPos.getWorld().equals(currentPlayerTarget.getLocation().getWorld())
+                                            || guardPos.distanceSquared(currentPlayerTarget.getLocation()) <= 900) {
+                                        continue;
+                                    }
                                     mob.setTarget(null);
                                 } else {
                                     continue;
                                 }
                             } else {
-                                // Valid for patrol and follow modes
-                                continue;
+                                mob.setTarget(null);
+                            }
+                        } else if (currentTarget instanceof Monster) {
+                            UUID tUUID = currentTarget.getUniqueId();
+                            boolean isSameDominionDefender = isDefender(tUUID)
+                                    && myDominionId.equals(entityToDominion.get(tUUID));
+                            if (!isSameDominionDefender) {
+                                if (mode == DefenderMode.GUARD) {
+                                    // Drop target if it has wandered outside the 30-block guard radius
+                                    Location guardPos = entityToGuardPosition.get(entityUUID);
+                                    if (guardPos != null && guardPos.getWorld() != null
+                                            && guardPos.getWorld().equals(currentTarget.getLocation().getWorld())
+                                            && guardPos.distanceSquared(currentTarget.getLocation()) > 900) {
+                                        mob.setTarget(null);
+                                    } else {
+                                        continue;
+                                    }
+                                } else {
+                                    // Valid for patrol and follow modes
+                                    continue;
+                                }
                             }
                         }
                     }
 
                     Dominion dominion = DominionUtils.getDominionById(myDominionId);
+                    DefenderType defType = getDefenderType(entityUUID);
                     LivingEntity priorityTarget = null;
                     double priorityDistSq = Double.MAX_VALUE;
                     LivingEntity fallbackTarget = null;
@@ -708,48 +739,78 @@ public class DefenderUtils {
                         }
                     }
 
-                    for (Entity nearby : mob.getNearbyEntities(scanRadius, 8, scanRadius)) {
-                        if (!(nearby instanceof Monster nearbyMonster)) {
-                            continue;
-                        }
-                        UUID nUUID = nearby.getUniqueId();
-                        if (isDefender(nUUID) && myDominionId.equals(entityToDominion.get(nUUID))) {
-                            continue;
-                        }
-
-                        // Guard mode will reject targets outside 30 blocks of guard position
-                        if (mode == DefenderMode.GUARD && guardPos != null
-                                && guardPos.getWorld() != null
-                                && guardPos.getWorld().equals(nearby.getLocation().getWorld())
-                                && guardPos.distanceSquared(nearby.getLocation()) > maxGuardDistSq) {
-                            continue;
-                        }
-
-                        double distSq = nearby.getLocation().distanceSquared(mob.getLocation());
-
-                        if (nearbyMonster instanceof Mob nearbyMob
-                                && nearbyMob.getTarget() instanceof Player targetPlayer) {
-                            boolean isPriority = false;
-                            if (mode == DefenderMode.FOLLOW) {
-                                UUID followId = entityToFollowPlayer.get(entityUUID);
-                                isPriority = followId != null
-                                        && targetPlayer.getUniqueId().equals(followId);
-                            } else if (dominion != null) {
-                                isPriority = dominion.getMembers().contains(targetPlayer.getUniqueId());
+                    // Breeze AI only recognizes player targets and immediately clears any monster target set
+                    // via setTarget(); skip the monster scan for Breeze so the player scan always runs
+                    if (defType != DefenderType.BREEZE) {
+                        for (Entity nearby : mob.getNearbyEntities(scanRadius, 8, scanRadius)) {
+                            if (!(nearby instanceof Monster nearbyMonster)) {
+                                continue;
                             }
-                            if (isPriority && distSq < priorityDistSq) {
-                                priorityDistSq = distSq;
-                                priorityTarget = nearbyMonster;
+                            UUID nUUID = nearby.getUniqueId();
+                            if (isDefender(nUUID) && myDominionId.equals(entityToDominion.get(nUUID))) {
+                                continue;
                             }
-                        }
 
-                        if (distSq < fallbackDistSq) {
-                            fallbackDistSq = distSq;
-                            fallbackTarget = nearbyMonster;
+                            // Guard mode will reject targets outside 30 blocks of guard position
+                            if (mode == DefenderMode.GUARD && guardPos != null
+                                    && guardPos.getWorld() != null
+                                    && guardPos.getWorld().equals(nearby.getLocation().getWorld())
+                                    && guardPos.distanceSquared(nearby.getLocation()) > maxGuardDistSq) {
+                                continue;
+                            }
+
+                            double distSq = nearby.getLocation().distanceSquared(mob.getLocation());
+
+                            if (nearbyMonster instanceof Mob nearbyMob
+                                    && nearbyMob.getTarget() instanceof Player targetPlayer) {
+                                boolean isPriority = false;
+                                if (mode == DefenderMode.FOLLOW) {
+                                    UUID followId = entityToFollowPlayer.get(entityUUID);
+                                    isPriority = followId != null
+                                            && targetPlayer.getUniqueId().equals(followId);
+                                } else if (dominion != null) {
+                                    isPriority = dominion.getMembers().contains(targetPlayer.getUniqueId());
+                                }
+                                if (isPriority && distSq < priorityDistSq) {
+                                    priorityDistSq = distSq;
+                                    priorityTarget = nearbyMonster;
+                                }
+                            }
+
+                            if (distSq < fallbackDistSq) {
+                                fallbackDistSq = distSq;
+                                fallbackTarget = nearbyMonster;
+                            }
                         }
                     }
 
                     LivingEntity chosen = priorityTarget != null ? priorityTarget : fallbackTarget;
+
+                    // Breeze and Blaze don't reliably acquire player targets via vanilla AI,
+                    // so actively scan for valid player targets when no monster target was found
+                    if (chosen == null && (defType == DefenderType.BREEZE || defType == DefenderType.BLAZE)) {
+                        double closestPlayerDistSq = Double.MAX_VALUE;
+                        for (Entity nearby : mob.getNearbyEntities(scanRadius, 8, scanRadius)) {
+                            if (!(nearby instanceof Player nearbyPlayer)) {
+                                continue;
+                            }
+                            if (mode == DefenderMode.GUARD && guardPos != null
+                                    && guardPos.getWorld() != null
+                                    && guardPos.getWorld().equals(nearby.getLocation().getWorld())
+                                    && guardPos.distanceSquared(nearby.getLocation()) > maxGuardDistSq) {
+                                continue;
+                            }
+                            if (!shouldDefenderTarget(myDominionId, nearbyPlayer)) {
+                                continue;
+                            }
+                            double distSq = nearby.getLocation().distanceSquared(mob.getLocation());
+                            if (distSq < closestPlayerDistSq) {
+                                closestPlayerDistSq = distSq;
+                                chosen = nearbyPlayer;
+                            }
+                        }
+                    }
+
                     if (chosen != null) {
                         mob.setTarget(chosen);
                     }
@@ -796,7 +857,14 @@ public class DefenderUtils {
 
                     double distSq = entity.getLocation().distanceSquared(followPlayer.getLocation());
 
-                    if (distSq > 1024) { // If more than 32 blocks, teleport immediately
+                    DefenderType followType = getDefenderType(entityUUID);
+                    if (followType == DefenderType.BREEZE) {
+                        // Teleport directly as Breeze AI conflicts otherwise
+                        if (distSq > 25) {
+                            entity.teleport(followPlayer.getLocation());
+                        }
+                        clearStuckState(entityUUID);
+                    } else if (distSq > 1024) { // If more than 32 blocks, teleport immediately
                         entity.teleport(followPlayer.getLocation());
                         clearStuckState(entityUUID);
                     } else if (distSq > 25) { // 5–32 blocks, try to pathfind
@@ -846,43 +914,118 @@ public class DefenderUtils {
     }
 
     /**
-     * Fires projectiles from BLAZE and BREEZE defenders toward their current target every 3 seconds.
+     * Fires projectiles from BLAZE defenders toward their current target every 2 seconds,
+     * and from BREEZE defenders every 3 seconds.
      */
     public static void startBlazeBreezeFiringTask() {
+        // Blaze fires every 2 seconds
         new BukkitRunnable() {
             @Override
             public void run() {
                 for (Map.Entry<UUID, DefenderType> entry : new HashMap<>(entityToType).entrySet()) {
-                    DefenderType type = entry.getValue();
-                    if (type != DefenderType.BLAZE && type != DefenderType.BREEZE) {
+                    if (entry.getValue() != DefenderType.BLAZE) {
                         continue;
                     }
-                    Entity entity = Bukkit.getEntity(entry.getKey());
+                    UUID entityUUID = entry.getKey();
+                    Entity entity = Bukkit.getEntity(entityUUID);
                     if (!(entity instanceof Mob mob) || mob.isDead()) {
                         continue;
                     }
-                    LivingEntity mobTarget = mob.getTarget();
-                    if (mobTarget == null || mobTarget.isDead()) {
+                    if (getDefenderMode(entityUUID) == DefenderMode.IDLE) {
                         continue;
                     }
-
-                    Location eyeLoc = mob.getLocation().add(0, 1, 0);
-                    Location targetEye = mobTarget.getEyeLocation();
-                    org.bukkit.util.Vector direction = targetEye.toVector()
-                            .subtract(eyeLoc.toVector()).normalize();
-
-                    if (type == DefenderType.BLAZE) {
-                        SmallFireball fireball = mob.getWorld().spawn(eyeLoc, SmallFireball.class);
-                        fireball.setShooter(mob);
-                        fireball.setDirection(direction);
-                    } else {
-                        BreezeWindCharge wc = mob.getWorld().spawn(eyeLoc, BreezeWindCharge.class);
-                        wc.setShooter(mob);
-                        wc.setVelocity(direction.multiply(1.5));
+                    LivingEntity fireTarget = mob.getTarget();
+                    if (fireTarget == null || fireTarget.isDead()) {
+                        continue;
                     }
+                    Location eyeLoc = mob.getLocation().add(0, 1, 0);
+                    org.bukkit.util.Vector direction = fireTarget.getEyeLocation().toVector()
+                            .subtract(eyeLoc.toVector()).normalize();
+                    SmallFireball fireball = mob.getWorld().spawn(eyeLoc, SmallFireball.class);
+                    fireball.setShooter(mob);
+                    fireball.setDirection(direction);
+                }
+            }
+        }.runTaskTimer(AranarthCore.getInstance(), 40L, 40L);
+
+        // Breeze fires every 3 seconds
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (Map.Entry<UUID, DefenderType> entry : new HashMap<>(entityToType).entrySet()) {
+                    if (entry.getValue() != DefenderType.BREEZE) {
+                        continue;
+                    }
+                    UUID entityUUID = entry.getKey();
+                    Entity entity = Bukkit.getEntity(entityUUID);
+                    if (!(entity instanceof Mob mob) || mob.isDead()) {
+                        continue;
+                    }
+                    if (getDefenderMode(entityUUID) == DefenderMode.IDLE) {
+                        continue;
+                    }
+                    LivingEntity fireTarget = findBreezeFireTarget(mob, entityUUID);
+                    if (fireTarget == null || fireTarget.isDead()) {
+                        continue;
+                    }
+                    Location eyeLoc = mob.getLocation().add(0, 1, 0);
+                    org.bukkit.util.Vector direction = fireTarget.getEyeLocation().toVector()
+                            .subtract(eyeLoc.toVector()).normalize();
+                    BreezeWindCharge wc = mob.getWorld().spawn(eyeLoc, BreezeWindCharge.class);
+                    wc.setShooter(mob);
+                    wc.setVelocity(direction.multiply(1.5));
                 }
             }
         }.runTaskTimer(AranarthCore.getInstance(), 60L, 60L);
+    }
+
+    /**
+     * Finds the nearest valid fire target for a Breeze defender.
+     */
+    private static LivingEntity findBreezeFireTarget(Mob breeze, UUID breezeUUID) {
+        UUID dominionId = entityToDominion.get(breezeUUID);
+        DefenderMode mode = getDefenderMode(breezeUUID);
+        double scanRadius = mode == DefenderMode.GUARD ? 30 : 16;
+        Location guardPos = mode == DefenderMode.GUARD ? entityToGuardPosition.get(breezeUUID) : null;
+
+        LivingEntity best = null;
+        double bestDistSq = Double.MAX_VALUE;
+
+        for (Entity nearby : breeze.getNearbyEntities(scanRadius, 8, scanRadius)) {
+            if (!(nearby instanceof LivingEntity nearbyLiving) || nearbyLiving.isDead()) {
+                continue;
+            }
+            if (mode == DefenderMode.GUARD && guardPos != null
+                    && guardPos.getWorld() != null
+                    && guardPos.getWorld().equals(nearby.getLocation().getWorld())
+                    && guardPos.distanceSquared(nearby.getLocation()) > 900) {
+                continue;
+            }
+
+            boolean valid = false;
+            if (nearby instanceof Player nearbyPlayer) {
+                valid = dominionId != null && shouldDefenderTarget(dominionId, nearbyPlayer);
+            } else if (nearby instanceof Monster) {
+                UUID nUUID = nearby.getUniqueId();
+                // Skip same-dominion defenders
+                if (isDefender(nUUID) && dominionId != null && dominionId.equals(entityToDominion.get(nUUID))) {
+                    continue;
+                }
+                valid = true;
+            }
+
+            if (!valid) {
+                continue;
+            }
+
+            double distSq = nearby.getLocation().distanceSquared(breeze.getLocation());
+            if (distSq < bestDistSq) {
+                bestDistSq = distSq;
+                best = nearbyLiving;
+            }
+        }
+
+        return best;
     }
 
     /**

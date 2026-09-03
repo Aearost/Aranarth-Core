@@ -40,6 +40,12 @@ public class ExplosionListener implements Listener {
 				// Defender creepers: allow explosion entity damage but clear block list
 				if (DefenderUtils.isDefender(creeper.getUniqueId())) {
 					e.blockList().clear();
+					// Remove all potion effects before the explosion finalizes so no lingering cloud spawns
+					for (org.bukkit.potion.PotionEffect effect : new java.util.ArrayList<>(creeper.getActivePotionEffects())) {
+						creeper.removePotionEffect(effect.getType());
+					}
+					// Decrement the defender count - EntityDeathEvent may not fire reliably for explosion deaths
+					DefenderUtils.onDefenderDeath(creeper.getUniqueId());
 					return;
 				}
 				// Non-defender creepers: cancel entirely (existing behavior)

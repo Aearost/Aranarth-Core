@@ -112,8 +112,8 @@ public enum DefenderType {
             6.0,
             12.0,
             0,
-            "Flies at increased speed. Fires wind charges at 1.5x rate.",
-            List.of(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 0, false, false))
+            "Fires wind charges at 1.5x rate.",
+            List.of()
     ),
 
     GUARDIAN(
