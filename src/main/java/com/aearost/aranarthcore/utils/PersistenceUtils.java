@@ -6055,6 +6055,7 @@ public class PersistenceUtils {
             obj.addProperty("chestSortSoundVolume", ap.getChestSortSoundVolume());
             obj.addProperty("jobsSoundVolume", ap.getJobsSoundVolume());
             obj.addProperty("expStoreSoundVolume", ap.getExpStoreSoundVolume());
+            obj.addProperty("lowHealthSoundVolume", ap.getLowHealthSoundVolume());
             obj.addProperty("interactiveChat", ap.isInteractiveChatEnabled());
             obj.addProperty("emojiEnabled", ap.isEmojiEnabled());
             obj.addProperty("sizeScaleEnabled", ap.isSizeScaleEnabled());
@@ -7698,6 +7699,9 @@ public class PersistenceUtils {
                 if (obj.has("expStoreSoundVolume")) {
                     ap.setExpStoreSoundVolume(obj.get("expStoreSoundVolume").getAsInt());
                 }
+                if (obj.has("lowHealthSoundVolume")) {
+                    ap.setLowHealthSoundVolume(obj.get("lowHealthSoundVolume").getAsInt());
+                }
                 if (obj.has("interactiveChat")) {
                     ap.setInteractiveChatEnabled(obj.get("interactiveChat").getAsBoolean());
                 }
@@ -7764,6 +7768,7 @@ public class PersistenceUtils {
         obj.addProperty("chestSortSoundVolume", ap.getChestSortSoundVolume());
         obj.addProperty("jobsSoundVolume", ap.getJobsSoundVolume());
         obj.addProperty("expStoreSoundVolume", ap.getExpStoreSoundVolume());
+        obj.addProperty("lowHealthSoundVolume", ap.getLowHealthSoundVolume());
         obj.addProperty("interactiveChat", ap.isInteractiveChatEnabled());
         obj.addProperty("emojiEnabled", ap.isEmojiEnabled());
         obj.addProperty("sizeScaleEnabled", ap.isSizeScaleEnabled());
@@ -7894,6 +7899,9 @@ public class PersistenceUtils {
             }
             if (obj.has("expStoreSoundVolume")) {
                 ap.setExpStoreSoundVolume(obj.get("expStoreSoundVolume").getAsInt());
+            }
+            if (obj.has("lowHealthSoundVolume")) {
+                ap.setLowHealthSoundVolume(obj.get("lowHealthSoundVolume").getAsInt());
             }
             if (obj.has("adminMode")) {
                 ap.setInAdminMode(obj.get("adminMode").getAsBoolean());

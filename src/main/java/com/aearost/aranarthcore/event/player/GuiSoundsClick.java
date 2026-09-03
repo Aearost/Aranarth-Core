@@ -146,6 +146,13 @@ public class GuiSoundsClick {
                 player.sendMessage(ChatUtils.chatMessage("&7Exp store sound volume set to &e" + vol + "%"));
                 refreshGui(player, slot, Material.EXPERIENCE_BOTTLE, "&f&lExp Store", vol);
             }
+            case 25 -> {
+                int vol = adjustVolume(aranarthPlayer.getLowHealthSoundVolume(), e.isLeftClick(), e.isShiftClick());
+                aranarthPlayer.setLowHealthSoundVolume(vol);
+                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                player.sendMessage(ChatUtils.chatMessage("&7Low health sound volume set to &e" + vol + "%"));
+                refreshGui(player, slot, Material.TOTEM_OF_UNDYING, "&f&lLow Health", vol);
+            }
         }
     }
 

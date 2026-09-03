@@ -50,7 +50,10 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 
 public class AranarthCore extends JavaPlugin {
 
@@ -913,6 +916,37 @@ public class AranarthCore extends JavaPlugin {
 //				AranarthUtils.applyWaterfallEffect();
 //			}
 //		}, 1, 1);
+
+        // Low health heartbeat sound - interval speeds up as health drops
+        Map<UUID, Integer> lowHealthCounters = new HashMap<>();
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
+            final double threshold = 6.0; // 3 hearts
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                UUID uuid = player.getUniqueId();
+                if (player.isDead() || player.getHealth() > threshold) {
+                    lowHealthCounters.remove(uuid);
+                    continue;
+                }
+                AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+                if (ap == null) {
+                    continue;
+                }
+                int volSetting = ap.getLowHealthSoundVolume();
+                if (volSetting <= 0) {
+                    lowHealthCounters.remove(uuid);
+                    continue;
+                }
+                int remaining = lowHealthCounters.getOrDefault(uuid, 0) - 1;
+                if (remaining <= 0) {
+                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, volSetting / 100f, 1.0f);
+                    // Interval scales linearly: 26 ticks at threshold, 8 ticks at 0 HP
+                    int interval = (int) (8 + 18 * (player.getHealth() / threshold));
+                    lowHealthCounters.put(uuid, interval);
+                } else {
+                    lowHealthCounters.put(uuid, remaining);
+                }
+            }
+        }, 1L, 1L);
     }
 
     /**

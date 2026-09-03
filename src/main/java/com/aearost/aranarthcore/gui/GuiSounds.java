@@ -101,6 +101,7 @@ public class GuiSounds {
         gui.setItem(22, buildVolumeItem(Material.CHEST, "&f&lChest Sort", aranarthPlayer.getChestSortSoundVolume()));
         gui.setItem(23, buildVolumeItem(Material.IRON_PICKAXE, "&f&lJobs", aranarthPlayer.getJobsSoundVolume()));
         gui.setItem(24, buildVolumeItem(Material.EXPERIENCE_BOTTLE, "&f&lExp Store", aranarthPlayer.getExpStoreSoundVolume()));
+        gui.setItem(25, buildVolumeItem(Material.TOTEM_OF_UNDYING, "&f&lLow Health", aranarthPlayer.getLowHealthSoundVolume()));
 
         return gui;
     }
