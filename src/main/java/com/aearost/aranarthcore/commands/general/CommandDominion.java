@@ -1459,14 +1459,10 @@ public class CommandDominion implements CommandExecutor {
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), PersistenceUtils::saveOutposts);
 
         String foundedMsg = ChatUtils.chatMessage("&e" + dominion.getName() + " &7has founded the outpost, &e" + outpostName);
-        for (Player online : Bukkit.getOnlinePlayers()) {
-            online.sendMessage(foundedMsg);
-        }
-        Bukkit.getConsoleSender().sendMessage(foundedMsg);
+        Bukkit.broadcastMessage(foundedMsg);
         DiscordUtils.dominionMessage(dominion, dominion.getName() + " has founded the outpost, " + outpostName, new Color(245, 197, 66));
         NetworkManager nm = NetworkManager.getInstance();
         if (nm != null) {
-            nm.publishBroadcast(foundedMsg);
             nm.publishOutpostCreate(outpost);
             nm.publishDominionBalanceAdjust(dominion.getId(), -cost);
         }
@@ -1501,14 +1497,10 @@ public class CommandDominion implements CommandExecutor {
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), PersistenceUtils::saveOutposts);
         player.sendMessage(ChatUtils.chatMessage("&7Outpost renamed to &e" + newName));
         String renamedMsg = ChatUtils.chatMessage("&e" + dominion.getName() + "&7's outpost, &e" + oldName + "&7, has been renamed to &e" + newName);
-        for (Player online : Bukkit.getOnlinePlayers()) {
-            online.sendMessage(renamedMsg);
-        }
-        Bukkit.getConsoleSender().sendMessage(renamedMsg);
+        Bukkit.broadcastMessage(renamedMsg);
         DiscordUtils.dominionMessage(dominion, dominion.getName() + "'s outpost, " + oldName + ", has been renamed to " + newName, new Color(135, 245, 220));
         NetworkManager nm = NetworkManager.getInstance();
         if (nm != null) {
-            nm.publishBroadcast(renamedMsg);
             nm.publishOutpostUpdate(outpost);
         }
     }
