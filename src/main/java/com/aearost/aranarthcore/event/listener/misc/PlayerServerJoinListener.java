@@ -149,6 +149,16 @@ public class PlayerServerJoinListener implements Listener {
             }
         }
 
+        WorldEvent activeWorldEvent = AranarthUtils.getActiveWorldEvent();
+        if (activeWorldEvent != null) {
+            int eventIntensity = AranarthUtils.getActiveWorldEventIntensity();
+            boolean useThe = activeWorldEvent != WorldEvent.SEIKOS_COMET
+                    && activeWorldEvent != WorldEvent.HARMONIC_CONVERGENCE_OF_SACHSI
+                    && activeWorldEvent != WorldEvent.AEAROSTS_METEORITE;
+            String eventPrefix = useThe ? "  &7The &6" : "  &6";
+            player.sendMessage(ChatUtils.translateToColor(eventPrefix + activeWorldEvent.getName(eventIntensity) + " &7is currently active"));
+        }
+
         player.sendMessage("  " + messages[1]); // Date message
 
         int mailCount = MailUtils.getMail(player.getUniqueId()).size();

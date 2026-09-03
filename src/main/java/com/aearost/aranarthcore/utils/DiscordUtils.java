@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
+import com.aearost.aranarthcore.enums.WorldEvent;
 import com.aearost.aranarthcore.objects.*;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.EmbedBuilder;
@@ -44,6 +45,10 @@ public class DiscordUtils {
 
 	private static TextChannel getBoostsChannel() {
 		return DiscordSRV.getPlugin().getJda().getTextChannelById("1516249987795779604");
+	}
+
+	private static TextChannel getWorldEventsChannel() {
+		return DiscordSRV.getPlugin().getJda().getTextChannelById("1544900849107730435");
 	}
 
 	private static String discordRole(String key) {
@@ -863,6 +868,38 @@ public class DiscordUtils {
 		notifications.sendMessageEmbeds(embed.build()).queue();
 		// Server owner's Discord User ID
 		notifications.sendMessage("<@" + ownerUserId() + ">").queue();
+	}
+
+	/**
+	 * Sends a Discord announcement when a world event begins or ends.
+	 * @param event The world event.
+	 * @param intensity 0=Weak, 1=Normal, 2=Strong
+	 * @param started Whether the event is starting (true) or ending (false).
+	 */
+	public static void worldEventMessage(WorldEvent event, int intensity, boolean started) {
+		Color color;
+		switch (event) {
+			case SOLARIS -> color = Color.YELLOW;
+			case LUNARIS -> color = new Color(30, 30, 180);
+			case SEIKOS_COMET -> color = Color.RED;
+			case BLUE_MOON_OF_LEIKS -> color = Color.CYAN;
+			case HARMONIC_CONVERGENCE_OF_SACHSI -> color = Color.WHITE;
+			case AEAROSTS_METEORITE -> color = new Color(50, 180, 50);
+			default -> color = Color.GRAY;
+		}
+
+		EmbedBuilder embed = new EmbedBuilder();
+		if (started) {
+			String description = event.getSubtitleText(intensity).replaceAll("&.", "");
+			embed.setTitle(event.getName(intensity) + " has begun!")
+					.setDescription(description);
+		} else {
+			embed.setTitle(event.getName(intensity) + " has ended.");
+		}
+		embed.setColor(color);
+
+		getWorldEventsChannel().sendMessageEmbeds(embed.build()).queue();
+		serverChatChannel.sendMessageEmbeds(embed.build()).queue();
 	}
 
 	/**

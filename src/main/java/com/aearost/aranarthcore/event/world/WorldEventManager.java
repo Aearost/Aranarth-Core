@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.WorldEvent;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DiscordUtils;
 import com.aearost.aranarthcore.utils.PermissionUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
 import org.bukkit.Bukkit;
@@ -62,6 +63,9 @@ public class WorldEventManager implements Listener {
             }
         }
 
+        if (!AranarthCore.isSmpServer()) {
+            DiscordUtils.worldEventMessage(event, intensity, true);
+        }
         Bukkit.getLogger().info("[AC] World Event started: " + event.getName(intensity));
     }
 
@@ -94,6 +98,9 @@ public class WorldEventManager implements Listener {
             }
         }
 
+        if (!AranarthCore.isSmpServer()) {
+            DiscordUtils.worldEventMessage(event, intensity, false);
+        }
         nightBlindnessCounts.clear();
         Bukkit.getLogger().info("[AC] World Event ended: " + event.getName(intensity));
     }
