@@ -2197,6 +2197,38 @@ public class AranarthCoreBendingListener implements Listener {
         }
     }
 
+    // Rank-based choose-element cooldowns (ms): Peasant -> Emperor
+    private static final long[] CHOOSE_COOLDOWNS_MS = {
+        24L * 3600_000, // Rank 0: Peasant  - 24h
+        22L * 3600_000, // Rank 1: Esquire  - 22h
+        20L * 3600_000, // Rank 2: Knight   - 20h
+        18L * 3600_000, // Rank 3: Baron    - 18h
+        16L * 3600_000, // Rank 4: Count    - 16h
+        14L * 3600_000, // Rank 5: Duke     - 14h
+        12L * 3600_000, // Rank 6: Prince   - 12h
+         8L * 3600_000, // Rank 7: King     - 8h
+         6L * 3600_000, // Rank 8: Emperor  - 6h
+    };
+
+    /**
+     * Scales the element-change cooldown down as the player's rank increases.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onChooseElementCooldown(final PlayerCooldownChangeEvent e) {
+        if (e.getResult() != PlayerCooldownChangeEvent.Result.ADDED) {
+            return;
+        }
+        if (!"ChooseElement".equals(e.getAbility())) {
+            return;
+        }
+        if (!(e.getPlayer() instanceof Player player)) {
+            return;
+        }
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        int rank = Math.min(aranarthPlayer.getRank(), CHOOSE_COOLDOWNS_MS.length - 1);
+        e.setCooldown(CHOOSE_COOLDOWNS_MS[rank]);
+    }
+
     /**
      * Aang form reduces all incoming ability cooldowns by 30%.
      */
