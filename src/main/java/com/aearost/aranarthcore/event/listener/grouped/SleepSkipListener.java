@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.enums.WorldEvent;
 import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DefenderUtils;
 import net.md_5.bungee.api.ChatMessageType;
@@ -86,9 +87,7 @@ public class SleepSkipListener implements Listener {
 	@EventHandler
 	public void onPlayerLeaveBed(final PlayerBedLeaveEvent e) {
 		sleepingPlayers.remove(e.getPlayer().getUniqueId());
-		if (!sleepingPlayers.isEmpty()) {
-			updateSleepMessage();
-		}
+		updateSleepMessage();
 	}
 
 	/**
@@ -104,10 +103,17 @@ public class SleepSkipListener implements Listener {
 	 *                       to the remote server to prevent a count feedback loop.
 	 */
 	private void updateSleepMessage(boolean isRemoteUpdate) {
+		long deepAfkThresholdMs = AranarthUtils.getAfkSecondsAmount() * 1000L;
+		long now = System.currentTimeMillis();
 		int onlinePlayersInSurvivalWorlds = 0;
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			String worldName = player.getLocation().getWorld().getName();
 			if (worldName.equals("world") || AranarthUtils.isSmpWorld(worldName) || worldName.equals("resource")) {
+				AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
+				long startTime = ap != null ? ap.getAfkStartTime() : 0;
+				if (startTime > 0 && (now - startTime) >= deepAfkThresholdMs) {
+					continue; // Deeply AFK - exclude from sleep threshold
+				}
 				onlinePlayersInSurvivalWorlds++;
 			}
 		}

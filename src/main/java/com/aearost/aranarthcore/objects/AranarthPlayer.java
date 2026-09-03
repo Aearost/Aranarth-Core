@@ -85,6 +85,7 @@ public class AranarthPlayer {
     private HashMap<EntityType, List<Sentinel>> sentinel = new HashMap<>();
     private int plentifulBlocksToDestroy = 0;
     private AfkLocation afkLocation = null;
+    private long afkStartTime = 0;
     private int votePointsSpent = 0;
     private UUID lastReceivedMessage = null;
     private boolean isUsingSpawnBoost = true;
@@ -1427,6 +1428,14 @@ public class AranarthPlayer {
      */
     public void setAfkLocation(AfkLocation afkLocation) {
         this.afkLocation = afkLocation;
+    }
+
+    public long getAfkStartTime() {
+        return afkStartTime;
+    }
+
+    public void setAfkStartTime(long afkStartTime) {
+        this.afkStartTime = afkStartTime;
     }
 
     /**

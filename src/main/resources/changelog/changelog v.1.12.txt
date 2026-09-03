@@ -168,6 +168,7 @@ Minor Features
 [~] Fixed Hunter/Chi Strength not applying when Miner boost is also active
 [~] Fixed doubled outpost creation/rename messages caused by BroadcastRelayListener double-relay
 [~] Fixed outpost chunk counts not showing cross-server in /d info
+[+] Added exclusion to AFK players for sleep skipping
 
 Backend Code Changes
 -

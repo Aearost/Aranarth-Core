@@ -19,6 +19,7 @@ public class NetworkPlayer {
     private final String textureValue;
     private final String textureSignature;
     private boolean afk;
+    private long afkStartTime = 0;
 
     public NetworkPlayer(UUID uuid, String username, String nickname, String server,
                          int rank, int councilRank, int saintRank, int architectRank, boolean vanished,
@@ -106,5 +107,13 @@ public class NetworkPlayer {
 
     public void setAfk(boolean afk) {
         this.afk = afk;
+    }
+
+    public long getAfkStartTime() {
+        return afkStartTime;
+    }
+
+    public void setAfkStartTime(long afkStartTime) {
+        this.afkStartTime = afkStartTime;
     }
 }

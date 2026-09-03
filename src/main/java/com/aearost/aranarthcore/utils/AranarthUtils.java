@@ -3873,6 +3873,7 @@ public class AranarthUtils {
                 AfkLocation afkLocation = new AfkLocation(player.getLocation(), getAfkSecondsAmount());
                 aranarthPlayer.setAfkLocation(afkLocation);
             }
+            aranarthPlayer.setAfkStartTime(System.currentTimeMillis());
 
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
@@ -3890,6 +3891,7 @@ public class AranarthUtils {
                 return;
             }
             aranarthPlayer.setAfkLocation(null);
+            aranarthPlayer.setAfkStartTime(0);
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
                     onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You are no longer AFK"));

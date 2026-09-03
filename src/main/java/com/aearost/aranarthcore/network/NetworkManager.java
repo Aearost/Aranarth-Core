@@ -651,8 +651,17 @@ public class NetworkManager {
      * Returns the number of remote players that should count toward the sleep threshold.
      */
     public int getRemoteSleepEligibleCount() {
-        // All remote players count - they are on survival/SMP gameplay servers
-        return remoteRoster.size();
+        long deepAfkThresholdMs = AranarthUtils.getAfkSecondsAmount() * 1000L;
+        long now = System.currentTimeMillis();
+        int count = 0;
+        for (NetworkPlayer np : remoteRoster.values()) {
+            long startTime = np.getAfkStartTime();
+            if (startTime > 0 && (now - startTime) >= deepAfkThresholdMs) {
+                continue; // Deeply AFK - skip
+            }
+            count++;
+        }
+        return count;
     }
 
     public void setRemoteSleepCallback(Runnable callback) {
@@ -845,6 +854,7 @@ public class NetworkManager {
         json.addProperty("uuid", uuid.toString());
         json.addProperty("nickname", nickname);
         json.addProperty("afk", isAfk);
+        json.addProperty("afkStartTime", isAfk ? System.currentTimeMillis() : 0L);
         publish(CH_AFK, json);
     }
 
@@ -1919,10 +1929,13 @@ public class NetworkManager {
         String nickname = json.get("nickname").getAsString();
         boolean isAfk = json.get("afk").getAsBoolean();
 
+        long afkStartTime = json.has("afkStartTime") ? json.get("afkStartTime").getAsLong() : 0L;
+
         // Update the in-memory roster entry and refresh that player's tab display name
         NetworkPlayer np = remoteRoster.get(uuid);
         if (np != null) {
             np.setAfk(isAfk);
+            np.setAfkStartTime(afkStartTime);
             NetworkTabManager.addToTab(np);
         }
 
