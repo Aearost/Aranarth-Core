@@ -94,6 +94,7 @@ public class NetworkManager {
     public static final String CH_JOB_UPDATE = "aranarth:job_update";
     public static final String CH_VOTE_AWARD = "aranarth:vote_award";
     public static final String CH_VOTE_KEY = "aranarth:vote_key";
+    public static final String CH_VP_TRANSFER = "aranarth:vp_transfer";
     public static final String CH_INVSEE_REQUEST = "aranarth:invsee_request";
     public static final String CH_INVSEE_RESPONSE = "aranarth:invsee_response";
     public static final String CH_INVSEE_UPDATE = "aranarth:invsee_update";
@@ -359,6 +360,7 @@ public class NetworkManager {
             case CH_JOB_UPDATE -> handleJobUpdate(json);
             case CH_VOTE_AWARD -> handleVoteAward(json);
             case CH_VOTE_KEY -> handleVoteKey(json);
+            case CH_VP_TRANSFER -> handleVpTransfer(json);
             case CH_INVSEE_REQUEST -> handleInvseeRequest(json);
             case CH_INVSEE_RESPONSE -> handleInvseeResponse(json);
             case CH_INVSEE_UPDATE -> handleInvseeUpdate(json);
@@ -2520,6 +2522,40 @@ public class NetworkManager {
                         () -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(uuid));
             }
         });
+    }
+
+    /**
+     * Tells the receiver's server to credit vote points transferred from another player.
+     *
+     * @param receiverUuid   The UUID of the player receiving the points.
+     * @param amount         The number of vote points being transferred.
+     * @param timestamp      The timestamp of the synthetic vote entry.
+     * @param senderNickname The display name of the sending player.
+     */
+    public void publishVpTransfer(UUID receiverUuid, int amount, long timestamp, String senderNickname) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("receiverUuid", receiverUuid.toString());
+        json.addProperty("amount", amount);
+        json.addProperty("timestamp", timestamp);
+        json.addProperty("senderNickname", senderNickname);
+        publish(CH_VP_TRANSFER, json);
+    }
+
+    private void handleVpTransfer(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        UUID receiverUuid = UUID.fromString(json.get("receiverUuid").getAsString());
+        int amount = json.get("amount").getAsInt();
+        long timestamp = json.get("timestamp").getAsLong();
+        String senderNickname = json.get("senderNickname").getAsString();
+        AranarthUtils.addVote(new AranarthVote(receiverUuid, amount, timestamp));
+        Player receiver = Bukkit.getPlayer(receiverUuid);
+        if (receiver != null) {
+            receiver.sendMessage(ChatUtils.chatMessage("&7You have received &e" + amount + " &7vote points from &e" + senderNickname + "&7."));
+        }
     }
 
     /**

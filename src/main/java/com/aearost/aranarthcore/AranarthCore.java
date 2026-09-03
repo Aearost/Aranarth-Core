@@ -1455,6 +1455,8 @@ public class AranarthCore extends JavaPlugin {
         getCommand("votetop").setExecutor(new CommandVoteTop());
         getCommand("votetop").setTabCompleter(new CommandVoteTopCompleter());
         getCommand("voteshop").setExecutor(new CommandVoteShop());
+        getCommand("vptransfer").setExecutor(new CommandVpTransfer());
+        getCommand("vptransfer").setTabCompleter(new CommandVpTransferCompleter());
         getCommand("warp").setExecutor(new CommandWarp());
         getCommand("warp").setTabCompleter(new CommandWarpCompleter());
         getCommand("quests").setExecutor(new CommandQuests());
