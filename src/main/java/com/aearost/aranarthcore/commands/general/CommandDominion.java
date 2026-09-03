@@ -1843,7 +1843,7 @@ public class CommandDominion implements CommandExecutor {
                 Outpost op = dominionOutposts.get(i);
                 int maxChunks = OutpostUtils.getOutpostMaxChunks(op);
                 outpostsBuilder.append("&e").append(op.getName())
-                        .append(" &7(").append(op.getChunks().size()).append("/").append(maxChunks).append(" chunks)");
+                        .append(" &7(").append(op.getChunkCount()).append("/").append(maxChunks).append(" chunks)");
                 if (i < dominionOutposts.size() - 1) {
                     outpostsBuilder.append("&7, ");
                 }

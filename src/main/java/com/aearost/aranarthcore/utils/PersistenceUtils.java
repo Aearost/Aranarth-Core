@@ -6725,14 +6725,20 @@ public class PersistenceUtils {
                     ? worldName.substring(4) : worldName;
             World world = Bukkit.getWorld(outpostLookupName);
             List<Chunk> chunks = new ArrayList<>();
-            if (world != null && obj.has("chunks")) {
-                for (com.google.gson.JsonElement cEl : obj.getAsJsonArray("chunks")) {
-                    JsonObject c = cEl.getAsJsonObject();
-                    chunks.add(world.getChunkAt(c.get("x").getAsInt(), c.get("z").getAsInt()));
+            int jsonChunkCount = 0;
+            if (obj.has("chunks")) {
+                JsonArray chunkArr = obj.getAsJsonArray("chunks");
+                jsonChunkCount = chunkArr.size();
+                if (world != null) {
+                    for (com.google.gson.JsonElement cEl : chunkArr) {
+                        JsonObject c = cEl.getAsJsonObject();
+                        chunks.add(world.getChunkAt(c.get("x").getAsInt(), c.get("z").getAsInt()));
+                    }
                 }
             }
             Outpost outpost = new Outpost(id, name, dominionId, outpostIndex,
                     worldName, homeX, homeY, homeZ, homeYaw, homePitch, chunks, boughtChunks, createdTimestamp);
+            outpost.setStoredChunkCount(jsonChunkCount);
             outpost.setIcon(icon);
             OutpostUtils.registerOutpost(outpost);
         } catch (Exception e) {

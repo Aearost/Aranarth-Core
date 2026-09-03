@@ -2402,6 +2402,10 @@ public class NetworkManager {
                 } catch (IllegalArgumentException ignored) {
                 }
             }
+            if (data.has("chunks")) {
+                int newCount = data.getAsJsonArray("chunks").size();
+                existing.setStoredChunkCount(newCount);
+            }
         });
     }
 

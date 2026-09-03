@@ -54,7 +54,7 @@ Feather - Selling 8 for 83
 
 __**Smith Shop**__
 Glowberries - Selling 16 for 33
-Raw Copper - Selling 16 for 3
+Raw Copper - Selling 16 for 33
 Raw Iron - Selling 8 for 33
 Raw Gold - Selling 8 for 83
 Golden Carrots - Selling 16 for 75

@@ -164,6 +164,7 @@ Minor Features
 [~] Fixed Elder Guardian defenders applying Mining Fatigue to PvP-exempt players
 [~] Fixed Hunter/Chi Strength not applying when Miner boost is also active
 [~] Fixed doubled outpost creation/rename messages caused by BroadcastRelayListener double-relay
+[~] Fixed outpost chunk counts not showing cross-server in /d info
 
 Backend Code Changes
 -

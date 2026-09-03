@@ -26,6 +26,7 @@ public class Outpost {
     private String homeWorldName;
     private List<Chunk> chunks;
     private int boughtChunks;
+    private int storedChunkCount;
     private final long createdTimestamp;
     private Material icon;
     private Set<Biome> cachedBiomes = new HashSet<>();
@@ -91,6 +92,18 @@ public class Outpost {
 
     public void setChunks(List<Chunk> chunks) {
         this.chunks = chunks;
+    }
+
+    public int getChunkCount() {
+        return chunks.isEmpty() ? storedChunkCount : chunks.size();
+    }
+
+    public int getStoredChunkCount() {
+        return storedChunkCount;
+    }
+
+    public void setStoredChunkCount(int storedChunkCount) {
+        this.storedChunkCount = storedChunkCount;
     }
 
     public int getBoughtChunks() {
