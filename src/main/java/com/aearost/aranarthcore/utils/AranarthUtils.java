@@ -2881,7 +2881,8 @@ public class AranarthUtils {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 220, 1));
             }
-        } else if (serverBoosts.containsKey(Boost.HUNTER) || serverBoosts.containsKey(Boost.CHI)) {
+        }
+        if (serverBoosts.containsKey(Boost.HUNTER) || serverBoosts.containsKey(Boost.CHI)) {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 220, 1));
             }
