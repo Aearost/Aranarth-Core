@@ -4025,11 +4025,9 @@ public class PersistenceUtils {
         } catch (IOException e) {
             Bukkit.getLogger().info("[AC] There was an error in saving the quest state");
         }
-        // MySQL sync - snapshot UUIDs now so async dispatch doesn't miss any removed after this call
-        if (DatabaseManager.isActive()) {
-            Set<UUID> snapshot = new HashSet<>(QuestUtils.getLocallyModifiedUuids());
-            runDbSync(() -> syncQuestDataToDatabase(snapshot));
-        }
+        // MySQL sync is handled by saveQuestProgress() which runs immediately after this call
+        // in every save path. Running it here too would cause duplicate DB writes for every
+        // locally-modified UUID.
     }
 
     /**
@@ -9174,7 +9172,10 @@ public class PersistenceUtils {
         java.util.Collection<? extends Player> online = Bukkit.getOnlinePlayers();
         Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] saveAllJobData - " + online.size() + " online player(s)");
         for (Player player : online) {
-            saveJobDataSync(player.getUniqueId());
+            // saveJobData dispatches async when the plugin is enabled (periodic saves)
+            // and falls back to sync when the plugin is disabled (shutdown path), avoiding
+            // blocking MySQL writes on the main thread during normal operation.
+            saveJobData(player.getUniqueId());
         }
     }
 
