@@ -23,6 +23,11 @@ public class PlayerReaperCapture {
     public void execute(PlayerDeathEvent e) {
         Player player = e.getEntity();
 
+        // Soulbound armor negates all drops, so there is nothing to capture
+        if (AranarthUtils.isWearingArmorType(player, "soulbound")) {
+            return;
+        }
+
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
         if (aranarthPlayer != null && aranarthPlayer.isReaperDisabled()) {
             return;
