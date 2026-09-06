@@ -323,6 +323,7 @@ public class ShopProtectionListener implements Listener {
                 || block.getType() == Material.HOPPER
                 || block.getType() == Material.CRAFTER
                 || block.getType() == Material.FLOWER_POT
+                || name.endsWith("_SHELF")
                 || block.getType() == Material.CHISELED_BOOKSHELF
                 || block.getType() == Material.DECORATED_POT
                 || block.getType() == Material.SMOKER
