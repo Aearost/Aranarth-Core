@@ -45,26 +45,28 @@ public class WorldEventManager implements Listener {
         AranarthUtils.setActiveWorldEvent(event);
         AranarthUtils.setActiveWorldEventIntensity(intensity);
 
-        String title = ChatUtils.translateToColor(event.getTitleText(intensity));
-        String subtitle = ChatUtils.translateToColor(event.getSubtitleText(intensity));
-        String chatMsg = ChatUtils.chatMessage("&6[World Event] &f" + event.getName(intensity) + " &7has begun!");
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            String worldName = player.getWorld().getName();
-            if (!AranarthUtils.isSurvivalWorld(worldName) || worldName.equals("spawn") || worldName.equals("shops")) {
-                continue;
+        if (AranarthCore.isPublicServer()) {
+            String title = ChatUtils.translateToColor(event.getTitleText(intensity));
+            String subtitle = ChatUtils.translateToColor(event.getSubtitleText(intensity));
+            String chatMsg = ChatUtils.chatMessage("&6[World Event] &f" + event.getName(intensity) + " &7has begun!");
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                String worldName = player.getWorld().getName();
+                if (!AranarthUtils.isSurvivalWorld(worldName) || worldName.equals("spawn") || worldName.equals("shops")) {
+                    continue;
+                }
+                player.sendTitle(title, subtitle, 20, 120, 20);
+                player.sendMessage(chatMsg);
             }
-            player.sendTitle(title, subtitle, 20, 120, 20);
-            player.sendMessage(chatMsg);
+
+            if (!AranarthCore.isSmpServer()) {
+                DiscordUtils.worldEventMessage(event, intensity, true);
+            }
         }
 
         if (event.isElementalEvent()) {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 applyElementalEventToPlayer(player, event);
             }
-        }
-
-        if (!AranarthCore.isSmpServer()) {
-            DiscordUtils.worldEventMessage(event, intensity, true);
         }
         Bukkit.getLogger().info("[AC] World Event started: " + event.getName(intensity));
     }
@@ -82,13 +84,19 @@ public class WorldEventManager implements Listener {
         AranarthUtils.setActiveWorldEvent(null);
         AranarthUtils.setActiveWorldEventIntensity(1);
 
-        String chatMsg = ChatUtils.chatMessage("&6[World Event] &7The " + event.getName(intensity) + " has ended.");
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            String worldName = player.getWorld().getName();
-            if (!AranarthUtils.isSurvivalWorld(worldName) || worldName.equals("spawn") || worldName.equals("shops")) {
-                continue;
+        if (AranarthCore.isPublicServer()) {
+            String chatMsg = ChatUtils.chatMessage("&6[World Event] &7The " + event.getName(intensity) + " has ended.");
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                String worldName = player.getWorld().getName();
+                if (!AranarthUtils.isSurvivalWorld(worldName) || worldName.equals("spawn") || worldName.equals("shops")) {
+                    continue;
+                }
+                player.sendMessage(chatMsg);
             }
-            player.sendMessage(chatMsg);
+
+            if (!AranarthCore.isSmpServer()) {
+                DiscordUtils.worldEventMessage(event, intensity, false);
+            }
         }
 
         // Re-evaluate all player permissions to revoke event-granted sub-elements
@@ -96,10 +104,6 @@ public class WorldEventManager implements Listener {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 PermissionUtils.evaluatePlayerPermissions(player);
             }
-        }
-
-        if (!AranarthCore.isSmpServer()) {
-            DiscordUtils.worldEventMessage(event, intensity, false);
         }
         nightBlindnessCounts.clear();
         Bukkit.getLogger().info("[AC] World Event ended: " + event.getName(intensity));
