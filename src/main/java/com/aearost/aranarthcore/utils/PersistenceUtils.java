@@ -1421,7 +1421,7 @@ public class PersistenceUtils {
                     continue;
                 }
 
-                // #id|name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance|memberRanks
+                // #id|name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance|memberRanks|...|claimFoodYields(41)
                 String[] fields = row.split("\\|");
 
                 UUID id = null;
@@ -1556,6 +1556,13 @@ public class PersistenceUtils {
                         x, y, z, yaw, pitch, food, claimableResources, conquered, null,
                         // Keep balance at the end
                         balance);
+                if (fields.length > 41 && !fields[41].isEmpty()) {
+                    for (String s : fields[41].split(",")) {
+                        try {
+                            dominion.getClaimFoodYields().add(Double.parseDouble(s));
+                        } catch (NumberFormatException ignored) {}
+                    }
+                }
                 dominion.setMemberPvpEnabled(memberPvpEnabled);
                 dominion.setMobSpawningEnabled(mobSpawningEnabled);
                 dominion.setExplosionEnabled(explosionEnabled);
@@ -1780,7 +1787,10 @@ public class PersistenceUtils {
                 + "|" + (dominion.getConqueredRequest() != null ? dominion.getConqueredRequest().toString() : "")
                 + "|" + (dominion.getRebelRequest() != null ? dominion.getRebelRequest().toString() : "")
                 + "|" + dominion.getMapColor()
-                + "|" + (dominion.isExplosionEnabled() ? "1" : "0");
+                + "|" + (dominion.isExplosionEnabled() ? "1" : "0")
+                + "|" + dominion.getClaimFoodYields().stream()
+                        .map(v -> String.format("%.4f", v))
+                        .collect(java.util.stream.Collectors.joining(","));
     }
 
     /**
@@ -8278,6 +8288,13 @@ public class PersistenceUtils {
 
         Dominion dominion = new Dominion(id, name, leader, members, memberRanks, allies, truced, enemies, worldName, chunks,
                 x, y, z, yaw, pitch, food, claimableResources, conquered, null, balance);
+        if (fields.length > 41 && !fields[41].isEmpty()) {
+            for (String s : fields[41].split(",")) {
+                try {
+                    dominion.getClaimFoodYields().add(Double.parseDouble(s));
+                } catch (NumberFormatException ignored) {}
+            }
+        }
         dominion.setMemberPvpEnabled(memberPvpEnabled);
         dominion.setMobSpawningEnabled(mobSpawningEnabled);
         dominion.setExplosionEnabled(explosionEnabled);

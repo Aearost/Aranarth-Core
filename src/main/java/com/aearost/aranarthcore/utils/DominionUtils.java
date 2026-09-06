@@ -1073,6 +1073,35 @@ public class DominionUtils {
     }
 
     /**
+     * Returns the food reserve percentage (0.0-1.0) for the given dominion.
+     * @param dominion The dominion.
+     * @return Food reserve percentage, clamped to [0.0, 1.0].
+     */
+    public static double getBaseFoodPercentage(Dominion dominion) {
+        int totalSlots = getFoodArraySize(dominion);
+        if (totalSlots == 0) return 0.0;
+        int filledSlots = 0;
+        for (ItemStack food : dominion.getFood()) {
+            if (food != null && food.getType() != Material.AIR) {
+                filledSlots++;
+            }
+        }
+        return Math.min(1.0, filledSlots / (double) totalSlots);
+    }
+
+    /**
+     * Converts a raw food reserve percentage (0.0-1.0) to a resource claim yield multiplier.
+     * @param foodPct Raw food reserve percentage (0.0-1.0).
+     * @return Yield multiplier in [0.33, 1.0].
+     */
+    public static double foodPercentageToYield(double foodPct) {
+        if (foodPct >= 1.0) return 1.0;
+        if (foodPct <= 0.5) return 0.33;
+        // 0.33 at food of 0.5, 1.0 at food of 1.0
+        return 0.33 + (foodPct - 0.5) * 1.34;
+    }
+
+    /**
      * Returns the correct food array size for a dominion based on its rank level.
      * Level 1 = 18 slots (2 rows), Level 2 = 45 slots (5 rows),
      * Level 3 = 90 slots (2 pages), Level 4 = 135 slots (3 pages), Level 5 = 225 slots (5 pages).
@@ -1406,7 +1435,7 @@ public class DominionUtils {
      * @param biome The biome.
      * @return The icon.
      */
-    public static List<ItemStack> getResourcesByDominionAndBiome(Dominion dominion, Biome biome) {
+    public static List<ItemStack> getResourcesByDominionAndBiome(Dominion dominion, Biome biome, double yieldMultiplier) {
         List<ItemStack> items = new ArrayList<>();
         Random random = new Random();
 
@@ -2340,6 +2369,19 @@ public class DominionUtils {
             }
         }
 
+        // Apply food yield multiplier to item quantities before rank duplication
+        if (yieldMultiplier < 1.0) {
+            List<ItemStack> yieldScaled = new ArrayList<>();
+            for (ItemStack item : items) {
+                int scaled = (int) Math.round(item.getAmount() * yieldMultiplier);
+                if (scaled > 0) {
+                    item.setAmount(scaled);
+                    yieldScaled.add(item);
+                }
+            }
+            items = yieldScaled;
+        }
+
         List<ItemStack> multiplierItems = new ArrayList<>();
         for (ItemStack item : items) {
             multiplierItems.add(item);
@@ -2375,8 +2417,13 @@ public class DominionUtils {
 
             if (claimableAmount < maxClaimableResourcesAmount) {
                 if (isAllowedToClaimResources(dominion)) {
-                    claimableAmount = Math.min(claimableAmount + 2, maxClaimableResourcesAmount);
+                    double yieldThisWeek = foodPercentageToYield(getBaseFoodPercentage(dominion));
+                    int toAdd = Math.min(2, maxClaimableResourcesAmount - claimableAmount);
+                    claimableAmount += toAdd;
                     dominion.setClaimableResources(claimableAmount);
+                    for (int j = 0; j < toAdd; j++) {
+                        dominion.getClaimFoodYields().add(yieldThisWeek);
+                    }
                     isAmountIncreasing = true;
                 } else {
                     isClaimPrevented = true;
@@ -2424,7 +2471,10 @@ public class DominionUtils {
 
             if (player.isOnline()) {
                 if (isAmountIncreasing) {
+                    int foodPct = (int) Math.round(getBaseFoodPercentage(dominion) * 100);
+                    int yieldPct = (int) Math.round(foodPercentageToYield(foodPct / 100.0) * 100);
                     player.getPlayer().sendMessage(ChatUtils.chatMessage("&7It is a new week - Dominion resources may be claimed"));
+                    player.getPlayer().sendMessage(ChatUtils.chatMessage("&7Food reserves: &e" + foodPct + "% &7- Claim yield this week: &e" + yieldPct + "%"));
                 } else {
                     if (isClaimPrevented) {
                         player.getPlayer().sendMessage(ChatUtils.chatMessage("&7Your Dominion was unable to claim resources this week"));

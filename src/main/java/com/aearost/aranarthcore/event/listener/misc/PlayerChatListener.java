@@ -145,6 +145,20 @@ public class PlayerChatListener implements Listener {
 
                         final int count = enteredNumber;
                         final Biome capturedBiome = dominion.getBiomeResourcesBeingClaimed();
+
+                        // Compute the average yield
+                        List<Double> yields = dominion.getClaimFoodYields();
+                        int stored = Math.min(count, yields.size());
+                        double yieldSum = 0;
+                        for (int i = 0; i < stored; i++) {
+                            yieldSum += yields.get(i);
+                        }
+                        yieldSum += (count - stored) * 1.0; // Missing entries default to 100%
+                        final double avgYield = yieldSum / count;
+                        if (stored > 0) {
+                            yields.subList(0, stored).clear();
+                        }
+
                         // Deduct and clear state immediately on this thread to prevent a second claim
                         // being started while the main-thread task is still queued.
                         dominion.setClaimableResources(dominion.getClaimableResources() - count);
@@ -152,7 +166,7 @@ public class PlayerChatListener implements Listener {
                         DominionUtils.updateDominion(dominion);
                         Bukkit.getScheduler().runTask(plugin, () -> {
                             for (int i = 0; i < count; i++) {
-                                claimDominionResources(dominion, player, capturedBiome);
+                                claimDominionResources(dominion, player, capturedBiome, avgYield);
                             }
                             player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 0.5F, 1F);
                         });
@@ -449,8 +463,8 @@ public class PlayerChatListener implements Listener {
      * @param player   The player claiming the resources.
      * @param biome    The biome whose resources should be distributed.
      */
-    private void claimDominionResources(Dominion dominion, Player player, Biome biome) {
-        List<ItemStack> resourcesToClaim = DominionUtils.getResourcesByDominionAndBiome(dominion, biome);
+    private void claimDominionResources(Dominion dominion, Player player, Biome biome, double yieldMultiplier) {
+        List<ItemStack> resourcesToClaim = DominionUtils.getResourcesByDominionAndBiome(dominion, biome, yieldMultiplier);
         Location loc = player.getLocation();
         for (ItemStack resource : resourcesToClaim) {
             HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(resource);
@@ -458,6 +472,8 @@ public class PlayerChatListener implements Listener {
                 loc.getWorld().dropItemNaturally(loc, remainder.get(0));
             }
         }
-        player.sendMessage(ChatUtils.chatMessage("&7The resources have been added to your inventory"));
+        int yieldPct = (int) Math.round(yieldMultiplier * 100);
+        String yieldColor = yieldPct >= 80 ? "&a" : yieldPct >= 50 ? "&e" : "&c";
+        player.sendMessage(ChatUtils.chatMessage("&7The resources have been added to your inventory " + yieldColor + "(" + yieldPct + "% yield)"));
     }
 }

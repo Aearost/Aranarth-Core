@@ -33,6 +33,7 @@ public class Dominion {
 	private ItemStack[] food;
 	private int foodPowerBeingConsumed;
 	private int claimableResources;
+	private final List<Double> claimFoodYields = new ArrayList<>();
 	private Biome biomeResourcesBeingClaimed;
 	private List<UUID> conquered;
 	private UUID conqueredRequest;
@@ -625,6 +626,13 @@ public class Dominion {
 	 */
 	public void setClaimableResources(int claimableResources) {
 		this.claimableResources = claimableResources;
+	}
+
+	/**
+	 * Provides the list of yield multipliers (0.33-1.0) for each pending claimable resource slot.
+	 */
+	public List<Double> getClaimFoodYields() {
+		return claimFoodYields;
 	}
 
 	/**

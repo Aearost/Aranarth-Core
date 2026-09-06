@@ -40,6 +40,20 @@ public class GuiDominionResourcesClick {
 			player.sendMessage(ChatUtils.chatMessage("&7Your Dominion has &e"
 					+ dominion.getClaimableResources() + "/" + DominionUtils.getMaxClaimableResourcesAmount(dominion)
 					+ " &7available"));
+			// Show average claim yield across all pending slots
+			java.util.List<Double> yields = dominion.getClaimFoodYields();
+			int claimable = dominion.getClaimableResources();
+			double avgYield;
+			if (claimable == 0) {
+				avgYield = DominionUtils.foodPercentageToYield(DominionUtils.getBaseFoodPercentage(dominion));
+			} else {
+				double sum = yields.stream().mapToDouble(Double::doubleValue).sum();
+				int missing = Math.max(0, claimable - yields.size());
+				avgYield = (sum + missing) / claimable;
+			}
+			int avgYieldPct = (int) Math.round(avgYield * 100);
+			String yieldColor = avgYieldPct >= 80 ? "&a" : avgYieldPct >= 50 ? "&e" : "&c";
+			player.sendMessage(ChatUtils.chatMessage("&7Average claim yield - " + yieldColor + avgYieldPct + "%"));
 			player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5F, 1F);
 			player.closeInventory();
 		}
