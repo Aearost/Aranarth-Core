@@ -1158,6 +1158,9 @@ public class PersistenceUtils {
             int weekday = 0;
             Month month = null;
             int year = 0;
+            long worldEventStartTime = 0L;
+            WorldEvent worldEventType = null;
+            int worldEventIntensity = 1;
 
             Bukkit.getLogger().info("[AC] Attempting to read the serverdate file...");
 
@@ -1185,6 +1188,15 @@ public class PersistenceUtils {
                     case "lastResourceWorldResetTime" -> {
                         AranarthUtils.setLastResourceWorldResetTime(Long.parseLong(parts[1]));
                     }
+                    case "worldEventStartTime" -> {
+                        worldEventStartTime = Long.parseLong(parts[1]);
+                    }
+                    case "worldEventType" -> {
+                        try { worldEventType = WorldEvent.valueOf(parts[1]); } catch (IllegalArgumentException ignored) {}
+                    }
+                    case "worldEventIntensity" -> {
+                        worldEventIntensity = Integer.parseInt(parts[1]);
+                    }
                 }
 
                 if (fieldCount == 4) {
@@ -1193,6 +1205,11 @@ public class PersistenceUtils {
                     AranarthUtils.setMonth(month);
                     AranarthUtils.setYear(year);
                 }
+            }
+            AranarthUtils.setWorldEventStartTime(worldEventStartTime);
+            if (worldEventType != null && worldEventStartTime > 0) {
+                AranarthUtils.setActiveWorldEvent(worldEventType);
+                AranarthUtils.setActiveWorldEventIntensity(worldEventIntensity);
             }
             Bukkit.getLogger().info("[AC] The server date has been initialized");
             reader.close();
@@ -1233,7 +1250,13 @@ public class PersistenceUtils {
                 writer.write("weekday:" + AranarthUtils.getWeekday() + "\n");
                 writer.write("month:" + AranarthUtils.getMonth().name() + "\n");
                 writer.write("year:" + AranarthUtils.getYear() + "\n");
-                writer.write("lastResourceWorldResetTime:" + AranarthUtils.getLastResourceWorldResetTime());
+                writer.write("lastResourceWorldResetTime:" + AranarthUtils.getLastResourceWorldResetTime() + "\n");
+                writer.write("worldEventStartTime:" + AranarthUtils.getWorldEventStartTime() + "\n");
+                WorldEvent activeEvent = AranarthUtils.getActiveWorldEvent();
+                if (activeEvent != null) {
+                    writer.write("worldEventType:" + activeEvent.name() + "\n");
+                    writer.write("worldEventIntensity:" + AranarthUtils.getActiveWorldEventIntensity());
+                }
 
                 writer.close();
             } catch (IOException e) {
@@ -6156,6 +6179,12 @@ public class PersistenceUtils {
         obj.addProperty("month", AranarthUtils.getMonth().name());
         obj.addProperty("year", AranarthUtils.getYear());
         obj.addProperty("lastResourceWorldResetTime", AranarthUtils.getLastResourceWorldResetTime());
+        obj.addProperty("worldEventStartTime", AranarthUtils.getWorldEventStartTime());
+        WorldEvent activeEvent = AranarthUtils.getActiveWorldEvent();
+        if (activeEvent != null) {
+            obj.addProperty("worldEventType", activeEvent.name());
+            obj.addProperty("worldEventIntensity", AranarthUtils.getActiveWorldEventIntensity());
+        }
         try {
             db.saveServerDate(GSON.toJson(obj));
         } catch (Exception e) {
@@ -8096,6 +8125,16 @@ public class PersistenceUtils {
             }
             if (obj.has("lastResourceWorldResetTime")) {
                 AranarthUtils.setLastResourceWorldResetTime(obj.get("lastResourceWorldResetTime").getAsLong());
+            }
+            long worldEventStartTime = obj.has("worldEventStartTime") ? obj.get("worldEventStartTime").getAsLong() : 0L;
+            AranarthUtils.setWorldEventStartTime(worldEventStartTime);
+            if (obj.has("worldEventType") && worldEventStartTime > 0) {
+                try {
+                    WorldEvent event = WorldEvent.valueOf(obj.get("worldEventType").getAsString());
+                    int intensity = obj.has("worldEventIntensity") ? obj.get("worldEventIntensity").getAsInt() : 1;
+                    AranarthUtils.setActiveWorldEvent(event);
+                    AranarthUtils.setActiveWorldEventIntensity(intensity);
+                } catch (IllegalArgumentException ignored) {}
             }
             Bukkit.getLogger().info("[AC] Server date initialized from MySQL");
         } catch (Exception e) {

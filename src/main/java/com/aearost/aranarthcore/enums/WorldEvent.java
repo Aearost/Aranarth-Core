@@ -76,6 +76,11 @@ public enum WorldEvent {
 
     WorldEvent(String[] names, Month month, int minDay, int dayRange, Element element,
                int cycleOffset, String[] titleTexts, String[] subtitleTexts) {
+        for (String name : names) {
+            if (name.contains(":")) {
+                throw new IllegalArgumentException("WorldEvent name must not contain ':': " + name);
+            }
+        }
         this.names = names;
         this.month = month;
         this.minDay = minDay;

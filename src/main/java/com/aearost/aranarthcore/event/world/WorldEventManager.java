@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
 import com.aearost.aranarthcore.utils.PermissionUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -68,6 +69,8 @@ public class WorldEventManager implements Listener {
                 applyElementalEventToPlayer(player, event);
             }
         }
+        AranarthUtils.setWorldEventStartTime(System.currentTimeMillis());
+        PersistenceUtils.saveServerDate();
         Bukkit.getLogger().info("[AC] World Event started: " + event.getName(intensity));
     }
 
@@ -105,6 +108,10 @@ public class WorldEventManager implements Listener {
                 PermissionUtils.evaluatePlayerPermissions(player);
             }
         }
+        // -1 means this event cycle is done to prevent re-triggering in same window
+        // Reset to 0 when a new month begins
+        AranarthUtils.setWorldEventStartTime(-1L);
+        PersistenceUtils.saveServerDate();
         nightBlindnessCounts.clear();
         Bukkit.getLogger().info("[AC] World Event ended: " + event.getName(intensity));
     }

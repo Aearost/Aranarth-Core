@@ -2509,22 +2509,37 @@ public class DateUtils {
      * Checks whether a world event should start or end on the current new day.
      */
     private void checkWorldEventForDay(int dayNum, Month month, int yearNum) {
-        // End active event if its window has passed
         WorldEvent active = AranarthUtils.getActiveWorldEvent();
-        if (active != null && !isWithinEventWindow(active, dayNum, month, yearNum)) {
-            WorldEventManager.getInstance().endEvent();
+        long startTime = AranarthUtils.getWorldEventStartTime();
+
+        if (active != null) {
+            // End if the event's month has passed, or 24 real hours have elapsed since it started
+            boolean monthPassed = active.getMonth() != month;
+            boolean expired = startTime > 0 && System.currentTimeMillis() - startTime >= 24L * 60 * 60 * 1000;
+            if (monthPassed || expired) {
+                WorldEventManager.getInstance().endEvent();
+                if (monthPassed) {
+                    // Don't leave the sentinel set for the new month - reset so the new month's event can trigger
+                    AranarthUtils.setWorldEventStartTime(0);
+                    PersistenceUtils.saveServerDate();
+                }
+            }
+            return;
         }
 
-        // Start a new event if one begins today
-        if (AranarthUtils.getActiveWorldEvent() == null) {
-            for (WorldEvent event : WorldEvent.values()) {
-                if (event.getMonth() == month) {
-                    int[] window = getEventWindow(event, yearNum);
-                    if (dayNum >= window[0] && dayNum <= window[1]) {
-                        int intensity = getEventIntensity(event, yearNum);
-                        WorldEventManager.getInstance().startEvent(event, intensity);
-                        break;
-                    }
+        // startTime == -1: this month's event already ran; don't restart within the same window
+        if (startTime < 0) {
+            return;
+        }
+
+        // No active event and no cycle sentinel: check if one starts today
+        for (WorldEvent event : WorldEvent.values()) {
+            if (event.getMonth() == month) {
+                int[] window = getEventWindow(event, yearNum);
+                if (dayNum >= window[0] && dayNum <= window[1]) {
+                    int intensity = getEventIntensity(event, yearNum);
+                    WorldEventManager.getInstance().startEvent(event, intensity);
+                    break;
                 }
             }
         }
@@ -2563,6 +2578,8 @@ public class DateUtils {
     }
 
     private int getEventDuration(WorldEvent event, int yearNum) {
+        // Controls the catch-up window for starting if the server was down on day 0.
+        // Event lifespan is now governed by real time (24 hours from start).
         int intensity = getEventIntensity(event, yearNum);
         return switch (intensity) {
             case 2 -> 3;

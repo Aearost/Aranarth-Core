@@ -105,6 +105,7 @@ public class AranarthUtils {
     private static int year;
     private static WorldEvent activeWorldEvent = null;
     private static int activeWorldEventIntensity = 1;
+    private static long worldEventStartTime = 0L; // epoch ms; -1 = ended this cycle, 0 = none
     private static long lastResourceWorldResetTime = 0L;
     private static int stormDuration;
     private static int stormDelay;
@@ -2609,6 +2610,14 @@ public class AranarthUtils {
 
     public static void setActiveWorldEventIntensity(int intensity) {
         activeWorldEventIntensity = intensity;
+    }
+
+    public static long getWorldEventStartTime() {
+        return worldEventStartTime;
+    }
+
+    public static void setWorldEventStartTime(long time) {
+        worldEventStartTime = time;
     }
 
     /**
