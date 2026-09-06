@@ -108,6 +108,10 @@ public class CommandShop implements CommandExecutor {
         }
 
         if (args[0].equalsIgnoreCase("create")) {
+            if (!aranarthPlayer.isInAdminMode()) {
+                player.sendMessage(ChatUtils.chatMessage("&cShop island creation is currently disabled"));
+                return true;
+            }
             if (aranarthPlayer.getRank() < 3 && !aranarthPlayer.isInAdminMode()) {
                 String suffix = aranarthPlayer.getPronouns() == Pronouns.FEMALE ? "ess" : "";
                 player.sendMessage(ChatUtils.chatMessage("&cYou must be a &5&lBaron" + suffix + " &cor higher to create a shop"));
