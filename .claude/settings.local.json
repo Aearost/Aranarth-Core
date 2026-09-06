@@ -457,7 +457,8 @@
       "Bash(find /c/Users/liamh -name *.json)",
       "Bash(/c/Program Files/NetBeans-23/netbeans/java/maven/bin/mvn compile -q)",
       "Bash(zcat \"C:/Users/liamh/Downloads/Logs/Survival/2026-09-04-1.log.gz\")",
-      "Bash(zcat \"C:/Users/liamh/Downloads/Logs/Survival/2026-09-05-1.log.gz\")"
+      "Bash(zcat \"C:/Users/liamh/Downloads/Logs/Survival/2026-09-05-1.log.gz\")",
+      "Bash(find /c/Users/liamh/IdeaProjects/ProjectKorra-wip -iname *firebomb*)"
     ]
   }
 }

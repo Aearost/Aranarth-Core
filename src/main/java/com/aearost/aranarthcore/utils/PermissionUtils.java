@@ -425,6 +425,7 @@ public class PermissionUtils {
         perms.setPermission("bending.ability.cablewhip", true);      // metal - Knight
         perms.setPermission("bending.ability.bloodgrip", true);      // blood - Prince
         perms.setPermission("bending.ability.daggerthrow", true);    // chi - always
+        perms.setPermission("bending.ability.firebomb", true);      // fire - always
 
         // Aranarth abilities unlocked at a higher rank than their sub-element (enabled in setRankPermissions)
         perms.setPermission("bending.ability.astralprojection", false);   // spiritual - Duke
