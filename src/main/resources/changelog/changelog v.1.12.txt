@@ -50,6 +50,7 @@ Major Features
 [+] Added low health heartbeat sound with progressive speed
 [+] Scaled element change cooldown by rank from 24h at Peasant to 6h at Emperor
 [+] Added /vptransfer to transfer vote points from one player to another
+[+] Implemented the AirSnipe combo for airbenders
 
 Minor Features
 [~] Fixed issue where the alchemist job was not providing xp when shift-clicking ingredients into a brewing stand

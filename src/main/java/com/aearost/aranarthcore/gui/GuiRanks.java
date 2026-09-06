@@ -118,6 +118,7 @@ public class GuiRanks {
 			knightMeta.setDisplayName(ChatUtils.translateToColor("&7&l&nKnight&r&f&l ($5,000)"));
 		}
 		knightLore.add(ChatUtils.translateToColor("&f&lBending"));
+		knightLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] &7&oAirSnipe"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] &3&oBasic healing abilities"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.METAL.getColor() + "&oBasic metalbending abilities"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- &6[&eC&6] &6&oAcrobatStance, WarriorStance"));

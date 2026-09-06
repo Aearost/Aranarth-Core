@@ -450,7 +450,14 @@
       "Bash(/c/Users/liamh/AppData/Local/Programs/Maven/apache-maven-3.9.9/bin/mvn compile:*)",
       "Bash(find /c/Users/liamh/Downloads -name *.yml)",
       "Bash(cmd /c \"mvn compile -q 2>&1\")",
-      "Bash(C:/ProgramData/chocolatey/bin/mvn.cmd compile:*)"
+      "Bash(C:/ProgramData/chocolatey/bin/mvn.cmd compile:*)",
+      "Bash(find /c/Users/liamh -name *.yml -path */luckperms*)",
+      "Bash(find /c/Users/liamh -name groups.yml -o -name knight*.yml)",
+      "Bash(find /c/Users/liamh/Downloads/Logs -name *.json)",
+      "Bash(find /c/Users/liamh -name *.json)",
+      "Bash(/c/Program Files/NetBeans-23/netbeans/java/maven/bin/mvn compile -q)",
+      "Bash(zcat \"C:/Users/liamh/Downloads/Logs/Survival/2026-09-04-1.log.gz\")",
+      "Bash(zcat \"C:/Users/liamh/Downloads/Logs/Survival/2026-09-05-1.log.gz\")"
     ]
   }
 }

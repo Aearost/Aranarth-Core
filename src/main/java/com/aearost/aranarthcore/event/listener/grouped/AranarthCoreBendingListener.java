@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.abilities.airbending.combo.AirSnipe;
 import com.aearost.aranarthcore.abilities.airbending.soundbending.*;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.*;
 import com.aearost.aranarthcore.abilities.chiblocking.DaggerThrow;
@@ -124,6 +125,7 @@ public class AranarthCoreBendingListener implements Listener {
         // so players are safely returned to their body location.
         AstralProjection.endAllProjections();
         PastLives.endAllInstances();
+        new ArrayList<>(CoreAbility.getAbilities(AirSnipe.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(AstralShot.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(CableSlash.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(EarthRush.class)).forEach(CoreAbility::remove);
@@ -753,6 +755,13 @@ public class AranarthCoreBendingListener implements Listener {
                 new LeafScythe(player);
                 return;
             }
+        }
+
+        // AirSnipe: left-click with AirPunch fires the charged snipe
+        AirSnipe airSnipe = AirSnipe.getActiveInstance(player.getUniqueId());
+        if (airSnipe != null) {
+            airSnipe.fire();
+            return;
         }
 
         // JetBolt: block other left-click abilities during active flight

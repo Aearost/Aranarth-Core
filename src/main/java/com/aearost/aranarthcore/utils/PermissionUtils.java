@@ -250,6 +250,7 @@ public class PermissionUtils {
             perms.setPermission("bending.ability.Combustion", true);
             perms.setPermission("bending.ability.SwiftStream", true);
             // Aranarth abilities now rank-gated
+            perms.setPermission("bending.ability.airsnipe", true);
             perms.setPermission("bending.ability.astralprojection", true);
             perms.setPermission("bending.ability.astralshot", true);
             perms.setPermission("bending.ability.vinewhip", true);
@@ -333,6 +334,7 @@ public class PermissionUtils {
             perms.setPermission("bending.ability.Combustion", false);
             perms.setPermission("bending.ability.SwiftStream", false);
             // Aranarth abilities now rank-gated
+            perms.setPermission("bending.ability.airsnipe", false);
             perms.setPermission("bending.ability.astralprojection", false);
             perms.setPermission("bending.ability.astralshot", false);
             perms.setPermission("bending.ability.vinewhip", false);
@@ -451,6 +453,7 @@ public class PermissionUtils {
         perms.setPermission("bending.ability.metalblade", false);         // metal - Baron
         perms.setPermission("bending.ability.cablethrash", false);        // metal - Baron
         perms.setPermission("bending.ability.daggervolley", false);       // chi - Count
+        perms.setPermission("bending.ability.airsnipe", false);              // air combo - Knight
         perms.setPermission("bending.ability.mendingwaters", false);        // healing - Knight
         perms.setPermission("bending.ability.healinghelix", false);         // healing - Count
         perms.setPermission("bending.ability.corruptinghelix", false);    // healing - Prince
@@ -771,6 +774,7 @@ public class PermissionUtils {
                     perms.setPermission("bending.ability.Combustion", true);
                     perms.setPermission("bending.ability.SwiftStream", true);
                     // Aranarth abilities now rank-gated
+                    perms.setPermission("bending.ability.airsnipe", true);
                     perms.setPermission("bending.ability.astralprojection", true);
                     perms.setPermission("bending.ability.astralshot", true);
                     perms.setPermission("bending.ability.vinewhip", true);
@@ -959,6 +963,7 @@ public class PermissionUtils {
 
         // Knight
         if (rank >= 2) {
+            perms.setPermission("bending.ability.airsnipe", true);              // air combo
             perms.setPermission("bending.water.healing", true);
             perms.setPermission("bending.ability.mendingwaters", true);         // healing
             perms.setPermission("bending.earth.metalbending", true);
