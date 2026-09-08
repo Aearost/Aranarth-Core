@@ -441,6 +441,11 @@ public class AranarthUtils {
 
         if (currentWorld.startsWith("world")) {
             aranarthPlayer.setSurvivalInventory(ItemUtils.toBase64(player.getInventory()));
+            if (destinationWorld.startsWith("arena")) {
+                // Capture food/saturation before the immediate DB write
+                aranarthPlayer.setSurvivalFoodLevel(player.getFoodLevel());
+                aranarthPlayer.setSurvivalSaturation(player.getSaturation());
+            }
             // Immediately persist the survival snapshot to MySQL so it survives a rapid server
             // restart before the next periodic save or quit-time async write can run.
             PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
@@ -448,6 +453,8 @@ public class AranarthUtils {
                 boolean hasArena = !aranarthPlayer.getArenaInventory().isEmpty();
                 if (hasArena) {
                     player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getArenaInventory()));
+                    player.setFoodLevel(20);
+                    player.setSaturation(0f);
                     player.setGameMode(GameMode.SURVIVAL);
                     PermissionUtils.toggleArenaBendingPermissions(player, true);
                     PermissionUtils.updateSubElements(player);
@@ -455,6 +462,8 @@ public class AranarthUtils {
                     return;
                 }
                 player.getInventory().clear();
+                player.setFoodLevel(20);
+                player.setSaturation(0f);
                 player.setGameMode(GameMode.SURVIVAL);
                 PermissionUtils.toggleArenaBendingPermissions(player, true);
                 PermissionUtils.updateSubElements(player);
@@ -483,8 +492,10 @@ public class AranarthUtils {
                     // were not properly persisted (MySQL race condition on restart). Logging so
                     // admins can investigate and use /invswap to correct if needed.
                     Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] survivalInventory empty for "
-                            + player.getName() + " during arena→world switch - skipping clear to protect items");
+                            + player.getName() + " during arena->world switch - skipping clear to protect items");
                 }
+                player.setFoodLevel(aranarthPlayer.getSurvivalFoodLevel());
+                player.setSaturation(aranarthPlayer.getSurvivalSaturation());
                 player.setGameMode(GameMode.SURVIVAL);
                 PermissionUtils.toggleArenaBendingPermissions(player, false);
                 PermissionUtils.updateSubElements(player);
@@ -529,6 +540,8 @@ public class AranarthUtils {
                 boolean hasArena = !aranarthPlayer.getArenaInventory().isEmpty();
                 if (hasArena) {
                     player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getArenaInventory()));
+                    player.setFoodLevel(20);
+                    player.setSaturation(0f);
                     player.setGameMode(GameMode.SURVIVAL);
                     PermissionUtils.toggleArenaBendingPermissions(player, true);
                     PermissionUtils.updateSubElements(player);
@@ -536,6 +549,8 @@ public class AranarthUtils {
                     return;
                 }
                 player.getInventory().clear();
+                player.setFoodLevel(20);
+                player.setSaturation(0f);
                 player.setGameMode(GameMode.SURVIVAL);
                 PermissionUtils.toggleArenaBendingPermissions(player, true);
                 PermissionUtils.updateSubElements(player);
