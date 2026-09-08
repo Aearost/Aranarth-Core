@@ -11,51 +11,116 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class GuiDominionResources {
 
+	public static final int CONTENT_PER_PAGE = 36; // max 4 content rows per page
+	public static final Map<UUID, Integer> playerPage = new HashMap<>();
+
 	private final Player player;
+	private final int page;
 	private final Inventory initializedGui;
 
 	public GuiDominionResources(Player player) {
+		this(player, 0);
+	}
+
+	public GuiDominionResources(Player player, int page) {
 		this.player = player;
-		this.initializedGui = initializeGui(player);
+		this.page = page;
+		this.initializedGui = initializeGui(player, page);
 	}
 
 	public void openGui() {
+		playerPage.put(player.getUniqueId(), page);
 		player.closeInventory();
 		player.openInventory(initializedGui);
 	}
-	
-	private Inventory initializeGui(Player player) {
+
+	private Inventory initializeGui(Player player, int page) {
 		Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 		List<Biome> biomes = DominionUtils.getResourceClaimTypes(dominion);
 
-		int size = 0;
-		if (biomes.size() <= 9) {
-			size = 9;
-		} else if (biomes.size() <= 18) {
-			size = 18;
-		} else if (biomes.size() <= 27) {
-			size = 27;
-		} else if (biomes.size() <= 36) {
-			size = 36;
-		} else if (biomes.size() <= 45) {
-			size = 45;
+		int totalBiomes = biomes.size();
+		int totalPages = Math.max(1, (int) Math.ceil((double) totalBiomes / CONTENT_PER_PAGE));
+		int safePage = Math.min(page, totalPages - 1);
+
+		// Determine content rows and total size
+		int contentRows;
+		if (totalPages > 1) {
+			// Paginated - always use 4 content rows (54 total)
+			contentRows = 4;
 		} else {
-			size = 54;
+			contentRows = Math.max(1, (int) Math.ceil((double) totalBiomes / 9.0));
+		}
+		int size = contentRows * 9 + 18;
+
+		Inventory gui = Bukkit.getServer().createInventory(player, size,
+				ChatUtils.translateToColor("&e" + dominion.getName() + "'s &rResources"));
+
+		ItemStack filler = makeFiller();
+
+		// Top filler row
+		for (int i = 0; i < 9; i++) {
+			gui.setItem(i, filler);
+		}
+		// Bottom filler row
+		for (int i = size - 9; i < size; i++) {
+			gui.setItem(i, filler);
 		}
 
-		Inventory gui = Bukkit.getServer().createInventory(player, size, ChatUtils.translateToColor("&e" + dominion.getName() +"'s &rResources"));
-		for (int i = 0; i < biomes.size(); i++) {
-			ItemStack item = new ItemStack(getIconByBiome(biomes.get(i)));
+		// Biome items in content area
+		int start = safePage * CONTENT_PER_PAGE;
+		int end = Math.min(start + CONTENT_PER_PAGE, totalBiomes);
+		int slot = 9;
+		for (int i = start; i < end; i++) {
+			Biome biome = biomes.get(i);
+			ItemStack item = new ItemStack(getIconByBiome(biome));
 			ItemMeta itemMeta = item.getItemMeta();
-			itemMeta.setDisplayName(DominionUtils.getBiomeName(biomes.get(i)));
+			itemMeta.setDisplayName(ChatUtils.translateToColor("&l" + DominionUtils.getBiomeName(biome)));
+			itemMeta.setLore(Arrays.asList(
+					ChatUtils.translateToColor("&7Right-click to &epreview &7resources"),
+					ChatUtils.translateToColor("&7Left-click to &eclaim &7resources")
+			));
 			item.setItemMeta(itemMeta);
-			gui.setItem(i, item);
+			gui.setItem(slot++, item);
 		}
+
+		// Pagination buttons in bottom row
+		if (totalPages > 1) {
+			if (safePage > 0) {
+				gui.setItem(size - 9, makeNavButton(Material.ARROW, "&aPrevious Page",
+						"&7Page " + safePage + " / " + totalPages));
+			}
+			if (safePage < totalPages - 1) {
+				gui.setItem(size - 1, makeNavButton(Material.ARROW, "&aNext Page",
+						"&7Page " + (safePage + 2) + " / " + totalPages));
+			}
+		}
+
 		return gui;
+	}
+
+	private ItemStack makeFiller() {
+		ItemStack pane = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+		ItemMeta meta = pane.getItemMeta();
+		meta.setDisplayName(" ");
+		pane.setItemMeta(meta);
+		return pane;
+	}
+
+	private ItemStack makeNavButton(Material mat, String name, String loreText) {
+		ItemStack item = new ItemStack(mat);
+		ItemMeta meta = item.getItemMeta();
+		meta.setDisplayName(ChatUtils.translateToColor(name));
+		meta.setLore(List.of(ChatUtils.translateToColor(loreText)));
+		item.setItemMeta(meta);
+		return item;
 	}
 
 	/**

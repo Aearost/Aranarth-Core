@@ -53,6 +53,7 @@ Major Features
 [+] Implemented the AirSnipe combo for airbenders
 [~] Scaled dominion resource claim yields by weekly food slot fill efficiency
 [-] Disabled the creation of new shop islands
+[+] Added dominion resource claim preview via right-click
 
 Minor Features
 [~] Fixed issue where the alchemist job was not providing xp when shift-clicking ingredients into a brewing stand
