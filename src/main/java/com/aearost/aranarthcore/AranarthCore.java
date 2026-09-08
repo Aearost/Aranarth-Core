@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore;
 
+import com.aearost.aranarthcore.bending.RankCanBindHook;
 import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralProjection;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.PastLives;
@@ -29,6 +30,7 @@ import com.aearost.aranarthcore.recipes.*;
 import com.aearost.aranarthcore.recipes.aranarthium.*;
 import com.aearost.aranarthcore.utils.*;
 import com.github.retrooper.packetevents.PacketEvents;
+import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.util.TempBlock;
@@ -471,6 +473,7 @@ public class AranarthCore extends JavaPlugin {
             Bukkit.getLogger().warning("Failed to set sub-element colors: " + e.getMessage());
         }
         CoreAbility.registerPluginAbilities(AranarthCore.getInstance(), "com.aearost.aranarthcore.abilities");
+        BendingPlayer.registerCanBindHook(this, new RankCanBindHook());
         Bukkit.getLogger().info(LOG_PREFIX + "AranarthCore Bending has been loaded");
 
         runRepeatingTasks();

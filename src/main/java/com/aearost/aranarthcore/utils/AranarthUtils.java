@@ -497,9 +497,7 @@ public class AranarthUtils {
                 player.setFoodLevel(aranarthPlayer.getSurvivalFoodLevel());
                 player.setSaturation(aranarthPlayer.getSurvivalSaturation());
                 player.setGameMode(GameMode.SURVIVAL);
-                PermissionUtils.toggleArenaBendingPermissions(player, false);
-                PermissionUtils.updateSubElements(player);
-                player.updateCommands();
+                PermissionUtils.evaluatePlayerPermissions(player);
                 return;
             } else if (destinationWorld.startsWith("creative")) {
                 aranarthPlayer.setArenaInventory(ItemUtils.toBase64(player.getInventory()));
@@ -510,9 +508,7 @@ public class AranarthUtils {
                     player.getInventory().clear();
                 }
                 player.setGameMode(GameMode.CREATIVE);
-                PermissionUtils.toggleArenaBendingPermissions(player, false);
-                PermissionUtils.updateSubElements(player);
-                player.updateCommands();
+                PermissionUtils.evaluatePlayerPermissions(player);
                 return;
             }
             player.getInventory().clear();

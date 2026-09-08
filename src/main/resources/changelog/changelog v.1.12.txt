@@ -182,4 +182,4 @@ Minor Features
 [+] Added full hunger bars to the arena world
 
 Backend Code Changes
--
+- Restructured how ability permissions are added to fix issues causing certain abilities to not be bindable

@@ -290,6 +290,8 @@ public class PermissionUtils {
             perms.setPermission("bending.ability.BloodPuppet", false);
             perms.setPermission("bending.ability.bloodgrip", false);
             perms.setPermission("bending.ability.bloodfreeze", false);
+            perms.setPermission("bending.ability.disalignment", false);
+            perms.setPermission("bending.ability.liferip", false);
             perms.setPermission("bending.air.flight", false);
             perms.setPermission("bending.ability.SwiftStream", false);
         } else {
@@ -305,69 +307,9 @@ public class PermissionUtils {
             perms.setPermission("bending.air.spiritual", false);
             perms.setPermission("bending.air.sound", false);
 
-            // Disable rank-gated abilities (setRankPermissions re-enables them for appropriate ranks)
-            perms.setPermission("bending.ability.waterarms", false);
-            perms.setPermission("bending.ability.firecomet", false);
-            perms.setPermission("bending.ability.suffocate", false);
-            perms.setPermission("bending.ability.LavaFlux", false);
-            perms.setPermission("bending.ability.Fissure", false);
-            // JedCore abilities
-            perms.setPermission("bending.ability.SandBlast", false);
-            perms.setPermission("bending.ability.AcrobatStance", false);
-            perms.setPermission("bending.ability.WarriorStance", false);
-            perms.setPermission("bending.ability.MetalShred", false);
-            perms.setPermission("bending.ability.MagnetShield", false);
-            perms.setPermission("bending.ability.MetalFragments", false);
-            perms.setPermission("bending.ability.Meditate", false);
-            perms.setPermission("bending.ability.LavaThrow", false);
-            perms.setPermission("bending.ability.Discharge", false);
-            perms.setPermission("bending.ability.Lightning", false);
-            perms.setPermission("bending.ability.jolt", false);
-            perms.setPermission("bending.ability.electricstrike", false);
-            perms.setPermission("bending.ability.jetbolt", false);
-            perms.setPermission("bending.ability.static", false);
-            perms.setPermission("bending.ability.BloodPuppet", false);
-            perms.setPermission("bending.ability.LavaDisc", false);
-            perms.setPermission("bending.ability.MagmaBlast", false);
-            perms.setPermission("bending.ability.LightningBurst", false);
-            perms.setPermission("bending.ability.Bolt", false);
-            perms.setPermission("bending.ability.Combustion", false);
-            perms.setPermission("bending.ability.SwiftStream", false);
-            // Aranarth abilities now rank-gated
-            perms.setPermission("bending.ability.airsnipe", false);
-            perms.setPermission("bending.ability.astralprojection", false);
-            perms.setPermission("bending.ability.astralshot", false);
-            perms.setPermission("bending.ability.vinewhip", false);
-            perms.setPermission("bending.ability.sonicboom", false);
-            perms.setPermission("bending.ability.cableslash", false);
-            perms.setPermission("bending.ability.sandstorm", false);
-            perms.setPermission("bending.ability.iceshards", false);
-            perms.setPermission("bending.ability.barrage", false);
-            perms.setPermission("bending.ability.angeredspirits", false);
-            perms.setPermission("bending.ability.burial", false);
-            perms.setPermission("bending.ability.deafeningscream", false);
-            perms.setPermission("bending.ability.sonicpulse", false);
-            perms.setPermission("bending.ability.toxicspores", false);
-            perms.setPermission("bending.ability.leafscythe", false);
-            perms.setPermission("bending.ability.rootsnare", false);
-            perms.setPermission("bending.ability.energyburst", false);
-            perms.setPermission("bending.ability.magmaglaives", false);
-            perms.setPermission("bending.ability.moltenblast", false);
-            perms.setPermission("bending.ability.eruption", false);
-            perms.setPermission("bending.ability.magmawave", false);
-            perms.setPermission("bending.ability.combustionstrike", false);
-            perms.setPermission("bending.ability.metalshots", false);
-            perms.setPermission("bending.ability.metalstrips", false);
-            perms.setPermission("bending.ability.metalshred", false);
-            perms.setPermission("bending.ability.metalblade", false);
-            perms.setPermission("bending.ability.cablethrash", false);
-            perms.setPermission("bending.ability.daggervolley", false);
-            perms.setPermission("bending.ability.mendingwaters", false);
-            perms.setPermission("bending.ability.healinghelix", false);
-            perms.setPermission("bending.ability.corruptinghelix", false);
-            perms.setPermission("bending.ability.bloodfreeze", false);
-            perms.setPermission("bending.ability.disalignment", false);
-            perms.setPermission("bending.ability.liferip", false);
+            // Ability permissions are always true (set in setDefaultPermissions/attachment 1).
+            // Only sub-element permissions need to be managed here for non-arena.
+            // RankCanBindHook enforces rank gates at bind time.
             setRankPermissions(perms, AranarthUtils.getPlayer(player.getUniqueId()).getRank());
         }
     }
@@ -404,86 +346,85 @@ public class PermissionUtils {
         perms.setPermission("bending.water.bloodbending", false);
         perms.setPermission("bending.water.bloodbending.anytime", false);
 
-        // Disable abilities
-        perms.setPermission("bending.ability.waterarms", false);
-        perms.setPermission("bending.ability.firecomet", false);
-        perms.setPermission("bending.ability.suffocate", false);
-        perms.setPermission("bending.ability.LavaFlux", false);
-        perms.setPermission("bending.ability.Fissure", false);
+        // All ability permissions are set to true so every ability is always visible
+        perms.setPermission("bending.ability.waterarms", true);
+        perms.setPermission("bending.ability.firecomet", true);
+        perms.setPermission("bending.ability.suffocate", true);
+        perms.setPermission("bending.ability.LavaFlux", true);
+        perms.setPermission("bending.ability.Fissure", true);
 
-        // Aranarth abilities available at same rank as their sub-element unlock
-        perms.setPermission("bending.ability.razorleaves", true);    // plant - Esquire
-        perms.setPermission("bending.ability.icediscs", true);       // water combo - always
-        perms.setPermission("bending.ability.earthrush", true);       // earth combo - always
-        perms.setPermission("bending.ability.IceSkate", true);        // JedCore ice passive - always
-        perms.setPermission("bending.ability.noxiousfumes", true);   // combustion - King
-        perms.setPermission("bending.ability.sandwave", true);       // sand - Esquire
-        perms.setPermission("bending.ability.amplification", true);  // sound - Duke
-        perms.setPermission("bending.ability.regrowth", true);       // plant - Esquire
-        perms.setPermission("bending.ability.sonicclap", true);      // sound - Duke
-        perms.setPermission("bending.ability.jetfumes", true);       // combustion combo - King
-        perms.setPermission("bending.ability.cablewhip", true);      // metal - Knight
-        perms.setPermission("bending.ability.bloodgrip", true);      // blood - Prince
-        perms.setPermission("bending.ability.daggerthrow", true);    // chi - always
-        perms.setPermission("bending.ability.firebomb", true);      // fire - always
+        // Aranarth abilities (all true - rank gates enforced by RankCanBindHook)
+        perms.setPermission("bending.ability.razorleaves", true);
+        perms.setPermission("bending.ability.icediscs", true);
+        perms.setPermission("bending.ability.earthrush", true);
+        perms.setPermission("bending.ability.IceSkate", true);
+        perms.setPermission("bending.ability.noxiousfumes", true);
+        perms.setPermission("bending.ability.sandwave", true);
+        perms.setPermission("bending.ability.amplification", true);
+        perms.setPermission("bending.ability.regrowth", true);
+        perms.setPermission("bending.ability.sonicclap", true);
+        perms.setPermission("bending.ability.jetfumes", true);
+        perms.setPermission("bending.ability.cablewhip", true);
+        perms.setPermission("bending.ability.bloodgrip", true);
+        perms.setPermission("bending.ability.daggerthrow", true);
+        perms.setPermission("bending.ability.firebomb", true);
+        perms.setPermission("bending.ability.astralprojection", true);
+        perms.setPermission("bending.ability.astralshot", true);
+        perms.setPermission("bending.ability.vinewhip", true);
+        perms.setPermission("bending.ability.sonicboom", true);
+        perms.setPermission("bending.ability.cableslash", true);
+        perms.setPermission("bending.ability.sandstorm", true);
+        perms.setPermission("bending.ability.iceshards", true);
+        perms.setPermission("bending.ability.barrage", true);
+        perms.setPermission("bending.ability.angeredspirits", true);
+        perms.setPermission("bending.ability.burial", true);
+        perms.setPermission("bending.ability.deafeningscream", true);
+        perms.setPermission("bending.ability.sonicpulse", true);
+        perms.setPermission("bending.ability.toxicspores", true);
+        perms.setPermission("bending.ability.leafscythe", true);
+        perms.setPermission("bending.ability.rootsnare", true);
+        perms.setPermission("bending.ability.energyburst", true);
+        perms.setPermission("bending.ability.magmaglaives", true);
+        perms.setPermission("bending.ability.moltenblast", true);
+        perms.setPermission("bending.ability.eruption", true);
+        perms.setPermission("bending.ability.magmawave", true);
+        perms.setPermission("bending.ability.combustionstrike", true);
+        perms.setPermission("bending.ability.metalshots", true);
+        perms.setPermission("bending.ability.metalstrips", true);
+        perms.setPermission("bending.ability.metalblade", true);
+        perms.setPermission("bending.ability.cablethrash", true);
+        perms.setPermission("bending.ability.daggervolley", true);
+        perms.setPermission("bending.ability.airsnipe", true);
+        perms.setPermission("bending.ability.mendingwaters", true);
+        perms.setPermission("bending.ability.healinghelix", true);
+        perms.setPermission("bending.ability.corruptinghelix", true);
+        perms.setPermission("bending.ability.Lightning", true);
+        perms.setPermission("bending.ability.jolt", true);
+        perms.setPermission("bending.ability.static", true);
+        perms.setPermission("bending.ability.electricstrike", true);
+        perms.setPermission("bending.ability.jetbolt", true);
+        perms.setPermission("bending.ability.bloodfreeze", true);
+        perms.setPermission("bending.ability.disalignment", true);
+        perms.setPermission("bending.ability.liferip", true);
+        perms.setPermission("bending.ability.metalshred", true);
 
-        // Aranarth abilities unlocked at a higher rank than their sub-element (enabled in setRankPermissions)
-        perms.setPermission("bending.ability.astralprojection", false);   // spiritual - Duke
-        perms.setPermission("bending.ability.astralshot", false);         // spiritual combo - Duke
-        perms.setPermission("bending.ability.vinewhip", false);           // plant - Baron
-        perms.setPermission("bending.ability.sonicboom", false);          // sound - King
-        perms.setPermission("bending.ability.cableslash", false);         // metal combo - Baron
-        perms.setPermission("bending.ability.sandstorm", false);          // sand - Baron
-        perms.setPermission("bending.ability.iceshards", false);          // ice - Count
-        perms.setPermission("bending.ability.barrage", false);            // combustion - Emperor
-        perms.setPermission("bending.ability.angeredspirits", false);     // spiritual - Count
-        perms.setPermission("bending.ability.burial", false);             // sand - Baron
-        perms.setPermission("bending.ability.deafeningscream", false);    // sound - King
-        perms.setPermission("bending.ability.sonicpulse", false);         // sound - Prince
-        perms.setPermission("bending.ability.toxicspores", false);        // plant - Baron
-        perms.setPermission("bending.ability.leafscythe", false);         // plant - Baron
-        perms.setPermission("bending.ability.rootsnare", false);          // plant - Baron
-        perms.setPermission("bending.ability.energyburst", false);        // spiritual - Prince
-        perms.setPermission("bending.ability.magmaglaives", false);       // lava - King
-        perms.setPermission("bending.ability.moltenblast", false);        // lava combo - King
-        perms.setPermission("bending.ability.eruption", false);           // lava - Emperor
-        perms.setPermission("bending.ability.magmawave", false);          // lava - King
-        perms.setPermission("bending.ability.combustionstrike", false);   // combustion - Emperor
-        perms.setPermission("bending.ability.metalshots", false);         // metal - Count
-        perms.setPermission("bending.ability.metalstrips", false);        // metal - Count
-        perms.setPermission("bending.ability.metalblade", false);         // metal - Baron
-        perms.setPermission("bending.ability.cablethrash", false);        // metal - Baron
-        perms.setPermission("bending.ability.daggervolley", false);       // chi - Count
-        perms.setPermission("bending.ability.airsnipe", false);              // air combo - Knight
-        perms.setPermission("bending.ability.mendingwaters", false);        // healing - Knight
-        perms.setPermission("bending.ability.healinghelix", false);         // healing - Count
-        perms.setPermission("bending.ability.corruptinghelix", false);    // healing - Prince
-        perms.setPermission("bending.ability.Lightning", false);           // lightning - Prince
-        perms.setPermission("bending.ability.jolt", false);               // lightning - Prince
-        perms.setPermission("bending.ability.static", false);             // lightning - Prince
-        perms.setPermission("bending.ability.electricstrike", false);     // lightning - King
-        perms.setPermission("bending.ability.jetbolt", false);           // lightning combo - King
-        perms.setPermission("bending.ability.bloodfreeze", false);        // blood - King
-        perms.setPermission("bending.ability.disalignment", false);       // blood - Emperor
-        perms.setPermission("bending.ability.liferip", false);            // blood - Emperor
-
-        // JedCore abilities blocked by default (enabled in setRankPermissions)
-        perms.setPermission("bending.ability.SandBlast", false);          // sand - Esquire
-        perms.setPermission("bending.ability.AcrobatStance", false);      // chi - Knight
-        perms.setPermission("bending.ability.WarriorStance", false);      // chi - Knight
-        perms.setPermission("bending.ability.MetalShred", false);         // metal - Knight
-        perms.setPermission("bending.ability.MagnetShield", false);       // metal - Knight
-        perms.setPermission("bending.ability.MetalFragments", false);     // metal - Baron
-        perms.setPermission("bending.ability.Meditate", false);           // spiritual - Baron
-        perms.setPermission("bending.ability.LavaThrow", false);          // lava - Duke
-        perms.setPermission("bending.ability.Discharge", false);          // lightning - Prince
-        perms.setPermission("bending.ability.BloodPuppet", false);        // blood - Prince
-        perms.setPermission("bending.ability.LavaDisc", false);           // lava - Prince
-        perms.setPermission("bending.ability.MagmaBlast", false);         // lava combo - Prince
-        perms.setPermission("bending.ability.LightningBurst", false);     // lightning - King
-        perms.setPermission("bending.ability.Bolt", false);               // lightning - King
-        perms.setPermission("bending.ability.Combustion", false);         // combustion - Emperor
-        perms.setPermission("bending.ability.SwiftStream", false);        // flight combo - Emperor
+        // JedCore abilities (all true - rank gates enforced by RankCanBindHook)
+        perms.setPermission("bending.ability.SandBlast", true);
+        perms.setPermission("bending.ability.AcrobatStance", true);
+        perms.setPermission("bending.ability.WarriorStance", true);
+        perms.setPermission("bending.ability.MetalShred", true);
+        perms.setPermission("bending.ability.MagnetShield", true);
+        perms.setPermission("bending.ability.MetalFragments", true);
+        perms.setPermission("bending.ability.Meditate", true);
+        perms.setPermission("bending.ability.LavaThrow", true);
+        perms.setPermission("bending.ability.Discharge", true);
+        perms.setPermission("bending.ability.BloodPuppet", true);
+        perms.setPermission("bending.ability.LavaDisc", true);
+        perms.setPermission("bending.ability.MagmaBlast", true);
+        perms.setPermission("bending.ability.LightningBurst", true);
+        perms.setPermission("bending.ability.Bolt", true);
+        perms.setPermission("bending.ability.Combustion", true);
+        perms.setPermission("bending.ability.SwiftStream", true);
 
         // Enable commands available to all players
         perms.setPermission("aranarth.afk", true);
