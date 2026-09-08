@@ -176,6 +176,7 @@ Minor Features
 [~] Fixed TPS drop due to synchronous job updates on main server thread
 [~] Fixed shelves being interactable in the shops world
 [+] Added /cd as alias for /countdown
+[~] Fixed issue where dominion disband was not properly deleting the dominion
 
 Backend Code Changes
 -

@@ -765,7 +765,10 @@ public class DominionUtils {
                 }
             }
 
-            updateDominion(dominion);
+            // Skip re-saving the dominion being disbanded - disbandDominion handles DB deletion
+            if (!isDeleting || !dominion.isSameDominion(dominionBeingUpdated)) {
+                updateDominion(dominion);
+            }
         }
         if (!isDeleting) {
             // Demote old leader to Lieutenant and promote new leader
