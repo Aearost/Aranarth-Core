@@ -27,6 +27,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.InventoryHolder;
+import com.projectkorra.projectkorra.BendingPlayer;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.BlockStateMeta;
@@ -576,7 +577,13 @@ public class AranarthUtils {
      */
     private static void verifyAndApplyAranarthiumArmourEffects(Player player) {
         if (isWearingArmorType(player, "aquatic")) {
-            player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
+            BendingPlayer bPlayer = BendingPlayer.getBendingPlayer(player);
+            boolean waterArmsBound = bPlayer != null && bPlayer.getAbilities().containsValue("WaterArms");
+            if (waterArmsBound) {
+                player.removePotionEffect(PotionEffectType.DOLPHINS_GRACE);
+            } else {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
+            }
             player.addPotionEffect(new PotionEffect(PotionEffectType.CONDUIT_POWER, 320, 0));
             player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
             boolean isRaining = AranarthUtils.getWeather() == Weather.RAIN || AranarthUtils.getWeather() == Weather.THUNDER;

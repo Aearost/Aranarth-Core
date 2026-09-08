@@ -177,6 +177,7 @@ Minor Features
 [~] Fixed shelves being interactable in the shops world
 [+] Added /cd as alias for /countdown
 [~] Fixed issue where dominion disband was not properly deleting the dominion
+[-] Removed Dolphin's Grace from Aquatic Aranarthium while WaterArms is bound to fix flight abuse
 
 Backend Code Changes
 -
