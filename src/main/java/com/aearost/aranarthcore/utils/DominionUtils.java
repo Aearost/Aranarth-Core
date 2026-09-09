@@ -8,8 +8,10 @@ import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.*;
 import org.bukkit.*;
 import org.bukkit.block.Biome;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 
 import java.awt.Color;
 import java.util.*;
@@ -2371,6 +2373,13 @@ public class DominionUtils {
 
                 if (random.nextInt(elytraOdds[rank - 1]) == 0) {
                     items.add(new ItemStack(Material.ELYTRA, 1));
+                }
+                if (random.nextInt(5) == 0) {
+                    ItemStack mendingBook = new ItemStack(Material.ENCHANTED_BOOK, 1);
+                    EnchantmentStorageMeta meta = (EnchantmentStorageMeta) mendingBook.getItemMeta();
+                    meta.addStoredEnchant(Enchantment.MENDING, 1, true);
+                    mendingBook.setItemMeta(meta);
+                    items.add(mendingBook);
                 }
             }
         }
