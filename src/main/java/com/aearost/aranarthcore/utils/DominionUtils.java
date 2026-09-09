@@ -1465,8 +1465,8 @@ public class DominionUtils {
             items.add(new ItemStack(Material.SAND, 32));
             items.add(new ItemStack(Material.STONE, 32));
             items.add(new ItemStack(Material.KELP, 32));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.LAPIS_LAZULI, 16));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.LAPIS_ORE, 4));
             items.add(new ItemStack(Material.INK_SAC, 8));
             items.add(new ItemStack(Material.COD, 16));
 
@@ -1481,8 +1481,8 @@ public class DominionUtils {
             items.add(new ItemStack(Material.STONE, 32));
             items.add(new ItemStack(Material.OAK_LOG, 4));
             items.add(new ItemStack(Material.SUGAR_CANE, 8));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.RAW_IRON, 4));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.IRON_ORE, 2));
             items.add(new ItemStack(Material.INK_SAC, 8));
             items.add(new ItemStack(Material.SALMON, 16));
         } else if (biome == Biome.FROZEN_OCEAN) {
@@ -1493,8 +1493,8 @@ public class DominionUtils {
             items.add(new ItemStack(Material.ICE, 64));
             items.add(new ItemStack(Material.PACKED_ICE, 64));
             items.add(new ItemStack(Material.BLUE_ICE, 8));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.RAW_IRON, 4));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.IRON_ORE, 2));
             items.add(new ItemStack(Material.SALMON, 8));
             items.add(new ItemStack(Material.INK_SAC, 4));
 
@@ -1509,8 +1509,8 @@ public class DominionUtils {
             items.add(new ItemStack(Material.STONE, 32));
             items.add(new ItemStack(Material.ICE, 32));
             items.add(new ItemStack(Material.SUGAR_CANE, 8));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.RAW_IRON, 4));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.IRON_ORE, 2));
             items.add(new ItemStack(Material.INK_SAC, 4));
             items.add(new ItemStack(Material.SALMON, 16));
         } else if (biome == Biome.BEACH) {
@@ -1522,14 +1522,17 @@ public class DominionUtils {
             if (random.nextInt(rareOdds[rank - 1]) == 0) {
                 items.add(new ItemStack(Material.TURTLE_SCUTE, 1));
             }
+            if (random.nextInt(25) == 0) {
+                items.add(new ItemStack(Material.HEART_OF_THE_SEA, 1));
+            }
         } else if (biome == Biome.DEEP_OCEAN) {
             items.add(new ItemStack(Material.GRAVEL, 64));
             items.add(new ItemStack(Material.GRAVEL, 64));
             items.add(new ItemStack(Material.SAND, 32));
             items.add(new ItemStack(Material.STONE, 32));
             items.add(new ItemStack(Material.KELP, 32));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.LAPIS_LAZULI, 16));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.LAPIS_ORE, 4));
             items.add(new ItemStack(Material.INK_SAC, 8));
             items.add(new ItemStack(Material.COD, 16));
 
@@ -1547,15 +1550,15 @@ public class DominionUtils {
         } else if (biome == Biome.STONY_SHORE) {
             items.add(new ItemStack(Material.STONE, 64));
             items.add(new ItemStack(Material.GRAVEL, 64));
-            items.add(new ItemStack(Material.COAL, 16));
-            items.add(new ItemStack(Material.RAW_IRON, 4));
-            items.add(new ItemStack(Material.RAW_COPPER, 4));
+            items.add(new ItemStack(Material.COAL_ORE, 8));
+            items.add(new ItemStack(Material.IRON_ORE, 2));
+            items.add(new ItemStack(Material.COPPER_ORE, 2));
             items.add(new ItemStack(Material.COD, 8));
         } else if (biome == Biome.SNOWY_BEACH) {
             items.add(new ItemStack(Material.SAND, 32));
             items.add(new ItemStack(Material.SNOW, 32));
-            items.add(new ItemStack(Material.COAL, 16));
-            items.add(new ItemStack(Material.RAW_IRON, 4));
+            items.add(new ItemStack(Material.COAL_ORE, 8));
+            items.add(new ItemStack(Material.IRON_ORE, 2));
             items.add(new ItemStack(Material.SALMON, 8));
         } else if (biome == Biome.WARM_OCEAN) {
             items.add(new ItemStack(Material.SAND, 64));
@@ -1585,8 +1588,8 @@ public class DominionUtils {
             }
             items.add(new ItemStack(Material.SEA_PICKLE, 8));
 
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.LAPIS_LAZULI, 16));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.LAPIS_ORE, 4));
             items.add(new ItemStack(Material.INK_SAC, 8));
             items.add(new ItemStack(Material.TROPICAL_FISH, 16));
             items.add(new ItemStack(Material.PUFFERFISH, 2));
@@ -1598,8 +1601,8 @@ public class DominionUtils {
             items.add(new ItemStack(Material.SAND, 64));
             items.add(new ItemStack(Material.STONE, 32));
             items.add(new ItemStack(Material.KELP, 32));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.LAPIS_LAZULI, 16));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.LAPIS_ORE, 4));
             items.add(new ItemStack(Material.INK_SAC, 8));
             items.add(new ItemStack(Material.TROPICAL_FISH, 4));
             items.add(new ItemStack(Material.PUFFERFISH, 2));
@@ -1612,7 +1615,7 @@ public class DominionUtils {
             items.add(new ItemStack(Material.GRAVEL, 64));
             items.add(new ItemStack(Material.STONE, 32));
             items.add(new ItemStack(Material.KELP, 32));
-            items.add(new ItemStack(Material.COAL, 8));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
             items.add(new ItemStack(Material.COD, 8));
             items.add(new ItemStack(Material.SALMON, 8));
             items.add(new ItemStack(Material.INK_SAC, 8));
@@ -1624,8 +1627,8 @@ public class DominionUtils {
             items.add(new ItemStack(Material.SAND, 64));
             items.add(new ItemStack(Material.STONE, 32));
             items.add(new ItemStack(Material.KELP, 32));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.LAPIS_LAZULI, 16));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.LAPIS_ORE, 4));
             items.add(new ItemStack(Material.INK_SAC, 8));
             items.add(new ItemStack(Material.COD, 4));
             items.add(new ItemStack(Material.TROPICAL_FISH, 16));
@@ -1646,8 +1649,8 @@ public class DominionUtils {
             items.add(new ItemStack(Material.SAND, 32));
             items.add(new ItemStack(Material.STONE, 32));
             items.add(new ItemStack(Material.KELP, 32));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.LAPIS_LAZULI, 16));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.LAPIS_ORE, 4));
             items.add(new ItemStack(Material.INK_SAC, 8));
             items.add(new ItemStack(Material.COD, 16));
 
@@ -1666,8 +1669,8 @@ public class DominionUtils {
             items.add(new ItemStack(Material.GRAVEL, 64));
             items.add(new ItemStack(Material.STONE, 32));
             items.add(new ItemStack(Material.KELP, 32));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.LAPIS_LAZULI, 16));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.LAPIS_ORE, 4));
             items.add(new ItemStack(Material.INK_SAC, 8));
             items.add(new ItemStack(Material.SALMON, 16));
 
@@ -1688,8 +1691,8 @@ public class DominionUtils {
             items.add(new ItemStack(Material.RED_MUSHROOM_BLOCK, 32));
             items.add(new ItemStack(Material.BROWN_MUSHROOM_BLOCK, 32));
             items.add(new ItemStack(Material.MUSHROOM_STEM, 32));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.RAW_IRON, 4));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.IRON_ORE, 2));
 
             if (random.nextInt(commonOdds[rank - 1]) == 0) {
                 items.add(new ItemStack(Material.DIAMOND, 1));
@@ -1701,8 +1704,8 @@ public class DominionUtils {
             items.add(new ItemStack(Material.GRASS_BLOCK, 64));
             items.add(new ItemStack(Material.STONE, 64));
             items.add(new ItemStack(Material.OAK_LOG, 8));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.RAW_IRON, 4));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.IRON_ORE, 2));
             items.add(new ItemStack(Material.DANDELION, 8));
             int flowerNum = random.nextInt(3);
             if (flowerNum == 0) {
@@ -1717,8 +1720,8 @@ public class DominionUtils {
             items.add(new ItemStack(Material.GRASS_BLOCK, 64));
             items.add(new ItemStack(Material.STONE, 64));
             items.add(new ItemStack(Material.OAK_LOG, 8));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.RAW_IRON, 4));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.IRON_ORE, 2));
             items.add(new ItemStack(Material.DANDELION, 8));
             int flowerNum = random.nextInt(3);
             if (flowerNum == 0) {
@@ -1739,8 +1742,8 @@ public class DominionUtils {
             items.add(new ItemStack(Material.MELON, 2));
             items.add(new ItemStack(Material.PUMPKIN, 2));
             items.add(new ItemStack(Material.COCOA_BEANS, 2));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.RAW_IRON, 4));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.IRON_ORE, 2));
             items.add(new ItemStack(Material.CHICKEN, 16));
         } else if (biome == Biome.SNOWY_PLAINS) {
             items.add(new ItemStack(Material.GRASS_BLOCK, 64));
@@ -1748,16 +1751,16 @@ public class DominionUtils {
             items.add(new ItemStack(Material.SNOW, 64));
             items.add(new ItemStack(Material.STONE, 64));
             items.add(new ItemStack(Material.SPRUCE_LOG, 8));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.RAW_IRON, 4));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.IRON_ORE, 2));
             items.add(new ItemStack(Material.RABBIT, 16));
         } else if (biome == Biome.ICE_SPIKES) {
             items.add(new ItemStack(Material.SNOW_BLOCK, 64));
             items.add(new ItemStack(Material.PACKED_ICE, 64));
             items.add(new ItemStack(Material.ICE, 32));
             items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.RAW_IRON, 4));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.IRON_ORE, 2));
             items.add(new ItemStack(Material.RABBIT, 16));
         }
 
@@ -1768,8 +1771,8 @@ public class DominionUtils {
             items.add(new ItemStack(Material.OAK_LOG, 16));
             items.add(new ItemStack(Material.BIRCH_LOG, 16));
             items.add(new ItemStack(Material.LEAF_LITTER, 16));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.RAW_IRON, 4));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.IRON_ORE, 2));
             items.add(new ItemStack(Material.APPLE, 4));
             items.add(new ItemStack(Material.RABBIT, 16));
 
@@ -1785,8 +1788,8 @@ public class DominionUtils {
             items.add(new ItemStack(Material.STONE, 64));
             items.add(new ItemStack(Material.SPRUCE_LOG, 32));
             items.add(new ItemStack(Material.SWEET_BERRIES, 16));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.RAW_IRON, 4));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.IRON_ORE, 2));
             items.add(new ItemStack(Material.RABBIT, 16));
         } else if (biome == Biome.SWAMP) {
             items.add(new ItemStack(Material.GRASS_BLOCK, 64));
@@ -1797,8 +1800,8 @@ public class DominionUtils {
             items.add(new ItemStack(Material.BROWN_MUSHROOM, 8));
             items.add(new ItemStack(Material.RED_MUSHROOM, 8));
             items.add(new ItemStack(Material.LILY_PAD, 16));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.RAW_IRON, 4));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.IRON_ORE, 2));
             items.add(new ItemStack(Material.SLIME_BALL, 2));
         } else if (biome == Biome.MANGROVE_SWAMP) {
             items.add(new ItemStack(Material.GRASS_BLOCK, 16));
@@ -1810,8 +1813,8 @@ public class DominionUtils {
             items.add(new ItemStack(Material.MUDDY_MANGROVE_ROOTS, 32));
             items.add(new ItemStack(Material.MOSS_CARPET, 32));
             items.add(new ItemStack(Material.LILY_PAD, 8));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.RAW_IRON, 4));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.IRON_ORE, 2));
         } else if (biome == Biome.JUNGLE) {
             items.add(new ItemStack(Material.GRASS_BLOCK, 64));
             items.add(new ItemStack(Material.STONE, 64));
@@ -1821,8 +1824,8 @@ public class DominionUtils {
             items.add(new ItemStack(Material.VINE, 16));
             items.add(new ItemStack(Material.MELON, 2));
             items.add(new ItemStack(Material.COCOA_BEANS, 4));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.RAW_IRON, 4));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.IRON_ORE, 2));
             items.add(new ItemStack(Material.CHICKEN, 16));
         } else if (biome == Biome.BAMBOO_JUNGLE) {
             items.add(new ItemStack(Material.GRASS_BLOCK, 16));
@@ -1832,16 +1835,16 @@ public class DominionUtils {
             items.add(new ItemStack(Material.OAK_LOG, 8));
             items.add(new ItemStack(Material.BAMBOO, 64));
             items.add(new ItemStack(Material.MELON, 2));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.RAW_IRON, 4));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.IRON_ORE, 2));
             items.add(new ItemStack(Material.CHICKEN, 16));
         } else if (biome == Biome.BIRCH_FOREST || biome == Biome.OLD_GROWTH_BIRCH_FOREST) {
             items.add(new ItemStack(Material.GRASS_BLOCK, 64));
             items.add(new ItemStack(Material.STONE, 64));
             items.add(new ItemStack(Material.BIRCH_LOG, 32));
             items.add(new ItemStack(Material.WILDFLOWERS, 32));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.RAW_IRON, 4));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.IRON_ORE, 2));
             items.add(new ItemStack(Material.RABBIT, 16));
         } else if (biome == Biome.DARK_FOREST) {
             items.add(new ItemStack(Material.GRASS_BLOCK, 64));
@@ -1852,9 +1855,9 @@ public class DominionUtils {
             items.add(new ItemStack(Material.RED_MUSHROOM_BLOCK, 16));
             items.add(new ItemStack(Material.MUSHROOM_STEM, 16));
             items.add(new ItemStack(Material.LEAF_LITTER, 16));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.RAW_IRON, 4));
-            items.add(new ItemStack(Material.RAW_IRON, 4));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.IRON_ORE, 2));
+            items.add(new ItemStack(Material.IRON_ORE, 2));
             items.add(new ItemStack(Material.APPLE, 4));
 
             int godOdds = godAppleOdds[rank - 1];
@@ -1870,16 +1873,16 @@ public class DominionUtils {
             items.add(new ItemStack(Material.PALE_OAK_LOG, 64));
             items.add(new ItemStack(Material.PALE_MOSS_BLOCK, 16));
             items.add(new ItemStack(Material.PALE_HANGING_MOSS, 8));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.RAW_IRON, 4));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.IRON_ORE, 2));
             items.add(new ItemStack(Material.RESIN_CLUMP, 8));
         } else if (biome == Biome.SNOWY_TAIGA) {
             items.add(new ItemStack(Material.GRASS_BLOCK, 64));
             items.add(new ItemStack(Material.STONE, 64));
             items.add(new ItemStack(Material.SPRUCE_LOG, 32));
             items.add(new ItemStack(Material.SNOW, 32));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.RAW_IRON, 4));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.IRON_ORE, 2));
             items.add(new ItemStack(Material.RABBIT, 16));
         } else if (biome == Biome.OLD_GROWTH_PINE_TAIGA || biome == Biome.OLD_GROWTH_SPRUCE_TAIGA) {
             items.add(new ItemStack(Material.GRASS_BLOCK, 32));
@@ -1888,8 +1891,8 @@ public class DominionUtils {
             items.add(new ItemStack(Material.STONE, 64));
             items.add(new ItemStack(Material.MOSSY_COBBLESTONE, 16));
             items.add(new ItemStack(Material.SPRUCE_LOG, 64));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.RAW_IRON, 4));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.IRON_ORE, 2));
             items.add(new ItemStack(Material.BROWN_MUSHROOM, 16));
             items.add(new ItemStack(Material.RABBIT, 16));
         } else if (biome == Biome.FLOWER_FOREST) {
@@ -1928,8 +1931,8 @@ public class DominionUtils {
             } else if (flowerNum == 13) {
                 items.add(new ItemStack(Material.ROSE_BUSH, 4));
             }
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.RAW_IRON, 4));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.IRON_ORE, 2));
 
             items.add(new ItemStack(Material.APPLE, 4));
             items.add(new ItemStack(Material.RABBIT, 16));
@@ -1953,11 +1956,11 @@ public class DominionUtils {
             items.add(new ItemStack(Material.ANDESITE, 16));
             items.add(new ItemStack(Material.SPRUCE_LOG, 4));
             items.add(new ItemStack(Material.OAK_LOG, 4));
-            items.add(new ItemStack(Material.COAL, 16));
-            items.add(new ItemStack(Material.RAW_COPPER, 16));
-            items.add(new ItemStack(Material.RAW_IRON, 16));
-            items.add(new ItemStack(Material.RAW_GOLD, 8));
-            items.add(new ItemStack(Material.EMERALD, 2));
+            items.add(new ItemStack(Material.COAL_ORE, 8));
+            items.add(new ItemStack(Material.COPPER_ORE, 8));
+            items.add(new ItemStack(Material.IRON_ORE, 8));
+            items.add(new ItemStack(Material.GOLD_ORE, 4));
+            items.add(new ItemStack(Material.EMERALD_ORE, 2));
             items.add(new ItemStack(Material.MUTTON, 16));
         } else if (biome == Biome.WINDSWEPT_FOREST) {
             items.add(new ItemStack(Material.GRASS_BLOCK, 32));
@@ -1968,11 +1971,11 @@ public class DominionUtils {
             items.add(new ItemStack(Material.ANDESITE, 16));
             items.add(new ItemStack(Material.SPRUCE_LOG, 16));
             items.add(new ItemStack(Material.OAK_LOG, 4));
-            items.add(new ItemStack(Material.COAL, 16));
-            items.add(new ItemStack(Material.RAW_COPPER, 16));
-            items.add(new ItemStack(Material.RAW_IRON, 16));
-            items.add(new ItemStack(Material.RAW_GOLD, 8));
-            items.add(new ItemStack(Material.EMERALD, 2));
+            items.add(new ItemStack(Material.COAL_ORE, 8));
+            items.add(new ItemStack(Material.COPPER_ORE, 8));
+            items.add(new ItemStack(Material.IRON_ORE, 8));
+            items.add(new ItemStack(Material.GOLD_ORE, 4));
+            items.add(new ItemStack(Material.EMERALD_ORE, 2));
             items.add(new ItemStack(Material.MUTTON, 16));
         } else if (biome == Biome.WINDSWEPT_GRAVELLY_HILLS) {
             items.add(new ItemStack(Material.GRASS_BLOCK, 32));
@@ -1980,11 +1983,11 @@ public class DominionUtils {
             items.add(new ItemStack(Material.STONE, 64));
             items.add(new ItemStack(Material.STONE, 64));
             items.add(new ItemStack(Material.SPRUCE_LOG, 8));
-            items.add(new ItemStack(Material.COAL, 16));
-            items.add(new ItemStack(Material.RAW_COPPER, 16));
-            items.add(new ItemStack(Material.RAW_IRON, 16));
-            items.add(new ItemStack(Material.RAW_GOLD, 8));
-            items.add(new ItemStack(Material.EMERALD, 2));
+            items.add(new ItemStack(Material.COAL_ORE, 8));
+            items.add(new ItemStack(Material.COPPER_ORE, 8));
+            items.add(new ItemStack(Material.IRON_ORE, 8));
+            items.add(new ItemStack(Material.GOLD_ORE, 4));
+            items.add(new ItemStack(Material.EMERALD_ORE, 2));
             items.add(new ItemStack(Material.MUTTON, 16));
         } else if (biome == Biome.WINDSWEPT_SAVANNA) {
             items.add(new ItemStack(Material.GRASS_BLOCK, 32));
@@ -1992,32 +1995,32 @@ public class DominionUtils {
             items.add(new ItemStack(Material.STONE, 64));
             items.add(new ItemStack(Material.STONE, 64));
             items.add(new ItemStack(Material.ACACIA_LOG, 16));
-            items.add(new ItemStack(Material.COAL, 16));
-            items.add(new ItemStack(Material.RAW_COPPER, 16));
-            items.add(new ItemStack(Material.RAW_IRON, 16));
-            items.add(new ItemStack(Material.RAW_GOLD, 8));
-            items.add(new ItemStack(Material.EMERALD, 2));
+            items.add(new ItemStack(Material.COAL_ORE, 8));
+            items.add(new ItemStack(Material.COPPER_ORE, 8));
+            items.add(new ItemStack(Material.IRON_ORE, 8));
+            items.add(new ItemStack(Material.GOLD_ORE, 4));
+            items.add(new ItemStack(Material.EMERALD_ORE, 2));
             items.add(new ItemStack(Material.BEEF, 16));
         } else if (biome == Biome.GROVE) {
             items.add(new ItemStack(Material.SNOW_BLOCK, 64));
             items.add(new ItemStack(Material.STONE, 64));
             items.add(new ItemStack(Material.STONE, 64));
             items.add(new ItemStack(Material.SPRUCE_LOG, 32));
-            items.add(new ItemStack(Material.COAL, 16));
-            items.add(new ItemStack(Material.RAW_COPPER, 16));
-            items.add(new ItemStack(Material.RAW_IRON, 16));
-            items.add(new ItemStack(Material.RAW_GOLD, 8));
-            items.add(new ItemStack(Material.EMERALD, 2));
+            items.add(new ItemStack(Material.COAL_ORE, 8));
+            items.add(new ItemStack(Material.COPPER_ORE, 8));
+            items.add(new ItemStack(Material.IRON_ORE, 8));
+            items.add(new ItemStack(Material.GOLD_ORE, 4));
+            items.add(new ItemStack(Material.EMERALD_ORE, 2));
             items.add(new ItemStack(Material.RABBIT, 16));
         } else if (biome == Biome.FROZEN_PEAKS) {
             items.add(new ItemStack(Material.SNOW_BLOCK, 64));
             items.add(new ItemStack(Material.PACKED_ICE, 64));
             items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.COAL, 16));
-            items.add(new ItemStack(Material.RAW_COPPER, 16));
-            items.add(new ItemStack(Material.RAW_IRON, 16));
-            items.add(new ItemStack(Material.RAW_GOLD, 8));
-            items.add(new ItemStack(Material.EMERALD, 2));
+            items.add(new ItemStack(Material.COAL_ORE, 8));
+            items.add(new ItemStack(Material.COPPER_ORE, 8));
+            items.add(new ItemStack(Material.IRON_ORE, 8));
+            items.add(new ItemStack(Material.GOLD_ORE, 4));
+            items.add(new ItemStack(Material.EMERALD_ORE, 2));
             items.add(new ItemStack(Material.MUTTON, 16));
         } else if (biome == Biome.MEADOW) {
             items.add(new ItemStack(Material.GRASS_BLOCK, 64));
@@ -2025,42 +2028,42 @@ public class DominionUtils {
             items.add(new ItemStack(Material.DANDELION, 8));
             items.add(new ItemStack(Material.CORNFLOWER, 8));
             items.add(new ItemStack(Material.WILDFLOWERS, 32));
-            items.add(new ItemStack(Material.COAL, 16));
-            items.add(new ItemStack(Material.RAW_COPPER, 16));
-            items.add(new ItemStack(Material.RAW_IRON, 16));
-            items.add(new ItemStack(Material.RAW_GOLD, 8));
-            items.add(new ItemStack(Material.EMERALD, 2));
+            items.add(new ItemStack(Material.COAL_ORE, 8));
+            items.add(new ItemStack(Material.COPPER_ORE, 8));
+            items.add(new ItemStack(Material.IRON_ORE, 8));
+            items.add(new ItemStack(Material.GOLD_ORE, 4));
+            items.add(new ItemStack(Material.EMERALD_ORE, 2));
             items.add(new ItemStack(Material.MUTTON, 16));
         } else if (biome == Biome.JAGGED_PEAKS || biome == Biome.SNOWY_SLOPES) {
             items.add(new ItemStack(Material.SNOW_BLOCK, 64));
             items.add(new ItemStack(Material.STONE, 64));
             items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.COAL, 16));
-            items.add(new ItemStack(Material.RAW_COPPER, 16));
-            items.add(new ItemStack(Material.RAW_IRON, 16));
-            items.add(new ItemStack(Material.RAW_GOLD, 8));
-            items.add(new ItemStack(Material.EMERALD, 2));
+            items.add(new ItemStack(Material.COAL_ORE, 8));
+            items.add(new ItemStack(Material.COPPER_ORE, 8));
+            items.add(new ItemStack(Material.IRON_ORE, 8));
+            items.add(new ItemStack(Material.GOLD_ORE, 4));
+            items.add(new ItemStack(Material.EMERALD_ORE, 2));
             items.add(new ItemStack(Material.MUTTON, 16));
         } else if (biome == Biome.STONY_PEAKS) {
             items.add(new ItemStack(Material.STONE, 64));
             items.add(new ItemStack(Material.STONE, 64));
             items.add(new ItemStack(Material.CALCITE, 32));
-            items.add(new ItemStack(Material.COAL, 16));
-            items.add(new ItemStack(Material.RAW_COPPER, 16));
-            items.add(new ItemStack(Material.RAW_IRON, 16));
-            items.add(new ItemStack(Material.RAW_GOLD, 8));
-            items.add(new ItemStack(Material.EMERALD, 2));
+            items.add(new ItemStack(Material.COAL_ORE, 8));
+            items.add(new ItemStack(Material.COPPER_ORE, 8));
+            items.add(new ItemStack(Material.IRON_ORE, 8));
+            items.add(new ItemStack(Material.GOLD_ORE, 4));
+            items.add(new ItemStack(Material.EMERALD_ORE, 2));
             items.add(new ItemStack(Material.MUTTON, 16));
         } else if (biome == Biome.CHERRY_GROVE) {
             items.add(new ItemStack(Material.GRASS_BLOCK, 64));
             items.add(new ItemStack(Material.STONE, 64));
             items.add(new ItemStack(Material.CHERRY_LOG, 32));
             items.add(new ItemStack(Material.PINK_PETALS, 32));
-            items.add(new ItemStack(Material.COAL, 16));
-            items.add(new ItemStack(Material.RAW_COPPER, 16));
-            items.add(new ItemStack(Material.RAW_IRON, 16));
-            items.add(new ItemStack(Material.RAW_GOLD, 8));
-            items.add(new ItemStack(Material.EMERALD, 2));
+            items.add(new ItemStack(Material.COAL_ORE, 8));
+            items.add(new ItemStack(Material.COPPER_ORE, 8));
+            items.add(new ItemStack(Material.IRON_ORE, 8));
+            items.add(new ItemStack(Material.GOLD_ORE, 4));
+            items.add(new ItemStack(Material.EMERALD_ORE, 2));
             items.add(new ItemStack(Material.RABBIT, 16));
         }
 
@@ -2076,16 +2079,16 @@ public class DominionUtils {
             }
             items.add(new ItemStack(Material.CACTUS, 8));
             items.add(new ItemStack(Material.CACTUS_FLOWER, 4));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.RAW_GOLD, 4));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.GOLD_ORE, 2));
             items.add(new ItemStack(Material.RABBIT, 16));
 
         } else if (biome == Biome.SAVANNA || biome == Biome.SAVANNA_PLATEAU) {
             items.add(new ItemStack(Material.GRASS_BLOCK, 64));
             items.add(new ItemStack(Material.STONE, 64));
             items.add(new ItemStack(Material.ACACIA_LOG, 32));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.RAW_GOLD, 4));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.GOLD_ORE, 2));
             items.add(new ItemStack(Material.BEEF, 16));
 
             if (random.nextInt(commonOdds[rank - 1]) == 0) {
@@ -2110,8 +2113,8 @@ public class DominionUtils {
             } else if (terracottaVariant == 5) {
                 items.add(new ItemStack(Material.WHITE_TERRACOTTA, 16));
             }
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.RAW_GOLD, 8));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.GOLD_ORE, 4));
 
             if (random.nextInt(commonOdds[rank - 1]) == 0) {
                 items.add(new ItemStack(Material.ARMADILLO_SCUTE, 1));
@@ -2137,8 +2140,8 @@ public class DominionUtils {
             }
             items.add(new ItemStack(Material.OAK_LOG, 32));
             items.add(new ItemStack(Material.LEAF_LITTER, 16));
-            items.add(new ItemStack(Material.COAL, 8));
-            items.add(new ItemStack(Material.RAW_GOLD, 8));
+            items.add(new ItemStack(Material.COAL_ORE, 4));
+            items.add(new ItemStack(Material.GOLD_ORE, 4));
 
             if (random.nextInt(commonOdds[rank - 1]) == 0) {
                 items.add(new ItemStack(Material.ARMADILLO_SCUTE, 1));
@@ -2151,8 +2154,8 @@ public class DominionUtils {
             items.add(new ItemStack(Material.NETHERRACK, 64));
             items.add(new ItemStack(Material.BLACKSTONE, 32));
             items.add(new ItemStack(Material.MAGMA_BLOCK, 8));
-            items.add(new ItemStack(Material.QUARTZ, 64));
-            items.add(new ItemStack(Material.GOLD_NUGGET, 64));
+            items.add(new ItemStack(Material.NETHER_QUARTZ_ORE, 32));
+            items.add(new ItemStack(Material.NETHER_GOLD_ORE, 16));
 
             if (random.nextInt(commonOdds[rank - 1]) == 0) {
                 items.add(new ItemStack(Material.GHAST_TEAR, 1));
@@ -2191,8 +2194,8 @@ public class DominionUtils {
             items.add(new ItemStack(Material.BASALT, 16));
             items.add(new ItemStack(Material.BLACKSTONE, 32));
             items.add(new ItemStack(Material.BONE_BLOCK, 8));
-            items.add(new ItemStack(Material.QUARTZ, 16));
-            items.add(new ItemStack(Material.GOLD_NUGGET, 16));
+            items.add(new ItemStack(Material.NETHER_QUARTZ_ORE, 8));
+            items.add(new ItemStack(Material.NETHER_GOLD_ORE, 4));
             items.add(new ItemStack(Material.BONE, 4));
 
             // 1-5 ghast tears based on rank
@@ -2237,8 +2240,8 @@ public class DominionUtils {
             items.add(new ItemStack(Material.SHROOMLIGHT, 16));
             items.add(new ItemStack(Material.WEEPING_VINES, 16));
             items.add(new ItemStack(Material.CRIMSON_FUNGUS, 16));
-            items.add(new ItemStack(Material.QUARTZ, 32));
-            items.add(new ItemStack(Material.GOLD_NUGGET, 32));
+            items.add(new ItemStack(Material.NETHER_QUARTZ_ORE, 16));
+            items.add(new ItemStack(Material.NETHER_GOLD_ORE, 8));
             items.add(new ItemStack(Material.PORKCHOP, 16));
 
             if (random.nextInt(commonOdds[rank - 1]) == 0) {
@@ -2275,8 +2278,8 @@ public class DominionUtils {
             items.add(new ItemStack(Material.SHROOMLIGHT, 8));
             items.add(new ItemStack(Material.TWISTING_VINES, 8));
             items.add(new ItemStack(Material.WARPED_FUNGUS, 8));
-            items.add(new ItemStack(Material.QUARTZ, 16));
-            items.add(new ItemStack(Material.GOLD_NUGGET, 16));
+            items.add(new ItemStack(Material.NETHER_QUARTZ_ORE, 8));
+            items.add(new ItemStack(Material.NETHER_GOLD_ORE, 4));
 
             // 1-5 ender pearls based on rank
             items.add(new ItemStack(Material.ENDER_PEARL, rank));
@@ -2314,8 +2317,8 @@ public class DominionUtils {
             items.add(new ItemStack(Material.BLACKSTONE, 64));
             items.add(new ItemStack(Material.BLACKSTONE, 64));
             items.add(new ItemStack(Material.MAGMA_BLOCK, 8));
-            items.add(new ItemStack(Material.QUARTZ, 32));
-            items.add(new ItemStack(Material.GOLD_NUGGET, 64));
+            items.add(new ItemStack(Material.NETHER_QUARTZ_ORE, 16));
+            items.add(new ItemStack(Material.NETHER_GOLD_ORE, 16));
             items.add(new ItemStack(Material.MAGMA_CREAM, 4));
 
             // 0 to rank ghast tears, lower than other biomes
@@ -2393,6 +2396,7 @@ public class DominionUtils {
             if (item.getType() == Material.NAUTILUS_SHELL || item.getType() == Material.NETHERITE_SCRAP
                     || item.getType() == Material.TURTLE_SCUTE || item.getType() == Material.ARMADILLO_SCUTE
                     || item.getType() == Material.GHAST_TEAR || item.getType() == Material.DIAMOND
+                    || item.getType() == Material.HEART_OF_THE_SEA
                     || item.isSimilar(new GodAppleFragment().getItem())) {
                 continue;
             }
