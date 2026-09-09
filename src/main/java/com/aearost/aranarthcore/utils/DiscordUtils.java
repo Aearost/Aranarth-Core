@@ -890,15 +890,16 @@ public class DiscordUtils {
 
 		EmbedBuilder embed = new EmbedBuilder();
 		if (started) {
-			String description = event.getSubtitleText(intensity).replaceAll("&.", "");
 			embed.setTitle(event.getName(intensity) + " has begun!")
-					.setDescription(description);
+					.setDescription(event.getLoreText(intensity));
 		} else {
-			embed.setTitle(event.getName(intensity) + " has ended.");
+			embed.setTitle(event.getName(intensity) + " has ended");
 		}
 		embed.setColor(color);
 
-		getWorldEventsChannel().sendMessageEmbeds(embed.build()).queue();
+		if (AranarthCore.isPublicServer()) {
+			getWorldEventsChannel().sendMessageEmbeds(embed.build()).queue();
+		}
 		serverChatChannel.sendMessageEmbeds(embed.build()).queue();
 	}
 
