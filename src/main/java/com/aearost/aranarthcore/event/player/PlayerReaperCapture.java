@@ -58,8 +58,11 @@ public class PlayerReaperCapture {
         double deathZ = deathLocation.getZ();
 
         ReaperManager.put(player.getUniqueId(), dropsB64, deathTime, deathWorld, deathX, deathY, deathZ);
-        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
-                DatabaseManager.getInstance().upsertReaperInventory(player.getUniqueId(), dropsB64, deathTime, deathWorld, deathX, deathY, deathZ));
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+            if (DatabaseManager.getInstance() != null) {
+                DatabaseManager.getInstance().upsertReaperInventory(player.getUniqueId(), dropsB64, deathTime, deathWorld, deathX, deathY, deathZ);
+            }
+        });
 
         Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
                 player.sendMessage(ChatUtils.chatMessage("&7Purchase back your inventory using &e/reaper")), 1L);
