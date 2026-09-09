@@ -182,6 +182,7 @@ Minor Features
 [+] Added full hunger bars to the arena world
 [~] Renamed /toggle bulksellshulker to shulkerbulk
 [~] Reduced charge times of AngeredSpirits, EnergyBurst, and IceShards
+[~] Changed the charging and charged animations of AngeredSpirits
 
 Backend Code Changes
 - Restructured how ability permissions are added to fix issues causing certain abilities to not be bindable
