@@ -1451,6 +1451,7 @@ public class DominionUtils {
         int[] commonOdds = {10, 8, 5, 3, 1};  // nautilus, armadillo, netherite scrap, mushroom diamond, nether tear
         int[] rareOdds = {20, 15, 10, 5, 2}; // turtle scute, desert fossil
         int[] elytraOdds = {200, 100, 65, 50, 40}; // elytra (0.1%/0.2%/0.31%/0.4%/0.5% per claim)
+        int[] mendingOdds = {16, 12, 8, 6, 4};   // mending book if end city simulates (6.25%-8.3%-12.5%-16.7%-25% if city)
         int[] godAppleOdds = {16, 12, 8, 4, 1};  // god apple fragment (divided by 4 during SOLARVOR)
 
         // Dirts
@@ -2374,7 +2375,7 @@ public class DominionUtils {
                 if (random.nextInt(elytraOdds[rank - 1]) == 0) {
                     items.add(new ItemStack(Material.ELYTRA, 1));
                 }
-                if (random.nextInt(5) == 0) {
+                if (random.nextInt(mendingOdds[rank - 1]) == 0) {
                     ItemStack mendingBook = new ItemStack(Material.ENCHANTED_BOOK, 1);
                     EnchantmentStorageMeta meta = (EnchantmentStorageMeta) mendingBook.getItemMeta();
                     meta.addStoredEnchant(Enchantment.MENDING, 1, true);
