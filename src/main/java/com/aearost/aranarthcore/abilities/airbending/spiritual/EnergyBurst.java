@@ -49,7 +49,7 @@ public class EnergyBurst extends SpiritualAbility implements AddonAbility {
         super(player);
 
         this.cooldown = 12000L;
-        this.chargeDuration = 3000L;
+        this.chargeDuration = 1500L;
         this.damage = 10.0; // 5 hearts
         this.state = State.CHARGING;
         this.heldSlot = player.getInventory().getHeldItemSlot();
@@ -70,7 +70,7 @@ public class EnergyBurst extends SpiritualAbility implements AddonAbility {
         super(player);
 
         this.cooldown = 12000L;
-        this.chargeDuration = 3000L;
+        this.chargeDuration = 1500L;
         this.damage = 10.0;
         this.heldSlot = player.getInventory().getHeldItemSlot();
 

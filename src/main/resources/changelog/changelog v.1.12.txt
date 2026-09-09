@@ -181,6 +181,7 @@ Minor Features
 [-] Removed Dolphin's Grace from Aquatic Aranarthium while WaterArms is bound to fix flight abuse
 [+] Added full hunger bars to the arena world
 [~] Renamed /toggle bulksellshulker to shulkerbulk
+[~] Reduced charge times of AngeredSpirits, EnergyBurst, and IceShards
 
 Backend Code Changes
 - Restructured how ability permissions are added to fix issues causing certain abilities to not be bindable

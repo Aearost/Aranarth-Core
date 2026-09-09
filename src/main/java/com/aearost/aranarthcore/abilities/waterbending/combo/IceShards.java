@@ -50,7 +50,7 @@ public class IceShards extends IceAbility implements AddonAbility, ComboAbility 
     private double damage;
 
     private final int domeRadius = 10;
-    private final long chargeTime = 6000L;
+    private final long chargeTime = 3000L;
     private final long chargeHoldGrace = 5000L;
     private final double projectileSpeed = 2.5;
     private final long projectileMaxLifetime = 5000L;
