@@ -8,7 +8,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 
@@ -21,17 +20,6 @@ public class CropInfoEventListener implements Listener {
 
 	public CropInfoEventListener(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
-	}
-
-	/**
-	 * Refreshes seeds in the container and in the player's own inventory.
-	 */
-	@EventHandler
-	public void onInventoryOpen(InventoryOpenEvent e) {
-		if (e.getPlayer() instanceof Player player) {
-			CropUtils.refreshInventory(e.getInventory(), e.getPlayer().getWorld());
-			CropUtils.refreshInventory(player.getInventory(), e.getPlayer().getWorld());
-		}
 	}
 
 	/**

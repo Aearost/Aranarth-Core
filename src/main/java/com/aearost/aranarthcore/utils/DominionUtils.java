@@ -1434,6 +1434,812 @@ public class DominionUtils {
         return formatted;
     }
 
+    // - Resource drop data classes for biome tables -
+
+    public static class ResourceDrop {
+        public final ItemStack item;
+        public final int maxAmount;
+        public final int subChanceOdds;
+        public final String lore;
+        public final boolean previewOnly;
+
+        public ResourceDrop(ItemStack item) {
+            this(item, 0, 0, null, false);
+        }
+
+        public ResourceDrop(ItemStack item, String lore) {
+            this(item, 0, 0, lore, false);
+        }
+
+        public ResourceDrop(ItemStack item, int maxAmount, int subChanceOdds, String lore) {
+            this(item, maxAmount, subChanceOdds, lore, false);
+        }
+
+        public ResourceDrop(ItemStack item, int maxAmount, int subChanceOdds, String lore, boolean previewOnly) {
+            this.item = item;
+            this.maxAmount = maxAmount;
+            this.subChanceOdds = subChanceOdds;
+            this.lore = lore;
+            this.previewOnly = previewOnly;
+        }
+    }
+
+    public static class SimulationGroup {
+        public final String name;
+        public final int odds;
+        public final List<ResourceDrop> drops;
+
+        public SimulationGroup(String name, int odds, List<ResourceDrop> drops) {
+            this.name = name;
+            this.odds = odds;
+            this.drops = drops;
+        }
+    }
+
+    public static class VarietyGroup {
+        public final List<ResourceDrop> options;
+
+        public VarietyGroup(List<ResourceDrop> options) {
+            this.options = options;
+        }
+    }
+
+    public static class BiomeTable {
+        public final List<ResourceDrop> guaranteed;
+        public final List<SimulationGroup> simulations;
+        public final List<ResourceDrop> rares;
+        public final List<VarietyGroup> varieties;
+
+        public BiomeTable(List<ResourceDrop> guaranteed, List<SimulationGroup> simulations,
+                          List<ResourceDrop> rares, List<VarietyGroup> varieties) {
+            this.guaranteed = guaranteed;
+            this.simulations = simulations;
+            this.rares = rares;
+            this.varieties = varieties;
+        }
+    }
+
+    public static String formatPct(int odds) {
+        double pct = 100.0 / odds;
+        if (pct == Math.floor(pct)) {
+            return (int) pct + "%";
+        }
+        String formatted = String.format("%.2f", pct);
+        formatted = formatted.replaceAll("\\.?0+$", "");
+        return formatted + "%";
+    }
+
+    private static ItemStack resolveAmount(ResourceDrop drop, Random random) {
+        int amount = drop.maxAmount > 0
+                ? random.nextInt(drop.maxAmount - drop.item.getAmount() + 1) + drop.item.getAmount()
+                : drop.item.getAmount();
+        ItemStack result = drop.item.clone();
+        result.setAmount(amount);
+        return result;
+    }
+
+    public static BiomeTable buildBiomeTable(Dominion dominion, Biome biome) {
+        int rank = dominion.getDominionLevel();
+
+        int[] commonOdds = {10, 8, 5, 3, 1};
+        int[] rareOdds = {20, 15, 10, 5, 2};
+        int[] elytraOdds = {200, 100, 65, 50, 40};
+        int[] mendingOdds = {16, 12, 8, 6, 4};
+        int[] godAppleOdds = {16, 12, 8, 4, 1};
+
+        List<ResourceDrop> guaranteed = new ArrayList<>();
+        List<SimulationGroup> simulations = new ArrayList<>();
+        List<ResourceDrop> rares = new ArrayList<>();
+        List<VarietyGroup> varieties = new ArrayList<>();
+
+        // Shared simulation group builders
+        List<ResourceDrop> fortressDrops = new ArrayList<>();
+        fortressDrops.add(new ResourceDrop(new ItemStack(Material.NETHER_BRICKS, 64)));
+        fortressDrops.add(new ResourceDrop(new ItemStack(Material.NETHER_BRICKS, 64)));
+        fortressDrops.add(new ResourceDrop(new ItemStack(Material.NETHER_WART, 32)));
+        fortressDrops.add(new ResourceDrop(new ItemStack(Material.BLAZE_ROD, 2), 6, 0, null));
+        fortressDrops.add(new ResourceDrop(new ItemStack(Material.WITHER_SKELETON_SKULL, 1), 0, 15,
+                "Wither Skeleton Skull (" + formatPct(15) + " if simulating Nether Fortress)"));
+        SimulationGroup netherFortress = new SimulationGroup("Nether Fortress", 8, fortressDrops);
+
+        List<ResourceDrop> bastionDrops = new ArrayList<>();
+        bastionDrops.add(new ResourceDrop(new ItemStack(Material.BLACKSTONE, 64)));
+        bastionDrops.add(new ResourceDrop(new ItemStack(Material.BLACKSTONE, 64)));
+        bastionDrops.add(new ResourceDrop(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 64)));
+        bastionDrops.add(new ResourceDrop(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 64)));
+        bastionDrops.add(new ResourceDrop(new ItemStack(Material.GILDED_BLACKSTONE, 32)));
+        bastionDrops.add(new ResourceDrop(new ItemStack(Material.GOLDEN_CARROT, 32)));
+        bastionDrops.add(new ResourceDrop(new ItemStack(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE, 1), 0, 3,
+                "Smithing Template (" + formatPct(3) + " if simulating Bastion Remnant)"));
+        SimulationGroup bastionRemnant = new SimulationGroup("Bastion Remnant", 12, bastionDrops);
+
+        List<ResourceDrop> seaTempleDrops = new ArrayList<>();
+        seaTempleDrops.add(new ResourceDrop(new ItemStack(Material.PRISMARINE, 64)));
+        seaTempleDrops.add(new ResourceDrop(new ItemStack(Material.PRISMARINE_BRICKS, 64)));
+        seaTempleDrops.add(new ResourceDrop(new ItemStack(Material.DARK_PRISMARINE, 16)));
+        seaTempleDrops.add(new ResourceDrop(new ItemStack(Material.SEA_LANTERN, 16)));
+        SimulationGroup seaTemple = new SimulationGroup("Sea Temple", 8, seaTempleDrops);
+
+        ItemStack mendingBook = new ItemStack(Material.ENCHANTED_BOOK, 1);
+        EnchantmentStorageMeta mendingMeta = (EnchantmentStorageMeta) mendingBook.getItemMeta();
+        mendingMeta.addStoredEnchant(Enchantment.MENDING, 1, true);
+        mendingBook.setItemMeta(mendingMeta);
+        List<ResourceDrop> endCityDrops = new ArrayList<>();
+        endCityDrops.add(new ResourceDrop(new ItemStack(Material.END_STONE_BRICKS, 64)));
+        endCityDrops.add(new ResourceDrop(new ItemStack(Material.END_STONE_BRICKS, 64)));
+        endCityDrops.add(new ResourceDrop(new ItemStack(Material.PURPUR_BLOCK, 64)));
+        endCityDrops.add(new ResourceDrop(new ItemStack(Material.PURPUR_PILLAR, 64)));
+        endCityDrops.add(new ResourceDrop(new ItemStack(Material.END_ROD, 16)));
+        endCityDrops.add(new ResourceDrop(new ItemStack(Material.ELYTRA, 1), 0, elytraOdds[rank - 1],
+                "Elytra (" + formatPct(elytraOdds[rank - 1]) + " if simulating End City)"));
+        endCityDrops.add(new ResourceDrop(mendingBook, 0, mendingOdds[rank - 1],
+                "Mending Book (" + formatPct(mendingOdds[rank - 1]) + " if simulating End City)"));
+        SimulationGroup endCity = new SimulationGroup("End City", 5, endCityDrops);
+
+        // Oceans, Rivers, Beaches, Islands
+        if (biome == Biome.OCEAN) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRAVEL, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.KELP, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 16)));
+            rares.add(new ResourceDrop(new ItemStack(Material.NAUTILUS_SHELL, 1), 0, commonOdds[rank - 1],
+                    "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
+        } else if (biome == Biome.RIVER) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRAVEL, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CLAY, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SUGAR_CANE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SALMON, 16)));
+        } else if (biome == Biome.FROZEN_OCEAN) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRAVEL, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.DIRT, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.ICE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.PACKED_ICE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BLUE_ICE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SALMON, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 4)));
+            rares.add(new ResourceDrop(new ItemStack(Material.NAUTILUS_SHELL, 1), 0, commonOdds[rank - 1],
+                    "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
+        } else if (biome == Biome.FROZEN_RIVER) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRAVEL, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.DIRT, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CLAY, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.ICE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SUGAR_CANE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SALMON, 16)));
+        } else if (biome == Biome.BEACH) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SUGAR_CANE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 16)));
+            rares.add(new ResourceDrop(new ItemStack(Material.TURTLE_SCUTE, 1), 0, rareOdds[rank - 1],
+                    "Rare Drop (" + formatPct(rareOdds[rank - 1]) + " chance)"));
+            rares.add(new ResourceDrop(new ItemStack(Material.HEART_OF_THE_SEA, 1), 0, 25,
+                    "Rare Drop (" + formatPct(25) + " chance)"));
+        } else if (biome == Biome.DEEP_OCEAN) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRAVEL, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRAVEL, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.KELP, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 16)));
+            rares.add(new ResourceDrop(new ItemStack(Material.NAUTILUS_SHELL, 1), 0, commonOdds[rank - 1],
+                    "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
+            simulations.add(seaTemple);
+        } else if (biome == Biome.STONY_SHORE) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRAVEL, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 8)));
+        } else if (biome == Biome.SNOWY_BEACH) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SNOW, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SALMON, 8)));
+        } else if (biome == Biome.WARM_OCEAN) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SEA_PICKLE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.TROPICAL_FISH, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.PUFFERFISH, 2)));
+            // Coral - previewOnly variety items, actual selection done in getResourcesByDominionAndBiome
+            String coralNote = "1 of 5 coral types per claim";
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.TUBE_CORAL_BLOCK, 8), 0, 0, coralNote, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.TUBE_CORAL, 4), 0, 0, coralNote, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.TUBE_CORAL_FAN, 4), 0, 0, coralNote, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BRAIN_CORAL_BLOCK, 8), 0, 0, coralNote, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BRAIN_CORAL, 4), 0, 0, coralNote, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BRAIN_CORAL_FAN, 4), 0, 0, coralNote, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BUBBLE_CORAL_BLOCK, 8), 0, 0, coralNote, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BUBBLE_CORAL, 4), 0, 0, coralNote, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BUBBLE_CORAL_FAN, 4), 0, 0, coralNote, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.FIRE_CORAL_BLOCK, 8), 0, 0, coralNote, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.FIRE_CORAL, 4), 0, 0, coralNote, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.FIRE_CORAL_FAN, 4), 0, 0, coralNote, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.HORN_CORAL_BLOCK, 8), 0, 0, coralNote, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.HORN_CORAL, 4), 0, 0, coralNote, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.HORN_CORAL_FAN, 4), 0, 0, coralNote, true));
+            rares.add(new ResourceDrop(new ItemStack(Material.NAUTILUS_SHELL, 1), 0, commonOdds[rank - 1],
+                    "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
+        } else if (biome == Biome.LUKEWARM_OCEAN) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.KELP, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.TROPICAL_FISH, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.PUFFERFISH, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 8)));
+            rares.add(new ResourceDrop(new ItemStack(Material.NAUTILUS_SHELL, 1), 0, commonOdds[rank - 1],
+                    "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
+        } else if (biome == Biome.COLD_OCEAN) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRAVEL, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.KELP, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SALMON, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
+            rares.add(new ResourceDrop(new ItemStack(Material.NAUTILUS_SHELL, 1), 0, commonOdds[rank - 1],
+                    "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
+        } else if (biome == Biome.DEEP_LUKEWARM_OCEAN) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.KELP, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.TROPICAL_FISH, 16)));
+            rares.add(new ResourceDrop(new ItemStack(Material.NAUTILUS_SHELL, 1), 0, commonOdds[rank - 1],
+                    "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
+            simulations.add(seaTemple);
+        } else if (biome == Biome.DEEP_COLD_OCEAN) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRAVEL, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.KELP, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 16)));
+            rares.add(new ResourceDrop(new ItemStack(Material.NAUTILUS_SHELL, 1), 0, commonOdds[rank - 1],
+                    "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
+            simulations.add(seaTemple);
+        } else if (biome == Biome.DEEP_FROZEN_OCEAN) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRAVEL, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.KELP, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SALMON, 16)));
+            rares.add(new ResourceDrop(new ItemStack(Material.NAUTILUS_SHELL, 1), 0, commonOdds[rank - 1],
+                    "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
+            simulations.add(seaTemple);
+        } else if (biome == Biome.MUSHROOM_FIELDS) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MYCELIUM, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RED_MUSHROOM_BLOCK, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BROWN_MUSHROOM_BLOCK, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUSHROOM_STEM, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            rares.add(new ResourceDrop(new ItemStack(Material.DIAMOND, 1), 0, commonOdds[rank - 1],
+                    "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
+
+        // Flat Biomes
+        } else if (biome == Biome.PLAINS) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.DANDELION, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BEEF, 16)));
+            String flowerNote3 = "1 of 3 possible per claim";
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.POPPY, 8), 0, 0, flowerNote3, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.OXEYE_DAISY, 8), 0, 0, flowerNote3, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CORNFLOWER, 8), 0, 0, flowerNote3, true));
+        } else if (biome == Biome.SUNFLOWER_PLAINS) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.DANDELION, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SUNFLOWER, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BEEF, 16)));
+            String flowerNote3s = "1 of 3 possible per claim";
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.POPPY, 8), 0, 0, flowerNote3s, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.OXEYE_DAISY, 8), 0, 0, flowerNote3s, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CORNFLOWER, 8), 0, 0, flowerNote3s, true));
+        } else if (biome == Biome.SPARSE_JUNGLE) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.JUNGLE_LOG, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.VINE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MELON, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.PUMPKIN, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COCOA_BEANS, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CHICKEN, 16)));
+        } else if (biome == Biome.SNOWY_PLAINS) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SNOW, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SPRUCE_LOG, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+        } else if (biome == Biome.ICE_SPIKES) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SNOW_BLOCK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.PACKED_ICE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.ICE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+
+        // Forests
+        } else if (biome == Biome.FOREST) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BIRCH_LOG, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LEAF_LITTER, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.APPLE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+            int godOddsF = godAppleOdds[rank - 1];
+            if (AranarthUtils.getMonth() == Month.SOLARVOR) {
+                godOddsF = Math.max(1, godOddsF / 4);
+            }
+            rares.add(new ResourceDrop(new GodAppleFragment().getItem(), 0, godOddsF,
+                    "Rare Drop (" + formatPct(godOddsF) + " chance)"));
+        } else if (biome == Biome.TAIGA) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SPRUCE_LOG, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SWEET_BERRIES, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+        } else if (biome == Biome.SWAMP) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CLAY, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.FIREFLY_BUSH, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BROWN_MUSHROOM, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RED_MUSHROOM, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LILY_PAD, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SLIME_BALL, 2)));
+        } else if (biome == Biome.MANGROVE_SWAMP) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUD, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUD, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MANGROVE_LOG, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MANGROVE_ROOTS, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUDDY_MANGROVE_ROOTS, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MOSS_CARPET, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LILY_PAD, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+        } else if (biome == Biome.JUNGLE) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.JUNGLE_LOG, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BAMBOO, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.VINE, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MELON, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COCOA_BEANS, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CHICKEN, 16)));
+        } else if (biome == Biome.BAMBOO_JUNGLE) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.PODZOL, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.JUNGLE_LOG, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BAMBOO, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MELON, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CHICKEN, 16)));
+        } else if (biome == Biome.BIRCH_FOREST || biome == Biome.OLD_GROWTH_BIRCH_FOREST) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BIRCH_LOG, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.WILDFLOWERS, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+        } else if (biome == Biome.DARK_FOREST) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.DARK_OAK_LOG, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BROWN_MUSHROOM_BLOCK, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RED_MUSHROOM_BLOCK, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUSHROOM_STEM, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LEAF_LITTER, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.APPLE, 4)));
+            int godOddsD = godAppleOdds[rank - 1];
+            if (AranarthUtils.getMonth() == Month.SOLARVOR) {
+                godOddsD = Math.max(1, godOddsD / 4);
+            }
+            rares.add(new ResourceDrop(new GodAppleFragment().getItem(), 0, godOddsD,
+                    "Rare Drop (" + formatPct(godOddsD) + " chance)"));
+        } else if (biome == Biome.PALE_GARDEN) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.PALE_OAK_LOG, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.PALE_MOSS_BLOCK, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.PALE_HANGING_MOSS, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RESIN_CLUMP, 8)));
+        } else if (biome == Biome.SNOWY_TAIGA) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SPRUCE_LOG, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SNOW, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+        } else if (biome == Biome.OLD_GROWTH_PINE_TAIGA || biome == Biome.OLD_GROWTH_SPRUCE_TAIGA) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.PODZOL, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COARSE_DIRT, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MOSSY_COBBLESTONE, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SPRUCE_LOG, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BROWN_MUSHROOM, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+        } else if (biome == Biome.FLOWER_FOREST) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BIRCH_LOG, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LEAF_LITTER, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.APPLE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            String flowerNote14 = "1 of 14 possible per claim";
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.DANDELION, 8), 0, 0, flowerNote14, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.POPPY, 8), 0, 0, flowerNote14, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.WHITE_TULIP, 8), 0, 0, flowerNote14, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.PINK_TULIP, 8), 0, 0, flowerNote14, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.ORANGE_TULIP, 8), 0, 0, flowerNote14, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RED_TULIP, 8), 0, 0, flowerNote14, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.ALLIUM, 8), 0, 0, flowerNote14, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.AZURE_BLUET, 8), 0, 0, flowerNote14, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.OXEYE_DAISY, 8), 0, 0, flowerNote14, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LILY_OF_THE_VALLEY, 8), 0, 0, flowerNote14, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CORNFLOWER, 8), 0, 0, flowerNote14, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LILAC, 4), 0, 0, flowerNote14, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.PEONY, 4), 0, 0, flowerNote14, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.ROSE_BUSH, 4), 0, 0, flowerNote14, true));
+            int godOddsFF = godAppleOdds[rank - 1];
+            if (AranarthUtils.getMonth() == Month.SOLARVOR) {
+                godOddsFF = Math.max(1, godOddsFF / 4);
+            }
+            rares.add(new ResourceDrop(new GodAppleFragment().getItem(), 0, godOddsFF,
+                    "Rare Drop (" + formatPct(godOddsFF) + " chance)"));
+
+        // Mountains and Large Hills
+        } else if (biome == Biome.WINDSWEPT_HILLS) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRANITE, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.DIORITE, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.ANDESITE, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SPRUCE_LOG, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 16)));
+        } else if (biome == Biome.WINDSWEPT_FOREST) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRANITE, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.DIORITE, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.ANDESITE, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SPRUCE_LOG, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 16)));
+        } else if (biome == Biome.WINDSWEPT_GRAVELLY_HILLS) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRAVEL, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SPRUCE_LOG, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 16)));
+        } else if (biome == Biome.WINDSWEPT_SAVANNA) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COARSE_DIRT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.ACACIA_LOG, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BEEF, 16)));
+        } else if (biome == Biome.GROVE) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SNOW_BLOCK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SPRUCE_LOG, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+        } else if (biome == Biome.FROZEN_PEAKS) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SNOW_BLOCK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.PACKED_ICE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 16)));
+        } else if (biome == Biome.MEADOW) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.DANDELION, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CORNFLOWER, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.WILDFLOWERS, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 16)));
+        } else if (biome == Biome.JAGGED_PEAKS || biome == Biome.SNOWY_SLOPES) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SNOW_BLOCK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 16)));
+        } else if (biome == Biome.STONY_PEAKS) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CALCITE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 16)));
+        } else if (biome == Biome.CHERRY_GROVE) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CHERRY_LOG, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.PINK_PETALS, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+
+        // Dry and Desert Biomes
+        } else if (biome == Biome.DESERT) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SANDSTONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CACTUS, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CACTUS_FLOWER, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+            rares.add(new ResourceDrop(new ItemStack(Material.BONE_BLOCK, 32), 0, rareOdds[rank - 1],
+                    "Rare Drop (" + formatPct(rareOdds[rank - 1]) + " chance)"));
+        } else if (biome == Biome.SAVANNA || biome == Biome.SAVANNA_PLATEAU) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.ACACIA_LOG, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BEEF, 16)));
+            rares.add(new ResourceDrop(new ItemStack(Material.ARMADILLO_SCUTE, 1), 0, commonOdds[rank - 1],
+                    "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
+        } else if (biome == Biome.BADLANDS || biome == Biome.ERODED_BADLANDS) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RED_SAND, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RED_SANDSTONE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.TERRACOTTA, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
+            String terracottaNote = "1 of 6 possible per claim";
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RED_TERRACOTTA, 16), 0, 0, terracottaNote, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.ORANGE_TERRACOTTA, 16), 0, 0, terracottaNote, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.YELLOW_TERRACOTTA, 16), 0, 0, terracottaNote, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BROWN_TERRACOTTA, 16), 0, 0, terracottaNote, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LIGHT_GRAY_TERRACOTTA, 16), 0, 0, terracottaNote, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.WHITE_TERRACOTTA, 16), 0, 0, terracottaNote, true));
+            rares.add(new ResourceDrop(new ItemStack(Material.ARMADILLO_SCUTE, 1), 0, commonOdds[rank - 1],
+                    "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
+        } else if (biome == Biome.WOODED_BADLANDS) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COARSE_DIRT, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.TERRACOTTA, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LEAF_LITTER, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
+            String terracottaNoteW = "1 of 6 possible per claim";
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RED_TERRACOTTA, 8), 0, 0, terracottaNoteW, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.ORANGE_TERRACOTTA, 8), 0, 0, terracottaNoteW, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.YELLOW_TERRACOTTA, 8), 0, 0, terracottaNoteW, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BROWN_TERRACOTTA, 8), 0, 0, terracottaNoteW, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LIGHT_GRAY_TERRACOTTA, 8), 0, 0, terracottaNoteW, true));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.WHITE_TERRACOTTA, 8), 0, 0, terracottaNoteW, true));
+            rares.add(new ResourceDrop(new ItemStack(Material.ARMADILLO_SCUTE, 1), 0, commonOdds[rank - 1],
+                    "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
+
+        // Nether and End
+        } else if (biome == Biome.NETHER_WASTES) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHERRACK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHERRACK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BLACKSTONE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MAGMA_BLOCK, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_QUARTZ_ORE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_GOLD_ORE, 16)));
+            rares.add(new ResourceDrop(new ItemStack(Material.GHAST_TEAR, 1), 0, commonOdds[rank - 1],
+                    "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
+            rares.add(new ResourceDrop(new ItemStack(Material.NETHERITE_SCRAP, 2), 0, commonOdds[rank - 1],
+                    "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
+            simulations.add(netherFortress);
+            simulations.add(bastionRemnant);
+        } else if (biome == Biome.SOUL_SAND_VALLEY) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SOUL_SAND, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SOUL_SOIL, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRAVEL, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHERRACK, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BASALT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BLACKSTONE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BONE_BLOCK, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_QUARTZ_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BONE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GHAST_TEAR, rank)));
+            rares.add(new ResourceDrop(new ItemStack(Material.NETHERITE_SCRAP, 1), 0, commonOdds[rank - 1],
+                    "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
+            rares.add(new ResourceDrop(new ItemStack(Material.DRIED_GHAST, 1), 0, 8,
+                    "Rare Drop (" + formatPct(8) + " chance)"));
+            simulations.add(netherFortress);
+            simulations.add(bastionRemnant);
+        } else if (biome == Biome.CRIMSON_FOREST) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CRIMSON_NYLIUM, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHERRACK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BLACKSTONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CRIMSON_STEM, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SHROOMLIGHT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.WEEPING_VINES, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CRIMSON_FUNGUS, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_QUARTZ_ORE, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_GOLD_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.PORKCHOP, 16)));
+            rares.add(new ResourceDrop(new ItemStack(Material.NETHERITE_SCRAP, 1), 0, commonOdds[rank - 1],
+                    "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
+            simulations.add(netherFortress);
+            simulations.add(bastionRemnant);
+        } else if (biome == Biome.WARPED_FOREST) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.WARPED_NYLIUM, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHERRACK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BLACKSTONE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.WARPED_STEM, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SHROOMLIGHT, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.TWISTING_VINES, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.WARPED_FUNGUS, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_QUARTZ_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.ENDER_PEARL, rank)));
+            rares.add(new ResourceDrop(new ItemStack(Material.NETHERITE_SCRAP, 1), 0, commonOdds[rank - 1],
+                    "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
+            simulations.add(netherFortress);
+            simulations.add(bastionRemnant);
+        } else if (biome == Biome.BASALT_DELTAS) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHERRACK, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BASALT, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BASALT, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BLACKSTONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BLACKSTONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MAGMA_BLOCK, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_QUARTZ_ORE, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_GOLD_ORE, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MAGMA_CREAM, 4)));
+            rares.add(new ResourceDrop(new ItemStack(Material.NETHERITE_SCRAP, 1), 0, commonOdds[rank - 1],
+                    "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
+            rares.add(new ResourceDrop(new ItemStack(Material.GHAST_TEAR, rank), 0, 0,
+                    "0 to " + rank + " Ghast Tears (random amount per claim)", true));
+            simulations.add(netherFortress);
+            simulations.add(bastionRemnant);
+        } else if (biome == Biome.THE_END || biome == Biome.END_BARRENS || biome == Biome.END_HIGHLANDS
+                || biome == Biome.END_MIDLANDS || biome == Biome.SMALL_END_ISLANDS) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.END_STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.END_STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.OBSIDIAN, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CHORUS_FRUIT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.PURPUR_BLOCK, 4)));
+            simulations.add(endCity);
+        }
+
+        return new BiomeTable(guaranteed, simulations, rares, varieties);
+    }
+
     /**
      * Provides the icon associated to the biome.
      *
@@ -1441,132 +2247,37 @@ public class DominionUtils {
      * @return The icon.
      */
     public static List<ItemStack> getResourcesByDominionAndBiome(Dominion dominion, Biome biome, double yieldMultiplier) {
-        List<ItemStack> items = new ArrayList<>();
-        Random random = new Random();
-
-        // Dominion rank level determines drop odds and yield multipliers
+        BiomeTable table = buildBiomeTable(dominion, biome);
         int rank = dominion.getDominionLevel();
+        Random random = new Random();
+        List<ItemStack> items = new ArrayList<>();
 
-        // Scaled odds per rank (higher the rank, the higher the odds)
-        int[] commonOdds = {10, 8, 5, 3, 1};  // nautilus, armadillo, netherite scrap, mushroom diamond, nether tear
-        int[] rareOdds = {20, 15, 10, 5, 2}; // turtle scute, desert fossil
-        int[] elytraOdds = {200, 100, 65, 50, 40}; // elytra (0.1%/0.2%/0.31%/0.4%/0.5% per claim)
-        int[] mendingOdds = {16, 12, 8, 6, 4};   // mending book if end city simulates (6.25%-8.3%-12.5%-16.7%-25% if city)
-        int[] godAppleOdds = {16, 12, 8, 4, 1};  // god apple fragment (divided by 4 during SOLARVOR)
+        // Guaranteed drops
+        for (ResourceDrop drop : table.guaranteed) {
+            if (drop.previewOnly) continue;
+            items.add(resolveAmount(drop, random));
+        }
 
-        // Dirts
-        // Stones
-        // Woods
-        // Other blocks
-        // Plants
-        // Ores
-        // Special
-
-        // Oceans, Rivers, Beaches, Islands
-        if (biome == Biome.OCEAN) {
-            items.add(new ItemStack(Material.GRAVEL, 64));
-            items.add(new ItemStack(Material.SAND, 32));
-            items.add(new ItemStack(Material.STONE, 32));
-            items.add(new ItemStack(Material.KELP, 32));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.LAPIS_ORE, 4));
-            items.add(new ItemStack(Material.INK_SAC, 8));
-            items.add(new ItemStack(Material.COD, 16));
-
-            if (random.nextInt(commonOdds[rank - 1]) == 0) {
-                items.add(new ItemStack(Material.NAUTILUS_SHELL, 1));
+        // Simulation drops
+        for (SimulationGroup sim : table.simulations) {
+            if (random.nextInt(sim.odds) == 0) {
+                for (ResourceDrop drop : sim.drops) {
+                    if (drop.previewOnly) continue;
+                    if (drop.subChanceOdds > 0 && random.nextInt(drop.subChanceOdds) != 0) continue;
+                    items.add(resolveAmount(drop, random));
+                }
             }
-        } else if (biome == Biome.RIVER) {
-            items.add(new ItemStack(Material.GRASS_BLOCK, 32));
-            items.add(new ItemStack(Material.SAND, 32));
-            items.add(new ItemStack(Material.GRAVEL, 32));
-            items.add(new ItemStack(Material.CLAY, 16));
-            items.add(new ItemStack(Material.STONE, 32));
-            items.add(new ItemStack(Material.OAK_LOG, 4));
-            items.add(new ItemStack(Material.SUGAR_CANE, 8));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.IRON_ORE, 2));
-            items.add(new ItemStack(Material.INK_SAC, 8));
-            items.add(new ItemStack(Material.SALMON, 16));
-        } else if (biome == Biome.FROZEN_OCEAN) {
-            items.add(new ItemStack(Material.GRAVEL, 64));
-            items.add(new ItemStack(Material.SAND, 32));
-            items.add(new ItemStack(Material.DIRT, 32));
-            items.add(new ItemStack(Material.STONE, 32));
-            items.add(new ItemStack(Material.ICE, 64));
-            items.add(new ItemStack(Material.PACKED_ICE, 64));
-            items.add(new ItemStack(Material.BLUE_ICE, 8));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.IRON_ORE, 2));
-            items.add(new ItemStack(Material.SALMON, 8));
-            items.add(new ItemStack(Material.INK_SAC, 4));
+        }
 
-            if (random.nextInt(commonOdds[rank - 1]) == 0) {
-                items.add(new ItemStack(Material.NAUTILUS_SHELL, 1));
-            }
-        } else if (biome == Biome.FROZEN_RIVER) {
-            items.add(new ItemStack(Material.GRAVEL, 32));
-            items.add(new ItemStack(Material.DIRT, 32));
-            items.add(new ItemStack(Material.SAND, 32));
-            items.add(new ItemStack(Material.CLAY, 8));
-            items.add(new ItemStack(Material.STONE, 32));
-            items.add(new ItemStack(Material.ICE, 32));
-            items.add(new ItemStack(Material.SUGAR_CANE, 8));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.IRON_ORE, 2));
-            items.add(new ItemStack(Material.INK_SAC, 4));
-            items.add(new ItemStack(Material.SALMON, 16));
-        } else if (biome == Biome.BEACH) {
-            items.add(new ItemStack(Material.SAND, 32));
-            items.add(new ItemStack(Material.STONE, 32));
-            items.add(new ItemStack(Material.SUGAR_CANE, 8));
-            items.add(new ItemStack(Material.COD, 16));
+        // Rare drops
+        for (ResourceDrop drop : table.rares) {
+            if (drop.previewOnly) continue;
+            if (drop.subChanceOdds > 0 && random.nextInt(drop.subChanceOdds) != 0) continue;
+            items.add(resolveAmount(drop, random));
+        }
 
-            if (random.nextInt(rareOdds[rank - 1]) == 0) {
-                items.add(new ItemStack(Material.TURTLE_SCUTE, 1));
-            }
-            if (random.nextInt(25) == 0) {
-                items.add(new ItemStack(Material.HEART_OF_THE_SEA, 1));
-            }
-        } else if (biome == Biome.DEEP_OCEAN) {
-            items.add(new ItemStack(Material.GRAVEL, 64));
-            items.add(new ItemStack(Material.GRAVEL, 64));
-            items.add(new ItemStack(Material.SAND, 32));
-            items.add(new ItemStack(Material.STONE, 32));
-            items.add(new ItemStack(Material.KELP, 32));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.LAPIS_ORE, 4));
-            items.add(new ItemStack(Material.INK_SAC, 8));
-            items.add(new ItemStack(Material.COD, 16));
-
-            if (random.nextInt(commonOdds[rank - 1]) == 0) {
-                items.add(new ItemStack(Material.NAUTILUS_SHELL, 1));
-            }
-
-            // Simulates a sea temple
-            if (random.nextInt(8) == 0) {
-                items.add(new ItemStack(Material.PRISMARINE, 64));
-                items.add(new ItemStack(Material.PRISMARINE_BRICKS, 64));
-                items.add(new ItemStack(Material.DARK_PRISMARINE, 16));
-                items.add(new ItemStack(Material.SEA_LANTERN, 16));
-            }
-        } else if (biome == Biome.STONY_SHORE) {
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.GRAVEL, 64));
-            items.add(new ItemStack(Material.COAL_ORE, 8));
-            items.add(new ItemStack(Material.IRON_ORE, 2));
-            items.add(new ItemStack(Material.COPPER_ORE, 2));
-            items.add(new ItemStack(Material.COD, 8));
-        } else if (biome == Biome.SNOWY_BEACH) {
-            items.add(new ItemStack(Material.SAND, 32));
-            items.add(new ItemStack(Material.SNOW, 32));
-            items.add(new ItemStack(Material.COAL_ORE, 8));
-            items.add(new ItemStack(Material.IRON_ORE, 2));
-            items.add(new ItemStack(Material.SALMON, 8));
-        } else if (biome == Biome.WARM_OCEAN) {
-            items.add(new ItemStack(Material.SAND, 64));
-            items.add(new ItemStack(Material.STONE, 32));
-
+        // Variety selections - biome-specific random choice logic
+        if (biome == Biome.WARM_OCEAN) {
             int coralType = random.nextInt(5);
             if (coralType == 0) {
                 items.add(new ItemStack(Material.TUBE_CORAL_BLOCK, 8));
@@ -1584,804 +2295,59 @@ public class DominionUtils {
                 items.add(new ItemStack(Material.FIRE_CORAL_BLOCK, 8));
                 items.add(new ItemStack(Material.FIRE_CORAL, 4));
                 items.add(new ItemStack(Material.FIRE_CORAL_FAN, 4));
-            } else if (coralType == 4) {
+            } else {
                 items.add(new ItemStack(Material.HORN_CORAL_BLOCK, 8));
                 items.add(new ItemStack(Material.HORN_CORAL, 4));
                 items.add(new ItemStack(Material.HORN_CORAL_FAN, 4));
             }
-            items.add(new ItemStack(Material.SEA_PICKLE, 8));
-
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.LAPIS_ORE, 4));
-            items.add(new ItemStack(Material.INK_SAC, 8));
-            items.add(new ItemStack(Material.TROPICAL_FISH, 16));
-            items.add(new ItemStack(Material.PUFFERFISH, 2));
-
-            if (random.nextInt(commonOdds[rank - 1]) == 0) {
-                items.add(new ItemStack(Material.NAUTILUS_SHELL, 1));
-            }
-        } else if (biome == Biome.LUKEWARM_OCEAN) {
-            items.add(new ItemStack(Material.SAND, 64));
-            items.add(new ItemStack(Material.STONE, 32));
-            items.add(new ItemStack(Material.KELP, 32));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.LAPIS_ORE, 4));
-            items.add(new ItemStack(Material.INK_SAC, 8));
-            items.add(new ItemStack(Material.TROPICAL_FISH, 4));
-            items.add(new ItemStack(Material.PUFFERFISH, 2));
-            items.add(new ItemStack(Material.COD, 8));
-
-            if (random.nextInt(commonOdds[rank - 1]) == 0) {
-                items.add(new ItemStack(Material.NAUTILUS_SHELL, 1));
-            }
-        } else if (biome == Biome.COLD_OCEAN) {
-            items.add(new ItemStack(Material.GRAVEL, 64));
-            items.add(new ItemStack(Material.STONE, 32));
-            items.add(new ItemStack(Material.KELP, 32));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.COD, 8));
-            items.add(new ItemStack(Material.SALMON, 8));
-            items.add(new ItemStack(Material.INK_SAC, 8));
-
-            if (random.nextInt(commonOdds[rank - 1]) == 0) {
-                items.add(new ItemStack(Material.NAUTILUS_SHELL, 1));
-            }
-        } else if (biome == Biome.DEEP_LUKEWARM_OCEAN) {
-            items.add(new ItemStack(Material.SAND, 64));
-            items.add(new ItemStack(Material.STONE, 32));
-            items.add(new ItemStack(Material.KELP, 32));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.LAPIS_ORE, 4));
-            items.add(new ItemStack(Material.INK_SAC, 8));
-            items.add(new ItemStack(Material.COD, 4));
-            items.add(new ItemStack(Material.TROPICAL_FISH, 16));
-
-            if (random.nextInt(commonOdds[rank - 1]) == 0) {
-                items.add(new ItemStack(Material.NAUTILUS_SHELL, 1));
-            }
-
-            // Simulates a sea temple
-            if (random.nextInt(8) == 0) {
-                items.add(new ItemStack(Material.PRISMARINE, 64));
-                items.add(new ItemStack(Material.PRISMARINE_BRICKS, 64));
-                items.add(new ItemStack(Material.DARK_PRISMARINE, 16));
-                items.add(new ItemStack(Material.SEA_LANTERN, 16));
-            }
-        } else if (biome == Biome.DEEP_COLD_OCEAN) {
-            items.add(new ItemStack(Material.GRAVEL, 64));
-            items.add(new ItemStack(Material.SAND, 32));
-            items.add(new ItemStack(Material.STONE, 32));
-            items.add(new ItemStack(Material.KELP, 32));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.LAPIS_ORE, 4));
-            items.add(new ItemStack(Material.INK_SAC, 8));
-            items.add(new ItemStack(Material.COD, 16));
-
-            if (random.nextInt(commonOdds[rank - 1]) == 0) {
-                items.add(new ItemStack(Material.NAUTILUS_SHELL, 1));
-            }
-
-            // Simulates a sea temple
-            if (random.nextInt(8) == 0) {
-                items.add(new ItemStack(Material.PRISMARINE, 64));
-                items.add(new ItemStack(Material.PRISMARINE_BRICKS, 64));
-                items.add(new ItemStack(Material.DARK_PRISMARINE, 16));
-                items.add(new ItemStack(Material.SEA_LANTERN, 16));
-            }
-        } else if (biome == Biome.DEEP_FROZEN_OCEAN) {
-            items.add(new ItemStack(Material.GRAVEL, 64));
-            items.add(new ItemStack(Material.STONE, 32));
-            items.add(new ItemStack(Material.KELP, 32));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.LAPIS_ORE, 4));
-            items.add(new ItemStack(Material.INK_SAC, 8));
-            items.add(new ItemStack(Material.SALMON, 16));
-
-            if (random.nextInt(commonOdds[rank - 1]) == 0) {
-                items.add(new ItemStack(Material.NAUTILUS_SHELL, 1));
-            }
-
-            // Simulates a sea temple
-            if (random.nextInt(8) == 0) {
-                items.add(new ItemStack(Material.PRISMARINE, 64));
-                items.add(new ItemStack(Material.PRISMARINE_BRICKS, 64));
-                items.add(new ItemStack(Material.DARK_PRISMARINE, 16));
-                items.add(new ItemStack(Material.SEA_LANTERN, 16));
-            }
-        } else if (biome == Biome.MUSHROOM_FIELDS) {
-            items.add(new ItemStack(Material.MYCELIUM, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.RED_MUSHROOM_BLOCK, 32));
-            items.add(new ItemStack(Material.BROWN_MUSHROOM_BLOCK, 32));
-            items.add(new ItemStack(Material.MUSHROOM_STEM, 32));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.IRON_ORE, 2));
-
-            if (random.nextInt(commonOdds[rank - 1]) == 0) {
-                items.add(new ItemStack(Material.DIAMOND, 1));
-            }
-        }
-
-        // Flat Biomes
-        else if (biome == Biome.PLAINS) {
-            items.add(new ItemStack(Material.GRASS_BLOCK, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.OAK_LOG, 8));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.IRON_ORE, 2));
-            items.add(new ItemStack(Material.DANDELION, 8));
+        } else if (biome == Biome.PLAINS || biome == Biome.SUNFLOWER_PLAINS) {
             int flowerNum = random.nextInt(3);
             if (flowerNum == 0) {
                 items.add(new ItemStack(Material.POPPY, 8));
             } else if (flowerNum == 1) {
                 items.add(new ItemStack(Material.OXEYE_DAISY, 8));
-            } else if (flowerNum == 2) {
+            } else {
                 items.add(new ItemStack(Material.CORNFLOWER, 8));
             }
-            items.add(new ItemStack(Material.BEEF, 16));
-        } else if (biome == Biome.SUNFLOWER_PLAINS) {
-            items.add(new ItemStack(Material.GRASS_BLOCK, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.OAK_LOG, 8));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.IRON_ORE, 2));
-            items.add(new ItemStack(Material.DANDELION, 8));
-            int flowerNum = random.nextInt(3);
-            if (flowerNum == 0) {
-                items.add(new ItemStack(Material.POPPY, 8));
-            } else if (flowerNum == 1) {
-                items.add(new ItemStack(Material.OXEYE_DAISY, 8));
-            } else if (flowerNum == 2) {
-                items.add(new ItemStack(Material.CORNFLOWER, 8));
-            }
-            items.add(new ItemStack(Material.SUNFLOWER, 16));
-            items.add(new ItemStack(Material.BEEF, 16));
-        } else if (biome == Biome.SPARSE_JUNGLE) {
-            items.add(new ItemStack(Material.GRASS_BLOCK, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.JUNGLE_LOG, 8));
-            items.add(new ItemStack(Material.OAK_LOG, 2));
-            items.add(new ItemStack(Material.VINE, 4));
-            items.add(new ItemStack(Material.MELON, 2));
-            items.add(new ItemStack(Material.PUMPKIN, 2));
-            items.add(new ItemStack(Material.COCOA_BEANS, 2));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.IRON_ORE, 2));
-            items.add(new ItemStack(Material.CHICKEN, 16));
-        } else if (biome == Biome.SNOWY_PLAINS) {
-            items.add(new ItemStack(Material.GRASS_BLOCK, 64));
-            items.add(new ItemStack(Material.GRASS_BLOCK, 64));
-            items.add(new ItemStack(Material.SNOW, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.SPRUCE_LOG, 8));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.IRON_ORE, 2));
-            items.add(new ItemStack(Material.RABBIT, 16));
-        } else if (biome == Biome.ICE_SPIKES) {
-            items.add(new ItemStack(Material.SNOW_BLOCK, 64));
-            items.add(new ItemStack(Material.PACKED_ICE, 64));
-            items.add(new ItemStack(Material.ICE, 32));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.IRON_ORE, 2));
-            items.add(new ItemStack(Material.RABBIT, 16));
-        }
-
-        // Forests
-        else if (biome == Biome.FOREST) {
-            items.add(new ItemStack(Material.GRASS_BLOCK, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.OAK_LOG, 16));
-            items.add(new ItemStack(Material.BIRCH_LOG, 16));
-            items.add(new ItemStack(Material.LEAF_LITTER, 16));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.IRON_ORE, 2));
-            items.add(new ItemStack(Material.APPLE, 4));
-            items.add(new ItemStack(Material.RABBIT, 16));
-
-            int godOdds = godAppleOdds[rank - 1];
-            if (AranarthUtils.getMonth() == Month.SOLARVOR) {
-                godOdds = Math.max(1, godOdds / 4);
-            }
-            if (random.nextInt(godOdds) == 0) {
-                items.add(new GodAppleFragment().getItem());
-            }
-        } else if (biome == Biome.TAIGA) {
-            items.add(new ItemStack(Material.GRASS_BLOCK, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.SPRUCE_LOG, 32));
-            items.add(new ItemStack(Material.SWEET_BERRIES, 16));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.IRON_ORE, 2));
-            items.add(new ItemStack(Material.RABBIT, 16));
-        } else if (biome == Biome.SWAMP) {
-            items.add(new ItemStack(Material.GRASS_BLOCK, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.OAK_LOG, 32));
-            items.add(new ItemStack(Material.CLAY, 32));
-            items.add(new ItemStack(Material.FIREFLY_BUSH, 8));
-            items.add(new ItemStack(Material.BROWN_MUSHROOM, 8));
-            items.add(new ItemStack(Material.RED_MUSHROOM, 8));
-            items.add(new ItemStack(Material.LILY_PAD, 16));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.IRON_ORE, 2));
-            items.add(new ItemStack(Material.SLIME_BALL, 2));
-        } else if (biome == Biome.MANGROVE_SWAMP) {
-            items.add(new ItemStack(Material.GRASS_BLOCK, 16));
-            items.add(new ItemStack(Material.MUD, 64));
-            items.add(new ItemStack(Material.MUD, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.MANGROVE_LOG, 64));
-            items.add(new ItemStack(Material.MANGROVE_ROOTS, 32));
-            items.add(new ItemStack(Material.MUDDY_MANGROVE_ROOTS, 32));
-            items.add(new ItemStack(Material.MOSS_CARPET, 32));
-            items.add(new ItemStack(Material.LILY_PAD, 8));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.IRON_ORE, 2));
-        } else if (biome == Biome.JUNGLE) {
-            items.add(new ItemStack(Material.GRASS_BLOCK, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.JUNGLE_LOG, 32));
-            items.add(new ItemStack(Material.OAK_LOG, 4));
-            items.add(new ItemStack(Material.BAMBOO, 4));
-            items.add(new ItemStack(Material.VINE, 16));
-            items.add(new ItemStack(Material.MELON, 2));
-            items.add(new ItemStack(Material.COCOA_BEANS, 4));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.IRON_ORE, 2));
-            items.add(new ItemStack(Material.CHICKEN, 16));
-        } else if (biome == Biome.BAMBOO_JUNGLE) {
-            items.add(new ItemStack(Material.GRASS_BLOCK, 16));
-            items.add(new ItemStack(Material.PODZOL, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.JUNGLE_LOG, 4));
-            items.add(new ItemStack(Material.OAK_LOG, 8));
-            items.add(new ItemStack(Material.BAMBOO, 64));
-            items.add(new ItemStack(Material.MELON, 2));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.IRON_ORE, 2));
-            items.add(new ItemStack(Material.CHICKEN, 16));
-        } else if (biome == Biome.BIRCH_FOREST || biome == Biome.OLD_GROWTH_BIRCH_FOREST) {
-            items.add(new ItemStack(Material.GRASS_BLOCK, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.BIRCH_LOG, 32));
-            items.add(new ItemStack(Material.WILDFLOWERS, 32));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.IRON_ORE, 2));
-            items.add(new ItemStack(Material.RABBIT, 16));
-        } else if (biome == Biome.DARK_FOREST) {
-            items.add(new ItemStack(Material.GRASS_BLOCK, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.DARK_OAK_LOG, 64));
-            items.add(new ItemStack(Material.OAK_LOG, 16));
-            items.add(new ItemStack(Material.BROWN_MUSHROOM_BLOCK, 16));
-            items.add(new ItemStack(Material.RED_MUSHROOM_BLOCK, 16));
-            items.add(new ItemStack(Material.MUSHROOM_STEM, 16));
-            items.add(new ItemStack(Material.LEAF_LITTER, 16));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.IRON_ORE, 2));
-            items.add(new ItemStack(Material.IRON_ORE, 2));
-            items.add(new ItemStack(Material.APPLE, 4));
-
-            int godOdds = godAppleOdds[rank - 1];
-            if (AranarthUtils.getMonth() == Month.SOLARVOR) {
-                godOdds = Math.max(1, godOdds / 4);
-            }
-            if (random.nextInt(godOdds) == 0) {
-                items.add(new GodAppleFragment().getItem());
-            }
-        } else if (biome == Biome.PALE_GARDEN) {
-            items.add(new ItemStack(Material.GRASS_BLOCK, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.PALE_OAK_LOG, 64));
-            items.add(new ItemStack(Material.PALE_MOSS_BLOCK, 16));
-            items.add(new ItemStack(Material.PALE_HANGING_MOSS, 8));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.IRON_ORE, 2));
-            items.add(new ItemStack(Material.RESIN_CLUMP, 8));
-        } else if (biome == Biome.SNOWY_TAIGA) {
-            items.add(new ItemStack(Material.GRASS_BLOCK, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.SPRUCE_LOG, 32));
-            items.add(new ItemStack(Material.SNOW, 32));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.IRON_ORE, 2));
-            items.add(new ItemStack(Material.RABBIT, 16));
-        } else if (biome == Biome.OLD_GROWTH_PINE_TAIGA || biome == Biome.OLD_GROWTH_SPRUCE_TAIGA) {
-            items.add(new ItemStack(Material.GRASS_BLOCK, 32));
-            items.add(new ItemStack(Material.PODZOL, 32));
-            items.add(new ItemStack(Material.COARSE_DIRT, 32));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.MOSSY_COBBLESTONE, 16));
-            items.add(new ItemStack(Material.SPRUCE_LOG, 64));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.IRON_ORE, 2));
-            items.add(new ItemStack(Material.BROWN_MUSHROOM, 16));
-            items.add(new ItemStack(Material.RABBIT, 16));
         } else if (biome == Biome.FLOWER_FOREST) {
-            items.add(new ItemStack(Material.GRASS_BLOCK, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.OAK_LOG, 16));
-            items.add(new ItemStack(Material.BIRCH_LOG, 16));
-            items.add(new ItemStack(Material.LEAF_LITTER, 16));
             int flowerNum = random.nextInt(14);
-            if (flowerNum == 0) {
-                items.add(new ItemStack(Material.DANDELION, 8));
-            } else if (flowerNum == 1) {
-                items.add(new ItemStack(Material.POPPY, 8));
-            } else if (flowerNum == 2) {
-                items.add(new ItemStack(Material.WHITE_TULIP, 8));
-            } else if (flowerNum == 3) {
-                items.add(new ItemStack(Material.PINK_TULIP, 8));
-            } else if (flowerNum == 4) {
-                items.add(new ItemStack(Material.ORANGE_TULIP, 8));
-            } else if (flowerNum == 5) {
-                items.add(new ItemStack(Material.RED_TULIP, 8));
-            } else if (flowerNum == 6) {
-                items.add(new ItemStack(Material.ALLIUM, 8));
-            } else if (flowerNum == 7) {
-                items.add(new ItemStack(Material.AZURE_BLUET, 8));
-            } else if (flowerNum == 8) {
-                items.add(new ItemStack(Material.OXEYE_DAISY, 8));
-            } else if (flowerNum == 9) {
-                items.add(new ItemStack(Material.LILY_OF_THE_VALLEY, 8));
-            } else if (flowerNum == 10) {
-                items.add(new ItemStack(Material.CORNFLOWER, 8));
-            } else if (flowerNum == 11) {
-                items.add(new ItemStack(Material.LILAC, 4));
-            } else if (flowerNum == 12) {
-                items.add(new ItemStack(Material.PEONY, 4));
-            } else if (flowerNum == 13) {
-                items.add(new ItemStack(Material.ROSE_BUSH, 4));
-            }
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.IRON_ORE, 2));
-
-            items.add(new ItemStack(Material.APPLE, 4));
-            items.add(new ItemStack(Material.RABBIT, 16));
-
-            int godOdds = godAppleOdds[rank - 1];
-            if (AranarthUtils.getMonth() == Month.SOLARVOR) {
-                godOdds = Math.max(1, godOdds / 4);
-            }
-            if (random.nextInt(godOdds) == 0) {
-                items.add(new GodAppleFragment().getItem());
-            }
-        }
-
-        // Mountains and Large Hills
-        else if (biome == Biome.WINDSWEPT_HILLS) {
-            items.add(new ItemStack(Material.GRASS_BLOCK, 32));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.GRANITE, 16));
-            items.add(new ItemStack(Material.DIORITE, 16));
-            items.add(new ItemStack(Material.ANDESITE, 16));
-            items.add(new ItemStack(Material.SPRUCE_LOG, 4));
-            items.add(new ItemStack(Material.OAK_LOG, 4));
-            items.add(new ItemStack(Material.COAL_ORE, 8));
-            items.add(new ItemStack(Material.COPPER_ORE, 8));
-            items.add(new ItemStack(Material.IRON_ORE, 8));
-            items.add(new ItemStack(Material.GOLD_ORE, 4));
-            items.add(new ItemStack(Material.EMERALD_ORE, 2));
-            items.add(new ItemStack(Material.MUTTON, 16));
-        } else if (biome == Biome.WINDSWEPT_FOREST) {
-            items.add(new ItemStack(Material.GRASS_BLOCK, 32));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.GRANITE, 16));
-            items.add(new ItemStack(Material.DIORITE, 16));
-            items.add(new ItemStack(Material.ANDESITE, 16));
-            items.add(new ItemStack(Material.SPRUCE_LOG, 16));
-            items.add(new ItemStack(Material.OAK_LOG, 4));
-            items.add(new ItemStack(Material.COAL_ORE, 8));
-            items.add(new ItemStack(Material.COPPER_ORE, 8));
-            items.add(new ItemStack(Material.IRON_ORE, 8));
-            items.add(new ItemStack(Material.GOLD_ORE, 4));
-            items.add(new ItemStack(Material.EMERALD_ORE, 2));
-            items.add(new ItemStack(Material.MUTTON, 16));
-        } else if (biome == Biome.WINDSWEPT_GRAVELLY_HILLS) {
-            items.add(new ItemStack(Material.GRASS_BLOCK, 32));
-            items.add(new ItemStack(Material.GRAVEL, 32));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.SPRUCE_LOG, 8));
-            items.add(new ItemStack(Material.COAL_ORE, 8));
-            items.add(new ItemStack(Material.COPPER_ORE, 8));
-            items.add(new ItemStack(Material.IRON_ORE, 8));
-            items.add(new ItemStack(Material.GOLD_ORE, 4));
-            items.add(new ItemStack(Material.EMERALD_ORE, 2));
-            items.add(new ItemStack(Material.MUTTON, 16));
-        } else if (biome == Biome.WINDSWEPT_SAVANNA) {
-            items.add(new ItemStack(Material.GRASS_BLOCK, 32));
-            items.add(new ItemStack(Material.COARSE_DIRT, 16));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.ACACIA_LOG, 16));
-            items.add(new ItemStack(Material.COAL_ORE, 8));
-            items.add(new ItemStack(Material.COPPER_ORE, 8));
-            items.add(new ItemStack(Material.IRON_ORE, 8));
-            items.add(new ItemStack(Material.GOLD_ORE, 4));
-            items.add(new ItemStack(Material.EMERALD_ORE, 2));
-            items.add(new ItemStack(Material.BEEF, 16));
-        } else if (biome == Biome.GROVE) {
-            items.add(new ItemStack(Material.SNOW_BLOCK, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.SPRUCE_LOG, 32));
-            items.add(new ItemStack(Material.COAL_ORE, 8));
-            items.add(new ItemStack(Material.COPPER_ORE, 8));
-            items.add(new ItemStack(Material.IRON_ORE, 8));
-            items.add(new ItemStack(Material.GOLD_ORE, 4));
-            items.add(new ItemStack(Material.EMERALD_ORE, 2));
-            items.add(new ItemStack(Material.RABBIT, 16));
-        } else if (biome == Biome.FROZEN_PEAKS) {
-            items.add(new ItemStack(Material.SNOW_BLOCK, 64));
-            items.add(new ItemStack(Material.PACKED_ICE, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.COAL_ORE, 8));
-            items.add(new ItemStack(Material.COPPER_ORE, 8));
-            items.add(new ItemStack(Material.IRON_ORE, 8));
-            items.add(new ItemStack(Material.GOLD_ORE, 4));
-            items.add(new ItemStack(Material.EMERALD_ORE, 2));
-            items.add(new ItemStack(Material.MUTTON, 16));
-        } else if (biome == Biome.MEADOW) {
-            items.add(new ItemStack(Material.GRASS_BLOCK, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.DANDELION, 8));
-            items.add(new ItemStack(Material.CORNFLOWER, 8));
-            items.add(new ItemStack(Material.WILDFLOWERS, 32));
-            items.add(new ItemStack(Material.COAL_ORE, 8));
-            items.add(new ItemStack(Material.COPPER_ORE, 8));
-            items.add(new ItemStack(Material.IRON_ORE, 8));
-            items.add(new ItemStack(Material.GOLD_ORE, 4));
-            items.add(new ItemStack(Material.EMERALD_ORE, 2));
-            items.add(new ItemStack(Material.MUTTON, 16));
-        } else if (biome == Biome.JAGGED_PEAKS || biome == Biome.SNOWY_SLOPES) {
-            items.add(new ItemStack(Material.SNOW_BLOCK, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.COAL_ORE, 8));
-            items.add(new ItemStack(Material.COPPER_ORE, 8));
-            items.add(new ItemStack(Material.IRON_ORE, 8));
-            items.add(new ItemStack(Material.GOLD_ORE, 4));
-            items.add(new ItemStack(Material.EMERALD_ORE, 2));
-            items.add(new ItemStack(Material.MUTTON, 16));
-        } else if (biome == Biome.STONY_PEAKS) {
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.CALCITE, 32));
-            items.add(new ItemStack(Material.COAL_ORE, 8));
-            items.add(new ItemStack(Material.COPPER_ORE, 8));
-            items.add(new ItemStack(Material.IRON_ORE, 8));
-            items.add(new ItemStack(Material.GOLD_ORE, 4));
-            items.add(new ItemStack(Material.EMERALD_ORE, 2));
-            items.add(new ItemStack(Material.MUTTON, 16));
-        } else if (biome == Biome.CHERRY_GROVE) {
-            items.add(new ItemStack(Material.GRASS_BLOCK, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.CHERRY_LOG, 32));
-            items.add(new ItemStack(Material.PINK_PETALS, 32));
-            items.add(new ItemStack(Material.COAL_ORE, 8));
-            items.add(new ItemStack(Material.COPPER_ORE, 8));
-            items.add(new ItemStack(Material.IRON_ORE, 8));
-            items.add(new ItemStack(Material.GOLD_ORE, 4));
-            items.add(new ItemStack(Material.EMERALD_ORE, 2));
-            items.add(new ItemStack(Material.RABBIT, 16));
-        }
-
-        // Dry and Desert Biomes
-        else if (biome == Biome.DESERT) {
-            items.add(new ItemStack(Material.SAND, 64));
-            items.add(new ItemStack(Material.SAND, 64));
-            items.add(new ItemStack(Material.SANDSTONE, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            // Higher fossil rate in deserts
-            if (random.nextInt(rareOdds[rank - 1]) == 0) {
-                items.add(new ItemStack(Material.BONE_BLOCK, 32));
-            }
-            items.add(new ItemStack(Material.CACTUS, 8));
-            items.add(new ItemStack(Material.CACTUS_FLOWER, 4));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.GOLD_ORE, 2));
-            items.add(new ItemStack(Material.RABBIT, 16));
-
-        } else if (biome == Biome.SAVANNA || biome == Biome.SAVANNA_PLATEAU) {
-            items.add(new ItemStack(Material.GRASS_BLOCK, 64));
-            items.add(new ItemStack(Material.STONE, 64));
-            items.add(new ItemStack(Material.ACACIA_LOG, 32));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.GOLD_ORE, 2));
-            items.add(new ItemStack(Material.BEEF, 16));
-
-            if (random.nextInt(commonOdds[rank - 1]) == 0) {
-                items.add(new ItemStack(Material.ARMADILLO_SCUTE, 1));
-            }
+            if (flowerNum == 0) { items.add(new ItemStack(Material.DANDELION, 8)); }
+            else if (flowerNum == 1) { items.add(new ItemStack(Material.POPPY, 8)); }
+            else if (flowerNum == 2) { items.add(new ItemStack(Material.WHITE_TULIP, 8)); }
+            else if (flowerNum == 3) { items.add(new ItemStack(Material.PINK_TULIP, 8)); }
+            else if (flowerNum == 4) { items.add(new ItemStack(Material.ORANGE_TULIP, 8)); }
+            else if (flowerNum == 5) { items.add(new ItemStack(Material.RED_TULIP, 8)); }
+            else if (flowerNum == 6) { items.add(new ItemStack(Material.ALLIUM, 8)); }
+            else if (flowerNum == 7) { items.add(new ItemStack(Material.AZURE_BLUET, 8)); }
+            else if (flowerNum == 8) { items.add(new ItemStack(Material.OXEYE_DAISY, 8)); }
+            else if (flowerNum == 9) { items.add(new ItemStack(Material.LILY_OF_THE_VALLEY, 8)); }
+            else if (flowerNum == 10) { items.add(new ItemStack(Material.CORNFLOWER, 8)); }
+            else if (flowerNum == 11) { items.add(new ItemStack(Material.LILAC, 4)); }
+            else if (flowerNum == 12) { items.add(new ItemStack(Material.PEONY, 4)); }
+            else { items.add(new ItemStack(Material.ROSE_BUSH, 4)); }
         } else if (biome == Biome.BADLANDS || biome == Biome.ERODED_BADLANDS) {
-            items.add(new ItemStack(Material.RED_SAND, 32));
-            items.add(new ItemStack(Material.STONE, 32));
-            items.add(new ItemStack(Material.RED_SANDSTONE, 32));
-            items.add(new ItemStack(Material.TERRACOTTA, 64));
             int terracottaVariant = random.nextInt(6);
-            if (terracottaVariant == 0) {
-                items.add(new ItemStack(Material.RED_TERRACOTTA, 16));
-            } else if (terracottaVariant == 1) {
-                items.add(new ItemStack(Material.ORANGE_TERRACOTTA, 16));
-            } else if (terracottaVariant == 2) {
-                items.add(new ItemStack(Material.YELLOW_TERRACOTTA, 16));
-            } else if (terracottaVariant == 3) {
-                items.add(new ItemStack(Material.BROWN_TERRACOTTA, 16));
-            } else if (terracottaVariant == 4) {
-                items.add(new ItemStack(Material.LIGHT_GRAY_TERRACOTTA, 16));
-            } else if (terracottaVariant == 5) {
-                items.add(new ItemStack(Material.WHITE_TERRACOTTA, 16));
-            }
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.GOLD_ORE, 4));
-
-            if (random.nextInt(commonOdds[rank - 1]) == 0) {
-                items.add(new ItemStack(Material.ARMADILLO_SCUTE, 1));
-            }
+            if (terracottaVariant == 0) { items.add(new ItemStack(Material.RED_TERRACOTTA, 16)); }
+            else if (terracottaVariant == 1) { items.add(new ItemStack(Material.ORANGE_TERRACOTTA, 16)); }
+            else if (terracottaVariant == 2) { items.add(new ItemStack(Material.YELLOW_TERRACOTTA, 16)); }
+            else if (terracottaVariant == 3) { items.add(new ItemStack(Material.BROWN_TERRACOTTA, 16)); }
+            else if (terracottaVariant == 4) { items.add(new ItemStack(Material.LIGHT_GRAY_TERRACOTTA, 16)); }
+            else { items.add(new ItemStack(Material.WHITE_TERRACOTTA, 16)); }
         } else if (biome == Biome.WOODED_BADLANDS) {
-            items.add(new ItemStack(Material.GRASS_BLOCK, 32));
-            items.add(new ItemStack(Material.COARSE_DIRT, 32));
-            items.add(new ItemStack(Material.STONE, 32));
-            items.add(new ItemStack(Material.TERRACOTTA, 32));
             int terracottaVariant = random.nextInt(6);
-            if (terracottaVariant == 0) {
-                items.add(new ItemStack(Material.RED_TERRACOTTA, 8));
-            } else if (terracottaVariant == 1) {
-                items.add(new ItemStack(Material.ORANGE_TERRACOTTA, 8));
-            } else if (terracottaVariant == 2) {
-                items.add(new ItemStack(Material.YELLOW_TERRACOTTA, 8));
-            } else if (terracottaVariant == 3) {
-                items.add(new ItemStack(Material.BROWN_TERRACOTTA, 8));
-            } else if (terracottaVariant == 4) {
-                items.add(new ItemStack(Material.LIGHT_GRAY_TERRACOTTA, 8));
-            } else if (terracottaVariant == 5) {
-                items.add(new ItemStack(Material.WHITE_TERRACOTTA, 8));
-            }
-            items.add(new ItemStack(Material.OAK_LOG, 32));
-            items.add(new ItemStack(Material.LEAF_LITTER, 16));
-            items.add(new ItemStack(Material.COAL_ORE, 4));
-            items.add(new ItemStack(Material.GOLD_ORE, 4));
-
-            if (random.nextInt(commonOdds[rank - 1]) == 0) {
-                items.add(new ItemStack(Material.ARMADILLO_SCUTE, 1));
-            }
+            if (terracottaVariant == 0) { items.add(new ItemStack(Material.RED_TERRACOTTA, 8)); }
+            else if (terracottaVariant == 1) { items.add(new ItemStack(Material.ORANGE_TERRACOTTA, 8)); }
+            else if (terracottaVariant == 2) { items.add(new ItemStack(Material.YELLOW_TERRACOTTA, 8)); }
+            else if (terracottaVariant == 3) { items.add(new ItemStack(Material.BROWN_TERRACOTTA, 8)); }
+            else if (terracottaVariant == 4) { items.add(new ItemStack(Material.LIGHT_GRAY_TERRACOTTA, 8)); }
+            else { items.add(new ItemStack(Material.WHITE_TERRACOTTA, 8)); }
         }
 
-        // Nether and End
-        else if (biome == Biome.NETHER_WASTES) {
-            items.add(new ItemStack(Material.NETHERRACK, 64));
-            items.add(new ItemStack(Material.NETHERRACK, 64));
-            items.add(new ItemStack(Material.BLACKSTONE, 32));
-            items.add(new ItemStack(Material.MAGMA_BLOCK, 8));
-            items.add(new ItemStack(Material.NETHER_QUARTZ_ORE, 32));
-            items.add(new ItemStack(Material.NETHER_GOLD_ORE, 16));
-
-            if (random.nextInt(commonOdds[rank - 1]) == 0) {
-                items.add(new ItemStack(Material.GHAST_TEAR, 1));
-            }
-            if (random.nextInt(commonOdds[rank - 1]) == 0) {
-                items.add(new ItemStack(Material.NETHERITE_SCRAP, 2));
-            }
-
-            // Simulates a fortress
-            if (random.nextInt(8) == 0) {
-                items.add(new ItemStack(Material.NETHER_BRICKS, 64));
-                items.add(new ItemStack(Material.NETHER_BRICKS, 64));
-                items.add(new ItemStack(Material.NETHER_WART, 32));
-                items.add(new ItemStack(Material.BLAZE_ROD, random.nextInt(5) + 2));
-                if (random.nextInt(15) == 0) {
-                    items.add(new ItemStack(Material.WITHER_SKELETON_SKULL, 1));
-                }
-            }
-            // Simulates a bastion
-            if (random.nextInt(12) == 0) {
-                items.add(new ItemStack(Material.BLACKSTONE, 64));
-                items.add(new ItemStack(Material.BLACKSTONE, 64));
-                items.add(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 64));
-                items.add(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 64));
-                items.add(new ItemStack(Material.GILDED_BLACKSTONE, 32));
-                items.add(new ItemStack(Material.GOLDEN_CARROT, 32));
-                if (random.nextInt(3) == 0) {
-                    items.add(new ItemStack(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE, 1));
-                }
-            }
-        } else if (biome == Biome.SOUL_SAND_VALLEY) {
-            items.add(new ItemStack(Material.SOUL_SAND, 32));
-            items.add(new ItemStack(Material.SOUL_SOIL, 32));
-            items.add(new ItemStack(Material.GRAVEL, 8));
-            items.add(new ItemStack(Material.NETHERRACK, 32));
-            items.add(new ItemStack(Material.BASALT, 16));
-            items.add(new ItemStack(Material.BLACKSTONE, 32));
-            items.add(new ItemStack(Material.BONE_BLOCK, 8));
-            items.add(new ItemStack(Material.NETHER_QUARTZ_ORE, 8));
-            items.add(new ItemStack(Material.NETHER_GOLD_ORE, 4));
-            items.add(new ItemStack(Material.BONE, 4));
-
-            // 1-5 ghast tears based on rank
-            items.add(new ItemStack(Material.GHAST_TEAR, rank));
-
-            if (random.nextInt(commonOdds[rank - 1]) == 0) {
-                items.add(new ItemStack(Material.NETHERITE_SCRAP, 1));
-            }
-
-            // Simulates a fortress
-            if (random.nextInt(8) == 0) {
-                items.add(new ItemStack(Material.NETHER_BRICKS, 64));
-                items.add(new ItemStack(Material.NETHER_BRICKS, 64));
-                items.add(new ItemStack(Material.NETHER_WART, 32));
-                items.add(new ItemStack(Material.BLAZE_ROD, random.nextInt(5) + 2));
-                if (random.nextInt(15) == 0) {
-                    items.add(new ItemStack(Material.WITHER_SKELETON_SKULL, 1));
-                }
-            }
-            // Simulates a bastion
-            if (random.nextInt(12) == 0) {
-                items.add(new ItemStack(Material.BLACKSTONE, 64));
-                items.add(new ItemStack(Material.BLACKSTONE, 64));
-                items.add(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 64));
-                items.add(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 64));
-                items.add(new ItemStack(Material.GILDED_BLACKSTONE, 32));
-                items.add(new ItemStack(Material.GOLDEN_CARROT, 32));
-                if (random.nextInt(3) == 0) {
-                    items.add(new ItemStack(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE, 1));
-                }
-            }
-
-            // Simulates a dried ghast
-            if (random.nextInt(8) == 0) {
-                items.add(new ItemStack(Material.DRIED_GHAST, 1));
-            }
-        } else if (biome == Biome.CRIMSON_FOREST) {
-            items.add(new ItemStack(Material.CRIMSON_NYLIUM, 64));
-            items.add(new ItemStack(Material.NETHERRACK, 64));
-            items.add(new ItemStack(Material.BLACKSTONE, 64));
-            items.add(new ItemStack(Material.CRIMSON_STEM, 64));
-            items.add(new ItemStack(Material.SHROOMLIGHT, 16));
-            items.add(new ItemStack(Material.WEEPING_VINES, 16));
-            items.add(new ItemStack(Material.CRIMSON_FUNGUS, 16));
-            items.add(new ItemStack(Material.NETHER_QUARTZ_ORE, 16));
-            items.add(new ItemStack(Material.NETHER_GOLD_ORE, 8));
-            items.add(new ItemStack(Material.PORKCHOP, 16));
-
-            if (random.nextInt(commonOdds[rank - 1]) == 0) {
-                items.add(new ItemStack(Material.NETHERITE_SCRAP, 1));
-            }
-
-            // Simulates a fortress
-            if (random.nextInt(8) == 0) {
-                items.add(new ItemStack(Material.NETHER_BRICKS, 64));
-                items.add(new ItemStack(Material.NETHER_BRICKS, 64));
-                items.add(new ItemStack(Material.NETHER_WART, 32));
-                items.add(new ItemStack(Material.BLAZE_ROD, random.nextInt(5) + 2));
-                if (random.nextInt(15) == 0) {
-                    items.add(new ItemStack(Material.WITHER_SKELETON_SKULL, 1));
-                }
-            }
-            // Simulates a bastion
-            if (random.nextInt(12) == 0) {
-                items.add(new ItemStack(Material.BLACKSTONE, 64));
-                items.add(new ItemStack(Material.BLACKSTONE, 64));
-                items.add(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 64));
-                items.add(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 64));
-                items.add(new ItemStack(Material.GILDED_BLACKSTONE, 32));
-                items.add(new ItemStack(Material.GOLDEN_CARROT, 32));
-                if (random.nextInt(3) == 0) {
-                    items.add(new ItemStack(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE, 1));
-                }
-            }
-        } else if (biome == Biome.WARPED_FOREST) {
-            items.add(new ItemStack(Material.WARPED_NYLIUM, 32));
-            items.add(new ItemStack(Material.NETHERRACK, 64));
-            items.add(new ItemStack(Material.BLACKSTONE, 32));
-            items.add(new ItemStack(Material.WARPED_STEM, 32));
-            items.add(new ItemStack(Material.SHROOMLIGHT, 8));
-            items.add(new ItemStack(Material.TWISTING_VINES, 8));
-            items.add(new ItemStack(Material.WARPED_FUNGUS, 8));
-            items.add(new ItemStack(Material.NETHER_QUARTZ_ORE, 8));
-            items.add(new ItemStack(Material.NETHER_GOLD_ORE, 4));
-
-            // 1-5 ender pearls based on rank
-            items.add(new ItemStack(Material.ENDER_PEARL, rank));
-
-            if (random.nextInt(commonOdds[rank - 1]) == 0) {
-                items.add(new ItemStack(Material.NETHERITE_SCRAP, 1));
-            }
-
-            // Simulates a fortress
-            if (random.nextInt(8) == 0) {
-                items.add(new ItemStack(Material.NETHER_BRICKS, 64));
-                items.add(new ItemStack(Material.NETHER_BRICKS, 64));
-                items.add(new ItemStack(Material.NETHER_WART, 32));
-                items.add(new ItemStack(Material.BLAZE_ROD, random.nextInt(5) + 2));
-                if (random.nextInt(15) == 0) {
-                    items.add(new ItemStack(Material.WITHER_SKELETON_SKULL, 1));
-                }
-            }
-            // Simulates a bastion
-            if (random.nextInt(12) == 0) {
-                items.add(new ItemStack(Material.BLACKSTONE, 64));
-                items.add(new ItemStack(Material.BLACKSTONE, 64));
-                items.add(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 64));
-                items.add(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 64));
-                items.add(new ItemStack(Material.GILDED_BLACKSTONE, 32));
-                items.add(new ItemStack(Material.GOLDEN_CARROT, 32));
-                if (random.nextInt(3) == 0) {
-                    items.add(new ItemStack(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE, 1));
-                }
-            }
-        } else if (biome == Biome.BASALT_DELTAS) {
-            items.add(new ItemStack(Material.NETHERRACK, 32));
-            items.add(new ItemStack(Material.BASALT, 64));
-            items.add(new ItemStack(Material.BASALT, 64));
-            items.add(new ItemStack(Material.BLACKSTONE, 64));
-            items.add(new ItemStack(Material.BLACKSTONE, 64));
-            items.add(new ItemStack(Material.MAGMA_BLOCK, 8));
-            items.add(new ItemStack(Material.NETHER_QUARTZ_ORE, 16));
-            items.add(new ItemStack(Material.NETHER_GOLD_ORE, 16));
-            items.add(new ItemStack(Material.MAGMA_CREAM, 4));
-
-            // 0 to rank ghast tears, lower than other biomes
+        // Special: Basalt Deltas ghast tear - random 0 to rank amount
+        if (biome == Biome.BASALT_DELTAS) {
             int ghastTears = random.nextInt(rank + 1);
             if (ghastTears > 0) {
                 items.add(new ItemStack(Material.GHAST_TEAR, ghastTears));
-            }
-
-            if (random.nextInt(commonOdds[rank - 1]) == 0) {
-                items.add(new ItemStack(Material.NETHERITE_SCRAP, 1));
-            }
-
-            // Simulates a fortress
-            if (random.nextInt(8) == 0) {
-                items.add(new ItemStack(Material.NETHER_BRICKS, 64));
-                items.add(new ItemStack(Material.NETHER_BRICKS, 64));
-                items.add(new ItemStack(Material.NETHER_WART, 32));
-                items.add(new ItemStack(Material.BLAZE_ROD, random.nextInt(5) + 2));
-                if (random.nextInt(15) == 0) {
-                    items.add(new ItemStack(Material.WITHER_SKELETON_SKULL, 1));
-                }
-            }
-            // Simulates a bastion
-            if (random.nextInt(12) == 0) {
-                items.add(new ItemStack(Material.BLACKSTONE, 64));
-                items.add(new ItemStack(Material.BLACKSTONE, 64));
-                items.add(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 64));
-                items.add(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 64));
-                items.add(new ItemStack(Material.GILDED_BLACKSTONE, 32));
-                items.add(new ItemStack(Material.GOLDEN_CARROT, 32));
-                if (random.nextInt(3) == 0) {
-                    items.add(new ItemStack(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE, 1));
-                }
-            }
-        } else if (biome == Biome.THE_END || biome == Biome.END_BARRENS || biome == Biome.END_HIGHLANDS
-                || biome == Biome.END_MIDLANDS || biome == Biome.SMALL_END_ISLANDS) {
-            items.add(new ItemStack(Material.END_STONE, 64));
-            items.add(new ItemStack(Material.END_STONE, 64));
-            items.add(new ItemStack(Material.OBSIDIAN, 16));
-            items.add(new ItemStack(Material.CHORUS_FRUIT, 16));
-            items.add(new ItemStack(Material.PURPUR_BLOCK, 4));
-
-            // Simulates an end city
-            if (random.nextInt(5) == 0) {
-                items.add(new ItemStack(Material.END_STONE_BRICKS, 64));
-                items.add(new ItemStack(Material.END_STONE_BRICKS, 64));
-                items.add(new ItemStack(Material.PURPUR_BLOCK, 64));
-                items.add(new ItemStack(Material.PURPUR_PILLAR, 64));
-                items.add(new ItemStack(Material.END_ROD, 16));
-
-                if (random.nextInt(elytraOdds[rank - 1]) == 0) {
-                    items.add(new ItemStack(Material.ELYTRA, 1));
-                }
-                if (random.nextInt(mendingOdds[rank - 1]) == 0) {
-                    ItemStack mendingBook = new ItemStack(Material.ENCHANTED_BOOK, 1);
-                    EnchantmentStorageMeta meta = (EnchantmentStorageMeta) mendingBook.getItemMeta();
-                    meta.addStoredEnchant(Enchantment.MENDING, 1, true);
-                    mendingBook.setItemMeta(meta);
-                    items.add(mendingBook);
-                }
             }
         }
 
@@ -2411,7 +2377,7 @@ public class DominionUtils {
                 continue;
             }
 
-            // Rank 1 = 1×, rank 2 = 2×, rank 3 = 3×, rank 4 = 4×, rank 5 = 5×
+            // Rank 1 = 1x, rank 2 = 2x, rank 3 = 3x, rank 4 = 4x, rank 5 = 5x
             for (int i = 1; i < rank; i++) {
                 multiplierItems.add(item);
             }
