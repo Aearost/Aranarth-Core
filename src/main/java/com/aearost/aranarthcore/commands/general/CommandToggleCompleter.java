@@ -14,10 +14,10 @@ import java.util.stream.Collectors;
 public class CommandToggleCompleter implements TabCompleter {
 
     private static final List<String> TOGGLE_OPTIONS = List.of(
-            "barbarian", "blacklist", "bulksellshulker", "changeclaim", "chat", "chestlock",
+            "barbarian", "blacklist", "changeclaim", "chat", "chestlock",
             "emoji", "firetype", "compressor", "daymessage", "dmsgcompact", "gate",
             "gradientchat", "inventory", "invisiblearmor", "messages", "pethurt",
-            "reaper", "shulker", "size", "spawnboost", "teleport", "weathermessage"
+            "reaper", "shulker", "shulkerbulk", "size", "spawnboost", "teleport", "weathermessage"
     );
 
     /**

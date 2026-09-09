@@ -290,7 +290,7 @@ public class CommandToggle implements CommandExecutor {
 						player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7weather change messages"));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-				} else if (args[0].equalsIgnoreCase("bulksellshulker")) {
+				} else if (args[0].equalsIgnoreCase("shulkerbulk")) {
 					if (player.hasPermission("aranarth.shulker")) {
 						if (aranarthPlayer.isBulkSellShulkerEnabled()) {
 							aranarthPlayer.setBulkSellShulkerEnabled(false);
