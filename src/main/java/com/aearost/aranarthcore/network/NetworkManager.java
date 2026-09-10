@@ -3336,24 +3336,40 @@ public class NetworkManager {
      */
     private void handleSentinelDeath(JsonObject json) {
         UUID sentinelUuid = UUID.fromString(json.get("sentinelUuid").getAsString());
-        org.bukkit.entity.EntityType type = org.bukkit.entity.EntityType.valueOf(json.get("sentinelType").getAsString());
+        // Search all tracked sentinel types by UUID
+        org.bukkit.entity.EntityType[] trackedTypes = {
+            org.bukkit.entity.EntityType.HORSE,
+            org.bukkit.entity.EntityType.IRON_GOLEM,
+            org.bukkit.entity.EntityType.WOLF
+        };
 
         for (Map.Entry<UUID, AranarthPlayer> entry : AranarthUtils.getAranarthPlayers().entrySet()) {
             AranarthPlayer ap = entry.getValue();
-            if (ap.getSentinels() == null || ap.getSentinels().get(type) == null) {
+            if (ap.getSentinels() == null) {
                 continue;
             }
-            java.util.List<com.aearost.aranarthcore.objects.Sentinel> list = ap.getSentinels().get(type);
-            com.aearost.aranarthcore.objects.Sentinel toRemove = null;
-            for (com.aearost.aranarthcore.objects.Sentinel s : list) {
-                if (s.getUuid().equals(sentinelUuid)) {
-                    toRemove = s;
+            boolean removed = false;
+            for (org.bukkit.entity.EntityType trackedType : trackedTypes) {
+                java.util.List<com.aearost.aranarthcore.objects.Sentinel> list = ap.getSentinels().get(trackedType);
+                if (list == null) {
+                    continue;
+                }
+                com.aearost.aranarthcore.objects.Sentinel toRemove = null;
+                for (com.aearost.aranarthcore.objects.Sentinel s : list) {
+                    if (s.getUuid().equals(sentinelUuid)) {
+                        toRemove = s;
+                        break;
+                    }
+                }
+                if (toRemove != null) {
+                    list.remove(toRemove);
+                    AranarthUtils.setPlayer(entry.getKey(), ap);
+                    PersistenceUtils.syncPlayerSentinelsToDatabase(entry.getKey());
+                    removed = true;
                     break;
                 }
             }
-            if (toRemove != null) {
-                list.remove(toRemove);
-                AranarthUtils.setPlayer(entry.getKey(), ap);
+            if (removed) {
                 break;
             }
         }

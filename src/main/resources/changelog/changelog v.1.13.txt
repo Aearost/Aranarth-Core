@@ -2,6 +2,7 @@ AranarthCore v. 1.13
 
 World & Events
 [+] Added support for tall grass and large fern in winter snowfall
+[~] Fixed horse sentinels not persisting after server crash
 
 Bending & Abilities
 [+]

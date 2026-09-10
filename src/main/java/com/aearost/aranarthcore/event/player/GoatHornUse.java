@@ -10,6 +10,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DefenderUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
@@ -245,9 +246,11 @@ public class GoatHornUse {
                     @Override
                     public void run() {
                         Player closestPlayerTarget = getTarget(player);
+                        List<Sentinel> toRemove = new ArrayList<>();
                         for (Sentinel sentinel : localSentinels) {
                             Entity entity = Bukkit.getEntity(sentinel.getUuid());
                             if (entity == null) {
+                                toRemove.add(sentinel);
                                 continue;
                             }
                             entity.teleport(player.getLocation());
@@ -259,6 +262,17 @@ public class GoatHornUse {
                                     wolf.setSitting(false);
                                 }
                             }
+                        }
+                        // Clean up any sentinels whose entities no longer exist
+                        if (!toRemove.isEmpty()) {
+                            AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
+                            List<Sentinel> sentinelList = ap.getSentinels().get(sentinelType);
+                            sentinelList.removeAll(toRemove);
+                            ap.getSentinels().put(sentinelType, sentinelList);
+                            AranarthUtils.setPlayer(player.getUniqueId(), ap);
+                            PersistenceUtils.syncPlayerSentinelsToDatabase(player.getUniqueId());
+                            String typeName = sentinelType == EntityType.IRON_GOLEM ? "Iron Golem" : "Wolf";
+                            player.sendMessage(ChatUtils.chatMessage("&c" + toRemove.size() + " of your &e" + typeName + " Sentinel(s) &ccould not be found - they may have died."));
                         }
                         int tpVol = AranarthUtils.getPlayer(player.getUniqueId()).getTeleportSoundVolume();
                         if (tpVol > 0) {
@@ -301,6 +315,14 @@ public class GoatHornUse {
                     public void run() {
                         Entity entity = Bukkit.getEntity(sentinel.getUuid());
                         if (entity == null) {
+                            // Entity no longer exists - remove the stale sentinel record
+                            AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
+                            List<Sentinel> horseSentinels = ap.getSentinels().get(EntityType.HORSE);
+                            horseSentinels.remove(sentinel);
+                            ap.getSentinels().put(EntityType.HORSE, horseSentinels);
+                            AranarthUtils.setPlayer(player.getUniqueId(), ap);
+                            PersistenceUtils.syncPlayerSentinelsToDatabase(player.getUniqueId());
+                            player.sendMessage(ChatUtils.chatMessage("&cYour &eHorse Sentinel &ccould not be found - it may have died. Use the &eYearn Horn &con a new horse to designate a replacement."));
                             return;
                         }
                         entity.teleport(player.getLocation());

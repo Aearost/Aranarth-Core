@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Sentinel;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.EntityDeathEvent;
 
@@ -17,18 +18,32 @@ import java.util.UUID;
 public class SentinelDeath {
 	public void execute(final EntityDeathEvent e) {
 		UUID uuidOfSentinel = e.getEntity().getUniqueId();
-		UUID uuidOfPlayer = null;
 		AranarthPlayer aranarthPlayerOfSentinel = null;
 		Sentinel sentinelToRemove = null;
+		EntityType sentinelTypeToRemove = null;
+		// Search all tracked sentinel types by UUID rather than the event entity type.
+		// SentinelMark stores any AbstractHorse (Donkey, Mule, etc.) as HORSE, so
+		// matching only on e.getEntityType() would miss those variants when they die.
+		EntityType[] trackedTypes = {EntityType.HORSE, EntityType.IRON_GOLEM, EntityType.WOLF};
 		for (AranarthPlayer aranarthPlayer : AranarthUtils.getAranarthPlayers().values()) {
-			if (aranarthPlayer.getSentinels() == null || aranarthPlayer.getSentinels().get(e.getEntityType()) == null) {
+			if (aranarthPlayer.getSentinels() == null) {
 				continue;
 			}
 
-			for (Sentinel sentinel : aranarthPlayer.getSentinels().get(e.getEntityType())) {
-				if (sentinel.getUuid().equals(uuidOfSentinel)) {
-					aranarthPlayerOfSentinel = aranarthPlayer;
-					sentinelToRemove = sentinel;
+			for (EntityType trackedType : trackedTypes) {
+				List<Sentinel> sentinelsOfType = aranarthPlayer.getSentinels().get(trackedType);
+				if (sentinelsOfType == null) {
+					continue;
+				}
+				for (Sentinel sentinel : sentinelsOfType) {
+					if (sentinel.getUuid().equals(uuidOfSentinel)) {
+						aranarthPlayerOfSentinel = aranarthPlayer;
+						sentinelToRemove = sentinel;
+						sentinelTypeToRemove = trackedType;
+						break;
+					}
+				}
+				if (sentinelToRemove != null) {
 					break;
 				}
 			}
@@ -39,11 +54,12 @@ public class SentinelDeath {
 
 		if (aranarthPlayerOfSentinel != null) {
 			HashMap<EntityType, List<Sentinel>> sentinels = aranarthPlayerOfSentinel.getSentinels();
-			List<Sentinel> sentinelsOfType = sentinels.get(e.getEntityType());
+			List<Sentinel> sentinelsOfType = sentinels.get(sentinelTypeToRemove);
 			sentinelsOfType.remove(sentinelToRemove);
-			sentinels.put(e.getEntityType(), sentinelsOfType);
+			sentinels.put(sentinelTypeToRemove, sentinelsOfType);
 			aranarthPlayerOfSentinel.setSentinels(sentinels);
 			AranarthUtils.setPlayer(AranarthUtils.getUuidOfAranarthPlayer(aranarthPlayerOfSentinel), aranarthPlayerOfSentinel);
+			PersistenceUtils.syncPlayerSentinelsToDatabase(AranarthUtils.getUuidOfAranarthPlayer(aranarthPlayerOfSentinel));
 		} else if (NetworkManager.isActive()) {
 			// Owner is on a different server - notify them so they can clean up their sentinel list
 			NetworkManager.getInstance().publishSentinelDeath(uuidOfSentinel, e.getEntityType());
