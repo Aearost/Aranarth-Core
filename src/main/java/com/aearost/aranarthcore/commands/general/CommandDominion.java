@@ -231,7 +231,7 @@ public class CommandDominion implements CommandExecutor {
                     player.sendMessage(ChatUtils.chatMessage("&cYou are already in a Dominion!"));
                 }
             } else {
-                player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/dominion create <name>"));
+                player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/dominion create [gradient|gradientbold] <name>"));
             }
         } else {
             player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to create a Dominion!"));
@@ -2079,8 +2079,20 @@ public class CommandDominion implements CommandExecutor {
     }
 
     private static String verifyDominionName(String[] args, Player player, Dominion dominionToSkip) {
+        if (args.length <= 1) {
+            return null;
+        }
+        boolean isGradient = args[1].equalsIgnoreCase("gradient") || args[1].equalsIgnoreCase("gradientbold");
+        boolean isBold = args[1].equalsIgnoreCase("gradientbold");
+        int nameStart = isGradient ? 2 : 1;
+
+        if (isGradient && args.length <= 2) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou must provide a name after gradient!"));
+            return null;
+        }
+
         StringBuilder parts = new StringBuilder();
-        for (int i = 1; i < args.length; i++) {
+        for (int i = nameStart; i < args.length; i++) {
             if (i == args.length - 1) {
                 parts.append(args[i]);
             } else {
@@ -2093,7 +2105,24 @@ public class CommandDominion implements CommandExecutor {
             return null;
         }
 
-        if (player.hasPermission("aranarth.chat.hex")) {
+        if (isGradient) {
+            String requiredPerm = isBold ? "aranarth.chat.gradientbold" : "aranarth.chat.gradient";
+            if (!player.hasPermission(requiredPerm)) {
+                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use gradient naming!"));
+                return null;
+            }
+            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+            if (aranarthPlayer == null || aranarthPlayer.getGradientChatColors().isEmpty()) {
+                player.sendMessage(ChatUtils.chatMessage("&cYou do not have gradient colors configured!"));
+                return null;
+            }
+            String gradientName = ChatUtils.translateToGradient(aranarthPlayer.getGradientChatColors(), dominionName, isBold);
+            if (gradientName == null) {
+                player.sendMessage(ChatUtils.chatMessage("&cThe name cannot contain color codes when using gradient!"));
+                return null;
+            }
+            dominionName = gradientName;
+        } else if (player.hasPermission("aranarth.chat.hex")) {
             dominionName = ChatUtils.translateToColor(dominionName);
         } else if (player.hasPermission("aranarth.chat.color")) {
             dominionName = ChatUtils.playerColorChat(dominionName);

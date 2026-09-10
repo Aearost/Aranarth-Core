@@ -212,7 +212,30 @@ public class CommandDominionCompleter implements TabCompleter {
 					.collect(Collectors.toList());
 			}
 			case "buychunks" -> args[1].isEmpty() ? List.of("amount") : List.of();
-			case "create" -> args[1].isEmpty() ? List.of("name") : List.of();
+			case "create" -> {
+				if (args.length == 2) {
+					List<String> opts = new ArrayList<>(List.of("name"));
+					if (sender.hasPermission("aranarth.chat.gradient")) opts.add("gradient");
+					if (sender.hasPermission("aranarth.chat.gradientbold")) opts.add("gradientbold");
+					yield filter(opts, args[1]);
+				}
+				if (args.length >= 3 && (args[1].equalsIgnoreCase("gradient") || args[1].equalsIgnoreCase("gradientbold"))) {
+					yield args[2].isEmpty() ? List.of("name") : List.of();
+				}
+				yield List.of();
+			}
+			case "rename" -> {
+				if (args.length == 2) {
+					List<String> opts = new ArrayList<>(List.of("name"));
+					if (sender.hasPermission("aranarth.chat.gradient")) opts.add("gradient");
+					if (sender.hasPermission("aranarth.chat.gradientbold")) opts.add("gradientbold");
+					yield filter(opts, args[1]);
+				}
+				if (args.length >= 3 && (args[1].equalsIgnoreCase("gradient") || args[1].equalsIgnoreCase("gradientbold"))) {
+					yield args[2].isEmpty() ? List.of("name") : List.of();
+				}
+				yield List.of();
+			}
 			case "mapcolor" -> filter(MAP_COLOR_OPTIONS, args[1]);
 			case "outpost" -> {
 				if (args.length == 2) {

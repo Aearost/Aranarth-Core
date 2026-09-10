@@ -8,7 +8,7 @@ Bending & Abilities
 [+]
 
 Dominion
-[+]
+[+] Added gradient functionality to dominion names
 
 Incantations
 [+]
