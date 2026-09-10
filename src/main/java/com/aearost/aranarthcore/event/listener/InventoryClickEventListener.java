@@ -170,6 +170,9 @@ public class InventoryClickEventListener implements Listener {
                 new GuiPetFoodClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiHeadExchange.TITLE)) {
                 new GuiHeadExchangeClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiMcstats.TITLE_SELF)
+                    || ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(GuiMcstats.TITLE_SUFFIX)) {
+                new GuiMcstatsClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiReaper.TITLE)) {
                 new GuiReaperClick().execute(e);
             }

@@ -57,6 +57,7 @@ Major Features
 [~] Dominion resource claims now yield ore blocks instead of raw materials
 [+] Beach Dominion resource claims have a 1/25 chance to yield a Heart of the Sea
 [+] Added mending books to end city simulations in End biomes from dominion resource claims
+[+] Added a custom /mcstats GUI
 
 Minor Features
 [~] Fixed issue where the alchemist job was not providing xp when shift-clicking ingredients into a brewing stand

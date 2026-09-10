@@ -443,6 +443,8 @@ public class AranarthCore extends JavaPlugin {
             commandMap.getKnownCommands().put("aranarthcore:ac", getCommand("ac"));
             commandMap.getKnownCommands().put("mctop", getCommand("mctop"));
             commandMap.getKnownCommands().put("aranarthcore:mctop", getCommand("mctop"));
+            commandMap.getKnownCommands().put("mcstats", getCommand("mcstats"));
+            commandMap.getKnownCommands().put("aranarthcore:mcstats", getCommand("mcstats"));
             commandMap.getKnownCommands().put("enchant", getCommand("enchant"));
             commandMap.getKnownCommands().put("aranarthcore:enchant", getCommand("enchant"));
         });
@@ -1469,6 +1471,8 @@ public class AranarthCore extends JavaPlugin {
         getCommand("mount").setTabCompleter(new CommandMountCompleter());
         getCommand("mctop").setExecutor(new CommandMctop());
         getCommand("mctop").setTabCompleter(new CommandMctopCompleter());
+        getCommand("mcstats").setExecutor(new CommandMcstats());
+        getCommand("mcstats").setTabCompleter(new CommandMcstatsCompleter());
         getCommand("mail").setExecutor(new CommandMail());
         getCommand("mail").setTabCompleter(new CommandMailCompleter());
         getCommand("map").setExecutor(new CommandMap());

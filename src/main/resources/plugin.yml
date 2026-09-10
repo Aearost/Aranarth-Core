@@ -170,6 +170,9 @@ commands:
     description: Opens a GUI showing the top players in a given mcMMO skill
     aliases: [ skilltop ]
     permission: aranarth.mctop
+  mcstats:
+    description: Opens a GUI showing your or another player's mcMMO skill levels and rankings
+    aliases: [ skills ]
   mount:
     description: Calls or dismisses the player's current mount
     permission: aranarth.mount

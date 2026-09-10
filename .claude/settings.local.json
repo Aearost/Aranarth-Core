@@ -465,7 +465,9 @@
       "Bash(zcat \"C:/Users/liamh/Downloads/Logs/SMP/2026-09-04-1.log.gz\" \"C:/Users/liamh/Downloads/Logs/SMP/2026-09-04-2.log.gz\" \"C:/Users/liamh/Downloads/Logs/SMP/2026-09-04-3.log.gz\" \"C:/Users/liamh/Downloads/Logs/SMP/2026-09-05-1.log.gz\" \"C:/Users/liamh/Downloads/Logs/SMP/2026-09-05-2.log.gz\" \"C:/Users/liamh/Downloads/Logs/SMP/2026-09-05-3.log.gz\")",
       "Bash(zcat \"C:/Users/liamh/Downloads/Logs/SMP/2026-09-05-3.log.gz\")",
       "Bash(zcat \"C:/Users/liamh/Downloads/Logs/Survival/2026-09-06-1.log.gz\")",
-      "Bash(zcat C:/Users/liamh/Downloads/Logs/Survival/2026-09-06-1.log.gz)"
+      "Bash(zcat C:/Users/liamh/Downloads/Logs/Survival/2026-09-06-1.log.gz)",
+      "Bash(find C:/Users/liamh/IdeaProjects -path */mcMMO* -name DatabaseManager.class)",
+      "Bash(find C:/Users/liamh/.m2 -path *mcmmo* -name *.jar)"
     ]
   }
 }
