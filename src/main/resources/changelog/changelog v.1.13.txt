@@ -1,0 +1,34 @@
+AranarthCore v. 1.13
+
+World & Events
+[+]
+
+Bending & Abilities
+[+]
+
+Dominion
+[+]
+
+Incantations
+[+]
+
+Items & Crafting
+[+] Added honey block to sugar crafting recipe
+
+Economy, Jobs & Quests
+[+]
+
+Homepad
+[+]
+
+Chat, UI & Sounds
+[+]
+
+Quality of Life
+[+]
+
+Cross-server & Technical
+[+]
+
+Miscellaneous
+[+]

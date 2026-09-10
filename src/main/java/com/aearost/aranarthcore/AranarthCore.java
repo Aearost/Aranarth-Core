@@ -1325,6 +1325,7 @@ public class AranarthCore extends JavaPlugin {
         new RecipePaleMossBlock(this);
         new RecipePaleMossCarpet(this);
         new RecipeHoneycombBlockUncraft(this);
+        new RecipeHoneyBlockSugar(this);
         new RecipeBeeNest(this);
         new RecipeCopperExposed(this);
         new RecipeCopperWeathered(this);
