@@ -40,7 +40,7 @@ varrick
 kuvira
 zaheer
 ghazan
-minghua
+ming hua
 pli
 unalaq
 suyin
@@ -71,7 +71,7 @@ healing
 spirit
 chakra
 avatar
-avatarstate
+avatar state
 
 # Aranarth armor sets
 aranarth
@@ -108,12 +108,12 @@ vindicator
 evoker
 pillager
 silverfish
-magmacube
+magma cube
 slime
-flyingbison
-polarbeardog
-komodorhino
-badgermole
+flying bison
+polar bear dog
+komodo rhino
+badger mole
 
 # Minecraft blocks and materials
 obsidian
@@ -168,6 +168,14 @@ cauldron
 bundle
 pumpkin
 melon
+
+# Incantations
+plentiful
+lifesteal
+magnetism
+beheading
+resilience
+preservation
 
 # Aranarth calendar months
 ignivor

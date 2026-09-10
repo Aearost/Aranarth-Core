@@ -1,63 +1,39 @@
 package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.abilities.airbending.soundbending.Amplification;
-import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralProjection;
-import com.aearost.aranarthcore.abilities.airbending.soundbending.DeafeningScream;
-import com.aearost.aranarthcore.abilities.airbending.soundbending.SonicClap;
-import com.aearost.aranarthcore.abilities.airbending.soundbending.SonicPulse;
-import com.aearost.aranarthcore.abilities.airbending.soundbending.SonicBoom;
-import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
-import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralShot;
+import com.aearost.aranarthcore.abilities.airbending.combo.AirSnipe;
+import com.aearost.aranarthcore.abilities.airbending.soundbending.*;
+import com.aearost.aranarthcore.abilities.airbending.spiritual.*;
+import com.aearost.aranarthcore.abilities.chiblocking.DaggerThrow;
+import com.aearost.aranarthcore.abilities.chiblocking.DaggerVolley;
+import com.aearost.aranarthcore.abilities.chiblocking.HighJump;
+import com.aearost.aranarthcore.abilities.earthbending.combo.CableSlash;
+import com.aearost.aranarthcore.abilities.earthbending.combo.EarthRush;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.Eruption;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.MagmaGlaives;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.MagmaWave;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.combo.MoltenBlast;
-import com.aearost.aranarthcore.abilities.chiblocking.DaggerThrow;
-import com.aearost.aranarthcore.abilities.chiblocking.DaggerVolley;
-import com.aearost.aranarthcore.abilities.chiblocking.HighJump;
-import com.aearost.aranarthcore.abilities.earthbending.metalbending.CableWhip;
-import com.aearost.aranarthcore.abilities.earthbending.metalbending.CableThrash;
-import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalBlade;
-import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalShots;
-import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalShred;
-import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalStrips;
+import com.aearost.aranarthcore.abilities.earthbending.metalbending.*;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.Burial;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.SandWave;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.Sandstorm;
-import com.aearost.aranarthcore.abilities.earthbending.combo.CableSlash;
 import com.aearost.aranarthcore.abilities.firebending.combustion.Barrage;
 import com.aearost.aranarthcore.abilities.firebending.combustion.CombustionStrike;
 import com.aearost.aranarthcore.abilities.firebending.combustion.JetFumes;
 import com.aearost.aranarthcore.abilities.firebending.combustion.NoxiousFumes;
-import com.aearost.aranarthcore.abilities.firebending.lightningbending.Discharge;
-import com.aearost.aranarthcore.abilities.firebending.lightningbending.ElectricStrike;
-import com.aearost.aranarthcore.abilities.firebending.lightningbending.JetBolt;
-import com.aearost.aranarthcore.abilities.firebending.lightningbending.Jolt;
-import com.aearost.aranarthcore.abilities.firebending.lightningbending.Lightning;
-import com.aearost.aranarthcore.abilities.firebending.lightningbending.LightningBurst;
-import com.aearost.aranarthcore.abilities.firebending.lightningbending.Static;
-import com.aearost.aranarthcore.abilities.airbending.spiritual.AngeredSpirits;
-import com.aearost.aranarthcore.abilities.airbending.spiritual.EnergyBurst;
-import com.aearost.aranarthcore.abilities.airbending.spiritual.LightOfRaava;
-import com.aearost.aranarthcore.abilities.airbending.spiritual.PastLives;
+import com.aearost.aranarthcore.abilities.firebending.lightningbending.*;
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.BloodFreeze;
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.BloodGrip;
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.Disalignment;
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.LifeRip;
+import com.aearost.aranarthcore.abilities.waterbending.combo.IceDiscs;
+import com.aearost.aranarthcore.abilities.waterbending.combo.IceShards;
 import com.aearost.aranarthcore.abilities.waterbending.healing.CorruptingHelix;
 import com.aearost.aranarthcore.abilities.waterbending.healing.HealingHelix;
 import com.aearost.aranarthcore.abilities.waterbending.healing.MendingWaters;
-import com.projectkorra.projectkorra.ability.BloodAbility;
-import com.projectkorra.projectkorra.ability.HealingAbility;
-import com.aearost.aranarthcore.abilities.waterbending.plantbending.LeafScythe;
-import com.aearost.aranarthcore.abilities.waterbending.plantbending.RazorLeaves;
-import com.aearost.aranarthcore.abilities.waterbending.plantbending.Regrowth;
-import com.aearost.aranarthcore.abilities.waterbending.plantbending.RootSnare;
-import com.aearost.aranarthcore.abilities.waterbending.plantbending.ToxicSpores;
-import com.aearost.aranarthcore.abilities.waterbending.plantbending.VineWhip;
-import com.aearost.aranarthcore.abilities.waterbending.combo.IceDiscs;
-import com.aearost.aranarthcore.abilities.waterbending.combo.IceShards;
+import com.aearost.aranarthcore.abilities.waterbending.plantbending.*;
+import com.aearost.aranarthcore.enums.FireType;
+import com.aearost.aranarthcore.event.listener.misc.FireParticleListener;
 import com.aearost.aranarthcore.event.mob.MountListener;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
@@ -66,33 +42,13 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.ShopIslandUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
-import com.projectkorra.projectkorra.ability.Ability;
-import com.projectkorra.projectkorra.ability.AirAbility;
-import com.projectkorra.projectkorra.ability.AvatarAbility;
-import com.projectkorra.projectkorra.ability.ChiAbility;
-import com.projectkorra.projectkorra.ability.CoreAbility;
-import com.projectkorra.projectkorra.ability.EarthAbility;
-import com.projectkorra.projectkorra.ability.FireAbility;
-import com.projectkorra.projectkorra.ability.LavaAbility;
-import com.projectkorra.projectkorra.ability.PassiveAbility;
-import com.projectkorra.projectkorra.ability.PlantAbility;
-import com.projectkorra.projectkorra.ability.SandAbility;
-import com.projectkorra.projectkorra.ability.SpiritualAbility;
-import com.projectkorra.projectkorra.ability.WaterAbility;
-import com.projectkorra.projectkorra.event.AbilityDamageEntityEvent;
-import com.projectkorra.projectkorra.event.AbilityProgressEvent;
-import com.projectkorra.projectkorra.event.AbilityStartEvent;
-import com.projectkorra.projectkorra.event.BendingReloadEvent;
-import com.projectkorra.projectkorra.event.PlayerCooldownChangeEvent;
+import com.projectkorra.projectkorra.ability.*;
+import com.projectkorra.projectkorra.airbending.AirBlast;
+import com.projectkorra.projectkorra.event.*;
 import com.projectkorra.projectkorra.util.TempBlock;
-import org.bukkit.Bukkit;
-import org.bukkit.FluidCollisionMode;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -101,25 +57,58 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.EntityPickupItemEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.*;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.*;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.UUID;
 
 /**
  * Handles all logic regarding the use of AranarthCore bending abilities.
  */
 public class AranarthCoreBendingListener implements Listener {
+
+    private static Field airBlastOriginsField;
+
+    static {
+        try {
+            airBlastOriginsField = AirBlast.class.getDeclaredField("ORIGINS");
+            airBlastOriginsField.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            airBlastOriginsField = null;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<Player, Location> getAirBlastOrigins() {
+        if (airBlastOriginsField == null) {
+            return null;
+        }
+        try {
+            return (Map<Player, Location>) airBlastOriginsField.get(null);
+        } catch (IllegalAccessException e) {
+            return null;
+        }
+    }
+
+    private static boolean airBlastHasOrigin(Player player) {
+        Map<Player, Location> origins = getAirBlastOrigins();
+        return origins != null && origins.containsKey(player);
+    }
+
+    private static void airBlastClearOrigin(Player player) {
+        Map<Player, Location> origins = getAirBlastOrigins();
+        if (origins != null) {
+            origins.remove(player);
+        }
+    }
 
     public AranarthCoreBendingListener(AranarthCore plugin) {
         Bukkit.getPluginManager().registerEvents(this, plugin);
@@ -136,8 +125,10 @@ public class AranarthCoreBendingListener implements Listener {
         // so players are safely returned to their body location.
         AstralProjection.endAllProjections();
         PastLives.endAllInstances();
+        new ArrayList<>(CoreAbility.getAbilities(AirSnipe.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(AstralShot.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(CableSlash.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(EarthRush.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(CableWhip.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(CableThrash.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(MetalShred.class)).forEach(CoreAbility::remove);
@@ -269,6 +260,34 @@ public class AranarthCoreBendingListener implements Listener {
     }
 
     /**
+     * Registers the initial position of a fire ability as a fire source immediately on start,
+     * before the per-tick scheduler can pick it up. This eliminates the 1-tick gap on the
+     * first frame of a new ability.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onFireAbilityStart(final AbilityStartEvent e) {
+        if (!(e.getAbility() instanceof FireAbility)) {
+            return;
+        }
+        Player player = e.getAbility().getPlayer();
+        if (player == null) {
+            return;
+        }
+        AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
+        if (ap == null || ap.getFireType() == FireType.DEFAULT) {
+            return;
+        }
+        FireType ft = ap.getFireType();
+        for (Location loc : ((FireAbility) e.getAbility()).getLocations()) {
+            if (loc == null) {
+                continue;
+            }
+            FireParticleListener.registerFireSource(loc, ft);
+            FireParticleListener.registerFireSource(loc.clone().add(0, 1, 0), ft);
+        }
+    }
+
+    /**
      * Prevents bending abilities from progressing when the player is in a restricted zone.
      * Passive abilities are always exempt.
      */
@@ -292,7 +311,36 @@ public class AranarthCoreBendingListener implements Listener {
         }
     }
 
+    /**
+     * Tracks the raw physical sneak state before any cancellation so that shop and shulker
+     * handlers can check the real key-press even when the event is cancelled by the bending
+     * restriction below.
+     */
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerSneakTrack(final PlayerToggleSneakEvent e) {
+        AranarthUtils.setPhysicallySneaking(e.getPlayer().getUniqueId(), e.isSneaking());
+    }
+
     @EventHandler
+    public void onPlayerQuitClearSneak(final org.bukkit.event.player.PlayerQuitEvent e) {
+        AranarthUtils.setPhysicallySneaking(e.getPlayer().getUniqueId(), false);
+    }
+
+    /**
+     * Clears stale AirBlast origins when a player enters a restricted zone.
+     * Without this, particles persist if the player sourced outside and walked in.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerMoveClearAirBlastOrigin(final org.bukkit.event.player.PlayerMoveEvent e) {
+        if (!airBlastHasOrigin(e.getPlayer())) {
+            return;
+        }
+        if (isBendingRestricted(e.getPlayer(), e.getTo())) {
+            airBlastClearOrigin(e.getPlayer());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
     public void onPlayerSneak(final PlayerToggleSneakEvent e) {
         Player player = e.getPlayer();
         BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
@@ -303,7 +351,7 @@ public class AranarthCoreBendingListener implements Listener {
         CoreAbility ability = bendingPlayer.getBoundAbility();
         String abilityName = bendingPlayer.getBoundAbilityName();
 
-        // Sneak press during FIRING — cancel so PK cannot activate IceSpike via SHIFT_DOWN
+        // Sneak press during FIRING - cancel so PK cannot activate IceSpike via SHIFT_DOWN
         if (e.isSneaking()) {
             IceDiscs iceDiscs = IceDiscs.getActiveInstance(player.getUniqueId());
             if (iceDiscs != null && iceDiscs.getPhase() == IceDiscs.Phase.FIRING) {
@@ -340,21 +388,42 @@ public class AranarthCoreBendingListener implements Listener {
             if (abilityName.equalsIgnoreCase("earthsmash")) {
                 MoltenBlast.markEarthSmashSneak(player.getUniqueId());
             }
+            if (abilityName.equalsIgnoreCase("raiseearth")
+                    && EarthRush.hasRecentShockwaveSneak(player.getUniqueId())
+                    && !EarthRush.hasActiveInstance(player.getUniqueId())) {
+                EarthRush.markRaiseEarthTransition(player.getUniqueId());
+            }
             PastLives pastLivesRelease = PastLives.getActiveInstance(player.getUniqueId());
             if (pastLivesRelease != null) {
                 pastLivesRelease.onSneakRelease();
             }
         }
 
-        if (e.isSneaking() && player.getGameMode() == GameMode.SURVIVAL) {
+        if (e.isSneaking()) {
             if (BloodGrip.isControlled(player.getUniqueId())) {
                 e.setCancelled(true);
                 return;
             }
             if (isBendingRestricted(player, player.getLocation())) {
+                // Cancel the sneak-press event to prevent PK from sourcing abilities.
+                // Physical sneak state is tracked separately (onPlayerSneakTrack at LOWEST
+                // priority) so shop and shulker handlers can still detect the key-press.
+                // Also clear any stale AirBlast origin so particles don't persist.
+                airBlastClearOrigin(player);
                 e.setCancelled(true);
                 return;
             }
+        } else if (isBendingRestricted(player, player.getLocation()) && !player.isSneaking()) {
+            // When the sneak-press was cancelled, the server never set isSneaking=true.
+            // On release, player.isSneaking() is therefore still false - PK's handler
+            // (ignoreCancelled=true) would see sneaking=false and call AirBlast.setOrigin.
+            // Cancel the release event too to prevent this.
+            airBlastClearOrigin(player);
+            e.setCancelled(true);
+            return;
+        }
+
+        if (e.isSneaking() && player.getGameMode() == GameMode.SURVIVAL) {
             if (!bendingPlayer.canCurrentlyBendWithWeapons()) {
                 return;
             }
@@ -562,6 +631,16 @@ public class AranarthCoreBendingListener implements Listener {
                     if (!CableThrash.hasActiveInstance(player.getUniqueId())) {
                         new CableThrash(player);
                     }
+                } else if (abilityName.equalsIgnoreCase("shockwave")) {
+                    EarthRush.markShockwaveSneak(player.getUniqueId());
+                } else if (abilityName.equalsIgnoreCase("raiseearth")
+                        && !EarthRush.hasActiveInstance(player.getUniqueId())
+                        && EarthRush.canCreateShot(player.getUniqueId())) {
+                    // Add cooldown before constructing so PK cannot activate RaiseEarth this tick
+                    bendingPlayer.addCooldown("RaiseEarth", 1000L);
+                    EarthRush.markListenerTriggered(player.getUniqueId());
+                    new EarthRush(player);
+                    return;
                 } else if (abilityName.equalsIgnoreCase("earthtunnel") || abilityName.equalsIgnoreCase("collapse")) {
                     e.setCancelled(AranarthBendingUtils.preventAbilityNearDominion(player));
                 }
@@ -678,6 +757,13 @@ public class AranarthCoreBendingListener implements Listener {
             }
         }
 
+        // AirSnipe: left-click with AirPunch fires the charged snipe
+        AirSnipe airSnipe = AirSnipe.getActiveInstance(player.getUniqueId());
+        if (airSnipe != null) {
+            airSnipe.fire();
+            return;
+        }
+
         // JetBolt: block other left-click abilities during active flight
         if (JetBolt.hasActiveInstance(player.getUniqueId())) {
             return;
@@ -749,6 +835,13 @@ public class AranarthCoreBendingListener implements Listener {
             return;
         }
 
+        // EarthRush: left-click with RaiseEarth equipped fires the loaded boulder
+        EarthRush earthRush = EarthRush.getActiveInstance(player.getUniqueId());
+        if (earthRush != null && earthRush.getPhase() == EarthRush.Phase.LOADED) {
+            earthRush.fire();
+            return;
+        }
+
         // MoltenBlast: left-click with LavaThrow equipped fires the heated ball
         MoltenBlast moltenBlast = MoltenBlast.getActiveInstance(player.getUniqueId());
         if (moltenBlast != null) {
@@ -807,14 +900,14 @@ public class AranarthCoreBendingListener implements Listener {
             return;
         }
 
-        // DaggerVolley: instant left-click fire — advances the 3 → 6 → 9 arrow cycle
+        // DaggerVolley: instant left-click fire - advances the 3 → 6 → 9 arrow cycle
         BendingPlayer bpDaggerVolley = BendingPlayer.getBendingPlayer(player);
         if (bpDaggerVolley != null && bpDaggerVolley.getBoundAbilityName().equalsIgnoreCase("daggervolley")) {
             new DaggerVolley(player);
             return;
         }
 
-        // MetalStrips: instant left-click fire — one iron ingot per shot
+        // MetalStrips: instant left-click fire - one iron ingot per shot
         BendingPlayer bpMetal = BendingPlayer.getBendingPlayer(player);
         if (bpMetal != null && bpMetal.getBoundAbilityName().equalsIgnoreCase("metalstrips")
                 && bpMetal.isElementToggled(Element.EARTH)) {
@@ -888,6 +981,17 @@ public class AranarthCoreBendingListener implements Listener {
                 Block sourceBlock = player.getTargetBlockExact(5, FluidCollisionMode.ALWAYS);
                 if (sourceBlock != null) {
                     MendingWaters.trySelectSource(player, sourceBlock);
+                }
+            }
+        }
+
+        // Regrowth (crop growth)
+        if (!Regrowth.hasActiveInstance(player.getUniqueId())) {
+            BendingPlayer bpRegrowth = BendingPlayer.getBendingPlayer(player);
+            if (bpRegrowth != null && bpRegrowth.getBoundAbilityName().equalsIgnoreCase("regrowth")) {
+                Block sourceBlock = player.getTargetBlockExact(6, FluidCollisionMode.ALWAYS);
+                if (sourceBlock != null) {
+                    Regrowth.trySelectSource(player, sourceBlock);
                 }
             }
         }
@@ -1104,6 +1208,7 @@ public class AranarthCoreBendingListener implements Listener {
         if (regrowth != null) {
             regrowth.remove();
         }
+        Regrowth.clearPendingSource(e.getPlayer().getUniqueId());
         AngeredSpirits angeredSpirits = AngeredSpirits.getActiveInstance(e.getPlayer().getUniqueId());
         if (angeredSpirits != null) {
             angeredSpirits.onSlotChange();
@@ -1339,6 +1444,31 @@ public class AranarthCoreBendingListener implements Listener {
         if (Burial.isBuried(e.getEntity().getUniqueId())) {
             e.setCancelled(true);
         }
+    }
+
+    /**
+     * Triggers EnergyBurst as a fall proc when the player lands with EnergyBurst bound.
+     * Damage scales from 0.5 hearts at the vanilla fall-damage threshold to full damage at 75 blocks.
+     */
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onEnergyBurstFallProc(final EntityDamageEvent e) {
+        if (e.getCause() != EntityDamageEvent.DamageCause.FALL) {
+            return;
+        }
+        if (!(e.getEntity() instanceof Player player)) {
+            return;
+        }
+        final BendingPlayer bPlayer = BendingPlayer.getBendingPlayer(player);
+        if (bPlayer == null || bPlayer.isChiBlocked()) {
+            return;
+        }
+        if (!bPlayer.getBoundAbilityName().equalsIgnoreCase("EnergyBurst")) {
+            return;
+        }
+        if (bPlayer.isOnCooldown("EnergyBurst") || EnergyBurst.hasActiveInstance(player.getUniqueId())) {
+            return;
+        }
+        new EnergyBurst(player, player.getFallDistance());
     }
 
     /**
@@ -1728,7 +1858,7 @@ public class AranarthCoreBendingListener implements Listener {
             return;
         }
 
-        // Owner is collecting their ingot — swap the tagged stack for a clean stack of the
+        // Owner is collecting their ingot - swap the tagged stack for a clean stack of the
         // correct metal type so the player never receives the internal instance-ID metadata.
         e.getItem().setItemStack(new ItemStack(MetalStrips.getStoredMaterial(e.getItem()), 1));
         MetalStrips.removeTrackedItem(e.getItem(), player.getUniqueId());
@@ -1975,7 +2105,7 @@ public class AranarthCoreBendingListener implements Listener {
      */
     @EventHandler
     public void onFangInteract(final PlayerInteractEntityEvent e) {
-        // Resolve the clicked entity to the main EnderDragon — the player often
+        // Resolve the clicked entity to the main EnderDragon - the player often
         // clicks a body part (head, wing, tail) which is a ComplexEntityPart, not the dragon itself.
         EnderDragon dragon;
         if (e.getRightClicked() instanceof EnderDragon d) {
@@ -2076,6 +2206,38 @@ public class AranarthCoreBendingListener implements Listener {
         }
     }
 
+    // Rank-based choose-element cooldowns (ms): Peasant -> Emperor
+    private static final long[] CHOOSE_COOLDOWNS_MS = {
+        24L * 3600_000, // Rank 0: Peasant  - 24h
+        22L * 3600_000, // Rank 1: Esquire  - 22h
+        20L * 3600_000, // Rank 2: Knight   - 20h
+        18L * 3600_000, // Rank 3: Baron    - 18h
+        16L * 3600_000, // Rank 4: Count    - 16h
+        14L * 3600_000, // Rank 5: Duke     - 14h
+        12L * 3600_000, // Rank 6: Prince   - 12h
+         8L * 3600_000, // Rank 7: King     - 8h
+         6L * 3600_000, // Rank 8: Emperor  - 6h
+    };
+
+    /**
+     * Scales the element-change cooldown down as the player's rank increases.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onChooseElementCooldown(final PlayerCooldownChangeEvent e) {
+        if (e.getResult() != PlayerCooldownChangeEvent.Result.ADDED) {
+            return;
+        }
+        if (!"ChooseElement".equals(e.getAbility())) {
+            return;
+        }
+        if (!(e.getPlayer() instanceof Player player)) {
+            return;
+        }
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        int rank = Math.min(aranarthPlayer.getRank(), CHOOSE_COOLDOWNS_MS.length - 1);
+        e.setCooldown(CHOOSE_COOLDOWNS_MS[rank]);
+    }
+
     /**
      * Aang form reduces all incoming ability cooldowns by 30%.
      */
@@ -2095,7 +2257,7 @@ public class AranarthCoreBendingListener implements Listener {
         if ("PastLives".equals(e.getAbility())) {
             return;
         }
-        e.setCooldown(e.getCooldown() / 3); // 2/3 reduction — ability runs at 1/3 of normal cooldown
+        e.setCooldown(e.getCooldown() / 3); // 2/3 reduction - ability runs at 1/3 of normal cooldown
     }
 
 }

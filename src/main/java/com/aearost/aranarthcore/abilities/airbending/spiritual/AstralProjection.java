@@ -252,7 +252,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
         player.setInvulnerable(false);
         player.setGlowing(wasGlowing);
         player.setCollidable(true);
-        // Remove projection effects before restoring — don't let them linger or be double-applied
+        // Remove projection effects before restoring - don't let them linger or be double-applied
         player.removePotionEffect(PotionEffectType.INVISIBILITY);
         player.removePotionEffect(PotionEffectType.GLOWING);
 
@@ -341,7 +341,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
     }
 
     // -------------------------------------------------------------------------
-    // Sub-ability activation — triggered by the listener on left-click per slot
+    // Sub-ability activation - triggered by the listener on left-click per slot
     // -------------------------------------------------------------------------
 
     /** Slot 0: Emit a disorienting aura (Slowness II + Nausea) in a 5-block radius. */

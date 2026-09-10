@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.mob;
 
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.DefenderUtils;
 import org.bukkit.entity.Guardian;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityTargetEvent;
@@ -10,6 +11,10 @@ import org.bukkit.event.entity.EntityTargetEvent;
  */
 public class GuardianTargetPrevent {
 	public void execute(EntityTargetEvent e) {
+		// Defender guardians follow dominion PvP rules (handled by DefenderTarget), not this aquatic exemption
+		if (DefenderUtils.isDefender(e.getEntity().getUniqueId())) {
+			return;
+		}
 		if (e.getEntity() instanceof Guardian guardian) {
 			if (e.getTarget() instanceof Player player) {
 				if (AranarthUtils.isWearingArmorType(player, "aquatic")) {

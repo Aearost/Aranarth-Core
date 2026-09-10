@@ -261,8 +261,13 @@ public class JetFumes extends CombustionAbility implements AddonAbility, ComboAb
                 }
 
                 UUID id = entity.getUniqueId();
-                boolean firstContact = !entityEntryTime.containsKey(id);
                 inFumes.add(id);
+
+                if (living.getWorld().getName().startsWith("arena")) {
+                    continue;
+                }
+
+                boolean firstContact = !entityEntryTime.containsKey(id);
                 entityEntryTime.putIfAbsent(id, now);
                 entityLastEffectTime.putIfAbsent(id, now);
 

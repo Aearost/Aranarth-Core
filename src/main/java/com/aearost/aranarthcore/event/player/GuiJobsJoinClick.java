@@ -3,9 +3,9 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.enums.JobType;
 import com.aearost.aranarthcore.gui.GuiJobs;
 import com.aearost.aranarthcore.gui.GuiJobsJoin;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.JobData;
-import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.JobUtils;
@@ -19,9 +19,15 @@ public class GuiJobsJoinClick {
 
     public void execute(InventoryClickEvent e) {
         e.setCancelled(true);
-        if (!(e.getWhoClicked() instanceof Player player)) return;
-        if (e.getClickedInventory() == null) return;
-        if (!e.getClickedInventory().equals(e.getView().getTopInventory())) return;
+        if (!(e.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+        if (e.getClickedInventory() == null) {
+            return;
+        }
+        if (!e.getClickedInventory().equals(e.getView().getTopInventory())) {
+            return;
+        }
 
         int slot = e.getRawSlot();
 
@@ -34,10 +40,14 @@ public class GuiJobsJoinClick {
 
         // Find which job was clicked
         JobType job = getJobForSlot(slot);
-        if (job == null) return;
+        if (job == null) {
+            return;
+        }
 
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
-        if (ap == null) return;
+        if (ap == null) {
+            return;
+        }
         JobData jobData = ap.getJobData();
         int maxJobs = JobUtils.getMaxJobs(ap.getRank());
 
@@ -52,9 +62,10 @@ public class GuiJobsJoinClick {
         }
 
         jobData.addJob(job);
+        ap.setJobDataLoaded(true);
         AranarthUtils.setPlayer(player.getUniqueId(), ap);
         Bukkit.getLogger().info("[AC][Jobs] " + player.getName() + " joined job " + job.name()
-                + " — active=" + jobData.getActiveJobs());
+                + " - active=" + jobData.getActiveJobs());
         // Sync save ensures the DB row is committed before the player can switch servers.
         // An async save would race with Velocity's join-before-quit ordering: the destination
         // server loads from DB before the source server's quit handler fires, so an async
@@ -65,17 +76,21 @@ public class GuiJobsJoinClick {
         }
 
         player.sendMessage(ChatUtils.chatMessage("&7You have joined the &e" + job.getDisplayName() + " &7job!"));
-        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+        int jobsVol = AranarthUtils.getPlayer(player.getUniqueId()).getJobsSoundVolume();
+        if (jobsVol > 0) {
+            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, jobsVol / 100f, 1.0f);
+        }
 
-        player.closeInventory();
-        new GuiJobsJoin(player).openGui();
+        new GuiJobsJoin(player).populateInto(player.getOpenInventory().getTopInventory());
     }
 
     private JobType getJobForSlot(int slot) {
         int[] slots = GuiJobsJoin.JOB_SLOTS;
         JobType[] jobs = GuiJobsJoin.JOB_ORDER;
         for (int i = 0; i < slots.length; i++) {
-            if (slots[i] == slot) return jobs[i];
+            if (slots[i] == slot) {
+                return jobs[i];
+            }
         }
         return null;
     }

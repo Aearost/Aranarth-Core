@@ -34,6 +34,15 @@ public class GuiTeleport {
 		player.openInventory(initializedGui);
 	}
 
+	/**
+	 * Updates an already-open homepad inventory in-place without closing it.
+	 */
+	public void populateInto(org.bukkit.inventory.Inventory inv) {
+		for (int i = 0; i < initializedGui.getSize(); i++) {
+			inv.setItem(i, initializedGui.getItem(i));
+		}
+	}
+
 	private Inventory initializeGui(Player player, int pageNum) {
 		List<Home> homes = AranarthUtils.getHomepads();
 		int totalHomesOnPage = homes.size();

@@ -1,11 +1,8 @@
 package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
-import com.vexsoftware.votifier.model.Vote;
-import com.vexsoftware.votifier.model.VotifierEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -26,36 +23,11 @@ public class CommandVote implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
-			if (args.length == 0) {
-				displayVoteLinks(player);
-			} else if (args.length == 1) {
-				if (args[0].equals("test")) {
-					if (!player.hasPermission("aranarth.vote.test")) {
-						displayVoteLinks(player);
-						return true;
-					}
-
-					if (args[0].equals("test")) {
-						Vote vote = new Vote(
-								"AranarthCore",
-								player.getName(),
-								"127.0.0.1",
-								Long.toString(System.currentTimeMillis())
-						);
-
-						VotifierEvent event = new VotifierEvent(vote);
-						Bukkit.getPluginManager().callEvent(new VotifierEvent(vote));
-						return true;
-					} else {
-						displayVoteLinks(player);
-					}
-				}
-			}
-			return true;
+			displayVoteLinks(player);
 		} else {
 			sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
-			return true;
 		}
+		return true;
 	}
 
 	/**

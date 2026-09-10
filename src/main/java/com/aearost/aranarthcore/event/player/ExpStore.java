@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -30,9 +31,13 @@ public class ExpStore {
                             amountToReduce = amountToReduce * -1;
                             player.giveExp(amountToReduce);
 
-                            player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 1F, 1F);
-                            player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 1F, 1.5F);
-                            player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 1F, 2F);
+                            int expVol = AranarthUtils.getPlayer(player.getUniqueId()).getExpStoreSoundVolume();
+                            if (expVol > 0) {
+                                float expVf = expVol / 100f;
+                                player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, expVf, 1F);
+                                player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, expVf, 1.5F);
+                                player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, expVf, 2F);
+                            }
                             HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(new ItemStack(Material.EXPERIENCE_BOTTLE));
                             // If the player's inventory was full, drop it to the ground
                             if (!leftover.isEmpty()) {
@@ -50,6 +55,7 @@ public class ExpStore {
 
     /**
      * Helper method to provide the true total EXP a player has.
+     *
      * @param player The player to be analyzed.
      * @return The true total EXP.
      */

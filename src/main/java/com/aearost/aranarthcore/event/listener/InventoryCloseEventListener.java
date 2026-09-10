@@ -2,6 +2,9 @@ package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.player.*;
+import com.aearost.aranarthcore.gui.GuiChatSnapshot;
+import com.aearost.aranarthcore.gui.GuiDominionFood;
+import com.aearost.aranarthcore.gui.GuiHeadExchange;
 import com.aearost.aranarthcore.gui.GuiPetFood;
 import com.aearost.aranarthcore.gui.GuiWrench;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -22,6 +25,10 @@ public class InventoryCloseEventListener implements Listener {
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent e) {
+        if (GuiChatSnapshot.isSnapshotGui(ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
+            GuiChatSnapshot.close(e.getInventory());
+            return;
+        }
         if (e.getView().getType() == InventoryType.CHEST) {
             if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiWrench.TITLE)) {
                 GuiWrench.openBlocks.remove(e.getPlayer().getUniqueId());
@@ -37,6 +44,8 @@ public class InventoryCloseEventListener implements Listener {
                 new GuiDominionFoodClose().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiPetFood.TITLE)) {
                 new GuiPetFoodClose().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiHeadExchange.TITLE)) {
+                new GuiHeadExchangeClose().execute(e);
             }
         } else if (e.getView().getType() == InventoryType.ANVIL) {
             if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarthium Anvil")) {
@@ -50,7 +59,6 @@ public class InventoryCloseEventListener implements Listener {
     }
 
     private static boolean isDominionFoodTitle(String title) {
-        return (title.endsWith(" Food") && !title.equals(GuiPetFood.TITLE))
-                || title.matches(".+'s Food \\(\\d+/\\d+\\)");
+        return title.startsWith(GuiDominionFood.TITLE_PREFIX);
     }
 }

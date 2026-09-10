@@ -14,9 +14,10 @@ import java.util.stream.Collectors;
 public class CommandToggleCompleter implements TabCompleter {
 
     private static final List<String> TOGGLE_OPTIONS = List.of(
-            "blacklist", "bluefire", "bulksellshulker", "changeclaim", "chat", "chestlock",
-            "compressor", "daymessage", "dmsgcompact", "gate", "gradientchat", "inventory", "messages", "pethurt",
-            "shulker", "spawnboost", "teleport", "weathermessage"
+            "barbarian", "blacklist", "changeclaim", "chat", "chestlock",
+            "emoji", "firetype", "compressor", "daymessage", "dmsgcompact", "gate",
+            "gradientchat", "inventory", "invisiblearmor", "messages", "pethurt",
+            "reaper", "shulker", "shulkerbulk", "size", "spawnboost", "teleport", "weathermessage"
     );
 
     /**
@@ -33,7 +34,7 @@ public class CommandToggleCompleter implements TabCompleter {
         }
         if (args.length == 2) {
             if (args[0].equalsIgnoreCase("gradientchat")) {
-                return filter(List.of("bold", "get", "#hex1,#hex2,..."), args[1]);
+                return filter(List.of("bold", "get", "#hex1,&2,#hex3,..."), args[1]);
             }
             if (args[0].equalsIgnoreCase("blacklist")) {
                 return filter(List.of("off", "ignore", "trash"), args[1]);

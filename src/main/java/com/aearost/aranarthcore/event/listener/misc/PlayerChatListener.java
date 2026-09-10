@@ -1,16 +1,25 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.gui.GuiBlacklistEditor;
+import com.aearost.aranarthcore.gui.GuiBrewBook;
 import com.aearost.aranarthcore.gui.GuiDominionPlayerPermissions;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.BlacklistPreset;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.EmojiUtils;
+import com.aearost.aranarthcore.utils.InteractiveChatManager;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import java.util.Objects;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -25,6 +34,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Handles formatting chat messages.
@@ -32,22 +44,86 @@ import java.util.List;
  */
 public class PlayerChatListener implements Listener {
 
-	private final AranarthCore plugin;
+    private final AranarthCore plugin;
 
-	public PlayerChatListener(AranarthCore plugin) {
-		this.plugin = plugin;
-		Bukkit.getPluginManager().registerEvents(this, plugin);
-	}
+    /** Matches [item], [inv], [ec], [coords], [pos] case-insensitively. */
+    private static final Pattern INTERACTIVE_PATTERN =
+            Pattern.compile("\\[item]|\\[inv]|\\[ec]|\\[coords?]|\\[pos]", Pattern.CASE_INSENSITIVE);
 
-	@EventHandler
+    public PlayerChatListener(AranarthCore plugin) {
+        this.plugin = plugin;
+        Bukkit.getPluginManager().registerEvents(this, plugin);
+    }
+
+    @EventHandler
     public void chatEvent(final AsyncPlayerChatEvent e) {
         Player player = e.getPlayer();
         String message = e.getMessage();
+
+        // Remove a leading period when the message starts with "./" followed by a letter (e.g. "./calendar" -> "/calendar")
+        if (message.length() >= 3 && message.charAt(0) == '.' && message.charAt(1) == '/' && Character.isLetter(message.charAt(2))) {
+            message = message.substring(1);
+        }
+
+        // If the player is awaiting a brew book search input, handle it first
+        if (GuiBrewBook.isAwaitingSearch(player.getUniqueId())) {
+            e.setCancelled(true);
+            GuiBrewBook.handleSearchInput(player, message);
+            return;
+        }
 
         // If the player is awaiting a user-search input for the player permission GUI, handle it first
         if (GuiDominionPlayerPermissions.isAwaitingSearch(player.getUniqueId())) {
             e.setCancelled(true);
             GuiDominionPlayerPermissions.handleSearchInput(player, message);
+            return;
+        }
+
+        // If the player is awaiting a blacklist preset rename, handle it
+        if (GuiBlacklistEditor.isAwaitingRename(player.getUniqueId())) {
+            e.setCancelled(true);
+            UUID uuid = player.getUniqueId();
+            int renameIndex = GuiBlacklistEditor.getAwaitingRenameIndex(uuid);
+            GuiBlacklistEditor.clearAwaitingRename(uuid);
+
+            if (message.equalsIgnoreCase("cancel")) {
+                player.sendMessage(ChatUtils.chatMessage("&7Preset rename cancelled."));
+                return;
+            }
+
+            if (message.contains("&") && !player.hasPermission("aranarth.nick.color")) {
+                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use color codes!"));
+                GuiBlacklistEditor.setAwaitingRename(uuid, renameIndex);
+                return;
+            }
+            if (message.contains("#") && !player.hasPermission("aranarth.nick.hex")) {
+                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use hex color codes!"));
+                GuiBlacklistEditor.setAwaitingRename(uuid, renameIndex);
+                return;
+            }
+            if (ChatUtils.stripColorFormatting(message).length() > 30) {
+                player.sendMessage(ChatUtils.chatMessage("&cPreset name cannot exceed 30 characters! Please try again."));
+                GuiBlacklistEditor.setAwaitingRename(uuid, renameIndex);
+                return;
+            }
+            if (ChatUtils.stripColorFormatting(message).isEmpty()) {
+                player.sendMessage(ChatUtils.chatMessage("&cPreset name cannot be empty! Please try again."));
+                GuiBlacklistEditor.setAwaitingRename(uuid, renameIndex);
+                return;
+            }
+
+            final String presetName = message;
+            final int finalIndex = renameIndex;
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+                while (ap.getBlacklistPresets().size() <= finalIndex) {
+                    ap.getBlacklistPresets().add(new BlacklistPreset("", new ArrayList<>()));
+                }
+                ap.getBlacklistPresets().get(finalIndex).setName(presetName);
+                PersistenceUtils.saveBlacklistPresetsAsync(uuid);
+                player.sendMessage(ChatUtils.chatMessage("&7Preset renamed to &r" + ChatUtils.translateToColor(presetName)));
+                new GuiBlacklistEditor(player, finalIndex).openGui();
+            });
             return;
         }
 
@@ -69,6 +145,20 @@ public class PlayerChatListener implements Listener {
 
                         final int count = enteredNumber;
                         final Biome capturedBiome = dominion.getBiomeResourcesBeingClaimed();
+
+                        // Compute the average yield
+                        List<Double> yields = dominion.getClaimFoodYields();
+                        int stored = Math.min(count, yields.size());
+                        double yieldSum = 0;
+                        for (int i = 0; i < stored; i++) {
+                            yieldSum += yields.get(i);
+                        }
+                        yieldSum += (count - stored) * 1.0; // Missing entries default to 100%
+                        final double avgYield = yieldSum / count;
+                        if (stored > 0) {
+                            yields.subList(0, stored).clear();
+                        }
+
                         // Deduct and clear state immediately on this thread to prevent a second claim
                         // being started while the main-thread task is still queued.
                         dominion.setClaimableResources(dominion.getClaimableResources() - count);
@@ -76,7 +166,7 @@ public class PlayerChatListener implements Listener {
                         DominionUtils.updateDominion(dominion);
                         Bukkit.getScheduler().runTask(plugin, () -> {
                             for (int i = 0; i < count; i++) {
-                                claimDominionResources(dominion, player, capturedBiome);
+                                claimDominionResources(dominion, player, capturedBiome, avgYield);
                             }
                             player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 0.5F, 1F);
                         });
@@ -89,7 +179,7 @@ public class PlayerChatListener implements Listener {
             }
         }
 
-        // If another listener (e.g. chat game) already cancelled this event, don't send it to chat
+        // If another listener already cancelled this event, don't send it to chat
         if (e.isCancelled()) {
             return;
         }
@@ -114,7 +204,10 @@ public class PlayerChatListener implements Listener {
             String strippedNickname = ChatUtils.stripColorFormatting(recipientAranarthPlayer.getNickname());
             if (!isSenderTheRecipient && (message.toLowerCase().contains(recipient.getDisplayName().toLowerCase())
                     || message.toLowerCase().contains(strippedNickname.toLowerCase()))) {
-                recipient.playSound(recipient, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 5f, 1f);
+                int pmVol = AranarthUtils.getPlayer(recipient.getUniqueId()).getPrivateMsgSoundVolume();
+                if (pmVol > 0) {
+                    recipient.playSound(recipient, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 5f * (pmVol / 100f), 1f);
+                }
             }
         }
         e.getRecipients().removeAll(toRemove);
@@ -137,6 +230,10 @@ public class PlayerChatListener implements Listener {
             return;
         }
 
+        if (aranarthPlayer.isEmojiEnabled()) {
+            message = EmojiUtils.translateEmojis(message);
+        }
+
         String prefix = ChatUtils.formatChatPrefix(player);
         String chatMessage = ChatUtils.formatChatMessage(player, message);
         // preserve unescaped form for council routing
@@ -148,12 +245,21 @@ public class PlayerChatListener implements Listener {
         Component prefixComponent = LegacyComponentSerializer.legacySection().deserialize(prefix);
         prefixComponent = ChatUtils.clickableCommand(prefixComponent, hoverMsg, "/info " + player.getName(), true);
 
-        // Build the message component. For gradient chat, build directly from the raw message so
-        // that URL characters receive their own per-character gradient colors rather than a flat color.
+        // Build the message component, injecting interactive chat keywords where applicable.
         Component messageComponent = null;
-        if (aranarthPlayer.isGradientChatEnabled() && !aranarthPlayer.getGradientChatColors().isEmpty()) {
-            messageComponent = ChatUtils.buildGradientMessageWithUrls(
-                    aranarthPlayer.getGradientChatColors(), ChatUtils.stripColorFormatting(message), aranarthPlayer.isGradientChatBold());
+        List<UUID> createdSnapshotIds = new ArrayList<>();
+        boolean canUseInteractiveChat = InteractiveChatManager.hasInteractiveChatPerm(aranarthPlayer)
+                && aranarthPlayer.isInteractiveChatEnabled()
+                && INTERACTIVE_PATTERN.matcher(message).find();
+        if (canUseInteractiveChat) {
+            messageComponent = buildInteractiveChatComponent(player, aranarthPlayer, message, chatMessage, createdSnapshotIds);
+        }
+        // Fall back to standard gradient or plain message building.
+        if (messageComponent == null) {
+            if (aranarthPlayer.isGradientChatEnabled() && !aranarthPlayer.getGradientChatColors().isEmpty()) {
+                messageComponent = ChatUtils.buildGradientMessageWithUrls(
+                        aranarthPlayer.getGradientChatColors(), ChatUtils.stripColorFormatting(message), aranarthPlayer.isGradientChatBold());
+            }
         }
         if (messageComponent == null) {
             messageComponent = ChatUtils.buildMessageWithUrls(chatMessage);
@@ -166,11 +272,11 @@ public class PlayerChatListener implements Listener {
                 .append(messageComponent);
 
         if (aranarthPlayer.isInCouncilChat()) {
-            // Council chat toggle is on — route to council chat once (evaluateCouncilMessage sends to all council members)
+            // Council chat toggle is on - route to council chat once (evaluateCouncilMessage sends to all council members)
             // Pass raw message (no gradient) since council chat is not public chat
             ChatUtils.evaluateCouncilMessage(player, message.split(" "), false);
         } else if (aranarthPlayer.isInDominionChat()) {
-            // Dominion chat toggle is on — route to dominion chat
+            // Dominion chat toggle is on - route to dominion chat
             ChatUtils.evaluateDominionMessage(player, message.split(" "), false);
         } else {
             for (Player recipient : e.getRecipients()) {
@@ -185,21 +291,180 @@ public class PlayerChatListener implements Listener {
 
         if (!aranarthPlayer.isInCouncilChat() && !aranarthPlayer.isInDominionChat()) {
             DiscordUtils.sendChatMessage(prefix + chatMessage);
-            // Relay to SMP server so its players see public chat
+            // Relay to the other server so its players see public chat
             if (NetworkManager.isActive()) {
-                NetworkManager.getInstance().publishChat(prefix, chatMessage);
+                if (!createdSnapshotIds.isEmpty()) {
+                    List<InteractiveChatManager.Snapshot> snapshots = createdSnapshotIds.stream()
+                            .map(InteractiveChatManager::getSnapshot)
+                            .filter(Objects::nonNull)
+                            .collect(java.util.stream.Collectors.toList());
+                    NetworkManager.getInstance().publishInteractiveChat(prefix, chatMessage, fullMessage, snapshots);
+                } else {
+                    NetworkManager.getInstance().publishChat(prefix, chatMessage);
+                }
             }
         }
     }
 
     /**
-     * Claims the resources of the Dominion for the given biome.
-     * @param dominion The Dominion.
-     * @param player The player claiming the resources.
-     * @param biome The biome whose resources should be distributed.
+     * Builds a Component for the player's message.
+     * Snapshot IDs created for interactive keywords are added to {@code createdSnapshotIds}.
      */
-    private void claimDominionResources(Dominion dominion, Player player, Biome biome) {
-        List<ItemStack> resourcesToClaim = DominionUtils.getResourcesByDominionAndBiome(dominion, biome);
+    private Component buildInteractiveChatComponent(Player player, AranarthPlayer ap, String rawMessage,
+                                                    String chatMessage, List<UUID> createdSnapshotIds) {
+        String nickname = ap.getNickname().isEmpty() ? player.getName() : ChatUtils.stripColorFormatting(ap.getNickname());
+        Location loc = player.getLocation();
+        Component result = Component.empty();
+
+        Matcher matcher = INTERACTIVE_PATTERN.matcher(rawMessage);
+        int lastEnd = 0;
+
+        while (matcher.find()) {
+            // Append the text segment before this keyword
+            if (matcher.start() > lastEnd) {
+                String rawSegment = rawMessage.substring(lastEnd, matcher.start());
+                result = result.append(buildSegment(player, ap, rawSegment, chatMessage, lastEnd));
+            }
+
+            String keyword = matcher.group().toLowerCase();
+            Component interactiveComp = buildKeywordComponent(player, ap, nickname, loc, keyword, createdSnapshotIds);
+            result = result.append(interactiveComp);
+            lastEnd = matcher.end();
+        }
+
+        // Append any remaining text after the last keyword
+        if (lastEnd < rawMessage.length()) {
+            String rawSegment = rawMessage.substring(lastEnd);
+            result = result.append(buildSegment(player, ap, rawSegment, chatMessage, lastEnd));
+        }
+
+        return result;
+    }
+
+    /**
+     * Formats a plain text segment using the player's chat permissions (gradient or color).
+     */
+    private Component buildSegment(Player player, AranarthPlayer ap, String rawSegment, String chatMessage, int rawOffset) {
+        if (rawSegment.isEmpty()) return Component.empty();
+
+        if (ap.isGradientChatEnabled() && !ap.getGradientChatColors().isEmpty()) {
+            String stripped = ChatUtils.stripColorFormatting(rawSegment);
+            Component gradComp = ChatUtils.buildGradientMessageWithUrls(
+                    ap.getGradientChatColors(), stripped, ap.isGradientChatBold());
+            if (gradComp != null) return gradComp;
+        }
+
+        // Non-gradient
+        String formattedSegment = applySegmentFormatting(player, rawSegment);
+        return ChatUtils.buildMessageWithUrls(formattedSegment);
+    }
+
+    private String applySegmentFormatting(Player player, String segment) {
+        if (player.hasPermission("aranarth.chat.hex")) {
+            return ChatUtils.translateToColor(segment);
+        } else if (player.hasPermission("aranarth.chat.color")) {
+            String result = ChatUtils.playerColorChat(segment);
+            return result != null ? result : segment;
+        }
+        return segment;
+    }
+
+    /**
+     * Builds the interactive Component for a single keyword ([item], [inv], [ec], [coords]/[pos]).
+     * Snapshot IDs created here are added to {@code createdSnapshotIds}.
+     */
+    private Component buildKeywordComponent(Player player, AranarthPlayer ap, String nickname, Location loc,
+                                            String keyword, List<UUID> createdSnapshotIds) {
+        return switch (keyword) {
+            case "[item]" -> buildItemComponent(player, nickname, createdSnapshotIds);
+            case "[inv]"  -> buildInvComponent(player, nickname, createdSnapshotIds);
+            case "[ec]"   -> buildEcComponent(player, nickname, createdSnapshotIds);
+            default       -> buildCoordsComponent(nickname, loc); // [coords], [coord], [pos]
+        };
+    }
+
+    private Component buildItemComponent(Player player, String nickname, List<UUID> createdSnapshotIds) {
+        ItemStack held = player.getInventory().getItemInMainHand().clone();
+        ItemStack[] items = new ItemStack[]{held.getType().isAir() ? null : held};
+        UUID snapshotId = InteractiveChatManager.storeSnapshot(
+                player.getUniqueId(), nickname, InteractiveChatManager.SnapshotType.ITEM, items);
+        createdSnapshotIds.add(snapshotId);
+
+        String displayName = ChatUtils.translateToColor("&6&l[" + nickname + "'s Item]");
+        Component display = LegacyComponentSerializer.legacySection().deserialize(displayName);
+        String hoverMsg = ChatUtils.translateToColor("&7Click to view &e" + nickname + "&7's held item");
+        return ChatUtils.clickableCommand(display, hoverMsg, "/ichat view " + snapshotId, true);
+    }
+
+    private Component buildInvComponent(Player player, String nickname, List<UUID> createdSnapshotIds) {
+        ItemStack[] invItems = new ItemStack[41];
+        invItems[0] = cloneOrNull(player.getInventory().getHelmet());
+        invItems[1] = cloneOrNull(player.getInventory().getChestplate());
+        invItems[2] = cloneOrNull(player.getInventory().getLeggings());
+        invItems[3] = cloneOrNull(player.getInventory().getBoots());
+        invItems[4] = cloneOrNull(player.getInventory().getItemInOffHand());
+        for (int i = 0; i < 27; i++) {
+            invItems[5 + i] = cloneOrNull(player.getInventory().getItem(9 + i));
+        }
+        for (int i = 0; i < 9; i++) {
+            invItems[32 + i] = cloneOrNull(player.getInventory().getItem(i));
+        }
+        UUID snapshotId = InteractiveChatManager.storeSnapshot(
+                player.getUniqueId(), nickname, InteractiveChatManager.SnapshotType.INV, invItems);
+        createdSnapshotIds.add(snapshotId);
+
+        String displayName = ChatUtils.translateToColor("&6&l[" + nickname + "'s Inventory]");
+        Component display = LegacyComponentSerializer.legacySection().deserialize(displayName);
+        String hoverMsg = ChatUtils.translateToColor("&7Click to view &e" + nickname + "&7's inventory");
+        return ChatUtils.clickableCommand(display, hoverMsg, "/ichat view " + snapshotId, true);
+    }
+
+    private Component buildEcComponent(Player player, String nickname, List<UUID> createdSnapshotIds) {
+        ItemStack[] ecItems = new ItemStack[27];
+        for (int i = 0; i < 27; i++) {
+            ecItems[i] = cloneOrNull(player.getEnderChest().getItem(i));
+        }
+        UUID snapshotId = InteractiveChatManager.storeSnapshot(
+                player.getUniqueId(), nickname, InteractiveChatManager.SnapshotType.EC, ecItems);
+        createdSnapshotIds.add(snapshotId);
+
+        String displayName = ChatUtils.translateToColor("&6&l[" + nickname + "'s Ender Chest]");
+        Component display = LegacyComponentSerializer.legacySection().deserialize(displayName);
+        String hoverMsg = ChatUtils.translateToColor("&7Click to view &e" + nickname + "&7's ender chest");
+        return ChatUtils.clickableCommand(display, hoverMsg, "/ichat view " + snapshotId, true);
+    }
+
+    private Component buildCoordsComponent(String nickname, Location loc) {
+        String worldName = loc.getWorld() != null ? loc.getWorld().getName() : "unknown";
+        int x = loc.getBlockX();
+        int y = loc.getBlockY();
+        int z = loc.getBlockZ();
+
+        String displayName = ChatUtils.translateToColor("&b&l[" + nickname + "'s Coords]");
+        Component display = LegacyComponentSerializer.legacySection().deserialize(displayName);
+
+        String hoverMsg = ChatUtils.translateToColor(
+                "&7X: &e" + x + " &7Y: &e" + y + " &7Z: &e" + z + "\n&7World: &e" + worldName);
+        Component hover = LegacyComponentSerializer.legacySection().deserialize(hoverMsg);
+
+        return display
+                .hoverEvent(HoverEvent.showText(hover))
+                .clickEvent(ClickEvent.suggestCommand("/tp " + x + " " + y + " " + z));
+    }
+
+    private static ItemStack cloneOrNull(ItemStack item) {
+        return (item != null && !item.getType().isAir()) ? item.clone() : null;
+    }
+
+    /**
+     * Claims the resources of the Dominion for the given biome.
+     *
+     * @param dominion The Dominion.
+     * @param player   The player claiming the resources.
+     * @param biome    The biome whose resources should be distributed.
+     */
+    private void claimDominionResources(Dominion dominion, Player player, Biome biome, double yieldMultiplier) {
+        List<ItemStack> resourcesToClaim = DominionUtils.getResourcesByDominionAndBiome(dominion, biome, yieldMultiplier);
         Location loc = player.getLocation();
         for (ItemStack resource : resourcesToClaim) {
             HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(resource);
@@ -207,6 +472,8 @@ public class PlayerChatListener implements Listener {
                 loc.getWorld().dropItemNaturally(loc, remainder.get(0));
             }
         }
-        player.sendMessage(ChatUtils.chatMessage("&7The resources have been added to your inventory"));
+        int yieldPct = (int) Math.round(yieldMultiplier * 100);
+        String yieldColor = yieldPct >= 80 ? "&a" : yieldPct >= 50 ? "&e" : "&c";
+        player.sendMessage(ChatUtils.chatMessage("&7The resources have been added to your inventory " + yieldColor + "(" + yieldPct + "% yield)"));
     }
 }

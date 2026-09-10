@@ -17,7 +17,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.*;
 
 /**
- * Manages the Dominion Hub GUI — the main menu opened by /dominion (no args).
+ * Manages the Dominion Hub GUI - the main menu opened by /dominion (no args).
  *
  * <p>The hub screen shows rank/relation permission groups, toggles (Mob Spawning, Member PvP),
  * and navigation buttons for Members, User Search, Guardians, and Outposts.
@@ -52,12 +52,12 @@ public class GuiDominionPermissions {
     /**
      * Returns the slot-to-permission map for a rank sub-screen (27-slot grouped layout).
      * <pre>
-     * Row 0 — Buffer:              slots 0-8  (gray panes)
-     * Row 1 — Interactions:       slots 10-14 (BUILD, MISC_INTERACT, ARMOR_STAND, ITEM_FRAME, VILLAGER)
-     * Row 2 — Block Interactions: slots 19-25 (DOOR, TRAPDOOR, FENCE_GATE, LEVER, BUTTON, PRESSURE_PLATE, CONTAINER)
-     * Row 3 — Commands:           slots 28-35 (HOME, FOOD, RESOURCES, INVITE, REMOVE_MEMBER, SURRENDER, REBEL, RETREAT)
-     * Row 4 — (no section header) slots 36-37 (OUTPOST_HOME, MANAGE_OUTPOSTS)
-     * Row 5 — Buffer:             slots 45-53 (gray panes)
+     * Row 0 - Buffer:              slots 0-8  (gray panes)
+     * Row 1 - Interactions:       slots 10-14 (BUILD, MISC_INTERACT, ARMOR_STAND, ITEM_FRAME, VILLAGER)
+     * Row 2 - Block Interactions: slots 19-25 (DOOR, TRAPDOOR, FENCE_GATE, LEVER, BUTTON, PRESSURE_PLATE, CONTAINER)
+     * Row 3 - Commands:           slots 28-35 (HOME, FOOD, RESOURCES, INVITE, REMOVE_MEMBER, SURRENDER, REBEL, RETREAT)
+     * Row 4 - (no section header) slots 36-37 (OUTPOST_HOME, MANAGE_OUTPOSTS)
+     * Row 5 - Buffer:             slots 45-53 (gray panes)
      * </pre>
      * The rank sub-screen uses 54 slots to accommodate the extra row.
      */
@@ -75,6 +75,7 @@ public class GuiDominionPermissions {
         map.put(23, DominionPermission.BUTTON);
         map.put(24, DominionPermission.PRESSURE_PLATE);
         map.put(25, DominionPermission.CONTAINER);
+        map.put(26, DominionPermission.LOCK_CONTAINER);
         map.put(28, DominionPermission.HOME);
         map.put(29, DominionPermission.FOOD);
         map.put(30, DominionPermission.RESOURCES);
@@ -93,11 +94,11 @@ public class GuiDominionPermissions {
     /**
      * Returns the slot-to-permission map for a relation sub-screen (27-slot grouped layout).
      * <pre>
-     * Row 0 — Buffer:              slots 0-8  (gray panes)
-     * Row 1 — Interactions:       slots 10-15 (BUILD, MISC_INTERACT, ARMOR_STAND, ITEM_FRAME, VILLAGER, PVP)
-     * Row 2 — Block Interactions: slots 19-25 (DOOR, TRAPDOOR, FENCE_GATE, LEVER, BUTTON, PRESSURE_PLATE, CONTAINER)
-     * Row 3 — Commands:           slots 28-29 (HOME, OUTPOST_HOME)
-     * Row 4 — Buffer:             slots 36-44 (gray panes)
+     * Row 0 - Buffer:              slots 0-8  (gray panes)
+     * Row 1 - Interactions:       slots 10-15 (BUILD, MISC_INTERACT, ARMOR_STAND, ITEM_FRAME, VILLAGER, PVP)
+     * Row 2 - Block Interactions: slots 19-25 (DOOR, TRAPDOOR, FENCE_GATE, LEVER, BUTTON, PRESSURE_PLATE, CONTAINER)
+     * Row 3 - Commands:           slots 28-29 (HOME, OUTPOST_HOME)
+     * Row 4 - Buffer:             slots 36-44 (gray panes)
      * </pre>
      */
     public static Map<Integer, DominionPermission> getRelationSlotPermissions() {
@@ -115,6 +116,7 @@ public class GuiDominionPermissions {
         map.put(23, DominionPermission.BUTTON);
         map.put(24, DominionPermission.PRESSURE_PLATE);
         map.put(25, DominionPermission.CONTAINER);
+        map.put(26, DominionPermission.LOCK_CONTAINER);
         map.put(28, DominionPermission.HOME);
         map.put(29, DominionPermission.OUTPOST_HOME);
         return map;
@@ -251,8 +253,9 @@ public class GuiDominionPermissions {
         gui.setItem(16, buildMemberPvpToggleItem(dominion.isMemberPvpEnabled()));
         gui.setItem(17, buildBendingToggleItem(dominion.isBendingEnabled()));
 
-        // Row 4 toggle
-        gui.setItem(31, buildMobSpawningToggleItem(dominion.isMobSpawningEnabled()));
+        // Row 4 toggles
+        gui.setItem(30, buildMobSpawningToggleItem(dominion.isMobSpawningEnabled()));
+        gui.setItem(32, buildExplosionToggleItem(dominion.isExplosionEnabled()));
 
         // Row 3: navigation and new hub sections
         gui.setItem(GUARDIANS_SLOT, buildDefendersItem());
@@ -290,6 +293,20 @@ public class GuiDominionPermissions {
                 index[0]++;
             }
         }.runTaskTimer(AranarthCore.getInstance(), 0L, 20L);
+    }
+
+    /**
+     * Builds the Explosion toggle item for the main screen.
+     */
+    public static ItemStack buildExplosionToggleItem(boolean enabled) {
+        ItemStack item = new ItemStack(Material.TNT);
+        ItemMeta meta = item.getItemMeta();
+        String statusColor = enabled ? "&a" : "&c";
+        String statusText = enabled ? "Enabled" : "Disabled";
+        meta.setDisplayName(ChatUtils.translateToColor("&6&lExplosions &7&l- " + statusColor + "&l" + statusText));
+        meta.setLore(List.of(ChatUtils.translateToColor("&7Allows explosions to damage blocks in dominion chunks")));
+        item.setItemMeta(meta);
+        return item;
     }
 
     /**
@@ -390,6 +407,7 @@ public class GuiDominionPermissions {
             case LEVER -> Material.LEVER;
             case PRESSURE_PLATE -> Material.OAK_PRESSURE_PLATE;
             case CONTAINER -> Material.CHEST;
+            case LOCK_CONTAINER -> Material.TRIAL_KEY;
             case MISC_INTERACT -> Material.MAGENTA_GLAZED_TERRACOTTA;
             case ARMOR_STAND -> Material.ARMOR_STAND;
             case ITEM_FRAME -> Material.ITEM_FRAME;
@@ -411,7 +429,7 @@ public class GuiDominionPermissions {
         };
     }
 
-    private static ItemStack buildPermissionItem(DominionPermission permission, boolean enabled) {
+    public static ItemStack buildPermissionItem(DominionPermission permission, boolean enabled) {
         ItemStack item = new ItemStack(getPermissionMaterial(permission));
         ItemMeta meta = item.getItemMeta();
         String statusColor = enabled ? "&a" : "&c";
@@ -479,6 +497,7 @@ public class GuiDominionPermissions {
      */
     public static String formatPermissionName(DominionPermission permission) {
         if (permission == DominionPermission.FENCE_GATE) return "Gates";
+        if (permission == DominionPermission.LOCK_CONTAINER) return "Lock Containers";
         String raw = permission.name().replace("_", " ");
         StringBuilder formatted = new StringBuilder();
         for (String word : raw.split(" ")) {

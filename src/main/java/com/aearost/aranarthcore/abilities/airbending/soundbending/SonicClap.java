@@ -95,6 +95,8 @@ public class SonicClap extends SoundAbility implements AddonAbility {
 
             if (isGlass(wave.location.getBlock().getType())) {
                 shatterGlass(player, wave.location.getBlock());
+            } else if (isIce(wave.location.getBlock().getType())) {
+                shatterIce(player, wave.location.getBlock());
             } else if (wave.location.getBlock().getType().isSolid()) {
                 it.remove();
                 continue;

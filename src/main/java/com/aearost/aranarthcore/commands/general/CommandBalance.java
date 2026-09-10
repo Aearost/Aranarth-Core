@@ -1,12 +1,13 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -14,6 +15,7 @@ import org.bukkit.entity.Player;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -41,18 +43,15 @@ public class CommandBalance implements CommandExecutor {
 			}
 		} else {
 			if (args.length == 1) {
-				boolean isPlayerFound = false;
-				// Does the player exist
-				for (OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
-					if (AranarthUtils.getPlayer(offlinePlayer.getUniqueId()) != null) {
-						if (offlinePlayer.getName().equalsIgnoreCase(args[0])) {
-							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(offlinePlayer.getUniqueId());
-							sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + "&e's &7balance is &6" + formatter.format(aranarthPlayer.getBalance())));
-							return true;
-						}
-					}
+				UUID targetUuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
+				if (targetUuid == null) {
+					sender.sendMessage(ChatUtils.chatMessage("&cThis player does not exist!"));
+					return true;
 				}
-				sender.sendMessage(ChatUtils.chatMessage("&cThis player does not exist!"));
+				String displayName = resolveDisplayName(targetUuid, args[0]);
+				double balance = resolveBalance(targetUuid);
+				sender.sendMessage(ChatUtils.chatMessage("&e" + displayName + "&e's &7balance is &6" + formatter.format(balance)));
+				return true;
 			} else if (args.length == 2) {
 				if (sender instanceof Player player) {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
@@ -63,53 +62,91 @@ public class CommandBalance implements CommandExecutor {
 					}
 				}
 
-				boolean isPlayerFound = false;
-				// Does the player exist
-				for (OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
-					if (AranarthUtils.getPlayer(offlinePlayer.getUniqueId()) != null) {
-						if (offlinePlayer.getName().equalsIgnoreCase(args[0])) {
-							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(offlinePlayer.getUniqueId());
-							try {
-								DecimalFormat df = new DecimalFormat("0.00");
-
-								// If increasing the balance
-								if (args[1].charAt(0) == '+') {
-									double valueAsDouble = Double.parseDouble(args[1].substring(1));
-									double delta = Double.parseDouble(df.format(valueAsDouble));
-									aranarthPlayer.setBalance(aranarthPlayer.getBalance() + delta);
-									sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + "&e's &7balance has been increased by &6" + formatter.format(valueAsDouble)));
-									persistAndBroadcastBalanceDelta(offlinePlayer.getUniqueId(), delta);
-									return true;
-								}
-								// If decreasing the balance
-								else if (args[1].charAt(0) == '-') {
-									double valueAsDouble = Double.parseDouble(args[1].substring(1));
-									double delta = -Double.parseDouble(df.format(valueAsDouble));
-									aranarthPlayer.setBalance(aranarthPlayer.getBalance() + delta);
-									sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + "&e's &7balance has been decreased by &6" + formatter.format(valueAsDouble)));
-									persistAndBroadcastBalanceDelta(offlinePlayer.getUniqueId(), delta);
-									return true;
-								}
-								// If overriding the balance
-								else {
-									double valueAsDouble = Double.parseDouble(args[1]);
-									double newBalance = Double.parseDouble(df.format(valueAsDouble));
-									double delta = newBalance - aranarthPlayer.getBalance();
-									aranarthPlayer.setBalance(newBalance);
-									sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + "&e's &7balance has been set to &6" + formatter.format(valueAsDouble)));
-									persistAndBroadcastBalanceDelta(offlinePlayer.getUniqueId(), delta);
-									return true;
-								}
-							} catch (NumberFormatException e) {
-								sender.sendMessage(ChatUtils.chatMessage("&cThat value is invalid!"));
-							}
-						}
-					}
+				UUID targetUuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
+				if (targetUuid == null) {
+					sender.sendMessage(ChatUtils.chatMessage("&cThis player does not exist!"));
+					return true;
 				}
-				sender.sendMessage(ChatUtils.chatMessage("&cThis player does not exist!"));
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(targetUuid);
+				if (aranarthPlayer == null) {
+					sender.sendMessage(ChatUtils.chatMessage("&e" + args[0] + " &cis not on this server - balance changes require the player to be present"));
+					return true;
+				}
+				String displayName = resolveDisplayName(targetUuid, args[0]);
+				try {
+					DecimalFormat df = new DecimalFormat("0.00");
+
+					// If increasing the balance
+					if (args[1].charAt(0) == '+') {
+						double valueAsDouble = Double.parseDouble(args[1].substring(1));
+						double delta = Double.parseDouble(df.format(valueAsDouble));
+						aranarthPlayer.setBalance(aranarthPlayer.getBalance() + delta);
+						sender.sendMessage(ChatUtils.chatMessage("&e" + displayName + "&e's &7balance has been increased by &6" + formatter.format(valueAsDouble)));
+						persistAndBroadcastBalanceDelta(targetUuid, delta);
+						return true;
+					}
+					// If decreasing the balance
+					else if (args[1].charAt(0) == '-') {
+						double valueAsDouble = Double.parseDouble(args[1].substring(1));
+						double delta = -Double.parseDouble(df.format(valueAsDouble));
+						aranarthPlayer.setBalance(aranarthPlayer.getBalance() + delta);
+						sender.sendMessage(ChatUtils.chatMessage("&e" + displayName + "&e's &7balance has been decreased by &6" + formatter.format(valueAsDouble)));
+						persistAndBroadcastBalanceDelta(targetUuid, delta);
+						return true;
+					}
+					// If overriding the balance
+					else {
+						double valueAsDouble = Double.parseDouble(args[1]);
+						double newBalance = Double.parseDouble(df.format(valueAsDouble));
+						double delta = newBalance - aranarthPlayer.getBalance();
+						aranarthPlayer.setBalance(newBalance);
+						sender.sendMessage(ChatUtils.chatMessage("&e" + displayName + "&e's &7balance has been set to &6" + formatter.format(valueAsDouble)));
+						persistAndBroadcastBalanceDelta(targetUuid, delta);
+						return true;
+					}
+				} catch (NumberFormatException e) {
+					sender.sendMessage(ChatUtils.chatMessage("&cThat value is invalid!"));
+				}
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Resolves the display name for a player UUID, checking local memory, remote roster, then Bukkit cache.
+	 */
+	private static String resolveDisplayName(UUID uuid, String fallback) {
+		AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+		if (ap != null) {
+			return ap.getNickname();
+		}
+		if (NetworkManager.isActive()) {
+			NetworkPlayer remote = NetworkManager.getInstance().getRemotePlayer(uuid);
+			if (remote != null) {
+				String nick = remote.getNickname();
+				return (nick == null || nick.isEmpty()) ? remote.getUsername() : ChatUtils.stripColorFormatting(nick);
+			}
+		}
+		String bukkit = Bukkit.getOfflinePlayer(uuid).getName();
+		return bukkit != null ? bukkit : fallback;
+	}
+
+	/**
+	 * Resolves the balance for a player UUID, checking local memory first then the DB.
+	 */
+	private static double resolveBalance(UUID uuid) {
+		AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+		if (ap != null) {
+			return ap.getBalance();
+		}
+		if (DatabaseManager.isActive()) {
+			Map<UUID, DatabaseManager.BalanceEntry> balances = DatabaseManager.getInstance().loadAllPlayerBalances();
+			DatabaseManager.BalanceEntry entry = balances.get(uuid);
+			if (entry != null) {
+				return entry.balance();
+			}
+		}
+		return 0.0;
 	}
 
 	private void persistAndBroadcastBalanceDelta(UUID uuid, double delta) {

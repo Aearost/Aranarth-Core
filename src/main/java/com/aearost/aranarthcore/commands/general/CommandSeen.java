@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -47,11 +49,37 @@ public class CommandSeen implements CommandExecutor {
 			if (uuid != null) {
 				OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-				if (offlinePlayer.isOnline()) {
-					sender.sendMessage(ChatUtils.chatMessage(AranarthUtils.getRank(aranarthPlayer) + "&e" + aranarthPlayer.getNickname() + " &7is currently online"));
+
+				// Check if the player is online on another server in the network
+				NetworkPlayer remotePlayer = NetworkManager.isActive()
+						? NetworkManager.getInstance().getRemotePlayer(uuid) : null;
+
+				// Resolve display name regardless of which server the player is on
+				String rankPrefix;
+				String displayName;
+				if (aranarthPlayer != null) {
+					rankPrefix = AranarthUtils.getRank(aranarthPlayer);
+					displayName = aranarthPlayer.getNickname();
+				} else if (remotePlayer != null) {
+					rankPrefix = "";
+					String remoteNick = remotePlayer.getNickname();
+					displayName = (remoteNick == null || remoteNick.isEmpty())
+							? remotePlayer.getUsername()
+							: ChatUtils.stripColorFormatting(remoteNick);
+				} else {
+					rankPrefix = "";
+					String bukkit = offlinePlayer.getName();
+					displayName = bukkit != null ? bukkit : args[0];
+				}
+
+				boolean isOnline = offlinePlayer.isOnline() || remotePlayer != null;
+				if (isOnline) {
+					sender.sendMessage(ChatUtils.chatMessage(rankPrefix + "&e" + displayName + " &7is currently online"));
 					return true;
 				} else {
 					if (sender instanceof Player player) {
+						final String finalRankPrefix = rankPrefix;
+						final String finalDisplayName = displayName;
 						AranarthUtils.getPlayerTimezone(player, zoneId -> {
 							String result = calculateDisplayDate(
 								offlinePlayer,
@@ -59,11 +87,11 @@ public class CommandSeen implements CommandExecutor {
 								zoneId,
 								sender
 							);
-							sender.sendMessage(ChatUtils.chatMessage(AranarthUtils.getRank(aranarthPlayer) + "&e" + aranarthPlayer.getNickname() + " &7was last seen " + result));
+							sender.sendMessage(ChatUtils.chatMessage(finalRankPrefix + "&e" + finalDisplayName + " &7was last seen " + result));
 						});
 					} else {
 						String result = calculateDisplayDate(offlinePlayer, aranarthPlayer, ZoneId.systemDefault(), sender);
-						sender.sendMessage(ChatUtils.chatMessage(AranarthUtils.getRank(aranarthPlayer) + "&e" + aranarthPlayer.getNickname() + " &7was last seen " + result));
+						sender.sendMessage(ChatUtils.chatMessage(rankPrefix + "&e" + displayName + " &7was last seen " + result));
 					}
 					return true;
 				}

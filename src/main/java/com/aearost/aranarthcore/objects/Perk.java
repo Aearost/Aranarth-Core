@@ -12,5 +12,10 @@ public enum Perk {
     HOMES,
     ITEMFRAME,
     BLUEFIRE,
-    DISCORD
+    WHITEFIRE,
+    PRISMATICFIRE,
+    IRIDESCENTFIRE, // tombstone - positional slot preserved for persistence, do not remove
+    DISCORD,
+    NICKNAME,
+    INVISIBLEARMOR
 }

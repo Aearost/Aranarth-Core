@@ -1,5 +1,8 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.gui.GuiBlacklist;
+import com.aearost.aranarthcore.gui.GuiBlacklistEditor;
+import com.aearost.aranarthcore.gui.GuiBlacklistSelect;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -7,68 +10,64 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.ItemStack;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 /**
- * Deals with all clicks of the blacklist GUI elements.
+ * Deals with all clicks of the main blacklist GUI.
  */
 public class GuiBlacklistClick {
-	public void execute(InventoryClickEvent e) {
-		e.setCancelled(true);
-		Player player = (Player) e.getWhoClicked();
-		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		List<ItemStack> blacklistedItems = aranarthPlayer.getBlacklist();
-		// If the user did not click a slot
-		if (e.getClickedInventory() == null) {
-			return;
-		}
-		if (Objects.isNull(blacklistedItems)) {
-			blacklistedItems = new ArrayList<>();
-		}
 
-		// If adding a new item to the blacklist
-		if (e.getClickedInventory().getType() == InventoryType.PLAYER) {
-			ItemStack clickedItem = e.getClickedInventory().getItem(e.getSlot());
-			if (Objects.isNull(clickedItem)) {
-				return;
-			}
-			int size = e.getClickedInventory().getSize();
-			if (blacklistedItems.size() == size) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou have already blacklisted " + size + " items!"));
-			} else {
-				for (ItemStack itemStack : blacklistedItems) {
-					if (clickedItem.getType() == itemStack.getType()) {
-						player.sendMessage(ChatUtils.chatMessage("&cThis item is already blacklisted!"));
-						e.getWhoClicked().closeInventory();
-						return;
-					}
-				}
-				blacklistedItems.add(new ItemStack(clickedItem.getType(), 1));
-				player.getInventory().setItem(e.getSlot(), clickedItem);
-				aranarthPlayer.setBlacklist(blacklistedItems);
-				player.sendMessage(ChatUtils.chatMessage("&7You have added &e" + ChatUtils.getFormattedItemName(clickedItem.getType().name() + " &7to the blacklisted items")));
-				player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 0.5F, 1.75F);
-			}
-		}
-		// If removing a blacklisted item
-		else {
-			// Clicking on a null slot
-			if (e.getSlot() >= blacklistedItems.size()) {
-				return;
-			}
-			ItemStack blacklistedItem = blacklistedItems.get(e.getSlot());
-			if (Objects.nonNull(blacklistedItem)) {
-				player.sendMessage(ChatUtils.chatMessage("&7You are no longer blacklisting &e" + ChatUtils.getFormattedItemName(blacklistedItem.getType().name()) ));
-				player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 0.5F, 0.8F);
-				blacklistedItems.remove(e.getSlot());
-				aranarthPlayer.setBlacklist(blacklistedItems);
-			}
-		}
-		e.getWhoClicked().closeInventory();
-	}
-	
+    public void execute(InventoryClickEvent e) {
+        e.setCancelled(true);
+        if (!(e.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+        if (e.getClickedInventory() == null) {
+            return;
+        }
+        if (e.getClickedInventory().getType() != InventoryType.CHEST) {
+            return;
+        }
+
+        int slot = e.getSlot();
+        AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
+
+        // Preset buttons
+        int presetIndex = switch (slot) {
+            case 11 -> 0;
+            case 13 -> 1;
+            case 15 -> 2;
+            case 20 -> 3;
+            case 22 -> 4;
+            case 24 -> 5;
+            default -> -1;
+        };
+        if (presetIndex >= 0) {
+            new GuiBlacklistEditor(player, presetIndex).openGui();
+            return;
+        }
+
+        // Mode toggle
+        if (slot == 28) {
+            int current = ap.getBlacklistingMethod();
+            int next = current == 0 ? 1 : current == 1 ? -1 : 0;
+            ap.setBlacklistingMethod(next);
+            AranarthUtils.setPlayer(player.getUniqueId(), ap);
+            String modeName = next == 0 ? "&eIgnore" : next == 1 ? "&eTrash" : "&cOff";
+            player.sendMessage(ChatUtils.chatMessage("&7Blacklist mode set to " + modeName));
+            player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1.0F);
+            player.getOpenInventory().getTopInventory().setItem(28, GuiBlacklist.buildToggleButton(next));
+            return;
+        }
+
+        // Use Preset
+        if (slot == 31) {
+            new GuiBlacklistSelect(player, false).openGui();
+            return;
+        }
+
+        // Clear Preset
+        if (slot == 34) {
+            new GuiBlacklistSelect(player, true).openGui();
+        }
+    }
 }

@@ -51,6 +51,7 @@ public class GuiDominionMembers {
 
         List<UUID> members = new ArrayList<>(dominion.getMembers());
 
+        int expectedSize = calculateSize(members.size() + 1);
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
             Map<UUID, PlayerProfile> profiles = new LinkedHashMap<>();
             for (UUID uuid : members) {
@@ -60,9 +61,31 @@ public class GuiDominionMembers {
                 profiles.put(uuid, profile);
             }
 
-            Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () ->
-                    new GuiDominionMembers(player, dominion, profiles).openGui());
+            Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+                String openTitle = ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
+                if (player.isOnline() && openTitle.equals("Dominion Members")
+                        && player.getOpenInventory().getTopInventory().getSize() == expectedSize) {
+                    populate(player.getOpenInventory().getTopInventory(), dominion, profiles);
+                } else {
+                    new GuiDominionMembers(player, dominion, profiles).openGui();
+                }
+            });
         });
+    }
+
+    /**
+     * Updates an already-open Dominion Members inventory in-place without closing it.
+     */
+    public static void populate(Inventory inv, Dominion dominion, Map<UUID, PlayerProfile> profiles) {
+        List<UUID> members = dominion.getMembers();
+        for (int i = 0; i < members.size(); i++) {
+            UUID memberUuid = members.get(i);
+            DominionRank rank = dominion.getMemberRank(memberUuid);
+            if (rank == null) rank = DominionRank.NEWCOMER;
+            PlayerProfile profile = profiles.get(memberUuid);
+            inv.setItem(i, buildMemberSkull(memberUuid, rank, dominion.getLeader().equals(memberUuid), profile));
+        }
+        inv.setItem(inv.getSize() - 1, GuiDominionPermissions.buildBackButton());
     }
 
     private Inventory initializeGui(Player player, Dominion dominion, Map<UUID, PlayerProfile> profiles) {
@@ -99,7 +122,7 @@ public class GuiDominionMembers {
      * @param profile  The pre-loaded player profile for the skull skin.
      * @return The customized item with the input type.
      */
-    private ItemStack buildMemberSkull(UUID uuid, DominionRank rank, boolean isLeader, PlayerProfile profile) {
+    private static ItemStack buildMemberSkull(UUID uuid, DominionRank rank, boolean isLeader, PlayerProfile profile) {
         ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) skull.getItemMeta();
 
@@ -122,7 +145,7 @@ public class GuiDominionMembers {
         return skull;
     }
 
-    private int calculateSize(int members) {
+    private static int calculateSize(int members) {
         if (members <= 9) {
             return 9;
         }

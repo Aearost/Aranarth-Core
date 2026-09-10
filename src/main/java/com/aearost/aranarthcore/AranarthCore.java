@@ -1,54 +1,61 @@
 package com.aearost.aranarthcore;
 
+import com.aearost.aranarthcore.bending.RankCanBindHook;
+import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralProjection;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.PastLives;
-import com.aearost.aranarthcore.network.NetworkManager;
-import com.aearost.aranarthcore.event.block.IncantationMagnetismBlockBreak;
-import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
 import com.aearost.aranarthcore.commands.council.CommandAC;
 import com.aearost.aranarthcore.commands.council.CommandACCompleter;
+import com.aearost.aranarthcore.commands.council.CommandEnchant;
+import com.aearost.aranarthcore.commands.council.CommandEnchantCompleter;
 import com.aearost.aranarthcore.commands.council.CommandTrash;
 import com.aearost.aranarthcore.commands.general.*;
+import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Weather;
+import com.aearost.aranarthcore.event.block.IncantationMagnetismBlockBreak;
 import com.aearost.aranarthcore.event.listener.*;
 import com.aearost.aranarthcore.event.listener.grouped.*;
 import com.aearost.aranarthcore.event.listener.misc.*;
+import com.aearost.aranarthcore.event.mob.CaveSpiderPoisonExtract;
 import com.aearost.aranarthcore.event.mob.MountListener;
+import com.aearost.aranarthcore.event.world.WorldEventManager;
+import com.aearost.aranarthcore.integration.SquaremapIntegration;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.VoidChunkGenerator;
 import com.aearost.aranarthcore.recipes.*;
 import com.aearost.aranarthcore.recipes.aranarthium.*;
-import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.utils.*;
-import com.aearost.aranarthcore.event.listener.grouped.QuestEventListener;
-import com.aearost.aranarthcore.event.listener.grouped.JobEventListener;
-import com.aearost.aranarthcore.commands.general.CommandJobs;
-import com.aearost.aranarthcore.commands.general.CommandJobsCompleter;
-import com.aearost.aranarthcore.utils.JobUtils;
-import com.aearost.aranarthcore.integration.SquaremapIntegration;
+import com.github.retrooper.packetevents.PacketEvents;
+import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.util.TempBlock;
+import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Biome;
-import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 
 public class AranarthCore extends JavaPlugin {
 
@@ -57,15 +64,340 @@ public class AranarthCore extends JavaPlugin {
     private static AranarthCore plugin;
     private DiscordChatListener discordChatListener;
     private RoleReactionListener roleReactionListener;
+    private FireParticleListener fireParticleListener;
     private volatile boolean savedOnDisable = false;
+    private static volatile boolean shutdownHookMode = false;
+
+    public static boolean isShutdownHookMode() {
+        return shutdownHookMode;
+    }
+
     private SquaremapIntegration squaremapIntegration;
 
-    /** Triggers an immediate async refresh of the SquareMap dominion layer, if active. */
+    /**
+     * Triggers an immediate async refresh of the SquareMap dominion layer, if active.
+     */
     public static void refreshSquaremap() {
         AranarthCore instance = plugin;
         if (instance != null && instance.squaremapIntegration != null) {
             Bukkit.getScheduler().runTaskAsynchronously(instance, instance.squaremapIntegration::refresh);
         }
+    }
+
+    public static AranarthCore getInstance() {
+        return plugin;
+    }
+
+    public FireParticleListener getFireParticleListener() {
+        return fireParticleListener;
+    }
+
+    public static boolean isPublicServer() {
+        return plugin.getConfig().getBoolean("is-public-server", true);
+    }
+
+    /**
+     * Returns true when this jar is running as the SMP server instance.
+     * Always false on the test server (is-public-server: false).
+     */
+    public static boolean isSmpServer() {
+        if (!isPublicServer()) {
+            return false;
+        }
+        String thisServer = plugin.getConfig().getString("network.this-server", "survival");
+        String smpServer = plugin.getConfig().getString("network.servers.smp", "smp");
+        return thisServer.equals(smpServer);
+    }
+
+    /**
+     * The Bukkit world name for the SMP overworld on whichever server is currently running.
+     */
+    public static String getSmpMainWorldName() {
+        return isSmpServer() ? "world" : "smp";
+    }
+
+    /**
+     * The Bukkit world name for the SMP nether on whichever server is currently running.
+     */
+    public static String getSmpNetherWorldName() {
+        return isSmpServer() ? "world_nether" : "smp_nether";
+    }
+
+    /**
+     * The Bukkit world name for the SMP end on whichever server is currently running.
+     */
+    public static String getSmpEndWorldName() {
+        return isSmpServer() ? "world_the_end" : "smp_the_end";
+    }
+
+    /**
+     * Resets the resource world automatically.
+     * Called automatically on the 1st of Ignivór (new year).
+     */
+    public static void resetResourceWorlds() {
+        String[] worldNames = {"resource", "resource_nether", "resource_the_end"};
+        World.Environment[] environments = {
+                World.Environment.NORMAL,
+                World.Environment.NETHER,
+                World.Environment.THE_END
+        };
+
+        Location spawnLocation = new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0);
+
+        Bukkit.broadcastMessage(ChatUtils.chatMessage(
+                "&5A new year has dawned! The resource world is being reset..."));
+
+        // Record the reset time so offline players can be detected on next login
+        AranarthUtils.setLastResourceWorldResetTime(System.currentTimeMillis());
+        PersistenceUtils.saveServerDate();
+
+        // Teleport any players in a resource world to Spawn immediately
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            String worldName = player.getWorld().getName();
+            for (String rWorld : worldNames) {
+                if (worldName.equals(rWorld)) {
+                    player.teleport(spawnLocation);
+                    player.sendMessage(ChatUtils.chatMessage(
+                            "&7You have been teleported to &eSpawn &7due to the resource world reset!"));
+                    break;
+                }
+            }
+        }
+
+        // Unload, delete, and recreate each resource world
+        for (int i = 0; i < worldNames.length; i++) {
+            String worldName = worldNames[i];
+            World world = Bukkit.getWorld(worldName);
+
+            File worldFolder = null;
+            if (world != null) {
+                worldFolder = world.getWorldFolder();
+                Bukkit.unloadWorld(world, false);
+            } else {
+                worldFolder = new File(Bukkit.getWorldContainer(), worldName);
+            }
+
+            if (worldFolder.exists()) {
+                deleteDirectory(worldFolder);
+            }
+
+            WorldCreator wc = new WorldCreator(worldName);
+            wc.environment(environments[i]);
+            wc.type(WorldType.NORMAL);
+            World newWorld = wc.createWorld();
+
+            if (newWorld != null) {
+                newWorld.setGameRule(GameRules.SHOW_ADVANCEMENT_MESSAGES, false);
+                newWorld.setGameRule(GameRules.LOCATOR_BAR, false);
+                newWorld.getWorldBorder().setCenter(0, 0);
+                newWorld.getWorldBorder().setSize(5000);
+                ConsoleCommandSender console = Bukkit.getConsoleSender();
+                Bukkit.dispatchCommand(console, "chunky world " + worldName);
+                Bukkit.dispatchCommand(console, "chunky center 0 0");
+                Bukkit.dispatchCommand(console, "chunky radius 2500");
+                Bukkit.dispatchCommand(console, "chunky start");
+                Bukkit.getLogger().info(LOG_PREFIX + "Chunky pre-generation started for world: " + worldName);
+            }
+        }
+
+        Bukkit.broadcastMessage(ChatUtils.chatMessage("&5The resource world has been reset - &dHappy New Year!"));
+        launchNewYearFireworks();
+    }
+
+    /**
+     * Launches themed fireworks for each online player at the start of a new in-game month.
+     * Fireworks use the month's signature color plus one lighter and one darker shade.
+     * Runs for approximately 1 second (3 waves, 10 ticks apart).
+     */
+    public static void launchMonthFireworks(Month month) {
+        Color[] colors = getMonthFireworkColors(month);
+        Random random = new Random();
+        FireworkEffect.Type[] types = FireworkEffect.Type.values();
+
+        new BukkitRunnable() {
+            int iterations = 0;
+
+            @Override
+            public void run() {
+                if (iterations >= 3) {
+                    cancel();
+                    return;
+                }
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    String worldName = player.getWorld().getName();
+                    if (worldName.equals("arena") || worldName.equals("creative")) {
+                        continue;
+                    }
+                    double offsetX = (random.nextDouble() - 0.5) * 5;
+                    double offsetZ = (random.nextDouble() - 0.5) * 5;
+                    double offsetY = random.nextDouble() * 2 + 2;
+                    Location loc = player.getLocation().add(offsetX, offsetY, offsetZ);
+
+                    Firework fw = player.getWorld().spawn(loc, Firework.class);
+                    FireworkMeta meta = fw.getFireworkMeta();
+                    Color mainColor = colors[random.nextInt(colors.length)];
+                    Color fadeColor = colors[random.nextInt(colors.length)];
+                    FireworkEffect effect = FireworkEffect.builder()
+                            .with(types[random.nextInt(types.length)])
+                            .withColor(mainColor)
+                            .withFade(fadeColor)
+                            .trail(random.nextBoolean())
+                            .flicker(random.nextBoolean())
+                            .build();
+                    meta.addEffect(effect);
+                    meta.setPower(0);
+                    fw.setFireworkMeta(meta);
+                    fw.setMetadata("newYearFirework", new FixedMetadataValue(plugin, true));
+                    fw.detonate();
+                }
+                iterations++;
+            }
+        }.runTaskTimer(plugin, 0L, 10L);
+    }
+
+    private static Color[] getMonthFireworkColors(Month month) {
+        return switch (month) {
+            // #ffe082 - warm gold; lighter pastel gold + deeper amber
+            case IGNIVOR ->
+                    new Color[]{Color.fromRGB(255, 224, 130), Color.fromRGB(255, 242, 185), Color.fromRGB(200, 162, 75)};
+            // &3 (#00AAAA) - dark aqua; brighter teal + deep teal
+            case AQUINVOR ->
+                    new Color[]{Color.fromRGB(0, 170, 170), Color.fromRGB(50, 215, 215), Color.fromRGB(0, 105, 105)};
+            // #d1e5f4 - very light sky blue; only darken
+            case VENTIVOR ->
+                    new Color[]{Color.fromRGB(209, 229, 244), Color.fromRGB(155, 188, 222), Color.fromRGB(95, 140, 185)};
+            // #FDA4BA - soft pink; lighter blush + deeper rose
+            case FLORIVOR ->
+                    new Color[]{Color.fromRGB(253, 164, 186), Color.fromRGB(255, 205, 218), Color.fromRGB(200, 95, 128)};
+            // &e (#FFFF55) - bright yellow; lighter cream + deeper golden yellow
+            case AESTIVOR ->
+                    new Color[]{Color.fromRGB(255, 255, 85), Color.fromRGB(255, 255, 165), Color.fromRGB(195, 195, 0)};
+            // &6 (#FFAA00) - gold; lighter golden + deep amber
+            case CALORVOR ->
+                    new Color[]{Color.fromRGB(255, 170, 0), Color.fromRGB(255, 208, 75), Color.fromRGB(185, 115, 0)};
+            // #ff4500 - orange-red; lighter orange + deep scarlet
+            case ARDORVOR ->
+                    new Color[]{Color.fromRGB(255, 69, 0), Color.fromRGB(255, 125, 55), Color.fromRGB(175, 25, 0)};
+            // #BD5745 - muted terracotta; lighter salmon + deep rust
+            case SOLARVOR ->
+                    new Color[]{Color.fromRGB(189, 87, 69), Color.fromRGB(230, 135, 112), Color.fromRGB(125, 42, 32)};
+            // #a17100 - dark amber; lighter ochre + deep brown-gold
+            case FOLLIVOR ->
+                    new Color[]{Color.fromRGB(161, 113, 0), Color.fromRGB(210, 158, 45), Color.fromRGB(95, 60, 0)};
+            // #8a00c2 - vibrant purple; lighter violet + deep indigo-purple
+            case STRIGAVOR ->
+                    new Color[]{Color.fromRGB(138, 0, 194), Color.fromRGB(182, 55, 242), Color.fromRGB(78, 0, 125)};
+            // #5b0001 - very dark crimson; only lighten
+            case FAUNIVOR ->
+                    new Color[]{Color.fromRGB(91, 0, 1), Color.fromRGB(145, 28, 28), Color.fromRGB(205, 72, 72)};
+            // #2B3856 - dark navy-grey; only lighten
+            case UMBRAVOR ->
+                    new Color[]{Color.fromRGB(43, 56, 86), Color.fromRGB(78, 100, 142), Color.fromRGB(118, 148, 202)};
+            // #DBE9FA - very pale ice blue; only darken
+            case GLACIVOR ->
+                    new Color[]{Color.fromRGB(219, 233, 250), Color.fromRGB(155, 188, 228), Color.fromRGB(92, 138, 195)};
+            // #79BAEC - medium cornflower blue; lighter sky + deeper cerulean
+            case FRIGORVOR ->
+                    new Color[]{Color.fromRGB(121, 186, 236), Color.fromRGB(178, 220, 255), Color.fromRGB(55, 128, 190)};
+            // #2C041C - very dark maroon-purple; only lighten
+            case OBSCURVOR ->
+                    new Color[]{Color.fromRGB(44, 4, 28), Color.fromRGB(102, 18, 68), Color.fromRGB(162, 58, 118)};
+        };
+    }
+
+    private static void launchNewYearFireworks() {
+        Random random = new Random();
+        Color[] brightColors = {
+                Color.RED, Color.ORANGE, Color.YELLOW, Color.GREEN, Color.AQUA,
+                Color.BLUE, Color.PURPLE, Color.FUCHSIA, Color.WHITE, Color.LIME
+        };
+        FireworkEffect.Type[] types = FireworkEffect.Type.values();
+
+        new BukkitRunnable() {
+            int iterations = 0;
+
+            @Override
+            public void run() {
+                if (iterations >= 6) {
+                    cancel();
+                    return;
+                }
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    for (int i = 0; i < 2; i++) {
+                        double offsetX = (random.nextDouble() - 0.5) * 6;
+                        double offsetZ = (random.nextDouble() - 0.5) * 6;
+                        double offsetY = random.nextDouble() * 3 + 2;
+                        Location loc = player.getLocation().add(offsetX, offsetY, offsetZ);
+
+                        Firework fw = player.getWorld().spawn(loc, Firework.class);
+                        FireworkMeta meta = fw.getFireworkMeta();
+                        FireworkEffect effect = FireworkEffect.builder()
+                                .with(types[random.nextInt(types.length)])
+                                .withColor(brightColors[random.nextInt(brightColors.length)],
+                                        brightColors[random.nextInt(brightColors.length)])
+                                .withFade(brightColors[random.nextInt(brightColors.length)])
+                                .trail(random.nextBoolean())
+                                .flicker(random.nextBoolean())
+                                .build();
+                        meta.addEffect(effect);
+                        meta.setPower(0);
+                        fw.setFireworkMeta(meta);
+                        fw.setMetadata("newYearFirework", new FixedMetadataValue(plugin, true));
+                        fw.detonate();
+                    }
+                }
+                iterations++;
+            }
+        }.runTaskTimer(plugin, 0L, 10L);
+    }
+
+    private static void deleteDirectory(File directory) {
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    deleteDirectory(file);
+                } else {
+                    boolean isFileDeleted = file.delete();
+                }
+            }
+        }
+        boolean isDirectoryDeleted = directory.delete();
+    }
+
+    private static Material getFaeTrailFlower(Biome biome) {
+        Random rng = new Random();
+        if (biome == Biome.FLOWER_FOREST) {
+            Material[] flowers = {
+                    Material.DANDELION, Material.POPPY, Material.OXEYE_DAISY, Material.AZURE_BLUET,
+                    Material.CORNFLOWER, Material.ORANGE_TULIP, Material.RED_TULIP, Material.WHITE_TULIP,
+                    Material.PINK_TULIP, Material.ALLIUM, Material.BLUE_ORCHID, Material.LILY_OF_THE_VALLEY
+            };
+            return flowers[rng.nextInt(flowers.length)];
+        } else if (biome == Biome.FOREST
+                || biome == Biome.BIRCH_FOREST
+                || biome == Biome.OLD_GROWTH_BIRCH_FOREST) {
+            Material[] flowers = {
+                    Material.DANDELION, Material.POPPY, Material.OXEYE_DAISY, Material.AZURE_BLUET,
+                    Material.CORNFLOWER, Material.ORANGE_TULIP, Material.RED_TULIP, Material.WHITE_TULIP,
+                    Material.PINK_TULIP, Material.ALLIUM
+            };
+            return flowers[rng.nextInt(flowers.length)];
+        } else if (biome == Biome.DARK_FOREST) {
+            Material[] flowers = {Material.DANDELION, Material.POPPY, Material.ALLIUM, Material.AZURE_BLUET};
+            return flowers[rng.nextInt(flowers.length)];
+        } else if (biome == Biome.CHERRY_GROVE) {
+            return Material.PINK_PETALS;
+        } else if (biome == Biome.MEADOW) {
+            Material[] flowers = {
+                    Material.DANDELION, Material.POPPY, Material.ALLIUM,
+                    Material.AZURE_BLUET, Material.CORNFLOWER, Material.OXEYE_DAISY
+            };
+            return flowers[rng.nextInt(flowers.length)];
+        } else if (biome == Biome.MUSHROOM_FIELDS) {
+            return rng.nextBoolean() ? Material.BROWN_MUSHROOM : Material.RED_MUSHROOM;
+        }
+        return null;
     }
 
     /**
@@ -76,16 +408,25 @@ public class AranarthCore extends JavaPlugin {
     public void onEnable() {
         plugin = this;
         saveDefaultConfig();
+
+        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
+        PacketEvents.getAPI().getSettings().reEncodeByDefault(false).checkForUpdates(false);
+        PacketEvents.getAPI().load();
+        PacketEvents.getAPI().init();
+        fireParticleListener = new FireParticleListener(this);
+        PacketEvents.getAPI().getEventManager().registerListeners(fireParticleListener);
+        FireParticleListener.initReflection();
+
         initializeWorlds();
 
         // Initialize MySQL before loading data so DB-primary loads can activate.
         // Only on the public server; test server skips this entirely.
         if (isPublicServer()) {
-            String host       = getConfig().getString("network.mysql.host", "127.0.0.1");
-            int    port       = getConfig().getInt("network.mysql.port", 3306);
-            String database   = getConfig().getString("network.mysql.database", "");
-            String username   = getConfig().getString("network.mysql.username", "");
-            String password   = getConfig().getString("network.mysql.password", "");
+            String host = getConfig().getString("network.mysql.host", "127.0.0.1");
+            int port = getConfig().getInt("network.mysql.port", 3306);
+            String database = getConfig().getString("network.mysql.database", "");
+            String username = getConfig().getString("network.mysql.username", "");
+            String password = getConfig().getString("network.mysql.password", "");
 
             DatabaseManager.initialize(host, port, database, username, password);
         }
@@ -102,27 +443,44 @@ public class AranarthCore extends JavaPlugin {
             commandMap.getKnownCommands().put("aranarthcore:ac", getCommand("ac"));
             commandMap.getKnownCommands().put("mctop", getCommand("mctop"));
             commandMap.getKnownCommands().put("aranarthcore:mctop", getCommand("mctop"));
+            commandMap.getKnownCommands().put("mcstats", getCommand("mcstats"));
+            commandMap.getKnownCommands().put("aranarthcore:mcstats", getCommand("mcstats"));
+            commandMap.getKnownCommands().put("enchant", getCommand("enchant"));
+            commandMap.getKnownCommands().put("aranarthcore:enchant", getCommand("enchant"));
         });
+
+        // Purge expired reaper inventories once on startup, then every hour
+        if (isPublicServer()) {
+            long expiryMs = 24L * 60 * 60 * 1000;
+            long oneHourTicks = 20L * 60 * 60;
+            Bukkit.getScheduler().runTaskTimerAsynchronously(this, () ->
+                    DatabaseManager.getInstance().deleteExpiredReaperInventories(expiryMs), 0L, oneHourTicks);
+        }
 
         // Sets default storm values
         AranarthUtils.setWeather(Weather.CLEAR);
         AranarthUtils.setStormDelay(new Random().nextInt(18000));
 
         SoundAbility.SOUND = new Element.SubElement("Sound", Element.AIR, Element.ElementType.NO_SUFFIX, this);
+        FireParticleRegistry.WHITE_FIRE_SUB = new Element.SubElement("WhiteFire", Element.FIRE, Element.ElementType.NO_SUFFIX, this);
+        FireParticleRegistry.PRISMATIC_FIRE_SUB = new Element.SubElement("PrismaticFire", Element.FIRE, Element.ElementType.NO_SUFFIX, this);
         try {
             Field colorField = Element.class.getDeclaredField("color");
             colorField.setAccessible(true);
             colorField.set(SoundAbility.SOUND, net.md_5.bungee.api.ChatColor.of("#6644CC"));
             colorField.set(Element.LIGHTNING, net.md_5.bungee.api.ChatColor.of("#FFF050"));
+            colorField.set(FireParticleRegistry.WHITE_FIRE_SUB, net.md_5.bungee.api.ChatColor.of("#FFFFFF"));
+            colorField.set(FireParticleRegistry.PRISMATIC_FIRE_SUB, net.md_5.bungee.api.ChatColor.of("#FFB3C6"));
         } catch (Exception e) {
-            Bukkit.getLogger().warning("Failed to set Sound sub-element color: " + e.getMessage());
+            Bukkit.getLogger().warning("Failed to set sub-element colors: " + e.getMessage());
         }
         CoreAbility.registerPluginAbilities(AranarthCore.getInstance(), "com.aearost.aranarthcore.abilities");
+        BendingPlayer.registerCanBindHook(this, new RankCanBindHook());
         Bukkit.getLogger().info(LOG_PREFIX + "AranarthCore Bending has been loaded");
 
         runRepeatingTasks();
 
-        // Initialize SquareMap dominion layer (soft-depend — only if squaremap is loaded)
+        // Initialize SquareMap dominion layer (soft-depend - only if squaremap is loaded)
         if (Bukkit.getPluginManager().isPluginEnabled("squaremap")) {
             squaremapIntegration = new SquaremapIntegration();
             squaremapIntegration.enable();
@@ -146,6 +504,10 @@ public class AranarthCore extends JavaPlugin {
         // terminate the JVM via System.exit() without triggering onDisable()
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (!savedOnDisable) {
+                // Force runDbSync() to execute synchronously: isEnabled() may still return true
+                // here if Paper never called onDisable() (e.g. bare System.exit()). Without this
+                // flag, runDbSync() would schedule async tasks that never run before the JVM dies.
+                shutdownHookMode = true;
                 saveAll();
                 NetworkManager.shutdown();
                 DatabaseManager.shutdown();
@@ -159,7 +521,7 @@ public class AranarthCore extends JavaPlugin {
             @Override
             public void run() {
                 // Snapshot online players' survival inventory into their AranarthPlayer so MySQL
-                // has a recent copy — limits inventory loss to at most 30 minutes on ungraceful shutdown.
+                // has a recent copy - limits inventory loss to at most 30 minutes on ungraceful shutdown.
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     try {
                         if (AranarthUtils.isSurvivalWorld(p.getWorld().getName())) {
@@ -185,6 +547,11 @@ public class AranarthCore extends JavaPlugin {
                                     p.getUniqueId(), server, loc.getWorld().getName(),
                                     loc.getX(), loc.getY(), loc.getZ(),
                                     loc.getYaw(), loc.getPitch());
+                            // Write raw_data (inventory snapshot) synchronously, immediately after snapshotting
+                            String rawRow = PersistenceUtils.buildPlayerRowForTransfer(p.getUniqueId());
+                            if (rawRow != null) {
+                                DatabaseManager.getInstance().saveAranarthPlayerRaw(p.getUniqueId(), p.getName(), rawRow);
+                            }
                         }
                     } catch (Exception e) {
                         Bukkit.getLogger().warning(LOG_PREFIX + "Failed to snapshot inventory for " + p.getName() + " during periodic save: " + e.getMessage());
@@ -239,7 +606,7 @@ public class AranarthCore extends JavaPlugin {
                 DiscordUtils.updateAllDiscordRoles();
                 Bukkit.getLogger().info(LOG_PREFIX + "Aranarth data has been saved");
 
-                // Resets the two bending arenas (Survival server only — arena world doesn't exist on SMP)
+                // Resets the two bending arenas (Survival server only - arena world doesn't exist on SMP)
                 if (!isSmpServer()) {
                     Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "arenas reset arena1");
                     Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "arenas reset arena2");
@@ -286,6 +653,7 @@ public class AranarthCore extends JavaPlugin {
                 }
                 // Each server scans only its own dominions
                 DominionLevelUtils.runPeriodicScan();
+                CaveSpiderPoisonExtract.resetExtractionCounts();
             }
         }, 12000, 12000);
 
@@ -315,7 +683,8 @@ public class AranarthCore extends JavaPlugin {
                     CropUtils.refreshInventory(player.getInventory(), player.getWorld());
                     // Fallback if the player goes offline while vanished
                     AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                    if (!aranarthPlayer.isVanished() && player.isInvisible()) {
+                    if (!aranarthPlayer.isVanished() && player.isInvisible()
+                            && !player.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
                         player.setInvisible(false);
                     }
                 }
@@ -331,6 +700,12 @@ public class AranarthCore extends JavaPlugin {
                         && world.getName().endsWith("_nether")) {
                     world.spawnParticle(Particle.FLAME, loc, 3, 0.3, 0.15, 0.3, 0.02);
                     world.spawnParticle(Particle.LAVA, loc, 1, 0.25, 0.1, 0.25, 0);
+                    if (new Random().nextInt(20) == 0) {
+                        int arVol = AranarthUtils.getPlayer(player.getUniqueId()).getAranarthiumSoundVolume();
+                        if (arVol > 0) {
+                            player.playSound(loc, Sound.BLOCK_FIRE_AMBIENT, 0.3f * (arVol / 100f), 1.0f);
+                        }
+                    }
                 } else if (AranarthUtils.isWearingArmorType(player, "aquatic")) {
                     boolean isRaining = AranarthUtils.getWeather() == Weather.RAIN
                             || AranarthUtils.getWeather() == Weather.THUNDER;
@@ -338,6 +713,12 @@ public class AranarthCore extends JavaPlugin {
                         Location above = loc.clone().add(0, 0.3, 0);
                         world.spawnParticle(Particle.DRIPPING_WATER, above, 5, 0.3, 0.2, 0.3, 0);
                         world.spawnParticle(Particle.RAIN, above, 3, 0.3, 0.2, 0.3, 0);
+                        if (new Random().nextInt(20) == 0) {
+                            int arVol = AranarthUtils.getPlayer(player.getUniqueId()).getAranarthiumSoundVolume();
+                            if (arVol > 0) {
+                                player.playSound(loc, Sound.BLOCK_WATER_AMBIENT, 0.3f * (arVol / 100f), 1.0f);
+                            }
+                        }
                     }
                 } else if (AranarthUtils.isWearingArmorType(player, "fae")) {
                     Biome biome = loc.getBlock().getBiome();
@@ -347,12 +728,17 @@ public class AranarthCore extends JavaPlugin {
                     // Biome transition sounds
                     if (wasInFaeBiome == null || wasInFaeBiome != inFaeBiome) {
                         AranarthUtils.playerInFaeBiome.put(player.getUniqueId(), inFaeBiome);
+                        int arVol = AranarthUtils.getPlayer(player.getUniqueId()).getAranarthiumSoundVolume();
                         if (inFaeBiome) {
-                            // Entered Fae biome — magical sound
-                            player.playSound(loc, Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM, 0.9f, 1.2f);
+                            // Entered Fae biome - magical sound
+                            if (arVol > 0) {
+                                player.playSound(loc, Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM, 0.9f * (arVol / 100f), 1.2f);
+                            }
                         } else if (wasInFaeBiome != null) {
-                            // Left Fae biome — dimming sound
-                            player.playSound(loc, Sound.ENTITY_ALLAY_AMBIENT_WITH_ITEM, 0.9f, 0.6f);
+                            // Left Fae biome - dimming sound
+                            if (arVol > 0) {
+                                player.playSound(loc, Sound.ENTITY_ALLAY_AMBIENT_WITH_ITEM, 0.9f * (arVol / 100f), 0.6f);
+                            }
                         }
                     }
 
@@ -385,11 +771,49 @@ public class AranarthCore extends JavaPlugin {
                                     new Particle.DustOptions(particleColor, particleSize));
                         }
                     }
+                } else if (AranarthUtils.isWearingArmorType(player, "dwarven")) {
+                    boolean underground = loc.getY() < 0;
+                    Boolean wasUnderground = AranarthUtils.playerUnderground.get(player.getUniqueId());
+                    if (wasUnderground == null || wasUnderground != underground) {
+                        AranarthUtils.playerUnderground.put(player.getUniqueId(), underground);
+                        int arVol = AranarthUtils.getPlayer(player.getUniqueId()).getAranarthiumSoundVolume();
+                        if (arVol > 0) {
+                            if (underground) {
+                                player.playSound(loc, Sound.BLOCK_DEEPSLATE_BREAK, 0.7f * (arVol / 100f), 1.0f);
+                                new BukkitRunnable() {
+                                    @Override
+                                    public void run() {
+                                        player.playSound(loc, Sound.BLOCK_DEEPSLATE_BREAK, 0.4f * (arVol / 100f), 0.9f);
+                                    }
+                                }.runTaskLater(this, 2L);
+                                new BukkitRunnable() {
+                                    @Override
+                                    public void run() {
+                                        player.playSound(loc, Sound.BLOCK_DEEPSLATE_BREAK, 0.2f * (arVol / 100f), 0.85f);
+                                    }
+                                }.runTaskLater(this, 5L);
+                            } else if (wasUnderground != null) {
+                                player.playSound(loc, Sound.BLOCK_GRASS_STEP, 0.6f * (arVol / 100f), 1.1f);
+                                new BukkitRunnable() {
+                                    @Override
+                                    public void run() {
+                                        player.playSound(loc, Sound.BLOCK_GRASS_STEP, 0.4f * (arVol / 100f), 1.0f);
+                                    }
+                                }.runTaskLater(this, 3L);
+                                new BukkitRunnable() {
+                                    @Override
+                                    public void run() {
+                                        player.playSound(loc, Sound.BLOCK_GRASS_STEP, 0.25f * (arVol / 100f), 1.2f);
+                                    }
+                                }.runTaskLater(this, 6L);
+                            }
+                        }
+                    }
                 }
             }
         }, 0, 3);
 
-        // Flower trail for Fae Aranarthium in Fae biomes — random 1-10 tick interval, only when moving
+        // Flower trail for Fae Aranarthium in Fae biomes - random 1-10 tick interval, only when moving
         scheduleFaeFlowerTrail();
 
         // Periodically broadcast world time from the Survival server so the SMP server
@@ -402,6 +826,10 @@ public class AranarthCore extends JavaPlugin {
                 }
             }
         }, 6000, 6000);
+
+        // Purge expired interactive chat snapshots every 10 minutes
+        long tenMinutes = 20L * 60 * 10;
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, InteractiveChatManager::purgeExpired, tenMinutes, tenMinutes);
 
         // Remind players every hour if their chat is toggled off
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
@@ -416,6 +844,10 @@ public class AranarthCore extends JavaPlugin {
             }
         }, 72000, 72000);
 
+        // Dynamic market pricing - adjust server shop sell prices hourly
+        long oneHour = 20L * 60 * 60;
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> MarketUtils.runPriceTick(this), oneHour, oneHour);
+
         // Pull drops harvested with Magnetism
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             @Override
@@ -424,46 +856,102 @@ public class AranarthCore extends JavaPlugin {
             }
         }, 2L, 2L);
 
+        // Autoclaim chunk particles - show colored dust on surface blocks of nearby chunks while autoclaim is active
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+                if (aranarthPlayer == null || !aranarthPlayer.isAutoClaimEnabled()) {
+                    continue;
+                }
+                String worldName = player.getWorld().getName();
+                if (!worldName.startsWith("world") && !worldName.startsWith("smp")) {
+                    continue;
+                }
+
+                Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+                Chunk playerChunk = player.getLocation().getChunk();
+                World world = player.getWorld();
+
+                for (int dx = -2; dx <= 2; dx++) {
+                    for (int dz = -2; dz <= 2; dz++) {
+                        Chunk chunk = world.getChunkAt(playerChunk.getX() + dx, playerChunk.getZ() + dz);
+                        Dominion chunkDominion = DominionUtils.getDominionOfChunk(chunk);
+
+                        Color particleColor;
+                        if (chunkDominion == null) {
+                            // Unclaimed - white
+                            particleColor = Color.WHITE;
+                        } else if (playerDominion != null && chunkDominion.isSameDominion(playerDominion)) {
+                            // Own dominion - lime green
+                            particleColor = Color.LIME;
+                        } else if (playerDominion != null && playerDominion.isAllied(chunkDominion)) {
+                            // Ally - purple
+                            particleColor = Color.PURPLE;
+                        } else if (playerDominion != null && playerDominion.isTruced(chunkDominion)) {
+                            // Truce - pink
+                            particleColor = Color.fromRGB(255, 105, 180);
+                        } else if (playerDominion != null && playerDominion.isEnemied(chunkDominion)) {
+                            // Enemy - red
+                            particleColor = Color.RED;
+                        } else {
+                            // Neutral (unrelated dominion) - orange
+                            particleColor = Color.ORANGE;
+                        }
+
+                        Particle.DustOptions dust = new Particle.DustOptions(particleColor, 1.2f);
+                        int baseX = chunk.getX() * 16;
+                        int baseZ = chunk.getZ() * 16;
+
+                        for (int x = 2; x < 16; x += 4) {
+                            for (int z = 2; z < 16; z += 4) {
+                                int bx = baseX + x;
+                                int bz = baseZ + z;
+                                int by = world.getHighestBlockYAt(bx, bz, HeightMap.MOTION_BLOCKING_NO_LEAVES);
+                                player.spawnParticle(Particle.DUST, bx + 0.5, by + 1.25, bz + 0.5, 1, 0, 0, 0, 0, dust);
+                            }
+                        }
+                    }
+                }
+            }
+        }, 10L, 10L);
+
 //		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 //			@Override
 //			public void run() {
 //				AranarthUtils.applyWaterfallEffect();
 //			}
 //		}, 1, 1);
-    }
 
-    public static AranarthCore getInstance() {
-        return plugin;
-    }
-
-    public static boolean isPublicServer() {
-        return plugin.getConfig().getBoolean("is-public-server", true);
-    }
-
-    /**
-     * Returns true when this jar is running as the SMP server instance.
-     * Always false on the test server (is-public-server: false).
-     */
-    public static boolean isSmpServer() {
-        if (!isPublicServer()) return false;
-        String thisServer = plugin.getConfig().getString("network.this-server", "survival");
-        String smpServer  = plugin.getConfig().getString("network.servers.smp", "smp");
-        return thisServer.equals(smpServer);
-    }
-
-    /** The Bukkit world name for the SMP overworld on whichever server is currently running. */
-    public static String getSmpMainWorldName() {
-        return isSmpServer() ? "world" : "smp";
-    }
-
-    /** The Bukkit world name for the SMP nether on whichever server is currently running. */
-    public static String getSmpNetherWorldName() {
-        return isSmpServer() ? "world_nether" : "smp_nether";
-    }
-
-    /** The Bukkit world name for the SMP end on whichever server is currently running. */
-    public static String getSmpEndWorldName() {
-        return isSmpServer() ? "world_the_end" : "smp_the_end";
+        // Low health heartbeat sound - interval speeds up as health drops
+        Map<UUID, Integer> lowHealthCounters = new HashMap<>();
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
+            final double threshold = 6.0; // 3 hearts
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                UUID uuid = player.getUniqueId();
+                if (player.isDead() || player.getHealth() > threshold) {
+                    lowHealthCounters.remove(uuid);
+                    continue;
+                }
+                AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+                if (ap == null) {
+                    continue;
+                }
+                int volSetting = ap.getLowHealthSoundVolume();
+                if (volSetting <= 0) {
+                    lowHealthCounters.remove(uuid);
+                    continue;
+                }
+                int remaining = lowHealthCounters.getOrDefault(uuid, 0) - 1;
+                if (remaining <= 0) {
+                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, volSetting / 100f, 1.0f);
+                    // Interval scales linearly: 26 ticks at threshold, 8 ticks at 0 HP
+                    int interval = (int) (8 + 18 * (player.getHealth() / threshold));
+                    lowHealthCounters.put(uuid, interval);
+                } else {
+                    lowHealthCounters.put(uuid, remaining);
+                }
+            }
+        }, 1L, 1L);
     }
 
     /**
@@ -493,6 +981,9 @@ public class AranarthCore extends JavaPlugin {
             PersistenceUtils.loadServerShopsFromDatabase();
         } else {
             PersistenceUtils.loadShops();
+        }
+        if (db) {
+            PersistenceUtils.loadMarketDynamicsFromDatabase();
         }
         ShopUtils.initializeAllHolograms();
         if (db) {
@@ -609,13 +1100,19 @@ public class AranarthCore extends JavaPlugin {
         }
         QuestUtils.initialize(this);
         BrewRecipeUtils.initialize(this);
+        MobHeadUtils.initialize(this);
+        HeadsDatabaseManager.initialize(this);
         // Load shared quest reset timestamps from DB so both servers stay synchronized
         if (db) {
             try {
                 String lastDaily = DatabaseManager.getInstance().loadTempData("quest:lastDailyReset");
-                if (lastDaily != null) QuestUtils.setLastDailyReset(Long.parseLong(lastDaily));
+                if (lastDaily != null) {
+                    QuestUtils.setLastDailyReset(Long.parseLong(lastDaily));
+                }
                 String lastWeekly = DatabaseManager.getInstance().loadTempData("quest:lastWeeklyReset");
-                if (lastWeekly != null) QuestUtils.setLastWeeklyReset(Long.parseLong(lastWeekly));
+                if (lastWeekly != null) {
+                    QuestUtils.setLastWeeklyReset(Long.parseLong(lastWeekly));
+                }
             } catch (Exception e) {
                 Bukkit.getLogger().warning(LOG_PREFIX + "Failed to load quest reset timestamps: " + e.getMessage());
             }
@@ -650,6 +1147,8 @@ public class AranarthCore extends JavaPlugin {
         DefenderUtils.startTargetingTask();
         DefenderUtils.startFollowTask();
         DefenderUtils.startGuardTask();
+        DefenderUtils.startBlazeBreezeFiringTask();
+        DefenderUtils.startElderGuardianMiningFatigueTask();
         // Only Survival runs the game; its broadcast is relayed to SMP via BroadcastRelayListener.
         if (!isSmpServer()) {
             ChatGameUtils.initialize(this);
@@ -664,6 +1163,7 @@ public class AranarthCore extends JavaPlugin {
         new CropInfoEventListener(this);
         new QuestEventListener(this);
         new JobEventListener(this);
+        new WorldEventManager(this);
 
         // General listeners
         new BlockBreakEventListener(this);
@@ -673,6 +1173,7 @@ public class AranarthCore extends JavaPlugin {
         new InventoryOpenEventListener(this);
         new PlayerInteractEventListener(this);
         new PlayerInteractEntityEventListener(this);
+        new PlayerShearEntityEventListener(this);
         new PlayerMoveEventListener(this);
         new EntityChangeBlockEventListener(this);
         new EntityPickupItemEventListener(this);
@@ -739,6 +1240,8 @@ public class AranarthCore extends JavaPlugin {
         new ExpGainPreventListener(this);
         new VillagerCamelDismountListener(this);
         new PotionEffectListener(this);
+        new InvisibilityListener(this);
+        new InvisibleArmorManager(this);
         new BrewingListener(this);
         new BrewRecipeUnlockListener(this);
         new BrewRecipeAutoUnlockListener(this);
@@ -862,6 +1365,7 @@ public class AranarthCore extends JavaPlugin {
         getCommand("calendar").setExecutor(new CommandCalendar());
         getCommand("cartography").setExecutor(new CommandCartography());
         getCommand("compressor").setExecutor(new CommandCompressor());
+        getCommand("condense").setExecutor(new CommandCondense());
         getCommand("craft").setExecutor(new CommandCraft());
         getCommand("countdown").setExecutor(new CommandCountdown());
         getCommand("countdown").setTabCompleter(new CommandCountdownCompleter());
@@ -873,13 +1377,17 @@ public class AranarthCore extends JavaPlugin {
         getCommand("delhome").setTabCompleter(new CommandDelhomeCompleter());
         getCommand("dominion").setExecutor(new CommandDominion());
         getCommand("dominion").setTabCompleter(new CommandDominionCompleter());
+        getCommand("enchant").setExecutor(new CommandEnchant());
+        getCommand("enchant").setTabCompleter(new CommandEnchantCompleter());
         getCommand("enderchest").setExecutor(new CommandEnderchest());
         getCommand("fletching").setExecutor(new CommandFletching());
         getCommand("grindstone").setExecutor(new CommandGrindstone());
         getCommand("hat").setExecutor(new CommandHat());
+        getCommand("heads").setExecutor(new CommandHeads());
         getCommand("home").setExecutor(new CommandHome());
         getCommand("home").setTabCompleter(new CommandHomeCompleter());
         getCommand("homepad").setExecutor(new CommandHomePad());
+        getCommand("homepad").setTabCompleter(new CommandHomePadCompleter());
         getCommand("incantations").setExecutor(new CommandIncantations());
         getCommand("info").setExecutor(new CommandInfo());
         getCommand("info").setTabCompleter(new CommandInfoCompleter());
@@ -924,6 +1432,7 @@ public class AranarthCore extends JavaPlugin {
         getCommand("shop").setTabCompleter(new CommandShopCompleter());
         getCommand("smithing").setExecutor(new CommandSmithing());
         getCommand("smp").setExecutor(new CommandSMP());
+        getCommand("sounds").setExecutor(new CommandSounds());
         getCommand("spawn").setExecutor(new CommandSpawn());
         getCommand("stonecutter").setExecutor(new CommandStonecutter());
         getCommand("sawmill").setExecutor(new CommandSawmill());
@@ -932,6 +1441,7 @@ public class AranarthCore extends JavaPlugin {
         getCommand("tables").setExecutor(new CommandTables());
         getCommand("teleport").setExecutor(new CommandTeleport());
         getCommand("teleport").setTabCompleter(new CommandTeleportCompleter());
+        getCommand("ichat").setExecutor(new CommandInteractiveChat());
         getCommand("toggle").setExecutor(new CommandToggle());
         getCommand("toggle").setTabCompleter(new CommandToggleCompleter());
         getCommand("topdeaths").setExecutor(new CommandTopDeaths());
@@ -950,19 +1460,25 @@ public class AranarthCore extends JavaPlugin {
         getCommand("votetop").setExecutor(new CommandVoteTop());
         getCommand("votetop").setTabCompleter(new CommandVoteTopCompleter());
         getCommand("voteshop").setExecutor(new CommandVoteShop());
+        getCommand("vptransfer").setExecutor(new CommandVpTransfer());
+        getCommand("vptransfer").setTabCompleter(new CommandVpTransferCompleter());
         getCommand("warp").setExecutor(new CommandWarp());
         getCommand("warp").setTabCompleter(new CommandWarpCompleter());
         getCommand("quests").setExecutor(new CommandQuests());
+        getCommand("reaper").setExecutor(new CommandReaper());
         getCommand("streak").setExecutor(new CommandStreak());
         getCommand("mount").setExecutor(new CommandMount());
         getCommand("mount").setTabCompleter(new CommandMountCompleter());
         getCommand("mctop").setExecutor(new CommandMctop());
         getCommand("mctop").setTabCompleter(new CommandMctopCompleter());
+        getCommand("mcstats").setExecutor(new CommandMcstats());
+        getCommand("mcstats").setTabCompleter(new CommandMcstatsCompleter());
         getCommand("mail").setExecutor(new CommandMail());
         getCommand("mail").setTabCompleter(new CommandMailCompleter());
         getCommand("map").setExecutor(new CommandMap());
         getCommand("smpmap").setExecutor(new CommandSmpMap());
         getCommand("brewbook").setExecutor(new CommandBrewBook());
+        getCommand("brewbook").setTabCompleter(new CommandBrewBookCompleter());
     }
 
     /**
@@ -999,7 +1515,7 @@ public class AranarthCore extends JavaPlugin {
             return;
         }
 
-        // Survival server (public or test) — load all survival-side worlds.
+        // Survival server (public or test) - load all survival-side worlds.
 
         // Main survival worlds
         if (Bukkit.getWorld("world") == null) {
@@ -1021,7 +1537,7 @@ public class AranarthCore extends JavaPlugin {
             wc.createWorld();
         }
 
-        // SMP worlds — only on the test server (single-server setup).
+        // SMP worlds - only on the test server (single-server setup).
         // On the public survival server the SMP worlds live on the separate SMP server.
         if (!isPublicServer()) {
             if (Bukkit.getWorld("smp") == null) {
@@ -1116,7 +1632,7 @@ public class AranarthCore extends JavaPlugin {
         }
 
         // Apply world borders (always set so they survive world resets)
-        // Skip on SMP server — "world", "world_nether", "world_the_end" are SMP worlds there and have no border
+        // Skip on SMP server - "world", "world_nether", "world_the_end" are SMP worlds there and have no border
         if (!isSmpServer()) {
             for (String worldName : new String[]{"world", "world_nether", "world_the_end"}) {
                 World w = Bukkit.getWorld(worldName);
@@ -1133,267 +1649,6 @@ public class AranarthCore extends JavaPlugin {
                 w.getWorldBorder().setSize(5000);
             }
         }
-    }
-
-    /**
-     * Resets the resource world automatically.
-     * Called automatically on the 1st of Ignivór (new year).
-     */
-    public static void resetResourceWorlds() {
-        String[] worldNames = {"resource", "resource_nether", "resource_the_end"};
-        World.Environment[] environments = {
-            World.Environment.NORMAL,
-            World.Environment.NETHER,
-            World.Environment.THE_END
-        };
-
-        Location spawnLocation = new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0);
-
-        Bukkit.broadcastMessage(ChatUtils.chatMessage(
-            "&5A new year has dawned! The resource world is being reset..."));
-
-        // Record the reset time so offline players can be detected on next login
-        AranarthUtils.setLastResourceWorldResetTime(System.currentTimeMillis());
-        PersistenceUtils.saveServerDate();
-
-        // Teleport any players in a resource world to Spawn immediately
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            String worldName = player.getWorld().getName();
-            for (String rWorld : worldNames) {
-                if (worldName.equals(rWorld)) {
-                    player.teleport(spawnLocation);
-                    player.sendMessage(ChatUtils.chatMessage(
-                        "&7You have been teleported to &eSpawn &7due to the resource world reset!"));
-                    break;
-                }
-            }
-        }
-
-        // Unload, delete, and recreate each resource world
-        for (int i = 0; i < worldNames.length; i++) {
-            String worldName = worldNames[i];
-            World world = Bukkit.getWorld(worldName);
-
-            File worldFolder = null;
-            if (world != null) {
-                worldFolder = world.getWorldFolder();
-                Bukkit.unloadWorld(world, false);
-            } else {
-                worldFolder = new File(Bukkit.getWorldContainer(), worldName);
-            }
-
-            if (worldFolder.exists()) {
-                deleteDirectory(worldFolder);
-            }
-
-            WorldCreator wc = new WorldCreator(worldName);
-            wc.environment(environments[i]);
-            wc.type(WorldType.NORMAL);
-            World newWorld = wc.createWorld();
-
-            if (newWorld != null) {
-                newWorld.setGameRule(GameRules.SHOW_ADVANCEMENT_MESSAGES, false);
-                newWorld.setGameRule(GameRules.LOCATOR_BAR, false);
-                newWorld.getWorldBorder().setCenter(0, 0);
-                newWorld.getWorldBorder().setSize(5000);
-                preGenerateResourceWorld(newWorld);
-            }
-        }
-
-        Bukkit.broadcastMessage(ChatUtils.chatMessage("&5The resource world has been reset - &dHappy New Year!"));
-        launchNewYearFireworks();
-    }
-
-    /**
-     * Asynchronously pre-generates all chunks within the resource world's 5000-block border.
-     * Processes chunks in small batches per tick to avoid server lag.
-     */
-    private static void preGenerateResourceWorld(World world) {
-        int borderHalf = 2500;
-        int chunkMin = -(borderHalf / 16) - 1;
-        int chunkMax = (borderHalf / 16) + 1;
-
-        List<int[]> chunkCoords = new ArrayList<>();
-        for (int cx = chunkMin; cx <= chunkMax; cx++) {
-            for (int cz = chunkMin; cz <= chunkMax; cz++) {
-                chunkCoords.add(new int[]{cx, cz});
-            }
-        }
-
-        final int total = chunkCoords.size();
-        final int batchSize = 8;
-        final int[] index = {0};
-
-        Bukkit.getLogger().info(LOG_PREFIX + "Pre-generating " + total + " chunks for world: " + world.getName());
-
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (Bukkit.getWorld(world.getName()) == null) {
-                    cancel();
-                    return;
-                }
-                if (index[0] >= total) {
-                    cancel();
-                    Bukkit.getLogger().info(LOG_PREFIX + "Finished pre-generating chunks for world: " + world.getName());
-                    return;
-                }
-                for (int i = 0; i < batchSize && index[0] < total; i++, index[0]++) {
-                    int[] coord = chunkCoords.get(index[0]);
-                    int cx = coord[0];
-                    int cz = coord[1];
-                    world.getChunkAtAsync(cx, cz, true).thenAccept(chunk ->
-                        world.unloadChunkRequest(chunk.getX(), chunk.getZ())
-                    );
-                }
-            }
-        }.runTaskTimer(getInstance(), 40L, 1L);
-    }
-
-    /**
-     * Launches themed fireworks for each online player at the start of a new in-game month.
-     * Fireworks use the month's signature color plus one lighter and one darker shade.
-     * Runs for approximately 1 second (3 waves, 10 ticks apart).
-     */
-    public static void launchMonthFireworks(Month month) {
-        Color[] colors = getMonthFireworkColors(month);
-        Random random = new Random();
-        FireworkEffect.Type[] types = FireworkEffect.Type.values();
-
-        new BukkitRunnable() {
-            int iterations = 0;
-
-            @Override
-            public void run() {
-                if (iterations >= 3) {
-                    cancel();
-                    return;
-                }
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    String worldName = player.getWorld().getName();
-                    if (worldName.equals("arena") || worldName.equals("creative")) {
-                        continue;
-                    }
-                    double offsetX = (random.nextDouble() - 0.5) * 5;
-                    double offsetZ = (random.nextDouble() - 0.5) * 5;
-                    double offsetY = random.nextDouble() * 2 + 2;
-                    Location loc = player.getLocation().add(offsetX, offsetY, offsetZ);
-
-                    Firework fw = player.getWorld().spawn(loc, Firework.class);
-                    FireworkMeta meta = fw.getFireworkMeta();
-                    Color mainColor = colors[random.nextInt(colors.length)];
-                    Color fadeColor = colors[random.nextInt(colors.length)];
-                    FireworkEffect effect = FireworkEffect.builder()
-                        .with(types[random.nextInt(types.length)])
-                        .withColor(mainColor)
-                        .withFade(fadeColor)
-                        .trail(random.nextBoolean())
-                        .flicker(random.nextBoolean())
-                        .build();
-                    meta.addEffect(effect);
-                    meta.setPower(0);
-                    fw.setFireworkMeta(meta);
-                    fw.setMetadata("newYearFirework", new FixedMetadataValue(plugin, true));
-                    fw.detonate();
-                }
-                iterations++;
-            }
-        }.runTaskTimer(plugin, 0L, 10L);
-    }
-
-    private static Color[] getMonthFireworkColors(Month month) {
-        return switch (month) {
-            // #ffe082 — warm gold; lighter pastel gold + deeper amber
-            case IGNIVOR   -> new Color[]{ Color.fromRGB(255,224,130), Color.fromRGB(255,242,185), Color.fromRGB(200,162,75) };
-            // &3 (#00AAAA) — dark aqua; brighter teal + deep teal
-            case AQUINVOR  -> new Color[]{ Color.fromRGB(0,170,170),   Color.fromRGB(50,215,215),  Color.fromRGB(0,105,105) };
-            // #d1e5f4 — very light sky blue; only darken
-            case VENTIVOR  -> new Color[]{ Color.fromRGB(209,229,244), Color.fromRGB(155,188,222), Color.fromRGB(95,140,185) };
-            // #FDA4BA — soft pink; lighter blush + deeper rose
-            case FLORIVOR  -> new Color[]{ Color.fromRGB(253,164,186), Color.fromRGB(255,205,218), Color.fromRGB(200,95,128) };
-            // &e (#FFFF55) — bright yellow; lighter cream + deeper golden yellow
-            case AESTIVOR  -> new Color[]{ Color.fromRGB(255,255,85),  Color.fromRGB(255,255,165), Color.fromRGB(195,195,0) };
-            // &6 (#FFAA00) — gold; lighter golden + deep amber
-            case CALORVOR  -> new Color[]{ Color.fromRGB(255,170,0),   Color.fromRGB(255,208,75),  Color.fromRGB(185,115,0) };
-            // #ff4500 — orange-red; lighter orange + deep scarlet
-            case ARDORVOR  -> new Color[]{ Color.fromRGB(255,69,0),    Color.fromRGB(255,125,55),  Color.fromRGB(175,25,0) };
-            // #BD5745 — muted terracotta; lighter salmon + deep rust
-            case SOLARVOR  -> new Color[]{ Color.fromRGB(189,87,69),   Color.fromRGB(230,135,112), Color.fromRGB(125,42,32) };
-            // #a17100 — dark amber; lighter ochre + deep brown-gold
-            case FOLLIVOR  -> new Color[]{ Color.fromRGB(161,113,0),   Color.fromRGB(210,158,45),  Color.fromRGB(95,60,0) };
-            // #8a00c2 — vibrant purple; lighter violet + deep indigo-purple
-            case STRIGAVOR -> new Color[]{ Color.fromRGB(138,0,194),   Color.fromRGB(182,55,242),  Color.fromRGB(78,0,125) };
-            // #5b0001 — very dark crimson; only lighten
-            case FAUNIVOR  -> new Color[]{ Color.fromRGB(91,0,1),      Color.fromRGB(145,28,28),   Color.fromRGB(205,72,72) };
-            // #2B3856 — dark navy-grey; only lighten
-            case UMBRAVOR  -> new Color[]{ Color.fromRGB(43,56,86),    Color.fromRGB(78,100,142),  Color.fromRGB(118,148,202) };
-            // #DBE9FA — very pale ice blue; only darken
-            case GLACIVOR  -> new Color[]{ Color.fromRGB(219,233,250), Color.fromRGB(155,188,228), Color.fromRGB(92,138,195) };
-            // #79BAEC — medium cornflower blue; lighter sky + deeper cerulean
-            case FRIGORVOR -> new Color[]{ Color.fromRGB(121,186,236), Color.fromRGB(178,220,255), Color.fromRGB(55,128,190) };
-            // #2C041C — very dark maroon-purple; only lighten
-            case OBSCURVOR -> new Color[]{ Color.fromRGB(44,4,28),     Color.fromRGB(102,18,68),   Color.fromRGB(162,58,118) };
-        };
-    }
-
-    private static void launchNewYearFireworks() {
-        Random random = new Random();
-        Color[] brightColors = {
-            Color.RED, Color.ORANGE, Color.YELLOW, Color.GREEN, Color.AQUA,
-            Color.BLUE, Color.PURPLE, Color.FUCHSIA, Color.WHITE, Color.LIME
-        };
-        FireworkEffect.Type[] types = FireworkEffect.Type.values();
-
-        new BukkitRunnable() {
-            int iterations = 0;
-
-            @Override
-            public void run() {
-                if (iterations >= 6) {
-                    cancel();
-                    return;
-                }
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    for (int i = 0; i < 2; i++) {
-                        double offsetX = (random.nextDouble() - 0.5) * 6;
-                        double offsetZ = (random.nextDouble() - 0.5) * 6;
-                        double offsetY = random.nextDouble() * 3 + 2;
-                        Location loc = player.getLocation().add(offsetX, offsetY, offsetZ);
-
-                        Firework fw = player.getWorld().spawn(loc, Firework.class);
-                        FireworkMeta meta = fw.getFireworkMeta();
-                        FireworkEffect effect = FireworkEffect.builder()
-                            .with(types[random.nextInt(types.length)])
-                            .withColor(brightColors[random.nextInt(brightColors.length)],
-                                       brightColors[random.nextInt(brightColors.length)])
-                            .withFade(brightColors[random.nextInt(brightColors.length)])
-                            .trail(random.nextBoolean())
-                            .flicker(random.nextBoolean())
-                            .build();
-                        meta.addEffect(effect);
-                        meta.setPower(0);
-                        fw.setFireworkMeta(meta);
-                        fw.setMetadata("newYearFirework", new FixedMetadataValue(plugin, true));
-                        fw.detonate();
-                    }
-                }
-                iterations++;
-            }
-        }.runTaskTimer(plugin, 0L, 10L);
-    }
-
-    private static void deleteDirectory(File directory) {
-        File[] files = directory.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    deleteDirectory(file);
-                } else {
-                    boolean isFileDeleted = file.delete();
-                }
-            }
-        }
-        boolean isDirectoryDeleted = directory.delete();
     }
 
     /**
@@ -1419,8 +1674,11 @@ public class AranarthCore extends JavaPlugin {
         DatabaseManager.shutdown();
 
         Bukkit.resetRecipes();
-        if (discordChatListener != null) discordChatListener.unsubscribe();
+        if (discordChatListener != null) {
+            discordChatListener.unsubscribe();
+        }
 
+        PacketEvents.getAPI().terminate();
     }
 
     /**
@@ -1432,13 +1690,13 @@ public class AranarthCore extends JavaPlugin {
         // Flush all online players' Bukkit data (inventory, ender chest, XP, health, etc.) to
         // player.dat files before we exit. This is a no-op for graceful /stop (Paper already
         // saved them while kicking players), but it protects against restart scripts that call
-        // System.exit() directly and bypass Paper's normal shutdown sequence — the JVM shutdown
+        // System.exit() directly and bypass Paper's normal shutdown sequence - the JVM shutdown
         // hook fires but Paper never got to write player.dat, causing inventory/EC rollbacks.
         // We also snapshot each online player's live inventory into AranarthPlayer.survivalInventory
         // so that MySQL stays in sync (avoids stale data if they transfer cross-server shortly
         // after the restart).
         Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
-        Bukkit.getLogger().info(LOG_PREFIX + "[Shutdown] saveAll() called — " + onlinePlayers.size() + " player(s) still online.");
+        Bukkit.getLogger().info(LOG_PREFIX + "[Shutdown] saveAll() called - " + onlinePlayers.size() + " player(s) still online.");
         for (Player p : onlinePlayers) {
             try {
                 if (AranarthUtils.isSurvivalWorld(p.getWorld().getName())) {
@@ -1452,6 +1710,14 @@ public class AranarthCore extends JavaPlugin {
                         ap.setSurvivalExpLevel(p.getLevel());
                         ap.setSurvivalExpProgress(p.getExp());
                         AranarthUtils.setPlayer(p.getUniqueId(), ap);
+                        // Write raw_data synchronously during shutdown so MySQL is current even if
+                        // syncAranarthPlayersToDatabase's async path never fires (plugin disabled).
+                        if (DatabaseManager.isActive()) {
+                            String rawRow = PersistenceUtils.buildPlayerRowForTransfer(p.getUniqueId());
+                            if (rawRow != null) {
+                                DatabaseManager.getInstance().saveAranarthPlayerRaw(p.getUniqueId(), p.getName(), rawRow);
+                            }
+                        }
                     }
                 }
                 p.saveData();
@@ -1464,7 +1730,7 @@ public class AranarthCore extends JavaPlugin {
                     Location loc = p.getLocation();
                     String server = NetworkManager.isActive() ? NetworkManager.getInstance().getThisServer() : "survival";
                     Bukkit.getLogger().info(LOG_PREFIX + "[Shutdown] Saving last location for " + p.getName()
-                            + " — server=" + server + " world=" + loc.getWorld().getName()
+                            + " - server=" + server + " world=" + loc.getWorld().getName()
                             + " pos=(" + String.format("%.1f", loc.getX()) + "," + String.format("%.1f", loc.getY()) + "," + String.format("%.1f", loc.getZ()) + ")");
                     DatabaseManager.getInstance().saveLastLocation(
                             p.getUniqueId(), server, loc.getWorld().getName(),
@@ -1602,41 +1868,6 @@ public class AranarthCore extends JavaPlugin {
                 scheduleFaeFlowerTrail(); // Reschedule with a new random delay
             }
         }.runTaskLater(this, delay);
-    }
-
-    private static Material getFaeTrailFlower(Biome biome) {
-        Random rng = new Random();
-        if (biome == Biome.FLOWER_FOREST) {
-            Material[] flowers = {
-                Material.DANDELION, Material.POPPY, Material.OXEYE_DAISY, Material.AZURE_BLUET,
-                Material.CORNFLOWER, Material.ORANGE_TULIP, Material.RED_TULIP, Material.WHITE_TULIP,
-                Material.PINK_TULIP, Material.ALLIUM, Material.BLUE_ORCHID, Material.LILY_OF_THE_VALLEY
-            };
-            return flowers[rng.nextInt(flowers.length)];
-        } else if (biome == Biome.FOREST
-                || biome == Biome.BIRCH_FOREST
-                || biome == Biome.OLD_GROWTH_BIRCH_FOREST) {
-            Material[] flowers = {
-                Material.DANDELION, Material.POPPY, Material.OXEYE_DAISY, Material.AZURE_BLUET,
-                Material.CORNFLOWER, Material.ORANGE_TULIP, Material.RED_TULIP, Material.WHITE_TULIP,
-                Material.PINK_TULIP, Material.ALLIUM
-            };
-            return flowers[rng.nextInt(flowers.length)];
-        } else if (biome == Biome.DARK_FOREST) {
-            Material[] flowers = {Material.DANDELION, Material.POPPY, Material.ALLIUM, Material.AZURE_BLUET};
-            return flowers[rng.nextInt(flowers.length)];
-        } else if (biome == Biome.CHERRY_GROVE) {
-            return Material.PINK_PETALS;
-        } else if (biome == Biome.MEADOW) {
-            Material[] flowers = {
-                Material.DANDELION, Material.POPPY, Material.ALLIUM,
-                Material.AZURE_BLUET, Material.CORNFLOWER, Material.OXEYE_DAISY
-            };
-            return flowers[rng.nextInt(flowers.length)];
-        } else if (biome == Biome.MUSHROOM_FIELDS) {
-            return rng.nextBoolean() ? Material.BROWN_MUSHROOM : Material.RED_MUSHROOM;
-        }
-        return null;
     }
 
 }

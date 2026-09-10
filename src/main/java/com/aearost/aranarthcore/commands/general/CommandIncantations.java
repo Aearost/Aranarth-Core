@@ -5,6 +5,8 @@ import com.aearost.aranarthcore.items.incantation.IncantationBeheading;
 import com.aearost.aranarthcore.items.incantation.IncantationLifesteal;
 import com.aearost.aranarthcore.items.incantation.IncantationMagnetism;
 import com.aearost.aranarthcore.items.incantation.IncantationPlentiful;
+import com.aearost.aranarthcore.items.incantation.IncantationPreservation;
+import com.aearost.aranarthcore.items.incantation.IncantationResilience;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -41,6 +43,8 @@ public class CommandIncantations implements CommandExecutor {
 			meta.addPage(lifesteal());
 			meta.addPage(plentiful());
 			meta.addPage(magnetism());
+			meta.addPage(resilience());
+			meta.addPage(preservation());
 
 			book.setItemMeta(meta);
 			player.getInventory().addItem(book);
@@ -62,12 +66,15 @@ public class CommandIncantations implements CommandExecutor {
 
 	private static String introduction2() {
 		return ChatUtils.translateToColor(
-				"There are four different Incantations that are currently found on Aranarth:\n"
+				"There are 6 different Incantations found in the Realm of Aranarth:\n"
 					+ "- " + new IncantationBeheading().getColor() + "&lBeheading&r\n"
 					+ "- " + new IncantationLifesteal().getColor() + "&lLifesteal&r\n"
 					+ "- " + new IncantationPlentiful().getColor() + "&lPlentiful&r\n"
-					+ "- " + new IncantationMagnetism().getColor() + "&lMagnetism&r\n\n"
-					+ "Note that only &oone incantation&r may be applied per item."
+					+ "- " + new IncantationMagnetism().getColor() + "&lMagnetism&r\n"
+					+ "- " + new IncantationResilience().getColor() + "&lResilience&r\n"
+					+ "- " + new IncantationPreservation().getColor() + "&lPreservation&r\n"
+					+ "Note that only &oone incantation&r may be applied per item. " +
+						"Some additionally require an " + new AranarthiumIngot().getName() + " &ringot."
 		);
 	}
 
@@ -82,22 +89,19 @@ public class CommandIncantations implements CommandExecutor {
 
 	private static String beheading() {
 		return ChatUtils.translateToColor(
-				new IncantationBeheading().getColor() + "&lBeheading&r\n\n" +
-						"&oIncreases the drop rates of player heads\n\n" +
-						"&rApplies to: swords, axes, maces, tridents, spears\n\n" +
-						"- 25% chance at I\n" +
-						"- 50% chance at II\n" +
-						"- 75% chance at III\n"
+				new IncantationBeheading().getColor() + "&lBeheading&r\n" +
+						"&oIncreases the drop rates of heads\n\n" +
+						"&r&lApplies to: &rswords, axes, maces, tridents, and spears\n\n" +
+						"&r&lPlayers: &r25% at I, 50% at II, 75% at III\n\n" +
+						"&r&lMobs: &r10% at I, 20% at II, 30% at III\n"
 		);
 	}
 
 	private static String lifesteal() {
 		return ChatUtils.translateToColor(
 				new IncantationLifesteal().getColor() + "&lLifesteal&r\n\n" +
-						"&oHeal off of your dealt damage\n\n" +
-						"&rApplies to: swords, axes, maces, tridents, spears\n\n" +
-						"You must drop an " + new AranarthiumIngot().getName() +
-						" &ringot onto the weapon, as well as the incantation.\n\n" +
+						"&oHeal off of your dealt damage. Requires an " + new AranarthiumIngot().getName() + "&r&o ingot\n\n" +
+						"&r&lApplies to: &rswords, axes, maces, tridents, spears\n\n" +
 						"- 15% heal at I\n" +
 						"- 30% heal at II\n" +
 						"- 50% heal at III\n"
@@ -106,20 +110,40 @@ public class CommandIncantations implements CommandExecutor {
 
 	private static String plentiful() {
 		return ChatUtils.translateToColor(
-				new IncantationPlentiful().getColor() + "&lPlentiful&r\n" +
-						"&oIncreased block harvest size\n\n" +
-						"&rApplies to: pickaxes, axes, shovels, hoes\n\n" +
-						"You must drop an " + new AranarthiumIngot().getName() +
-						" &ringot onto the tool, as well as the incantation. There is only one level of Plentiful."
+				new IncantationPlentiful().getColor() + "&lPlentiful&r\n\n" +
+						"&oIncreased block harvest size. Requires an " + new AranarthiumIngot().getName() + "&r&o ingot\n\n" +
+						"&r&lApplies to: &rpickaxes, axes, shovels, hoes\n\n" +
+						"&o**Only one level\n"
 		);
 	}
 
 	private static String magnetism() {
 		return ChatUtils.translateToColor(
-				new IncantationMagnetism().getColor() + "&lMagnetism&r\n" +
-						"&oPulls harvested items to you\n\n" +
-						"&rApplies to: pickaxes, axes, shovels, hoes\n\n" +
-						"Drop the incantation onto the tool to apply it. There is only one level of Magnetism."
+				new IncantationMagnetism().getColor() + "&lMagnetism&r\n\n" +
+						"&oPulls harvested items to you. Requires an " + new AranarthiumIngot().getName() + "&r&o ingot\n\n" +
+						"&r&lApplies to: &rpickaxes, axes, shovels, hoes\n\n" +
+						"&o**Only one level\n"
+		);
+	}
+
+	private static String resilience() {
+		return ChatUtils.translateToColor(
+				new IncantationResilience().getColor() + "&lResilience&r\n\n" +
+						"&oMakes your item indestructible\n\n" +
+						"&r&lApplies to: &rany tool, weapon, or armor\n\n" +
+						"- Items have infinite durability\n" +
+						"- Indestructible by fire & lava\n" +
+						"&o**Only one level\n"
+		);
+	}
+
+	private static String preservation() {
+		return ChatUtils.translateToColor(
+				new IncantationPreservation().getColor() + "&lPreservation&r\n\n" +
+						"&oCollection of unharvestable blocks. Requires an " + new AranarthiumIngot().getName() + "&r&o ingot\n\n" +
+						"&r&lApplies to: &rpickaxes (no Fortune)\n\n" +
+						"&o**Only 3 uses\n" +
+						"&o**Only one level\n"
 		);
 	}
 

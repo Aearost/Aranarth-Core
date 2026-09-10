@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.utils;
 
+import com.aearost.aranarthcore.enums.JobType;
 import com.aearost.aranarthcore.enums.QuestTaskType;
 import com.aearost.aranarthcore.enums.QuestType;
 import com.aearost.aranarthcore.items.brew.BrewRecipe;
@@ -59,7 +60,7 @@ public class QuestUtils {
     // Only these are synced to the shared DB so each server doesn't stomp the other's data.
     private static final Set<UUID> locallyModifiedUuids = new HashSet<>();
 
-    // Superset of locallyModifiedUuids — never cleared during the session, only reset on startup.
+    // Superset of locallyModifiedUuids - never cleared during the session, only reset on startup.
     // Used at shutdown to safely write back all player data this server touched, even after
     // locallyModifiedUuids has been cleared by quit events.
     private static final Set<UUID> sessionModifiedUuids = new HashSet<>();
@@ -220,6 +221,8 @@ public class QuestUtils {
         long dailySeed = uuid.getLeastSignificantBits() ^ lastDailyReset;
         Random dailyRandom = new Random(dailySeed);
         Collections.shuffle(shuffled, dailyRandom);
+        // Prioritize quests matching the player's active jobs; fill remaining slots with general quests
+        shuffled = prioritizeJobQuests(uuid, shuffled);
         List<Quest> selected = shuffled.subList(0, Math.min(3, shuffled.size()));
         List<Quest> assigned = new ArrayList<>();
         for (Quest q : selected) {
@@ -246,6 +249,8 @@ public class QuestUtils {
         long weeklySeed = uuid.getLeastSignificantBits() ^ lastWeeklyReset;
         Random weeklyRandom = new Random(weeklySeed);
         Collections.shuffle(shuffled, weeklyRandom);
+        // Prioritize quests matching the player's active jobs; fill remaining slots with general quests
+        shuffled = prioritizeJobQuests(uuid, shuffled);
         List<Quest> selected = shuffled.subList(0, Math.min(3, shuffled.size()));
         List<Quest> assigned = new ArrayList<>();
         for (Quest q : selected) {
@@ -276,6 +281,72 @@ public class QuestUtils {
         }
 
         playerActiveWeeklyQuests.put(uuid, assigned);
+    }
+
+    /**
+     * Reorders a shuffled quest list so that quests matching the player's active jobs come first.
+     */
+    private static List<Quest> prioritizeJobQuests(UUID uuid, List<Quest> shuffled) {
+        Set<QuestTaskType> jobTypes = getActiveJobTaskTypes(uuid);
+        if (jobTypes.isEmpty()) {
+            return shuffled;
+        }
+        List<Quest> jobQuests = new ArrayList<>();
+        List<Quest> generalQuests = new ArrayList<>();
+        for (Quest q : shuffled) {
+            if (jobTypes.contains(q.getTaskType())) {
+                jobQuests.add(q);
+            } else {
+                generalQuests.add(q);
+            }
+        }
+        List<Quest> result = new ArrayList<>(jobQuests);
+        result.addAll(generalQuests);
+        return result;
+    }
+
+    /**
+     * Returns the set of QuestTaskTypes that correspond to the given player's active jobs.
+     */
+    private static Set<QuestTaskType> getActiveJobTaskTypes(UUID uuid) {
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+        if (aranarthPlayer == null || !aranarthPlayer.isJobDataLoaded()) {
+            return Collections.emptySet();
+        }
+        Set<QuestTaskType> types = new HashSet<>();
+        for (JobType job : aranarthPlayer.getJobData().getActiveJobs()) {
+            types.addAll(getJobQuestTaskTypes(job));
+        }
+        return types;
+    }
+
+    /**
+     * Returns the QuestTaskTypes that are associated with the given job.
+     */
+    private static List<QuestTaskType> getJobQuestTaskTypes(JobType job) {
+        return switch (job) {
+            case FARMER -> List.of(
+                    QuestTaskType.HARVEST_CROPS, QuestTaskType.PLANT_CROPS, QuestTaskType.BREED_ANIMALS,
+                    QuestTaskType.KILL_COW, QuestTaskType.KILL_PIG, QuestTaskType.KILL_CHICKEN,
+                    QuestTaskType.KILL_SHEEP, QuestTaskType.KILL_RABBIT);
+            case MINER -> List.of(
+                    QuestTaskType.MINE_STONE, QuestTaskType.MINE_COAL_ORE, QuestTaskType.MINE_IRON_ORE,
+                    QuestTaskType.MINE_GOLD_ORE, QuestTaskType.MINE_DIAMOND, QuestTaskType.MINE_ANCIENT_DEBRIS);
+            case EXCAVATOR -> List.of(
+                    QuestTaskType.BREAK_SAND, QuestTaskType.BREAK_DIRT, QuestTaskType.BREAK_GRAVEL);
+            case LUMBERJACK -> List.of(QuestTaskType.BREAK_LOG);
+            case EXPLORER -> List.of(QuestTaskType.TRAVEL_BLOCKS);
+            case HUNTER -> List.of(
+                    QuestTaskType.KILL_HOSTILE_MOB, QuestTaskType.KILL_PASSIVE_MOB,
+                    QuestTaskType.KILL_WITH_SWORD, QuestTaskType.KILL_WITH_BOW,
+                    QuestTaskType.KILL_WITH_MELEE, QuestTaskType.KILL_WITH_RANGED,
+                    QuestTaskType.KILL_SKELETON, QuestTaskType.KILL_ZOMBIE, QuestTaskType.KILL_CREEPER,
+                    QuestTaskType.KILL_ENDERMAN, QuestTaskType.KILL_SPIDER, QuestTaskType.KILL_WITCH,
+                    QuestTaskType.KILL_BLAZE, QuestTaskType.KILL_GHAST, QuestTaskType.KILL_PLAYER,
+                    QuestTaskType.FISH);
+            // Builder and Alchemist have no matching quest task types
+            case BUILDER, ALCHEMIST -> List.of();
+        };
     }
 
     /**
@@ -529,7 +600,7 @@ public class QuestUtils {
         long nowMillis = System.currentTimeMillis();
 
         if (nowMillis >= todayReset3amMillis && lastDailyReset < todayReset3amMillis) {
-            // Sync from DB first — the other server may have already reset this period.
+            // Sync from DB first - the other server may have already reset this period.
             // Only runs when a reset is imminent (once per day), so the synchronous DB read is acceptable.
             if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
                 try {
@@ -649,7 +720,7 @@ public class QuestUtils {
 
     /**
      * Updates a player's quest progress for the given task type by the given amount.
-     * Rewards are NOT granted automatically — the player must click the quest in the GUI.
+     * Rewards are NOT granted automatically - the player must click the quest in the GUI.
      */
     public static void updateProgress(Player player, QuestTaskType taskType, int amount) {
         UUID uuid = player.getUniqueId();
@@ -664,7 +735,7 @@ public class QuestUtils {
         Integer storedRank = playerQuestRank.get(uuid);
         if (storedRank == null || storedRank != rank) {
             Bukkit.getLogger().info("[AC] [Quest] Rank change for " + uuid
-                    + " (stored=" + storedRank + " current=" + rank + ") — wiping quest data and assigning new quests");
+                    + " (stored=" + storedRank + " current=" + rank + ") - wiping quest data and assigning new quests");
             playerActiveDailyQuests.remove(uuid);
             playerActiveWeeklyQuests.remove(uuid);
             playerDailyProgress.remove(uuid);
@@ -973,6 +1044,42 @@ public class QuestUtils {
         playerWeeklyClaimed.remove(uuid);
         locallyModifiedUuids.add(uuid);
         sessionModifiedUuids.add(uuid);
+    }
+
+    /**
+     * If the player has an active weekly quest that rewards the given brew recipe and has not yet
+     * been claimed, replaces that quest's item reward with a randomly generated money reward.
+     * Progress and completion state for the slot are preserved.
+     *
+     * @return true if a quest was updated, false if no matching unclaimed quest was found in memory
+     */
+    public static boolean regenerateWeeklyQuestIfBrewReward(UUID uuid, int rank, String recipeId) {
+        List<Quest> active = playerActiveWeeklyQuests.get(uuid);
+        if (active == null) return false;
+
+        boolean[] claimed = playerWeeklyClaimed.get(uuid);
+
+        for (int i = 0; i < active.size(); i++) {
+            Quest quest = active.get(i);
+            if (!quest.hasItemReward()) continue;
+            if (claimed != null && i < claimed.length && claimed[i]) continue;
+
+            String questRecipeId = quest.getItemReward().hasItemMeta()
+                    ? quest.getItemReward().getItemMeta().getPersistentDataContainer()
+                            .get(BREW_RECIPE, PersistentDataType.STRING)
+                    : null;
+            if (!recipeId.equals(questRecipeId)) continue;
+
+            Quest regenerated = quest.withItemReward(null)
+                    .withReward(generateRandomReward(rank, QuestType.WEEKLY, quest.getTaskType()));
+            List<Quest> updated = new ArrayList<>(active);
+            updated.set(i, regenerated);
+            playerActiveWeeklyQuests.put(uuid, updated);
+            locallyModifiedUuids.add(uuid);
+            sessionModifiedUuids.add(uuid);
+            return true;
+        }
+        return false;
     }
 
     public static void setPlayerActiveDailyQuests(UUID uuid, List<Quest> quests) {

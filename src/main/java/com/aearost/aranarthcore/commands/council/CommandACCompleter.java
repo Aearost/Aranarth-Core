@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.council;
 
+import com.aearost.aranarthcore.enums.WorldEvent;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -33,8 +34,8 @@ public class CommandACCompleter implements TabCompleter {
     private static final List<String> COUNCIL_OPTIONS = List.of(
             "admin", "ban", "broadcast", "clearchat", "dateset", "discordreload", "give",
             "home", "invsee", "invswap", "msg", "mute", "og", "perks", "punishments", "questnpc", "rankset",
-            "resetquest", "speed", "spy", "sudo", "time", "tp", "tpf", "tpw", "unban", "unmute",
-            "unscramble", "vanish", "vpedit", "warn", "weather", "whereis", "skull"
+            "reloadperms", "reloadshops", "resetquest", "speed", "spy", "sudo", "time", "tp", "tpf", "tpw", "unban", "unmute",
+            "unscramble", "vanish", "vpedit", "warn", "weather", "whereis", "worldevent"
     );
 
     private static final List<String> ITEM_NAMES;
@@ -68,8 +69,8 @@ public class CommandACCompleter implements TabCompleter {
 
     private static final List<String> PERK_OPTIONS = List.of(
             "blacklist", "bluefire", "chat", "compressor", "discord",
-            "homes", "inventory", "itemframe", "itemname", "randomizer",
-            "shulker", "tables"
+            "homes", "inventory", "itemframe", "itemname",
+            "prismaticfire", "randomizer", "shulker", "tables", "whitefire"
     );
 
     /**
@@ -119,8 +120,9 @@ public class CommandACCompleter implements TabCompleter {
                 }
                 yield List.of();
             }
+            case "reloadperms" -> args.length == 2 ? filterPlayers(args[1]) : List.of();
             case "whereis", "give", "mute", "unmute", "ban", "unban", "invsee", "warn", "punishments", "perks",
-                 "sudo", "skull" -> {
+                 "sudo" -> {
                 if (args.length == 2) {
                     yield filterPlayers(args[1]);
                 }
@@ -274,6 +276,18 @@ public class CommandACCompleter implements TabCompleter {
                 }
                 if (args.length == 7) {
                     yield isOnlinePlayer(args[1]) ? List.of("pitch") : List.of();
+                }
+                yield List.of();
+            }
+            case "worldevent" -> {
+                if (args.length == 2) {
+                    List<String> eventNames = Arrays.stream(WorldEvent.values())
+                            .map(Enum::name)
+                            .collect(Collectors.toList());
+                    yield filter(eventNames, args[1]);
+                }
+                if (args.length == 3) {
+                    yield filter(List.of("1", "2", "3"), args[2]);
                 }
                 yield List.of();
             }

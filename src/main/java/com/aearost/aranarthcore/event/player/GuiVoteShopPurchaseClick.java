@@ -6,16 +6,14 @@ import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
 import com.aearost.aranarthcore.items.key.KeyRare;
 import com.aearost.aranarthcore.items.key.KeyVote;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.objects.Perk;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.AvatarUtils;
-import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
-import org.bukkit.NamespacedKey;
-import org.bukkit.persistence.PersistentDataType;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
 import com.gmail.nossr50.datatypes.player.PlayerProfile;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
@@ -24,10 +22,12 @@ import com.gmail.nossr50.util.skills.SkillTools;
 import com.projectkorra.projectkorra.BendingPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.HashMap;
 
@@ -128,7 +128,7 @@ public class GuiVoteShopPurchaseClick {
                     }
                     // Discord perk
                     else if (clicked.getType() == Material.PURPLE_GLAZED_TERRACOTTA) {
-                        if (aranarthPlayer.getPerks().get(Perk.DISCORD) == 0) {
+                        if (aranarthPlayer.getPerks().getOrDefault(Perk.DISCORD, 0) == 0) {
                             Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " discord 1 silent");
                         } else {
                             player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
@@ -139,7 +139,7 @@ public class GuiVoteShopPurchaseClick {
                     }
                     // Tables perk
                     else if (clicked.getType() == Material.CRAFTING_TABLE) {
-                        if (aranarthPlayer.getPerks().get(Perk.TABLES) == 0) {
+                        if (aranarthPlayer.getPerks().getOrDefault(Perk.TABLES, 0) == 0) {
                             Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " tables 1 silent");
                         } else {
                             player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
@@ -150,7 +150,7 @@ public class GuiVoteShopPurchaseClick {
                     }
                     // Invisible Item Frames perk
                     else if (clicked.getType() == Material.GLOW_ITEM_FRAME) {
-                        if (aranarthPlayer.getPerks().get(Perk.ITEMFRAME) == 0) {
+                        if (aranarthPlayer.getPerks().getOrDefault(Perk.ITEMFRAME, 0) == 0) {
                             Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " itemframe 1 silent");
                         } else {
                             player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
@@ -161,7 +161,7 @@ public class GuiVoteShopPurchaseClick {
                     }
                     // Colored chat perk
                     else if (clicked.getType() == Material.WRITABLE_BOOK) {
-                        if (aranarthPlayer.getPerks().get(Perk.CHAT) == 0) {
+                        if (aranarthPlayer.getPerks().getOrDefault(Perk.CHAT, 0) == 0) {
                             Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " chat 1 silent");
                         } else {
                             player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
@@ -170,20 +170,31 @@ public class GuiVoteShopPurchaseClick {
                         }
                         return;
                     }
-                    // Item name perk
+                    // Nickname perk or Item name perk (both NAME_TAG - differentiated by tag)
                     else if (clicked.getType() == Material.NAME_TAG) {
-                        if (aranarthPlayer.getPerks().get(Perk.ITEMNAME) == 0) {
-                            Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " itemname 1 silent");
+                        NamespacedKey nicknamePerkNSKey = new NamespacedKey(AranarthCore.getInstance(), "nickname_perk");
+                        if (clicked.getItemMeta().getPersistentDataContainer().has(nicknamePerkNSKey, PersistentDataType.STRING)) {
+                            if (aranarthPlayer.getPerks().getOrDefault(Perk.NICKNAME, 0) == 0) {
+                                Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " nickname 1 silent");
+                            } else {
+                                player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
+                                aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() - requiredPoints);
+                                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                            }
                         } else {
-                            player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
-                            aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() - requiredPoints);
-                            AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                            if (aranarthPlayer.getPerks().getOrDefault(Perk.ITEMNAME, 0) == 0) {
+                                Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " itemname 1 silent");
+                            } else {
+                                player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
+                                aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() - requiredPoints);
+                                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                            }
                         }
                         return;
                     }
                     // Blacklist perk
                     else if (clicked.getType() == Material.LAVA_BUCKET) {
-                        if (aranarthPlayer.getPerks().get(Perk.BLACKLIST) == 0) {
+                        if (aranarthPlayer.getPerks().getOrDefault(Perk.BLACKLIST, 0) == 0) {
                             Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " blacklist 1 silent");
                         } else {
                             player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
@@ -194,7 +205,7 @@ public class GuiVoteShopPurchaseClick {
                     }
                     // Homes perk
                     else if (clicked.getType() == Material.RED_BED) {
-                        if (aranarthPlayer.getPerks().get(Perk.HOMES) <= 12) {
+                        if (aranarthPlayer.getPerks().getOrDefault(Perk.HOMES, 0) <= 12) {
                             Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " homes silent");
                         } else {
                             player.sendMessage(ChatUtils.chatMessage("&cYou already have the maximum amount of additional homes!"));

@@ -377,4 +377,21 @@ public class AranarthBendingUtils {
     public static boolean hasMetalRequirement(final Player player) {
         return hasMetalArmor(player) || hasMetalIngot(player);
     }
+
+    /**
+     * Returns true if the material is a valid plant-bending source block.
+     * Mirrors the categories that ProjectKorra considers plant-bendable.
+     */
+    public static boolean isPlantSource(Material mat) {
+        if (mat.name().endsWith("_LEAVES")) {
+            return true;
+        }
+        return switch (mat) {
+            case GRASS_BLOCK, SHORT_GRASS, TALL_GRASS, FERN, LARGE_FERN,
+                 VINE, GLOW_LICHEN, LILY_PAD, SEAGRASS, TALL_SEAGRASS,
+                 HANGING_ROOTS, BIG_DRIPLEAF, SMALL_DRIPLEAF ->
+                    true;
+            default -> AranarthUtils.isFlower(mat);
+        };
+    }
 }

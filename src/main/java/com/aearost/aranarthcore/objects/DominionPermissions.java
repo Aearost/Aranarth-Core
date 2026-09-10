@@ -38,10 +38,10 @@ public class DominionPermissions {
         // LEADER gets all permissions
         perms.put(DominionRank.LEADER, new HashSet<>(Arrays.asList(DominionPermission.values())));
 
-        // LIEUTENANT gets most permissions — excluded: WITHDRAW
+        // LIEUTENANT gets most permissions - excluded: WITHDRAW
         Set<DominionPermission> lieutenantPerms = new HashSet<>(fullInteraction);
         lieutenantPerms.addAll(Arrays.asList(
-                DominionPermission.BUILD,
+                DominionPermission.BUILD, DominionPermission.LOCK_CONTAINER,
                 DominionPermission.HOME, DominionPermission.OUTPOST_HOME, DominionPermission.FOOD,
                 DominionPermission.RESOURCES, DominionPermission.INVITE, DominionPermission.REMOVE_MEMBER,
                 DominionPermission.SURRENDER, DominionPermission.REBEL, DominionPermission.RETREAT,
@@ -53,12 +53,12 @@ public class DominionPermissions {
         // CITIZEN gets basic permissions
         Set<DominionPermission> citizenPerms = new HashSet<>(fullInteraction);
         citizenPerms.addAll(Arrays.asList(
-                DominionPermission.BUILD,
+                DominionPermission.BUILD, DominionPermission.LOCK_CONTAINER,
                 DominionPermission.HOME, DominionPermission.OUTPOST_HOME, DominionPermission.FOOD
         ));
         perms.put(DominionRank.CITIZEN, citizenPerms);
 
-        // NEWCOMER gets very restricted permissions — no interaction
+        // NEWCOMER gets very restricted permissions - no interaction
         perms.put(DominionRank.NEWCOMER, new HashSet<>(List.of(
                 DominionPermission.HOME, DominionPermission.OUTPOST_HOME
         )));
@@ -115,7 +115,7 @@ public class DominionPermissions {
      * @return The mutable set of permissions for that rank.
      */
     public Set<DominionPermission> getPermissions(DominionRank rank) {
-        return permissions.getOrDefault(rank, new HashSet<>());
+        return Collections.unmodifiableSet(permissions.getOrDefault(rank, Collections.emptySet()));
     }
 
     /**

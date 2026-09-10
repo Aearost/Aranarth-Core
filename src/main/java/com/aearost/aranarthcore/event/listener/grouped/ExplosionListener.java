@@ -1,11 +1,14 @@
 package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.DefenderUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.*;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -28,22 +31,41 @@ public class ExplosionListener implements Listener {
 	@EventHandler
 	public void onExplodeBlock(final EntityExplodeEvent e) {
 		if (!(e.getEntity() instanceof WindCharge) && !(e.getEntity() instanceof BreezeWindCharge)) {
-			// Always prevent these explosions
-			if (e.getEntity() instanceof Creeper) {
+			if (e.getEntity() instanceof EnderDragon dragon
+					&& dragon.getPersistentDataContainer().has(CustomKeys.FANG_OWNER, PersistentDataType.STRING)) {
+				e.setCancelled(true);
+				return;
+			}
+			if (e.getEntity() instanceof Creeper creeper) {
+				// Defender creepers: allow explosion entity damage but clear block list
+				if (DefenderUtils.isDefender(creeper.getUniqueId())) {
+					e.blockList().clear();
+					// Remove all potion effects before the explosion finalizes so no lingering cloud spawns
+					for (org.bukkit.potion.PotionEffect effect : new java.util.ArrayList<>(creeper.getActivePotionEffects())) {
+						creeper.removePotionEffect(effect.getType());
+					}
+					// Decrement the defender count - EntityDeathEvent may not fire reliably for explosion deaths
+					DefenderUtils.onDefenderDeath(creeper.getUniqueId());
+					return;
+				}
+				// Non-defender creepers: cancel entirely (existing behavior)
 				e.setCancelled(true);
 				return;
 			}
 
 			Dominion chunkDominion = DominionUtils.getDominionOfChunk(e.getEntity().getLocation().getChunk());
 			if (chunkDominion != null) {
-				e.setCancelled(true);
+				if (chunkDominion.isExplosionEnabled()) {
+					e.blockList().removeIf(block -> AranarthUtils.getLockedContainerAtBlock(block) != null);
+				} else {
+					e.setCancelled(true);
+				}
 			} else {
 				e.blockList().removeIf(block -> AranarthUtils.getLockedContainerAtBlock(block) != null);
 			}
 		}
 	}
-	
-	
+
 	/**
 	 * Deals with cancelling explosion item damage.
 	 * @param e The event.
@@ -52,7 +74,10 @@ public class ExplosionListener implements Listener {
 	public void onExplodeItem(final EntityDamageEvent e) {
 		if (e.getEntity() instanceof Item) {
 			if (e.getCause() == DamageCause.BLOCK_EXPLOSION || e.getCause() == DamageCause.ENTITY_EXPLOSION) {
-				e.setCancelled(true);
+				Dominion chunkDominion = DominionUtils.getDominionOfChunk(e.getEntity().getLocation().getChunk());
+				if (chunkDominion != null && !chunkDominion.isExplosionEnabled()) {
+					e.setCancelled(true);
+				}
 			}
 		}
 	}

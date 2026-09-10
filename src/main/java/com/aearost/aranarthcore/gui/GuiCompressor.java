@@ -28,6 +28,19 @@ public class GuiCompressor {
 			player.openInventory(initializedGui);
 		}
 	}
+
+	/**
+	 * Repopulates an already-open compressor inventory in-place without closing it.
+	 */
+	public static void populate(org.bukkit.inventory.Inventory inv, Player player) {
+		GuiCompressor fresh = new GuiCompressor(player);
+		if (fresh.initializedGui == null) {
+			return;
+		}
+		for (int i = 0; i < fresh.initializedGui.getSize(); i++) {
+			inv.setItem(i, fresh.initializedGui.getItem(i));
+		}
+	}
 	
 	private Inventory initializeGui(Player player) {
 		UUID uuid = player.getUniqueId();

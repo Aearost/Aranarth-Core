@@ -58,7 +58,7 @@ public class SonicPulse extends SoundAbility implements AddonAbility {
     public SonicPulse(Player player) {
         super(player);
 
-        this.cooldown = 10000L;
+        this.cooldown = 6000L;
         this.range = 10.0;
         this.numPulses = 4;
 
@@ -147,13 +147,15 @@ public class SonicPulse extends SoundAbility implements AddonAbility {
             pulse.location.add(pulse.direction.clone().multiply(PULSE_SPEED));
             pulse.distanceTraveled += PULSE_SPEED;
 
-            // Shatter glass blocks without stopping the pulse
+            // Shatter glass and ice blocks without stopping the pulse
             Block block = pulse.location.getBlock();
             if (isGlass(block.getType())) {
                 shatterGlass(player, block);
+            } else if (isIce(block.getType())) {
+                shatterIce(player, block);
             }
 
-            // Block collision — pulse stops; close enough to the caster triggers recoil
+            // Block collision - pulse stops; close enough to the caster triggers recoil
             if (block.getType().isSolid()) {
                 if (pulse.distanceTraveled <= MAX_RECOIL_DISTANCE) {
                     applyPlayerRecoil(pulse);

@@ -1,26 +1,207 @@
 AranarthCore v. 1.12
 
-Major Features
+World & Events
+[+] Added World Events system, starting automatically or manually triggered with /ac worldevent
+[+] Did a full overhaul of wandering traders, providing each with their own theme
+[+] Added Structure Wraiths when first opening of structure chests
+[+] Added an ItemDisplay crate roll animation
+[~] Updated Rare/Epic/Godly crate rewards - money, ham, netherite, heavy core, incantation rotations
+[~] Slowness will only apply while "outdoors" during snowstorms in Winter months, not year-round
+[+] Added overrides for snow and ice in certain biomes such as jungles, swamps, deserts, etc, regardless of temperature
+
+Bending & Abilities
+[+] Implemented white fire and prismatic fire
+[+] Implemented new invisibility mechanics where it breaks on PvP hit, mobs can't target, and armor is hidden from others
+[+] Implemented the EarthRush combo for earthbenders
+[+] Implemented the AirSnipe combo for airbenders
+[+] Implemented Barbarian toggle system for Wanderers
+[+] Added crop growth buff to the Regrowth ability
+[+] Implemented potion duration extension at max amplifier cap
+[+] Scaled element change cooldown by rank from 24h at Peasant to 6h at Emperor
+[+] Added missing restriction to tapping sneak in a restricted bending area
+[~] Fixed issue where AirBlast was sourceable in restricted locations/worlds
+[~] Added missing functionality where Saints bypass all bending change cooldowns
+[~] Mitigated effects of Burial suffocating targets when blocks are on top of the exit hole
+[+] NoxiousFumes can now source fire from nearby positively-aligned players and extinguish them
+[~] Fixed CorruptingHelix not finding targets due to incorrect Dominion check
+[~] Decreased cooldown of SonicPulse from 10 to 6 seconds
+[~] Reduced charge times of AngeredSpirits, EnergyBurst, and IceShards
+[~] Changed the charging and charged animations of AngeredSpirits
+[+] Added EnergyBurst fall proc with scaled damage
+[+] Added the missing IceSkate passive to waterbenders
+[+] Add 3-hit cap per target for JetBolt damage ticks
+[+] Allowed HealingHelix, CorruptingHelix, and MendingWaters to be sourced from plants
+[~] Fixed VineWhip bypassing arena damage cap by using DamageHandler.damageEntity()
+[~] Fixed issue where Roku's form of Fang was causing block damage when flown in PastLives
+[~] Fix Chi boost lengthening bending cooldowns instead of shortening them
+[~] Fixed Hunter/Chi Strength not applying when Miner boost is also active
+[-] Removed Dolphin's Grace from Aquatic Aranarthium while WaterArms is bound to fix flight abuse
+[~] Restructured how ability permissions are added to fix issues causing certain abilities to not be bindable
+
+Dominion
+[+] Implemented additional Dominion Defender types (Creeper, Spider, Enderman, Blaze, Breeze, Guardian, Elder Guardian) with unique special abilities
+[+] Implemented particles to visualize dominion border lands while auto-claiming land
+[+] Added a dominion-wide Explosion permission to Dominions
+[+] Implemented seasonal food power multipliers for dominion food
+[~] Increased meat food power values and added meat/fish drops to more biome resource claims
+[~] Decreased dominion food/balance costs and fixed food persistence after daily/penalty consumption
+[+] Now displaying food power and estimated duration in dominion food GUI title, updating as items are added/removed
+[+] Added dominion resource claim preview via right-click
+[~] Scaled dominion resource claim yields by weekly food slot fill efficiency
+[~] Dominion resource claims now yield ore blocks instead of raw materials
+[+] Beach Dominion resource claims have a 1/25 chance to yield a Heart of the Sea
+[+] Added mending books to end city simulations in End biomes from dominion resource claims
+[+] Added dominion permission of chest locking in dominion lands
+[+] Added player search relation display in /d's User Search
+[+] Added Discord dominion-relations crumble/recovery messages on auto-unclaim
+[~] Allowing dominion renaming to the same name with different color codes
+[~] Fixed per-player PvP overrides not taking precedence over relation flags for defenders and combat
+[~] Defenders no longer block sleep if nearby the bed
+[~] Fixed Elder Guardian defenders applying Mining Fatigue to PvP-exempt players
+[~] Protected passive mobs in dominion land from outsider damage unless enemied
+[~] Fix potted flowers being stealable in Dominions
+[~] Fixed locked containers being openable in dominions by untrusted players with Container permission
+[~] Delayed the Dominion death penalty messages by 1 tick so they appear after the vanilla death message
+[~] Fixed issue where dominion death penalty message, un-afk chat messages were displayed in the incorrect order, and new player server join was in the incorrect order
+[~] Blocked new dominion and outpost creation in Survival's main end island
+[~] Fixed issue where dominion disband was not properly deleting the dominion
+[~] Fixed outpost chunk counts not showing cross-server in /d info
+[~] Increase rates of obtaining blaze rods in nether fortress simulations in dominion resource claims
+[~] Reduced odds of getting elytras in dominion resource claims in biomes from The End
+[~] Replaced chorus plant/flower dominion resource claims with chorus fruit and purpur blocks
+[~] Fixed capitalization of "The End" in dominion resource claims
+
+Incantations
+[+] Implemented the Incantation of Resilience
+[+] Implemented the Incantation of Preservation
+[~] Restructured the book of /incantations
+[~] Updated Beheading description in /incantations to reflect new head drop rates
+[~] Updated /incantations formatting
+[+] Added incantation names to the chat unscrambler
+
+Items & Crafting
+[+] Implemented mob head drops with Beheading, and /heads to exchange resources for head items
 [+] Added the sawmill functionality
 [+] Implemented the Wrench item
-[+] Did a full overhaul of wandering traders, providing each with their own theme
-
-Minor Features
-[~] Fixed issue where the alchemist job was not providing xp when shift-clicking ingredients into a brewing stand
+[+] Implemented Aranarthium size scaling with /toggle size
+[+] Added support for Plentiful to be applied to shears
+[+] Implemented cave spider poison extraction
+[+] Added crop harvest functionality to LeafScythe
+[+] Added Invisible Armor perk
 [+] Added in missing netherite elytra "recipe" in an anvil
-[+] Added missing restriction to tapping sneak in a restricted bending area
-[~] Fixed incorrect world validations for snow in the SMP server
-[~] Fixed issue where OG players could not access /smpmap
-[~] Fixed issue where /msg and /r click functionality was typing /msg instead of prompting a hyperlink
-[~] Increase rates of obtaining blaze rods in nether fortress simulations in dominion resource claims
-[~] Fixed issue where mail was not synced properly across servers
-[~] Fixed issue where you couldn't use /resource from the SMP server as the world didn't exist
-[~] Fixed issue where homepad worlds were not being saved correctly in the SMP
+[+] Added the missing fire resistance to all Aranarthium armour pieces
+[+] Added sound effects to all Aranarthium armor
+[+] Added nether forest biomes to Fae Aranarthium boosts
+[+] Added a feature to search for your unlocked brews in /brewbook
+[+] Added /brewbook unlock as an admin command
+[+] Added custom /enchant to support unsafe enchantment levels
+[-] CamelHusk mounts no longer receive custom speed on spawn
+[~] Fixed issue where crops were not going into shulkers correctly due to lore issues
+
+Economy, Jobs & Quests
+[+] Added dynamic economy system
+[~] Decreased all market sell prices
+[~] Significantly increased all job pays
+[-] Removed the Smith job
+[+] Implemented /jobs top, /jobs who, and admin job commands
+[+] Quest selection now prioritizes quests that match the player's active jobs, filling with general quests when needed
+[+] Added /vptransfer to transfer vote points from one player to another
+[+] Added colored nickname perk to vote shop and store
+[-] Disabled the creation of new shop islands
+[~] Fixed issue where the alchemist job was not providing xp when shift-clicking ingredients into a brewing stand
+[+] Added rewards from milking, shearing, etc animals to the Farmer job
+[~] Fixed spear kills not counting towards quest/job progress
+[~] Added fix to prevent loss of job progress
+[~] Fixed TPS drop due to synchronous job updates on main server thread
 [~] Fixed issue where quests were not resetting correctly in the SMP server
 [+] Implemented /ac resetquests
+[~] Removed stale quest logs and combined them into one
+[~] Fixed issue where shops were not allowing bulk sale of shulkers due to recent change with bending sourcing in restricted locations/worlds
+[~] Fixed shelves being interactable in the shops world
+[+] Added support for /pay for offline players
+
+Homepad
+[~] Fixed issue where homepad worlds were not being saved correctly in the SMP
+[~] Fix homepads being placeable on Survival and losing nether/end homepads after restart
+[~] Fixed issue where homepads couldn't be reordered due to them using the indexes from old command format
+[+] Add /homepad delete to unregister a homepad without breaking the block
+[+] Added tab completion for /homepad
+[~] Changed recipe of homepads to be more expensive
+
+Chat, UI & Sounds
+[+] Added interactive chat - [item], [inv], [ec], and [coords]/[pos]
+[+] Implemented emoji shorthand translation in chat with /toggle emoji support
+[+] Stripped period from chat messages starting with ./ to clean up command references in chat
+[+] Overhauled blacklist functionality to have 6 unique nameable presets
+[+] Added clickable navigation buttons to /baltop
+[+] Added active boosts to tab footer
+[+] Added /t servertips toggle to hide periodic server tip messages
+[+] Added a custom /mcstats GUI
+[~] Fixed issue where /msg and /r click functionality was typing /msg instead of prompting a hyperlink
+[+] Added mixing of hex and & codes in gradient chat
+[~] Fixed issue where gradient chat was not persisting correctly across server restarts
+[~] Fixed issue where clicking in most GUIs would relocate the player's mouse to the center of the screen
+[~] Capitalized the first letter of each word when displaying unscrambled answers
+[~] Decreased chat unscrambler reward amount at later ranks
+[~] Separated "ming hua" into two words for chat unscrambler
+[~] Fixed chat unscramble win not removing AFK status
+[+] Implemented custom mcMMO level broadcast messages
+[~] Saint donation messages now display the specific Saint rank name
+[~] Home GUI title now shows current vs total homes
+[~] Reformatted toggle GUI
+[+] Added brewing stand bubble sound at world location on brew complete
+[~] Changed the vote sound icon from experience bottle to vote key in /sounds GUI
+[-] Removed redundant "Sound" keyword from items in /sounds
+[~] Added /sounds reminder in the server tips
+[+] Added /cd as alias for /countdown
+
+Quality of Life
+[+] Implemented /condense to auto-condense your inventory
+[+] Added Reaper Inventory system to purchase back your last death's inventory within 24 hours
+[+] Added low health heartbeat sound with progressive speed
+[+] Added support to mass empty shulker box contents to containers via Shulker Assist
+[~] Inventory Assist replenishment now prioritizes direct inventory items over shulker box contents
+[~] Fixed drinking water bottle deleting the glass bottle when auto-replenish overwrote the slot
+[~] Renamed /toggle bulksellshulker to shulkerbulk
+[+] Added exclusion to AFK players for sleep skipping
+[+] Added full hunger bars to the arena world
+
+Cross-server & Technical
+[~] Fixed incorrect world validations for snow in the SMP server
+[~] Fixed issue where OG players could not access /smpmap
+[~] Fixed issue where mail was not synced properly across servers
+[~] Fix cross-server mail not being received - sync to MySQL before publishing network notification
+[~] Fixed issue where you couldn't use /resource from the SMP server as the world didn't exist
 [~] Fixed issue where inventories were not saved upon server transfer i.e during server restart
 [~] Mitigated issue where previous locations are not saving correctly across server restarts causing players to be teleported abnormally on later login
-[~] Added missing functionality where Saints bypass all bending change cooldowns
+[~] Fixed issue where vote points were not being saved due to cross-server voting
+[~] Merged database and in-memory vote history on sync to prevent cross-server overwrite
+[~] Fixed vote keys not being delivered immediately when player is on SMP
+[~] Fixed cross-server sleep count double-counting sleeping players
+[~] Fixed issue where server join messages were not being properly sent to discord chat
+[~] Fix new month Discord message sending twice
+[~] Fix NPE in updateDiscordRole when DISCORD perk is absent from player perks map
+[~] Fixed Discord role/notification updates silently skipping non-cached guild members by switching from getMemberById to retrieveMemberById
+[~] Fixed null player names in command results due to cross-server player lookup
+[~] Stopped applying MySQL snapshot on unplanned cross-server landing which was causing inventory corruption on server shutdown
+[~] Fixed rank changes not updating cross-server for TAB and permissions
+[~] Fix first-time SMP players getting blank AranarthPlayer instead of DB data
+[~] Fixed null pointer due to reference to resource world in SMP server weather change listener
+[~] Removed resource world preloading logic and replaced with calls to Chunky
+[~] Mitigations to boosts being unintentionally removed on server restart
+[~] Fix /boosts remove doing nothing when run from SMP
+[~] Fixed SMP overwriting Survival dominion data on shutdown, causing data loss on restart
+[~] Fixed issues with doubled messages in chat from both server consoles running commands publicly
+[~] Fixed doubled new day message due to both Survival and SMP servers evaluating it
+[~] Fixed double broadcast of chat unscrambler messages when cross-server
+[~] Fixed doubled outpost creation/rename messages caused by BroadcastRelayListener double-relay
+[~] Added cross-server /ac invsee support
 
-Backend Code Changes
--
+Miscellaneous
+[~] Reverted old temporary code that was causing endless snowstorms during Frigorvor
+[~] Fixed repeated weather change message issue
+[~] Fixed stacking potion effects applying in the arena world
+[~] Added /ac tp to Moderators
+[~] Fixed architects being unable to use /ac msg
+[+] Added /ac reloadperms [player] to force permission re-evaluation for online players across both servers
+[+] Added /ac speed to architects

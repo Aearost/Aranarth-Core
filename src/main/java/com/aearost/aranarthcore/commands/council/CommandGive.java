@@ -114,7 +114,10 @@ public class CommandGive {
                         if (isBroadcast) {
                             String broadcastMessage = ChatUtils.chatMessage("&e" + player.getName() + " &7has purchased " + itemName + " x" + quantity);
                             DiscordUtils.donationNotification(player.getName() + " has purchased " + itemName + " x" + quantity, player.getUniqueId(), Color.CYAN);
-                            Bukkit.broadcastMessage(broadcastMessage);
+                            for (Player online : Bukkit.getOnlinePlayers()) {
+                                online.sendMessage(broadcastMessage);
+                            }
+                            Bukkit.getConsoleSender().sendMessage(broadcastMessage);
                             if (NetworkManager.isActive()) {
                                 NetworkManager.getInstance().publishBroadcast(broadcastMessage);
                             }

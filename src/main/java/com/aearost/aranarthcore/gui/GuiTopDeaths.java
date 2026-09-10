@@ -57,9 +57,51 @@ public class GuiTopDeaths {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                 aranarthPlayer.setCurrentGuiPageNum(pageNum);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                new GuiTopDeaths(player, pageNum, profiles).openGui();
+                String openTitle = com.aearost.aranarthcore.utils.ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
+                if (player.isOnline() && openTitle.equals("Top Deaths")) {
+                    populate(player.getOpenInventory().getTopInventory(), player, pageNum, profiles);
+                } else {
+                    new GuiTopDeaths(player, pageNum, profiles).openGui();
+                }
             });
         });
+    }
+
+    private static void populate(Inventory gui, Player player, int pageNum, Map<UUID, PlayerProfile> profiles) {
+        List<UUID> uuidList = AranarthUtils.getTopDeaths(player.getWorld());
+        int startIndex = pageNum * 45;
+
+        ItemStack blank = new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE);
+        ItemMeta blankMeta = blank.getItemMeta();
+        if (Objects.nonNull(blankMeta)) {
+            blankMeta.setDisplayName(ChatUtils.translateToColor("&f"));
+            blank.setItemMeta(blankMeta);
+        }
+
+        for (int i = 0; i < 45; i++) {
+            if (i >= uuidList.size()) {
+                gui.setItem(i, blank);
+                continue;
+            }
+
+            UUID uuid = uuidList.get(startIndex + i);
+            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+            ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+            SkullMeta skullMeta = (SkullMeta) head.getItemMeta();
+
+            PlayerProfile profile = profiles.get(uuid);
+            if (profile != null) {
+                skullMeta.setPlayerProfile(profile);
+            }
+
+            skullMeta.setDisplayName(ChatUtils.translateToColor("&e" + aranarthPlayer.getNickname()));
+            List<String> lore = new ArrayList<>();
+            int deathCount = AranarthUtils.getKillsOrDeathsInWorld(uuid, player.getWorld(), false);
+            lore.add(ChatUtils.translateToColor("&e" + deathCount + " deaths"));
+            skullMeta.setLore(lore);
+            head.setItemMeta(skullMeta);
+            gui.setItem(i, head);
+        }
     }
 
     private Inventory initializeGui(Player player, int pageNum, Map<UUID, PlayerProfile> profiles) {

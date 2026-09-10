@@ -280,7 +280,7 @@ public class Sandstorm extends SandAbility implements AddonAbility {
     }
 
     // -------------------------------------------------------------------------
-    // Entity tracking — slowness & damage
+    // Entity tracking - slowness & damage
     // -------------------------------------------------------------------------
 
     /**

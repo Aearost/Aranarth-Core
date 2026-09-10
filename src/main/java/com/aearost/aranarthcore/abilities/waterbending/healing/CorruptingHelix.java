@@ -1,9 +1,7 @@
 package com.aearost.aranarthcore.abilities.waterbending.healing;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
-import com.aearost.aranarthcore.objects.DominionRank;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
@@ -395,7 +393,7 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
     private LivingEntity findTarget() {
         Location eye = player.getEyeLocation();
         Vector direction = eye.getDirection().normalize();
-        Dominion casterDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+        boolean inArena = player.getWorld().getName().startsWith("arena");
         LivingEntity closest = null;
         double closestDist = Double.MAX_VALUE;
 
@@ -410,17 +408,8 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
                 continue;
             }
 
-            if (entity instanceof Player targetPlayer) {
-                Dominion targetDominion = DominionUtils.getPlayerDominion(targetPlayer.getUniqueId());
-                if (casterDominion != null && targetDominion != null) {
-                    if (casterDominion.isSameDominion(targetDominion)) {
-                        continue;
-                    }
-                    DominionRank relation = DominionUtils.getRelationKey(casterDominion, targetDominion);
-                    if (relation == DominionRank.ALLIED || relation == DominionRank.TRUCED) {
-                        continue;
-                    }
-                }
+            if (!inArena && entity instanceof Player targetPlayer && !DominionUtils.canAttackPlayer(player, targetPlayer)) {
+                continue;
             }
 
             double dist = entity.getLocation().distance(eye);
@@ -461,11 +450,15 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
     }
 
     /**
-     * Attempts to register the block as the pending water source for the player.
-     * Must be water, ice, or snow.
+     * Attempts to register the block as the pending water or plant source for the player.
+     * Must be water, ice, snow, or a plant material (if the player can plantbend).
      */
     public static void trySelectSource(final Player player, final Block block) {
-        if (!VALID_SOURCES.contains(block.getType())) {
+        BendingPlayer bp = BendingPlayer.getBendingPlayer(player);
+        boolean isWater = VALID_SOURCES.contains(block.getType());
+        boolean isPlant = !isWater && bp != null && bp.canPlantbend()
+                && AranarthBendingUtils.isPlantSource(block.getType());
+        if (!isWater && !isPlant) {
             return;
         }
         if (!block.getWorld().equals(player.getWorld())) {
@@ -474,7 +467,6 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
         if (block.getLocation().distance(player.getLocation()) > SOURCE_RANGE) {
             return;
         }
-        BendingPlayer bp = BendingPlayer.getBendingPlayer(player);
         if (bp != null && bp.isOnCooldown("CorruptingHelix")) {
             return;
         }

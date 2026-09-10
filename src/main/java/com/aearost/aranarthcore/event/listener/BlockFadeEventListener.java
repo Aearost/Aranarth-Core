@@ -34,7 +34,7 @@ public class BlockFadeEventListener implements Listener {
             return;
         }
 
-        // Farmland drying out (no water nearby) reverts to dirt — decrement the cached count
+        // Farmland drying out (no water nearby) reverts to dirt - decrement the cached count
         if (e.getBlock().getType() == Material.FARMLAND) {
             Dominion dominion = DominionUtils.getDominionOfChunkAnywhere(e.getBlock().getChunk());
             if (dominion != null) {
@@ -57,7 +57,7 @@ public class BlockFadeEventListener implements Listener {
         Block block = e.getBlock();
         double temperature = block.getTemperature();
 
-        // Only seep blocks (warm biome) need protection — cold biome blocks are handled elsewhere
+        // Only seep blocks (warm biome) need protection - cold biome blocks are handled elsewhere
         if (temperature < 0.85) {
             return;
         }
@@ -73,6 +73,6 @@ public class BlockFadeEventListener implements Listener {
                 }
             }
         }
-        // No cold neighbour within range — deep in a warm biome, let it fade naturally
+        // No cold neighbour within range - deep in a warm biome, let it fade naturally
     }
 }

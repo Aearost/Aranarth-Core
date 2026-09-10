@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.mob;
 
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.EntityEquipment;
@@ -39,6 +40,11 @@ public class ArdentArmorMobDrops {
                 continue;
             }
             drop.setAmount((int) Math.ceil(drop.getAmount() * 1.5));
+        }
+
+        int arVol = AranarthUtils.getPlayer(killer.getUniqueId()).getAranarthiumSoundVolume();
+        if (arVol > 0) {
+            killer.playSound(killer.getLocation(), Sound.ENTITY_RAVAGER_STEP, 0.5f * (arVol / 100f), 0.9f);
         }
     }
 }

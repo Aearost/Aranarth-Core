@@ -93,6 +93,7 @@ public class PlayerInteractEventListener implements Listener {
             new PlayerAutoReplenishSlot().execute(e, plugin);
             new CauldronFillBottle().execute(e);
             new SweetBerryHarvest().execute(e);
+            new CaveVineHarvest().execute(e);
             new LogWoodStripPrevent().execute(e);
             new BoneMealSapling().execute(e);
             new BoneMealWood().execute(e);
@@ -102,10 +103,12 @@ public class PlayerInteractEventListener implements Listener {
             new DoubleDoorOpen().execute(e);
             new EnderChestOpenPrevent().execute(e);
             new FletchingTableClick().execute(e);
+            new StructureWraith().execute(e);
             new ContainerInteract().execute(e);
             new ExpStore().execute(e);
             new CrateOpen().execute(e);
         } else if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
+            new ShulkerDump().execute(e);
             new ChestSort().execute(e);
             new SingleDoorOpen().execute(e);
         } else if (e.getAction() == Action.RIGHT_CLICK_AIR) {

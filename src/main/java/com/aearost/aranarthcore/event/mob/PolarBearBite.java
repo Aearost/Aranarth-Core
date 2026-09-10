@@ -17,7 +17,7 @@ import java.util.*;
  * Bite ability for the Polar Bear Dog (Water) mount.
  *
  * <p><b>On land/air:</b> the bear lunges in the rider's look direction. Max range scales
- * with the upward angle — 12 blocks horizontal, down to 5 blocks straight up. The lunge
+ * with the upward angle - 12 blocks horizontal, down to 5 blocks straight up. The lunge
  * stops on first entity contact, dealing high damage plus reduced splash damage to up to
  * {@value MAX_AOE_TARGETS} targets within {@value AOE_RADIUS} blocks.
  *
@@ -60,11 +60,11 @@ public class PolarBearBite extends BukkitRunnable {
         this.inWater = MountUtils.isMountInWater(bear.getUniqueId());
 
         if (inWater) {
-            // No lunge — these fields are unused in the water path
+            // No lunge - these fields are unused in the water path
             this.lungeDir = null;
             this.maxDistance = 0;
         } else {
-            // Full 3D look direction — getDirection() returns a unit vector
+            // Full 3D look direction - getDirection() returns a unit vector
             Vector look = rider.getEyeLocation().getDirection();
             this.lungeDir = look.clone().multiply(LUNGE_SPEED);
 
@@ -183,7 +183,7 @@ public class PolarBearBite extends BukkitRunnable {
             targets.add(le);
         }
 
-        // Deal damage — full to primary, reduced to AOE targets
+        // Deal damage - full to primary, reduced to AOE targets
         int actualHits = 0;
         for (LivingEntity target : targets) {
             double d = target.equals(primaryTarget) ? damage : damage * AOE_DAMAGE_FRACTION;
@@ -215,7 +215,7 @@ public class PolarBearBite extends BukkitRunnable {
     private void finish() {
         if (!inWater) {
             // Zero residual velocity so the bear doesn't coast beyond the range cap.
-            // When called after a land/air bite(), velocity is already zero — harmless double-zero.
+            // When called after a land/air bite(), velocity is already zero - harmless double-zero.
             Entity e = Bukkit.getEntity(bearUUID);
             if (e instanceof PolarBear bear && !bear.isDead()) {
                 bear.setVelocity(new Vector(0, 0, 0));

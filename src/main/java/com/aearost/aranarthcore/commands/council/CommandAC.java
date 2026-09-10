@@ -93,8 +93,6 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandRankSet.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("msg")) {
 			commandResult = CommandCouncilMessage.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("skull")) {
-			commandResult = CommandSkull.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("dateset")) {
 			commandResult = CommandDateSet.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("teleport") || args[0].equalsIgnoreCase("tp") || args[0].equalsIgnoreCase("tpf") || args[0].equalsIgnoreCase("tpw")) {
@@ -119,12 +117,18 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandInvSwap.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("discordreload")) {
 			commandResult = CommandDiscordReload.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("reloadperms")) {
+			commandResult = CommandReloadPerms.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("migrate")) {
 			commandResult = CommandMigrate.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("unscramble")) {
 			commandResult = CommandUnscramble.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("og")) {
 			commandResult = CommandOG.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("reloadshops")) {
+			commandResult = CommandReloadShops.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("worldevent")) {
+			commandResult = CommandWorldEvent.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("disband")) {
 			if (args.length < 2) {
 				sender.sendMessage(ChatUtils.chatMessage("&cUsage: &e/ac disband <dominion name>"));

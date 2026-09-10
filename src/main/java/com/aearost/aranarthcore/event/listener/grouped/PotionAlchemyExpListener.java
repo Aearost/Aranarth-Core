@@ -65,7 +65,7 @@ public class PotionAlchemyExpListener implements Listener {
 			return;
 		}
 
-		// ADDED or CHANGED — only track if the effect was applied by a potion.
+		// ADDED or CHANGED - only track if the effect was applied by a potion.
 		EntityPotionEffectEvent.Cause cause = e.getCause();
 		if (cause == EntityPotionEffectEvent.Cause.POTION_DRINK ||
 				cause == EntityPotionEffectEvent.Cause.POTION_SPLASH ||
@@ -75,7 +75,7 @@ public class PotionAlchemyExpListener implements Listener {
 						.put(effectType, e.getNewEffect().getDuration());
 			}
 		} else {
-			// Effect overwritten by a non-potion source — remove tracking so the restriction no longer applies.
+			// Effect overwritten by a non-potion source - remove tracking so the restriction no longer applies.
 			Map<PotionEffectType, Integer> tracked = potionEffectDurations.get(entityId);
 			if (tracked != null) {
 				tracked.remove(effectType);
@@ -100,7 +100,7 @@ public class PotionAlchemyExpListener implements Listener {
 			PotionEffectType effectType = appliedEffect.getType();
 			PotionEffect existingEffect = entity.getPotionEffect(effectType);
 
-			// Effect is not currently active — no restriction needed.
+			// Effect is not currently active - no restriction needed.
 			if (existingEffect == null) continue;
 
 			// Only restrict if the active effect was itself applied by a potion.

@@ -94,13 +94,14 @@ public class QuestEventListener implements Listener {
     // Material name suffixes for melee weapon detection
     private static final String SWORD_SUFFIX = "_SWORD";
     private static final String AXE_SUFFIX = "_AXE";
+    private static final String SPEAR_SUFFIX = "_SPEAR";
 
     public QuestEventListener(AranarthCore plugin) {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     // -------------------------------------------------------------------------
-    // Block Break — logs, stone, ores, sand, dirt, gravel, crops, ancient debris
+    // Block Break - logs, stone, ores, sand, dirt, gravel, crops, ancient debris
     // -------------------------------------------------------------------------
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
@@ -180,7 +181,7 @@ public class QuestEventListener implements Listener {
             return;
         }
 
-        // Crop harvest — check if mature
+        // Crop harvest - check if mature
         if (HARVESTABLE_CROP_MATERIALS.contains(type)) {
             if (isMatureCrop(e.getBlock())) {
                 QuestUtils.updateProgress(player, QuestTaskType.HARVEST_CROPS, 1);
@@ -189,7 +190,7 @@ public class QuestEventListener implements Listener {
     }
 
     // -------------------------------------------------------------------------
-    // Block Place — planting crops
+    // Block Place - planting crops
     // -------------------------------------------------------------------------
 
     @EventHandler
@@ -207,7 +208,7 @@ public class QuestEventListener implements Listener {
     }
 
     // -------------------------------------------------------------------------
-    // Entity Death — mob kills
+    // Entity Death - mob kills
     // -------------------------------------------------------------------------
 
     @EventHandler
@@ -345,7 +346,7 @@ public class QuestEventListener implements Listener {
 
     /**
      * Attempts to find the player who killed the entity.
-     * Handles both direct melee kills and arrow/projectile kills.
+     * Handles direct melee kills, arrow/projectile kills, and spear lunge kills.
      */
     private Player getPlayerKiller(LivingEntity entity) {
         Player directKiller = entity.getKiller();
@@ -365,6 +366,10 @@ public class QuestEventListener implements Listener {
                     return p;
                 }
             }
+        }
+        // Spear lunges fire EntityDamageEvent (not ByEntity) with the player as causingEntity
+        if (lastDamage != null && lastDamage.getDamageSource().getCausingEntity() instanceof Player p) {
+            return p;
         }
         return null;
     }
@@ -386,7 +391,7 @@ public class QuestEventListener implements Listener {
 
     /**
      * Returns true if the entity's killing blow was delivered by a melee weapon:
-     * sword, axe, mace, or trident (used in melee, not thrown).
+     * sword, axe, mace, spear, or trident (used in melee, not thrown).
      */
     private boolean isMeleeKill(LivingEntity entity, Player killer) {
         EntityDamageEvent lastDamage = entity.getLastDamageCause();
@@ -400,6 +405,7 @@ public class QuestEventListener implements Listener {
         String matName = killer.getInventory().getItemInMainHand().getType().name();
         return matName.endsWith(SWORD_SUFFIX)
                 || matName.endsWith(AXE_SUFFIX)
+                || matName.endsWith(SPEAR_SUFFIX)
                 || matName.equals("MACE")
                 || matName.equals("TRIDENT");
     }
@@ -409,7 +415,7 @@ public class QuestEventListener implements Listener {
      */
     private boolean isMatureCrop(Block block) {
         Material type = block.getType();
-        // Melon and pumpkin blocks don't have Ageable — they are always harvestable
+        // Melon and pumpkin blocks don't have Ageable - they are always harvestable
         if (type == Material.MELON || type == Material.PUMPKIN) {
             return true;
         }

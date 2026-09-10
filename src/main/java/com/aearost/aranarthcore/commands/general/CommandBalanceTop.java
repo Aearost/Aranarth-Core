@@ -6,6 +6,8 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.NetworkPlayer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -41,7 +43,6 @@ public class CommandBalanceTop implements CommandExecutor {
 			totalPageNumber++;
 		}
 
-		sender.sendMessage(ChatUtils.translateToColor("&8      - - - &6&lAranarth Balances &8- - -"));
 		int page = 1;
 
 		if (args.length > 0) {
@@ -61,6 +62,26 @@ public class CommandBalanceTop implements CommandExecutor {
 				page = totalPageNumber;
 			}
 		}
+
+		// Build navigation header with clickable navigation buttons
+		Component prevButton;
+		if (page > 1) {
+			Component prevDisplay = LegacyComponentSerializer.legacyAmpersand().deserialize("&8[&6&l<<&8]");
+			prevButton = ChatUtils.clickableCommand(prevDisplay, ChatUtils.translateToColor("&7Go to page &6" + (page - 1)), "/baltop " + (page - 1), false);
+		} else {
+			prevButton = LegacyComponentSerializer.legacyAmpersand().deserialize("&8[&7<<&8]");
+		}
+
+		Component nextButton;
+		if (page < totalPageNumber) {
+			Component nextDisplay = LegacyComponentSerializer.legacyAmpersand().deserialize("&8[&6&l>>&8]");
+			nextButton = ChatUtils.clickableCommand(nextDisplay, ChatUtils.translateToColor("&7Go to page &6" + (page + 1)), "/baltop " + (page + 1), false);
+		} else {
+			nextButton = LegacyComponentSerializer.legacyAmpersand().deserialize("&8[&7>>&8]");
+		}
+
+		Component titleMiddle = LegacyComponentSerializer.legacyAmpersand().deserialize("&8 - - - &6&lAranarth Balances &8- - - ");
+		sender.sendMessage(prevButton.append(titleMiddle).append(nextButton));
 
 		sender.sendMessage(ChatUtils.translateToColor("&7Showing page &6" + page + " &7of &6" + totalPageNumber));
 
@@ -101,18 +122,25 @@ public class CommandBalanceTop implements CommandExecutor {
 			if (aranarthPlayer != null) {
 				displayedName = ChatUtils.providePrefixAndName(uuid);
 			} else {
-				// Player is not loaded on this server — use DB nickname/username for display.
+				// Player is not loaded on this server - use DB nickname/username for display.
 				// If they are currently online on another server, prefer the remote roster entry.
 				NetworkPlayer remote = NetworkManager.isActive()
 						? NetworkManager.getInstance().getRemotePlayer(uuid) : null;
 				if (remote != null) {
-					displayedName = remote.getNickname().isEmpty()
+					String remoteNick = remote.getNickname();
+					displayedName = (remoteNick == null || remoteNick.isEmpty())
 							? remote.getUsername()
-							: ChatUtils.stripColorFormatting(remote.getNickname());
+							: ChatUtils.stripColorFormatting(remoteNick);
 				} else {
 					String nick = balanceEntry.nickname();
+					String username = balanceEntry.username();
+					if (username == null || username.isEmpty()) {
+						// DB username column missing - fall back to Bukkit's cached player name
+						String bukkit = org.bukkit.Bukkit.getOfflinePlayer(uuid).getName();
+						username = bukkit != null ? bukkit : "Unknown";
+					}
 					displayedName = (nick == null || nick.isEmpty())
-							? balanceEntry.username()
+							? username
 							: ChatUtils.stripColorFormatting(nick);
 				}
 			}

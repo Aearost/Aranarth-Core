@@ -35,6 +35,15 @@ public class GuiJobsLeave {
         player.openInventory(gui);
     }
 
+    /**
+     * Updates an already-open leave-jobs inventory in-place without closing it.
+     */
+    public void populateInto(org.bukkit.inventory.Inventory inv) {
+        for (int i = 0; i < gui.getSize(); i++) {
+            inv.setItem(i, gui.getItem(i));
+        }
+    }
+
     private Inventory initializeGui() {
         Inventory inv = Bukkit.createInventory(player, 27, ChatUtils.translateToColor("&8&lLeave a Job"));
 

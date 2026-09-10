@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.block;
 import com.aearost.aranarthcore.commands.general.CommandLock;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -143,8 +144,11 @@ public class ContainerInteract {
         CommandLock.scheduleToggleExpiry(uuid);
         LockedContainer container = AranarthUtils.getLockedContainerAtBlock(block);
 
+        Dominion chunkDominion = DominionUtils.getDominionOfChunk(block.getChunk());
         if (!AranarthUtils.isSurvivalWorld(block.getWorld().getName()) || AranarthUtils.isSpawnLocation(block.getLocation())) {
             player.sendMessage(ChatUtils.chatMessage("&cContainers cannot be locked here!"));
+        } else if (chunkDominion != null && !DominionUtils.hasPermission(player, chunkDominion, DominionPermission.LOCK_CONTAINER)) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to lock containers in this dominion!"));
         } else if (container != null) {
             player.sendMessage(ChatUtils.chatMessage("&cThis container is already locked!"));
         } else {
@@ -198,13 +202,7 @@ public class ContainerInteract {
     private void attemptOpen(PlayerInteractEvent e) {
         Block block = e.getClickedBlock();
         Player player = e.getPlayer();
-        Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
         Dominion chunkDominion = DominionUtils.getDominionOfChunk(block.getChunk());
-
-        // Message is sent in DominionProtection already
-        if (chunkDominion != null) {
-            return;
-        }
 
         // Message is sent in ShopInteract already
         if (ShopUtils.getShopFromLocation(block.getRelative(BlockFace.UP).getLocation()) != null) {
@@ -225,6 +223,9 @@ public class ContainerInteract {
                 e.setCancelled(true);
                 player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to open this container!"));
             }
+        } else if (chunkDominion != null) {
+            // No lock - apply normal dominion permission check instead
+            return;
         }
     }
 }

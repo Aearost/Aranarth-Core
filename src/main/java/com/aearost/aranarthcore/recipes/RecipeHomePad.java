@@ -21,11 +21,11 @@ public class RecipeHomePad {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_HOME_PAD");
 		ShapedRecipe recipe = new ShapedRecipe(nk, new Homepad().getItem());
 
-		recipe.shape("LDL", "GPG", "LDL");
+		recipe.shape("EDE", "NPN", "EDE");
 
-		recipe.setIngredient('L', Material.LAPIS_BLOCK);
+		recipe.setIngredient('E', Material.EMERALD_BLOCK);
 		recipe.setIngredient('D', Material.DIAMOND);
-		recipe.setIngredient('G', Material.GOLD_BLOCK);
+		recipe.setIngredient('N', Material.NETHERITE_BLOCK);
 		recipe.setIngredient('P', Material.HEAVY_WEIGHTED_PRESSURE_PLATE);
 		
 		Bukkit.addRecipe(recipe);

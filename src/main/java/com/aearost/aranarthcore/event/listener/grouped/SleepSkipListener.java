@@ -3,14 +3,21 @@ package com.aearost.aranarthcore.event.listener.grouped;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Weather;
+import com.aearost.aranarthcore.enums.WorldEvent;
 import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.DefenderUtils;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
@@ -25,7 +32,9 @@ public class SleepSkipListener implements Listener {
 	public SleepSkipListener(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 		if (NetworkManager.isActive()) {
-			NetworkManager.getInstance().setRemoteSleepCallback(this::updateSleepMessage);
+			// Pass isRemoteUpdate=true so the callback re-evaluates the skip condition
+			// and updates the local action bar without re-publishing back to the remote server.
+			NetworkManager.getInstance().setRemoteSleepCallback(() -> updateSleepMessage(true));
 		}
 	}
 
@@ -34,11 +43,37 @@ public class SleepSkipListener implements Listener {
 	private final List<UUID> sleepingPlayers = new ArrayList<>();
 
 	/**
+	 * Allows sleeping when the only nearby hostile mobs are defenders.
+	 */
+	@EventHandler(priority = EventPriority.HIGH)
+	public void onPlayerBedEnterNotSafe(final PlayerBedEnterEvent e) {
+		if (e.getBedEnterResult() != PlayerBedEnterEvent.BedEnterResult.NOT_SAFE) {
+			return;
+		}
+		// Check all nearby monsters within vanilla sleep-check radius (8 blocks)
+		for (Entity nearby : e.getPlayer().getNearbyEntities(8, 5, 8)) {
+			if (nearby instanceof Monster && !DefenderUtils.isDefender(nearby.getUniqueId())) {
+				return; // Real hostile mob present - keep the block
+			}
+		}
+		// Only defenders (if any) are nearby - allow sleeping
+		e.setUseBed(Event.Result.ALLOW);
+	}
+
+	/**
 	 * Allows for players to skip the day cycle in-game
 	 * @param e The event.
 	 */
 	@EventHandler
 	public void onPlayerSleep(final PlayerBedEnterEvent e) {
+		// Lunaris blocks sleeping - we also need to prevent tracking this player as sleeping
+		if (AranarthUtils.getActiveWorldEvent() == WorldEvent.LUNARIS) {
+			long time = e.getPlayer().getWorld().getTime();
+			if (time >= 12300 && time <= 23960) {
+				return;
+			}
+		}
+
 		if (e.getBedEnterResult() == PlayerBedEnterEvent.BedEnterResult.OK) {
 			sleepingPlayers.add(e.getPlayer().getUniqueId());
 			updateSleepMessage();
@@ -52,19 +87,33 @@ public class SleepSkipListener implements Listener {
 	@EventHandler
 	public void onPlayerLeaveBed(final PlayerBedLeaveEvent e) {
 		sleepingPlayers.remove(e.getPlayer().getUniqueId());
-		if (!sleepingPlayers.isEmpty()) {
-			updateSleepMessage();
-		}
+		updateSleepMessage();
 	}
 
 	/**
 	 * Handles updating the boss bar with the current number of players sleeping in a bed.
 	 */
 	private void updateSleepMessage() {
+		updateSleepMessage(false);
+	}
+
+	/**
+	 * Handles updating the action bar with the current number of players sleeping in a bed.
+	 * @param isRemoteUpdate True when triggered by a remote-server sleep event. Skips re-publishing
+	 *                       to the remote server to prevent a count feedback loop.
+	 */
+	private void updateSleepMessage(boolean isRemoteUpdate) {
+		long deepAfkThresholdMs = AranarthUtils.getAfkSecondsAmount() * 1000L;
+		long now = System.currentTimeMillis();
 		int onlinePlayersInSurvivalWorlds = 0;
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			String worldName = player.getLocation().getWorld().getName();
 			if (worldName.equals("world") || AranarthUtils.isSmpWorld(worldName) || worldName.equals("resource")) {
+				AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
+				long startTime = ap != null ? ap.getAfkStartTime() : 0;
+				if (startTime > 0 && (now - startTime) >= deepAfkThresholdMs) {
+					continue; // Deeply AFK - exclude from sleep threshold
+				}
 				onlinePlayersInSurvivalWorlds++;
 			}
 		}
@@ -80,7 +129,10 @@ public class SleepSkipListener implements Listener {
 		}
 
 		amountRequiredToSkip = (int) Math.ceil(onlinePlayersInSurvivalWorlds * percentRequiredToSkip);
-		int sleepingPlayerNum = sleepingPlayers.size();
+		// Capture the local-only count before combining - this is what gets published so the
+		// receiving server stores the correct per-server count (not a combined total).
+		final int localSleepingCount = sleepingPlayers.size();
+		int sleepingPlayerNum = localSleepingCount;
 		// Include players sleeping on the other server so the combined count is accurate
 		if (NetworkManager.isActive()) {
 			sleepingPlayerNum += NetworkManager.getInstance().getRemoteSleepingCount();
@@ -98,9 +150,11 @@ public class SleepSkipListener implements Listener {
 					}
 				}
 			}
-			// Publish to the other server so their players also see the sleep count
-			if (NetworkManager.isActive()) {
-				NetworkManager.getInstance().publishSleepMessage(message, totalSleepingPlayerNum, amountRequiredToSkip);
+			// Publish local-only sleeping count to the remote server. Do not publish when this
+			// update was itself triggered by a remote message - that would echo the count back
+			// and cause the remote server to double-count it.
+			if (!isRemoteUpdate && NetworkManager.isActive()) {
+				NetworkManager.getInstance().publishSleepMessage(message, localSleepingCount, amountRequiredToSkip);
 			}
 		}, 1L);
 

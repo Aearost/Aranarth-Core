@@ -400,7 +400,7 @@ public class OutpostUtils {
     public static int getTotalOutpostChunkCount(UUID dominionId) {
         int total = 0;
         for (Outpost outpost : getDominionOutposts(dominionId)) {
-            total += outpost.getChunks().size();
+            total += outpost.getChunkCount();
         }
         return total;
     }

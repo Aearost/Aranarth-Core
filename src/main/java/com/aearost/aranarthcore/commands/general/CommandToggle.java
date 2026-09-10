@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.enums.FireType;
+import com.aearost.aranarthcore.event.listener.misc.InvisibleArmorManager;
 import com.aearost.aranarthcore.gui.GuiToggle;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Perk;
@@ -12,10 +14,18 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 /**
  * Centralizes the logic for toggling different functionality in Aranarth.
  */
 public class CommandToggle implements CommandExecutor {
+
+    private static final Map<UUID, Long> pendingBarbarianToggle = new HashMap<>();
+    private static final long BARBARIAN_CONFIRM_TIMEOUT_MS = 30_000L;
+    private static final long BARBARIAN_COOLDOWN_MS = 72L * 60 * 60 * 1000; // 72 hours
 
 	/**
 	 * @param sender The user that entered the command.
@@ -165,20 +175,22 @@ public class CommandToggle implements CommandExecutor {
 						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7automatic chest locking"));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-				} else if (args[0].equalsIgnoreCase("bluefire")) {
-					// Will need to remove blue fire entirely and re-enable based on perk
-					if (aranarthPlayer.getPerks().get(Perk.BLUEFIRE) == 1) {
-						if (aranarthPlayer.hasBlueFireDisabled()) {
-							aranarthPlayer.setBlueFireDisabled(false);
-							player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7your blue fire"));
-						} else {
-							aranarthPlayer.setBlueFireDisabled(true);
-							player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7your blue fire"));
+				} else if (args[0].equalsIgnoreCase("firetype")) {
+					if (hasAnyFirePerk(aranarthPlayer)) {
+						FireType oldType = aranarthPlayer.getFireType();
+						FireType newType = nextAvailableType(oldType, aranarthPlayer);
+						if (newType == oldType) {
+							player.sendMessage(ChatUtils.chatMessage("&cYou do not have access to any other fire types"));
+							return true;
 						}
+						aranarthPlayer.setFireType(newType);
+						player.sendMessage(ChatUtils.chatMessage("&7Fire type set to &e" + newType.getDisplayName()));
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-						PermissionUtils.evaluatePlayerPermissions(player);
+						if (oldType == FireType.BLUE || newType == FireType.BLUE) {
+							PermissionUtils.evaluatePlayerPermissions(player);
+						}
 					} else {
-						player.sendMessage(ChatUtils.chatMessage("&cYou do not have the Blue Fire perk"));
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have any fire type perks"));
 					}
 				} else if (args[0].equalsIgnoreCase("pethurt")) {
 					if (aranarthPlayer.isHurtingOwnPets()) {
@@ -217,18 +229,18 @@ public class CommandToggle implements CommandExecutor {
 						String colors = args[1];
 						String[] colorArray = colors.split(",");
 						if (colorArray.length < 2) {
-							player.sendMessage(ChatUtils.chatMessage("&cAt least 2 colors are required! Use: &e/toggle gradientchat #hex1,#hex2,..."));
+							player.sendMessage(ChatUtils.chatMessage("&cAt least 2 colors are required"));
 							return true;
 						}
 						boolean validColors = true;
 						for (String color : colorArray) {
-							if (!color.startsWith("#") || color.length() != 7 || !color.substring(1).matches("[0-9A-Fa-f]+")) {
+							if (!ChatUtils.isValidGradientColor(color)) {
 								validColors = false;
 								break;
 							}
 						}
 						if (!validColors) {
-							player.sendMessage(ChatUtils.chatMessage("&cThe entered hex codes are not valid"));
+							player.sendMessage(ChatUtils.chatMessage("&cThis color is invalid"));
 							return true;
 						}
 						aranarthPlayer.setGradientChatColors(colors);
@@ -278,7 +290,7 @@ public class CommandToggle implements CommandExecutor {
 						player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7weather change messages"));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-				} else if (args[0].equalsIgnoreCase("bulksellshulker")) {
+				} else if (args[0].equalsIgnoreCase("shulkerbulk")) {
 					if (player.hasPermission("aranarth.shulker")) {
 						if (aranarthPlayer.isBulkSellShulkerEnabled()) {
 							aranarthPlayer.setBulkSellShulkerEnabled(false);
@@ -300,6 +312,104 @@ public class CommandToggle implements CommandExecutor {
 						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7compact dominion messages"));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				} else if (args[0].equalsIgnoreCase("emoji")) {
+					if (aranarthPlayer.isEmojiEnabled()) {
+						aranarthPlayer.setEmojiEnabled(false);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7emoji translation"));
+					} else {
+						aranarthPlayer.setEmojiEnabled(true);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7emoji translation"));
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				} else if (args[0].equalsIgnoreCase("interactivechat")) {
+					boolean hasPerm = aranarthPlayer.getSaintRank() >= 2 || aranarthPlayer.getCouncilRank() > 0;
+					if (!hasPerm) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this!"));
+						return true;
+					}
+					if (aranarthPlayer.isInteractiveChatEnabled()) {
+						aranarthPlayer.setInteractiveChatEnabled(false);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7interactive chat"));
+					} else {
+						aranarthPlayer.setInteractiveChatEnabled(true);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7interactive chat"));
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				} else if (args[0].equalsIgnoreCase("barbarian")) {
+					long now = System.currentTimeMillis();
+					long cooldownEnd = aranarthPlayer.getBarbarianCooldownEnd();
+					if (cooldownEnd > now) {
+						long remainingMs = cooldownEnd - now;
+						long hours = remainingMs / 3_600_000L;
+						long minutes = (remainingMs % 3_600_000L) / 60_000L;
+						player.sendMessage(ChatUtils.chatMessage("&cYou cannot change your Barbarian status for another &e"
+								+ hours + "h " + minutes + "m"));
+						return true;
+					}
+					boolean becomingBarbarian = !aranarthPlayer.isBarbarian();
+					Long pendingExpiry = pendingBarbarianToggle.get(player.getUniqueId());
+					if (pendingExpiry == null || now > pendingExpiry) {
+						// First run - show confirmation prompt
+						pendingBarbarianToggle.put(player.getUniqueId(), now + BARBARIAN_CONFIRM_TIMEOUT_MS);
+						if (becomingBarbarian) {
+							player.sendMessage(ChatUtils.chatMessage("&eWarning: &7Becoming a Barbarian means you can both &edeal/take &7damage from other players"));
+							player.sendMessage(ChatUtils.chatMessage("&7This cannot be changed for &e3 days&7. Run &e/toggle barbarian &7again to confirm"));
+						} else {
+							player.sendMessage(ChatUtils.chatMessage("&eWarning: &7Becoming a Wanderer means you will be &aimmune &7to player damage, but cannot deal damage to players either"));
+							player.sendMessage(ChatUtils.chatMessage("&7This cannot be changed for &e3 days&7. Run &e/toggle barbarian &7again to confirm"));
+						}
+						return true;
+					}
+					// Second run within window - execute the toggle
+					pendingBarbarianToggle.remove(player.getUniqueId());
+					aranarthPlayer.setBarbarian(becomingBarbarian);
+					aranarthPlayer.setBarbarianCooldownEnd(now + BARBARIAN_COOLDOWN_MS);
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+					if (becomingBarbarian) {
+						player.sendMessage(ChatUtils.chatMessage("&7You are now a &cBarbarian&7. You can deal and take damage from other players"));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&7You are now a &aWanderer&7. You are immune to player damage"));
+					}
+				} else if (args[0].equalsIgnoreCase("invisiblearmor")) {
+					if (!player.hasPermission("aranarth.invisiblearmor")) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have the Invisible Armor perk!"));
+						return true;
+					}
+					if (InvisibleArmorManager.isArmorHidden(player.getUniqueId())) {
+						InvisibleArmorManager.showArmor(player);
+						player.sendMessage(ChatUtils.chatMessage("&7Your armor is now &evisible"));
+					} else {
+						InvisibleArmorManager.hideArmor(player);
+						player.sendMessage(ChatUtils.chatMessage("&7Your armor is now &ehidden"));
+					}
+				} else if (args[0].equalsIgnoreCase("reaper")) {
+					if (aranarthPlayer.isReaperDisabled()) {
+						aranarthPlayer.setReaperDisabled(false);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7the Reaper system"));
+					} else {
+						aranarthPlayer.setReaperDisabled(true);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7the Reaper system"));
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				} else if (args[0].equalsIgnoreCase("size")) {
+					if (aranarthPlayer.isSizeScaleEnabled()) {
+						aranarthPlayer.setSizeScaleEnabled(false);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7Aranarthium size scaling"));
+					} else {
+						aranarthPlayer.setSizeScaleEnabled(true);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7Aranarthium size scaling"));
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+					AranarthUtils.applyAranarthiumScale(player);
+				} else if (args[0].equalsIgnoreCase("servertips")) {
+					if (aranarthPlayer.isServerTipsDisabled()) {
+						aranarthPlayer.setServerTipsDisabled(false);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7server tips"));
+					} else {
+						aranarthPlayer.setServerTipsDisabled(true);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7server tips"));
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/toggle <option>"));
 				}
@@ -312,6 +422,34 @@ public class CommandToggle implements CommandExecutor {
 			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to execute this command!"));
 			return true;
 		}
+	}
+
+	private boolean hasAnyFirePerk(AranarthPlayer aranarthPlayer) {
+		return aranarthPlayer.getPerks().getOrDefault(Perk.BLUEFIRE, 0) == 1
+				|| aranarthPlayer.getPerks().getOrDefault(Perk.WHITEFIRE, 0) == 1
+				|| aranarthPlayer.getPerks().getOrDefault(Perk.PRISMATICFIRE, 0) == 1
+;
+	}
+
+	private FireType nextAvailableType(FireType current, AranarthPlayer aranarthPlayer) {
+		FireType[] values = FireType.values();
+		int start = current.ordinal();
+		for (int i = 1; i < values.length; i++) {
+			FireType candidate = values[(start + i) % values.length];
+			if (canUseFireType(candidate, aranarthPlayer)) {
+				return candidate;
+			}
+		}
+		return current;
+	}
+
+	private boolean canUseFireType(FireType type, AranarthPlayer aranarthPlayer) {
+		return switch (type) {
+			case DEFAULT -> true;
+			case BLUE -> aranarthPlayer.getPerks().getOrDefault(Perk.BLUEFIRE, 0) == 1;
+			case WHITE -> aranarthPlayer.getPerks().getOrDefault(Perk.WHITEFIRE, 0) == 1;
+			case PRISMATIC -> aranarthPlayer.getPerks().getOrDefault(Perk.PRISMATICFIRE, 0) == 1;
+		};
 	}
 
 }

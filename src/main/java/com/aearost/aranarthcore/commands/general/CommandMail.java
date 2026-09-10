@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Mail;
@@ -57,6 +58,20 @@ public class CommandMail implements CommandExecutor {
                 }
 
                 AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(targetUUID);
+                String targetDisplayName;
+                if (targetAranarthPlayer != null) {
+                    targetDisplayName = targetAranarthPlayer.getNickname();
+                } else {
+                    com.aearost.aranarthcore.network.NetworkPlayer remoteTarget = NetworkManager.isActive()
+                            ? NetworkManager.getInstance().getRemotePlayer(targetUUID) : null;
+                    if (remoteTarget != null) {
+                        String nick = remoteTarget.getNickname();
+                        targetDisplayName = (nick == null || nick.isEmpty()) ? remoteTarget.getUsername() : ChatUtils.stripColorFormatting(nick);
+                    } else {
+                        String bukkit = Bukkit.getOfflinePlayer(targetUUID).getName();
+                        targetDisplayName = bukkit != null ? bukkit : args[1];
+                    }
+                }
 
                 StringBuilder sb = new StringBuilder();
                 for (int i = 2; i < args.length; i++) {
@@ -77,16 +92,21 @@ public class CommandMail implements CommandExecutor {
 
                 MailUtils.addMail(targetUUID, new Mail(player.getUniqueId(), targetUUID, System.currentTimeMillis(), processedMessage));
                 AranarthPlayer senderPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                player.sendMessage(ChatUtils.chatMessage("&7The following mail has been sent to &e" + targetAranarthPlayer.getNickname() + "&7: &e" + processedMessage));
+                player.sendMessage(ChatUtils.chatMessage("&7The following mail has been sent to &e" + targetDisplayName + "&7: &e" + processedMessage));
                 if (Bukkit.getOfflinePlayer(targetUUID).isOnline()) {
-                    // Recipient is on this server — notify directly
+                    // Recipient is on this server - notify directly
                     Player target = Bukkit.getPlayer(targetUUID);
                     target.sendMessage(ChatUtils.chatMessage("&7You have received mail from &e" + senderPlayer.getNickname()));
                     target.sendMessage(ChatUtils.chatMessage("&7View it with &e/mail read"));
                 } else if (NetworkManager.isActive()
                         && NetworkManager.getInstance().getRemotePlayer(targetUUID) != null) {
-                    // Recipient is on a remote server — relay the notification there
-                    NetworkManager.getInstance().publishMailNotification(targetUUID, senderPlayer.getNickname());
+                    // Recipient is on a remote server
+                    final UUID recipientUUID = targetUUID;
+                    final String senderNickname = senderPlayer.getNickname();
+                    Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+                        PersistenceUtils.syncPlayerMailToDatabaseNow(recipientUUID);
+                        NetworkManager.getInstance().publishMailNotification(recipientUUID, senderNickname);
+                    });
                 }
             }
             case "read" -> {
@@ -123,7 +143,20 @@ public class CommandMail implements CommandExecutor {
                     int entryNum = i + 1;
 
                     AranarthPlayer senderPlayer = AranarthUtils.getPlayer(mail.getSenderUUID());
-                    String senderName = senderPlayer.getNickname();
+                    String senderName;
+                    if (senderPlayer != null) {
+                        senderName = senderPlayer.getNickname();
+                    } else {
+                        com.aearost.aranarthcore.network.NetworkPlayer remoteSender = NetworkManager.isActive()
+                                ? NetworkManager.getInstance().getRemotePlayer(mail.getSenderUUID()) : null;
+                        if (remoteSender != null) {
+                            String nick = remoteSender.getNickname();
+                            senderName = (nick == null || nick.isEmpty()) ? remoteSender.getUsername() : ChatUtils.stripColorFormatting(nick);
+                        } else {
+                            String bukkit = Bukkit.getOfflinePlayer(mail.getSenderUUID()).getName();
+                            senderName = bukkit != null ? bukkit : "Unknown";
+                        }
+                    }
 
                     LocalDateTime dateTime = LocalDateTime.ofInstant(
                             Instant.ofEpochMilli(mail.getTimestamp()),

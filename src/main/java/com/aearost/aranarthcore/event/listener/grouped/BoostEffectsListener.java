@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.enums.WorldEvent;
 import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
@@ -8,6 +9,10 @@ import com.gmail.nossr50.events.experience.McMMOPlayerXpGainEvent;
 import com.gmail.nossr50.mcMMO;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.ability.Ability;
+import com.projectkorra.projectkorra.ability.AirAbility;
+import com.projectkorra.projectkorra.ability.EarthAbility;
+import com.projectkorra.projectkorra.ability.FireAbility;
+import com.projectkorra.projectkorra.ability.WaterAbility;
 import com.projectkorra.projectkorra.event.AbilityDamageEntityEvent;
 import com.projectkorra.projectkorra.event.AbilityEndEvent;
 import org.bukkit.Bukkit;
@@ -86,7 +91,7 @@ public class BoostEffectsListener implements Listener {
 				if (AranarthUtils.getServerBoosts().containsKey(Boost.HARVEST)) {
 					Material type = e.getBlock().getType();
 					Location loc = e.getBlock().getLocation();
-					// Increase drops by 1.5x — use the block's actual loot table drops so blocks
+					// Increase drops by 1.5x - use the block's actual loot table drops so blocks
 					// like grass (which drop dirt, not the block itself) are handled correctly.
 					if (AranarthUtils.isHarvestableWithShovel(type) || AranarthUtils.isHarvestableWithAxe(type)) {
 						if (new Random().nextInt(2) == 0) {
@@ -152,6 +157,27 @@ public class BoostEffectsListener implements Listener {
 			if (AranarthUtils.getServerBoosts().containsKey(Boost.CHI)) {
 				e.setDamage(e.getDamage() * 1.5);
 			}
+
+			// Elemental world event damage boost
+			WorldEvent activeEvent = AranarthUtils.getActiveWorldEvent();
+			if (activeEvent != null && activeEvent.isElementalEvent()) {
+				Ability ability = e.getAbility();
+				boolean isMatchingElement = switch (activeEvent) {
+					case SEIKOS_COMET -> ability instanceof FireAbility;
+					case BLUE_MOON_OF_LEIKS -> ability instanceof WaterAbility;
+					case HARMONIC_CONVERGENCE_OF_SACHSI -> ability instanceof AirAbility;
+					case AEAROSTS_METEORITE -> ability instanceof EarthAbility;
+					default -> false;
+				};
+				if (isMatchingElement) {
+					double multiplier = switch (AranarthUtils.getActiveWorldEventIntensity()) {
+						case 0 -> 1.5;
+						case 2 -> 2.5;
+						default -> 2.0;
+					};
+					e.setDamage(e.getDamage() * multiplier);
+				}
+			}
 		}
 	}
 
@@ -168,9 +194,19 @@ public class BoostEffectsListener implements Listener {
 
 			if (AranarthUtils.getServerBoosts().containsKey(Boost.CHI)) {
 				Ability ability = e.getAbility();
-				BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(e.getAbility().getPlayer());
-				bendingPlayer.removeCooldown(ability.getName());
-				bendingPlayer.addCooldown(ability, ability.getCooldown() / 2);
+				Player player = ability.getPlayer();
+				String abilityName = ability.getName();
+				long halfCooldown = ability.getCooldown() / 2;
+				// Delay 1 tick so PK has finished applying its full cooldown before we halve it.
+				// Without the delay, PK's addCooldown fires after ours and stacks on top,
+				// resulting in 1.5x the normal cooldown instead of 0.5x.
+				Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
+					BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+					if (bendingPlayer != null) {
+						bendingPlayer.removeCooldown(abilityName);
+						bendingPlayer.addCooldown(abilityName, halfCooldown);
+					}
+				}, 1L);
 			}
 		}
 	}

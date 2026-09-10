@@ -109,7 +109,7 @@ public class GuiShopLocationClick {
 						String shopName = AranarthUtils.getShopName(uuid, defaultName);
 						Location shopLoc = shopLocations.get(uuid);
 						if (AranarthCore.isSmpServer() && NetworkManager.isActive() && shopLoc.getWorld() == null) {
-							// The shops world doesn't exist on SMP — do the countdown here then
+							// The shops world doesn't exist on SMP - do the countdown here then
 							// transfer to the survival server where the shop world lives.
                             AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
 									aranarthPlayer.isInAdminMode(), shopName, "&7Transferring to shop...", success -> {

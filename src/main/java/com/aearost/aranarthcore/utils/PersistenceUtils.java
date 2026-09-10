@@ -2,30 +2,20 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
-import com.aearost.aranarthcore.enums.JobType;
-import com.aearost.aranarthcore.enums.Month;
-import com.aearost.aranarthcore.objects.JobData;
+import com.aearost.aranarthcore.enums.*;
+import com.aearost.aranarthcore.objects.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.aearost.aranarthcore.enums.Pronouns;
-import com.aearost.aranarthcore.enums.QuestTaskType;
-import com.aearost.aranarthcore.enums.QuestType;
-import com.aearost.aranarthcore.objects.*;
-import com.aearost.aranarthcore.objects.DefenderType;
-import com.aearost.aranarthcore.objects.Quest;
 import com.projectkorra.projectkorra.BendingPlayer;
-
-import java.util.stream.Collectors;
-
 import com.projectkorra.projectkorra.OfflineBendingPlayer;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -37,6 +27,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Provides utility methods to facilitate the reading and writing of json and
@@ -45,6 +36,9 @@ import java.util.*;
 public class PersistenceUtils {
 
     private static final Gson GSON = new Gson();
+    private static final Gson JOB_GSON = new Gson();
+    // Used for one-time migration.
+    private static final long[] OLD_CUMULATIVE_XP = {0, 500, 2500, 8500, 23500, 63500, 153500, 328500, 628500, 1128500};
 
     /**
      * Converts a stored homepad worldName (e.g. "smp:world") to the actual Bukkit world name
@@ -63,7 +57,10 @@ public class PersistenceUtils {
      * "Plugin attempted to register task while disabled" error.
      */
     private static void runDbSync(Runnable task) {
-        if (AranarthCore.getInstance().isEnabled()) {
+        // Run synchronously when: plugin is disabled (onDisable path) OR we are in the JVM
+        // shutdown hook (System.exit() path where isEnabled() may still return true but the
+        // Bukkit scheduler cannot guarantee the async task will complete before JVM exit).
+        if (AranarthCore.getInstance().isEnabled() && !AranarthCore.isShutdownHookMode()) {
             Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), task);
         } else {
             task.run();
@@ -336,7 +333,7 @@ public class PersistenceUtils {
                     String[] perksValues = fields[17].split("\\*");
                     Perk[] perkArray = Perk.values();
                     HashMap<Perk, Integer> perks = new HashMap<>();
-                    for (int i = 0; i < perkArray.length; i++) {
+                    for (int i = 0; i < perkArray.length && i < perksValues.length; i++) {
                         Perk perk = perkArray[i];
                         perks.put(perk, Integer.parseInt(perksValues[i]));
                     }
@@ -375,6 +372,8 @@ public class PersistenceUtils {
                     float survivalSaturation = fields.length > 28 ? Float.parseFloat(fields[27]) : 5.0f;
                     int survivalExpLevel = fields.length > 29 ? Integer.parseInt(fields[28]) : 0;
                     float survivalExpProgress = fields.length > 30 ? Float.parseFloat(fields[29]) : 0.0f;
+                    boolean isBarbarian = fields.length > 31 && fields[30].equals("1");
+                    long barbarianCooldownEnd = fields.length > 32 ? Long.parseLong(fields[31]) : 0L;
                     AranarthUtils.getPlayer(uuid).setConquestDisbandCooldownEnd(conquestDisbandCooldownEnd);
                     AranarthUtils.getPlayer(uuid).setSurvivalEnderChest(survivalEnderChest);
                     AranarthUtils.getPlayer(uuid).setSurvivalHealth(survivalHealth);
@@ -382,12 +381,17 @@ public class PersistenceUtils {
                     AranarthUtils.getPlayer(uuid).setSurvivalSaturation(survivalSaturation);
                     AranarthUtils.getPlayer(uuid).setSurvivalExpLevel(survivalExpLevel);
                     AranarthUtils.getPlayer(uuid).setSurvivalExpProgress(survivalExpProgress);
+                    AranarthUtils.getPlayer(uuid).setBarbarian(isBarbarian);
+                    AranarthUtils.getPlayer(uuid).setBarbarianCooldownEnd(barbarianCooldownEnd);
                 } catch (Exception e) {
                     // Skip malformed rows without aborting the rest of the load
+                    Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Load] Skipping malformed player row (first 40 chars: "
+                            + (row.length() > 40 ? row.substring(0, 40) : row) + "): " + e.getMessage());
                 }
             }
             Bukkit.getLogger().info("[AC] All aranarth players have been initialized");
             reader.close();
+            loadAllBlacklistPresetsFromDatabase();
         } catch (Exception e) {
             Bukkit.getLogger().info("[AC] Something went wrong with loading the aranarth players!");
         }
@@ -469,7 +473,7 @@ public class PersistenceUtils {
             } else {
                 perks += aranarthPlayer.getPerks().get(perk);
             }
-            if (i < aranarthPlayer.getPerks().size() - 1) {
+            if (i < Perk.values().length - 1) {
                 perks += "*";
             }
         }
@@ -500,6 +504,8 @@ public class PersistenceUtils {
         float survivalSaturation = aranarthPlayer.getSurvivalSaturation();
         int survivalExpLevel = aranarthPlayer.getSurvivalExpLevel();
         float survivalExpProgress = aranarthPlayer.getSurvivalExpProgress();
+        int barbarianValue = aranarthPlayer.isBarbarian() ? 1 : 0;
+        long barbarianCooldownEnd = aranarthPlayer.getBarbarianCooldownEnd();
         return uuidStr + "|" + nickname + "|" + survivalInventory + "|" + arenaInventory + "|"
                 + creativeInventory + "|" + potions + "|" + arrows + "|" + blacklist + "|" + blacklistingMethod
                 + "|" + balance + "|" + rank + "|" + saint + "|" + council + "|" + architect + "|"
@@ -508,6 +514,7 @@ public class PersistenceUtils {
                 + firstJoinDate + "|" + conquestDisbandCooldownEnd + "|" + survivalEnderChest + "|"
                 + survivalHealth + "|" + survivalFoodLevel + "|" + survivalSaturation + "|"
                 + survivalExpLevel + "|" + survivalExpProgress + "|"
+                + barbarianValue + "|" + barbarianCooldownEnd + "|"
                 // Keep pronouns at the end and add before this
                 + pronouns;
     }
@@ -557,7 +564,7 @@ public class PersistenceUtils {
                 // Write to a temp file first; only replace the real file if the entire
                 // write succeeds. This prevents a mid-write exception from truncating the
                 // live file (e.g. a NullPointerException from a home in an unloaded world).
-                // NOTE: Files.move() must be called AFTER the FileWriter is closed —
+                // NOTE: Files.move() must be called AFTER the FileWriter is closed -
                 // on Windows, renaming an open file throws an exception.
                 File tempFile = new File(filePath + ".tmp");
                 boolean writeSucceeded = false;
@@ -577,7 +584,7 @@ public class PersistenceUtils {
                         Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Could not delete temp file: " + tempFile.getPath());
                     }
                 }
-                // Writer is now closed — safe to move on Windows.
+                // Writer is now closed - safe to move on Windows.
                 if (writeSucceeded) {
                     try {
                         Files.move(tempFile.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -591,7 +598,7 @@ public class PersistenceUtils {
                 }
             }
         }
-        // MySQL sync (additive — runs after file save)
+        // MySQL sync (additive - runs after file save)
         if (DatabaseManager.isActive()) {
             runDbSync(
                     PersistenceUtils::syncAranarthPlayersToDatabase);
@@ -709,12 +716,19 @@ public class PersistenceUtils {
                     aranarthPlayer.setAutoLockingChests(false);
                 }
 
-                // Fields from index 11 onward are optional — checked with fields.length > N so that
+                // Fields from index 11 onward are optional - checked with fields.length > N so that
                 // existing files without the field load fine and use the default from the constructor.
 
-                // Blue Fire (index 11)
+                // Fire Type (index 11) - old format: "0"=blue enabled, "1"=blue disabled
                 if (fields.length > 11) {
-                    aranarthPlayer.setBlueFireDisabled(!fields[11].equals("0"));
+                    String fireField = fields[11];
+                    if (fireField.equals("0")) {
+                        aranarthPlayer.setFireType(FireType.BLUE);
+                    } else if (fireField.equals("1")) {
+                        aranarthPlayer.setFireType(FireType.DEFAULT);
+                    } else {
+                        aranarthPlayer.setFireType(FireType.fromString(fireField));
+                    }
                 }
 
                 // Gradient Chat Enabled (index 12)
@@ -740,6 +754,154 @@ public class PersistenceUtils {
                 // Dominion Msg Compact (index 16)
                 if (fields.length > 16) {
                     aranarthPlayer.setDominionMsgCompact(!fields[16].equals("0"));
+                }
+
+                // Join Sound volume (index 17)
+                if (fields.length > 17) {
+                    try {
+                        aranarthPlayer.setJoinSoundVolume(Integer.parseInt(fields[17]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Leave Sound volume (index 18)
+                if (fields.length > 18) {
+                    try {
+                        aranarthPlayer.setLeaveSoundVolume(Integer.parseInt(fields[18]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Vote Sound volume (index 19)
+                if (fields.length > 19) {
+                    try {
+                        aranarthPlayer.setVoteSoundVolume(Integer.parseInt(fields[19]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Crate Sound volume (index 20)
+                if (fields.length > 20) {
+                    try {
+                        aranarthPlayer.setCrateSoundVolume(Integer.parseInt(fields[20]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Weather Sound volume (index 21)
+                if (fields.length > 21) {
+                    try {
+                        aranarthPlayer.setWeatherSoundVolume(Integer.parseInt(fields[21]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // New Day Sound volume (index 22)
+                if (fields.length > 22) {
+                    try {
+                        aranarthPlayer.setNewDaySoundVolume(Integer.parseInt(fields[22]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // New Month Sound volume (index 23)
+                if (fields.length > 23) {
+                    try {
+                        aranarthPlayer.setNewMonthSoundVolume(Integer.parseInt(fields[23]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Private Msg Sound volume (index 24)
+                if (fields.length > 24) {
+                    try {
+                        aranarthPlayer.setPrivateMsgSoundVolume(Integer.parseInt(fields[24]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Teleport Sound volume (index 25)
+                if (fields.length > 25) {
+                    try {
+                        aranarthPlayer.setTeleportSoundVolume(Integer.parseInt(fields[25]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Avatar Sound volume (index 26)
+                if (fields.length > 26) {
+                    try {
+                        aranarthPlayer.setAvatarSoundVolume(Integer.parseInt(fields[26]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Dominion Sound volume (index 27)
+                if (fields.length > 27) {
+                    try {
+                        aranarthPlayer.setDominionSoundVolume(Integer.parseInt(fields[27]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Aranarthium Sound volume (index 28)
+                if (fields.length > 28) {
+                    try {
+                        aranarthPlayer.setAranarthiumSoundVolume(Integer.parseInt(fields[28]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Chat Game Sound volume (index 29)
+                if (fields.length > 29) {
+                    try {
+                        aranarthPlayer.setChatGameSoundVolume(Integer.parseInt(fields[29]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Chest Sort Sound volume (index 30)
+                if (fields.length > 30) {
+                    try {
+                        aranarthPlayer.setChestSortSoundVolume(Integer.parseInt(fields[30]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Jobs Sound volume (index 31)
+                if (fields.length > 31) {
+                    try {
+                        aranarthPlayer.setJobsSoundVolume(Integer.parseInt(fields[31]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Exp Store Sound volume (index 32)
+                if (fields.length > 32) {
+                    try {
+                        aranarthPlayer.setExpStoreSoundVolume(Integer.parseInt(fields[32]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+
+                // Interactive Chat (index 33)
+                if (fields.length > 33) {
+                    aranarthPlayer.setInteractiveChatEnabled(!fields[33].equals("0"));
+                }
+
+                // Emoji Enabled (index 34)
+                if (fields.length > 34) {
+                    aranarthPlayer.setEmojiEnabled(!fields[34].equals("0"));
+                }
+
+                // Size Scale Enabled
+                if (fields.length > 35) {
+                    aranarthPlayer.setSizeScaleEnabled(!fields[35].equals("0"));
+                }
+
+                // Server Tips Disabled (index 36)
+                if (fields.length > 36) {
+                    aranarthPlayer.setServerTipsDisabled(!fields[36].equals("0"));
                 }
 
                 AranarthUtils.setPlayer(uuid, aranarthPlayer);
@@ -781,7 +943,7 @@ public class PersistenceUtils {
                 try {
                     FileWriter writer = new FileWriter(filePath);
                     // Template line
-                    writer.write("#uuid|chat|messages|teleport|spawnboost|changeclaim|inventory|shulker|blacklist|compressing|chestlock|bluefire|gradientchatenabled|gradientchatcolors|daymessage|weathermessage\n");
+                    writer.write("#uuid|chat|messages|teleport|spawnboost|changeclaim|inventory|shulker|blacklist|compressing|chestlock|firetype|gradientchatenabled|gradientchatcolors|daymessage|weathermessage|dominionmsgcompact|joinsound|leavesound|votesound|cratesound|weathersound|newdaysound|newmonthsound|privatemsgsound|teleportsound|avatarsound|dominionSound|aranarthiumsound|chatgamesound|chestsortsound|jobssound|expstoresponud|interactivechat|emojienabled|sizescaleenabled|servertipsdisabled\n");
 
                     for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
                         AranarthPlayer aranarthPlayer = entry.getValue();
@@ -797,17 +959,42 @@ public class PersistenceUtils {
                         String blacklist = aranarthPlayer.getBlacklistingMethod() + "";
                         String compressing = aranarthPlayer.isCompressingItems() ? "0" : "1";
                         String chestLock = aranarthPlayer.isAutoLockingChests() ? "0" : "1";
-                        String bluefire = aranarthPlayer.hasBlueFireDisabled() ? "1" : "0";
+                        String bluefire = aranarthPlayer.getFireType().name();
                         String gradientEnabled = aranarthPlayer.isGradientChatEnabled() ? "1" : "0";
                         String gradientColors = aranarthPlayer.getGradientChatColors().isEmpty() ? "none" : aranarthPlayer.getGradientChatColors();
                         String dayMessage = aranarthPlayer.isDayMessageDisabled() ? "1" : "0";
                         String weatherMessage = aranarthPlayer.isWeatherMessageDisabled() ? "1" : "0";
                         String dominionMsgCompact = aranarthPlayer.isDominionMsgCompact() ? "1" : "0";
 
+                        String joinSound = aranarthPlayer.getJoinSoundVolume() + "";
+                        String leaveSound = aranarthPlayer.getLeaveSoundVolume() + "";
+                        String voteSound = aranarthPlayer.getVoteSoundVolume() + "";
+                        String crateSound = aranarthPlayer.getCrateSoundVolume() + "";
+                        String weatherSound = aranarthPlayer.getWeatherSoundVolume() + "";
+                        String newDaySound = aranarthPlayer.getNewDaySoundVolume() + "";
+                        String newMonthSound = aranarthPlayer.getNewMonthSoundVolume() + "";
+                        String privateMsgSound = aranarthPlayer.getPrivateMsgSoundVolume() + "";
+                        String teleportSound = aranarthPlayer.getTeleportSoundVolume() + "";
+                        String avatarSound = aranarthPlayer.getAvatarSoundVolume() + "";
+                        String dominionSound = aranarthPlayer.getDominionSoundVolume() + "";
+                        String aranarthiumSound = aranarthPlayer.getAranarthiumSoundVolume() + "";
+                        String chatGameSound = aranarthPlayer.getChatGameSoundVolume() + "";
+                        String chestSortSound = aranarthPlayer.getChestSortSoundVolume() + "";
+                        String jobsSound = aranarthPlayer.getJobsSoundVolume() + "";
+                        String expStoreSound = aranarthPlayer.getExpStoreSoundVolume() + "";
+
+                        String interactiveChat = aranarthPlayer.isInteractiveChatEnabled() ? "1" : "0";
+                        String emojiEnabled = aranarthPlayer.isEmojiEnabled() ? "1" : "0";
+                        String sizeScaleEnabled = aranarthPlayer.isSizeScaleEnabled() ? "1" : "0";
+                        String serverTipsDisabled = aranarthPlayer.isServerTipsDisabled() ? "1" : "0";
                         String row = uuid + "|" + chat + "|" + messages + "|" + teleport + "|" + spawnboost + "|" + changeClaim
                                 + "|" + inventory + "|" + shulker + "|" + blacklist + "|" + compressing + "|" + chestLock + "|"
                                 + bluefire + "|" + gradientEnabled + "|" + gradientColors + "|" + dayMessage + "|" + weatherMessage
-                                + "|" + dominionMsgCompact + "\n";
+                                + "|" + dominionMsgCompact + "|" + joinSound + "|" + leaveSound + "|" + voteSound + "|" + crateSound
+                                + "|" + weatherSound + "|" + newDaySound + "|" + newMonthSound + "|" + privateMsgSound
+                                + "|" + teleportSound + "|" + avatarSound + "|" + dominionSound + "|" + aranarthiumSound
+                                + "|" + chatGameSound + "|" + chestSortSound + "|" + jobsSound + "|" + expStoreSound
+                                + "|" + interactiveChat + "|" + emojiEnabled + "|" + sizeScaleEnabled + "|" + serverTipsDisabled + "\n";
                         writer.write(row);
                     }
                     writer.close();
@@ -971,6 +1158,9 @@ public class PersistenceUtils {
             int weekday = 0;
             Month month = null;
             int year = 0;
+            long worldEventStartTime = 0L;
+            WorldEvent worldEventType = null;
+            int worldEventIntensity = 1;
 
             Bukkit.getLogger().info("[AC] Attempting to read the serverdate file...");
 
@@ -998,6 +1188,15 @@ public class PersistenceUtils {
                     case "lastResourceWorldResetTime" -> {
                         AranarthUtils.setLastResourceWorldResetTime(Long.parseLong(parts[1]));
                     }
+                    case "worldEventStartTime" -> {
+                        worldEventStartTime = Long.parseLong(parts[1]);
+                    }
+                    case "worldEventType" -> {
+                        try { worldEventType = WorldEvent.valueOf(parts[1]); } catch (IllegalArgumentException ignored) {}
+                    }
+                    case "worldEventIntensity" -> {
+                        worldEventIntensity = Integer.parseInt(parts[1]);
+                    }
                 }
 
                 if (fieldCount == 4) {
@@ -1006,6 +1205,11 @@ public class PersistenceUtils {
                     AranarthUtils.setMonth(month);
                     AranarthUtils.setYear(year);
                 }
+            }
+            AranarthUtils.setWorldEventStartTime(worldEventStartTime);
+            if (worldEventType != null && worldEventStartTime > 0) {
+                AranarthUtils.setActiveWorldEvent(worldEventType);
+                AranarthUtils.setActiveWorldEventIntensity(worldEventIntensity);
             }
             Bukkit.getLogger().info("[AC] The server date has been initialized");
             reader.close();
@@ -1046,7 +1250,13 @@ public class PersistenceUtils {
                 writer.write("weekday:" + AranarthUtils.getWeekday() + "\n");
                 writer.write("month:" + AranarthUtils.getMonth().name() + "\n");
                 writer.write("year:" + AranarthUtils.getYear() + "\n");
-                writer.write("lastResourceWorldResetTime:" + AranarthUtils.getLastResourceWorldResetTime());
+                writer.write("lastResourceWorldResetTime:" + AranarthUtils.getLastResourceWorldResetTime() + "\n");
+                writer.write("worldEventStartTime:" + AranarthUtils.getWorldEventStartTime() + "\n");
+                WorldEvent activeEvent = AranarthUtils.getActiveWorldEvent();
+                if (activeEvent != null) {
+                    writer.write("worldEventType:" + activeEvent.name() + "\n");
+                    writer.write("worldEventIntensity:" + AranarthUtils.getActiveWorldEventIntensity());
+                }
 
                 writer.close();
             } catch (IOException e) {
@@ -1234,7 +1444,7 @@ public class PersistenceUtils {
                     continue;
                 }
 
-                // #id|name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance|memberRanks
+                // #id|name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance|memberRanks|...|claimFoodYields(41)
                 String[] fields = row.split("\\|");
 
                 UUID id = null;
@@ -1333,6 +1543,7 @@ public class PersistenceUtils {
 
                 boolean memberPvpEnabled = fields.length > 19 && fields[19].equals("1");
                 boolean mobSpawningEnabled = fields.length > 20 && fields[20].equals("1");
+                boolean explosionEnabled = fields.length > 40 && fields[40].equals("1");
                 long conqueredRequestTimestamp = fields.length > 21 ? Long.parseLong(fields[21]) : 0L;
                 long lastConquerAttemptTimestamp = fields.length > 22 ? Long.parseLong(fields[22]) : 0L;
                 long rebelRequestTimestamp = fields.length > 23 ? Long.parseLong(fields[23]) : 0L;
@@ -1368,8 +1579,16 @@ public class PersistenceUtils {
                         x, y, z, yaw, pitch, food, claimableResources, conquered, null,
                         // Keep balance at the end
                         balance);
+                if (fields.length > 41 && !fields[41].isEmpty()) {
+                    for (String s : fields[41].split(",")) {
+                        try {
+                            dominion.getClaimFoodYields().add(Double.parseDouble(s));
+                        } catch (NumberFormatException ignored) {}
+                    }
+                }
                 dominion.setMemberPvpEnabled(memberPvpEnabled);
                 dominion.setMobSpawningEnabled(mobSpawningEnabled);
+                dominion.setExplosionEnabled(explosionEnabled);
                 dominion.setConqueredRequestTimestamp(conqueredRequestTimestamp);
                 dominion.setLastConquerAttemptTimestamp(lastConquerAttemptTimestamp);
                 dominion.setRebelRequestTimestamp(rebelRequestTimestamp);
@@ -1445,8 +1664,7 @@ public class PersistenceUtils {
                 }
 
                 List<Dominion> dominions = DominionUtils.getDominions();
-                try {
-                    FileWriter writer = new FileWriter(filePath);
+                try (FileWriter writer = new FileWriter(filePath)) {
                     writer.write("#id|name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance|memberRanks|memberPvpEnabled|mobSpawningEnabled|conqueredRequestTimestamp|lastConquerAttemptTimestamp|rebelRequestTimestamp|conqueredRequestDefenderLastSeen|rebelRequestConquerorLastSeen|lastRebelAttemptTimestamp|conqueredTimestamp|boughtChunks|dominionLevel|cachedFarmlandCount|cachedLivestockCount|foundedTimestamp|levelDropTimestamp|boughtOutpostChunks|cachedLivestockByWorld|bendingEnabled|conqueredRequest|rebelRequest\n");
 
                     if (dominions != null && !dominions.isEmpty()) {
@@ -1455,13 +1673,17 @@ public class PersistenceUtils {
                             if (dominion.getChunks().isEmpty()) {
                                 continue;
                             }
-                            String row = buildDominionRow(dominion) + "\n";
-                            writer.write(row);
+                            try {
+                                String row = buildDominionRow(dominion) + "\n";
+                                writer.write(row);
+                            } catch (Exception rowEx) {
+                                Bukkit.getLogger().warning("[AC] Failed to serialize dominion "
+                                        + dominion.getId() + " (" + dominion.getName() + ") to file: " + rowEx.getMessage());
+                            }
                         }
                     }
-                    writer.close();
                 } catch (IOException e) {
-                    Bukkit.getLogger().info("[AC] There was an error in saving the dominions!");
+                    Bukkit.getLogger().warning("[AC] There was an error saving dominions.txt: " + e.getMessage());
                 }
             }
         }
@@ -1587,7 +1809,11 @@ public class PersistenceUtils {
                 + "|" + (dominion.isBendingEnabled() ? "1" : "0")
                 + "|" + (dominion.getConqueredRequest() != null ? dominion.getConqueredRequest().toString() : "")
                 + "|" + (dominion.getRebelRequest() != null ? dominion.getRebelRequest().toString() : "")
-                + "|" + dominion.getMapColor();
+                + "|" + dominion.getMapColor()
+                + "|" + (dominion.isExplosionEnabled() ? "1" : "0")
+                + "|" + dominion.getClaimFoodYields().stream()
+                        .map(v -> String.format("%.4f", v))
+                        .collect(java.util.stream.Collectors.joining(","));
     }
 
     /**
@@ -2650,6 +2876,11 @@ public class PersistenceUtils {
 
                 Boost boost = Boost.valueOf(parts[0]);
                 LocalDateTime end = LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(parts[1])), ZoneId.systemDefault());
+                if (end.isBefore(LocalDateTime.now())) {
+                    Bukkit.getLogger().info("[AC] Skipping expired boost on load: " + boost.name() + " (expired=" + end + ")");
+                    continue;
+                }
+                Bukkit.getLogger().info("[AC] Loading boost from file: " + boost.name() + " expires=" + end);
                 AranarthUtils.addServerBoost(boost, end, null, false);
             }
             Bukkit.getLogger().info("[AC] The server boosts have been initialized");
@@ -3686,6 +3917,10 @@ public class PersistenceUtils {
         }
     }
 
+    // -------------------------------------------------------------------------
+    // Quest State Persistence
+    // -------------------------------------------------------------------------
+
     public static void loadGodlyKeys() {
         String currentPath = System.getProperty("user.dir");
         String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
@@ -3746,7 +3981,7 @@ public class PersistenceUtils {
     }
 
     // -------------------------------------------------------------------------
-    // Quest State Persistence
+    // Quest Progress Persistence
     // -------------------------------------------------------------------------
 
     /**
@@ -3816,23 +4051,17 @@ public class PersistenceUtils {
 
         try {
             FileWriter writer = new FileWriter(filePath);
-            writer.write("#Quest state — do not edit manually\n");
+            writer.write("#Quest state - do not edit manually\n");
             writer.write("lastDailyReset|" + QuestUtils.getLastDailyReset() + "\n");
             writer.write("lastWeeklyReset|" + QuestUtils.getLastWeeklyReset() + "\n");
             writer.close();
         } catch (IOException e) {
             Bukkit.getLogger().info("[AC] There was an error in saving the quest state");
         }
-        // MySQL sync — snapshot UUIDs now so async dispatch doesn't miss any removed after this call
-        if (DatabaseManager.isActive()) {
-            Set<UUID> snapshot = new HashSet<>(QuestUtils.getLocallyModifiedUuids());
-            runDbSync(() -> syncQuestDataToDatabase(snapshot));
-        }
+        // MySQL sync is handled by saveQuestProgress() which runs immediately after this call
+        // in every save path. Running it here too would cause duplicate DB writes for every
+        // locally-modified UUID.
     }
-
-    // -------------------------------------------------------------------------
-    // Quest Progress Persistence
-    // -------------------------------------------------------------------------
 
     /**
      * Loads per-player quest progress (including active quest assignments) from quest_progress.txt.
@@ -3893,7 +4122,7 @@ public class PersistenceUtils {
                     weeklyCompleted = new boolean[]{fields[20].equals("1"), fields[25].equals("1"), fields[30].equals("1")};
                     weeklyClaimed = new boolean[]{fields[21].equals("1"), fields[26].equals("1"), fields[31].equals("1")};
                 } else {
-                    // Old format — rewards will be regenerated randomly
+                    // Old format - rewards will be regenerated randomly
                     dTasks = new String[]{fields[2], fields[6], fields[10]};
                     dRewards = new double[]{0.0, 0.0, 0.0};
                     dailyProgress = new int[]{Integer.parseInt(fields[3]), Integer.parseInt(fields[7]), Integer.parseInt(fields[11])};
@@ -3932,6 +4161,10 @@ public class PersistenceUtils {
             Bukkit.getLogger().info("[AC] Something went wrong with loading quest progress!");
         }
     }
+
+    // -------------------------------------------------------------------------
+    // Login Streak Persistence
+    // -------------------------------------------------------------------------
 
     /**
      * Resolves Quest objects from the quest pool using stored task type names and rewards.
@@ -4065,16 +4298,12 @@ public class PersistenceUtils {
         } catch (IOException e) {
             Bukkit.getLogger().info("[AC] There was an error in saving quest progress");
         }
-        // MySQL sync — snapshot UUIDs now so async dispatch doesn't miss any removed after this call
+        // MySQL sync - snapshot UUIDs now so async dispatch doesn't miss any removed after this call
         if (DatabaseManager.isActive()) {
             Set<UUID> snapshot = new HashSet<>(QuestUtils.getLocallyModifiedUuids());
             runDbSync(() -> syncQuestDataToDatabase(snapshot));
         }
     }
-
-    // -------------------------------------------------------------------------
-    // Login Streak Persistence
-    // -------------------------------------------------------------------------
 
     /**
      * Loads per-player login streak data from login_streaks.txt.
@@ -4262,7 +4491,7 @@ public class PersistenceUtils {
                                 mat = fallbackMaterial(gateType);
                             }
                         } else {
-                            // Legacy entry without material — use a sensible default.
+                            // Legacy entry without material - use a sensible default.
                             mat = fallbackMaterial(gateType);
                         }
                         blockMaterials.put(loc, mat);
@@ -4556,7 +4785,7 @@ public class PersistenceUtils {
 
         try {
             FileWriter writer = new FileWriter(filePath);
-            writer.write("#Mail data — do not edit manually\n");
+            writer.write("#Mail data - do not edit manually\n");
             for (Map.Entry<UUID, List<Mail>> entry : MailUtils.getAllMail().entrySet()) {
                 UUID recipientUUID = entry.getKey();
                 for (Mail mail : entry.getValue()) {
@@ -4655,7 +4884,7 @@ public class PersistenceUtils {
             Bukkit.getLogger().info("[AC] All outposts have been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().warning("outposts.txt not found — skipping outpost load.");
+            Bukkit.getLogger().warning("outposts.txt not found - skipping outpost load.");
         }
     }
 
@@ -4735,6 +4964,12 @@ public class PersistenceUtils {
             runDbSync(PersistenceUtils::syncOutpostsToDatabase);
         }
     }
+
+    // =========================================================================
+    // MySQL sync helpers - called from existing save/load methods when DB is active.
+    // All MySQL operations run synchronously here; callers may wrap in async tasks.
+    // The file-based code is always executed first; MySQL is purely supplemental.
+    // =========================================================================
 
     /**
      * Loads defenders from defenders.txt and spawns each one at its saved location.
@@ -4946,12 +5181,6 @@ public class PersistenceUtils {
         }
     }
 
-    // =========================================================================
-    // MySQL sync helpers — called from existing save/load methods when DB is active.
-    // All MySQL operations run synchronously here; callers may wrap in async tasks.
-    // The file-based code is always executed first; MySQL is purely supplemental.
-    // =========================================================================
-
     /**
      * Syncs all AranarthPlayer data to MySQL. Call after the file has been saved.
      * Each player's pipe-delimited row is stored as a plain text blob in data_json.
@@ -4994,14 +5223,7 @@ public class PersistenceUtils {
             json.addProperty("conquestDisbandCooldownEnd", ap.getConquestDisbandCooldownEnd());
             try {
                 db.saveAranarthPlayer(uuid, username, GSON.toJson(json));
-                // Only write the full raw row for players currently online on this server.
-                // Offline players may have transferred to another server and made inventory
-                // changes there; writing our stale in-memory snapshot would overwrite the
-                // other server's correct quit-time save.
-                if (Bukkit.getPlayer(uuid) != null) {
-                    String rawRow = buildAranarthPlayerRow(uuid, ap);
-                    db.saveAranarthPlayerRaw(uuid, rawRow);
-                }
+                // raw_data (inventory) is intentionally NOT written here
             } catch (Exception e) {
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync player " + uuid + ": " + e.getMessage());
             }
@@ -5023,9 +5245,10 @@ public class PersistenceUtils {
         String rawRow = buildAranarthPlayerRow(uuid, ap);
         // Advance the snapshot to reflect what we are about to write
         ap.setBalanceSnapshot(ap.getBalance());
+        String apUsername = ap.getUsername() != null ? ap.getUsername() : "";
         DatabaseManager db = DatabaseManager.getInstance();
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
-                db.saveAranarthPlayerRaw(uuid, rawRow)
+                db.saveAranarthPlayerRaw(uuid, apUsername, rawRow)
         );
     }
 
@@ -5041,8 +5264,14 @@ public class PersistenceUtils {
         try {
             String rawRow = DatabaseManager.getInstance().loadAranarthPlayerRaw(uuid);
             if (rawRow != null) {
+                Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[DB] reloadPlayerFromDatabase " + uuid
+                        + " - raw_data length=" + rawRow.length() + " (non-null, will parse)");
                 parseAndAddAranarthPlayer(rawRow);
+            } else {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] reloadPlayerFromDatabase " + uuid
+                        + " - raw_data is NULL in MySQL; in-memory snapshot unchanged");
             }
+            loadBlacklistPresetsForPlayer(uuid);
         } catch (Exception e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to reload player " + uuid + ": " + e.getMessage());
         }
@@ -5193,32 +5422,69 @@ public class PersistenceUtils {
         }
         DatabaseManager db = DatabaseManager.getInstance();
 
-        // Aggregate vote counts per player
-        Map<UUID, Integer> voteCounts = new HashMap<>();
+        // Aggregate in-memory vote counts per player
+        Map<UUID, Integer> inMemoryCounts = new HashMap<>();
         for (AranarthVote vote : AranarthUtils.getVotes()) {
-            voteCounts.merge(vote.getUuid(), 1, Integer::sum);
+            inMemoryCounts.merge(vote.getUuid(), 1, Integer::sum);
         }
 
-        // Only iterate players who have votes — key counts are intentionally excluded from
+        if (inMemoryCounts.isEmpty()) {
+            return;
+        }
+
+        // Load existing DB histories to merge against. This prevents a server with a stale
+        // in-memory list from clobbering entries the other server already committed to the DB.
+        Map<UUID, String> dbHistories = db.loadAllVoteHistories();
+        if (dbHistories == null) {
+            dbHistories = new HashMap<>();
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] syncVotesToDatabase: loadAllVoteHistories failed - writing in-memory only without merge");
+        }
+
+        // Only iterate players who have votes - key counts are intentionally excluded from
         // this periodic sync. Pending key counts are exclusively written by
         // syncVoteKeysForPlayerToDatabase (called on vote receipt and after /keyclaim),
         // which is the authoritative source. Writing in-memory key counts here would race
         // against a claim on the other server and silently restore claimed keys in the DB.
-        for (UUID uuid : voteCounts.keySet()) {
-            int vc = voteCounts.get(uuid);
+        for (UUID uuid : inMemoryCounts.keySet()) {
             try {
-                db.saveVoteCountOnly(uuid, vc);
-                // Also save individual vote history
-                JsonArray history = new JsonArray();
+                // Merge: start from DB history (preserves entries the other server wrote),
+                // then overlay in-memory entries (in-memory wins same-timestamp conflicts).
+                Map<Long, Integer> merged = new LinkedHashMap<>();
+                String dbJson = dbHistories.get(uuid);
+                if (dbJson != null && !dbJson.isEmpty()) {
+                    try {
+                        JsonArray dbArr = GSON.fromJson(dbJson, JsonArray.class);
+                        for (com.google.gson.JsonElement el : dbArr) {
+                            JsonObject v = el.getAsJsonObject();
+                            merged.put(v.get("timestamp").getAsLong(), v.get("keyNum").getAsInt());
+                        }
+                    } catch (Exception parseEx) {
+                        Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to parse DB vote history for " + uuid + " during merge: " + parseEx.getMessage());
+                    }
+                }
                 for (AranarthVote vote : AranarthUtils.getVotes()) {
                     if (!vote.getUuid().equals(uuid)) {
                         continue;
                     }
+                    merged.put(vote.getTimestamp(), vote.getPointsRewarded());
+                }
+                int mergedTotal = merged.size();
+                int inMemTotal = inMemoryCounts.get(uuid);
+                if (mergedTotal > inMemTotal) {
+                    Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[VOTE] Merge preserved " + (mergedTotal - inMemTotal)
+                            + " DB-only entry(s) for " + uuid + " (in-memory=" + inMemTotal + ", merged=" + mergedTotal + ")");
+                }
+                // Sort by timestamp for a stable, readable order
+                List<Map.Entry<Long, Integer>> sorted = new ArrayList<>(merged.entrySet());
+                sorted.sort(Map.Entry.comparingByKey());
+                JsonArray history = new JsonArray();
+                for (Map.Entry<Long, Integer> entry : sorted) {
                     JsonObject v = new JsonObject();
-                    v.addProperty("keyNum", vote.getPointsRewarded());
-                    v.addProperty("timestamp", vote.getTimestamp());
+                    v.addProperty("keyNum", entry.getValue());
+                    v.addProperty("timestamp", entry.getKey());
                     history.add(v);
                 }
+                db.saveVoteCountOnly(uuid, history.size());
                 db.saveVoteHistory(uuid, GSON.toJson(history));
             } catch (Exception e) {
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync vote data for " + uuid + ": " + e.getMessage());
@@ -5237,23 +5503,44 @@ public class PersistenceUtils {
             return;
         }
         DatabaseManager db = DatabaseManager.getInstance();
-        int vc = 0;
-        JsonArray history = new JsonArray();
-        for (AranarthVote vote : AranarthUtils.getVotes()) {
-            if (vote.getUuid().equals(uuid)) {
-                vc++;
-                JsonObject v = new JsonObject();
-                v.addProperty("keyNum", vote.getPointsRewarded());
-                v.addProperty("timestamp", vote.getTimestamp());
-                history.add(v);
+
+        // Merge: start from DB history (preserves entries the other server wrote),
+        // then overlay in-memory entries (in-memory wins same-timestamp conflicts).
+        Map<Long, Integer> merged = new LinkedHashMap<>();
+        String dbHistoryJson = db.loadVoteHistoryForPlayer(uuid);
+        if (dbHistoryJson != null && !dbHistoryJson.isEmpty()) {
+            try {
+                JsonArray dbArr = GSON.fromJson(dbHistoryJson, JsonArray.class);
+                for (com.google.gson.JsonElement el : dbArr) {
+                    JsonObject v = el.getAsJsonObject();
+                    merged.put(v.get("timestamp").getAsLong(), v.get("keyNum").getAsInt());
+                }
+            } catch (Exception parseEx) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to parse DB vote history for " + uuid + " during merge: " + parseEx.getMessage());
             }
         }
+        for (AranarthVote vote : AranarthUtils.getVotes()) {
+            if (vote.getUuid().equals(uuid)) {
+                merged.put(vote.getTimestamp(), vote.getPointsRewarded());
+            }
+        }
+        // Sort by timestamp for a stable, readable order
+        List<Map.Entry<Long, Integer>> sorted = new ArrayList<>(merged.entrySet());
+        sorted.sort(Map.Entry.comparingByKey());
+        JsonArray history = new JsonArray();
+        for (Map.Entry<Long, Integer> entry : sorted) {
+            JsonObject v = new JsonObject();
+            v.addProperty("keyNum", entry.getValue());
+            v.addProperty("timestamp", entry.getKey());
+            history.add(v);
+        }
+        int vc = history.size();
         int vk = AranarthUtils.getPendingVoteKeys().getOrDefault(uuid, 0);
         int rk = AranarthUtils.getPendingRareKeys().getOrDefault(uuid, 0);
         int ek = AranarthUtils.getPendingEpicKeys().getOrDefault(uuid, 0);
         int gk = AranarthUtils.getPendingGodlyKeys().getOrDefault(uuid, 0);
         Bukkit.getLogger().info("[AC] [VOTE] Syncing vote data to DB for " + uuid
-                + " — vote_count=" + vc + ", history_entries=" + history.size()
+                + " - vote_count=" + vc + ", history_entries=" + history.size()
                 + ", pendingVoteKeys=" + vk + ", pendingRareKeys=" + rk
                 + ", pendingEpicKeys=" + ek + ", pendingGodlyKeys=" + gk);
         try {
@@ -5311,8 +5598,8 @@ public class PersistenceUtils {
     }
 
     /**
-     * Shutdown-safe DB sync. Uses sessionModifiedUuids — the set of players whose quest
-     * data was touched on THIS server during this session — instead of locallyModifiedUuids,
+     * Shutdown-safe DB sync. Uses sessionModifiedUuids - the set of players whose quest
+     * data was touched on THIS server during this session - instead of locallyModifiedUuids,
      * which is cleared by quit events before onDisable() runs.
      * This avoids clobbering the other server's data for players it actively owns, while
      * still ensuring all locally-touched data is persisted.
@@ -5327,7 +5614,7 @@ public class PersistenceUtils {
     /**
      * Synchronously writes a single player's quest progress to MySQL.
      * Call from cross-server transfer quit events so the receiving server can immediately
-     * read the current progress — the async path in saveQuestProgress() may not complete
+     * read the current progress - the async path in saveQuestProgress() may not complete
      * in time before reloadQuestProgressForPlayer() runs on the other server.
      */
     public static void syncQuestProgressForPlayerSync(UUID uuid) {
@@ -5357,7 +5644,7 @@ public class PersistenceUtils {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync quest state: " + e.getMessage());
         }
 
-        // Per-player quest progress — only sync UUIDs that had actual quest actions on THIS
+        // Per-player quest progress - only sync UUIDs that had actual quest actions on THIS
         // server this session, so we don't overwrite data for players active on the other server
         // (both servers load all players from the shared DB at startup, but only the server where
         // the player is actually playing should write back their progress).
@@ -5508,6 +5795,31 @@ public class PersistenceUtils {
     }
 
     /**
+     * Writes a single player's mail to MySQL synchronously.
+     */
+    public static void syncPlayerMailToDatabaseNow(UUID uuid) {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        List<Mail> mailList = MailUtils.getMail(uuid);
+        JsonArray arr = new JsonArray();
+        for (Mail mail : mailList) {
+            JsonObject m = new JsonObject();
+            m.addProperty("sender", mail.getSenderUUID().toString());
+            m.addProperty("recipient", uuid.toString());
+            m.addProperty("timestamp", mail.getTimestamp());
+            m.addProperty("message", mail.getMessage());
+            arr.add(m);
+        }
+        try {
+            DatabaseManager.getInstance().saveAllMail(uuid, GSON.toJson(arr));
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Mail] Immediate MySQL sync complete for " + uuid + " (" + mailList.size() + " message(s))");
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync mail for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    /**
      * Immediately syncs a single player's mail to MySQL.
      * Call right after the player clears or removes mail so the change is durable
      * before the next periodic save, and is visible to other servers in the network.
@@ -5551,7 +5863,7 @@ public class PersistenceUtils {
         int previousCount = MailUtils.getMail(uuid).size();
         String json = DatabaseManager.getInstance().loadAllMail(uuid);
         if (json == null) {
-            // No row in MySQL — player has no mail
+            // No row in MySQL - player has no mail
             MailUtils.setMailForPlayer(uuid, new ArrayList<>());
             MailUtils.getLocallyModifiedMailUuids().remove(uuid);
             Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Mail] Reloaded from MySQL for " + uuid
@@ -5672,9 +5984,10 @@ public class PersistenceUtils {
 
     /**
      * Syncs server boost data to MySQL. Call after the file has been saved.
+     * Only Survival writes to the DB - SMP must not overwrite Survival's state.
      */
     public static void syncBoostsToDatabase() {
-        if (!DatabaseManager.isActive()) {
+        if (!DatabaseManager.isActive() || AranarthCore.isSmpServer()) {
             return;
         }
         DatabaseManager db = DatabaseManager.getInstance();
@@ -5686,7 +5999,9 @@ public class PersistenceUtils {
             arr.add(bo);
         }
         try {
-            db.saveBoosts(GSON.toJson(arr));
+            String json = GSON.toJson(arr);
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[DB] Saving boosts to MySQL: " + json);
+            db.saveBoosts(json);
         } catch (Exception e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync boosts: " + e.getMessage());
         }
@@ -5696,7 +6011,7 @@ public class PersistenceUtils {
      * Syncs server homepads to MySQL.
      */
     public static void syncHomepadsToDatabase() {
-        if (!DatabaseManager.isActive()) {
+        if (!DatabaseManager.isActive() || !AranarthCore.isSmpServer()) {
             return;
         }
         DatabaseManager db = DatabaseManager.getInstance();
@@ -5722,6 +6037,9 @@ public class PersistenceUtils {
 
     /**
      * Syncs per-player toggled features to MySQL.
+     * Only saves data for players currently online on this server, so that a
+     * stale in-memory copy of an offline player cannot overwrite the toggle data
+     * already saved by the other server where that player is (or was) active.
      */
     public static void syncToggledFeaturesToDatabase() {
         if (!DatabaseManager.isActive()) {
@@ -5730,6 +6048,9 @@ public class PersistenceUtils {
         DatabaseManager db = DatabaseManager.getInstance();
         for (Map.Entry<UUID, AranarthPlayer> entry : AranarthUtils.getAranarthPlayers().entrySet()) {
             UUID uuid = entry.getKey();
+            if (Bukkit.getPlayer(uuid) == null) {
+                continue;
+            }
             AranarthPlayer ap = entry.getValue();
             JsonObject obj = new JsonObject();
             obj.addProperty("chat", ap.isTogglingChat());
@@ -5742,13 +6063,35 @@ public class PersistenceUtils {
             obj.addProperty("blacklistMethod", ap.getBlacklistingMethod());
             obj.addProperty("compressing", ap.isCompressingItems());
             obj.addProperty("chestLock", ap.isAutoLockingChests());
-            obj.addProperty("blueFireDisabled", ap.hasBlueFireDisabled());
+            obj.addProperty("fireType", ap.getFireType().name());
             obj.addProperty("gradientChatEnabled", ap.isGradientChatEnabled());
             obj.addProperty("gradientChatColors", ap.getGradientChatColors());
             obj.addProperty("dayMessageDisabled", ap.isDayMessageDisabled());
             obj.addProperty("weatherMessageDisabled", ap.isWeatherMessageDisabled());
             obj.addProperty("dominionMsgCompact", ap.isDominionMsgCompact());
             obj.addProperty("bulkSellShulker", ap.isBulkSellShulkerEnabled());
+            obj.addProperty("joinSoundVolume", ap.getJoinSoundVolume());
+            obj.addProperty("leaveSoundVolume", ap.getLeaveSoundVolume());
+            obj.addProperty("voteSoundVolume", ap.getVoteSoundVolume());
+            obj.addProperty("crateSoundVolume", ap.getCrateSoundVolume());
+            obj.addProperty("weatherSoundVolume", ap.getWeatherSoundVolume());
+            obj.addProperty("newDaySoundVolume", ap.getNewDaySoundVolume());
+            obj.addProperty("newMonthSoundVolume", ap.getNewMonthSoundVolume());
+            obj.addProperty("privateMsgSoundVolume", ap.getPrivateMsgSoundVolume());
+            obj.addProperty("teleportSoundVolume", ap.getTeleportSoundVolume());
+            obj.addProperty("avatarSoundVolume", ap.getAvatarSoundVolume());
+            obj.addProperty("dominionSoundVolume", ap.getDominionSoundVolume());
+            obj.addProperty("aranarthiumSoundVolume", ap.getAranarthiumSoundVolume());
+            obj.addProperty("chatGameSoundVolume", ap.getChatGameSoundVolume());
+            obj.addProperty("chestSortSoundVolume", ap.getChestSortSoundVolume());
+            obj.addProperty("jobsSoundVolume", ap.getJobsSoundVolume());
+            obj.addProperty("expStoreSoundVolume", ap.getExpStoreSoundVolume());
+            obj.addProperty("lowHealthSoundVolume", ap.getLowHealthSoundVolume());
+            obj.addProperty("interactiveChat", ap.isInteractiveChatEnabled());
+            obj.addProperty("emojiEnabled", ap.isEmojiEnabled());
+            obj.addProperty("sizeScaleEnabled", ap.isSizeScaleEnabled());
+            obj.addProperty("reaperDisabled", ap.isReaperDisabled());
+            obj.addProperty("serverTipsDisabled", ap.isServerTipsDisabled());
             try {
                 db.savePlayerToggles(uuid, GSON.toJson(obj));
             } catch (Exception e) {
@@ -5836,6 +6179,12 @@ public class PersistenceUtils {
         obj.addProperty("month", AranarthUtils.getMonth().name());
         obj.addProperty("year", AranarthUtils.getYear());
         obj.addProperty("lastResourceWorldResetTime", AranarthUtils.getLastResourceWorldResetTime());
+        obj.addProperty("worldEventStartTime", AranarthUtils.getWorldEventStartTime());
+        WorldEvent activeEvent = AranarthUtils.getActiveWorldEvent();
+        if (activeEvent != null) {
+            obj.addProperty("worldEventType", activeEvent.name());
+            obj.addProperty("worldEventIntensity", AranarthUtils.getActiveWorldEventIntensity());
+        }
         try {
             db.saveServerDate(GSON.toJson(obj));
         } catch (Exception e) {
@@ -5899,7 +6248,7 @@ public class PersistenceUtils {
             return;
         }
         for (Dominion dominion : dominions) {
-            // Skip cross-server stubs (empty chunk list) — saving them would overwrite valid
+            // Skip cross-server stubs (empty chunk list) - saving them would overwrite valid
             // chunk data in the DB with an empty string, corrupting the row on next load.
             if (dominion.getChunks().isEmpty()) {
                 continue;
@@ -6414,20 +6763,30 @@ public class PersistenceUtils {
                     ? worldName.substring(4) : worldName;
             World world = Bukkit.getWorld(outpostLookupName);
             List<Chunk> chunks = new ArrayList<>();
-            if (world != null && obj.has("chunks")) {
-                for (com.google.gson.JsonElement cEl : obj.getAsJsonArray("chunks")) {
-                    JsonObject c = cEl.getAsJsonObject();
-                    chunks.add(world.getChunkAt(c.get("x").getAsInt(), c.get("z").getAsInt()));
+            int jsonChunkCount = 0;
+            if (obj.has("chunks")) {
+                JsonArray chunkArr = obj.getAsJsonArray("chunks");
+                jsonChunkCount = chunkArr.size();
+                if (world != null) {
+                    for (com.google.gson.JsonElement cEl : chunkArr) {
+                        JsonObject c = cEl.getAsJsonObject();
+                        chunks.add(world.getChunkAt(c.get("x").getAsInt(), c.get("z").getAsInt()));
+                    }
                 }
             }
             Outpost outpost = new Outpost(id, name, dominionId, outpostIndex,
                     worldName, homeX, homeY, homeZ, homeYaw, homePitch, chunks, boughtChunks, createdTimestamp);
+            outpost.setStoredChunkCount(jsonChunkCount);
             outpost.setIcon(icon);
             OutpostUtils.registerOutpost(outpost);
         } catch (Exception e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Net] Failed to parse outpost from JSON: " + e.getMessage());
         }
     }
+
+    // =========================================================================
+    // DB-primary load methods (called from AranarthCore.initializeUtils when DB active)
+    // =========================================================================
 
     public static void syncOutpostsToDatabase() {
         if (!DatabaseManager.isActive()) {
@@ -6545,12 +6904,8 @@ public class PersistenceUtils {
         }
     }
 
-    // =========================================================================
-    // DB-primary load methods (called from AranarthCore.initializeUtils when DB active)
-    // =========================================================================
-
     /**
-     * Shared parser — same logic as the while-loop body in loadAranarthPlayers().
+     * Shared parser - same logic as the while-loop body in loadAranarthPlayers().
      * Parses a single pipe-delimited row and registers the player via AranarthUtils.
      */
     static void parseAndAddAranarthPlayer(String row) throws Exception {
@@ -6591,12 +6946,12 @@ public class PersistenceUtils {
         double balance = Double.parseDouble(fields[9]);
         int rank = Integer.parseInt(fields[10]);
         int saintRank = Integer.parseInt(fields[11]);
-        int councilRank = Integer.parseInt(fields[12]);
-        int architectRank = Integer.parseInt(fields[13]);
+        int councilRank = fields.length > 12 ? Integer.parseInt(fields[12]) : 0;
+        int architectRank = fields.length > 13 ? Integer.parseInt(fields[13]) : 0;
 
         List<Home> homes = new ArrayList<>();
         String[] homesStrings = null;
-        if (!fields[14].isEmpty()) {
+        if (fields.length > 14 && !fields[14].isEmpty()) {
             homesStrings = fields[14].split("\\*\\*\\*");
         }
 
@@ -6653,25 +7008,26 @@ public class PersistenceUtils {
             }
         }
 
-        String muteEndDate = fields[15];
-        int particles = Integer.parseInt(fields[16]);
+        String muteEndDate = fields.length > 15 ? fields[15] : "none";
+        int particles = fields.length > 16 ? Integer.parseInt(fields[16]) : 0;
 
-        String[] perksValues = fields[17].split("\\*");
-        Perk[] perkArray = Perk.values();
         HashMap<Perk, Integer> perks = new HashMap<>();
-        for (int i = 0; i < perkArray.length; i++) {
-            Perk perk = perkArray[i];
-            perks.put(perk, Integer.parseInt(perksValues[i]));
+        if (fields.length > 17 && !fields[17].isEmpty()) {
+            String[] perksValues = fields[17].split("\\*");
+            Perk[] perkArray = Perk.values();
+            for (int i = 0; i < perkArray.length && i < perksValues.length; i++) {
+                perks.put(perkArray[i], Integer.parseInt(perksValues[i]));
+            }
         }
 
-        long saintExpireDate = Long.parseLong(fields[18]);
-        boolean isCompressingItems = fields[19].equals("1");
+        long saintExpireDate = fields.length > 18 ? Long.parseLong(fields[18]) : 0L;
+        boolean isCompressingItems = fields.length > 19 && fields[19].equals("1");
 
-        int votePointsSpent = Integer.parseInt(fields[20]);
-        int spawnBoostValue = Integer.parseInt(fields[21]);
+        int votePointsSpent = fields.length > 20 ? Integer.parseInt(fields[20]) : 0;
+        int spawnBoostValue = fields.length > 21 ? Integer.parseInt(fields[21]) : 0;
         boolean isUsingSpawnBoost = spawnBoostValue == 1;
 
-        String firstJoinDate = fields[22];
+        String firstJoinDate = fields.length > 22 ? fields[22] : "";
 
         Pronouns pronouns = Pronouns.MALE;
         if (fields[lastIndex].equals("F")) {
@@ -6684,7 +7040,7 @@ public class PersistenceUtils {
             Bukkit.getLogger().warning("[AC] [Inv] Loaded " + uuid + " from DB with empty survivalInventory"
                     + " (creativeInventory=" + (creativeInventory.isEmpty() ? "empty" : "set")
                     + ", arenaInventory=" + (arenaInventory.isEmpty() ? "empty" : "set") + ")"
-                    + " — will skip clear if they switch to survival");
+                    + " - will skip clear if they switch to survival");
         }
         AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname,
                 survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist,
@@ -6701,6 +7057,8 @@ public class PersistenceUtils {
         float survivalSaturation = fields.length > 28 ? Float.parseFloat(fields[27]) : 5.0f;
         int survivalExpLevel = fields.length > 29 ? Integer.parseInt(fields[28]) : 0;
         float survivalExpProgress = fields.length > 30 ? Float.parseFloat(fields[29]) : 0.0f;
+        boolean isBarbarian = fields.length > 31 && fields[30].equals("1");
+        long barbarianCooldownEnd = fields.length > 32 ? Long.parseLong(fields[31]) : 0L;
         AranarthUtils.getPlayer(uuid).setConquestDisbandCooldownEnd(conquestDisbandCooldownEnd);
         AranarthUtils.getPlayer(uuid).setSurvivalEnderChest(survivalEnderChest);
         AranarthUtils.getPlayer(uuid).setSurvivalHealth(survivalHealth);
@@ -6708,6 +7066,8 @@ public class PersistenceUtils {
         AranarthUtils.getPlayer(uuid).setSurvivalSaturation(survivalSaturation);
         AranarthUtils.getPlayer(uuid).setSurvivalExpLevel(survivalExpLevel);
         AranarthUtils.getPlayer(uuid).setSurvivalExpProgress(survivalExpProgress);
+        AranarthUtils.getPlayer(uuid).setBarbarian(isBarbarian);
+        AranarthUtils.getPlayer(uuid).setBarbarianCooldownEnd(barbarianCooldownEnd);
     }
 
     /**
@@ -6722,14 +7082,77 @@ public class PersistenceUtils {
             return;
         }
         Bukkit.getLogger().info("[AC] Loading " + rawRows.size() + " players from MySQL...");
+        int failCount = 0;
         for (Map.Entry<UUID, String> entry : rawRows.entrySet()) {
             try {
                 parseAndAddAranarthPlayer(entry.getValue());
             } catch (Exception e) {
+                failCount++;
                 Bukkit.getLogger().warning("[AC] Failed to parse DB player row for " + entry.getKey() + ": " + e.getMessage());
             }
         }
+        // If the majority of rows failed to parse, the raw_data is likely in an incompatible
+        // format. Fall back to the flat file so startup isn't crippled.
+        if (failCount > 0 && failCount >= rawRows.size() / 2) {
+            Bukkit.getLogger().severe("[AC] " + failCount + "/" + rawRows.size()
+                    + " player rows failed to parse - raw_data format is incompatible. Falling back to flat file.");
+            AranarthUtils.getAranarthPlayers().clear();
+            loadAranarthPlayers();
+            return;
+        }
+        // Supplement with flat file entries for any players whose raw_data is still null
+        loadFlatFilePlayersForMissing();
         Bukkit.getLogger().info("[AC] All aranarth players have been initialized from MySQL");
+        loadAllBlacklistPresetsFromDatabase();
+    }
+
+    /**
+     * Reads aranarth_players.txt and adds any player whose UUID is not already present
+     * in the in-memory players map.
+     */
+    private static void loadFlatFilePlayersForMissing() {
+        String filePath = System.getProperty("user.dir") + File.separator + "plugins"
+                + File.separator + "AranarthCore" + File.separator + "aranarth_players.txt";
+        File file = new File(filePath);
+        if (!file.exists()) {
+            return;
+        }
+        int recovered = 0;
+        try (Scanner reader = new Scanner(file)) {
+            while (reader.hasNextLine()) {
+                String row = reader.nextLine();
+                if (row.startsWith("#") || row.isEmpty()) {
+                    continue;
+                }
+                String[] fields = row.split("\\|");
+                if (fields.length == 0) {
+                    continue;
+                }
+                try {
+                    UUID uuid = UUID.fromString(fields[0]);
+                    if (!AranarthUtils.getAranarthPlayers().containsKey(uuid)) {
+                        parseAndAddAranarthPlayer(row);
+                        // Immediately persist to MySQL so /baltop and future startups
+                        // don't require this player to log in first.
+                        if (DatabaseManager.isActive()) {
+                            AranarthPlayer recoveredAp = AranarthUtils.getPlayer(uuid);
+                            String recoveredUsername = recoveredAp != null && recoveredAp.getUsername() != null ? recoveredAp.getUsername() : "";
+                            DatabaseManager.getInstance().saveAranarthPlayerRaw(uuid, recoveredUsername, row);
+                        }
+                        recovered++;
+                    }
+                } catch (Exception ignored) {
+                    // Malformed row - skip silently as loadAranarthPlayers() already logs these
+                }
+            }
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+                    + "[Load] Error reading flat file for missing-player recovery: " + e.getMessage());
+        }
+        if (recovered > 0) {
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Load] Recovered " + recovered
+                    + " player(s) from flat file (raw_data was null in MySQL)");
+        }
     }
 
     /**
@@ -6797,10 +7220,10 @@ public class PersistenceUtils {
             return;
         }
         if (counts.isEmpty()) {
-            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[DB] No vote rows in MySQL — starting with empty vote data");
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[DB] No vote rows in MySQL - starting with empty vote data");
             return;
         }
-        Bukkit.getLogger().info("[AC] Loading vote data from MySQL — " + counts.size() + " player row(s), "
+        Bukkit.getLogger().info("[AC] Loading vote data from MySQL - " + counts.size() + " player row(s), "
                 + (histories != null ? histories.size() : 0) + " with history_json");
         // Restore individual vote history
         if (histories == null) {
@@ -6829,7 +7252,7 @@ public class PersistenceUtils {
                 int dbVoteCount = entry.getValue()[0];
                 if (dbVoteCount > 0 && !histories.containsKey(uuid)) {
                     Bukkit.getLogger().warning("[AC] [VOTE] Player " + uuid + " has vote_count=" + dbVoteCount
-                            + " in DB but no history_json — their vote points will show as 0 this session!");
+                            + " in DB but no history_json - their vote points will show as 0 this session!");
                 }
             }
         }
@@ -6855,7 +7278,7 @@ public class PersistenceUtils {
                 totalGodly += vals[4];
             }
         }
-        Bukkit.getLogger().info("[AC] Vote data initialized from MySQL — " + counts.size() + " player(s) with pending keys"
+        Bukkit.getLogger().info("[AC] Vote data initialized from MySQL - " + counts.size() + " player(s) with pending keys"
                 + " (vote=" + totalVote + ", rare=" + totalRare + ", epic=" + totalEpic + ", godly=" + totalGodly + ")");
     }
 
@@ -6903,6 +7326,7 @@ public class PersistenceUtils {
         }
         Bukkit.getLogger().info("[AC] Loading quest progress from MySQL...");
         UUID stateKey = new UUID(0L, 0L);
+        int loaded = 0, staleDaily = 0, staleWeekly = 0;
         for (Map.Entry<UUID, String[]> entry : all.entrySet()) {
             UUID uuid = entry.getKey();
             if (uuid.equals(stateKey)) {
@@ -6927,24 +7351,18 @@ public class PersistenceUtils {
                 boolean dailyCurrent = dailyPeriod >= QuestUtils.getLastDailyReset();
                 boolean weeklyCurrent = weeklyPeriod >= QuestUtils.getLastWeeklyReset();
                 if (!dailyCurrent) {
-                    Bukkit.getLogger().info("[AC] [Quest] Discarding stale daily data for " + uuid
-                            + " (savedPeriod=" + dailyPeriod + ", lastDailyReset=" + QuestUtils.getLastDailyReset() + ")");
+                    staleDaily++;
                     dp = new int[3];
                     dc = new boolean[3];
                     dClaim = new boolean[3];
                 }
                 if (!weeklyCurrent) {
-                    Bukkit.getLogger().info("[AC] [Quest] Discarding stale weekly data for " + uuid
-                            + " (savedPeriod=" + weeklyPeriod + ", lastWeeklyReset=" + QuestUtils.getLastWeeklyReset() + ")");
+                    staleWeekly++;
                     wp = new int[3];
                     wc = new boolean[3];
                     wClaim = new boolean[3];
                 }
-                Bukkit.getLogger().info("[AC] [Quest] Loaded from DB for " + uuid
-                        + " daily=" + java.util.Arrays.toString(dp)
-                        + " weekly=" + java.util.Arrays.toString(wp)
-                        + " rank=" + rank
-                        + " dailyCurrent=" + dailyCurrent + " weeklyCurrent=" + weeklyCurrent);
+                loaded++;
                 QuestUtils.getPlayerDailyProgress().put(uuid, dp);
                 QuestUtils.getPlayerDailyCompleted().put(uuid, dc);
                 QuestUtils.getPlayerDailyClaimed().put(uuid, dClaim);
@@ -6979,7 +7397,8 @@ public class PersistenceUtils {
                 Bukkit.getLogger().warning("[AC] Failed to parse quest progress for " + uuid + " from DB: " + e.getMessage());
             }
         }
-        Bukkit.getLogger().info("[AC] Quest progress initialized from MySQL");
+        Bukkit.getLogger().info("[AC] Quest progress loaded from MySQL: " + loaded + " players"
+                + " (" + staleDaily + " stale daily, " + staleWeekly + " stale weekly discarded)");
     }
 
     /**
@@ -7017,16 +7436,16 @@ public class PersistenceUtils {
         DatabaseManager db = DatabaseManager.getInstance();
         Map<UUID, String> all = db.loadAllMailData();
         if (all == null) {
-            // DB query failed — fall back to flat file as best-effort. #195
+            // DB query failed - fall back to flat file as best-effort. #195
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] loadAllMailData failed; falling back to flat file");
             loadMail();
             return;
         }
         if (all.isEmpty()) {
             // Table is genuinely empty (e.g. everyone has cleared their mail). Do NOT fall back
-            // to mail.txt — the file may contain old mail that was already read/deleted from DB,
+            // to mail.txt - the file may contain old mail that was already read/deleted from DB,
             // and loading it would resurface it. #195
-            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[DB] No mail rows in MySQL — starting with empty mailbox");
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[DB] No mail rows in MySQL - starting with empty mailbox");
             return;
         }
         Bukkit.getLogger().info("[AC] Loading mail from MySQL...");
@@ -7050,7 +7469,7 @@ public class PersistenceUtils {
         }
         MailUtils.setAllMail(mailData);
         int totalMessages = mailData.values().stream().mapToInt(List::size).sum();
-        Bukkit.getLogger().info("[AC] Mail initialized from MySQL — " + mailData.size() + " recipient(s), " + totalMessages + " message(s)");
+        Bukkit.getLogger().info("[AC] Mail initialized from MySQL - " + mailData.size() + " recipient(s), " + totalMessages + " message(s)");
     }
 
     /**
@@ -7133,21 +7552,28 @@ public class PersistenceUtils {
         DatabaseManager db = DatabaseManager.getInstance();
         String json = db.loadBoosts();
         if (json == null || json.isEmpty()) {
+            Bukkit.getLogger().info("[AC] Loading boosts from MySQL... DB returned empty, falling back to file");
             loadBoosts();
             return;
         }
-        Bukkit.getLogger().info("[AC] Loading boosts from MySQL...");
+        Bukkit.getLogger().info("[AC] Loading boosts from MySQL... raw=" + json);
         try {
             JsonArray arr = GSON.fromJson(json, JsonArray.class);
+            int loaded = 0;
             for (com.google.gson.JsonElement el : arr) {
                 JsonObject bo = el.getAsJsonObject();
                 Boost boost = Boost.valueOf(bo.get("boost").getAsString());
                 java.time.LocalDateTime end = java.time.LocalDateTime.ofInstant(
                         java.time.Instant.ofEpochMilli(bo.get("end").getAsLong()),
                         java.time.ZoneId.systemDefault());
+                if (end.isBefore(java.time.LocalDateTime.now())) {
+                    Bukkit.getLogger().info("[AC] Skipping expired boost on load: " + boost.name() + " (expired=" + end + ")");
+                    continue;
+                }
                 AranarthUtils.addServerBoost(boost, end, null, false);
+                loaded++;
             }
-            Bukkit.getLogger().info("[AC] Boosts initialized from MySQL");
+            Bukkit.getLogger().info("[AC] Boosts initialized from MySQL: " + loaded + " active");
         } catch (Exception e) {
             Bukkit.getLogger().warning("[AC] Failed to parse boosts from DB: " + e.getMessage());
             loadBoosts();
@@ -7238,8 +7664,11 @@ public class PersistenceUtils {
                 if (obj.has("chestLock")) {
                     ap.setAutoLockingChests(obj.get("chestLock").getAsBoolean());
                 }
-                if (obj.has("blueFireDisabled")) {
-                    ap.setBlueFireDisabled(obj.get("blueFireDisabled").getAsBoolean());
+                if (obj.has("fireType")) {
+                    ap.setFireType(FireType.fromString(obj.get("fireType").getAsString()));
+                } else if (obj.has("blueFireDisabled")) {
+                    // Backward compat: old boolean field
+                    ap.setFireType(obj.get("blueFireDisabled").getAsBoolean() ? FireType.DEFAULT : FireType.BLUE);
                 }
                 if (obj.has("gradientChatEnabled")) {
                     ap.setGradientChatEnabled(obj.get("gradientChatEnabled").getAsBoolean());
@@ -7258,6 +7687,72 @@ public class PersistenceUtils {
                 }
                 if (obj.has("bulkSellShulker")) {
                     ap.setBulkSellShulkerEnabled(obj.get("bulkSellShulker").getAsBoolean());
+                }
+                if (obj.has("joinSoundVolume")) {
+                    ap.setJoinSoundVolume(obj.get("joinSoundVolume").getAsInt());
+                }
+                if (obj.has("leaveSoundVolume")) {
+                    ap.setLeaveSoundVolume(obj.get("leaveSoundVolume").getAsInt());
+                }
+                if (obj.has("voteSoundVolume")) {
+                    ap.setVoteSoundVolume(obj.get("voteSoundVolume").getAsInt());
+                }
+                if (obj.has("crateSoundVolume")) {
+                    ap.setCrateSoundVolume(obj.get("crateSoundVolume").getAsInt());
+                }
+                if (obj.has("weatherSoundVolume")) {
+                    ap.setWeatherSoundVolume(obj.get("weatherSoundVolume").getAsInt());
+                }
+                if (obj.has("newDaySoundVolume")) {
+                    ap.setNewDaySoundVolume(obj.get("newDaySoundVolume").getAsInt());
+                }
+                if (obj.has("newMonthSoundVolume")) {
+                    ap.setNewMonthSoundVolume(obj.get("newMonthSoundVolume").getAsInt());
+                }
+                if (obj.has("privateMsgSoundVolume")) {
+                    ap.setPrivateMsgSoundVolume(obj.get("privateMsgSoundVolume").getAsInt());
+                }
+                if (obj.has("teleportSoundVolume")) {
+                    ap.setTeleportSoundVolume(obj.get("teleportSoundVolume").getAsInt());
+                }
+                if (obj.has("avatarSoundVolume")) {
+                    ap.setAvatarSoundVolume(obj.get("avatarSoundVolume").getAsInt());
+                }
+                if (obj.has("dominionSoundVolume")) {
+                    ap.setDominionSoundVolume(obj.get("dominionSoundVolume").getAsInt());
+                }
+                if (obj.has("aranarthiumSoundVolume")) {
+                    ap.setAranarthiumSoundVolume(obj.get("aranarthiumSoundVolume").getAsInt());
+                }
+                if (obj.has("chatGameSoundVolume")) {
+                    ap.setChatGameSoundVolume(obj.get("chatGameSoundVolume").getAsInt());
+                }
+                if (obj.has("chestSortSoundVolume")) {
+                    ap.setChestSortSoundVolume(obj.get("chestSortSoundVolume").getAsInt());
+                }
+                if (obj.has("jobsSoundVolume")) {
+                    ap.setJobsSoundVolume(obj.get("jobsSoundVolume").getAsInt());
+                }
+                if (obj.has("expStoreSoundVolume")) {
+                    ap.setExpStoreSoundVolume(obj.get("expStoreSoundVolume").getAsInt());
+                }
+                if (obj.has("lowHealthSoundVolume")) {
+                    ap.setLowHealthSoundVolume(obj.get("lowHealthSoundVolume").getAsInt());
+                }
+                if (obj.has("interactiveChat")) {
+                    ap.setInteractiveChatEnabled(obj.get("interactiveChat").getAsBoolean());
+                }
+                if (obj.has("emojiEnabled")) {
+                    ap.setEmojiEnabled(obj.get("emojiEnabled").getAsBoolean());
+                }
+                if (obj.has("sizeScaleEnabled")) {
+                    ap.setSizeScaleEnabled(obj.get("sizeScaleEnabled").getAsBoolean());
+                }
+                if (obj.has("reaperDisabled")) {
+                    ap.setReaperDisabled(obj.get("reaperDisabled").getAsBoolean());
+                }
+                if (obj.has("serverTipsDisabled")) {
+                    ap.setServerTipsDisabled(obj.get("serverTipsDisabled").getAsBoolean());
                 }
                 AranarthUtils.setPlayer(uuid, ap);
             } catch (Exception e) {
@@ -7287,14 +7782,38 @@ public class PersistenceUtils {
         obj.addProperty("blacklistMethod", ap.getBlacklistingMethod());
         obj.addProperty("compressing", ap.isCompressingItems());
         obj.addProperty("chestLock", ap.isAutoLockingChests());
-        obj.addProperty("blueFireDisabled", ap.hasBlueFireDisabled());
+        obj.addProperty("fireType", ap.getFireType().name());
         obj.addProperty("gradientChatEnabled", ap.isGradientChatEnabled());
         obj.addProperty("gradientChatColors", ap.getGradientChatColors());
         obj.addProperty("dayMessageDisabled", ap.isDayMessageDisabled());
         obj.addProperty("weatherMessageDisabled", ap.isWeatherMessageDisabled());
         obj.addProperty("dominionMsgCompact", ap.isDominionMsgCompact());
         obj.addProperty("bulkSellShulker", ap.isBulkSellShulkerEnabled());
+        obj.addProperty("joinSoundVolume", ap.getJoinSoundVolume());
+        obj.addProperty("leaveSoundVolume", ap.getLeaveSoundVolume());
+        obj.addProperty("voteSoundVolume", ap.getVoteSoundVolume());
+        obj.addProperty("crateSoundVolume", ap.getCrateSoundVolume());
+        obj.addProperty("weatherSoundVolume", ap.getWeatherSoundVolume());
+        obj.addProperty("newDaySoundVolume", ap.getNewDaySoundVolume());
+        obj.addProperty("newMonthSoundVolume", ap.getNewMonthSoundVolume());
+        obj.addProperty("privateMsgSoundVolume", ap.getPrivateMsgSoundVolume());
+        obj.addProperty("teleportSoundVolume", ap.getTeleportSoundVolume());
+        obj.addProperty("avatarSoundVolume", ap.getAvatarSoundVolume());
+        obj.addProperty("dominionSoundVolume", ap.getDominionSoundVolume());
+        obj.addProperty("aranarthiumSoundVolume", ap.getAranarthiumSoundVolume());
+        obj.addProperty("chatGameSoundVolume", ap.getChatGameSoundVolume());
+        obj.addProperty("chestSortSoundVolume", ap.getChestSortSoundVolume());
+        obj.addProperty("jobsSoundVolume", ap.getJobsSoundVolume());
+        obj.addProperty("expStoreSoundVolume", ap.getExpStoreSoundVolume());
+        obj.addProperty("lowHealthSoundVolume", ap.getLowHealthSoundVolume());
+        obj.addProperty("interactiveChat", ap.isInteractiveChatEnabled());
+        obj.addProperty("emojiEnabled", ap.isEmojiEnabled());
+        obj.addProperty("sizeScaleEnabled", ap.isSizeScaleEnabled());
         obj.addProperty("adminMode", ap.isInAdminMode());
+        obj.addProperty("isBarbarian", ap.isBarbarian());
+        obj.addProperty("barbarianCooldownEnd", ap.getBarbarianCooldownEnd());
+        obj.addProperty("reaperDisabled", ap.isReaperDisabled());
+        obj.addProperty("serverTipsDisabled", ap.isServerTipsDisabled());
         return GSON.toJson(obj);
     }
 
@@ -7346,8 +7865,11 @@ public class PersistenceUtils {
             if (obj.has("chestLock")) {
                 ap.setAutoLockingChests(obj.get("chestLock").getAsBoolean());
             }
-            if (obj.has("blueFireDisabled")) {
-                ap.setBlueFireDisabled(obj.get("blueFireDisabled").getAsBoolean());
+            if (obj.has("fireType")) {
+                ap.setFireType(FireType.fromString(obj.get("fireType").getAsString()));
+            } else if (obj.has("blueFireDisabled")) {
+                // Backward compat: old boolean field
+                ap.setFireType(obj.get("blueFireDisabled").getAsBoolean() ? FireType.DEFAULT : FireType.BLUE);
             }
             if (obj.has("gradientChatEnabled")) {
                 ap.setGradientChatEnabled(obj.get("gradientChatEnabled").getAsBoolean());
@@ -7367,8 +7889,80 @@ public class PersistenceUtils {
             if (obj.has("bulkSellShulker")) {
                 ap.setBulkSellShulkerEnabled(obj.get("bulkSellShulker").getAsBoolean());
             }
+            if (obj.has("joinSoundVolume")) {
+                ap.setJoinSoundVolume(obj.get("joinSoundVolume").getAsInt());
+            }
+            if (obj.has("leaveSoundVolume")) {
+                ap.setLeaveSoundVolume(obj.get("leaveSoundVolume").getAsInt());
+            }
+            if (obj.has("voteSoundVolume")) {
+                ap.setVoteSoundVolume(obj.get("voteSoundVolume").getAsInt());
+            }
+            if (obj.has("crateSoundVolume")) {
+                ap.setCrateSoundVolume(obj.get("crateSoundVolume").getAsInt());
+            }
+            if (obj.has("weatherSoundVolume")) {
+                ap.setWeatherSoundVolume(obj.get("weatherSoundVolume").getAsInt());
+            }
+            if (obj.has("newDaySoundVolume")) {
+                ap.setNewDaySoundVolume(obj.get("newDaySoundVolume").getAsInt());
+            }
+            if (obj.has("newMonthSoundVolume")) {
+                ap.setNewMonthSoundVolume(obj.get("newMonthSoundVolume").getAsInt());
+            }
+            if (obj.has("privateMsgSoundVolume")) {
+                ap.setPrivateMsgSoundVolume(obj.get("privateMsgSoundVolume").getAsInt());
+            }
+            if (obj.has("teleportSoundVolume")) {
+                ap.setTeleportSoundVolume(obj.get("teleportSoundVolume").getAsInt());
+            }
+            if (obj.has("avatarSoundVolume")) {
+                ap.setAvatarSoundVolume(obj.get("avatarSoundVolume").getAsInt());
+            }
+            if (obj.has("dominionSoundVolume")) {
+                ap.setDominionSoundVolume(obj.get("dominionSoundVolume").getAsInt());
+            }
+            if (obj.has("aranarthiumSoundVolume")) {
+                ap.setAranarthiumSoundVolume(obj.get("aranarthiumSoundVolume").getAsInt());
+            }
+            if (obj.has("chatGameSoundVolume")) {
+                ap.setChatGameSoundVolume(obj.get("chatGameSoundVolume").getAsInt());
+            }
+            if (obj.has("chestSortSoundVolume")) {
+                ap.setChestSortSoundVolume(obj.get("chestSortSoundVolume").getAsInt());
+            }
+            if (obj.has("jobsSoundVolume")) {
+                ap.setJobsSoundVolume(obj.get("jobsSoundVolume").getAsInt());
+            }
+            if (obj.has("expStoreSoundVolume")) {
+                ap.setExpStoreSoundVolume(obj.get("expStoreSoundVolume").getAsInt());
+            }
+            if (obj.has("lowHealthSoundVolume")) {
+                ap.setLowHealthSoundVolume(obj.get("lowHealthSoundVolume").getAsInt());
+            }
             if (obj.has("adminMode")) {
                 ap.setInAdminMode(obj.get("adminMode").getAsBoolean());
+            }
+            if (obj.has("interactiveChat")) {
+                ap.setInteractiveChatEnabled(obj.get("interactiveChat").getAsBoolean());
+            }
+            if (obj.has("emojiEnabled")) {
+                ap.setEmojiEnabled(obj.get("emojiEnabled").getAsBoolean());
+            }
+            if (obj.has("sizeScaleEnabled")) {
+                ap.setSizeScaleEnabled(obj.get("sizeScaleEnabled").getAsBoolean());
+            }
+            if (obj.has("isBarbarian")) {
+                ap.setBarbarian(obj.get("isBarbarian").getAsBoolean());
+            }
+            if (obj.has("barbarianCooldownEnd")) {
+                ap.setBarbarianCooldownEnd(obj.get("barbarianCooldownEnd").getAsLong());
+            }
+            if (obj.has("reaperDisabled")) {
+                ap.setReaperDisabled(obj.get("reaperDisabled").getAsBoolean());
+            }
+            if (obj.has("serverTipsDisabled")) {
+                ap.setServerTipsDisabled(obj.get("serverTipsDisabled").getAsBoolean());
             }
             AranarthUtils.setPlayer(uuid, ap);
         } catch (Exception e) {
@@ -7457,6 +8051,54 @@ public class PersistenceUtils {
     }
 
     /**
+     * Loads market dynamics from MySQL and populates the in-memory MarketUtils map.
+     */
+    public static void loadMarketDynamicsFromDatabase() {
+        DatabaseManager db = DatabaseManager.getInstance();
+        List<Object[]> rows = db.loadAllMarketDynamics();
+        for (Object[] row : rows) {
+            String shopKey = (String) row[0];
+            double defaultSellPrice = (double) row[1];
+            double modifier = (double) row[2];
+            double pressure = (double) row[3];
+            MarketDynamics data = new MarketDynamics(shopKey, defaultSellPrice, modifier, pressure);
+            MarketUtils.addMarketData(data);
+        }
+
+        // Auto-create entries for any server shop that has no market dynamics row yet
+        List<Shop> serverShops = ShopUtils.getShops().get(null);
+        if (serverShops != null) {
+            for (Shop shop : serverShops) {
+                if (shop.getSellPrice() <= 0) {
+                    continue;
+                }
+                String key = MarketUtils.getShopKey(shop);
+                if (MarketUtils.getMarketData(key) == null) {
+                    MarketDynamics data = new MarketDynamics(key, shop.getSellPrice(), 1.0, 0.0);
+                    MarketUtils.addMarketData(data);
+                }
+            }
+        }
+
+        Bukkit.getLogger().info("[AC] Market dynamics initialized from MySQL");
+    }
+
+    /**
+     * Saves all in-memory market dynamics to the database asynchronously.
+     */
+    public static void syncMarketDynamicsToDatabase() {
+        DatabaseManager db = DatabaseManager.getInstance();
+        Map<String, MarketDynamics> all = MarketUtils.getAllMarketData();
+        runDbSync(() -> {
+            for (Map.Entry<String, MarketDynamics> entry : all.entrySet()) {
+                MarketDynamics data = entry.getValue();
+                db.saveMarketDynamic(data.getShopKey(), data.getDefaultSellPrice(),
+                        data.getCurrentPriceModifier(), data.getSellPressure());
+            }
+        });
+    }
+
+    /**
      * Loads server date from MySQL. Falls back to file if empty.
      */
     public static void loadServerDateFromDatabase() {
@@ -7483,6 +8125,16 @@ public class PersistenceUtils {
             }
             if (obj.has("lastResourceWorldResetTime")) {
                 AranarthUtils.setLastResourceWorldResetTime(obj.get("lastResourceWorldResetTime").getAsLong());
+            }
+            long worldEventStartTime = obj.has("worldEventStartTime") ? obj.get("worldEventStartTime").getAsLong() : 0L;
+            AranarthUtils.setWorldEventStartTime(worldEventStartTime);
+            if (obj.has("worldEventType") && worldEventStartTime > 0) {
+                try {
+                    WorldEvent event = WorldEvent.valueOf(obj.get("worldEventType").getAsString());
+                    int intensity = obj.has("worldEventIntensity") ? obj.get("worldEventIntensity").getAsInt() : 1;
+                    AranarthUtils.setActiveWorldEvent(event);
+                    AranarthUtils.setActiveWorldEventIntensity(intensity);
+                } catch (IllegalArgumentException ignored) {}
             }
             Bukkit.getLogger().info("[AC] Server date initialized from MySQL");
         } catch (Exception e) {
@@ -7547,8 +8199,10 @@ public class PersistenceUtils {
         UUID leader = UUID.fromString(fields[2]);
         List<UUID> members = new ArrayList<>();
         String[] memberParts = fields[3].split("\\*\\*\\*");
-        for (String member : memberParts) {
-            members.add(UUID.fromString(member));
+        if (!memberParts[0].isEmpty()) {
+            for (String member : memberParts) {
+                members.add(UUID.fromString(member));
+            }
         }
 
         List<UUID> allies = new ArrayList<>();
@@ -7570,11 +8224,26 @@ public class PersistenceUtils {
         }
 
         String worldName = fields[7];
-        // Strip "smp:" prefix only on the SMP server where those worlds actually exist as "world" etc.
-        // On other servers, keep the raw name so Bukkit.getWorld() returns null (cross-server stub with empty chunks).
-        String lookupName = (worldName.startsWith("smp:") && AranarthCore.isSmpServer())
-                ? worldName.substring(4) : worldName;
-        World world = Bukkit.getWorld(lookupName);
+        // Resolve the world on the current server. Stored names use a "smp:" prefix for SMP worlds
+        // so the two servers' "world" (both named "world" in Bukkit) don't collide:
+        //   Survival stores its own worlds as "world", "resource", etc.  (no prefix)
+        //   SMP stores its own worlds as "smp:world", "smp:world_nether", etc.
+        //
+        // On SMP: only resolve chunks for rows with "smp:" prefix (our own dominions).
+        //   Rows without the prefix belong to Survival - treat as stubs (null world).
+        //   Without this guard, Bukkit.getWorld("world") on SMP returns SMP's own overworld,
+        //   making Survival's dominions appear as non-stubs. SMP's periodic saves and shutdown
+        //   save then write those stale in-memory copies back to MySQL, overwriting Survival's
+        //   fresh shutdown save and causing data loss (claims, reserves, members all reset).
+        //
+        // On Survival: "smp:*" names return null from Bukkit.getWorld() naturally (no such world),
+        //   so no special handling needed.
+        World world;
+        if (AranarthCore.isSmpServer()) {
+            world = worldName.startsWith("smp:") ? Bukkit.getWorld(worldName.substring(4)) : null;
+        } else {
+            world = Bukkit.getWorld(worldName);
+        }
 
         List<Chunk> chunks = new ArrayList<>();
         String[] claimedChunks = fields[8].split("\\*\\*\\*");
@@ -7626,6 +8295,7 @@ public class PersistenceUtils {
 
         boolean memberPvpEnabled = fields.length > 19 && fields[19].equals("1");
         boolean mobSpawningEnabled = fields.length > 20 && fields[20].equals("1");
+        boolean explosionEnabled = fields.length > 40 && fields[40].equals("1");
         long conqueredRequestTimestamp = fields.length > 21 ? Long.parseLong(fields[21]) : 0L;
         long lastConquerAttemptTimestamp = fields.length > 22 ? Long.parseLong(fields[22]) : 0L;
         long rebelRequestTimestamp = fields.length > 23 ? Long.parseLong(fields[23]) : 0L;
@@ -7657,8 +8327,16 @@ public class PersistenceUtils {
 
         Dominion dominion = new Dominion(id, name, leader, members, memberRanks, allies, truced, enemies, worldName, chunks,
                 x, y, z, yaw, pitch, food, claimableResources, conquered, null, balance);
+        if (fields.length > 41 && !fields[41].isEmpty()) {
+            for (String s : fields[41].split(",")) {
+                try {
+                    dominion.getClaimFoodYields().add(Double.parseDouble(s));
+                } catch (NumberFormatException ignored) {}
+            }
+        }
         dominion.setMemberPvpEnabled(memberPvpEnabled);
         dominion.setMobSpawningEnabled(mobSpawningEnabled);
+        dominion.setExplosionEnabled(explosionEnabled);
         dominion.setConqueredRequestTimestamp(conqueredRequestTimestamp);
         dominion.setLastConquerAttemptTimestamp(lastConquerAttemptTimestamp);
         dominion.setRebelRequestTimestamp(rebelRequestTimestamp);
@@ -7714,7 +8392,12 @@ public class PersistenceUtils {
             try {
                 parseAndAddDominionRow(entry.getValue());
             } catch (Exception e) {
-                Bukkit.getLogger().warning("[AC] Failed to parse DB dominion row for " + entry.getKey() + ": " + e.getMessage());
+                // Log enough detail to diagnose the root cause - the raw row is
+                // included so the data can be recovered manually if needed.
+                String raw = entry.getValue();
+                String preview = raw != null && raw.length() > 200 ? raw.substring(0, 200) + "..." : raw;
+                Bukkit.getLogger().warning("[AC] Failed to parse DB dominion row for " + entry.getKey()
+                        + ": " + e.getMessage() + " | row preview: " + preview);
             }
         }
         Bukkit.getLogger().info("[AC] All dominions initialized from MySQL");
@@ -8314,6 +8997,10 @@ public class PersistenceUtils {
         }
     }
 
+    // -------------------------------------------------------------------------
+    // Job Data (MySQL only - shared across servers)
+    // -------------------------------------------------------------------------
+
     /**
      * Loads outposts from MySQL. Must be called after loadDominionsFromDatabase().
      * Falls back to file if empty.
@@ -8437,12 +9124,6 @@ public class PersistenceUtils {
         Bukkit.getLogger().info("[AC] Defenders scheduled to spawn from MySQL");
     }
 
-    // -------------------------------------------------------------------------
-    // Job Data (MySQL only — shared across servers)
-    // -------------------------------------------------------------------------
-
-    private static final Gson JOB_GSON = new Gson();
-
     public static void loadJobDataForPlayer(UUID uuid) {
         if (!DatabaseManager.isActive()) {
             return;
@@ -8455,20 +9136,21 @@ public class PersistenceUtils {
             AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
             if (ap == null) {
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Jobs] Load skipped for " + name
-                        + " — AranarthPlayer not in memory");
+                        + " - AranarthPlayer not in memory");
                 return;
             }
             if (json != null && !json.isEmpty()) {
                 JobData loaded = deserializeJobData(json);
                 ap.setJobData(loaded);
                 Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] Loaded for " + name
-                        + " — jobs=" + loaded.getActiveJobs()
+                        + " - jobs=" + loaded.getActiveJobs()
                         + " levels=" + loaded.getLevels());
             } else {
                 ap.setJobData(new JobData());
                 Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] No DB row for " + name
-                        + " — initialised with empty JobData");
+                        + " - initialised with empty JobData");
             }
+            ap.setJobDataLoaded(true);
             AranarthUtils.setPlayer(uuid, ap);
         } catch (Exception e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Jobs] Failed to load job data for " + name + ": " + e.getMessage());
@@ -8483,11 +9165,16 @@ public class PersistenceUtils {
         if (ap == null) {
             return;
         }
+        if (!ap.isJobDataLoaded()) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Jobs] Skipping async save for " + playerName(uuid)
+                    + " - job data not yet loaded from DB (join-time async load still pending)");
+            return;
+        }
         String json = serializeJobData(ap.getJobData());
         String name = playerName(uuid);
         if (AranarthCore.getInstance().isEnabled()) {
             Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] Dispatching async save for " + name
-                    + " — jobs=" + ap.getJobData().getActiveJobs());
+                    + " - jobs=" + ap.getJobData().getActiveJobs());
             Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
                 try {
                     DatabaseManager.getInstance().saveJobData(uuid, json);
@@ -8498,7 +9185,7 @@ public class PersistenceUtils {
             });
         } else {
             Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] Saving sync (plugin disabled) for " + name
-                    + " — jobs=" + ap.getJobData().getActiveJobs());
+                    + " - jobs=" + ap.getJobData().getActiveJobs());
             DatabaseManager.getInstance().saveJobData(uuid, json);
         }
     }
@@ -8516,10 +9203,15 @@ public class PersistenceUtils {
         if (ap == null) {
             return;
         }
+        if (!ap.isJobDataLoaded()) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Jobs] Skipping sync save for " + playerName(uuid)
+                    + " - job data not yet loaded from DB (join-time async load still pending)");
+            return;
+        }
         String name = playerName(uuid);
         String json = serializeJobData(ap.getJobData());
         Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] Saving sync for " + name
-                + " — jobs=" + ap.getJobData().getActiveJobs()
+                + " - jobs=" + ap.getJobData().getActiveJobs()
                 + " thread=" + Thread.currentThread().getName());
         try {
             DatabaseManager.getInstance().saveJobData(uuid, json);
@@ -8534,9 +9226,12 @@ public class PersistenceUtils {
             return;
         }
         java.util.Collection<? extends Player> online = Bukkit.getOnlinePlayers();
-        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] saveAllJobData — " + online.size() + " online player(s)");
+        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Jobs] saveAllJobData - " + online.size() + " online player(s)");
         for (Player player : online) {
-            saveJobDataSync(player.getUniqueId());
+            // saveJobData dispatches async when the plugin is enabled (periodic saves)
+            // and falls back to sync when the plugin is disabled (shutdown path), avoiding
+            // blocking MySQL writes on the main thread during normal operation.
+            saveJobData(player.getUniqueId());
         }
     }
 
@@ -8566,10 +9261,7 @@ public class PersistenceUtils {
         return obj.toString();
     }
 
-    // Used for one-time migration.
-    private static final long[] OLD_CUMULATIVE_XP = {0, 500, 2500, 8500, 23500, 63500, 153500, 328500, 628500, 1128500};
-
-    private static JobData deserializeJobData(String json) {
+    public static JobData deserializeJobData(String json) {
         JobData jobData = new JobData();
         try {
             JsonObject obj = JOB_GSON.fromJson(json, JsonObject.class);
@@ -8630,6 +9322,146 @@ public class PersistenceUtils {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Jobs: Failed to parse job data JSON: " + e.getMessage());
         }
         return jobData;
+    }
+
+    /**
+     * Saves the blacklist presets for a player asynchronously to MySQL.
+     */
+    public static void saveBlacklistPresetsAsync(UUID uuid) {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+        if (ap == null) {
+            return;
+        }
+
+        int activeIndex = ap.getActivePresetIndex();
+        JsonObject presetsJson = new JsonObject();
+        List<BlacklistPreset> presets = ap.getBlacklistPresets();
+        for (int i = 0; i < presets.size(); i++) {
+            BlacklistPreset preset = presets.get(i);
+            JsonObject p = new JsonObject();
+            p.addProperty("name", preset.getName());
+            String itemsBase64 = "";
+            if (!preset.getItems().isEmpty()) {
+                try {
+                    itemsBase64 = ItemUtils.itemStackArrayToBase64(preset.getItems().toArray(new ItemStack[0]));
+                } catch (Exception ex) {
+                    Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Blacklist] Failed to encode items for preset " + i + " of " + uuid + ": " + ex.getMessage());
+                }
+            }
+            p.addProperty("items", itemsBase64);
+            presetsJson.add(String.valueOf(i), p);
+        }
+        String json = presetsJson.toString();
+
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
+                DatabaseManager.getInstance().saveBlacklistPresets(uuid, activeIndex, json));
+    }
+
+    /**
+     * Loads all blacklist presets from MySQL at startup.
+     */
+    public static void loadAllBlacklistPresetsFromDatabase() {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        Map<UUID, Object[]> rows = DatabaseManager.getInstance().loadAllBlacklistPresets();
+        for (Map.Entry<UUID, Object[]> entry : rows.entrySet()) {
+            UUID uuid = entry.getKey();
+            AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+            if (ap == null) {
+                continue;
+            }
+            applyBlacklistPresetRow(ap, uuid, entry.getValue());
+        }
+        // Migrate any players who have old blacklist data but no preset row
+        for (Map.Entry<UUID, AranarthPlayer> entry : AranarthUtils.getAranarthPlayers().entrySet()) {
+            UUID uuid = entry.getKey();
+            AranarthPlayer ap = entry.getValue();
+            if (!ap.getBlacklistPresets().isEmpty()) {
+                continue; // Already loaded
+            }
+            if (ap.getBlacklist() != null && !ap.getBlacklist().isEmpty()) {
+                // Migrate to preset 0
+                List<BlacklistPreset> presets = new ArrayList<>();
+                presets.add(new BlacklistPreset("Default", new ArrayList<>(ap.getBlacklist())));
+                ap.setBlacklistPresets(presets);
+                ap.setActivePresetIndex(0);
+                saveBlacklistPresetsAsync(uuid);
+                Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Blacklist] Migrated legacy blacklist for " + uuid + " to Preset 1");
+            }
+        }
+    }
+
+    /**
+     * Loads blacklist presets for a single player from MySQL (used on cross-server transfer).
+     */
+    public static void loadBlacklistPresetsForPlayer(UUID uuid) {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+        if (ap == null) {
+            return;
+        }
+        Object[] row = DatabaseManager.getInstance().loadBlacklistPresets(uuid);
+        if (row == null) {
+            // Migrate if they have legacy data
+            if (ap.getBlacklist() != null && !ap.getBlacklist().isEmpty() && ap.getBlacklistPresets().isEmpty()) {
+                List<BlacklistPreset> presets = new ArrayList<>();
+                presets.add(new BlacklistPreset("Default", new ArrayList<>(ap.getBlacklist())));
+                ap.setBlacklistPresets(presets);
+                ap.setActivePresetIndex(0);
+                saveBlacklistPresetsAsync(uuid);
+            }
+            return;
+        }
+        applyBlacklistPresetRow(ap, uuid, row);
+    }
+
+    private static void applyBlacklistPresetRow(AranarthPlayer ap, UUID uuid, Object[] row) {
+        int activeIndex = (int) row[0];
+        String json = (String) row[1];
+
+        List<BlacklistPreset> presets = new ArrayList<>();
+        if (json != null && !json.isEmpty() && !json.equals("{}")) {
+            try {
+                JsonObject presetsJson = GSON.fromJson(json, JsonObject.class);
+                // Find max index
+                int maxIndex = -1;
+                for (String key : presetsJson.keySet()) {
+                    try {
+                        maxIndex = Math.max(maxIndex, Integer.parseInt(key));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+                for (int i = 0; i <= maxIndex; i++) {
+                    presets.add(new BlacklistPreset("", new ArrayList<>()));
+                }
+                for (String key : presetsJson.keySet()) {
+                    try {
+                        int idx = Integer.parseInt(key);
+                        JsonObject p = presetsJson.getAsJsonObject(key);
+                        String name = p.has("name") ? p.get("name").getAsString() : "";
+                        String itemsBase64 = p.has("items") ? p.get("items").getAsString() : "";
+                        List<ItemStack> items = new ArrayList<>();
+                        if (!itemsBase64.isEmpty()) {
+                            ItemStack[] arr = ItemUtils.itemStackArrayFromBase64(itemsBase64);
+                            items = new LinkedList<>(Arrays.asList(arr));
+                        }
+                        presets.set(idx, new BlacklistPreset(name, items));
+                    } catch (Exception ex) {
+                        Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Blacklist] Failed to parse preset key for " + uuid + ": " + ex.getMessage());
+                    }
+                }
+            } catch (Exception ex) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Blacklist] Failed to parse preset JSON for " + uuid + ": " + ex.getMessage());
+            }
+        }
+        ap.setBlacklistPresets(presets);
+        ap.setActivePresetIndex(activeIndex);
     }
 
 }

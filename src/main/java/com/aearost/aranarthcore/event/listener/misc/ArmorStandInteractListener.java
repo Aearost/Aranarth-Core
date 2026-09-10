@@ -278,7 +278,7 @@ public class ArmorStandInteractListener implements Listener {
 
         switch (pose) {
             case 1 -> {
-                // No Pose — neutral arm defaults already applied above
+                // No Pose - neutral arm defaults already applied above
             }
             case 2 -> {
                 // Solemn

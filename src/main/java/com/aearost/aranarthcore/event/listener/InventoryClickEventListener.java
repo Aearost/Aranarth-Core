@@ -4,20 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.block.BannerExtendPatternLimit;
 import com.aearost.aranarthcore.event.mob.GuiVillagerClick;
 import com.aearost.aranarthcore.event.player.*;
-import com.aearost.aranarthcore.event.player.DoubleBrewingBonus;
-import com.aearost.aranarthcore.gui.GuiBrewBook;
-import com.aearost.aranarthcore.gui.GuiBrewShop;
-import com.aearost.aranarthcore.event.player.GuiWrenchClick;
-import com.aearost.aranarthcore.gui.GuiDefenderManage;
-import com.aearost.aranarthcore.gui.GuiDefenders;
-import com.aearost.aranarthcore.gui.GuiWrench;
-import com.aearost.aranarthcore.gui.GuiPetFood;
-import com.aearost.aranarthcore.gui.GuiDominionPermissions;
-import com.aearost.aranarthcore.gui.GuiJobs;
-import com.aearost.aranarthcore.gui.GuiJobsJoin;
-import com.aearost.aranarthcore.gui.GuiJobsLeave;
-import com.aearost.aranarthcore.gui.GuiJobsStats;
-import com.aearost.aranarthcore.gui.GuiOutposts;
+import com.aearost.aranarthcore.gui.*;
 import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
@@ -38,6 +25,10 @@ public class InventoryClickEventListener implements Listener {
 
     public InventoryClickEventListener(AranarthCore plugin) {
         Bukkit.getPluginManager().registerEvents(this, plugin);
+    }
+
+    private static boolean isDominionFoodTitle(String title) {
+        return title.startsWith(GuiDominionFood.TITLE_PREFIX);
     }
 
     /**
@@ -64,11 +55,22 @@ public class InventoryClickEventListener implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent e) {
+        // Chat snapshot GUIs are purely view-only
+        if (GuiChatSnapshot.isSnapshotGui(ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
+            e.setCancelled(true);
+            return;
+        }
         if (e.getView().getType() == InventoryType.CHEST) {
             if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiWrench.TITLE)) {
                 new GuiWrenchClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Teleport")) {
                 new GuiHomepadClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiBlacklistSelect.TITLE_CLEAR)
+                    || ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiBlacklistSelect.TITLE_USE)) {
+                new GuiBlacklistSelectClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(GuiBlacklistEditor.TITLE_PREFIX)
+                    && e.getView().getTopInventory().getSize() == 54) {
+                new GuiBlacklistEditorClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Blacklist")) {
                 new GuiBlacklistClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Villager")) {
@@ -90,7 +92,7 @@ public class InventoryClickEventListener implements Listener {
                 new GuiRanksClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Rankup Confirm")) {
                 new GuiRankupClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Your Homes")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Your Homes")) {
                 new GuiHomesClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Delete Home")) {
                 new GuiDelhomeClick().execute(e);
@@ -108,6 +110,9 @@ public class InventoryClickEventListener implements Listener {
                 new GuiShopLocationClick().execute(e);
             } else if (isDominionFoodTitle(ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
                 new GuiDominionFoodClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(GuiDominionResourcesPreview.TITLE_SUFFIX)
+                    && !ChatUtils.stripColorFormatting(e.getView().getTitle()).contains("'s Resources")) {
+                new GuiDominionResourcesPreviewClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(" Resources")) {
                 new GuiDominionResourcesClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiDominionPermissions.HUB_TITLE)
@@ -152,6 +157,8 @@ public class InventoryClickEventListener implements Listener {
                 new GuiLoginStreakClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Player Toggles")) {
                 new GuiToggleClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiSounds.TITLE)) {
+                new GuiSoundsClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Top Voters")) {
                 new GuiVoteTopClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Top ")
@@ -161,6 +168,13 @@ public class InventoryClickEventListener implements Listener {
                 new GuiMctopClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiPetFood.TITLE)) {
                 new GuiPetFoodClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiHeadExchange.TITLE)) {
+                new GuiHeadExchangeClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiMcstats.TITLE_SELF)
+                    || ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(GuiMcstats.TITLE_SUFFIX)) {
+                new GuiMcstatsClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiReaper.TITLE)) {
+                new GuiReaperClick().execute(e);
             }
         } else {
             if (e.getClickedInventory() != null) {
@@ -182,10 +196,5 @@ public class InventoryClickEventListener implements Listener {
             new AfkCancelByInteract().execute(player);
         }
 //        new QuiverSwitchSlots().execute(e);
-    }
-
-    private static boolean isDominionFoodTitle(String title) {
-        return (title.endsWith(" Food") && !title.equals(GuiPetFood.TITLE))
-                || title.matches(".+'s Food \\(\\d+/\\d+\\)");
     }
 }

@@ -33,6 +33,7 @@ public class Dominion {
 	private ItemStack[] food;
 	private int foodPowerBeingConsumed;
 	private int claimableResources;
+	private final List<Double> claimFoodYields = new ArrayList<>();
 	private Biome biomeResourcesBeingClaimed;
 	private List<UUID> conquered;
 	private UUID conqueredRequest;
@@ -47,6 +48,7 @@ public class Dominion {
 
 	private boolean memberPvpEnabled;
 	private boolean mobSpawningEnabled;
+	private boolean explosionEnabled;
 	private boolean bendingEnabled;
 	private int boughtChunks;
 
@@ -261,10 +263,15 @@ public class Dominion {
 	 */
 	public void togglePlayerPermissionOverride(UUID playerUuid, DominionPermission permission, boolean inheritedValue) {
 		Map<DominionPermission, Boolean> overrides = getPlayerPermissionOverrides().computeIfAbsent(playerUuid, k -> new HashMap<>());
-		if (overrides.containsKey(permission)) {
-			overrides.put(permission, !overrides.get(permission));
+		boolean newValue = overrides.containsKey(permission) ? !overrides.get(permission) : !inheritedValue;
+		if (newValue == inheritedValue) {
+			// Toggled back to inherited - remove the override so no stale * marker remains
+			overrides.remove(permission);
+			if (overrides.isEmpty()) {
+				getPlayerPermissionOverrides().remove(playerUuid);
+			}
 		} else {
-			overrides.put(permission, !inheritedValue);
+			overrides.put(permission, newValue);
 		}
 	}
 
@@ -486,6 +493,14 @@ public class Dominion {
 		this.mobSpawningEnabled = mobSpawningEnabled;
 	}
 
+	public boolean isExplosionEnabled() {
+		return explosionEnabled;
+	}
+
+	public void setExplosionEnabled(boolean explosionEnabled) {
+		this.explosionEnabled = explosionEnabled;
+	}
+
 	/**
 	 * Returns whether bending is enabled in this dominion.
 	 */
@@ -611,6 +626,13 @@ public class Dominion {
 	 */
 	public void setClaimableResources(int claimableResources) {
 		this.claimableResources = claimableResources;
+	}
+
+	/**
+	 * Provides the list of yield multipliers (0.33-1.0) for each pending claimable resource slot.
+	 */
+	public List<Double> getClaimFoodYields() {
+		return claimFoodYields;
 	}
 
 	/**

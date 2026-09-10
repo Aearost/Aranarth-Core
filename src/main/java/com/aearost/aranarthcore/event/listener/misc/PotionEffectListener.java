@@ -5,12 +5,16 @@ import com.aearost.aranarthcore.abilities.airbending.spiritual.PastLives;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
+import com.aearost.aranarthcore.utils.DefenderUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.MusicInstrument;
+import org.bukkit.entity.ElderGuardian;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -140,10 +144,35 @@ public class PotionEffectListener implements Listener {
         }
 
         if (newEffect != null && newEffect.getType().getCategory() == PotionEffectTypeCategory.HARMFUL) {
-            // Do not apply mining fatigue from Elder guardians
+            // Do not apply mining fatigue from Elder guardians to exempt players
             if (e.getEntity() instanceof Player player) {
-                if (AranarthUtils.isWearingArmorType(player, "aquatic")) {
-                    if (newEffect.getType() == PotionEffectType.MINING_FATIGUE && e.getCause() == Cause.ATTACK) {
+                if (newEffect.getType() == PotionEffectType.MINING_FATIGUE && e.getCause() == Cause.ATTACK) {
+                    if (AranarthUtils.isWearingArmorType(player, "aquatic")) {
+                        e.setCancelled(true);
+                        player.removePotionEffect(PotionEffectType.MINING_FATIGUE);
+                        return;
+                    }
+                    // Cancel if all nearby Elder Guardian defenders have PvP disabled for this player
+                    boolean shouldBlock = false;
+                    for (Entity nearby : player.getNearbyEntities(60, 60, 60)) {
+                        if (!(nearby instanceof ElderGuardian)) {
+                            continue;
+                        }
+                        if (!DefenderUtils.isDefender(nearby.getUniqueId())) {
+                            // Wild Elder Guardian - effect is legitimate
+                            shouldBlock = false;
+                            break;
+                        }
+                        UUID dominionId = DefenderUtils.getDefenderDominionId(nearby.getUniqueId());
+                        Dominion defenderDominion = DominionUtils.getDominionById(dominionId);
+                        if (defenderDominion == null || DominionUtils.hasPermission(player, defenderDominion, DominionPermission.PVP)) {
+                            // PvP is enabled against this player - effect is legitimate
+                            shouldBlock = false;
+                            break;
+                        }
+                        shouldBlock = true;
+                    }
+                    if (shouldBlock) {
                         e.setCancelled(true);
                         player.removePotionEffect(PotionEffectType.MINING_FATIGUE);
                         return;
@@ -186,6 +215,11 @@ public class PotionEffectListener implements Listener {
                 }
             }
 
+            // Invisibility has no meaningful amplifier difference
+            if (newEffect != null && newEffect.getType() == PotionEffectType.INVISIBILITY) {
+                return;
+            }
+
             // Do not proceed if there is not a new effect being applied
             if (newEffect == null) {
                 // Allow proceeding only for instant health arrows
@@ -205,6 +239,7 @@ public class PotionEffectListener implements Listener {
             // If the player currently has that same effect and is re-applying it
             if (oldEffect != null && newEffect != null) {
                 int stackedAmplifier = getStackedAmplifier(oldEffect, newEffect);
+                int uncappedAmplifier = stackedAmplifier;
 
                 // Do not apply aranarthium armor or beacon effects if player already has the effect
                 // If the effect is coming from an arrow, allow it to stack
@@ -227,8 +262,9 @@ public class PotionEffectListener implements Listener {
                 // Adds amplifier restrictions based on the potion's type
                 stackedAmplifier = determineEffectAmplifierRestriction(stackedAmplifier, newEffect.getType(), effectiveFae);
                 stackedAmplifier = applySzetoBoost(entity, e.getCause(), newEffect.getType(), stackedAmplifier, effectiveFae);
+                int duration = getExtendedDuration(oldEffect, newEffect, uncappedAmplifier, stackedAmplifier);
                 // This will call the event recursively
-                entity.addPotionEffect(new PotionEffect(newEffect.getType(), newEffect.getDuration(), stackedAmplifier));
+                entity.addPotionEffect(new PotionEffect(newEffect.getType(), duration, stackedAmplifier));
             } else {
                 // Must disable the hit by tipped arrow variable and manually apply instant health
                 if (entity instanceof Player player) {
@@ -304,7 +340,7 @@ public class PotionEffectListener implements Listener {
                     }
                     return DominionUtils.isPositivelyAligned(faePlayer, targetPlayer);
                 }
-                // Mobs are always negatively-aligned — cancel beneficial effects
+                // Mobs are always negatively-aligned - cancel beneficial effects
                 e.setCancelled(true);
                 return false;
             } else if (category == PotionEffectTypeCategory.HARMFUL) {
@@ -315,7 +351,7 @@ public class PotionEffectListener implements Listener {
                     }
                     return DominionUtils.isNegativelyAligned(faePlayer, targetPlayer);
                 }
-                // Mobs are always negatively-aligned — apply Fae harmful boost
+                // Mobs are always negatively-aligned - apply Fae harmful boost
                 return true;
             }
             return false;
@@ -422,6 +458,30 @@ public class PotionEffectListener implements Listener {
         } else {
             return false;
         }
+    }
+
+    /**
+     * If the stacked amplifier exceeds the cap, extends the existing effect's duration by
+     * 50% of the new effect's base duration instead, capped at 4x the base duration.
+     *
+     * @param oldEffect   The existing effect on the entity.
+     * @param newEffect   The new effect being applied.
+     * @param uncappedAmp The stacked amplifier before the cap was applied.
+     * @param cappedAmp   The stacked amplifier after the cap was applied.
+     * @return The duration to use for the new effect application.
+     */
+    private int getExtendedDuration(PotionEffect oldEffect, PotionEffect newEffect, int uncappedAmp, int cappedAmp) {
+        if (cappedAmp >= uncappedAmp) {
+            return newEffect.getDuration();
+        }
+        if (newEffect.getType() == PotionEffectType.INSTANT_HEALTH || newEffect.getType() == PotionEffectType.INSTANT_DAMAGE) {
+            return newEffect.getDuration();
+        }
+        int baseDuration = newEffect.getDuration();
+        int extension = (int) (baseDuration * 0.5);
+        int newDuration = Math.max(oldEffect.getDuration(), baseDuration) + extension;
+        int maxDuration = baseDuration * 4;
+        return Math.min(newDuration, maxDuration);
     }
 
     /**

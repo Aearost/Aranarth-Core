@@ -303,7 +303,7 @@ public class BrewRecipeUtils {
 
     /**
      * Updates the in-memory unlock map when a brew is unlocked on another server.
-     * No DB write is needed here — the originating server already persisted it.
+     * No DB write is needed here - the originating server already persisted it.
      */
     public static void applyRemoteUnlock(UUID uuid, String recipeId) {
         playerUnlocks.computeIfAbsent(uuid, k -> new HashSet<>()).add(recipeId);
@@ -372,7 +372,7 @@ public class BrewRecipeUtils {
     }
 
     /**
-     * Returns all COMMON recipes that are purchasable in the shop — excludes default-unlocked
+     * Returns all COMMON recipes that are purchasable in the shop - excludes default-unlocked
      * recipes, price-0 recipes, and any the player has already bought.
      */
     public static List<BrewRecipe> getLockedCommonRecipes(UUID uuid) {

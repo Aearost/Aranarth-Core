@@ -41,7 +41,7 @@ public class NetworkPlayerTabCompleteListener implements Listener {
     }
 
     /**
-     * HIGHEST priority — fires after all other plugins have had a chance to handle
+     * HIGHEST priority - fires after all other plugins have had a chance to handle
      * the event. We overwrite completions with the full network player list so that
      * cross-server players always appear, regardless of what other plugins did.
      */
@@ -57,7 +57,7 @@ public class NetworkPlayerTabCompleteListener implements Listener {
         String command = tokens[0].toLowerCase();
         String partial = tokens[tokens.length - 1];
 
-        // /command <player>  — player name is the only argument
+        // /command <player>  - player name is the only argument
         if (PLAYER_ARG0_COMMANDS.contains(command) && tokens.length == 2) {
             applyPlayerCompletions(event, partial);
             return;

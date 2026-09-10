@@ -34,12 +34,14 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
     private double sourceCheckRadius;
 
     private Phase phase;
-    private Location sourceLocation; // Self-fire source point only (used when selfOnFire)
+    private Location sourceLocation; // Self/ally-fire source point (used when selfOnFire or alliedSourcePlayer != null)
     private final List<Location> sourceLocations = new ArrayList<>();      // Top-center of each block source
     private final List<Location> sourceBlockLocations = new ArrayList<>(); // Actual block positions
     private final List<Material> sourceBlockTypes = new ArrayList<>();     // Material at each source
     private boolean selfOnFire; // True when the player's own fire is being used as the source
     private boolean selfFireExtinguished; // True once we've consumed the player's fire at charge time
+    private Player alliedSourcePlayer; // Non-null when sourcing fire from a nearby ally
+    private boolean alliedFireExtinguished; // True once we've consumed the allied player's fire at charge time
     private int activeSourceCount = 1; // Number of sources captured at channeling start (drives launch rate)
     private long readyStartTime;
     private long channelingStartTime;
@@ -61,7 +63,7 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
     private static final int BASE_EFFECT_DURATION_TICKS = 60; // +20 ticks per 0.5s interval in fumes
 
     private static final Map<UUID, NoxiousFumes> activeInstances  = new HashMap<>();
-    // Tracks when a player's NoxiousFumes reached full charge — consumed by JetFumes activation.
+    // Tracks when a player's NoxiousFumes reached full charge - consumed by JetFumes activation.
     private static final Map<UUID, Long>         chargeTimestamps = new HashMap<>();
     private static final long                    CHARGE_VALID_MS  = 15000L;
     private final Random random = new Random();
@@ -157,9 +159,14 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
             selfOnFire = true;
             sourceLocation = getSelfFireSourceLocation();
         } else {
-            findNearestSources(isDay() ? 5 : 1);
-            if (sourceLocations.isEmpty()) {
-                return;
+            alliedSourcePlayer = findNearestAlliedPlayerOnFire();
+            if (alliedSourcePlayer != null) {
+                sourceLocation = getPlayerFireSourceLocation(alliedSourcePlayer);
+            } else {
+                findNearestSources(isDay() ? 5 : 1);
+                if (sourceLocations.isEmpty()) {
+                    return;
+                }
             }
         }
 
@@ -183,7 +190,7 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
         phase = Phase.CHANNELING;
         channelingStartTime = System.currentTimeMillis();
         lastTravelerLaunchTime = 0;
-        activeSourceCount = selfOnFire ? 1 : Math.max(1, sourceLocations.size());
+        activeSourceCount = (selfOnFire || alliedSourcePlayer != null) ? 1 : Math.max(1, sourceLocations.size());
         player.getWorld().playSound(player.getLocation(), Sound.ITEM_FIRECHARGE_USE, 0.5f, 0.6f);
     }
 
@@ -199,7 +206,7 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
             clearChargeTimestamp(player.getUniqueId());
             consumeSource();
         }
-        // If already DISPERSING, do nothing — let it finish naturally.
+        // If already DISPERSING, do nothing - let it finish naturally.
     }
 
     // -------------------------------------------------------------------------
@@ -230,11 +237,18 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
         // Re-derive source each tick so it stays valid
         if (selfOnFire) {
             if (!selfFireExtinguished && player.getFireTicks() <= 0) {
-                // Player's fire was extinguished externally before charge — cancel
+                // Player's fire was extinguished externally before charge - cancel
                 remove();
                 return;
             }
             sourceLocation = getSelfFireSourceLocation();
+        } else if (alliedSourcePlayer != null) {
+            if (!alliedFireExtinguished && (!alliedSourcePlayer.isOnline() || alliedSourcePlayer.getFireTicks() <= 0)) {
+                // Ally's fire was extinguished externally before charge - cancel
+                remove();
+                return;
+            }
+            sourceLocation = getPlayerFireSourceLocation(alliedSourcePlayer);
         } else {
             findNearestSources(isDay() ? 5 : 1);
             if (sourceLocations.isEmpty()) {
@@ -251,6 +265,10 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
                 selfFireExtinguished = true;
                 player.setFireTicks(0);
                 player.getWorld().playSound(player.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, 1.0f, 1.0f);
+            } else if (alliedSourcePlayer != null && !alliedFireExtinguished) {
+                alliedFireExtinguished = true;
+                alliedSourcePlayer.setFireTicks(0);
+                alliedSourcePlayer.getWorld().playSound(alliedSourcePlayer.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, 1.0f, 1.0f);
             }
             recordChargeComplete(player.getUniqueId());
         }
@@ -306,7 +324,7 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
         World world = player.getWorld();
 
         List<Location> origins = new ArrayList<>();
-        if (selfOnFire && sourceLocation != null) {
+        if ((selfOnFire || alliedSourcePlayer != null) && sourceLocation != null) {
             origins.add(sourceLocation);
         } else {
             origins.addAll(sourceLocations);
@@ -439,6 +457,10 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
                 UUID id = entity.getUniqueId();
                 inFumes.add(id);
 
+                if (living.getWorld().getName().startsWith("arena")) {
+                    continue;
+                }
+
                 boolean firstContact = !entityEntryTime.containsKey(id);
                 entityEntryTime.putIfAbsent(id, now);
                 entityLastEffectTime.putIfAbsent(id, now);
@@ -486,6 +508,15 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
             player.getWorld().playSound(player.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, 1.0f, 1.0f);
             if (sourceLocation != null) {
                 player.getWorld().spawnParticle(Particle.LARGE_SMOKE, sourceLocation,
+                        12, 0.3, 0.3, 0.3, 0.02);
+            }
+            return;
+        }
+        if (alliedSourcePlayer != null) {
+            alliedSourcePlayer.setFireTicks(0);
+            alliedSourcePlayer.getWorld().playSound(alliedSourcePlayer.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, 1.0f, 1.0f);
+            if (sourceLocation != null) {
+                alliedSourcePlayer.getWorld().spawnParticle(Particle.LARGE_SMOKE, sourceLocation,
                         12, 0.3, 0.3, 0.3, 0.02);
             }
             return;
@@ -605,6 +636,38 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
         return eye.clone().add(forward.multiply(1.2)).add(0, -0.3, 0);
     }
 
+    /**
+     * Returns a source location derived from a target player's position - same
+     * calculation as getSelfFireSourceLocation() but for an allied player.
+     */
+    private Location getPlayerFireSourceLocation(Player target) {
+        Location eye = target.getEyeLocation();
+        Vector forward = eye.getDirection().normalize();
+        return eye.clone().add(forward.multiply(1.2)).add(0, -0.3, 0);
+    }
+
+    /**
+     * Returns the nearest player within sourceCheckRadius who is on fire,
+     * in a positive relation (same dominion, allied, or truced), and has PvP disabled.
+     */
+    private Player findNearestAlliedPlayerOnFire() {
+        double bestDistSq = sourceCheckRadius * sourceCheckRadius;
+        Player best = null;
+        for (Entity entity : player.getWorld().getNearbyEntities(player.getLocation(), sourceCheckRadius, sourceCheckRadius, sourceCheckRadius)) {
+            if (!(entity instanceof Player target)) continue;
+            if (target == player) continue;
+            if (target.getFireTicks() <= 0) continue;
+            if (!DominionUtils.isPositivelyAligned(player, target)) continue;
+            if (DominionUtils.canAttackPlayer(player, target)) continue; // PvP must be disabled
+            double distSq = player.getLocation().distanceSquared(target.getLocation());
+            if (distSq < bestDistSq) {
+                bestDistSq = distSq;
+                best = target;
+            }
+        }
+        return best;
+    }
+
     // -------------------------------------------------------------------------
     // Static registry
     // -------------------------------------------------------------------------
@@ -686,7 +749,7 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
 
     /**
      * Returns true once the ability has been in the READY phase for at least the
-     * full charge duration — i.e., the smoke path has fully reached the player's hand.
+     * full charge duration - i.e., the smoke path has fully reached the player's hand.
      */
     public boolean isCharged() {
         return phase == Phase.READY && System.currentTimeMillis() - readyStartTime >= CHARGE_DURATION_MS;

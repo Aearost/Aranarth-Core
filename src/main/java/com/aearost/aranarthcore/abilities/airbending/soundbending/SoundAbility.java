@@ -17,52 +17,72 @@ import org.bukkit.potion.PotionEffectType;
 
 public abstract class SoundAbility extends AirAbility implements SubAbility {
 
-	public static Element.SubElement SOUND;
+    public static Element.SubElement SOUND;
 
-	public SoundAbility(final Player player) {
-		super(player);
-	}
+    public SoundAbility(final Player player) {
+        super(player);
+    }
 
-	@Override
-	public Class<? extends Ability> getParentAbility() {
-		return AirAbility.class;
-	}
+    @Override
+    public Class<? extends Ability> getParentAbility() {
+        return AirAbility.class;
+    }
 
-	@Override
-	public Element getElement() {
-		return SOUND;
-	}
+    @Override
+    public Element getElement() {
+        return SOUND;
+    }
 
-	/**
-	 * Returns true if the given material is any glass variant (glass block or glass pane,
-	 * including all stained/colored variants).
-	 */
-	protected static boolean isGlass(Material material) {
-		return material.name().contains("GLASS");
-	}
+    /**
+     * Returns true if the given material is any glass variant (glass block or glass pane,
+     * including all stained/colored variants).
+     */
+    protected static boolean isGlass(Material material) {
+        return material.name().contains("GLASS");
+    }
 
-	/**
-	 * Breaks a glass block and plays the glass break sound at its location,
-	 * respecting dominion build permissions. Returns true if the block was shattered.
-	 */
-	protected static boolean shatterGlass(Player player, Block block) {
-		Dominion dominion = DominionUtils.getDominionOfChunk(block.getChunk());
-		if (dominion != null && !DominionUtils.hasPermission(player, dominion, DominionPermission.BUILD)) {
-			return false;
-		}
-		block.getWorld().playSound(block.getLocation(), Sound.BLOCK_GLASS_BREAK, 1.0f, 1.0f);
-		block.setType(Material.AIR);
-		return true;
-	}
+    /**
+     * Breaks a glass block and plays the glass break sound at its location,
+     * respecting dominion build permissions. Returns true if the block was shattered.
+     */
+    protected static void shatterGlass(Player player, Block block) {
+        Dominion dominion = DominionUtils.getDominionOfChunk(block.getChunk());
+        if (dominion != null && !DominionUtils.hasPermission(player, dominion, DominionPermission.BUILD)) {
+            return;
+        }
+        block.getWorld().playSound(block.getLocation(), Sound.BLOCK_GLASS_BREAK, 1.0f, 1.0f);
+        block.setType(Material.AIR);
+    }
 
-	/**
-	 * Applies the standard Sound bending debuff: Slowness I for 3 seconds and
-	 * Darkness for 2 seconds. Intended for use by all Sound bending abilities.
-	 * @param entity The entity to apply the effects to.
-	 */
-	protected static void applySoundDebuff(LivingEntity entity) {
-		entity.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 60, 0, false, true));
-		entity.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 40, 0, false, true));
-	}
+    /**
+     * Returns true if the given material is regular ice (not packed or blue ice).
+     */
+    public static boolean isIce(Material material) {
+        return material == Material.ICE;
+    }
+
+    /**
+     * Shatters an ice block into water and plays the glass break sound at its location,
+     * respecting dominion build permissions. Returns true if the block was shattered.
+     */
+    protected static void shatterIce(Player player, Block block) {
+        Dominion dominion = DominionUtils.getDominionOfChunk(block.getChunk());
+        if (dominion != null && !DominionUtils.hasPermission(player, dominion, DominionPermission.BUILD)) {
+            return;
+        }
+        block.getWorld().playSound(block.getLocation(), Sound.BLOCK_GLASS_BREAK, 1.0f, 0.8f);
+        block.setType(Material.WATER);
+    }
+
+    /**
+     * Applies the standard Sound bending debuff: Slowness I for 3 seconds and
+     * Darkness for 2 seconds. Intended for use by all Sound bending abilities.
+     *
+     * @param entity The entity to apply the effects to.
+     */
+    protected static void applySoundDebuff(LivingEntity entity) {
+        entity.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 60, 0, false, true));
+        entity.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 40, 0, false, true));
+    }
 
 }

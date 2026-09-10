@@ -62,7 +62,7 @@ public class ShopIslandUtils {
      * Shape characteristics:
      *   - Irregular perimeter: overlapping sine waves + fractal noise make each viewing angle different.
      *   - Organic surface: fractal noise raises/lowers the surface by a few blocks; center is kept high.
-     *   - Rounded base: hemispherical bowl — deepest at centre (~MAX_ISLAND_DEPTH blocks), rounding
+     *   - Rounded base: hemispherical bowl - deepest at centre (~MAX_ISLAND_DEPTH blocks), rounding
      *     out smoothly to zero at the perimeter; fractal noise roughens the underside organically.
      *   - Natural layering: the dirt/stone boundary is driven by 3-D-like noise, so dirt "bleeds"
      *     irregularly into stone rather than sitting on a flat horizontal plane.
@@ -91,7 +91,7 @@ public class ShopIslandUtils {
                                 + 0.013 * Math.sin(angle * 5 + 1.30)
                                 + 0.010 * Math.sin(angle * 7 + 2.40);
 
-                // Very light fractal noise — just enough to break up the perfect circle
+                // Very light fractal noise - just enough to break up the perfect circle
                 float perimNoise = fractalNoise(dx * 0.20f, dz * 0.20f, seed, 3);
                 double effectiveD = d * (1.0 - angleMod - perimNoise * 0.025);
 
@@ -227,7 +227,7 @@ public class ShopIslandUtils {
         int x = location.getBlockX();
         int z = location.getBlockZ();
 
-        // Negative coordinates have no islands — islands start at positive (125, 125)
+        // Negative coordinates have no islands - islands start at positive (125, 125)
         if (x < 0 || z < 0) {
             return null;
         }

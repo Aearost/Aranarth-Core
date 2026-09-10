@@ -33,7 +33,8 @@ public class GuiHomes {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		Location bedSpawn = player.getBedSpawnLocation();
         int guiSize = aranarthPlayer.getHomes().size() + (bedSpawn != null ? 1 : 0);
-		String guiName = "Your Homes";
+		int maxHomes = AranarthUtils.getMaxHomeNum(player);
+		String guiName = "Your Homes (" + aranarthPlayer.getHomes().size() + "/" + maxHomes + ")";
 
 		// Size is based on which method is used
 		// If the amount is a multiple of 9, use a full row

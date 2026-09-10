@@ -97,7 +97,14 @@ public class CommandMctop implements CommandExecutor {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                 aranarthPlayer.setCurrentGuiPageNum(pageNum);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                new GuiMctop(player, skill, pageNum, finalLeaderboard, finalProfiles).openGui();
+                String skillDisplay = skill == null ? "Overall" : skill.name().charAt(0) + skill.name().substring(1).toLowerCase();
+                String expectedTitle = "Top " + skillDisplay;
+                String openTitle = ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
+                if (player.isOnline() && openTitle.equals(expectedTitle)) {
+                    GuiMctop.populate(player.getOpenInventory().getTopInventory(), skill, finalLeaderboard, finalProfiles);
+                } else {
+                    new GuiMctop(player, skill, pageNum, finalLeaderboard, finalProfiles).openGui();
+                }
             });
         });
     }

@@ -95,6 +95,11 @@ public class GuiDefendersClick {
         }
 
         player.sendMessage(ChatUtils.chatMessage(result));
-        GuiDefenders.open(player);
+        String openTitle = ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
+        if (openTitle.startsWith(GuiDefenders.TITLE_PREFIX)) {
+            GuiDefenders.populate(player.getOpenInventory().getTopInventory(), dominion);
+        } else {
+            GuiDefenders.open(player);
+        }
     }
 }

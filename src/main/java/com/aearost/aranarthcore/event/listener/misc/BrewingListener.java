@@ -5,6 +5,7 @@ import com.dre.brewery.api.events.brew.BrewModifyEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -27,7 +28,7 @@ import static com.aearost.aranarthcore.objects.CustomKeys.BREWING_COPY;
 /**
  * Tags potions in brewing stand output slots when a brew completes to avoid potion duplication.
  * Potions that were themselves produced by the double-brew bonus (BREWING_COPY) are ineligible
- * to trigger further duplication rolls — their outputs are not tagged with BREWED_POTION.
+ * to trigger further duplication rolls - their outputs are not tagged with BREWED_POTION.
  */
 public class BrewingListener implements Listener {
 
@@ -43,6 +44,11 @@ public class BrewingListener implements Listener {
         BrewerInventory brewer = e.getContents();
         Location loc = brewer.getLocation();
         boolean hasCopyInput = copyInputStands.remove(loc);
+
+        // Play the brewing bubble sound at the stand's world location for nearby players
+        if (loc != null && loc.getWorld() != null) {
+            loc.getWorld().playSound(loc, Sound.BLOCK_BREWING_STAND_BREW, 1.0F, 1.0F);
+        }
 
         if (hasCopyInput) {
             // Outputs brewed from a BREWING_COPY input do not receive the duplication-eligible tag

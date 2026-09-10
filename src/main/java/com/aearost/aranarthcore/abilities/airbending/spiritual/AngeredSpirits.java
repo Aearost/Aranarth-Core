@@ -48,6 +48,14 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
     private static final double MIN_RANGE = 16.0;
     private static final double MAX_RANGE = 24.0;
 
+    // {rightComponent, yComponent, forwardComponent} - indices 0-1 are left shoulder, 2-3 are right shoulder
+    private static final double[][] SHOULDER_OFFSETS = {
+            {-0.35, 1.50,  0.10},
+            {-0.35, 1.40, -0.05},
+            { 0.35, 1.50,  0.10},
+            { 0.35, 1.40, -0.05},
+    };
+
     private static final Map<UUID, AngeredSpirits> activeInstances = new HashMap<>();
 
     @Attribute(Attribute.COOLDOWN)
@@ -67,13 +75,16 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
     private final int heldSlot;
     private final int[] shotOrder;
     private final List<SpiritProjectile> activeProjectiles;
+    private Location[] spiritSources;
+    private int[] shoulderAssignment;
+    private double[] wobbleOffset;
 
     public AngeredSpirits(final Player player) {
         super(player);
 
         this.activeProjectiles = new ArrayList<>();
-        this.cooldown = 12000L;
-        this.chargeDuration = 1500L;
+        this.cooldown = 6000L;
+        this.chargeDuration = 1000L;
         this.damage = 2.0;
         this.speed = 2.0;
 
@@ -96,8 +107,34 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
             return;
         }
 
+        initSpiritSources();
         start();
         activeInstances.put(player.getUniqueId(), this);
+    }
+
+    private void initSpiritSources() {
+        final Location start = player.getLocation();
+        spiritSources = new Location[4];
+        wobbleOffset = new double[4];
+
+        // Randomly assign 2 spirits to each shoulder side
+        shoulderAssignment = new int[]{0, 1, 2, 3};
+        for (int i = 3; i > 0; i--) {
+            final int j = (int) (Math.random() * (i + 1));
+            final int tmp = shoulderAssignment[i];
+            shoulderAssignment[i] = shoulderAssignment[j];
+            shoulderAssignment[j] = tmp;
+        }
+
+        // Place sources in 4 quadrants around the player with jitter
+        for (int i = 0; i < 4; i++) {
+            final double baseAngle = (i / 4.0) * 2 * Math.PI;
+            final double angle = baseAngle + (Math.random() - 0.5) * Math.PI * 0.6;
+            final double dist = 6.0 + Math.random() * 4.0;
+            final double height = (Math.random() - 0.3) * 3.0 + 1.0;
+            spiritSources[i] = start.clone().add(Math.cos(angle) * dist, height, Math.sin(angle) * dist);
+            wobbleOffset[i] = Math.random() * 2 * Math.PI;
+        }
     }
 
     @Override
@@ -139,7 +176,7 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
 
     private void handleReady() {
         if (player.getInventory().getHeldItemSlot() != heldSlot) {
-            remove(); // No cooldown — player never fired
+            remove(); // No cooldown - player never fired
             return;
         }
 
@@ -215,16 +252,75 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
     }
 
     private void spawnChargeParticles(final long elapsed) {
+        if (spiritSources == null) return;
         final double progress = (double) elapsed / chargeDuration;
-        final int colorCount = Math.min((int) (progress * 4) + 1, 4);
-        for (int c = 0; c < colorCount; c++) {
-            final Particle.DustOptions dust = new Particle.DustOptions(SHOT_TYPES[shotOrder[c]].color(), 0.7f);
-            final double angle = Math.random() * 2 * Math.PI;
-            final double radius = 0.6;
-            final Location loc = player.getLocation().add(0, 1.0, 0)
-                    .add(Math.cos(angle) * radius, (Math.random() - 0.5) * 0.5, Math.sin(angle) * radius);
-            loc.getWorld().spawnParticle(Particle.DUST, loc, 1, 0, 0, 0, 0, dust);
+
+        // Player-local axes for shoulder placement
+        final Location playerLoc = player.getLocation();
+        final Vector forward = playerLoc.getDirection().clone().setY(0);
+        if (forward.lengthSquared() > 0.001) {
+            forward.normalize();
+        } else {
+            forward.setZ(1);
         }
+        final Vector right = new Vector(0, 1, 0).crossProduct(forward).normalize();
+
+        // Reveal one spirit at a time
+        final int activeCount = Math.min((int) (progress * 4) + 1, 4);
+        for (int c = 0; c < activeCount; c++) {
+            final double spiritAppearAt = c / 4.0;
+            final double spiritDuration = 1.0 - spiritAppearAt;
+            final double spiritProgress = spiritDuration > 0
+                    ? Math.min(1.0, (progress - spiritAppearAt) / spiritDuration)
+                    : 1.0;
+
+            final ShotType shotType = SHOT_TYPES[shotOrder[c]];
+            final double[] off = SHOULDER_OFFSETS[shoulderAssignment[c]];
+
+            // Shoulder position in world space
+            final Location shoulder = playerLoc.clone().add(
+                    right.getX() * off[0] + forward.getX() * off[2],
+                    off[1],
+                    right.getZ() * off[0] + forward.getZ() * off[2]);
+
+            final Vector srcVec = spiritSources[c].toVector();
+            final Vector toShoulder = shoulder.toVector().subtract(srcVec);
+            final Vector pathDir = toShoulder.lengthSquared() > 0.001
+                    ? toShoulder.clone().normalize()
+                    : new Vector(0, 1, 0);
+
+            // Two perpendicular axes for 3D wobble
+            final Vector perp1 = computePerpendicular(pathDir);
+            final Vector perp2 = pathDir.clone().crossProduct(perp1).normalize();
+
+            // Draw a trailing blob
+            final double tailT = Math.max(0.0, spiritProgress - 0.35);
+
+            final int numParticles = 6;
+            for (int p = 0; p < numParticles; p++) {
+                final double t = numParticles > 1
+                        ? tailT + (spiritProgress - tailT) * (p / (double) (numParticles - 1))
+                        : spiritProgress;
+
+                // Path position + 3D sine/cosine wobble that dampens to zero at the shoulder
+                final Vector particlePos = srcVec.clone().add(toShoulder.clone().multiply(t));
+                final double wobbleAmp = 0.30 * (1.0 - t * t);
+                final double w1 = Math.sin(t * 5.0 * Math.PI + wobbleOffset[c]) * wobbleAmp;
+                final double w2 = Math.cos(t * 3.5 * Math.PI + wobbleOffset[c] * 1.3) * wobbleAmp * 0.6;
+                particlePos.add(perp1.clone().multiply(w1)).add(perp2.clone().multiply(w2));
+
+                // Size grows from 0.2 (at source) to 1.2 (at shoulder)
+                final float size = 0.2f + (float) (t * 1.0f);
+                final Particle.DustOptions dust = new Particle.DustOptions(shotType.color(), size);
+                spiritSources[c].getWorld().spawnParticle(
+                        Particle.DUST, particlePos.toLocation(spiritSources[c].getWorld()), 1, 0, 0, 0, 0, dust);
+            }
+        }
+    }
+
+    private static Vector computePerpendicular(final Vector v) {
+        final Vector arbitrary = Math.abs(v.getX()) < 0.9 ? new Vector(1, 0, 0) : new Vector(0, 1, 0);
+        return v.getCrossProduct(arbitrary).normalize();
     }
 
     /**

@@ -41,7 +41,7 @@ public class CommandCreative implements CommandExecutor {
 				return false;
 			}
 
-			// On the SMP server: creative world lives on Survival — count down then transfer.
+			// On the SMP server: creative world lives on Survival - count down then transfer.
 			if (AranarthCore.isSmpServer() && NetworkManager.isActive()) {
 				AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
 						aranarthPlayer.isInAdminMode(), "&e&lCreative", "&7Transferring to Creative...", success -> {

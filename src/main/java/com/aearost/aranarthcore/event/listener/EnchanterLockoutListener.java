@@ -12,6 +12,7 @@ import org.bukkit.inventory.MerchantInventory;
 import org.bukkit.inventory.MerchantRecipe;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,7 +26,10 @@ public class EnchanterLockoutListener implements Listener {
 
     private static final int RESULT_SLOT = 2;
 
+    private final AranarthCore plugin;
+
     public EnchanterLockoutListener(AranarthCore plugin) {
+        this.plugin = plugin;
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
@@ -71,16 +75,25 @@ public class EnchanterLockoutListener implements Listener {
             return;
         }
 
-        // Lock all other over-leveled trades
-        List<MerchantRecipe> recipes = wt.getRecipes();
-        for (int idx : overLeveledIndices) {
-            if (idx == selectedIndex || idx >= recipes.size()) {
-                continue;
+        // Defer setRecipes to the next tick so the click event fully completes
+        // and the book is handed to the player before the recipe list is refreshed.
+        // Calling setRecipes synchronously mid-event resets the result slot and
+        // causes the book to disappear even though the emeralds were consumed.
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                // Lock all other over-leveled trades
+                List<MerchantRecipe> recipes = wt.getRecipes();
+                for (int idx : overLeveledIndices) {
+                    if (idx == selectedIndex || idx >= recipes.size()) {
+                        continue;
+                    }
+                    MerchantRecipe recipe = recipes.get(idx);
+                    recipe.setUses(recipe.getMaxUses());
+                }
+                wt.setRecipes(recipes);
             }
-            MerchantRecipe recipe = recipes.get(idx);
-            recipe.setUses(recipe.getMaxUses());
-        }
-        wt.setRecipes(recipes);
+        }.runTask(plugin);
     }
 
     private boolean isTakeAction(InventoryAction action) {

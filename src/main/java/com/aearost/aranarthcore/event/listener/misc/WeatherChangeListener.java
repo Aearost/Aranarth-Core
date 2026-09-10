@@ -87,12 +87,14 @@ public class WeatherChangeListener implements Listener {
 					smp.setClearWeatherDuration(delay);
 					smp.setTime(world.getTime());
 
-					resource.setThunderDuration(0);
-					resource.setWeatherDuration(0);
-					resource.setThundering(false);
-					resource.setStorm(false);
-					resource.setClearWeatherDuration(delay);
-					resource.setTime(world.getTime());
+					if (resource != null) {
+						resource.setThunderDuration(0);
+						resource.setWeatherDuration(0);
+						resource.setThundering(false);
+						resource.setStorm(false);
+						resource.setClearWeatherDuration(delay);
+						resource.setTime(world.getTime());
+					}
 
 					for (Player player : Bukkit.getOnlinePlayers()) {
 							String worldName = player.getWorld().getName();

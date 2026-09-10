@@ -45,7 +45,7 @@ public class SentinelDeath {
 			aranarthPlayerOfSentinel.setSentinels(sentinels);
 			AranarthUtils.setPlayer(AranarthUtils.getUuidOfAranarthPlayer(aranarthPlayerOfSentinel), aranarthPlayerOfSentinel);
 		} else if (NetworkManager.isActive()) {
-			// Owner is on a different server — notify them so they can clean up their sentinel list
+			// Owner is on a different server - notify them so they can clean up their sentinel list
 			NetworkManager.getInstance().publishSentinelDeath(uuidOfSentinel, e.getEntityType());
 		}
 	}

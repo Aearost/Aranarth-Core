@@ -6,17 +6,8 @@ import com.aearost.aranarthcore.gui.GuiShopLocation;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.PendingTeleport;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
-import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.PersistenceUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
-import com.aearost.aranarthcore.utils.ShopIslandUtils;
-import com.aearost.aranarthcore.utils.ShopUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
-import org.bukkit.Sound;
-import org.bukkit.World;
+import com.aearost.aranarthcore.utils.*;
+import org.bukkit.*;
 import org.bukkit.block.Biome;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -31,6 +22,76 @@ import java.util.UUID;
  * Allows players to create, manage, and visit player shop islands.
  */
 public class CommandShop implements CommandExecutor {
+
+    /**
+     * Deletes the shop island, all associated shop signs, holograms, and location data for the given UUID.
+     *
+     * @param targetUuid The UUID of the shop owner whose island is being deleted.
+     * @param executor   The player who ran the delete command (used for feedback messages), or null for automated deletion.
+     */
+    public static void deleteShop(UUID targetUuid, Player executor) {
+        AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(targetUuid);
+        String targetName = targetAranarthPlayer != null ? targetAranarthPlayer.getNickname() : targetUuid.toString();
+
+        Location safeSpot = new Location(Bukkit.getWorld("spawn"), 0.5, 100, 0.5, 180, 0);
+        safeSpot = AranarthUtils.getSafeTeleportLocation(safeSpot);
+
+        // Teleport all players on this island off it
+        int[] center = AranarthUtils.getShopIslandCenters().get(targetUuid);
+        boolean executorWasOnIsland = false;
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            if (!online.getWorld().getName().equals(ShopIslandUtils.SHOPS_WORLD)) {
+                continue;
+            }
+            if (center == null || !ShopIslandUtils.isWithinPlotBoundary(online.getLocation(), center[0], center[1])) {
+                continue;
+            }
+            if (executor != null && online.getUniqueId().equals(executor.getUniqueId())) {
+                executorWasOnIsland = true;
+            }
+            online.teleport(safeSpot);
+            int tpVol = AranarthUtils.getPlayer(online.getUniqueId()).getTeleportSoundVolume();
+            if (tpVol > 0) {
+                online.playSound(online, Sound.ENTITY_ENDERMAN_TELEPORT, tpVol / 100f, 0.9F);
+            }
+            if (online.getUniqueId().equals(targetUuid)) {
+                online.sendMessage(ChatUtils.chatMessage("&cYour shop has been deleted. You have been teleported to Spawn"));
+            } else {
+                online.sendMessage(ChatUtils.chatMessage("&cThis shop has been deleted. You have been teleported to Spawn"));
+            }
+        }
+
+        // Remove all trading shop holograms and data belonging to this player
+        List<com.aearost.aranarthcore.objects.Shop> playerShops = ShopUtils.getShops().get(targetUuid);
+        if (playerShops != null) {
+            for (com.aearost.aranarthcore.objects.Shop shop : List.copyOf(playerShops)) {
+                ShopUtils.removeShopHologram(shop);
+            }
+            ShopUtils.getShops().remove(targetUuid);
+        }
+
+        // Delete the island blocks
+        World shopsWorld = Bukkit.getWorld(ShopIslandUtils.SHOPS_WORLD);
+        if (center != null && shopsWorld != null) {
+            ShopIslandUtils.deleteShopIsland(shopsWorld, center[0], center[1]);
+        }
+
+        // Remove location data, collaborators, and custom name
+        AranarthUtils.deleteShopLocation(targetUuid);
+        PersistenceUtils.deleteShopLocationFromDatabase(targetUuid);
+        AranarthUtils.removeShopIslandCenter(targetUuid);
+        AranarthUtils.removeAllShopCollaborators(targetUuid);
+        AranarthUtils.removeShopName(targetUuid);
+
+        // Only notify the executor if they weren't already messaged by the loop above
+        if (executor != null && !executorWasOnIsland) {
+            if (executor.getUniqueId().equals(targetUuid)) {
+                executor.sendMessage(ChatUtils.chatMessage("&7Your shop has been deleted"));
+            } else {
+                executor.sendMessage(ChatUtils.chatMessage("&e" + targetName + "'s &7shop has been deleted"));
+            }
+        }
+    }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
@@ -47,6 +108,10 @@ public class CommandShop implements CommandExecutor {
         }
 
         if (args[0].equalsIgnoreCase("create")) {
+            if (!aranarthPlayer.isInAdminMode()) {
+                player.sendMessage(ChatUtils.chatMessage("&cShop island creation is currently disabled"));
+                return true;
+            }
             if (aranarthPlayer.getRank() < 3 && !aranarthPlayer.isInAdminMode()) {
                 String suffix = aranarthPlayer.getPronouns() == Pronouns.FEMALE ? "ess" : "";
                 player.sendMessage(ChatUtils.chatMessage("&cYou must be a &5&lBaron" + suffix + " &cor higher to create a shop"));
@@ -61,18 +126,18 @@ public class CommandShop implements CommandExecutor {
                 return true;
             }
 
-            // Shops only exist on Survival — transfer the player there and re-run the command on arrival.
+            // Shops only exist on Survival - transfer the player there and re-run the command on arrival.
             if (AranarthCore.isSmpServer() && NetworkManager.isActive()) {
                 String survivalServerName = AranarthCore.getInstance().getConfig()
                         .getString("network.servers.survival", "survival");
                 AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
                         aranarthPlayer.isInAdminMode(), "&e&lYour Shop", "&7Creating your shop...", success -> {
-                    if (success) {
-                        PendingTeleport pt = PendingTeleport.forCommand(
-                                "shop create", "&e&lYour Shop", "&7Your shop island has been created");
-                        NetworkManager.getInstance().saveInventoryAndTransfer(player, survivalServerName, pt);
-                    }
-                });
+                            if (success) {
+                                PendingTeleport pt = PendingTeleport.forCommand(
+                                        "shop create", "&e&lYour Shop", "&7Your shop island has been created");
+                                NetworkManager.getInstance().saveInventoryAndTransfer(player, survivalServerName, pt);
+                            }
+                        });
                 return true;
             }
 
@@ -112,21 +177,21 @@ public class CommandShop implements CommandExecutor {
                 player.sendMessage(ChatUtils.chatMessage("&cYou do not have a shop. Create one with &e/shop create"));
                 return true;
             }
-            // Shops world only exists on Survival — transfer the player there if on SMP.
+            // Shops world only exists on Survival - transfer the player there if on SMP.
             if (AranarthCore.isSmpServer() && NetworkManager.isActive() && shopHome.getWorld() == null) {
                 String survivalServerName = AranarthCore.getInstance().getConfig()
                         .getString("network.servers.survival", "survival");
                 AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
                         aranarthPlayer.isInAdminMode(), "&e&lYour Shop", "&7Transferring to shop...", success -> {
-                    if (success) {
-                        PendingTeleport pt = new PendingTeleport(
-                                ShopIslandUtils.SHOPS_WORLD,
-                                shopHome.getX(), shopHome.getY(), shopHome.getZ(),
-                                shopHome.getYaw(), shopHome.getPitch(),
-                                "&e&lYour Shop", "&7You have teleported to your shop");
-                        NetworkManager.getInstance().saveInventoryAndTransfer(player, survivalServerName, pt);
-                    }
-                });
+                            if (success) {
+                                PendingTeleport pt = new PendingTeleport(
+                                        ShopIslandUtils.SHOPS_WORLD,
+                                        shopHome.getX(), shopHome.getY(), shopHome.getZ(),
+                                        shopHome.getYaw(), shopHome.getPitch(),
+                                        "&e&lYour Shop", "&7You have teleported to your shop");
+                                NetworkManager.getInstance().saveInventoryAndTransfer(player, survivalServerName, pt);
+                            }
+                        });
                 return true;
             }
             AranarthUtils.teleportPlayer(player, player.getLocation(), shopHome, aranarthPlayer.isInAdminMode(), "&e&lYour Shop", "&7You have teleported to your shop", success -> {
@@ -245,7 +310,7 @@ public class CommandShop implements CommandExecutor {
                 return true;
             }
 
-            // Send the invite — the target must accept it
+            // Send the invite - the target must accept it
             AranarthUtils.setPendingShopInvite(targetUuid, player.getUniqueId());
             AranarthPlayer ownerAranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
             player.sendMessage(ChatUtils.chatMessage("&7A shop invitation has been sent to &e" + args[1]));
@@ -323,7 +388,10 @@ public class CommandShop implements CommandExecutor {
                 Location safeSpot = new Location(Bukkit.getWorld("spawn"), 0.5, 100, 0.5, 180, 0);
                 safeSpot = AranarthUtils.getSafeTeleportLocation(safeSpot);
                 player.teleport(safeSpot);
-                player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
+                int tpVol = AranarthUtils.getPlayer(player.getUniqueId()).getTeleportSoundVolume();
+                if (tpVol > 0) {
+                    player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, tpVol / 100f, 0.9F);
+                }
             }
 
             AranarthUtils.removeShopCollaborator(ownerUuid, player.getUniqueId());
@@ -364,7 +432,10 @@ public class CommandShop implements CommandExecutor {
                 Location safeSpot = new Location(Bukkit.getWorld("spawn"), 0.5, 100, 0.5, 180, 0);
                 safeSpot = AranarthUtils.getSafeTeleportLocation(safeSpot);
                 target.teleport(safeSpot);
-                target.playSound(target, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
+                int tpVol = AranarthUtils.getPlayer(target.getUniqueId()).getTeleportSoundVolume();
+                if (tpVol > 0) {
+                    target.playSound(target, Sound.ENTITY_ENDERMAN_TELEPORT, tpVol / 100f, 0.9F);
+                }
                 target.sendMessage(ChatUtils.chatMessage("&7You have been removed as a collaborator from &e" + ownerAranarthPlayer.getNickname() + "'s &7shop"));
             } else if (target != null) {
                 target.sendMessage(ChatUtils.chatMessage("&7You have been removed as a collaborator from &e" + ownerAranarthPlayer.getNickname() + "'s &7shop"));
@@ -406,72 +477,5 @@ public class CommandShop implements CommandExecutor {
 
         player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/shop <subcommand>"));
         return true;
-    }
-
-    /**
-     * Deletes the shop island, all associated shop signs, holograms, and location data for the given UUID.
-     *
-     * @param targetUuid The UUID of the shop owner whose island is being deleted.
-     * @param executor   The player who ran the delete command (used for feedback messages), or null for automated deletion.
-     */
-    public static void deleteShop(UUID targetUuid, Player executor) {
-        AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(targetUuid);
-        String targetName = targetAranarthPlayer != null ? targetAranarthPlayer.getNickname() : targetUuid.toString();
-
-        Location safeSpot = new Location(Bukkit.getWorld("spawn"), 0.5, 100, 0.5, 180, 0);
-        safeSpot = AranarthUtils.getSafeTeleportLocation(safeSpot);
-
-        // Teleport all players on this island off it
-        int[] center = AranarthUtils.getShopIslandCenters().get(targetUuid);
-        boolean executorWasOnIsland = false;
-        for (Player online : Bukkit.getOnlinePlayers()) {
-            if (!online.getWorld().getName().equals(ShopIslandUtils.SHOPS_WORLD)) {
-                continue;
-            }
-            if (center == null || !ShopIslandUtils.isWithinPlotBoundary(online.getLocation(), center[0], center[1])) {
-                continue;
-            }
-            if (executor != null && online.getUniqueId().equals(executor.getUniqueId())) {
-                executorWasOnIsland = true;
-            }
-            online.teleport(safeSpot);
-            online.playSound(online, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
-            if (online.getUniqueId().equals(targetUuid)) {
-                online.sendMessage(ChatUtils.chatMessage("&cYour shop has been deleted. You have been teleported to Spawn"));
-            } else {
-                online.sendMessage(ChatUtils.chatMessage("&cThis shop has been deleted. You have been teleported to Spawn"));
-            }
-        }
-
-        // Remove all trading shop holograms and data belonging to this player
-        List<com.aearost.aranarthcore.objects.Shop> playerShops = ShopUtils.getShops().get(targetUuid);
-        if (playerShops != null) {
-            for (com.aearost.aranarthcore.objects.Shop shop : List.copyOf(playerShops)) {
-                ShopUtils.removeShopHologram(shop);
-            }
-            ShopUtils.getShops().remove(targetUuid);
-        }
-
-        // Delete the island blocks
-        World shopsWorld = Bukkit.getWorld(ShopIslandUtils.SHOPS_WORLD);
-        if (center != null && shopsWorld != null) {
-            ShopIslandUtils.deleteShopIsland(shopsWorld, center[0], center[1]);
-        }
-
-        // Remove location data, collaborators, and custom name
-        AranarthUtils.deleteShopLocation(targetUuid);
-        PersistenceUtils.deleteShopLocationFromDatabase(targetUuid);
-        AranarthUtils.removeShopIslandCenter(targetUuid);
-        AranarthUtils.removeAllShopCollaborators(targetUuid);
-        AranarthUtils.removeShopName(targetUuid);
-
-        // Only notify the executor if they weren't already messaged by the loop above
-        if (executor != null && !executorWasOnIsland) {
-            if (executor.getUniqueId().equals(targetUuid)) {
-                executor.sendMessage(ChatUtils.chatMessage("&7Your shop has been deleted"));
-            } else {
-                executor.sendMessage(ChatUtils.chatMessage("&e" + targetName + "'s &7shop has been deleted"));
-            }
-        }
     }
 }

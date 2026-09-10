@@ -49,7 +49,7 @@ public class GuiQuests {
 
     public void openGui() {
         player.openInventory(gui);
-        // Async timezone lookup — update info item (slot 22) once resolved
+        // Async timezone lookup - update info item (slot 22) once resolved
         AranarthUtils.getPlayerTimezone(player, zoneId ->
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () ->
                 gui.setItem(22, makeInfoItem(rank, zoneId))

@@ -11,20 +11,10 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.nio.file.Files;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -33,37 +23,32 @@ import java.util.stream.Collectors;
 public class ChatGameUtils {
 
     // Each value is proportional to the cost to reach the next rank from that tier
-    private static final double[] RANK_REWARDS = { 50, 100, 200, 500, 1000, 2000, 4000, 7000, 10000 };
+    private static final double[] RANK_REWARDS = {50, 100, 200, 400, 700, 1000, 1500, 2000, 2500};
 
     private static final List<String> wordPool = new ArrayList<>();
-    private static Plugin plugin;
     private static final List<String> remainingWords = new ArrayList<>();
     private static final Random random = new Random();
     private static final Object gameLock = new Object();
-
+    // Global all-time speed record
+    private static final Object globalRecordLock = new Object();
+    private static final int TIMEOUT_TICKS = 600; // 30 seconds
+    private static Plugin plugin;
     private static volatile String currentAnswer = null;
     private static volatile String currentScrambled = null;
     private static volatile String currentGameOrigin = null;
-
     // Streak state tracks consecutive wins by the same player
     private static volatile UUID streakWinnerUUID = null;
     private static volatile int streakCount = 0;
-
     // Timeout task for the active game (cancelled on win)
     private static volatile BukkitTask timeoutTask = null;
-
     // Timestamp (ms) when the current game started, for speed calculation
     private static volatile long gameStartTime = 0;
-
-    // Global all-time speed record
-    private static final Object globalRecordLock = new Object();
     private static volatile UUID globalBestHolderUUID = null;
     private static volatile String globalBestHolderNickname = "";
     private static volatile double globalBestTime = 0;
 
-    private static final int TIMEOUT_TICKS = 600; // 30 seconds
-
-    private ChatGameUtils() {}
+    private ChatGameUtils() {
+    }
 
     /**
      * Loads words from the words.txt resource file and schedules the first game.
@@ -137,6 +122,7 @@ public class ChatGameUtils {
 
     /**
      * Adds a word to the pool and appends it to words.txt.
+     *
      * @return false if the word already exists
      */
     public static boolean addWord(String word) {
@@ -164,6 +150,7 @@ public class ChatGameUtils {
 
     /**
      * Removes a word from the pool and from words.txt.
+     *
      * @return false if the word was not found
      */
     public static boolean removeWord(String word) {
@@ -243,7 +230,10 @@ public class ChatGameUtils {
         String startMsg = ChatUtils.chatMessage("&7Unscramble the following word: &e" + scrambled);
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.sendMessage(startMsg);
-            p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 5f, 1f);
+            int cgVol = AranarthUtils.getPlayer(p.getUniqueId()).getChatGameSoundVolume();
+            if (cgVol > 0) {
+                p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 5f * (cgVol / 100f), 1f);
+            }
         }
 
         if (NetworkManager.isActive()) {
@@ -263,11 +253,15 @@ public class ChatGameUtils {
             streakWinnerUUID = null;
             streakCount = 0;
         }
-        String expireMsg = ChatUtils.chatMessage("&7Nobody guessed! The word was &e" + expectedAnswer);
+        String expireMsg = ChatUtils.chatMessage("&7Nobody guessed! The word was &e" + toTitleCase(expectedAnswer));
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.sendMessage(expireMsg);
-            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_DIDGERIDOO, 1f, 1.0f);
-            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_DIDGERIDOO, 1f, 0.1f);
+            int cgVol = AranarthUtils.getPlayer(p.getUniqueId()).getChatGameSoundVolume();
+            if (cgVol > 0) {
+                float cgVf = cgVol / 100f;
+                p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_DIDGERIDOO, cgVf, 1.0f);
+                p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_DIDGERIDOO, cgVf, 0.1f);
+            }
         }
         if (NetworkManager.isActive()) {
             NetworkManager.getInstance().publishChatGameExpire(expectedAnswer);
@@ -277,6 +271,7 @@ public class ChatGameUtils {
 
     /**
      * Checks whether the given message is the correct answer to the active game.
+     *
      * @return true if the player guessed correctly (caller should cancel the chat event)
      */
     public static boolean tryAnswer(Player player, String message) {
@@ -289,7 +284,7 @@ public class ChatGameUtils {
             if (currentAnswer == null) {
                 return false;
             }
-            if (!message.equalsIgnoreCase(currentAnswer)) {
+            if (!message.replaceAll("\\s+", "").equalsIgnoreCase(currentAnswer.replaceAll("\\s+", ""))) {
                 return false;
             }
 
@@ -323,7 +318,7 @@ public class ChatGameUtils {
             }
         }
 
-        // This server did not originate the game — publish claim immediately from the async chat
+        // This server did not originate the game - publish claim immediately from the async chat
         // thread (AranarthUtils.getPlayer is a plain map lookup and publish() dispatches its own
         // async task, so no main-thread hop is needed here).
         if (!isOrigin) {
@@ -356,19 +351,19 @@ public class ChatGameUtils {
 
             String winnerNickname = ap.getNickname();
             String timeStr = String.format("%.2f", elapsedSeconds);
-            String winMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7guessed &e" + answer + " &7correctly in &e" + timeStr + "s!");
+            String winMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7guessed &e" + toTitleCase(answer) + " &7correctly in &e" + timeStr + "s!");
             for (Player p : Bukkit.getOnlinePlayers()) {
                 p.sendMessage(winMsg);
-                p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
+                int cgVol = AranarthUtils.getPlayer(p.getUniqueId()).getChatGameSoundVolume();
+                if (cgVol > 0) {
+                    p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, cgVol / 100f, 1f);
+                }
             }
 
             if (localStreakCount >= 3) {
                 String streakMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7is on a &e" + localStreakCount + "x &7unscramble streak!");
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     p.sendMessage(streakMsg);
-                }
-                if (NetworkManager.isActive()) {
-                    NetworkManager.getInstance().publishBroadcast(streakMsg);
                 }
             }
 
@@ -487,10 +482,13 @@ public class ChatGameUtils {
 
         Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
             String timeStr = String.format("%.2f", elapsedSeconds);
-            String winMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7guessed &e" + answer + " &7correctly in &e" + timeStr + "s!");
+            String winMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7guessed &e" + toTitleCase(answer) + " &7correctly in &e" + timeStr + "s!");
             for (Player p : Bukkit.getOnlinePlayers()) {
                 p.sendMessage(winMsg);
-                p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
+                int cgVol = AranarthUtils.getPlayer(p.getUniqueId()).getChatGameSoundVolume();
+                if (cgVol > 0) {
+                    p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, cgVol / 100f, 1f);
+                }
             }
 
             if (localStreakCount >= 3) {
@@ -498,7 +496,6 @@ public class ChatGameUtils {
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     p.sendMessage(streakMsg);
                 }
-                NetworkManager.getInstance().publishBroadcast(streakMsg);
             }
 
             final boolean newGlobalRecord;
@@ -552,7 +549,10 @@ public class ChatGameUtils {
         String startMsg = ChatUtils.chatMessage("&7Unscramble the following word: &e" + scrambled);
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.sendMessage(startMsg);
-            p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 5f, 1f);
+            int cgVol = AranarthUtils.getPlayer(p.getUniqueId()).getChatGameSoundVolume();
+            if (cgVol > 0) {
+                p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 5f * (cgVol / 100f), 1f);
+            }
         }
     }
 
@@ -560,7 +560,7 @@ public class ChatGameUtils {
      * Called by NetworkManager when a player on another server has won the chat game.
      */
     public static void applyNetworkGameWin(Plugin plugin, String winnerNickname, String answer, UUID winnerUUID,
-            double elapsedSeconds, boolean newGlobalRecord, String newHolderNickname, UUID newHolderUUID, double newGlobalBestTime) {
+                                           double elapsedSeconds, boolean newGlobalRecord, String newHolderNickname, UUID newHolderUUID, double newGlobalBestTime) {
         final boolean wasOrigin;
         final int networkStreakCount;
         synchronized (gameLock) {
@@ -585,10 +585,13 @@ public class ChatGameUtils {
             updateGlobalBestCache(newHolderUUID, newHolderNickname, newGlobalBestTime);
         }
         String timeStr = String.format("%.2f", elapsedSeconds);
-        String winMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7guessed &e" + answer + " &7correctly in &e" + timeStr + "s!");
+        String winMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7guessed &e" + toTitleCase(answer) + " &7correctly in &e" + timeStr + "s!");
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.sendMessage(winMsg);
-            p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
+            int cgVol = AranarthUtils.getPlayer(p.getUniqueId()).getChatGameSoundVolume();
+            if (cgVol > 0) {
+                p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, cgVol / 100f, 1f);
+            }
         }
         if (networkStreakCount >= 3) {
             String streakMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7is on a &e" + networkStreakCount + "x &7unscramble streak!");
@@ -602,7 +605,9 @@ public class ChatGameUtils {
         final double elapsedForReward = elapsedSeconds;
         Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
             Player winner = Bukkit.getPlayer(winnerUUID);
-            if (winner == null) return;
+            if (winner == null) {
+                return;
+            }
             AranarthPlayer ap = AranarthUtils.getPlayer(winner.getUniqueId());
             int rank = Math.min(ap.getRank(), RANK_REWARDS.length - 1);
             double baseReward = RANK_REWARDS[rank];
@@ -675,11 +680,15 @@ public class ChatGameUtils {
             streakWinnerUUID = null;
             streakCount = 0;
         }
-        String expireMsg = ChatUtils.chatMessage("&7Nobody guessed! The word was &e" + answer);
+        String expireMsg = ChatUtils.chatMessage("&7Nobody guessed! The word was &e" + toTitleCase(answer));
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.sendMessage(expireMsg);
-            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_DIDGERIDOO, 1f, 1.0f);
-            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_DIDGERIDOO, 1f, 0.1f);
+            int cgVol = AranarthUtils.getPlayer(p.getUniqueId()).getChatGameSoundVolume();
+            if (cgVol > 0) {
+                float cgVf = cgVol / 100f;
+                p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_DIDGERIDOO, cgVf, 1.0f);
+                p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_DIDGERIDOO, cgVf, 0.1f);
+            }
         }
         if (wasOrigin) {
             scheduleNextGame(plugin);
@@ -700,9 +709,42 @@ public class ChatGameUtils {
         return currentScrambled;
     }
 
+    private static String toTitleCase(String word) {
+        if (word == null || word.isEmpty()) {
+            return word;
+        }
+        String[] parts = word.split(" ");
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < parts.length; i++) {
+            if (i > 0) sb.append(' ');
+            String part = parts[i];
+            if (!part.isEmpty()) {
+                sb.append(Character.toUpperCase(part.charAt(0)));
+                if (part.length() > 1) sb.append(part.substring(1));
+            }
+        }
+        return sb.toString();
+    }
+
     private static String scramble(String word) {
+        String[] parts = word.split(" ");
+        StringBuilder result = new StringBuilder();
+        for (String part : parts) {
+            // Capitalize the first letter before shuffling so it lands at whatever position the shuffle puts it
+            String withCapital = Character.toUpperCase(part.charAt(0)) + (part.length() > 1 ? part.substring(1) : "");
+            result.append(scramblePart(withCapital));
+        }
+        // Retry if the scramble is identical to the original joined word
+        String joined = word.replaceAll("\\s+", "");
+        if (result.toString().equalsIgnoreCase(joined) && joined.length() > 1) {
+            return scramble(word);
+        }
+        return result.toString();
+    }
+
+    private static String scramblePart(String part) {
         List<Character> chars = new ArrayList<>();
-        for (char c : word.toCharArray()) {
+        for (char c : part.toCharArray()) {
             chars.add(c);
         }
         String scrambled;
@@ -715,7 +757,7 @@ public class ChatGameUtils {
             }
             scrambled = sb.toString();
             attempts++;
-        } while (scrambled.equals(word) && attempts < 20);
+        } while (scrambled.equals(part) && attempts < 20);
         return scrambled;
     }
 }

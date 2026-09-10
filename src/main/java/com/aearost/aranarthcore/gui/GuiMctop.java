@@ -38,6 +38,46 @@ public class GuiMctop {
 		}
 	}
 
+	public static void populate(Inventory gui, @org.jetbrains.annotations.Nullable PrimarySkillType skill,
+								List<PlayerStat> leaderboard, Map<String, PlayerProfile> profiles) {
+		ItemStack blank = new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE);
+		ItemMeta blankMeta = blank.getItemMeta();
+		if (Objects.nonNull(blankMeta)) {
+			blankMeta.setDisplayName(ChatUtils.translateToColor("&f"));
+			blank.setItemMeta(blankMeta);
+		}
+
+		for (int i = 0; i < 45; i++) {
+			if (i >= leaderboard.size()) {
+				gui.setItem(i, blank);
+				continue;
+			}
+
+			PlayerStat stat = leaderboard.get(i);
+			ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+			SkullMeta skullMeta = (SkullMeta) head.getItemMeta();
+
+			PlayerProfile profile = profiles.get(stat.playerName());
+			if (profile != null) {
+				skullMeta.setPlayerProfile(profile);
+			}
+
+			UUID uuid = profile != null && profile.getId() != null ? profile.getId() : null;
+			AranarthPlayer aranarthPlayer = uuid != null ? AranarthUtils.getPlayer(uuid) : null;
+			String displayName = aranarthPlayer != null ? aranarthPlayer.getNickname() : stat.playerName();
+			if (displayName == null) {
+				displayName = stat.playerName() != null ? stat.playerName() : "Unknown";
+			}
+			skullMeta.setDisplayName(ChatUtils.translateToColor(displayName));
+
+			List<String> lore = new ArrayList<>();
+			lore.add(ChatUtils.translateToColor("&7Level " + stat.value()));
+			skullMeta.setLore(lore);
+			head.setItemMeta(skullMeta);
+			gui.setItem(i, head);
+		}
+	}
+
 	private Inventory initializeGui(Player player, @org.jetbrains.annotations.Nullable PrimarySkillType skill,
 									List<PlayerStat> leaderboard, Map<String, PlayerProfile> profiles) {
 		String skillDisplayName = skill == null ? "Overall" : skill.name().charAt(0) + skill.name().substring(1).toLowerCase();
