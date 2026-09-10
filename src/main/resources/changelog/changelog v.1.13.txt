@@ -1,7 +1,7 @@
 AranarthCore v. 1.13
 
 World & Events
-[+]
+[+] Added support for tall grass and large fern in winter snowfall
 
 Bending & Abilities
 [+]

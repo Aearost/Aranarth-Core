@@ -1492,6 +1492,7 @@ public class DateUtils {
 
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
             List<Block> toSnow = new ArrayList<>();
+            List<Block> tallGrassToSnow = new ArrayList<>();
             int snowAmountToCreate = bigFlakeDensity * 2;
             ThreadLocalRandom tlr = ThreadLocalRandom.current();
 
@@ -1551,6 +1552,14 @@ public class DateUtils {
                     }
                 }
 
+                // Tall grass and large fern upper halves need special handling
+                if ((surfaceBlock.getType() == Material.TALL_GRASS || surfaceBlock.getType() == Material.LARGE_FERN)
+                        && surfaceBlock.getBlockData() instanceof Bisected bisected
+                        && bisected.getHalf() == Bisected.Half.TOP) {
+                    tallGrassToSnow.add(surfaceBlock.getRelative(BlockFace.DOWN));
+                    continue;
+                }
+
                 // If the surface block is invalid, skip this column
                 if (INVALID_SURFACE_BLOCKS.contains(surfaceBlock.getType())) {
                     continue;
@@ -1568,10 +1577,15 @@ public class DateUtils {
                 }
 
                 Block above = surfaceBlock.getRelative(BlockFace.UP);
-                if (above.getType() != Material.AIR && above.getType() != Material.SNOW && above.getType() != Material.SHORT_GRASS && above.getType() != Material.FERN) {
+                if (above.getType() != Material.AIR && above.getType() != Material.SNOW && above.getType() != Material.SHORT_GRASS && above.getType() != Material.FERN
+                        && above.getType() != Material.TALL_GRASS && above.getType() != Material.LARGE_FERN) {
                     continue;
                 }
-                toSnow.add(above);
+                if (above.getType() == Material.TALL_GRASS || above.getType() == Material.LARGE_FERN) {
+                    tallGrassToSnow.add(above);
+                } else {
+                    toSnow.add(above);
+                }
             }
 
             // --- SWITCH BACK TO SYNC ---
@@ -1648,6 +1662,12 @@ public class DateUtils {
                             }
                         }
                     }
+                }
+
+                // Remove both halves of tall grass/large fern and place snow at the lower half position
+                for (Block lowerHalf : tallGrassToSnow) {
+                    lowerHalf.getRelative(BlockFace.UP).setType(Material.AIR);
+                    lowerHalf.setType(Material.SNOW);
                 }
             });
         });
@@ -2059,25 +2079,52 @@ public class DateUtils {
                                                     continue;
                                                 }
 
-                                                // Adds short grass depending on biome
+                                                // Adds short grass or tall grass depending on biome
                                                 switch (biome) {
                                                     case "MEADOW":
                                                         if (grassReplaceRate > 55) {
                                                             break;
                                                         }
-                                                        above.setType(Material.SHORT_GRASS);
+                                                        if (grassReplaceRate <= 5 && above.getRelative(BlockFace.UP).getType() == Material.AIR) {
+                                                            Bisected meadowLower = (Bisected) Material.TALL_GRASS.createBlockData();
+                                                            meadowLower.setHalf(Bisected.Half.BOTTOM);
+                                                            above.setBlockData(meadowLower);
+                                                            Bisected meadowUpper = (Bisected) Material.TALL_GRASS.createBlockData();
+                                                            meadowUpper.setHalf(Bisected.Half.TOP);
+                                                            above.getRelative(BlockFace.UP).setBlockData(meadowUpper);
+                                                        } else {
+                                                            above.setType(Material.SHORT_GRASS);
+                                                        }
                                                         break;
                                                     case "PLAINS":
                                                         if (grassReplaceRate > 35) {
                                                             break;
                                                         }
-                                                        above.setType(Material.SHORT_GRASS);
+                                                        if (grassReplaceRate <= 2 && above.getRelative(BlockFace.UP).getType() == Material.AIR) {
+                                                            Bisected plainsLower = (Bisected) Material.TALL_GRASS.createBlockData();
+                                                            plainsLower.setHalf(Bisected.Half.BOTTOM);
+                                                            above.setBlockData(plainsLower);
+                                                            Bisected plainsUpper = (Bisected) Material.TALL_GRASS.createBlockData();
+                                                            plainsUpper.setHalf(Bisected.Half.TOP);
+                                                            above.getRelative(BlockFace.UP).setBlockData(plainsUpper);
+                                                        } else {
+                                                            above.setType(Material.SHORT_GRASS);
+                                                        }
                                                         break;
                                                     case "SUNFLOWER_PLAINS":
                                                         if (grassReplaceRate > 45) {
                                                             break;
                                                         }
-                                                        above.setType(Material.SHORT_GRASS);
+                                                        if (grassReplaceRate <= 4 && above.getRelative(BlockFace.UP).getType() == Material.AIR) {
+                                                            Bisected sfplainsLower = (Bisected) Material.TALL_GRASS.createBlockData();
+                                                            sfplainsLower.setHalf(Bisected.Half.BOTTOM);
+                                                            above.setBlockData(sfplainsLower);
+                                                            Bisected sfplainsUpper = (Bisected) Material.TALL_GRASS.createBlockData();
+                                                            sfplainsUpper.setHalf(Bisected.Half.TOP);
+                                                            above.getRelative(BlockFace.UP).setBlockData(sfplainsUpper);
+                                                        } else {
+                                                            above.setType(Material.SHORT_GRASS);
+                                                        }
                                                         break;
                                                     case "TAIGA", "OLD_GROWTH_PINE_TAIGA",
                                                          "OLD_GROWTH_SPRUCE_TAIGA":
@@ -2085,8 +2132,15 @@ public class DateUtils {
                                                             break;
                                                         } else if (grassReplaceRate > 5) {
                                                             above.setType(Material.FERN);
-                                                        } else {
+                                                        } else if (grassReplaceRate > 1 || above.getRelative(BlockFace.UP).getType() != Material.AIR) {
                                                             above.setType(Material.SHORT_GRASS);
+                                                        } else {
+                                                            Bisected taigaLower = (Bisected) Material.LARGE_FERN.createBlockData();
+                                                            taigaLower.setHalf(Bisected.Half.BOTTOM);
+                                                            above.setBlockData(taigaLower);
+                                                            Bisected taigaUpper = (Bisected) Material.LARGE_FERN.createBlockData();
+                                                            taigaUpper.setHalf(Bisected.Half.TOP);
+                                                            above.getRelative(BlockFace.UP).setBlockData(taigaUpper);
                                                         }
                                                         break;
                                                     case "WINDSWEPT_HILLS":

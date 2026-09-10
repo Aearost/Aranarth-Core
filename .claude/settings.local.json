@@ -467,7 +467,10 @@
       "Bash(zcat \"C:/Users/liamh/Downloads/Logs/Survival/2026-09-06-1.log.gz\")",
       "Bash(zcat C:/Users/liamh/Downloads/Logs/Survival/2026-09-06-1.log.gz)",
       "Bash(find C:/Users/liamh/IdeaProjects -path */mcMMO* -name DatabaseManager.class)",
-      "Bash(find C:/Users/liamh/.m2 -path *mcmmo* -name *.jar)"
+      "Bash(find C:/Users/liamh/.m2 -path *mcmmo* -name *.jar)",
+      "Bash(find /c/Users/liamh/IdeaProjects/ProjectKorra-wip -name *Cooldown* -o -name *cooldown*)",
+      "Bash(/c/Program Files/Maven/bin/mvn compile -q)",
+      "WebFetch(domain:misode.github.io)"
     ]
   }
 }
