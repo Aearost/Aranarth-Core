@@ -17,7 +17,7 @@ target/
 .classpath
 .factorypath
 .project
-.settings
+.settings/
 .springBeans
 .sts4-cache
 
@@ -49,3 +49,7 @@ discord-bot/
 ### Local libs ###
 libs/
 libs/paper-server.jar
+
+### Build outputs ###
+bin/
+com/
