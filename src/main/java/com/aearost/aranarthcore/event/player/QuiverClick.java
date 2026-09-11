@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.gui.GuiQuiver;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Sound;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -25,7 +26,7 @@ public class QuiverClick {
 						GuiQuiver gui = new GuiQuiver(e.getPlayer());
 						gui.openGui();
 					} else {
-						e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou must be in Survival to open the quiver!"));
+						e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("market.must_survival_quiver")));
 					}
 				}
 			}

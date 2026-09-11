@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -73,7 +74,7 @@ public class ShulkerDump {
         Dominion chunkDominion = DominionUtils.getDominionOfChunk(block.getChunk());
         if (chunkDominion != null && !DominionUtils.hasPermission(player, chunkDominion, DominionPermission.CONTAINER)) {
             e.setCancelled(true);
-            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to access containers in this dominion!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.access_containers")));
             return;
         }
 
@@ -85,7 +86,7 @@ public class ShulkerDump {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
                 if (!lockedContainer.getTrusted().contains(uuid) && !aranarthPlayer.isInAdminMode()) {
                     e.setCancelled(true);
-                    player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to access this container!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("lock.no_permission_access")));
                     return;
                 }
             }
@@ -110,7 +111,7 @@ public class ShulkerDump {
         }
         if (!hasItems) {
             e.setCancelled(true);
-            player.sendMessage(ChatUtils.chatMessage("&cYour shulker box is empty!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("inventory.shulker_empty")));
             return;
         }
 
@@ -145,9 +146,9 @@ public class ShulkerDump {
         e.setCancelled(true);
         player.playSound(player, Sound.BLOCK_SHULKER_BOX_CLOSE, 1F, 1F);
         if (anyLeftover) {
-            player.sendMessage(ChatUtils.chatMessage("&eNot all items fit - remaining items are still in your shulker box."));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("inventory.shulker_not_all_fit")));
         } else {
-            player.sendMessage(ChatUtils.chatMessage("&7Items emptied from your shulker box into the container!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("inventory.emptied_shulker")));
         }
     }
 }

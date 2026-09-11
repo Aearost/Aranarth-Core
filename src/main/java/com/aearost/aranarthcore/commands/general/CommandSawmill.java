@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -17,7 +18,7 @@ public class CommandSawmill implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.tables")) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 				return true;
 			}
 
@@ -27,7 +28,7 @@ public class CommandSawmill implements CommandExecutor {
 					.build(player)
 					.open();
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to use this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 		}
 		return true;
 	}

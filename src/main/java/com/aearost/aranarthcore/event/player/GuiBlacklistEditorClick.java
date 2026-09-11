@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.BlacklistPreset;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -46,8 +47,8 @@ public class GuiBlacklistEditorClick {
             if (clicked != null && clicked.getType() == Material.NAME_TAG) {
                 player.closeInventory();
                 GuiBlacklistEditor.setAwaitingRename(player.getUniqueId(), presetIndex);
-                player.sendMessage(ChatUtils.chatMessage("&7Enter a name for this preset in chat - up to 30 characters"));
-                player.sendMessage(ChatUtils.chatMessage("&7Type &ecancel &7to abort"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("gradient.enter_preset_name")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.type_cancel")));
                 return;
             }
         }
@@ -71,12 +72,12 @@ public class GuiBlacklistEditorClick {
 
             List<ItemStack> items = preset.getItems();
             if (items.size() >= 36) {
-                player.sendMessage(ChatUtils.chatMessage("&cThis preset is full (36 items max)!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("blacklist.preset_full")));
                 return;
             }
             for (ItemStack existing : items) {
                 if (existing.getType() == clickedItem.getType()) {
-                    player.sendMessage(ChatUtils.chatMessage("&cThis item is already in the preset!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("blacklist.already_in_preset")));
                     return;
                 }
             }
@@ -86,7 +87,7 @@ public class GuiBlacklistEditorClick {
             String presetLabel = preset.getName().isEmpty()
                     ? "Preset " + (presetIndex + 1)
                     : "the " + ChatUtils.translateToColor(preset.getName()) + "&7 Preset";
-            player.sendMessage(ChatUtils.chatMessage("&7Added &e" + ChatUtils.getFormattedItemName(clickedItem.getType().name()) + " &7to " + presetLabel));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("blacklist.item_added", "item", ChatUtils.getFormattedItemName(clickedItem.getType().name()), "preset", presetLabel)));
             player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 0.5F, 1.75F);
             refreshEditorSlots(player, items);
             return;
@@ -112,7 +113,7 @@ public class GuiBlacklistEditorClick {
             items.remove(itemIndex);
             preset.setItems(items);
             PersistenceUtils.saveBlacklistPresetsAsync(player.getUniqueId());
-            player.sendMessage(ChatUtils.chatMessage("&7Removed &e" + ChatUtils.getFormattedItemName(removed.getType().name()) + " &7from preset"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("blacklist.item_removed", "item", ChatUtils.getFormattedItemName(removed.getType().name()))));
             player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 0.5F, 0.8F);
             refreshEditorSlots(player, items);
         }

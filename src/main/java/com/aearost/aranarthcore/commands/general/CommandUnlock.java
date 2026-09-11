@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands.general;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -29,7 +30,7 @@ public class CommandUnlock implements CommandExecutor {
 			if (aranarthPlayer.isUnlockingContainer()) {
 				aranarthPlayer.setUnlockingContainer(false);
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-				sender.sendMessage(ChatUtils.chatMessage("&7You are no longer unlocking containers"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("lock.mode_exit_lock")));
 			} else {
 				aranarthPlayer.setTrustedPlayerUUID(null);
 				aranarthPlayer.setUntrustedPlayerUUID(null);
@@ -37,12 +38,12 @@ public class CommandUnlock implements CommandExecutor {
 				aranarthPlayer.setLockingContainer(false);
 				aranarthPlayer.setContainerToggleExpiry(System.currentTimeMillis() + 5000);
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-				sender.sendMessage(ChatUtils.chatMessage("&7You are now unlocking containers - right-click to unlock them"));
-				sender.sendMessage(ChatUtils.chatMessage("&7Run &e/unlock &7again to exit unlocking mode"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("lock.unlock_mode_enter")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("lock.unlock_mode_hint")));
 				scheduleToggleExpiry(player.getUniqueId());
 			}
         } else {
-			sender.sendMessage(ChatUtils.chatMessage("&cThis command can only be executed in-game!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
         }
         return true;
     }

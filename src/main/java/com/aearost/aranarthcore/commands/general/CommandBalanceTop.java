@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.NetworkPlayer;
 import net.kyori.adventure.text.Component;
@@ -54,7 +55,7 @@ public class CommandBalanceTop implements CommandExecutor {
 					throw new NumberFormatException();
 				}
 			} catch (NumberFormatException e) {
-				sender.sendMessage(ChatUtils.translateToColor("&cPlease enter a valid page number!"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("baltop.invalid_page")));
 				return false;
 			}
 

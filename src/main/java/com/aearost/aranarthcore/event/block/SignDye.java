@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -21,7 +22,7 @@ public class SignDye {
                         Shop playerShop = ShopUtils.getShopFromLocation(e.getClickedBlock().getLocation());
                         if (playerShop != null) {
                             e.setCancelled(true);
-                            e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot dye a player shop sign!"));
+                            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("shop.cannot_dye_sign")));
                         }
                     }
                 }

@@ -48,6 +48,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import com.aearost.aranarthcore.utils.Lang;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -144,8 +145,7 @@ public class AranarthCore extends JavaPlugin {
 
         Location spawnLocation = new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0);
 
-        Bukkit.broadcastMessage(ChatUtils.chatMessage(
-                "&5A new year has dawned! The resource world is being reset..."));
+        Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("resource.reset_broadcast")));
 
         // Record the reset time so offline players can be detected on next login
         AranarthUtils.setLastResourceWorldResetTime(System.currentTimeMillis());
@@ -157,8 +157,7 @@ public class AranarthCore extends JavaPlugin {
             for (String rWorld : worldNames) {
                 if (worldName.equals(rWorld)) {
                     player.teleport(spawnLocation);
-                    player.sendMessage(ChatUtils.chatMessage(
-                            "&7You have been teleported to &eSpawn &7due to the resource world reset!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.resource_reset")));
                     break;
                 }
             }
@@ -200,7 +199,7 @@ public class AranarthCore extends JavaPlugin {
             }
         }
 
-        Bukkit.broadcastMessage(ChatUtils.chatMessage("&5The resource world has been reset - &dHappy New Year!"));
+        Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("resource.reset_complete")));
         launchNewYearFireworks();
     }
 
@@ -431,6 +430,7 @@ public class AranarthCore extends JavaPlugin {
             DatabaseManager.initialize(host, port, database, username, password);
         }
 
+        LangManager.getInstance().load();
         initializeUtils();
         initializeEvents();
         initializeRecipes();
@@ -838,7 +838,7 @@ public class AranarthCore extends JavaPlugin {
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                     if (aranarthPlayer.isTogglingChat()) {
-                        player.sendMessage(ChatUtils.chatMessage("&7Your chat is currently &cdisabled&7. Use &e/toggle chat &7to re-enable it."));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("general.chat_muted_toggle")));
                     }
                 }
             }

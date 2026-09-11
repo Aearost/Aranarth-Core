@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.gui.GuiMctop;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.gmail.nossr50.api.exceptions.InvalidSkillException;
 import com.gmail.nossr50.datatypes.database.PlayerStat;
@@ -31,7 +32,7 @@ public class CommandMctop implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
             return true;
         }
 
@@ -40,12 +41,12 @@ public class CommandMctop implements CommandExecutor {
             try {
                 skill = PrimarySkillType.valueOf(args[0].toUpperCase());
             } catch (IllegalArgumentException e) {
-                player.sendMessage(ChatUtils.chatMessage("&cUnknown skill &e" + args[0]));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("mctop.unknown_skill", "skill", args[0])));
                 return true;
             }
 
             if (SkillTools.isChildSkill(skill)) {
-                player.sendMessage(ChatUtils.chatMessage("&c" + args[0] + " &cis a child skill and does not have a leaderboard"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("mctop.child_skill", "skill", args[0])));
                 return true;
             }
         }

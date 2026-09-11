@@ -63,7 +63,7 @@ public class GuiRankupClick {
                         }
                         DiscordUtils.updateRank(player, aranarthPlayer.getRank(), true);
 
-                        Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has become " + aOrAn + " " + rankDisplay + "&7!"));
+                        Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("rank.ranked_up", "player", aranarthPlayer.getNickname(), "article", aOrAn, "rank", rankDisplay)));
                         PermissionUtils.evaluatePlayerPermissions(player);
                         if (NetworkManager.isActive()) {
                             NetworkManager.getInstance().publishRankUpdate(player.getUniqueId(), aranarthPlayer.getRank(), aranarthPlayer.getCouncilRank(), aranarthPlayer.getSaintRank(), aranarthPlayer.getArchitectRank());
@@ -71,15 +71,15 @@ public class GuiRankupClick {
                         player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
                         player.closeInventory();
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cYou do not meet the mcMMO requirements per category!"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("rank.missing_mcmmo_category")));
                         player.closeInventory();
                     }
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou do not meet the overall mcMMO level requirements!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("rank.missing_mcmmo")));
                     player.closeInventory();
                 }
             } else {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough money to rankup!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("rank.not_enough_money")));
                 player.closeInventory();
             }
         }

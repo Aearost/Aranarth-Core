@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -34,13 +35,13 @@ public class GuiDelhomeClick {
 						if (e.getSlot() == i) {
 							Home home = aranarthPlayer.getHomes().get(i);
 							AranarthUtils.deletePlayerHome(player, ChatUtils.stripColorFormatting(home.getName()));
-							player.sendMessage(ChatUtils.chatMessage("&7You have deleted the home &e" + home.getName()));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("home.deleted", "name", home.getName())));
 							player.closeInventory();
 							return;
 						}
 					}
 					player.closeInventory();
-					player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with deleting that home..."));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("general.error")));
 				}
 			}
 		}

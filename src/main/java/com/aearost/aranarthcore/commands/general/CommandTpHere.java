@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -29,7 +30,7 @@ public class CommandTpHere implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (args.length == 0) {
-				sender.sendMessage(ChatUtils.chatMessage("&cYou must enter a player to teleport to!"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "tphere <player>")));
 				return true;
 			} else {
 				UUID targetUUID = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
@@ -38,13 +39,13 @@ public class CommandTpHere implements CommandExecutor {
 					if (target != null) {
 						// Same-server tphere request
 						if (player.getUniqueId().equals(target.getUniqueId())) {
-							player.sendMessage(ChatUtils.chatMessage("&cYou cannot teleport to yourself!"));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.cannot_self")));
 							return true;
 						}
 
 						AranarthPlayer targetPlayer = AranarthUtils.getPlayer(target.getUniqueId());
 						if (targetPlayer.isTogglingTp()) {
-							player.sendMessage(ChatUtils.chatMessage("&e" + targetPlayer.getNickname() + " &cis currently not accepting teleport requests"));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.not_accepting", "player", targetPlayer.getNickname())));
 							return true;
 						}
 
@@ -53,8 +54,8 @@ public class CommandTpHere implements CommandExecutor {
 						targetPlayer.setTeleportFromUuid(null);
 						targetPlayer.setTeleportToUuid(player.getUniqueId());
 						AranarthUtils.setPlayer(target.getUniqueId(), targetPlayer);
-						player.sendMessage(ChatUtils.chatMessage("&7You have requested for &e" + targetPlayer.getNickname() + " &7to teleport to you"));
-						target.sendMessage(ChatUtils.chatMessage("&e" + senderPlayer.getNickname() + " &7has requested you teleport to them"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.tphere_sent", "player", targetPlayer.getNickname())));
+						target.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.tphere_received", "player", senderPlayer.getNickname())));
 						target.sendMessage(ChatUtils.buildTpAcceptDenyPrompt());
 						AranarthUtils.playTeleportSound(player);
 						AranarthUtils.playTeleportSound(target);
@@ -62,15 +63,15 @@ public class CommandTpHere implements CommandExecutor {
 						// Target is on another server
 						NetworkPlayer remoteTarget = NetworkManager.getInstance().getRemotePlayer(targetUUID);
 						if (remoteTarget == null) {
-							player.sendMessage(ChatUtils.chatMessage("&cThat player is not online!"));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("player.offline")));
 							return true;
 						}
 						if (player.getUniqueId().equals(targetUUID)) {
-							player.sendMessage(ChatUtils.chatMessage("&cYou cannot teleport to yourself!"));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.cannot_self")));
 							return true;
 						}
 						AranarthPlayer senderPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-						player.sendMessage(ChatUtils.chatMessage("&7You have requested for &e" + remoteTarget.getNickname() + " &7to teleport to you"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.tphere_sent", "player", remoteTarget.getNickname())));
 						NetworkManager.getInstance().publishTpRequest(
 								player.getUniqueId(),
 								senderPlayer.getNickname().isEmpty() ? player.getName() : senderPlayer.getNickname(),
@@ -78,14 +79,14 @@ public class CommandTpHere implements CommandExecutor {
 								true);
 						AranarthUtils.playTeleportSound(player);
 					} else {
-						player.sendMessage(ChatUtils.chatMessage("&cThat player is not online!"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("player.offline")));
 					}
 				} else {
-					player.sendMessage(ChatUtils.chatMessage("&cThat player is not online!"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("player.offline")));
 				}
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 		}
 		return true;
 	}

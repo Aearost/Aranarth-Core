@@ -470,7 +470,15 @@
       "Bash(find C:/Users/liamh/.m2 -path *mcmmo* -name *.jar)",
       "Bash(find /c/Users/liamh/IdeaProjects/ProjectKorra-wip -name *Cooldown* -o -name *cooldown*)",
       "Bash(/c/Program Files/Maven/bin/mvn compile -q)",
-      "WebFetch(domain:misode.github.io)"
+      "WebFetch(domain:misode.github.io)",
+      "Bash(sed \"s/.*chatMessage\\(\"\"//\")",
+      "Bash(sed 's/\"\"\"\"\\).*//')",
+      "Bash(head -20 echo \"---\" grep -n \"chatMessage\\(\"\"&\" \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/utils/QuestUtils.java\")",
+      "Bash(head -15 echo \"---\" grep -n \"chatMessage\\(\"\"&\" \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/utils/DominionUtils.java\")",
+      "Bash(head -10 echo \"---\" grep -n \"unscramble.reward\\\\|unscramble.streak\" \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/utils/ChatGameUtils.java\")",
+      "Bash(head -10 grep -n \"quest.reward\\\\|for completing the quest\" \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/utils/QuestUtils.java\")",
+      "Bash(wc -l echo \"---\" grep -rl \"chatMessage\\(\"\"&\" \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/\" --include=\"*.java\")",
+      "Bash(wc -l echo \"---\" grep -rn \"chatMessage\\(\"\"&\" \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/\" --include=\"*.java\")"
     ]
   }
 }

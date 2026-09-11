@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
@@ -23,7 +24,7 @@ public class CommandTime {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.time")) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 				return true;
 			}
 		}
@@ -31,14 +32,14 @@ public class CommandTime {
 		if (args.length == 1) {
 			World survival = Bukkit.getWorld("world");
 			long ticks = survival != null ? survival.getTime() : 0;
-			sender.sendMessage(ChatUtils.chatMessage("&7Current time: &e" + ticks + " ticks &7(" + getTimeOfDay(ticks) + ")"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.time_current", "ticks", String.valueOf(ticks), "label", getTimeOfDay(ticks))));
 			return true;
 		}
 
 		try {
 			long time = Long.parseLong(args[1]);
 			updateTime(time);
-			sender.sendMessage(ChatUtils.chatMessage("&7The time has been updated"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.time_updated")));
 		} catch (NumberFormatException e) {
 			long time = -1;
 			if (args[1].equalsIgnoreCase("day")) {
@@ -52,10 +53,10 @@ public class CommandTime {
 			}
 
 			if (time == -1) {
-				sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac time <time>"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac time <time>")));
 			} else {
 				updateTime(time);
-				sender.sendMessage(ChatUtils.chatMessage("&7The time has been updated"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.time_updated")));
 			}
 		}
 		return true;

@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.gui.GuiRankup;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -47,7 +48,7 @@ public class CommandRankup implements CommandExecutor {
 
 			// If the player is already an Emperor, there are no further ranks
 			if (currentRank == 8) {
-				player.sendMessage(ChatUtils.chatMessage("&7You are already the highest rank!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("rank.already_highest")));
 				return true;
 			}
 
@@ -64,7 +65,7 @@ public class CommandRankup implements CommandExecutor {
 			GuiRankup gui = new GuiRankup(player, rankName, rankupCosts[currentRank]);
 			gui.openGui();
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to execute this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 		}
 		return true;
 	}

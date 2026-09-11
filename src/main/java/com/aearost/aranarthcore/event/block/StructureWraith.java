@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -88,7 +89,7 @@ public class StructureWraith {
 
         Player player = e.getPlayer();
         player.playSound(block.getLocation(), Sound.ENTITY_WITHER_SPAWN, 1.0f, 1.75f);
-        player.sendMessage(ChatUtils.chatMessage("&cA Wraith has started to attack you!"));
+        player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.wraith_attack")));
 
         spawnWraith(wraithType, block);
     }

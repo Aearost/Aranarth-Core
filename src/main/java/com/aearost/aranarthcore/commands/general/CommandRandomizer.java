@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.RandomItem;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -30,23 +31,23 @@ public class CommandRandomizer implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.randomizer")) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 				return true;
 			}
 
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (args.length == 0) {
 				if (aranarthPlayer.isRandomizing()) {
-					player.sendMessage(ChatUtils.chatMessage("&7Blocks will no longer be randomized from the pattern"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("randomizer.block_no_longer")));
 				} else {
-					player.sendMessage(ChatUtils.chatMessage("&7Blocks will now be randomized from the pattern!"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("randomizer.blocks_now")));
 				}
 				aranarthPlayer.isRandomizing(!aranarthPlayer.isRandomizing());
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				return true;
 			} else {
 				if (!args[0].contains(",")) {
-					player.sendMessage(ChatUtils.chatMessage("&cYou must specify more than one item!"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("randomizer.need_multiple_items")));
 					return true;
 				}
 
@@ -55,7 +56,7 @@ public class CommandRandomizer implements CommandExecutor {
 				for (String component : components) {
 					String[] percentageItem = component.split("%");
 					if (percentageItem.length != 2) {
-						player.sendMessage(ChatUtils.chatMessage("&cAn incorrect format was entered!"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("randomizer.invalid_format")));
 						return true;
 					}
 
@@ -64,11 +65,11 @@ public class CommandRandomizer implements CommandExecutor {
 					try {
 						percentage = Integer.parseInt(percentageItem[0]);
 					} catch (NumberFormatException e) {
-						player.sendMessage(ChatUtils.chatMessage("&cYou entered an incorrect percentage!"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("randomizer.invalid_percent")));
 						return true;
 					}
 					if (percentage == 0) {
-						player.sendMessage(ChatUtils.chatMessage("&cYou cannot enter a percentage of 0%!"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("randomizer.zero_percent")));
 						return true;
 					}
 
@@ -77,7 +78,7 @@ public class CommandRandomizer implements CommandExecutor {
 					try {
 						material = Material.valueOf(percentageItem[1].toUpperCase());
 					} catch (IllegalArgumentException e) {
-						player.sendMessage(ChatUtils.chatMessage("&cYou entered an invalid material!"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("randomizer.invalid_material")));
 						return true;
 					}
 
@@ -92,16 +93,16 @@ public class CommandRandomizer implements CommandExecutor {
 					totalPercentageSum += randomItem.getPercentage();
 				}
 				if (totalPercentageSum != 100) {
-					player.sendMessage(ChatUtils.chatMessage("&cThe percentages do not sum to 100%!"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("randomizer.not_100_percent")));
 					return true;
 				} else {
 					aranarthPlayer.setRandomItems(randomItems);
-					player.sendMessage(ChatUtils.chatMessage("&7You have updated your randomizer pattern!"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("randomizer.pattern_updated")));
 					return true;
 				}
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to run this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 			return true;
 		}
 	}

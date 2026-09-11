@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.Gate;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.GateUtils;
 import org.bukkit.Bukkit;
@@ -43,7 +44,7 @@ public class GateListener implements Listener {
         Gate occupant = GateUtils.getGateAt(placedLoc);
         if (occupant != null && occupant.isOpen()) {
             e.setCancelled(true);
-            player.sendMessage(ChatUtils.chatMessage("&cYou cannot place a block inside an open gate!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("gate.cannot_place_inside")));
             return;
         }
 
@@ -52,7 +53,7 @@ public class GateListener implements Listener {
         String error = GateUtils.handleBlockPlaced(e.getBlockPlaced(), player);
         if (error != null) {
             e.setCancelled(true);
-            player.sendMessage(ChatUtils.chatMessage("&c" + error));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("gate.error", "message", error)));
         }
     }
 
@@ -129,14 +130,14 @@ public class GateListener implements Listener {
         if (!aranarthPlayer.isInAdminMode()) {
             Dominion dominion = DominionUtils.getDominionOfChunk(e.getClickedBlock().getChunk());
             if (dominion != null && !DominionUtils.hasPermission(player, dominion, DominionPermission.FENCE_GATE)) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou don't have permission to open this gate!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("gate.no_permission")));
                 return;
             }
         }
 
         String error = GateUtils.toggleGate(gate);
         if (error != null) {
-            player.sendMessage(ChatUtils.chatMessage("&c" + error));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("gate.error", "message", error)));
             return;
         }
     }

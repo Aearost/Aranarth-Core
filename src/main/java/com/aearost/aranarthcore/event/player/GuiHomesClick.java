@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -41,15 +42,15 @@ public class GuiHomesClick {
 						Material heldItem = e.getCursor().getType();
 						if (heldItem != Material.AIR) {
 							e.setCancelled(true);
-							player.sendMessage(ChatUtils.chatMessage("&cYou cannot change the icon of your bed spawn!"));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("home.bed_no_icon")));
 							player.closeInventory();
 							return;
 						}
 						AranarthUtils.teleportPlayer(player, player.getLocation(), bedSpawn, aranarthPlayer.isInAdminMode(), "&eBed Spawn", "&7You have teleported to your bed spawn", success -> {
 							if (success) {
-								player.sendMessage(ChatUtils.chatMessage("&7You have teleported to your &eBed Spawn"));
+								player.sendMessage(ChatUtils.chatMessage(Lang.get("player.tp_bed_success")));
 							} else {
-								player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to your &eBed Spawn"));
+								player.sendMessage(ChatUtils.chatMessage(Lang.get("player.tp_bed_fail")));
 							}
 						});
 						player.closeInventory();
@@ -60,7 +61,7 @@ public class GuiHomesClick {
 					Home home = aranarthPlayer.getHomes().get(homeIndex);
 
 					if (home.isSmpHome() && !AranarthUtils.isOriginalPlayer(player.getUniqueId())) {
-						player.sendMessage(ChatUtils.chatMessage("&cOnly OG players can teleport to SMP homes!"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("player.og_only_smp_homes")));
 						player.closeInventory();
 						return;
 					}
@@ -70,10 +71,10 @@ public class GuiHomesClick {
 					if (heldItem != Material.AIR) {
 						e.setCancelled(true);
 						if (heldItem == home.getIcon()) {
-							player.sendMessage(ChatUtils.chatMessage("&cThis home already uses that icon!"));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("player.home_same_icon")));
 						} else {
 							AranarthUtils.updateHome(player, home.getName(), home.getLocation(), heldItem);
-							player.sendMessage(ChatUtils.chatMessage("&e" + home.getName() + "&7's icon is now &e" + ChatUtils.getFormattedItemName(heldItem.name())));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("home.icon_set", "name", home.getName(), "icon", ChatUtils.getFormattedItemName(heldItem.name()))));
 						}
 						player.closeInventory();
 						return;
@@ -121,9 +122,9 @@ public class GuiHomesClick {
 						// Same-server home
 						AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation(), aranarthPlayer.isInAdminMode(), home.getName(), "&7You have teleported to your home", success -> {
 							if (success) {
-								player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + home.getName()));
+								player.sendMessage(ChatUtils.chatMessage(Lang.get("home.teleported", "name", home.getName())));
 							} else {
-								player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to &e" + home.getName()));
+								player.sendMessage(ChatUtils.chatMessage(Lang.get("home.teleport_failed", "name", home.getName())));
 							}
 						});
 						player.closeInventory();

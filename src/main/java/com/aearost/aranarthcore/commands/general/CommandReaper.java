@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.ItemUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.ReaperManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -31,7 +32,7 @@ public class CommandReaper implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to execute this command!"));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
             return true;
         }
 
@@ -43,7 +44,7 @@ public class CommandReaper implements CommandExecutor {
 
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                 if (data == null) {
-                    player.sendMessage(ChatUtils.chatMessage("&7You do not have a Reaper inventory"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("reaper.no_inventory")));
                     return;
                 }
 
@@ -52,7 +53,7 @@ public class CommandReaper implements CommandExecutor {
                     ReaperManager.remove(player.getUniqueId());
                     Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
                             DatabaseManager.getInstance().deleteReaperInventory(player.getUniqueId()));
-                    player.sendMessage(ChatUtils.chatMessage("&7Your Reaper Inventory has expired"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("reaper.expired")));
                     return;
                 }
 
@@ -60,7 +61,7 @@ public class CommandReaper implements CommandExecutor {
                 try {
                     drops = ItemUtils.itemStackArrayFromBase64(data[0]);
                 } catch (IOException e) {
-                    player.sendMessage(ChatUtils.chatMessage("&cFailed to load your Reaper Inventory. Please contact the Council!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("reaper.load_failed")));
                     Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Failed to deserialize reaper drops for " + player.getName() + ": " + e.getMessage());
                     return;
                 }

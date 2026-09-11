@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.commands.council;
 
 import com.aearost.aranarthcore.gui.GuiTrash;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -23,7 +24,7 @@ public class CommandTrash implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.trash")) {
-				sender.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 				return true;
 			}
 
@@ -31,7 +32,7 @@ public class CommandTrash implements CommandExecutor {
 			gui.openGui();
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to execute this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 			return true;
 		}
 	}

@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -26,7 +27,7 @@ public class RespawnSurvival {
         try {
             AranarthUtils.switchInventory(player, player.getLocation().getWorld().getName(), player.getLocation().getWorld().getName());
         } catch (IOException ex) {
-            player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.error_changing_world")));
             return;
         }
 

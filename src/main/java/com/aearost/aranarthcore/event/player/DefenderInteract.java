@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DefenderUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 
@@ -34,7 +35,7 @@ public class DefenderInteract {
                     && dominion.getDominionPermissions().hasPermission(
                             dominion.getMemberRank(player.getUniqueId()), DominionPermission.MANAGE_DEFENDERS));
         if (!canManage) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to manage defenders"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.no_permission_defenders")));
             return;
         }
 

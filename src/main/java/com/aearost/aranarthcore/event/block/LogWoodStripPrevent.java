@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -18,7 +19,7 @@ public class LogWoodStripPrevent {
                 if (getMaterialIfLogOrWood(e.getClickedBlock()) != null) {
                     if (!e.getPlayer().isSneaking()) {
                         e.setCancelled(true);
-                        e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou must be sneaking to strip logs!"));
+                        e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("log.must_sneak_strip")));
                     }
                 }
             }

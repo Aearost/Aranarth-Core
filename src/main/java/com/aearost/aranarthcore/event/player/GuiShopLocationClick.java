@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.network.PendingTeleport;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.ShopIslandUtils;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -127,9 +128,9 @@ public class GuiShopLocationClick {
 						} else {
 							AranarthUtils.teleportPlayer(player, player.getLocation(), shopLoc, aranarthPlayer.isInAdminMode(), shopName, "&7You have teleported to " + shopName, success -> {
 								if (success) {
-									player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + shopName + "&7!"));
+									player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.teleported", "name", shopName)));
 								} else {
-									player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to &e" + shopName + "&c!"));
+									player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.teleport_failed", "name", shopName)));
 								}
 							});
 						}

@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.BrewRecipeUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -143,8 +144,8 @@ public class GuiBrewBook {
     public static void initiateSearch(Player player) {
         awaitingSearch.add(player.getUniqueId());
         player.closeInventory();
-        player.sendMessage(ChatUtils.chatMessage("&7Enter a brew name to search for"));
-        player.sendMessage(ChatUtils.chatMessage("&7Type &ccancel &7to abort"));
+        player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.search_prompt")));
+        player.sendMessage(ChatUtils.chatMessage(Lang.get("general.type_cancel_abort")));
     }
 
     public static boolean isAwaitingSearch(UUID uuid) {
@@ -154,7 +155,7 @@ public class GuiBrewBook {
     public static void handleSearchInput(Player player, String query) {
         awaitingSearch.remove(player.getUniqueId());
         if (query.equalsIgnoreCase("cancel")) {
-            player.sendMessage(ChatUtils.chatMessage("&7Search cancelled"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.search_cancelled")));
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> new GuiBrewBook(player, 0).openGui());
             return;
         }

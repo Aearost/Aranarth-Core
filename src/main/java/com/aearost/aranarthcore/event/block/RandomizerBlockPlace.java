@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.RandomItem;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -98,7 +99,7 @@ public class RandomizerBlockPlace {
 						if (!aranarthPlayer.isMissingItemMessageSent()) {
 							aranarthPlayer.isMissingItemMessageSent(!aranarthPlayer.isMissingItemMessageSent());
 							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-							player.sendMessage(ChatUtils.chatMessage("&cYou are missing one or more items from your pattern!"));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("randomizer.missing_items")));
                         }
 					}
 				}

@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.JobData;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -84,7 +85,7 @@ public class GuiJobsLeaveClick {
         for (int i = 0; i < slots.length && i < activeJobs.size(); i++) {
             if (slots[i] == slot) {
                 if (isOnCooldown(player.getUniqueId())) {
-                    player.sendMessage(ChatUtils.chatMessage("&7You must wait &e" + getCooldownRemaining(player.getUniqueId()) + " &7before leaving another job"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("jobs.leave_cooldown", "time", getCooldownRemaining(player.getUniqueId()))));
                     return;
                 }
 
@@ -100,7 +101,7 @@ public class GuiJobsLeaveClick {
                 }
                 applyCooldown(player.getUniqueId());
 
-                player.sendMessage(ChatUtils.chatMessage("&7You have left the &e" + job.getDisplayName() + " &7job &8- &7your progress has been saved"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("jobs.left", "job", job.getDisplayName())));
                 int jobsVol = AranarthUtils.getPlayer(player.getUniqueId()).getJobsSoundVolume();
                 if (jobsVol > 0) {
                     player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, jobsVol / 100f, 1.0f);

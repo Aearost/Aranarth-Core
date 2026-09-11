@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.gui.GuiCompressor;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -24,7 +25,7 @@ public class CommandCompressor implements CommandExecutor {
 
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.compressor")) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 				return false;
 			}
 
@@ -32,7 +33,7 @@ public class CommandCompressor implements CommandExecutor {
 			gui.openGui();
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cThis can only be executed by a player!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 		}
 		return false;
 	}

@@ -10,6 +10,7 @@ import com.aearost.aranarthcore.objects.Outpost;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DefenderUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.OutpostUtils;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -41,7 +42,7 @@ public class GuiDefendersClick {
         boolean canManage = dominion.getLeader().equals(player.getUniqueId())
                 || (memberRank != null && dominion.getDominionPermissions().hasPermission(memberRank, DominionPermission.MANAGE_DEFENDERS));
         if (!canManage) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to manage defenders"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.no_permission_defenders")));
             return;
         }
 
@@ -76,7 +77,7 @@ public class GuiDefendersClick {
         boolean inOwnOutpost = outpostPlayerIsIn != null && outpostPlayerIsIn.getDominionId().equals(dominion.getId());
 
         if (!inMainDominion && !inOwnOutpost) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou can only purchase defenders while in your Dominion or one of its outposts"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.defenders_in_dominion")));
             return;
         }
 

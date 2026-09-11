@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.projectkorra.projectkorra.event.AbilityDamageEntityEvent;
 import io.papermc.paper.event.player.PlayerOpenSignEvent;
 import org.bukkit.Bukkit;
@@ -59,7 +60,7 @@ public class ArenaProtection implements Listener {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
 			if (!aranarthPlayer.isInAdminMode()) {
 				e.setCancelled(true);
-				e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot break this!"));
+				e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("access.no_break")));
 			}
 		}
 	}
@@ -73,7 +74,7 @@ public class ArenaProtection implements Listener {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
 			if (!aranarthPlayer.isInAdminMode()) {
 				e.setCancelled(true);
-				e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot place this here!"));
+				e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("arena.cannot_place")));
 			}
 		}
 	}
@@ -211,7 +212,7 @@ public class ArenaProtection implements Listener {
 	private void onDamage(EntityDamageEvent e) {
 		if (isArenaSpawn(e.getEntity().getLocation())) {
 			if (e.getDamageSource().getCausingEntity() instanceof Player attacker) {
-				attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm players here!"));
+				attacker.sendMessage(ChatUtils.chatMessage(Lang.get("spawn.no_harm_players")));
 			}
 			// Additionally prevents the target from being damaged, regardless of the source of damage
 			e.setCancelled(true);
@@ -233,9 +234,9 @@ public class ArenaProtection implements Listener {
 					Location arenaLoc = new Location(Bukkit.getWorld("arena"), 1000, 101, 1000);
 					AranarthUtils.teleportPlayer(player, player.getLocation(), arenaLoc, true, "&e&lSmall Arena", "&7You have teleported to the Small Arena", success -> {
 						if (success) {
-							player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &eSmall Arena"));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("arena.tp_small_success")));
 						} else {
-							player.sendMessage(ChatUtils.chatMessage("&cYou could not be teleported to the &eSmall Arena"));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("arena.tp_small_fail")));
 						}
 					});
 				}
@@ -257,9 +258,9 @@ public class ArenaProtection implements Listener {
 					}
 					AranarthUtils.teleportPlayer(player, player.getLocation(), arenaLoc, true, "&e&lLarge Arena", "&7You have teleported to the Large Arena", success -> {
 						if (success) {
-							player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &eLarge Arena"));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("arena.tp_large_success")));
 						} else {
-							player.sendMessage(ChatUtils.chatMessage("&cYou could not be teleported to the &eLarge Arena"));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("arena.tp_large_fail")));
 						}
 					});
 				}

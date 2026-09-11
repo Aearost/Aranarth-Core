@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import io.papermc.paper.event.player.PlayerOpenSignEvent;
@@ -291,7 +292,7 @@ public class SpawnProtectionListener implements Listener {
 
                 if (e.getEntity().getShooter() != null && e.getEntity().getShooter() instanceof Player player) {
                     e.setCancelled(true);
-                    player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this item at spawn!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("spawn.no_item_use")));
                 }
             }
         }
@@ -306,7 +307,7 @@ public class SpawnProtectionListener implements Listener {
         if (e.getPlayer().getLocation().getWorld().getName().equals("spawn")) {
             if (e.getItem().getType() == Material.CHORUS_FRUIT) {
                 e.setCancelled(true);
-                e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot use this item at spawn!"));
+                e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("spawn.no_item_use")));
             }
         }
     }
@@ -319,7 +320,7 @@ public class SpawnProtectionListener implements Listener {
         if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
             if (e.getEntity() instanceof Player target) {
                 if (e.getDamageSource().getCausingEntity() instanceof Player attacker) {
-                    attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm players at Spawn!"));
+                    attacker.sendMessage(ChatUtils.chatMessage(Lang.get("spawn.no_harm_players")));
                 }
                 // Additionally prevents the target from being damaged, regardless of the source of damage
                 e.setCancelled(true);
@@ -382,9 +383,9 @@ public class SpawnProtectionListener implements Listener {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 3000.5, 100, 0.5, 0, 0);
                 AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&5Bending Tutorial", "&7You have teleported to the &5Bending Tutorial", success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &5Bending Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("tutorial.bending_enter")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cThis tutorial is currently disabled"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("tutorial.disabled")));
                     }
                 });
                 return;
@@ -392,9 +393,9 @@ public class SpawnProtectionListener implements Listener {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 4000.5, 100, 0.5, 0, 0);
                 AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&bAranarthium Tutorial", "&7You have teleported to the &bAranarthium Tutorial", success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &bAranarthium Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("tutorial.aranarthium_enter")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cThis tutorial is currently disabled"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("tutorial.disabled")));
                     }
                 });
                 return;
@@ -402,9 +403,9 @@ public class SpawnProtectionListener implements Listener {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 9000.5, 100, 0.5, 0, 0);
                 AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&fRecipe Tutorial", "&7You have teleported to the &fRecipe Tutorial", success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &fRecipe Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("tutorial.recipe_enter")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cThis tutorial is currently disabled"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("tutorial.disabled")));
                     }
                 });
                 return;
@@ -412,9 +413,9 @@ public class SpawnProtectionListener implements Listener {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 5000.5, 100, 0.5, 0, 0);
                 AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&eCalendar Tutorial", "&7You have teleported to the &eCalendar Tutorial", success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &eCalendar Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("tutorial.calendar_enter")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cThis tutorial is currently disabled"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("tutorial.disabled")));
                     }
                 });
                 return;
@@ -422,9 +423,9 @@ public class SpawnProtectionListener implements Listener {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 6000.5, 100, 0.5, 0, 0);
                 AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&aShops Tutorial", "&7You have teleported to the &aShops Tutorial", success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &aShops Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("tutorial.shops_enter")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cThis tutorial is currently disabled"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("tutorial.disabled")));
                     }
                 });
                 return;
@@ -432,9 +433,9 @@ public class SpawnProtectionListener implements Listener {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 7000.5, 100, 0.5, 0, 0);
                 AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&4Ranks Tutorial", "&7You have teleported to the &4Ranks Tutorial", success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &4Ranks Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("tutorial.ranks_enter")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cThis tutorial is currently disabled"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("tutorial.disabled")));
                     }
                 });
                 return;
@@ -442,9 +443,9 @@ public class SpawnProtectionListener implements Listener {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 8000.5, 100, 0.5, 0, 0);
                 AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&6Dominions Tutorial", "&7You have teleported to the &6Dominions Tutorial", success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &6Dominions Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("tutorial.dominion_enter")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cThis tutorial is currently disabled"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("tutorial.disabled")));
                     }
                 });
                 return;
@@ -454,9 +455,9 @@ public class SpawnProtectionListener implements Listener {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 51.5, 103, -56.5, 0, 0);
                 AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&5Bending Tutorial", "&7You have exited the &5Bending Tutorial", success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have exited the &5Bending Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("tutorial.bending_exit")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong. Please use &e/spawn"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("general.error_use_spawn")));
                     }
                 });
                 return;
@@ -464,9 +465,9 @@ public class SpawnProtectionListener implements Listener {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 56.5, 104, -51.5, 180, 0);
                 AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&bAranarthium Tutorial", "&7You have exited the &bAranarthium Tutorial", success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have exited the &bAranarthium Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("tutorial.aranarthium_exit")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong. Please use &e/spawn"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("general.error_use_spawn")));
                     }
                 });
                 return;
@@ -474,9 +475,9 @@ public class SpawnProtectionListener implements Listener {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 62.5, 106, -57.5, 90, 0);
                 AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&fRecipe Tutorial", "&7You have exited the &fRecipe Tutorial", success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have exited the &fRecipe Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("tutorial.recipe_exit")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong. Please use &e/spawn"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("general.error_use_spawn")));
                     }
                 });
                 return;
@@ -484,9 +485,9 @@ public class SpawnProtectionListener implements Listener {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 63.5, 109, -67.5, 90, 0);
                 AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&eCalendar Tutorial", "&7You have exited the &eCalendar Tutorial", success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have exited the &eCalendar Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("tutorial.calendar_exit")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong. Please use &e/spawn"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("general.error_use_spawn")));
                     }
                 });
                 return;
@@ -494,9 +495,9 @@ public class SpawnProtectionListener implements Listener {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 50.5, 110, -66.5, -90, 0);
                 AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&aShops Tutorial", "&7You have exited the &aShops Tutorial", success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have exited the &aShops Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("tutorial.shops_exit")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong. Please use &e/spawn"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("general.error_use_spawn")));
                     }
                 });
                 return;
@@ -504,9 +505,9 @@ public class SpawnProtectionListener implements Listener {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 55, 110, -74.5, -45, 0);
                 AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&4Ranks Tutorial", "&7You have exited the &4Ranks Tutorial", success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have exited the &4Ranks Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("tutorial.ranks_exit")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong. Please use &e/spawn"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("general.error_use_spawn")));
                     }
                 });
                 return;
@@ -514,9 +515,9 @@ public class SpawnProtectionListener implements Listener {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 57.5, 111, -74.5, 0, 0);
                 AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&6Dominions Tutorial", "&7You have exited the &6Dominions Tutorial", success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have exited the &6Dominions Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("tutorial.dominion_exit")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong. Please use &e/spawn"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("general.error_use_spawn")));
                     }
                 });
                 return;
@@ -553,7 +554,7 @@ public class SpawnProtectionListener implements Listener {
      */
     private void teleportPlayerToWorld(Player player, String worldName) {
         if (AranarthUtils.getTeleportTask(player.getUniqueId()) != null) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou are already teleporting somewhere!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.already_teleporting")));
             return;
         }
 
@@ -561,7 +562,7 @@ public class SpawnProtectionListener implements Listener {
         if (System.currentTimeMillis() < aranarthPlayer.getLastWorldCommandUse() + 60000) {
             if (!aranarthPlayer.isInAdminMode()) {
                 int wait = (int) ((aranarthPlayer.getLastWorldCommandUse() + 60000) - System.currentTimeMillis()) / 1000;
-                player.sendMessage(ChatUtils.chatMessage("&cYou must wait another &e" + wait + " seconds &cto teleport again!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("spawn.wait", "seconds", wait)));
                 return;
             }
         }
@@ -607,9 +608,9 @@ public class SpawnProtectionListener implements Listener {
                 if (success) {
                     aranarthPlayer.setLastWorldCommandUse(System.currentTimeMillis());
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                    player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to " + finalAdjustedName));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("spawn.teleported", "name", finalAdjustedName)));
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to " + finalAdjustedName));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("spawn.could_not", "name", finalAdjustedName)));
                 }
             });
         }

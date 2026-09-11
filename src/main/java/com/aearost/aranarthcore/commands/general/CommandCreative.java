@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.network.PendingTeleport;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -32,12 +33,12 @@ public class CommandCreative implements CommandExecutor {
 			// Only the OG players, Council, and Architect are permitted into the Creative world
 			if (!AranarthUtils.isOriginalPlayer(player.getUniqueId()) && aranarthPlayer.getCouncilRank() == 0
 					&& aranarthPlayer.getArchitectRank() == 0) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have access to this world!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("access.world_restricted")));
 				return false;
 			}
 
 			if (AranarthUtils.getTeleportTask(player.getUniqueId()) != null) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou are already teleporting somewhere!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.already_teleporting")));
 				return false;
 			}
 
@@ -59,15 +60,15 @@ public class CommandCreative implements CommandExecutor {
 			Location creativeSpawn = new Location(Bukkit.getWorld("creative"), 0, -60, 0, 0, 2);
 			AranarthUtils.teleportPlayer(player, player.getLocation(), creativeSpawn, aranarthPlayer.isInAdminMode(), "&e&lCreative", "&7You have teleported to Creative", success -> {
 				if (success) {
-					player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eCreative"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.to_creative")));
 				} else {
-					player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to &eCreative"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.could_not_creative")));
 				}
 			});
 
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to use this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 			return false;
 		}
 	}

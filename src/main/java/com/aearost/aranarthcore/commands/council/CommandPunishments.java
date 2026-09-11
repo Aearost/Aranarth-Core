@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.Punishment;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -28,7 +29,7 @@ public class CommandPunishments {
 		if (sender instanceof Player player) {
 			if (player.hasPermission("aranarth.punishments")) {
 				if (args.length == 1) {
-					sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac punishments <player> [<remove> <number>]"));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac punishments <player> [<remove> <number>]")));
 					return true;
 				}
 				// List the punishments
@@ -38,7 +39,7 @@ public class CommandPunishments {
 					removePunishment(sender, args);
 				}
 			} else {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 			}
         } else {
 			listPunishments(sender, args);
@@ -57,7 +58,7 @@ public class CommandPunishments {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				List<Punishment> punishments = AranarthUtils.getPunishments(player.getUniqueId());
 				if (punishments == null || punishments.isEmpty()) {
-					sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has no logged punishments"));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.get("punishment.none", "player", aranarthPlayer.getNickname())));
 					return;
 				} else {
 					sender.sendMessage(ChatUtils.translateToColor("&8      - - - &6" + aranarthPlayer.getNickname() + "'s &6Punishments &8- - -"));
@@ -119,16 +120,16 @@ public class CommandPunishments {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				List<Punishment> punishments = AranarthUtils.getPunishments(player.getUniqueId());
 				if (punishments == null || punishments.isEmpty()) {
-					sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has no logged punishments"));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.get("punishment.none", "player", aranarthPlayer.getNickname())));
 					return;
 				} else {
 					if (args.length < 4) {
-						sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac punishments <player> [<remove> <number>]"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac punishments <player> [<remove> <number>]")));
 						return;
 					}
 
 					if (!args[2].equals("remove")) {
-						sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac punishments <player> [<remove> <number>]"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac punishments <player> [<remove> <number>]")));
 						return;
 					}
 
@@ -148,7 +149,7 @@ public class CommandPunishments {
 										player.getUniqueId(), LocalDateTime.now(), "REMOVE_" + type, punishmentBeingRemoved.getReason(), senderUuid);
 								DiscordUtils.addPunishmentToDiscord(punishment);
 								AranarthUtils.removePunishment(player.getUniqueId(), punishmentBeingRemoved);
-								sender.sendMessage(ChatUtils.chatMessage("&7You have removed &e" + aranarthPlayer.getNickname() + "&e's &7punishment successfully"));
+								sender.sendMessage(ChatUtils.chatMessage(Lang.get("punishment.removed", "number", String.valueOf(slotToRemove), "player", aranarthPlayer.getNickname())));
 							} else {
 								throw new NumberFormatException();
 							}
@@ -156,7 +157,7 @@ public class CommandPunishments {
 							throw new NumberFormatException();
 						}
 					} catch (NumberFormatException e) {
-						sender.sendMessage(ChatUtils.chatMessage("&cThat punishment number is invalid"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.get("punishment.invalid_number")));
 						return;
 					}
 				}

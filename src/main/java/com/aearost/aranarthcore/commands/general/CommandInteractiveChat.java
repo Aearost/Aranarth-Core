@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.gui.GuiChatSnapshot;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -26,7 +27,7 @@ public class CommandInteractiveChat implements CommandExecutor {
         try {
             snapshotId = UUID.fromString(args[1]);
         } catch (IllegalArgumentException e) {
-            player.sendMessage(ChatUtils.chatMessage("&cInvalid snapshot ID."));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("chat_snapshot.expired")));
             return true;
         }
         GuiChatSnapshot.open(player, snapshotId);

@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -30,11 +31,11 @@ public class SpawnChangeLocation {
 				Player player = e.getPlayer();
 				// Entering spawn
 				if (!fromSpawn && toSpawn) {
-					player.sendMessage(ChatUtils.chatMessage("&7You have entered the Spawn"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("spawn.entered")));
 				}
 				// Leaving spawn
 				else if (fromSpawn && !toSpawn) {
-					player.sendMessage(ChatUtils.chatMessage("&7You have left the Spawn"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("spawn.left")));
 				}
 			}
 		}

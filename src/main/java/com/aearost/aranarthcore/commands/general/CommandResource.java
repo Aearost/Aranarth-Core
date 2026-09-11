@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.network.PendingTeleport;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -33,7 +34,7 @@ public class CommandResource implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (AranarthUtils.getTeleportTask(player.getUniqueId()) != null) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou are already teleporting somewhere!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.already_teleporting")));
 				return true;
 			}
 
@@ -56,7 +57,7 @@ public class CommandResource implements CommandExecutor {
 			if (System.currentTimeMillis() < aranarthPlayer.getLastWorldCommandUse() + 60000) {
 				if (!aranarthPlayer.isInAdminMode()) {
 					int wait = (int) ((aranarthPlayer.getLastWorldCommandUse() + 60000) - System.currentTimeMillis()) / 1000;
-					player.sendMessage(ChatUtils.chatMessage("&cYou must wait another &e" + wait + " seconds &cto use this command!"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.world_cooldown", "seconds", String.valueOf(wait))));
 					return true;
 				}
 			}
@@ -79,14 +80,14 @@ public class CommandResource implements CommandExecutor {
 				if (success) {
 					aranarthPlayer.setLastWorldCommandUse(System.currentTimeMillis());
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-					player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to the &eResource &7world"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.to_resource")));
 				} else {
-					player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to the &eResource &cworld"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.could_not_resource")));
 				}
 			});
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to use this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 			return true;
 		}
 	}

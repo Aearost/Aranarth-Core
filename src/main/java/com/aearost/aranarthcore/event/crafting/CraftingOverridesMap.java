@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.crafting;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.destroystokyo.paper.event.inventory.PrepareResultEvent;
 import io.papermc.paper.event.player.CartographyItemEvent;
 import org.bukkit.Material;
@@ -89,7 +90,7 @@ public class CraftingOverridesMap {
             }
             if (isCopy(ingredient)) {
                 e.setCancelled(true);
-                player.sendMessage(ChatUtils.chatMessage("&cMap copies cannot be copied further!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.map_no_copy")));
                 return;
             }
         }
@@ -147,7 +148,7 @@ public class CraftingOverridesMap {
         ItemStack sourceMap = inv.getItem(0);
         if (isCopy(sourceMap)) {
             e.setCancelled(true);
-            e.getWhoClicked().sendMessage(ChatUtils.chatMessage("&cMap copies cannot be copied further!"));
+            e.getWhoClicked().sendMessage(ChatUtils.chatMessage(Lang.get("crafting.map_no_copy")));
         }
     }
 

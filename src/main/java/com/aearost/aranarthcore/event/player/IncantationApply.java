@@ -11,6 +11,7 @@ import com.aearost.aranarthcore.items.incantation.IncantationPreservation;
 import com.aearost.aranarthcore.items.incantation.IncantationResilience;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -84,7 +85,7 @@ public class IncantationApply {
 					if (itemMeta.getPersistentDataContainer().has(INCANTATION_TYPE)) {
 						String incantationTypeOnItem = itemMeta.getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
 						if (!incantationTypeOnItem.equals(incantationType)) {
-							player.sendMessage(ChatUtils.chatMessage("&cOnly one incantation can be applied to an item!"));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("incantation.one_only")));
 							return;
 						}
 					}
@@ -123,7 +124,7 @@ public class IncantationApply {
 							item.setItemMeta(itemMeta);
 							incantationFloorItem.remove();
 							floorItem.setItemStack(item);
-							player.sendMessage(ChatUtils.chatMessage("&5You have applied the " + incantation.getItem().getItemMeta().getDisplayName()));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("incantation.applied", "name", incantation.getItem().getItemMeta().getDisplayName())));
 							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 						}
 					} else if (incantationType.equals("incantation_resilience")) {
@@ -142,7 +143,7 @@ public class IncantationApply {
 							item.setItemMeta(itemMeta);
 							incantationFloorItem.remove();
 							floorItem.setItemStack(item);
-							player.sendMessage(ChatUtils.chatMessage("&5You have applied the " + incantation.getItem().getItemMeta().getDisplayName()));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("incantation.applied", "name", incantation.getItem().getItemMeta().getDisplayName())));
 							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 						}
 					}
@@ -168,7 +169,7 @@ public class IncantationApply {
 					if (toolItem.getItemStack().getItemMeta().getPersistentDataContainer().has(INCANTATION_TYPE)) {
 						String incantationTypeOnItem = toolItem.getItemStack().getItemMeta().getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
 						if (!incantationTypeOnItem.equals(incantationType)) {
-							player.sendMessage(ChatUtils.chatMessage("&cOnly one incantation can be applied to an item!"));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("incantation.one_only")));
 							return;
 						}
 					}
@@ -193,7 +194,7 @@ public class IncantationApply {
 						toolItem.setItemStack(tool);
 						aranarthiumItem.remove();
 						incantationFloorItem.remove();
-						player.sendMessage(ChatUtils.chatMessage("&5You have applied the " + incantation.getItem().getItemMeta().getDisplayName()));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("incantation.applied", "name", incantation.getItem().getItemMeta().getDisplayName())));
 						player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 					} else if (incantationType.equals("incantation_lifesteal")) {
 						if (isMeleeWeapon(toolItem.getItemStack()) && !isExceedingLevel(toolItem.getItemStack())) {
@@ -231,7 +232,7 @@ public class IncantationApply {
 							toolItem.setItemStack(tool);
 							aranarthiumItem.remove();
 							incantationFloorItem.remove();
-							player.sendMessage(ChatUtils.chatMessage("&5You have applied the " + incantation.getItem().getItemMeta().getDisplayName()));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("incantation.applied", "name", incantation.getItem().getItemMeta().getDisplayName())));
 							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 						}
 					} else if (incantationType.equals("incantation_magnetism")) {
@@ -256,13 +257,13 @@ public class IncantationApply {
 							toolItem.setItemStack(tool);
 							aranarthiumItem.remove();
 							incantationFloorItem.remove();
-							player.sendMessage(ChatUtils.chatMessage("&5You have applied the " + incantation.getItem().getItemMeta().getDisplayName()));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("incantation.applied", "name", incantation.getItem().getItemMeta().getDisplayName())));
 							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 						}
 					} else if (incantationType.equals("incantation_preservation")) {
 						if (isPickaxe(toolItem.getItemStack())) {
 							if (hasFortune(toolItem.getItemStack())) {
-								player.sendMessage(ChatUtils.chatMessage("&cPreservation cannot be applied to a tool with Fortune!"));
+								player.sendMessage(ChatUtils.chatMessage(Lang.get("incantation.preservation_no_fortune")));
 								return;
 							}
 							Incantation incantation = new IncantationPreservation();
@@ -286,7 +287,7 @@ public class IncantationApply {
 							toolItem.setItemStack(tool);
 							aranarthiumItem.remove();
 							incantationFloorItem.remove();
-							player.sendMessage(ChatUtils.chatMessage("&5You have applied the " + incantation.getItem().getItemMeta().getDisplayName()));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("incantation.applied", "name", incantation.getItem().getItemMeta().getDisplayName())));
 							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 						}
 					}

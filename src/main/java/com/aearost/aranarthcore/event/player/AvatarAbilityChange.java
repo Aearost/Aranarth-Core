@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
 import org.bukkit.entity.Player;
@@ -24,7 +25,7 @@ public class AvatarAbilityChange {
                         || parts[1].equals("p") || parts[1].equals("preset") || parts[1].equals("copy")) {
                     for (String name : bendingPlayer.getAbilities().values()) {
                         if (isSubAbility(ChatUtils.stripColorFormatting(name))) {
-                            player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this command while using this ability!"));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.no_commands_ability")));
                             e.setCancelled(true);
                             return;
                         }

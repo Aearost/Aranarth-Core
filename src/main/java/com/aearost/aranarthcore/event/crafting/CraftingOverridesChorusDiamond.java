@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.crafting;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.block.CrafterCraftEvent;
@@ -46,14 +47,14 @@ public class CraftingOverridesChorusDiamond {
                 if (resultMeta.getPersistentDataContainer().has(HOMEPAD)) {
                     // A normal diamond is used as an ingredient instead of a chorus diamond
                     if (!meta.getPersistentDataContainer().has(CHORUS_DIAMOND)) {
-                        player.sendMessage(ChatUtils.chatMessage("&cYou must use a Chorus Diamond to craft this!"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.must_use_item", "item", "Chorus Diamond")));
                         e.setCancelled(true);
                     }
                 }
                 // A chorus diamond is used as an ingredient incorrectly
                 else {
                     if (meta.getPersistentDataContainer().has(CHORUS_DIAMOND)) {
-                        player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a Chorus Diamond to craft this!"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.special_item_restricted", "item", "Chorus Diamond")));
                         e.setCancelled(true);
                     }
                 }
@@ -61,7 +62,7 @@ public class CraftingOverridesChorusDiamond {
         }
         // Result has no meta, therefore not requiring Chorus Diamonds
         else {
-            player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a Chorus Diamond to craft this!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.special_item_restricted", "item", "Chorus Diamond")));
             e.setCancelled(true);
         }
     }

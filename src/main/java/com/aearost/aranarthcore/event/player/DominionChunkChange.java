@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.objects.Outpost;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.OutpostUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -90,10 +91,9 @@ public class DominionChunkChange {
 			}
 			if (!aranarthPlayer.isTogglingChangeClaim()) {
 				if (dominionFrom != null) {
-					player.sendMessage(ChatUtils.chatMessage("&7You have exited the Dominion of &e" + dominionFrom.getName()));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.exited", "name", dominionFrom.getName())));
 				} else if (outpostFrom != null && outpostDominionFrom != null) {
-					player.sendMessage(ChatUtils.chatMessage("&7You have exited &e" + outpostDominionFrom.getName()
-							+ "&7's outpost, &e" + outpostFrom.getName()));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.exited_outpost", "outpost", outpostFrom.getName(), "name", outpostDominionFrom.getName())));
 				}
 			}
 		}
@@ -101,10 +101,9 @@ public class DominionChunkChange {
 		// Enter message
 		if (effectiveTo != null && !aranarthPlayer.isTogglingChangeClaim()) {
 			if (dominionTo != null) {
-				player.sendMessage(ChatUtils.chatMessage("&7You have entered the Dominion of &e" + dominionTo.getName()));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.entered", "name", dominionTo.getName())));
 			} else if (outpostTo != null && outpostDominionTo != null) {
-				player.sendMessage(ChatUtils.chatMessage("&7You have entered &e" + outpostDominionTo.getName()
-						+ "&7's outpost, &e" + outpostTo.getName()));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.entered_outpost", "outpost", outpostTo.getName(), "name", outpostDominionTo.getName())));
 			}
 		}
 

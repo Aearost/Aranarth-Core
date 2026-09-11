@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.network.PendingTeleport;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -62,14 +63,14 @@ public class CommandAdminTeleport {
 			aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
 			if (aranarthPlayer.getCouncilRank() < 2) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 				return true;
 			}
 		} else {
             player = null;
             aranarthPlayer = null;
             if (!(sender instanceof BlockCommandSender)) {
-                sender.sendMessage(ChatUtils.chatMessage("&cThis command must be executed in-game!"));
+                sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
                 return true;
             }
         }
@@ -79,35 +80,35 @@ public class CommandAdminTeleport {
 		if (args[0].equalsIgnoreCase("tpw")) {
 			// /ac tpw <worldname> - teleport self to surface of 0,0 in the specified world
 			if (isSenderPlayer && aranarthPlayer.getCouncilRank() < 3) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 				return true;
 			}
 			if (!isSenderPlayer) {
-				sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 				return true;
 			}
 			if (args.length != 2) {
-				player.sendMessage(ChatUtils.chatMessage("&cUsage: /ac tpw <worldname>"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac tpw <worldname>")));
 				return true;
 			}
 			World world = Bukkit.getWorld(args[1]);
 			if (world == null) {
-				player.sendMessage(ChatUtils.chatMessage("&cWorld &e" + args[1] + " &ccould not be found!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("admin.world_not_found", "name", args[1])));
 				return true;
 			}
 			Location loc = AranarthUtils.getSafeTeleportLocation(new Location(world, 0, world.getHighestBlockYAt(0, 0), 0));
 			player.teleport(loc);
-			player.sendMessage(ChatUtils.chatMessage("&7You have teleported to world &e" + world.getName()));
+			player.sendMessage(ChatUtils.chatMessage(Lang.get("admin.teleport_world_success", "world", world.getName())));
 			return true;
 		} else if (args[0].equalsIgnoreCase("tpf")) {
 			if (isSenderPlayer && aranarthPlayer.getCouncilRank() < 3) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 				return true;
 			}
 			// /ac tpf x y z [<yaw> <pitch>] - self teleport, player only
 			if (args.length == 4 || args.length == 6) {
 				if (!isSenderPlayer) {
-					sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 					return true;
 				}
 
@@ -124,7 +125,7 @@ public class CommandAdminTeleport {
 						pitch = Float.parseFloat(args[5]);
 					}
 				} catch (NumberFormatException e) {
-					player.sendMessage(ChatUtils.chatMessage("&cThose coordinates are invalid"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_coordinates")));
 					return true;
 				}
 
@@ -132,7 +133,7 @@ public class CommandAdminTeleport {
 						? new Location(player.getWorld(), x, y, z)
 						: new Location(player.getWorld(), x, y, z, yaw, pitch);
 				player.teleport(loc);
-				player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the input coordinates"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.to_coordinates")));
 			}
 			// /ac tpf username x y z [<yaw> <pitch>] - command blocks supported, @p resolved
 			else if (args.length == 5 || args.length == 7) {
@@ -148,7 +149,7 @@ public class CommandAdminTeleport {
 						pitch = Float.parseFloat(args[6]);
 					}
 				} catch (NumberFormatException e) {
-					sender.sendMessage(ChatUtils.chatMessage("&cThose coordinates are invalid"));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_coordinates")));
 					return true;
 				}
 				Player target = resolvePlayer(sender, args[1]);
@@ -158,8 +159,8 @@ public class CommandAdminTeleport {
 							? new Location(target.getWorld(), x, y, z)
 							: new Location(target.getWorld(), x, y, z, yaw, pitch);
 					target.teleport(loc);
-					sender.sendMessage(ChatUtils.chatMessage("&7You have teleported &e" + targetAranarthPlayer.getNickname() + " &7to the input coordinates"));
-					target.sendMessage(ChatUtils.chatMessage("&7You have been teleported to the input coordinates"));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.teleport_player_coords", "player", targetAranarthPlayer.getNickname())));
+					target.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.to_coordinates")));
 				} else {
 					NetworkPlayer remoteTarget = findRemotePlayer(args[1]);
 					if (remoteTarget != null) {
@@ -173,13 +174,13 @@ public class CommandAdminTeleport {
 								"&e&lCoordinates", "&7You have been teleported to the input coordinates");
 						NetworkManager.getInstance().setPendingTeleport(remoteTarget.getUuid(), pending);
 						NetworkManager.getInstance().publishTransfer(remoteTarget.getUuid(), NetworkManager.getInstance().getThisServer());
-						sender.sendMessage(ChatUtils.chatMessage("&7Teleporting &e" + remoteTarget.getNickname() + " &7to the input coordinates"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.teleporting_player_coords", "player", remoteTarget.getNickname())));
 					} else {
-						sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found!"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
 					}
 				}
 			} else {
-				sender.sendMessage(ChatUtils.chatMessage("&cThose coordinates are invalid"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_coordinates")));
 			}
 			return true;
 		} else {
@@ -187,18 +188,18 @@ public class CommandAdminTeleport {
 			// /ac tp username
 			if (args.length == 2) {
 				if (!isSenderPlayer) {
-					sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 					return true;
 				}
 
 				Player target = Bukkit.getPlayer(args[1]);
 				if (target != null) {
 					AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
-                    AranarthUtils.teleportPlayer(player, player.getLocation(), target.getLocation(), true, targetAranarthPlayer.getNickname(), "&7You have teleported to " + targetAranarthPlayer.getNickname(), success -> {
+                    AranarthUtils.teleportPlayer(player, player.getLocation(), target.getLocation(), true, targetAranarthPlayer.getNickname(), Lang.get("admin.teleport_to_player_success", "player", targetAranarthPlayer.getNickname()), success -> {
 						if (success) {
-							player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + targetAranarthPlayer.getNickname()));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("admin.teleport_to_player_success", "player", targetAranarthPlayer.getNickname())));
 						} else {
-							player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to &e" + targetAranarthPlayer.getNickname()));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("admin.teleport_to_player_failed", "player", targetAranarthPlayer.getNickname())));
 						}
 					});
 				} else {
@@ -210,10 +211,10 @@ public class CommandAdminTeleport {
 								remoteTarget.getUuid().toString(),
 								"&e&l" + remoteTarget.getServer().toUpperCase(),
 								"&7You have teleported to " + remoteTarget.getNickname());
-						player.sendMessage(ChatUtils.chatMessage("&7Teleporting you to &e" + remoteTarget.getNickname() + "&7..."));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("admin.teleporting_to_player", "player", remoteTarget.getNickname())));
 						NetworkManager.getInstance().saveInventoryAndTransfer(player, targetServer, pending);
 					} else {
-						sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found!"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
 					}
 				}
 				return true;
@@ -227,18 +228,17 @@ public class CommandAdminTeleport {
 					AranarthPlayer target1AranarthPlayer = AranarthUtils.getPlayer(target1.getUniqueId());
 					AranarthPlayer target2AranarthPlayer = AranarthUtils.getPlayer(target2.getUniqueId());
 
-					AranarthUtils.teleportPlayer(target1, target1.getLocation(), target2.getLocation(), true, target2AranarthPlayer.getNickname(), "&7You have teleported to " + target2AranarthPlayer.getNickname(), success -> {
+					AranarthUtils.teleportPlayer(target1, target1.getLocation(), target2.getLocation(), true, target2AranarthPlayer.getNickname(), Lang.get("admin.teleport_to_player_success", "player", target2AranarthPlayer.getNickname()), success -> {
 						if (success) {
 							if (!isSenderPlayer
 									|| (!player.getUniqueId().equals(target1.getUniqueId())
 									&& !player.getUniqueId().equals(target2.getUniqueId()))) {
-								sender.sendMessage(ChatUtils.chatMessage("&7You have teleported &e"
-										+ target1AranarthPlayer.getNickname() + " &7to &e" + target2AranarthPlayer.getNickname()));
+								sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.teleport_p1_to_p2", "player1", target1AranarthPlayer.getNickname(), "player2", target2AranarthPlayer.getNickname())));
 							}
 
-							target1.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &e" + target2AranarthPlayer.getNickname()));
+							target1.sendMessage(ChatUtils.chatMessage(Lang.get("admin.teleported_to_player", "player", target2AranarthPlayer.getNickname())));
 						} else {
-							sender.sendMessage(ChatUtils.chatMessage("&cThe teleportation failed"));
+							sender.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.failed")));
 						}
 					});
 				} else if (NetworkManager.isActive()) {
@@ -246,11 +246,11 @@ public class CommandAdminTeleport {
 					NetworkPlayer remote2 = target2 == null ? findRemotePlayer(args[2]) : null;
 
 					if (target1 == null && remote1 == null) {
-						sender.sendMessage(ChatUtils.chatMessage("&e" + args[1] + " &ccould not be found!"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
 						return true;
 					}
 					if (target2 == null && remote2 == null) {
-						sender.sendMessage(ChatUtils.chatMessage("&e" + args[2] + " &ccould not be found!"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[2])));
 						return true;
 					}
 
@@ -265,26 +265,26 @@ public class CommandAdminTeleport {
 								remote2.getUuid().toString(),
 								"&e&l" + remote2.getServer().toUpperCase(),
 								"&7You have been teleported to " + nick2);
-						target1.sendMessage(ChatUtils.chatMessage("&7You are being teleported to &e" + nick2));
+						target1.sendMessage(ChatUtils.chatMessage(Lang.get("admin.teleporting_to_player", "player", nick2)));
 						NetworkManager.getInstance().saveInventoryAndTransfer(target1, targetServer, pending);
 						if (!isSenderPlayer || !player.getUniqueId().equals(target1.getUniqueId())) {
-							sender.sendMessage(ChatUtils.chatMessage("&7Teleporting &e" + nick1 + " &7to &e" + nick2));
+							sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.teleport_p1_to_p2", "player1", nick1, "player2", nick2)));
 						}
 					} else if (remote1 != null && target2 != null) {
 						// player1 remote, player2 local: pull player1 to this server to tp to player2
 						PendingTeleport pending = new PendingTeleport(
 								target2.getUniqueId().toString(),
 								"&e&l" + NetworkManager.getInstance().getThisServer().toUpperCase(),
-								"&7You have been teleported to " + nick2);
+								Lang.get("admin.teleported_to_player", "player", nick2));
 						NetworkManager.getInstance().setPendingTeleport(remote1.getUuid(), pending);
 						NetworkManager.getInstance().publishTransfer(remote1.getUuid(), NetworkManager.getInstance().getThisServer());
-						sender.sendMessage(ChatUtils.chatMessage("&7Teleporting &e" + nick1 + " &7to &e" + nick2));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.teleport_p1_to_p2", "player1", nick1, "player2", nick2)));
 					} else {
 						// both remote
-						sender.sendMessage(ChatUtils.chatMessage("&cBoth players are on another server!"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.both_remote")));
 					}
 				} else {
-					sender.sendMessage(ChatUtils.chatMessage("&cOne of the two input players could not be found!"));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.one_not_found")));
 				}
 				return true;
 			}
@@ -303,7 +303,7 @@ public class CommandAdminTeleport {
 						pitch = Float.parseFloat(args[6]);
 					}
 				} catch (NumberFormatException e) {
-					sender.sendMessage(ChatUtils.chatMessage("&cThose coordinates are invalid"));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_coordinates")));
 					return true;
 				}
 				Player target = resolvePlayer(sender, args[1]);
@@ -314,10 +314,10 @@ public class CommandAdminTeleport {
 							: new Location(target.getWorld(), x, y, z, yaw, pitch);
 					AranarthUtils.teleportPlayer(target, target.getLocation(), loc, true, "&e&lCoordinates", "&7You have teleported to the input coordinates", success -> {
 						if (success) {
-							sender.sendMessage(ChatUtils.chatMessage("&7You have teleported &e" + targetAranarthPlayer.getNickname() + " &7to the input coordinates"));
-							target.sendMessage(ChatUtils.chatMessage("&7You have been teleported to the input coordinates"));
+							sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.teleport_player_coords", "player", targetAranarthPlayer.getNickname())));
+							target.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.to_coordinates")));
 						} else {
-							sender.sendMessage(ChatUtils.chatMessage("&cThe teleportation failed"));
+							sender.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.failed")));
 						}
 					});
 				} else {
@@ -333,9 +333,9 @@ public class CommandAdminTeleport {
 								"&e&lCoordinates", "&7You have been teleported to the input coordinates");
 						NetworkManager.getInstance().setPendingTeleport(remoteTarget.getUuid(), pending);
 						NetworkManager.getInstance().publishTransfer(remoteTarget.getUuid(), NetworkManager.getInstance().getThisServer());
-						sender.sendMessage(ChatUtils.chatMessage("&7Teleporting &e" + remoteTarget.getNickname() + " &7to the input coordinates"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.teleporting_player_coords", "player", remoteTarget.getNickname())));
 					} else {
-						sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found!"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
 					}
 				}
 			}
@@ -343,7 +343,7 @@ public class CommandAdminTeleport {
 			// /ac tp x y z [<yaw> <pitch>]
 			else if (args.length == 4 || args.length == 6) {
 				if (!isSenderPlayer) {
-					sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 					return true;
 				}
 
@@ -360,7 +360,7 @@ public class CommandAdminTeleport {
 						pitch = Float.parseFloat(args[5]);
 					}
 				} catch (NumberFormatException e) {
-					player.sendMessage(ChatUtils.chatMessage("&cThose coordinates are invalid"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_coordinates")));
 					return true;
 				}
 
@@ -369,13 +369,13 @@ public class CommandAdminTeleport {
 						: new Location(player.getWorld(), x, y, z, yaw, pitch);
 				AranarthUtils.teleportPlayer(player, player.getLocation(), loc, true, "&e&lCoordinates", "&7You have teleported to the input coordinates", success -> {
 					if (success) {
-						player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the input coordinates"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.to_coordinates")));
 					} else {
-						player.sendMessage(ChatUtils.chatMessage("&cThe teleportation failed"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.failed")));
 					}
 				});
 			} else {
-				sender.sendMessage(ChatUtils.chatMessage("&cThose coordinates are invalid"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_coordinates")));
 			}
 			return true;
 		}

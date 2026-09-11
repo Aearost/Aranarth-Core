@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.gui.GuiInvsee;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -20,12 +21,12 @@ public class CommandInvsee {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.invsee")) {
-				sender.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 				return true;
 			}
 
 			if (args.length == 1) {
-				player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac invsee <player>"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac invsee <player>")));
 				return true;
 			} else {
 				Player target = Bukkit.getPlayer(args[1]);
@@ -38,18 +39,18 @@ public class CommandInvsee {
 							.findFirst().orElse(null);
 					if (remotePlayer != null) {
 						NetworkManager.getInstance().publishInvseeRequest(player.getUniqueId(), remotePlayer.getUuid());
-						player.sendMessage(ChatUtils.chatMessage("&aLoading remote inventory..."));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("reaper.loading")));
 					} else {
-						player.sendMessage(ChatUtils.chatMessage("&cThat player could not be found"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
 					}
 					return true;
 				} else {
-					player.sendMessage(ChatUtils.chatMessage("&cThat player could not be found"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
 					return true;
 				}
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to execute this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 			return true;
 		}
 	}

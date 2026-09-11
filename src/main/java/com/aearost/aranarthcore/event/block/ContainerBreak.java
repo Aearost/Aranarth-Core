@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -31,9 +32,9 @@ public class ContainerBreak {
                     Location[] singleContainerLocation = new Location[] { e.getBlock().getLocation(), null };
                     int breakResult = AranarthUtils.removeLockedContainer(singleContainerLocation);
                     if (breakResult == 0) {
-                        player.sendMessage(ChatUtils.chatMessage("&7The locked container has been destroyed"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("lock.container_destroyed")));
                     } else if (breakResult == -1) {
-                        player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with destroying the container..."));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("lock.no_permission_destroy")));
                         e.setCancelled(true);
                     }
                 }
@@ -48,10 +49,10 @@ public class ContainerBreak {
                         if (breakResult == 0) {
                             // If there's a shop above, ShopDestroy will handle the success message
                             if (!hasShopAbove) {
-                                player.sendMessage(ChatUtils.chatMessage("&7The locked container has been destroyed"));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.get("lock.container_destroyed")));
                             }
                         } else if (breakResult == -1) {
-                            player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with destroying the container..."));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.get("lock.no_permission_destroy")));
                             e.setCancelled(true);
                         }
                     } else {
@@ -65,7 +66,7 @@ public class ContainerBreak {
 
                         // Only display message if there are no shops above either of the locations
                         if (ShopUtils.getShopFromLocation(above1) == null && (above2 == null || ShopUtils.getShopFromLocation(above2) == null)) {
-                            player.sendMessage(ChatUtils.chatMessage("&cYou cannot destroy someone else's locked container!"));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.get("lock.no_permission_destroy")));
                             e.setCancelled(true);
                         }
                     }

@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -121,19 +122,19 @@ public class ArmorStandInteractListener implements Listener {
         ItemStack hand = player.getInventory().getItemInMainHand();
         if (hand.getType() == Material.IRON_BLOCK) {
             if (!player.hasPermission("aranarth.armorstand.lock")) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to lock armor stands"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("lock.no_permission_lock")));
                 e.setCancelled(true);
                 return;
             }
             Dominion dominion = DominionUtils.getDominionOfChunk(armorStand.getLocation().getChunk());
             if (dominion != null && !DominionUtils.hasPermission(player, dominion, DominionPermission.ARMOR_STAND)) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to do this in &e" + dominion.getName()));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.no_permission_in", "name", dominion.getName())));
                 e.setCancelled(true);
                 return;
             }
             PersistentDataContainer pdc = armorStand.getPersistentDataContainer();
             if (pdc.has(lockedKey, PersistentDataType.BYTE)) {
-                player.sendMessage(ChatUtils.chatMessage("&cThis armor stand has already been locked"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("lock.locked")));
                 e.setCancelled(true);
                 return;
             }
@@ -146,7 +147,7 @@ public class ArmorStandInteractListener implements Listener {
             armorStand.setCanMove(false);
             armorStand.setGravity(false);
             player.playSound(armorStand.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1.0F, 1.0F);
-            player.sendMessage(ChatUtils.chatMessage("&7This armor stand has been locked"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("lock.locked")));
             e.setCancelled(true);
             return;
         }

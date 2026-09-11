@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.AfkLocation;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -40,7 +41,7 @@ public class CommandAfk implements CommandExecutor {
 
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cThis can only be executed in-game!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 			return false;
 		}
 	}

@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.event.world.WorldEventManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -22,13 +23,13 @@ public class CommandWorldEvent {
         if (sender instanceof Player player) {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
             if (aranarthPlayer.getCouncilRank() < 3) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
                 return true;
             }
         }
 
         if (args.length < 2) {
-            sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac worldevent <name> [intensity]"));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac worldevent <name> [intensity]")));
             return true;
         }
 
@@ -36,7 +37,7 @@ public class CommandWorldEvent {
         try {
             event = WorldEvent.valueOf(args[1].toUpperCase());
         } catch (IllegalArgumentException e) {
-            sender.sendMessage(ChatUtils.chatMessage("&cUnknown world event: &e" + args[1]));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.get("worldevent.unknown", "name", args[1])));
             return true;
         }
 
@@ -46,12 +47,12 @@ public class CommandWorldEvent {
             try {
                 int userIntensity = Integer.parseInt(args[2]);
                 if (userIntensity < 1 || userIntensity > 3) {
-                    sender.sendMessage(ChatUtils.chatMessage("&cIntensity must be &e1&c, &e2&c, or &e3&c."));
+                    sender.sendMessage(ChatUtils.chatMessage(Lang.get("worldevent.invalid_intensity")));
                     return true;
                 }
                 intensity = userIntensity - 1;
             } catch (NumberFormatException e) {
-                sender.sendMessage(ChatUtils.chatMessage("&cIntensity must be &e1&c, &e2&c, or &e3&c."));
+                sender.sendMessage(ChatUtils.chatMessage(Lang.get("worldevent.invalid_intensity")));
                 return true;
             }
         } else {

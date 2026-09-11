@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiMcstats;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.gmail.nossr50.api.ExperienceAPI;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
 import com.gmail.nossr50.util.skills.SkillTools;
@@ -39,7 +40,7 @@ public class CommandMcstats implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
         if (!(sender instanceof Player viewer)) {
-            sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
             return true;
         }
 
@@ -48,7 +49,7 @@ public class CommandMcstats implements CommandExecutor {
         } else {
             UUID targetUuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
             if (targetUuid == null) {
-                viewer.sendMessage(ChatUtils.chatMessage("&e" + args[0] + " &ccould not be found"));
+                viewer.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[0])));
                 return true;
             }
             boolean isSelf = viewer.getUniqueId().equals(targetUuid);

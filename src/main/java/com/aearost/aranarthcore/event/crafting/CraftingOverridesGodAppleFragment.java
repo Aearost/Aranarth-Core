@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.crafting;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.block.CrafterCraftEvent;
@@ -38,14 +39,14 @@ public class CraftingOverridesGodAppleFragment {
             if (result.getType() == Material.ENCHANTED_GOLDEN_APPLE) {
                 // A normal gold nugget is used as an ingredient instead of a god apple fragment
                 if (meta == null || !meta.getPersistentDataContainer().has(GOD_APPLE_FRAGMENT)) {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou must use a God Apple Fragment to craft this!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.must_use_item", "item", "God Apple Fragment")));
                     e.setCancelled(true);
                 }
             }
             // A god apple fragment is used as an ingredient incorrectly
             else {
                 if (meta.getPersistentDataContainer().has(GOD_APPLE_FRAGMENT)) {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a God Apple Fragment to craft this!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.special_item_restricted", "item", "God Apple Fragment")));
                     e.setCancelled(true);
                 }
             }

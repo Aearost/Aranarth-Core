@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -38,14 +39,14 @@ public class CommandDelhome implements CommandExecutor {
 				for (Home home : aranarthPlayer.getHomes()) {
 					if (homeName.equalsIgnoreCase(ChatUtils.stripColorFormatting(home.getName()))) {
 						AranarthUtils.deletePlayerHome(player, homeName);
-						player.sendMessage(ChatUtils.chatMessage("&7You have deleted the home &e" + home.getName()));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("home.deleted", "name", home.getName())));
 						return true;
 					}
 				}
-				player.sendMessage(ChatUtils.chatMessage("&cThis home could not be found!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("home.not_found")));
 			} else {
 				if (aranarthPlayer.getHomes().isEmpty()) {
-					player.sendMessage(ChatUtils.chatMessage("&7You do not have any homes"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("home.no_homes")));
 				} else {
 					GuiDelhome gui = new GuiDelhome(player);
 					gui.openGui();
@@ -53,7 +54,7 @@ public class CommandDelhome implements CommandExecutor {
 				}
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 		}
 		return false;
 	}

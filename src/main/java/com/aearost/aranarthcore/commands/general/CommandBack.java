@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.network.PendingTeleport;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -27,7 +28,7 @@ public class CommandBack implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.back")) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 				return true;
 			}
 
@@ -35,9 +36,9 @@ public class CommandBack implements CommandExecutor {
 			if (aranarthPlayer.getLastKnownTeleportLocation() != null) {
 				AranarthUtils.teleportPlayer(player, player.getLocation(), aranarthPlayer.getLastKnownTeleportLocation(), aranarthPlayer.isInAdminMode(), "&e&lPrevious Location", "&7You have returned to your previous location", success -> {
 					if (success) {
-						player.sendMessage(ChatUtils.chatMessage("&7You have returned to your previous location"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.returned")));
 					} else {
-						player.sendMessage(ChatUtils.chatMessage("&cYou could not return to your previous location"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.could_not_return")));
 					}
 				});
 				return true;
@@ -68,14 +69,14 @@ public class CommandBack implements CommandExecutor {
 						return true;
 					}
 				}
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have a previous location to teleport to!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.no_previous")));
 				return true;
 			} else {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have a previous location to teleport to!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.no_previous")));
 				return true;
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 			return true;
 		}
 	}

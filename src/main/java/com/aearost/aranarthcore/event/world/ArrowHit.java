@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import org.bukkit.*;
@@ -120,7 +121,7 @@ public class ArrowHit {
 							center.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, center, 1);
 							center.getWorld().playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 1f, 1f);
 						} else {
-							shooter.sendMessage(ChatUtils.chatMessage("&cYou are not in the Dominion of &e" + chunkDominion.getName()));
+							shooter.sendMessage(ChatUtils.chatMessage(Lang.get("arrow.not_in_dominion", "name", chunkDominion.getName())));
 						}
 						arrow.remove();
 					}
@@ -141,7 +142,7 @@ public class ArrowHit {
 				if (e.getHitEntity() != null) {
 					e.getHitEntity().getPersistentDataContainer().set(ARROW, PersistentDataType.STRING, "rooting");
 					if (e.getHitEntity() instanceof Player player) {
-						player.sendMessage(ChatUtils.chatMessage("&#964B00You have been rooted!"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.rooted")));
 					}
 
 					// Removes the attribute after 30 seconds

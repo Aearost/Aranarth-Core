@@ -138,7 +138,7 @@ public class JobUtils {
                 10, 60, 20
         );
 
-        String broadcastMsg = ChatUtils.chatMessage("&7" + nickname + " &7has reached &e&lLevel " + newLevel + " &7in &e" + jobName + "&7!");
+        String broadcastMsg = ChatUtils.chatMessage(Lang.get("jobs.level_up_broadcast", "player", nickname, "level", newLevel, "job", jobName));
 
         Bukkit.broadcastMessage(broadcastMsg);
     }

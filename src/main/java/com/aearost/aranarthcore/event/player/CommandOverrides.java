@@ -7,8 +7,9 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Mount;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import com.aearost.aranarthcore.utils.PermissionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.MountUtils;
+import com.aearost.aranarthcore.utils.PermissionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -54,14 +55,14 @@ public class CommandOverrides {
                 sb.append(plugins[i].isEnabled() ? "&7" : "&c");
                 sb.append(plugins[i].getName());
             }
-            player.sendMessage(ChatUtils.chatMessage("&e&lPlugins (" + plugins.length + ") &7&l- " + sb));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("plugins.list", "count", plugins.length, "list", sb)));
             e.setCancelled(true);
             return;
         }
 
         if (aranarthPlayer.getCouncilRank() != 3) {
             if (parts[0].equals("/w")) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
                 e.setCancelled(true);
                 return;
             }
@@ -70,9 +71,9 @@ public class CommandOverrides {
         // Prevent the command entirely
         if (parts[0].equals("/time") && AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
             if (aranarthPlayer.getCouncilRank() < 2) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
             } else {
-                player.sendMessage(ChatUtils.chatMessage("&cUse &e/ac time <time> &cinstead!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("commands.use_ac_time")));
             }
             e.setCancelled(true);
             return;
@@ -80,7 +81,7 @@ public class CommandOverrides {
 
         // Prevent the command entirely
         if (parts[0].equals("/me")) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
             e.setCancelled(true);
             return;
         }

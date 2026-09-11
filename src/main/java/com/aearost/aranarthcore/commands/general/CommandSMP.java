@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -28,28 +29,28 @@ public class CommandSMP implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (!AranarthUtils.isOriginalPlayer(player.getUniqueId())) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have access to this world!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("access.smp_restricted")));
 				return true;
 			}
 
 			// If already on the SMP server, teleport to SMP spawn
 			if (AranarthCore.isSmpServer()) {
 				if (AranarthUtils.getTeleportTask(player.getUniqueId()) != null) {
-					player.sendMessage(ChatUtils.chatMessage("&cYou are already teleporting somewhere!"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("general.already_teleporting")));
 					return true;
 				}
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				Location smpSpawn = new Location(Bukkit.getWorld(AranarthCore.getSmpMainWorldName()), 0.5, 120, 3, 180, 0);
 				AranarthUtils.teleportPlayer(player, player.getLocation(), smpSpawn, aranarthPlayer.isInAdminMode(), "&e&lSMP", "&7You have teleported to SMP Spawn", success -> {
 					if (!success) {
-						player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to SMP Spawn!"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.could_not_smp")));
 					}
 				});
 				return true;
 			}
 
 			if (AranarthUtils.getTeleportTask(player.getUniqueId()) != null) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou are already teleporting somewhere!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.already_teleporting")));
 				return true;
 			}
 
@@ -74,15 +75,15 @@ public class CommandSMP implements CommandExecutor {
 				Location smpSpawn = new Location(Bukkit.getWorld(AranarthCore.getSmpMainWorldName()), 0.5, 120, 3, 180, 0);
 				AranarthUtils.teleportPlayer(player, player.getLocation(), smpSpawn, aranarthPlayer.isInAdminMode(), "&e&lSMP", "&7You have teleported to the SMP", success -> {
 					if (success) {
-						player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to the &eSMP"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.to_smp")));
 					} else {
-						player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to the &eSMP"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.could_not_smp")));
 					}
 				});
 			}
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to use this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 			return true;
 		}
 	}

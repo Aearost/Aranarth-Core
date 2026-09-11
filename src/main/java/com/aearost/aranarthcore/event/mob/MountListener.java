@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.objects.Mount;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.MountUtils;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.*;
@@ -440,7 +441,7 @@ public class MountListener implements Listener {
                     && clickedEntity.getPersistentDataContainer()
                             .has(CustomKeys.MOUNT_ELEMENT, PersistentDataType.STRING)) {
                 event.setCancelled(true);
-                player.sendMessage(ChatUtils.chatMessage("&cYou cannot put a lead on a Flying Bison!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.cannot_lead_bison")));
                 return;
             }
             return;
@@ -466,7 +467,7 @@ public class MountListener implements Listener {
 
         if (!isOwner) {
             if (!"AIR".equals(mountElement)) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou cannot ride someone else's mount!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.cannot_ride_bison_no_owner")));
                 return;
             }
             // Flying Bison: non-owners may join when the owner is already riding
@@ -475,7 +476,7 @@ public class MountListener implements Listener {
                     && passengers.get(0) instanceof Player firstRider
                     && firstRider.getUniqueId().equals(ownerUUID);
             if (!ownerIsRiding) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou can only ride the Flying Bison when the owner is already riding it!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.cannot_ride_bison_not_riding")));
                 return;
             }
             if (!passengers.contains(player)) {
@@ -508,7 +509,7 @@ public class MountListener implements Listener {
                         mountData.setHarnessColor(colorName);
                     }
                     mainHand.setAmount(mainHand.getAmount() - 1);
-                    player.sendMessage(ChatUtils.chatMessage("&7Your Flying Bison's harness color has been updated!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.harness_updated")));
                 }
                 return;
             }
@@ -1042,7 +1043,7 @@ public class MountListener implements Listener {
         double actualHeal = Math.min(baseHeal, maxHp - currentHp);
 
         if (actualHeal <= 0) {
-            player.sendMessage(ChatUtils.chatMessage("&7Your mount is already at full health!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("mount.already_full_health")));
             return;
         }
         mount.setHealth(currentHp + actualHeal);

@@ -114,7 +114,7 @@ public class CrateOpen {
                             else {
                                 ItemStack voteKey = new KeyVote().getItem();
                                 if (heldItem == null || !heldItem.isSimilar(voteKey)) {
-                                    player.sendMessage(ChatUtils.chatMessage("&cYou must be holding a &aVote Crate Key &cto do this!"));
+                                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.must_hold_vote")));
                                     player.playSound(block.getLocation(), Sound.ENTITY_ENDER_EYE_DEATH, 1, 0.7F);
                                     return;
                                 }
@@ -122,13 +122,13 @@ public class CrateOpen {
                                 if (aranarthPlayer.getCrateTypeBeingOpened() == null) {
                                     // Compressible items require up to 2 empty slots
                                     if (emptySlotNum < 2) {
-                                        player.sendMessage(ChatUtils.chatMessage("&cYou need at least 2 empty inventory slots to open this crate!"));
+                                        player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.need_2_slots")));
                                         player.playSound(block.getLocation(), Sound.ENTITY_ENDER_EYE_DEATH, 1, 0.7F);
                                         return;
                                     }
                                     determineVoteCrateReward(player, block);
                                 } else {
-                                    player.sendMessage(ChatUtils.chatMessage("&cYou are already opening the " + getCrateTypeBeingOpenedName(aranarthPlayer)));
+                                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.already_opening", "type", getCrateTypeBeingOpenedName(aranarthPlayer))));
                                     return;
                                 }
                             }
@@ -179,7 +179,7 @@ public class CrateOpen {
                             else {
                                 ItemStack rareKey = new KeyRare().getItem();
                                 if (heldItem == null || !heldItem.isSimilar(rareKey)) {
-                                    player.sendMessage(ChatUtils.chatMessage("&cYou must be holding a &6Rare Crate Key &cto do this!"));
+                                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.must_hold_rare")));
                                     player.playSound(block.getLocation(), Sound.ENTITY_ENDER_EYE_DEATH, 1, 0.7F);
                                     return;
                                 }
@@ -187,13 +187,13 @@ public class CrateOpen {
                                 if (aranarthPlayer.getCrateTypeBeingOpened() == null) {
                                     // Compressible items require up to 2 empty slots
                                     if (emptySlotNum < 2) {
-                                        player.sendMessage(ChatUtils.chatMessage("&cYou need at least 2 empty inventory slots to open this crate!"));
+                                        player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.need_2_slots")));
                                         player.playSound(block.getLocation(), Sound.ENTITY_ENDER_EYE_DEATH, 1, 0.7F);
                                         return;
                                     }
                                     determineRareCrateReward(player, block);
                                 } else {
-                                    player.sendMessage(ChatUtils.chatMessage("&cYou are already opening the " + getCrateTypeBeingOpenedName(aranarthPlayer)));
+                                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.already_opening", "type", getCrateTypeBeingOpenedName(aranarthPlayer))));
                                     return;
                                 }
                             }
@@ -271,7 +271,7 @@ public class CrateOpen {
                             else {
                                 ItemStack epicKey = new KeyEpic().getItem();
                                 if (heldItem == null || !heldItem.isSimilar(epicKey)) {
-                                    player.sendMessage(ChatUtils.chatMessage("&cYou must be holding a &3Epic Crate Key &cto do this!"));
+                                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.must_hold_epic")));
                                     player.playSound(block.getLocation(), Sound.ENTITY_ENDER_EYE_DEATH, 1, 0.7F);
                                     return;
                                 }
@@ -279,13 +279,13 @@ public class CrateOpen {
                                 if (aranarthPlayer.getCrateTypeBeingOpened() == null) {
                                     // Clusters require up to 4 empty slots
                                     if (emptySlotNum < 4) {
-                                        player.sendMessage(ChatUtils.chatMessage("&cYou need at least 4 empty inventory slots to open this crate!"));
+                                        player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.need_4_slots")));
                                         player.playSound(block.getLocation(), Sound.ENTITY_ENDER_EYE_DEATH, 1, 0.7F);
                                         return;
                                     }
                                     determineEpicCrateReward(player, block);
                                 } else {
-                                    player.sendMessage(ChatUtils.chatMessage("&cYou are already opening the " + getCrateTypeBeingOpenedName(aranarthPlayer)));
+                                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.already_opening", "type", getCrateTypeBeingOpenedName(aranarthPlayer))));
                                     return;
                                 }
                             }
@@ -354,7 +354,7 @@ public class CrateOpen {
                             else {
                                 ItemStack godlyKey = new KeyGodly().getItem();
                                 if (heldItem == null || !heldItem.isSimilar(godlyKey)) {
-                                    player.sendMessage(ChatUtils.chatMessage("&cYou must be holding a &5Godly Crate Key &cto do this!"));
+                                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.must_hold_godly")));
                                     player.playSound(block.getLocation(), Sound.ENTITY_ENDER_EYE_DEATH, 1, 0.7F);
                                     return;
                                 }
@@ -362,13 +362,13 @@ public class CrateOpen {
                                 if (aranarthPlayer.getCrateTypeBeingOpened() == null) {
                                     // Compressible items require up to 2 empty slots
                                     if (emptySlotNum < 2) {
-                                        player.sendMessage(ChatUtils.chatMessage("&cYou need at least 2 empty inventory slots to open this crate!"));
+                                        player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.need_2_slots")));
                                         player.playSound(block.getLocation(), Sound.ENTITY_ENDER_EYE_DEATH, 1, 0.7F);
                                         return;
                                     }
                                     determineGodlyCrateReward(player, block);
                                 } else {
-                                    player.sendMessage(ChatUtils.chatMessage("&cYou are already opening the " + getCrateTypeBeingOpenedName(aranarthPlayer)));
+                                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.already_opening", "type", getCrateTypeBeingOpenedName(aranarthPlayer))));
                                     return;
                                 }
                             }
@@ -461,7 +461,7 @@ public class CrateOpen {
      */
     private void determineVoteCrateReward(Player player, Block crateBlock) {
         if (AranarthUtils.getCratesInUse().contains(CrateType.VOTE)) {
-            player.sendMessage(ChatUtils.chatMessage("&cThe &aVote Crate &cis currently in use"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.vote_in_use")));
         } else {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
             aranarthPlayer.setCrateTypeBeingOpened(CrateType.VOTE);
@@ -528,7 +528,7 @@ public class CrateOpen {
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                     PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
                     broadcastRewardToNearbyPlayers(player, aranarthPlayer, "&6$500 of In-Game Currency", "&aVote Crate");
-                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$500 of In-Game Currency"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.earned_currency", "amount", "500")));
                     Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled $500 of In-Game Currency in a Vote Crate"));
                     return;
                 } else if (chance <= 24) {
@@ -561,7 +561,7 @@ public class CrateOpen {
                     AranarthUtils.addVote(new AranarthVote(player.getUniqueId(), 10, System.currentTimeMillis()));
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                     broadcastRewardToNearbyPlayers(player, aranarthPlayer, "&aVote Points +10", "&aVote Crate");
-                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &aVote Points +10"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.earned_vote_points", "amount", "10")));
                     Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled Vote Points +10 in a Vote Crate"));
                     return;
                 } else if (chance <= 90) {
@@ -593,13 +593,13 @@ public class CrateOpen {
                 player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                 HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(reward);
                 if (!remainder.isEmpty()) {
-                    player.sendMessage(ChatUtils.chatMessage("&7The reward was dropped as you didn't have enough space!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.reward_dropped")));
                     for (ItemStack remain : remainder.values()) {
                         player.getLocation().getWorld().dropItemNaturally(player.getLocation(), remain);
                     }
                 }
                 broadcastRewardToNearbyPlayers(player, aranarthPlayer, name, "&aVote Crate");
-                player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.earned_item", "name", name)));
                 Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled " + name + " in a Vote Crate"));
             });
             playCrateOpenSound(player, CrateType.VOTE, () -> {});
@@ -616,7 +616,7 @@ public class CrateOpen {
      */
     private void determineRareCrateReward(Player player, Block crateBlock) {
         if (AranarthUtils.getCratesInUse().contains(CrateType.RARE)) {
-            player.sendMessage(ChatUtils.chatMessage("&cThe &6Rare Crate &cis currently in use"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.rare_in_use")));
         } else {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
             aranarthPlayer.setCrateTypeBeingOpened(CrateType.RARE);
@@ -685,7 +685,7 @@ public class CrateOpen {
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                     PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
                     broadcastRewardToNearbyPlayers(player, aranarthPlayer, "&6$10,000 of In-Game Currency", "&6Rare Crate");
-                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$10,000 of In-Game Currency"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.earned_currency", "amount", "10,000")));
                     Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled $10,000 of In-Game Currency in a Rare Crate"));
                     return;
                 } else if (chance <= 24) {
@@ -744,13 +744,13 @@ public class CrateOpen {
                 player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                 HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(reward);
                 if (!remainder.isEmpty()) {
-                    player.sendMessage(ChatUtils.chatMessage("&7The reward was dropped as you didn't have enough space!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.reward_dropped")));
                     for (ItemStack remain : remainder.values()) {
                         player.getLocation().getWorld().dropItemNaturally(player.getLocation(), remain);
                     }
                 }
                 broadcastRewardToNearbyPlayers(player, aranarthPlayer, name, "&6Rare Crate");
-                player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.earned_item", "name", name)));
                 Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled " + name + " in a Rare Crate"));
             });
             playCrateOpenSound(player, CrateType.RARE, () -> {});
@@ -767,12 +767,12 @@ public class CrateOpen {
      */
     private void determineEpicCrateReward(Player player, Block crateBlock) {
         if (AranarthUtils.getCratesInUse().contains(CrateType.EPIC)) {
-            player.sendMessage(ChatUtils.chatMessage("&cThe &3Epic Crate &cis currently in use"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.epic_in_use")));
         } else {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
             aranarthPlayer.setCrateTypeBeingOpened(CrateType.EPIC);
             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-            Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is opening an &3&lEpic Crate"));
+            Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("crate.epic_broadcast", "player", aranarthPlayer.getNickname())));
 
             player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
 
@@ -856,7 +856,7 @@ public class CrateOpen {
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                     PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
                     broadcastRewardToNearbyPlayers(player, aranarthPlayer, "&6$25,000 of In-Game Currency", "&3Epic Crate");
-                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$25,000 of In-Game Currency"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.earned_currency", "amount", "25,000")));
                     Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled $25,000 of In-Game Currency in an Epic Crate"));
                     return;
                 } else if (chance <= 24) {
@@ -937,7 +937,7 @@ public class CrateOpen {
                         if (cluster != null) {
                             HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(cluster);
                             if (!remainder.isEmpty()) {
-                                player.sendMessage(ChatUtils.chatMessage("&7The reward was dropped as you didn't have enough space!"));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.reward_dropped")));
                                 for (ItemStack remain : remainder.values()) {
                                     player.getLocation().getWorld().dropItemNaturally(player.getLocation(), remain);
                                 }
@@ -949,7 +949,7 @@ public class CrateOpen {
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                     player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                     broadcastRewardToNearbyPlayers(player, aranarthPlayer, name, "&3Epic Crate");
-                    player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.earned_item", "name", name)));
                     Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled " + name + " in an Epic Crate"));
                     return;
                 } else if (chance <= 80) {
@@ -972,7 +972,7 @@ public class CrateOpen {
                     AranarthUtils.removeCrateFromUse(CrateType.EPIC);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                     broadcastRewardToNearbyPlayers(player, aranarthPlayer, "&eAll Skills +10 Levels", "&3Epic Crate");
-                    player.sendMessage(ChatUtils.chatMessage("&7Your mcMMO Skills have each increased by &e10 Levels"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.mcmmo_levels", "levels", "10")));
                     Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled All Skills +10 Levels in an Epic Crate"));
                     return;
                 } else if (chance <= 85) {
@@ -1002,13 +1002,13 @@ public class CrateOpen {
                 player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                 HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(reward);
                 if (!remainder.isEmpty()) {
-                    player.sendMessage(ChatUtils.chatMessage("&7The reward was dropped as you didn't have enough space!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.reward_dropped")));
                     for (ItemStack remain : remainder.values()) {
                         player.getLocation().getWorld().dropItemNaturally(player.getLocation(), remain);
                     }
                 }
                 broadcastRewardToNearbyPlayers(player, aranarthPlayer, name, "&3Epic Crate");
-                player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.earned_item", "name", name)));
                 Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled " + name + " in an Epic Crate"));
             });
             playCrateOpenSound(player, CrateType.EPIC, () -> {});
@@ -1025,12 +1025,12 @@ public class CrateOpen {
      */
     private void determineGodlyCrateReward(Player player, Block crateBlock) {
         if (AranarthUtils.getCratesInUse().contains(CrateType.GODLY)) {
-            player.sendMessage(ChatUtils.chatMessage("&cThe &5Godly Crate &cis currently in use"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.godly_in_use")));
         } else {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
             aranarthPlayer.setCrateTypeBeingOpened(CrateType.GODLY);
             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-            Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is opening a &5&lGodly Crate"));
+            Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("crate.godly_broadcast", "player", aranarthPlayer.getNickname())));
 
             player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
 
@@ -1112,7 +1112,7 @@ public class CrateOpen {
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                     PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
                     broadcastRewardToNearbyPlayers(player, aranarthPlayer, "&6$75,000 of In-Game Currency", "&5Godly Crate");
-                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$75,000 of In-Game Currency"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.earned_currency", "amount", "75,000")));
                     Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled $75,000 of In-Game Currency in a Godly Crate"));
                     return;
                 } else if (chance <= 24) {
@@ -1151,7 +1151,7 @@ public class CrateOpen {
                     AranarthUtils.removeCrateFromUse(CrateType.GODLY);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                     broadcastRewardToNearbyPlayers(player, aranarthPlayer, "&eAll Skills +30 Levels", "&5Godly Crate");
-                    player.sendMessage(ChatUtils.chatMessage("&7Your mcMMO Skills have each increased by &e30 Levels"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.mcmmo_levels", "levels", "30")));
                     Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled All Skills +30 Levels in a Godly Crate"));
                     return;
                 } else if (chance <= 60) {
@@ -1211,13 +1211,13 @@ public class CrateOpen {
                 player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                 HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(reward);
                 if (!remainder.isEmpty()) {
-                    player.sendMessage(ChatUtils.chatMessage("&7The reward was dropped as you didn't have enough space!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.reward_dropped")));
                     for (ItemStack remain : remainder.values()) {
                         player.getLocation().getWorld().dropItemNaturally(player.getLocation(), remain);
                     }
                 }
                 broadcastRewardToNearbyPlayers(player, aranarthPlayer, name, "&5Godly Crate");
-                player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.earned_item", "name", name)));
                 Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled " + name + " in a Godly Crate"));
             });
             playCrateOpenSound(player, CrateType.GODLY, () -> {});
@@ -1235,7 +1235,7 @@ public class CrateOpen {
     private void broadcastRewardToNearbyPlayers(Player player, AranarthPlayer aranarthPlayer, String reward, String crateName) {
         for (Player nearby : Bukkit.getOnlinePlayers()) {
             if (!nearby.equals(player) && nearby.getWorld().equals(player.getWorld()) && nearby.getLocation().distance(player.getLocation()) <= 10) {
-                nearby.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has rolled " + reward + " &7in a " + crateName));
+                nearby.sendMessage(ChatUtils.chatMessage(Lang.get("crate.rolled", "player", aranarthPlayer.getNickname(), "reward", reward, "crate", crateName)));
             }
         }
     }

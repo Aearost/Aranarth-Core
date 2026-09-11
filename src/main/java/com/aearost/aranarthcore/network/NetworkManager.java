@@ -1296,8 +1296,7 @@ public class NetworkManager {
                 if (!transferAllowed) {
                     // The pending-TP write failed: transferring now would leave the player on the
                     // destination with no inventory state. Abort and notify the player instead.
-                    player.sendMessage(ChatUtils.chatMessage(
-                            "&cTransfer failed due to a database error. Please try again."));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.failed")));
                     return;
                 }
                 try {
@@ -1343,8 +1342,7 @@ public class NetworkManager {
                     return;
                 }
                 if (!transferAllowed) {
-                    player.sendMessage(ChatUtils.chatMessage(
-                            "&cTransfer failed due to a database error. Please try again."));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.failed")));
                     return;
                 }
                 try {
@@ -1641,9 +1639,9 @@ public class NetworkManager {
         // is populated.
 
         if (isTpHere) {
-            target.sendMessage(ChatUtils.chatMessage("&e" + fromNickname + " &7has requested you teleport to them"));
+            target.sendMessage(ChatUtils.chatMessage(Lang.get("tp.tphere_request", "player", fromNickname)));
         } else {
-            target.sendMessage(ChatUtils.chatMessage("&e" + fromNickname + " &7has requested to teleport to you"));
+            target.sendMessage(ChatUtils.chatMessage(Lang.get("tp.request_received", "player", fromNickname)));
         }
         target.sendMessage(ChatUtils.buildTpAcceptDenyPrompt());
         AranarthUtils.playTeleportSound(target);
@@ -1675,12 +1673,12 @@ public class NetworkManager {
             transfer.addProperty("targetServer", thisServer);
             publish(CH_TRANSFER, transfer);
             if (requester != null) {
-                requester.sendMessage(ChatUtils.chatMessage("&e" + accepterNick + " &7has accepted your teleport request"));
+                requester.sendMessage(ChatUtils.chatMessage(Lang.get("tp.accepted", "player", accepterNick)));
             }
         } else {
             Player requester = Bukkit.getPlayer(requesterUuid);
             if (requester != null) {
-                requester.sendMessage(ChatUtils.chatMessage("&e" + accepterNick + " &7has accepted your teleport request"));
+                requester.sendMessage(ChatUtils.chatMessage(Lang.get("tp.accepted", "player", accepterNick)));
                 String targetServer = AranarthCore.getInstance().getConfig()
                         .getString("network.servers." + accepterServer, accepterServer);
                 PendingTeleport ptForRequester = new PendingTeleport(accepterUuid.toString(),
@@ -1697,7 +1695,7 @@ public class NetworkManager {
 
         Player requester = Bukkit.getPlayer(requesterUuid);
         if (requester != null) {
-            requester.sendMessage(ChatUtils.chatMessage("&e" + denierNick + " &7has denied your teleport request"));
+            requester.sendMessage(ChatUtils.chatMessage(Lang.get("tp.denied_by", "player", denierNick)));
         }
         clearCrossServerTpContext(requesterUuid);
     }
@@ -1803,7 +1801,7 @@ public class NetworkManager {
                     if (ap.isWeatherMessageDisabled()) {
                         continue;
                     }
-                    p.sendMessage(ChatUtils.chatMessage("&7&oThe storm has subsided..."));
+                    p.sendMessage(ChatUtils.chatMessage(Lang.get("weather.clear")));
                     if (!isNewDay) {
                         int wVol = ap.getWeatherSoundVolume();
                         if (wVol > 0) {
@@ -1829,7 +1827,7 @@ public class NetworkManager {
                 if (prevWeather == type) {
                     return;
                 }
-                String broadcastMsg = isThunder ? "&7&oA thunderstorm has started..." : "&7&oIt has started to rain...";
+                String broadcastMsg = isThunder ? Lang.get("weather.thunder") : Lang.get("weather.rain");
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     String pWorld = p.getWorld().getName();
                     if (pWorld.equals("arena") || pWorld.equals("creative")) {
@@ -1876,7 +1874,7 @@ public class NetworkManager {
                     if (ap.isWeatherMessageDisabled()) {
                         continue;
                     }
-                    p.sendMessage(ChatUtils.chatMessage("&7&oIt has started to snow..."));
+                    p.sendMessage(ChatUtils.chatMessage(Lang.get("weather.snow")));
                     if (!isNewDay) {
                         int wVol = ap.getWeatherSoundVolume();
                         if (wVol > 0) {
@@ -2112,7 +2110,7 @@ public class NetworkManager {
         }
         String fromNickname = json.get("fromNickname").getAsString();
         String formattedAmount = json.get("formattedAmount").getAsString();
-        target.sendMessage(ChatUtils.chatMessage("&7You have received &6" + formattedAmount + " &7from &e" + fromNickname));
+        target.sendMessage(ChatUtils.chatMessage(Lang.get("economy.received_payment", "amount", formattedAmount, "player", fromNickname)));
     }
 
     private void handleSleepMessage(JsonObject json) {
@@ -2224,8 +2222,8 @@ public class NetworkManager {
                 () -> PersistenceUtils.reloadPlayerMailFromDatabase(toUuid));
 
         String fromNickname = json.get("fromNickname").getAsString();
-        target.sendMessage(ChatUtils.chatMessage("&7You have received mail from &e" + fromNickname));
-        target.sendMessage(ChatUtils.chatMessage("&7View it with &e/mail read"));
+        target.sendMessage(ChatUtils.chatMessage(Lang.get("mail.received", "sender", fromNickname)));
+        target.sendMessage(ChatUtils.chatMessage(Lang.get("mail.received_view")));
         target.playSound(target, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.4f, 1f);
     }
 
@@ -2520,14 +2518,14 @@ public class NetworkManager {
                 HashMap<Integer, ItemStack> remainder = onlinePlayer.getInventory().addItem(key);
                 if (!remainder.isEmpty()) {
                     AranarthUtils.addPendingVoteKeys(uuid, 1);
-                    onlinePlayer.sendMessage(ChatUtils.chatMessage("&7Your inventory was full! &7Use &e/keyclaim &7to obtain your vote key!"));
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("crate.inventory_full_keyclaim")));
                     Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[VOTE] Remote key delivery: inventory full for " + onlinePlayer.getName() + " - stored as pending");
                 } else {
                     Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[VOTE] Remote key delivery: key given directly to " + onlinePlayer.getName() + " in " + worldName);
                 }
             } else {
                 AranarthUtils.addPendingVoteKeys(uuid, 1);
-                onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You cannot receive crate keys here! &7Use &e/keyclaim &7to obtain your vote key!"));
+                onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("crate.cannot_receive_here")));
                 Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[VOTE] Remote key delivery: " + onlinePlayer.getName() + " is in invalid world (" + worldName + ") - stored as pending");
             }
             if (DatabaseManager.isActive()) {
@@ -2567,7 +2565,7 @@ public class NetworkManager {
         AranarthUtils.addVote(new AranarthVote(receiverUuid, amount, timestamp));
         Player receiver = Bukkit.getPlayer(receiverUuid);
         if (receiver != null) {
-            receiver.sendMessage(ChatUtils.chatMessage("&7You have received &e" + amount + " &7vote points from &e" + senderNickname + "&7."));
+            receiver.sendMessage(ChatUtils.chatMessage(Lang.get("economy.received_vote_points", "amount", amount, "player", senderNickname)));
         }
     }
 
@@ -2700,7 +2698,7 @@ public class NetworkManager {
             Player viewer = Bukkit.getPlayer(viewerUuid);
             if (viewer != null) {
                 viewer.sendMessage(com.aearost.aranarthcore.utils.ChatUtils.chatMessage(
-                        "&cFailed to load that player's inventory"));
+                        Lang.get("admin.invsee_load_failed")));
             }
         });
     }
@@ -2817,10 +2815,9 @@ public class NetworkManager {
             }
 
             String targetMsg = switch (type) {
-                case "ally" ->
-                        "&e" + requesterDominion.getName() + " &7has requested an &5Alliance &7with your Dominion";
-                case "truce" -> "&e" + requesterDominion.getName() + " &7has requested a &dTruce &7with your Dominion";
-                default -> "&e" + requesterDominion.getName() + " &7has requested &fNeutrality &7with your Dominion";
+                case "ally" -> Lang.get("dominion.notify_ally_request", "dominion", requesterDominion.getName());
+                case "truce" -> Lang.get("dominion.notify_truce_request", "dominion", requesterDominion.getName());
+                default -> Lang.get("dominion.notify_neutral_request", "dominion", requesterDominion.getName());
             };
             String requesterMsg = switch (type) {
                 case "ally" -> "&7Your Dominion has requested an &5Alliance &7with &e" + targetDominion.getName();
@@ -2924,12 +2921,12 @@ public class NetworkManager {
                         if (domVol > 0) {
                             p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 0.9F);
                         }
-                        p.sendMessage(ChatUtils.chatMessage("&7Your Dominion has become &fNeutral &7with &e" + b.getName()));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.notify_neutral", "dominion", b.getName())));
                     } else if (b.getMembers().contains(p.getUniqueId())) {
                         if (domVol > 0) {
                             p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 0.9F);
                         }
-                        p.sendMessage(ChatUtils.chatMessage("&7Your Dominion has become &fNeutral &7with &e" + a.getName()));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.notify_neutral", "dominion", a.getName())));
                     }
                 }
             }
@@ -3065,13 +3062,13 @@ public class NetworkManager {
                         if (domVol > 0) {
                             p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_2, 2F * (domVol / 100f), 1F);
                         }
-                        p.sendMessage(ChatUtils.chatMessage("&4Your Dominion is attempting to conquer &e" + b.getName()));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.notify_conquering_own", "dominion", b.getName())));
                     } else if (b.getMembers().contains(p.getUniqueId())) {
                         if (domVol > 0) {
                             p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_4, 2F * (domVol / 100f), 1F);
                         }
-                        p.sendMessage(ChatUtils.chatMessage("&e" + a.getName() + " &4is attempting to conquer your Dominion"));
-                        p.sendMessage(ChatUtils.chatMessage("&4Your Dominion will automatically be conquered if nobody logs on for 3 days during the conquest!"));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.notify_conquering", "dominion", a.getName())));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.conquest_auto_warning")));
                     }
                 }
             }
@@ -3083,14 +3080,14 @@ public class NetworkManager {
                         if (domVol > 0) {
                             p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_1, 2F * (domVol / 100f), 1F);
                         }
-                        p.sendMessage(ChatUtils.chatMessage("&5Your Dominion has started a rebellion against &e" + b.getName()));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.notify_rebellion_own", "dominion", b.getName())));
                     } else if (b.getMembers().contains(p.getUniqueId())) {
                         if (domVol > 0) {
                             p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_1, 2F * (domVol / 100f), 1F);
                         }
-                        p.sendMessage(ChatUtils.chatMessage("&e" + a.getName() + " &5has started a rebellion against your Dominion!"));
-                        p.sendMessage(ChatUtils.chatMessage("&5Use &e/dominion retreat " + ChatUtils.stripColorFormatting(a.getName()) + " &5to release them of your conquest"));
-                        p.sendMessage(ChatUtils.chatMessage("They will be freed if your Dominion goes 3 days without logging on"));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.notify_rebellion", "dominion", a.getName())));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.notify_retreat", "dominion", a.getName())));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.freed_note")));
                     }
                 }
             }

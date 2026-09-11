@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.crafting.*;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -115,7 +116,7 @@ public class CraftingOverridesListener implements Listener {
 			if (result.isSimilar(new InvisibleItemFrame().getItem())) {
 				if (!player.hasPermission("aranarth.invisible_item_frame")) {
 					e.setCancelled(true);
-					player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to craft this!"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.no_permission")));
 					break;
 				}
 			}

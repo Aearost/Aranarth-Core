@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -23,7 +24,7 @@ public class CommandHat implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.hat")) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to run this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 				return true;
 			}
 
@@ -42,11 +43,11 @@ public class CommandHat implements CommandExecutor {
 					return true;
 				}
 			} else {
-				player.sendMessage(ChatUtils.chatMessage("&cYou must be holding something!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.not_holding_item")));
 				return true;
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cThis can only be executed in-game!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 			return true;
 		}
 	}

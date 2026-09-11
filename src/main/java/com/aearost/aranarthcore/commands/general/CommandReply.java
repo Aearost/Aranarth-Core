@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.*;
@@ -31,14 +32,14 @@ public class CommandReply implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (args.length == 0) {
-				player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/reply <message>"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "reply <message>")));
 				return false;
 			}
 
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			UUID lastMessaged = aranarthPlayer.getLastReceivedMessage();
 			if (lastMessaged == null) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have any messages to reply to!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("message.no_reply")));
 				return false;
 			} else {
 				OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(lastMessaged);
@@ -52,7 +53,7 @@ public class CommandReply implements CommandExecutor {
 								String targetNick = targetAp.getNickname().isEmpty()
 										? remoteTarget.getUsername()
 										: ChatUtils.stripColorFormatting(targetAp.getNickname());
-								player.sendMessage(ChatUtils.chatMessage("&e" + targetNick + " &cis currently not receiving messages"));
+								player.sendMessage(ChatUtils.chatMessage(Lang.get("message.toggling", "player", targetNick)));
 								return true;
 							}
 							StringBuilder msg = new StringBuilder();
@@ -86,13 +87,13 @@ public class CommandReply implements CommandExecutor {
 							return true;
 						}
 					}
-					player.sendMessage(ChatUtils.chatMessage("&cThis player is no longer online!"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("message.player_offline")));
 					return false;
 				}
 
 				AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(lastMessaged);
 				if (targetAranarthPlayer.isTogglingMessages() && aranarthPlayer.getCouncilRank() == 0) {
-					player.sendMessage(ChatUtils.chatMessage("&e" + targetAranarthPlayer.getNickname() + " &cis currently not receiving messages"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("message.toggling", "player", targetAranarthPlayer.getNickname())));
 					return true;
 				}
 
@@ -100,7 +101,7 @@ public class CommandReply implements CommandExecutor {
 				return true;
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to use this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 			return false;
 		}
 	}

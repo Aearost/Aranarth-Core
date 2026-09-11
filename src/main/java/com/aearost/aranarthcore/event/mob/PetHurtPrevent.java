@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -35,8 +36,7 @@ public class PetHurtPrevent {
                             AranarthPlayer aranarthAttacker = AranarthUtils.getPlayer(attacker.getUniqueId());
                             if (!aranarthAttacker.isHurtingOwnPets()) {
                                 e.setCancelled(true);
-                                attacker.sendMessage(ChatUtils.chatMessage("&7You cannot hurt your own &7"
-                                        + ChatUtils.getFormattedItemName(pet.getType().name()) + "!"));
+                                attacker.sendMessage(ChatUtils.chatMessage(Lang.get("pet.cannot_hurt_own", "pet", ChatUtils.getFormattedItemName(pet.getType().name()))));
                                 return;
                             }
                         }
@@ -47,8 +47,7 @@ public class PetHurtPrevent {
                                 if (pet instanceof Sittable sittable) {
                                     if (sittable.isSitting()) {
                                         e.setCancelled(true);
-                                        attacker.sendMessage(ChatUtils.chatMessage("&7You cannot hurt &e" + AranarthUtils.getNickname(owner) + "'s &7"
-                                                + ChatUtils.getFormattedItemName(pet.getType().name()) + "!"));
+                                        attacker.sendMessage(ChatUtils.chatMessage(Lang.get("pet.cannot_hurt_others", "owner", AranarthUtils.getNickname(owner), "pet", ChatUtils.getFormattedItemName(pet.getType().name()))));
                                         return;
                                     }
                                 }

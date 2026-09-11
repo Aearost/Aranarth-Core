@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -27,22 +28,22 @@ public class CommandItemName implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
         if (sender instanceof Player player) {
             if (!player.hasPermission("aranarth.itemname")) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
                 return true;
             }
 
             if (args.length == 0) {
-                sender.sendMessage(ChatUtils.chatMessage("&cYou must enter an item name!"));
+                sender.sendMessage(ChatUtils.chatMessage(Lang.get("item.must_enter_name")));
                 return true;
             } else {
                 ItemStack item = player.getInventory().getItemInMainHand();
                 if (item.getType() == Material.AIR) {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou must be holding an item to use this command!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("general.not_holding_item")));
                 } else {
                     ItemMeta meta = item.getItemMeta();
                     if (args.length >= 1 && args[0].equalsIgnoreCase("remove")) {
                         meta.setDisplayName(null);
-                        player.sendMessage(ChatUtils.chatMessage("&7You have removed the name from this item"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("item.renamed_removed")));
                         item.setItemMeta(meta);
                         player.getInventory().setItemInMainHand(item);
                         return true;
@@ -50,7 +51,7 @@ public class CommandItemName implements CommandExecutor {
                         int stringStart = 0;
                         if (args[0].startsWith("gradient")) {
                             if (!player.hasPermission("aranarth.itemname.gradient")) {
-                                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
                                 return true;
                             }
 
@@ -72,7 +73,7 @@ public class CommandItemName implements CommandExecutor {
                         String itemName = itemNameSB.toString();
                         if (args[0].startsWith("gradient")) {
                             if (args.length < 3) {
-                                player.sendMessage(ChatUtils.chatMessage("&cYou must specify the colors and the text!"));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.must_specify_colors_text")));
                                 return true;
                             }
 
@@ -83,7 +84,7 @@ public class CommandItemName implements CommandExecutor {
                             }
 
                             if (Objects.isNull(itemName)) {
-                                player.sendMessage(ChatUtils.chatMessage("&cYour item could not be renamed as a gradient"));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.get("item.gradient_failed")));
                                 return false;
                             }
                             else {
@@ -95,13 +96,13 @@ public class CommandItemName implements CommandExecutor {
                         }
                         item.setItemMeta(meta);
                         player.getInventory().setItemInMainHand(item);
-                        player.sendMessage(ChatUtils.chatMessage("&7You have named this item " + itemName));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("item.named", "name", itemName)));
                         return true;
                     }
                 }
             }
         } else {
-            sender.sendMessage(ChatUtils.chatMessage("&cThis must be executed in-game!"));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
             return true;
         }
         return false;

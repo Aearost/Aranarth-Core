@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.command.Command;
@@ -25,7 +26,7 @@ public class CommandVote implements CommandExecutor {
 		if (sender instanceof Player player) {
 			displayVoteLinks(player);
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 		}
 		return true;
 	}

@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands.council;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -20,21 +21,21 @@ public class CommandAdmin {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
 			if (aranarthPlayer.getCouncilRank() != 3) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 				return true;
 			}
 
 			if (aranarthPlayer.isInAdminMode()) {
-				player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7admin mode"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("admin.mode_exit")));
 				aranarthPlayer.setInAdminMode(false);
 			} else {
-				player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7admin mode"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("admin.mode_enter")));
 				aranarthPlayer.setInAdminMode(true);
 			}
 			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cThis command must be executed in-game!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 			return true;
 		}
 	}

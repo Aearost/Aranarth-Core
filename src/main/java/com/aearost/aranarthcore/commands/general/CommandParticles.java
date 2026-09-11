@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands.general;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -24,7 +25,7 @@ public class CommandParticles implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (args.length == 0) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou must enter a percentage of particles to see!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("particles.must_enter_percent")));
 				return true;
 			} else {
 				int percentage = 100;
@@ -34,18 +35,18 @@ public class CommandParticles implements CommandExecutor {
 						throw new NumberFormatException();
 					}
 				} catch (NumberFormatException e) {
-					player.sendMessage(ChatUtils.chatMessage("&cYou must enter a number between 0 and 200!"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("particles.invalid_range")));
 					return true;
 				}
 
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				aranarthPlayer.setParticleNum(percentage);
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-				player.sendMessage(ChatUtils.chatMessage("&7You will now see &e" + percentage + "% &7of particles"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("particles.set", "percent", String.valueOf(percentage))));
 				return true;
 			}
         } else {
-			sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 			return true;
         }
     }

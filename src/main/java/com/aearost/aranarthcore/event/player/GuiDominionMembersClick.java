@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.objects.DominionRank;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -41,7 +42,7 @@ public class GuiDominionMembersClick {
 
         // Only the leader can change ranks
         if (!dominion.getLeader().equals(player.getUniqueId())) {
-            player.sendMessage(ChatUtils.chatMessage("&cOnly the leader can change member ranks!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.leader_only_ranks")));
             return;
         }
 
@@ -70,7 +71,7 @@ public class GuiDominionMembersClick {
 
         // Cannot change the leader's rank through this GUI
         if (targetUuid.equals(dominion.getLeader())) {
-            player.sendMessage(ChatUtils.chatMessage("&cUse /dominion setleader to transfer leadership!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.use_setleader")));
             return;
         }
 
@@ -90,13 +91,13 @@ public class GuiDominionMembersClick {
         String rankName = DominionUtils.getFormattedRankName(nextRank);
 
         String nickname = AranarthUtils.getNickname(Bukkit.getOfflinePlayer(targetUuid));
-        player.sendMessage(ChatUtils.chatMessage("&e" + nickname + "&7's rank has been set to " + rankName));
+        player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.rank_set", "player", nickname, "rank", rankName)));
         player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5F, 1F);
 
         // Notify the member if they're online
         Player targetPlayer = Bukkit.getPlayer(targetUuid);
         if (targetPlayer != null && targetPlayer.isOnline()) {
-            targetPlayer.sendMessage(ChatUtils.chatMessage("&7Your rank in &e" + dominion.getName() + "&7 has been changed to " + rankName));
+            targetPlayer.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.your_rank_changed", "name", dominion.getName(), "rank", rankName)));
         }
 
         // Refresh the GUI

@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.network.PendingTeleport;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -29,7 +30,7 @@ public class CommandSpawn implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (AranarthUtils.getTeleportTask(player.getUniqueId()) != null) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou are already teleporting somewhere!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.already_teleporting")));
 				return true;
 			}
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
@@ -52,14 +53,14 @@ public class CommandSpawn implements CommandExecutor {
 			Location spawn = new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0);
 			AranarthUtils.teleportPlayer(player, player.getLocation(), spawn, aranarthPlayer.isInAdminMode(), "&e&lSpawn", "&7You have teleported to Spawn", success -> {
 				if (success) {
-					player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eSpawn"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.to_spawn")));
 				} else {
-					player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to &eSpawn"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.could_not_spawn")));
 				}
 			});
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to use this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 			return true;
 		}
 	}

@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.gui.GuiCompressor;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -36,10 +37,10 @@ public class GuiCompressorClick {
 				player.playSound(player, Sound.UI_BUTTON_CLICK, 1F, 0.8F);
 				if (aranarthPlayer.isCompressingItems()) {
 					aranarthPlayer.setCompressingItems(false);
-					player.sendMessage(ChatUtils.chatMessage("&7You are no longer compressing items"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("compress.no_longer")));
 				} else {
 					aranarthPlayer.setCompressingItems(true);
-					player.sendMessage(ChatUtils.chatMessage("&7You are now compressing items"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("compress.now_compressing")));
 				}
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 			}

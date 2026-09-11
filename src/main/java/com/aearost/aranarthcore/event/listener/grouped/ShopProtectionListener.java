@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.ShopIslandUtils;
 import io.papermc.paper.event.player.PlayerOpenSignEvent;
 import org.bukkit.Bukkit;
@@ -86,7 +87,7 @@ public class ShopProtectionListener implements Listener {
         }
         if (!canModify(e.getPlayer(), e.getBlock().getLocation())) {
             e.setCancelled(true);
-            e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot place blocks on another player's shop island!"));
+            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("shop.cannot_place_island")));
         } else {
             // Owner may only build within the 50x50 boundary
             UUID owner = ShopIslandUtils.getIslandOwnerAtLocation(e.getBlock().getLocation());
@@ -94,7 +95,7 @@ public class ShopProtectionListener implements Listener {
                 int[] center = AranarthUtils.getShopIslandCenters().get(owner);
                 if (center != null && !ShopIslandUtils.isWithinBuildBoundary(e.getBlock().getLocation(), center[0], center[1])) {
                     e.setCancelled(true);
-                    e.getPlayer().sendMessage(ChatUtils.chatMessage("&cThis block is outside of your shop island's space!"));
+                    e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("shop.cannot_place_island")));
                 }
             }
         }
@@ -107,7 +108,7 @@ public class ShopProtectionListener implements Listener {
         }
         if (!canModify(e.getPlayer(), e.getBlock().getLocation())) {
             e.setCancelled(true);
-            e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot break blocks on another player's shop island!"));
+            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("shop.cannot_break_island")));
         }
     }
 
@@ -159,7 +160,7 @@ public class ShopProtectionListener implements Listener {
         }
         if (!canModify(e.getPlayer(), e.getEntity().getLocation())) {
             e.setCancelled(true);
-            e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot place entities on another player's shop island!"));
+            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("shop.cannot_place_entities_island")));
         }
     }
 

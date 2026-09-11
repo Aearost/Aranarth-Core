@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -41,10 +42,10 @@ public class CommandAranarthium implements CommandExecutor {
 
 			book.setItemMeta(meta);
 			player.getInventory().addItem(book);
-			player.sendMessage(ChatUtils.chatMessage("&7You have received the &eAranarthium&7 book"));
+			player.sendMessage(ChatUtils.chatMessage(Lang.get("aranarthium.book_received")));
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to use this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 			return false;
 		}
 	}

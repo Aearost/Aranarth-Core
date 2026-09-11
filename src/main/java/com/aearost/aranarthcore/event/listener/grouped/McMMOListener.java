@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.gmail.nossr50.api.ExperienceAPI;
 import com.gmail.nossr50.events.experience.McMMOPlayerLevelUpEvent;
 import com.gmail.nossr50.events.skills.repair.McMMOPlayerRepairCheckEvent;
@@ -35,7 +36,7 @@ public class McMMOListener implements Listener {
 		if (repairedObject != null && repairedObject.getItemMeta() != null
 				&& repairedObject.getItemMeta().getPersistentDataContainer().has(CustomKeys.ARMOR_TYPE, PersistentDataType.STRING)) {
 			e.setCancelled(true);
-			e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot repair Aranarthium armor!"));
+			e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("aranarthium.cannot_repair")));
 		}
 	}
 
@@ -48,7 +49,7 @@ public class McMMOListener implements Listener {
 		if (salvageItem != null && salvageItem.getItemMeta() != null
 				&& salvageItem.getItemMeta().getPersistentDataContainer().has(CustomKeys.ARMOR_TYPE, PersistentDataType.STRING)) {
 			e.setCancelled(true);
-			e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot salvage Aranarthium armor!"));
+			e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("aranarthium.cannot_salvage")));
 		}
 	}
 

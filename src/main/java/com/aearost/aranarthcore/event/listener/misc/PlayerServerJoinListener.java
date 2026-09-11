@@ -253,7 +253,7 @@ public class PlayerServerJoinListener implements Listener {
         if (resetTime > 0 && player.getWorld().getName().startsWith("resource")
                 && player.getLastPlayed() < resetTime) {
             player.teleport(new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0));
-            player.sendMessage(ChatUtils.chatMessage("&7You were in the resource world when it was reset, so you have been sent to &eSpawn&7."));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.resource_reset_offline")));
         }
 
         boolean isNewPlayer = false;
@@ -330,7 +330,7 @@ public class PlayerServerJoinListener implements Listener {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                 aranarthPlayer.setNickname("");
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                player.sendMessage(ChatUtils.chatMessage("&7Your nickname has been cleared"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("player.nickname_cleared")));
             }
         }
 
@@ -816,7 +816,7 @@ public class PlayerServerJoinListener implements Listener {
                         NetworkManager.getInstance().publishChat("", "");
                     }
 
-                    player.sendMessage(ChatUtils.chatMessage("&7Be sure to read the &e/rules &7and check out &e/warp Tutorial"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("join.welcome_rules")));
 
                     // Give starter kit
                     PlayerInventory inv = player.getInventory();

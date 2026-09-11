@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiInvsee;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -55,7 +56,7 @@ public class InvseeListener implements Listener {
             e.setCancelled(true);
             if (!GuiInvsee.isRemote(e.getInventory())) {
                 viewer.closeInventory();
-                viewer.sendMessage(ChatUtils.chatMessage("&cThis player is no longer online"));
+                viewer.sendMessage(ChatUtils.chatMessage(Lang.get("invsee.offline")));
             }
             return;
         }

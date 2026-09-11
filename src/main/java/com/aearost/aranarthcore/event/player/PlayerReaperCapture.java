@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.ItemUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.ReaperManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -65,6 +66,6 @@ public class PlayerReaperCapture {
         });
 
         Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
-                player.sendMessage(ChatUtils.chatMessage("&7Purchase back your inventory using &e/reaper")), 1L);
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("reaper.purchase_back"))), 1L);
     }
 }

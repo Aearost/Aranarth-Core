@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands.general;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -27,18 +28,18 @@ public class CommandUntrust implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (args.length == 0) {
-			sender.sendMessage(ChatUtils.chatMessage("&cYou must specify a player to untrust!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "untrust <player>")));
 			return true;
 		} else {
 			if (sender instanceof Player player) {
 				UUID targetUuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
 				if (targetUuid == null) {
-					sender.sendMessage(ChatUtils.chatMessage("&cThis player does not exist!"));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[0])));
 					return true;
 				}
 
 				if (targetUuid.equals(player.getUniqueId())) {
-					player.sendMessage(ChatUtils.chatMessage("&cYou cannot untrust yourself!"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("lock.untrust_self")));
 					return true;
 				}
 
@@ -47,7 +48,7 @@ public class CommandUntrust implements CommandExecutor {
 				if (targetUuid.equals(aranarthPlayer.getUntrustedPlayerUUID())) {
 					aranarthPlayer.setUntrustedPlayerUUID(null);
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-					sender.sendMessage(ChatUtils.chatMessage("&7You are no longer in untrust mode"));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.get("lock.mode_exit_lock")));
 				} else {
 					aranarthPlayer.setTrustedPlayerUUID(null);
 					aranarthPlayer.setUntrustedPlayerUUID(targetUuid);
@@ -56,9 +57,8 @@ public class CommandUntrust implements CommandExecutor {
 					aranarthPlayer.setContainerToggleExpiry(System.currentTimeMillis() + 5000);
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					String nickname = CommandTrust.resolveDisplayName(targetUuid, args[0]);
-					sender.sendMessage(ChatUtils.chatMessage("&7You are now untrusting &e" + nickname
-							+ " &7from your containers - right-click to untrust them"));
-					sender.sendMessage(ChatUtils.chatMessage("&7Run &e/untrust &7again to exit the untrust mode"));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.get("lock.untrust_mode_enter", "player", nickname)));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.get("lock.untrust_mode_hint")));
 					scheduleToggleExpiry(player.getUniqueId());
 				}
 				return true;

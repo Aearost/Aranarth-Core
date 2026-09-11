@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.DominionRank;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -38,7 +39,7 @@ public class GuiDominionPlayerPermissionsClick {
 
         // Only the leader may use this GUI
         if (!dominion.getLeader().equals(player.getUniqueId())) {
-            player.sendMessage(ChatUtils.chatMessage("&cOnly the leader can manage permissions!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.leader_only_permissions")));
             return;
         }
 

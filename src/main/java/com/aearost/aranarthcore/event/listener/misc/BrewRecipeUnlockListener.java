@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.items.brew.BrewRecipe;
 import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.utils.BrewRecipeUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -58,13 +59,12 @@ public class BrewRecipeUnlockListener implements Listener {
         Player player = e.getPlayer();
         BrewRecipe recipe = BrewRecipe.fromId(recipeId);
         if (recipe == null) {
-            player.sendMessage(ChatUtils.chatMessage("&cThis recipe page is invalid"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.invalid_page")));
             return;
         }
 
         if (BrewRecipeUtils.isUnlocked(player.getUniqueId(), recipe)) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou have already unlocked the recipe for &f&l"
-                    + recipe.getDisplayName()));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.already_unlocked", "name", recipe.getDisplayName())));
             return;
         }
 
@@ -76,8 +76,7 @@ public class BrewRecipeUnlockListener implements Listener {
         }
 
         BrewRecipeUtils.unlock(player.getUniqueId(), recipeId);
-        player.sendMessage(ChatUtils.chatMessage("&7You've unlocked the recipe for &f&l"
-                + recipe.getDisplayName()));
-        player.sendMessage(ChatUtils.chatMessage("&7Use &e/brewbook &7to view your unlocked recipes"));
+        player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.recipe_unlocked", "recipe", recipe.getDisplayName())));
+        player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.use_brewbook")));
     }
 }

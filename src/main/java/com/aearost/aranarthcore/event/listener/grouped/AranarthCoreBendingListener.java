@@ -39,6 +39,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.ShopIslandUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
@@ -1628,7 +1629,7 @@ public class AranarthCoreBendingListener implements Listener {
     public void onCommand(PlayerCommandPreprocessEvent e) {
         if (AstralProjection.isProjecting(e.getPlayer().getUniqueId())) {
             e.setCancelled(true);
-            e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot run commands while Astral Projecting!"));
+            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("bending.no_commands_astral")));
         }
     }
 

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -16,7 +17,7 @@ public class SugarcaneBlockPlace {
 			ItemMeta meta = e.getItemInHand().getItemMeta();
 			if (meta.getPersistentDataContainer().has(SUGARCANE_BLOCK)) {
 				e.setCancelled(true);
-				e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot place a Block of Sugarcane!"));
+				e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("shop.cannot_place_sugarcane")));
 			}
 		}
 	}

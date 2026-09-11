@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.crafting;
 
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.block.CrafterCraftEvent;
@@ -32,13 +33,13 @@ public class CraftingOverridesHomepad {
     public void onCraft(CraftItemEvent e, ItemStack is, HumanEntity player) {
         if (!AranarthUtils.isSmpWorld(player.getLocation().getWorld().getName())) {
             e.setCancelled(true);
-            player.sendMessage(ChatUtils.chatMessage("&cYou cannot craft a homepad in this world!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.homepad_world")));
             return;
         } else {
             ItemMeta meta = is.getItemMeta();
             if (is.getType() == Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
                 if (meta.getPersistentDataContainer().has(HOMEPAD)) {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a Homepad to craft this!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.special_item_restricted", "item", "Homepad")));
                     e.setCancelled(true);
                 }
             }

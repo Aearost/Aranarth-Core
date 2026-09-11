@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.gui.GuiDominionResourcesPreview;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.Sound;
@@ -79,10 +80,8 @@ public class GuiDominionResourcesClick {
 		dominion.setBiomeResourcesBeingClaimed(biome);
 		DominionUtils.updateDominion(dominion);
 
-		player.sendMessage(ChatUtils.chatMessage("&7Enter the number of claims for the &e" + biomeNameUnformatted + " &7biome"));
-		player.sendMessage(ChatUtils.chatMessage("&7Your Dominion has &e"
-				+ dominion.getClaimableResources() + "/" + DominionUtils.getMaxClaimableResourcesAmount(dominion)
-				+ " &7available"));
+		player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.resources_enter_claims", "biome", biomeNameUnformatted)));
+		player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.resources_available", "chunks", dominion.getClaimableResources() + "/" + DominionUtils.getMaxClaimableResourcesAmount(dominion), "biome", biomeNameUnformatted)));
 		// Show average claim yield across all pending slots
 		List<Double> yields = dominion.getClaimFoodYields();
 		int claimable = dominion.getClaimableResources();
@@ -96,7 +95,7 @@ public class GuiDominionResourcesClick {
 		}
 		int avgYieldPct = (int) Math.round(avgYield * 100);
 		String yieldColor = avgYieldPct >= 80 ? "&a" : avgYieldPct >= 50 ? "&e" : "&c";
-		player.sendMessage(ChatUtils.chatMessage("&7Average claim yield - " + yieldColor + avgYieldPct + "%"));
+		player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.resources_avg_yield", "color", yieldColor, "yield", avgYieldPct)));
 		player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5F, 1F);
 		player.closeInventory();
 	}

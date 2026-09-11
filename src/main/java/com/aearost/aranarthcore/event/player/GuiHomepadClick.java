@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -120,10 +121,10 @@ public class GuiHomepadClick {
                     if (heldItem != Material.AIR) {
                         e.setCancelled(true);
                         if (heldItem == home.getIcon()) {
-                            player.sendMessage(ChatUtils.chatMessage("&cThis homepad already uses that icon!"));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.get("player.home_same_icon")));
                         } else {
                             AranarthUtils.updateHomepad(home.getName(), home.getLocation(), heldItem);
-                            player.sendMessage(ChatUtils.chatMessage(home.getName() + "&7's icon is now &e" + ChatUtils.getFormattedItemName(heldItem.name())));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.get("home.icon_set", "name", home.getName(), "icon", ChatUtils.getFormattedItemName(heldItem.name()))));
                         }
                     } else {
                         if (player.isInsideVehicle()) {
@@ -140,11 +141,11 @@ public class GuiHomepadClick {
 									player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, tpVol / 100f, 0.9F);
 								}
                                 Bukkit.getLogger().info("[AC] " + player.getName() + " has teleported to " + home.getName() + " via homepad");
-                                player.sendMessage(ChatUtils.chatMessage("&5&oYou have been wooshed to &d" + home.getName() + "&5!"));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.get("home.wooshed", "name", home.getName())));
                                 try {
                                     AranarthUtils.switchInventory(player, fromWorld, destination.getWorld().getName());
                                 } catch (IOException ex) {
-                                    player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
+                                    player.sendMessage(ChatUtils.chatMessage(Lang.get("general.error")));
                                 }
                                 new BukkitRunnable() {
                                     @Override
@@ -163,11 +164,11 @@ public class GuiHomepadClick {
 								player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, tpVol / 100f, 0.9F);
 							}
                             player.sendMessage(ChatUtils
-                                    .chatMessage("&5&oYou have been wooshed to &d" + home.getName() + "&5!"));
+                                    .chatMessage(Lang.get("home.wooshed", "name", home.getName())));
                             try {
                                 AranarthUtils.switchInventory(player, fromWorld, home.getLocation().getWorld().getName());
                             } catch (IOException ex) {
-                                player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.error")));
                             }
                         }
                         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);

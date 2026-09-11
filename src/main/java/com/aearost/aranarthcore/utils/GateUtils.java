@@ -240,7 +240,7 @@ public class GateUtils {
                 gates.add(gate);
                 blockToGateId.put(key(loc), gate.getId());
                 exitGatePlacementMode(playerId);
-                player.sendMessage(ChatUtils.chatMessage("&7A new gate has been created"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("gate.created")));
             }
         }
 
@@ -670,7 +670,7 @@ public class GateUtils {
 
         if (!modifyingGateSet.contains(id)) {
             modifyingGateSet.add(id);
-            player.sendMessage(ChatUtils.chatMessage("&7You are now modifying a gate"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("gate.modifying")));
         }
 
         Integer existing = modifyTimeoutTaskIds.remove(id);
@@ -685,7 +685,7 @@ public class GateUtils {
                     modifyTimeoutTaskIds.remove(id);
                     Player online = Bukkit.getPlayer(id);
                     if (online != null) {
-                        online.sendMessage(ChatUtils.chatMessage("&7The gate modification has ended"));
+                        online.sendMessage(ChatUtils.chatMessage(Lang.get("gate.modification_ended")));
                     }
                 },
                 60L

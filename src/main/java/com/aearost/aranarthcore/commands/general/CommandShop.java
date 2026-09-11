@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.PendingTeleport;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.*;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.*;
 import org.bukkit.block.Biome;
 import org.bukkit.command.Command;
@@ -55,9 +56,9 @@ public class CommandShop implements CommandExecutor {
                 online.playSound(online, Sound.ENTITY_ENDERMAN_TELEPORT, tpVol / 100f, 0.9F);
             }
             if (online.getUniqueId().equals(targetUuid)) {
-                online.sendMessage(ChatUtils.chatMessage("&cYour shop has been deleted. You have been teleported to Spawn"));
+                online.sendMessage(ChatUtils.chatMessage(Lang.get("shop.deleted_teleport_spawn")));
             } else {
-                online.sendMessage(ChatUtils.chatMessage("&cThis shop has been deleted. You have been teleported to Spawn"));
+                online.sendMessage(ChatUtils.chatMessage(Lang.get("shop.other_deleted_teleport_spawn")));
             }
         }
 
@@ -86,9 +87,9 @@ public class CommandShop implements CommandExecutor {
         // Only notify the executor if they weren't already messaged by the loop above
         if (executor != null && !executorWasOnIsland) {
             if (executor.getUniqueId().equals(targetUuid)) {
-                executor.sendMessage(ChatUtils.chatMessage("&7Your shop has been deleted"));
+                executor.sendMessage(ChatUtils.chatMessage(Lang.get("shop.self_deleted")));
             } else {
-                executor.sendMessage(ChatUtils.chatMessage("&e" + targetName + "'s &7shop has been deleted"));
+                executor.sendMessage(ChatUtils.chatMessage(Lang.get("shop.other_deleted", "player", targetName)));
             }
         }
     }
@@ -96,7 +97,7 @@ public class CommandShop implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(ChatUtils.chatMessage("&cThis command can only be executed in-game"));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
             return true;
         }
 
@@ -109,20 +110,20 @@ public class CommandShop implements CommandExecutor {
 
         if (args[0].equalsIgnoreCase("create")) {
             if (!aranarthPlayer.isInAdminMode()) {
-                player.sendMessage(ChatUtils.chatMessage("&cShop island creation is currently disabled"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.creation_disabled")));
                 return true;
             }
             if (aranarthPlayer.getRank() < 3 && !aranarthPlayer.isInAdminMode()) {
                 String suffix = aranarthPlayer.getPronouns() == Pronouns.FEMALE ? "ess" : "";
-                player.sendMessage(ChatUtils.chatMessage("&cYou must be a &5&lBaron" + suffix + " &cor higher to create a shop"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.rank_required", "suffix", suffix)));
                 return true;
             }
             if (AranarthUtils.getShopLocations().containsKey(player.getUniqueId())) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou already have a shop. Use &e/shop home"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.already_have")));
                 return true;
             }
             if (AranarthUtils.isCollaboratorOnAnyShop(player.getUniqueId())) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou are already a collaborator on another player's shop. Use &e/shop leave &cfirst"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.already_collaborator_other")));
                 return true;
             }
 
@@ -143,7 +144,7 @@ public class CommandShop implements CommandExecutor {
 
             World shopsWorld = Bukkit.getWorld(ShopIslandUtils.SHOPS_WORLD);
             if (shopsWorld == null) {
-                player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with the shops world"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.world_error")));
                 return true;
             }
 
@@ -162,10 +163,10 @@ public class CommandShop implements CommandExecutor {
             // Teleport the player immediately
             AranarthUtils.teleportPlayer(player, player.getLocation(), homeLocation, true, "&e&lYour Shop", "&7Your shop island has been created", success -> {
                 if (success) {
-                    player.sendMessage(ChatUtils.chatMessage("&7Your shop island has been created"));
-                    player.sendMessage(ChatUtils.chatMessage("&7Use &e/shop sethome &7to update the shop's home location"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.island_created")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.set_home_prompt")));
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to your shop..."));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.could_not_teleport")));
                 }
             });
             return true;
@@ -174,7 +175,7 @@ public class CommandShop implements CommandExecutor {
         if (args[0].equalsIgnoreCase("home")) {
             Location shopHome = AranarthUtils.getShopLocations().get(player.getUniqueId());
             if (shopHome == null) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have a shop. Create one with &e/shop create"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.no_shop_create")));
                 return true;
             }
             // Shops world only exists on Survival - transfer the player there if on SMP.
@@ -196,9 +197,9 @@ public class CommandShop implements CommandExecutor {
             }
             AranarthUtils.teleportPlayer(player, player.getLocation(), shopHome, aranarthPlayer.isInAdminMode(), "&e&lYour Shop", "&7You have teleported to your shop", success -> {
                 if (success) {
-                    player.sendMessage(ChatUtils.chatMessage("&7You have teleported to your shop"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.teleport_success")));
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to your shop"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.could_not_teleport")));
                 }
             });
             return true;
@@ -206,13 +207,13 @@ public class CommandShop implements CommandExecutor {
 
         if (args[0].equalsIgnoreCase("sethome")) {
             if (!AranarthUtils.getShopLocations().containsKey(player.getUniqueId())) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have a shop"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.no_shop")));
                 return true;
             }
             // Ensure they are on their own island
             UUID ownerAtLocation = ShopIslandUtils.getIslandOwnerAtLocation(player.getLocation());
             if (!player.getWorld().getName().equals(ShopIslandUtils.SHOPS_WORLD) || !player.getUniqueId().equals(ownerAtLocation)) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou must be on your shop island to update your home"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.must_be_on_island")));
                 return true;
             }
 
@@ -220,30 +221,30 @@ public class CommandShop implements CommandExecutor {
             newHome.setX(newHome.getBlockX() + 0.5);
             newHome.setZ(newHome.getBlockZ() + 0.5);
             AranarthUtils.createShopLocation(player.getUniqueId(), newHome);
-            player.sendMessage(ChatUtils.chatMessage("&7Your shop home has been updated to your current location"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.home_set")));
             return true;
         }
 
         if (args[0].equalsIgnoreCase("rename")) {
             if (!AranarthUtils.getShopLocations().containsKey(player.getUniqueId())) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have a shop"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.no_shop")));
                 return true;
             }
             if (args.length < 2) {
-                player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/shop rename <name>"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "shop rename <name>")));
                 return true;
             }
             String newName = String.join(" ", Arrays.copyOfRange(args, 1, args.length)).trim();
             if (newName.length() > 32) {
-                player.sendMessage(ChatUtils.chatMessage("&cShop names cannot be longer than 32 characters"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.name_too_long")));
                 return true;
             }
             if (ChatUtils.stripColorFormatting(newName).contains("|")) {
-                player.sendMessage(ChatUtils.chatMessage("&cShop names cannot contain the '|' character"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.name_invalid_char")));
                 return true;
             }
             AranarthUtils.setShopName(player.getUniqueId(), newName);
-            player.sendMessage(ChatUtils.chatMessage("&7Your shop name has been set to &e" + newName));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.renamed", "name", newName)));
             return true;
         }
 
@@ -254,14 +255,14 @@ public class CommandShop implements CommandExecutor {
             if (args.length >= 2) {
                 // Only admins in admin mode may delete another player's shop
                 if (!aranarthPlayer.isInAdminMode()) {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to delete another player's shop"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.cannot_destroy_no_permission")));
                     return true;
                 }
 
                 targetUuid = AranarthUtils.getUUIDFromUsername(args[1]);
                 targetName = args[1];
                 if (targetUuid == null) {
-                    player.sendMessage(ChatUtils.chatMessage("&e" + args[1] + " &ccould not be found"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
                     return true;
                 }
             } else {
@@ -271,7 +272,7 @@ public class CommandShop implements CommandExecutor {
             }
 
             if (!AranarthUtils.getShopLocations().containsKey(targetUuid)) {
-                player.sendMessage(ChatUtils.chatMessage("&e" + targetName + " &cdoes not have a shop"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.other_no_shop", "player", targetName)));
                 return true;
             }
 
@@ -281,43 +282,43 @@ public class CommandShop implements CommandExecutor {
 
         if (args[0].equalsIgnoreCase("invite")) {
             if (!AranarthUtils.getShopLocations().containsKey(player.getUniqueId())) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have a shop"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.no_shop")));
                 return true;
             }
             if (args.length < 2) {
-                player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/shop invite <username>"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "shop invite <username>")));
                 return true;
             }
             if (args[1].equalsIgnoreCase(player.getName())) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou cannot invite yourself"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.invite_self")));
                 return true;
             }
             UUID targetUuid = AranarthUtils.getUUIDFromUsername(args[1]);
             if (targetUuid == null) {
-                player.sendMessage(ChatUtils.chatMessage("&e" + args[1] + " &ccould not be found"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
                 return true;
             }
             if (AranarthUtils.isShopCollaborator(player.getUniqueId(), targetUuid)) {
-                player.sendMessage(ChatUtils.chatMessage("&e" + args[1] + " &cis already a collaborator on your shop"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.already_collaborator_this", "player", args[1])));
                 return true;
             }
             if (AranarthUtils.getShopLocations().containsKey(targetUuid)) {
-                player.sendMessage(ChatUtils.chatMessage("&e" + args[1] + " &calready has their own shop"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.invite_target_has_shop", "player", args[1])));
                 return true;
             }
             if (AranarthUtils.isCollaboratorOnAnyShop(targetUuid)) {
-                player.sendMessage(ChatUtils.chatMessage("&e" + args[1] + " &cis already a collaborator on another shop"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.invite_target_collaborator", "player", args[1])));
                 return true;
             }
 
             // Send the invite - the target must accept it
             AranarthUtils.setPendingShopInvite(targetUuid, player.getUniqueId());
             AranarthPlayer ownerAranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-            player.sendMessage(ChatUtils.chatMessage("&7A shop invitation has been sent to &e" + args[1]));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.invite_sent", "player", args[1])));
             Player target = Bukkit.getPlayer(targetUuid);
             if (target != null) {
-                target.sendMessage(ChatUtils.chatMessage("&e" + ownerAranarthPlayer.getNickname() + " &7has invited you to collaborate on their shop"));
-                target.sendMessage(ChatUtils.chatMessage("&7Use &e/shop accept &7to join or &e/shop decline &7to refuse"));
+                target.sendMessage(ChatUtils.chatMessage(Lang.get("shop.invite_received", "player", ownerAranarthPlayer.getNickname())));
+                target.sendMessage(ChatUtils.chatMessage(Lang.get("shop.invite_instructions")));
             }
             return true;
         }
@@ -325,24 +326,24 @@ public class CommandShop implements CommandExecutor {
         if (args[0].equalsIgnoreCase("accept")) {
             UUID ownerUuid = AranarthUtils.getPendingShopInvite(player.getUniqueId());
             if (ownerUuid == null) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have a pending shop invitation"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.no_pending_invite")));
                 return true;
             }
             // Check they haven't gained a shop or become a collaborator since the invite was sent
             if (AranarthUtils.getShopLocations().containsKey(player.getUniqueId())) {
                 AranarthUtils.removePendingShopInvite(player.getUniqueId());
-                player.sendMessage(ChatUtils.chatMessage("&cYou now own a shop and cannot accept a collaborator invitation"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.accept_own_shop")));
                 return true;
             }
             if (AranarthUtils.isCollaboratorOnAnyShop(player.getUniqueId())) {
                 AranarthUtils.removePendingShopInvite(player.getUniqueId());
-                player.sendMessage(ChatUtils.chatMessage("&cYou are already a collaborator on another shop"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.already_collaborator_other")));
                 return true;
             }
             // Check the inviting shop still exists
             if (!AranarthUtils.getShopLocations().containsKey(ownerUuid)) {
                 AranarthUtils.removePendingShopInvite(player.getUniqueId());
-                player.sendMessage(ChatUtils.chatMessage("&cThe shop you were invited to no longer exists"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.invite_shop_gone")));
                 return true;
             }
 
@@ -351,11 +352,11 @@ public class CommandShop implements CommandExecutor {
 
             AranarthPlayer ownerAranarthPlayer = AranarthUtils.getPlayer(ownerUuid);
             String ownerName = ownerAranarthPlayer != null ? ownerAranarthPlayer.getNickname() : ownerUuid.toString();
-            player.sendMessage(ChatUtils.chatMessage("&7You are now a collaborator on &e" + ownerName + "'s &7shop"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.accepted_collaborator", "player", ownerName)));
             Player owner = Bukkit.getPlayer(ownerUuid);
             if (owner != null) {
                 AranarthPlayer playerAranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                owner.sendMessage(ChatUtils.chatMessage("&e" + playerAranarthPlayer.getNickname() + " &7is now a collaborator to your shop"));
+                owner.sendMessage(ChatUtils.chatMessage(Lang.get("shop.collaborator_joined", "player", playerAranarthPlayer.getNickname())));
             }
             return true;
         }
@@ -363,15 +364,15 @@ public class CommandShop implements CommandExecutor {
         if (args[0].equalsIgnoreCase("decline")) {
             UUID ownerUuid = AranarthUtils.getPendingShopInvite(player.getUniqueId());
             if (ownerUuid == null) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have a pending shop invitation"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.no_pending_invite")));
                 return true;
             }
             AranarthUtils.removePendingShopInvite(player.getUniqueId());
-            player.sendMessage(ChatUtils.chatMessage("&7You have declined the shop invitation"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.invite_declined")));
             Player owner = Bukkit.getPlayer(ownerUuid);
             if (owner != null) {
                 AranarthPlayer playerAranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                owner.sendMessage(ChatUtils.chatMessage("&e" + playerAranarthPlayer.getNickname() + " &7has declined your shop invitation"));
+                owner.sendMessage(ChatUtils.chatMessage(Lang.get("shop.invite_declined_notify", "player", playerAranarthPlayer.getNickname())));
             }
             return true;
         }
@@ -379,7 +380,7 @@ public class CommandShop implements CommandExecutor {
         if (args[0].equalsIgnoreCase("leave")) {
             UUID ownerUuid = AranarthUtils.getCollaboratorShopOwner(player.getUniqueId());
             if (ownerUuid == null) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou are not a collaborator to any shop"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.not_collaborator")));
                 return true;
             }
 
@@ -396,32 +397,32 @@ public class CommandShop implements CommandExecutor {
 
             AranarthUtils.removeShopCollaborator(ownerUuid, player.getUniqueId());
             String ownerNickname = AranarthUtils.getPlayer(ownerUuid).getNickname();
-            player.sendMessage(ChatUtils.chatMessage("&7You are no longer a collaborator to &e" + ownerNickname + "&e's &7shop"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.left_shop", "player", ownerNickname)));
             Player owner = Bukkit.getPlayer(ownerUuid);
             if (owner != null) {
                 AranarthPlayer playerAranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                owner.sendMessage(ChatUtils.chatMessage("&e" + playerAranarthPlayer.getNickname() + " &7is no longer a collaborator to your shop"));
+                owner.sendMessage(ChatUtils.chatMessage(Lang.get("shop.collaborator_left", "player", playerAranarthPlayer.getNickname())));
             }
             return true;
         }
 
         if (args[0].equalsIgnoreCase("remove")) {
             if (!AranarthUtils.getShopLocations().containsKey(player.getUniqueId())) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have a shop"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.no_shop")));
                 return true;
             }
             if (args.length < 2) {
-                player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/shop remove <username>"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "shop remove <username>")));
                 return true;
             }
             UUID targetUuid = AranarthUtils.getUUIDFromUsername(args[1]);
             if (targetUuid == null) {
-                player.sendMessage(ChatUtils.chatMessage("&e" + args[1] + " &ccould not be found"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
                 return true;
             }
             boolean removed = AranarthUtils.removeShopCollaborator(player.getUniqueId(), targetUuid);
             if (!removed) {
-                player.sendMessage(ChatUtils.chatMessage("&e" + args[1] + " &cis not a collaborator on your shop"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.not_collaborator_on_shop", "player", args[1])));
                 return true;
             }
 
@@ -436,46 +437,46 @@ public class CommandShop implements CommandExecutor {
                 if (tpVol > 0) {
                     target.playSound(target, Sound.ENTITY_ENDERMAN_TELEPORT, tpVol / 100f, 0.9F);
                 }
-                target.sendMessage(ChatUtils.chatMessage("&7You have been removed as a collaborator from &e" + ownerAranarthPlayer.getNickname() + "'s &7shop"));
+                target.sendMessage(ChatUtils.chatMessage(Lang.get("shop.removed_from_shop", "player", ownerAranarthPlayer.getNickname())));
             } else if (target != null) {
-                target.sendMessage(ChatUtils.chatMessage("&7You have been removed as a collaborator from &e" + ownerAranarthPlayer.getNickname() + "'s &7shop"));
+                target.sendMessage(ChatUtils.chatMessage(Lang.get("shop.removed_from_shop", "player", ownerAranarthPlayer.getNickname())));
             }
 
-            player.sendMessage(ChatUtils.chatMessage("&e" + args[1] + " &7has been removed as a collaborator from your shop"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.collaborator_removed", "player", args[1])));
             return true;
         }
 
         if (args[0].equalsIgnoreCase("biome")) {
             if (aranarthPlayer.getSaintRank() < 1 && aranarthPlayer.getCouncilRank() < 1 && !aranarthPlayer.isInAdminMode()) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou must be a &b⚜ &6&lSaint &cor higher to change your island's biome"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.biome_rank_required")));
                 return true;
             }
             if (!AranarthUtils.getShopIslandCenters().containsKey(player.getUniqueId())) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have a shop"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.no_shop")));
                 return true;
             }
             if (args.length < 2) {
-                player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/shop biome <biome>"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "shop biome <biome>")));
                 return true;
             }
             Biome biome = Registry.BIOME.get(NamespacedKey.minecraft(args[1].toLowerCase()));
             if (biome == null) {
-                player.sendMessage(ChatUtils.chatMessage("&cThis biome could not be found"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.biome_not_found")));
                 return true;
             }
             World shopsWorld = Bukkit.getWorld(ShopIslandUtils.SHOPS_WORLD);
             if (shopsWorld == null) {
-                player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with the shops world"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.world_error")));
                 return true;
             }
             int[] center = AranarthUtils.getShopIslandCenters().get(player.getUniqueId());
             ShopIslandUtils.setIslandBiome(shopsWorld, center[0], center[1], biome);
-            player.sendMessage(ChatUtils.chatMessage("&7Your island's biome has been set to &e" + args[1].toLowerCase()));
-            player.sendMessage(ChatUtils.chatMessage("&7Try relogging if the biome doesn't update"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.biome_set", "biome", args[1].toLowerCase())));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.biome_relog_hint")));
             return true;
         }
 
-        player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/shop <subcommand>"));
+        player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "shop <subcommand>")));
         return true;
     }
 }

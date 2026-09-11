@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.brew.BrewRecipe;
 import com.aearost.aranarthcore.utils.BrewRecipeUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.dre.brewery.Brew;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -91,11 +92,9 @@ public class BrewRecipeAutoUnlockListener implements Listener {
         BrewRecipeUtils.master(uuid, recipeId);
 
         if (!wasAlreadyUnlocked) {
-            player.sendMessage(ChatUtils.chatMessage("&6[Brew Book] &fYou've mastered &e" + recipe.getDisplayName()
-                    + "&f! The recipe has been added to your brew book."));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.recipe_mastered_added", "recipe", recipe.getDisplayName())));
         } else if (hasSecret) {
-            player.sendMessage(ChatUtils.chatMessage("&6[Brew Book] &fYou've mastered &e" + recipe.getDisplayName()
-                    + "&f! The secret ingredient has been revealed in your brew book."));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.recipe_mastered_secret", "recipe", recipe.getDisplayName())));
         }
     }
 }

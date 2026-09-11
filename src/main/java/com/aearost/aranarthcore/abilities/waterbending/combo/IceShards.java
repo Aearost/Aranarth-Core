@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.*;
@@ -100,13 +101,13 @@ public class IceShards extends IceAbility implements AddonAbility, ComboAbility 
 
         String worldName = player.getWorld().getName().toLowerCase();
         if (worldName.endsWith("_nether") || worldName.endsWith("_the_end")) {
-            player.sendMessage(ChatUtils.chatMessage("&7You can only use " + Element.ICE.getColor() + this.getName() + " &7in the Overworld!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("ability.iceshards.overworld_only", "ability", Element.ICE.getColor() + this.getName())));
             return;
         }
 
         final Weather weather = AranarthUtils.getWeather();
         if (weather == Weather.CLEAR && this.countNearbyWaterSources(player.getLocation(), 50, 50) < 50) {
-            player.sendMessage(ChatUtils.chatMessage("&7You can only use " + Element.ICE.getColor() + this.getName() + " &7while it is raining, or while near a large body of water!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("ability.iceshards.needs_water", "ability", Element.ICE.getColor() + this.getName())));
             return;
         }
 

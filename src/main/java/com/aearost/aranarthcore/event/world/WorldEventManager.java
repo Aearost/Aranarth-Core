@@ -2,11 +2,7 @@ package com.aearost.aranarthcore.event.world;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.WorldEvent;
-import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
-import com.aearost.aranarthcore.utils.DiscordUtils;
-import com.aearost.aranarthcore.utils.PermissionUtils;
-import com.aearost.aranarthcore.utils.PersistenceUtils;
+import com.aearost.aranarthcore.utils.*;
 import com.projectkorra.projectkorra.BendingPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -90,7 +86,7 @@ public class WorldEventManager implements Listener {
         AranarthUtils.setActiveWorldEventIntensity(1);
 
         if (!AranarthCore.isSmpServer()) {
-            String chatMsg = ChatUtils.chatMessage("&7The " + event.getColor() + event.getName(intensity) + " &7has ended");
+            String chatMsg = ChatUtils.chatMessage(Lang.get("world_event.ended", "color", event.getColor(), "name", event.getName(intensity)));
             for (Player player : Bukkit.getOnlinePlayers()) {
                 String worldName = player.getWorld().getName();
                 if (!AranarthUtils.isSurvivalWorld(worldName) || worldName.equals("spawn") || worldName.equals("shops")) {

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -45,7 +46,7 @@ public class BuddingAmethystBreak {
 					lore.removeIf(line -> ChatUtils.stripColorFormatting(line).equals("Preservation"));
 					meta.setLore(lore.isEmpty() ? null : lore);
 				}
-				player.sendMessage(ChatUtils.chatMessage("&5Your Incantation of Preservation has expired."));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("incantation.preservation_expired")));
 			} else {
 				meta.getPersistentDataContainer().set(PRESERVATION_USES, PersistentDataType.INTEGER, uses);
 			}

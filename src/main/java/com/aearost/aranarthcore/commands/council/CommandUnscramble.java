@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatGameUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -14,16 +15,16 @@ public class CommandUnscramble {
 
     public static boolean onCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(ChatUtils.chatMessage("&cThis command can only be used by players!"));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
             return true;
         }
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
         if (aranarthPlayer.getCouncilRank() < 3) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
             return true;
         }
         if (args.length < 3) {
-            player.sendMessage(ChatUtils.chatMessage("&cUsage: &e/ac unscramble <add|remove> <word>"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac unscramble <add|remove> <word>")));
             return true;
         }
         String subCommand = args[1].toLowerCase();
@@ -31,19 +32,19 @@ public class CommandUnscramble {
         switch (subCommand) {
             case "add" -> {
                 if (ChatGameUtils.addWord(word)) {
-                    player.sendMessage(ChatUtils.chatMessage("&7Added &e" + word + " &7to the unscramble word pool"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("unscramble.word_added", "word", word)));
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage("&cThe word &e" + word + " &calready exists in the pool"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("unscramble.word_exists", "word", word)));
                 }
             }
             case "remove" -> {
                 if (ChatGameUtils.removeWord(word)) {
-                    player.sendMessage(ChatUtils.chatMessage("&7Removed &e" + word + " &7from the unscramble word pool"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("unscramble.word_removed", "word", word)));
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage("&cThe word &e" + word + " &ccould not be found in the pool"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("unscramble.word_not_found", "word", word)));
                 }
             }
-            default -> player.sendMessage(ChatUtils.chatMessage("&cUsage: &e/ac unscramble <add|remove> <word>"));
+            default -> player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac unscramble <add|remove> <word>")));
         }
         return true;
     }

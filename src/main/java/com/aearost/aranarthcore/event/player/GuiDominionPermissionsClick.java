@@ -11,6 +11,7 @@ import com.aearost.aranarthcore.objects.DominionRank;
 import com.aearost.aranarthcore.objects.Outpost;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.OutpostUtils;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -42,7 +43,7 @@ public class GuiDominionPermissionsClick {
 
         // Only the leader can use this GUI
         if (!dominion.getLeader().equals(player.getUniqueId())) {
-            player.sendMessage(ChatUtils.chatMessage("&cOnly the leader can manage permissions!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.leader_only_permissions")));
             return;
         }
 
@@ -111,7 +112,7 @@ public class GuiDominionPermissionsClick {
                         boolean inMain = chunkDominion != null && chunkDominion.getId().equals(playerDominion.getId());
                         boolean inOutpost = chunkOutpost != null && chunkOutpost.getDominionId().equals(playerDominion.getId());
                         if (!inMain && !inOutpost) {
-                            player.sendMessage(ChatUtils.chatMessage("&cYou can only manage defenders while in your Dominion or one of its outposts"));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.defenders_in_dominion")));
                             break;
                         }
                     }
@@ -153,7 +154,7 @@ public class GuiDominionPermissionsClick {
             }
 
             if (rank == DominionRank.LEADER) {
-                player.sendMessage(ChatUtils.chatMessage("&cThe Leader rank always has full permissions!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.leader_full_permissions")));
                 return;
             }
 

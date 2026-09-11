@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.enums.WanderingTraderType;
 import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.WanderingTrader;
@@ -28,7 +29,7 @@ public class WanderingTraderDeath {
                 "&7The " + typeName + " has been slain by &e" + e.getDamageSource().getCausingEntity().getName()
             ));
         } else {
-            Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + typeName + " has died"));
+            Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("trader.died", "type", typeName)));
         }
     }
 

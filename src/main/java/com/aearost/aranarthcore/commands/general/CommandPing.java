@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -25,16 +26,16 @@ public class CommandPing implements CommandExecutor {
 			if (sender instanceof Player player) {
 				int ping = player.getPing();
 				if (ping <= 150) {
-					player.sendMessage(ChatUtils.chatMessage("&7Your ping is &a" + ping + "ms"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("ping.self_good", "ping", String.valueOf(ping))));
 				} else if (ping <= 250) {
-					player.sendMessage(ChatUtils.chatMessage("&7Your ping is &e" + ping + "ms"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("ping.self_ok", "ping", String.valueOf(ping))));
 				} else {
-					player.sendMessage(ChatUtils.chatMessage("&7Your ping is &c" + ping + "ms"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("ping.self_bad", "ping", String.valueOf(ping))));
 				}
 
 				return true;
 			} else {
-				sender.sendMessage(ChatUtils.chatMessage("&cYou must specify a player's ping! /ping <player>"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ping <player>")));
 				return true;
 			}
 		} else {
@@ -43,11 +44,11 @@ public class CommandPing implements CommandExecutor {
 				if (sender.getName().equalsIgnoreCase(args[0])) {
 					int ping = onlinePlayer.getPing();
 					if (ping <= 150) {
-						sender.sendMessage(ChatUtils.chatMessage("&7Your ping is &a" + ping + "ms"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.get("ping.self_good", "ping", String.valueOf(ping))));
 					} else if (ping <= 250) {
-						sender.sendMessage(ChatUtils.chatMessage("&7Your ping is &e" + ping + "ms"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.get("ping.self_ok", "ping", String.valueOf(ping))));
 					} else {
-						sender.sendMessage(ChatUtils.chatMessage("&7Your ping is &c" + ping + "ms"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.get("ping.self_bad", "ping", String.valueOf(ping))));
 					}
                     return true;
 				}
@@ -55,16 +56,16 @@ public class CommandPing implements CommandExecutor {
 				else if (onlinePlayer.getName().equalsIgnoreCase(args[0])) {
 					int ping = onlinePlayer.getPing();
 					if (ping <= 150) {
-						sender.sendMessage(ChatUtils.chatMessage("&e" + onlinePlayer.getName() +"'s &7ping is &a" + ping + "ms"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.get("ping.other_good", "player", onlinePlayer.getName(), "ping", String.valueOf(ping))));
 					} else if (ping <= 250) {
-						sender.sendMessage(ChatUtils.chatMessage("&e" + onlinePlayer.getName() +"'s &7ping is &e" + ping + "ms"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.get("ping.other_ok", "player", onlinePlayer.getName(), "ping", String.valueOf(ping))));
 					} else {
-						sender.sendMessage(ChatUtils.chatMessage("&e" + onlinePlayer.getName() +"'s &7ping is &c" + ping + "ms"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.get("ping.other_bad", "player", onlinePlayer.getName(), "ping", String.valueOf(ping))));
 					}
 					return true;
 				}
 			}
-            sender.sendMessage(ChatUtils.chatMessage("&cThat player is not online!"));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.offline", "name", args[0])));
 			return true;
         }
 	}

@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
@@ -29,7 +30,7 @@ public class CommandWeather {
         if (sender instanceof Player player) {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
             if (aranarthPlayer.getCouncilRank() != 3) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this command!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
                 return true;
             }
         }
@@ -71,7 +72,7 @@ public class CommandWeather {
 					if (ap.isWeatherMessageDisabled()) {
 						continue;
 					}
-                    p.sendMessage(ChatUtils.chatMessage("&7&oThe storm has subsided..."));
+                    p.sendMessage(ChatUtils.chatMessage(Lang.get("weather.clear")));
                     int wVol = ap.getWeatherSoundVolume();
 					if (wVol > 0) {
 						DateUtils.playClearSound(p, wVol / 100f);
@@ -118,7 +119,7 @@ public class CommandWeather {
                                 isThunder ? "THUNDER" : "RAIN", duration, isThunder, duration - 100, 0);
                     }
 
-                    String broadcastMsg = isThunder ? "&7&oA thunderstorm has started..." : "&7&oIt has started to rain...";
+                    String broadcastMsg = isThunder ? Lang.get("weather.thunder") : Lang.get("weather.rain");
                     for (Player p : Bukkit.getOnlinePlayers()) {
                         String pWorld = p.getWorld().getName();
 						if (pWorld.equals("arena") || pWorld.equals("creative")) {
@@ -147,24 +148,24 @@ public class CommandWeather {
                             // Only update the AranarthUtils tracking counter; no world state changes
                             // needed here, as DateUtils manages the storm lifecycle via this counter
                             AranarthUtils.setStormDuration(value);
-                            sender.sendMessage(ChatUtils.chatMessage("&7The duration of the storm will be &e" + value + " &7ticks"));
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.weather_duration_set", "ticks", String.valueOf(value))));
                         } else {
                             // Only update the AranarthUtils tracking counter; no world state changes
                             // needed here, as DateUtils manages the storm delay via this counter
                             AranarthUtils.setStormDelay(value);
-                            sender.sendMessage(ChatUtils.chatMessage("&7The delay until the next storm will be &e" + value + " &7ticks"));
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.weather_delay_set", "ticks", String.valueOf(value))));
                         }
                     } catch (NumberFormatException ex) {
-                        sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac weather " + args[1].toUpperCase() + " <ticks>"));
+                        sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.weather_ticks_syntax", "type", args[1].toUpperCase())));
                     }
                 } else {
-                    sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac weather " + args[1].toUpperCase() + " <ticks>"));
+                    sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.weather_ticks_syntax", "type", args[1].toUpperCase())));
                 }
             } else {
-                sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac weather <CLEAR|RAIN|THUNDER|DURATION|DELAY>"));
+                sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac weather <CLEAR|RAIN|THUNDER|DURATION|DELAY>")));
             }
         } else {
-            sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac weather <CLEAR|RAIN|THUNDER|DURATION|DELAY>"));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac weather <CLEAR|RAIN|THUNDER|DURATION|DELAY>")));
         }
         return true;
     }
@@ -209,7 +210,7 @@ public class CommandWeather {
 			if (ap.isWeatherMessageDisabled()) {
 				continue;
 			}
-            p.sendMessage(ChatUtils.chatMessage("&7&oIt has started to snow..."));
+            p.sendMessage(ChatUtils.chatMessage(Lang.get("weather.snow")));
             int wVol = ap.getWeatherSoundVolume();
 			if (wVol > 0) {
 				DateUtils.playSnowStartSound(p, wVol / 100f);

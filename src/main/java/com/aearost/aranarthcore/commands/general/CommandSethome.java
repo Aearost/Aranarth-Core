@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -36,7 +37,7 @@ public class CommandSethome implements CommandExecutor {
 						|| worldName.startsWith("resource")
 						|| (!isOG && worldName.equals("creative"))
 						|| (!isOG && AranarthUtils.isSmpWorld(worldName))) {
-					player.sendMessage(ChatUtils.chatMessage("&cYou cannot set a home here!"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("home.cannot_set_here")));
 					return true;
 				}
 
@@ -55,7 +56,7 @@ public class CommandSethome implements CommandExecutor {
 				} else if (player.hasPermission("aranarth.chat.color")) {
 					homeName = ChatUtils.playerColorChat(homeName);
 					if (homeName == null) {
-						player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this kind of formatting!"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.no_permission_color")));
 						return true;
 					}
 				}
@@ -65,7 +66,7 @@ public class CommandSethome implements CommandExecutor {
 
 				// Ensures that more than just color codes were entered
 				if (strippedName.isEmpty()) {
-					player.sendMessage(ChatUtils.chatMessage("&cYou must input a name!"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("home.must_enter_name")));
 					return true;
 				}
 
@@ -81,7 +82,7 @@ public class CommandSethome implements CommandExecutor {
 				if (homeNameToDelete.isEmpty()) {
 					int playerMaxHomeCount = AranarthUtils.getMaxHomeNum(player);
 					if (aranarthPlayer.getHomes().size() >= playerMaxHomeCount) {
-						player.sendMessage(ChatUtils.chatMessage("&cYou cannot set more than &e" + playerMaxHomeCount + " &chomes!"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("home.max_homes", "max", String.valueOf(playerMaxHomeCount))));
 						return true;
 					}
 				}
@@ -95,17 +96,17 @@ public class CommandSethome implements CommandExecutor {
 				AranarthUtils.addPlayerHome(player, home);
 
 				if (homeNameToDelete.isEmpty()) {
-					player.sendMessage(ChatUtils.chatMessage("&7You have added the home &e" + homeName));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("home.added", "name", homeName)));
 				} else {
-					player.sendMessage(ChatUtils.chatMessage("&7You have updated the location of the home &e" + homeName));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("home.location_updated", "name", homeName)));
 				}
 				return true;
 			} else {
-				player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/sethome <name>"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "sethome <name>")));
 				return true;
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 			return true;
 		}
 	}

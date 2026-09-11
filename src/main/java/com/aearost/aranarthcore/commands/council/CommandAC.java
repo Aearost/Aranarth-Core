@@ -5,6 +5,8 @@ import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.LangManager;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -30,26 +32,26 @@ public class CommandAC implements CommandExecutor {
 			boolean isCouncil = aranarthPlayer.getCouncilRank() > 0;
 			boolean isArchitect = aranarthPlayer.getArchitectRank() >= 1;
 			if (!isCouncil && !isArchitect) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 				return false;
 			}
 			if (!isCouncil && isArchitect) {
 				if (args.length == 0 || !args[0].equalsIgnoreCase("msg")) {
-					player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 					return false;
 				}
 			}
 		}
 
 		if (args.length == 0) {
-			sender.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: &e/ac <sub-command>"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac <sub-command>")));
 			return false;
 		} else {
 			boolean commandResult = false;
 			commandResult = isCouncil(sender, args);
 
 			if (!commandResult) {
-				sender.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid sub-command!"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("ac.invalid_subcommand")));
 			}
 			return commandResult;
 		}
@@ -119,6 +121,10 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandDiscordReload.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("reloadperms")) {
 			commandResult = CommandReloadPerms.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("reloadlang")) {
+			LangManager.getInstance().load();
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("ac.lang_reloaded")));
+			commandResult = true;
 		} else if (args[0].equalsIgnoreCase("migrate")) {
 			commandResult = CommandMigrate.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("unscramble")) {
@@ -131,7 +137,7 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandWorldEvent.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("disband")) {
 			if (args.length < 2) {
-				sender.sendMessage(ChatUtils.chatMessage("&cUsage: &e/ac disband <dominion name>"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac disband <dominion name>")));
 			} else {
 				StringBuilder nameBuilder = new StringBuilder();
 				for (int i = 1; i < args.length; i++) {
@@ -143,7 +149,7 @@ public class CommandAC implements CommandExecutor {
 						.filter(d -> ChatUtils.stripColorFormatting(d.getName()).equalsIgnoreCase(targetName))
 						.findFirst().orElse(null);
 				if (target == null) {
-					sender.sendMessage(ChatUtils.chatMessage("&cDominion &e" + targetName + " &ccould not be found!"));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_found", "name", targetName)));
 				} else {
 					DominionUtils.disbandDominion(target);
 					commandResult = true;

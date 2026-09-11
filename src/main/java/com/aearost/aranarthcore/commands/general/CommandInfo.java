@@ -9,6 +9,7 @@ import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.AvatarUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
@@ -46,7 +47,7 @@ public class CommandInfo implements CommandExecutor {
 			if (sender instanceof Player player) {
 				sendInfo(player.getUniqueId(), sender);
 			} else {
-				sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/info <player>"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "info <player>")));
 				return false;
 			}
 		} else {
@@ -93,7 +94,7 @@ public class CommandInfo implements CommandExecutor {
 				sendInfo(uuid, sender);
 				return true;
 			} else {
-				sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[0])));
 			}
 		}
 		return false;
@@ -151,7 +152,7 @@ public class CommandInfo implements CommandExecutor {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
 
 		if (aranarthPlayer == null) {
-			sender.sendMessage(ChatUtils.chatMessage("&cPlayer data could not be loaded."));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.data_load_failed")));
 			return;
 		}
 

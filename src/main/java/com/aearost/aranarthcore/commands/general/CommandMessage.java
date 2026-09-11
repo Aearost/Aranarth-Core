@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
@@ -31,7 +32,7 @@ public class CommandMessage implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (args.length <= 1) {
-				player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/msg <player> <message>"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "msg <player> <message>")));
 				return true;
 			} else {
 				UUID targetUuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
@@ -52,14 +53,14 @@ public class CommandMessage implements CommandExecutor {
 					AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(targetUuid);
 					if (targetAranarthPlayer != null && targetAranarthPlayer.isTogglingMessages() && aranarthPlayer.getCouncilRank() == 0) {
 						String targetNick = targetAranarthPlayer.getNickname().isEmpty() ? args[0] : ChatUtils.stripColorFormatting(targetAranarthPlayer.getNickname());
-						player.sendMessage(ChatUtils.chatMessage("&e" + targetNick + " &cis currently not receiving messages"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("message.toggling", "player", targetNick)));
 						return true;
 					}
 
 					// If the player is online locally
 					if (target != null) {
 						if (ChatUtils.isPlayerMuted(player)) {
-							player.sendMessage(ChatUtils.chatMessage("&cYou are muted and cannot send messages!"));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("message.muted")));
 							return true;
 						}
 						ChatUtils.sendPrivateMessage(player, target, args, false);
@@ -71,7 +72,7 @@ public class CommandMessage implements CommandExecutor {
 						NetworkPlayer remoteTarget = NetworkManager.getInstance().getRemotePlayer(targetUuid);
 						if (remoteTarget != null) {
 							if (ChatUtils.isPlayerMuted(player)) {
-								player.sendMessage(ChatUtils.chatMessage("&cYou are muted and cannot send messages!"));
+								player.sendMessage(ChatUtils.chatMessage(Lang.get("message.muted")));
 								return true;
 							}
 
@@ -116,15 +117,15 @@ public class CommandMessage implements CommandExecutor {
 
 					String displayName = targetAranarthPlayer != null && !targetAranarthPlayer.getNickname().isEmpty()
 							? ChatUtils.stripColorFormatting(targetAranarthPlayer.getNickname()) : args[0];
-					player.sendMessage(ChatUtils.chatMessage("&e" + displayName + " &cis not online"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("player.offline", "name", displayName)));
 					return true;
 				} else {
-					player.sendMessage(ChatUtils.chatMessage("&e" + args[0] + " &ccould not be found"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[0])));
 					return true;
 				}
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cThis command can only be used by players!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 			return true;
 		}
 	}

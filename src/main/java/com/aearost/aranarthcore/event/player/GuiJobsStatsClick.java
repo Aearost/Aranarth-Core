@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.JobData;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.JobUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -50,10 +51,10 @@ public class GuiJobsStatsClick {
         long required = JobUtils.getXpRequired(level);
         String xpStr = level >= 10 ? "Max Level" : (int) currentXp + " / " + required;
 
-        player.sendMessage(ChatUtils.chatMessage("&e" + job.getDisplayName() + " &7Statistics &8- &7Level &e" + level));
-        player.sendMessage(ChatUtils.chatMessage("&7XP: &e" + xpStr));
+        player.sendMessage(ChatUtils.chatMessage(Lang.get("jobs.stats_header", "job", job.getDisplayName(), "level", level)));
+        player.sendMessage(ChatUtils.chatMessage(Lang.get("jobs.stats_xp", "xp", xpStr)));
         player.sendMessage(ChatUtils.chatMessage(""));
-        player.sendMessage(ChatUtils.chatMessage("&e--- Actions ---"));
+        player.sendMessage(ChatUtils.chatMessage(Lang.get("jobs.actions_header")));
 
         double multiplier = JobUtils.getLevelMultiplier(level);
         for (String line : getActionLines(job, multiplier)) {

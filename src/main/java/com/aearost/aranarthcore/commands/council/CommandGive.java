@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -29,13 +30,13 @@ public class CommandGive {
     public static void onCommand(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
             if (!player.hasPermission("aranarth.give")) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
                 return;
             }
         }
 
         if (args.length < 3) {
-            sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac give <player> <item> <quantity>"));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac give <player> <item> <quantity>")));
             return;
         } else {
             Player player = null;
@@ -80,7 +81,7 @@ public class CommandGive {
                     instance = unknownClass.getDeclaredConstructor().newInstance();
                 } catch (ClassNotFoundException | InvocationTargetException | InstantiationException
                          | IllegalAccessException | NoSuchMethodException e) {
-                    sender.sendMessage(ChatUtils.chatMessage("&cThere is no item by that name!"));
+                    sender.sendMessage(ChatUtils.chatMessage(Lang.get("give.no_such_item")));
                     return;
                 }
 
@@ -95,7 +96,7 @@ public class CommandGive {
                             }
                             item.setAmount(quantity);
                         } catch (Exception e) {
-                            player.sendMessage(ChatUtils.chatMessage("&cThe entered Quantity is invalid!"));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.get("give.invalid_quantity")));
                             return;
                         }
                     }
@@ -112,7 +113,7 @@ public class CommandGive {
                     // For crate keys in non-survival worlds, store as pending instead of giving directly
                     if (isKey) {
                         if (isBroadcast) {
-                            String broadcastMessage = ChatUtils.chatMessage("&e" + player.getName() + " &7has purchased " + itemName + " x" + quantity);
+                            String broadcastMessage = ChatUtils.chatMessage(Lang.get("give.purchased_broadcast", "player", player.getName(), "item", itemName, "amount", String.valueOf(quantity)));
                             DiscordUtils.donationNotification(player.getName() + " has purchased " + itemName + " x" + quantity, player.getUniqueId(), Color.CYAN);
                             for (Player online : Bukkit.getOnlinePlayers()) {
                                 online.sendMessage(broadcastMessage);
@@ -126,7 +127,7 @@ public class CommandGive {
                         String worldName = player.getWorld().getName();
                         if (!AranarthUtils.isSurvivalWorld(worldName)) {
                             AranarthUtils.addPendingKey(player.getUniqueId(), item, quantity);
-                            player.sendMessage(ChatUtils.chatMessage("&7Use &e/keyclaim &7in a Survival world to obtain your keys!"));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.get("give.keyclaim_hint")));
                             return;
                         }
                     }
@@ -142,12 +143,12 @@ public class CommandGive {
 
                     if (!isKey || !isBroadcast) {
                         if (isInventoryFull) {
-                            player.sendMessage(ChatUtils.chatMessage("&e" + itemName + " &7has been dropped to the floor"));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.get("give.dropped", "item", itemName)));
                         } else {
-                            player.sendMessage(ChatUtils.chatMessage("&7You have been given " + itemName + " x" + quantity));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.get("give.received", "item", itemName + " x" + quantity)));
                         }
                         if (isKey && sender instanceof Player senderPlayer && !senderPlayer.getUniqueId().equals(player.getUniqueId())) {
-                            sender.sendMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has been given " + itemName + " x" + quantity));
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.get("give.success", "player", player.getName(), "amount", String.valueOf(quantity), "item", itemName)));
                         }
                     }
                 } else if (instance instanceof Incantation incantation) {
@@ -161,7 +162,7 @@ public class CommandGive {
                             }
                             item.setAmount(quantity);
                         } catch (Exception e) {
-                            player.sendMessage(ChatUtils.chatMessage("&cThe entered Quantity is invalid!"));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.get("give.invalid_quantity")));
                             return;
                         }
                     }
@@ -176,17 +177,17 @@ public class CommandGive {
                         }
                     }
 
-                    player.sendMessage(ChatUtils.chatMessage("&7You have been given " + itemName + " x" + quantity));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("give.received", "item", itemName + " x" + quantity)));
                     if (sender instanceof Player playerSender) {
                         if (!playerSender.getUniqueId().equals(player.getUniqueId())) {
-                            sender.sendMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has been given " + itemName + " x" + quantity));
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.get("give.success", "player", player.getName(), "amount", String.valueOf(quantity), "item", itemName)));
                         }
                     }
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage("&cThere is no item by that name!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("give.no_such_item")));
                 }
             } else {
-                sender.sendMessage(ChatUtils.chatMessage("&cThat player was not found!"));
+                sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
             }
         }
     }

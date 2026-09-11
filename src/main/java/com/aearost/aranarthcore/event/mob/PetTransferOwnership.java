@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.*;
@@ -48,15 +49,15 @@ public class PetTransferOwnership {
 				tameable.setOwner(offlinePlayer);
 				e.setCancelled(true);
 				AranarthPlayer offlineAranarthPlayer = AranarthUtils.getPlayer(transferUUID);
-				player.sendMessage(ChatUtils.chatMessage("&e" + tameable.getName() + " &7is now owned by &e" + offlineAranarthPlayer.getNickname()));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.transferred_to", "pet", tameable.getName(), "player", offlineAranarthPlayer.getNickname())));
 				if (offlinePlayer.isOnline()) {
-					offlinePlayer.getPlayer().sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has transferred the ownership of &e" + tameable.getName() + " &7to you!"));
+					offlinePlayer.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("pet.transferred_notify", "from", aranarthPlayer.getNickname(), "pet", tameable.getName())));
 				}
 			} else {
-				player.sendMessage(ChatUtils.chatMessage("&cThis is not your pet!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.not_owner_wolf")));
 			}
 		} else {
-			player.sendMessage(ChatUtils.chatMessage("&cThis pet is not tamed yet!"));
+			player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.not_tamed")));
 		}
 		aranarthPlayer.setPetTransferUuid(null);
 		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
@@ -81,7 +82,7 @@ public class PetTransferOwnership {
 		}
 
 		if (!ownerUUID.equals(player.getUniqueId())) {
-			player.sendMessage(ChatUtils.chatMessage("&cThis is not your mount!"));
+			player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.not_owner_horse")));
 			aranarthPlayer.setPetTransferUuid(null);
 			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 			return;
@@ -92,10 +93,10 @@ public class PetTransferOwnership {
 		e.setCancelled(true);
 
 		AranarthPlayer offlineAranarthPlayer = AranarthUtils.getPlayer(transferUUID);
-		player.sendMessage(ChatUtils.chatMessage("&e" + entity.getName() + " &7is now owned by &e" + offlineAranarthPlayer.getNickname()));
+		player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.transferred_to", "pet", entity.getName(), "player", offlineAranarthPlayer.getNickname())));
 		OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(transferUUID);
 		if (offlinePlayer.isOnline()) {
-			offlinePlayer.getPlayer().sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has transferred the ownership of &e" + entity.getName() + " &7to you!"));
+			offlinePlayer.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("pet.transferred_notify", "from", aranarthPlayer.getNickname(), "pet", entity.getName())));
 		}
 
 		aranarthPlayer.setPetTransferUuid(null);

@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -35,9 +36,8 @@ public class GuiDominionPlayerPermissions {
     public static void initiateSearch(Player player) {
         awaitingSearch.add(player.getUniqueId());
         player.closeInventory();
-        player.sendMessage(ChatUtils.chatMessage(
-                "&7Enter the username of the player to manage"));
-        player.sendMessage(ChatUtils.chatMessage("&7Type &ccancel &7to abort"));
+        player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.player_perm_search_prompt")));
+        player.sendMessage(ChatUtils.chatMessage(Lang.get("general.type_cancel_abort")));
     }
 
     public static boolean isAwaitingSearch(UUID uuid) {
@@ -59,7 +59,7 @@ public class GuiDominionPlayerPermissions {
         }
 
         if (input.equalsIgnoreCase("cancel")) {
-            leader.sendMessage(ChatUtils.chatMessage("&7The search has been cancelled"));
+            leader.sendMessage(ChatUtils.chatMessage(Lang.get("general.search_cancelled")));
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(),
                     () -> new GuiDominionPermissions(leader).openGui());
             return;
@@ -80,8 +80,7 @@ public class GuiDominionPlayerPermissions {
         }
 
         if (target == null || !target.hasPlayedBefore()) {
-            leader.sendMessage(ChatUtils.chatMessage(
-                    "&e" + input + " &ccould not be found"));
+            leader.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", input)));
             return;
         }
 
@@ -90,8 +89,7 @@ public class GuiDominionPlayerPermissions {
 
         // Leaders always have all permissions
         if (finalTarget.getUniqueId().equals(dominion.getLeader())) {
-            leader.sendMessage(ChatUtils.chatMessage(
-                    "&cThe dominion leader always has all permissions"));
+            leader.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.leader_all_permissions")));
             return;
         }
 

@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands.general;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -24,26 +25,26 @@ public class CommandCondense implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.compressor")) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 				return false;
 			}
 
 			if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou can only condense your inventory in the Survival world!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("condense.wrong_world")));
 				return false;
 			}
 
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (!aranarthPlayer.isCompressingItems()) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have the compressor enabled! Use &e/compressor &cto configure it."));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("compress.not_enabled")));
 				return false;
 			}
 
 			AranarthUtils.compressPlayerInventory(player, aranarthPlayer, null);
-			player.sendMessage(ChatUtils.chatMessage("&aCondensed your inventory!"));
+			player.sendMessage(ChatUtils.chatMessage(Lang.get("condense.success")));
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cThis can only be executed by a player!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 		}
 		return false;
 	}

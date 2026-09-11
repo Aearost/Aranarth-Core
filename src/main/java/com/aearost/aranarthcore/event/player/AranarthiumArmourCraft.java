@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.gui.GuiEnhancedAranarthium;
 import com.aearost.aranarthcore.items.aranarthium.armour.*;
 import com.aearost.aranarthcore.items.netherite.NetheriteElytra;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
@@ -111,9 +112,9 @@ public class AranarthiumArmourCraft {
                             if (strippedName.startsWith("a") || strippedName.startsWith("e")
                                     || strippedName.startsWith("i") || strippedName.startsWith("o")
                                     || strippedName.startsWith("u")) {
-                                player.sendMessage(ChatUtils.chatMessage("&7You have forged an " + displayName));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.get("aranarthium.forged", "article", "an", "item", displayName)));
                             } else {
-                                player.sendMessage(ChatUtils.chatMessage("&7You have forged a " + displayName));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.get("aranarthium.forged", "article", "a", "item", displayName)));
                             }
                         }
                     }
@@ -253,7 +254,7 @@ public class AranarthiumArmourCraft {
                             if (result.getItemMeta().getPersistentDataContainer().has(ARMOR_TYPE)) {
                                 e.setCancelled(true);
                                 player.closeInventory();
-                                player.sendMessage(ChatUtils.chatMessage("&cYou cannot apply armor trims to Aranarthium armor!"));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.get("aranarthium.cannot_trim")));
                             }
                         }
                     }

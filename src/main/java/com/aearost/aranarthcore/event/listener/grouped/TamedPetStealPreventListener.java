@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -31,8 +32,7 @@ public class TamedPetStealPreventListener implements Listener {
 				isAttemptingToLeash = true;
 				e.setCancelled(true);
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(tameable.getOwner().getUniqueId());
-				player.sendMessage(ChatUtils.chatMessage("&cYou cannot leash &e"
-						+ aranarthPlayer.getNickname() + "'s &e" + ChatUtils.getFormattedItemName(e.getEntity().getType().name())));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.cannot_leash", "owner", aranarthPlayer.getNickname(), "pet", ChatUtils.getFormattedItemName(e.getEntity().getType().name()))));
 			}
 		}
 	}
@@ -47,8 +47,7 @@ public class TamedPetStealPreventListener implements Listener {
 							e.setCancelled(true);
 							if (!isAttemptingToLeash) {
 								AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(tameable.getOwner().getUniqueId());
-								player.sendMessage(ChatUtils.chatMessage("&cYou cannot ride &e"
-										+ aranarthPlayer.getNickname() + "'s &e" + ChatUtils.getFormattedItemName(mob.getType().name())));
+								player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.cannot_ride", "owner", aranarthPlayer.getNickname(), "pet", ChatUtils.getFormattedItemName(mob.getType().name()))));
 							} else {
 								isAttemptingToLeash = false;
 							}

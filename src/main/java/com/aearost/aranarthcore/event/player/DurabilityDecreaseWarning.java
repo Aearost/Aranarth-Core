@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.inventory.meta.Damageable;
@@ -27,14 +28,11 @@ public class DurabilityDecreaseWarning {
 
 			Player player = e.getPlayer();
 			if (damagedDurability == thresholdA) {
-				player.sendMessage(ChatUtils.chatMessage("&7Your &e" + ChatUtils.getFormattedItemName(e.getItem().getType().name())
-															+" &7has only 10% durability remaining!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("durability.low", "item", ChatUtils.getFormattedItemName(e.getItem().getType().name()))));
 			} else if (damagedDurability == thresholdB) {
-				player.sendMessage(ChatUtils.chatMessage("&cYour &e" + ChatUtils.getFormattedItemName(e.getItem().getType().name())
-				+" &chas only 5% durability remaining!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("durability.very_low", "item", ChatUtils.getFormattedItemName(e.getItem().getType().name()))));
 			} else if (damagedDurability == thresholdC) {
-				player.sendMessage(ChatUtils.chatMessage("&4&lYour &6&l" + ChatUtils.getFormattedItemName(e.getItem().getType().name())
-				+" &4&lhas only 1% durability remaining!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("durability.almost_broken", "item", ChatUtils.getFormattedItemName(e.getItem().getType().name()))));
 			}
 		}
 	}

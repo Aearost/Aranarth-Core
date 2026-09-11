@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.items.incantation.IncantationPlentiful;
 import com.aearost.aranarthcore.items.incantation.IncantationPreservation;
 import com.aearost.aranarthcore.items.incantation.IncantationResilience;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -48,10 +49,10 @@ public class CommandIncantations implements CommandExecutor {
 
 			book.setItemMeta(meta);
 			player.getInventory().addItem(book);
-			player.sendMessage(ChatUtils.chatMessage("&7You have received the &eIncantations&7 book"));
+			player.sendMessage(ChatUtils.chatMessage(Lang.get("book.received", "name", "Incantations")));
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to use this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 			return false;
 		}
 	}

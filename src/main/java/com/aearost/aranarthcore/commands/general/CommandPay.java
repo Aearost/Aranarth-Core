@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -32,7 +33,7 @@ public class CommandPay implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (args.length <= 1) {
-				player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax! &e/pay <player> <amount>"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "pay <player> <amount>")));
 				return true;
 			} else {
 				UUID uuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
@@ -43,7 +44,7 @@ public class CommandPay implements CommandExecutor {
 
 				if (uuid != null && target != null) {
 					if (target.getUniqueId().equals(player.getUniqueId())) {
-						player.sendMessage(ChatUtils.chatMessage("&cYou cannot pay yourself!"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("economy.pay_self")));
 						return false;
 					}
 
@@ -57,15 +58,15 @@ public class CommandPay implements CommandExecutor {
 						String noCommas = (formattedAmount.substring(1)).replaceAll(",", "");
 						amount = Double.parseDouble(noCommas); // The actual value will be two decimals
 					} catch (NumberFormatException e) {
-						player.sendMessage(ChatUtils.chatMessage("&cThat is not a valid number!"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_number")));
 						return true;
 					}
 
 					if (amount < 0) {
-						player.sendMessage(ChatUtils.chatMessage("&cYou cannot pay someone a negative amount!"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("economy.pay_negative")));
 						return true;
 					} else if (amount == 0) {
-						player.sendMessage(ChatUtils.chatMessage("&cYou cannot pay someone &6$0.00&c!"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("economy.pay_zero")));
 						return true;
 					} else {
 						AranarthPlayer aranarthPlayerSender = AranarthUtils.getPlayer(player.getUniqueId());
@@ -84,7 +85,7 @@ public class CommandPay implements CommandExecutor {
 							if (networkReceiver == null) {
 								// Target is fully offline - pay using local in-memory data and persist
 								if (aranarthPlayerReceiver == null) {
-									player.sendMessage(ChatUtils.chatMessage("&e" + args[0] + " &ccould not be found"));
+									player.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[0])));
 									return true;
 								}
 								if (aranarthPlayerSender.getBalance() >= amount) {
@@ -92,9 +93,9 @@ public class CommandPay implements CommandExecutor {
 									aranarthPlayerReceiver.setBalance(aranarthPlayerReceiver.getBalance() + amount);
 									PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
 									PersistenceUtils.saveAranarthPlayerImmediately(target.getUniqueId());
-									player.sendMessage(ChatUtils.chatMessage("&7You have paid &e" + aranarthPlayerReceiver.getNickname() + " &6" + formattedAmount));
+									player.sendMessage(ChatUtils.chatMessage(Lang.get("economy.paid", "player", aranarthPlayerReceiver.getNickname(), "amount", formattedAmount)));
 								} else {
-									player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough money for this!"));
+									player.sendMessage(ChatUtils.chatMessage(Lang.get("economy.not_enough")));
 								}
 								return true;
 							}
@@ -109,9 +110,9 @@ public class CommandPay implements CommandExecutor {
 								NetworkManager.getInstance().publishBalanceAdjust(target.getUniqueId(), amount);
 								NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), -amount);
 								NetworkManager.getInstance().publishPayNotify(target.getUniqueId(), aranarthPlayerSender.getNickname(), formattedAmount);
-								player.sendMessage(ChatUtils.chatMessage("&7You have paid &e" + networkReceiver.getNickname() + " &6" + formattedAmount));
+								player.sendMessage(ChatUtils.chatMessage(Lang.get("economy.paid", "player", networkReceiver.getNickname(), "amount", formattedAmount)));
 							} else {
-								player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough money for this!"));
+								player.sendMessage(ChatUtils.chatMessage(Lang.get("economy.not_enough")));
 							}
 							return true;
 						}
@@ -121,22 +122,22 @@ public class CommandPay implements CommandExecutor {
 							aranarthPlayerReceiver.setBalance(aranarthPlayerReceiver.getBalance() + amount);
 							PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
 							PersistenceUtils.saveAranarthPlayerImmediately(target.getUniqueId());
-							player.sendMessage(ChatUtils.chatMessage("&7You have paid &e" + aranarthPlayerReceiver.getNickname() + " &6" + formattedAmount));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("economy.paid", "player", aranarthPlayerReceiver.getNickname(), "amount", formattedAmount)));
 							Player onlineTarget = Bukkit.getPlayer(target.getUniqueId());
-							onlineTarget.sendMessage(ChatUtils.chatMessage("&7You have received &6" + formattedAmount + " &7from &e" + aranarthPlayerSender.getNickname()));
+							onlineTarget.sendMessage(ChatUtils.chatMessage(Lang.get("economy.received_payment", "amount", formattedAmount, "player", aranarthPlayerSender.getNickname())));
 							return true;
 						} else {
-							player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough money for this!"));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("pay.not_enough")));
 							return true;
 						}
 					}
 				} else {
-					player.sendMessage(ChatUtils.chatMessage("&e" + args[0] + " &ccould not be found"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("pay.player_not_found", "name", args[0])));
 					return true;
 				}
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 			return true;
 		}
     }

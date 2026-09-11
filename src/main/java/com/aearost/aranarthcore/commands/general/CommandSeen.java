@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -36,13 +37,13 @@ public class CommandSeen implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.seen")) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("seen.cannot_use")));
 				return true;
 			}
 		}
 
 		if (args.length == 0) {
-			sender.sendMessage(ChatUtils.chatMessage("&cYou must enter a player's username!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "seen <player>")));
 			return true;
 		} else {
 			UUID uuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
@@ -74,7 +75,7 @@ public class CommandSeen implements CommandExecutor {
 
 				boolean isOnline = offlinePlayer.isOnline() || remotePlayer != null;
 				if (isOnline) {
-					sender.sendMessage(ChatUtils.chatMessage(rankPrefix + "&e" + displayName + " &7is currently online"));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.get("seen.online", "prefix", rankPrefix, "player", displayName)));
 					return true;
 				} else {
 					if (sender instanceof Player player) {
@@ -87,16 +88,16 @@ public class CommandSeen implements CommandExecutor {
 								zoneId,
 								sender
 							);
-							sender.sendMessage(ChatUtils.chatMessage(finalRankPrefix + "&e" + finalDisplayName + " &7was last seen " + result));
+							sender.sendMessage(ChatUtils.chatMessage(Lang.get("seen.last_seen", "prefix", finalRankPrefix, "player", finalDisplayName, "date", result)));
 						});
 					} else {
 						String result = calculateDisplayDate(offlinePlayer, aranarthPlayer, ZoneId.systemDefault(), sender);
-						sender.sendMessage(ChatUtils.chatMessage(rankPrefix + "&e" + displayName + " &7was last seen " + result));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.get("seen.last_seen", "prefix", rankPrefix, "player", displayName, "date", result)));
 					}
 					return true;
 				}
 			} else {
-				sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found!"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[0])));
 				return true;
 			}
 		}

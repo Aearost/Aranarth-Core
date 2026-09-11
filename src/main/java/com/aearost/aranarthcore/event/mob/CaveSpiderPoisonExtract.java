@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.mob;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.CaveSpider;
@@ -50,7 +51,7 @@ public class CaveSpiderPoisonExtract {
         UUID spiderId = e.getRightClicked().getUniqueId();
         int count = extractionCounts.getOrDefault(spiderId, 0);
         if (count >= MAX_EXTRACTIONS) {
-            player.sendMessage(ChatUtils.chatMessage("&7This cave spider has no venom left"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("spider.no_venom")));
             return;
         }
         extractionCounts.put(spiderId, count + 1);
@@ -71,6 +72,6 @@ public class CaveSpiderPoisonExtract {
         }
 
         player.playSound(player.getLocation(), Sound.ENTITY_COW_MILK, 1.0f, 1.7f);
-        player.sendMessage(ChatUtils.chatMessage("&aYou extract the venom from the cave spider"));
+        player.sendMessage(ChatUtils.chatMessage(Lang.get("spider.extract")));
     }
 }

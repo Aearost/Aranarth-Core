@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -182,7 +183,7 @@ public class BannerExtendPatternLimit {
                 player.setItemOnCursor(onCursor);
 
                 if (cursorMeta.getPatterns().size() > 6) {
-                    player.sendMessage(ChatUtils.chatMessage("&7You have exceeded the banner pattern limit of 6 - proceed with caution!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("banner.pattern_limit")));
                 }
             });
         } else {

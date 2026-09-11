@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands.council;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -19,12 +20,12 @@ public class CommandSpeed {
 		if (sender instanceof Player player) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (aranarthPlayer.getCouncilRank() == 0 && aranarthPlayer.getArchitectRank() == 0) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 				return false;
 			}
 
 			if (args.length < 2) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou must enter a speed!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("speed.must_enter")));
 				return true;
 			}
 
@@ -39,20 +40,20 @@ public class CommandSpeed {
 				}
 				speed = speed / 10;
 			} catch (NumberFormatException e) {
-				player.sendMessage(ChatUtils.chatMessage("&cThe speed must be between 1 and 10!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("speed.must_enter_range")));
 				return true;
 			}
 
 			if (player.isFlying()) {
-				player.sendMessage(ChatUtils.chatMessage("&7You have updated your flying speed from &e" + (player.getFlySpeed() * 10) + " &7to &e" + (speed * 10)));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("speed.set_success", "player", player.getName(), "value", String.valueOf(speed * 10))));
 				player.setFlySpeed(speed);
 			} else {
-				player.sendMessage(ChatUtils.chatMessage("&7You have updated your walking speed from &e" + (player.getWalkSpeed() * 10) + " &7to &e" + (speed * 10)));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("speed.set_success", "player", player.getName(), "value", String.valueOf(speed * 10))));
 				player.setWalkSpeed(speed);
 			}
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to execute this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 			return true;
 		}
 	}

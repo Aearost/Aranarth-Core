@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -43,10 +44,10 @@ public class GuiWarpClick {
 								if (heldItem != Material.AIR) {
 									e.setCancelled(true);
 									if (heldItem == warp.getIcon()) {
-										player.sendMessage(ChatUtils.chatMessage("&cThis warp already uses that icon!"));
+										player.sendMessage(ChatUtils.chatMessage(Lang.get("warp.icon_same")));
 									} else {
 										AranarthUtils.updateWarp(warp.getName(), warp.getLocation(), heldItem);
-										player.sendMessage(ChatUtils.chatMessage("&e" + warp.getName() + "&7's icon is now &e" + ChatUtils.getFormattedItemName(heldItem.name())));
+										player.sendMessage(ChatUtils.chatMessage(Lang.get("warp.icon_set", "name", warp.getName(), "icon", ChatUtils.getFormattedItemName(heldItem.name()))));
 									}
 									player.closeInventory();
 									return;
@@ -55,9 +56,9 @@ public class GuiWarpClick {
 
 							AranarthUtils.teleportPlayer(player, player.getLocation(), warp.getLocation(), aranarthPlayer.isInAdminMode(), warp.getName(), "&7You have teleported to " + warp.getName(), success -> {
 								if (success) {
-									player.sendMessage(ChatUtils.chatMessage("&7You have warped to &e" + warp.getName()));
+									player.sendMessage(ChatUtils.chatMessage(Lang.get("warp.teleported", "name", warp.getName())));
 								} else {
-									player.sendMessage(ChatUtils.chatMessage("&cYou could not warp to &e" + warp.getName()));
+									player.sendMessage(ChatUtils.chatMessage(Lang.get("warp.teleport_failed", "name", warp.getName())));
 								}
 							});
 
@@ -66,7 +67,7 @@ public class GuiWarpClick {
 						}
 					}
 					player.closeInventory();
-					player.sendMessage(ChatUtils.chatMessage("&cSomething with wrong with teleporting to that warp..."));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("general.error")));
 				}
 			}
 		}

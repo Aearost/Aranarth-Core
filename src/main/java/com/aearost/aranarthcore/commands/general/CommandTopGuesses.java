@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.gui.GuiTopGuesses;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -18,7 +19,7 @@ public class CommandTopGuesses implements CommandExecutor {
 			GuiTopGuesses.open(player, 0);
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 			return true;
 		}
 	}

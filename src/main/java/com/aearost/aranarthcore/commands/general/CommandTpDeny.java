@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -33,10 +34,10 @@ public class CommandTpDeny implements CommandExecutor {
 				String targetNickname = AranarthUtils.getNickname(Bukkit.getOfflinePlayer(aranarthPlayer.getTeleportToUuid()));
 				// If both players are still online
 				if (target != null) {
-					target.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has denied your teleport request"));
-					player.sendMessage(ChatUtils.chatMessage("&7You have denied &e" + targetNickname + "&e's &7teleport request"));
+					target.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.request_denied_notify", "player", aranarthPlayer.getNickname())));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.denied_request", "player", targetNickname)));
 				} else {
-					player.sendMessage(ChatUtils.chatMessage("&e" + targetNickname + " &cis no longer online"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("player.no_longer_online", "player", targetNickname)));
 				}
 				// If the player logged off, the request should be cleared
 				aranarthPlayer.setTeleportToUuid(null);
@@ -48,10 +49,10 @@ public class CommandTpDeny implements CommandExecutor {
 				String targetNickname = AranarthUtils.getNickname(Bukkit.getOfflinePlayer(aranarthPlayer.getTeleportFromUuid()));
 				// If both players are still online
 				if (target != null) {
-					target.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has denied your teleport request"));
-					player.sendMessage(ChatUtils.chatMessage("&7You have denied &e" + targetNickname + "&e's &7teleport request"));
+					target.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.request_denied_notify", "player", aranarthPlayer.getNickname())));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.denied_request", "player", targetNickname)));
 				} else {
-					player.sendMessage(ChatUtils.chatMessage("&e" + targetNickname + " &cis no longer online"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("player.no_longer_online", "player", targetNickname)));
 				}
 				// If the player logged off, the request should be cleared
 				aranarthPlayer.setTeleportToUuid(null);
@@ -68,20 +69,20 @@ public class CommandTpDeny implements CommandExecutor {
 					aranarthPlayer.setTeleportToUuid(null);
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
-					player.sendMessage(ChatUtils.chatMessage("&7You have denied &e" + ctx.remotePlayerNickname() + "&7's teleport request"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.denied_request", "player", ctx.remotePlayerNickname())));
 					NetworkManager.getInstance().publishTpDenied(
 							player.getUniqueId(), localNickname,
 							ctx.remotePlayerUuid());
 				} else {
-					player.sendMessage(ChatUtils.chatMessage("&cYou do not have any pending teleport requests!"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.no_pending_request")));
 				}
 				return true;
 			} else {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have any pending teleport requests!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.no_pending_request")));
 				return true;
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 			return true;
 		}
     }

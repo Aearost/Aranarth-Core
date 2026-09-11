@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.items.GodAppleFragment;
 import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.gmail.nossr50.api.TreeFellerBlockBreakEvent;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
 import com.gmail.nossr50.skills.woodcutting.WoodcuttingManager;
@@ -110,7 +111,7 @@ public class LeafDropsListener implements Listener {
 
 							// If the player is within 48 blocks of the spawn location
 							if (block.getLocation().distance(player.getLocation()) <= 48) {
-								player.sendMessage(ChatUtils.chatMessage("&7A god apple fragment has dropped nearby"));
+								player.sendMessage(ChatUtils.chatMessage(Lang.get("leaf.god_apple_nearby")));
 							}
 						}
 					}
@@ -165,7 +166,7 @@ public class LeafDropsListener implements Listener {
 
 						// If the player is within 48 blocks of the spawn location
 						if (block.getLocation().distance(player.getLocation()) <= 48) {
-							player.sendMessage(ChatUtils.chatMessage("&7A god apple fragment has dropped nearby"));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("leaf.god_apple_nearby")));
 						}
 					}
 				}

@@ -2370,7 +2370,7 @@ public class DateUtils {
                         }
                     }
                 }
-                message = ChatUtils.chatMessage("&7&oIt has started to rain...");
+                message = ChatUtils.chatMessage(Lang.get("weather.started_rain"));
             } else if (type == Weather.THUNDER) {
                 for (World w : weatherWorlds) {
                     w.setClearWeatherDuration(0);
@@ -2391,7 +2391,7 @@ public class DateUtils {
                         }
                     }
                 }
-                message = ChatUtils.chatMessage("&7&oA thunderstorm has started...");
+                message = ChatUtils.chatMessage(Lang.get("weather.started_thunderstorm"));
             } else if (type == Weather.SNOW) {
                 for (World w : weatherWorlds) {
                     w.setThunderDuration(0);
@@ -2412,7 +2412,7 @@ public class DateUtils {
                         }
                     }
                 }
-                message = ChatUtils.chatMessage("&7&oIt has started to snow...");
+                message = ChatUtils.chatMessage(Lang.get("weather.started_snow"));
             } else {
                 Bukkit.getLogger().info("[AC] Something went wrong with starting the storm...");
                 AranarthUtils.setWeather(Weather.CLEAR);
@@ -2439,7 +2439,7 @@ public class DateUtils {
                     }
                 }
             }
-            message = ChatUtils.chatMessage("&7&oThe storm has subsided...");
+            message = ChatUtils.chatMessage(Lang.get("weather.storm_subsided"));
         }
         for (Player player : Bukkit.getOnlinePlayers()) {
             String playerWorld = player.getWorld().getName();

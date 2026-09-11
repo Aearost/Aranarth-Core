@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.gui.GuiRanks;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -25,7 +26,7 @@ public class CommandRanks implements CommandExecutor {
 			GuiRanks gui = new GuiRanks(player);
 			gui.openGui();
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to execute this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 		}
 		return true;
 	}

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.crafting;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.block.CrafterCraftEvent;
@@ -37,12 +38,12 @@ public class CraftingOverridesArrows {
             }
 
             if (is.getType() == Material.FLINT) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou must craft an arrowhead in a Fletching Table!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.arrowhead_fletching")));
                 e.setCancelled(true);
                 return;
             }
 
-            player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this item as an ingredient!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.cannot_use_ingredient")));
             e.setCancelled(true);
         }
     }

@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.AranarthVote;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -23,19 +24,19 @@ public class CommandVpEdit {
 		if (sender instanceof Player player) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (aranarthPlayer.getCouncilRank() < 3) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 				return true;
 			}
 		}
 
 		if (args.length != 3) {
-			sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac vpedit <username> <+amount|-amount>"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac vpedit <username> <+amount|-amount>")));
 			return true;
 		}
 
 		String amountArg = args[2];
 		if (!amountArg.startsWith("+") && !amountArg.startsWith("-")) {
-			sender.sendMessage(ChatUtils.chatMessage("&cThe amount must be increasing or decreasing!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("vpedit.must_be_signed")));
 			return true;
 		}
 
@@ -43,12 +44,12 @@ public class CommandVpEdit {
 		try {
 			amount = Integer.parseInt(amountArg);
 		} catch (NumberFormatException e) {
-			sender.sendMessage(ChatUtils.chatMessage("&cThat is not a valid number!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_number")));
 			return true;
 		}
 
 		if (amount == 0) {
-			sender.sendMessage(ChatUtils.chatMessage("&cAmount cannot be zero!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.amount_zero")));
 			return true;
 		}
 
@@ -61,7 +62,7 @@ public class CommandVpEdit {
 		}
 
 		if (target == null) {
-			sender.sendMessage(ChatUtils.chatMessage("&cThat player was not found!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
 			return true;
 		}
 
@@ -78,8 +79,8 @@ public class CommandVpEdit {
 
 		AranarthUtils.addVote(new AranarthVote(target.getUniqueId(), amount, System.currentTimeMillis()));
 
-		String sign = amount > 0 ? "&a+" : "&c";
-		sender.sendMessage(ChatUtils.chatMessage("&7Updated &e" + displayName + "&7's vote points by " + sign + amount));
+		int total = AranarthUtils.getAvailableVotePoints(target.getUniqueId());
+		sender.sendMessage(ChatUtils.chatMessage(Lang.get("vpedit.success", "player", displayName, "amount", String.valueOf(amount), "total", String.valueOf(total))));
 
 		if (target.isOnline()) {
 			Player onlineTarget = target.getPlayer();

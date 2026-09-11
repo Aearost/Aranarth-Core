@@ -1817,7 +1817,7 @@ public class AranarthUtils {
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
                 if (offlinePlayer.isOnline()) {
                     Player player = Bukkit.getPlayer(uuid);
-                    player.sendMessage(ChatUtils.chatMessage("&7You are no longer muted"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("mute.no_longer_muted")));
                 }
             }
         }
@@ -2025,11 +2025,11 @@ public class AranarthUtils {
         } else {
             AranarthPlayer aranarthPlayerCheck = getPlayer(player.getUniqueId());
             if (aranarthPlayerCheck != null && !aranarthPlayerCheck.getCombatLogTime().isEmpty()) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou cannot teleport while in combat!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.combat_tagged")));
                 resultCallback.accept(false);
                 return;
             }
-            player.sendMessage(ChatUtils.chatMessage("&7You will be teleported in &e3 seconds!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.countdown")));
             initiateTeleport(player, () -> {
                 boolean result = handleTeleportLogic(player, from, to);
                 if (result) {
@@ -2078,7 +2078,7 @@ public class AranarthUtils {
         Location locToTeleportTo = getSafeTeleportLocation(to);
         // If i.e over the void
         if (locToTeleportTo == null) {
-            player.sendMessage(ChatUtils.chatMessage("&cThis teleport location is unsafe!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.failed")));
             return false;
         }
 
@@ -2157,7 +2157,7 @@ public class AranarthUtils {
 
             return true;
         } catch (IOException e) {
-            player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.error_changing_world")));
             return false;
         }
     }
@@ -2684,16 +2684,16 @@ public class AranarthUtils {
             // to avoid duplicate messages when both servers independently receive a boost event.
             if (!AranarthCore.isSmpServer()) {
                 if (uuid == null) {
-                    Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied"));
+                    Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("boost.applied", "boost", name)));
                     if (AranarthCore.isPublicServer()) {
                         DiscordUtils.updateBoostInDiscord(null, boost, true, fromVoteShop);
                     }
                 } else {
                     AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
                     if (fromVoteShop) {
-                        Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " &7used vote points to purchase the " + name));
+                        Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("boost.player_purchased", "player", aranarthPlayer.getNickname(), "boost", name)));
                     } else {
-                        Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied by &e" + aranarthPlayer.getNickname()));
+                        Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("boost.player_applied", "player", aranarthPlayer.getNickname(), "boost", name)));
                     }
                     if (AranarthCore.isPublicServer()) {
                         DiscordUtils.updateBoostInDiscord(uuid, boost, true, fromVoteShop);
@@ -2747,7 +2747,7 @@ public class AranarthUtils {
                 name = "&7&lUnspecified Boost";
             }
             if (!AranarthCore.isSmpServer()) {
-                Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
+                Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("boost.expired", "boost", name)));
                 if (AranarthCore.isPublicServer()) {
                     DiscordUtils.updateBoostInDiscord(null, boost, false, false);
                     DiscordUtils.sendBoostExpiredToDiscord(boost);
@@ -2852,7 +2852,7 @@ public class AranarthUtils {
             sentBoostReminders.remove(boost.name() + "_1");
             // Only Survival broadcasts and notifies Discord/network
             if (!AranarthCore.isSmpServer()) {
-                Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
+                Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("boost.expired", "boost", name)));
                 if (AranarthCore.isPublicServer()) {
                     DiscordUtils.updateBoostInDiscord(null, boost, false, false);
                     DiscordUtils.sendBoostExpiredToDiscord(boost);
@@ -2889,7 +2889,7 @@ public class AranarthUtils {
                 if (minutesLeft == thresholds[i] && !sentBoostReminders.contains(key)) {
                     sentBoostReminders.add(key);
                     if (!AranarthCore.isSmpServer()) {
-                        Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7expires in " + labels[i] + "&7!"));
+                        Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("boost.expires_in", "boost", name, "time", labels[i])));
                         if (discordLabels[i] != null && AranarthCore.isPublicServer()) {
                             DiscordUtils.sendBoostReminderToDiscord(boost, discordLabels[i]);
                         }
@@ -3732,13 +3732,13 @@ public class AranarthUtils {
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (player.getWorld().getName().equals(onlinePlayer.getWorld().getName())) {
                     if (onlinePlayer.getName().equals(player.getName())) {
-                        onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You have used the &eHorn of " + hornName));
+                        onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("horn.used", "horn", hornName)));
                         continue;
                     }
 
                     if (player.getWorld().equals(onlinePlayer.getWorld())) {
                         if (player.getLocation().distance(onlinePlayer.getLocation()) <= 256) {
-                            onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has used the &eHorn of " + hornName));
+                            onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("horn.player_used", "player", aranarthPlayer.getNickname(), "horn", hornName)));
                         }
                     }
                 }
@@ -3759,7 +3759,7 @@ public class AranarthUtils {
             long remainder = (horns.get(hornWithLongestCooldown) + getHornCooldown(hornWithLongestCooldown)) - System.currentTimeMillis();
             remainder = remainder / 1000;
             int seconds = (int) remainder;
-            player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a horn again for another &e" + seconds + " &cseconds!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("horn.cooldown", "seconds", seconds)));
             return false;
         }
     }
@@ -3904,9 +3904,9 @@ public class AranarthUtils {
 
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
-                    onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You are now AFK"));
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("afk.now_afk")));
                 } else {
-                    onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is now AFK"));
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("afk.player_now_afk", "name", aranarthPlayer.getNickname())));
                 }
             }
             Bukkit.getLogger().info("[AC] " + ChatUtils.translateToColor(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " is now AFK"));
@@ -3921,9 +3921,9 @@ public class AranarthUtils {
             aranarthPlayer.setAfkStartTime(0);
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
-                    onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You are no longer AFK"));
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("afk.no_longer_afk")));
                 } else {
-                    onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is no longer AFK"));
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("afk.player_no_longer_afk", "name", aranarthPlayer.getNickname())));
                 }
             }
             Bukkit.getLogger().info("[AC] " + ChatUtils.translateToColor(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " is no longer AFK"));

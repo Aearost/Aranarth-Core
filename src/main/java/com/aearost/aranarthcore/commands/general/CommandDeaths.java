@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -29,7 +30,7 @@ public class CommandDeaths implements CommandExecutor {
 			// List their own deaths
 			if (args.length == 0) {
 				int deathCount = AranarthUtils.getKillsOrDeathsInWorld(player.getUniqueId(), player.getWorld(), false);
-				player.sendMessage(ChatUtils.chatMessage("&7You have &c" + deathCount + " deaths"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("deaths.self", "count", deathCount)));
 				return true;
 			} else {
 				java.util.UUID targetUuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
@@ -49,14 +50,14 @@ public class CommandDeaths implements CommandExecutor {
 							displayName = bukkit != null ? bukkit : args[0];
 						}
 					}
-					player.sendMessage(ChatUtils.chatMessage("&e" + displayName + " &7has &c" + deathCount + " deaths"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("deaths.other", "player", displayName, "count", deathCount)));
 				} else {
-					player.sendMessage(ChatUtils.chatMessage("&e" + args[0] + " &ccould not be found"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[0])));
 				}
 				return true;
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to execute this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 			return true;
 		}
 	}

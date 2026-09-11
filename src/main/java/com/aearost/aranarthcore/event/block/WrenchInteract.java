@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.gui.GuiWrench;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
@@ -46,7 +47,7 @@ public class WrenchInteract {
 
         // Check that this block actually has properties
         if (GuiWrench.buildPropertyItems(data).isEmpty()) {
-            player.sendMessage(ChatUtils.chatMessage("&cThis block has no properties"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("wrench.no_properties")));
             return;
         }
 
@@ -65,7 +66,7 @@ public class WrenchInteract {
                 if (newDamage >= damageable.getMaxDamage()) {
                     player.getInventory().setItemInMainHand(null);
                     player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1f, 1f);
-                    player.sendMessage(ChatUtils.chatMessage("&cYour Wrench has broken!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("wrench.broken")));
                     return;
                 }
                 damageable.setDamage(newDamage);

@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.event.listener.misc.PotionEffectListener;
 import com.aearost.aranarthcore.event.mob.MountListener;
 import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.AvatarAbility;
@@ -159,7 +160,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
         }
 
         if (bPlayer.isAvatarState()) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou must exit the " + Element.AVATAR.getColor() + "AvatarState &cto do this"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.avatar_state_exit", "color", Element.AVATAR.getColor())));
             return;
         }
 
@@ -190,12 +191,12 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
 
     private void handleActive() {
         if (bPlayer.isAvatarState()) {
-            player.sendMessage(ChatUtils.chatMessage("&cThe Avatar State disrupts your connection to your past lives!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.past_lives_avatar_disrupts")));
             endAbility(true);
             return;
         }
         if (System.currentTimeMillis() - getStartTime() >= duration) {
-            player.sendMessage(ChatUtils.chatMessage("&5Your connection to your past lives has faded"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.past_lives_faded")));
             endAbility(true);
             return;
         }
@@ -277,7 +278,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
         this.state = State.ACTIVE;
         MultiAbilityManager.unbindMultiAbility(player);
         player.playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 1.0f, 0.7f);
-        player.sendMessage(ChatUtils.chatMessage("&5You have channeled the spirit of &dAvatar " + form.getDisplayName() + "&5!"));
+        player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.past_lives_channeled", "name", form.getDisplayName())));
         switch (form) {
             case WAN      -> activateWan();
             case SZETO    -> activateSzeto();
@@ -306,7 +307,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
 
     public void endAbility(final boolean applyCooldown) {
         if (activeForm != null) {
-            player.sendMessage(ChatUtils.chatMessage("&5Your connection to &dAvatar " + activeForm.getDisplayName() + " &5has faded"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.past_lives_connection_faded", "name", activeForm.getDisplayName())));
             removeFormEffects();
         }
         if (applyCooldown) {
@@ -322,7 +323,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
 
     public void endAbilityWithCooldown(final long overrideCooldownMs) {
         if (activeForm != null) {
-            player.sendMessage(ChatUtils.chatMessage("&5Your connection to &dAvatar " + activeForm.getDisplayName() + " &5has faded"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.past_lives_connection_faded", "name", activeForm.getDisplayName())));
             removeFormEffects();
         }
         bPlayer.addCooldown(getName(), overrideCooldownMs);
@@ -511,7 +512,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
 
     private void activateRoku() {
         if (player.getWorld().getName().equalsIgnoreCase("arena")) {
-            player.sendMessage(ChatUtils.chatMessage("&cFang cannot fly in the arena!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.past_lives_fang_arena")));
             remove();
             return;
         }
@@ -721,7 +722,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
     public void onFangDeath() {
         fangInstances.remove(fangUUID);
         fangUUID = null;
-        player.sendMessage(ChatUtils.chatMessage("&cFang has fallen! You must wait before calling upon Roku again."));
+        player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.past_lives_fang_fallen")));
         bPlayer.addCooldown(getName(), ROKU_DEATH_COOLDOWN_MS);
         remove();
     }

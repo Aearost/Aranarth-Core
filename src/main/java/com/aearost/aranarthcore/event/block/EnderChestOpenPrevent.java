@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.DiscordUtils;
 import org.bukkit.Material;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -16,7 +17,7 @@ public class EnderChestOpenPrevent {
 				if (e.getPlayer().getWorld().getName().equalsIgnoreCase("creative")) {
 					if (!e.getPlayer().isOp()) {
 						e.setCancelled(true);
-						e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot open an enderchest in creative!"));
+						e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("access.cannot_ender_creative")));
 						DiscordUtils.createNotification(e.getPlayer().getName() + " tried to open an enderchest in creative", e.getPlayer().getUniqueId());
 					}
 				}

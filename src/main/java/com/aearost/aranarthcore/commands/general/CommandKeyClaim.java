@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.items.key.KeyRare;
 import com.aearost.aranarthcore.items.key.KeyVote;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -28,13 +29,13 @@ public class CommandKeyClaim implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
             return true;
         }
 
         String worldName = player.getWorld().getName();
         if (!AranarthUtils.isSurvivalWorld(worldName)) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou can only claim crate keys in survival worlds!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.wrong_world")));
             return true;
         }
 
@@ -55,7 +56,7 @@ public class CommandKeyClaim implements CommandExecutor {
                 || (pendingGodly != null && pendingGodly > 0);
 
         if (!hasPending) {
-            player.sendMessage(ChatUtils.chatMessage("&7You have no pending crate keys to claim!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.no_keys")));
             return true;
         }
 
@@ -107,14 +108,14 @@ public class CommandKeyClaim implements CommandExecutor {
         }
 
         if (totalClaimed == 0) {
-            player.sendMessage(ChatUtils.chatMessage("&cYour inventory is full - make some room and try again."));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.claim_inventory_full")));
         } else if (totalRemaining > 0) {
             String keyWordClaimed = totalClaimed > 1 ? "keys" : "key";
             String keyWordRemaining = totalRemaining > 1 ? "keys" : "key";
-            player.sendMessage(ChatUtils.chatMessage("&7You have claimed &e" + totalClaimed + " " + keyWordClaimed));
-            player.sendMessage(ChatUtils.chatMessage("&cYour inventory is full - you still have &e" + totalRemaining + " " + keyWordRemaining + " &7to claim"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.claimed_partial", "count", String.valueOf(totalClaimed), "word", keyWordClaimed)));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.claim_partial_full", "count", String.valueOf(totalRemaining), "word", keyWordRemaining)));
         } else {
-            player.sendMessage(ChatUtils.chatMessage("&7You have claimed all of your pending keys!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.claimed_all")));
         }
 
         // Immediately persist the updated (reduced) key counts so the other server can't

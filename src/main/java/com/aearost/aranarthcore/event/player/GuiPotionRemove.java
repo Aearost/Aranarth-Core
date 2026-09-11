@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -93,7 +94,7 @@ public class GuiPotionRemove {
 					aranarthPlayer.setPotions(potions);
 					aranarthPlayer.setPotionQuantityToRemove(0);
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-					player.sendMessage(ChatUtils.chatMessage("&7You have removed &e" + amountRemoved + " &7potions"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("potions.removed", "count", amountRemoved)));
 
 					for (ItemStack potionBeingAdded : potionsToRemove) {
 						HashMap<Integer, ItemStack> nonAdded = player.getInventory().addItem(potionBeingAdded);

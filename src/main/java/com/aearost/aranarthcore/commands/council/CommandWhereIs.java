@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -27,13 +28,13 @@ public class CommandWhereIs {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.whereis")) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 				return true;
 			}
 		}
 
 		if (args.length == 1) {
-			sender.sendMessage(ChatUtils.chatMessage("&cYou must enter a player's username!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.specify_player")));
 			return true;
 		}
 
@@ -43,11 +44,12 @@ public class CommandWhereIs {
 		for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 			if (targetName.equalsIgnoreCase(onlinePlayer.getName())) {
 				Location location = onlinePlayer.getLocation();
-				sender.sendMessage(ChatUtils.chatMessage(onlinePlayer.getDisplayName()
-						+ " &7is in &e" + location.getWorld().getName()
-						+ " &7at &ex: " + location.getBlockX()
-						+ " | y: " + location.getBlockY()
-						+ " | z: " + location.getBlockZ()));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("whereis.online_local",
+						"player", onlinePlayer.getDisplayName(),
+						"world", location.getWorld().getName(),
+						"x", String.valueOf(location.getBlockX()),
+						"y", String.valueOf(location.getBlockY()),
+						"z", String.valueOf(location.getBlockZ()))));
 				return true;
 			}
 		}
@@ -57,8 +59,9 @@ public class CommandWhereIs {
 			for (Map.Entry<UUID, NetworkPlayer> entry : NetworkManager.getInstance().getRemoteRoster().entrySet()) {
 				NetworkPlayer np = entry.getValue();
 				if (targetName.equalsIgnoreCase(np.getUsername())) {
-					sender.sendMessage(ChatUtils.chatMessage("&e" + np.getUsername()
-							+ " &7is currently online on the &e" + np.getServer().toUpperCase() + " &7server"));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.get("whereis.online_remote",
+							"player", np.getUsername(),
+							"server", np.getServer().toUpperCase())));
 					return true;
 				}
 			}
@@ -76,17 +79,18 @@ public class CommandWhereIs {
 		if (uuid != null && DatabaseManager.isActive()) {
 			DatabaseManager.LastLocation last = DatabaseManager.getInstance().loadLastLocation(uuid);
 			if (last != null) {
-				sender.sendMessage(ChatUtils.chatMessage("&e" + targetName
-						+ " &7was last seen on the &e" + last.server.toUpperCase()
-						+ " &7server in &e" + last.world
-						+ " &7at &ex: " + (int) last.x
-						+ " | y: " + (int) last.y
-						+ " | z: " + (int) last.z));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("whereis.offline",
+						"player", targetName,
+						"server", last.server.toUpperCase(),
+						"world", last.world,
+						"x", String.valueOf((int) last.x),
+						"y", String.valueOf((int) last.y),
+						"z", String.valueOf((int) last.z))));
 				return true;
 			}
 		}
 
-		sender.sendMessage(ChatUtils.chatMessage("&cThat player could not be found!"));
+		sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", targetName)));
 		return true;
 	}
 

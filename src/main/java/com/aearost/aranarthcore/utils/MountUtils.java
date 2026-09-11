@@ -70,7 +70,7 @@ public class MountUtils {
     public static void summonMount(Player player, String element) {
         String worldName = player.getWorld().getName();
         if (worldName.equals("spawn") || worldName.equals("arena") || worldName.equals("creative")) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou cannot summon a mount in this world!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("mount.wrong_world")));
             return;
         }
 
@@ -93,7 +93,7 @@ public class MountUtils {
         }
 
         if (player.getVehicle() != null) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou must exit this vehicle before calling your mount"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("mount.must_exit_vehicle")));
             return;
         }
 
@@ -117,7 +117,7 @@ public class MountUtils {
         Entity entity = Bukkit.getEntity(mountId);
         if (!(entity instanceof LivingEntity mount)) {
             unregisterActive(mountId);
-            player.sendMessage(ChatUtils.chatMessage("&cYour mount could not be found"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("mount.not_found")));
             return;
         }
 

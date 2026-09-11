@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands.council;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.command.CommandSender;
 
 /**
@@ -16,12 +17,12 @@ public class CommandDiscordReload {
 	 */
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (!AranarthCore.isPublicServer()) {
-			sender.sendMessage(ChatUtils.chatMessage("&cThis command cannot be used on the test server."));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("discord.test_server_only")));
 			return false;
 		}
-		sender.sendMessage(ChatUtils.chatMessage("&7Refreshing Discord roles for all linked accounts..."));
+		sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.discord_refresh")));
 		DiscordUtils.updateAllDiscordRoles();
-		sender.sendMessage(ChatUtils.chatMessage("&aDiscord role refresh complete."));
+		sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.discord_refresh_done")));
 		return true;
 	}
 }

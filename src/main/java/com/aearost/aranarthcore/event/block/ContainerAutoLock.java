@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -88,7 +89,7 @@ public class ContainerAutoLock {
             trusted.add(e.getPlayer().getUniqueId());
             LockedContainer lockedContainer = new LockedContainer(e.getPlayer().getUniqueId(), trusted, new Location[] { placed.getLocation(), null });
             AranarthUtils.addLockedContainer(lockedContainer);
-            e.getPlayer().sendMessage(ChatUtils.chatMessage("&7This container has been locked"));
+            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("lock.locked")));
         }
     }
 

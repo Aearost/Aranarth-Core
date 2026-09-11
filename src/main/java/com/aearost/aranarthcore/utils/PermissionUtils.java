@@ -1049,7 +1049,7 @@ public class PermissionUtils {
                 aranarthPlayer.setSaintExpireDate(0);
                 aranarthPlayer.setSaintRank(0);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                player.sendMessage(ChatUtils.chatMessage("&7Your monthly &dSaint &7rank has expired!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("rank.saint_expired")));
             }
         }
     }

@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands.general;
 import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -40,7 +41,7 @@ public class CommandBoosts implements CommandExecutor {
 			}
 
 			if (args.length <= 1) {
-				sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/boosts <add/remove> <type> [user]"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "boosts <add/remove> <type> [user]")));
 				return true;
 			} else {
 				if (args[0].equals("add") || args[0].equals("remove")) {
@@ -68,11 +69,11 @@ public class CommandBoosts implements CommandExecutor {
 							return true;
 						}
 					} else {
-						sender.sendMessage(ChatUtils.chatMessage("&cThe entered boost does not exist!"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.get("boost.not_found")));
 						return true;
 					}
 				} else {
-					sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/boosts <add/remove> <type> <user>"));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "boosts <add/remove> <type> <user>")));
 					return true;
 				}
 			}
@@ -83,7 +84,7 @@ public class CommandBoosts implements CommandExecutor {
 	private void displayBoosts(CommandSender sender) {
 		HashMap<Boost, LocalDateTime> boosts = AranarthUtils.getServerBoosts();
 		if (boosts.isEmpty()) {
-			sender.sendMessage(ChatUtils.chatMessage("&7There are currently no active server boosts"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("boost.no_active")));
 		} else {
 			sender.sendMessage(ChatUtils.translateToColor("&8      - - - &6&lActive Server Boosts &8- - -"));
 			HashMap<String, String> activeBoosts = AranarthUtils.getActiveServerBoostsMessages();

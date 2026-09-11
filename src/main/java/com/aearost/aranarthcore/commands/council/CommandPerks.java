@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.objects.Perk;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PermissionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -28,7 +29,7 @@ public class CommandPerks {
     public static boolean onCommand(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
             if (!player.hasPermission("aranarth.perk.modify")) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
                 return true;
             }
         }
@@ -58,7 +59,7 @@ public class CommandPerks {
                 sender.sendMessage(ChatUtils.translateToColor("&6InvisibleArmor: &e" + perks.get(Perk.INVISIBLEARMOR)));
                 return true;
             } else {
-                sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found"));
+                sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
                 return true;
             }
         }
@@ -85,7 +86,7 @@ public class CommandPerks {
                                 }
 
                                 boolean isSilent = args.length == 4 && args[3].equalsIgnoreCase("silent");
-                                String message = "&e" + aranarthPlayer.getNickname() + " &7has purchased the &4&lAdditional 3 Homes &7perk!";
+                                String message = Lang.get("perk.purchased_homes", "player", aranarthPlayer.getNickname());
                                 if (sender instanceof Player || !AranarthCore.isSmpServer()) {
                                     String formatted = ChatUtils.chatMessage(message);
                                     for (Player online : Bukkit.getOnlinePlayers()) {
@@ -102,20 +103,20 @@ public class CommandPerks {
 
                                 return true;
                             } else {
-                                sender.sendMessage(ChatUtils.chatMessage("&cThis player already has 15 homes!"));
+                                sender.sendMessage(ChatUtils.chatMessage(Lang.get("perk.max_homes")));
                                 return true;
                             }
                         } else {
-                            sender.sendMessage(ChatUtils.chatMessage("&cThis is not a valid perk!"));
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.get("perk.invalid")));
                             return true;
                         }
                     } else {
-                        sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found"));
+                        sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
                         return true;
                     }
                 }
             }
-            sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac perks <player> <perk> <value>"));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac perks <player> <perk> <value>")));
             return true;
         } else {
             UUID uuid = AranarthUtils.getUUIDFromUsername(args[1]);
@@ -167,7 +168,7 @@ public class CommandPerks {
 
                             boolean isSilent = args.length >= 5 && args[4].equalsIgnoreCase("silent");
                             if (!args[3].equals("0")) {
-                                String message = "&e" + aranarthPlayer.getNickname() + " &7has purchased the " + perk + " &7perk!";
+                                String message = Lang.get("perk.purchased", "player", aranarthPlayer.getNickname(), "perk", perk);
                                 if (sender instanceof Player || !AranarthCore.isSmpServer()) {
                                     String formatted = ChatUtils.chatMessage(message);
                                     for (Player online : Bukkit.getOnlinePlayers()) {
@@ -182,16 +183,16 @@ public class CommandPerks {
                                     }
                                 }
                             } else {
-                                sender.sendMessage(ChatUtils.chatMessage("&7The " + perk + " &7perk has been removed from &e" + aranarthPlayer.getNickname()));
+                                sender.sendMessage(ChatUtils.chatMessage(Lang.get("perk.updated", "perk", perk, "player", aranarthPlayer.getNickname(), "value", args[3])));
                                 // If the sender is either console or if the sender player is not the one the perk is being applied to
                                 if (Bukkit.getOfflinePlayer(uuid).isOnline() &&
                                         (!(sender instanceof Player) || sender instanceof Player senderPlayer && !senderPlayer.getUniqueId().equals(uuid))) {
                                     Player player = Bukkit.getPlayer(uuid);
-                                    player.sendMessage(ChatUtils.chatMessage("&7Your " + perk + " &7has been removed"));
+                                    player.sendMessage(ChatUtils.chatMessage(Lang.get("perk.removed", "perk", perk)));
                                 }
                             }
                         } else {
-                            sender.sendMessage(ChatUtils.chatMessage("&cThat is not an appropriate value!"));
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.get("perk.invalid_value")));
                         }
                         return true;
                     } else if (args[2].equals("homes")) {
@@ -207,7 +208,7 @@ public class CommandPerks {
 
                             boolean isSilent = args.length >= 5 && args[4].equalsIgnoreCase("silent");
                             if (!args[3].equals("0")) {
-                                String message = "&e" + aranarthPlayer.getNickname() + " &7has purchased the &4&lAdditional 3 Homes &7perk!";
+                                String message = Lang.get("perk.purchased_homes", "player", aranarthPlayer.getNickname());
                                 if (sender instanceof Player || !AranarthCore.isSmpServer()) {
                                     String formatted = ChatUtils.chatMessage(message);
                                     for (Player online : Bukkit.getOnlinePlayers()) {
@@ -223,7 +224,7 @@ public class CommandPerks {
                                 }
                             }
                         } else {
-                            sender.sendMessage(ChatUtils.chatMessage("&cThat is not an appropriate value!"));
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.get("perk.invalid_value")));
                         }
                         return true;
                     } else if (args[2].equals("discord")) {
@@ -235,7 +236,7 @@ public class CommandPerks {
 
                         boolean isSilent = args.length >= 5 && args[4].equalsIgnoreCase("silent");
                         if (!args[3].equals("0")) {
-                            String message = "&e" + aranarthPlayer.getNickname() + " &7has purchased the &5&lDiscord Chat &7perk!";
+                            String message = Lang.get("perk.purchased_discord", "player", aranarthPlayer.getNickname());
                             if (sender instanceof Player || !AranarthCore.isSmpServer()) {
                                 String formatted = ChatUtils.chatMessage(message);
                                 for (Player online : Bukkit.getOnlinePlayers()) {
@@ -253,15 +254,15 @@ public class CommandPerks {
 
                         return true;
                     } else {
-                        sender.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with this sub-command..."));
+                        sender.sendMessage(ChatUtils.chatMessage(Lang.get("perk.error")));
                         return true;
                     }
                 } else {
-                    sender.sendMessage(ChatUtils.chatMessage("&cThis is not a valid perk!"));
+                    sender.sendMessage(ChatUtils.chatMessage(Lang.get("perk.invalid")));
                     return true;
                 }
             } else {
-                sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found"));
+                sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
                 return true;
             }
         }

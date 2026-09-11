@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.crafting;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
@@ -63,7 +64,7 @@ public class CraftingOverridesSugarcaneBlock {
             if (meta.getPersistentDataContainer().has(SUGARCANE_BLOCK)) {
                 // preCraft does not actually update it to sugarcane in the backend
                 if (result.getType() != Material.BAMBOO) {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a Block of Sugarcane to craft this!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.special_item_restricted", "item", "Block of Sugarcane")));
                     Bukkit.getLogger().info("[AC] " + result.getType().name());
                     e.setCancelled(true);
                 }

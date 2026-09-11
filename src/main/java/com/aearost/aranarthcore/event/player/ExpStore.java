@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -45,7 +46,7 @@ public class ExpStore {
                             }
                             player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
                         } else {
-                            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to store EXP bottles!"));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.get("potions.no_exp_permission")));
                         }
                     }
                 }

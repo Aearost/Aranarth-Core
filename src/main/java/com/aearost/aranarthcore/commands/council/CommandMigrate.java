@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands.council;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -15,11 +16,11 @@ public class CommandMigrate {
 
     public static boolean onCommand(CommandSender sender, String[] args) {
         if (!DatabaseManager.isActive()) {
-            sender.sendMessage(ChatUtils.chatMessage("&cMySQL is not active. Check your config and logs."));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.get("migrate.mysql_not_active")));
             return true;
         }
 
-        sender.sendMessage(ChatUtils.chatMessage("&7Starting data migration to MySQL... this may take a moment."));
+        sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.migration_start")));
 
         Bukkit.getScheduler().runTaskAsynchronously(
                 AranarthCore.getInstance(), () -> {
@@ -36,11 +37,11 @@ public class CommandMigrate {
 
                 Bukkit.getScheduler().runTask(
                         AranarthCore.getInstance(),
-                        () -> sender.sendMessage(ChatUtils.chatMessage("&aData migration complete!")));
+                        () -> sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.migration_done"))));
             } catch (Exception e) {
                 Bukkit.getScheduler().runTask(
                         AranarthCore.getInstance(),
-                        () -> sender.sendMessage(ChatUtils.chatMessage("&cMigration failed - check console for details.")));
+                        () -> sender.sendMessage(ChatUtils.chatMessage(Lang.get("migrate.failed"))));
                 AranarthCore.getInstance().getLogger().severe("Migration error: " + e.getMessage());
             }
         });

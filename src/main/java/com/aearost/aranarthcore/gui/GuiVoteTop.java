@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.AranarthVote;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -82,7 +83,7 @@ public class GuiVoteTop {
                 .toList();
 
         if (sorted.isEmpty()) {
-            player.sendMessage(ChatUtils.chatMessage("&7There are no votes in this period"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("votetop.no_votes")));
             return;
         }
 

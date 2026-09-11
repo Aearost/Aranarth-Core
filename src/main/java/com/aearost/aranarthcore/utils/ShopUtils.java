@@ -126,9 +126,9 @@ public class ShopUtils {
         }
 
         if (existingShop == null) {
-            e.getPlayer().sendMessage(ChatUtils.chatMessage("&7You have created a new shop!"));
+            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("shop.created")));
         } else {
-            e.getPlayer().sendMessage(ChatUtils.chatMessage("&7You have updated this shop!"));
+            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("shop.updated")));
         }
 
         initializeShopHologram(newShop);

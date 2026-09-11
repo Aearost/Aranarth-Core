@@ -486,7 +486,7 @@ public class DominionUtils {
      * @param dominion The Dominion to be disbanded.
      */
     public static void disbandDominion(Dominion dominion) {
-        Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The Dominion of &e" + dominion.getName() + " &7has been disbanded"));
+        Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("dominion.disbanded_broadcast", "name", dominion.getName())));
         DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " &7has been disbanded", Color.RED);
         DefenderUtils.sellAllDominionDefenders(dominion);
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(dominion.getLeader());
@@ -497,7 +497,7 @@ public class DominionUtils {
         }
         if (Bukkit.getOfflinePlayer(dominion.getLeader()).isOnline()) {
             Player leader = Bukkit.getPlayer(dominion.getLeader());
-            leader.sendMessage(ChatUtils.chatMessage("&7Your Dominion's balance has been added to your own"));
+            leader.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.balance_returned")));
             ItemStack[] foodReserves = dominion.getFood();
             if (foodReserves != null) {
                 for (ItemStack item : foodReserves) {
@@ -841,8 +841,8 @@ public class DominionUtils {
                     for (UUID memberUuid : dominion.getMembers()) {
                         if (Bukkit.getOfflinePlayer(memberUuid).isOnline()) {
                             Player member = Bukkit.getPlayer(memberUuid);
-                            member.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &7has more chunks claimed than its membership allows"));
-                            member.sendMessage(ChatUtils.chatMessage("&7A chunk has been automatically unclaimed to bring the total within the limit"));
+                            member.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.chunk_over_limit", "name", dominion.getName())));
+                            member.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.chunk_auto_unclaimed")));
                         }
                     }
                 }
@@ -858,7 +858,7 @@ public class DominionUtils {
                 PersistenceUtils.saveSingleDominionToDatabase(dominion);
                 if (Bukkit.getOfflinePlayer(dominion.getLeader()).isOnline()) {
                     Player onlineLeader = Bukkit.getPlayer(dominion.getLeader());
-                    onlineLeader.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + "'s &7daily food rations have been consumed"));
+                    onlineLeader.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.food_consumed", "name", dominion.getName())));
                 }
                 // No chunk lost today but lost one yesterday
                 if (yesterdayCrumblingDominionIds.contains(dominion.getId())) {
@@ -882,14 +882,14 @@ public class DominionUtils {
                     for (UUID memberUuid : dominion.getMembers()) {
                         if (Bukkit.getOfflinePlayer(memberUuid).isOnline()) {
                             Player member = Bukkit.getPlayer(memberUuid);
-                            member.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &7did not have enough food in its reserves"));
+                            member.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.food_not_enough", "name", dominion.getName())));
                             // Money was consumed
                             if (result == 1) {
-                                member.sendMessage(ChatUtils.chatMessage("&7Instead, &6$" + (int) dailyCost + " &7was consumed to pay for the tax"));
+                                member.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.tax_paid_money", "amount", (int) dailyCost)));
                             }
                             // Land was consumed
                             else {
-                                member.sendMessage(ChatUtils.chatMessage("&7Instead, a chunk was sold to pay for the tax"));
+                                member.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.tax_paid_chunk")));
                             }
                         }
                     }
@@ -2456,13 +2456,13 @@ public class DominionUtils {
                 if (isAmountIncreasing) {
                     int foodPct = (int) Math.round(getBaseFoodPercentage(dominion) * 100);
                     int yieldPct = (int) Math.round(foodPercentageToYield(foodPct / 100.0) * 100);
-                    player.getPlayer().sendMessage(ChatUtils.chatMessage("&7It is a new week - Dominion resources may be claimed"));
-                    player.getPlayer().sendMessage(ChatUtils.chatMessage("&7Food reserves: &e" + foodPct + "% &7- Claim yield this week: &e" + yieldPct + "%"));
+                    player.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("dominion.new_week_resources")));
+                    player.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("dominion.new_week_yield", "food", foodPct, "yield", yieldPct)));
                 } else {
                     if (isClaimPrevented) {
-                        player.getPlayer().sendMessage(ChatUtils.chatMessage("&7Your Dominion was unable to claim resources this week"));
+                        player.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("dominion.claim_failed")));
                     } else {
-                        player.getPlayer().sendMessage(ChatUtils.chatMessage("&7You must claim the available resources from your Dominion"));
+                        player.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("dominion.claim_available")));
                     }
                 }
 
@@ -2644,7 +2644,7 @@ public class DominionUtils {
             conqueror.setLastConquerAttemptTimestamp(now);
             updateDominion(defender);
             updateDominion(conqueror);
-            String conquestExpiredMsg = ChatUtils.chatMessage("&e" + conqueror.getName() + " &7's conquest of &e" + defender.getName() + " &7has failed");
+            String conquestExpiredMsg = ChatUtils.chatMessage(Lang.get("dominion.conquest_failed_broadcast", "conqueror", conqueror.getName(), "defender", defender.getName()));
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 int domVol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getDominionSoundVolume();
                 if (domVol > 0) {
@@ -2708,7 +2708,7 @@ public class DominionUtils {
             updateDominion(conqueror);
 
             if (rebel != null) {
-                String rebelExpiredMsg = ChatUtils.chatMessage("&e" + rebel.getName() + "&7's rebellion against &e" + conqueror.getName() + " &7has failed");
+                String rebelExpiredMsg = ChatUtils.chatMessage(Lang.get("dominion.rebellion_failed_broadcast", "rebel", rebel.getName(), "conqueror", conqueror.getName()));
                 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                     int domVol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getDominionSoundVolume();
                     if (domVol > 0) {

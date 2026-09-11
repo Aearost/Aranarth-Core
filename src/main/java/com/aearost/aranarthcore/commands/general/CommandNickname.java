@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands.general;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -27,50 +28,50 @@ public class CommandNickname implements CommandExecutor {
 
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.nick")) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 				return true;
 			}
 
 			if (args.length == 0) {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				aranarthPlayer.setNickname("");
-				player.sendMessage(ChatUtils.chatMessage("&7Your nickname has been removed!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.removed")));
 				return true;
 
 			} else if (args.length == 1) {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				if (args[0].contains("&")) {
 					if (!player.hasPermission("aranarth.nick.color")) {
-						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 						return true;
 					}
 				}
 
 				if (args[0].contains("#")) {
 					if (!player.hasPermission("aranarth.nick.hex")) {
-						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 						return true;
 					}
 				}
 
 				if (ChatUtils.stripColorFormatting(args[0]).length() > 20) {
-					player.sendMessage(ChatUtils.chatMessage("&cThis nickname is too long!"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.too_long")));
 					return true;
 				} else if (ChatUtils.stripColorFormatting(args[0]).isEmpty()) {
-					player.sendMessage(ChatUtils.chatMessage("&cYou must enter a nickname!"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.must_enter")));
 					return true;
 				}
 
 				aranarthPlayer.setNickname(args[0]);
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-				sender.sendMessage(ChatUtils.chatMessage("&7Your nickname has been set to " + args[0]));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.set", "name", args[0])));
 				return true;
 			} else {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				int stringStart = 0;
 				if (args[0].equalsIgnoreCase("gradient") || args[0].equalsIgnoreCase("gradientbold")) {
 					if (!player.hasPermission("aranarth.nick.gradient")) {
-						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 						return true;
 					}
 
@@ -98,35 +99,35 @@ public class CommandNickname implements CommandExecutor {
 
 					if (Objects.nonNull(nickname)) {
 						if (nicknameSB.toString().length() > 20) {
-							player.sendMessage(ChatUtils.chatMessage("&cThis nickname is too long!"));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.too_long")));
 							return true;
 						} else if (nicknameSB.toString().isEmpty()) {
-							player.sendMessage(ChatUtils.chatMessage("&cYou must enter a nickname!"));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.must_enter")));
 							return true;
 						}
 
 						aranarthPlayer.setNickname(nickname);
-						player.sendMessage(ChatUtils.chatMessage("&7Your nickname has been set to " + nickname));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.set", "name", nickname)));
 						return true;
 					}
-					player.sendMessage(ChatUtils.chatMessage("&cYour nickname could not be set to a gradient"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.gradient_failed")));
 					return true;
 				}
 
 				if (ChatUtils.stripColorFormatting(nickname).length() > 20) {
-					player.sendMessage(ChatUtils.chatMessage("&cThis nickname is too long!"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.too_long")));
 					return true;
 				} else if (ChatUtils.stripColorFormatting(nickname).isEmpty()) {
-					player.sendMessage(ChatUtils.chatMessage("&cYou must enter a nickname!"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.must_enter")));
 					return true;
 				}
 
 				aranarthPlayer.setNickname(nickname);
-				sender.sendMessage(ChatUtils.chatMessage("&7Your nickname has been set to " + nickname));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.set", "name", nickname)));
 				return true;
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to execute this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 			return true;
 		}
 	}

@@ -51,7 +51,7 @@ public class GuiDefenderManageClick {
                 && dominion.getDominionPermissions().hasPermission(
                 dominion.getMemberRank(player.getUniqueId()), DominionPermission.MANAGE_DEFENDERS));
         if (!canManage) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to manage defenders"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.no_permission_defenders")));
             player.closeInventory();
             return;
         }
@@ -115,14 +115,14 @@ public class GuiDefenderManageClick {
         } else if (slot == GuiDefenderManage.SLOT_TELEPORT_HOME) {
             Entity defender = Bukkit.getEntity(defenderUUID);
             if (defender == null) {
-                player.sendMessage(ChatUtils.chatMessage("&cThis defender is no longer available"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("defender.no_longer_available")));
                 GuiDefenderManage.clearSession(player.getUniqueId());
                 player.closeInventory();
                 return;
             }
             Location homeLocation = DefenderUtils.getDefenderHomeLocation(defenderUUID);
             if (homeLocation == null) {
-                player.sendMessage(ChatUtils.chatMessage("&cThis territory does not have a home set"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("defender.no_home_set")));
                 return;
             }
             UUID assignedOutpostId = DefenderUtils.getAssignedOutpostId(defenderUUID);
@@ -147,7 +147,7 @@ public class GuiDefenderManageClick {
         } else if (slot == GuiDefenderManage.SLOT_LOCATION) {
             List<Outpost> outposts = OutpostUtils.getDominionOutposts(dominionId);
             if (outposts.isEmpty()) {
-                player.sendMessage(ChatUtils.chatMessage("&cThis dominion has no outposts to assign this defender to"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("defender.no_outposts")));
                 return;
             }
             UUID currentOutpostId = DefenderUtils.getAssignedOutpostId(defenderUUID);

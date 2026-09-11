@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -69,7 +70,7 @@ public class ShopDestroy {
 				Shop shop = ShopUtils.getShopFromLocation(signBlock.getLocation());
 
 				if (shop.getUuid() == null || shop.getUuid().equals(player.getUniqueId())) {
-					player.sendMessage(ChatUtils.chatMessage("&cYou must destroy the shop first!"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.must_destroy_first")));
 					e.setCancelled(true);
 					return;
 				} else {
@@ -81,13 +82,13 @@ public class ShopDestroy {
 		}
 
 		if (deletionResult == 1) {
-			player.sendMessage(ChatUtils.chatMessage("&7You have destroyed this shop"));
+			player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.destroyed")));
 			player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 0.1F);
 		} else if (deletionResult == 0) {
-			player.sendMessage(ChatUtils.chatMessage("&cYou cannot destroy someone else's shop!"));
+			player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.cannot_destroy_others")));
 			e.setCancelled(true);
 		} else {
-			player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with deleting this shop..."));
+			player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.delete_error")));
 			e.setCancelled(true);
 		}
 	}

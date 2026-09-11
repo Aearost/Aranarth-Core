@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
@@ -54,8 +55,8 @@ public class PlayerKillMoneySteal {
         String formattedAmount = formatter.format(stolenAmount);
         String warSuffix = warMultiplier > 1 ? " &4(" + warMultiplier + "x war penalty)" : "";
 
-        killer.sendMessage(ChatUtils.chatMessage("&7You have stolen &6" + formattedAmount + " &7from &e" + victimAranarthPlayer.getNickname() + warSuffix));
+        killer.sendMessage(ChatUtils.chatMessage(Lang.get("pvp.stolen_from", "amount", formattedAmount, "player", victimAranarthPlayer.getNickname(), "suffix", warSuffix)));
         killer.playSound(killer, Sound.ENTITY_PLAYER_LEVELUP, 1F, 1F);
-        victim.sendMessage(ChatUtils.chatMessage("&e" + killerAranarthPlayer.getNickname() + " &chas stolen &6" + formattedAmount + " &cfrom you!" + warSuffix));
+        victim.sendMessage(ChatUtils.chatMessage(Lang.get("pvp.stolen_by", "player", killerAranarthPlayer.getNickname(), "amount", formattedAmount, "suffix", warSuffix)));
     }
 }

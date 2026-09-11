@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthVote;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 import com.vexsoftware.votifier.model.Vote;
 import com.vexsoftware.votifier.model.VotifierEvent;
@@ -65,12 +66,12 @@ public class VotifierListener implements Listener {
             }
 
             String voterNickname = AranarthUtils.getPlayer(offlinePlayer.getUniqueId()).getNickname();
-            String announcementMsg = ChatUtils.chatMessage("&e" + voterNickname + " &7has voted and received &a" + amount + " vote points!");
+            String announcementMsg = ChatUtils.chatMessage(Lang.get("vote.announced", "player", voterNickname, "amount", amount));
 
             // Announce to all locally-online players
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (onlinePlayer.getUniqueId().equals(offlinePlayer.getUniqueId())) {
-                    onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You voted and received &a" + amount + " vote points!"));
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("vote.received_points", "amount", amount)));
                 } else {
                     onlinePlayer.sendMessage(announcementMsg);
                 }
@@ -129,7 +130,7 @@ public class VotifierListener implements Listener {
                     HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(key);
                     if (!remainder.isEmpty()) {
                         AranarthUtils.addPendingVoteKeys(uuid, 1);
-                        player.sendMessage(ChatUtils.chatMessage("&7Your inventory was full! &7Use &e/keyclaim &7in a Survival world to obtain your key!"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.inventory_full_keyclaim")));
                         Bukkit.getLogger().info("[AC] [VOTE] " + username + " inventory full - key stored as pending");
                     } else {
                         Bukkit.getLogger().info("[AC] [VOTE] " + username + " is online in valid world (" + worldName + ") - key given directly");
@@ -144,7 +145,7 @@ public class VotifierListener implements Listener {
                     AranarthUtils.addPendingVoteKeys(uuid, 1);
                     Bukkit.getLogger().info("[AC] [VOTE] " + username + " is online in invalid world (" + worldName + ") - key stored as pending");
                     if (player != null) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You cannot receive crate keys here! &7Use &e/keyclaim &7in a Survival world to obtain your key!"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("crate.cannot_receive_here")));
                     }
                     if (DatabaseManager.isActive()) {
                         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),

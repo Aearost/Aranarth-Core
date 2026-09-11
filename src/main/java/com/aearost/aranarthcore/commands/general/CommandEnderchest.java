@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands.general;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -25,18 +26,18 @@ public class CommandEnderchest implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (!(sender instanceof Player player)) {
-			sender.sendMessage(ChatUtils.chatMessage("&cThis can only be executed in-game!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 			return true;
 		}
 
 		if (args.length == 0) {
 			if (!player.hasPermission("aranarth.enderchest")) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 				return true;
 			}
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (!aranarthPlayer.getCombatLogTime().isEmpty()) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this command while combat tagged!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.combat_tagged")));
 				return true;
 			}
 			player.openInventory(player.getEnderChest());
@@ -46,13 +47,13 @@ public class CommandEnderchest implements CommandExecutor {
 		if (args.length == 1) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (!aranarthPlayer.isInAdminMode()) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou must be in admin mode to view other players' ender chests!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("admin.must_be_admin_ender")));
 				return true;
 			}
 
 			Player target = Bukkit.getPlayer(args[0]);
 			if (target == null) {
-				player.sendMessage(ChatUtils.chatMessage("&cThis player could not be found!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[0])));
 				return true;
 			}
 
@@ -60,7 +61,7 @@ public class CommandEnderchest implements CommandExecutor {
 			return true;
 		}
 
-		player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax! /enderchest [username]"));
+		player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "enderchest [username]")));
 		return true;
 	}
 

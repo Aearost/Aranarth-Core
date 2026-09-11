@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.AranarthVote;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -24,12 +25,12 @@ public class CommandVpTransfer implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (!(sender instanceof Player player)) {
-			sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 			return true;
 		}
 
 		if (args.length != 2) {
-			player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax! &e/vptransfer <player> <amount>"));
+			player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "vptransfer <player> <amount>")));
 			return true;
 		}
 
@@ -37,23 +38,23 @@ public class CommandVpTransfer implements CommandExecutor {
 		try {
 			amount = Integer.parseInt(args[1]);
 		} catch (NumberFormatException e) {
-			player.sendMessage(ChatUtils.chatMessage("&cThat is not a valid number!"));
+			player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_number")));
 			return true;
 		}
 
 		if (amount <= 0) {
-			player.sendMessage(ChatUtils.chatMessage("&cAmount must be greater than zero!"));
+			player.sendMessage(ChatUtils.chatMessage(Lang.get("economy.pay_zero")));
 			return true;
 		}
 
 		UUID receiverUuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
 		if (receiverUuid == null) {
-			player.sendMessage(ChatUtils.chatMessage("&e" + args[0] + " &ccould not be found"));
+			player.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[0])));
 			return true;
 		}
 
 		if (receiverUuid.equals(player.getUniqueId())) {
-			player.sendMessage(ChatUtils.chatMessage("&cYou cannot transfer vote points to yourself!"));
+			player.sendMessage(ChatUtils.chatMessage(Lang.get("economy.pay_self")));
 			return true;
 		}
 
@@ -62,7 +63,7 @@ public class CommandVpTransfer implements CommandExecutor {
 
 		int available = AranarthUtils.getAvailableVotePoints(player.getUniqueId());
 		if (amount > available) {
-			player.sendMessage(ChatUtils.chatMessage("&cYou only have &e" + available + " &cvote points available!"));
+			player.sendMessage(ChatUtils.chatMessage(Lang.get("vptransfer.not_enough", "amount", String.valueOf(available))));
 			return true;
 		}
 
@@ -80,14 +81,14 @@ public class CommandVpTransfer implements CommandExecutor {
 				PersistenceUtils.syncVoteKeysForPlayerToDatabase(receiverUuid)
 		);
 
-		player.sendMessage(ChatUtils.chatMessage("&7You have transferred &e" + amount + " &7vote points to &e" + receiverNickname));
+		player.sendMessage(ChatUtils.chatMessage(Lang.get("vptransfer.sent", "amount", String.valueOf(amount), "player", receiverNickname)));
 
 		// Notify receiver
 		boolean receiverOnThisServer = Bukkit.getPlayer(receiverUuid) != null;
 		if (receiverOnThisServer) {
 			Player localReceiver = Bukkit.getPlayer(receiverUuid);
 			if (localReceiver != null) {
-				localReceiver.sendMessage(ChatUtils.chatMessage("&7You have received &e" + amount + " &7vote points from &e" + senderAp.getNickname()));
+				localReceiver.sendMessage(ChatUtils.chatMessage(Lang.get("vptransfer.received", "amount", String.valueOf(amount), "player", senderAp.getNickname())));
 			}
 		} else if (NetworkManager.isActive()) {
 			NetworkPlayer networkReceiver = NetworkManager.getInstance().getRemoteRoster().get(receiverUuid);

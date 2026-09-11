@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.crafting;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.block.CrafterCraftEvent;
@@ -30,14 +31,14 @@ public class CraftingOverridesHoneyGlazedHam {
             ItemMeta resultMeta = e.getRecipe().getResult().getItemMeta();
             if (is.getType() == Material.COOKED_PORKCHOP) {
                 if (meta.getPersistentDataContainer().has(HONEY_GLAZED_HAM)) {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a Honey Glazed Ham to craft this!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.special_item_restricted", "item", "Honey Glazed Ham")));
                     e.setCancelled(true);
                 }
             }
         }
         // Result has no meta, therefore not requiring Honey Glazed Ham
         else {
-            player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a Honey Glazed Ham to craft this!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.special_item_restricted", "item", "Honey Glazed Ham")));
             e.setCancelled(true);
         }
     }

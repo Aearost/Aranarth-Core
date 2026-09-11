@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.listener.misc;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -52,14 +53,14 @@ public class PlayerTeleportBetweenWorldsListener implements Listener {
                         player.removePotionEffect(effect.getType());
                     }
                 } catch (IOException exception) {
-                    player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("general.error")));
                     e.setCancelled(true);
                 }
             } else {
                 try {
                     AranarthUtils.switchInventory(player, currentWorld, currentWorld);
                 } catch (IOException exception) {
-                    player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("general.error")));
                     e.setCancelled(true);
                 }
             }

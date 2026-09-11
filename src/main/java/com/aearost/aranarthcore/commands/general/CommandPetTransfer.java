@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands.general;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -25,7 +26,7 @@ public class CommandPetTransfer implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (args.length == 0) {
-			sender.sendMessage(ChatUtils.chatMessage("&cYou must specify a player!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "pettransfer <player>")));
 			return true;
 		} else {
 			if (sender instanceof Player player) {
@@ -35,21 +36,21 @@ public class CommandPetTransfer implements CommandExecutor {
 					if (AranarthUtils.getPlayer(offlinePlayer.getUniqueId()) != null) {
 						if (offlinePlayer.getName().equalsIgnoreCase(args[0])) {
 							if (offlinePlayer.getUniqueId().equals(player.getUniqueId())) {
-								player.sendMessage(ChatUtils.chatMessage("&cYou are already the owner of this pet!"));
+								player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.already_owner")));
 								return true;
 							}
 
 							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 							aranarthPlayer.setPetTransferUuid(offlinePlayer.getUniqueId());
 							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-							player.sendMessage(ChatUtils.chatMessage("&7Right-click the pet to transfer to &e" + offlinePlayer.getName()));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.transfer_prompt", "player", offlinePlayer.getName())));
 							isPlayerFound = true;
 							return true;
 						}
 					}
 				}
 				if (!isPlayerFound) {
-					sender.sendMessage(ChatUtils.chatMessage("&cThis player does not exist!"));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[0])));
 					return true;
 				}
 			}

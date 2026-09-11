@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -82,10 +83,10 @@ public class GuiPotionAddClose {
             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
             if (potionAmountAdded > 0) {
-                player.sendMessage(ChatUtils.chatMessage("&7You have added &e" + potionAmountAdded + " &7potions!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("potions.added", "count", potionAmountAdded)));
             }
             if (potionAmountUnableToAdd > 0) {
-                player.sendMessage(ChatUtils.chatMessage("&7You could not add &e" + potionAmountUnableToAdd + " &7potions"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("potions.add_failed", "count", potionAmountUnableToAdd)));
             }
         }
 	}

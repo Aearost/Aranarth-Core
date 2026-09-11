@@ -11,6 +11,7 @@ import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.EmojiUtils;
 import com.aearost.aranarthcore.utils.InteractiveChatManager;
@@ -87,27 +88,27 @@ public class PlayerChatListener implements Listener {
             GuiBlacklistEditor.clearAwaitingRename(uuid);
 
             if (message.equalsIgnoreCase("cancel")) {
-                player.sendMessage(ChatUtils.chatMessage("&7Preset rename cancelled."));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.cancelled")));
                 return;
             }
 
             if (message.contains("&") && !player.hasPermission("aranarth.nick.color")) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use color codes!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_color")));
                 GuiBlacklistEditor.setAwaitingRename(uuid, renameIndex);
                 return;
             }
             if (message.contains("#") && !player.hasPermission("aranarth.nick.hex")) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use hex color codes!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_hex")));
                 GuiBlacklistEditor.setAwaitingRename(uuid, renameIndex);
                 return;
             }
             if (ChatUtils.stripColorFormatting(message).length() > 30) {
-                player.sendMessage(ChatUtils.chatMessage("&cPreset name cannot exceed 30 characters! Please try again."));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("gradient.name_too_long")));
                 GuiBlacklistEditor.setAwaitingRename(uuid, renameIndex);
                 return;
             }
             if (ChatUtils.stripColorFormatting(message).isEmpty()) {
-                player.sendMessage(ChatUtils.chatMessage("&cPreset name cannot be empty! Please try again."));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("gradient.name_empty")));
                 GuiBlacklistEditor.setAwaitingRename(uuid, renameIndex);
                 return;
             }
@@ -121,7 +122,7 @@ public class PlayerChatListener implements Listener {
                 }
                 ap.getBlacklistPresets().get(finalIndex).setName(presetName);
                 PersistenceUtils.saveBlacklistPresetsAsync(uuid);
-                player.sendMessage(ChatUtils.chatMessage("&7Preset renamed to &r" + ChatUtils.translateToColor(presetName)));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("gradient.preset_renamed", "name", ChatUtils.translateToColor(presetName))));
                 new GuiBlacklistEditor(player, finalIndex).openGui();
             });
             return;
@@ -171,7 +172,7 @@ public class PlayerChatListener implements Listener {
                             player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 0.5F, 1F);
                         });
                     } catch (NumberFormatException ex) {
-                        player.sendMessage(ChatUtils.chatMessage("&cThat number is invalid! Please re-enter /dominion resources to try again."));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.resources_invalid_number")));
                         dominion.setBiomeResourcesBeingClaimed(null);
                     }
                     return;
@@ -225,7 +226,7 @@ public class PlayerChatListener implements Listener {
         }
 
         if (ChatUtils.isPlayerMuted(player)) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou cannot send any messages as you are muted!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.muted")));
             e.setCancelled(true);
             return;
         }
@@ -474,6 +475,6 @@ public class PlayerChatListener implements Listener {
         }
         int yieldPct = (int) Math.round(yieldMultiplier * 100);
         String yieldColor = yieldPct >= 80 ? "&a" : yieldPct >= 50 ? "&e" : "&c";
-        player.sendMessage(ChatUtils.chatMessage("&7The resources have been added to your inventory " + yieldColor + "(" + yieldPct + "% yield)"));
+        player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.resources_added", "color", yieldColor, "yield", yieldPct)));
     }
 }

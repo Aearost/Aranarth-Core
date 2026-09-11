@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 
@@ -14,7 +15,7 @@ public class ResourceWorldDamagePrevent {
             if (e.getEntity() instanceof Player target) {
                 if (target.getWorld().getName().startsWith("resource")) {
                     e.setCancelled(true);
-                    attacker.sendMessage(ChatUtils.chatMessage("&cYou cannot attack players in the Resource World!"));
+                    attacker.sendMessage(ChatUtils.chatMessage(Lang.get("resource.cannot_attack")));
                 }
             }
         }

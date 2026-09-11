@@ -9,6 +9,7 @@ import com.aearost.aranarthcore.objects.JobData;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.JobUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -52,12 +53,13 @@ public class GuiJobsJoinClick {
         int maxJobs = JobUtils.getMaxJobs(ap.getRank());
 
         if (jobData.hasJob(job)) {
-            player.sendMessage(ChatUtils.chatMessage("&7You are already a &e" + job.getDisplayName()));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("jobs.already_have", "job", job.getDisplayName())));
             return;
         }
 
         if (jobData.getActiveJobs().size() >= maxJobs) {
-            player.sendMessage(ChatUtils.chatMessage("&7You have reached your maximum of &e" + maxJobs + " &7job" + (maxJobs == 1 ? "" : "s")));
+            String maxKey = maxJobs == 1 ? "jobs.max_reached_singular" : "jobs.max_reached";
+            player.sendMessage(ChatUtils.chatMessage(Lang.get(maxKey, "count", maxJobs)));
             return;
         }
 
@@ -75,7 +77,7 @@ public class GuiJobsJoinClick {
             NetworkManager.getInstance().publishJobUpdate(player.getUniqueId());
         }
 
-        player.sendMessage(ChatUtils.chatMessage("&7You have joined the &e" + job.getDisplayName() + " &7job!"));
+        player.sendMessage(ChatUtils.chatMessage(Lang.get("jobs.joined", "job", job.getDisplayName())));
         int jobsVol = AranarthUtils.getPlayer(player.getUniqueId()).getJobsSoundVolume();
         if (jobsVol > 0) {
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, jobsVol / 100f, 1.0f);

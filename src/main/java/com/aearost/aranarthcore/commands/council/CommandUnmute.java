@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Punishment;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -26,7 +27,7 @@ public class CommandUnmute {
 			if (player.hasPermission("aranarth.unmute")) {
 				unmutePlayer(sender, args);
 			} else {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 			}
         } else {
 			unmutePlayer(sender, args);
@@ -41,7 +42,7 @@ public class CommandUnmute {
 	 */
 	private static void unmutePlayer(CommandSender sender, String[] args) {
 		if (args.length == 1) {
-			sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac unmute <player> <reason>"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac unmute <player> <reason>")));
 			return;
 		}
 
@@ -63,7 +64,7 @@ public class CommandUnmute {
 
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
 				if (aranarthPlayer.getMuteEndDate().isEmpty()) {
-					sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &cis not currently muted!"));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.get("unmute.not_muted", "name", aranarthPlayer.getNickname())));
 					return;
 				}
 				aranarthPlayer.setMuteEndDate("");
@@ -72,18 +73,18 @@ public class CommandUnmute {
 
 				Punishment punishment = new Punishment(uuid, LocalDateTime.now(), "UNMUTE", reason.toString(), senderUuid);
 				AranarthUtils.addPunishment(uuid, punishment, false);
-				sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has been unmuted"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("unmute.player_unmuted", "name", aranarthPlayer.getNickname())));
 
 				for (Player player : Bukkit.getOnlinePlayers()) {
 					if (player.getUniqueId().equals(uuid)) {
-						player.sendMessage(ChatUtils.chatMessage("&7You have been unmuted"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("mute.unmuted")));
 					}
 				}
 			} else {
-				sender.sendMessage(ChatUtils.chatMessage("&cYou must specify an unmute reason"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("unmute.must_specify_reason")));
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
 		}
 	}
 }

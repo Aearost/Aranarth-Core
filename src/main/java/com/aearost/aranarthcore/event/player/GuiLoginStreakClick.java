@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.gui.GuiLoginStreak;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.LoginStreakUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Sound;
@@ -30,7 +31,7 @@ public class GuiLoginStreakClick {
             return;
         }
         if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou can only claim login streaks in survival worlds!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("streak.only_survival")));
             return;
         }
 

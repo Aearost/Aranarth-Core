@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.gui.GuiRankup;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -101,10 +102,10 @@ public class GuiRanksClick {
 		} else if (isClickedRankHigherThanCurrent) {
 			if (pronouns == Pronouns.MALE) {
 				player.sendMessage(
-						ChatUtils.chatMessage("&cYou must rankup to " + maleRanks[rank + 1] + " &cfirst!"));
+						ChatUtils.chatMessage(Lang.get("rank.must_rankup_first", "rank", maleRanks[rank + 1])));
 			} else {
 				player.sendMessage(
-						ChatUtils.chatMessage("&cYou must rankup to " + femaleRanks[rank + 1] + " &cfirst!"));
+						ChatUtils.chatMessage(Lang.get("rank.must_rankup_first", "rank", femaleRanks[rank + 1])));
 			}
 			player.playSound(player, Sound.ENTITY_ENDER_EYE_DEATH, 0.8F, 0.5F);
 			player.closeInventory();

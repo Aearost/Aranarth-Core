@@ -661,7 +661,7 @@ public class QuestUtils {
             });
         }
         for (Player online : Bukkit.getOnlinePlayers()) {
-            online.sendMessage(ChatUtils.chatMessage("&6Daily quests have reset! Visit the Quest Master for new quests."));
+            online.sendMessage(ChatUtils.chatMessage(Lang.get("quest.daily_reset")));
         }
     }
 
@@ -684,7 +684,7 @@ public class QuestUtils {
             });
         }
         for (Player online : Bukkit.getOnlinePlayers()) {
-            online.sendMessage(ChatUtils.chatMessage("&bWeekly quests have reset! Visit the Quest Master for new quests."));
+            online.sendMessage(ChatUtils.chatMessage(Lang.get("quest.weekly_reset")));
         }
     }
 
@@ -699,7 +699,7 @@ public class QuestUtils {
         locallyModifiedUuids.clear();
         Bukkit.getLogger().info("[AC] [AranarthCore] Daily quests synced from remote reset.");
         for (Player online : Bukkit.getOnlinePlayers()) {
-            online.sendMessage(ChatUtils.chatMessage("&6Daily quests have reset! Visit the Quest Master for new quests."));
+            online.sendMessage(ChatUtils.chatMessage(Lang.get("quest.daily_reset")));
         }
     }
 
@@ -714,7 +714,7 @@ public class QuestUtils {
         locallyModifiedUuids.clear();
         Bukkit.getLogger().info("[AC] [AranarthCore] Weekly quests synced from remote reset.");
         for (Player online : Bukkit.getOnlinePlayers()) {
-            online.sendMessage(ChatUtils.chatMessage("&bWeekly quests have reset! Visit the Quest Master for new quests."));
+            online.sendMessage(ChatUtils.chatMessage(Lang.get("quest.weekly_reset")));
         }
     }
 
@@ -779,13 +779,13 @@ public class QuestUtils {
 
             if (progress[i] == 0) {
                 String typeLabel = questType == QuestType.DAILY ? "daily" : "weekly";
-                player.sendMessage(ChatUtils.chatMessage("&7You have started the " + typeLabel + " &e" + quest.getDisplayName() + " &7quest"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("quest.started", "type", typeLabel, "name", quest.getDisplayName())));
             }
             progress[i] = Math.min(progress[i] + amount, quest.getRequired());
 
             if (progress[i] >= quest.getRequired()) {
                 completed[i] = true;
-                player.sendMessage(ChatUtils.chatMessage("&7You've completed a quest! Use &e/quests &7to claim your reward"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("quest.completed_hint")));
 
                 if (questType == QuestType.WEEKLY) {
                     boolean allComplete = true;
@@ -797,7 +797,7 @@ public class QuestUtils {
                     }
                     if (allComplete) {
                         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-                        Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has completed all of their &eweekly quests"));
+                        Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("quest.all_weekly_broadcast", "player", aranarthPlayer.getNickname())));
                     }
                 }
             }
@@ -845,15 +845,13 @@ public class QuestUtils {
             String itemName = getItemRewardDisplayName(rewardItem);
             if (isCrateKey && !AranarthUtils.isSurvivalWorld(worldName)) {
                 AranarthUtils.addPendingKey(player.getUniqueId(), rewardItem, rewardItem.getAmount());
-                player.sendMessage(ChatUtils.chatMessage("&7You have been rewarded &f" + itemName
-                        + " &7for completing the quest (use &e/keyclaim &7in Survival to claim)"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("quest.reward_item_keyclaim", "item", itemName)));
             } else {
                 Map<Integer, ItemStack> leftover = player.getInventory().addItem(rewardItem);
                 for (ItemStack overflow : leftover.values()) {
                     player.getWorld().dropItemNaturally(player.getLocation(), overflow);
                 }
-                player.sendMessage(ChatUtils.chatMessage("&7You have been rewarded &f" + itemName
-                        + " &7for completing the quest"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("quest.reward_item", "item", itemName)));
             }
         } else {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
@@ -865,8 +863,7 @@ public class QuestUtils {
             }
 
             String formattedReward = "$" + MONEY_FORMAT.format(quest.getReward());
-            player.sendMessage(ChatUtils.chatMessage("&7You have been rewarded &6" + formattedReward
-                    + " &7for completing the quest"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("quest.reward_money", "amount", formattedReward)));
         }
         return true;
     }

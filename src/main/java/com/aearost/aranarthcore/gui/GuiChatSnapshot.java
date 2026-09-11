@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.InteractiveChatManager;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.InteractiveChatManager.Snapshot;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -46,7 +47,7 @@ public class GuiChatSnapshot {
     public static void open(Player viewer, UUID snapshotId) {
         Snapshot snap = InteractiveChatManager.getSnapshot(snapshotId);
         if (snap == null) {
-            viewer.sendMessage(ChatUtils.chatMessage("&cThis item is no longer available"));
+            viewer.sendMessage(ChatUtils.chatMessage(Lang.get("chat_snapshot.expired")));
             return;
         }
         Inventory gui = switch (snap.getType()) {

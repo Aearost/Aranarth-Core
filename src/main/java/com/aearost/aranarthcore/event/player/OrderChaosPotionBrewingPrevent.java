@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -26,7 +27,7 @@ public class OrderChaosPotionBrewingPrevent {
 							e.setCancelled(true);
 							e.getView().getTopInventory().setItem(3, null);
 							player.getInventory().setItem(e.getSlot(), copy);
-							player.sendMessage(ChatUtils.chatMessage("&cYou can only use this ingredient during Florivor"));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.florivor_only")));
 							// Sometimes shift-clicks result in a lost eyeblossom - this refunds it
 							if (e.isShiftClick()) {
 								player.getInventory().addItem(new ItemStack(clickedItem.getType()));
@@ -43,7 +44,7 @@ public class OrderChaosPotionBrewingPrevent {
 							ItemStack copy = ingredientItem.clone();
 							e.getView().getTopInventory().setItem(3, null);
 							player.getInventory().setItem(e.getSlot(), copy);
-							player.sendMessage(ChatUtils.chatMessage("&cYou can only use this ingredient during Florivor"));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.florivor_only")));
 						}
 					}
 				}

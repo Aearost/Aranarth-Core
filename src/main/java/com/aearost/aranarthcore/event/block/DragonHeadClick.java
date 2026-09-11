@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -41,7 +42,7 @@ public class DragonHeadClick {
                                         remains.get(1));
                             }
                         } else {
-                            player.sendMessage(ChatUtils.chatMessage("&cThis dragon head has no fuel!"));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.get("dragon_head.no_fuel")));
                         }
                     }
                     else if (e.getItem().hasItemMeta()) {
@@ -51,7 +52,7 @@ public class DragonHeadClick {
                             int fuelAmountAdded = AranarthUtils.updateDragonHead(location, isPoweredByRedstone);
                             int newAmount = e.getItem().getAmount() - 1;
                             e.getItem().setAmount(newAmount);
-                            player.sendMessage(ChatUtils.chatMessage("&7You have added " + fuelAmountAdded + " fuel to the head!"));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.get("dragon_head.fuel_added", "amount", fuelAmountAdded)));
                         }
                     }
                 }

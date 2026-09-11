@@ -235,7 +235,7 @@ public class AvatarUtils {
         new BukkitRunnable() {
             @Override
             public void run() {
-                Bukkit.broadcastMessage(ChatUtils.chatMessage("&5&l&oThe new Avatar &d" + aranarthPlayer.getNickname() + " &5&l&ohas risen!"));
+                Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("avatar.new_risen", "player", aranarthPlayer.getNickname())));
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     int avVol = AranarthUtils.getPlayer(player.getUniqueId()).getAvatarSoundVolume();
 					if (avVol > 0) {
@@ -271,7 +271,7 @@ public class AvatarUtils {
         DiscordUtils.addAvatarMessageToDiscord(oldAvatar, false);
 
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(oldAvatar.getUuid());
-        Bukkit.broadcastMessage(ChatUtils.chatMessage("&5&l&oThe Avatar &d" + aranarthPlayer.getNickname() + " &5&l&ohas deceased..."));
+        Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("avatar.deceased", "player", aranarthPlayer.getNickname())));
         for (Player player : Bukkit.getOnlinePlayers()) {
             int avVol = AranarthUtils.getPlayer(player.getUniqueId()).getAvatarSoundVolume();
 			if (avVol > 0) {
@@ -286,7 +286,7 @@ public class AvatarUtils {
         new BukkitRunnable() {
             @Override
             public void run() {
-                Bukkit.broadcastMessage(ChatUtils.chatMessage("&5&l&oA new Avatar must be found..."));
+                Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("avatar.must_be_found")));
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     int avVol = AranarthUtils.getPlayer(player.getUniqueId()).getAvatarSoundVolume();
 					if (avVol > 0) {

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -33,7 +34,7 @@ public class CommandDominions {
 
 		book.setItemMeta(meta);
 		player.getInventory().addItem(book);
-		player.sendMessage(ChatUtils.chatMessage("&7You have received the &eDominions&7 book"));
+		player.sendMessage(ChatUtils.chatMessage(Lang.get("book.received", "name", "Dominions")));
 	}
 
 	private static String introduction() {

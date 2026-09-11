@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.BrewRecipeUtils;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -70,7 +71,7 @@ public class GuiBrewShopClick {
 
             // Already unlocked
             if (BrewRecipeUtils.isUnlocked(player.getUniqueId(), target)) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou already know this recipe!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.already_unlocked", "name", target.getDisplayName())));
                 return;
             }
 
@@ -78,8 +79,7 @@ public class GuiBrewShopClick {
             AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
             if (ap.getBalance() < target.getPrice()) {
                 NumberFormat fmt = NumberFormat.getInstance();
-                player.sendMessage(ChatUtils.chatMessage("&cYou need &6$" + fmt.format(target.getPrice())
-                        + " &cto unlock this recipe! (you have &6$" + fmt.format(ap.getBalance()) + "&c)"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.not_enough_money", "amount", fmt.format(target.getPrice()))));
                 return;
             }
 
@@ -93,9 +93,8 @@ public class GuiBrewShopClick {
             }
             BrewRecipeUtils.unlock(player.getUniqueId(), target.getId());
 
-            player.sendMessage(ChatUtils.chatMessage("&7You've unlocked the recipe for &f&l"
-                    + target.getDisplayName() + "&7!"));
-            player.sendMessage(ChatUtils.chatMessage("&7Use the &e/brewbook &7to view your unlocked recipes"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.recipe_unlocked", "recipe", target.getDisplayName())));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.use_brewbook")));
 
             player.closeInventory();
         }

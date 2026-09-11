@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.gui;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -58,7 +59,7 @@ public class GuiQuiver {
 			int guiSize = 0;
 
 			if (arrows.isEmpty()) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have any arrows in your Quiver!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("quiver.no_arrows")));
 				return null;
 			}
 

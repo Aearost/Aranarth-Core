@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands.council;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PermissionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -25,16 +26,16 @@ public class CommandReloadPerms {
             String targetName = args[1];
             UUID targetUuid = AranarthUtils.getUUIDFromUsername(targetName);
             if (targetUuid == null) {
-                sender.sendMessage(ChatUtils.chatMessage("&cPlayer &e" + targetName + " &ccould not be found!"));
+                sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", targetName)));
                 return true;
             }
 
             Player localPlayer = Bukkit.getPlayer(targetUuid);
             if (localPlayer != null) {
                 PermissionUtils.evaluatePlayerPermissions(localPlayer);
-                sender.sendMessage(ChatUtils.chatMessage("&7Permissions reloaded for &e" + localPlayer.getName()));
+                sender.sendMessage(ChatUtils.chatMessage(Lang.get("reloadperms.reloaded_single", "player", localPlayer.getName())));
             } else {
-                sender.sendMessage(ChatUtils.chatMessage("&e" + targetName + " &7is offline - permissions will be applied on their next login"));
+                sender.sendMessage(ChatUtils.chatMessage(Lang.get("reloadperms.offline", "player", targetName)));
             }
 
             // Notify the other server to reload this player's permissions if they are online there
@@ -51,8 +52,8 @@ public class CommandReloadPerms {
             count++;
         }
 
-        sender.sendMessage(ChatUtils.chatMessage("&7Permissions reloaded for &e" + count + " player(s) &7on this server"));
-        sender.sendMessage(ChatUtils.chatMessage("&7Offline players will receive updated permissions on their next login"));
+        sender.sendMessage(ChatUtils.chatMessage(Lang.get("reloadperms.reloaded_all", "count", String.valueOf(count))));
+        sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.offline_perms")));
 
         // Notify the other server to reload all its online players' permissions too
         if (NetworkManager.isActive()) {

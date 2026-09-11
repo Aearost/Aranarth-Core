@@ -85,7 +85,7 @@ public class GuiReaperClick {
                     DatabaseManager.getInstance().deleteReaperInventory(player.getUniqueId()));
 
             player.playSound(player, Sound.ENTITY_ENDER_EYE_DEATH, 0.8F, 0.5F);
-            player.sendMessage(ChatUtils.chatMessage("&7Your items have been dropped at your death location"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("player.items_dropped")));
             player.closeInventory();
             return;
         }
@@ -116,7 +116,7 @@ public class GuiReaperClick {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
             if (aranarthPlayer.getBalance() < cost) {
                 NumberFormat nf = NumberFormat.getNumberInstance();
-                player.sendMessage(ChatUtils.chatMessage("&cYou need &6$" + nf.format((long) cost) + " &cto recover your inventory!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("reaper.not_enough_money", "amount", nf.format((long) cost))));
                 player.playSound(player, Sound.ENTITY_ENDER_EYE_DEATH, 0.8F, 0.5F);
                 player.closeInventory();
                 return;
@@ -159,7 +159,7 @@ public class GuiReaperClick {
                     DatabaseManager.getInstance().deleteReaperInventory(player.getUniqueId()));
 
             player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
-            player.sendMessage(ChatUtils.chatMessage("&aYour inventory has been recovered!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("player.inventory_recovered")));
             player.closeInventory();
         }
     }

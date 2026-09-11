@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.DateUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -105,7 +106,7 @@ public class WeatherChangeListener implements Listener {
 							if (aranarthPlayer.isWeatherMessageDisabled()) {
 								continue;
 							}
-							player.sendMessage(ChatUtils.chatMessage("&7&oThe storm has subsided..."));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("weather.clear")));
 						}
 				}
 			}

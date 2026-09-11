@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.DateUtils;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -50,10 +51,10 @@ public class CommandCalendar implements CommandExecutor {
 
 			book.setItemMeta(meta);
 			player.getInventory().addItem(book);
-			player.sendMessage(ChatUtils.chatMessage("&7You have received the &eThe Calendar&7 book"));
+			player.sendMessage(ChatUtils.chatMessage(Lang.get("book.received", "name", "The Calendar")));
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to use this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
 			return false;
 		}
 	}

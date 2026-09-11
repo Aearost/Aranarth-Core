@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.gui.GuiVoteShopPurchase;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -44,7 +45,7 @@ public class GuiVoteShopClick {
 					gui.openGui();
 				} else {
 					player.closeInventory();
-					player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough vote points to purchase this!"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_enough_vote_points")));
 				}
 			}
 		}

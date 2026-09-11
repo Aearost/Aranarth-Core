@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.gui.GuiBlacklistSelect;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -53,7 +54,7 @@ public class GuiBlacklistClick {
             ap.setBlacklistingMethod(next);
             AranarthUtils.setPlayer(player.getUniqueId(), ap);
             String modeName = next == 0 ? "&eIgnore" : next == 1 ? "&eTrash" : "&cOff";
-            player.sendMessage(ChatUtils.chatMessage("&7Blacklist mode set to " + modeName));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("blacklist.mode_set", "mode", modeName)));
             player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1.0F);
             player.getOpenInventory().getTopInventory().setItem(28, GuiBlacklist.buildToggleButton(next));
             return;

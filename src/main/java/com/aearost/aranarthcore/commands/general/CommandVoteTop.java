@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.gui.GuiVoteTop;
 import com.aearost.aranarthcore.objects.AranarthVote;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -37,7 +38,7 @@ public class CommandVoteTop implements CommandExecutor {
 				if (year < 1000 || year > 9999) throw new NumberFormatException();
 				openOrDisplay(sender, year, null, "Year " + year);
 			} catch (NumberFormatException e) {
-				sender.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid year!"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("votetop.invalid_year")));
 			}
 		} else if (args.length == 2 && args[0].equalsIgnoreCase("month")) {
 			try {
@@ -49,10 +50,10 @@ public class CommandVoteTop implements CommandExecutor {
 				String label = String.format("%02d-%d", month, year);
 				openOrDisplay(sender, year, month, label);
 			} catch (Exception e) {
-				sender.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid month!"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("votetop.invalid_month")));
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: &e/votetop [month|year] [MM-YYYY|YYYY]"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "votetop [month|year] [MM-YYYY|YYYY]")));
 		}
 		return true;
 	}
@@ -105,7 +106,7 @@ public class CommandVoteTop implements CommandExecutor {
 				.toList();
 
 		if (sorted.isEmpty()) {
-			sender.sendMessage(ChatUtils.chatMessage("&7There are no votes in this period"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("votetop.no_votes")));
 			return;
 		}
 

@@ -10,6 +10,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DefenderUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -77,7 +78,7 @@ public class GoatHornUse {
                             summonSentinels(player, EntityType.IRON_GOLEM);
                         }
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cYou have not yet designated any &eIron Golem Sentinels"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("sentinel.none_golem")));
                     }
                 } else if (meta.getInstrument() == MusicInstrument.CALL_GOAT_HORN) {
                     List<Sentinel> sentinels = aranarthPlayer.getSentinels().get(EntityType.WOLF);
@@ -99,7 +100,7 @@ public class GoatHornUse {
                             summonSentinels(player, EntityType.WOLF);
                         }
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cYou have not yet designated any &eWolf Sentinels"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("sentinel.none_wolf")));
                     }
                 } else if (meta.getInstrument() == MusicInstrument.YEARN_GOAT_HORN) {
                     List<Sentinel> sentinel = aranarthPlayer.getSentinels().get(EntityType.HORSE);
@@ -109,7 +110,7 @@ public class GoatHornUse {
                             summonSentinels(player, EntityType.HORSE);
                         }
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cYou have not yet designated a &eHorse Sentinel"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("sentinel.none_horse")));
                     }
                 } else if (meta.getInstrument() == MusicInstrument.DREAM_GOAT_HORN) {
                     if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.DREAM_GOAT_HORN)) {
@@ -118,7 +119,7 @@ public class GoatHornUse {
                 }
             }
         } else {
-            player.sendMessage(ChatUtils.chatMessage("&7Goat horns do not have extra functionality in this world!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("horn.wrong_world")));
         }
     }
 
@@ -143,7 +144,7 @@ public class GoatHornUse {
     private void callNearbyDefenders(Player player) {
         Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
         if (playerDominion == null) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou must be in a dominion to use this horn"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("horn.no_dominion")));
             return;
         }
 
@@ -188,10 +189,10 @@ public class GoatHornUse {
         world.playSound(targetLocation, Sound.BLOCK_BELL_USE, 1.5F, 0.8F);
 
         if (count == 0) {
-            player.sendMessage(ChatUtils.chatMessage("&7No nearby defenders responded to the call"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("horn.no_defenders")));
         } else {
             String amountString = (count == 1) ? " defender has" : " defenders have";
-            player.sendMessage(ChatUtils.chatMessage("&e&o" + count + " been sent to the target area"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("horn.sentinels_sent", "count", count)));
         }
     }
 
@@ -272,7 +273,7 @@ public class GoatHornUse {
                             AranarthUtils.setPlayer(player.getUniqueId(), ap);
                             PersistenceUtils.syncPlayerSentinelsToDatabase(player.getUniqueId());
                             String typeName = sentinelType == EntityType.IRON_GOLEM ? "Iron Golem" : "Wolf";
-                            player.sendMessage(ChatUtils.chatMessage("&c" + toRemove.size() + " of your &e" + typeName + " Sentinel(s) &ccould not be found - they may have died."));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.get("horn.sentinel_missing", "count", toRemove.size(), "type", typeName)));
                         }
                         int tpVol = AranarthUtils.getPlayer(player.getUniqueId()).getTeleportSoundVolume();
                         if (tpVol > 0) {
@@ -322,7 +323,7 @@ public class GoatHornUse {
                             ap.getSentinels().put(EntityType.HORSE, horseSentinels);
                             AranarthUtils.setPlayer(player.getUniqueId(), ap);
                             PersistenceUtils.syncPlayerSentinelsToDatabase(player.getUniqueId());
-                            player.sendMessage(ChatUtils.chatMessage("&cYour &eHorse Sentinel &ccould not be found - it may have died. Use the &eYearn Horn &con a new horse to designate a replacement."));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.get("horn.sentinel_not_found")));
                             return;
                         }
                         entity.teleport(player.getLocation());

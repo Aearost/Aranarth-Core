@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.gui.GuiBrewShop;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -65,7 +66,7 @@ public class GuiBrewBookClick {
             player.playSound(player.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1.0f, 1.0f);
             player.closeInventory();
             player.getInventory().addItem(createBrewingGuide());
-            player.sendMessage(ChatUtils.chatMessage("&7You have received the &6Brewing Guide"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.guide_received")));
             return;
         }
 

@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.commands.council;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
@@ -19,7 +20,7 @@ public class CommandBroadcast {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.broadcast")) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 				return true;
 			}
 		}
@@ -41,11 +42,11 @@ public class CommandBroadcast {
 				}
 				return true;
 			} else {
-				sender.sendMessage(ChatUtils.chatMessage("&cYou must enter a message to broadcast!"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("broadcast.must_enter_message")));
 				return true;
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac broadcast <msg>"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac broadcast <msg>")));
 			return true;
 		}
 

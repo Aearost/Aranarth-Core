@@ -227,7 +227,7 @@ public class ChatGameUtils {
             }.runTaskLater(plugin, TIMEOUT_TICKS);
         }
 
-        String startMsg = ChatUtils.chatMessage("&7Unscramble the following word: &e" + scrambled);
+        String startMsg = ChatUtils.chatMessage(Lang.get("unscramble.start", "word", scrambled));
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.sendMessage(startMsg);
             int cgVol = AranarthUtils.getPlayer(p.getUniqueId()).getChatGameSoundVolume();
@@ -253,7 +253,7 @@ public class ChatGameUtils {
             streakWinnerUUID = null;
             streakCount = 0;
         }
-        String expireMsg = ChatUtils.chatMessage("&7Nobody guessed! The word was &e" + toTitleCase(expectedAnswer));
+        String expireMsg = ChatUtils.chatMessage(Lang.get("unscramble.nobody_guessed", "word", toTitleCase(expectedAnswer)));
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.sendMessage(expireMsg);
             int cgVol = AranarthUtils.getPlayer(p.getUniqueId()).getChatGameSoundVolume();
@@ -351,7 +351,7 @@ public class ChatGameUtils {
 
             String winnerNickname = ap.getNickname();
             String timeStr = String.format("%.2f", elapsedSeconds);
-            String winMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7guessed &e" + toTitleCase(answer) + " &7correctly in &e" + timeStr + "s!");
+            String winMsg = ChatUtils.chatMessage(Lang.get("unscramble.win", "player", winnerNickname, "word", toTitleCase(answer), "time", timeStr));
             for (Player p : Bukkit.getOnlinePlayers()) {
                 p.sendMessage(winMsg);
                 int cgVol = AranarthUtils.getPlayer(p.getUniqueId()).getChatGameSoundVolume();
@@ -361,7 +361,7 @@ public class ChatGameUtils {
             }
 
             if (localStreakCount >= 3) {
-                String streakMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7is on a &e" + localStreakCount + "x &7unscramble streak!");
+                String streakMsg = ChatUtils.chatMessage(Lang.get("unscramble.streak", "player", winnerNickname, "count", localStreakCount));
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     p.sendMessage(streakMsg);
                 }
@@ -408,7 +408,7 @@ public class ChatGameUtils {
 
             if (newGlobalRecord && oldHolderNickname != null && !oldHolderNickname.isEmpty()) {
                 String oldTimeStr = String.format("%.2f", oldGlobalBestTime);
-                String recordMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7has beat &e" + oldHolderNickname + "&e's &7record of &e" + oldTimeStr + "s");
+                String recordMsg = ChatUtils.chatMessage(Lang.get("unscramble.record", "player", winnerNickname, "holder", oldHolderNickname, "time", oldTimeStr));
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     p.sendMessage(recordMsg);
                 }
@@ -420,10 +420,9 @@ public class ChatGameUtils {
             String rewardText = formatMoney(reward);
             if (localStreakCount > 1) {
                 player.sendMessage(ChatUtils.chatMessage(
-                        "&7You earned &6" + rewardText
-                                + " &7- &e" + localStreakCount + "x streak"));
+                        Lang.get("unscramble.reward_streak", "reward", rewardText, "count", localStreakCount)));
             } else {
-                player.sendMessage(ChatUtils.chatMessage("&7You earned &6" + rewardText));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("unscramble.reward", "reward", rewardText)));
             }
 
             if (NetworkManager.isActive()) {
@@ -482,7 +481,7 @@ public class ChatGameUtils {
 
         Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
             String timeStr = String.format("%.2f", elapsedSeconds);
-            String winMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7guessed &e" + toTitleCase(answer) + " &7correctly in &e" + timeStr + "s!");
+            String winMsg = ChatUtils.chatMessage(Lang.get("unscramble.win", "player", winnerNickname, "word", toTitleCase(answer), "time", timeStr));
             for (Player p : Bukkit.getOnlinePlayers()) {
                 p.sendMessage(winMsg);
                 int cgVol = AranarthUtils.getPlayer(p.getUniqueId()).getChatGameSoundVolume();
@@ -492,7 +491,7 @@ public class ChatGameUtils {
             }
 
             if (localStreakCount >= 3) {
-                String streakMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7is on a &e" + localStreakCount + "x &7unscramble streak!");
+                String streakMsg = ChatUtils.chatMessage(Lang.get("unscramble.streak", "player", winnerNickname, "count", localStreakCount));
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     p.sendMessage(streakMsg);
                 }
@@ -518,7 +517,7 @@ public class ChatGameUtils {
 
             if (newGlobalRecord && oldHolderNickname != null && !oldHolderNickname.isEmpty()) {
                 String oldTimeStr = String.format("%.2f", oldGlobalBestTime);
-                String recordMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7has beat &e" + oldHolderNickname + "&e's &7record of &e" + oldTimeStr + "s");
+                String recordMsg = ChatUtils.chatMessage(Lang.get("unscramble.record", "player", winnerNickname, "holder", oldHolderNickname, "time", oldTimeStr));
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     p.sendMessage(recordMsg);
                 }
@@ -546,7 +545,7 @@ public class ChatGameUtils {
             currentGameOrigin = originServer;
             gameStartTime = System.currentTimeMillis();
         }
-        String startMsg = ChatUtils.chatMessage("&7Unscramble the following word: &e" + scrambled);
+        String startMsg = ChatUtils.chatMessage(Lang.get("unscramble.start", "word", scrambled));
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.sendMessage(startMsg);
             int cgVol = AranarthUtils.getPlayer(p.getUniqueId()).getChatGameSoundVolume();
@@ -585,7 +584,7 @@ public class ChatGameUtils {
             updateGlobalBestCache(newHolderUUID, newHolderNickname, newGlobalBestTime);
         }
         String timeStr = String.format("%.2f", elapsedSeconds);
-        String winMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7guessed &e" + toTitleCase(answer) + " &7correctly in &e" + timeStr + "s!");
+        String winMsg = ChatUtils.chatMessage(Lang.get("unscramble.win", "player", winnerNickname, "word", toTitleCase(answer), "time", timeStr));
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.sendMessage(winMsg);
             int cgVol = AranarthUtils.getPlayer(p.getUniqueId()).getChatGameSoundVolume();
@@ -594,7 +593,7 @@ public class ChatGameUtils {
             }
         }
         if (networkStreakCount >= 3) {
-            String streakMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7is on a &e" + networkStreakCount + "x &7unscramble streak!");
+            String streakMsg = ChatUtils.chatMessage(Lang.get("unscramble.streak", "player", winnerNickname, "count", networkStreakCount));
             for (Player p : Bukkit.getOnlinePlayers()) {
                 p.sendMessage(streakMsg);
             }
@@ -647,10 +646,9 @@ public class ChatGameUtils {
 
             String rewardText = formatMoney(reward);
             if (streakForReward > 1) {
-                winner.sendMessage(ChatUtils.chatMessage("&7You earned &6" + rewardText
-                        + " &7- &e" + streakForReward + "x streak"));
+                winner.sendMessage(ChatUtils.chatMessage(Lang.get("unscramble.reward_streak", "reward", rewardText, "count", streakForReward)));
             } else {
-                winner.sendMessage(ChatUtils.chatMessage("&7You earned &6" + rewardText));
+                winner.sendMessage(ChatUtils.chatMessage(Lang.get("unscramble.reward", "reward", rewardText)));
             }
         });
 
@@ -680,7 +678,7 @@ public class ChatGameUtils {
             streakWinnerUUID = null;
             streakCount = 0;
         }
-        String expireMsg = ChatUtils.chatMessage("&7Nobody guessed! The word was &e" + toTitleCase(answer));
+        String expireMsg = ChatUtils.chatMessage(Lang.get("unscramble.nobody_guessed", "word", toTitleCase(answer)));
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.sendMessage(expireMsg);
             int cgVol = AranarthUtils.getPlayer(p.getUniqueId()).getChatGameSoundVolume();

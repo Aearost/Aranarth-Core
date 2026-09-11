@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.items.aranarthium.clusters.*;
 import com.aearost.aranarthcore.items.aranarthium.ingots.*;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.block.CrafterCraftEvent;
@@ -164,26 +165,26 @@ public class CraftingOverridesAranarthium {
             String ingotType = resultMeta.getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING);
             if (ingotType.equals("aranarthium")) {
                 if (material == Material.IRON_INGOT || material == Material.TURTLE_SCUTE) {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou must use an " + itemName + " &cto craft this!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.must_use_item", "item", itemName)));
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou must use a " + itemName + " &cto craft this!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.must_use_item", "item", itemName)));
                 }
             } else {
                 if (material == Material.ECHO_SHARD && ingredientItem instanceof AranarthiumIngot) {
                     // Plain echo shard used where an Aranarthium Ingot (custom) is required
-                    player.sendMessage(ChatUtils.chatMessage("&cYou must use an " + itemName + " &cto craft this!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.must_use_item", "item", itemName)));
                 } else if (material == Material.IRON_INGOT || material == Material.TURTLE_SCUTE || material == Material.ECHO_SHARD) {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou cannot use an " + itemName + " &cto craft this!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.special_item_restricted", "item", itemName)));
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a " + itemName + " &cto craft this!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.special_item_restricted", "item", itemName)));
                 }
             }
         } else {
             e.setCancelled(true);
             if (material == Material.IRON_INGOT || material == Material.TURTLE_SCUTE || material == Material.ECHO_SHARD) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou cannot use an " + itemName + " &cto craft this!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.special_item_restricted", "item", itemName)));
             } else {
-                player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a " + itemName + " &cto craft this!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.special_item_restricted", "item", itemName)));
             }
         }
     }

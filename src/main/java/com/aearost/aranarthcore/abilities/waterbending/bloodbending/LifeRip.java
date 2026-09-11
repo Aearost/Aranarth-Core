@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.DominionRank;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -69,7 +70,7 @@ public class LifeRip extends BloodAbility implements AddonAbility {
         double currentGain = player.getPersistentDataContainer()
                 .getOrDefault(CASTER_GAIN_KEY, PersistentDataType.DOUBLE, 0.0);
         if (currentGain >= CASTER_MAX_GAIN_CAP) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou have already absorbed the maximum amount of life force possible"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.life_rip_max")));
             return;
         }
 
