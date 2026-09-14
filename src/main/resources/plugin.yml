@@ -134,6 +134,9 @@ commands:
   kills:
     description: Shows the number of kills the input player has
     permission: aranarth.kills
+  language:
+    description: View or change the language messages are displayed in
+    aliases: [ lang ]
   lock:
     description: Locks the next-clicked chest block
     permission: aranarth.lock

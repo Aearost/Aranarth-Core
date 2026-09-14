@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.objects.JobData;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.JobUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -18,7 +19,7 @@ import java.util.List;
 
 public class GuiJobsStats {
 
-    public static final String TITLE = "Job Statistics";
+    public static final String TITLE_KEY = "gui.jobsstats.title";
 
     private final Player player;
     private final Inventory gui;
@@ -33,7 +34,7 @@ public class GuiJobsStats {
     }
 
     private Inventory initializeGui() {
-        Inventory inv = Bukkit.createInventory(player, 45, ChatUtils.translateToColor("&8&lJob Statistics"));
+        Inventory inv = Bukkit.createInventory(player, 45, Lang.getFor(player, TITLE_KEY));
 
         ItemStack grayPane = makePane(Material.GRAY_STAINED_GLASS_PANE);
 
@@ -57,7 +58,7 @@ public class GuiJobsStats {
         // Back button
         ItemStack back = new ItemStack(Material.BARRIER);
         ItemMeta backMeta = back.getItemMeta();
-        backMeta.setDisplayName(ChatUtils.translateToColor("&7Back"));
+        backMeta.setDisplayName(Lang.getFor(player, "gui.back"));
         back.setItemMeta(backMeta);
         inv.setItem(40, back);
 
@@ -75,16 +76,16 @@ public class GuiJobsStats {
         String xpStr = level >= 10 ? "Max Level" : (int) currentXp + " &8/ &e" + required;
 
         if (isActive) {
-            meta.setDisplayName(ChatUtils.translateToColor(JobUtils.getJobColor(job) + job.getDisplayName() + " &a(Active)"));
+            meta.setDisplayName(ChatUtils.translateToColor(JobUtils.getJobColor(job) + job.getDisplayName() + " " + Lang.getFor(player, "gui.jobsstats.active")));
         } else {
             meta.setDisplayName(ChatUtils.translateToColor(JobUtils.getJobColor(job) + job.getDisplayName()));
         }
 
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&7Level: &e" + level));
-        lore.add(ChatUtils.translateToColor("&7XP: &e" + xpStr));
+        lore.add(Lang.getFor(player, "gui.jobsstats.level", "level", String.valueOf(level)));
+        lore.add(Lang.getFor(player, "gui.jobsstats.xp", "xp", xpStr));
         lore.add("");
-        lore.add(ChatUtils.translateToColor("&7Click to view detailed stats in chat"));
+        lore.add(Lang.getFor(player, "gui.jobsstats.view_chat"));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;

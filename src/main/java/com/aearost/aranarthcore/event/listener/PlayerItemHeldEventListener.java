@@ -21,7 +21,7 @@ public class PlayerItemHeldEventListener implements Listener {
     public void onPlayerItemHeld(PlayerItemHeldEvent e) {
         Player player = e.getPlayer();
         // Prevents scrolling while in a held shulker box causing duplication bug
-        if (player.getOpenInventory().getTitle().equals("Held Shulker")
+        if (player.getOpenInventory().getTitle().equals(com.aearost.aranarthcore.utils.Lang.get("gui.shulker.title"))
                 && player.getOpenInventory().getType() == InventoryType.CHEST) {
             e.setCancelled(true);
         }

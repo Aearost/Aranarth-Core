@@ -19,7 +19,7 @@ import org.bukkit.event.inventory.InventoryType;
  */
 public class GuiHomesClick {
 	public void execute(InventoryClickEvent e) {
-		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Your Homes")) {
+		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(com.aearost.aranarthcore.utils.Lang.get("gui.homes.title").split("\\(")[0].trim())) {
 			// If the user did not click a slot
 			if (e.getClickedInventory() == null) {
 				return;

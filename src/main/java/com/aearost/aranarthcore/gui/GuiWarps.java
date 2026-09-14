@@ -3,7 +3,7 @@ package com.aearost.aranarthcore.gui;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -31,7 +31,7 @@ public class GuiWarps {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		Inventory gui = null;
 		int guiSize = AranarthUtils.getWarps().size();
-		String guiName = "Warps";
+		String guiName = Lang.getFor(player, "gui.warps.title");
 
 		// Size is based on which method is used
 		// If the amount is a multiple of 9, use a full row
@@ -44,7 +44,7 @@ public class GuiWarps {
 		for (Home warp : AranarthUtils.getWarps()) {
 			ItemStack homeItem = new ItemStack(warp.getIcon(), 1);
 			ItemMeta homeItemMeta = homeItem.getItemMeta();
-			homeItemMeta.setDisplayName(ChatUtils.translateToColor("&e" + warp.getName()));
+			homeItemMeta.setDisplayName(Lang.getFor(player, "gui.warps.warp_name", "name", warp.getName()));
 			homeItem.setItemMeta(homeItemMeta);
 			gui.addItem(homeItem);
 		}

@@ -1,8 +1,8 @@
 package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.objects.HeadEntry;
-import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.HeadsDatabaseManager;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.MobHeadUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -11,15 +11,11 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class GuiHeads {
 
-    public static final String TITLE = "Custom Heads";
+    public static final String TITLE_KEY = "gui.heads.title";
     public static final int HEADS_START = 9;
     public static final int HEADS_END = 44; // inclusive
     public static final int HEADS_PER_PAGE = HEADS_END - HEADS_START + 1; // 36
@@ -45,7 +41,7 @@ public class GuiHeads {
         int safePage = Math.min(page, totalPages - 1);
 
         Inventory gui = Bukkit.createInventory(player, 54,
-                ChatUtils.translateToColor("&5&l" + TITLE));
+                Lang.getFor(player, TITLE_KEY));
 
         ItemStack glass = makeGlass(Material.PURPLE_STAINED_GLASS_PANE);
         ItemStack grayGlass = makeGlass(Material.GRAY_STAINED_GLASS_PANE);
@@ -58,10 +54,10 @@ public class GuiHeads {
         // Info item at slot 4
         ItemStack info = new ItemStack(Material.NETHER_STAR);
         ItemMeta infoMeta = info.getItemMeta();
-        infoMeta.setDisplayName(ChatUtils.translateToColor("&5&lCustom Heads"));
+        infoMeta.setDisplayName(Lang.getFor(player, "gui.heads.info"));
         List<String> infoLore = new ArrayList<>();
-        infoLore.add(ChatUtils.translateToColor("&7Click any head to exchange"));
-        infoLore.add(ChatUtils.translateToColor("&7the corresponding item for it."));
+        infoLore.add(Lang.getFor(player, "gui.heads.info_lore1"));
+        infoLore.add(Lang.getFor(player, "gui.heads.info_lore2"));
         infoMeta.setLore(infoLore);
         info.setItemMeta(infoMeta);
         gui.setItem(4, info);
@@ -73,8 +69,8 @@ public class GuiHeads {
 
         // Prev button
         if (safePage > 0) {
-            gui.setItem(SLOT_PREV, makeNavButton(Material.ARROW, "&aPrevious Page",
-                    "&7Page " + safePage + " / " + totalPages));
+            gui.setItem(SLOT_PREV, makeNavButton(Material.ARROW, Lang.getFor(player, "gui.heads.prev"),
+                    Lang.getFor(player, "gui.heads.page", "n", String.valueOf(safePage), "total", String.valueOf(totalPages))));
         } else {
             gui.setItem(SLOT_PREV, makeGlass(Material.RED_STAINED_GLASS_PANE));
         }
@@ -82,17 +78,17 @@ public class GuiHeads {
         // Page indicator / close
         ItemStack closeBtn = new ItemStack(Material.BARRIER);
         ItemMeta closeMeta = closeBtn.getItemMeta();
-        closeMeta.setDisplayName(ChatUtils.translateToColor("&cClose"));
+        closeMeta.setDisplayName(Lang.getFor(player, "gui.heads.close"));
         List<String> closeLore = new ArrayList<>();
-        closeLore.add(ChatUtils.translateToColor("&7Page &e" + (safePage + 1) + " &7/ &e" + totalPages));
+        closeLore.add(Lang.getFor(player, "gui.heads.page", "n", String.valueOf(safePage + 1), "total", String.valueOf(totalPages)));
         closeMeta.setLore(closeLore);
         closeBtn.setItemMeta(closeMeta);
         gui.setItem(SLOT_CLOSE, closeBtn);
 
         // Next button
         if (safePage < totalPages - 1) {
-            gui.setItem(SLOT_NEXT, makeNavButton(Material.ARROW, "&aNext Page",
-                    "&7Page " + (safePage + 2) + " / " + totalPages));
+            gui.setItem(SLOT_NEXT, makeNavButton(Material.ARROW, Lang.getFor(player, "gui.heads.next"),
+                    Lang.getFor(player, "gui.heads.page", "n", String.valueOf(safePage + 2), "total", String.valueOf(totalPages))));
         } else {
             gui.setItem(SLOT_NEXT, makeGlass(Material.RED_STAINED_GLASS_PANE));
         }
@@ -106,9 +102,9 @@ public class GuiHeads {
             ItemStack headItem = MobHeadUtils.createCustomHead(entry.texture(), "&f" + entry.name());
             ItemMeta meta = headItem.getItemMeta();
             List<String> lore = new ArrayList<>();
-            lore.add(ChatUtils.translateToColor("&7Requires: &e" + formatMaterialName(entry.material())));
+            lore.add(Lang.getFor(player, "gui.heads.requires", "material", formatMaterialName(entry.material())));
             lore.add("");
-            lore.add(ChatUtils.translateToColor("&aClick to exchange"));
+            lore.add(Lang.getFor(player, "gui.heads.click_exchange"));
             meta.setLore(lore);
             headItem.setItemMeta(meta);
             gui.setItem(guiSlot++, headItem);
@@ -133,9 +129,9 @@ public class GuiHeads {
     private static ItemStack makeNavButton(Material mat, String name, String loreText) {
         ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor(name));
+        meta.setDisplayName(name);
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor(loreText));
+        lore.add(loreText);
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;

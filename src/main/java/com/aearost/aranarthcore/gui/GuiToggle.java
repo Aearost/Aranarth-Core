@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.objects.Perk;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.GateUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -33,7 +34,7 @@ public class GuiToggle {
 
     private Inventory initializeGui(Player player) {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-        Inventory gui = Bukkit.getServer().createInventory(player, 54, "Player Toggles");
+        Inventory gui = Bukkit.getServer().createInventory(player, 54, Lang.getFor(player, "gui.toggle.title"));
 
         ItemStack blank = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta blankMeta = blank.getItemMeta();
@@ -63,7 +64,7 @@ public class GuiToggle {
 
         ItemStack exit = new ItemStack(Material.BARRIER);
         ItemMeta exitMeta = exit.getItemMeta();
-        exitMeta.setDisplayName(ChatUtils.translateToColor("&4&lExit"));
+        exitMeta.setDisplayName(Lang.getFor(player, "gui.exit"));
         exit.setItemMeta(exitMeta);
         gui.setItem(49, exit);
 
@@ -71,7 +72,7 @@ public class GuiToggle {
         // Blacklist
         if (player.hasPermission("aranarth.blacklist")) {
             boolean active = aranarthPlayer.getBlacklistingMethod() != -1;
-            gui.setItem(10, buildToggleItem(Material.LAVA_BUCKET, "&f&lBlacklist", active));
+            gui.setItem(10, buildToggleItem(Material.LAVA_BUCKET, Lang.getFor(player, "gui.toggle.blacklist"), active));
         } else {
             gui.setItem(10, buildLockedItem(Material.LAVA_BUCKET, "&f&lBlacklist"));
         }
@@ -80,43 +81,43 @@ public class GuiToggle {
         if (hasAnyFirePerk(aranarthPlayer)) {
             gui.setItem(11, buildFireTypeItem(aranarthPlayer.getFireType()));
         } else {
-            gui.setItem(11, buildLockedItem(Material.CAMPFIRE, "&f&lFire Type"));
+            gui.setItem(11, buildLockedItem(Material.CAMPFIRE, Lang.getFor(player, "gui.toggle.fire_type")));
         }
 
         // Bulk Sell Shulker
         if (player.hasPermission("aranarth.shulker")) {
-            gui.setItem(12, buildToggleItem(Material.PURPLE_SHULKER_BOX, "&f&lBulk Sell Shulker", aranarthPlayer.isBulkSellShulkerEnabled()));
+            gui.setItem(12, buildToggleItem(Material.PURPLE_SHULKER_BOX, Lang.getFor(player, "gui.toggle.bulk_sell"), aranarthPlayer.isBulkSellShulkerEnabled()));
         } else {
             gui.setItem(12, buildLockedItem(Material.PURPLE_SHULKER_BOX, "&f&lBulk Sell Shulker"));
         }
 
         // Dominion Claim Messages
-        gui.setItem(13, buildToggleItem(Material.WHITE_BANNER, "&f&lDominion Claim Messages", !aranarthPlayer.isTogglingChangeClaim()));
+        gui.setItem(13, buildToggleItem(Material.WHITE_BANNER, Lang.getFor(player, "gui.toggle.claim_messages"), !aranarthPlayer.isTogglingChangeClaim()));
 
         // Chat
         if (player.hasPermission("aranarth.toggle.chat")) {
-            gui.setItem(14, buildToggleItem(Material.WRITTEN_BOOK, "&f&lChat", !aranarthPlayer.isTogglingChat()));
+            gui.setItem(14, buildToggleItem(Material.WRITTEN_BOOK, Lang.getFor(player, "gui.toggle.chat"), !aranarthPlayer.isTogglingChat()));
         } else {
             gui.setItem(14, buildLockedItem(Material.WRITTEN_BOOK, "&f&lChat"));
         }
 
         // Chest Lock
-        gui.setItem(15, buildToggleItem(Material.TRIAL_KEY, "&f&lChest Lock", aranarthPlayer.isAutoLockingChests()));
+        gui.setItem(15, buildToggleItem(Material.TRIAL_KEY, Lang.getFor(player, "gui.toggle.chest_lock"), aranarthPlayer.isAutoLockingChests()));
 
         // Compressor
         if (player.hasPermission("aranarth.compressor")) {
-            gui.setItem(16, buildToggleItem(Material.PISTON, "&f&lCompressor", aranarthPlayer.isCompressingItems()));
+            gui.setItem(16, buildToggleItem(Material.PISTON, Lang.getFor(player, "gui.toggle.compressor"), aranarthPlayer.isCompressingItems()));
         } else {
             gui.setItem(16, buildLockedItem(Material.PISTON, "&f&lCompressor"));
         }
 
         // Row 2: slots 19-25
         // Day Message
-        gui.setItem(19, buildToggleItem(Material.CLOCK, "&f&lNew Day Message", !aranarthPlayer.isDayMessageDisabled()));
+        gui.setItem(19, buildToggleItem(Material.CLOCK, Lang.getFor(player, "gui.toggle.day_message"), !aranarthPlayer.isDayMessageDisabled()));
 
         // Gate Creation
         if (player.hasPermission("aranarth.gate")) {
-            gui.setItem(20, buildToggleItem(Material.IRON_BARS, "&f&lGate Creation", GateUtils.isInGatePlacementMode(player.getUniqueId())));
+            gui.setItem(20, buildToggleItem(Material.IRON_BARS, Lang.getFor(player, "gui.toggle.gate"), GateUtils.isInGatePlacementMode(player.getUniqueId())));
         } else {
             gui.setItem(20, buildLockedItem(Material.IRON_BARS, "&f&lGate Creation"));
         }
@@ -124,75 +125,75 @@ public class GuiToggle {
         // Gradient Chat
         boolean hasGradientAccess = aranarthPlayer.getPerks().containsKey(Perk.CHAT) || aranarthPlayer.getSaintRank() >= 2;
         if (hasGradientAccess) {
-            gui.setItem(21, buildToggleItem(Material.ORANGE_GLAZED_TERRACOTTA, "&f&lGradient Chat", aranarthPlayer.isGradientChatEnabled()));
+            gui.setItem(21, buildToggleItem(Material.ORANGE_GLAZED_TERRACOTTA, Lang.getFor(player, "gui.toggle.gradient_chat"), aranarthPlayer.isGradientChatEnabled()));
         } else {
             gui.setItem(21, buildLockedItem(Material.ORANGE_GLAZED_TERRACOTTA, "&f&lGradient Chat"));
         }
 
         // Inventory Assist
         if (player.hasPermission("aranarth.inventory")) {
-            gui.setItem(22, buildToggleItem(Material.CHEST, "&f&lInventory Assist", !aranarthPlayer.isTogglingInventoryAssist()));
+            gui.setItem(22, buildToggleItem(Material.CHEST, Lang.getFor(player, "gui.toggle.inventory_assist"), !aranarthPlayer.isTogglingInventoryAssist()));
         } else {
             gui.setItem(22, buildLockedItem(Material.CHEST, "&f&lInventory Assist"));
         }
 
         // Private Messages
         if (player.hasPermission("aranarth.toggle.msg")) {
-            gui.setItem(23, buildToggleItem(Material.PAPER, "&f&lPrivate Messages", !aranarthPlayer.isTogglingMessages()));
+            gui.setItem(23, buildToggleItem(Material.PAPER, Lang.getFor(player, "gui.toggle.private_messages"), !aranarthPlayer.isTogglingMessages()));
         } else {
             gui.setItem(23, buildLockedItem(Material.PAPER, "&f&lPrivate Messages"));
         }
 
         // Pet Hurt
-        gui.setItem(24, buildToggleItem(Material.NAME_TAG, "&f&lPet Hurt", aranarthPlayer.isHurtingOwnPets()));
+        gui.setItem(24, buildToggleItem(Material.NAME_TAG, Lang.getFor(player, "gui.toggle.pet_hurt"), aranarthPlayer.isHurtingOwnPets()));
 
         // Shulker Assist
         if (player.hasPermission("aranarth.shulker")) {
-            gui.setItem(25, buildToggleItem(Material.SHULKER_BOX, "&f&lShulker Assist", aranarthPlayer.isAddingToShulker()));
+            gui.setItem(25, buildToggleItem(Material.SHULKER_BOX, Lang.getFor(player, "gui.toggle.shulker_assist"), aranarthPlayer.isAddingToShulker()));
         } else {
             gui.setItem(25, buildLockedItem(Material.SHULKER_BOX, "&f&lShulker Assist"));
         }
 
         // Row 3: slots 28-34
         // Spawn Boost
-        gui.setItem(28, buildToggleItem(Material.FEATHER, "&f&lSpawn Boost", aranarthPlayer.isUsingSpawnBoost()));
+        gui.setItem(28, buildToggleItem(Material.FEATHER, Lang.getFor(player, "gui.toggle.spawn_boost"), aranarthPlayer.isUsingSpawnBoost()));
 
         // Teleport Requests
         if (player.hasPermission("aranarth.toggle.tp")) {
-            gui.setItem(29, buildToggleItem(Material.ENDER_PEARL, "&f&lTeleport Requests", !aranarthPlayer.isTogglingTp()));
+            gui.setItem(29, buildToggleItem(Material.ENDER_PEARL, Lang.getFor(player, "gui.toggle.tp_requests"), !aranarthPlayer.isTogglingTp()));
         } else {
             gui.setItem(29, buildLockedItem(Material.ENDER_PEARL, "&f&lTeleport Requests"));
         }
 
         // Weather Messages
-        gui.setItem(30, buildToggleItem(Material.WIND_CHARGE, "&f&lWeather Messages", !aranarthPlayer.isWeatherMessageDisabled()));
+        gui.setItem(30, buildToggleItem(Material.WIND_CHARGE, Lang.getFor(player, "gui.toggle.weather_messages"), !aranarthPlayer.isWeatherMessageDisabled()));
 
         // Dominion Msg Compact
-        gui.setItem(31, buildToggleItem(Material.COMPASS, "&f&lDominion Msg Compact", aranarthPlayer.isDominionMsgCompact()));
+        gui.setItem(31, buildToggleItem(Material.COMPASS, Lang.getFor(player, "gui.toggle.dominion_compact"), aranarthPlayer.isDominionMsgCompact()));
 
         // Interactive Chat
         boolean hasInteractivePerm = aranarthPlayer.getSaintRank() >= 2 || aranarthPlayer.getCouncilRank() > 0;
         if (hasInteractivePerm) {
-            gui.setItem(32, buildToggleItem(Material.RECOVERY_COMPASS, "&f&lInteractive Chat", aranarthPlayer.isInteractiveChatEnabled()));
+            gui.setItem(32, buildToggleItem(Material.RECOVERY_COMPASS, Lang.getFor(player, "gui.toggle.interactive_chat"), aranarthPlayer.isInteractiveChatEnabled()));
         } else {
             gui.setItem(32, buildLockedItem(Material.RECOVERY_COMPASS, "&f&lInteractive Chat"));
         }
 
         // Emoji
-        gui.setItem(33, buildToggleItem(Material.HEART_OF_THE_SEA, "&f&lEmoji", aranarthPlayer.isEmojiEnabled()));
+        gui.setItem(33, buildToggleItem(Material.HEART_OF_THE_SEA, Lang.getFor(player, "gui.toggle.emoji"), aranarthPlayer.isEmojiEnabled()));
 
         // Size Scale
-        gui.setItem(34, buildToggleItem(Material.POPPED_CHORUS_FRUIT, "&f&lAranarthium Size Scale", aranarthPlayer.isSizeScaleEnabled()));
+        gui.setItem(34, buildToggleItem(Material.POPPED_CHORUS_FRUIT, Lang.getFor(player, "gui.toggle.size_scale"), aranarthPlayer.isSizeScaleEnabled()));
 
         // Invisible Armor
         if (player.hasPermission("aranarth.invisiblearmor")) {
-            gui.setItem(37, buildToggleItem(Material.IRON_CHESTPLATE, "&f&lInvisible Armor", InvisibleArmorManager.isArmorHidden(player.getUniqueId())));
+            gui.setItem(37, buildToggleItem(Material.IRON_CHESTPLATE, Lang.getFor(player, "gui.toggle.invisible_armor"), InvisibleArmorManager.isArmorHidden(player.getUniqueId())));
         } else {
             gui.setItem(37, buildLockedItem(Material.IRON_CHESTPLATE, "&f&lInvisible Armor"));
         }
 
         // Server Tips
-        gui.setItem(38, buildToggleItem(Material.KNOWLEDGE_BOOK, "&f&lServer Tips", !aranarthPlayer.isServerTipsDisabled()));
+        gui.setItem(38, buildToggleItem(Material.KNOWLEDGE_BOOK, Lang.getFor(player, "gui.toggle.server_tips"), !aranarthPlayer.isServerTipsDisabled()));
 
         return gui;
     }
@@ -208,9 +209,9 @@ public class GuiToggle {
         ItemStack item = new ItemStack(Material.CAMPFIRE);
         ItemMeta meta = item.getItemMeta();
         String displayName = switch (type) {
-            case DEFAULT -> ChatUtils.translateToColor("&c&lRegular Fire");
-            case BLUE -> ChatUtils.translateToColor("&b&lBlue Fire");
-            case WHITE -> ChatUtils.translateToColor("&f&lWhite Fire");
+            case DEFAULT -> Lang.get("gui.toggle.fire_regular");
+            case BLUE -> Lang.get("gui.toggle.fire_blue");
+            case WHITE -> Lang.get("gui.toggle.fire_white");
             case PRISMATIC -> ChatUtils.translateToGradient(
                     "#EB5A5A,#EB8C5A,#EBEB5A,#5ACA5A,#5A6EEB,#9B5ACA", "Prismatic Fire", true);
         };
@@ -222,8 +223,8 @@ public class GuiToggle {
     public static ItemStack buildToggleItem(Material material, String name, boolean active) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
-        String status = active ? "&a&lActive" : "&c&lInactive";
-        meta.setDisplayName(ChatUtils.translateToColor(name + " &7&l- " + status));
+        String status = active ? Lang.get("gui.active") : Lang.get("gui.inactive");
+        meta.setDisplayName(name + " " + Lang.get("gui.separator") + " " + status);
         item.setItemMeta(meta);
         return item;
     }
@@ -231,7 +232,7 @@ public class GuiToggle {
     public static ItemStack buildLockedItem(Material material, String name) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor(name + " &7&l- &8&lLocked"));
+        meta.setDisplayName(name + " " + Lang.get("gui.separator") + " " + Lang.get("gui.locked"));
         item.setItemMeta(meta);
         return item;
     }

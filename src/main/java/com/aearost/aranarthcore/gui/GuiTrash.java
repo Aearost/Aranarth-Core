@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -27,7 +28,7 @@ public class GuiTrash {
 		List<Home> homes = AranarthUtils.getHomepads();
 		int totalHomesOnPage = homes.size();
 		
-		return Bukkit.getServer().createInventory(player, 9, "Trash");
+		return Bukkit.getServer().createInventory(player, 9, Lang.getFor(player, "gui.trash.title"));
 	}
 
 }

@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.commands.general.CommandMcstats;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -17,8 +18,8 @@ import java.util.Objects;
 
 public class GuiMcstats {
 
-    public static final String TITLE_SELF = "Your Stats";
-    public static final String TITLE_SUFFIX = "'s Stats";
+    public static final String TITLE_SELF_KEY = "gui.mcstats.title_self";
+    public static final String TITLE_SUFFIX_KEY = "gui.mcstats.title_suffix";
 
     // Skill display order per section - null entries leave that slot empty
     private static final String[] GATHERING_ORDER   = {"MINING", "WOODCUTTING", "EXCAVATION", "HERBALISM", "FISHING"};
@@ -41,7 +42,7 @@ public class GuiMcstats {
                       Map<PrimarySkillType, Integer> targetRanks, int targetOverallRank,
                       Map<PrimarySkillType, Integer> viewerRanks, int viewerOverallRank) {
         this.viewer = viewer;
-        String title = isSelf ? TITLE_SELF : (targetName + TITLE_SUFFIX);
+        String title = isSelf ? Lang.getFor(viewer, TITLE_SELF_KEY) : (targetName + Lang.getFor(viewer, TITLE_SUFFIX_KEY));
         this.gui = initializeGui(title, isSelf, targetLevels, targetPowerLevel,
                 targetRanks, targetOverallRank, viewerRanks, viewerOverallRank);
     }
@@ -114,12 +115,12 @@ public class GuiMcstats {
         ItemStack powerItem = new ItemStack(Material.NETHER_STAR);
         ItemMeta powerMeta = powerItem.getItemMeta();
         if (Objects.nonNull(powerMeta)) {
-            powerMeta.setDisplayName(ChatUtils.translateToColor("&e&lPower Level"));
+            powerMeta.setDisplayName(Lang.getFor(viewer, "gui.mcstats.power"));
             List<String> lore = new ArrayList<>();
-            lore.add(ChatUtils.translateToColor("&7Total Power - &f" + targetPowerLevel));
-            lore.add(ChatUtils.translateToColor("&7Rank - &f" + formatRank(targetOverallRank)));
+            lore.add(Lang.getFor(viewer, "gui.mcstats.total_power", "level", String.valueOf(targetPowerLevel)));
+            lore.add(Lang.getFor(viewer, "gui.mcstats.rank", "rank", formatRank(targetOverallRank)));
             if (!isSelf) {
-                lore.add(ChatUtils.translateToColor("&8Your Rank - &7" + formatRank(viewerOverallRank)));
+                lore.add(Lang.getFor(viewer, "gui.mcstats.your_rank", "rank", formatRank(viewerOverallRank)));
             }
             powerMeta.setLore(lore);
             powerItem.setItemMeta(powerMeta);
@@ -130,7 +131,7 @@ public class GuiMcstats {
         ItemStack barrier = new ItemStack(Material.BARRIER);
         ItemMeta barrierMeta = barrier.getItemMeta();
         if (Objects.nonNull(barrierMeta)) {
-            barrierMeta.setDisplayName(ChatUtils.translateToColor("&4&lExit"));
+            barrierMeta.setDisplayName(Lang.getFor(viewer, "gui.exit"));
             barrier.setItemMeta(barrierMeta);
         }
         inv.setItem(49, barrier);
@@ -166,11 +167,11 @@ public class GuiMcstats {
                 meta.setDisplayName(ChatUtils.translateToColor("&e&l" + toDisplayName(skill)));
 
                 List<String> lore = new ArrayList<>();
-                lore.add(ChatUtils.translateToColor("&7Level: &f" + level));
-                lore.add(ChatUtils.translateToColor("&7Rank: &f" + formatRank(targetRank)));
+                lore.add(Lang.getFor(viewer, "gui.mcstats.skill_level", "level", String.valueOf(level)));
+                lore.add(Lang.getFor(viewer, "gui.mcstats.skill_rank", "rank", formatRank(targetRank)));
                 if (!isSelf) {
                     int viewerRank = viewerRanks.getOrDefault(skill, 0);
-                    lore.add(ChatUtils.translateToColor("&8Your Rank: &7" + formatRank(viewerRank)));
+                    lore.add(Lang.getFor(viewer, "gui.mcstats.skill_your_rank", "rank", formatRank(viewerRank)));
                 }
                 meta.setLore(lore);
                 item.setItemMeta(meta);

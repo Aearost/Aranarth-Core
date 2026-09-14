@@ -2,7 +2,6 @@ package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
-import java.util.Map;
 import org.bukkit.Sound;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Player;
@@ -11,6 +10,8 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
+
+import java.util.Map;
 
 /**
  * Automatically places picked up items that have incomplete stacks in a shulker
@@ -48,7 +49,7 @@ public class ShulkerItemPickup {
 							return;
 						}
 
-						if ((player.getOpenInventory().getTitle()).equals("Held Shulker") && player.getOpenInventory().getType() == InventoryType.CHEST) {
+						if ((player.getOpenInventory().getTitle()).equals(com.aearost.aranarthcore.utils.Lang.get("gui.shulker.title")) && player.getOpenInventory().getType() == InventoryType.CHEST) {
 							e.setCancelled(true);
 							return;
 						}

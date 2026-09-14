@@ -4,10 +4,7 @@ import com.aearost.aranarthcore.objects.DefenderMode;
 import com.aearost.aranarthcore.objects.DefenderType;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.Outpost;
-import com.aearost.aranarthcore.utils.ChatUtils;
-import com.aearost.aranarthcore.utils.DefenderUtils;
-import com.aearost.aranarthcore.utils.DominionUtils;
-import com.aearost.aranarthcore.utils.OutpostUtils;
+import com.aearost.aranarthcore.utils.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -20,18 +17,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * GUI for managing a specific defender entity.
  */
 public class GuiDefenderManage {
 
-    public static final String TITLE = "Manage Defender";
+    public static final String TITLE_KEY = "gui.defendermanage.title";
     public static final int SLOT_MODE = 10;
     public static final int SLOT_TELEPORT_HOME = 11;
     public static final int SLOT_LOCATION = 12;
@@ -48,7 +41,7 @@ public class GuiDefenderManage {
 
         playerToDefender.put(player.getUniqueId(), defenderEntityUUID);
 
-        Inventory gui = Bukkit.createInventory(player, 27, ChatUtils.translateToColor(TITLE));
+        Inventory gui = Bukkit.createInventory(player, 27, Lang.getFor(player, TITLE_KEY));
 
         ItemStack border = buildBorder();
         for (int i = 0; i < 9; i++) {
@@ -89,9 +82,9 @@ public class GuiDefenderManage {
     public static ItemStack buildModeButton(DefenderMode mode, UUID defenderEntityUUID) {
         ItemStack item = new ItemStack(modeToMaterial(mode));
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&b&lMode: &f" + mode.getDisplayName()));
+        meta.setDisplayName(Lang.get("gui.defendermanage.mode", "mode", mode.getDisplayName()));
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&7" + mode.getDescription()));
+        lore.add(Lang.get("gui.defendermanage.mode_desc", "desc", mode.getDescription()));
         lore.add("");
 
         // Show follow player name if relevant
@@ -101,7 +94,7 @@ public class GuiDefenderManage {
                     ? (Bukkit.getOfflinePlayer(followId).getName() != null
                        ? Bukkit.getOfflinePlayer(followId).getName() : followId.toString())
                     : "none";
-            lore.add(ChatUtils.translateToColor("&7Following: &e" + name));
+            lore.add(Lang.get("gui.defendermanage.following", "name", name));
             lore.add("");
         }
 
@@ -109,14 +102,12 @@ public class GuiDefenderManage {
         if (mode == DefenderMode.GUARD) {
             Location guardPos = DefenderUtils.getGuardPosition(defenderEntityUUID);
             if (guardPos != null) {
-                lore.add(ChatUtils.translateToColor(
-                        "&7Guard pos: &e" + (int) guardPos.getX() + ", "
-                        + (int) guardPos.getY() + ", " + (int) guardPos.getZ()));
+                lore.add(Lang.get("gui.defendermanage.guard_pos", "x", String.valueOf((int) guardPos.getX()), "y", String.valueOf((int) guardPos.getY()), "z", String.valueOf((int) guardPos.getZ())));
                 lore.add("");
             }
         }
 
-        lore.add(ChatUtils.translateToColor("&eClick &7to cycle to next mode"));
+        lore.add(Lang.get("gui.defendermanage.cycle_mode"));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
@@ -139,10 +130,10 @@ public class GuiDefenderManage {
                 : "someone";
         ItemStack item = new ItemStack(Material.BARRIER);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&c&lMode Locked"));
+        meta.setDisplayName(Lang.get("gui.defendermanage.mode_locked"));
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&7This defender is currently following &e" + name));
-        lore.add(ChatUtils.translateToColor("&7This currently cannot be done"));
+        lore.add(Lang.get("gui.defendermanage.mode_locked_lore", "name", name));
+        lore.add(Lang.get("gui.defendermanage.mode_locked_lore2"));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
@@ -158,9 +149,9 @@ public class GuiDefenderManage {
         }
         ItemStack item = new ItemStack(Material.ENDER_PEARL);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&a&lTeleport to Home"));
+        meta.setDisplayName(Lang.get("gui.defendermanage.teleport_home"));
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&7Teleports this defender to &e" + homeName + "&7's home"));
+        lore.add(Lang.get("gui.defendermanage.teleport_home_lore", "name", homeName));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
@@ -172,24 +163,24 @@ public class GuiDefenderManage {
         String description;
         if (assignedOutpostId == null) {
             locationName = dominion.getName() + " &7(Dominion)";
-            description = "&7Patrols the main dominion territory";
+            description = Lang.get("gui.defendermanage.patrols_main");
         } else {
             Outpost outpost = OutpostUtils.getOutpostById(assignedOutpostId);
             if (outpost != null) {
                 locationName = outpost.getName() + " &7(Outpost " + outpost.getOutpostIndex() + ")";
-                description = "&7Patrols &e" + outpost.getName() + "&7's territory";
+                description = Lang.get("gui.defendermanage.patrols_outpost", "name", outpost.getName());
             } else {
                 locationName = dominion.getName() + " &7(Dominion)";
-                description = "&7Patrols the main dominion territory";
+                description = Lang.get("gui.defendermanage.patrols_main");
             }
         }
         ItemStack item = new ItemStack(Material.FILLED_MAP);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&b&lTerritory: &e" + locationName));
+        meta.setDisplayName(Lang.get("gui.defendermanage.territory", "name", ChatUtils.translateToColor(locationName)));
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor(description));
+        lore.add(description);
         lore.add("");
-        lore.add(ChatUtils.translateToColor("&eClick &7to cycle territory"));
+        lore.add(Lang.get("gui.defendermanage.cycle_territory"));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
@@ -210,12 +201,12 @@ public class GuiDefenderManage {
 
         ItemStack item = new ItemStack(type.getSpawnEgg());
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&c&l" + type.getDisplayName() + " Defender"));
+        meta.setDisplayName(Lang.get("gui.defendermanage.info_name", "type", type.getDisplayName()));
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&7Dominion: &e" + dominion.getName()));
-        lore.add(ChatUtils.translateToColor("&7Role: &e" + type.getRole()));
-        lore.add(ChatUtils.translateToColor("&7Health: &e" + (int) (currentHp / 2) + "/" + (int) (maxHp / 2) + " hearts"));
-        lore.add(ChatUtils.translateToColor("&7Mode: &b" + mode.getDisplayName()));
+        lore.add(Lang.get("gui.defendermanage.info_dominion", "name", dominion.getName()));
+        lore.add(Lang.get("gui.defenders.role", "role", type.getRole()));
+        lore.add(Lang.get("gui.defendermanage.info_hp", "hp", String.valueOf((int) (currentHp / 2)), "max", String.valueOf((int) (maxHp / 2))));
+        lore.add(Lang.get("gui.defendermanage.info_mode", "mode", mode.getDisplayName()));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
@@ -225,10 +216,10 @@ public class GuiDefenderManage {
         NumberFormat fmt = NumberFormat.getInstance();
         ItemStack item = new ItemStack(Material.GOLD_INGOT);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&6&lSell This Defender"));
+        meta.setDisplayName(Lang.get("gui.defendermanage.sell"));
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&7Sells this specific &e" + type.getDisplayName() + " defender."));
-        lore.add(ChatUtils.translateToColor("&7Refund: &6$" + fmt.format((long) type.getSellPrice())));
+        lore.add(Lang.get("gui.defendermanage.sell_lore", "type", type.getDisplayName()));
+        lore.add(Lang.get("gui.defendermanage.sell_refund", "amount", fmt.format((long) type.getSellPrice())));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;

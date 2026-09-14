@@ -3,7 +3,7 @@ package com.aearost.aranarthcore.gui;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.BlacklistPreset;
 import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -18,7 +18,7 @@ import java.util.UUID;
 
 public class GuiBlacklistEditor {
 
-    public static final String TITLE_PREFIX = "Blacklist - ";
+    public static final String TITLE_PREFIX_KEY = "gui.blacklisteditor.title_prefix";
     private static final Map<UUID, Integer> openPresets = new HashMap<>();
     private static final Map<UUID, Integer> awaitingRename = new HashMap<>();
 
@@ -68,10 +68,9 @@ public class GuiBlacklistEditor {
 
         // Title
         String presetName = presetIndex < presets.size() ? presets.get(presetIndex).getName() : "";
-        String title = presetName.isEmpty()
-                ? TITLE_PREFIX + "Preset " + (presetIndex + 1)
-                : TITLE_PREFIX + presetName;
-        Inventory inv = Bukkit.createInventory(player, 54, ChatUtils.translateToColor(title));
+        String defaultName = Lang.getFor(player, "gui.blacklisteditor.default_name", "n", String.valueOf(presetIndex + 1));
+        String title = Lang.getFor(player, TITLE_PREFIX_KEY) + (presetName.isEmpty() ? defaultName : presetName);
+        Inventory inv = Bukkit.createInventory(player, 54, title);
 
         // Gray pane filler
         ItemStack pane = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
@@ -91,14 +90,14 @@ public class GuiBlacklistEditor {
         // Rename button
         ItemStack rename = new ItemStack(Material.NAME_TAG);
         ItemMeta renameMeta = rename.getItemMeta();
-        renameMeta.setDisplayName(ChatUtils.translateToColor("&f&lRename Preset"));
+        renameMeta.setDisplayName(Lang.getFor(player, "gui.blacklisteditor.rename"));
         rename.setItemMeta(renameMeta);
         inv.setItem(4, rename);
 
         // Back button
         ItemStack back = new ItemStack(Material.ARROW);
         ItemMeta backMeta = back.getItemMeta();
-        backMeta.setDisplayName(ChatUtils.translateToColor("&7Back to Blacklist"));
+        backMeta.setDisplayName(Lang.getFor(player, "gui.blacklisteditor.back"));
         back.setItemMeta(backMeta);
         inv.setItem(49, back);
 

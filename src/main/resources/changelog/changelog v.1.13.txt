@@ -23,13 +23,14 @@ Homepad
 [+]
 
 Chat, UI & Sounds
-[+]
+[+] Added support for French in /lang
+[+] Added support for German in /lang
 
 Quality of Life
-[+]
+[+] Added /language command (alias /lang) to toggle preferred display language (English, German, French)
 
 Cross-server & Technical
-[+]
+[~] Removed all hardcoded text and set up AranarthCore for internationalization, storing all strings in lang files
 
 Miscellaneous
 [+]

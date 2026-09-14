@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.objects.JobData;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.JobUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -18,7 +19,7 @@ import java.util.List;
 
 public class GuiJobs {
 
-    public static final String TITLE = "Jobs";
+    public static final String TITLE_KEY = "gui.jobs.title";
 
     private final Player player;
     private final Inventory gui;
@@ -33,7 +34,7 @@ public class GuiJobs {
     }
 
     private Inventory initializeGui() {
-        Inventory inv = Bukkit.createInventory(player, 27, ChatUtils.translateToColor("&8&lJobs"));
+        Inventory inv = Bukkit.createInventory(player, 27, Lang.getFor(player, TITLE_KEY));
 
         ItemStack grayPane = makePane(Material.GRAY_STAINED_GLASS_PANE);
 
@@ -60,9 +61,9 @@ public class GuiJobs {
     private ItemStack makeJoinButton(JobData jobData, int maxJobs, int activeCount) {
         ItemStack item = new ItemStack(Material.LIME_CONCRETE);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&a&lJoin a Job"));
+        meta.setDisplayName(Lang.getFor(player, "gui.jobs.join"));
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&7Active Jobs: &e" + activeCount + " &8/ &e" + maxJobs));
+        lore.add(Lang.getFor(player, "gui.jobs.active_count", "count", String.valueOf(activeCount), "max", String.valueOf(maxJobs)));
         if (!jobData.getActiveJobs().isEmpty()) {
             lore.add("");
             for (JobType job : jobData.getActiveJobs()) {
@@ -70,7 +71,7 @@ public class GuiJobs {
             }
         }
         lore.add("");
-        lore.add(ChatUtils.translateToColor("&7Click to browse available jobs"));
+        lore.add(Lang.getFor(player, "gui.jobs.join_lore"));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
@@ -79,9 +80,9 @@ public class GuiJobs {
     private ItemStack makeStatsButton(JobData jobData) {
         ItemStack item = new ItemStack(Material.BOOK);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&e&lStatistics"));
+        meta.setDisplayName(Lang.getFor(player, "gui.jobs.stats"));
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&7View XP and level stats for your jobs"));
+        lore.add(Lang.getFor(player, "gui.jobs.stats_lore"));
         if (!jobData.getActiveJobs().isEmpty()) {
             lore.add("");
             for (JobType job : jobData.getActiveJobs()) {
@@ -93,7 +94,7 @@ public class GuiJobs {
             }
         }
         lore.add("");
-        lore.add(ChatUtils.translateToColor("&7Click to view detailed statistics"));
+        lore.add(Lang.getFor(player, "gui.jobs.stats_click"));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
@@ -102,17 +103,17 @@ public class GuiJobs {
     private ItemStack makeLeaveButton(JobData jobData) {
         ItemStack item = new ItemStack(Material.RED_CONCRETE);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&c&lLeave a Job"));
+        meta.setDisplayName(Lang.getFor(player, "gui.jobs.leave"));
         List<String> lore = new ArrayList<>();
         if (jobData.getActiveJobs().isEmpty()) {
-            lore.add(ChatUtils.translateToColor("&7You do not have any job to leave"));
+            lore.add(Lang.getFor(player, "gui.jobs.no_jobs_leave"));
         } else {
-            lore.add(ChatUtils.translateToColor("&7Your current jobs:"));
+            lore.add(Lang.getFor(player, "gui.jobs.current_jobs"));
             for (JobType job : jobData.getActiveJobs()) {
                 lore.add(ChatUtils.translateToColor("&e  " + job.getDisplayName() + " &7- Level &e" + jobData.getLevel(job)));
             }
             lore.add("");
-            lore.add(ChatUtils.translateToColor("&7Click to leave a job"));
+            lore.add(Lang.getFor(player, "gui.jobs.leave_click"));
         }
         meta.setLore(lore);
         item.setItemMeta(meta);

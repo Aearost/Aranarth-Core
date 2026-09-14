@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.objects.JobData;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.JobUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -18,7 +19,7 @@ import java.util.List;
 
 public class GuiJobsLeave {
 
-    public static final String TITLE = "Leave a Job";
+    public static final String TITLE_KEY = "gui.jobsleave.title";
 
     // Jobs centered in the middle row: slots 11-15
     public static final int[] JOB_SLOTS = {11, 12, 13, 14, 15};
@@ -45,7 +46,7 @@ public class GuiJobsLeave {
     }
 
     private Inventory initializeGui() {
-        Inventory inv = Bukkit.createInventory(player, 27, ChatUtils.translateToColor("&8&lLeave a Job"));
+        Inventory inv = Bukkit.createInventory(player, 27, Lang.getFor(player, TITLE_KEY));
 
         ItemStack grayPane = makePane(Material.GRAY_STAINED_GLASS_PANE);
 
@@ -60,7 +61,7 @@ public class GuiJobsLeave {
         // Back button
         ItemStack back = new ItemStack(Material.BARRIER);
         ItemMeta backMeta = back.getItemMeta();
-        backMeta.setDisplayName(ChatUtils.translateToColor("&7Back"));
+        backMeta.setDisplayName(Lang.getFor(player, "gui.back"));
         back.setItemMeta(backMeta);
         inv.setItem(22, back);
 
@@ -86,11 +87,11 @@ public class GuiJobsLeave {
 
         meta.setDisplayName(ChatUtils.translateToColor("&c&l" + job.getDisplayName()));
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&7Level: &e" + level));
-        lore.add(ChatUtils.translateToColor("&7XP: &e" + xpStr));
+        lore.add(Lang.getFor(player, "gui.jobsleave.level", "level", String.valueOf(level)));
+        lore.add(Lang.getFor(player, "gui.jobsleave.xp", "xp", xpStr));
         lore.add("");
-        lore.add(ChatUtils.translateToColor("&cClick to leave this job"));
-        lore.add(ChatUtils.translateToColor("&7Your level and XP will be saved"));
+        lore.add(Lang.getFor(player, "gui.jobsleave.click_leave"));
+        lore.add(Lang.getFor(player, "gui.jobsleave.saved"));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;

@@ -1,6 +1,6 @@
 package com.aearost.aranarthcore.gui;
 
-import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -32,7 +32,7 @@ public class GuiRankup {
 
 	private Inventory initializeGui(Player player, String rankName, String rankupCost) {
 		Inventory gui = Bukkit.getServer().createInventory(player, 27,
-				ChatUtils.translateToColor("&8&lRankup Confirm"));
+				Lang.getFor(player, "gui.rankup.title"));
 
 		// Initialize Items
 		ItemStack yellowPane = new ItemStack(Material.YELLOW_STAINED_GLASS_PANE);
@@ -49,11 +49,10 @@ public class GuiRankup {
 		blackPane.setItemMeta(blackPaneMeta);
 
 		ItemMeta cancelMeta = cancel.getItemMeta();
-		cancelMeta.setDisplayName(ChatUtils.translateToColor("&c&lCancel Rankup"));
+		cancelMeta.setDisplayName(Lang.getFor(player, "gui.rankup.cancel"));
 		cancel.setItemMeta(cancelMeta);
 		ItemMeta rankupMeta = rankup.getItemMeta();
-		rankupMeta
-				.setDisplayName(ChatUtils.translateToColor("&a&lRankup to " + rankName + " &a&lfor &6&l" + rankupCost));
+		rankupMeta.setDisplayName(Lang.getFor(player, "gui.rankup.confirm", "rank", rankName, "cost", rankupCost));
 		rankup.setItemMeta(rankupMeta);
 
 		// Initialize GUI

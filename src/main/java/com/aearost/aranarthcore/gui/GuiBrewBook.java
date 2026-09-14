@@ -14,20 +14,14 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * GUI displaying all brewery recipes the player has unlocked.
  */
 public class GuiBrewBook {
 
-    public static final String TITLE = "Brew Book";
+    public static final String TITLE_KEY = "gui.brewbook.title";
     private static final int PAGE_SIZE = 36;
     private static final int CONTENT_START = 9;
 
@@ -51,7 +45,7 @@ public class GuiBrewBook {
     }
 
     private Inventory build() {
-        Inventory inv = Bukkit.createInventory(player, 54, TITLE);
+        Inventory inv = Bukkit.createInventory(player, 54, Lang.getFor(player, TITLE_KEY));
 
         ItemStack glass = makeGlass();
 
@@ -78,19 +72,19 @@ public class GuiBrewBook {
         if (filter != null) {
             ItemStack back = new ItemStack(Material.ARROW);
             ItemMeta backMeta = back.getItemMeta();
-            backMeta.setDisplayName(ChatUtils.translateToColor("&c&lBack"));
+            backMeta.setDisplayName(Lang.getFor(player, "gui.brewbook.back"));
             List<String> backLore = new ArrayList<>();
-            backLore.add(ChatUtils.translateToColor("&7Searching: &f" + filter));
-            backLore.add(ChatUtils.translateToColor("&7Click to return to all recipes"));
+            backLore.add(Lang.getFor(player, "gui.brewbook.searching", "filter", filter));
+            backLore.add(Lang.getFor(player, "gui.brewbook.return_all"));
             backMeta.setLore(backLore);
             back.setItemMeta(backMeta);
             inv.setItem(4, back);
         } else {
             ItemStack search = new ItemStack(Material.SPYGLASS);
             ItemMeta searchMeta = search.getItemMeta();
-            searchMeta.setDisplayName(ChatUtils.translateToColor("&b&lSearch"));
+            searchMeta.setDisplayName(Lang.getFor(player, "gui.brewbook.search"));
             List<String> searchLore = new ArrayList<>();
-            searchLore.add(ChatUtils.translateToColor("&7Search for a brew by name"));
+            searchLore.add(Lang.getFor(player, "gui.brewbook.search_lore"));
             searchMeta.setLore(searchLore);
             search.setItemMeta(searchMeta);
             inv.setItem(4, search);
@@ -99,7 +93,7 @@ public class GuiBrewBook {
         // Previous page
         ItemStack previous = new ItemStack(Material.RED_WOOL);
         ItemMeta previousMeta = previous.getItemMeta();
-        previousMeta.setDisplayName(ChatUtils.translateToColor("&c&lPrevious"));
+        previousMeta.setDisplayName(Lang.getFor(player, "gui.page_prev"));
         previous.setItemMeta(previousMeta);
         inv.setItem(45, page > 0 ? previous : glass);
 
@@ -110,10 +104,10 @@ public class GuiBrewBook {
         // Brewing Guide book
         ItemStack book = new ItemStack(Material.BOOK);
         ItemMeta bookMeta = book.getItemMeta();
-        bookMeta.setDisplayName(ChatUtils.translateToColor("&6&lBrewing Guide"));
+        bookMeta.setDisplayName(Lang.getFor(player, "gui.brewbook.guide"));
         List<String> bookLore = new ArrayList<>();
-        bookLore.add(ChatUtils.translateToColor("&7" + unlocked.size() + " recipe(s) unlocked"));
-        bookLore.add(ChatUtils.translateToColor("&7Click to receive a guide book"));
+        bookLore.add(Lang.getFor(player, "gui.brewbook.recipes_unlocked", "n", String.valueOf(unlocked.size())));
+        bookLore.add(Lang.getFor(player, "gui.brewbook.guide_lore"));
         bookMeta.setLore(bookLore);
         book.setItemMeta(bookMeta);
         inv.setItem(49, book);
@@ -124,9 +118,9 @@ public class GuiBrewBook {
         // Recipe Shop
         ItemStack shopBtn = new ItemStack(Material.GOLD_INGOT);
         ItemMeta shopMeta = shopBtn.getItemMeta();
-        shopMeta.setDisplayName(ChatUtils.translateToColor("&6&lRecipe Shop"));
+        shopMeta.setDisplayName(Lang.getFor(player, "gui.brewbook.shop"));
         List<String> shopLore = new ArrayList<>();
-        shopLore.add(ChatUtils.translateToColor("&7Unlock Basic recipes with money!"));
+        shopLore.add(Lang.getFor(player, "gui.brewbook.shop_lore"));
         shopMeta.setLore(shopLore);
         shopBtn.setItemMeta(shopMeta);
         inv.setItem(52, shopBtn);
@@ -134,7 +128,7 @@ public class GuiBrewBook {
         // Next page
         ItemStack next = new ItemStack(Material.LIME_WOOL);
         ItemMeta nextMeta = next.getItemMeta();
-        nextMeta.setDisplayName(ChatUtils.translateToColor("&a&lNext"));
+        nextMeta.setDisplayName(Lang.getFor(player, "gui.page_next"));
         next.setItemMeta(nextMeta);
         inv.setItem(53, end < unlocked.size() ? next : glass);
 

@@ -15,7 +15,7 @@ import org.bukkit.event.inventory.InventoryType;
 public class GuiTopGuessesClick {
 
     public void execute(InventoryClickEvent e) {
-        if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Guesses")) {
+        if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(com.aearost.aranarthcore.utils.Lang.get("gui.topguesses.title"))) {
             if (e.getClickedInventory() == null) {
                 return;
             }

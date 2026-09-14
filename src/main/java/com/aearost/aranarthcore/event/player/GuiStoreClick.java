@@ -14,13 +14,13 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 public class GuiStoreClick {
     public void execute(InventoryClickEvent e) {
         e.setCancelled(true);
-        if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarth Store - Saint Ranks")) {
+        if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(com.aearost.aranarthcore.utils.Lang.get("gui.store.title_saint"))) {
             saintPageLogic(e);
-        } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarth Store - Perks")) {
+        } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(com.aearost.aranarthcore.utils.Lang.get("gui.store.title_perks"))) {
             perksPageLogic(e);
-        } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarth Store - Boosts")) {
+        } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(com.aearost.aranarthcore.utils.Lang.get("gui.store.title_boosts"))) {
             boostsPageLogic(e);
-        } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarth Store - Crate Keys")) {
+        } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(com.aearost.aranarthcore.utils.Lang.get("gui.store.title_crates"))) {
             cratesPageLogic(e);
         } else {
             mainPageLogic(e);

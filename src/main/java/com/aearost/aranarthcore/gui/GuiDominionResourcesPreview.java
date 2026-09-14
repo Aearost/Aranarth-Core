@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.gui;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
@@ -16,7 +17,7 @@ import java.util.List;
 
 public class GuiDominionResourcesPreview {
 
-	public static final String TITLE_SUFFIX = " Resources";
+	public static final String TITLE_SUFFIX_KEY = "gui.dominionresourcespreview.title_suffix";
 
 	private final Player player;
 	private final Inventory initializedGui;
@@ -70,7 +71,7 @@ public class GuiDominionResourcesPreview {
 		int size = contentRows * 9 + 18;
 		int backSlot = size - 5;
 
-		Inventory gui = Bukkit.getServer().createInventory(player, size, biomeName + TITLE_SUFFIX);
+		Inventory gui = Bukkit.getServer().createInventory(player, size, biomeName + Lang.getFor(player, TITLE_SUFFIX_KEY));
 
 		ItemStack filler = makeFiller();
 		for (int i = 0; i < 9; i++) { gui.setItem(i, filler); }
@@ -117,7 +118,7 @@ public class GuiDominionResourcesPreview {
 	private ItemStack buildBackButton() {
 		ItemStack item = new ItemStack(Material.BARRIER);
 		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(ChatUtils.translateToColor("&7Back"));
+		meta.setDisplayName(Lang.getFor(player, "gui.back"));
 		item.setItemMeta(meta);
 		return item;
 	}

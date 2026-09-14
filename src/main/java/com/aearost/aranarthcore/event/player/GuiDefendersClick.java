@@ -2,16 +2,8 @@ package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.gui.GuiDefenders;
 import com.aearost.aranarthcore.gui.GuiDominionPermissions;
-import com.aearost.aranarthcore.objects.DefenderType;
-import com.aearost.aranarthcore.objects.Dominion;
-import com.aearost.aranarthcore.objects.DominionPermission;
-import com.aearost.aranarthcore.objects.DominionRank;
-import com.aearost.aranarthcore.objects.Outpost;
-import com.aearost.aranarthcore.utils.ChatUtils;
-import com.aearost.aranarthcore.utils.DefenderUtils;
-import com.aearost.aranarthcore.utils.DominionUtils;
-import com.aearost.aranarthcore.utils.Lang;
-import com.aearost.aranarthcore.utils.OutpostUtils;
+import com.aearost.aranarthcore.objects.*;
+import com.aearost.aranarthcore.utils.*;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -97,7 +89,8 @@ public class GuiDefendersClick {
 
         player.sendMessage(ChatUtils.chatMessage(result));
         String openTitle = ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
-        if (openTitle.startsWith(GuiDefenders.TITLE_PREFIX)) {
+        String defendersTitlePrefix = ChatUtils.stripColorFormatting(Lang.getFor(player, GuiDefenders.TITLE_PREFIX_KEY, "total", "", "limit", "")).split("\\(")[0].trim();
+        if (openTitle.startsWith(defendersTitlePrefix)) {
             GuiDefenders.populate(player.getOpenInventory().getTopInventory(), dominion);
         } else {
             GuiDefenders.open(player);

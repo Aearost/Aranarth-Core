@@ -8,7 +8,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
  */
 public class GuiPotionListPreventRemoval {
 	public void execute(InventoryClickEvent e) {
-		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Your Potions")) {
+		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(com.aearost.aranarthcore.utils.Lang.get("gui.potions.title_view").split("\\(")[0].trim())) {
 			e.setCancelled(true);
 		}
 	}

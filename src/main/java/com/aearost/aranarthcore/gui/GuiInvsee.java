@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.gui;
 
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -48,7 +49,7 @@ public class GuiInvsee {
     }
 
     public static void open(Player viewer, Player target) {
-        Inventory gui = buildGui(target);
+        Inventory gui = buildGui(viewer, target);
         openInvsees.put(gui, target.getUniqueId());
         watchedBy.computeIfAbsent(target.getUniqueId(), k -> new HashSet<>()).add(gui);
         viewer.openInventory(gui);
@@ -76,7 +77,7 @@ public class GuiInvsee {
      * The guiItems array must be 45 elements matching the GUI slot layout.
      */
     public static void openRemote(Player viewer, UUID targetUuid, String targetName, ItemStack[] guiItems) {
-        String title = "Viewing " + targetName + "'s Inventory";
+        String title = Lang.getFor(viewer, "gui.invsee.title", "name", targetName);
         Inventory gui = Bukkit.createInventory(null, 45, title);
 
         ItemStack filler = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
@@ -149,8 +150,8 @@ public class GuiInvsee {
         }
     }
 
-    private static Inventory buildGui(Player target) {
-        String title = "Viewing " + target.getName() + "'s Inventory";
+    private static Inventory buildGui(Player viewer, Player target) {
+        String title = Lang.getFor(viewer, "gui.invsee.title", "name", target.getName());
         Inventory gui = Bukkit.createInventory(null, 45, title);
 
         // Row 0 (armor and off-hand)

@@ -2,7 +2,7 @@ package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -42,8 +42,9 @@ public class GuiPotions {
 	}
 
 	public Inventory initializeAddGui(Player player) {
-		String potionStats = AranarthUtils.getPlayerStoredPotionNum(player) + "/" + AranarthUtils.getMaxPotionNum(player);
-		return Bukkit.getServer().createInventory(player, 54, "Add Potions (" + potionStats + ")");
+		return Bukkit.getServer().createInventory(player, 54, Lang.getFor(player, "gui.potions.title_add",
+				"count", String.valueOf(AranarthUtils.getPlayerStoredPotionNum(player)),
+				"max", String.valueOf(AranarthUtils.getMaxPotionNum(player))));
 	}
 
 	private Inventory initializeRemoveGui(Player player) {
@@ -57,9 +58,9 @@ public class GuiPotions {
 		if (size % 9 != 0) {
 			size = ((int) (double) (size / 9) + 1) * 9;
 		}
-		String potionStats = AranarthUtils.getPlayerStoredPotionNum(player) + "/" + AranarthUtils.getMaxPotionNum(player);
-
-		Inventory inventory = Bukkit.getServer().createInventory(player, size, "Remove Potions (" + potionStats + ")");
+		Inventory inventory = Bukkit.getServer().createInventory(player, size, Lang.getFor(player, "gui.potions.title_remove",
+				"count", String.valueOf(AranarthUtils.getPlayerStoredPotionNum(player)),
+				"max", String.valueOf(AranarthUtils.getMaxPotionNum(player))));
 
 		HashMap<String, HashMap<ItemStack, Integer>> formattedPotions = AranarthUtils.getPlayerPotionNames(player);
 		for (String formattedName : formattedPotions.keySet()) {
@@ -69,7 +70,7 @@ public class GuiPotions {
 				ItemStack potionCopy = potion.clone();
 				if (potionCopy.hasItemMeta()) {
 					ItemMeta meta = potionCopy.getItemMeta();
-					meta.setDisplayName(ChatUtils.translateToColor("&e" + formattedName + " &6x" + storedPotion.get(potion)));
+					meta.setDisplayName(Lang.getFor(player, "gui.potions.name", "name", formattedName, "count", String.valueOf(storedPotion.get(potion))));
 					potionCopy.setItemMeta(meta);
 					inventory.addItem(potionCopy);
 				}
@@ -90,9 +91,9 @@ public class GuiPotions {
 		if (size % 9 != 0) {
 			size = ((int) (double) (size / 9) + 1) * 9;
 		}
-		String potionStats = AranarthUtils.getPlayerStoredPotionNum(player) + "/" + AranarthUtils.getMaxPotionNum(player);
-
-		Inventory inventory = Bukkit.getServer().createInventory(player, size, "Your Potions (" + potionStats + ")");
+		Inventory inventory = Bukkit.getServer().createInventory(player, size, Lang.getFor(player, "gui.potions.title_view",
+				"count", String.valueOf(AranarthUtils.getPlayerStoredPotionNum(player)),
+				"max", String.valueOf(AranarthUtils.getMaxPotionNum(player))));
 
 		HashMap<String, HashMap<ItemStack, Integer>> formattedPotions = AranarthUtils.getPlayerPotionNames(player);
 		for (String formattedName : formattedPotions.keySet()) {
@@ -102,7 +103,7 @@ public class GuiPotions {
 				ItemStack potionCopy = potion.clone();
 				if (potionCopy.hasItemMeta()) {
 					ItemMeta meta = potionCopy.getItemMeta();
-					meta.setDisplayName(ChatUtils.translateToColor("&e" + formattedName + " &6x" + storedPotion.get(potion)));
+					meta.setDisplayName(Lang.getFor(player, "gui.potions.name", "name", formattedName, "count", String.valueOf(storedPotion.get(potion))));
 					potionCopy.setItemMeta(meta);
 					inventory.addItem(potionCopy);
 				}

@@ -14,7 +14,7 @@ public class GuiMcstatsClick {
 
     public void execute(InventoryClickEvent e) {
         String title = ChatUtils.stripColorFormatting(e.getView().getTitle());
-        if (!title.equals(GuiMcstats.TITLE_SELF) && !title.endsWith(GuiMcstats.TITLE_SUFFIX)) {
+        if (!title.equals(com.aearost.aranarthcore.utils.Lang.get(GuiMcstats.TITLE_SELF_KEY)) && !title.endsWith(com.aearost.aranarthcore.utils.Lang.get(GuiMcstats.TITLE_SUFFIX_KEY))) {
             return;
         }
 

@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.gui;
 
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -20,7 +21,7 @@ public class GuiShulker {
 	}
 	
 	private Inventory initializeGui(Player player, Inventory shulkerInventory) {
-		Inventory gui = Bukkit.getServer().createInventory(player, 27, "Held Shulker");
+		Inventory gui = Bukkit.getServer().createInventory(player, 27, Lang.getFor(player, "gui.shulker.title"));
 		for (int i = 0; i < shulkerInventory.getSize(); i++) {
 			gui.setItem(i, shulkerInventory.getItem(i));
 		}

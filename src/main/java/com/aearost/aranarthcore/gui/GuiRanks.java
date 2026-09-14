@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.projectkorra.projectkorra.Element;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -39,7 +40,7 @@ public class GuiRanks {
 
 	private Inventory initializeGui(Player player) {
 		Inventory gui = Bukkit.getServer().createInventory(player, 45,
-				ChatUtils.translateToColor("&8&lAranarth Ranks"));
+				Lang.getFor(player, "gui.ranks.title"));
 
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		Pronouns pronouns = aranarthPlayer.getPronouns();
@@ -70,18 +71,18 @@ public class GuiRanks {
 		ItemMeta peasantMeta = peasant.getItemMeta();
 		ArrayList<String> peasantLore = new ArrayList<>();
 		if (rank == 0) {
-			peasantMeta.setDisplayName(ChatUtils.translateToColor("&a&l&nPeasant - Current Rank"));
+			peasantMeta.setDisplayName(Lang.getFor(player, "gui.ranks.peasant") + Lang.getFor(player, "gui.ranks.current_suffix"));
 		} else {
-			peasantMeta.setDisplayName(ChatUtils.translateToColor("&a&l&nPeasant"));
+			peasantMeta.setDisplayName(Lang.getFor(player, "gui.ranks.peasant"));
 		}
-		peasantLore.add(ChatUtils.translateToColor("&f&lBending"));
-		peasantLore.add(ChatUtils.translateToColor("&f&o- Basic abilities and sub-elements"));
-		peasantLore.add(ChatUtils.translateToColor("&f&o- 1x bending damage"));
-		peasantLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		peasantLore.add(ChatUtils.translateToColor("&f&o- 1 home"));
-		peasantLore.add(ChatUtils.translateToColor("&f&o- 3 quiver slots"));
-		peasantLore.add(ChatUtils.translateToColor("&f&o- 50 potion slots"));
-		peasantLore.add(ChatUtils.translateToColor("&f&o- 1.0x pay from Jobs"));
+		peasantLore.add(Lang.getFor(player, "gui.ranks.bending"));
+		peasantLore.add(Lang.getFor(player, "gui.ranks.peasant_bending1"));
+		peasantLore.add(Lang.getFor(player, "gui.ranks.peasant_bending2"));
+		peasantLore.add(Lang.getFor(player, "gui.ranks.perks"));
+		peasantLore.add(Lang.getFor(player, "gui.ranks.peasant_perk1"));
+		peasantLore.add(Lang.getFor(player, "gui.ranks.peasant_perk2"));
+		peasantLore.add(Lang.getFor(player, "gui.ranks.peasant_perk3"));
+		peasantLore.add(Lang.getFor(player, "gui.ranks.peasant_perk4"));
 		peasantMeta.setLore(peasantLore);
 		peasant.setItemMeta(peasantMeta);
 
@@ -89,23 +90,23 @@ public class GuiRanks {
 		ItemMeta esquireMeta = esquire.getItemMeta();
 		ArrayList<String> esquireLore = new ArrayList<>();
 		if (rank == 1) {
-			esquireMeta.setDisplayName(ChatUtils.translateToColor("&d&l&nEsquire&r&f&l ($1,000) - Current Rank"));
+			esquireMeta.setDisplayName(Lang.getFor(player, "gui.ranks.esquire") + Lang.getFor(player, "gui.ranks.current_suffix"));
 		} else {
-			esquireMeta.setDisplayName(ChatUtils.translateToColor("&d&l&nEsquire&r&f&l ($1,000)"));
+			esquireMeta.setDisplayName(Lang.getFor(player, "gui.ranks.esquire"));
 		}
-		esquireLore.add(ChatUtils.translateToColor("&f&lBending"));
+		esquireLore.add(Lang.getFor(player, "gui.ranks.bending"));
 		esquireLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] " + Element.PLANT.getColor() + "&oBasic plantbending abilities"));
 		esquireLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.SAND.getColor() + "&oBasic sandbending abilities"));
-		esquireLore.add(ChatUtils.translateToColor("&f&o- 1.05x bending damage"));
-		esquireLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		esquireLore.add(ChatUtils.translateToColor("&f&o- Summon your &e/mount"));
-		esquireLore.add(ChatUtils.translateToColor("&f&o- /seen"));
-		esquireLore.add(ChatUtils.translateToColor("&f&o- /dominion home"));
-		esquireLore.add(ChatUtils.translateToColor("&f&o- 5 quiver slots"));
-		esquireLore.add(ChatUtils.translateToColor("&f&o- 100 potion slots"));
+		esquireLore.add(Lang.getFor(player, "gui.ranks.esquire_bending1"));
+		esquireLore.add(Lang.getFor(player, "gui.ranks.perks"));
+		esquireLore.add(Lang.getFor(player, "gui.ranks.esquire_perk1"));
+		esquireLore.add(Lang.getFor(player, "gui.ranks.esquire_perk2"));
+		esquireLore.add(Lang.getFor(player, "gui.ranks.esquire_perk3"));
+		esquireLore.add(Lang.getFor(player, "gui.ranks.esquire_perk4"));
+		esquireLore.add(Lang.getFor(player, "gui.ranks.esquire_perk5"));
 		esquireLore.add("");
-		esquireLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 100 levels"));
-		esquireLore.add(ChatUtils.translateToColor("&f&o- 1.05x pay from Jobs"));
+		esquireLore.add(Lang.getFor(player, "gui.ranks.esquire_req1"));
+		esquireLore.add(Lang.getFor(player, "gui.ranks.esquire_perk6"));
 		esquireMeta.setLore(esquireLore);
 		esquire.setItemMeta(esquireMeta);
 
@@ -113,25 +114,25 @@ public class GuiRanks {
 		ItemMeta knightMeta = knight.getItemMeta();
 		ArrayList<String> knightLore = new ArrayList<>();
 		if (rank == 2) {
-			knightMeta.setDisplayName(ChatUtils.translateToColor("&7&l&nKnight&r&f&l ($5,000) - Current Rank"));
+			knightMeta.setDisplayName(Lang.getFor(player, "gui.ranks.knight") + Lang.getFor(player, "gui.ranks.current_suffix"));
 		} else {
-			knightMeta.setDisplayName(ChatUtils.translateToColor("&7&l&nKnight&r&f&l ($5,000)"));
+			knightMeta.setDisplayName(Lang.getFor(player, "gui.ranks.knight"));
 		}
-		knightLore.add(ChatUtils.translateToColor("&f&lBending"));
+		knightLore.add(Lang.getFor(player, "gui.ranks.bending"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] &7&oAirSnipe"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] &3&oBasic healing abilities"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.METAL.getColor() + "&oBasic metalbending abilities"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- &6[&eC&6] &6&oAcrobatStance, WarriorStance"));
-		knightLore.add(ChatUtils.translateToColor("&f&o- 1.15x bending damage"));
-		knightLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		knightLore.add(ChatUtils.translateToColor("&f&o- /back"));
-		knightLore.add(ChatUtils.translateToColor("&f&o- /trash"));
-		knightLore.add(ChatUtils.translateToColor("&f&o- 2 homes"));
-		knightLore.add(ChatUtils.translateToColor("&f&o- 9 quiver slots"));
-		knightLore.add(ChatUtils.translateToColor("&f&o- 200 potion slots"));
+		knightLore.add(Lang.getFor(player, "gui.ranks.knight_bending1"));
+		knightLore.add(Lang.getFor(player, "gui.ranks.perks"));
+		knightLore.add(Lang.getFor(player, "gui.ranks.knight_perk1"));
+		knightLore.add(Lang.getFor(player, "gui.ranks.knight_perk2"));
+		knightLore.add(Lang.getFor(player, "gui.ranks.knight_perk3"));
+		knightLore.add(Lang.getFor(player, "gui.ranks.knight_perk4"));
+		knightLore.add(Lang.getFor(player, "gui.ranks.knight_perk5"));
 		knightLore.add("");
-		knightLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 350 levels"));
-		knightLore.add(ChatUtils.translateToColor("&f&o- 1.15x pay from Jobs"));
+		knightLore.add(Lang.getFor(player, "gui.ranks.knight_req1"));
+		knightLore.add(Lang.getFor(player, "gui.ranks.knight_perk6"));
 		knightMeta.setLore(knightLore);
 		knight.setItemMeta(knightMeta);
 
@@ -140,35 +141,35 @@ public class GuiRanks {
 		ArrayList<String> baronLore = new ArrayList<>();
 		if (pronouns == Pronouns.MALE) {
 			if (rank == 3) {
-				baronMeta.setDisplayName(ChatUtils.translateToColor("&5&l&nBaron&r&f&l ($15,000) - Current Rank"));
+				baronMeta.setDisplayName(Lang.getFor(player, "gui.ranks.baron") + Lang.getFor(player, "gui.ranks.current_suffix"));
 			} else {
-				baronMeta.setDisplayName(ChatUtils.translateToColor("&5&l&nBaron&r&f&l ($15,000)"));
+				baronMeta.setDisplayName(Lang.getFor(player, "gui.ranks.baron"));
 			}
 		} else {
 			if (rank == 3) {
-				baronMeta.setDisplayName(ChatUtils.translateToColor("&5&l&nBaroness&r&f&l ($15,000) - Current Rank"));
+				baronMeta.setDisplayName(Lang.getFor(player, "gui.ranks.baroness") + Lang.getFor(player, "gui.ranks.current_suffix"));
 			} else {
-				baronMeta.setDisplayName(ChatUtils.translateToColor("&5&l&nBaroness&r&f&l ($15,000)"));
+				baronMeta.setDisplayName(Lang.getFor(player, "gui.ranks.baroness"));
 			}
 		}
-		baronLore.add(ChatUtils.translateToColor("&f&lBending"));
+		baronLore.add(Lang.getFor(player, "gui.ranks.bending"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] " + Element.SPIRITUAL.getColor() + "&oBasic spiritual abilities"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] &b&oWaterArms, " + Element.PLANT.getColor() + "&oToxicSpores, "));
 		baronLore.add(ChatUtils.translateToColor(Element.PLANT.getColor() + "       &oVineWhip, LeafScythe"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.SAND.getColor() + "&oSandstorm, Burial, " + Element.METAL.getColor() + "&oCableThrash,"));
 		baronLore.add(ChatUtils.translateToColor(Element.METAL.getColor() + "       &oCableSlash, MetalBlade, MetalFragments"));
-		baronLore.add(ChatUtils.translateToColor("&f&o- 1.3x bending damage"));
-		baronLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		baronLore.add(ChatUtils.translateToColor("&f&o- /dominion create"));
-		baronLore.add(ChatUtils.translateToColor("&f&o- /tphere"));
-		baronLore.add(ChatUtils.translateToColor("&f&o- 3 player shops"));
-		baronLore.add(ChatUtils.translateToColor("&f&o- 12 quiver slots"));
-		baronLore.add(ChatUtils.translateToColor("&f&o- 350 potion slots"));
-		baronLore.add(ChatUtils.translateToColor("&f- &oArmor Stand &e&o\"No Pose\" &f&opose"));
+		baronLore.add(Lang.getFor(player, "gui.ranks.baron_bending1"));
+		baronLore.add(Lang.getFor(player, "gui.ranks.perks"));
+		baronLore.add(Lang.getFor(player, "gui.ranks.baron_perk1"));
+		baronLore.add(Lang.getFor(player, "gui.ranks.baron_perk2"));
+		baronLore.add(Lang.getFor(player, "gui.ranks.baron_perk3"));
+		baronLore.add(Lang.getFor(player, "gui.ranks.baron_perk4"));
+		baronLore.add(Lang.getFor(player, "gui.ranks.baron_perk5"));
+		baronLore.add(Lang.getFor(player, "gui.ranks.baron_perk6"));
 		baronLore.add("");
-		baronLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 500 levels"));
-		baronLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO per category: 150 levels"));
-		baronLore.add(ChatUtils.translateToColor("&f&o- 1.3x pay from Jobs"));
+		baronLore.add(Lang.getFor(player, "gui.ranks.baron_req1"));
+		baronLore.add(Lang.getFor(player, "gui.ranks.baron_req2"));
+		baronLore.add(Lang.getFor(player, "gui.ranks.baron_perk7"));
 		baronMeta.setLore(baronLore);
 		baron.setItemMeta(baronMeta);
 
@@ -177,34 +178,34 @@ public class GuiRanks {
 		ArrayList<String> countLore = new ArrayList<>();
 		if (pronouns == Pronouns.MALE) {
 			if (rank == 4) {
-				countMeta.setDisplayName(ChatUtils.translateToColor("&8&l&nCount&r&f&l ($50,000) - Current Rank"));
+				countMeta.setDisplayName(Lang.getFor(player, "gui.ranks.count") + Lang.getFor(player, "gui.ranks.current_suffix"));
 			} else {
-				countMeta.setDisplayName(ChatUtils.translateToColor("&8&l&nCount&r&f&l ($50,000)"));
+				countMeta.setDisplayName(Lang.getFor(player, "gui.ranks.count"));
 			}
 		} else {
 			if (rank == 4) {
-				countMeta.setDisplayName(ChatUtils.translateToColor("&8&l&nCountess&r&f&l ($50,000) - Current Rank"));
+				countMeta.setDisplayName(Lang.getFor(player, "gui.ranks.countess") + Lang.getFor(player, "gui.ranks.current_suffix"));
 			} else {
-				countMeta.setDisplayName(ChatUtils.translateToColor("&8&l&nCountess&r&f&l ($50,000)"));
+				countMeta.setDisplayName(Lang.getFor(player, "gui.ranks.countess"));
 			}
 		}
-		countLore.add(ChatUtils.translateToColor("&f&lBending"));
+		countLore.add(Lang.getFor(player, "gui.ranks.bending"));
 		countLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] " + Element.SPIRITUAL.getColor() + "&oAngeredSpirits"));
 		countLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] &b&oIceShards, &3&oHealingHelix"));
 		countLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.METAL.getColor() + "&oMetalShots, MetalStrips"));
 		countLore.add(ChatUtils.translateToColor("&f&o- &6[&eC&6] &6&oDaggerVolley"));
-		countLore.add(ChatUtils.translateToColor("&f&o- 1.5x bending damage"));
-		countLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		countLore.add(ChatUtils.translateToColor("&f&o- Ability to store EXP in bottles"));
-		countLore.add(ChatUtils.translateToColor("&f&o- 7 player shops"));
-		countLore.add(ChatUtils.translateToColor("&f&o- 3 homes"));
-		countLore.add(ChatUtils.translateToColor("&f&o- 18 quiver slots"));
-		countLore.add(ChatUtils.translateToColor("&f&o- 500 potion slots"));
-		countLore.add(ChatUtils.translateToColor("&f- &oArmor Stand &e&oSolemn &f&opose"));
+		countLore.add(Lang.getFor(player, "gui.ranks.count_bending1"));
+		countLore.add(Lang.getFor(player, "gui.ranks.perks"));
+		countLore.add(Lang.getFor(player, "gui.ranks.count_perk1"));
+		countLore.add(Lang.getFor(player, "gui.ranks.count_perk2"));
+		countLore.add(Lang.getFor(player, "gui.ranks.count_perk3"));
+		countLore.add(Lang.getFor(player, "gui.ranks.count_perk4"));
+		countLore.add(Lang.getFor(player, "gui.ranks.count_perk5"));
+		countLore.add(Lang.getFor(player, "gui.ranks.count_perk6"));
 		countLore.add("");
-		countLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 1000 levels"));
-		countLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO per category: 375 levels"));
-		countLore.add(ChatUtils.translateToColor("&f&o- 1.5x pay from Jobs"));
+		countLore.add(Lang.getFor(player, "gui.ranks.count_req1"));
+		countLore.add(Lang.getFor(player, "gui.ranks.count_req2"));
+		countLore.add(Lang.getFor(player, "gui.ranks.count_perk7"));
 		countMeta.setLore(countLore);
 		count.setItemMeta(countMeta);
 
@@ -213,33 +214,33 @@ public class GuiRanks {
 		ArrayList<String> dukeLore = new ArrayList<>();
 		if (pronouns == Pronouns.MALE) {
 			if (rank == 5) {
-				dukeMeta.setDisplayName(ChatUtils.translateToColor("&6&l&nDuke&r&f&l ($125,000) - Current Rank"));
+				dukeMeta.setDisplayName(Lang.getFor(player, "gui.ranks.duke") + Lang.getFor(player, "gui.ranks.current_suffix"));
 			} else {
-				dukeMeta.setDisplayName(ChatUtils.translateToColor("&6&l&nDuke&r&f&l ($125,000)"));
+				dukeMeta.setDisplayName(Lang.getFor(player, "gui.ranks.duke"));
 			}
 		} else {
 			if (rank == 5) {
-				dukeMeta.setDisplayName(ChatUtils.translateToColor("&6&l&nDuchess&r&f&l ($125,000) - Current Rank"));
+				dukeMeta.setDisplayName(Lang.getFor(player, "gui.ranks.duchess") + Lang.getFor(player, "gui.ranks.current_suffix"));
 			} else {
-				dukeMeta.setDisplayName(ChatUtils.translateToColor("&6&l&nDuchess&r&f&l ($125,000)"));
+				dukeMeta.setDisplayName(Lang.getFor(player, "gui.ranks.duchess"));
 			}
 		}
-		dukeLore.add(ChatUtils.translateToColor("&f&lBending"));
+		dukeLore.add(Lang.getFor(player, "gui.ranks.bending"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] &7&oSuffocate, " + Element.SPIRITUAL.getColor() + "&oAstralProjection, AstralShot,"));
 		dukeLore.add(ChatUtils.translateToColor(SoundAbility.SOUND.getColor() + "       &oBasic soundbending abilities"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.LAVA.getColor() + "&oBasic lavabending abilities"));
-		dukeLore.add(ChatUtils.translateToColor("&f&o- 1.75x bending damage"));
-		dukeLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		dukeLore.add(ChatUtils.translateToColor("&f&o- /nick (and a nickname in Discord)"));
-		dukeLore.add(ChatUtils.translateToColor("&f&o- 15 player shops"));
-		dukeLore.add(ChatUtils.translateToColor("&f&o- 25 quiver slots"));
-		dukeLore.add(ChatUtils.translateToColor("&f&o- 750 potion slots"));
-		dukeLore.add(ChatUtils.translateToColor("&f- &oArmor Stand &e&oAttention &f&opose"));
-		dukeLore.add(ChatUtils.translateToColor("&f- &6&oAvatar &f&obrew recipes in weekly quests"));
+		dukeLore.add(Lang.getFor(player, "gui.ranks.duke_bending1"));
+		dukeLore.add(Lang.getFor(player, "gui.ranks.perks"));
+		dukeLore.add(Lang.getFor(player, "gui.ranks.duke_perk1"));
+		dukeLore.add(Lang.getFor(player, "gui.ranks.duke_perk2"));
+		dukeLore.add(Lang.getFor(player, "gui.ranks.duke_perk3"));
+		dukeLore.add(Lang.getFor(player, "gui.ranks.duke_perk4"));
+		dukeLore.add(Lang.getFor(player, "gui.ranks.duke_perk5"));
+		dukeLore.add(Lang.getFor(player, "gui.ranks.duke_perk6"));
 		dukeLore.add("");
-		dukeLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 2500 levels"));
-		dukeLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO per category: 750 levels"));
-		dukeLore.add(ChatUtils.translateToColor("&f&o- 1.75x pay from Jobs"));
+		dukeLore.add(Lang.getFor(player, "gui.ranks.duke_req1"));
+		dukeLore.add(Lang.getFor(player, "gui.ranks.duke_req2"));
+		dukeLore.add(Lang.getFor(player, "gui.ranks.duke_perk7"));
 		dukeMeta.setLore(dukeLore);
 		duke.setItemMeta(dukeMeta);
 
@@ -248,35 +249,35 @@ public class GuiRanks {
 		ArrayList<String> princeLore = new ArrayList<>();
 		if (pronouns == Pronouns.MALE) {
 			if (rank == 6) {
-				princeMeta.setDisplayName(ChatUtils.translateToColor("&b&l&nPrince&r&f&l ($500,000) - Current Rank"));
+				princeMeta.setDisplayName(Lang.getFor(player, "gui.ranks.prince") + Lang.getFor(player, "gui.ranks.current_suffix"));
 			} else {
-				princeMeta.setDisplayName(ChatUtils.translateToColor("&b&l&nPrince&r&f&l ($500,000)"));
+				princeMeta.setDisplayName(Lang.getFor(player, "gui.ranks.prince"));
 			}
 		} else {
 			if (rank == 6) {
-				princeMeta.setDisplayName(ChatUtils.translateToColor("&b&l&nPrincess&r&f&l ($500,000) - Current Rank"));
+				princeMeta.setDisplayName(Lang.getFor(player, "gui.ranks.princess") + Lang.getFor(player, "gui.ranks.current_suffix"));
 			} else {
-				princeMeta.setDisplayName(ChatUtils.translateToColor("&b&l&nPrincess&r&f&l ($500,000)"));
+				princeMeta.setDisplayName(Lang.getFor(player, "gui.ranks.princess"));
 			}
 		}
-		princeLore.add(ChatUtils.translateToColor("&f&lBending"));
+		princeLore.add(Lang.getFor(player, "gui.ranks.bending"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- &4[&cF&4] " + Element.LIGHTNING.getColor() + "&oBasic lightningbending abilities, Static"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] " + Element.SPIRITUAL.getColor() + "&oEnergyBurst, " + SoundAbility.SOUND.getColor() + "&oSonicPulse"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] &3&oCorruptingHelix, " + Element.BLOOD.getColor() + "&oBasic blood abilities"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.LAVA.getColor() + "&oLavaDisc, MagmaBlast"));
-		princeLore.add(ChatUtils.translateToColor("&f&o- 2.0x bending damage"));
-		princeLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		princeLore.add(ChatUtils.translateToColor("&f&o- /toggle msg"));
-		princeLore.add(ChatUtils.translateToColor("&f&o- /toggle tp"));
-		princeLore.add(ChatUtils.translateToColor("&f&o- 4 homes"));
-		princeLore.add(ChatUtils.translateToColor("&f&o- 30 player shops"));
-		princeLore.add(ChatUtils.translateToColor("&f&o- 30 quiver slots"));
-		princeLore.add(ChatUtils.translateToColor("&f&o- 1000 potion slots"));
-		princeLore.add(ChatUtils.translateToColor("&f- &oArmor Stand &e&oRiposte &f&opose"));
+		princeLore.add(Lang.getFor(player, "gui.ranks.prince_bending1"));
+		princeLore.add(Lang.getFor(player, "gui.ranks.perks"));
+		princeLore.add(Lang.getFor(player, "gui.ranks.prince_perk1"));
+		princeLore.add(Lang.getFor(player, "gui.ranks.prince_perk2"));
+		princeLore.add(Lang.getFor(player, "gui.ranks.prince_perk3"));
+		princeLore.add(Lang.getFor(player, "gui.ranks.prince_perk4"));
+		princeLore.add(Lang.getFor(player, "gui.ranks.prince_perk5"));
+		princeLore.add(Lang.getFor(player, "gui.ranks.prince_perk6"));
+		princeLore.add(Lang.getFor(player, "gui.ranks.prince_perk7"));
 		princeLore.add("");
-		princeLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 7500 levels"));
-		princeLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO per category: 1250 levels"));
-		princeLore.add(ChatUtils.translateToColor("&f&o- 2.0x pay from Jobs"));
+		princeLore.add(Lang.getFor(player, "gui.ranks.prince_req1"));
+		princeLore.add(Lang.getFor(player, "gui.ranks.prince_req2"));
+		princeLore.add(Lang.getFor(player, "gui.ranks.prince_perk8"));
 		princeMeta.setLore(princeLore);
 		prince.setItemMeta(princeMeta);
 
@@ -285,18 +286,18 @@ public class GuiRanks {
 		ArrayList<String> kingLore = new ArrayList<>();
 		if (pronouns == Pronouns.MALE) {
 			if (rank == 7) {
-				kingMeta.setDisplayName(ChatUtils.translateToColor("&9&l&nKing&r&f&l ($2,500,000) - Current Rank"));
+				kingMeta.setDisplayName(Lang.getFor(player, "gui.ranks.king") + Lang.getFor(player, "gui.ranks.current_suffix"));
 			} else {
-				kingMeta.setDisplayName(ChatUtils.translateToColor("&9&l&nKing&r&f&l ($2,500,000)"));
+				kingMeta.setDisplayName(Lang.getFor(player, "gui.ranks.king"));
 			}
 		} else {
 			if (rank == 7) {
-				kingMeta.setDisplayName(ChatUtils.translateToColor("&9&l&nQueen&r&f&l ($2,500,000) - Current Rank"));
+				kingMeta.setDisplayName(Lang.getFor(player, "gui.ranks.queen") + Lang.getFor(player, "gui.ranks.current_suffix"));
 			} else {
-				kingMeta.setDisplayName(ChatUtils.translateToColor("&9&l&nQueen&r&f&l ($2,500,000)"));
+				kingMeta.setDisplayName(Lang.getFor(player, "gui.ranks.queen"));
 			}
 		}
-		kingLore.add(ChatUtils.translateToColor("&f&lBending"));
+		kingLore.add(Lang.getFor(player, "gui.ranks.bending"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- &4[&cF&4] &c&oFireComet, " + Element.LIGHTNING.getColor() + "&oBolt, LightningBurst,"));
 		kingLore.add(ChatUtils.translateToColor(Element.LIGHTNING.getColor() + "       &oElectricStrike, JetBolt,"));
 		kingLore.add(ChatUtils.translateToColor(Element.COMBUSTION.getColor() + "       &oBasic combustion abilities"));
@@ -304,17 +305,17 @@ public class GuiRanks {
 		kingLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] " + Element.BLOOD.getColor() + "&oBloodFreeze"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.LAVA.getColor() + "&oLavaFlux, MagmaWave,"));
 		kingLore.add(ChatUtils.translateToColor(Element.LAVA.getColor() + "       &oMagmaGlaives, MoltenBlast"));
-		kingLore.add(ChatUtils.translateToColor("&f&o- 2.25x bending damage"));
-		kingLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		kingLore.add(ChatUtils.translateToColor("&f&o- /toggle chat"));
-		kingLore.add(ChatUtils.translateToColor("&f&o- /nick (color)"));
-		kingLore.add(ChatUtils.translateToColor("&f&o- 50 player shops"));
-		kingLore.add(ChatUtils.translateToColor("&f&o- 36 quiver slots"));
-		kingLore.add(ChatUtils.translateToColor("&f&o- 1500 potion slots"));
+		kingLore.add(Lang.getFor(player, "gui.ranks.king_bending1"));
+		kingLore.add(Lang.getFor(player, "gui.ranks.perks"));
+		kingLore.add(Lang.getFor(player, "gui.ranks.king_perk1"));
+		kingLore.add(Lang.getFor(player, "gui.ranks.king_perk2"));
+		kingLore.add(Lang.getFor(player, "gui.ranks.king_perk3"));
+		kingLore.add(Lang.getFor(player, "gui.ranks.king_perk4"));
+		kingLore.add(Lang.getFor(player, "gui.ranks.king_perk5"));
 		kingLore.add("");
-		kingLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 12500 levels"));
-		kingLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO per category: 2500 levels"));
-		kingLore.add(ChatUtils.translateToColor("&f&o- 2.25x pay from Jobs"));
+		kingLore.add(Lang.getFor(player, "gui.ranks.king_req1"));
+		kingLore.add(Lang.getFor(player, "gui.ranks.king_req2"));
+		kingLore.add(Lang.getFor(player, "gui.ranks.king_perk6"));
 		kingMeta.setLore(kingLore);
 		king.setItemMeta(kingMeta);
 
@@ -323,34 +324,34 @@ public class GuiRanks {
 		ArrayList<String> emperorLore = new ArrayList<>();
 		if (pronouns == Pronouns.MALE) {
 			if (rank == 8) {
-				emperorMeta.setDisplayName(ChatUtils.translateToColor("&4&l&nEmperor&r&f&l ($10,000,000) - Current Rank"));
+				emperorMeta.setDisplayName(Lang.getFor(player, "gui.ranks.emperor") + Lang.getFor(player, "gui.ranks.current_suffix"));
 			} else {
-				emperorMeta.setDisplayName(ChatUtils.translateToColor("&4&l&nEmperor&r&f&l ($10,000,000)"));
+				emperorMeta.setDisplayName(Lang.getFor(player, "gui.ranks.emperor"));
 			}
 		} else {
 			if (rank == 8) {
-				emperorMeta.setDisplayName(ChatUtils.translateToColor("&4&l&nEmpress&r&f&l ($10,000,000) - Current Rank"));
+				emperorMeta.setDisplayName(Lang.getFor(player, "gui.ranks.empress") + Lang.getFor(player, "gui.ranks.current_suffix"));
 			} else {
-				emperorMeta.setDisplayName(ChatUtils.translateToColor("&4&l&nEmpress&r&f&l ($10,000,000)"));
+				emperorMeta.setDisplayName(Lang.getFor(player, "gui.ranks.empress"));
 			}
 		}
 
-		emperorLore.add(ChatUtils.translateToColor("&f&lBending"));
+		emperorLore.add(Lang.getFor(player, "gui.ranks.bending"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- &4[&cF&4] " + Element.COMBUSTION.getColor() + "&oCombustion, CombustionStrike, Barrage"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] " + Element.FLIGHT.getColor() + "&oBasic flight abilities"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] " + Element.BLOOD.getColor() + "&oLifeRip, Disalignment"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.LAVA.getColor() + "&oEruption, Fissure"));
-		emperorLore.add(ChatUtils.translateToColor("&f&o- 2.5x bending damage"));
-		emperorLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		emperorLore.add(ChatUtils.translateToColor("&f&o- Access to #server-chat in Discord"));
-		emperorLore.add(ChatUtils.translateToColor("&f&o- Ability to create unlimited player shops"));
-		emperorLore.add(ChatUtils.translateToColor("&f&o- 5 homes"));
-		emperorLore.add(ChatUtils.translateToColor("&f&o- 45 quiver slots"));
-		emperorLore.add(ChatUtils.translateToColor("&f&o- 2500 potion slots"));
+		emperorLore.add(Lang.getFor(player, "gui.ranks.emperor_bending1"));
+		emperorLore.add(Lang.getFor(player, "gui.ranks.perks"));
+		emperorLore.add(Lang.getFor(player, "gui.ranks.emperor_perk1"));
+		emperorLore.add(Lang.getFor(player, "gui.ranks.emperor_perk2"));
+		emperorLore.add(Lang.getFor(player, "gui.ranks.emperor_perk3"));
+		emperorLore.add(Lang.getFor(player, "gui.ranks.emperor_perk4"));
+		emperorLore.add(Lang.getFor(player, "gui.ranks.emperor_perk5"));
 		emperorLore.add("");
-		emperorLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 25000 levels"));
-		emperorLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO per category: 5000 levels"));
-		emperorLore.add(ChatUtils.translateToColor("&f&o- 2.5x pay from Jobs"));
+		emperorLore.add(Lang.getFor(player, "gui.ranks.emperor_req1"));
+		emperorLore.add(Lang.getFor(player, "gui.ranks.emperor_req2"));
+		emperorLore.add(Lang.getFor(player, "gui.ranks.emperor_perk6"));
 		emperorMeta.setLore(emperorLore);
 		emperor.setItemMeta(emperorMeta);
 

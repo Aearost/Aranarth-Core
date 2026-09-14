@@ -2,9 +2,9 @@ package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.objects.DefenderType;
 import com.aearost.aranarthcore.objects.Dominion;
-import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DefenderUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -21,7 +21,7 @@ import java.util.List;
  */
 public class GuiDefenders {
 
-    public static final String TITLE_PREFIX = "Defenders (";
+    public static final String TITLE_PREFIX_KEY = "gui.defenders.title";
     private static final int[] DEFENDER_SLOTS = {11, 13, 15, 20, 22, 24, 29, 31, 33};
 
     public static void open(Player player) {
@@ -30,7 +30,7 @@ public class GuiDefenders {
 
         int total = DefenderUtils.getTotalDefenderCount(dominion.getId());
         int limit = DefenderUtils.getDefenderLimit(dominion.getDominionLevel());
-        String title = ChatUtils.translateToColor(TITLE_PREFIX + total + "/" + limit + ")");
+        String title = Lang.getFor(player, TITLE_PREFIX_KEY, "total", String.valueOf(total), "limit", String.valueOf(limit));
         Inventory gui = Bukkit.createInventory(player, 45, title);
 
         // Top and bottom border rows
@@ -77,26 +77,23 @@ public class GuiDefenders {
 
         ItemStack item = new ItemStack(type.getSpawnEgg());
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor(
-                "&c&l" + type.getDisplayName() + " &7(" + count + " active)"));
+        meta.setDisplayName(Lang.get("gui.defenders.type_count", "type", type.getDisplayName(), "count", String.valueOf(count)));
 
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&6Role: &e" + type.getRole()));
-        lore.add(ChatUtils.translateToColor("&7Max Health: &e" + (int) (type.getMaxHealth() / 2) + " hearts"));
-        lore.add(ChatUtils.translateToColor("&7Damage: &e" + (int) (type.getMinDamage() / 2) + "–" + (int) (type.getMaxDamage() / 2) + " hearts"));
+        lore.add(Lang.get("gui.defenders.role", "role", type.getRole()));
+        lore.add(Lang.get("gui.defenders.max_hp", "hp", String.valueOf((int) (type.getMaxHealth() / 2))));
+        lore.add(Lang.get("gui.defenders.damage", "min", String.valueOf((int) (type.getMinDamage() / 2)), "max", String.valueOf((int) (type.getMaxDamage() / 2))));
         if (type.getSpecialAbility() != null) {
-            lore.add(ChatUtils.translateToColor("&7Special: &f" + type.getSpecialAbility()));
+            lore.add(Lang.get("gui.defenders.special", "ability", type.getSpecialAbility()));
         }
         if (type.getPerRankLimit() > 0) {
             int typeCount = DefenderUtils.getDefenderCount(dominion.getId(), type);
             int typeMax = type.getPerRankLimit() * dominion.getDominionLevel();
-            lore.add(ChatUtils.translateToColor("&7Type Limit: &e" + typeCount + "/" + typeMax));
+            lore.add(Lang.get("gui.defenders.type_limit", "count", String.valueOf(typeCount), "max", String.valueOf(typeMax)));
         }
         lore.add("");
-        lore.add(ChatUtils.translateToColor(
-                "&a▶ Right-Click &7to purchase &e($" + fmt.format((long) type.getPurchasePrice()) + ")"));
-        lore.add(ChatUtils.translateToColor(
-                "&c◀ Left-Click &7to sell &e($" + fmt.format((long) type.getSellPrice()) + ")"));
+        lore.add(Lang.get("gui.defenders.buy", "price", fmt.format((long) type.getPurchasePrice())));
+        lore.add(Lang.get("gui.defenders.sell", "price", fmt.format((long) type.getSellPrice())));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
@@ -121,7 +118,7 @@ public class GuiDefenders {
     private static ItemStack buildBackButton() {
         ItemStack item = new ItemStack(Material.BARRIER);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&c&lBack"));
+        meta.setDisplayName(Lang.get("gui.back_red"));
         item.setItemMeta(meta);
         return item;
     }

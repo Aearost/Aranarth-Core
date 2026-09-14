@@ -1,14 +1,10 @@
 package com.aearost.aranarthcore;
 
-import com.aearost.aranarthcore.bending.RankCanBindHook;
 import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralProjection;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.PastLives;
-import com.aearost.aranarthcore.commands.council.CommandAC;
-import com.aearost.aranarthcore.commands.council.CommandACCompleter;
-import com.aearost.aranarthcore.commands.council.CommandEnchant;
-import com.aearost.aranarthcore.commands.council.CommandEnchantCompleter;
-import com.aearost.aranarthcore.commands.council.CommandTrash;
+import com.aearost.aranarthcore.bending.RankCanBindHook;
+import com.aearost.aranarthcore.commands.council.*;
 import com.aearost.aranarthcore.commands.general.*;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.Month;
@@ -48,15 +44,10 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
-import com.aearost.aranarthcore.utils.Lang;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 public class AranarthCore extends JavaPlugin {
 
@@ -1397,6 +1388,8 @@ public class AranarthCore extends JavaPlugin {
         getCommand("keyclaim").setExecutor(new CommandKeyClaim());
         getCommand("kills").setExecutor(new CommandKills());
         getCommand("kills").setTabCompleter(new CommandKillsCompleter());
+        getCommand("language").setExecutor(new CommandLanguage());
+        getCommand("language").setTabCompleter(new CommandLanguageCompleter());
         getCommand("lock").setExecutor(new CommandLock());
         getCommand("loom").setExecutor(new CommandLoom());
         getCommand("message").setExecutor(new CommandMessage());

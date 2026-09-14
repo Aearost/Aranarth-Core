@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.BrewRecipeUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -20,7 +21,7 @@ import java.util.List;
  */
 public class GuiBrewShop {
 
-    public static final String TITLE = "Brew Recipe Shop";
+    public static final String TITLE_KEY = "gui.brewshop.title";
     private static final int PAGE_SIZE = 36;
 
     private final Player player;
@@ -34,7 +35,7 @@ public class GuiBrewShop {
     }
 
     private Inventory build() {
-        Inventory inv = Bukkit.createInventory(player, 54, TITLE);
+        Inventory inv = Bukkit.createInventory(player, 54, Lang.getFor(player, TITLE_KEY));
 
         List<BrewRecipe> locked = BrewRecipeUtils.getLockedCommonRecipes(player.getUniqueId());
         int start = page * PAGE_SIZE;
@@ -53,7 +54,7 @@ public class GuiBrewShop {
 
         ItemStack previous = new ItemStack(Material.RED_WOOL);
         ItemMeta previousMeta = previous.getItemMeta();
-        previousMeta.setDisplayName(ChatUtils.translateToColor("&c&lPrevious"));
+        previousMeta.setDisplayName(Lang.getFor(player, "gui.page_prev"));
         previous.setItemMeta(previousMeta);
         inv.setItem(45, page > 0 ? previous : glass);
 
@@ -64,12 +65,12 @@ public class GuiBrewShop {
         // Slot 49: Back to brew book
         ItemStack back = new ItemStack(Material.BOOK);
         ItemMeta backMeta = back.getItemMeta();
-        backMeta.setDisplayName(ChatUtils.translateToColor("&a&lBack to Brew Book"));
+        backMeta.setDisplayName(Lang.getFor(player, "gui.brewbook.title"));
         List<String> backLore = new ArrayList<>();
         if (locked.isEmpty()) {
-            backLore.add(ChatUtils.translateToColor("&7All basic recipes are unlocked!"));
+            backLore.add(Lang.getFor(player, "gui.brewshop.all_unlocked"));
         } else {
-            backLore.add(ChatUtils.translateToColor("&7" + locked.size() + " recipe " + (locked.size() == 1 ? "" : "s") + " available"));
+            backLore.add(Lang.getFor(player, "gui.brewshop.available", "n", String.valueOf(locked.size())));
         }
         backMeta.setLore(backLore);
         back.setItemMeta(backMeta);
@@ -81,7 +82,7 @@ public class GuiBrewShop {
 
         ItemStack next = new ItemStack(Material.LIME_WOOL);
         ItemMeta nextMeta = next.getItemMeta();
-        nextMeta.setDisplayName(ChatUtils.translateToColor("&a&lNext"));
+        nextMeta.setDisplayName(Lang.getFor(player, "gui.page_next"));
         next.setItemMeta(nextMeta);
         inv.setItem(53, end < locked.size() ? next : glass);
 

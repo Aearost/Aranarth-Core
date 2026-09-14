@@ -137,6 +137,7 @@ public class AranarthPlayer {
     private boolean jobDataLoaded = false;
     private boolean isBarbarian = false;
     private long barbarianCooldownEnd = 0;
+    private String language = "en_US";
 
     public AranarthPlayer(String username) {
         this.username = username;
@@ -2024,5 +2025,13 @@ public class AranarthPlayer {
 
     public void setServerTipsDisabled(boolean serverTipsDisabled) {
         this.isServerTipsDisabled = serverTipsDisabled;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
     }
 }

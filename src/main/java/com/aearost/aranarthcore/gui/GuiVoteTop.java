@@ -59,16 +59,16 @@ public class GuiVoteTop {
             startTime = yearMonth.atDay(1).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
             endTime = yearMonth.atEndOfMonth().atTime(23, 59, 59, 999_000_000)
                     .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-            title = String.format("Top Voters Month %02d-%d", month, year);
+            title = Lang.getFor(player, "gui.votetop.title_month", "month", String.format("%02d", month), "year", String.valueOf(year));
         } else if (year != null) {
             startTime = LocalDate.of(year, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
             endTime = LocalDate.of(year, 12, 31).atTime(23, 59, 59, 999_000_000)
                     .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-            title = "Top Voters Year " + year;
+            title = Lang.getFor(player, "gui.votetop.title_year", "year", String.valueOf(year));
         } else {
             startTime = Long.MIN_VALUE;
             endTime = Long.MAX_VALUE;
-            title = "Top Voters";
+            title = Lang.getFor(player, "gui.votetop.title_all");
         }
 
         Map<UUID, Integer> voteCounts = new HashMap<>();
@@ -119,7 +119,7 @@ public class GuiVoteTop {
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 String openTitle = com.aearost.aranarthcore.utils.ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
                 if (player.isOnline() && openTitle.equals(com.aearost.aranarthcore.utils.ChatUtils.stripColorFormatting(finalTitle))) {
-                    populate(player.getOpenInventory().getTopInventory(), finalPageEntries, finalProfiles);
+                    populate(player, player.getOpenInventory().getTopInventory(), finalPageEntries, finalProfiles);
                 } else {
                     new GuiVoteTop(player, finalTitle, finalPageEntries, finalProfiles).openGui();
                 }
@@ -127,7 +127,7 @@ public class GuiVoteTop {
         });
     }
 
-    private static void populate(Inventory gui, List<Map.Entry<UUID, Integer>> pageEntries,
+    private static void populate(Player player, Inventory gui, List<Map.Entry<UUID, Integer>> pageEntries,
                                  Map<UUID, PlayerProfile> profiles) {
         ItemStack blank = new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE);
         ItemMeta blankMeta = blank.getItemMeta();
@@ -161,8 +161,8 @@ public class GuiVoteTop {
             skullMeta.setDisplayName(ChatUtils.translateToColor("&e" + displayName));
 
             List<String> lore = new ArrayList<>();
-            String voteWord = voteCount == 1 ? "vote" : "votes";
-            lore.add(ChatUtils.translateToColor("&6" + voteCount + " &e" + voteWord));
+            String voteKey = voteCount == 1 ? "gui.votetop.vote_singular" : "gui.votetop.vote_plural";
+            lore.add(Lang.getFor(player, voteKey, "count", String.valueOf(voteCount)));
             skullMeta.setLore(lore);
             head.setItemMeta(skullMeta);
             gui.setItem(i, head);
@@ -180,19 +180,19 @@ public class GuiVoteTop {
 
         ItemMeta previousMeta = previous.getItemMeta();
         if (Objects.nonNull(previousMeta)) {
-            previousMeta.setDisplayName(ChatUtils.translateToColor("&c&lPrevious"));
+            previousMeta.setDisplayName(Lang.getFor(player, "gui.page_prev"));
             previous.setItemMeta(previousMeta);
         }
 
         ItemMeta barrierMeta = barrier.getItemMeta();
         if (Objects.nonNull(barrierMeta)) {
-            barrierMeta.setDisplayName(ChatUtils.translateToColor("&4&lExit"));
+            barrierMeta.setDisplayName(Lang.getFor(player, "gui.exit"));
             barrier.setItemMeta(barrierMeta);
         }
 
         ItemMeta nextMeta = next.getItemMeta();
         if (Objects.nonNull(nextMeta)) {
-            nextMeta.setDisplayName(ChatUtils.translateToColor("&a&lNext"));
+            nextMeta.setDisplayName(Lang.getFor(player, "gui.page_next"));
             next.setItemMeta(nextMeta);
         }
 
@@ -237,8 +237,8 @@ public class GuiVoteTop {
             skullMeta.setDisplayName(ChatUtils.translateToColor("&e" + displayName));
 
             List<String> lore = new ArrayList<>();
-            String voteWord = voteCount == 1 ? "vote" : "votes";
-            lore.add(ChatUtils.translateToColor("&6" + voteCount + " &e" + voteWord));
+            String voteKey = voteCount == 1 ? "gui.votetop.vote_singular" : "gui.votetop.vote_plural";
+            lore.add(Lang.getFor(player, voteKey, "count", String.valueOf(voteCount)));
             skullMeta.setLore(lore);
             head.setItemMeta(skullMeta);
             gui.setItem(i, head);

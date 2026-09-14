@@ -1,10 +1,10 @@
 package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.DominionRank;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
@@ -142,7 +142,7 @@ public class GuiDominionPlayerPermissions {
 
         AranarthPlayer aranarthTarget = AranarthUtils.getPlayer(targetUuid);
         String nickname = aranarthTarget != null ? aranarthTarget.getNickname() : targetName;
-        String title = ChatUtils.translateToColor(nickname + "&r's Permissions");
+        String title = Lang.get("gui.dominionplayerperms.title", "nickname", nickname);
         Inventory gui = Bukkit.createInventory(leader, 45, title);
 
         // Filler top and bottom rows
@@ -162,22 +162,22 @@ public class GuiDominionPlayerPermissions {
         List<String> skullLore = new ArrayList<>();
         if (isRelation) {
             if (targetDominion == null) {
-                skullLore.add(ChatUtils.translateToColor("&7Relation: &fWanderer &8(no dominion)"));
+                skullLore.add(Lang.get("gui.dominionplayerperms.relation_wanderer"));
             } else {
-                skullLore.add(ChatUtils.translateToColor("&7Dominion: &f" + targetDominion.getName()));
-                skullLore.add(ChatUtils.translateToColor("&7Relation: " + DominionUtils.getFormattedRankName(effectiveRank)));
+                skullLore.add(Lang.get("gui.dominionplayerperms.dominion", "name", targetDominion.getName()));
+                skullLore.add(Lang.get("gui.dominionplayerperms.relation", "rank", DominionUtils.getFormattedRankName(effectiveRank)));
             }
         } else {
-            skullLore.add(ChatUtils.translateToColor("&7Rank: " + DominionUtils.getFormattedRankName(effectiveRank)));
+            skullLore.add(Lang.get("gui.dominionplayerperms.rank", "rank", DominionUtils.getFormattedRankName(effectiveRank)));
         }
         skullMeta.setLore(skullLore);
         skull.setItemMeta(skullMeta);
         gui.setItem(0, skull);
 
         // Section headers
-        gui.setItem(9, buildSectionHeader(Material.LIGHT_BLUE_STAINED_GLASS_PANE, "&b&lInteractions"));
-        gui.setItem(18, buildSectionHeader(Material.YELLOW_STAINED_GLASS_PANE, "&e&lBlock Interactions"));
-        gui.setItem(27, buildSectionHeader(Material.RED_STAINED_GLASS_PANE, "&c&lCommands"));
+        gui.setItem(9, buildSectionHeader(Material.LIGHT_BLUE_STAINED_GLASS_PANE, Lang.get("gui.dominionperms.section_interactions")));
+        gui.setItem(18, buildSectionHeader(Material.YELLOW_STAINED_GLASS_PANE, Lang.get("gui.dominionperms.section_blocks")));
+        gui.setItem(27, buildSectionHeader(Material.RED_STAINED_GLASS_PANE, Lang.get("gui.dominionperms.section_commands")));
 
         // Permission items
         for (Map.Entry<Integer, DominionPermission> entry : slotMap.entrySet()) {
@@ -200,7 +200,7 @@ public class GuiDominionPlayerPermissions {
 
         // Restore Defaults at slot 4, Back at slot 40
         gui.setItem(4, GuiDominionPermissions.buildRestoreDefaultsButton(
-                "&7Restores to base permissions"));
+                Lang.get("gui.dominionperms.restore_player_lore")));
         gui.setItem(40, GuiDominionPermissions.buildBackButton());
 
         leader.closeInventory();
@@ -230,12 +230,11 @@ public class GuiDominionPlayerPermissions {
         ItemStack item = new ItemStack(getPermissionMaterial(permission));
         ItemMeta meta = item.getItemMeta();
 
-        String statusColor = effective ? "&a" : "&c";
-        String statusText = effective ? "Yes" : "No";
-        String overrideTag = isOverridden ? " &e&l*" : "";
-        meta.setDisplayName(ChatUtils.translateToColor(
-                "&6&l" + GuiDominionPermissions.formatPermissionName(permission)
-                        + " &7&l- " + statusColor + "&l" + statusText + overrideTag));
+        String status = Lang.get(effective ? "gui.dominionperms.enabled" : "gui.dominionperms.disabled");
+        String overrideTag = isOverridden ? Lang.get("gui.dominionplayerperms.override_tag") : "";
+        meta.setDisplayName(Lang.get("gui.dominionperms.perm_name",
+                "name", GuiDominionPermissions.getPermissionName(permission),
+                "status", status + overrideTag));
 
         item.setItemMeta(meta);
         return item;
@@ -276,7 +275,7 @@ public class GuiDominionPlayerPermissions {
     private static ItemStack buildSectionHeader(Material material, String name) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor(name));
+        meta.setDisplayName(name);
         meta.setLore(Collections.emptyList());
         item.setItemMeta(meta);
         return item;

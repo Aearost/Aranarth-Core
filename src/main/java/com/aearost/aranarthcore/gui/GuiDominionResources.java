@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.gui;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
@@ -11,11 +12,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class GuiDominionResources {
 
@@ -61,7 +58,7 @@ public class GuiDominionResources {
 		int size = contentRows * 9 + 18;
 
 		Inventory gui = Bukkit.getServer().createInventory(player, size,
-				ChatUtils.translateToColor("&e" + dominion.getName() + "'s &rResources"));
+				Lang.getFor(player, "gui.dominionresources.title", "dominion", dominion.getName()));
 
 		ItemStack filler = makeFiller();
 
@@ -84,8 +81,8 @@ public class GuiDominionResources {
 			ItemMeta itemMeta = item.getItemMeta();
 			itemMeta.setDisplayName(ChatUtils.translateToColor("&l" + DominionUtils.getBiomeName(biome)));
 			itemMeta.setLore(Arrays.asList(
-					ChatUtils.translateToColor("&7Right-click to &epreview &7resources"),
-					ChatUtils.translateToColor("&7Left-click to &eclaim &7resources")
+					Lang.getFor(player, "gui.dominionresources.right_click"),
+					Lang.getFor(player, "gui.dominionresources.left_click")
 			));
 			item.setItemMeta(itemMeta);
 			gui.setItem(slot++, item);
@@ -94,12 +91,12 @@ public class GuiDominionResources {
 		// Pagination buttons in bottom row
 		if (totalPages > 1) {
 			if (safePage > 0) {
-				gui.setItem(size - 9, makeNavButton(Material.ARROW, "&aPrevious Page",
-						"&7Page " + safePage + " / " + totalPages));
+				gui.setItem(size - 9, makeNavButton(Material.ARROW, Lang.getFor(player, "gui.dominionresources.prev"),
+						Lang.getFor(player, "gui.dominionresources.page", "n", String.valueOf(safePage), "total", String.valueOf(totalPages))));
 			}
 			if (safePage < totalPages - 1) {
-				gui.setItem(size - 1, makeNavButton(Material.ARROW, "&aNext Page",
-						"&7Page " + (safePage + 2) + " / " + totalPages));
+				gui.setItem(size - 1, makeNavButton(Material.ARROW, Lang.getFor(player, "gui.dominionresources.next"),
+						Lang.getFor(player, "gui.dominionresources.page", "n", String.valueOf(safePage + 2), "total", String.valueOf(totalPages))));
 			}
 		}
 

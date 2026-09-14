@@ -2,8 +2,8 @@ package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.objects.HeadEntry;
-import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.HeadsDatabaseManager;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.MobHeadUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -13,18 +13,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Head Exchange GUI.
  */
 public class GuiHeadExchange {
 
-    public static final String TITLE = "Head Exchange";
+    public static final String TITLE_KEY = "gui.headexchange.title";
     public static final int SLOT_INPUT = 11;
     public static final int SLOT_INFO = 13;
     public static final int SLOT_OUTPUT = 15;
@@ -42,7 +38,7 @@ public class GuiHeadExchange {
     }
 
     public void openGui() {
-        Inventory gui = Bukkit.createInventory(player, 27, ChatUtils.translateToColor("&8&l" + TITLE));
+        Inventory gui = Bukkit.createInventory(player, 27, Lang.getFor(player, TITLE_KEY));
 
         ItemStack glass = makeGlass();
         for (int i = 0; i < 27; i++) {
@@ -121,7 +117,7 @@ public class GuiHeadExchange {
     private static ItemStack makeVariantInfo(int totalVariants, int variantIdx) {
         ItemStack book = new ItemStack(Material.PAPER);
         ItemMeta meta = book.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&eVariant " + (variantIdx + 1) + "&7/&e" + totalVariants));
+        meta.setDisplayName(Lang.get("gui.headexchange.variant", "n", String.valueOf(variantIdx + 1), "total", String.valueOf(totalVariants)));
         book.setItemMeta(meta);
         return book;
     }
@@ -129,9 +125,9 @@ public class GuiHeadExchange {
     private static ItemStack makeWrongInfoDisplay() {
         ItemStack pane = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta meta = pane.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&cNo Head Found"));
+        meta.setDisplayName(Lang.get("gui.headexchange.no_head"));
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&7No head exists for this item"));
+        lore.add(Lang.get("gui.headexchange.no_head_lore"));
         meta.setLore(lore);
         pane.setItemMeta(meta);
         return pane;
@@ -140,9 +136,9 @@ public class GuiHeadExchange {
     static ItemStack makeOutputPlaceholder() {
         ItemStack pane = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta meta = pane.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&7Output"));
+        meta.setDisplayName(Lang.get("gui.headexchange.output"));
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&7Place an item in the left slot"));
+        lore.add(Lang.get("gui.headexchange.place_item"));
         meta.setLore(lore);
         pane.setItemMeta(meta);
         return pane;
@@ -151,9 +147,9 @@ public class GuiHeadExchange {
     private static ItemStack makeWrongItemDisplay() {
         ItemStack pane = new ItemStack(Material.RED_STAINED_GLASS_PANE);
         ItemMeta meta = pane.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&cNo Head Found"));
+        meta.setDisplayName(Lang.get("gui.headexchange.no_head"));
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&cThis item has no matching head"));
+        lore.add(Lang.get("gui.headexchange.no_matching"));
         meta.setLore(lore);
         pane.setItemMeta(meta);
         return pane;
@@ -164,7 +160,7 @@ public class GuiHeadExchange {
         head.setAmount(Math.min(qty, 64));
         ItemMeta meta = head.getItemMeta();
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&aClick to exchange"));
+        lore.add(Lang.get("gui.headexchange.click_exchange"));
         meta.setLore(lore);
         meta.getPersistentDataContainer().set(CustomKeys.HEAD_TEXTURE, PersistentDataType.STRING, entry.texture());
         meta.getPersistentDataContainer().set(CustomKeys.HEAD_REQUIRED_MATERIAL, PersistentDataType.STRING, entry.material().name());
@@ -175,7 +171,7 @@ public class GuiHeadExchange {
     private static ItemStack makePrevVariant() {
         ItemStack pane = new ItemStack(Material.RED_STAINED_GLASS_PANE);
         ItemMeta meta = pane.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&c&lPrevious"));
+        meta.setDisplayName(Lang.get("gui.page_prev"));
         pane.setItemMeta(meta);
         return pane;
     }
@@ -183,7 +179,7 @@ public class GuiHeadExchange {
     private static ItemStack makeNextVariant() {
         ItemStack pane = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
         ItemMeta meta = pane.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&a&lNext"));
+        meta.setDisplayName(Lang.get("gui.page_next"));
         pane.setItemMeta(meta);
         return pane;
     }
@@ -191,7 +187,7 @@ public class GuiHeadExchange {
     private static ItemStack makeExit() {
         ItemStack barrier = new ItemStack(Material.BARRIER);
         ItemMeta meta = barrier.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&4&lExit"));
+        meta.setDisplayName(Lang.get("gui.exit"));
         barrier.setItemMeta(meta);
         return barrier;
     }

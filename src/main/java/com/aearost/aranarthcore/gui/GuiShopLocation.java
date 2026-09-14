@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -67,7 +68,7 @@ public class GuiShopLocation {
     private Inventory initializeGui(Player player, int pageNum, Map<UUID, PlayerProfile> profiles) {
         HashMap<UUID, Location> shopLocations = AranarthUtils.getShopLocations();
         int shopLocationStartIndex = pageNum * 27;
-        Inventory gui = Bukkit.getServer().createInventory(player, 36, "Player Shops");
+        Inventory gui = Bukkit.getServer().createInventory(player, 36, Lang.getFor(player, "gui.shoplocation.title"));
 
         ItemStack previous = new ItemStack(Material.RED_WOOL);
         ItemStack barrier = new ItemStack(Material.BARRIER);
@@ -76,19 +77,19 @@ public class GuiShopLocation {
 
         ItemMeta previousMeta = previous.getItemMeta();
         if (Objects.nonNull(previousMeta)) {
-            previousMeta.setDisplayName(ChatUtils.translateToColor("&c&lPrevious"));
+            previousMeta.setDisplayName(Lang.getFor(player, "gui.page_prev"));
             previous.setItemMeta(previousMeta);
         }
 
         ItemMeta barrierMeta = barrier.getItemMeta();
         if (Objects.nonNull(barrierMeta)) {
-            barrierMeta.setDisplayName(ChatUtils.translateToColor("&4&lExit"));
+            barrierMeta.setDisplayName(Lang.getFor(player, "gui.exit"));
             barrier.setItemMeta(barrierMeta);
         }
 
         ItemMeta nextMeta = next.getItemMeta();
         if (Objects.nonNull(nextMeta)) {
-            nextMeta.setDisplayName(ChatUtils.translateToColor("&a&lNext"));
+            nextMeta.setDisplayName(Lang.getFor(player, "gui.page_next"));
             next.setItemMeta(nextMeta);
         }
 
@@ -128,7 +129,7 @@ public class GuiShopLocation {
 
             String defaultName = shopLocationPlayer.getNickname() + "'s Shop";
             String shopDisplayName = AranarthUtils.getShopName(uuid, defaultName);
-            shopItemMeta.setDisplayName(ChatUtils.translateToColor("&e" + shopDisplayName));
+            shopItemMeta.setDisplayName(Lang.getFor(player, "gui.shoplocation.shop_name", "name", shopDisplayName));
             shopItem.setItemMeta(shopItemMeta);
             gui.setItem(i, shopItem);
         }

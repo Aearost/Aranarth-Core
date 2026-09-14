@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -21,6 +22,8 @@ import java.text.NumberFormat;
 import java.util.*;
 
 public class GuiTopGuesses {
+
+    public static final String TITLE_KEY = "gui.topguesses.title";
 
     // Caches the most recent total player count per viewer
     private static final Map<UUID, Integer> totalCountCache = new HashMap<>();
@@ -87,8 +90,8 @@ public class GuiTopGuesses {
                 aranarthPlayer.setCurrentGuiPageNum(pageNum);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 String openTitle = ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
-                if (player.isOnline() && openTitle.equals("Top Guesses")) {
-                    populate(player.getOpenInventory().getTopInventory(), pageNum, sortedUuids, dbData, profiles);
+                if (player.isOnline() && openTitle.equals(ChatUtils.stripColorFormatting(Lang.get(TITLE_KEY)))) {
+                    populate(player, player.getOpenInventory().getTopInventory(), pageNum, sortedUuids, dbData, profiles);
                 } else {
                     new GuiTopGuesses(player, pageNum, sortedUuids, dbData, profiles).openGui();
                 }
@@ -96,7 +99,7 @@ public class GuiTopGuesses {
         });
     }
 
-    private static void populate(Inventory gui, int pageNum, List<UUID> sortedUuids,
+    private static void populate(Player player, Inventory gui, int pageNum, List<UUID> sortedUuids,
                                  Map<UUID, DatabaseManager.ChatGameEntry> dbData,
                                  Map<UUID, PlayerProfile> profiles) {
         int startIndex = pageNum * 45;
@@ -166,10 +169,10 @@ public class GuiTopGuesses {
 
             skullMeta.setDisplayName(ChatUtils.translateToColor("&e" + displayName));
             List<String> lore = new ArrayList<>();
-            lore.add(ChatUtils.translateToColor("&7&oCorrect guesses - &e&o" + guessCount));
-            lore.add(ChatUtils.translateToColor("&7&oFastest guess - &e&o" + (bestTime > 0 ? String.format("%.2f", bestTime) + "s" : "N/A")));
-            lore.add(ChatUtils.translateToColor("&7&oLongest streak - &e&o" + (highestStreak > 0 ? highestStreak + "x" : "N/A")));
-            lore.add(ChatUtils.translateToColor("&7&oTotal earned - &6&o$" + nf.format(Math.round(earnings))));
+            lore.add(Lang.getFor(player, "gui.topguesses.correct", "count", String.valueOf(guessCount)));
+            lore.add(Lang.getFor(player, "gui.topguesses.fastest", "time", bestTime > 0 ? String.format("%.2f", bestTime) + "s" : "N/A"));
+            lore.add(Lang.getFor(player, "gui.topguesses.streak", "streak", highestStreak > 0 ? highestStreak + "x" : "N/A"));
+            lore.add(Lang.getFor(player, "gui.topguesses.earned", "earnings", nf.format(Math.round(earnings))));
             skullMeta.setLore(lore);
             head.setItemMeta(skullMeta);
             gui.setItem(i, head);
@@ -180,7 +183,7 @@ public class GuiTopGuesses {
                                     Map<UUID, DatabaseManager.ChatGameEntry> dbData,
                                     Map<UUID, PlayerProfile> profiles) {
         int startIndex = pageNum * 45;
-        Inventory gui = Bukkit.getServer().createInventory(player, 54, "Top Guesses");
+        Inventory gui = Bukkit.getServer().createInventory(player, 54, Lang.getFor(player, TITLE_KEY));
 
         ItemStack previous = new ItemStack(Material.RED_WOOL);
         ItemStack barrier = new ItemStack(Material.BARRIER);
@@ -189,19 +192,19 @@ public class GuiTopGuesses {
 
         ItemMeta previousMeta = previous.getItemMeta();
         if (Objects.nonNull(previousMeta)) {
-            previousMeta.setDisplayName(ChatUtils.translateToColor("&c&lPrevious"));
+            previousMeta.setDisplayName(Lang.getFor(player, "gui.page_prev"));
             previous.setItemMeta(previousMeta);
         }
 
         ItemMeta barrierMeta = barrier.getItemMeta();
         if (Objects.nonNull(barrierMeta)) {
-            barrierMeta.setDisplayName(ChatUtils.translateToColor("&4&lExit"));
+            barrierMeta.setDisplayName(Lang.getFor(player, "gui.exit"));
             barrier.setItemMeta(barrierMeta);
         }
 
         ItemMeta nextMeta = next.getItemMeta();
         if (Objects.nonNull(nextMeta)) {
-            nextMeta.setDisplayName(ChatUtils.translateToColor("&a&lNext"));
+            nextMeta.setDisplayName(Lang.getFor(player, "gui.page_next"));
             next.setItemMeta(nextMeta);
         }
 
@@ -281,10 +284,10 @@ public class GuiTopGuesses {
 
             skullMeta.setDisplayName(ChatUtils.translateToColor("&e" + displayName));
             List<String> lore = new ArrayList<>();
-            lore.add(ChatUtils.translateToColor("&7&oCorrect guesses - &e&o" + guessCount));
-            lore.add(ChatUtils.translateToColor("&7&oFastest guess - &e&o" + (bestTime > 0 ? String.format("%.2f", bestTime) + "s" : "N/A")));
-            lore.add(ChatUtils.translateToColor("&7&oLongest streak - &e&o" + (highestStreak > 0 ? highestStreak + "x" : "N/A")));
-            lore.add(ChatUtils.translateToColor("&7&oTotal earned - &6&o$" + nf.format(Math.round(earnings))));
+            lore.add(Lang.getFor(player, "gui.topguesses.correct", "count", String.valueOf(guessCount)));
+            lore.add(Lang.getFor(player, "gui.topguesses.fastest", "time", bestTime > 0 ? String.format("%.2f", bestTime) + "s" : "N/A"));
+            lore.add(Lang.getFor(player, "gui.topguesses.streak", "streak", highestStreak > 0 ? highestStreak + "x" : "N/A"));
+            lore.add(Lang.getFor(player, "gui.topguesses.earned", "earnings", nf.format(Math.round(earnings))));
             skullMeta.setLore(lore);
             head.setItemMeta(skullMeta);
             gui.setItem(i, head);

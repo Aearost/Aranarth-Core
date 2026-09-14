@@ -78,7 +78,7 @@ public class GuiQuiver {
 				guiSize = ((int) (double) (guiSize / 9) + 1) * 9;
 			}
 
-			String guiName = "Arrow Selection";
+			String guiName = Lang.getFor(player, "gui.quiver.title_select");
 			gui = Bukkit.getServer().createInventory(player, guiSize, guiName);
 
 			for (ItemStack arrow : initializedArrows) {
@@ -146,7 +146,7 @@ public class GuiQuiver {
 	private Inventory getPeasantQuiver(int saintRank) {
 		Inventory gui  = null;
 		if (saintRank == 0) {
-			gui = Bukkit.getServer().createInventory(player, 9, "Quiver");
+			gui = Bukkit.getServer().createInventory(player, 9, Lang.getFor(player, "gui.quiver.title"));
 			gui.setItem(0, blank);
 			gui.setItem(1, blank);
 			gui.setItem(2, blank);

@@ -23,7 +23,7 @@ public class GuiBlacklistSelectClick {
         e.setCancelled(true);
         Player player = (Player) e.getWhoClicked();
         String title = ChatUtils.stripColorFormatting(e.getView().getTitle());
-        boolean isClear = title.equals(GuiBlacklistSelect.TITLE_CLEAR);
+        boolean isClear = title.equals(ChatUtils.stripColorFormatting(Lang.getFor(player, GuiBlacklistSelect.TITLE_CLEAR_KEY)));
 
         if (e.getClickedInventory() == null) {
             return;

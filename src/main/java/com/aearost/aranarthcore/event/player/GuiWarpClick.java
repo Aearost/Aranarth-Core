@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class GuiWarpClick {
 	public void execute(InventoryClickEvent e) {
-		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Warps")) {
+		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(com.aearost.aranarthcore.utils.Lang.get("gui.warps.title"))) {
 			// If the user did not click a slot
 			if (e.getClickedInventory() == null) {
 				return;

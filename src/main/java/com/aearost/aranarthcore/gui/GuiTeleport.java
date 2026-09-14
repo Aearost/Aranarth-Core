@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.gui;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -48,7 +49,7 @@ public class GuiTeleport {
 		int totalHomesOnPage = homes.size();
 		int homeNumber = pageNum * 27;
 		
-		Inventory gui = Bukkit.getServer().createInventory(player, 36, "Teleport");
+		Inventory gui = Bukkit.getServer().createInventory(player, 36, Lang.getFor(player, "gui.teleport.title"));
 
 		// Initialize Items
 		ItemStack previous = new ItemStack(Material.RED_WOOL);
@@ -59,21 +60,21 @@ public class GuiTeleport {
 		// Previous
 		ItemMeta previousMeta = previous.getItemMeta();
 		if (Objects.nonNull(previousMeta)) {
-			previousMeta.setDisplayName(ChatUtils.translateToColor("&c&lPrevious"));
+			previousMeta.setDisplayName(Lang.getFor(player, "gui.page_prev"));
 			previous.setItemMeta(previousMeta);
 		}
 
 		// Barrier
 		ItemMeta barrierMeta = barrier.getItemMeta();
 		if (Objects.nonNull(barrierMeta)) {
-			barrierMeta.setDisplayName(ChatUtils.translateToColor("&4&lExit"));
+			barrierMeta.setDisplayName(Lang.getFor(player, "gui.exit"));
 			barrier.setItemMeta(barrierMeta);
 		}
 
 		// Next
 		ItemMeta nextMeta = next.getItemMeta();
 		if (Objects.nonNull(nextMeta)) {
-			nextMeta.setDisplayName(ChatUtils.translateToColor("&a&lNext"));
+			nextMeta.setDisplayName(Lang.getFor(player, "gui.page_next"));
 			next.setItemMeta(nextMeta);
 		}
 		
@@ -107,11 +108,10 @@ public class GuiTeleport {
 			ItemMeta homeMeta = homePad.getItemMeta();
 
 			List<String> lore = new ArrayList<>();
-			lore.add(ChatUtils.translateToColor("&6world: &7" + home.getWorldName()));
-
-			lore.add(ChatUtils.translateToColor("&6x: &7" + home.getLocation().getBlockX()));
-			lore.add(ChatUtils.translateToColor("&6y: &7" + home.getLocation().getBlockY()));
-			lore.add(ChatUtils.translateToColor("&6z: &7" + home.getLocation().getBlockZ()));
+			lore.add(Lang.getFor(player, "gui.teleport.world", "world", home.getWorldName()));
+			lore.add(Lang.getFor(player, "gui.teleport.x", "x", String.valueOf(home.getLocation().getBlockX())));
+			lore.add(Lang.getFor(player, "gui.teleport.y", "y", String.valueOf(home.getLocation().getBlockY())));
+			lore.add(Lang.getFor(player, "gui.teleport.z", "z", String.valueOf(home.getLocation().getBlockZ())));
 
 			if (Objects.nonNull(homeMeta)) {
 				homeMeta.setDisplayName(ChatUtils.translateToColor(home.getName()));

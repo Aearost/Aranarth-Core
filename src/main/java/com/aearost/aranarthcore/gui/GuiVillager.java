@@ -1,6 +1,6 @@
 package com.aearost.aranarthcore.gui;
 
-import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -27,13 +27,13 @@ public class GuiVillager {
 	}
 	
 	private Inventory initializeGui(Player player, Villager villager) {
-		Inventory gui = Bukkit.getServer().createInventory(player, 9, "Villager");
+		Inventory gui = Bukkit.getServer().createInventory(player, 9, Lang.getFor(player, "gui.villager.title"));
 		Inventory villagerInventory = villager.getInventory();
 		
 		ItemStack barrier = new ItemStack(Material.BARRIER);
 		ItemMeta barrierMeta = barrier.getItemMeta();
 		if (Objects.nonNull(barrierMeta)) {
-			barrierMeta.setDisplayName(ChatUtils.translateToColor("&4&lExit"));
+			barrierMeta.setDisplayName(Lang.getFor(player, "gui.exit"));
 		}
 		barrier.setItemMeta(barrierMeta);
 		gui.setItem(8, barrier);

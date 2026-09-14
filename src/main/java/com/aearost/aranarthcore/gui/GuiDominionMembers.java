@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.objects.DominionRank;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -20,7 +21,7 @@ import java.util.*;
 /**
  * Shows a list of all Dominion members with their current rank.
  * The leader can click a member to cycle their rank (NEWCOMER → CITIZEN → LIEUTENANT).
- * Title: "Dominion Members"
+ * Title: Lang.getFor(player, "gui.dominionmembers.title")
  */
 public class GuiDominionMembers {
 
@@ -43,7 +44,7 @@ public class GuiDominionMembers {
     public static void open(Player player) {
         Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
         if (dominion == null) {
-            Inventory emptyGui = Bukkit.createInventory(player, 9, ChatUtils.translateToColor("Dominion Members"));
+            Inventory emptyGui = Bukkit.createInventory(player, 9, Lang.getFor(player, "gui.dominionmembers.title"));
             player.closeInventory();
             player.openInventory(emptyGui);
             return;
@@ -63,9 +64,9 @@ public class GuiDominionMembers {
 
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                 String openTitle = ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
-                if (player.isOnline() && openTitle.equals("Dominion Members")
+                if (player.isOnline() && openTitle.equals(Lang.getFor(player, "gui.dominionmembers.title"))
                         && player.getOpenInventory().getTopInventory().getSize() == expectedSize) {
-                    populate(player.getOpenInventory().getTopInventory(), dominion, profiles);
+                    populate(player, player.getOpenInventory().getTopInventory(), dominion, profiles);
                 } else {
                     new GuiDominionMembers(player, dominion, profiles).openGui();
                 }
@@ -76,14 +77,14 @@ public class GuiDominionMembers {
     /**
      * Updates an already-open Dominion Members inventory in-place without closing it.
      */
-    public static void populate(Inventory inv, Dominion dominion, Map<UUID, PlayerProfile> profiles) {
+    public static void populate(Player viewer, Inventory inv, Dominion dominion, Map<UUID, PlayerProfile> profiles) {
         List<UUID> members = dominion.getMembers();
         for (int i = 0; i < members.size(); i++) {
             UUID memberUuid = members.get(i);
             DominionRank rank = dominion.getMemberRank(memberUuid);
             if (rank == null) rank = DominionRank.NEWCOMER;
             PlayerProfile profile = profiles.get(memberUuid);
-            inv.setItem(i, buildMemberSkull(memberUuid, rank, dominion.getLeader().equals(memberUuid), profile));
+            inv.setItem(i, buildMemberSkull(viewer, memberUuid, rank, dominion.getLeader().equals(memberUuid), profile));
         }
         inv.setItem(inv.getSize() - 1, GuiDominionPermissions.buildBackButton());
     }
@@ -93,7 +94,7 @@ public class GuiDominionMembers {
         // +1 ensures there is always at least one free slot for the back button
         int size = calculateSize(members.size() + 1);
 
-        Inventory gui = Bukkit.createInventory(player, size, ChatUtils.translateToColor("Dominion Members"));
+        Inventory gui = Bukkit.createInventory(player, size, Lang.getFor(player, "gui.dominionmembers.title"));
 
         for (int i = 0; i < members.size(); i++) {
             UUID memberUuid = members.get(i);
@@ -103,7 +104,7 @@ public class GuiDominionMembers {
             }
 
             PlayerProfile profile = profiles.get(memberUuid);
-            ItemStack skull = buildMemberSkull(memberUuid, rank, dominion.getLeader().equals(memberUuid), profile);
+            ItemStack skull = buildMemberSkull(player, memberUuid, rank, dominion.getLeader().equals(memberUuid), profile);
             gui.setItem(i, skull);
         }
 
@@ -122,7 +123,7 @@ public class GuiDominionMembers {
      * @param profile  The pre-loaded player profile for the skull skin.
      * @return The customized item with the input type.
      */
-    private static ItemStack buildMemberSkull(UUID uuid, DominionRank rank, boolean isLeader, PlayerProfile profile) {
+    private static ItemStack buildMemberSkull(Player viewer, UUID uuid, DominionRank rank, boolean isLeader, PlayerProfile profile) {
         ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) skull.getItemMeta();
 
@@ -134,11 +135,11 @@ public class GuiDominionMembers {
         meta.setDisplayName(ChatUtils.translateToColor("&e" + nickname));
 
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&7Rank: " + DominionUtils.getFormattedRankName(rank)));
+        lore.add(Lang.getFor(viewer, "gui.dominionmembers.rank", "rank", DominionUtils.getFormattedRankName(rank)));
         if (!isLeader) {
-            lore.add(ChatUtils.translateToColor("&7&oClick to promote/demote"));
+            lore.add(Lang.getFor(viewer, "gui.dominionmembers.click_manage"));
         } else {
-            lore.add(ChatUtils.translateToColor("&7You are the leader"));
+            lore.add(Lang.getFor(viewer, "gui.dominionmembers.leader"));
         }
         meta.setLore(lore);
         skull.setItemMeta(meta);

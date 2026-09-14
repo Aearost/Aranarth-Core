@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.Outpost;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.OutpostUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -20,7 +21,7 @@ import java.util.List;
  */
 public class GuiOutposts {
 
-    public static final String TITLE = "Dominion Outposts";
+    public static final String TITLE_KEY = "gui.outposts.title";
 
     private static final int[] OUTPOST_SLOTS = {10, 12, 14, 16};
 
@@ -30,7 +31,7 @@ public class GuiOutposts {
             return;
         }
 
-        String title = ChatUtils.translateToColor(TITLE);
+        String title = Lang.getFor(player, TITLE_KEY);
         Inventory gui = Bukkit.createInventory(player, 27, title);
 
         ItemStack filler = buildFiller();
@@ -48,29 +49,29 @@ public class GuiOutposts {
                     .findFirst().orElse(null);
 
             boolean unlocked = outpostIndex <= allowedCount;
-            gui.setItem(OUTPOST_SLOTS[i], buildOutpostItem(outpostIndex, outpost, unlocked, dominion));
+            gui.setItem(OUTPOST_SLOTS[i], buildOutpostItem(player, outpostIndex, outpost, unlocked, dominion));
         }
 
-        gui.setItem(22, buildBackButton());
+        gui.setItem(22, buildBackButton(player));
 
         player.closeInventory();
         player.openInventory(gui);
     }
 
-    private static ItemStack buildOutpostItem(int outpostIndex, Outpost outpost, boolean unlocked, Dominion dominion) {
+    private static ItemStack buildOutpostItem(Player player, int outpostIndex, Outpost outpost, boolean unlocked, Dominion dominion) {
         if (!unlocked) {
             return buildLockedItem(outpostIndex);
         }
         if (outpost == null) {
             return buildEmptySlotItem(outpostIndex, dominion);
         }
-        return buildActiveOutpostItem(outpost, dominion);
+        return buildActiveOutpostItem(player, outpost, dominion);
     }
 
     private static ItemStack buildLockedItem(int outpostIndex) {
         ItemStack item = new ItemStack(Material.RED_CONCRETE);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&8&lOutpost #" + outpostIndex + " &8&l- Locked"));
+        meta.setDisplayName(Lang.get("gui.outposts.locked", "n", String.valueOf(outpostIndex)));
         List<String> lore = new ArrayList<>();
         lore.add(ChatUtils.translateToColor("&7Requires &eDominion Level " + (outpostIndex + 1)));
         lore.add(ChatUtils.translateToColor("&7Cost to unlock: &6" + OutpostUtils.getFormattedOutpostCost(outpostIndex)));
@@ -82,7 +83,7 @@ public class GuiOutposts {
     private static ItemStack buildEmptySlotItem(int outpostIndex, Dominion dominion) {
         ItemStack item = new ItemStack(Material.OAK_LOG);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&e&lOutpost Slot " + outpostIndex + " &7- Available"));
+        meta.setDisplayName(Lang.get("gui.outposts.empty", "n", String.valueOf(outpostIndex)));
         List<String> lore = new ArrayList<>();
         lore.add(ChatUtils.translateToColor("&7Use &e/d outpost create <name> &7to establish an outpost"));
         lore.add(ChatUtils.translateToColor("&7Cost to create: &6" + OutpostUtils.getFormattedOutpostCost(outpostIndex)));
@@ -92,12 +93,12 @@ public class GuiOutposts {
         return item;
     }
 
-    private static ItemStack buildActiveOutpostItem(Outpost outpost, Dominion dominion) {
+    private static ItemStack buildActiveOutpostItem(Player player, Outpost outpost, Dominion dominion) {
         ItemStack item = new ItemStack(outpost.getIcon());
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(ChatUtils.translateToColor(outpost.getName()));
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&7Click to teleport to this outpost"));
+        lore.add(Lang.getFor(player, "gui.outposts.teleport"));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
@@ -111,10 +112,10 @@ public class GuiOutposts {
         return item;
     }
 
-    private static ItemStack buildBackButton() {
+    private static ItemStack buildBackButton(Player player) {
         ItemStack item = new ItemStack(Material.BARRIER);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&c&lBack"));
+        meta.setDisplayName(Lang.getFor(player, "gui.back_red"));
         item.setItemMeta(meta);
         return item;
     }

@@ -14,7 +14,7 @@ import org.bukkit.event.inventory.InventoryType;
  */
 public class GuiTopKillsClick {
 	public void execute(InventoryClickEvent e) {
-		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Kills")) {
+		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(com.aearost.aranarthcore.utils.Lang.get("gui.topkills.title"))) {
 			// If the user did not click a slot
 			if (e.getClickedInventory() == null) {
 				return;

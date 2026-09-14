@@ -478,7 +478,21 @@
       "Bash(head -10 echo \"---\" grep -n \"unscramble.reward\\\\|unscramble.streak\" \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/utils/ChatGameUtils.java\")",
       "Bash(head -10 grep -n \"quest.reward\\\\|for completing the quest\" \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/utils/QuestUtils.java\")",
       "Bash(wc -l echo \"---\" grep -rl \"chatMessage\\(\"\"&\" \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/\" --include=\"*.java\")",
-      "Bash(wc -l echo \"---\" grep -rn \"chatMessage\\(\"\"&\" \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/\" --include=\"*.java\")"
+      "Bash(wc -l echo \"---\" grep -rn \"chatMessage\\(\"\"&\" \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/\" --include=\"*.java\")",
+      "Bash(wc:*)",
+      "Bash(sort grep:*)",
+      "Bash(head -20 grep -n \"ChatUtils\\\\|hardcoded\\\\|\"\"&\" \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/gui/GuiCompressor.java\")",
+      "Bash(head -10 grep -n \"TITLE\\\\b\\\\|createInventory.*TITLE\" \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/gui/GuiOutposts.java\")",
+      "Bash(head -10 grep -n \"TITLE\\\\b\\\\|createInventory.*TITLE\" \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/gui/GuiPetFood.java\")",
+      "Bash(head -10 grep -n \"TITLE\\\\b\\\\|createInventory.*TITLE\" \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/gui/GuiReaper.java\")",
+      "Bash(head -10 grep -n \"createInventory\\\\|title\\\\|TITLE\" \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/gui/GuiDefenderManage.java\")",
+      "Bash(\"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/resources/lang/en_US.properties\":*)",
+      "Bash(\"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/resources/lang/fr_FR.properties\":*)",
+      "Bash(\"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/resources/lang/de_DE.properties\":*)",
+      "Bash(xargs head:*)",
+      "Bash(echo \"  -> NOT FOUND in source\" done)",
+      "Bash(__NEW_LINE_a2754d287a9d8ecd__ echo:*)",
+      "Bash(__NEW_LINE_ef3fb3d154e3ef3c__ for:*)"
     ]
   }
 }

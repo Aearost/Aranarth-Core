@@ -13,6 +13,7 @@ import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.network.NetworkTabManager;
 import com.aearost.aranarthcore.objects.*;
+import com.projectkorra.projectkorra.BendingPlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.*;
@@ -27,7 +28,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.InventoryHolder;
-import com.projectkorra.projectkorra.BendingPlayer;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.BlockStateMeta;
@@ -2058,7 +2058,12 @@ public class AranarthUtils {
             @Override
             public void run() {
                 teleportingPlayers.remove(player.getUniqueId());
-                onSuccess.run();
+                Lang.setActivePlayer(player.getUniqueId());
+                try {
+                    onSuccess.run();
+                } finally {
+                    Lang.clearActivePlayer();
+                }
             }
         }.runTaskLater(AranarthCore.getInstance(), 60);
 

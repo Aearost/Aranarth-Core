@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -17,6 +18,8 @@ import org.bukkit.inventory.meta.SkullMeta;
 import java.util.*;
 
 public class GuiTopKills {
+
+    public static final String TITLE_KEY = "gui.topkills.title";
 
     private final Player player;
     private final Inventory initializedGui;
@@ -58,7 +61,7 @@ public class GuiTopKills {
                 aranarthPlayer.setCurrentGuiPageNum(pageNum);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 String openTitle = com.aearost.aranarthcore.utils.ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
-                if (player.isOnline() && openTitle.equals("Top Kills")) {
+                if (player.isOnline() && openTitle.equals(ChatUtils.stripColorFormatting(Lang.get(TITLE_KEY)))) {
                     populate(player.getOpenInventory().getTopInventory(), player, pageNum, profiles);
                 } else {
                     new GuiTopKills(player, pageNum, profiles).openGui();
@@ -97,7 +100,7 @@ public class GuiTopKills {
             skullMeta.setDisplayName(ChatUtils.translateToColor("&e" + aranarthPlayer.getNickname()));
             List<String> lore = new ArrayList<>();
             int killCount = AranarthUtils.getKillsOrDeathsInWorld(uuid, player.getWorld(), true);
-            lore.add(ChatUtils.translateToColor("&e" + killCount + " kills"));
+            lore.add(Lang.getFor(player, "gui.topkills.skull_lore", "count", String.valueOf(killCount)));
             skullMeta.setLore(lore);
             head.setItemMeta(skullMeta);
             gui.setItem(i, head);
@@ -107,7 +110,7 @@ public class GuiTopKills {
     private Inventory initializeGui(Player player, int pageNum, Map<UUID, PlayerProfile> profiles) {
         List<UUID> uuidList = AranarthUtils.getTopKills(player.getWorld());
         int startIndex = pageNum * 45;
-        Inventory gui = Bukkit.getServer().createInventory(player, 54, "Top Kills");
+        Inventory gui = Bukkit.getServer().createInventory(player, 54, Lang.getFor(player, TITLE_KEY));
 
         ItemStack previous = new ItemStack(Material.RED_WOOL);
         ItemStack barrier = new ItemStack(Material.BARRIER);
@@ -116,19 +119,19 @@ public class GuiTopKills {
 
         ItemMeta previousMeta = previous.getItemMeta();
         if (Objects.nonNull(previousMeta)) {
-            previousMeta.setDisplayName(ChatUtils.translateToColor("&c&lPrevious"));
+            previousMeta.setDisplayName(Lang.getFor(player, "gui.page_prev"));
             previous.setItemMeta(previousMeta);
         }
 
         ItemMeta barrierMeta = barrier.getItemMeta();
         if (Objects.nonNull(barrierMeta)) {
-            barrierMeta.setDisplayName(ChatUtils.translateToColor("&4&lExit"));
+            barrierMeta.setDisplayName(Lang.getFor(player, "gui.exit"));
             barrier.setItemMeta(barrierMeta);
         }
 
         ItemMeta nextMeta = next.getItemMeta();
         if (Objects.nonNull(nextMeta)) {
-            nextMeta.setDisplayName(ChatUtils.translateToColor("&a&lNext"));
+            nextMeta.setDisplayName(Lang.getFor(player, "gui.page_next"));
             next.setItemMeta(nextMeta);
         }
 
@@ -167,7 +170,7 @@ public class GuiTopKills {
             skullMeta.setDisplayName(ChatUtils.translateToColor("&e" + aranarthPlayer.getNickname()));
             List<String> lore = new ArrayList<>();
             int killCount = AranarthUtils.getKillsOrDeathsInWorld(uuid, player.getWorld(), true);
-            lore.add(ChatUtils.translateToColor("&e" + killCount + " kills"));
+            lore.add(Lang.getFor(player, "gui.topkills.skull_lore", "count", String.valueOf(killCount)));
             skullMeta.setLore(lore);
             head.setItemMeta(skullMeta);
             gui.setItem(i, head);

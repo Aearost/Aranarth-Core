@@ -1,6 +1,6 @@
 package com.aearost.aranarthcore.gui;
 
-import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PetInventoryUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -14,7 +14,7 @@ import org.bukkit.inventory.ItemStack;
  */
 public class GuiPetFood {
 
-    public static final String TITLE = "Pet Food";
+    public static final String TITLE_KEY = "gui.petfood.title";
 
     private final Player player;
     private final Entity pet;
@@ -27,7 +27,7 @@ public class GuiPetFood {
     public void openGui() {
         ItemStack[] food = PetInventoryUtils.getFoodItems(pet);
         Inventory gui = Bukkit.createInventory(player, PetInventoryUtils.FOOD_SLOTS,
-                ChatUtils.translateToColor(TITLE));
+                Lang.getFor(player, TITLE_KEY));
         for (int i = 0; i < Math.min(food.length, PetInventoryUtils.FOOD_SLOTS); i++) {
             gui.setItem(i, food[i]);
         }

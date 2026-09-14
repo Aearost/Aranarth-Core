@@ -56,71 +56,71 @@ public class PlayerServerJoinListener implements Listener {
         String month = DateUtils.provideMonthName(AranarthUtils.getMonth());
         int year = AranarthUtils.getYear();
 
-        String[] messages = DateUtils.determineServerDate(day, weekday, month, year);
-        player.sendMessage(ChatUtils.translateToColor("&6&l-------------------------------------"));
+        player.sendMessage(Lang.getFor(player, "motd.divider"));
 
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
         List<String> toggling = new ArrayList<>();
         if (aranarthPlayer.isTogglingChat()) {
-            toggling.add("&e&oChat Messages");
+            toggling.add(Lang.getFor(player, "motd.toggle_chat"));
         }
         if (aranarthPlayer.isTogglingMessages()) {
-            toggling.add("&e&oDirect Messages");
+            toggling.add(Lang.getFor(player, "motd.toggle_messages"));
         }
         if (aranarthPlayer.isTogglingTp()) {
-            toggling.add("&e&oTeleport Requests");
+            toggling.add(Lang.getFor(player, "motd.toggle_tp"));
         }
         if (!aranarthPlayer.isUsingSpawnBoost()) {
-            toggling.add("&e&oSpawn Boost");
+            toggling.add(Lang.getFor(player, "motd.toggle_spawn_boost"));
         }
         if (aranarthPlayer.isTogglingChangeClaim()) {
-            toggling.add("&e&oClaim Changes");
+            toggling.add(Lang.getFor(player, "motd.toggle_claim_changes"));
         }
         if (aranarthPlayer.isTogglingInventoryAssist()) {
-            toggling.add("&e&oInventory Assist");
+            toggling.add(Lang.getFor(player, "motd.toggle_inventory_assist"));
         }
         if (!aranarthPlayer.isAddingToShulker()) {
-            toggling.add("&e&oShulker Assist");
+            toggling.add(Lang.getFor(player, "motd.toggle_shulker_assist"));
         }
         if (aranarthPlayer.getBlacklistingMethod() == -1) {
-            toggling.add("&e&oBlacklist");
+            toggling.add(Lang.getFor(player, "motd.toggle_blacklist"));
         }
         if (!aranarthPlayer.isCompressingItems()) {
-            toggling.add("&e&oCompressor");
+            toggling.add(Lang.getFor(player, "motd.toggle_compressor"));
         }
         if (!aranarthPlayer.isAutoLockingChests()) {
-            toggling.add("&e&oChest Locks");
+            toggling.add(Lang.getFor(player, "motd.toggle_chest_locks"));
         }
         if (aranarthPlayer.getFireType() != FireType.DEFAULT) {
-            toggling.add("&e&oFire Type: " + aranarthPlayer.getFireType().getDisplayName());
+            toggling.add(Lang.getFor(player, "motd.toggle_fire_type", "type", aranarthPlayer.getFireType().getDisplayName()));
         }
         if (aranarthPlayer.isDayMessageDisabled()) {
-            toggling.add("&e&oDay Message");
+            toggling.add(Lang.getFor(player, "motd.toggle_day_message"));
         }
         if (aranarthPlayer.isWeatherMessageDisabled()) {
-            toggling.add("&e&oWeather Message");
+            toggling.add(Lang.getFor(player, "motd.toggle_weather_message"));
         }
         if (aranarthPlayer.isBulkSellShulkerEnabled()) {
-            toggling.add("&e&oBulk Sell Shulker");
+            toggling.add(Lang.getFor(player, "motd.toggle_bulk_sell"));
         }
 
         if (!toggling.isEmpty()) {
-            String toggledFeatures = "  &7&oYou currently have ";
+            String and = Lang.getFor(player, "motd.toggled_and");
+            String toggledFeatures = "  " + Lang.getFor(player, "motd.toggled_prefix") + " ";
             for (int i = 0; i < toggling.size(); i++) {
                 toggledFeatures += toggling.get(i);
                 if (i < toggling.size() - 2) {
                     toggledFeatures += "&7&o, ";
                 } else if (i < toggling.size() - 1) {
-                    toggledFeatures += " &7&oand ";
+                    toggledFeatures += " " + and + " ";
                 }
             }
-            toggledFeatures += " &7&otoggled";
+            toggledFeatures += " " + Lang.getFor(player, "motd.toggled_suffix");
             player.sendMessage(ChatUtils.translateToColor(toggledFeatures));
         }
 
         Avatar avatar = AvatarUtils.getCurrentAvatar();
         if (avatar == null) {
-            player.sendMessage(ChatUtils.translateToColor("  &7&oAranarth is currently without an Avatar..."));
+            player.sendMessage("  " + Lang.getFor(player, "motd.no_avatar"));
         } else {
             String avatarNickname = AranarthUtils.getPlayer(avatar.getUuid()).getNickname();
             String element = "";
@@ -133,19 +133,18 @@ public class PlayerServerJoinListener implements Listener {
             } else {
                 element = "&7気";
             }
-            player.sendMessage(ChatUtils.translateToColor(
-                    "  &5&lThe current Avatar is " + element + " &d" + avatarNickname + " " + element));
+            player.sendMessage("  " + Lang.getFor(player, "motd.avatar", "element", element, "name", avatarNickname));
         }
 
         NumberFormat formatter = NumberFormat.getCurrencyInstance();
 
-        player.sendMessage(ChatUtils.translateToColor("  &7&oYour balance is currently &6" + formatter.format(aranarthPlayer.getBalance())));
+        player.sendMessage("  " + Lang.getFor(player, "motd.balance", "balance", formatter.format(aranarthPlayer.getBalance())));
         HashMap<String, String> activeBoosts = AranarthUtils.getActiveServerBoostsMessages();
         if (activeBoosts.isEmpty()) {
-            player.sendMessage(ChatUtils.translateToColor("  &7There are currently no active server boosts"));
+            player.sendMessage("  " + Lang.getFor(player, "motd.no_boosts"));
         } else {
-            for (String boost : activeBoosts.keySet()) {
-                player.sendMessage(ChatUtils.translateToColor("  " + boost + " &7is active for &e" + activeBoosts.get(boost)));
+            for (Map.Entry<String, String> boost : activeBoosts.entrySet()) {
+                player.sendMessage("  " + Lang.getFor(player, "motd.boost_active", "name", boost.getKey(), "duration", boost.getValue()));
             }
         }
 
@@ -155,23 +154,24 @@ public class PlayerServerJoinListener implements Listener {
             boolean useThe = activeWorldEvent != WorldEvent.SEIKOS_COMET
                     && activeWorldEvent != WorldEvent.HARMONIC_CONVERGENCE_OF_SACHSI
                     && activeWorldEvent != WorldEvent.AEAROSTS_METEORITE;
-            String eventPrefix = useThe ? "  &7The &6" : "  &6";
-            player.sendMessage(ChatUtils.translateToColor(eventPrefix + activeWorldEvent.getName(eventIntensity) + " &7is currently active"));
+            String eventKey = useThe ? "motd.world_event" : "motd.world_event_no_the";
+            player.sendMessage("  " + Lang.getFor(player, eventKey, "event", activeWorldEvent.getName(eventIntensity)));
         }
 
-        player.sendMessage("  " + messages[1]); // Date message
+        player.sendMessage("  " + Lang.getFor(player, "motd.date", "weekday", weekday, "day", DateUtils.getDayNumWithSuffix(day), "month", month, "year", String.valueOf(year)));
 
         int mailCount = MailUtils.getMail(player.getUniqueId()).size();
         if (mailCount > 0) {
-            player.sendMessage(ChatUtils.translateToColor("  &7You have &e" + mailCount + " &7mail message" + (mailCount == 1 ? "" : "s")));
+            String mailKey = mailCount == 1 ? "motd.mail" : "motd.mail_plural";
+            player.sendMessage("  " + Lang.getFor(player, mailKey, "count", String.valueOf(mailCount)));
         }
 
         // Login streak notification
         boolean streakReset = LoginStreakUtils.ensureStreakValid(player.getUniqueId());
         if (streakReset) {
-            player.sendMessage(ChatUtils.translateToColor("  &7Your login streak has been reset to Day 1"));
+            player.sendMessage("  " + Lang.getFor(player, "motd.streak_reset"));
         } else if (LoginStreakUtils.canClaim(player.getUniqueId())) {
-            player.sendMessage(ChatUtils.translateToColor("  &7Don't forget to claim your daily login reward with &e/streak"));
+            player.sendMessage("  " + Lang.getFor(player, "motd.streak_claim"));
         }
 
         // Pending crate key notification - reload from MySQL first so we display the
@@ -197,11 +197,11 @@ public class PlayerServerJoinListener implements Listener {
 			pendingKeys += pg;
 		}
         if (pendingKeys > 0) {
-            String keyWord = pendingKeys == 1 ? "key" : "keys";
-            player.sendMessage(ChatUtils.translateToColor("  &7You have &e" + pendingKeys + " pending crate " + keyWord + " &7- use &e/keyclaim &7to collect!"));
+            String keyWord = pendingKeys == 1 ? Lang.getFor(player, "motd.pending_key") : Lang.getFor(player, "motd.pending_keys_plural");
+            player.sendMessage("  " + Lang.getFor(player, "motd.pending_keys", "count", String.valueOf(pendingKeys), "keys", keyWord));
         }
 
-        player.sendMessage(ChatUtils.translateToColor("&6&l-------------------------------------"));
+        player.sendMessage(Lang.getFor(player, "motd.divider"));
         player.sendMessage("");
 
         // Adds all aranarth recipes

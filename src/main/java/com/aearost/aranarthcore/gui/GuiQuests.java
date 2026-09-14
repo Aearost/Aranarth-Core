@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Quest;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.QuestUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -28,6 +29,8 @@ import java.util.UUID;
  * A 45-slot chest GUI displaying the player's current daily and weekly quests.
  */
 public class GuiQuests {
+
+    public static final String TITLE_KEY = "gui.quests.title";
 
     private static final NumberFormat MONEY_FORMAT = NumberFormat.getInstance();
     private static final ZoneId EST = ZoneId.of("America/New_York");
@@ -58,7 +61,7 @@ public class GuiQuests {
     }
 
     private Inventory initializeGui() {
-        Inventory inv = Bukkit.createInventory(player, 45, ChatUtils.translateToColor("&8&lYour Quests"));
+        Inventory inv = Bukkit.createInventory(player, 45, Lang.getFor(player, TITLE_KEY));
 
         UUID uuid = player.getUniqueId();
 
@@ -152,43 +155,39 @@ public class GuiQuests {
 
     public static ItemStack makeQuestItem(Quest quest, int progress, boolean claimable, boolean completed) {
         Material mat;
-        String statusColor;
         String statusText;
 
         if (completed) {
             mat = Material.GRAY_CONCRETE;
-            statusColor = "&7";
-            statusText = "Completed";
+            statusText = Lang.get("gui.quests.completed");
         } else if (claimable) {
             mat = Material.LIME_CONCRETE;
-            statusColor = "&a";
-            statusText = "Click to Claim!";
+            statusText = Lang.get("gui.quests.click_claim");
         } else if (progress > 0) {
             mat = Material.YELLOW_CONCRETE;
-            statusColor = "&e";
-            statusText = "In Progress";
+            statusText = Lang.get("gui.quests.in_progress");
         } else {
             mat = Material.RED_CONCRETE;
-            statusColor = "&c";
-            statusText = "Not Started";
+            statusText = Lang.get("gui.quests.not_started");
         }
 
         ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(ChatUtils.translateToColor("&f&l" + quest.getDisplayName()));
 
+        String typeName = quest.getQuestType().name().charAt(0)
+                + quest.getQuestType().name().substring(1).toLowerCase();
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&8" + quest.getQuestType().name().charAt(0)
-                + quest.getQuestType().name().substring(1).toLowerCase() + " Quest"));
+        lore.add(Lang.get("gui.quests.type", "type", typeName));
         lore.add("");
-        lore.add(ChatUtils.translateToColor("&7Progress: &f" + progress + " &8/ &f" + quest.getRequired()));
+        lore.add(Lang.get("gui.quests.progress", "progress", String.valueOf(progress), "required", String.valueOf(quest.getRequired())));
         if (quest.hasItemReward()) {
-            lore.add(ChatUtils.translateToColor("&7Reward: &f" + QuestUtils.getItemRewardDisplayName(quest.getItemReward())));
+            lore.add(Lang.get("gui.quests.reward_item", "item", QuestUtils.getItemRewardDisplayName(quest.getItemReward())));
         } else {
-            lore.add(ChatUtils.translateToColor("&7Reward: &6$" + MONEY_FORMAT.format(quest.getReward())));
+            lore.add(Lang.get("gui.quests.reward_money", "money", MONEY_FORMAT.format(quest.getReward())));
         }
         lore.add("");
-        lore.add(ChatUtils.translateToColor(statusColor + statusText));
+        lore.add(statusText);
 
         meta.setLore(lore);
         item.setItemMeta(meta);
@@ -206,7 +205,7 @@ public class GuiQuests {
     private ItemStack makeNoQuestItem() {
         ItemStack item = new ItemStack(Material.BARRIER);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&cNo Quest Available"));
+        meta.setDisplayName(Lang.getFor(player, "gui.quests.no_quest"));
         item.setItemMeta(meta);
         return item;
     }
@@ -214,22 +213,22 @@ public class GuiQuests {
     public ItemStack makeInfoItem(int rank, ZoneId zone) {
         ItemStack item = new ItemStack(Material.BOOK);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&e&lQuest Info"));
+        meta.setDisplayName(Lang.getFor(player, "gui.quests.info"));
 
         String nextDailyStr = formatNextDailyReset(zone);
         String nextWeeklyStr = formatNextWeeklyReset(zone);
         String zoneName = zone.getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
 
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&7Your Rank: &f" + (rank + 1)));
+        lore.add(Lang.getFor(player, "gui.quests.your_rank", "rank", String.valueOf(rank + 1)));
         lore.add("");
-        lore.add(ChatUtils.translateToColor("&6Next daily reset:"));
-        lore.add(ChatUtils.translateToColor("&f  " + nextDailyStr + " &7(" + zoneName + ")"));
+        lore.add(Lang.getFor(player, "gui.quests.daily_reset"));
+        lore.add(Lang.getFor(player, "gui.quests.reset_time", "time", nextDailyStr, "zone", zoneName));
         lore.add("");
-        lore.add(ChatUtils.translateToColor("&bNext weekly reset:"));
-        lore.add(ChatUtils.translateToColor("&f  " + nextWeeklyStr + " &7(" + zoneName + ")"));
+        lore.add(Lang.getFor(player, "gui.quests.weekly_reset"));
+        lore.add(Lang.getFor(player, "gui.quests.reset_time", "time", nextWeeklyStr, "zone", zoneName));
         lore.add("");
-        lore.add(ChatUtils.translateToColor("&7Click a &alime &7quest to claim its reward."));
+        lore.add(Lang.getFor(player, "gui.quests.claim_hint"));
 
         meta.setLore(lore);
         item.setItemMeta(meta);

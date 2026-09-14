@@ -99,10 +99,10 @@ public class CommandMctop implements CommandExecutor {
                 aranarthPlayer.setCurrentGuiPageNum(pageNum);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 String skillDisplay = skill == null ? "Overall" : skill.name().charAt(0) + skill.name().substring(1).toLowerCase();
-                String expectedTitle = "Top " + skillDisplay;
+                String expectedTitle = ChatUtils.stripColorFormatting(Lang.getFor(player, "gui.mctop.title", "skill", skillDisplay));
                 String openTitle = ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
                 if (player.isOnline() && openTitle.equals(expectedTitle)) {
-                    GuiMctop.populate(player.getOpenInventory().getTopInventory(), skill, finalLeaderboard, finalProfiles);
+                    GuiMctop.populate(player, player.getOpenInventory().getTopInventory(), skill, finalLeaderboard, finalProfiles);
                 } else {
                     new GuiMctop(player, skill, pageNum, finalLeaderboard, finalProfiles).openGui();
                 }

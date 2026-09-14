@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.objects.JobData;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.JobUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -18,7 +19,7 @@ import java.util.List;
 
 public class GuiJobsJoin {
 
-    public static final String TITLE = "Join a Job";
+    public static final String TITLE_KEY = "gui.jobsjoin.title";
 
     public static final int[] JOB_SLOTS = {11, 13, 15, 20, 22, 24, 29, 31};
     public static final JobType[] JOB_ORDER = {
@@ -49,7 +50,7 @@ public class GuiJobsJoin {
     }
 
     private Inventory initializeGui() {
-        Inventory inv = Bukkit.createInventory(player, 45, ChatUtils.translateToColor("&8&lJoin a Job"));
+        Inventory inv = Bukkit.createInventory(player, 45, Lang.getFor(player, TITLE_KEY));
 
         ItemStack grayPane = makePane(Material.GRAY_STAINED_GLASS_PANE);
 
@@ -75,7 +76,7 @@ public class GuiJobsJoin {
         // Back button
         ItemStack back = new ItemStack(Material.BARRIER);
         ItemMeta backMeta = back.getItemMeta();
-        backMeta.setDisplayName(ChatUtils.translateToColor("&7Back"));
+        backMeta.setDisplayName(Lang.getFor(player, "gui.back"));
         back.setItemMeta(backMeta);
         inv.setItem(40, back);
 
@@ -92,20 +93,20 @@ public class GuiJobsJoin {
 
         if (alreadyJoined) {
             statusColor = "&a";
-            statusText = "Already Joined";
+            statusText = Lang.getFor(player, "gui.jobsjoin.already_joined");
         } else if (slotsFull) {
             statusColor = "&c";
-            statusText = "Job Slots Full";
+            statusText = Lang.getFor(player, "gui.jobsjoin.slots_full");
         } else {
             statusColor = "&e";
-            statusText = "Click to Join!";
+            statusText = Lang.getFor(player, "gui.jobsjoin.click_join");
         }
 
         meta.setDisplayName(ChatUtils.translateToColor(JobUtils.getJobColor(job) + job.getDisplayName()));
         List<String> lore = new ArrayList<>();
         lore.add(ChatUtils.translateToColor("&7" + JobUtils.getJobDescription(job)));
         lore.add("");
-        lore.add(ChatUtils.translateToColor("&7Actions that earn money:"));
+        lore.add(Lang.getFor(player, "gui.jobsjoin.actions_lore"));
 
         for (String action : getJobActions(job)) {
             lore.add(ChatUtils.translateToColor("&8 - &7" + action));
@@ -118,8 +119,8 @@ public class GuiJobsJoin {
             double currentXp = jobData.getCurrentXp(job);
             long required = JobUtils.getXpRequired(level);
             String xpStr = level >= 10 ? "Max Level" : (int) currentXp + " / " + required;
-            lore.add(ChatUtils.translateToColor("&7Level: &e" + level));
-            lore.add(ChatUtils.translateToColor("&7XP: &e" + xpStr));
+            lore.add(Lang.getFor(player, "gui.jobsjoin.level", "level", String.valueOf(level)));
+            lore.add(Lang.getFor(player, "gui.jobsjoin.xp", "xp", xpStr));
             lore.add("");
         }
 

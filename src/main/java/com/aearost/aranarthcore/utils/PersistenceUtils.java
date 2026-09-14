@@ -6092,6 +6092,7 @@ public class PersistenceUtils {
             obj.addProperty("sizeScaleEnabled", ap.isSizeScaleEnabled());
             obj.addProperty("reaperDisabled", ap.isReaperDisabled());
             obj.addProperty("serverTipsDisabled", ap.isServerTipsDisabled());
+            obj.addProperty("language", ap.getLanguage());
             try {
                 db.savePlayerToggles(uuid, GSON.toJson(obj));
             } catch (Exception e) {
@@ -7754,6 +7755,9 @@ public class PersistenceUtils {
                 if (obj.has("serverTipsDisabled")) {
                     ap.setServerTipsDisabled(obj.get("serverTipsDisabled").getAsBoolean());
                 }
+                if (obj.has("language")) {
+                    ap.setLanguage(obj.get("language").getAsString());
+                }
                 AranarthUtils.setPlayer(uuid, ap);
             } catch (Exception e) {
                 Bukkit.getLogger().warning("[AC] Failed to parse toggles for " + uuid + ": " + e.getMessage());
@@ -7814,6 +7818,7 @@ public class PersistenceUtils {
         obj.addProperty("barbarianCooldownEnd", ap.getBarbarianCooldownEnd());
         obj.addProperty("reaperDisabled", ap.isReaperDisabled());
         obj.addProperty("serverTipsDisabled", ap.isServerTipsDisabled());
+        obj.addProperty("language", ap.getLanguage());
         return GSON.toJson(obj);
     }
 
@@ -7963,6 +7968,9 @@ public class PersistenceUtils {
             }
             if (obj.has("serverTipsDisabled")) {
                 ap.setServerTipsDisabled(obj.get("serverTipsDisabled").getAsBoolean());
+            }
+            if (obj.has("language")) {
+                ap.setLanguage(obj.get("language").getAsString());
             }
             AranarthUtils.setPlayer(uuid, ap);
         } catch (Exception e) {
