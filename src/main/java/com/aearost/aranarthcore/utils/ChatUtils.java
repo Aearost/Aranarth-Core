@@ -12,7 +12,6 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -32,6 +31,7 @@ public class ChatUtils {
 
     // Maps &0-&f color codes to their Minecraft hex equivalents
     private static final Map<Character, String> COLOR_CODE_TO_HEX = new HashMap<>();
+
     static {
         COLOR_CODE_TO_HEX.put('0', "#000000");
         COLOR_CODE_TO_HEX.put('1', "#0000AA");
@@ -636,10 +636,7 @@ public class ChatUtils {
             Component targetComponent = LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(targetPrefixRaw))
                     .append(LegacyComponentSerializer.legacySection().deserialize(coloredFormattedMsg));
             target.sendMessage(ChatUtils.clickableCommand(targetComponent, ChatUtils.translateToColor("&7Reply to &e" + senderDisplay), "/r ", true));
-            int pmVol = AranarthUtils.getPlayer(target.getUniqueId()).getPrivateMsgSoundVolume();
-			if (pmVol > 0) {
-				target.playSound(target, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.4f * (pmVol / 100f), 1f);
-			}
+            AranarthUtils.playPingSound(target);
 
             targetAranarthPlayer.setLastReceivedMessage(player.getUniqueId());
             AranarthUtils.setPlayer(target.getUniqueId(), targetAranarthPlayer);

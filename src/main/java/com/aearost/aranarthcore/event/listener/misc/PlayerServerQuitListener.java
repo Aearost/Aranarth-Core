@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.SpecialDay;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Trade;
 import com.aearost.aranarthcore.utils.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -48,6 +49,13 @@ public class PlayerServerQuitListener implements Listener {
     public void onPlayerQuit(final PlayerQuitEvent e) {
         Player player = e.getPlayer();
         AranarthCore.getInstance().getFireParticleListener().clearPlayer(player.getUniqueId());
+
+        // Cancel any active trade when a player disconnects
+        Trade trade = TradeManager.getTrade(player.getUniqueId());
+        if (trade != null) {
+            TradeManager.cancelTrade(trade, player.getUniqueId());
+        }
+        TradeManager.clearAwaitingPayInput(player.getUniqueId());
 
         boolean isCrossServerTransfer = NetworkManager.isActive()
                 && NetworkManager.getInstance().consumeTransferring(player.getUniqueId());

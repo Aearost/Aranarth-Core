@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.gui.GuiHeadExchange;
 import com.aearost.aranarthcore.gui.GuiWrench;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -45,6 +46,9 @@ public class InventoryCloseEventListener implements Listener {
                 new GuiPetFoodClose().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(com.aearost.aranarthcore.utils.Lang.get(GuiHeadExchange.TITLE_KEY))) {
                 new GuiHeadExchangeClose().execute(e);
+            } else if (e.getPlayer() instanceof Player tradePlayer
+                    && com.aearost.aranarthcore.utils.TradeManager.isTradeGuiOpen(tradePlayer)) {
+                new GuiTradeClose().execute(e);
             }
         } else if (e.getView().getType() == InventoryType.ANVIL) {
             if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarthium Anvil")) {

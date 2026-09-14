@@ -230,10 +230,7 @@ public class ChatGameUtils {
         String startMsg = ChatUtils.chatMessage(Lang.get("unscramble.start", "word", scrambled));
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.sendMessage(startMsg);
-            int cgVol = AranarthUtils.getPlayer(p.getUniqueId()).getChatGameSoundVolume();
-            if (cgVol > 0) {
-                p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 5f * (cgVol / 100f), 1f);
-            }
+            AranarthUtils.playPingSound(p);
         }
 
         if (NetworkManager.isActive()) {
@@ -548,10 +545,7 @@ public class ChatGameUtils {
         String startMsg = ChatUtils.chatMessage(Lang.get("unscramble.start", "word", scrambled));
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.sendMessage(startMsg);
-            int cgVol = AranarthUtils.getPlayer(p.getUniqueId()).getChatGameSoundVolume();
-            if (cgVol > 0) {
-                p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 5f * (cgVol / 100f), 1f);
-            }
+            AranarthUtils.playPingSound(p);
         }
     }
 
@@ -714,11 +708,15 @@ public class ChatGameUtils {
         String[] parts = word.split(" ");
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < parts.length; i++) {
-            if (i > 0) sb.append(' ');
+            if (i > 0) {
+                sb.append(' ');
+            }
             String part = parts[i];
             if (!part.isEmpty()) {
                 sb.append(Character.toUpperCase(part.charAt(0)));
-                if (part.length() > 1) sb.append(part.substring(1));
+                if (part.length() > 1) {
+                    sb.append(part.substring(1));
+                }
             }
         }
         return sb.toString();

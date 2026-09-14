@@ -14,6 +14,7 @@ Incantations
 [+]
 
 Items & Crafting
+[+] Added item trade system with /trade command
 [+] Added honey block to sugar crafting recipe
 
 Economy, Jobs & Quests
@@ -31,6 +32,7 @@ Quality of Life
 
 Cross-server & Technical
 [~] Removed all hardcoded text and set up AranarthCore for internationalization, storing all strings in lang files
+[~] Removed hardcoded ping sound and added centralized playPingSound() in AranarthUtils
 
 Miscellaneous
 [+]

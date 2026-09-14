@@ -7,12 +7,10 @@ import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.items.key.KeyVote;
 import com.aearost.aranarthcore.objects.*;
 import com.aearost.aranarthcore.utils.*;
-import org.bukkit.inventory.ItemStack;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.aearost.aranarthcore.utils.InteractiveChatManager;
-import com.google.gson.JsonArray;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -23,6 +21,7 @@ import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -102,6 +101,13 @@ public class NetworkManager {
     public static final String CH_RANK_UPDATE = "aranarth:rank_update";
     public static final String CH_MARKET_UPDATE = "aranarth:market_update";
     public static final String CH_PERM_RELOAD = "aranarth:perm_reload";
+    public static final String CH_TRADE_INVITE = "aranarth:trade_invite";
+    public static final String CH_TRADE_ACCEPT = "aranarth:trade_accept";
+    public static final String CH_TRADE_CANCEL = "aranarth:trade_cancel";
+    public static final String CH_TRADE_ITEMS = "aranarth:trade_items";
+    public static final String CH_TRADE_MONEY = "aranarth:trade_money";
+    public static final String CH_TRADE_CONFIRM = "aranarth:trade_confirm";
+    public static final String CH_TRADE_EXECUTE = "aranarth:trade_execute";
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
     private static final String KEY_RETURN_LOC = "return_loc:";
@@ -368,6 +374,13 @@ public class NetworkManager {
             case CH_RANK_UPDATE -> handleRankUpdate(json);
             case CH_MARKET_UPDATE -> handleMarketUpdate(json);
             case CH_PERM_RELOAD -> handlePermReload(json);
+            case CH_TRADE_INVITE -> handleTradeInvite(json);
+            case CH_TRADE_ACCEPT -> handleTradeAccept(json);
+            case CH_TRADE_CANCEL -> handleTradeCancel(json);
+            case CH_TRADE_ITEMS -> handleTradeItems(json);
+            case CH_TRADE_MONEY -> handleTradeMoney(json);
+            case CH_TRADE_CONFIRM -> handleTradeConfirm(json);
+            case CH_TRADE_EXECUTE -> handleTradeExecute(json);
         }
     }
 
@@ -386,10 +399,10 @@ public class NetworkManager {
      * Publishes an interactive chat message (one containing [item]/[inv]/[ec]/[coords]) so the
      * other server can display the same clickable component and serve /ichat view clicks locally.
      *
-     * @param prefix       the formatted prefix string (legacy colour codes already applied)
-     * @param chatMessage  the plain-text version of the message (for console/discord fallback)
-     * @param fullMessage  the fully assembled Adventure Component including prefix and interactive parts
-     * @param snapshots    every snapshot that was created while building the message
+     * @param prefix      the formatted prefix string (legacy colour codes already applied)
+     * @param chatMessage the plain-text version of the message (for console/discord fallback)
+     * @param fullMessage the fully assembled Adventure Component including prefix and interactive parts
+     * @param snapshots   every snapshot that was created while building the message
      */
     public void publishInteractiveChat(String prefix, String chatMessage, Component fullMessage,
                                        List<InteractiveChatManager.Snapshot> snapshots) {
@@ -1907,7 +1920,7 @@ public class NetworkManager {
         Component targetPrefixComp = LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(prefixStart + "&7&l&oFrom: &r&e" + fromNickname + prefixEnd + " &7&o>> &e&o"));
         Component targetMsgComp = targetPrefixComp.append(LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor("&e&o") + message));
         target.sendMessage(ChatUtils.clickableCommand(targetMsgComp, ChatUtils.translateToColor("&7Reply to &e" + fromNickname), "/r ", true));
-        target.playSound(target, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.4f, 1f);
+        AranarthUtils.playPingSound(target);
 
         // Store the sender UUID for /reply (uses last received message UUID)
         AranarthPlayer targetAp = AranarthUtils.getPlayer(toUuid);
@@ -2224,7 +2237,7 @@ public class NetworkManager {
         String fromNickname = json.get("fromNickname").getAsString();
         target.sendMessage(ChatUtils.chatMessage(Lang.get("mail.received", "sender", fromNickname)));
         target.sendMessage(ChatUtils.chatMessage(Lang.get("mail.received_view")));
-        target.playSound(target, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.4f, 1f);
+        AranarthUtils.playPingSound(target);
     }
 
     private void handleCouncilMessage(JsonObject json) {
@@ -3335,9 +3348,9 @@ public class NetworkManager {
         UUID sentinelUuid = UUID.fromString(json.get("sentinelUuid").getAsString());
         // Search all tracked sentinel types by UUID
         org.bukkit.entity.EntityType[] trackedTypes = {
-            org.bukkit.entity.EntityType.HORSE,
-            org.bukkit.entity.EntityType.IRON_GOLEM,
-            org.bukkit.entity.EntityType.WOLF
+                org.bukkit.entity.EntityType.HORSE,
+                org.bukkit.entity.EntityType.IRON_GOLEM,
+                org.bukkit.entity.EntityType.WOLF
         };
 
         for (Map.Entry<UUID, AranarthPlayer> entry : AranarthUtils.getAranarthPlayers().entrySet()) {
@@ -3380,6 +3393,201 @@ public class NetworkManager {
             } catch (Exception e) {
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
                         + "DB publish failed on " + channel + ": " + e.getMessage());
+            }
+        });
+    }
+
+    // -------------------------------------------------------------------------
+    // Trade - publishers
+    // -------------------------------------------------------------------------
+
+    /**
+     * Sent by A's server when A invites B who is on another server.
+     */
+    public void publishTradeInvite(UUID inviterUuid, String inviterName, UUID inviteeUuid) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("inviterUuid", inviterUuid.toString());
+        json.addProperty("inviterName", inviterName);
+        json.addProperty("inviteeUuid", inviteeUuid.toString());
+        publish(CH_TRADE_INVITE, json);
+    }
+
+    /**
+     * Sent by B's server when B accepts a cross-server invite from A.
+     */
+    public void publishTradeAccept(UUID initiatorUuid, UUID targetUuid) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("initiatorUuid", initiatorUuid.toString());
+        json.addProperty("targetUuid", targetUuid.toString());
+        publish(CH_TRADE_ACCEPT, json);
+    }
+
+    /**
+     * Sent by either server when a player cancels the trade.
+     */
+    public void publishTradeCancel(UUID initiatorUuid, UUID cancellerUuid, String cancellerNick) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("initiatorUuid", initiatorUuid.toString());
+        json.addProperty("cancellerUuid", cancellerUuid.toString());
+        json.addProperty("cancellerNick", cancellerNick);
+        publish(CH_TRADE_CANCEL, json);
+    }
+
+    /**
+     * Sent after a player's offered items change.
+     */
+    public void publishTradeItems(UUID changerUuid, UUID initiatorUuid, ItemStack[] items) {
+        try {
+            String base64 = com.aearost.aranarthcore.utils.ItemUtils.itemStackArrayToBase64(items);
+            JsonObject json = new JsonObject();
+            json.addProperty("server", thisServer);
+            json.addProperty("changerUuid", changerUuid.toString());
+            json.addProperty("initiatorUuid", initiatorUuid.toString());
+            json.addProperty("items", base64);
+            publish(CH_TRADE_ITEMS, json);
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+                    + "Failed to serialize trade items for " + changerUuid + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Sent after a player's money offer changes.
+     */
+    public void publishTradeMoney(UUID changerUuid, UUID initiatorUuid, double amount) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("changerUuid", changerUuid.toString());
+        json.addProperty("initiatorUuid", initiatorUuid.toString());
+        json.addProperty("amount", amount);
+        publish(CH_TRADE_MONEY, json);
+    }
+
+    /**
+     * Sent when a player toggles their confirm state.
+     */
+    public void publishTradeConfirm(UUID confirmerUuid, UUID initiatorUuid, boolean confirmed) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("confirmerUuid", confirmerUuid.toString());
+        json.addProperty("initiatorUuid", initiatorUuid.toString());
+        json.addProperty("confirmed", confirmed);
+        publish(CH_TRADE_CONFIRM, json);
+    }
+
+    /**
+     * Sent by the initiator's server to execute the trade on the target's server.
+     */
+    public void publishTradeExecute(UUID initiatorUuid, ItemStack[] itemsForTarget,
+                                    double initiatorMoney, double targetMoney) {
+        try {
+            String base64 = com.aearost.aranarthcore.utils.ItemUtils.itemStackArrayToBase64(itemsForTarget);
+            JsonObject json = new JsonObject();
+            json.addProperty("server", thisServer);
+            json.addProperty("initiatorUuid", initiatorUuid.toString());
+            json.addProperty("itemsForTarget", base64);
+            json.addProperty("initiatorMoney", initiatorMoney);
+            json.addProperty("targetMoney", targetMoney);
+            publish(CH_TRADE_EXECUTE, json);
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+                    + "Failed to serialize trade execute for " + initiatorUuid + ": " + e.getMessage());
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Trade - handlers
+    // -------------------------------------------------------------------------
+
+    private void handleTradeInvite(JsonObject json) {
+        if (json.get("server").getAsString().equals(thisServer)) {
+            return;
+        }
+        UUID inviterUuid = UUID.fromString(json.get("inviterUuid").getAsString());
+        String inviterName = json.get("inviterName").getAsString();
+        UUID inviteeUuid = UUID.fromString(json.get("inviteeUuid").getAsString());
+        com.aearost.aranarthcore.utils.TradeManager.onCrossServerInvite(inviterUuid, inviterName, inviteeUuid);
+    }
+
+    private void handleTradeAccept(JsonObject json) {
+        if (json.get("server").getAsString().equals(thisServer)) {
+            return;
+        }
+        UUID initiatorUuid = UUID.fromString(json.get("initiatorUuid").getAsString());
+        UUID targetUuid = UUID.fromString(json.get("targetUuid").getAsString());
+        com.aearost.aranarthcore.utils.TradeManager.onCrossServerAccept(initiatorUuid, targetUuid);
+    }
+
+    private void handleTradeCancel(JsonObject json) {
+        if (json.get("server").getAsString().equals(thisServer)) {
+            return;
+        }
+        UUID initiatorUuid = UUID.fromString(json.get("initiatorUuid").getAsString());
+        UUID cancellerUuid = UUID.fromString(json.get("cancellerUuid").getAsString());
+        String cancellerNick = json.get("cancellerNick").getAsString();
+        com.aearost.aranarthcore.utils.TradeManager.onRemoteCancel(initiatorUuid, cancellerUuid, cancellerNick);
+    }
+
+    private void handleTradeItems(JsonObject json) {
+        if (json.get("server").getAsString().equals(thisServer)) {
+            return;
+        }
+        UUID changerUuid = UUID.fromString(json.get("changerUuid").getAsString());
+        UUID initiatorUuid = UUID.fromString(json.get("initiatorUuid").getAsString());
+        String base64 = json.get("items").getAsString();
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+            try {
+                ItemStack[] items = com.aearost.aranarthcore.utils.ItemUtils.itemStackArrayFromBase64(base64);
+                Bukkit.getScheduler().runTask(AranarthCore.getInstance(),
+                        () -> com.aearost.aranarthcore.utils.TradeManager.onRemoteItemUpdate(
+                                changerUuid, initiatorUuid, items));
+            } catch (Exception e) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+                        + "Failed to deserialize trade items from " + changerUuid + ": " + e.getMessage());
+            }
+        });
+    }
+
+    private void handleTradeMoney(JsonObject json) {
+        if (json.get("server").getAsString().equals(thisServer)) {
+            return;
+        }
+        UUID changerUuid = UUID.fromString(json.get("changerUuid").getAsString());
+        UUID initiatorUuid = UUID.fromString(json.get("initiatorUuid").getAsString());
+        double amount = json.get("amount").getAsDouble();
+        com.aearost.aranarthcore.utils.TradeManager.onRemoteMoneyUpdate(changerUuid, initiatorUuid, amount);
+    }
+
+    private void handleTradeConfirm(JsonObject json) {
+        if (json.get("server").getAsString().equals(thisServer)) {
+            return;
+        }
+        UUID confirmerUuid = UUID.fromString(json.get("confirmerUuid").getAsString());
+        UUID initiatorUuid = UUID.fromString(json.get("initiatorUuid").getAsString());
+        boolean confirmed = json.get("confirmed").getAsBoolean();
+        com.aearost.aranarthcore.utils.TradeManager.onRemoteConfirm(confirmerUuid, initiatorUuid, confirmed);
+    }
+
+    private void handleTradeExecute(JsonObject json) {
+        if (json.get("server").getAsString().equals(thisServer)) {
+            return;
+        }
+        UUID initiatorUuid = UUID.fromString(json.get("initiatorUuid").getAsString());
+        String base64 = json.get("itemsForTarget").getAsString();
+        double initiatorMoney = json.get("initiatorMoney").getAsDouble();
+        double targetMoney = json.get("targetMoney").getAsDouble();
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+            try {
+                ItemStack[] items = com.aearost.aranarthcore.utils.ItemUtils.itemStackArrayFromBase64(base64);
+                Bukkit.getScheduler().runTask(AranarthCore.getInstance(),
+                        () -> com.aearost.aranarthcore.utils.TradeManager.onRemoteExecute(
+                                initiatorUuid, items, initiatorMoney, targetMoney));
+            } catch (Exception e) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+                        + "Failed to deserialize trade execute items for " + initiatorUuid + ": " + e.getMessage());
             }
         });
     }

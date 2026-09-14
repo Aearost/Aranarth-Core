@@ -475,6 +475,7 @@ public class PermissionUtils {
         perms.setPermission("aranarth.topdeaths", true);
         perms.setPermission("aranarth.tpaccept", true);
         perms.setPermission("aranarth.tpdeny", true);
+        perms.setPermission("aranarth.trade", true);
         perms.setPermission("aranarth.trust", true);
         perms.setPermission("aranarth.unlock", true);
         perms.setPermission("aranarth.untrust", true);

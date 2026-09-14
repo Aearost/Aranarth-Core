@@ -3395,6 +3395,15 @@ public class AranarthUtils {
     }
 
     /**
+     * Plays the standard notification ping sound for a player.
+     *
+     * @param player The player to play the sound for.
+     */
+    public static void playPingSound(Player player) {
+        player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1F, 1F);
+    }
+
+    /**
      * Plays the jingle when a player sends or receives a teleport request.
      *
      * @param player The player that sent or received the request.

@@ -4,23 +4,17 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiBlacklistEditor;
 import com.aearost.aranarthcore.gui.GuiBrewBook;
 import com.aearost.aranarthcore.gui.GuiDominionPlayerPermissions;
+import com.aearost.aranarthcore.gui.GuiTrade;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.BlacklistPreset;
 import com.aearost.aranarthcore.objects.Dominion;
-import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
-import com.aearost.aranarthcore.utils.DiscordUtils;
-import com.aearost.aranarthcore.utils.Lang;
-import com.aearost.aranarthcore.utils.DominionUtils;
-import com.aearost.aranarthcore.utils.EmojiUtils;
-import com.aearost.aranarthcore.utils.InteractiveChatManager;
-import com.aearost.aranarthcore.utils.PersistenceUtils;
+import com.aearost.aranarthcore.objects.Trade;
+import com.aearost.aranarthcore.utils.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import java.util.Objects;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -31,11 +25,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,7 +37,9 @@ public class PlayerChatListener implements Listener {
 
     private final AranarthCore plugin;
 
-    /** Matches [item], [inv], [ec], [coords], [pos] case-insensitively. */
+    /**
+     * Matches [item], [inv], [ec], [coords], [pos] case-insensitively.
+     */
     private static final Pattern INTERACTIVE_PATTERN =
             Pattern.compile("\\[item]|\\[inv]|\\[ec]|\\[coords?]|\\[pos]", Pattern.CASE_INSENSITIVE);
 
@@ -64,6 +56,58 @@ public class PlayerChatListener implements Listener {
         // Remove a leading period when the message starts with "./" followed by a letter (e.g. "./calendar" -> "/calendar")
         if (message.length() >= 3 && message.charAt(0) == '.' && message.charAt(1) == '/' && Character.isLetter(message.charAt(2))) {
             message = message.substring(1);
+        }
+
+        // If the player is awaiting a trade money amount, handle it first
+        if (TradeManager.isAwaitingPayInput(player.getUniqueId())) {
+            e.setCancelled(true);
+            TradeManager.clearAwaitingPayInput(player.getUniqueId());
+            Trade trade = TradeManager.getTrade(player.getUniqueId());
+            if (trade == null) {
+                return;
+            }
+
+            if (message.equalsIgnoreCase("cancel")) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.cancelled")));
+                // Reopen the GUI
+                Bukkit.getScheduler().runTask(plugin, () -> new GuiTrade(player, trade).openGui());
+                return;
+            }
+
+            double amount;
+            try {
+                amount = Double.parseDouble(message);
+            } catch (NumberFormatException ex) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_number")));
+                Bukkit.getScheduler().runTask(plugin, () -> new GuiTrade(player, trade).openGui());
+                return;
+            }
+
+            if (amount < 0) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("economy.pay_negative")));
+                Bukkit.getScheduler().runTask(plugin, () -> new GuiTrade(player, trade).openGui());
+                return;
+            }
+
+            final double finalAmount = amount;
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                UUID playerUuid = player.getUniqueId();
+                trade.setMyMoney(playerUuid, finalAmount);
+                trade.resetConfirmations();
+                trade.setCompleting(false);
+                TradeManager.cancelCompletion(trade);
+                if (finalAmount > 0) {
+                    TradeManager.startAnimation(trade); // no-op if already running
+                } else {
+                    TradeManager.stopAnimation(trade);
+                }
+                TradeManager.updateConfirmButtons(trade);
+                new GuiTrade(player, trade).openGui();
+                if (TradeManager.isCrossServer(trade) && NetworkManager.isActive()) {
+                    NetworkManager.getInstance().publishTradeMoney(playerUuid, trade.getInitiatorUuid(), finalAmount);
+                }
+            });
+            return;
         }
 
         // If the player is awaiting a brew book search input, handle it first
@@ -205,10 +249,7 @@ public class PlayerChatListener implements Listener {
             String strippedNickname = ChatUtils.stripColorFormatting(recipientAranarthPlayer.getNickname());
             if (!isSenderTheRecipient && (message.toLowerCase().contains(recipient.getDisplayName().toLowerCase())
                     || message.toLowerCase().contains(strippedNickname.toLowerCase()))) {
-                int pmVol = AranarthUtils.getPlayer(recipient.getUniqueId()).getPrivateMsgSoundVolume();
-                if (pmVol > 0) {
-                    recipient.playSound(recipient, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 5f * (pmVol / 100f), 1f);
-                }
+                AranarthUtils.playPingSound(recipient);
             }
         }
         e.getRecipients().removeAll(toRemove);
@@ -346,13 +387,17 @@ public class PlayerChatListener implements Listener {
      * Formats a plain text segment using the player's chat permissions (gradient or color).
      */
     private Component buildSegment(Player player, AranarthPlayer ap, String rawSegment, String chatMessage, int rawOffset) {
-        if (rawSegment.isEmpty()) return Component.empty();
+        if (rawSegment.isEmpty()) {
+            return Component.empty();
+        }
 
         if (ap.isGradientChatEnabled() && !ap.getGradientChatColors().isEmpty()) {
             String stripped = ChatUtils.stripColorFormatting(rawSegment);
             Component gradComp = ChatUtils.buildGradientMessageWithUrls(
                     ap.getGradientChatColors(), stripped, ap.isGradientChatBold());
-            if (gradComp != null) return gradComp;
+            if (gradComp != null) {
+                return gradComp;
+            }
         }
 
         // Non-gradient
@@ -378,9 +423,9 @@ public class PlayerChatListener implements Listener {
                                             String keyword, List<UUID> createdSnapshotIds) {
         return switch (keyword) {
             case "[item]" -> buildItemComponent(player, nickname, createdSnapshotIds);
-            case "[inv]"  -> buildInvComponent(player, nickname, createdSnapshotIds);
-            case "[ec]"   -> buildEcComponent(player, nickname, createdSnapshotIds);
-            default       -> buildCoordsComponent(nickname, loc); // [coords], [coord], [pos]
+            case "[inv]" -> buildInvComponent(player, nickname, createdSnapshotIds);
+            case "[ec]" -> buildEcComponent(player, nickname, createdSnapshotIds);
+            default -> buildCoordsComponent(nickname, loc); // [coords], [coord], [pos]
         };
     }
 

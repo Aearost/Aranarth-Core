@@ -291,6 +291,9 @@ commands:
     description: Allows the player to request another player teleports to them
     aliases: [ tph ]
     permission: aranarth.tphere
+  trade:
+    description: Initiates or accepts a trade with another player
+    permission: aranarth.trade
   trash:
     description: Allows players to dispense of items
     permission: aranarth.trash

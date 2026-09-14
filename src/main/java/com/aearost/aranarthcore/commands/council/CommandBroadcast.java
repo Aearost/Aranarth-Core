@@ -1,10 +1,10 @@
 package com.aearost.aranarthcore.commands.council;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
-import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -13,44 +13,44 @@ import org.bukkit.entity.Player;
  */
 public class CommandBroadcast {
 
-	/**
-	 * @param sender The user that entered the command.
-	 * @param args The arguments of the command.
-	 */
-	public static boolean onCommand(CommandSender sender, String[] args) {
-		if (sender instanceof Player player) {
-			if (!player.hasPermission("aranarth.broadcast")) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
-				return true;
-			}
-		}
+    /**
+     * @param sender The user that entered the command.
+     * @param args   The arguments of the command.
+     */
+    public static boolean onCommand(CommandSender sender, String[] args) {
+        if (sender instanceof Player player) {
+            if (!player.hasPermission("aranarth.broadcast")) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+                return true;
+            }
+        }
 
-		if (args.length > 1) {
-			if (!args[1].isEmpty()) {
-				StringBuilder messageBuilder = new StringBuilder();
-				for (int i = 1; i < args.length; i++) {
-					messageBuilder.append(args[i]);
-					if (i < args.length - 1) {
-						messageBuilder.append(" ");
-					}
-				}
-				if (sender instanceof Player || !AranarthCore.isSmpServer()) {
-					Bukkit.broadcastMessage(ChatUtils.chatMessage(messageBuilder.toString()));
-				}
-				for (Player online : Bukkit.getOnlinePlayers()) {
-					online.playSound(online, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1F, 1F);
-				}
-				return true;
-			} else {
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("broadcast.must_enter_message")));
-				return true;
-			}
-		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac broadcast <msg>")));
-			return true;
-		}
+        if (args.length > 1) {
+            if (!args[1].isEmpty()) {
+                StringBuilder messageBuilder = new StringBuilder();
+                for (int i = 1; i < args.length; i++) {
+                    messageBuilder.append(args[i]);
+                    if (i < args.length - 1) {
+                        messageBuilder.append(" ");
+                    }
+                }
+                if (sender instanceof Player || !AranarthCore.isSmpServer()) {
+                    Bukkit.broadcastMessage(ChatUtils.chatMessage(messageBuilder.toString()));
+                }
+                for (Player online : Bukkit.getOnlinePlayers()) {
+                    AranarthUtils.playPingSound(online);
+                }
+                return true;
+            } else {
+                sender.sendMessage(ChatUtils.chatMessage(Lang.get("broadcast.must_enter_message")));
+                return true;
+            }
+        } else {
+            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac broadcast <msg>")));
+            return true;
+        }
 
 
-	}
+    }
 
 }

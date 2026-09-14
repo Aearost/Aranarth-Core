@@ -175,6 +175,9 @@ public class InventoryClickEventListener implements Listener {
                 new GuiMcstatsClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(com.aearost.aranarthcore.utils.Lang.get("gui.reaper.title"))) {
                 new GuiReaperClick().execute(e);
+            } else if (e.getWhoClicked() instanceof Player tradePlayer
+                    && com.aearost.aranarthcore.utils.TradeManager.isTradeGuiOpen(tradePlayer)) {
+                new GuiTradeClick().execute(e);
             }
         } else {
             if (e.getClickedInventory() != null) {

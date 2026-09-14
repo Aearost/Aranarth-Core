@@ -1444,6 +1444,8 @@ public class AranarthCore extends JavaPlugin {
         getCommand("tpaccept").setExecutor(new CommandTpAccept());
         getCommand("tpdeny").setExecutor(new CommandTpDeny());
         getCommand("tphere").setExecutor(new CommandTpHere());
+        getCommand("trade").setExecutor(new CommandTrade());
+        getCommand("trade").setTabCompleter(new CommandTradeCompleter());
         getCommand("trash").setExecutor(new CommandTrash());
         getCommand("trust").setExecutor(new CommandTrust());
         getCommand("trust").setTabCompleter(new CommandTrustCompleter());

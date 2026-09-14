@@ -492,7 +492,9 @@
       "Bash(xargs head:*)",
       "Bash(echo \"  -> NOT FOUND in source\" done)",
       "Bash(__NEW_LINE_a2754d287a9d8ecd__ echo:*)",
-      "Bash(__NEW_LINE_ef3fb3d154e3ef3c__ for:*)"
+      "Bash(__NEW_LINE_ef3fb3d154e3ef3c__ for:*)",
+      "Bash(/c/Users/liamh/IdeaProjects/AranarthCore/src/main/resources/lang/en_US.properties:*)",
+      "Bash(/c/Users/liamh/IdeaProjects/AranarthCore/src/main/resources/lang/de_DE.properties:*)"
     ]
   }
 }
