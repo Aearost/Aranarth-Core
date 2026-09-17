@@ -1738,6 +1738,16 @@ public class AranarthCore extends JavaPlugin {
             }
         }
 
+        // On SMP shutdown: write a fallback inventory snapshot for each online player so
+        // Survival can restore it if Velocity routes them there during the restart window.
+        // The periodic task (every 30s) is the primary mechanism; this is a belt-and-suspenders
+        // write for the final seconds before the server stops accepting connections.
+        if (isSmpServer() && NetworkManager.isActive()) {
+            for (Player p : onlinePlayers) {
+                NetworkManager.getInstance().writeSmpFallbackSnapshot(p);
+            }
+        }
+
         // End all active AstralProjections/cancel the abilities
         AstralProjection.endAllProjections();
         PastLives.endAllInstances();

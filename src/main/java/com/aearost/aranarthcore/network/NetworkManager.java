@@ -112,6 +112,7 @@ public class NetworkManager {
     private static final String KEY_PENDING_TP = "pending_tp:";
     private static final String KEY_RETURN_LOC = "return_loc:";
     private static final String KEY_LAST_MSG = "last_msg:";
+    public static final String KEY_SMP_RESTART_INV = "smp_restart_inv:";
     private static NetworkManager instance;
     private final String thisServer;
     private final DatabaseManager db;
@@ -158,6 +159,7 @@ public class NetworkManager {
     private long lastProcessedMessageId;
     private BukkitTask pollingTask;
     private BukkitTask cleanupTask;
+    private BukkitTask smpSnapshotTask;
     private final ExecutorService publishExecutor = Executors.newSingleThreadExecutor();
     /**
      * Number of players currently sleeping on other servers. Updated by handleSleepMessage.
@@ -177,6 +179,9 @@ public class NetworkManager {
 
         startPolling();
         startCleanup();
+        if (AranarthCore.isSmpServer()) {
+            startSmpFallbackSnapshots();
+        }
     }
 
     public static NetworkManager getInstance() {
@@ -237,6 +242,75 @@ public class NetworkManager {
                 6000L,
                 6000L
         );
+    }
+
+    /**
+     * Periodically snapshots every online SMP player's inventory + stats to MySQL so
+     * that Survival can restore them if Velocity routes a player there as a fallback
+     * during an SMP restart or crash. TTL is 10 minutes; refreshed every 30 seconds.
+     */
+    private void startSmpFallbackSnapshots() {
+        // Collect inventory data synchronously on the main thread, then write async.
+        smpSnapshotTask = Bukkit.getScheduler().runTaskTimer(
+                AranarthCore.getInstance(),
+                () -> {
+                    if (!DatabaseManager.isActive()) return;
+                    for (Player p : Bukkit.getOnlinePlayers()) {
+                        try {
+                            String key = KEY_SMP_RESTART_INV + p.getUniqueId();
+                            String json = buildFallbackSnapshot(p);
+                            Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                                    () -> db.saveTempData(key, json, 600)); // 10-min TTL
+                        } catch (Exception e) {
+                            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+                                    + "[SmpSnapshot] Failed to snapshot " + p.getName() + ": " + e.getMessage());
+                        }
+                    }
+                },
+                600L,  // 30s initial delay
+                600L   // every 30s
+        );
+    }
+
+    /**
+     * Serializes the player's current inventory + stats into a JSON string suitable for
+     * storing as an SMP fallback snapshot. Must be called from the main thread.
+     */
+    private String buildFallbackSnapshot(Player p) {
+        JsonObject snap = new JsonObject();
+        snap.addProperty("inventory", ItemUtils.itemStackArrayToBase64(p.getInventory().getContents()));
+        snap.addProperty("enderChest", ItemUtils.itemStackArrayToBase64(p.getEnderChest().getContents()));
+        snap.addProperty("health", p.getHealth());
+        snap.addProperty("food", p.getFoodLevel());
+        snap.addProperty("saturation", p.getSaturation());
+        snap.addProperty("expLevel", p.getLevel());
+        snap.addProperty("expProgress", p.getExp());
+        return snap.toString();
+    }
+
+    /**
+     * Writes a one-off SMP fallback snapshot for this player synchronously (no async
+     * dispatch). Intended for use during shutdown where async tasks may not complete.
+     * Safe to call from any thread.
+     */
+    public void writeSmpFallbackSnapshot(Player player) {
+        if (!DatabaseManager.isActive()) return;
+        try {
+            JsonObject snap = new JsonObject();
+            snap.addProperty("inventory", ItemUtils.itemStackArrayToBase64(player.getInventory().getContents()));
+            snap.addProperty("enderChest", ItemUtils.itemStackArrayToBase64(player.getEnderChest().getContents()));
+            snap.addProperty("health", player.getHealth());
+            snap.addProperty("food", player.getFoodLevel());
+            snap.addProperty("saturation", player.getSaturation());
+            snap.addProperty("expLevel", player.getLevel());
+            snap.addProperty("expProgress", player.getExp());
+            db.saveTempData(KEY_SMP_RESTART_INV + player.getUniqueId(), snap.toString(), 600);
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX
+                    + "[SmpSnapshot] Shutdown snapshot written for " + player.getName());
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+                    + "[SmpSnapshot] Failed to write shutdown snapshot for " + player.getName() + ": " + e.getMessage());
+        }
     }
 
     /**
@@ -310,6 +384,10 @@ public class NetworkManager {
         if (cleanupTask != null) {
             cleanupTask.cancel();
             cleanupTask = null;
+        }
+        if (smpSnapshotTask != null) {
+            smpSnapshotTask.cancel();
+            smpSnapshotTask = null;
         }
         publishExecutor.shutdown();
         // Clear this server's roster entries from the DB so stale entries don't appear on other servers
