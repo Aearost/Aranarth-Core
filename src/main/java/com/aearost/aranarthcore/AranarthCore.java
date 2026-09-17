@@ -1204,6 +1204,7 @@ public class AranarthCore extends JavaPlugin {
         new SoilTrampleListener(this);
         new CraftingOverridesListener(this);
         new PotionConsumeListener(this);
+        new WaterbendingBottleRefillListener(this);
         new PlayerRespawnEventListener(this);
         new DominionProtectionListener(this);
         new SpawnProtectionListener(this);

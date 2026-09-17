@@ -350,9 +350,9 @@ public class GuiPotionAdd {
 				|| item.getType() == Material.SPLASH_POTION
 				|| item.getType() == Material.LINGERING_POTION) {
 			PotionMeta meta = (PotionMeta) item.getItemMeta();
-			// Prevent potions without effects from being added
+			// Prevent potions without effects from being added (water bottles are allowed as a waterbending source)
 			if (meta.getBasePotionType() == PotionType.AWKWARD || meta.getBasePotionType() == PotionType.MUNDANE
-					|| meta.getBasePotionType() == PotionType.THICK || meta.getBasePotionType() == PotionType.WATER) {
+					|| meta.getBasePotionType() == PotionType.THICK) {
 				// Allows mcMMO potions
 				if (!meta.getCustomEffects().isEmpty()) {
 					return true;

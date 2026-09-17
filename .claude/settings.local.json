@@ -500,7 +500,11 @@
       "Bash(find \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/java\" -name \"*.java\" -type f -exec grep -l \"setDisplayName\\\\|setLore\\\\|lore\\\\.add\" {})",
       "Bash(do grep:*)",
       "Bash(echo \"FILE: $f\")",
-      "Bash(/c/Program Files/Java/jdk-21/bin/javac --version)"
+      "Bash(/c/Program Files/Java/jdk-21/bin/javac --version)",
+      "Bash(find /c/Users/liamh/IdeaProjects/ProjectKorra-wip -name *.java)",
+      "Bash(jar -tf /c/Users/liamh/.m2/repository/io/papermc/paper/paper-api/26.2.build.48-alpha/paper-api-26.2.build.48-alpha.jar)",
+      "Bash(jar -xf /c/Users/liamh/.m2/repository/io/papermc/paper/paper-api/26.2.build.48-alpha/paper-api-26.2.build.48-alpha-sources.jar io/papermc/paper/event/player/PlayerInventorySlotChangeEvent.java -C /tmp/paperapi_check)",
+      "Bash(jar -tf /c/Users/liamh/.m2/repository/io/papermc/paper/paper-api/26.2.build.48-alpha/paper-api-26.2.build.48-alpha-sources.jar)"
     ]
   }
 }

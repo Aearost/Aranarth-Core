@@ -38,11 +38,10 @@ public class GuiPotionPreventNonPotionAdd {
 					e.setCancelled(true);
 				} else {
 					PotionMeta meta = (PotionMeta) clickedItem.getItemMeta();
-					// Prevent potions without effects from being added
+					// Prevent potions without effects from being added (water bottles are allowed as a waterbending source)
 					if (meta.getBasePotionType() == PotionType.AWKWARD ||
 							meta.getBasePotionType() == PotionType.MUNDANE ||
-							meta.getBasePotionType() == PotionType.THICK ||
-							meta.getBasePotionType() == PotionType.WATER) {
+							meta.getBasePotionType() == PotionType.THICK) {
 						// Allows mcMMO potions to be placed in the inventory
 						if (meta.getCustomEffects().isEmpty()) {
 							e.setCancelled(true);

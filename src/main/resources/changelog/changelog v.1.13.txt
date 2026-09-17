@@ -9,6 +9,7 @@ World & Events
 
 Bending & Abilities
 [+] Implemented AranarthCore's Tremorsense ability, which includes a glowing effect to nearby mobs and players
+[+] Added water bottles to potions inventory for auto-refilling when water in bottle is lost
 
 Dominion
 [+] Added gradient functionality to dominion names
