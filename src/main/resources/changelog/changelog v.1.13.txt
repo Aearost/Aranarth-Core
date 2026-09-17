@@ -8,7 +8,7 @@ World & Events
 [+] Added double jump functionality to Elven Aranarthium
 
 Bending & Abilities
-[+]
+[+] Implemented AranarthCore's Tremorsense ability, which includes a glowing effect to nearby mobs and players
 
 Dominion
 [+] Added gradient functionality to dominion names

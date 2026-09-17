@@ -3,6 +3,7 @@ package com.aearost.aranarthcore;
 import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralProjection;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.PastLives;
+import com.aearost.aranarthcore.abilities.earthbending.Tremorsense;
 import com.aearost.aranarthcore.bending.RankCanBindHook;
 import com.aearost.aranarthcore.commands.council.*;
 import com.aearost.aranarthcore.commands.general.*;
@@ -943,6 +944,9 @@ public class AranarthCore extends JavaPlugin {
                 }
             }
         }, 1L, 1L);
+
+        // Manage Tremorsense passive glow block (runs every 4 ticks)
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> Tremorsense.managePassiveGlow(Bukkit.getServer()), 0L, 4L);
     }
 
     /**

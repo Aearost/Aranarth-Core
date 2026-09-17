@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.abilities.airbending.spiritual.*;
 import com.aearost.aranarthcore.abilities.chiblocking.DaggerThrow;
 import com.aearost.aranarthcore.abilities.chiblocking.DaggerVolley;
 import com.aearost.aranarthcore.abilities.chiblocking.HighJump;
+import com.aearost.aranarthcore.abilities.earthbending.Tremorsense;
 import com.aearost.aranarthcore.abilities.earthbending.combo.CableSlash;
 import com.aearost.aranarthcore.abilities.earthbending.combo.EarthRush;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.Eruption;
@@ -642,6 +643,10 @@ public class AranarthCoreBendingListener implements Listener {
                     EarthRush.markListenerTriggered(player.getUniqueId());
                     new EarthRush(player);
                     return;
+                } else if (abilityName.equalsIgnoreCase("tremorsense")) {
+                    if (!Tremorsense.hasActiveInstance(player.getUniqueId())) {
+                        new Tremorsense(player);
+                    }
                 } else if (abilityName.equalsIgnoreCase("earthtunnel") || abilityName.equalsIgnoreCase("collapse")) {
                     e.setCancelled(AranarthBendingUtils.preventAbilityNearDominion(player));
                 }
@@ -922,6 +927,14 @@ public class AranarthCoreBendingListener implements Listener {
         if (bpClap != null && bpClap.getBoundAbilityName().equalsIgnoreCase("sonicclap")
                 && bpClap.isElementToggled(Element.AIR)) {
             new SonicClap(player);
+            return;
+        }
+
+        // Tremorsense: left-click triggers the underground smoke reveal
+        BendingPlayer bpTremorsense = BendingPlayer.getBendingPlayer(player);
+        if (bpTremorsense != null && bpTremorsense.getBoundAbilityName().equalsIgnoreCase("tremorsense")
+                && bpTremorsense.isElementToggled(Element.EARTH)) {
+            Tremorsense.activateSmokeReveal(player);
             return;
         }
 
