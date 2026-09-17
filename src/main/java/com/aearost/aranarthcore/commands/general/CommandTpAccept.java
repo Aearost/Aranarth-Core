@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.network.CrossServerTpContext;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
@@ -134,8 +135,27 @@ public class CommandTpAccept implements CommandExecutor {
                 // Check for a cross-server request received from another server
                 CrossServerTpContext ctx = NetworkManager.getInstance().getCrossServerTpContext(player.getUniqueId());
                 if (ctx != null) {
-                    NetworkManager.getInstance().clearCrossServerTpContext(player.getUniqueId());
                     String localNickname = aranarthPlayer.getNickname().isEmpty() ? player.getName() : aranarthPlayer.getNickname();
+
+                    // Block if the accepter would be sent to the SMP server but lacks access (/tphere case)
+                    if (ctx.isTpHere()) {
+                        String smpServerName = AranarthCore.getInstance().getConfig().getString("network.servers.smp", "smp");
+                        if (ctx.remoteServer().equals(smpServerName) && !AranarthUtils.isOriginalPlayer(player.getUniqueId())) {
+                            player.sendMessage(ChatUtils.chatMessage(Lang.get("access.smp_restricted")));
+                            NetworkManager.getInstance().clearCrossServerTpContext(player.getUniqueId());
+                            NetworkManager.getInstance().publishTpDenied(player.getUniqueId(), localNickname, ctx.remotePlayerUuid());
+                            return true;
+                        }
+                    }
+                    // Block if the requester would be sent to this SMP server but lacks access (/tp case)
+                    if (!ctx.isTpHere() && AranarthCore.isSmpServer() && !AranarthUtils.isOriginalPlayer(ctx.remotePlayerUuid())) {
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.target_smp_restricted", "player", ctx.remotePlayerNickname())));
+                        NetworkManager.getInstance().clearCrossServerTpContext(player.getUniqueId());
+                        NetworkManager.getInstance().publishTpDenied(player.getUniqueId(), localNickname, ctx.remotePlayerUuid());
+                        return true;
+                    }
+
+                    NetworkManager.getInstance().clearCrossServerTpContext(player.getUniqueId());
                     // Clear the mirrored UUID so /tpaccept can't double-fire
                     aranarthPlayer.setTeleportFromUuid(null);
                     aranarthPlayer.setTeleportToUuid(null);
