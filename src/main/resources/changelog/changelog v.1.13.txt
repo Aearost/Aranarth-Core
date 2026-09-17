@@ -3,6 +3,7 @@ AranarthCore v. 1.13
 World & Events
 [+] Added support for tall grass and large fern in winter snowfall
 [~] Fixed horse sentinels not persisting after server crash
+[~] Fixed issue where the Wandering Enchanter over-leveled trades were not being obtained and blocked out correctly
 
 Bending & Abilities
 [+]
@@ -10,17 +11,11 @@ Bending & Abilities
 Dominion
 [+] Added gradient functionality to dominion names
 
-Incantations
-[+]
-
 Items & Crafting
 [+] Added item trade system with /trade command
 [+] Added honey block to sugar crafting recipe
 
 Economy, Jobs & Quests
-[+]
-
-Homepad
 [+]
 
 Chat, UI & Sounds
@@ -35,4 +30,4 @@ Cross-server & Technical
 [~] Removed hardcoded ping sound and added centralized playPingSound() in AranarthUtils
 
 Miscellaneous
-[+]
+[+] Fixed AFK color formatting
