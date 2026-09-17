@@ -36,3 +36,4 @@ Cross-server & Technical
 
 Miscellaneous
 [+] Fixed AFK color formatting
+[+] Added custom online players functionality for discord chat
