@@ -598,7 +598,8 @@ public class AranarthUtils {
             player.addPotionEffect(new PotionEffect(PotionEffectType.CONDUIT_POWER, 320, 0));
             player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
             boolean isRaining = AranarthUtils.getWeather() == Weather.RAIN || AranarthUtils.getWeather() == Weather.THUNDER;
-            if (isRaining || player.isInWater()) {
+            boolean isInOceanBiome = isAquaticBiome(player.getLocation().getBlock().getBiome());
+            if (isRaining || player.isInWater() || isInOceanBiome) {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
                 player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 1));
             }
@@ -649,6 +650,20 @@ public class AranarthUtils {
                 }
             }
         }
+    }
+
+    /**
+     * Returns true if the given biome is any ocean or river biome.
+     * @param biome The biome to check.
+     * @return Whether the biome is an ocean biome.
+     */
+    private static boolean isAquaticBiome(Biome biome) {
+        return biome == Biome.OCEAN || biome == Biome.DEEP_OCEAN
+                || biome == Biome.COLD_OCEAN || biome == Biome.DEEP_COLD_OCEAN
+                || biome == Biome.FROZEN_OCEAN || biome == Biome.DEEP_FROZEN_OCEAN
+                || biome == Biome.LUKEWARM_OCEAN || biome == Biome.DEEP_LUKEWARM_OCEAN
+                || biome == Biome.WARM_OCEAN
+                || biome == Biome.RIVER || biome == Biome.FROZEN_RIVER;
     }
 
     /**

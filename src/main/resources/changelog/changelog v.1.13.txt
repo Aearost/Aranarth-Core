@@ -4,6 +4,7 @@ World & Events
 [+] Added support for tall grass and large fern in winter snowfall
 [~] Fixed horse sentinels not persisting after server crash
 [~] Fixed issue where the Wandering Enchanter over-leveled trades were not being obtained and blocked out correctly
+[+] Added Aquatic Aranarthium support by being in ocean and river biomes
 
 Bending & Abilities
 [+]
