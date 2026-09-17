@@ -496,7 +496,10 @@
       "Bash(/c/Users/liamh/IdeaProjects/AranarthCore/src/main/resources/lang/en_US.properties:*)",
       "Bash(/c/Users/liamh/IdeaProjects/AranarthCore/src/main/resources/lang/de_DE.properties:*)",
       "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -type f -name *Network* -o -name *Proxy* -o -name *Transfer*)",
-      "Bash(find \"C:\\\\Users\\\\liamh\\\\IdeaProjects\\\\AranarthCore\" -type f -name \"*.java\" -exec grep -l \"report\\\\|Report\\\\|flag\\\\|Flag\\\\|approval\\\\|Approval\\\\|todo\\\\|Todo\\\\|task\\\\|Task\" {})"
+      "Bash(find \"C:\\\\Users\\\\liamh\\\\IdeaProjects\\\\AranarthCore\" -type f -name \"*.java\" -exec grep -l \"report\\\\|Report\\\\|flag\\\\|Flag\\\\|approval\\\\|Approval\\\\|todo\\\\|Todo\\\\|task\\\\|Task\" {})",
+      "Bash(find \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/java\" -name \"*.java\" -type f -exec grep -l \"setDisplayName\\\\|setLore\\\\|lore\\\\.add\" {})",
+      "Bash(do grep:*)",
+      "Bash(echo \"FILE: $f\")"
     ]
   }
 }

@@ -81,203 +81,203 @@ public class GuiCompressor {
 		ItemStack coal = new ItemStack(Material.COAL);
 		String coalActive = getStatusOfItem(uuid, coal.getType());
 		ItemMeta coalMeta = coal.getItemMeta();
-		coalMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_coal") + " &7&l- " + coalActive);
+		coalMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_coal") + " &7&l- " + coalActive));
 		coal.setItemMeta(coalMeta);
 		gui.setItem(9, coal);
 
 		ItemStack rawCopper = new ItemStack(Material.RAW_COPPER);
 		String rawCopperActive = getStatusOfItem(uuid, rawCopper.getType());
 		ItemMeta rawCopperMeta = rawCopper.getItemMeta();
-		rawCopperMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_raw_copper") + " &7&l- " + rawCopperActive);
+		rawCopperMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_raw_copper") + " &7&l- " + rawCopperActive));
 		rawCopper.setItemMeta(rawCopperMeta);
 		gui.setItem(10, rawCopper);
 
 		ItemStack copperNugget = new ItemStack(Material.COPPER_NUGGET);
 		String copperNuggetActive = getStatusOfItem(uuid, copperNugget.getType());
 		ItemMeta copperNuggetMeta = copperNugget.getItemMeta();
-		copperNuggetMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_copper_nugget") + " &7&l- " + copperNuggetActive);
+		copperNuggetMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_copper_nugget") + " &7&l- " + copperNuggetActive));
 		copperNugget.setItemMeta(copperNuggetMeta);
 		gui.setItem(11, copperNugget);
 
 		ItemStack copperIngot = new ItemStack(Material.COPPER_INGOT);
 		String copperIngotActive = getStatusOfItem(uuid, copperIngot.getType());
 		ItemMeta copperIngotMeta = copperIngot.getItemMeta();
-		copperIngotMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_copper_ingot") + " &7&l- " + copperIngotActive);
+		copperIngotMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_copper_ingot") + " &7&l- " + copperIngotActive));
 		copperIngot.setItemMeta(copperIngotMeta);
 		gui.setItem(12, copperIngot);
 
 		ItemStack rawIron = new ItemStack(Material.RAW_IRON);
 		String rawIronActive = getStatusOfItem(uuid, rawIron.getType());
 		ItemMeta rawIronMeta = rawIron.getItemMeta();
-		rawIronMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_raw_iron") + " &7&l- " + rawIronActive);
+		rawIronMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_raw_iron") + " &7&l- " + rawIronActive));
 		rawIron.setItemMeta(rawIronMeta);
 		gui.setItem(13, rawIron);
 
 		ItemStack ironNugget = new ItemStack(Material.IRON_NUGGET);
 		String ironNuggetActive = getStatusOfItem(uuid, ironNugget.getType());
 		ItemMeta ironNuggetMeta = ironNugget.getItemMeta();
-		ironNuggetMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_iron_nugget") + " &7&l- " + ironNuggetActive);
+		ironNuggetMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_iron_nugget") + " &7&l- " + ironNuggetActive));
 		ironNugget.setItemMeta(ironNuggetMeta);
 		gui.setItem(14, ironNugget);
 
 		ItemStack ironIngot = new ItemStack(Material.IRON_INGOT);
 		String ironIngotActive = getStatusOfItem(uuid, ironIngot.getType());
 		ItemMeta ironIngotMeta = ironIngot.getItemMeta();
-		ironIngotMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_iron_ingot") + " &7&l- " + ironIngotActive);
+		ironIngotMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_iron_ingot") + " &7&l- " + ironIngotActive));
 		ironIngot.setItemMeta(ironIngotMeta);
 		gui.setItem(15, ironIngot);
 
 		ItemStack rawGold = new ItemStack(Material.RAW_GOLD);
 		String rawGoldActive = getStatusOfItem(uuid, rawGold.getType());
 		ItemMeta rawGoldMeta = rawGold.getItemMeta();
-		rawGoldMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_raw_gold") + " &7&l- " + rawGoldActive);
+		rawGoldMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_raw_gold") + " &7&l- " + rawGoldActive));
 		rawGold.setItemMeta(rawGoldMeta);
 		gui.setItem(16, rawGold);
 
 		ItemStack goldNugget = new ItemStack(Material.GOLD_NUGGET);
 		String goldNuggetActive = getStatusOfItem(uuid, goldNugget.getType());
 		ItemMeta goldNuggetMeta = goldNugget.getItemMeta();
-		goldNuggetMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_gold_nugget") + " &7&l- " + goldNuggetActive);
+		goldNuggetMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_gold_nugget") + " &7&l- " + goldNuggetActive));
 		goldNugget.setItemMeta(goldNuggetMeta);
 		gui.setItem(17, goldNugget);
 
 		ItemStack goldIngot = new ItemStack(Material.GOLD_INGOT);
 		String goldIngotActive = getStatusOfItem(uuid, goldIngot.getType());
 		ItemMeta goldIngotMeta = goldIngot.getItemMeta();
-		goldIngotMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_gold_ingot") + " &7&l- " + goldIngotActive);
+		goldIngotMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_gold_ingot") + " &7&l- " + goldIngotActive));
 		goldIngot.setItemMeta(goldIngotMeta);
 		gui.setItem(18, goldIngot);
 
 		ItemStack redstone = new ItemStack(Material.REDSTONE);
 		String redstoneActive = getStatusOfItem(uuid, redstone.getType());
 		ItemMeta redstoneMeta = redstone.getItemMeta();
-		redstoneMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_redstone") + " &7&l- " + redstoneActive);
+		redstoneMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_redstone") + " &7&l- " + redstoneActive));
 		redstone.setItemMeta(redstoneMeta);
 		gui.setItem(19, redstone);
 
 		ItemStack lapis = new ItemStack(Material.LAPIS_LAZULI);
 		String lapisActive = getStatusOfItem(uuid, lapis.getType());
 		ItemMeta lapisMeta = lapis.getItemMeta();
-		lapisMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_lapis") + " &7&l- " + lapisActive);
+		lapisMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_lapis") + " &7&l- " + lapisActive));
 		lapis.setItemMeta(lapisMeta);
 		gui.setItem(20, lapis);
 
 		ItemStack diamond = new ItemStack(Material.DIAMOND);
 		String diamondActive = getStatusOfItem(uuid, diamond.getType());
 		ItemMeta diamondMeta = diamond.getItemMeta();
-		diamondMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_diamond") + " &7&l- " + diamondActive);
+		diamondMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_diamond") + " &7&l- " + diamondActive));
 		diamond.setItemMeta(diamondMeta);
 		gui.setItem(21, diamond);
 
 		ItemStack emerald = new ItemStack(Material.EMERALD);
 		String emeraldActive = getStatusOfItem(uuid, emerald.getType());
 		ItemMeta emeraldMeta = emerald.getItemMeta();
-		emeraldMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_emerald") + " &7&l- " + emeraldActive);
+		emeraldMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_emerald") + " &7&l- " + emeraldActive));
 		emerald.setItemMeta(emeraldMeta);
 		gui.setItem(22, emerald);
 
 		ItemStack netheriteIngot = new ItemStack(Material.NETHERITE_INGOT);
 		String netheriteIngotActive = getStatusOfItem(uuid, netheriteIngot.getType());
 		ItemMeta netheriteIngotMeta = netheriteIngot.getItemMeta();
-		netheriteIngotMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_netherite_ingot") + " &7&l- " + netheriteIngotActive);
+		netheriteIngotMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_netherite_ingot") + " &7&l- " + netheriteIngotActive));
 		netheriteIngot.setItemMeta(netheriteIngotMeta);
 		gui.setItem(23, netheriteIngot);
 
 		ItemStack amethystShard = new ItemStack(Material.AMETHYST_SHARD);
 		String amethystShardActive = getStatusOfItem(uuid, amethystShard.getType());
 		ItemMeta amethystShardMeta = amethystShard.getItemMeta();
-		amethystShardMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_amethyst") + " &7&l- " + amethystShardActive);
+		amethystShardMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_amethyst") + " &7&l- " + amethystShardActive));
 		amethystShard.setItemMeta(amethystShardMeta);
 		gui.setItem(24, amethystShard);
 
 		ItemStack resinClump = new ItemStack(Material.RESIN_CLUMP);
 		String resinClumpActive = getStatusOfItem(uuid, resinClump.getType());
 		ItemMeta resinClumpMeta = resinClump.getItemMeta();
-		resinClumpMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_resin") + " &7&l- " + resinClumpActive);
+		resinClumpMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_resin") + " &7&l- " + resinClumpActive));
 		resinClump.setItemMeta(resinClumpMeta);
 		gui.setItem(25, resinClump);
 
 		ItemStack glowstoneDust = new ItemStack(Material.GLOWSTONE_DUST);
 		String glowstoneDustActive = getStatusOfItem(uuid, glowstoneDust.getType());
 		ItemMeta glowstoneDustMeta = glowstoneDust.getItemMeta();
-		glowstoneDustMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_glowstone") + " &7&l- " + glowstoneDustActive);
+		glowstoneDustMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_glowstone") + " &7&l- " + glowstoneDustActive));
 		glowstoneDust.setItemMeta(glowstoneDustMeta);
 		gui.setItem(26, glowstoneDust);
 
 		ItemStack wheat = new ItemStack(Material.WHEAT);
 		String wheatActive = getStatusOfItem(uuid, wheat.getType());
 		ItemMeta wheatMeta = wheat.getItemMeta();
-		wheatMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_wheat") + " &7&l- " + wheatActive);
+		wheatMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_wheat") + " &7&l- " + wheatActive));
 		wheat.setItemMeta(wheatMeta);
 		gui.setItem(27, wheat);
 
 		ItemStack melonSlice = new ItemStack(Material.MELON_SLICE);
 		String melonSliceActive = getStatusOfItem(uuid, melonSlice.getType());
 		ItemMeta melonSliceMeta = melonSlice.getItemMeta();
-		melonSliceMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_melon") + " &7&l- " + melonSliceActive);
+		melonSliceMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_melon") + " &7&l- " + melonSliceActive));
 		melonSlice.setItemMeta(melonSliceMeta);
 		gui.setItem(28, melonSlice);
 
 		ItemStack driedKelp = new ItemStack(Material.DRIED_KELP);
 		String driedKelpActive = getStatusOfItem(uuid, driedKelp.getType());
 		ItemMeta driedKelpMeta = driedKelp.getItemMeta();
-		driedKelpMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_kelp") + " &7&l- " + driedKelpActive);
+		driedKelpMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_kelp") + " &7&l- " + driedKelpActive));
 		driedKelp.setItemMeta(driedKelpMeta);
 		gui.setItem(29, driedKelp);
 
 		ItemStack sugarcane = new ItemStack(Material.SUGAR_CANE);
 		String sugarcaneActive = getStatusOfItem(uuid, sugarcane.getType());
 		ItemMeta sugarcaneMeta = sugarcane.getItemMeta();
-		sugarcaneMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_sugarcane") + " &7&l- " + sugarcaneActive);
+		sugarcaneMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_sugarcane") + " &7&l- " + sugarcaneActive));
 		sugarcane.setItemMeta(sugarcaneMeta);
 		gui.setItem(30, sugarcane);
 
 		ItemStack honeycomb = new ItemStack(Material.HONEYCOMB);
 		String honeycombActive = getStatusOfItem(uuid, honeycomb.getType());
 		ItemMeta honeycombMeta = honeycomb.getItemMeta();
-		honeycombMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_honeycomb") + " &7&l- " + honeycombActive);
+		honeycombMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_honeycomb") + " &7&l- " + honeycombActive));
 		honeycomb.setItemMeta(honeycombMeta);
 		gui.setItem(31, honeycomb);
 
 		ItemStack slimeBall = new ItemStack(Material.SLIME_BALL);
 		String slimeBallActive = getStatusOfItem(uuid, slimeBall.getType());
 		ItemMeta slimeBallMeta = slimeBall.getItemMeta();
-		slimeBallMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_slimeball") + " &7&l- " + slimeBallActive);
+		slimeBallMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_slimeball") + " &7&l- " + slimeBallActive));
 		slimeBall.setItemMeta(slimeBallMeta);
 		gui.setItem(32, slimeBall);
 
 		ItemStack boneMeal = new ItemStack(Material.BONE_MEAL);
 		String boneMealActive = getStatusOfItem(uuid, boneMeal.getType());
 		ItemMeta boneMealMeta = boneMeal.getItemMeta();
-		boneMealMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_bonemeal") + " &7&l- " + boneMealActive);
+		boneMealMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_bonemeal") + " &7&l- " + boneMealActive));
 		boneMeal.setItemMeta(boneMealMeta);
 		gui.setItem(33, boneMeal);
 
 		ItemStack snowball = new ItemStack(Material.SNOWBALL);
 		String snowballActive = getStatusOfItem(uuid, snowball.getType());
 		ItemMeta snowballMeta = snowball.getItemMeta();
-		snowballMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_snowball") + " &7&l- " + snowballActive);
+		snowballMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_snowball") + " &7&l- " + snowballActive));
 		snowball.setItemMeta(snowballMeta);
 		gui.setItem(34, snowball);
 
 		ItemStack clayBall = new ItemStack(Material.CLAY_BALL);
 		String clayBallActive = getStatusOfItem(uuid, clayBall.getType());
 		ItemMeta clayBallMeta = clayBall.getItemMeta();
-		clayBallMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_clay") + " &7&l- " + clayBallActive);
+		clayBallMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_clay") + " &7&l- " + clayBallActive));
 		clayBall.setItemMeta(clayBallMeta);
 		gui.setItem(35, clayBall);
 
 		ItemStack quartz = new ItemStack(Material.QUARTZ);
 		String quartzActive = getStatusOfItem(uuid, quartz.getType());
 		ItemMeta quartzMeta = quartz.getItemMeta();
-		quartzMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_quartz") + " &7&l- " + quartzActive);
+		quartzMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_quartz") + " &7&l- " + quartzActive));
 		quartz.setItemMeta(quartzMeta);
 		gui.setItem(36, quartz);
 
 		ItemStack bamboo = new ItemStack(Material.BAMBOO);
 		String bambooActive = getStatusOfItem(uuid, bamboo.getType());
 		ItemMeta bambooMeta = bamboo.getItemMeta();
-		bambooMeta.setDisplayName(Lang.getFor(player, "gui.compressor.item_bamboo") + " &7&l- " + bambooActive);
+		bambooMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.compressor.item_bamboo") + " &7&l- " + bambooActive));
 		bamboo.setItemMeta(bambooMeta);
 		gui.setItem(37, bamboo);
 
