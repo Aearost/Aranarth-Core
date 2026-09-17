@@ -14,6 +14,7 @@ Dominion
 Items & Crafting
 [+] Added item trade system with /trade command
 [+] Added honey block to sugar crafting recipe
+[~] Fixed incantations being applicable multiple times to the same item
 
 Economy, Jobs & Quests
 [+]

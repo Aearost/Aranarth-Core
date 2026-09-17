@@ -175,18 +175,20 @@ public class IncantationApply {
 					}
 
 					if (incantationType.equals("incantation_plentiful")) {
+						if (isExceedingLevel(toolItem.getItemStack())) {
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("incantation.already_max_level")));
+							return;
+						}
 						Incantation incantation = new IncantationPlentiful();
 						String fullIncantationName = ChatUtils.translateToColor(incantation.getColor() + incantation.getIncantationName());
 
-						// Dynamically apply the incantation description on the item
-						List<String> lore = incantationMeta.getLore();
+						ItemStack tool = toolItem.getItemStack();
+						ItemMeta toolMeta = tool.getItemMeta();
+						List<String> lore = toolMeta.getLore();
 						if (lore == null) {
 							lore = new ArrayList<>();
 							lore.add(fullIncantationName);
 						}
-
-						ItemStack tool = toolItem.getItemStack();
-						ItemMeta toolMeta = tool.getItemMeta();
 						toolMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_plentiful");
 						toolMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, 1);
 						toolMeta.setLore(lore);
@@ -236,6 +238,10 @@ public class IncantationApply {
 							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 						}
 					} else if (incantationType.equals("incantation_magnetism")) {
+						if (isExceedingLevel(toolItem.getItemStack())) {
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("incantation.already_max_level")));
+							return;
+						}
 						if (isTool(toolItem.getItemStack())) {
 							Incantation incantation = new IncantationMagnetism();
 							ItemStack tool = toolItem.getItemStack();
@@ -261,6 +267,10 @@ public class IncantationApply {
 							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 						}
 					} else if (incantationType.equals("incantation_preservation")) {
+						if (isExceedingLevel(toolItem.getItemStack())) {
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("incantation.already_max_level")));
+							return;
+						}
 						if (isPickaxe(toolItem.getItemStack())) {
 							if (hasFortune(toolItem.getItemStack())) {
 								player.sendMessage(ChatUtils.chatMessage(Lang.get("incantation.preservation_no_fortune")));
