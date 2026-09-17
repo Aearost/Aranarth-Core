@@ -32,7 +32,8 @@ Cross-server & Technical
 [~] Removed all hardcoded text and set up AranarthCore for internationalization, storing all strings in lang files
 [~] Removed hardcoded ping sound and added centralized playPingSound() in AranarthUtils
 [~] Fixed cross-server teleports bypassing the OG player restriction to the SMP server
-[~] Fix SMP restart inventory corruption via cross-server fallback snapshots
+[~] Fixed SMP restart inventory corruption via cross-server fallback snapshots
+[~] Fixed smp_restart_inv data truncation by expanding network_temp_data.value_json to MEDIUMTEXT
 
 Miscellaneous
 [+] Fixed AFK color formatting

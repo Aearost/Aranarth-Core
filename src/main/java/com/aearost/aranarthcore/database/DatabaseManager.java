@@ -254,7 +254,7 @@ public class DatabaseManager {
                 """
             CREATE TABLE IF NOT EXISTS network_temp_data (
                 key_name VARCHAR(128) PRIMARY KEY,
-                value_json TEXT NOT NULL,
+                value_json MEDIUMTEXT NOT NULL,
                 expires_at TIMESTAMP NOT NULL,
                 INDEX idx_expires (expires_at)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
@@ -479,7 +479,8 @@ public class DatabaseManager {
                 "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_world VARCHAR(64) NOT NULL DEFAULT 'world'",
                 "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_x DOUBLE NOT NULL DEFAULT 0",
                 "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_y DOUBLE NOT NULL DEFAULT 64",
-                "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_z DOUBLE NOT NULL DEFAULT 0"
+                "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_z DOUBLE NOT NULL DEFAULT 0",
+                "ALTER TABLE network_temp_data MODIFY COLUMN value_json MEDIUMTEXT NOT NULL"
         };
         try (Connection conn = dataSource.getConnection(); Statement stmt = conn.createStatement()) {
             for (String sql : migrations) {
