@@ -11,6 +11,7 @@ Bending & Abilities
 Dominion
 [+] Added gradient functionality to dominion names
 [~] Modified strings for dominion relations to no longer say "Dominion of"
+[~] Modified formatting of dominion info's header lines
 
 Items & Crafting
 [+] Added item trade system with /trade command

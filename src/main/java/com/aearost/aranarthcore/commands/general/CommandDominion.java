@@ -1796,7 +1796,7 @@ public class CommandDominion implements CommandExecutor {
      */
     private static void displayInfoForDominion(Player player, Dominion dominion) {
         player.sendMessage(ChatUtils.translateToColor("&6&l---------------------------------"));
-        String dominionName = "&8&lThe Dominion of &e" + dominion.getName();
+        String dominionName = "&e" + dominion.getName();
 
         AranarthPlayer leader = AranarthUtils.getPlayer(dominion.getLeader());
         String leaderDisplayedName = "";
@@ -1810,7 +1810,8 @@ public class CommandDominion implements CommandExecutor {
 
         if (DominionUtils.getConquerorOfDominion(dominion) != null) {
             Dominion conqueror = DominionUtils.getPlayerDominion(DominionUtils.getConquerorOfDominion(dominion));
-            player.sendMessage(ChatUtils.translateToColor("&8Ruled by the Dominion of &e" + conqueror.getName()));
+            AranarthPlayer conquerorLeader = AranarthUtils.getPlayer(conqueror.getLeader());
+            player.sendMessage(ChatUtils.translateToColor("&e" + conqueror.getName() + " &8- led by &e" + conquerorLeader.getNickname()));
         } else if (!dominion.getConquered().isEmpty()) {
             String conquered = "&8Ruling over the Dominion";
             if (dominion.getConquered().size() > 1) {
