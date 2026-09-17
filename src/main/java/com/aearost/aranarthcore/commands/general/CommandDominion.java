@@ -217,7 +217,7 @@ public class CommandDominion implements CommandExecutor {
                                 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                                     onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_PLAYER_LEVELUP, 1.2F, 1.5F);
                                 }
-                                DiscordUtils.dominionMessage(dominion, AranarthUtils.getNickname(player) + " has created the Dominion of " + dominionName, Color.GREEN);
+                                DiscordUtils.dominionMessage(dominion, AranarthUtils.getNickname(player) + " has founded " + dominionName, Color.GREEN);
                             } else {
                                 player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.must_be_gameplay_world")));
                             }
@@ -885,7 +885,7 @@ public class CommandDominion implements CommandExecutor {
                                 online.sendMessage(allyMsg);
                             }
                             Bukkit.getConsoleSender().sendMessage(allyMsg);
-                            DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " is now allied with " + dominionFromList.getName(), new Color(170, 0, 170));
+                            DiscordUtils.dominionMessage(dominion, dominion.getName() + " is now allied with " + dominionFromList.getName(), new Color(170, 0, 170));
                             if (NetworkManager.isActive()) {
                                 NetworkManager.getInstance().publishBroadcast(allyMsg);
                                 NetworkManager.getInstance().publishDominionRelationUpdate(dominion.getId(), dominionFromList.getId(), "ally");
@@ -998,7 +998,7 @@ public class CommandDominion implements CommandExecutor {
                                 online.sendMessage(truceMsg);
                             }
                             Bukkit.getConsoleSender().sendMessage(truceMsg);
-                            DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " is now truced with " + dominionFromList.getName(), new Color(255, 85, 255));
+                            DiscordUtils.dominionMessage(dominion, dominion.getName() + " is now truced with " + dominionFromList.getName(), new Color(255, 85, 255));
                             if (NetworkManager.isActive()) {
                                 NetworkManager.getInstance().publishBroadcast(truceMsg);
                                 NetworkManager.getInstance().publishDominionRelationUpdate(dominion.getId(), dominionFromList.getId(), "truce");
@@ -1103,7 +1103,7 @@ public class CommandDominion implements CommandExecutor {
                                 online.sendMessage(enemyMsg);
                             }
                             Bukkit.getConsoleSender().sendMessage(enemyMsg);
-                            DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " has enemied " + dominionFromList.getName(), new Color(255, 85, 85));
+                            DiscordUtils.dominionMessage(dominion, dominion.getName() + " has enemied " + dominionFromList.getName(), new Color(255, 85, 85));
                             if (NetworkManager.isActive()) {
                                 NetworkManager.getInstance().publishBroadcast(enemyMsg);
                                 NetworkManager.getInstance().publishDominionRelationUpdate(dominion.getId(), dominionFromList.getId(), "enemy");
@@ -3248,7 +3248,7 @@ public class CommandDominion implements CommandExecutor {
                                 DominionUtils.updateDominion(dominion);
                                 Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("dominion.renamed_broadcast", "old", oldName, "name", dominionName)));
                                 if (!colorOnly) {
-                                    DiscordUtils.dominionMessage(dominion, "&7The Dominion of &e" + oldName + " &7has been renamed to &e" + dominionName, Color.CYAN);
+                                    DiscordUtils.dominionMessage(dominion, "&e" + oldName + " &7has been renamed to &e" + dominionName, Color.CYAN);
                                 }
                                 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                                     onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_PLAYER_LEVELUP, 1.2F, 1.5F);

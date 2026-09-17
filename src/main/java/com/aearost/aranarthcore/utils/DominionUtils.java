@@ -487,7 +487,7 @@ public class DominionUtils {
      */
     public static void disbandDominion(Dominion dominion) {
         Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("dominion.disbanded_broadcast", "name", dominion.getName())));
-        DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " &7has been disbanded", Color.RED);
+        DiscordUtils.dominionMessage(dominion, dominion.getName() + " &7has been disbanded", Color.RED);
         DefenderUtils.sellAllDominionDefenders(dominion);
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(dominion.getLeader());
         aranarthPlayer.setBalance(aranarthPlayer.getBalance() + dominion.getBalance());
@@ -836,7 +836,7 @@ public class DominionUtils {
                     removePenaltyChunk(dominion, chunkToRemove);
                     if (!todayCrumblingDominionIds.contains(dominion.getId())) {
                         todayCrumblingDominionIds.add(dominion.getId());
-                        DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " is starting to crumble", new Color(180, 70, 0));
+                        DiscordUtils.dominionMessage(dominion, dominion.getName() + " is starting to crumble", new Color(180, 70, 0));
                     }
                     for (UUID memberUuid : dominion.getMembers()) {
                         if (Bukkit.getOfflinePlayer(memberUuid).isOnline()) {
@@ -862,7 +862,7 @@ public class DominionUtils {
                 }
                 // No chunk lost today but lost one yesterday
                 if (yesterdayCrumblingDominionIds.contains(dominion.getId())) {
-                    DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " has recovered and prevented their demise", new Color(50, 180, 50));
+                    DiscordUtils.dominionMessage(dominion, dominion.getName() + " has recovered and prevented their demise", new Color(50, 180, 50));
                 }
             } else {
                 double dailyCost = DominionLevelUtils.getDailyBalanceCost(dominion.getDominionLevel());
@@ -873,11 +873,11 @@ public class DominionUtils {
                     // Land was consumed - mark as crumbling
                     if (result == 0 && !todayCrumblingDominionIds.contains(dominion.getId())) {
                         todayCrumblingDominionIds.add(dominion.getId());
-                        DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " is starting to crumble", new Color(180, 70, 0));
+                        DiscordUtils.dominionMessage(dominion, dominion.getName() + " is starting to crumble", new Color(180, 70, 0));
                     }
                     // Money was consumed - check recovery
                     if (result == 1 && yesterdayCrumblingDominionIds.contains(dominion.getId())) {
-                        DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " has recovered and prevented their demise", new Color(50, 180, 50));
+                        DiscordUtils.dominionMessage(dominion, dominion.getName() + " has recovered and prevented their demise", new Color(50, 180, 50));
                     }
                     for (UUID memberUuid : dominion.getMembers()) {
                         if (Bukkit.getOfflinePlayer(memberUuid).isOnline()) {
