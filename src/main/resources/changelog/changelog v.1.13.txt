@@ -21,7 +21,7 @@ Items & Crafting
 [~] Fixed incantations being applicable multiple times to the same item
 
 Economy, Jobs & Quests
-[+]
+[~] Fixed NPE in handleMarketUpdate on SMP by skipping sign refresh when shop world does not exist
 
 Chat, UI & Sounds
 [+] Added support for French in /lang
