@@ -499,7 +499,8 @@
       "Bash(find \"C:\\\\Users\\\\liamh\\\\IdeaProjects\\\\AranarthCore\" -type f -name \"*.java\" -exec grep -l \"report\\\\|Report\\\\|flag\\\\|Flag\\\\|approval\\\\|Approval\\\\|todo\\\\|Todo\\\\|task\\\\|Task\" {})",
       "Bash(find \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/java\" -name \"*.java\" -type f -exec grep -l \"setDisplayName\\\\|setLore\\\\|lore\\\\.add\" {})",
       "Bash(do grep:*)",
-      "Bash(echo \"FILE: $f\")"
+      "Bash(echo \"FILE: $f\")",
+      "Bash(/c/Program Files/Java/jdk-21/bin/javac --version)"
     ]
   }
 }

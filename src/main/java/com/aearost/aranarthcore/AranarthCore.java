@@ -1166,6 +1166,7 @@ public class AranarthCore extends JavaPlugin {
         new PlayerInteractEntityEventListener(this);
         new PlayerShearEntityEventListener(this);
         new PlayerMoveEventListener(this);
+        new ElvenDoubleJumpListener(this);
         new EntityChangeBlockEventListener(this);
         new EntityPickupItemEventListener(this);
         new CreatureSpawnEventListener(this);

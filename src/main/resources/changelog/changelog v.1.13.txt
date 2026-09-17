@@ -5,6 +5,7 @@ World & Events
 [~] Fixed horse sentinels not persisting after server crash
 [~] Fixed issue where the Wandering Enchanter over-leveled trades were not being obtained and blocked out correctly
 [+] Added Aquatic Aranarthium support by being in ocean and river biomes
+[+] Added double jump functionality to Elven Aranarthium
 
 Bending & Abilities
 [+]

@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.player.*;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -45,6 +46,14 @@ public class PlayerMoveEventListener implements Listener {
                 }
             }
             AranarthUtils.playerWasOnGround.put(player.getUniqueId(), onGround);
+
+            // When an elven player lands, revoke the double-jump flight grant
+            if (onGround && AranarthUtils.elvenCanDoubleJump.remove(player.getUniqueId())) {
+                GameMode gm = player.getGameMode();
+                if (gm != GameMode.CREATIVE && gm != GameMode.SPECTATOR) {
+                    player.setAllowFlight(false);
+                }
+            }
         }
     }
 

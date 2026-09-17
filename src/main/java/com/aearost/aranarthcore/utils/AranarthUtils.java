@@ -64,6 +64,8 @@ public class AranarthUtils {
     public static final Map<UUID, Boolean> playerUnderground = new HashMap<>();
     public static final Map<UUID, Boolean> playerWasOnGround = new HashMap<>();
     public static final Map<UUID, Location> playerLastFlowerLocation = new HashMap<>();
+    public static final Set<UUID> elvenCanDoubleJump = new HashSet<>();
+    public static final Map<UUID, Long> elvenDoubleJumpCooldown = new HashMap<>();
     private static final HashMap<UUID, AranarthPlayer> players = new HashMap<>();
     private static final HashMap<Location, Integer> dragonHeads = new HashMap<>();
     private static final HashMap<UUID, BannerMeta> playerBanners = new HashMap<>();
