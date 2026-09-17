@@ -57,6 +57,12 @@ public class GuiWrenchClick {
             case "Open" -> cycleOpen(player, block, data);
             case "In Wall" -> cycleInWall(player, block, data);
             case "Rotation" -> cycleRotation(player, block, data);
+            case "North Connection" -> toggleFaceConnection(block, data, BlockFace.NORTH);
+            case "South Connection" -> toggleFaceConnection(block, data, BlockFace.SOUTH);
+            case "East Connection"  -> toggleFaceConnection(block, data, BlockFace.EAST);
+            case "West Connection"  -> toggleFaceConnection(block, data, BlockFace.WEST);
+            case "Up Connection"    -> toggleFaceConnection(block, data, BlockFace.UP);
+            case "Down Connection"  -> toggleFaceConnection(block, data, BlockFace.DOWN);
         }
 
         GuiWrench.refresh(player);
@@ -214,6 +220,14 @@ public class GuiWrenchClick {
         block.setBlockData(rotatable, false);
     }
 
+
+    private void toggleFaceConnection(Block block, BlockData data, BlockFace face) {
+        if (!(data instanceof MultipleFacing multiFacing)) {
+            return;
+        }
+        multiFacing.setFace(face, !multiFacing.hasFace(face));
+        block.setBlockData(multiFacing, false);
+    }
 
     /**
      * Returns whether the proposed attachment face has a supporting block.

@@ -21,6 +21,12 @@ public class GuiWrench {
 
     public static final Map<UUID, Block> openBlocks = new HashMap<>();
 
+    // Cardinal + vertical faces used for fence/wall connection ordering
+    public static final List<BlockFace> CARDINAL_FACES = List.of(
+            BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST,
+            BlockFace.UP, BlockFace.DOWN
+    );
+
     // The 16 valid rotation BlockFaces in order (rotation 0–15)
     public static final List<BlockFace> ROTATIONS = List.of(
             BlockFace.SOUTH, BlockFace.SOUTH_SOUTH_WEST, BlockFace.SOUTH_WEST,
@@ -165,6 +171,15 @@ public class GuiWrench {
             items.add(buildRotationItem(rotatable));
         }
 
+        // Fence/wall connections
+        if (data instanceof MultipleFacing multiFacing) {
+            for (BlockFace face : CARDINAL_FACES) {
+                if (multiFacing.getAllowedFaces().contains(face)) {
+                    items.add(buildFaceConnectionItem(multiFacing, face));
+                }
+            }
+        }
+
         return items;
     }
 
@@ -304,6 +319,25 @@ public class GuiWrench {
                 Lang.get("gui.wrench.cycle")
         );
         return makePropertyItem(Material.CLOCK, Lang.get("gui.wrench.prop_rotation"), lore);
+    }
+
+    private static ItemStack buildFaceConnectionItem(MultipleFacing data, BlockFace face) {
+        String langKey = switch (face) {
+            case SOUTH -> "gui.wrench.prop_south_conn";
+            case EAST  -> "gui.wrench.prop_east_conn";
+            case WEST  -> "gui.wrench.prop_west_conn";
+            case UP    -> "gui.wrench.prop_up_conn";
+            case DOWN  -> "gui.wrench.prop_down_conn";
+            default    -> "gui.wrench.prop_north_conn";
+        };
+        String current = data.hasFace(face) ? "CONNECTED" : "DISCONNECTED";
+        List<String> lore = List.of(
+                Lang.get("gui.wrench.current", "value", current),
+                Lang.get("gui.wrench.available", "values", "CONNECTED, DISCONNECTED"),
+                "",
+                Lang.get("gui.wrench.toggle")
+        );
+        return makePropertyItem(Material.OAK_FENCE, Lang.get(langKey), lore);
     }
 
     private static ItemStack makePropertyItem(Material material, String name, List<String> lore) {

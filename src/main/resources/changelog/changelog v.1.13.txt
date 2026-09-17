@@ -30,6 +30,7 @@ Chat, UI & Sounds
 
 Quality of Life
 [+] Added /language command (alias /lang) to toggle preferred display language (English, German, French)
+[+] Added support for fences when using the Wrench
 
 Cross-server & Technical
 [~] Removed all hardcoded text and set up AranarthCore for internationalization, storing all strings in lang files
