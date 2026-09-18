@@ -480,7 +480,8 @@ public class DatabaseManager {
                 "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_x DOUBLE NOT NULL DEFAULT 0",
                 "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_y DOUBLE NOT NULL DEFAULT 64",
                 "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_z DOUBLE NOT NULL DEFAULT 0",
-                "ALTER TABLE network_temp_data MODIFY COLUMN value_json MEDIUMTEXT NOT NULL"
+                "ALTER TABLE network_temp_data MODIFY COLUMN value_json MEDIUMTEXT NOT NULL",
+                "ALTER TABLE network_roster ADD COLUMN IF NOT EXISTS pronouns VARCHAR(10) NOT NULL DEFAULT 'MALE'"
         };
         try (Connection conn = dataSource.getConnection(); Statement stmt = conn.createStatement()) {
             for (String sql : migrations) {
@@ -1051,13 +1052,14 @@ public class DatabaseManager {
     // -------------------------------------------------------------------------
 
     public void upsertRosterEntry(UUID uuid, String username, String nickname, String server,
-                                  int rank, int councilRank, int saintRank, int architectRank, boolean vanished) {
+                                  int rank, int councilRank, int saintRank, int architectRank, boolean vanished,
+                                  String pronouns) {
         String sql = """
-                INSERT INTO network_roster (uuid, username, nickname, server, rank, council_rank, saint_rank, architect_rank, vanished)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO network_roster (uuid, username, nickname, server, rank, council_rank, saint_rank, architect_rank, vanished, pronouns)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE username=VALUES(username), nickname=VALUES(nickname), server=VALUES(server),
                 rank=VALUES(rank), council_rank=VALUES(council_rank), saint_rank=VALUES(saint_rank),
-                architect_rank=VALUES(architect_rank), vanished=VALUES(vanished)
+                architect_rank=VALUES(architect_rank), vanished=VALUES(vanished), pronouns=VALUES(pronouns)
                 """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -1074,9 +1076,22 @@ public class DatabaseManager {
             ps.setInt(7, saintRank);
             ps.setInt(8, architectRank);
             ps.setBoolean(9, vanished);
+            ps.setString(10, pronouns != null ? pronouns : "MALE");
             ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to upsert roster entry for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    public void updateRosterPronouns(UUID uuid, String pronouns) {
+        String sql = "UPDATE network_roster SET pronouns = ? WHERE uuid = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, pronouns != null ? pronouns : "MALE");
+            ps.setString(2, uuid.toString());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to update roster pronouns for " + uuid + ": " + e.getMessage());
         }
     }
 
@@ -1109,7 +1124,7 @@ public class DatabaseManager {
      * Loads all roster entries NOT from thisServer.
      */
     public Map<UUID, NetworkPlayer> loadRemoteRoster(String thisServer) {
-        String sql = "SELECT uuid, username, nickname, server, rank, council_rank, saint_rank, architect_rank, vanished FROM network_roster WHERE server != ?";
+        String sql = "SELECT uuid, username, nickname, server, rank, council_rank, saint_rank, architect_rank, vanished, pronouns FROM network_roster WHERE server != ?";
         Map<UUID, NetworkPlayer> roster = new HashMap<>();
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -1117,6 +1132,7 @@ public class DatabaseManager {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     UUID uuid = UUID.fromString(rs.getString("uuid"));
+                    String pronouns = rs.getString("pronouns");
                     roster.put(uuid, new NetworkPlayer(
                             uuid,
                             rs.getString("username"),
@@ -1127,7 +1143,8 @@ public class DatabaseManager {
                             rs.getInt("saint_rank"),
                             rs.getInt("architect_rank"),
                             rs.getBoolean("vanished"),
-                            "", "" // textures not stored in DB roster; populated via CH_JOIN
+                            "", "", // textures not stored in DB roster; populated via CH_JOIN
+                            pronouns
                     ));
                 }
             }

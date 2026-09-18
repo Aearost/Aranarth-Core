@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.network;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.Month;
+import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.items.key.KeyVote;
 import com.aearost.aranarthcore.objects.*;
@@ -108,6 +109,7 @@ public class NetworkManager {
     public static final String CH_TRADE_MONEY = "aranarth:trade_money";
     public static final String CH_TRADE_CONFIRM = "aranarth:trade_confirm";
     public static final String CH_TRADE_EXECUTE = "aranarth:trade_execute";
+    public static final String CH_PRONOUNS_UPDATE = "aranarth:pronouns_update";
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
     private static final String KEY_RETURN_LOC = "return_loc:";
@@ -459,6 +461,7 @@ public class NetworkManager {
             case CH_TRADE_MONEY -> handleTradeMoney(json);
             case CH_TRADE_CONFIRM -> handleTradeConfirm(json);
             case CH_TRADE_EXECUTE -> handleTradeExecute(json);
+            case CH_PRONOUNS_UPDATE -> handlePronounsUpdate(json);
         }
     }
 
@@ -573,9 +576,11 @@ public class NetworkManager {
         String nickname = ap.getNickname().isEmpty() ? ap.getUsername() : ap.getNickname();
 
         // Update roster in DB
+        String pronounsName = ap.getPronouns() != null ? ap.getPronouns().name() : "MALE";
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
                 db.upsertRosterEntry(uuid, ap.getUsername(), nickname, thisServer,
-                        ap.getRank(), ap.getCouncilRank(), ap.getSaintRank(), ap.getArchitectRank(), ap.isVanished())
+                        ap.getRank(), ap.getCouncilRank(), ap.getSaintRank(), ap.getArchitectRank(), ap.isVanished(),
+                        pronounsName)
         );
 
         // Extract skin texture so other servers can render this player's head in the tab list
@@ -603,6 +608,7 @@ public class NetworkManager {
         json.addProperty("vanished", ap.isVanished());
         json.addProperty("textureValue", textureValue);
         json.addProperty("textureSignature", textureSignature);
+        json.addProperty("pronouns", ap.getPronouns() != null ? ap.getPronouns().name() : "MALE");
         publish(CH_JOIN, json);
     }
 
@@ -914,6 +920,22 @@ public class NetworkManager {
         json.addProperty("saintRank", saintRank);
         json.addProperty("architectRank", architectRank);
         publish(CH_RANK_UPDATE, json);
+    }
+
+    /**
+     * Notifies other servers that a player's pronouns have changed so they can update the
+     * remote roster and refresh the TAB list immediately.
+     */
+    public void publishPronounsUpdate(UUID uuid, String pronouns) {
+        // Update DB so the roster survives server restarts
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
+                db.updateRosterPronouns(uuid, pronouns)
+        );
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", uuid.toString());
+        json.addProperty("pronouns", pronouns);
+        publish(CH_PRONOUNS_UPDATE, json);
     }
 
     /**
@@ -1555,6 +1577,7 @@ public class NetworkManager {
         String username = json.has("username") ? json.get("username").getAsString() : "";
         String textureValue = json.has("textureValue") ? json.get("textureValue").getAsString() : "";
         String textureSignature = json.has("textureSignature") ? json.get("textureSignature").getAsString() : "";
+        String pronouns = json.has("pronouns") ? json.get("pronouns").getAsString() : "MALE";
         NetworkPlayer np = new NetworkPlayer(
                 uuid,
                 username,
@@ -1566,7 +1589,8 @@ public class NetworkManager {
                 json.get("architectRank").getAsInt(),
                 vanished,
                 textureValue,
-                textureSignature
+                textureSignature,
+                pronouns
         );
         remoteRoster.put(uuid, np);
         if (!vanished) {
@@ -2073,6 +2097,38 @@ public class NetworkManager {
                     AranarthUtils.setPlayer(uuid, ap);
                     Bukkit.getScheduler().runTask(AranarthCore.getInstance(),
                             () -> PermissionUtils.evaluatePlayerPermissions(localPlayer));
+                }
+            }
+        }
+    }
+
+    private void handlePronounsUpdate(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        String pronounsStr = json.get("pronouns").getAsString();
+
+        NetworkPlayer np = remoteRoster.get(uuid);
+        if (np != null) {
+            np.setPronouns(pronounsStr);
+            if (!np.isVanished()) {
+                NetworkTabManager.addToTab(np);
+            }
+            AranarthUtils.updateTab();
+        } else {
+            Player localPlayer = Bukkit.getPlayer(uuid);
+            if (localPlayer != null) {
+                AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+                if (ap != null) {
+                    try {
+                        ap.setPronouns(Pronouns.valueOf(pronounsStr));
+                    } catch (IllegalArgumentException ignored) {
+                        ap.setPronouns(Pronouns.MALE);
+                    }
+                    AranarthUtils.setPlayer(uuid, ap);
                 }
             }
         }

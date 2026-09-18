@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.enums.Pronouns;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -42,6 +43,7 @@ public class CommandPronouns implements CommandExecutor {
 				}
 
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				NetworkManager.getInstance().publishPronounsUpdate(player.getUniqueId(), aranarthPlayer.getPronouns().name());
 				player.sendMessage(ChatUtils.chatMessage(Lang.get("pronouns.updated")));
 				return true;
 			}

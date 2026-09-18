@@ -386,7 +386,6 @@ public class NetworkTabManager {
     /**
      * Builds a §-formatted display name for a remote player, mirroring the local tab format:
      * rank badges + rank title + nickname + [SMP] tag (without the ⊰⊱ outer brackets).
-     * Rank titles default to their male variants since pronouns are not stored in NetworkPlayer.
      */
     private static String buildDisplayName(NetworkPlayer np) {
         String display = "";
@@ -412,16 +411,17 @@ public class NetworkTabManager {
 
         if (!display.isEmpty()) display += " ";
 
-        // Rank title
+        // Rank title - use female variants when applicable
+        boolean isFemale = "FEMALE".equals(np.getPronouns());
         display += switch (np.getRank()) {
             case 1 -> "&d&l[&a&lEsquire&d&l] &r";
             case 2 -> "&7&l[&f&lKnight&7&l] &r";
-            case 3 -> "&5&l[&d&lBaron&5&l] &r";
-            case 4 -> "&8&l[&7&lCount&8&l] &r";
-            case 5 -> "&6&l[&e&lDuke&6&l] &r";
-            case 6 -> "&6&l[&b&lPrince&6&l] &r";
-            case 7 -> "&6&l[&9&lKing&6&l] &r";
-            case 8 -> "&6&l[&4&lEmperor&6&l] &r";
+            case 3 -> isFemale ? "&5&l[&d&lBaroness&5&l] &r" : "&5&l[&d&lBaron&5&l] &r";
+            case 4 -> isFemale ? "&8&l[&7&lCountess&8&l] &r" : "&8&l[&7&lCount&8&l] &r";
+            case 5 -> isFemale ? "&6&l[&e&lDuchess&6&l] &r" : "&6&l[&e&lDuke&6&l] &r";
+            case 6 -> isFemale ? "&6&l[&b&lPrincess&6&l] &r" : "&6&l[&b&lPrince&6&l] &r";
+            case 7 -> isFemale ? "&6&l[&9&lQueen&6&l] &r" : "&6&l[&9&lKing&6&l] &r";
+            case 8 -> isFemale ? "&6&l[&4&lEmpress&6&l] &r" : "&6&l[&4&lEmperor&6&l] &r";
             default -> "&8&l[&a&lPeasant&8&l] &r";
         };
 

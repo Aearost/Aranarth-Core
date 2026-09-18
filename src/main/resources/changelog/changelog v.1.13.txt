@@ -42,6 +42,7 @@ Cross-server & Technical
 [~] Fixed cross-server teleports bypassing the OG player restriction to the SMP server
 [~] Fixed SMP restart inventory corruption via cross-server fallback snapshots
 [~] Fixed smp_restart_inv data truncation by expanding network_temp_data.value_json to MEDIUMTEXT
+[~] Fixed cross-server pronouns not being shown correctly in tab list
 
 Miscellaneous
 [+] Fixed AFK color formatting
