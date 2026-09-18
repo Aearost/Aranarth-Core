@@ -32,6 +32,7 @@ Chat, UI & Sounds
 [+] Added support for French in /lang
 [+] Added support for German in /lang
 [+] Add missing mail.sent lang key to all locale files
+[~] Fixed Saint role changes channel showing "donated and become" instead of "has become"
 
 Quality of Life
 [+] Added /language command (alias /lang) to toggle preferred display language (English, German, French)

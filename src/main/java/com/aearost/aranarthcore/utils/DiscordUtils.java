@@ -277,7 +277,7 @@ public class DiscordUtils {
 				String uuidNoDashes = player.getUniqueId().toString().replaceAll("-", "");
 				String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
 				EmbedBuilder embed = new EmbedBuilder()
-						.setAuthor(player.getName() + " has donated and become " + saintRankName + "!", null, url)
+						.setAuthor(player.getName() + " has become " + saintRankName + "!", null, url)
 						.setColor(Color.MAGENTA);
 				roleChangesChannel.sendMessageEmbeds(embed.build()).queue(message -> {
 					message.addReaction("⚜").queue();
