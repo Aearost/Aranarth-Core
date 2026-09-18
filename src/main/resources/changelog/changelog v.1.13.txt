@@ -15,6 +15,9 @@ Dominion
 [+] Added gradient functionality to dominion names
 [~] Modified strings for dominion relations to no longer say "Dominion of"
 [~] Modified formatting of dominion info's header lines
+[+] Added resource category filters to the Dominion Resources GUI
+[+] Added an auto-cancel timer to the resource claim number prompt
+[+] Added Resources shortcut button to the dominion GUI
 
 Items & Crafting
 [+] Added item trade system with /trade command
@@ -27,6 +30,7 @@ Economy, Jobs & Quests
 Chat, UI & Sounds
 [+] Added support for French in /lang
 [+] Added support for German in /lang
+[+] Add missing mail.sent lang key to all locale files
 
 Quality of Life
 [+] Added /language command (alias /lang) to toggle preferred display language (English, German, French)

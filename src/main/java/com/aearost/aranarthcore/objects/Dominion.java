@@ -35,6 +35,7 @@ public class Dominion {
 	private int claimableResources;
 	private final List<Double> claimFoodYields = new ArrayList<>();
 	private Biome biomeResourcesBeingClaimed;
+	private final Set<DominionResourceCategory> disabledResourceCategories = new HashSet<>();
 	private List<UUID> conquered;
 	private UUID conqueredRequest;
 	private long conqueredRequestTimestamp;
@@ -649,6 +650,14 @@ public class Dominion {
 	 */
 	public void setBiomeResourcesBeingClaimed(Biome biomeResourcesBeingClaimed) {
 		this.biomeResourcesBeingClaimed = biomeResourcesBeingClaimed;
+	}
+
+	/**
+	 * Provides the set of resource categories that are disabled for this Dominion's claims.
+	 * @return The set of disabled resource categories.
+	 */
+	public Set<DominionResourceCategory> getDisabledResourceCategories() {
+		return disabledResourceCategories;
 	}
 
 	/**

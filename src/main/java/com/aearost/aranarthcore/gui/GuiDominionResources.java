@@ -16,7 +16,7 @@ import java.util.*;
 
 public class GuiDominionResources {
 
-	public static final int CONTENT_PER_PAGE = 36; // max 4 content rows per page
+	public static final int CONTENT_PER_PAGE = 27; // 3 content rows in the fixed 45-slot GUI
 	public static final Map<UUID, Integer> playerPage = new HashMap<>();
 
 	private final Player player;
@@ -47,29 +47,28 @@ public class GuiDominionResources {
 		int totalPages = Math.max(1, (int) Math.ceil((double) totalBiomes / CONTENT_PER_PAGE));
 		int safePage = Math.min(page, totalPages - 1);
 
-		// Determine content rows and total size
-		int contentRows;
-		if (totalPages > 1) {
-			// Paginated - always use 4 content rows (54 total)
-			contentRows = 4;
-		} else {
-			contentRows = Math.max(1, (int) Math.ceil((double) totalBiomes / 9.0));
-		}
-		int size = contentRows * 9 + 18;
+		// Always 45 slots
+		int size = 45;
 
 		Inventory gui = Bukkit.getServer().createInventory(player, size,
 				Lang.getFor(player, "gui.dominionresources.title", "dominion", dominion.getName()));
 
 		ItemStack filler = makeFiller();
+		ItemStack filterPane = makeFilterPane(player);
 
-		// Top filler row
+		// Top row - all filter panes
 		for (int i = 0; i < 9; i++) {
+			gui.setItem(i, i == 4 ? filterPane : filler);
+		}
+		// Bottom row - filler with back button at center
+		for (int i = 36; i < 45; i++) {
 			gui.setItem(i, filler);
 		}
-		// Bottom filler row
-		for (int i = size - 9; i < size; i++) {
-			gui.setItem(i, filler);
-		}
+		ItemStack back = new ItemStack(Material.BARRIER);
+		ItemMeta backMeta = back.getItemMeta();
+		backMeta.setDisplayName(Lang.getFor(player, "gui.back"));
+		back.setItemMeta(backMeta);
+		gui.setItem(40, back);
 
 		// Biome items in content area
 		int start = safePage * CONTENT_PER_PAGE;
@@ -88,14 +87,14 @@ public class GuiDominionResources {
 			gui.setItem(slot++, item);
 		}
 
-		// Pagination buttons in bottom row
+		// Pagination buttons in bottom row (slots 36 = prev, 44 = next)
 		if (totalPages > 1) {
 			if (safePage > 0) {
-				gui.setItem(size - 9, makeNavButton(Material.ARROW, Lang.getFor(player, "gui.dominionresources.prev"),
+				gui.setItem(36, makeNavButton(Material.ARROW, Lang.getFor(player, "gui.dominionresources.prev"),
 						Lang.getFor(player, "gui.dominionresources.page", "n", String.valueOf(safePage), "total", String.valueOf(totalPages))));
 			}
 			if (safePage < totalPages - 1) {
-				gui.setItem(size - 1, makeNavButton(Material.ARROW, Lang.getFor(player, "gui.dominionresources.next"),
+				gui.setItem(44, makeNavButton(Material.ARROW, Lang.getFor(player, "gui.dominionresources.next"),
 						Lang.getFor(player, "gui.dominionresources.page", "n", String.valueOf(safePage + 2), "total", String.valueOf(totalPages))));
 			}
 		}
@@ -107,6 +106,15 @@ public class GuiDominionResources {
 		ItemStack pane = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
 		ItemMeta meta = pane.getItemMeta();
 		meta.setDisplayName(" ");
+		pane.setItemMeta(meta);
+		return pane;
+	}
+
+	private ItemStack makeFilterPane(Player player) {
+		ItemStack pane = new ItemStack(Material.HOPPER);
+		ItemMeta meta = pane.getItemMeta();
+		meta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.dominionresources.filter_button")));
+		meta.setLore(List.of(ChatUtils.translateToColor(Lang.getFor(player, "gui.dominionresources.filter_lore"))));
 		pane.setItemMeta(meta);
 		return pane;
 	}

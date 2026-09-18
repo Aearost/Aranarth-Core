@@ -112,6 +112,23 @@ public class GuiDominionPermissionsClick {
                     player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
                 }
                 case 28 -> { GuiOutposts.open(player); player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F); }
+                case 31 -> {
+                    String worldName = player.getWorld().getName();
+                    if (!worldName.startsWith("world") && !worldName.startsWith("smp")) {
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.resources_gameplay_world")));
+                        return;
+                    }
+                    if (DominionUtils.hasPermission(player, dominion, DominionPermission.RESOURCES)) {
+                        if (dominion.getClaimableResources() > 0) {
+                            new GuiDominionResources(player).openGui();
+                            player.playSound(player, Sound.BLOCK_CHEST_OPEN, 1F, 1F);
+                        } else {
+                            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.resources_none")));
+                        }
+                    } else {
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.resources_no_permission")));
+                    }
+                }
             }
             return;
         }

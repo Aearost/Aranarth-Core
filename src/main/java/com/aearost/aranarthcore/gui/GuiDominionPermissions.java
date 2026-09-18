@@ -256,6 +256,7 @@ public class GuiDominionPermissions {
 
         // Row 4 toggles
         gui.setItem(30, buildMobSpawningToggleItem(dominion.isMobSpawningEnabled()));
+        gui.setItem(31, buildResourcesItem());
         gui.setItem(32, buildExplosionToggleItem(dominion.isExplosionEnabled()));
 
         // Row 3: navigation and new hub sections
@@ -355,6 +356,18 @@ public class GuiDominionPermissions {
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(Lang.get("gui.dominionperms.defenders"));
         meta.setLore(List.of(Lang.get("gui.dominionperms.defenders_lore")));
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    /**
+     * Builds the Resources hub button.
+     */
+    public static ItemStack buildResourcesItem() {
+        ItemStack item = new ItemStack(Material.DIAMOND_PICKAXE);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(Lang.get("gui.dominionperms.resources_nav"));
+        meta.setLore(List.of(Lang.get("gui.dominionperms.resources_nav_lore")));
         item.setItemMeta(meta);
         return item;
     }

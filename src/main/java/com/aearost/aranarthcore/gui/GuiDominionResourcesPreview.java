@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.DominionResourceCategory;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.Lang;
@@ -42,13 +43,13 @@ public class GuiDominionResourcesPreview {
 
 		// Guaranteed drops (including previewOnly variety drops)
 		for (DominionUtils.ResourceDrop drop : table.guaranteed) {
-			displayItems.add(buildPreviewItem(drop.item, buildLore(null, drop.lore)));
+			displayItems.add(buildPreviewItem(drop.item, buildLore(categoryLine(drop.item), null, drop.lore)));
 		}
 
 		// Variety group options (all shown with their lore)
 		for (DominionUtils.VarietyGroup variety : table.varieties) {
 			for (DominionUtils.ResourceDrop option : variety.options) {
-				displayItems.add(buildPreviewItem(option.item, buildLore(null, option.lore)));
+				displayItems.add(buildPreviewItem(option.item, buildLore(categoryLine(option.item), null, option.lore)));
 			}
 		}
 
@@ -56,13 +57,13 @@ public class GuiDominionResourcesPreview {
 		for (DominionUtils.SimulationGroup sim : table.simulations) {
 			String simLore = sim.name + " Simulation (" + DominionUtils.formatPct(sim.odds) + " chance)";
 			for (DominionUtils.ResourceDrop drop : sim.drops) {
-				displayItems.add(buildPreviewItem(drop.item, buildLore(simLore, drop.lore)));
+				displayItems.add(buildPreviewItem(drop.item, buildLore(categoryLine(drop.item), simLore, drop.lore)));
 			}
 		}
 
 		// Rare drops
 		for (DominionUtils.ResourceDrop drop : table.rares) {
-			displayItems.add(buildPreviewItem(drop.item, buildLore(null, drop.lore)));
+			displayItems.add(buildPreviewItem(drop.item, buildLore(categoryLine(drop.item), null, drop.lore)));
 		}
 
 		// Size calculation
@@ -86,9 +87,17 @@ public class GuiDominionResourcesPreview {
 		return gui;
 	}
 
-	// Builds a list of color-translated lore lines. simLine is the first line (or null). subLine is the second (or null).
-	private List<String> buildLore(String simLine, String subLine) {
+	// Returns the category label for an item, or null if uncategorized
+	private String categoryLine(ItemStack item) {
+		DominionResourceCategory cat = DominionUtils.getCategoryForMaterial(item.getType());
+		if (cat == null) return null;
+		return Lang.getFor(player, "gui.dominionresourcefilters.category_" + cat.name().toLowerCase());
+	}
+
+	// Builds a list of color-translated lore lines. catLine is first (or null), simLine second (or null), subLine third (or null).
+	private List<String> buildLore(String catLine, String simLine, String subLine) {
 		List<String> lore = new ArrayList<>();
+		if (catLine != null) lore.add(ChatUtils.translateToColor(catLine));
 		if (simLine != null) lore.add(ChatUtils.translateToColor("&7&o" + simLine));
 		if (subLine != null) lore.add(ChatUtils.translateToColor("&7&o" + subLine));
 		return lore;

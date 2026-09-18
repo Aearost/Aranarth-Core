@@ -1509,6 +1509,57 @@ public class DominionUtils {
         return formatted + "%";
     }
 
+    /**
+     * Maps a Material to its DominionResourceCategory for drop filtering.
+     */
+    public static DominionResourceCategory getCategoryForMaterial(Material material) {
+        return switch (material) {
+            case STONE, COBBLESTONE, BLACKSTONE, NETHERRACK, END_STONE, BASALT,
+                    SMOOTH_BASALT, CALCITE, GRANITE, DIORITE, ANDESITE -> DominionResourceCategory.STONES;
+            case COAL_ORE, IRON_ORE, COPPER_ORE, GOLD_ORE, EMERALD_ORE, LAPIS_ORE,
+                    NETHER_QUARTZ_ORE, NETHER_GOLD_ORE -> DominionResourceCategory.ORES;
+            case DIRT, COARSE_DIRT, GRASS_BLOCK, PODZOL, MYCELIUM, MUD,
+                    SAND, RED_SAND, GRAVEL, CLAY, SNOW, SNOW_BLOCK,
+                    ICE, PACKED_ICE, BLUE_ICE, SOUL_SAND, SOUL_SOIL,
+                    SANDSTONE, RED_SANDSTONE, MOSSY_COBBLESTONE,
+                    CRIMSON_NYLIUM, WARPED_NYLIUM -> DominionResourceCategory.DIRTS;
+            case OAK_LOG, SPRUCE_LOG, BIRCH_LOG, JUNGLE_LOG, ACACIA_LOG, DARK_OAK_LOG,
+                    MANGROVE_LOG, CHERRY_LOG, PALE_OAK_LOG, BAMBOO,
+                    CRIMSON_STEM, WARPED_STEM -> DominionResourceCategory.WOODS;
+            case MAGMA_BLOCK, OBSIDIAN, SEA_LANTERN,
+                    PRISMARINE, PRISMARINE_BRICKS, DARK_PRISMARINE,
+                    SHROOMLIGHT, VINE, KELP, SEAGRASS, SEA_PICKLE, LILY_PAD, FIREFLY_BUSH,
+                    MANGROVE_ROOTS, MUDDY_MANGROVE_ROOTS,
+                    MOSS_CARPET, PALE_MOSS_BLOCK, PALE_HANGING_MOSS, LEAF_LITTER,
+                    RESIN_CLUMP, PINK_PETALS, WILDFLOWERS,
+                    RED_MUSHROOM, BROWN_MUSHROOM, RED_MUSHROOM_BLOCK, BROWN_MUSHROOM_BLOCK, MUSHROOM_STEM,
+                    WEEPING_VINES, TWISTING_VINES, CRIMSON_FUNGUS, WARPED_FUNGUS,
+                    SWEET_BERRIES, SUGAR_CANE, CACTUS, CACTUS_FLOWER, MELON, PUMPKIN, COCOA_BEANS, CHORUS_FRUIT,
+                    DANDELION, SUNFLOWER, POPPY, OXEYE_DAISY, CORNFLOWER, ALLIUM, AZURE_BLUET,
+                    WHITE_TULIP, PINK_TULIP, ORANGE_TULIP, RED_TULIP, LILY_OF_THE_VALLEY, LILAC, PEONY, ROSE_BUSH,
+                    TUBE_CORAL_BLOCK, TUBE_CORAL, TUBE_CORAL_FAN,
+                    BRAIN_CORAL_BLOCK, BRAIN_CORAL, BRAIN_CORAL_FAN,
+                    BUBBLE_CORAL_BLOCK, BUBBLE_CORAL, BUBBLE_CORAL_FAN,
+                    FIRE_CORAL_BLOCK, FIRE_CORAL, FIRE_CORAL_FAN,
+                    HORN_CORAL_BLOCK, HORN_CORAL, HORN_CORAL_FAN,
+                    INK_SAC, SLIME_BALL, MAGMA_CREAM, BONE -> DominionResourceCategory.NATURAL_BLOCKS;
+            case COD, SALMON, TROPICAL_FISH, PUFFERFISH,
+                    BEEF, PORKCHOP, CHICKEN, RABBIT, MUTTON,
+                    APPLE, GOLDEN_CARROT -> DominionResourceCategory.FOOD;
+            case STONE_BRICKS, END_STONE_BRICKS, PURPUR_BLOCK, PURPUR_PILLAR -> DominionResourceCategory.BRICKS;
+            case NETHER_BRICKS, NETHER_WART, POLISHED_BLACKSTONE_BRICKS, GILDED_BLACKSTONE,
+                    END_ROD, BONE_BLOCK,
+                    TERRACOTTA, RED_TERRACOTTA, ORANGE_TERRACOTTA, YELLOW_TERRACOTTA,
+                    BROWN_TERRACOTTA, LIGHT_GRAY_TERRACOTTA, WHITE_TERRACOTTA -> DominionResourceCategory.MISC_BLOCKS;
+            case ELYTRA, HEART_OF_THE_SEA, NETHERITE_SCRAP, GHAST_TEAR,
+                    NAUTILUS_SHELL, TURTLE_SCUTE, ARMADILLO_SCUTE,
+                    BLAZE_ROD, WITHER_SKELETON_SKULL, DIAMOND,
+                    NETHERITE_UPGRADE_SMITHING_TEMPLATE, ENCHANTED_BOOK,
+                    GOLD_NUGGET, ENDER_PEARL, DRIED_GHAST -> DominionResourceCategory.VALUABLES;
+            default -> null;
+        };
+    }
+
     private static ItemStack resolveAmount(ResourceDrop drop, Random random) {
         int amount = drop.maxAmount > 0
                 ? random.nextInt(drop.maxAmount - drop.item.getAmount() + 1) + drop.item.getAmount()
@@ -2233,7 +2284,6 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.END_STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.OBSIDIAN, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.CHORUS_FRUIT, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.PURPUR_BLOCK, 4)));
             simulations.add(endCity);
         }
 
@@ -2349,6 +2399,15 @@ public class DominionUtils {
             if (ghastTears > 0) {
                 items.add(new ItemStack(Material.GHAST_TEAR, ghastTears));
             }
+        }
+
+        // Filter out items belonging to disabled resource categories
+        Set<DominionResourceCategory> disabledCategories = dominion.getDisabledResourceCategories();
+        if (!disabledCategories.isEmpty()) {
+            items.removeIf(item -> {
+                DominionResourceCategory cat = getCategoryForMaterial(item.getType());
+                return cat != null && disabledCategories.contains(cat);
+            });
         }
 
         // Apply food yield multiplier to item quantities before rank duplication

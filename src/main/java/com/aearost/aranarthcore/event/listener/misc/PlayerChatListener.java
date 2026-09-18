@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.listener.misc;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiBlacklistEditor;
 import com.aearost.aranarthcore.gui.GuiBrewBook;
+import com.aearost.aranarthcore.event.player.GuiDominionResourcesClick;
 import com.aearost.aranarthcore.gui.GuiDominionPlayerPermissions;
 import com.aearost.aranarthcore.gui.GuiTrade;
 import com.aearost.aranarthcore.network.NetworkManager;
@@ -209,6 +210,9 @@ public class PlayerChatListener implements Listener {
                         dominion.setClaimableResources(dominion.getClaimableResources() - count);
                         dominion.setBiomeResourcesBeingClaimed(null);
                         DominionUtils.updateDominion(dominion);
+                        // Cancel the 10-second auto-cancel timer now that a valid response was received
+                        org.bukkit.scheduler.BukkitTask timer = GuiDominionResourcesClick.claimTimerTasks.remove(dominion.getId());
+                        if (timer != null) timer.cancel();
                         Bukkit.getScheduler().runTask(plugin, () -> {
                             for (int i = 0; i < count; i++) {
                                 claimDominionResources(dominion, player, capturedBiome, avgYield);
@@ -218,6 +222,8 @@ public class PlayerChatListener implements Listener {
                     } catch (NumberFormatException ex) {
                         player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.resources_invalid_number")));
                         dominion.setBiomeResourcesBeingClaimed(null);
+                        org.bukkit.scheduler.BukkitTask timer = GuiDominionResourcesClick.claimTimerTasks.remove(dominion.getId());
+                        if (timer != null) timer.cancel();
                     }
                     return;
                 }

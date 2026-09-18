@@ -110,6 +110,8 @@ public class InventoryClickEventListener implements Listener {
                 new GuiShopLocationClick().execute(e);
             } else if (isDominionFoodTitle(ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
                 new GuiDominionFoodClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(com.aearost.aranarthcore.utils.Lang.get(GuiDominionResourceFilters.TITLE_SUFFIX_KEY))) {
+                new GuiDominionResourceFiltersClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(com.aearost.aranarthcore.utils.Lang.get(GuiDominionResourcesPreview.TITLE_SUFFIX_KEY))
                     && !ChatUtils.stripColorFormatting(e.getView().getTitle()).contains("'s Resources")) {
                 new GuiDominionResourcesPreviewClick().execute(e);
