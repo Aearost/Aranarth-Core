@@ -1197,6 +1197,7 @@ public class AranarthCore extends JavaPlugin {
         new LootGenerateEventListener(this);
         new WrenchEnchantListener(this);
         new EnchanterLockoutListener(this);
+        new OverLeveledAnvilListener(this);
 
         // Multi-event listeners for single purpose
         new InvisibleItemFrameListener(this);
