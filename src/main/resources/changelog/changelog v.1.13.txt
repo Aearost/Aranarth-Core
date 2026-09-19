@@ -52,3 +52,7 @@ Cross-server & Technical
 Miscellaneous
 [+] Fixed AFK color formatting
 [+] Added custom online players functionality for discord chat
+[+] Allowed the use of auto-clickers in the rules
+[+] Allowed the use of minimap mods in the rules
+[-] Removed rule that prevented the creation of large automated farms
+[+] Added rule to prevent the creation/use of lag-inducing builds
