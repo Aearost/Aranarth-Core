@@ -517,7 +517,9 @@
       "Bash(sed -n '1514p;1515p;1516p;1517p;1518p;1519p;1520p;1521p;1522p;1523p;1524p;1525p;1526p;1527p;1528p;1529p;1530p;1531p' src/main/resources/lang/en_US.properties)",
       "Bash(sort -u grep -oh ^[^=]* src/main/resources/lang/en_US.properties)",
       "Bash(sort -u grep -oh ^[^=]* src/main/resources/lang/de_DE.properties)",
-      "Bash(sort -u grep -oh ^[^=]* src/main/resources/lang/fr_FR.properties)"
+      "Bash(sort -u grep -oh ^[^=]* src/main/resources/lang/fr_FR.properties)",
+      "Bash(/c/Program Files/Eclipse Adoptium/jdk-25.0.3.9-hotspot/bin/javac --version)",
+      "Bash(\"/c/Program Files/JetBrains/IntelliJ IDEA Community Edition 2024.3.4/plugins/maven/lib/maven3/bin/mvn\" compile -q -f /c/Users/liamh/IdeaProjects/AranarthCore/pom.xml)"
     ]
   }
 }

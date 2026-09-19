@@ -63,7 +63,7 @@ public class GuiWrench {
         if (block == null) {
             return;
         }
-        if (!ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle()).equals(Lang.get(TITLE_KEY))) {
+        if (!ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle()).equals(Lang.getFor(player, TITLE_KEY))) {
             return;
         }
         GuiWrench rebuilt = new GuiWrench(player, block);

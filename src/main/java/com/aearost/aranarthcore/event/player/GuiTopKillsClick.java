@@ -3,7 +3,6 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.gui.GuiTopKills;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -14,13 +13,12 @@ import org.bukkit.event.inventory.InventoryType;
  */
 public class GuiTopKillsClick {
 	public void execute(InventoryClickEvent e) {
-		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(com.aearost.aranarthcore.utils.Lang.get("gui.topkills.title"))) {
-			// If the user did not click a slot
-			if (e.getClickedInventory() == null) {
-				return;
-			}
+		// If the user did not click a slot
+		if (e.getClickedInventory() == null) {
+			return;
+		}
 
-			if (e.getWhoClicked() instanceof Player player) {
+		if (e.getWhoClicked() instanceof Player player) {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
 				if (e.getClickedInventory().getType() == InventoryType.CHEST) {
@@ -71,7 +69,6 @@ public class GuiTopKillsClick {
 						}
 					}
 				}
-			}
 		}
 	}
 

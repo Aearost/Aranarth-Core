@@ -19,7 +19,10 @@ import java.util.List;
  */
 public class GuiPotionRemove {
 	public void execute(InventoryClickEvent e) {
-		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(com.aearost.aranarthcore.utils.Lang.get("gui.potions.title_remove").split("\\(")[0].trim())) {
+		if (!(e.getWhoClicked() instanceof Player player)) {
+			return;
+		}
+		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(Lang.getFor(player, "gui.potions.title_remove").split("\\(")[0].trim())) {
 			if (e.getView().getType() == InventoryType.CHEST) {
 				// If the user did not click a slot
 				if (e.getClickedInventory() == null) {
@@ -38,7 +41,6 @@ public class GuiPotionRemove {
 						return;
 					}
 
-					Player player = (Player) e.getWhoClicked();
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 					HashMap<ItemStack, Integer> potions = aranarthPlayer.getPotions();
 					int toBeRemoved = aranarthPlayer.getPotionQuantityToRemove();

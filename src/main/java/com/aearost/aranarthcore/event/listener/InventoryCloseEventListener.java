@@ -7,6 +7,8 @@ import com.aearost.aranarthcore.gui.GuiDominionFood;
 import com.aearost.aranarthcore.gui.GuiHeadExchange;
 import com.aearost.aranarthcore.gui.GuiWrench;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.TradeManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -29,25 +31,27 @@ public class InventoryCloseEventListener implements Listener {
             GuiChatSnapshot.close(e.getInventory());
             return;
         }
+        if (!(e.getPlayer() instanceof Player player)) {
+            return;
+        }
         if (e.getView().getType() == InventoryType.CHEST) {
-            if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(com.aearost.aranarthcore.utils.Lang.get("gui.wrench.title"))) {
-                GuiWrench.openBlocks.remove(e.getPlayer().getUniqueId());
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(com.aearost.aranarthcore.utils.Lang.get("gui.potions.title_add").split("\\(")[0].trim())) {
+            if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.wrench.title"))) {
+                GuiWrench.openBlocks.remove(player.getUniqueId());
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(Lang.getFor(player, "gui.potions.title_add").split("\\(")[0].trim())) {
                 new GuiPotionAddClose().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(com.aearost.aranarthcore.utils.Lang.get("gui.quiver.title"))) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.quiver.title"))) {
                 new GuiQuiverClose().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(com.aearost.aranarthcore.utils.Lang.get("gui.shulker.title"))) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.shulker.title"))) {
                 new GuiShulkerClose().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(com.aearost.aranarthcore.utils.Lang.get("gui.crate.title_vote").split(" - ")[0] + " - ")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(Lang.getFor(player, "gui.crate.title_vote").split(" - ")[0] + " - ")) {
                 new GuiCrateClose().execute(e);
             } else if (isDominionFoodTitle(ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
                 new GuiDominionFoodClose().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(com.aearost.aranarthcore.utils.Lang.get("gui.petfood.title"))) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.petfood.title"))) {
                 new GuiPetFoodClose().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(com.aearost.aranarthcore.utils.Lang.get(GuiHeadExchange.TITLE_KEY))) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiHeadExchange.TITLE_KEY))) {
                 new GuiHeadExchangeClose().execute(e);
-            } else if (e.getPlayer() instanceof Player tradePlayer
-                    && com.aearost.aranarthcore.utils.TradeManager.isTradeGuiOpen(tradePlayer)) {
+            } else if (TradeManager.isTradeGuiOpen(player)) {
                 new GuiTradeClose().execute(e);
             }
         } else if (e.getView().getType() == InventoryType.ANVIL) {

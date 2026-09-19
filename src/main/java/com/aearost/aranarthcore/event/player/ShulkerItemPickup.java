@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Sound;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Player;
@@ -49,7 +50,7 @@ public class ShulkerItemPickup {
 							return;
 						}
 
-						if ((player.getOpenInventory().getTitle()).equals(com.aearost.aranarthcore.utils.Lang.get("gui.shulker.title")) && player.getOpenInventory().getType() == InventoryType.CHEST) {
+						if (player.getOpenInventory().getTitle().equals(Lang.getFor(player, "gui.shulker.title")) && player.getOpenInventory().getType() == InventoryType.CHEST) {
 							e.setCancelled(true);
 							return;
 						}

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -21,7 +22,7 @@ public class PlayerItemHeldEventListener implements Listener {
     public void onPlayerItemHeld(PlayerItemHeldEvent e) {
         Player player = e.getPlayer();
         // Prevents scrolling while in a held shulker box causing duplication bug
-        if (player.getOpenInventory().getTitle().equals(com.aearost.aranarthcore.utils.Lang.get("gui.shulker.title"))
+        if (player.getOpenInventory().getTitle().equals(Lang.getFor(player, "gui.shulker.title"))
                 && player.getOpenInventory().getType() == InventoryType.CHEST) {
             e.setCancelled(true);
         }

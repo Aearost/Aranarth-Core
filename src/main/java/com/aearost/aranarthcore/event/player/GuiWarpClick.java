@@ -17,15 +17,14 @@ import java.util.List;
  */
 public class GuiWarpClick {
 	public void execute(InventoryClickEvent e) {
-		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(com.aearost.aranarthcore.utils.Lang.get("gui.warps.title"))) {
-			// If the user did not click a slot
-			if (e.getClickedInventory() == null) {
-				return;
-			}
+		// If the user did not click a slot
+		if (e.getClickedInventory() == null) {
+			return;
+		}
 
-			List<Home> warps = AranarthUtils.getWarps();
+		List<Home> warps = AranarthUtils.getWarps();
 
-			if (e.getWhoClicked() instanceof Player player) {
+		if (e.getWhoClicked() instanceof Player player) {
 				// Ensures the player is actually clicking a warp
 				if (e.getSlot() >= warps.size()) {
 					return;
@@ -69,7 +68,6 @@ public class GuiWarpClick {
 					player.closeInventory();
 					player.sendMessage(ChatUtils.chatMessage(Lang.get("general.error")));
 				}
-			}
 		}
 	}
 

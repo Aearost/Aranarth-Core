@@ -14,13 +14,17 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 public class GuiStoreClick {
     public void execute(InventoryClickEvent e) {
         e.setCancelled(true);
-        if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(com.aearost.aranarthcore.utils.Lang.get("gui.store.title_saint"))) {
+        if (!(e.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+        String title = ChatUtils.stripColorFormatting(e.getView().getTitle());
+        if (title.equals(Lang.getFor(player, "gui.store.title_saint"))) {
             saintPageLogic(e);
-        } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(com.aearost.aranarthcore.utils.Lang.get("gui.store.title_perks"))) {
+        } else if (title.equals(Lang.getFor(player, "gui.store.title_perks"))) {
             perksPageLogic(e);
-        } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(com.aearost.aranarthcore.utils.Lang.get("gui.store.title_boosts"))) {
+        } else if (title.equals(Lang.getFor(player, "gui.store.title_boosts"))) {
             boostsPageLogic(e);
-        } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(com.aearost.aranarthcore.utils.Lang.get("gui.store.title_crates"))) {
+        } else if (title.equals(Lang.getFor(player, "gui.store.title_crates"))) {
             cratesPageLogic(e);
         } else {
             mainPageLogic(e);

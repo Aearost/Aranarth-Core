@@ -14,35 +14,33 @@ import org.bukkit.event.inventory.InventoryType;
  */
 public class GuiDelhomeClick {
 	public void execute(InventoryClickEvent e) {
-		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(com.aearost.aranarthcore.utils.Lang.get("gui.delhome.title"))) {
-			// If the user did not click a slot
-			if (e.getClickedInventory() == null) {
+		// If the user did not click a slot
+		if (e.getClickedInventory() == null) {
+			return;
+		}
+
+		e.setCancelled(true);
+
+		if (e.getWhoClicked() instanceof Player player) {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+
+			// Ensures the player is actually clicking a home
+			if (e.getSlot() >= aranarthPlayer.getHomes().size()) {
 				return;
 			}
 
-			e.setCancelled(true);
-
-			if (e.getWhoClicked() instanceof Player player) {
-				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-
-				// Ensures the player is actually clicking a home
-				if (e.getSlot() >= aranarthPlayer.getHomes().size()) {
-					return;
-				}
-
-				if (e.getClickedInventory().getType() == InventoryType.CHEST) {
-					for (int i = 0; i < aranarthPlayer.getHomes().size(); i++) {
-						if (e.getSlot() == i) {
-							Home home = aranarthPlayer.getHomes().get(i);
-							AranarthUtils.deletePlayerHome(player, ChatUtils.stripColorFormatting(home.getName()));
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("home.deleted", "name", home.getName())));
-							player.closeInventory();
-							return;
-						}
+			if (e.getClickedInventory().getType() == InventoryType.CHEST) {
+				for (int i = 0; i < aranarthPlayer.getHomes().size(); i++) {
+					if (e.getSlot() == i) {
+						Home home = aranarthPlayer.getHomes().get(i);
+						AranarthUtils.deletePlayerHome(player, ChatUtils.stripColorFormatting(home.getName()));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("home.deleted", "name", home.getName())));
+						player.closeInventory();
+						return;
 					}
-					player.closeInventory();
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("general.error")));
 				}
+				player.closeInventory();
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.error")));
 			}
 		}
 	}

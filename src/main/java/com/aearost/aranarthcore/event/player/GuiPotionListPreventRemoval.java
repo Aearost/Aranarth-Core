@@ -1,6 +1,8 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
 /**
@@ -8,7 +10,10 @@ import org.bukkit.event.inventory.InventoryClickEvent;
  */
 public class GuiPotionListPreventRemoval {
 	public void execute(InventoryClickEvent e) {
-		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(com.aearost.aranarthcore.utils.Lang.get("gui.potions.title_view").split("\\(")[0].trim())) {
+		if (!(e.getWhoClicked() instanceof Player player)) {
+			return;
+		}
+		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(Lang.getFor(player, "gui.potions.title_view").split("\\(")[0].trim())) {
 			e.setCancelled(true);
 		}
 	}

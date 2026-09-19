@@ -25,13 +25,12 @@ import java.util.UUID;
  */
 public class GuiShopLocationClick {
 	public void execute(InventoryClickEvent e) {
-		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(com.aearost.aranarthcore.utils.Lang.get("gui.shoplocation.title"))) {
-			// If the user did not click a slot
-			if (e.getClickedInventory() == null) {
-				return;
-			}
+		// If the user did not click a slot
+		if (e.getClickedInventory() == null) {
+			return;
+		}
 
-			if (e.getWhoClicked() instanceof Player player) {
+		if (e.getWhoClicked() instanceof Player player) {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
 				if (e.getClickedInventory().getType() == InventoryType.CHEST) {
@@ -139,7 +138,6 @@ public class GuiShopLocationClick {
 						}
 						player.closeInventory();
 					}
-				}
 			}
 		}
 	}

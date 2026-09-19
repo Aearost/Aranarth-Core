@@ -19,13 +19,12 @@ import org.bukkit.event.inventory.InventoryType;
  */
 public class GuiHomesClick {
 	public void execute(InventoryClickEvent e) {
-		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(com.aearost.aranarthcore.utils.Lang.get("gui.homes.title").split("\\(")[0].trim())) {
-			// If the user did not click a slot
-			if (e.getClickedInventory() == null) {
-				return;
-			}
+		// If the user did not click a slot
+		if (e.getClickedInventory() == null) {
+			return;
+		}
 
-			if (e.getWhoClicked() instanceof Player player) {
+		if (e.getWhoClicked() instanceof Player player) {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				Location bedSpawn = player.getBedSpawnLocation();
 				boolean hasBedSpawn = bedSpawn != null;
@@ -131,7 +130,6 @@ public class GuiHomesClick {
 						return;
 					}
 				}
-			}
 		}
 	}
 
