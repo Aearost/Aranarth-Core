@@ -32,6 +32,7 @@ public class CommandAranarthium implements CommandExecutor {
 
 			meta.addPage(bookIntro());
 			meta.addPage(ingotIntro());
+			meta.addPage(elytraEnhancing());
 			meta.addPage(aquaticArmour());
 			meta.addPage(ardentArmour());
 			meta.addPage(dwarvenArmour());
@@ -61,6 +62,13 @@ public class CommandAranarthium implements CommandExecutor {
 		return ChatUtils.translateToColor(
 				"&l&nAranarthium\n&rWhen crafting all 8 ore clusters together with a netherite ingot, an &lAranarthium Ingot&r is created.\n\n" +
 						"This ingot is used as a base to crafting all &oEnhanced Aranarthium Ingots&r, which are applied to netherite armour and grant special abilities."
+		);
+	}
+
+	private static String elytraEnhancing() {
+		return ChatUtils.translateToColor(
+				"&7&lNetherite Elytra\n&rBy combining a netherite ingot and an elytra in an anvil, a Netherite Elytra provides the armor points from a netherite chestplate.\n\n" +
+						"You can also upgrade it with an enhanced ingot of your choice, providing the effects of the full set."
 		);
 	}
 
