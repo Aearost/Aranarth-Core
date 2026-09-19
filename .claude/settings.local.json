@@ -505,7 +505,19 @@
       "Bash(jar -tf /c/Users/liamh/.m2/repository/io/papermc/paper/paper-api/26.2.build.48-alpha/paper-api-26.2.build.48-alpha.jar)",
       "Bash(jar -xf /c/Users/liamh/.m2/repository/io/papermc/paper/paper-api/26.2.build.48-alpha/paper-api-26.2.build.48-alpha-sources.jar io/papermc/paper/event/player/PlayerInventorySlotChangeEvent.java -C /tmp/paperapi_check)",
       "Bash(jar -tf /c/Users/liamh/.m2/repository/io/papermc/paper/paper-api/26.2.build.48-alpha/paper-api-26.2.build.48-alpha-sources.jar)",
-      "Bash(find \"C:\\\\Users\\\\liamh\\\\IdeaProjects\\\\AranarthCore\" -name \"DominionUtils.java\" -type f -exec grep -n \"getResourcesByDominionAndBiome\\\\|getMaxClaimableResourcesAmount\\\\|getBaseFoodPercentage\\\\|foodPercentageToYield\" {} +)"
+      "Bash(find \"C:\\\\Users\\\\liamh\\\\IdeaProjects\\\\AranarthCore\" -name \"DominionUtils.java\" -type f -exec grep -n \"getResourcesByDominionAndBiome\\\\|getMaxClaimableResourcesAmount\\\\|getBaseFoodPercentage\\\\|foodPercentageToYield\" {} +)",
+      "Bash(sort -u grep -oh ^[^=]* C:/Users/liamh/IdeaProjects/AranarthCore/src/main/resources/lang/en_US.properties)",
+      "Bash(sort -u grep -oh ^[^=]* C:/Users/liamh/IdeaProjects/AranarthCore/src/main/resources/lang/de_DE.properties)",
+      "Bash(sort -u grep -oh ^[^=]* C:/Users/liamh/IdeaProjects/AranarthCore/src/main/resources/lang/fr_FR.properties)",
+      "Bash(sed -n '307p;308p;309p;310p;311p;312p;313p;314p' src/main/resources/lang/en_US.properties)",
+      "Bash(sed -n '918p;919p;920p;921p;922p;923p;924p' src/main/resources/lang/en_US.properties)",
+      "Bash(sed -n '537p;538p;539p;540p;541p;542p;543p' src/main/resources/lang/en_US.properties)",
+      "Bash(sed -n '875p;876p;877p;878p;879p;880p;881p;882p;883p;884p;885p;886p;887p;888p;889p;890p;891p;892p;893p' src/main/resources/lang/en_US.properties)",
+      "Bash(sed -n '1296p;1297p;1298p;1299p;1300p' src/main/resources/lang/en_US.properties)",
+      "Bash(sed -n '1514p;1515p;1516p;1517p;1518p;1519p;1520p;1521p;1522p;1523p;1524p;1525p;1526p;1527p;1528p;1529p;1530p;1531p' src/main/resources/lang/en_US.properties)",
+      "Bash(sort -u grep -oh ^[^=]* src/main/resources/lang/en_US.properties)",
+      "Bash(sort -u grep -oh ^[^=]* src/main/resources/lang/de_DE.properties)",
+      "Bash(sort -u grep -oh ^[^=]* src/main/resources/lang/fr_FR.properties)"
     ]
   }
 }
