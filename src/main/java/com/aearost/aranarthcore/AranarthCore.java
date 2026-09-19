@@ -662,6 +662,9 @@ public class AranarthCore extends JavaPlugin {
                 AranarthUtils.updateAfkLocations();
                 AranarthUtils.updateTab();
                 QuestUtils.checkAndPerformResets();
+                if (NetworkManager.isActive()) {
+                    NetworkManager.getInstance().publishPingUpdates();
+                }
                 if (roleReactionListener != null) {
                     roleReactionListener.pollReactions();
                 }

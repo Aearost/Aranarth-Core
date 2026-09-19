@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
@@ -65,6 +67,28 @@ public class CommandPing implements CommandExecutor {
 					return true;
 				}
 			}
+            // Check the remote roster for cross-server players
+            if (NetworkManager.isActive()) {
+                for (NetworkPlayer np : NetworkManager.getInstance().getRemoteRoster().values()) {
+                    if (np.getUsername().equalsIgnoreCase(args[0])) {
+                        int ping = np.getPing();
+                        if (ping < 0) {
+                            // Ping not yet received from remote server
+                            sender.sendMessage(ChatUtils.chatMessage(
+                                    Lang.get("ping.other_good", "player", np.getUsername(), "ping", "?")));
+                            return true;
+                        }
+                        if (ping <= 150) {
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.get("ping.other_good", "player", np.getUsername(), "ping", String.valueOf(ping))));
+                        } else if (ping <= 250) {
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.get("ping.other_ok", "player", np.getUsername(), "ping", String.valueOf(ping))));
+                        } else {
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.get("ping.other_bad", "player", np.getUsername(), "ping", String.valueOf(ping))));
+                        }
+                        return true;
+                    }
+                }
+            }
             sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.offline", "name", args[0])));
 			return true;
         }

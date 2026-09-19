@@ -83,7 +83,8 @@ public class NetworkTabManager {
             Object gameProfile  = createGameProfile(np.getUuid(), profileName,
                     np.getTextureValue(), np.getTextureSignature());
             Object displayName  = toNmsComponent(buildDisplayName(np)); // null on failure → falls back to profile name
-            Object entry        = createEntry(np.getUuid(), gameProfile, displayName, 0);
+            int latency = np.getPing() >= 0 ? np.getPing() : 0;
+            Object entry        = createEntry(np.getUuid(), gameProfile, displayName, 0, latency);
             EnumSet<?> actionsSet = createActionEnumSet();
             Object packet       = updatePacketClass
                     .getDeclaredConstructor(EnumSet.class, List.class)
@@ -140,7 +141,7 @@ public class NetworkTabManager {
             }
             // For UPDATE_LIST_ORDER only the UUID and listOrder fields are read by the codec;
             // all other Entry fields can be null / default.
-            Object entry = createEntry(uuid, null, null, listOrder);
+            Object entry = createEntry(uuid, null, null, listOrder, 0);
             EnumSet set = (EnumSet) EnumSet.class.getMethod("of", Enum.class)
                     .invoke(null, updateOrderAction);
             Object packet = updatePacketClass
@@ -151,6 +152,33 @@ public class NetworkTabManager {
             }
         } catch (Exception ex) {
             Bukkit.getLogger().log(Level.FINE, "[AC] sendListOrder failed for " + uuid, ex);
+        }
+    }
+
+    /** Sends an UPDATE_LATENCY-only packet for a remote player's tab entry. */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static void updateLatencyInTab(NetworkPlayer np) {
+        ensureInitialised();
+        if (!available) return;
+        try {
+            Enum updateLatencyAction;
+            try {
+                updateLatencyAction = Enum.valueOf((Class<Enum>) actionClass, "UPDATE_LATENCY");
+            } catch (IllegalArgumentException ignored) {
+                return; // Action not present in this server version - skip silently
+            }
+            int latency = np.getPing() >= 0 ? np.getPing() : 0;
+            Object entry = createEntry(np.getUuid(), null, null, 0, latency);
+            EnumSet set = (EnumSet) EnumSet.class.getMethod("of", Enum.class)
+                    .invoke(null, updateLatencyAction);
+            Object packet = updatePacketClass
+                    .getDeclaredConstructor(EnumSet.class, List.class)
+                    .newInstance(set, List.of(entry));
+            for (Player viewer : Bukkit.getOnlinePlayers()) {
+                sendPacket(viewer, packet);
+            }
+        } catch (Exception ex) {
+            Bukkit.getLogger().log(Level.WARNING, "[AC] updateLatencyInTab failed for " + np.getUuid(), ex);
         }
     }
 
@@ -204,10 +232,10 @@ public class NetworkTabManager {
 
     /** Creates a ClientboundPlayerInfoUpdatePacket.Entry record via reflection.
      *  Uses record-component names (Java 16+) to distinguish int fields so that
-     *  {@code listOrder} is set correctly alongside {@code latency}, even as the
+     *  {@code listOrder} and {@code latency} are set correctly, even as the
      *  NMS record gains or loses fields across Paper versions. */
     private static Object createEntry(UUID uuid, Object gameProfile, Object nmsComponent,
-                                      int listOrder) throws Exception {
+                                      int listOrder, int latency) throws Exception {
         Constructor<?> ctor = entryClass.getDeclaredConstructors()[0];
         ctor.setAccessible(true);
         Class<?>[] params = ctor.getParameterTypes();
@@ -228,8 +256,7 @@ public class NetworkTabManager {
                 args[i] = true; // listed=true; showHat=true (1.21.4+)
             } else if (p == int.class) {
                 // Use the component name to differentiate latency from listOrder.
-                // Latency 0 can render as "no bars" on some clients; use 1 (= full bars) for remote players.
-                args[i] = name.equals("listOrder") ? listOrder : 1;
+                args[i] = name.equals("listOrder") ? listOrder : latency;
             } else if (p == gameTypeClass) {
                 args[i] = survivalGameType;
             } else if (nmsComponentClass != null && p == nmsComponentClass) {

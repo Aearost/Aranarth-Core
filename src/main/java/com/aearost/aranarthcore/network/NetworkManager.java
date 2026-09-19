@@ -110,6 +110,7 @@ public class NetworkManager {
     public static final String CH_TRADE_CONFIRM = "aranarth:trade_confirm";
     public static final String CH_TRADE_EXECUTE = "aranarth:trade_execute";
     public static final String CH_PRONOUNS_UPDATE = "aranarth:pronouns_update";
+    public static final String CH_PING_UPDATE = "aranarth:ping_update";
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
     private static final String KEY_RETURN_LOC = "return_loc:";
@@ -462,6 +463,7 @@ public class NetworkManager {
             case CH_TRADE_CONFIRM -> handleTradeConfirm(json);
             case CH_TRADE_EXECUTE -> handleTradeExecute(json);
             case CH_PRONOUNS_UPDATE -> handlePronounsUpdate(json);
+            case CH_PING_UPDATE -> handlePingUpdate(json);
         }
     }
 
@@ -969,6 +971,20 @@ public class NetworkManager {
         json.addProperty("afk", isAfk);
         json.addProperty("afkStartTime", isAfk ? System.currentTimeMillis() : 0L);
         publish(CH_AFK, json);
+    }
+
+    /**
+     * Publishes the current ping of every locally online player so other servers
+     * can display accurate pings via /ping.
+     */
+    public void publishPingUpdates() {
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            JsonObject json = new JsonObject();
+            json.addProperty("server", thisServer);
+            json.addProperty("uuid", p.getUniqueId().toString());
+            json.addProperty("ping", p.getPing());
+            publish(CH_PING_UPDATE, json);
+        }
     }
 
     /**
@@ -2058,6 +2074,24 @@ public class NetworkManager {
                 : "&e" + nickname + " &7is no longer AFK";
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.sendMessage(ChatUtils.chatMessage(message));
+        }
+    }
+
+    private void handlePingUpdate(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        int ping = json.get("ping").getAsInt();
+
+        NetworkPlayer np = remoteRoster.get(uuid);
+        if (np != null) {
+            np.setPing(ping);
+            if (!np.isVanished()) {
+                NetworkTabManager.updateLatencyInTab(np);
+            }
         }
     }
 
