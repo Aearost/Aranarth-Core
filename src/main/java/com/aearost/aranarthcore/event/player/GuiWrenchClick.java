@@ -63,6 +63,11 @@ public class GuiWrenchClick {
             case "West Connection"  -> toggleFaceConnection(block, data, BlockFace.WEST);
             case "Up Connection"    -> toggleFaceConnection(block, data, BlockFace.UP);
             case "Down Connection"  -> toggleFaceConnection(block, data, BlockFace.DOWN);
+            case "North Height" -> cycleWallHeight(block, data, BlockFace.NORTH);
+            case "South Height" -> cycleWallHeight(block, data, BlockFace.SOUTH);
+            case "East Height"  -> cycleWallHeight(block, data, BlockFace.EAST);
+            case "West Height"  -> cycleWallHeight(block, data, BlockFace.WEST);
+            case "Wall Post"    -> toggleWallUp(block, data);
         }
 
         GuiWrench.refresh(player);
@@ -220,6 +225,24 @@ public class GuiWrenchClick {
         block.setBlockData(rotatable, false);
     }
 
+
+    private void cycleWallHeight(Block block, BlockData data, BlockFace face) {
+        if (!(data instanceof Wall wall)) {
+            return;
+        }
+        Wall.Height[] heights = Wall.Height.values(); // NONE, LOW, TALL
+        int idx = wall.getHeight(face).ordinal();
+        wall.setHeight(face, heights[(idx + 1) % heights.length]);
+        block.setBlockData(wall, false);
+    }
+
+    private void toggleWallUp(Block block, BlockData data) {
+        if (!(data instanceof Wall wall)) {
+            return;
+        }
+        wall.setUp(!wall.isUp());
+        block.setBlockData(wall, false);
+    }
 
     private void toggleFaceConnection(Block block, BlockData data, BlockFace face) {
         if (!(data instanceof MultipleFacing multiFacing)) {

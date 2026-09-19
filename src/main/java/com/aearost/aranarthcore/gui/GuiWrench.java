@@ -171,7 +171,16 @@ public class GuiWrench {
             items.add(buildRotationItem(rotatable));
         }
 
-        // Fence/wall connections
+        // Wall heights and post
+        if (data instanceof Wall wall) {
+            items.add(buildWallHeightItem(wall, BlockFace.NORTH));
+            items.add(buildWallHeightItem(wall, BlockFace.EAST));
+            items.add(buildWallHeightItem(wall, BlockFace.SOUTH));
+            items.add(buildWallHeightItem(wall, BlockFace.WEST));
+            items.add(buildWallUpItem(wall));
+        }
+
+        // Fence connections
         if (data instanceof MultipleFacing multiFacing) {
             for (BlockFace face : CARDINAL_FACES) {
                 if (multiFacing.getAllowedFaces().contains(face)) {
@@ -319,6 +328,34 @@ public class GuiWrench {
                 Lang.get("gui.wrench.cycle")
         );
         return makePropertyItem(Material.CLOCK, Lang.get("gui.wrench.prop_rotation"), lore);
+    }
+
+    private static ItemStack buildWallHeightItem(Wall data, BlockFace face) {
+        String langKey = switch (face) {
+            case SOUTH -> "gui.wrench.prop_south_height";
+            case EAST  -> "gui.wrench.prop_east_height";
+            case WEST  -> "gui.wrench.prop_west_height";
+            default    -> "gui.wrench.prop_north_height";
+        };
+        String current = data.getHeight(face).name();
+        List<String> lore = List.of(
+                Lang.get("gui.wrench.current", "value", current),
+                Lang.get("gui.wrench.available", "values", "NONE, LOW, TALL"),
+                "",
+                Lang.get("gui.wrench.cycle")
+        );
+        return makePropertyItem(Material.COBBLESTONE_WALL, Lang.get(langKey), lore);
+    }
+
+    private static ItemStack buildWallUpItem(Wall data) {
+        String current = data.isUp() ? "TRUE" : "FALSE";
+        List<String> lore = List.of(
+                Lang.get("gui.wrench.current", "value", current),
+                Lang.get("gui.wrench.available", "values", "TRUE, FALSE"),
+                "",
+                Lang.get("gui.wrench.toggle")
+        );
+        return makePropertyItem(Material.COBBLESTONE_WALL, Lang.get("gui.wrench.prop_wall_up"), lore);
     }
 
     private static ItemStack buildFaceConnectionItem(MultipleFacing data, BlockFace face) {
