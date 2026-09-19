@@ -90,7 +90,7 @@ public class CommandHome implements CommandExecutor {
 						}
 
 						// Same-server home
-						AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation(), aranarthPlayer.isInAdminMode(), home.getName(), "&7You have teleported to your home", success -> {
+						AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation(), aranarthPlayer.isInAdminMode(), home.getName(), Lang.get("home.teleported", "name", home.getName()), success -> {
 							if (success) {
 								player.sendMessage(ChatUtils.chatMessage(Lang.get("home.teleported", "name", home.getName())));
 							} else {

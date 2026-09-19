@@ -151,7 +151,7 @@ public class GuiOutpostsClick {
         }
 
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-        AranarthUtils.teleportPlayer(player, player.getLocation(), outpost.getHome(), aranarthPlayer.isInAdminMode(), outpost.getName(), "&7You have teleported to your outpost", success -> {
+        AranarthUtils.teleportPlayer(player, player.getLocation(), outpost.getHome(), aranarthPlayer.isInAdminMode(), outpost.getName(), Lang.getFor(player, "outpost.teleported", "name", outpost.getName()), success -> {
             if (success) {
                 player.sendMessage(ChatUtils.chatMessage(Lang.get("outpost.teleported", "name", outpost.getName())));
             } else {

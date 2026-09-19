@@ -45,7 +45,7 @@ public class GuiHomesClick {
 							player.closeInventory();
 							return;
 						}
-						AranarthUtils.teleportPlayer(player, player.getLocation(), bedSpawn, aranarthPlayer.isInAdminMode(), "&eBed Spawn", "&7You have teleported to your bed spawn", success -> {
+						AranarthUtils.teleportPlayer(player, player.getLocation(), bedSpawn, aranarthPlayer.isInAdminMode(), "&eBed Spawn", Lang.getFor(player, "player.tp_bed_success"), success -> {
 							if (success) {
 								player.sendMessage(ChatUtils.chatMessage(Lang.get("player.tp_bed_success")));
 							} else {
@@ -119,7 +119,7 @@ public class GuiHomesClick {
 							return;
 						}
 						// Same-server home
-						AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation(), aranarthPlayer.isInAdminMode(), home.getName(), "&7You have teleported to your home", success -> {
+						AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation(), aranarthPlayer.isInAdminMode(), home.getName(), Lang.getFor(player, "home.teleported", "name", home.getName()), success -> {
 							if (success) {
 								player.sendMessage(ChatUtils.chatMessage(Lang.get("home.teleported", "name", home.getName())));
 							} else {

@@ -128,7 +128,7 @@ public class GuiShopLocationClick {
 								}
 							});
 						} else {
-							AranarthUtils.teleportPlayer(player, player.getLocation(), shopLoc, aranarthPlayer.isInAdminMode(), shopName, "&7You have teleported to " + shopName, success -> {
+							AranarthUtils.teleportPlayer(player, player.getLocation(), shopLoc, aranarthPlayer.isInAdminMode(), shopName, Lang.getFor(player, "shop.teleported", "name", shopName), success -> {
 								if (success) {
 									player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.teleported", "name", shopName)));
 								} else {

@@ -65,7 +65,7 @@ public class CommandTpAccept implements CommandExecutor {
                     }
 
                     target.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.request_accepted_notify", "player", aranarthPlayer.getNickname())));
-                    AranarthUtils.teleportPlayer(player, player.getLocation(), target.getLocation(), aranarthPlayer.isInAdminMode(), targetNickname, "&7You have teleported to " + targetNickname, success -> {
+                    AranarthUtils.teleportPlayer(player, player.getLocation(), target.getLocation(), aranarthPlayer.isInAdminMode(), targetNickname, Lang.get("teleport.teleported_to", "player", targetNickname), success -> {
                         if (success) {
                             player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.teleported_to", "player", targetNickname)));
                             target.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.teleported_to_you", "player", aranarthPlayer.getNickname())));
@@ -112,7 +112,7 @@ public class CommandTpAccept implements CommandExecutor {
                         staleTask.cancel();
                         AranarthUtils.removeTeleportTask(player.getUniqueId());
                     }
-                    AranarthUtils.teleportPlayer(target, target.getLocation(), player.getLocation(), targetPlayer.isInAdminMode(), aranarthPlayer.getNickname(), "&7You have teleported to " + aranarthPlayer.getNickname(), success -> {
+                    AranarthUtils.teleportPlayer(target, target.getLocation(), player.getLocation(), targetPlayer.isInAdminMode(), aranarthPlayer.getNickname(), Lang.get("teleport.teleported_to", "player", aranarthPlayer.getNickname()), success -> {
                         if (success) {
                             target.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.teleported_to", "player", aranarthPlayer.getNickname())));
                             player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.teleported_to_you", "player", targetPlayer.getNickname())));

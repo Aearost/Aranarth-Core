@@ -25,6 +25,7 @@ Items & Crafting
 [+] Added honey block to sugar crafting recipe
 [~] Fixed incantations being applicable multiple times to the same item
 [~] Fixed over-leveled enchants being downgraded when applied via anvil
+[~] Included netherite elytras and enhanced elytras in the Aranarthium book
 
 Economy, Jobs & Quests
 [~] Fixed NPE in handleMarketUpdate on SMP by skipping sign refresh when shop world does not exist

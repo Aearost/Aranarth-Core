@@ -53,7 +53,7 @@ public class GuiWarpClick {
 								}
 							}
 
-							AranarthUtils.teleportPlayer(player, player.getLocation(), warp.getLocation(), aranarthPlayer.isInAdminMode(), warp.getName(), "&7You have teleported to " + warp.getName(), success -> {
+							AranarthUtils.teleportPlayer(player, player.getLocation(), warp.getLocation(), aranarthPlayer.isInAdminMode(), warp.getName(), Lang.getFor(player, "warp.teleported", "name", warp.getName()), success -> {
 								if (success) {
 									player.sendMessage(ChatUtils.chatMessage(Lang.get("warp.teleported", "name", warp.getName())));
 								} else {

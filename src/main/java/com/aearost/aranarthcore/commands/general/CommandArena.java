@@ -52,7 +52,7 @@ public class CommandArena implements CommandExecutor {
 			}
 
 			Location arenaSpawn = new Location(Bukkit.getWorld("arena"), 0.5, 105, 0.5, 180, 0);
-			AranarthUtils.teleportPlayer(player, player.getLocation(), arenaSpawn, aranarthPlayer.isInAdminMode(), "&e&lArena", "&7You have teleported to the Arena", success -> {
+			AranarthUtils.teleportPlayer(player, player.getLocation(), arenaSpawn, aranarthPlayer.isInAdminMode(), "&e&lArena", Lang.get("teleport.to_arena"), success -> {
 				if (success) {
 					player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.to_arena")));
 				} else {

@@ -312,7 +312,7 @@ public class CommandAdminTeleport {
 					Location loc = args.length == 5
 							? new Location(target.getWorld(), x, y, z)
 							: new Location(target.getWorld(), x, y, z, yaw, pitch);
-					AranarthUtils.teleportPlayer(target, target.getLocation(), loc, true, "&e&lCoordinates", "&7You have teleported to the input coordinates", success -> {
+					AranarthUtils.teleportPlayer(target, target.getLocation(), loc, true, "&e&lCoordinates", Lang.get("teleport.to_coordinates"), success -> {
 						if (success) {
 							sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.teleport_player_coords", "player", targetAranarthPlayer.getNickname())));
 							target.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.to_coordinates")));
@@ -367,7 +367,7 @@ public class CommandAdminTeleport {
 				Location loc = args.length == 4
 						? new Location(player.getWorld(), x, y, z)
 						: new Location(player.getWorld(), x, y, z, yaw, pitch);
-				AranarthUtils.teleportPlayer(player, player.getLocation(), loc, true, "&e&lCoordinates", "&7You have teleported to the input coordinates", success -> {
+				AranarthUtils.teleportPlayer(player, player.getLocation(), loc, true, "&e&lCoordinates", Lang.get("teleport.to_coordinates"), success -> {
 					if (success) {
 						player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.to_coordinates")));
 					} else {
