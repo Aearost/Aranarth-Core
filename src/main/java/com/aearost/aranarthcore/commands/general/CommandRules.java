@@ -27,9 +27,9 @@ public class CommandRules implements CommandExecutor {
 		sender.sendMessage(ChatUtils.translateToColor("&8[&65&8] &eKeep destruction during Dominion raids limited. The deliberate or excessive destruction of Dominion blocks is prohibited"));
 		sender.sendMessage(ChatUtils.translateToColor("&8[&66&8] &7Do not unnecessarily damage or litter the overworld. Use the Resource World for large-scale gathering"));
 		sender.sendMessage(ChatUtils.translateToColor("&8[&67&8] &eDo not use hacks, exploits, or anything providing an unfair advantage"));
-		sender.sendMessage(ChatUtils.translateToColor("&8[&68&8] &7Only client-side mods approved by the Council (staff) are permitted (i.e OptiFine, Shaders, MiniHUD, Litematica, Minimap, etc)"));
+		sender.sendMessage(ChatUtils.translateToColor("&8[&68&8] &7Only client-side mods approved by the Council (staff) are permitted. Pre-approved mods include OptiFine, Shaders, MiniHUD, Litematica, and Minimaps"));
 		sender.sendMessage(ChatUtils.translateToColor("&8[&69&8] &eRespect the Council and moderation decisions. Do not impersonate staff or intentionally interfere with moderation"));
-		sender.sendMessage(ChatUtils.translateToColor("&8[&610&8] &7Do not create lag-inducing builds or farms - the Council may remove any build that is found to be causing lag"));
+		sender.sendMessage(ChatUtils.translateToColor("&8[&610&8] &7Do not create lag-inducing builds or farms. The Council may remove any build that is found to be causing lag"));
 		return true;
 	}
 
