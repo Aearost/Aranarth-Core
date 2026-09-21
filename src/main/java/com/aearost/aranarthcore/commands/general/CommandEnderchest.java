@@ -40,7 +40,9 @@ public class CommandEnderchest implements CommandExecutor {
 				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.combat_tagged")));
 				return true;
 			}
-			player.openInventory(player.getEnderChest());
+			if (AranarthUtils.isSurvivalWorld(player.getLocation().getWorld().getName())) {
+				player.openInventory(player.getEnderChest());
+			}
 			return true;
 		}
 
