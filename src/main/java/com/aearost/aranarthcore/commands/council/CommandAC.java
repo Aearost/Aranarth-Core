@@ -36,7 +36,7 @@ public class CommandAC implements CommandExecutor {
 				return false;
 			}
 			if (!isCouncil && isArchitect) {
-				if (args.length == 0 || !args[0].equalsIgnoreCase("msg")) {
+				if (args.length == 0 || (!args[0].equalsIgnoreCase("msg") && !args[0].equalsIgnoreCase("speed"))) {
 					player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 					return false;
 				}
