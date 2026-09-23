@@ -301,7 +301,9 @@ public class PlayerAutoReplenishSlot {
                 // drinking a water bottle) before overwriting it with the replenished stack
                 ItemStack displaced = inventory.getItem(slot);
                 if (displaced != null && displaced.getType() != Material.AIR) {
-                    inventory.addItem(displaced);
+                    if (!inventory.addItem(displaced.clone()).isEmpty()) {
+                        return;
+                    }
                 }
                 inventory.setItem(slot, new ItemStack(contents[i]));
                 inventory.setItem(i, null);
@@ -331,6 +333,13 @@ public class PlayerAutoReplenishSlot {
                     ItemStack[] shulkerContents = shulkerInventory.getContents();
                     for (int j = 0; j < shulkerInventory.getSize(); j++) {
                         if (shulkerContents[j] != null && matcher.test(shulkerContents[j], referenceItem)) {
+                            // Preserve any item currently occupying the slot before overwriting it
+                            ItemStack displaced = inventory.getItem(slot);
+                            if (displaced != null && displaced.getType() != Material.AIR) {
+                                if (!inventory.addItem(displaced.clone()).isEmpty()) {
+                                    return;
+                                }
+                            }
                             inventory.setItem(slot, new ItemStack(shulkerContents[j]));
                             shulkerInventory.setItem(j, null);
                             shulker.update();
