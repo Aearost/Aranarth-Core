@@ -54,6 +54,7 @@ Cross-server & Technical
 [~] Fixed cross-server pronouns not being shown correctly in tab list
 [~] Fixed ping not being shown with /ping or in tab when in different servers
 [~] Fixed monthly saint expiry removing permanent saint rank
+[+] Added missing /heads permission for architects
 
 Miscellaneous
 [+] Fixed AFK color formatting
