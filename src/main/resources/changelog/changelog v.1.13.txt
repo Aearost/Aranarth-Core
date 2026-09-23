@@ -27,6 +27,7 @@ Items & Crafting
 [~] Fixed over-leveled enchants being downgraded when applied via anvil
 [~] Included netherite elytras and enhanced elytras in the Aranarthium book
 [~] Prevented enderchests from being opened in the arena world
+[~] Fixed incantations being stripped when crafting Aranarthium armour
 
 Economy, Jobs & Quests
 [~] Fixed NPE in handleMarketUpdate on SMP by skipping sign refresh when shop world does not exist

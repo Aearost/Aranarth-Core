@@ -19,10 +19,13 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.aearost.aranarthcore.objects.CustomKeys.ARANARTHIUM_INGOT;
 import static com.aearost.aranarthcore.objects.CustomKeys.ARMOR_TYPE;
+import static com.aearost.aranarthcore.objects.CustomKeys.INCANTATION_LEVEL;
+import static com.aearost.aranarthcore.objects.CustomKeys.INCANTATION_TYPE;
 import static com.aearost.aranarthcore.objects.CustomKeys.NETHERITE_ITEM;
 
 /**
@@ -313,6 +316,35 @@ public class AranarthiumArmourCraft {
     }
 
     /**
+     * Copies incantation PDC entries and lore from the source item to the result item.
+     */
+    private void transferIncantation(ItemStack source, ItemStack result) {
+        if (!source.hasItemMeta() || !result.hasItemMeta()) return;
+        ItemMeta sourceMeta = source.getItemMeta();
+        if (!sourceMeta.getPersistentDataContainer().has(INCANTATION_TYPE)) return;
+
+        ItemMeta resultMeta = result.getItemMeta();
+        String incantationType = sourceMeta.getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
+        int incantationLevel = sourceMeta.getPersistentDataContainer().get(INCANTATION_LEVEL, PersistentDataType.INTEGER);
+        resultMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, incantationType);
+        resultMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, incantationLevel);
+
+        // Copy incantation lore lines - any line in source that isn't already in result
+        List<String> sourceLore = sourceMeta.getLore();
+        List<String> resultLore = resultMeta.getLore();
+        if (sourceLore != null && resultLore != null) {
+            for (String loreLine : sourceLore) {
+                if (!resultLore.contains(loreLine)) {
+                    resultLore.add(loreLine);
+                }
+            }
+            resultMeta.setLore(resultLore);
+        }
+
+        result.setItemMeta(resultMeta);
+    }
+
+    /**
      * Determines if the input slot is an enhanced Aranarthium ingot.
      *
      * @param item The item in the anvil to be verified.
@@ -354,6 +386,7 @@ public class AranarthiumArmourCraft {
                 }
                 netheriteElytra.setItemMeta(resultMeta);
             }
+            transferIncantation(armor, netheriteElytra);
             return netheriteElytra;
         }
         String ingotName = ingot.getItemMeta().getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING);
@@ -477,6 +510,7 @@ public class AranarthiumArmourCraft {
             }
             enhancedAranarthiumArmor.setItemMeta(resultMeta);
         }
+        transferIncantation(armor, enhancedAranarthiumArmor);
 
         return enhancedAranarthiumArmor;
     }
