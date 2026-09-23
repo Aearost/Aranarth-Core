@@ -64,9 +64,14 @@ public class GuiReaper {
         ItemMeta dropMeta = dropButton.getItemMeta();
         dropMeta.setDisplayName(Lang.getFor(player, "gui.reaper.drop"));
         String worldName = deathLocation.getWorld() != null ? deathLocation.getWorld().getName() : "world";
+        int dx = deathLocation.getBlockX();
+        int dy = deathLocation.getBlockY();
+        int dz = deathLocation.getBlockZ();
         dropMeta.setLore(Arrays.asList(
                 ChatUtils.translateToColor("&7Drops your items at your death location"),
-                ChatUtils.translateToColor("&7and discards this Reaper Inventory")
+                ChatUtils.translateToColor("&7and discards this Reaper Inventory"),
+                ChatUtils.translateToColor("&7Location: &e" + worldName + " (" + dx + ", " + dy + ", " + dz + ")"),
+                ChatUtils.translateToColor("&0world:" + worldName + " x:" + deathLocation.getX() + " y:" + deathLocation.getY() + " z:" + deathLocation.getZ())
         ));
         dropButton.setItemMeta(dropMeta);
         inv.setItem(47, dropButton);

@@ -45,6 +45,7 @@ Quality of Life
 [+] Added support for fences when using the Wrench
 [+] Added support for walls when using the Wrench
 [+] Added support to dye/re-dye placed down shulkers by clicking them with dye
+[~] Fixed Reaper drop-to-death-location button doing nothing due to missing location lore line
 
 Cross-server & Technical
 [~] Removed all hardcoded text and set up AranarthCore for internationalization, storing all strings in lang files
