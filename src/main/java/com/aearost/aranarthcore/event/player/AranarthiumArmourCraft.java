@@ -283,12 +283,13 @@ public class AranarthiumArmourCraft {
                 }
                 return true;
             }
-            // Any elytra without an ARMOR_TYPE tag (plain or Netherite Elytra) is valid input
+            // Only a Netherite Elytra (has NETHERITE_ITEM tag, no ARMOR_TYPE tag) is valid input
             if (type == Material.ELYTRA) {
-				if (!item.hasItemMeta()) {
-					return true;
-				}
-                return !item.getItemMeta().getPersistentDataContainer().has(ARMOR_TYPE);
+                if (!item.hasItemMeta()) {
+                    return false;
+                }
+                var pdc = item.getItemMeta().getPersistentDataContainer();
+                return pdc.has(NETHERITE_ITEM) && !pdc.has(ARMOR_TYPE);
             }
         }
         return false;

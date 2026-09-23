@@ -28,6 +28,7 @@ Items & Crafting
 [~] Included netherite elytras and enhanced elytras in the Aranarthium book
 [~] Prevented enderchests from being opened in the arena world
 [~] Fixed incantations being stripped when crafting Aranarthium armour
+[~] Prevented elytras from being directly upgraded to Aranarthium without crafting a Netherite Elytra first
 
 Economy, Jobs & Quests
 [~] Fixed NPE in handleMarketUpdate on SMP by skipping sign refresh when shop world does not exist
