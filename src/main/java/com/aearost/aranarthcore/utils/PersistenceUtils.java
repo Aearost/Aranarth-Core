@@ -374,6 +374,7 @@ public class PersistenceUtils {
                     float survivalExpProgress = fields.length > 30 ? Float.parseFloat(fields[29]) : 0.0f;
                     boolean isBarbarian = fields.length > 31 && fields[30].equals("1");
                     long barbarianCooldownEnd = fields.length > 32 ? Long.parseLong(fields[31]) : 0L;
+                    int permanentSaintRank = fields.length > 33 ? Integer.parseInt(fields[32]) : 0;
                     AranarthUtils.getPlayer(uuid).setConquestDisbandCooldownEnd(conquestDisbandCooldownEnd);
                     AranarthUtils.getPlayer(uuid).setSurvivalEnderChest(survivalEnderChest);
                     AranarthUtils.getPlayer(uuid).setSurvivalHealth(survivalHealth);
@@ -383,6 +384,7 @@ public class PersistenceUtils {
                     AranarthUtils.getPlayer(uuid).setSurvivalExpProgress(survivalExpProgress);
                     AranarthUtils.getPlayer(uuid).setBarbarian(isBarbarian);
                     AranarthUtils.getPlayer(uuid).setBarbarianCooldownEnd(barbarianCooldownEnd);
+                    AranarthUtils.getPlayer(uuid).setPermanentSaintRank(permanentSaintRank);
                 } catch (Exception e) {
                     // Skip malformed rows without aborting the rest of the load
                     Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Load] Skipping malformed player row (first 40 chars: "
@@ -506,6 +508,7 @@ public class PersistenceUtils {
         float survivalExpProgress = aranarthPlayer.getSurvivalExpProgress();
         int barbarianValue = aranarthPlayer.isBarbarian() ? 1 : 0;
         long barbarianCooldownEnd = aranarthPlayer.getBarbarianCooldownEnd();
+        int permanentSaintRank = aranarthPlayer.getPermanentSaintRank();
         return uuidStr + "|" + nickname + "|" + survivalInventory + "|" + arenaInventory + "|"
                 + creativeInventory + "|" + potions + "|" + arrows + "|" + blacklist + "|" + blacklistingMethod
                 + "|" + balance + "|" + rank + "|" + saint + "|" + council + "|" + architect + "|"
@@ -514,7 +517,7 @@ public class PersistenceUtils {
                 + firstJoinDate + "|" + conquestDisbandCooldownEnd + "|" + survivalEnderChest + "|"
                 + survivalHealth + "|" + survivalFoodLevel + "|" + survivalSaturation + "|"
                 + survivalExpLevel + "|" + survivalExpProgress + "|"
-                + barbarianValue + "|" + barbarianCooldownEnd + "|"
+                + barbarianValue + "|" + barbarianCooldownEnd + "|" + permanentSaintRank + "|"
                 // Keep pronouns at the end and add before this
                 + pronouns;
     }
@@ -570,7 +573,7 @@ public class PersistenceUtils {
                 boolean writeSucceeded = false;
                 try (FileWriter writer = new FileWriter(tempFile)) {
                     // Template line
-                    writer.write("#uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|perks|saintExpirationDate|isCompressingItems|votePointsSpent|spawnBoostValue|firstJoinDate|pronouns\n");
+                    writer.write("#uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|perks|saintExpirationDate|isCompressingItems|votePointsSpent|spawnBoostValue|firstJoinDate|conquestDisbandCooldownEnd|survivalEnderChest|survivalHealth|survivalFoodLevel|survivalSaturation|survivalExpLevel|survivalExpProgress|barbarianValue|barbarianCooldownEnd|permanentSaintRank|pronouns\n");
 
                     for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
                         String row = buildAranarthPlayerRow(entry.getKey(), entry.getValue()) + "\n";
@@ -5225,6 +5228,7 @@ public class PersistenceUtils {
             json.addProperty("architectRank", ap.getArchitectRank());
             json.addProperty("muteEndDate", ap.getMuteEndDate() != null ? ap.getMuteEndDate() : "");
             json.addProperty("saintExpireDate", ap.getSaintExpireDate());
+            json.addProperty("permanentSaintRank", ap.getPermanentSaintRank());
             json.addProperty("firstJoinDate", ap.getFirstJoinDate() != null ? ap.getFirstJoinDate() : "");
             json.addProperty("votePointsSpent", ap.getVotePointsSpent());
             json.addProperty("isCompressingItems", ap.isCompressingItems());
@@ -7070,6 +7074,7 @@ public class PersistenceUtils {
         float survivalExpProgress = fields.length > 30 ? Float.parseFloat(fields[29]) : 0.0f;
         boolean isBarbarian = fields.length > 31 && fields[30].equals("1");
         long barbarianCooldownEnd = fields.length > 32 ? Long.parseLong(fields[31]) : 0L;
+        int permanentSaintRank = fields.length > 33 ? Integer.parseInt(fields[32]) : 0;
         AranarthUtils.getPlayer(uuid).setConquestDisbandCooldownEnd(conquestDisbandCooldownEnd);
         AranarthUtils.getPlayer(uuid).setSurvivalEnderChest(survivalEnderChest);
         AranarthUtils.getPlayer(uuid).setSurvivalHealth(survivalHealth);
@@ -7079,6 +7084,7 @@ public class PersistenceUtils {
         AranarthUtils.getPlayer(uuid).setSurvivalExpProgress(survivalExpProgress);
         AranarthUtils.getPlayer(uuid).setBarbarian(isBarbarian);
         AranarthUtils.getPlayer(uuid).setBarbarianCooldownEnd(barbarianCooldownEnd);
+        AranarthUtils.getPlayer(uuid).setPermanentSaintRank(permanentSaintRank);
     }
 
     /**

@@ -67,6 +67,7 @@ public class AranarthPlayer {
     private HashMap<Perk, Integer> perks = new HashMap<>();
     private boolean isInAdminMode = false;
     private long saintExpireDate;
+    private int permanentSaintRank;
     private long conquestDisbandCooldownEnd = 0;
     private boolean isCompressingItems = true;
     private int bulkTransactionNum = 0;
@@ -184,6 +185,7 @@ public class AranarthPlayer {
         this.perks = new HashMap<>();
         this.isInAdminMode = false;
         this.saintExpireDate = 0;
+        this.permanentSaintRank = 0;
         this.isCompressingItems = true;
         this.bulkTransactionNum = 0;
         this.votePointsSpent = 0;
@@ -1123,6 +1125,23 @@ public class AranarthPlayer {
      */
     public void setSaintExpireDate(long saintExpireDate) {
         this.saintExpireDate = saintExpireDate;
+    }
+
+    /**
+     * Provides the player's permanent saint rank which is the fallback when a monthly saint rank expires.
+     * @return The permanent saint rank.
+     */
+    public int getPermanentSaintRank() {
+        return permanentSaintRank;
+    }
+
+    /**
+     * Updates the player's permanent saint rank.
+     *
+     * @param permanentSaintRank The permanent saint rank (0-3).
+     */
+    public void setPermanentSaintRank(int permanentSaintRank) {
+        this.permanentSaintRank = permanentSaintRank;
     }
 
     /**

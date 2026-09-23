@@ -96,7 +96,18 @@ public class CommandRankSet {
                                 AranarthUtils.compressAllMaterials(player.getUniqueId());
                             }
 
-                            aranarthPlayer.setSaintRank(rank);
+                            aranarthPlayer.setPermanentSaintRank(rank);
+                            // Keep a monthly rank if still active and higher, otherwise apply permanent now
+                            long now = Instant.now().toEpochMilli();
+                            boolean monthlyActive = aranarthPlayer.getSaintExpireDate() != 0
+                                    && aranarthPlayer.getSaintExpireDate() > now;
+                            if (monthlyActive && aranarthPlayer.getSaintRank() > rank) {
+                                // Monthly is higher - keep active rank as-is
+                            } else {
+                                // Clear monthly and apply permanent
+                                aranarthPlayer.setSaintExpireDate(0);
+                                aranarthPlayer.setSaintRank(rank);
+                            }
                             DiscordUtils.updateSaint(player, rank, true);
                             isSuccessful = true;
                         } else {
@@ -131,15 +142,18 @@ public class CommandRankSet {
                     // Limited from 0 to 3
                     else if (args[1].equals("saintmonth")) {
                         if (rank <= 3) {
-                            aranarthPlayer.setSaintRank(rank);
                             if (rank == 0) {
                                 aranarthPlayer.setSaintExpireDate(0);
+                                // Fall back to permanent rank when monthly is removed
+                                aranarthPlayer.setSaintRank(aranarthPlayer.getPermanentSaintRank());
                             } else {
                                 if (rank == 3) {
                                     AranarthUtils.compressAllMaterials(player.getUniqueId());
                                 }
                                 Instant end = Instant.now().plusSeconds(2592000);
                                 aranarthPlayer.setSaintExpireDate(end.toEpochMilli());
+                                // Active rank is the higher of the monthly or permanent rank
+                                aranarthPlayer.setSaintRank(Math.max(rank, aranarthPlayer.getPermanentSaintRank()));
                                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                             }
                             DiscordUtils.updateSaint(player, rank, !silent);

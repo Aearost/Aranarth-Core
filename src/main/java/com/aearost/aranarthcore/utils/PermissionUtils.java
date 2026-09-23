@@ -1048,7 +1048,7 @@ public class PermissionUtils {
             Instant now = Instant.now();
             if (now.isAfter(Instant.ofEpochMilli(aranarthPlayer.getSaintExpireDate()))) {
                 aranarthPlayer.setSaintExpireDate(0);
-                aranarthPlayer.setSaintRank(0);
+                aranarthPlayer.setSaintRank(aranarthPlayer.getPermanentSaintRank());
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 player.sendMessage(ChatUtils.chatMessage(Lang.get("rank.saint_expired")));
             }

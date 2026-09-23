@@ -53,6 +53,7 @@ Cross-server & Technical
 [~] Fixed smp_restart_inv data truncation by expanding network_temp_data.value_json to MEDIUMTEXT
 [~] Fixed cross-server pronouns not being shown correctly in tab list
 [~] Fixed ping not being shown with /ping or in tab when in different servers
+[~] Fixed monthly saint expiry removing permanent saint rank
 
 Miscellaneous
 [+] Fixed AFK color formatting
