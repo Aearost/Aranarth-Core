@@ -109,10 +109,11 @@ public class CommandShop implements CommandExecutor {
         }
 
         if (args[0].equalsIgnoreCase("create")) {
-            if (!aranarthPlayer.isInAdminMode()) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.creation_disabled")));
-                return true;
-            }
+//            // Disable shop creation
+//            if (!aranarthPlayer.isInAdminMode()) {
+//                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.creation_disabled")));
+//                return true;
+//            }
             if (aranarthPlayer.getRank() < 3 && !aranarthPlayer.isInAdminMode()) {
                 String suffix = aranarthPlayer.getPronouns() == Pronouns.FEMALE ? "ess" : "";
                 player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.rank_required", "suffix", suffix)));
