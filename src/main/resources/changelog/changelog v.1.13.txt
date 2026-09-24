@@ -22,6 +22,7 @@ Dominion
 [+] Added Resources shortcut button to the dominion GUI
 [~] Fixed dominion relation/role permissions reverting to defaults on reload
 [+] Added dominion flag control per outpost as well
+[~] Reduced mountain biome emerald ore drops to 50% chance of 1 per claim
 
 Items & Crafting
 [+] Added item trade system with /trade command
