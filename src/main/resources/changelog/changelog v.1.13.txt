@@ -63,6 +63,7 @@ Cross-server & Technical
 [+] Added missing /heads permission for architects
 [+] Added /ac speed for architects
 [~] Fixed custom Discord emojis not resolving when typed in-game chat
+[~] Fixed issue where online player checks were displaying two messages and not one in server chat
 
 Miscellaneous
 [+] Fixed AFK color formatting

@@ -56,11 +56,13 @@ public class DiscordChatListener {
         String discordName = member != null ? member.getEffectiveName() : e.getMessage().getAuthor().getName();
         String content = ChatUtils.stripColorFormatting(e.getMessage().getContentDisplay());
 
-        // Handle player list commands from Discord
+        // Handle player list commands from Discord - only respond from the Survival server to avoid duplicate replies
         String trimmed = content.trim().toLowerCase();
         if (trimmed.equals("!online") || trimmed.equals("!playerlist") || trimmed.equals("!list")) {
             e.getMessage().delete().queue();
-            sendOnlinePlayersToDiscord(chatChannel);
+            if (!AranarthCore.isSmpServer()) {
+                sendOnlinePlayersToDiscord(chatChannel);
+            }
             return;
         }
 
