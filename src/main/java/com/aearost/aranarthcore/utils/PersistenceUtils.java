@@ -1195,7 +1195,10 @@ public class PersistenceUtils {
                         worldEventStartTime = Long.parseLong(parts[1]);
                     }
                     case "worldEventType" -> {
-                        try { worldEventType = WorldEvent.valueOf(parts[1]); } catch (IllegalArgumentException ignored) {}
+                        try {
+                            worldEventType = WorldEvent.valueOf(parts[1]);
+                        } catch (IllegalArgumentException ignored) {
+                        }
                     }
                     case "worldEventIntensity" -> {
                         worldEventIntensity = Integer.parseInt(parts[1]);
@@ -1586,14 +1589,16 @@ public class PersistenceUtils {
                     for (String s : fields[41].split(",")) {
                         try {
                             dominion.getClaimFoodYields().add(Double.parseDouble(s));
-                        } catch (NumberFormatException ignored) {}
+                        } catch (NumberFormatException ignored) {
+                        }
                     }
                 }
                 if (fields.length > 42 && !fields[42].isEmpty()) {
                     for (String s : fields[42].split(",")) {
                         try {
                             dominion.getDisabledResourceCategories().add(DominionResourceCategory.valueOf(s));
-                        } catch (IllegalArgumentException ignored) {}
+                        } catch (IllegalArgumentException ignored) {
+                        }
                     }
                 }
                 dominion.setMemberPvpEnabled(memberPvpEnabled);
@@ -1822,11 +1827,11 @@ public class PersistenceUtils {
                 + "|" + dominion.getMapColor()
                 + "|" + (dominion.isExplosionEnabled() ? "1" : "0")
                 + "|" + dominion.getClaimFoodYields().stream()
-                        .map(v -> String.format("%.4f", v))
-                        .collect(java.util.stream.Collectors.joining(","))
+                .map(v -> String.format("%.4f", v))
+                .collect(java.util.stream.Collectors.joining(","))
                 + "|" + dominion.getDisabledResourceCategories().stream()
-                        .map(Enum::name)
-                        .collect(java.util.stream.Collectors.joining(","));
+                .map(Enum::name)
+                .collect(java.util.stream.Collectors.joining(","));
     }
 
     /**
@@ -4839,7 +4844,7 @@ public class PersistenceUtils {
                     continue;
                 }
 
-                // #id|dominionId|name|outpostIndex|worldName|homeX|homeY|homeZ|homeYaw|homePitch|chunks|createdTimestamp|boughtChunks|icon
+                // #id|dominionId|name|outpostIndex|worldName|homeX|homeY|homeZ|homeYaw|homePitch|chunks|createdTimestamp|boughtChunks|icon|mobSpawningEnabled|memberPvpEnabled|bendingEnabled|explosionEnabled
                 String[] fields = row.split("\\|", -1);
                 if (fields.length < 12) {
                     continue;
@@ -4882,12 +4887,21 @@ public class PersistenceUtils {
                     }
                 }
 
+                boolean mobSpawningEnabled = fields.length > 14 && Boolean.parseBoolean(fields[14]);
+                boolean memberPvpEnabled = fields.length > 15 && Boolean.parseBoolean(fields[15]);
+                boolean bendingEnabled = fields.length > 16 && Boolean.parseBoolean(fields[16]);
+                boolean explosionEnabled = fields.length > 17 && Boolean.parseBoolean(fields[17]);
+
                 Outpost outpost = new Outpost(
                         id, name, dominionId, outpostIndex,
                         worldName, homeX, homeY, homeZ, homeYaw, homePitch,
                         chunks, boughtChunks, createdTimestamp
                 );
                 outpost.setIcon(icon);
+                outpost.setMobSpawningEnabled(mobSpawningEnabled);
+                outpost.setMemberPvpEnabled(memberPvpEnabled);
+                outpost.setBendingEnabled(bendingEnabled);
+                outpost.setExplosionEnabled(explosionEnabled);
                 OutpostUtils.registerOutpost(outpost);
             }
 
@@ -4927,7 +4941,7 @@ public class PersistenceUtils {
 
         try {
             FileWriter writer = new FileWriter(filePath);
-            writer.write("#id|dominionId|name|outpostIndex|worldName|homeX|homeY|homeZ|homeYaw|homePitch|chunks|createdTimestamp|boughtChunks|icon\n");
+            writer.write("#id|dominionId|name|outpostIndex|worldName|homeX|homeY|homeZ|homeYaw|homePitch|chunks|createdTimestamp|boughtChunks|icon|mobSpawningEnabled|memberPvpEnabled|bendingEnabled|explosionEnabled\n");
 
             for (Dominion dominion : DominionUtils.getDominions()) {
                 // Skip cross-server stubs to avoid overwriting valid outpost data
@@ -4961,7 +4975,11 @@ public class PersistenceUtils {
                             + chunks + "|"
                             + outpost.getCreatedTimestamp() + "|"
                             + outpost.getBoughtChunks() + "|"
-                            + outpost.getIcon().name() + "\n";
+                            + outpost.getIcon().name() + "|"
+                            + outpost.isMobSpawningEnabled() + "|"
+                            + outpost.isMemberPvpEnabled() + "|"
+                            + outpost.isBendingEnabled() + "|"
+                            + outpost.isExplosionEnabled() + "\n";
                     writer.write(row);
                 }
             }
@@ -6730,6 +6748,10 @@ public class PersistenceUtils {
         obj.addProperty("createdTimestamp", outpost.getCreatedTimestamp());
         obj.addProperty("boughtChunks", outpost.getBoughtChunks());
         obj.addProperty("icon", outpost.getIcon().name());
+        obj.addProperty("mobSpawningEnabled", outpost.isMobSpawningEnabled());
+        obj.addProperty("memberPvpEnabled", outpost.isMemberPvpEnabled());
+        obj.addProperty("bendingEnabled", outpost.isBendingEnabled());
+        obj.addProperty("explosionEnabled", outpost.isExplosionEnabled());
         JsonArray chunks = new JsonArray();
         for (Chunk chunk : outpost.getChunks()) {
             JsonObject c = new JsonObject();
@@ -6786,10 +6808,18 @@ public class PersistenceUtils {
                     }
                 }
             }
+            boolean mobSpawningEnabled = obj.has("mobSpawningEnabled") && obj.get("mobSpawningEnabled").getAsBoolean();
+            boolean memberPvpEnabled = obj.has("memberPvpEnabled") && obj.get("memberPvpEnabled").getAsBoolean();
+            boolean bendingEnabled = obj.has("bendingEnabled") && obj.get("bendingEnabled").getAsBoolean();
+            boolean explosionEnabled = obj.has("explosionEnabled") && obj.get("explosionEnabled").getAsBoolean();
             Outpost outpost = new Outpost(id, name, dominionId, outpostIndex,
                     worldName, homeX, homeY, homeZ, homeYaw, homePitch, chunks, boughtChunks, createdTimestamp);
             outpost.setStoredChunkCount(jsonChunkCount);
             outpost.setIcon(icon);
+            outpost.setMobSpawningEnabled(mobSpawningEnabled);
+            outpost.setMemberPvpEnabled(memberPvpEnabled);
+            outpost.setBendingEnabled(bendingEnabled);
+            outpost.setExplosionEnabled(explosionEnabled);
             OutpostUtils.registerOutpost(outpost);
         } catch (Exception e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Net] Failed to parse outpost from JSON: " + e.getMessage());
@@ -8155,7 +8185,8 @@ public class PersistenceUtils {
                     int intensity = obj.has("worldEventIntensity") ? obj.get("worldEventIntensity").getAsInt() : 1;
                     AranarthUtils.setActiveWorldEvent(event);
                     AranarthUtils.setActiveWorldEventIntensity(intensity);
-                } catch (IllegalArgumentException ignored) {}
+                } catch (IllegalArgumentException ignored) {
+                }
             }
             Bukkit.getLogger().info("[AC] Server date initialized from MySQL");
         } catch (Exception e) {
@@ -8352,14 +8383,16 @@ public class PersistenceUtils {
             for (String s : fields[41].split(",")) {
                 try {
                     dominion.getClaimFoodYields().add(Double.parseDouble(s));
-                } catch (NumberFormatException ignored) {}
+                } catch (NumberFormatException ignored) {
+                }
             }
         }
         if (fields.length > 42 && !fields[42].isEmpty()) {
             for (String s : fields[42].split(",")) {
                 try {
                     dominion.getDisabledResourceCategories().add(DominionResourceCategory.valueOf(s));
-                } catch (IllegalArgumentException ignored) {}
+                } catch (IllegalArgumentException ignored) {
+                }
             }
         }
         dominion.setMemberPvpEnabled(memberPvpEnabled);

@@ -3,16 +3,12 @@ package com.aearost.aranarthcore.utils;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
+import com.aearost.aranarthcore.objects.Outpost;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Particle;
+import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -20,12 +16,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class AranarthBendingUtils {
 
@@ -282,7 +273,12 @@ public class AranarthBendingUtils {
      * @return Whether bending should be blocked at that location.
      */
     public static boolean isBendingBlockedAtLocation(Player player, Location location) {
-        Dominion dominion = DominionUtils.getDominionOfChunk(location.getChunk());
+        Chunk chunk = location.getChunk();
+        Outpost outpost = OutpostUtils.getOutpostOfChunk(chunk);
+        if (outpost != null) {
+            return !outpost.isBendingEnabled();
+        }
+        Dominion dominion = DominionUtils.getDominionOfChunk(chunk);
         if (dominion == null) {
             return false;
         }
@@ -389,8 +385,7 @@ public class AranarthBendingUtils {
         return switch (mat) {
             case GRASS_BLOCK, SHORT_GRASS, TALL_GRASS, FERN, LARGE_FERN,
                  VINE, GLOW_LICHEN, LILY_PAD, SEAGRASS, TALL_SEAGRASS,
-                 HANGING_ROOTS, BIG_DRIPLEAF, SMALL_DRIPLEAF ->
-                    true;
+                 HANGING_ROOTS, BIG_DRIPLEAF, SMALL_DRIPLEAF -> true;
             default -> AranarthUtils.isFlower(mat);
         };
     }

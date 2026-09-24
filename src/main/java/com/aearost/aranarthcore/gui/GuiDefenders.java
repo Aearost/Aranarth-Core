@@ -2,9 +2,11 @@ package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.objects.DefenderType;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.Outpost;
 import com.aearost.aranarthcore.utils.DefenderUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.OutpostUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -13,8 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * GUI displaying all Defender types for a Dominion, with purchase and sell options.
@@ -24,9 +25,33 @@ public class GuiDefenders {
     public static final String TITLE_PREFIX_KEY = "gui.defenders.title";
     private static final int[] DEFENDER_SLOTS = {11, 13, 15, 20, 22, 24, 29, 31, 33};
 
+    private static final Map<UUID, UUID> playerOutpostContext = new HashMap<>();
+
+    /**
+     * Opens the defenders GUI with the given area context.
+     */
+    public static void open(Player player, Outpost assignTo) {
+        if (assignTo != null) {
+            playerOutpostContext.put(player.getUniqueId(), assignTo.getId());
+        } else {
+            playerOutpostContext.remove(player.getUniqueId());
+        }
+        open(player);
+    }
+
+    /**
+     * Returns the outpost that was last selected.
+     */
+    public static Outpost getContext(UUID playerId) {
+        UUID outpostId = playerOutpostContext.get(playerId);
+        return outpostId != null ? OutpostUtils.getOutpostById(outpostId) : null;
+    }
+
     public static void open(Player player) {
         Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
-        if (dominion == null) return;
+        if (dominion == null) {
+            return;
+        }
 
         int total = DefenderUtils.getTotalDefenderCount(dominion.getId());
         int limit = DefenderUtils.getDefenderLimit(dominion.getDominionLevel());

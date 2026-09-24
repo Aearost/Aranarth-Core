@@ -1,16 +1,8 @@
 package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
-import com.aearost.aranarthcore.objects.Dominion;
-import com.aearost.aranarthcore.objects.DominionPermission;
-import com.aearost.aranarthcore.objects.DominionRank;
-import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
-import com.aearost.aranarthcore.utils.Lang;
-import com.aearost.aranarthcore.utils.DominionUtils;
-import com.aearost.aranarthcore.utils.MountUtils;
-import com.aearost.aranarthcore.utils.ShopUtils;
+import com.aearost.aranarthcore.objects.*;
+import com.aearost.aranarthcore.utils.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
@@ -26,11 +18,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPlaceEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
-import org.bukkit.event.player.PlayerBucketEmptyEvent;
-import org.bukkit.event.player.PlayerBucketFillEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerTakeLecternBookEvent;
+import org.bukkit.event.player.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +36,9 @@ public class DominionProtectionListener implements Listener {
     private static final long DENY_MESSAGE_COOLDOWN_MS = 1000L;
     private final Map<UUID, Long> lastDenyMessageTime = new HashMap<>();
 
-    /** Players who have been standing on the ground inside a dominion since last entering one. */
+    /**
+     * Players who have been standing on the ground inside a dominion since last entering one.
+     */
 
     public DominionProtectionListener(AranarthCore plugin) {
         Bukkit.getPluginManager().registerEvents(this, plugin);
@@ -340,10 +330,14 @@ public class DominionProtectionListener implements Listener {
         Dominion targetDominion = DominionUtils.getPlayerDominion(target.getUniqueId());
         AranarthPlayer aranarthTarget = AranarthUtils.getPlayer(target.getUniqueId());
 
-        // Same dominion, check the single dominion-wide PvP flag
+        // Same dominion - check per-area PvP flag (outpost overrides dominion flag)
         if (attackerDominion != null && targetDominion != null
                 && attackerDominion.isSameDominion(targetDominion)) {
-            if (!attackerDominion.isMemberPvpEnabled()) {
+            Outpost fightOutpost = OutpostUtils.getOutpostOfChunk(attacker.getLocation().getChunk());
+            boolean pvpEnabled = (fightOutpost != null && fightOutpost.getDominionId().equals(attackerDominion.getId()))
+                    ? fightOutpost.isMemberPvpEnabled()
+                    : attackerDominion.isMemberPvpEnabled();
+            if (!pvpEnabled) {
                 e.setCancelled(true);
                 attacker.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.cannot_harm_pvp_disabled", "target", aranarthTarget.getNickname(), "name", attackerDominion.getName())));
             }
@@ -528,10 +522,14 @@ public class DominionProtectionListener implements Listener {
                 ? MountUtils.getDisplayName(mountOwner.getUniqueId(), mountInfo[1])
                 : ChatUtils.getFormattedItemName(e.getEntity().getType().name());
 
-        // Same dominion - check the dominion-wide PvP flag
+        // Same dominion - check per-area PvP flag (outpost overrides dominion flag)
         if (attackerDominion != null && ownerDominion != null
                 && attackerDominion.isSameDominion(ownerDominion)) {
-            if (!attackerDominion.isMemberPvpEnabled()) {
+            Outpost fightOutpost = OutpostUtils.getOutpostOfChunk(attacker.getLocation().getChunk());
+            boolean pvpEnabled = (fightOutpost != null && fightOutpost.getDominionId().equals(attackerDominion.getId()))
+                    ? fightOutpost.isMemberPvpEnabled()
+                    : attackerDominion.isMemberPvpEnabled();
+            if (!pvpEnabled) {
                 e.setCancelled(true);
                 attacker.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.cannot_harm_pet", "owner", aranarthOwner.getNickname(), "pet", mountTypeName, "name", attackerDominion.getName())));
             }
@@ -759,10 +757,16 @@ public class DominionProtectionListener implements Listener {
         if (!isNaturalSpawn || e.getEntity().getSpawnCategory() != SpawnCategory.MONSTER) {
             return;
         }
-        // Only hostile mobs will make it this far
-        Dominion chunkDominion = DominionUtils.getDominionOfChunkAnywhere(e.getLocation().getChunk());
-        if (chunkDominion != null) {
-            if (!chunkDominion.isMobSpawningEnabled()) {
+        // Only hostile mobs will make it this far - check per-outpost flag first, then dominion flag
+        Chunk spawnChunk = e.getLocation().getChunk();
+        Outpost spawnOutpost = OutpostUtils.getOutpostOfChunk(spawnChunk);
+        if (spawnOutpost != null) {
+            if (!spawnOutpost.isMobSpawningEnabled()) {
+                e.setCancelled(true);
+            }
+        } else {
+            Dominion chunkDominion = DominionUtils.getDominionOfChunk(spawnChunk);
+            if (chunkDominion != null && !chunkDominion.isMobSpawningEnabled()) {
                 e.setCancelled(true);
             }
         }

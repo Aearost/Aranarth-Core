@@ -30,6 +30,10 @@ public class Outpost {
     private final long createdTimestamp;
     private Material icon;
     private Set<Biome> cachedBiomes = new HashSet<>();
+    private boolean mobSpawningEnabled;
+    private boolean memberPvpEnabled;
+    private boolean bendingEnabled;
+    private boolean explosionEnabled;
 
     public Outpost(UUID id, String name, UUID dominionId, int outpostIndex,
                    String worldName, double homeX, double homeY, double homeZ,
@@ -132,5 +136,37 @@ public class Outpost {
 
     public void setCachedBiomes(Set<Biome> cachedBiomes) {
         this.cachedBiomes = cachedBiomes;
+    }
+
+    public boolean isMobSpawningEnabled() {
+        return mobSpawningEnabled;
+    }
+
+    public void setMobSpawningEnabled(boolean mobSpawningEnabled) {
+        this.mobSpawningEnabled = mobSpawningEnabled;
+    }
+
+    public boolean isMemberPvpEnabled() {
+        return memberPvpEnabled;
+    }
+
+    public void setMemberPvpEnabled(boolean memberPvpEnabled) {
+        this.memberPvpEnabled = memberPvpEnabled;
+    }
+
+    public boolean isBendingEnabled() {
+        return bendingEnabled;
+    }
+
+    public void setBendingEnabled(boolean bendingEnabled) {
+        this.bendingEnabled = bendingEnabled;
+    }
+
+    public boolean isExplosionEnabled() {
+        return explosionEnabled;
+    }
+
+    public void setExplosionEnabled(boolean explosionEnabled) {
+        this.explosionEnabled = explosionEnabled;
     }
 }

@@ -1,9 +1,12 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.gui.GuiDefenderAreaSelect;
 import com.aearost.aranarthcore.gui.GuiDefenders;
-import com.aearost.aranarthcore.gui.GuiDominionPermissions;
 import com.aearost.aranarthcore.objects.*;
-import com.aearost.aranarthcore.utils.*;
+import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DefenderUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -45,7 +48,7 @@ public class GuiDefendersClick {
 
         // Back button
         if (clicked.getType() == Material.BARRIER) {
-            new GuiDominionPermissions(player).openGui();
+            GuiDefenderAreaSelect.open(player);
             player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
             return;
         }
@@ -62,19 +65,8 @@ public class GuiDefendersClick {
             return;
         }
 
-        // Determine which territory the player is currently standing in
-        Outpost outpostPlayerIsIn = OutpostUtils.getOutpostPlayerIsIn(player);
-        boolean inMainDominion = DominionUtils.getDominionOfChunk(player.getLocation().getChunk()) != null
-                && DominionUtils.getDominionOfChunk(player.getLocation().getChunk()).getId().equals(dominion.getId());
-        boolean inOwnOutpost = outpostPlayerIsIn != null && outpostPlayerIsIn.getDominionId().equals(dominion.getId());
-
-        if (!inMainDominion && !inOwnOutpost) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.defenders_in_dominion")));
-            return;
-        }
-
-        // Outpost to assign the new defender to
-        Outpost assignTo = inOwnOutpost ? outpostPlayerIsIn : null;
+        // Area context set when the player picked an area in the area-select GUI
+        Outpost assignTo = GuiDefenders.getContext(player.getUniqueId());
 
         String result;
         if (e.getClick() == ClickType.RIGHT) {

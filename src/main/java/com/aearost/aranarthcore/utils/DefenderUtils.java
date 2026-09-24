@@ -2,18 +2,8 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.network.NetworkManager;
-import com.aearost.aranarthcore.objects.CustomKeys;
-import com.aearost.aranarthcore.objects.DefenderMode;
-import com.aearost.aranarthcore.objects.DefenderType;
-import com.aearost.aranarthcore.objects.Dominion;
-import com.aearost.aranarthcore.objects.DominionPermission;
-import com.aearost.aranarthcore.objects.DominionRank;
-import com.aearost.aranarthcore.objects.Outpost;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.Material;
-import org.bukkit.Location;
-import org.bukkit.World;
+import com.aearost.aranarthcore.objects.*;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
@@ -23,15 +13,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Manages all Defender data, spawning, entity tracking, and behaviour modes for Dominions.
@@ -310,6 +292,10 @@ public class DefenderUtils {
                 : dominion.getDominionHome();
         if (spawnLoc == null || spawnLoc.getWorld() == null) {
             return;
+        }
+        // Force-load the chunk so the entity can be placed even if the player is elsewhere
+        if (!spawnLoc.getChunk().isLoaded()) {
+            spawnLoc.getChunk().load(true);
         }
         Entity entity = spawnLoc.getWorld().spawnEntity(spawnLoc, type.getEntityType());
         applyDefenderStats(entity, dominion.getId(), type);

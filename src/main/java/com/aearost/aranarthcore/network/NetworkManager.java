@@ -257,7 +257,9 @@ public class NetworkManager {
         smpSnapshotTask = Bukkit.getScheduler().runTaskTimer(
                 AranarthCore.getInstance(),
                 () -> {
-                    if (!DatabaseManager.isActive()) return;
+                    if (!DatabaseManager.isActive()) {
+                        return;
+                    }
                     for (Player p : Bukkit.getOnlinePlayers()) {
                         try {
                             String key = KEY_SMP_RESTART_INV + p.getUniqueId();
@@ -297,7 +299,9 @@ public class NetworkManager {
      * Safe to call from any thread.
      */
     public void writeSmpFallbackSnapshot(Player player) {
-        if (!DatabaseManager.isActive()) return;
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
         try {
             JsonObject snap = new JsonObject();
             snap.addProperty("inventory", ItemUtils.itemStackArrayToBase64(player.getInventory().getContents()));
@@ -2601,6 +2605,18 @@ public class NetworkManager {
             if (data.has("chunks")) {
                 int newCount = data.getAsJsonArray("chunks").size();
                 existing.setStoredChunkCount(newCount);
+            }
+            if (data.has("mobSpawningEnabled")) {
+                existing.setMobSpawningEnabled(data.get("mobSpawningEnabled").getAsBoolean());
+            }
+            if (data.has("memberPvpEnabled")) {
+                existing.setMemberPvpEnabled(data.get("memberPvpEnabled").getAsBoolean());
+            }
+            if (data.has("bendingEnabled")) {
+                existing.setBendingEnabled(data.get("bendingEnabled").getAsBoolean());
+            }
+            if (data.has("explosionEnabled")) {
+                existing.setExplosionEnabled(data.get("explosionEnabled").getAsBoolean());
             }
         });
     }

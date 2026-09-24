@@ -21,6 +21,7 @@ Dominion
 [+] Added an auto-cancel timer to the resource claim number prompt
 [+] Added Resources shortcut button to the dominion GUI
 [~] Fixed dominion relation/role permissions reverting to defaults on reload
+[+] Added dominion flag control per outpost as well
 
 Items & Crafting
 [+] Added item trade system with /trade command
