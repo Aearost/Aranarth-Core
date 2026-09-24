@@ -61,6 +61,7 @@ Cross-server & Technical
 [~] Fixed monthly saint expiry removing permanent saint rank
 [+] Added missing /heads permission for architects
 [+] Added /ac speed for architects
+[~] Fixed custom Discord emojis not resolving when typed in-game chat
 
 Miscellaneous
 [+] Fixed AFK color formatting

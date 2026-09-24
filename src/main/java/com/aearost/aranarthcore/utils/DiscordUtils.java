@@ -10,6 +10,7 @@ import github.scarsz.discordsrv.dependencies.jda.api.JDA;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.Guild;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.Member;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.Role;
+import github.scarsz.discordsrv.dependencies.jda.api.entities.Emote;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
@@ -127,7 +128,43 @@ public class DiscordUtils {
 		finalMessage = finalMessage.replace("\uD83D\uDD28", "\uD83D\uDD28\uFE0E");
 		// Saint symbol - force text presentation
 		finalMessage = finalMessage.replace("\u269C", "\u269C\uFE0E");
+		finalMessage = resolveCustomEmojis(finalMessage);
 		serverChatChannel.sendMessage(finalMessage).queue();
+	}
+
+	/**
+	 * Resolves :shortcode: patterns in a message to Discord custom emoji mentions (<:name:id>).
+	 */
+	private static String resolveCustomEmojis(String message) {
+		Guild guild = getGuild();
+		if (guild == null) {
+			return message;
+		}
+		StringBuilder result = new StringBuilder();
+		int i = 0;
+		while (i < message.length()) {
+			if (message.charAt(i) == ':') {
+				int end = message.indexOf(':', i + 1);
+				if (end > i + 1) {
+					String name = message.substring(i + 1, end);
+					// Only treat as a shortcode if the name contains only word chars and underscores
+					if (name.matches("[\\w]+")) {
+						List<Emote> emotes = guild.getEmotesByName(name, true);
+						if (!emotes.isEmpty()) {
+							Emote emote = emotes.get(0);
+							result.append(emote.isAnimated()
+									? "<a:" + emote.getName() + ":" + emote.getId() + ">"
+									: "<:" + emote.getName() + ":" + emote.getId() + ">");
+							i = end + 1;
+							continue;
+						}
+					}
+				}
+			}
+			result.append(message.charAt(i));
+			i++;
+		}
+		return result.toString();
 	}
 
 	/**
