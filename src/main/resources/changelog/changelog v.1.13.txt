@@ -33,6 +33,7 @@ Items & Crafting
 [~] Fixed incantations being stripped when crafting Aranarthium armour
 [~] Prevented elytras from being directly upgraded to Aranarthium without crafting a Netherite Elytra first
 [~] Fixed inventory assist deleting Loyalty tridents when eating with a full inventory
+[~] Fixed reaper inventory capturing arena deaths and being claimable outside survival worlds
 
 Economy, Jobs & Quests
 [~] Fixed NPE in handleMarketUpdate on SMP by skipping sign refresh when shop world does not exist

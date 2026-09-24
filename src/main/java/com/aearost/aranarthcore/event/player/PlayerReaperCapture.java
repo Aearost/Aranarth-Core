@@ -24,6 +24,11 @@ public class PlayerReaperCapture {
     public void execute(PlayerDeathEvent e) {
         Player player = e.getEntity();
 
+        // Only capture deaths in survival worlds - ignore arena and other non-survival worlds
+        if (player.getWorld() == null || !AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
+            return;
+        }
+
         // Soulbound armor negates all drops, so there is nothing to capture
         if (AranarthUtils.isWearingArmorType(player, "soulbound")) {
             return;
