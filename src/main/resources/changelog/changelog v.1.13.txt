@@ -8,6 +8,8 @@ World & Events
 [+] Added double jump functionality to Elven Aranarthium
 [~] Updated the location of the Aranarthium exit portal
 [~] Reset /ac speed to default on Survival gamemode change
+[~] Ardorvor heat effects are now daytime-only
+[+] Added frostbite to winter months after prolonged outdoor exposure
 
 Bending & Abilities
 [+] Implemented AranarthCore's Tremorsense ability, which includes a glowing effect to nearby mobs and players

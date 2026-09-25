@@ -49,6 +49,7 @@ public class PlayerServerQuitListener implements Listener {
     public void onPlayerQuit(final PlayerQuitEvent e) {
         Player player = e.getPlayer();
         AranarthCore.getInstance().getFireParticleListener().clearPlayer(player.getUniqueId());
+        DateUtils.clearOutdoorExposure(player.getUniqueId());
 
         // Cancel any active trade when a player disconnects
         Trade trade = TradeManager.getTrade(player.getUniqueId());

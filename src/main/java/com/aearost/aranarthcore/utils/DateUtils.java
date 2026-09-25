@@ -41,6 +41,10 @@ public class DateUtils {
     private static int baseMonsterLimit = 0;
     private static long baseAnimalTicks = 0;
     private static long baseMonsterTicks = 0;
+    private static final Map<UUID, Long> outdoorExposureStart = new HashMap<>();
+
+    private static final long FROSTBITE_DAYTIME_THRESHOLD_MS = 15 * 60 * 1000L;
+    private static final long FROSTBITE_NIGHTTIME_THRESHOLD_MS = 5 * 60 * 1000L;
 
     static {
         INVALID_SURFACE_BLOCKS = EnumSet.of(
@@ -1062,7 +1066,15 @@ public class DateUtils {
         meltSnow(5);
         applyRain();
 
-        if (new Random().nextInt(15) == 0) {
+        World mainWorld = Bukkit.getWorld("world");
+        if (mainWorld == null) {
+            return;
+        }
+        // Heat effects only apply during the daytime
+        long time = mainWorld.getTime();
+        boolean isDaytime = time >= 0 && time < 12000;
+
+        if (isDaytime && new Random().nextInt(15) == 0) {
             List<PotionEffect> effects = new ArrayList<>();
             effects.add(new PotionEffect(PotionEffectType.MINING_FATIGUE, 100, 0));
             effects.add(new PotionEffect(PotionEffectType.WEAKNESS, 320, 0));
@@ -1132,6 +1144,7 @@ public class DateUtils {
             effects.add(new PotionEffect(PotionEffectType.SLOWNESS, 320, 0));
         }
         applyWeatherEffectsToAllPlayers(effects);
+        applyFrostbiteTracking(0);
 
         // Applies delay to first snow storm
         if (!AranarthUtils.getHasStormedInMonth()) {
@@ -1151,6 +1164,7 @@ public class DateUtils {
             effects.add(new PotionEffect(PotionEffectType.SLOWNESS, 320, 1));
         }
         applyWeatherEffectsToAllPlayers(effects);
+        applyFrostbiteTracking(1);
 
         // Applies delay to first snow storm
         if (!AranarthUtils.getHasStormedInMonth()) {
@@ -1170,6 +1184,7 @@ public class DateUtils {
             effects.add(new PotionEffect(PotionEffectType.SLOWNESS, 320, 0));
         }
         applyWeatherEffectsToAllPlayers(effects);
+        applyFrostbiteTracking(0);
 
         // Applies delay to first snow storm
         if (!AranarthUtils.getHasStormedInMonth()) {
@@ -1179,6 +1194,53 @@ public class DateUtils {
         }
         applySnow(35, 700);
         attemptSpawnExtraPhantoms();
+    }
+
+    /**
+     * Tracks outdoor exposure time in winter months and applies a frostbite burst.
+     * @param baseSloAmp The base Slowness amplifier the month normally applies (0 = Slowness I, 1 = Slowness II, etc.)
+     */
+    private void applyFrostbiteTracking(int baseSloAmp) {
+        long now = System.currentTimeMillis();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            String worldName = player.getWorld().getName();
+            if (!worldName.startsWith("world") && !AranarthUtils.isSmpWorld(worldName)
+                    && !worldName.startsWith("resource")) {
+                outdoorExposureStart.remove(player.getUniqueId());
+                continue;
+            }
+
+            Location loc = player.getLocation();
+            Block highestBlock = loc.getWorld().getHighestBlockAt(loc.getBlockX(), loc.getBlockZ());
+            boolean isOutdoors = loc.getBlockY() + 2 >= highestBlock.getLocation().getBlockY();
+
+            if (!isOutdoors) {
+                outdoorExposureStart.remove(player.getUniqueId());
+                continue;
+            }
+
+            outdoorExposureStart.putIfAbsent(player.getUniqueId(), now);
+            long exposedMs = now - outdoorExposureStart.get(player.getUniqueId());
+
+            long time = player.getWorld().getTime();
+            boolean isNight = time >= 12300;
+            long threshold = isNight ? FROSTBITE_NIGHTTIME_THRESHOLD_MS : FROSTBITE_DAYTIME_THRESHOLD_MS;
+
+            if (exposedMs >= threshold) {
+                player.setFreezeTicks(player.getMaxFreezeTicks());
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 320, baseSloAmp + 1), true);
+                // Reset so they must remain outside for another full threshold before the next burst
+                outdoorExposureStart.put(player.getUniqueId(), now);
+            }
+        }
+    }
+
+    /**
+     * Removes a player's outdoor exposure tracking entry.
+     * @param uuid The player's UUID.
+     */
+    public static void clearOutdoorExposure(UUID uuid) {
+        outdoorExposureStart.remove(uuid);
     }
 
     /**
