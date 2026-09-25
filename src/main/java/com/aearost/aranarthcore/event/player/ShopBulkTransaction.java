@@ -63,7 +63,15 @@ public class ShopBulkTransaction {
                 }
                 Shop bulkShop = ShopUtils.getBulkShop(shop, player, true);
                 if (bulkShop.getQuantity() == shop.getQuantity()) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.cannot_bulk_purchase")));
+                    if (aranarthPlayer.getBalance() < shop.getBuyPrice() * 2) {
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("general.not_enough_money")));
+                    } else if (ShopUtils.computePlayerFreeSpaceForItem(player, shop) < shop.getQuantity() * 2) {
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("general.not_enough_space")));
+                    } else if (shop.getUuid() != null && ShopUtils.computeChestQuantityOfItem(shop) < shop.getQuantity() * 2) {
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.not_enough_inventory")));
+                    } else {
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.cannot_bulk_purchase")));
+                    }
                     return;
                 }
                 saleOrPurchase = "purchase";
@@ -77,7 +85,15 @@ public class ShopBulkTransaction {
                 }
                 Shop bulkShop = ShopUtils.getBulkShop(shop, player, false);
                 if (bulkShop.getQuantity() == shop.getQuantity()) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.cannot_bulk_sell")));
+                    if (ShopUtils.computePlayerQuantityOfItem(player, shop) < shop.getQuantity() * 2) {
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("inventory.not_enough")));
+                    } else if (shop.getUuid() != null && AranarthUtils.getPlayer(shop.getUuid()).getBalance() < shop.getSellPrice() * 2) {
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.owner_not_enough_money")));
+                    } else if (shop.getUuid() != null && ShopUtils.computeChestFreeSpaceForItem(shop) < shop.getQuantity() * 2) {
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.no_chest_space")));
+                    } else {
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.cannot_bulk_sell")));
+                    }
                     return;
                 }
                 // Apply "leave one per shulker slot" adjustment to displayed quantity/price

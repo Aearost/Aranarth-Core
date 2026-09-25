@@ -39,7 +39,7 @@ Items & Crafting
 
 Economy, Jobs & Quests
 [~] Fixed NPE in handleMarketUpdate on SMP by skipping sign refresh when shop world does not exist
-[~] Fixed bulk purchase/sell showing a generic "cannot bulk" message instead of the appropriate money message when the player or shop owner lacks funds
+[~] Fixed bulk transactions showing unclear messages when inventory space, item quantity, or chest capacity prevents the transaction
 
 Chat, UI & Sounds
 [+] Added support for French in /lang

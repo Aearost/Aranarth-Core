@@ -381,6 +381,129 @@ public class ShopUtils {
     }
 
     /**
+     * Computes the player's free inventory space for the given shop's item.
+     */
+    public static int computePlayerFreeSpaceForItem(Player player, Shop shop) {
+        boolean shopItemIsShulker = isShulkerBox(shop.getItem());
+        int free = 0;
+        for (ItemStack item : player.getInventory().getStorageContents()) {
+            if (item == null || item.getType() == Material.AIR) {
+                free += 64;
+                continue;
+            }
+            boolean isSameCropSeed = item.getType() == shop.getItem().getType() && CropUtils.isCropSeed(item.getType());
+            if (item.isSimilar(shop.getItem()) || isSameCropSeed) {
+                free += item.getMaxStackSize() - item.getAmount();
+            }
+        }
+        if (!shopItemIsShulker && player.hasPermission("aranarth.shulker")) {
+            for (ItemStack item : player.getInventory().getStorageContents()) {
+                if (!isShulkerBox(item)) continue;
+                BlockStateMeta bsm = (BlockStateMeta) item.getItemMeta();
+                ShulkerBox shulker = (ShulkerBox) bsm.getBlockState();
+                for (ItemStack shulkerItem : shulker.getInventory().getContents()) {
+                    if (shulkerItem == null) continue;
+                    boolean isSameCropSeed = shulkerItem.getType() == shop.getItem().getType() && CropUtils.isCropSeed(shulkerItem.getType());
+                    if (shulkerItem.isSimilar(shop.getItem()) || isSameCropSeed) {
+                        free += shulkerItem.getMaxStackSize() - shulkerItem.getAmount();
+                    }
+                }
+            }
+        }
+        return free;
+    }
+
+    /**
+     * Computes the player's total quantity of the given shop's item across their inventory and shulker boxes.
+     */
+    public static int computePlayerQuantityOfItem(Player player, Shop shop) {
+        boolean shopItemIsShulker = isShulkerBox(shop.getItem());
+        int quantity = 0;
+        for (ItemStack item : player.getInventory().getStorageContents()) {
+            if (item == null || item.getType() == Material.AIR) continue;
+            boolean isSameCropSeed = item.getType() == shop.getItem().getType() && CropUtils.isCropSeed(item.getType());
+            if (item.isSimilar(shop.getItem()) || isSameCropSeed) {
+                quantity += item.getAmount();
+            }
+        }
+        if (!shopItemIsShulker) {
+            for (ItemStack item : player.getInventory().getStorageContents()) {
+                if (!isShulkerBox(item)) continue;
+                BlockStateMeta bsm = (BlockStateMeta) item.getItemMeta();
+                ShulkerBox shulker = (ShulkerBox) bsm.getBlockState();
+                for (ItemStack shulkerItem : shulker.getInventory().getContents()) {
+                    if (shulkerItem == null) continue;
+                    boolean isSameCropSeed = shulkerItem.getType() == shop.getItem().getType() && CropUtils.isCropSeed(shulkerItem.getType());
+                    if (shulkerItem.isSimilar(shop.getItem()) || isSameCropSeed) {
+                        quantity += shulkerItem.getAmount();
+                    }
+                }
+            }
+        }
+        return quantity;
+    }
+
+    /**
+     * Computes the quantity of the shop's item currently in the shop chest.
+     */
+    public static int computeChestQuantityOfItem(Shop shop) {
+        BlockState chestBlockState = shop.getLocation().getBlock().getRelative(BlockFace.DOWN).getState();
+        Container container = (Container) chestBlockState;
+        Inventory chestInventory = container.getInventory();
+        if (chestInventory.getHolder() instanceof DoubleChest doubleChest) {
+            chestInventory = doubleChest.getInventory();
+        }
+        boolean shopItemIsShulker = isShulkerBox(shop.getItem());
+        int quantity = 0;
+        for (ItemStack item : chestInventory.getContents()) {
+            if (item == null || item.getType() == Material.AIR) continue;
+            boolean isSameCropSeed = item.getType() == shop.getItem().getType() && CropUtils.isCropSeed(item.getType());
+            if (item.isSimilar(shop.getItem()) || isSameCropSeed) {
+                quantity += item.getAmount();
+            }
+        }
+        if (!shopItemIsShulker) {
+            for (ItemStack item : chestInventory.getContents()) {
+                if (!isShulkerBox(item)) continue;
+                BlockStateMeta bsm = (BlockStateMeta) item.getItemMeta();
+                ShulkerBox shulker = (ShulkerBox) bsm.getBlockState();
+                for (ItemStack shulkerItem : shulker.getInventory().getContents()) {
+                    if (shulkerItem == null) continue;
+                    boolean isSameCropSeed = shulkerItem.getType() == shop.getItem().getType() && CropUtils.isCropSeed(shulkerItem.getType());
+                    if (shulkerItem.isSimilar(shop.getItem()) || isSameCropSeed) {
+                        quantity += shulkerItem.getAmount();
+                    }
+                }
+            }
+        }
+        return quantity;
+    }
+
+    /**
+     * Computes the free space for the shop's item in the shop chest.
+     */
+    public static int computeChestFreeSpaceForItem(Shop shop) {
+        BlockState chestBlockState = shop.getLocation().getBlock().getRelative(BlockFace.DOWN).getState();
+        Container container = (Container) chestBlockState;
+        Inventory chestInventory = container.getInventory();
+        if (chestInventory.getHolder() instanceof DoubleChest doubleChest) {
+            chestInventory = doubleChest.getInventory();
+        }
+        int free = 0;
+        for (ItemStack item : chestInventory.getContents()) {
+            if (item == null || item.getType() == Material.AIR) {
+                free += 64;
+                continue;
+            }
+            boolean isSameCropSeed = item.getType() == shop.getItem().getType() && CropUtils.isCropSeed(item.getType());
+            if (item.isSimilar(shop.getItem()) || isSameCropSeed) {
+                free += item.getMaxStackSize() - item.getAmount();
+            }
+        }
+        return free;
+    }
+
+    /**
      * Provides the shop with its quantities and prices maxed out, tailored to the player making the transaction.
      * @param shop The original shop object.
      * @param player The player that is interacting with the shop.
