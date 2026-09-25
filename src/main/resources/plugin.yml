@@ -22,9 +22,8 @@ commands:
   anvil:
     description: Opens an anvil GUI
     permission: aranarth.tables
-  aranarthium:
-    description: Provides a written book containing information about Aranarthium
-    permission: aranarth.aranarthium
+  aranarth:
+    description: Centralised guide for Aranarth topics
   arena:
     description: Teleports the player to the arena world
     permission: aranarth.arena
@@ -52,10 +51,6 @@ commands:
   boosts:
     description: Lists the active boosts on the server
     permission: aranarth.boosts
-  calendar:
-    description: Provides a written book containing information about the calendar system
-    aliases: [ cal ]
-    permission: aranarth.calendar
   cartography:
     description: Opens a cartography table GUI
     permission: aranarth.tables
@@ -115,9 +110,6 @@ commands:
   homepad:
     description: Defines a homepad
     permission: aranarth.homepad
-  incantations:
-    description: Provides a written book containing information about the incantations system
-    permission: aranarth.incantations
   jobs:
     description: Manage your jobs
     usage: /jobs [join|quit|stats] [name]

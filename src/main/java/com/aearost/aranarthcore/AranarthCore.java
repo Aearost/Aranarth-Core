@@ -1354,7 +1354,8 @@ public class AranarthCore extends JavaPlugin {
         getCommand("ac").setTabCompleter(new CommandACCompleter());
         getCommand("afk").setExecutor(new CommandAfk());
         getCommand("anvil").setExecutor(new CommandAnvil());
-        getCommand("aranarthium").setExecutor(new CommandAranarthium());
+        getCommand("aranarth").setExecutor(new CommandAranarth());
+        getCommand("aranarth").setTabCompleter(new CommandAranarthCompleter());
         getCommand("arena").setExecutor(new CommandArena());
         getCommand("avatar").setExecutor(new CommandAvatar());
         getCommand("back").setExecutor(new CommandBack());
@@ -1365,7 +1366,6 @@ public class AranarthCore extends JavaPlugin {
         getCommand("blacklist").setTabCompleter(new CommandBlacklistCompleter());
         getCommand("boosts").setExecutor(new CommandBoosts());
         getCommand("boosts").setTabCompleter(new CommandBoostsCompleter());
-        getCommand("calendar").setExecutor(new CommandCalendar());
         getCommand("cartography").setExecutor(new CommandCartography());
         getCommand("compressor").setExecutor(new CommandCompressor());
         getCommand("condense").setExecutor(new CommandCondense());
@@ -1391,7 +1391,6 @@ public class AranarthCore extends JavaPlugin {
         getCommand("home").setTabCompleter(new CommandHomeCompleter());
         getCommand("homepad").setExecutor(new CommandHomePad());
         getCommand("homepad").setTabCompleter(new CommandHomePadCompleter());
-        getCommand("incantations").setExecutor(new CommandIncantations());
         getCommand("info").setExecutor(new CommandInfo());
         getCommand("info").setTabCompleter(new CommandInfoCompleter());
         getCommand("itemname").setExecutor(new CommandItemName());

@@ -93,6 +93,8 @@ public class InventoryClickEventListener implements Listener {
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.shulker.title"))) {
                 new GuiShulkerPreventDrop().execute(e);
                 new ShulkerPreventSlotSwitch().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiAranarth.TITLE_KEY))) {
+                new GuiAranarthClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.ranks.title"))) {
                 new GuiRanksClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.rankup.title"))) {
