@@ -1387,6 +1387,7 @@ public class AranarthCore extends JavaPlugin {
         getCommand("grindstone").setExecutor(new CommandGrindstone());
         getCommand("hat").setExecutor(new CommandHat());
         getCommand("heads").setExecutor(new CommandHeads());
+        getCommand("heads").setTabCompleter(new CommandHeadsCompleter());
         getCommand("home").setExecutor(new CommandHome());
         getCommand("home").setTabCompleter(new CommandHomeCompleter());
         getCommand("homepad").setExecutor(new CommandHomePad());

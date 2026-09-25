@@ -186,6 +186,8 @@ public class InventoryClickEventListener implements Listener {
                 new GuiPetFoodClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiHeadExchange.TITLE_KEY))) {
                 new GuiHeadExchangeClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiHeads.ADMIN_TITLE_KEY))) {
+                new GuiHeadsAdminClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiMcstats.TITLE_SELF_KEY))
                     || ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(Lang.getFor(player, GuiMcstats.TITLE_SUFFIX_KEY))) {
                 new GuiMcstatsClick().execute(e);

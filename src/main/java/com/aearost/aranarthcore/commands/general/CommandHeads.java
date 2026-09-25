@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.gui.GuiHeadExchange;
+import com.aearost.aranarthcore.gui.GuiHeads;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -24,6 +25,24 @@ public class CommandHeads implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+            return true;
+        }
+
+        // Using /heads adminbuy
+        if (args.length >= 1 && args[0].equalsIgnoreCase("adminbuy")) {
+            if (!player.hasPermission("aranarth.heads.admin")) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+                return true;
+            }
+            if (!HeadsDatabaseManager.isLoaded()) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("heads.loading")));
+                return true;
+            }
+            if (HeadsDatabaseManager.getExchangeableHeads().isEmpty()) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("heads.unavailable")));
+                return true;
+            }
+            new GuiHeads(player, 0, true).openGui();
             return true;
         }
 

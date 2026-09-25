@@ -82,3 +82,4 @@ Miscellaneous
 [+] Allowed the use of minimap mods in the rules
 [-] Removed rule that prevented the creation of large automated farms
 [+] Added rule to prevent the creation/use of lag-inducing builds
+[+] Added /heads adminbuy command for free head acquisition for server builds
