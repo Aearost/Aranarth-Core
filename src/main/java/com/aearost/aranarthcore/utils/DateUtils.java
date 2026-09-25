@@ -821,37 +821,63 @@ public class DateUtils {
      */
     private boolean checkIfExceedsMonth(int day, Month month) {
         if (month == Month.IGNIVOR) {
-            return day > 147;
+            return day > 127;
         } else if (month == Month.AQUINVOR) {
-            return day > 147;
+            return day > 140;
         } else if (month == Month.VENTIVOR) {
-            return day > 146;
+            return day > 153;
         } else if (month == Month.FLORIVOR) {
-            return day > 145;
+            return day > 165;
         } else if (month == Month.AESTIVOR) {
-            return day > 146;
+            return day > 172;
         } else if (month == Month.CALORVOR) {
-            return day > 145;
+            return day > 177;
         } else if (month == Month.ARDORVOR) {
-            return day > 146;
+            return day > 178;
         } else if (month == Month.SOLARVOR) {
-            return day > 146;
+            return day > 177;
         } else if (month == Month.FOLLIVOR) {
-            return day > 146;
+            return day > 170;
         } else if (month == Month.STRIGAVOR) {
-            return day > 146;
+            return day > 157;
         } else if (month == Month.FAUNIVOR) {
-            return day > 146;
+            return day > 142;
         } else if (month == Month.UMBRAVOR) {
-            return day > 146;
+            return day > 123;
         } else if (month == Month.GLACIVOR) {
-            return day > 146;
+            return day > 108;
         } else if (month == Month.FRIGORVOR) {
-            return day > 147;
+            return day > 102;
         } else if (month == Month.OBSCURVOR) {
-            return day > 147;
+            return day > 101;
         }
         return false;
+    }
+
+    /**
+     * Returns the number of days in the given month.
+     *
+     * @param month The month to check.
+     * @return The number of days in that month.
+     */
+    public static int getDaysInMonth(Month month) {
+        return switch (month) {
+            case IGNIVOR -> 127;
+            case AQUINVOR -> 140;
+            case VENTIVOR -> 153;
+            case FLORIVOR -> 165;
+            case AESTIVOR -> 172;
+            case CALORVOR -> 177;
+            case ARDORVOR -> 178;
+            case SOLARVOR -> 177;
+            case FOLLIVOR -> 170;
+            case STRIGAVOR -> 157;
+            case FAUNIVOR -> 142;
+            case UMBRAVOR -> 123;
+            case GLACIVOR -> 108;
+            case FRIGORVOR -> 102;
+            case OBSCURVOR -> 101;
+        };
     }
 
     /**

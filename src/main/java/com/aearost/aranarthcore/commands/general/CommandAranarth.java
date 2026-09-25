@@ -1,7 +1,9 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.gui.GuiAranarth;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DateUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -113,8 +115,9 @@ public class CommandAranarth implements CommandExecutor {
         String prevMonth = CALENDAR_MONTHS.get(prevIdx);
         String nextMonth = CALENDAR_MONTHS.get(nextIdx);
 
+        int days = DateUtils.getDaysInMonth(Month.valueOf(month.toUpperCase()));
         player.sendMessage(ChatUtils.translateToColor(Lang.get("guide.divider")));
-        player.sendMessage(ChatUtils.translateToColor("  " + name + " &8(&7" + monthNum + "&8) &7- " + subtitle));
+        player.sendMessage(ChatUtils.translateToColor("  " + name + " &8(&7" + monthNum + "&8) &7- " + subtitle + " &8| &7" + days + " days"));
         player.sendMessage(Component.empty());
         sendMultilineIndented(player, desc);
         player.sendMessage(ChatUtils.translateToColor(Lang.get("guide.divider")));
