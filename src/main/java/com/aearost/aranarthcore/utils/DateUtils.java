@@ -351,7 +351,7 @@ public class DateUtils {
      * @return The Description of the month.
      */
     public static String getArdorvorDescription() {
-        return "The month of Ardorvór is the month of flames. All sources of fire deal more damage, and random bursts of weakness and mining fatigue are felt.";
+        return "The month of Ardorvór is the month of flames. All sources of fire deal more damage, and random bursts of weakness and mining fatigue are felt under the blistering sun.";
     }
 
     /**
@@ -405,7 +405,7 @@ public class DateUtils {
      * @return The Description of the month.
      */
     public static String getGlacivorDescription() {
-        return "The month of Glacivór sends shivers down your spine. You will be slowed down in your tracks, and water begins to freeze in rivers and the sea.";
+        return "The month of Glacivór sends shivers down your spine. You will be slowed down in your tracks, and water begins to freeze in rivers and the sea. Lingering outdoors will lead to frostbite.";
     }
 
     /**
@@ -414,7 +414,7 @@ public class DateUtils {
      * @return The Description of the month.
      */
     public static String getFrigorvorDescription() {
-        return "The month of Frigorvór brings the heaviest snowfalls. Your movements will be slowed even further, as will your crop growth rates.";
+        return "The month of Frigorvór brings the heaviest snowfalls. Your movements will be slowed even further, as will your crop growth rates. Frostbite strikes faster when night falls.";
     }
 
     /**
@@ -423,7 +423,7 @@ public class DateUtils {
      * @return The Description of the month.
      */
     public static String getObscurvorDescription() {
-        return "The month of Obscurvór is the month of rest. The slowness of Winter lingers, with more aggression from phantoms, and an increased amount of sleeping players to skip the night.";
+        return "The month of Obscurvór is the month of rest. The slowness of Winter lingers, with more aggression from phantoms, and an increased amount of sleeping players to skip the night. The cold still bites those who stay outside too long.";
     }
 
     /**
