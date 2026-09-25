@@ -1574,7 +1574,7 @@ public class DominionUtils {
 
         int[] commonOdds = {10, 8, 5, 3, 1};
         int[] rareOdds = {20, 15, 10, 5, 2};
-        int[] elytraOdds = {200, 100, 65, 50, 40};
+        int[] elytraOdds = {40, 20, 13, 10, 8};
         int[] mendingOdds = {16, 12, 8, 6, 4};
         int[] godAppleOdds = {16, 12, 8, 4, 1};
 
