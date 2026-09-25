@@ -439,6 +439,7 @@ public class PermissionUtils {
         perms.setPermission("aranarth.deaths", true);
         perms.setPermission("aranarth.delhome", true);
         perms.setPermission("aranarth.dominion", true);
+        perms.setPermission("aranarth.heads", true);
         perms.setPermission("aranarth.home", true);
         perms.setPermission("aranarth.homepad", true);
         perms.setPermission("aranarth.incantations", true);
@@ -536,7 +537,7 @@ public class PermissionUtils {
         perms.setPermission("aranarth.vote.test", false);
         perms.setPermission("aranarth.shop.modify", false);
         perms.setPermission("aranarth.time", false);
-        perms.setPermission("aranarth.skull", false);
+        perms.setPermission("aranarth.heads.player", false);
         perms.setPermission("aranarth.resetquests", false);
         perms.setPermission("aranarth.sudo", false);
         perms.setPermission("aranarth.trash", false);
@@ -1153,7 +1154,7 @@ public class PermissionUtils {
             perms.setPermission("aranarth.whereis", true);
             perms.setPermission("aranarth.broadcast", true);
             perms.setPermission("aranarth.time", true);
-            perms.setPermission("aranarth.skull", true);
+            perms.setPermission("aranarth.heads.player", true);
             perms.setPermission("aranarth.resetquests", true);
             perms.setPermission("minecraft.command.gamemode", true);
             setSaintPermissions(perms, 2);
@@ -1193,7 +1194,7 @@ public class PermissionUtils {
             perms.setPermission("aranarth.ac", true);
             perms.setPermission("aranarth.creative", true);
             perms.setPermission("worldedit.*", true);
-            perms.setPermission("aranarth.skull", true);
+            perms.setPermission("aranarth.heads.player", true);
             perms.setPermission("aranarth.gate", true);
             perms.setPermission("aranarth.nick", true);
         }

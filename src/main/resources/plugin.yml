@@ -102,7 +102,7 @@ commands:
     permission: aranarth.hat
   heads:
     description: Opens the custom heads exchange shop, or /heads <username> to get a player skull
-    permission: aranarth.customheads
+    permission: aranarth.heads
     usage: /heads [username]
   home:
     description: Opens the GUI or teleports the player to their specified home

@@ -29,7 +29,7 @@ public class CommandHeads implements CommandExecutor {
 
         // Using /heads <username>
         if (args.length >= 1) {
-            if (!player.hasPermission("aranarth.skull")) {
+            if (!player.hasPermission("aranarth.heads.player")) {
                 player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
                 return true;
             }
@@ -52,17 +52,6 @@ public class CommandHeads implements CommandExecutor {
         }
 
         // Using /heads
-        if (!player.hasPermission("aranarth.customheads")) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
-            return true;
-        }
-
-        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-        if (aranarthPlayer.getSaintRank() < 1 && aranarthPlayer.getCouncilRank() < 1 && aranarthPlayer.getArchitectRank() < 1) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
-            return true;
-        }
-
         if (!HeadsDatabaseManager.isLoaded()) {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("heads.loading")));
             return true;

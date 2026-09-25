@@ -40,6 +40,7 @@ Items & Crafting
 [~] Prevented elytras from being directly upgraded to Aranarthium without crafting a Netherite Elytra first
 [~] Fixed inventory assist deleting Loyalty tridents when eating with a full inventory
 [~] Fixed reaper inventory capturing arena deaths and being claimable outside survival worlds
+[~] Renamed heads permissions to ensure access to /heads was possible
 
 Economy, Jobs & Quests
 [~] Fixed NPE in handleMarketUpdate on SMP by skipping sign refresh when shop world does not exist
