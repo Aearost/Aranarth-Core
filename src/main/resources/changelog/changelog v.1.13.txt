@@ -28,6 +28,7 @@ Dominion
 [+] Added dominion flag control per outpost as well
 [~] Reduced mountain biome emerald ore drops to 50% chance of 1 per claim
 [~] Reverted elytra odds in end city simulations back to pre-nerf values
+[~] Fixed /d resources prompt ignoring the resources permission
 
 Items & Crafting
 [+] Added item trade system with /trade command

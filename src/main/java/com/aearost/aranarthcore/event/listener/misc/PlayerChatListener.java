@@ -10,6 +10,7 @@ import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.BlacklistPreset;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.Trade;
 import com.aearost.aranarthcore.utils.*;
 import net.kyori.adventure.text.Component;
@@ -177,7 +178,7 @@ public class PlayerChatListener implements Listener {
         // If resources are actively being claimed by the Dominion, prioritize this above all other chat functionality
         if (dominion != null) {
             if (dominion.getBiomeResourcesBeingClaimed() != null) {
-                if (player.getUniqueId().equals(dominion.getLeader())) {
+                if (DominionUtils.hasPermission(player, dominion, DominionPermission.RESOURCES)) {
                     e.setCancelled(true);
                     try {
                         int enteredNumber = Integer.parseInt(message);
