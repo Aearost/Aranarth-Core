@@ -252,13 +252,13 @@ public class GuiDominionPermissions {
         gui.setItem(24, buildGroupItem(Material.LIGHT_GRAY_BANNER, DominionUtils.getFormattedRankName(DominionRank.WANDERER) + "s", groupLore));
 
         // Row 1 toggles / nav
-        gui.setItem(16, buildMemberPvpNavItem());
-        gui.setItem(17, buildBendingNavItem());
+        gui.setItem(16, buildMemberPvpNavItem(dominion.isMemberPvpEnabled()));
+        gui.setItem(17, buildBendingNavItem(dominion.isBendingEnabled()));
 
         // Row 4 toggles / nav
-        gui.setItem(30, buildMobSpawningNavItem());
+        gui.setItem(30, buildMobSpawningNavItem(dominion.isMobSpawningEnabled()));
         gui.setItem(31, buildResourcesItem());
-        gui.setItem(32, buildExplosionNavItem());
+        gui.setItem(32, buildExplosionNavItem(dominion.isExplosionEnabled()));
 
         // Row 3: navigation and new hub sections
         gui.setItem(GUARDIANS_SLOT, buildDefendersItem());
@@ -301,10 +301,11 @@ public class GuiDominionPermissions {
     /**
      * Builds the Explosions nav item for the main screen (opens per-area config).
      */
-    public static ItemStack buildExplosionNavItem() {
+    public static ItemStack buildExplosionNavItem(boolean enabled) {
         ItemStack item = new ItemStack(Material.TNT);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(Lang.get("gui.dominionperms.toggle_explosions_name"));
+        String status = Lang.get(enabled ? "gui.dominionperms.enabled" : "gui.dominionperms.disabled");
+        meta.setDisplayName(Lang.get("gui.dominionperms.toggle_explosions_name", "status", status));
         meta.setLore(List.of(Lang.get("gui.dominionperms.toggle_explosions")));
         item.setItemMeta(meta);
         return item;
@@ -313,10 +314,11 @@ public class GuiDominionPermissions {
     /**
      * Builds the Mob Spawning nav item for the main screen (opens per-area config).
      */
-    public static ItemStack buildMobSpawningNavItem() {
+    public static ItemStack buildMobSpawningNavItem(boolean enabled) {
         ItemStack item = new ItemStack(Material.ZOMBIE_SPAWN_EGG);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(Lang.get("gui.dominionperms.toggle_monsters_name"));
+        String status = Lang.get(enabled ? "gui.dominionperms.enabled" : "gui.dominionperms.disabled");
+        meta.setDisplayName(Lang.get("gui.dominionperms.toggle_monsters_name", "status", status));
         meta.setLore(List.of(Lang.get("gui.dominionperms.toggle_monsters")));
         item.setItemMeta(meta);
         return item;
@@ -325,10 +327,11 @@ public class GuiDominionPermissions {
     /**
      * Builds the Bending nav item for the main screen (opens per-area config).
      */
-    public static ItemStack buildBendingNavItem() {
+    public static ItemStack buildBendingNavItem(boolean enabled) {
         ItemStack item = new ItemStack(Material.BLAZE_POWDER);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(Lang.get("gui.dominionperms.toggle_bending_name"));
+        String status = Lang.get(enabled ? "gui.dominionperms.enabled" : "gui.dominionperms.disabled");
+        meta.setDisplayName(Lang.get("gui.dominionperms.toggle_bending_name", "status", status));
         meta.setLore(List.of(Lang.get("gui.dominionperms.toggle_bending")));
         item.setItemMeta(meta);
         return item;
@@ -337,10 +340,11 @@ public class GuiDominionPermissions {
     /**
      * Builds the Member PvP nav item for the main screen (opens per-area config).
      */
-    public static ItemStack buildMemberPvpNavItem() {
+    public static ItemStack buildMemberPvpNavItem(boolean enabled) {
         ItemStack item = new ItemStack(Material.IRON_SWORD);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(Lang.get("gui.dominionperms.toggle_pvp_name"));
+        String status = Lang.get(enabled ? "gui.dominionperms.enabled" : "gui.dominionperms.disabled");
+        meta.setDisplayName(Lang.get("gui.dominionperms.toggle_pvp_name", "status", status));
         meta.setLore(List.of(Lang.get("gui.dominionperms.toggle_pvp")));
         item.setItemMeta(meta);
         return item;

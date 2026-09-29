@@ -96,7 +96,7 @@ public class GuiOutpostsClick {
                 .findFirst().orElse(null);
 
         if (outpost == null) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.outpost_not_found")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.outpost_not_found", "name", displayName)));
             return;
         }
 

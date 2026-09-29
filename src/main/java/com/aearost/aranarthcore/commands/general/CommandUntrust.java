@@ -58,7 +58,7 @@ public class CommandUntrust implements CommandExecutor {
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					String nickname = CommandTrust.resolveDisplayName(targetUuid, args[0]);
 					sender.sendMessage(ChatUtils.chatMessage(Lang.get("lock.untrust_mode_enter", "player", nickname)));
-					sender.sendMessage(ChatUtils.chatMessage(Lang.get("lock.untrust_mode_hint")));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.get("lock.untrust_mode_hint", "player", nickname)));
 					scheduleToggleExpiry(player.getUniqueId());
 				}
 				return true;

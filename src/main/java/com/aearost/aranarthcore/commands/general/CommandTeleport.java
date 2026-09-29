@@ -73,7 +73,7 @@ public class CommandTeleport implements CommandExecutor {
 						// Target is on another server
 						NetworkPlayer remoteTarget = NetworkManager.getInstance().getRemotePlayer(targetUUID);
 						if (remoteTarget == null) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("player.offline")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("player.offline", "name", args[0])));
 							return true;
 						}
 						if (player.getUniqueId().equals(targetUUID)) {
@@ -89,10 +89,10 @@ public class CommandTeleport implements CommandExecutor {
 								false);
 						AranarthUtils.playTeleportSound(player);
 					} else {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("player.offline")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("player.offline", "name", args[0])));
 					}
 				} else {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("player.offline")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("player.offline", "name", args[0])));
 				}
 			}
 		} else {

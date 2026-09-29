@@ -527,7 +527,17 @@
       "Bash(source discord-bot/.env)",
       "Bash(find . -name *Market* -o -name *Price* -o -name *price*)",
       "Bash(\"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/resources/lang/pt_PT.properties\":*)",
-      "Bash(sort comm:*)"
+      "Bash(sort comm:*)",
+      "Read(//c/ProgramData/**)",
+      "Read(//c/Users/liamh/IdeaProjects/AranarthCore/$MAVEN_HOME/bin/**)",
+      "Read(//c/Users/liamh/IdeaProjects/AranarthCore/$M2_HOME/bin/**)",
+      "Bash(bash /tmp/check_keys.sh)",
+      "Bash(sed -n '1628,1645p' src/main/java/com/aearost/aranarthcore/commands/general/CommandDominion.java)",
+      "Bash(sed -n '1775,1793p' src/main/java/com/aearost/aranarthcore/commands/general/CommandDominion.java)",
+      "Bash(sed -n '73,100p' src/main/java/com/aearost/aranarthcore/commands/general/CommandTeleport.java)",
+      "Bash(sed -n '63,90p' src/main/java/com/aearost/aranarthcore/commands/general/CommandTpHere.java)",
+      "Bash(sed -i 's/Lang\\\\.get\\(\"\"lock\\\\.trust_mode_hint\"\"\\)/Lang.get\\(\"\"lock.trust_mode_hint\"\", \"\"player\"\", nickname\\)/' src/main/java/com/aearost/aranarthcore/commands/general/CommandTrust.java)",
+      "Bash(sed -i 's/Lang\\\\.get\\(\"\"lock\\\\.untrust_mode_hint\"\"\\)/Lang.get\\(\"\"lock.untrust_mode_hint\"\", \"\"player\"\", nickname\\)/' src/main/java/com/aearost/aranarthcore/commands/general/CommandUntrust.java)"
     ]
   }
 }

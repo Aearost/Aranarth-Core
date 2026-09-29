@@ -56,7 +56,7 @@ public class CommandTrust implements CommandExecutor {
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					String nickname = resolveDisplayName(targetUuid, args[0]);
 					sender.sendMessage(ChatUtils.chatMessage(Lang.get("lock.trust_mode_enter", "player", nickname)));
-					sender.sendMessage(ChatUtils.chatMessage(Lang.get("lock.trust_mode_hint")));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.get("lock.trust_mode_hint", "player", nickname)));
 					scheduleToggleExpiry(player.getUniqueId());
 				}
 				return true;

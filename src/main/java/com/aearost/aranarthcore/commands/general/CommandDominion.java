@@ -73,7 +73,7 @@ public class CommandDominion implements CommandExecutor {
         Dominion target = DominionUtils.getDominions().stream().filter(d -> ChatUtils.stripColorFormatting(d.getName()).equalsIgnoreCase(targetDominionName)).findFirst().orElse(null);
 
         if (target == null) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_found")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_found", "name", targetDominionName)));
             return;
         }
 
@@ -930,7 +930,7 @@ public class CommandDominion implements CommandExecutor {
             }
 
             if (!wasDominionFound) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_found")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_found", "name", dominionNameBuilder.toString())));
             }
         } else {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_in_dominion")));
@@ -1043,7 +1043,7 @@ public class CommandDominion implements CommandExecutor {
             }
 
             if (!wasDominionFound) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_found")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_found", "name", dominionNameBuilder.toString())));
             }
         } else {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_in_dominion")));
@@ -1121,7 +1121,7 @@ public class CommandDominion implements CommandExecutor {
             }
 
             if (!wasDominionFound) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_found")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_found", "name", dominionNameBuilder.toString())));
             }
         } else {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_in_dominion")));
@@ -1246,7 +1246,7 @@ public class CommandDominion implements CommandExecutor {
             }
 
             if (!wasDominionFound) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_found")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_found", "name", dominionNameBuilder.toString())));
             }
         } else {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_in_dominion")));
@@ -2563,7 +2563,7 @@ public class CommandDominion implements CommandExecutor {
         }
 
         if (!wasDominionFound) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_found")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_found", "name", dominionNameBuilder.toString())));
         }
     }
 
@@ -2643,7 +2643,7 @@ public class CommandDominion implements CommandExecutor {
         }
 
         if (!wasDominionFound) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_found")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_found", "name", dominionNameBuilder.toString())));
         }
     }
 
@@ -2736,7 +2736,7 @@ public class CommandDominion implements CommandExecutor {
         }
 
         if (!wasDominionFound) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_found")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_found", "name", dominionNameBuilder.toString())));
         }
     }
 
@@ -2845,7 +2845,7 @@ public class CommandDominion implements CommandExecutor {
         }
 
         if (!wasDominionFound) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_found")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_found", "name", dominionNameBuilder.toString())));
         }
     }
 
@@ -3235,7 +3235,7 @@ public class CommandDominion implements CommandExecutor {
                         }
 
                         if (!wasDominionFound) {
-                            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_found")));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_found", "name", dominionNameBuilder.toString())));
                         }
                     }
                 } else if (args[0].equalsIgnoreCase("rename")) {

@@ -369,7 +369,7 @@ public class CommandShop implements CommandExecutor {
                 return true;
             }
             AranarthUtils.removePendingShopInvite(player.getUniqueId());
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.invite_declined")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.invite_declined", "player", AranarthUtils.getPlayer(ownerUuid).getNickname())));
             Player owner = Bukkit.getPlayer(ownerUuid);
             if (owner != null) {
                 AranarthPlayer playerAranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
@@ -449,7 +449,7 @@ public class CommandShop implements CommandExecutor {
 
         if (args[0].equalsIgnoreCase("biome")) {
             if (aranarthPlayer.getSaintRank() < 1 && aranarthPlayer.getCouncilRank() < 1 && !aranarthPlayer.isInAdminMode()) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.biome_rank_required")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.biome_rank_required", "rank", "1")));
                 return true;
             }
             if (!AranarthUtils.getShopIslandCenters().containsKey(player.getUniqueId())) {
@@ -462,7 +462,7 @@ public class CommandShop implements CommandExecutor {
             }
             Biome biome = Registry.BIOME.get(NamespacedKey.minecraft(args[1].toLowerCase()));
             if (biome == null) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.biome_not_found")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.biome_not_found", "biome", args[1])));
                 return true;
             }
             World shopsWorld = Bukkit.getWorld(ShopIslandUtils.SHOPS_WORLD);
