@@ -55,6 +55,7 @@ Chat, UI & Sounds
 [+] Add missing mail.sent lang key to all locale files
 [~] Fixed Saint role changes channel showing "donated and become" instead of "has become"
 [+] Centralized all help menus under a single /aranarth menu
+[+] Added base Portuguese lang files (both Portgual and Brazil)
 
 Quality of Life
 [+] Added /language command (alias /lang) to toggle preferred display language (English, German, French)
