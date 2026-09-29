@@ -1,5 +1,8 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.NetworkPlayer;
+import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -22,6 +25,18 @@ public class CommandTradeCompleter implements TabCompleter {
                 }
                 if (p.getName().toLowerCase().startsWith(partial)) {
                     completions.add(p.getName());
+                }
+            }
+            if (NetworkManager.isActive()) {
+                for (NetworkPlayer np : NetworkManager.getInstance().getRemoteRoster().values()) {
+                    String name = np.getUsername();
+                    if (name.toLowerCase().startsWith(partial)) {
+                        completions.add(name);
+                    }
+                    String nick = ChatUtils.stripColorFormatting(np.getNickname());
+                    if (!nick.equalsIgnoreCase(name) && nick.toLowerCase().startsWith(partial)) {
+                        completions.add(nick);
+                    }
                 }
             }
         }

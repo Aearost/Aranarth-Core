@@ -2200,9 +2200,11 @@ public class NetworkManager {
         if (originServer.equals(thisServer)) {
             return;
         }
-        // Reload market dynamics from DB on main thread; only refresh signs on Survival (shops world does not exist on SMP)
+        // Reload market dynamics and trade market data from DB on main thread;
+        // only refresh signs on Survival (shops world does not exist on SMP)
         Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
             PersistenceUtils.loadMarketDynamicsFromDatabase();
+            PersistenceUtils.loadTradeMarketDataFromDatabase();
             if (!AranarthCore.isSmpServer()) {
                 List<Shop> serverShops = ShopUtils.getShops().get(null);
                 if (serverShops != null) {

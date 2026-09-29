@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.MarketDynamics;
 import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.objects.TradeMarketData;
@@ -167,8 +168,12 @@ public class TradeMarketUtils {
 
             if (DatabaseManager.isActive()) {
                 final TradeMarketData toSave = existing;
-                Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
-                        () -> DatabaseManager.getInstance().upsertTradeMarketData(toSave));
+                Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+                    DatabaseManager.getInstance().upsertTradeMarketData(toSave);
+                    if (NetworkManager.isActive()) {
+                        NetworkManager.getInstance().publishMarketUpdate();
+                    }
+                });
             }
         }
     }
