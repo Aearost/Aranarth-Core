@@ -546,6 +546,7 @@ public class ChatUtils {
             tips.add("&7&oCheck out the different brewable drinks with &e&o/brewbook");
             tips.add("&7&oReady to PvP? Use &e&o/toggle barbarian");
             tips.add("&7&oCustomize your in-game sounds with &e&o/sounds");
+            tips.add("&7&oCheck out the &e&o/marketprice &7&ovalue of an item before using &e&o/trade");
 
             Collections.shuffle(tips);
         }

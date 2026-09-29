@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiBlacklistEditor;
 import com.aearost.aranarthcore.gui.GuiBrewBook;
 import com.aearost.aranarthcore.gui.GuiHeads;
+import com.aearost.aranarthcore.gui.GuiMarketPrice;
 import com.aearost.aranarthcore.event.player.GuiDominionResourcesClick;
 import com.aearost.aranarthcore.gui.GuiDominionPlayerPermissions;
 import com.aearost.aranarthcore.gui.GuiTrade;
@@ -124,6 +125,13 @@ public class PlayerChatListener implements Listener {
         if (GuiHeads.isAwaitingSearch(player.getUniqueId())) {
             e.setCancelled(true);
             GuiHeads.handleSearchInput(player, message);
+            return;
+        }
+
+        // If the player is awaiting a market price search input, handle it first
+        if (GuiMarketPrice.isAwaitingSearch(player.getUniqueId())) {
+            e.setCancelled(true);
+            GuiMarketPrice.handleSearchInput(player, message);
             return;
         }
 

@@ -36,6 +36,7 @@ build/
 
 ### Claude Code ###
 .claude/worktrees/
+announcement_draft.txt
 
 ### Mac OS ###
 .DS_Store

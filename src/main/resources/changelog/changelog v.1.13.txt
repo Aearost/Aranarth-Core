@@ -31,7 +31,6 @@ Dominion
 [~] Fixed /d resources prompt ignoring the resources permission
 
 Items & Crafting
-[+] Added item trade system with /trade command
 [+] Added honey block to sugar crafting recipe
 [~] Fixed incantations being applicable multiple times to the same item
 [~] Fixed over-leveled enchants being downgraded when applied via anvil
@@ -44,6 +43,9 @@ Items & Crafting
 [~] Renamed heads permissions to ensure access to /heads was possible
 
 Economy, Jobs & Quests
+[+] Added item trade system with /trade command
+[+] Implemented /marketprice that tracks the current market price for all items transacted with in server shops and /trade
+[~] Increased the rate that dynamic server shop pricing reverts
 [~] Fixed NPE in handleMarketUpdate on SMP by skipping sign refresh when shop world does not exist
 [~] Fixed bulk transactions showing unclear messages when inventory space, item quantity, or chest capacity prevents the transaction
 

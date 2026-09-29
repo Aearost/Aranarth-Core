@@ -30,7 +30,10 @@ public class MarketUtils {
     // Per-tick constants
     private static final double DECAY_RATE = 0.95;
     private static final double SENSITIVITY = 0.000691;
-    private static final double RISE_RATE = 0.00127;
+    // Price reverts from 0.25x to 1.0x, should take ~3.5 days to return to base
+    private static final double RISE_RATE = 0.01664;
+    // Price reverts from 2.5x to 1.0x, should take ~3.5 days to return to base
+    private static final double FALL_RATE = 0.01085;
     private static final double PRESSURE_THRESHOLD = 0.01;
     private static final double CHANGE_THRESHOLD = 0.005;
 
@@ -147,8 +150,12 @@ public class MarketUtils {
                         }
                         newPrice = Math.max(defaultPrice * PRICE_FLOOR_MODIFIER, currentPrice * (1.0 - dropRate));
                     } else {
-                        // No meaningful pressure - price recovers toward ceiling
-                        newPrice = Math.min(defaultPrice * PRICE_CEILING_MODIFIER, currentPrice * (1.0 + RISE_RATE));
+                        // No meaningful pressure - price reverts toward base
+                        if (currentPrice < defaultPrice) {
+                            newPrice = Math.min(defaultPrice, currentPrice * (1.0 + RISE_RATE));
+                        } else {
+                            newPrice = Math.max(defaultPrice, currentPrice * (1.0 - FALL_RATE));
+                        }
                     }
 
                     if (Math.abs(newPrice - currentPrice) > CHANGE_THRESHOLD) {

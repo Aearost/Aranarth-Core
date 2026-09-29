@@ -8135,6 +8135,17 @@ public class PersistenceUtils {
     }
 
     /**
+     * Loads trade market data from MySQL and populates the in-memory TradeMarketUtils map.
+     */
+    public static void loadTradeMarketDataFromDatabase() {
+        DatabaseManager db = DatabaseManager.getInstance();
+        List<TradeMarketData> rows = db.loadAllTradeMarketData();
+        for (TradeMarketData data : rows) {
+            TradeMarketUtils.addTradeMarketData(data);
+        }
+    }
+
+    /**
      * Saves all in-memory market dynamics to the database asynchronously.
      */
     public static void syncMarketDynamicsToDatabase() {

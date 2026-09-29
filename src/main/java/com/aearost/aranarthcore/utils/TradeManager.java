@@ -365,6 +365,22 @@ public class TradeManager {
         ItemStack[] toInitiator = cloneItemArray(trade.getOtherItems(trade.getInitiatorUuid()));
         ItemStack[] toTarget = cloneItemArray(trade.getOtherItems(trade.getTargetUuid()));
 
+        // Record market price data from this trade
+        boolean initiatorHasItems = !isEmptyOffer(toTarget); // toTarget = initiator's items
+        boolean targetHasItems = !isEmptyOffer(toInitiator);  // toInitiator = target's items
+        if (targetHasItems) {
+            double price = initiatorMoney > 0 ? initiatorMoney : computeFullyKnownValue(toTarget);
+            if (price > 0) {
+                TradeMarketUtils.recordTradeTransaction(toInitiator, price);
+            }
+        }
+        if (initiatorHasItems) {
+            double price = targetMoney > 0 ? targetMoney : computeFullyKnownValue(toInitiator);
+            if (price > 0) {
+                TradeMarketUtils.recordTradeTransaction(toTarget, price);
+            }
+        }
+
         unregisterTrade(trade);
 
         if (!crossServer) {
@@ -689,6 +705,30 @@ public class TradeManager {
             copy[i] = (source[i] != null && !source[i].getType().isAir()) ? source[i].clone() : null;
         }
         return copy;
+    }
+
+    private static boolean isEmptyOffer(ItemStack[] items) {
+        if (items == null) return true;
+        for (ItemStack item : items) {
+            if (item != null && item.getType() != Material.AIR) return false;
+        }
+        return true;
+    }
+
+    /**
+     * Returns the total known market value of an item array.
+     */
+    private static double computeFullyKnownValue(ItemStack[] items) {
+        double total = 0;
+        for (ItemStack item : items) {
+            if (item == null || item.getType() == Material.AIR) continue;
+            String key = TradeMarketUtils.getMarketKey(item);
+            if (key == null) return -1;
+            Double unitPrice = TradeMarketUtils.getKnownUnitPrice(key, item);
+            if (unitPrice == null) return -1;
+            total += unitPrice * item.getAmount();
+        }
+        return total;
     }
 
     /**

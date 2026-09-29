@@ -982,6 +982,7 @@ public class AranarthCore extends JavaPlugin {
         }
         if (db) {
             PersistenceUtils.loadMarketDynamicsFromDatabase();
+            PersistenceUtils.loadTradeMarketDataFromDatabase();
         }
         ShopUtils.initializeAllHolograms();
         if (db) {
@@ -1457,6 +1458,8 @@ public class AranarthCore extends JavaPlugin {
         getCommand("tphere").setExecutor(new CommandTpHere());
         getCommand("trade").setExecutor(new CommandTrade());
         getCommand("trade").setTabCompleter(new CommandTradeCompleter());
+        getCommand("marketprice").setExecutor(new CommandMarketPrice());
+        getCommand("marketprice").setTabCompleter(new CommandMarketPriceCompleter());
         getCommand("trash").setExecutor(new CommandTrash());
         getCommand("trust").setExecutor(new CommandTrust());
         getCommand("trust").setTabCompleter(new CommandTrustCompleter());

@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.database;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.network.NetworkPlayer;
+import com.aearost.aranarthcore.objects.TradeMarketData;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.Bukkit;
@@ -448,6 +449,18 @@ public class DatabaseManager {
                 default_sell_price DOUBLE NOT NULL,
                 current_price_modifier DOUBLE NOT NULL DEFAULT 1.0,
                 sell_pressure DOUBLE NOT NULL DEFAULT 0.0,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+                """
+            CREATE TABLE IF NOT EXISTS trade_market_prices (
+                market_key VARCHAR(256) PRIMARY KEY,
+                display_name VARCHAR(256) NOT NULL,
+                material VARCHAR(64) NOT NULL,
+                item_model_key VARCHAR(256),
+                total_value DOUBLE NOT NULL DEFAULT 0,
+                total_units BIGINT NOT NULL DEFAULT 0,
+                first_price DOUBLE NOT NULL DEFAULT 0,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """
@@ -2213,6 +2226,47 @@ public class DatabaseManager {
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load market dynamics: " + e.getMessage());
+        }
+        return result;
+    }
+
+    public void upsertTradeMarketData(TradeMarketData data) {
+        String sql = "INSERT INTO trade_market_prices (market_key, display_name, material, item_model_key, total_value, total_units, first_price) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE " +
+                "display_name=VALUES(display_name), total_value=VALUES(total_value), " +
+                "total_units=VALUES(total_units), first_price=VALUES(first_price)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, data.getMarketKey());
+            ps.setString(2, data.getDisplayName());
+            ps.setString(3, data.getMaterial());
+            ps.setString(4, data.getItemModelKey());
+            ps.setDouble(5, data.getTotalValue());
+            ps.setLong(6, data.getTotalUnits());
+            ps.setDouble(7, data.getFirstPrice());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to upsert trade market data for " + data.getMarketKey() + ": " + e.getMessage());
+        }
+    }
+
+    public List<TradeMarketData> loadAllTradeMarketData() {
+        String sql = "SELECT market_key, display_name, material, item_model_key, total_value, total_units, first_price FROM trade_market_prices";
+        List<TradeMarketData> result = new ArrayList<>();
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                result.add(new TradeMarketData(
+                        rs.getString("market_key"),
+                        rs.getString("display_name"),
+                        rs.getString("material"),
+                        rs.getString("item_model_key"),
+                        rs.getDouble("total_value"),
+                        rs.getLong("total_units"),
+                        rs.getDouble("first_price")
+                ));
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load trade market data: " + e.getMessage());
         }
         return result;
     }
