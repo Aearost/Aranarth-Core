@@ -3993,7 +3993,7 @@ public class AranarthUtils {
                 if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
                     onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("afk.now_afk")));
                 } else {
-                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("afk.player_now_afk", "name", aranarthPlayer.getNickname())));
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("afk.player_now_afk", "name", ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()))));
                 }
             }
             Bukkit.getLogger().info("[AC] " + ChatUtils.translateToColor(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " is now AFK"));
@@ -4010,7 +4010,7 @@ public class AranarthUtils {
                 if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
                     onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("afk.no_longer_afk")));
                 } else {
-                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("afk.player_no_longer_afk", "name", aranarthPlayer.getNickname())));
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("afk.player_no_longer_afk", "name", ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()))));
                 }
             }
             Bukkit.getLogger().info("[AC] " + ChatUtils.translateToColor(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " is no longer AFK"));
