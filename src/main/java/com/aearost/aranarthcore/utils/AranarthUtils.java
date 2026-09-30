@@ -1301,10 +1301,8 @@ public class AranarthUtils {
                 continue;
             }
             // Skip chest shops
-            boolean isShop = (loc1 != null && loc1.getWorld() != null && ShopUtils.getShopFromLocation(
-                    loc1.getBlock().getRelative(BlockFace.UP).getLocation()) != null)
-                    || (loc2 != null && loc2.getWorld() != null && ShopUtils.getShopFromLocation(
-                    loc2.getBlock().getRelative(BlockFace.UP).getLocation()) != null);
+            boolean isShop = (loc1 != null && loc1.getWorld() != null && ShopUtils.getShopForContainer(loc1.getBlock()) != null)
+                    || (loc2 != null && loc2.getWorld() != null && ShopUtils.getShopForContainer(loc2.getBlock()) != null);
             if (!isShop) {
                 iterator.remove();
             }

@@ -42,6 +42,24 @@ public class ShopCreateListener implements Listener {
 			// If placing a Player Shop
 			if (ChatUtils.stripColorFormatting(lines[0]).equals("[Shop]")) {
 				if (signState.getBlockData() instanceof WallSign wallSign) {
+					// Check if the target chest already has a shop on any of its faces
+					Block targetChest = getChestBlock(sign);
+					if (targetChest != null) {
+						Location[] targetLocs = AranarthUtils.getLocationsOfContainer(targetChest);
+						Shop chestShop = ShopUtils.getShopForContainer(targetLocs[0].getBlock());
+						if (chestShop == null && targetLocs[1] != null) {
+							chestShop = ShopUtils.getShopForContainer(targetLocs[1].getBlock());
+						}
+						if (chestShop != null && !chestShop.getLocation().equals(sign.getLocation())) {
+							player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.chest_already_has_shop")));
+							canShopBeRemoved(e);
+							e.setLine(0, "");
+							e.setLine(1, "");
+							e.setLine(2, "");
+							e.setLine(3, "");
+							return;
+						}
+					}
 					if (!canCreateShop(e)) {
 						player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.cannot_create_here")));
 						canShopBeRemoved(e);
@@ -184,14 +202,24 @@ public class ShopCreateListener implements Listener {
 	}
 
 	/**
+	 * Returns the chest block associated with a sign (below or directly attached), or null.
+	 * @param sign The sign block.
+	 * @return The container block, or null.
+	 */
+	private Block getChestBlock(Block sign) {
+		return ShopUtils.getChestBlockForSign(sign);
+	}
+
+	/**
 	 * Determines if a shop can be created in the particular location.
 	 * @param e The event.
 	 * @return Confirmation if the shop can be created.
 	 */
 	private boolean canCreateShop(SignChangeEvent e) {
 		Block signBlock = e.getBlock();
-		// If no container is below, no need to verify further
-		if (!isBlockBelowContainer(signBlock)) {
+		Block chest = getChestBlock(signBlock);
+		// If no container is associated, no need to verify further
+		if (chest == null) {
 			return true;
 		}
 
@@ -200,23 +228,27 @@ public class ShopCreateListener implements Listener {
 			return false;
 		}
 
-		LockedContainer lockedContainer = AranarthUtils.getLockedContainerAtBlock(signBlock.getRelative(BlockFace.DOWN));
-		Location[] locations = AranarthUtils.getLocationsOfContainer(signBlock.getRelative(BlockFace.DOWN));
+		LockedContainer lockedContainer = AranarthUtils.getLockedContainerAtBlock(chest);
+		Location[] locations = AranarthUtils.getLocationsOfContainer(chest);
 
-		// Double chest
-		if (locations[1] != null) {
-			Shop shop1 = ShopUtils.getShopFromLocation(locations[0].getBlock().getRelative(BlockFace.UP).getLocation());
-			Shop shop2 = ShopUtils.getShopFromLocation(locations[1].getBlock().getRelative(BlockFace.UP).getLocation());
-			if ((shop1 != null && e.getPlayer().getUniqueId().equals(shop1.getUuid()))
-				|| (shop2 != null && e.getPlayer().getUniqueId().equals(shop2.getUuid()))) {
-				return true;
-			}
-			return shop1 == null && shop2 == null && (lockedContainer == null || lockedContainer.getOwner().equals(e.getPlayer().getUniqueId()));
+		// Check all faces of the entire container (including double-chest halves) for existing shops
+		Shop existingShop = ShopUtils.getShopForContainer(locations[0].getBlock());
+		if (existingShop == null && locations[1] != null) {
+			existingShop = ShopUtils.getShopForContainer(locations[1].getBlock());
 		}
-		// Can always place if it's a single chest
-		else {
+
+		// Editing the same sign is always an update - allow it
+		if (existingShop != null && existingShop.getLocation().equals(signBlock.getLocation())) {
 			return true;
 		}
+
+		// Another shop already occupies this chest - block it
+		if (existingShop != null) {
+			return false;
+		}
+
+		// No existing shop - check locked container ownership
+		return lockedContainer == null || lockedContainer.getOwner().equals(e.getPlayer().getUniqueId());
 	}
 
 	/**
@@ -373,12 +405,12 @@ public class ShopCreateListener implements Listener {
 	}
 
 	/**
-	 * Determines if the block below is a valid shop container (chest, trapped chest, barrel, copper chest, or shulker box).
-	 * @param sign The sign above the block.
-	 * @return Confirmation of whether the block is a valid shop container.
+	 * Determines if the block below or attached to the wall sign is a valid shop container.
+	 * @param sign The sign block.
+	 * @return Confirmation of whether the sign has an associated container.
 	 */
 	private boolean isBlockBelowContainer(Block sign) {
-		return AranarthUtils.isContainerBlock(sign.getRelative(BlockFace.DOWN));
+		return getChestBlock(sign) != null;
 	}
 
 	/**
@@ -388,17 +420,19 @@ public class ShopCreateListener implements Listener {
 	 * @return The single quantity of the item for the shop.
 	 */
 	private ItemStack getShopItem(Block sign, boolean isPlayerShop) {
-		Location signLocation = sign.getLocation();
-		Location blockBelowSign = new Location(signLocation.getWorld(),
-				signLocation.getBlockX(), signLocation.getBlockY() - 1, signLocation.getBlockZ());
+		Block chestBlock = getChestBlock(sign);
 
 		// If it is a server shop
-		if (!isBlockBelowContainer(blockBelowSign.getBlock()) && !isPlayerShop) {
+		if (chestBlock == null && !isPlayerShop) {
 			return new ItemStack(Material.AIR);
 		}
 
+		if (chestBlock == null) {
+			return null;
+		}
+
 		// Gets the first item in the chest and uses this as the item
-		BlockState state = blockBelowSign.getBlock().getState();
+		BlockState state = chestBlock.getState();
 		Container container = (Container) state;
 		ItemStack firstItem = container.getInventory().getContents()[0];
 		if (firstItem != null) {

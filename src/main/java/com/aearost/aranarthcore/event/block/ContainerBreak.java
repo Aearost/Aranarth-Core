@@ -8,7 +8,6 @@ import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 
@@ -42,13 +41,12 @@ public class ContainerBreak {
                 else {
                     AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                     if (aranarthPlayer.isInAdminMode()) {
-                        Location above = e.getBlock().getRelative(BlockFace.UP).getLocation();
-                        boolean hasShopAbove = ShopUtils.getShopFromLocation(above) != null;
+                        boolean hasShop = ShopUtils.getShopForContainer(e.getBlock()) != null;
                         Location[] singleContainerLocation = new Location[] { e.getBlock().getLocation(), null };
                         int breakResult = AranarthUtils.removeLockedContainer(singleContainerLocation);
                         if (breakResult == 0) {
-                            // If there's a shop above, ShopDestroy will handle the success message
-                            if (!hasShopAbove) {
+                            // If there's a shop on this chest, ShopDestroy will handle the success message
+                            if (!hasShop) {
                                 player.sendMessage(ChatUtils.chatMessage(Lang.get("lock.container_destroyed")));
                             }
                         } else if (breakResult == -1) {
@@ -58,14 +56,11 @@ public class ContainerBreak {
                     } else {
                         // Getting the locations of the locked container
                         Location[] locations = lockedContainer.getLocations();
-                        Location above1 = locations[0].getBlock().getRelative(BlockFace.UP).getLocation();
-                        Location above2 = null;
-                        if (locations[1] != null) {
-                            above2 = locations[1].getBlock().getRelative(BlockFace.UP).getLocation();
-                        }
 
-                        // Only display message if there are no shops above either of the locations
-                        if (ShopUtils.getShopFromLocation(above1) == null && (above2 == null || ShopUtils.getShopFromLocation(above2) == null)) {
+                        // Only display message if there are no shops on either container half
+                        boolean hasShop = ShopUtils.getShopForContainer(locations[0].getBlock()) != null
+                                || (locations[1] != null && ShopUtils.getShopForContainer(locations[1].getBlock()) != null);
+                        if (!hasShop) {
                             player.sendMessage(ChatUtils.chatMessage(Lang.get("lock.no_permission_destroy")));
                             e.setCancelled(true);
                         }

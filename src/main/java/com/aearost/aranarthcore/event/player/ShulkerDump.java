@@ -13,7 +13,6 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.block.ShulkerBox;
@@ -93,7 +92,7 @@ public class ShulkerDump {
         }
 
         // Shop container check - mirrors ContainerInteract.attemptOpen
-        if (ShopUtils.getShopFromLocation(block.getRelative(BlockFace.UP).getLocation()) != null) {
+        if (ShopUtils.getShopForContainer(block) != null) {
             e.setCancelled(true);
             return;
         }

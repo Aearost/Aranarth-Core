@@ -6,6 +6,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.*;
+import org.bukkit.block.data.type.WallSign;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemDisplay;
@@ -57,6 +58,46 @@ public class ShopUtils {
                 if (shop.getLocation().equals(location)) {
                     return shop;
                 }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the chest block associated with a shop sign, or null if none.
+     * @param signBlock The sign block.
+     * @return The container block, or null.
+     */
+    public static Block getChestBlockForSign(Block signBlock) {
+        Block below = signBlock.getRelative(BlockFace.DOWN);
+        if (AranarthUtils.isContainerBlock(below)) {
+            return below;
+        }
+        if (signBlock.getBlockData() instanceof WallSign wallSign) {
+            BlockFace attachedFace = wallSign.getFacing().getOppositeFace();
+            Block attached = signBlock.getRelative(attachedFace);
+            if (AranarthUtils.isContainerBlock(attached)) {
+                return attached;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the shop whose sign is on any face of the given container block, or null if none.
+     * Checks the block above and all four cardinal wall-sign faces.
+     *
+     * @param container The container block.
+     * @return The shop, or null.
+     */
+    public static Shop getShopForContainer(Block container) {
+        Shop above = getShopFromLocation(container.getRelative(BlockFace.UP).getLocation());
+        if (above != null) return above;
+        for (BlockFace face : new BlockFace[]{BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST}) {
+            Block adjacent = container.getRelative(face);
+            if (adjacent.getBlockData() instanceof WallSign ws && ws.getFacing() == face) {
+                Shop shop = getShopFromLocation(adjacent.getLocation());
+                if (shop != null) return shop;
             }
         }
         return null;
@@ -228,13 +269,16 @@ public class ShopUtils {
             ItemStack item = shop.getItem().clone();
             item.setAmount(1);
 
-            Location loc = shop.getLocation().clone();
-            // Player shop
+            Location loc;
+            // Player shop - anchor the hologram above the chest regardless of where the sign is
             if (shop.getUuid() != null) {
-                loc.add(0.5, 0.15, 0.5);
+                Block chestBlock = getChestBlockForSign(shop.getLocation().getBlock());
+                loc = (chestBlock != null ? chestBlock.getLocation() : shop.getLocation()).clone();
+                loc.add(0.5, 1.15, 0.5);
             }
             // Server shop
             else {
+                loc = shop.getLocation().clone();
                 loc.add(0.5, 1.15, 0.5);
             }
 
@@ -447,7 +491,7 @@ public class ShopUtils {
      * Computes the quantity of the shop's item currently in the shop chest.
      */
     public static int computeChestQuantityOfItem(Shop shop) {
-        BlockState chestBlockState = shop.getLocation().getBlock().getRelative(BlockFace.DOWN).getState();
+        BlockState chestBlockState = getChestBlockForSign(shop.getLocation().getBlock()).getState();
         Container container = (Container) chestBlockState;
         Inventory chestInventory = container.getInventory();
         if (chestInventory.getHolder() instanceof DoubleChest doubleChest) {
@@ -483,7 +527,7 @@ public class ShopUtils {
      * Computes the free space for the shop's item in the shop chest.
      */
     public static int computeChestFreeSpaceForItem(Shop shop) {
-        BlockState chestBlockState = shop.getLocation().getBlock().getRelative(BlockFace.DOWN).getState();
+        BlockState chestBlockState = getChestBlockForSign(shop.getLocation().getBlock()).getState();
         Container container = (Container) chestBlockState;
         Inventory chestInventory = container.getInventory();
         if (chestInventory.getHolder() instanceof DoubleChest doubleChest) {
@@ -573,7 +617,7 @@ public class ShopUtils {
         // Only for player shops
         if (shop.getUuid() != null) {
             Inventory chestInventory = null;
-            BlockState chestBlockState = shop.getLocation().getBlock().getRelative(BlockFace.DOWN).getState();
+            BlockState chestBlockState = getChestBlockForSign(shop.getLocation().getBlock()).getState();
             Container container = (Container) chestBlockState;
             chestInventory = container.getInventory();
             if (chestInventory.getHolder() instanceof DoubleChest doubleChest) {

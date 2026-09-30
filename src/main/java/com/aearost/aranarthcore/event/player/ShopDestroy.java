@@ -39,27 +39,31 @@ public class ShopDestroy {
 				return;
 			}
 		} else if (AranarthUtils.isContainerBlock(e.getBlock())) {
-			Location signLocation = e.getBlock().getRelative(BlockFace.UP).getLocation();
-			Shop playerShop = ShopUtils.getShopFromLocation(signLocation);
+			Shop playerShop = ShopUtils.getShopForContainer(e.getBlock());
 			if (playerShop != null) {
+				Location signLocation = playerShop.getLocation();
 				deletionResult = deleteShopIfPossible(player, signLocation);
 
-				Sign sign = (Sign) signLocation.getBlock().getState();
-				SignSide back = sign.getSide(Side.BACK);
-				back.setLine(0, ChatUtils.stripColorFormatting(back.getLine(0)));
-				back.setLine(1, ChatUtils.stripColorFormatting(back.getLine(1)));
-				back.setLine(2, ChatUtils.stripColorFormatting(back.getLine(2)));
-				back.setLine(3, ChatUtils.stripColorFormatting(back.getLine(3)));
+				// Only clear sign text for signs above the chest - front-facing wall signs
+				// drop naturally when their attachment block is broken
+				Block signBlock = signLocation.getBlock();
+				if (signBlock.getRelative(BlockFace.DOWN).equals(e.getBlock()) && signBlock.getState() instanceof Sign sign) {
+					SignSide back = sign.getSide(Side.BACK);
+					back.setLine(0, ChatUtils.stripColorFormatting(back.getLine(0)));
+					back.setLine(1, ChatUtils.stripColorFormatting(back.getLine(1)));
+					back.setLine(2, ChatUtils.stripColorFormatting(back.getLine(2)));
+					back.setLine(3, ChatUtils.stripColorFormatting(back.getLine(3)));
 
-				SignSide front = sign.getSide(Side.FRONT);
-				front.setLine(0, ChatUtils.stripColorFormatting(front.getLine(0)));
-				front.setLine(1, ChatUtils.stripColorFormatting(front.getLine(1)));
-				front.setLine(2, ChatUtils.stripColorFormatting(front.getLine(2)));
-				front.setLine(3, ChatUtils.stripColorFormatting(front.getLine(3)));
+					SignSide front = sign.getSide(Side.FRONT);
+					front.setLine(0, ChatUtils.stripColorFormatting(front.getLine(0)));
+					front.setLine(1, ChatUtils.stripColorFormatting(front.getLine(1)));
+					front.setLine(2, ChatUtils.stripColorFormatting(front.getLine(2)));
+					front.setLine(3, ChatUtils.stripColorFormatting(front.getLine(3)));
 
-				sign.update(true, false);
+					sign.update(true, false);
+				}
 			}
-			// If the sign is not a shop
+			// If the chest is not a shop
 			else {
 				return;
 			}

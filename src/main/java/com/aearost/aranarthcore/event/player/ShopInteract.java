@@ -36,12 +36,12 @@ public class ShopInteract {
             Player player = e.getPlayer();
             AranarthPlayer clickUser = AranarthUtils.getPlayer(player.getUniqueId());
             Location signLocation = e.getClickedBlock().getLocation();
-            Location locationBelow = new Location(signLocation.getWorld(),
-                    signLocation.getBlockX(), signLocation.getBlockY() - 1, signLocation.getBlockZ());
+            Block chestBlock = ShopUtils.getChestBlockForSign(e.getClickedBlock());
+            Location locationBelow = chestBlock != null ? chestBlock.getLocation() : null;
             Shop shop = ShopUtils.getShopFromLocation(signLocation);
 
             // Player shop
-            if (isContainer(locationBelow.getBlock()) && shop != null && AranarthUtils.getPlayer(shop.getUuid()) != null) {
+            if (locationBelow != null && shop != null && shop.getUuid() != null && AranarthUtils.getPlayer(shop.getUuid()) != null) {
                 if (shop != null) {
                     e.setCancelled(true);
 
@@ -202,10 +202,10 @@ public class ShopInteract {
                 locations[0] = e.getClickedBlock().getLocation();
             }
 
-            Shop location1Shop = ShopUtils.getShopFromLocation(locations[0].getBlock().getRelative(BlockFace.UP).getLocation());
+            Shop location1Shop = ShopUtils.getShopForContainer(locations[0].getBlock());
             Shop location2Shop = null;
-            if (ShopUtils.getShopFromLocation(locations[1]) != null) {
-                location2Shop = ShopUtils.getShopFromLocation(locations[1].getBlock().getRelative(BlockFace.UP).getLocation());
+            if (locations[1] != null) {
+                location2Shop = ShopUtils.getShopForContainer(locations[1].getBlock());
             }
 
             if (location1Shop != null || (locations[1] != null && location2Shop != null)) {

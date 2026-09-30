@@ -13,7 +13,6 @@ import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 
@@ -206,7 +205,7 @@ public class ContainerInteract {
         Dominion chunkDominion = DominionUtils.getDominionOfChunk(block.getChunk());
 
         // Message is sent in ShopInteract already
-        if (ShopUtils.getShopFromLocation(block.getRelative(BlockFace.UP).getLocation()) != null) {
+        if (ShopUtils.getShopForContainer(block) != null) {
             return;
         }
 
