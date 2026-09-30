@@ -707,7 +707,7 @@ public class TradeManager {
         return copy;
     }
 
-    private static boolean isEmptyOffer(ItemStack[] items) {
+    public static boolean isEmptyOffer(ItemStack[] items) {
         if (items == null) return true;
         for (ItemStack item : items) {
             if (item != null && item.getType() != Material.AIR) return false;

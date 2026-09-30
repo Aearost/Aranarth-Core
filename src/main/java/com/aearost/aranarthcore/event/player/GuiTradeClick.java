@@ -161,8 +161,19 @@ public class GuiTradeClick {
     private void handleConfirmSlot(Player player, UUID uuid, Trade trade) {
         boolean nowConfirmed = !trade.isMyConfirmed(uuid);
 
-        // Validate balance before allowing the confirm
         if (nowConfirmed) {
+            // Sync local slots before validating so the trade object is current
+            TradeManager.syncLeftSlots(player, trade);
+
+            // At least 1 player must have an item in their offer
+            if (TradeManager.isEmptyOffer(trade.getMyItems(uuid))
+                    && TradeManager.isEmptyOffer(trade.getMyItems(trade.getOther(uuid)))) {
+                player.sendMessage(ChatUtils.chatMessage(
+                        Lang.getFor(player, "trade.no_items")));
+                return;
+            }
+
+            // Validate balance before allowing the confirm
             double myMoney = trade.getMyMoney(uuid);
             if (myMoney > 0) {
                 AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
