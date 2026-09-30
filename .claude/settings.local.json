@@ -537,7 +537,22 @@
       "Bash(sed -n '73,100p' src/main/java/com/aearost/aranarthcore/commands/general/CommandTeleport.java)",
       "Bash(sed -n '63,90p' src/main/java/com/aearost/aranarthcore/commands/general/CommandTpHere.java)",
       "Bash(sed -i 's/Lang\\\\.get\\(\"\"lock\\\\.trust_mode_hint\"\"\\)/Lang.get\\(\"\"lock.trust_mode_hint\"\", \"\"player\"\", nickname\\)/' src/main/java/com/aearost/aranarthcore/commands/general/CommandTrust.java)",
-      "Bash(sed -i 's/Lang\\\\.get\\(\"\"lock\\\\.untrust_mode_hint\"\"\\)/Lang.get\\(\"\"lock.untrust_mode_hint\"\", \"\"player\"\", nickname\\)/' src/main/java/com/aearost/aranarthcore/commands/general/CommandUntrust.java)"
+      "Bash(sed -i 's/Lang\\\\.get\\(\"\"lock\\\\.untrust_mode_hint\"\"\\)/Lang.get\\(\"\"lock.untrust_mode_hint\"\", \"\"player\"\", nickname\\)/' src/main/java/com/aearost/aranarthcore/commands/general/CommandUntrust.java)",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -type f -name *[Ii]ncantation*)",
+      "Bash(BASE=/c/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore)",
+      "Bash(mkdir -p $BASE/items/essence)",
+      "Bash(PACK=/c/Users/liamh/IdeaProjects/AranarthCore/src/main/resources/pack/assets/aranarthcore ls $PACK/items/)",
+      "Bash(PACK=/c/Users/liamh/IdeaProjects/AranarthCore/src/main/resources/pack/assets/aranarthcore for type in magnetism preservation resilience)",
+      "Bash(do mv:*)",
+      "Bash(PACK=/c/Users/liamh/IdeaProjects/AranarthCore/src/main/resources/pack/assets/aranarthcore)",
+      "Read(//c/Users/liamh/IdeaProjects/AranarthCore/$PACK/items/**)",
+      "Read(//c/Users/liamh/IdeaProjects/AranarthCore/$PACK/models/item/**)",
+      "Bash(head -10 grep -n \"incantation\\\\|Incantation\" /c/Users/liamh/IdeaProjects/AranarthCore/src/main/resources/mob_heads.yml)",
+      "Bash(echo '=== Java files with incantation references ===' grep -rn \"incantation\\\\|Incantation\\\\|INCANTATION\" --include=*.java /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java/)",
+      "Bash(echo '=== Final Java check ===' grep -rn \"incantation\\\\|Incantation\\\\|INCANTATION\" --include=*.java /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java/)",
+      "Bash(echo '=== Resource pack JSON check ===' grep -rn incantation --include=*.json /c/Users/liamh/IdeaProjects/AranarthCore/src/main/resources/ 2)",
+      "Bash(/dev/null __NEW_LINE_db90428d9a0ccfd0__ echo echo '=== Lang file key check ===' grep -rn \"^incantation\\\\|^gui\\\\.aranarth\\\\.incantations\\\\|^guide\\\\.topic_incantations\" /c/Users/liamh/IdeaProjects/AranarthCore/src/main/resources/lang/ 2)",
+      "Bash(/dev/null __NEW_LINE_db90428d9a0ccfd0__ echo echo '=== Lang file value check \\(English incantation words\\) ===' grep -rn =.*[Ii]ncantation /c/Users/liamh/IdeaProjects/AranarthCore/src/main/resources/lang/en_US.properties)"
     ]
   }
 }

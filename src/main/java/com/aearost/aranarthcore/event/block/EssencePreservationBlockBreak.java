@@ -13,14 +13,14 @@ import org.bukkit.event.block.BlockBreakEvent;
 
 import java.util.List;
 
-import static com.aearost.aranarthcore.objects.CustomKeys.INCANTATION_LEVEL;
-import static com.aearost.aranarthcore.objects.CustomKeys.INCANTATION_TYPE;
+import static com.aearost.aranarthcore.objects.CustomKeys.ESSENCE_LEVEL;
+import static com.aearost.aranarthcore.objects.CustomKeys.ESSENCE_TYPE;
 import static com.aearost.aranarthcore.objects.CustomKeys.PRESERVATION_USES;
 
 /**
- * Handles block breaks for pickaxes with the Incantation of Preservation.
+ * Handles block breaks for pickaxes with the Essence of Preservation.
  */
-public class IncantationPreservationBlockBreak {
+public class EssencePreservationBlockBreak {
     public void execute(BlockBreakEvent e) {
         Material type = e.getBlock().getType();
         Location location = e.getBlock().getLocation();
@@ -42,7 +42,7 @@ public class IncantationPreservationBlockBreak {
             location.getWorld().dropItemNaturally(location, new ItemStack(type, 1));
         }
 
-        // Decrement uses and strip the incantation when exhausted
+        // Decrement uses and strip the essence when exhausted
         Player player = e.getPlayer();
         ItemStack heldItem = player.getInventory().getItemInMainHand();
         ItemMeta meta = heldItem.getItemMeta();
@@ -52,8 +52,8 @@ public class IncantationPreservationBlockBreak {
         uses--;
 
         if (uses <= 0) {
-            meta.getPersistentDataContainer().remove(INCANTATION_TYPE);
-            meta.getPersistentDataContainer().remove(INCANTATION_LEVEL);
+            meta.getPersistentDataContainer().remove(ESSENCE_TYPE);
+            meta.getPersistentDataContainer().remove(ESSENCE_LEVEL);
             meta.getPersistentDataContainer().remove(PRESERVATION_USES);
             meta.removeEnchant(Enchantment.SILK_TOUCH);
             List<String> lore = meta.getLore();
@@ -61,7 +61,7 @@ public class IncantationPreservationBlockBreak {
                 lore.removeIf(line -> ChatUtils.stripColorFormatting(line).equals("Preservation"));
                 meta.setLore(lore.isEmpty() ? null : lore);
             }
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("incantation.preservation_expired")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("essence.preservation_expired")));
         } else {
             meta.getPersistentDataContainer().set(PRESERVATION_USES, PersistentDataType.INTEGER, uses);
         }

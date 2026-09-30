@@ -1,7 +1,7 @@
 package com.aearost.aranarthcore.commands.council;
 
 import com.aearost.aranarthcore.items.AranarthItem;
-import com.aearost.aranarthcore.items.incantation.Incantation;
+import com.aearost.aranarthcore.items.essence.Essence;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -69,8 +69,8 @@ public class CommandGive {
                 } else if (args[2].startsWith("Key")) {
                     isKey = true;
                     fullPathName = "com.aearost.aranarthcore.items.key." + args[2];
-                } else if (args[2].startsWith("Incantation")) {
-                    fullPathName = "com.aearost.aranarthcore.items.incantation." + args[2];
+                } else if (args[2].startsWith("Essence")) {
+                    fullPathName = "com.aearost.aranarthcore.items.essence." + args[2];
                 } else {
                     fullPathName = "com.aearost.aranarthcore.items." + args[2];
                 }
@@ -151,8 +151,8 @@ public class CommandGive {
                             sender.sendMessage(ChatUtils.chatMessage(Lang.get("give.success", "player", player.getName(), "amount", String.valueOf(quantity), "item", itemName)));
                         }
                     }
-                } else if (instance instanceof Incantation incantation) {
-                    ItemStack item = incantation.getItem();
+                } else if (instance instanceof Essence essence) {
+                    ItemStack item = essence.getItem();
                     int quantity = 1;
                     if (args.length >= 4) {
                         try {

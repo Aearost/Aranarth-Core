@@ -1,7 +1,7 @@
 package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.items.aranarthium.ingots.AranarthiumIngot;
-import com.aearost.aranarthcore.items.incantation.IncantationPlentiful;
+import com.aearost.aranarthcore.items.essence.EssencePlentiful;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
@@ -24,7 +24,7 @@ public class GuiAranarth {
     public static final int SLOT_RULES = 4;
     public static final int SLOT_CALENDAR = 11;
     public static final int SLOT_ARANARTHIUM = 13;
-    public static final int SLOT_INCANTATIONS = 15;
+    public static final int SLOT_ESSENCES = 15;
 
     private final Player player;
     private final Inventory gui;
@@ -86,15 +86,15 @@ public class GuiAranarth {
         ingotItem.setItemMeta(ingotMeta);
         inv.setItem(SLOT_ARANARTHIUM, ingotItem);
 
-        ItemStack incantationItem = new IncantationPlentiful().getItem();
-        ItemMeta incantationMeta = incantationItem.getItemMeta();
-        incantationMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.aranarth.incantations_name")));
-        incantationMeta.setLore(List.of(
-                ChatUtils.translateToColor(Lang.getFor(player, "gui.aranarth.incantations_lore1")),
-                ChatUtils.translateToColor(Lang.getFor(player, "gui.aranarth.incantations_lore2"))
+        ItemStack essenceItem = new EssencePlentiful().getItem();
+        ItemMeta essenceMeta = essenceItem.getItemMeta();
+        essenceMeta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.aranarth.essences_name")));
+        essenceMeta.setLore(List.of(
+                ChatUtils.translateToColor(Lang.getFor(player, "gui.aranarth.essences_lore1")),
+                ChatUtils.translateToColor(Lang.getFor(player, "gui.aranarth.essences_lore2"))
         ));
-        incantationItem.setItemMeta(incantationMeta);
-        inv.setItem(SLOT_INCANTATIONS, incantationItem);
+        essenceItem.setItemMeta(essenceMeta);
+        inv.setItem(SLOT_ESSENCES, essenceItem);
 
         return inv;
     }

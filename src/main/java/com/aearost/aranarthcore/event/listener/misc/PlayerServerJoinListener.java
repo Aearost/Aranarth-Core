@@ -223,6 +223,9 @@ public class PlayerServerJoinListener implements Listener {
     public void onPlayerJoin(final PlayerJoinEvent e) {
         Player player = e.getPlayer();
 
+        // Migrate any pre-#420 Incantation items in the player's inventory to Essences.
+        AranarthUtils.migrateInventoryEssences(player.getInventory());
+
         // Clear any stale BendingPlayer data PK may have cached from a previous session on
         // this server. Without this, players who switch to SMP, change element, then return
         // here would still see their old element because PK skips the DB load when the player

@@ -24,8 +24,8 @@ import java.util.Map;
 
 import static com.aearost.aranarthcore.objects.CustomKeys.ARANARTHIUM_INGOT;
 import static com.aearost.aranarthcore.objects.CustomKeys.ARMOR_TYPE;
-import static com.aearost.aranarthcore.objects.CustomKeys.INCANTATION_LEVEL;
-import static com.aearost.aranarthcore.objects.CustomKeys.INCANTATION_TYPE;
+import static com.aearost.aranarthcore.objects.CustomKeys.ESSENCE_LEVEL;
+import static com.aearost.aranarthcore.objects.CustomKeys.ESSENCE_TYPE;
 import static com.aearost.aranarthcore.objects.CustomKeys.NETHERITE_ITEM;
 
 /**
@@ -317,20 +317,20 @@ public class AranarthiumArmourCraft {
     }
 
     /**
-     * Copies incantation PDC entries and lore from the source item to the result item.
+     * Copies essence PDC entries and lore from the source item to the result item.
      */
-    private void transferIncantation(ItemStack source, ItemStack result) {
+    private void transferEssence(ItemStack source, ItemStack result) {
         if (!source.hasItemMeta() || !result.hasItemMeta()) return;
         ItemMeta sourceMeta = source.getItemMeta();
-        if (!sourceMeta.getPersistentDataContainer().has(INCANTATION_TYPE)) return;
+        if (!sourceMeta.getPersistentDataContainer().has(ESSENCE_TYPE)) return;
 
         ItemMeta resultMeta = result.getItemMeta();
-        String incantationType = sourceMeta.getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
-        int incantationLevel = sourceMeta.getPersistentDataContainer().get(INCANTATION_LEVEL, PersistentDataType.INTEGER);
-        resultMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, incantationType);
-        resultMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, incantationLevel);
+        String essenceType = sourceMeta.getPersistentDataContainer().get(ESSENCE_TYPE, PersistentDataType.STRING);
+        int essenceLevel = sourceMeta.getPersistentDataContainer().get(ESSENCE_LEVEL, PersistentDataType.INTEGER);
+        resultMeta.getPersistentDataContainer().set(ESSENCE_TYPE, PersistentDataType.STRING, essenceType);
+        resultMeta.getPersistentDataContainer().set(ESSENCE_LEVEL, PersistentDataType.INTEGER, essenceLevel);
 
-        // Copy incantation lore lines - any line in source that isn't already in result
+        // Copy essence lore lines - any line in source that isn't already in result
         List<String> sourceLore = sourceMeta.getLore();
         List<String> resultLore = resultMeta.getLore();
         if (sourceLore != null && resultLore != null) {
@@ -387,7 +387,7 @@ public class AranarthiumArmourCraft {
                 }
                 netheriteElytra.setItemMeta(resultMeta);
             }
-            transferIncantation(armor, netheriteElytra);
+            transferEssence(armor, netheriteElytra);
             return netheriteElytra;
         }
         String ingotName = ingot.getItemMeta().getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING);
@@ -511,7 +511,7 @@ public class AranarthiumArmourCraft {
             }
             enhancedAranarthiumArmor.setItemMeta(resultMeta);
         }
-        transferIncantation(armor, enhancedAranarthiumArmor);
+        transferEssence(armor, enhancedAranarthiumArmor);
 
         return enhancedAranarthiumArmor;
     }

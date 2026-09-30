@@ -1,7 +1,7 @@
 package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.event.block.IncantationMagnetismBlockBreak;
+import com.aearost.aranarthcore.event.block.EssenceMagnetismBlockBreak;
 import com.aearost.aranarthcore.event.block.TrialChamberLuck;
 import com.aearost.aranarthcore.utils.CropUtils;
 import org.bukkit.Bukkit;
@@ -28,7 +28,7 @@ public class ItemSpawnEventListener implements Listener {
         }
 
         // Tag any item spawning at an active magnetism break location so it can be pulled later.
-        String toolId = IncantationMagnetismBlockBreak.getToolIdForSpawn(e.getLocation());
+        String toolId = EssenceMagnetismBlockBreak.getToolIdForSpawn(e.getLocation());
         if (toolId != null) {
             e.getEntity().getPersistentDataContainer().set(MAGNETISM_TAG, PersistentDataType.STRING, toolId);
         }

@@ -27,9 +27,9 @@ public class GuiAranarthClick {
                 player.closeInventory();
                 player.performCommand("aranarth aranarthium");
             }
-            case GuiAranarth.SLOT_INCANTATIONS -> {
+            case GuiAranarth.SLOT_ESSENCES -> {
                 player.closeInventory();
-                player.performCommand("aranarth incantations");
+                player.performCommand("aranarth essences");
             }
             case GuiAranarth.SLOT_RULES -> {
                 player.closeInventory();

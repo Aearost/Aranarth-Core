@@ -32,7 +32,7 @@ public class EntityDamageEventListener implements Listener {
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityDamage(EntityDamageEvent e) {
-        new IncantationResilienceProtect().executeFireLava(e);
+        new EssenceResilienceProtect().executeFireLava(e);
         if (e.isCancelled()) {
             return;
         }

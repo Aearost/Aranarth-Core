@@ -30,8 +30,8 @@ public class PlayerHeadDrop {
                         // 5% base chance (1/20)
                         int threshold = 1;
                         int range = 20;
-                        if (AranarthUtils.hasIncantation(weapon, "incantation_beheading")) {
-                            int level = AranarthUtils.getIncantationLevel(weapon);
+                        if (AranarthUtils.hasEssence(weapon, "essence_beheading")) {
+                            int level = AranarthUtils.getEssenceLevel(weapon);
                             if (level == 1) {
                                 // 25% chance
                                 threshold = 1;

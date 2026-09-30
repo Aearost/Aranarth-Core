@@ -25,7 +25,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.UUID;
 
-import static com.aearost.aranarthcore.objects.CustomKeys.INCANTATION_TYPE;
+import static com.aearost.aranarthcore.objects.CustomKeys.ESSENCE_TYPE;
 
 /**
  * Centralizes all logic to be called by blocks being broken.
@@ -104,7 +104,7 @@ public class BlockBreakEventListener implements Listener {
     }
 
     /**
-     * Handles the logic for an Incantation of Plentiful block break.
+     * Handles the logic for an Essence of Plentiful block break.
      * @param e The event.
      */
     private void handlePlentifulBreak(BlockBreakEvent e) {
@@ -118,9 +118,9 @@ public class BlockBreakEventListener implements Listener {
                 aranarthPlayer.setPlentifulBlocksToDestroy(aranarthPlayer.getPlentifulBlocksToDestroy() - 1);
             } else {
                 ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
-                if (heldItem.hasItemMeta() && heldItem.getItemMeta().getPersistentDataContainer().has(INCANTATION_TYPE)) {
-                    String type = heldItem.getItemMeta().getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
-                    if (type.equals("incantation_plentiful")) {
+                if (heldItem.hasItemMeta() && heldItem.getItemMeta().getPersistentDataContainer().has(ESSENCE_TYPE)) {
+                    String type = heldItem.getItemMeta().getPersistentDataContainer().get(ESSENCE_TYPE, PersistentDataType.STRING);
+                    if (type.equals("essence_plentiful")) {
                         // Only activate plentiful for fully matured crops to avoid durability draining
                         if (heldItem.getType().name().endsWith("_HOE")) {
                             Block block = e.getBlock();
@@ -133,7 +133,7 @@ public class BlockBreakEventListener implements Listener {
                             }
                         }
                         aranarthPlayer.setPlentifulBlocksToDestroy(9);
-                        new IncantationPlentifulBlockBreak().execute(e);
+                        new EssencePlentifulBlockBreak().execute(e);
                     }
                 }
             }
@@ -142,34 +142,34 @@ public class BlockBreakEventListener implements Listener {
     }
 
     /**
-     * Handles the logic for an Incantation of Preservation block break.
+     * Handles the logic for an Essence of Preservation block break.
      * @param e The event.
      */
     private void handlePreservationBreak(BlockBreakEvent e) {
         String worldName = e.getBlock().getWorld().getName();
         if (worldName.startsWith("world") || AranarthUtils.isSmpWorld(worldName) || worldName.startsWith("resource")) {
             ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
-            if (heldItem.hasItemMeta() && heldItem.getItemMeta().getPersistentDataContainer().has(INCANTATION_TYPE)) {
-                String type = heldItem.getItemMeta().getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
-                if (type.equals("incantation_preservation")) {
-                    new IncantationPreservationBlockBreak().execute(e);
+            if (heldItem.hasItemMeta() && heldItem.getItemMeta().getPersistentDataContainer().has(ESSENCE_TYPE)) {
+                String type = heldItem.getItemMeta().getPersistentDataContainer().get(ESSENCE_TYPE, PersistentDataType.STRING);
+                if (type.equals("essence_preservation")) {
+                    new EssencePreservationBlockBreak().execute(e);
                 }
             }
         }
     }
 
     /**
-     * Handles the logic for an Incantation of Magnetism block break.
+     * Handles the logic for an Essence of Magnetism block break.
      * @param e The event.
      */
     private void handleMagnetismBreak(BlockBreakEvent e) {
         String worldName = e.getBlock().getWorld().getName();
         if (worldName.startsWith("world") || AranarthUtils.isSmpWorld(worldName) || worldName.startsWith("resource")) {
             ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
-            if (heldItem.hasItemMeta() && heldItem.getItemMeta().getPersistentDataContainer().has(INCANTATION_TYPE)) {
-                String type = heldItem.getItemMeta().getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
-                if (type.equals("incantation_magnetism")) {
-                    new IncantationMagnetismBlockBreak().execute(e);
+            if (heldItem.hasItemMeta() && heldItem.getItemMeta().getPersistentDataContainer().has(ESSENCE_TYPE)) {
+                String type = heldItem.getItemMeta().getPersistentDataContainer().get(ESSENCE_TYPE, PersistentDataType.STRING);
+                if (type.equals("essence_magnetism")) {
+                    new EssenceMagnetismBlockBreak().execute(e);
                 }
             }
         }

@@ -1,11 +1,11 @@
-package com.aearost.aranarthcore.items.incantation;
+package com.aearost.aranarthcore.items.essence;
 
 import org.bukkit.inventory.ItemStack;
 
-public interface Incantation {
+public interface Essence {
 
     ItemStack getItem();
-    String getIncantationName();
+    String getEssenceName();
     int getLevelLimit();
     String getColor();
 

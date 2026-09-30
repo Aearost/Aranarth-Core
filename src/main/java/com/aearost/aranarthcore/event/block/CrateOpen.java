@@ -7,12 +7,12 @@ import com.aearost.aranarthcore.items.HoneyGlazedHam;
 import com.aearost.aranarthcore.items.aranarthium.clusters.*;
 import com.aearost.aranarthcore.items.aranarthium.ingots.*;
 import com.aearost.aranarthcore.items.brew.BrewRecipe;
-import com.aearost.aranarthcore.items.incantation.IncantationBeheading;
-import com.aearost.aranarthcore.items.incantation.IncantationLifesteal;
-import com.aearost.aranarthcore.items.incantation.IncantationMagnetism;
-import com.aearost.aranarthcore.items.incantation.IncantationPlentiful;
-import com.aearost.aranarthcore.items.incantation.IncantationPreservation;
-import com.aearost.aranarthcore.items.incantation.IncantationResilience;
+import com.aearost.aranarthcore.items.essence.EssenceBeheading;
+import com.aearost.aranarthcore.items.essence.EssenceLifesteal;
+import com.aearost.aranarthcore.items.essence.EssenceMagnetism;
+import com.aearost.aranarthcore.items.essence.EssencePlentiful;
+import com.aearost.aranarthcore.items.essence.EssencePreservation;
+import com.aearost.aranarthcore.items.essence.EssenceResilience;
 import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
 import com.aearost.aranarthcore.items.key.KeyRare;
@@ -209,7 +209,7 @@ public class CrateOpen {
                                 // Sets default value to display at first
                                 indexes.add(0); // egg index
                                 indexes.add(0); // cluster index
-                                indexes.add(0); // incantation index
+                                indexes.add(0); // essence index
                                 indexes.add(0); // weapon index
                                 indexes.add(0); // ham/sniffer/shulker index
                                 GuiCrate gui = new GuiCrate(player, CrateType.EPIC, indexes);
@@ -241,7 +241,7 @@ public class CrateOpen {
                                                 indexes.set(1, 0);
                                             }
 
-                                            // Cycle through the next incantation iteration
+                                            // Cycle through the next essence iteration
                                             if (indexes.get(2) < 1) {
                                                 indexes.set(2, indexes.get(2) + 1);
                                             } else {
@@ -302,7 +302,7 @@ public class CrateOpen {
                                 indexes.add(0);
                                 indexes.add(0);
                                 indexes.add(0);
-                                indexes.add(0); // incantation index (Resilience, Preservation, Plentiful)
+                                indexes.add(0); // essence index (Resilience, Preservation, Plentiful)
                                 GuiCrate gui = new GuiCrate(player, CrateType.GODLY, indexes);
                                 gui.openGui();
                                 // Updates to next slot so task can update it accordingly
@@ -338,7 +338,7 @@ public class CrateOpen {
                                                 indexes.set(2, 0);
                                             }
 
-                                            // Cycle through incantations (Resilience, Preservation, Plentiful)
+                                            // Cycle through essences (Resilience, Preservation, Plentiful)
                                             if (indexes.get(3) < 2) {
                                                 indexes.set(3, indexes.get(3) + 1);
                                             } else {
@@ -652,7 +652,7 @@ public class CrateOpen {
             } else if (chance <= 80) {
                 displayItem = new ItemStack(Material.TOTEM_OF_UNDYING);
             } else if (chance <= 85) {
-                displayItem = new IncantationBeheading().getItem();
+                displayItem = new EssenceBeheading().getItem();
             } else if (chance <= 90) {
                 displayItem = new ItemStack(Material.NETHERITE_INGOT, 2);
             } else if (chance <= 95) {
@@ -724,7 +724,7 @@ public class CrateOpen {
                     reward = new ItemStack(Material.TOTEM_OF_UNDYING, 1);
                     name = "&#f5eba3&lTotem of Undying x1";
                 } else if (chance <= 85) {
-                    reward = new IncantationBeheading().getItem();
+                    reward = new EssenceBeheading().getItem();
                     name = reward.getItemMeta().getDisplayName() + " x1";
                 } else if (chance <= 90) {
                     reward = new ItemStack(Material.NETHERITE_INGOT, 2);
@@ -827,7 +827,7 @@ public class CrateOpen {
                 key.setAmount(2);
                 displayItem = key;
             } else if (chance <= 95) {
-                displayItem = isMagnetism ? new IncantationMagnetism().getItem() : new IncantationLifesteal().getItem();
+                displayItem = isMagnetism ? new EssenceMagnetism().getItem() : new EssenceLifesteal().getItem();
             } else {
                 displayItem = new KeyGodly().getItem();
             }
@@ -986,9 +986,9 @@ public class CrateOpen {
                 } else if (chance <= 95) {
                     // Use pre-rolled isMagnetism
                     if (isMagnetism) {
-                        reward = new IncantationMagnetism().getItem();
+                        reward = new EssenceMagnetism().getItem();
                     } else {
-                        reward = new IncantationLifesteal().getItem();
+                        reward = new EssenceLifesteal().getItem();
                     }
                     name = reward.getItemMeta().getDisplayName();
                 } else {
@@ -1059,11 +1059,11 @@ public class CrateOpen {
                 displayItem = new ItemStack(Material.NETHER_STAR);
             } else if (chance <= 80) {
                 if (incantRoll == 0) {
-                    displayItem = new IncantationResilience().getItem();
+                    displayItem = new EssenceResilience().getItem();
                 } else if (incantRoll == 1) {
-                    displayItem = new IncantationPreservation().getItem();
+                    displayItem = new EssencePreservation().getItem();
                 } else {
-                    displayItem = new IncantationPlentiful().getItem();
+                    displayItem = new EssencePlentiful().getItem();
                 }
             } else if (chance <= 85) {
                 ItemStack key = new KeyGodly().getItem();
@@ -1163,13 +1163,13 @@ public class CrateOpen {
                 } else if (chance <= 80) {
                     // Use pre-rolled incantRoll
                     if (incantRoll == 0) {
-                        reward = new IncantationResilience().getItem();
+                        reward = new EssenceResilience().getItem();
                         name = reward.getItemMeta().getDisplayName() + " x1";
                     } else if (incantRoll == 1) {
-                        reward = new IncantationPreservation().getItem();
+                        reward = new EssencePreservation().getItem();
                         name = reward.getItemMeta().getDisplayName() + " x1";
                     } else {
-                        reward = new IncantationPlentiful().getItem();
+                        reward = new EssencePlentiful().getItem();
                         name = reward.getItemMeta().getDisplayName() + " x1";
                     }
                 } else if (chance <= 85) {
@@ -1606,7 +1606,7 @@ public class CrateOpen {
                 pool.add(new ItemStack(Material.SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE));
                 pool.add(new ItemStack(Material.TOTEM_OF_UNDYING));
                 pool.add(new ItemStack(Material.NETHERITE_INGOT));
-                pool.add(new IncantationBeheading().getItem());
+                pool.add(new EssenceBeheading().getItem());
                 pool.add(new CopperCluster().getItem());
                 pool.add(new ItemStack(Material.OMINOUS_TRIAL_KEY));
                 pool.add(new KeyEpic().getItem());
@@ -1620,7 +1620,7 @@ public class CrateOpen {
                 pool.add(new ItemStack(Material.CONDUIT));
                 pool.add(new CopperCluster().getItem());
                 pool.add(new ItemStack(Material.ZOMBIE_SPAWN_EGG));
-                pool.add(new IncantationMagnetism().getItem());
+                pool.add(new EssenceMagnetism().getItem());
                 pool.add(new ItemStack(Material.SNIFFER_EGG));
                 pool.add(new ItemStack(Material.SHULKER_SHELL));
                 pool.add(new ItemStack(Material.ENCHANTED_BOOK));
@@ -1632,7 +1632,7 @@ public class CrateOpen {
                 pool.add(new ItemStack(Material.NETHERITE_BLOCK));
                 pool.add(new ItemStack(Material.NETHER_STAR));
                 pool.add(new AranarthiumArdent().getItem());
-                pool.add(new IncantationResilience().getItem());
+                pool.add(new EssenceResilience().getItem());
                 pool.add(new ItemStack(Material.MAGMA_CUBE_SPAWN_EGG));
                 pool.add(new ItemStack(Material.SHULKER_SHELL));
                 pool.add(new ItemStack(Material.ENCHANTED_BOOK));

@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Loads and provides custom mob head ItemStacks for the Beheading incantation.
+ * Loads and provides custom mob head ItemStacks for the Beheading essence.
  */
 public class MobHeadUtils {
 

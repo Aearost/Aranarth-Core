@@ -20,10 +20,10 @@ import static com.aearost.aranarthcore.objects.CustomKeys.MAGNETISM_TAG;
 import static com.aearost.aranarthcore.objects.CustomKeys.MAGNETISM_TOOL_ID;
 
 /**
- * Handles logic when a block is broken with a tool that has the Magnetism incantation applied.
+ * Handles logic when a block is broken with a tool that has the Magnetism essence applied.
  * Records the break location so items spawning there are tagged, and drives the sneak-pull mechanic.
  */
-public class IncantationMagnetismBlockBreak {
+public class EssenceMagnetismBlockBreak {
 
     private static final Map<String, String> activeBreakLocations = new HashMap<>();
 

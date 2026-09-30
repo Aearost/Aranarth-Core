@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "aranarthcore:item/incantation_lifesteal"
+    "layer0": "aranarthcore:item/essence_lifesteal"
   }
 }

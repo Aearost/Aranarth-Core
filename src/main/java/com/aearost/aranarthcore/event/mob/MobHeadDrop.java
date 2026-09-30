@@ -10,7 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.Random;
 
 /**
- * Drops a mob-specific head when killed by a player using the Beheading incantation.
+ * Drops a mob-specific head when killed by a player using the Beheading essence.
  */
 public class MobHeadDrop {
 
@@ -34,7 +34,7 @@ public class MobHeadDrop {
         }
 
         ItemStack weapon = attacker.getInventory().getItemInMainHand();
-        boolean hasBeheading = AranarthUtils.hasIncantation(weapon, "incantation_beheading");
+        boolean hasBeheading = AranarthUtils.hasEssence(weapon, "essence_beheading");
 
         int threshold;
         int range;
@@ -42,7 +42,7 @@ public class MobHeadDrop {
             // Wither skeleton skulls are already rare in vanilla - keep Beheading rates lower
             if (!hasBeheading)                                      { threshold = 1; range = 200; } // 0.5%
             else {
-                int level = AranarthUtils.getIncantationLevel(weapon);
+                int level = AranarthUtils.getEssenceLevel(weapon);
                 if (level == 1)      { threshold = 1; range = 20; }  // 5%
                 else if (level == 2) { threshold = 1; range = 10; }  // 10%
                 else if (level == 3) { threshold = 1; range = 5; }   // 20%
@@ -51,7 +51,7 @@ public class MobHeadDrop {
         } else {
             if (!hasBeheading)                                      { threshold = 1; range = 200; } // 0.5%
             else {
-                int level = AranarthUtils.getIncantationLevel(weapon);
+                int level = AranarthUtils.getEssenceLevel(weapon);
                 if (level == 1)      { threshold = 1; range = 10; }  // 10%
                 else if (level == 2) { threshold = 1; range = 5; }   // 20%
                 else if (level == 3) { threshold = 3; range = 10; }  // 30%

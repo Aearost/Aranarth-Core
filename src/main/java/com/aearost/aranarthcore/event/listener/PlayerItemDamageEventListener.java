@@ -2,7 +2,7 @@ package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.player.DurabilityDecreaseWarning;
-import com.aearost.aranarthcore.event.player.IncantationResilienceProtect;
+import com.aearost.aranarthcore.event.player.EssenceResilienceProtect;
 import com.aearost.aranarthcore.event.player.PlayerAutoReplenishSlot;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -24,7 +24,7 @@ public class PlayerItemDamageEventListener implements Listener {
 
     @EventHandler
     public void onItemDamage(PlayerItemDamageEvent e) {
-        new IncantationResilienceProtect().executeDurability(e);
+        new EssenceResilienceProtect().executeDurability(e);
         if (e.isCancelled()) {
             return;
         }

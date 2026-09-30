@@ -10,9 +10,9 @@ import org.bukkit.inventory.ItemStack;
 import java.util.List;
 
 /**
- * Handles logic when shearing a sheep with shears that have the Incantation of Plentiful.
+ * Handles logic when shearing a sheep with shears that have the Essence of Plentiful.
  */
-public class IncantationPlentifulShear {
+public class EssencePlentifulShear {
 
     public void execute(PlayerShearEntityEvent e) {
         Player player = e.getPlayer();

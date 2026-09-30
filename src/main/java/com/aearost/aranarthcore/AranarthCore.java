@@ -10,7 +10,7 @@ import com.aearost.aranarthcore.commands.general.*;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Weather;
-import com.aearost.aranarthcore.event.block.IncantationMagnetismBlockBreak;
+import com.aearost.aranarthcore.event.block.EssenceMagnetismBlockBreak;
 import com.aearost.aranarthcore.event.listener.*;
 import com.aearost.aranarthcore.event.listener.grouped.*;
 import com.aearost.aranarthcore.event.listener.misc.*;
@@ -847,7 +847,7 @@ public class AranarthCore extends JavaPlugin {
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             @Override
             public void run() {
-                IncantationMagnetismBlockBreak.tickMagnetismPull();
+                EssenceMagnetismBlockBreak.tickMagnetismPull();
             }
         }, 2L, 2L);
 

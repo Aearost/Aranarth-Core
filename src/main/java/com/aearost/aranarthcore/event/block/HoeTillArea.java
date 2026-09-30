@@ -12,10 +12,10 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
-import static com.aearost.aranarthcore.objects.CustomKeys.INCANTATION_TYPE;
+import static com.aearost.aranarthcore.objects.CustomKeys.ESSENCE_TYPE;
 
 /**
- * Tills the surrounding 3x3 area for the incantation of plentiful.
+ * Tills the surrounding 3x3 area for the essence of plentiful.
  */
 public class HoeTillArea {
 
@@ -30,8 +30,8 @@ public class HoeTillArea {
         if (!heldItem.hasItemMeta()) {
             return;
         }
-        String incantationType = heldItem.getItemMeta().getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
-        if (!"incantation_plentiful".equals(incantationType)) {
+        String essenceType = heldItem.getItemMeta().getPersistentDataContainer().get(ESSENCE_TYPE, PersistentDataType.STRING);
+        if (!"essence_plentiful".equals(essenceType)) {
             return;
         }
 

@@ -31,13 +31,13 @@ public class CommandAranarth implements CommandExecutor {
             "dwarven", "elven", "fae", "scorched", "soulbound"
     );
 
-    static final List<String> INCANTATION_SECTIONS = List.of(
+    static final List<String> ESSENCE_SECTIONS = List.of(
             "overview", "applying", "beheading", "lifesteal",
             "plentiful", "magnetism", "resilience", "preservation"
     );
 
     private static final Set<String> ARANARTHIUM_SET = Set.copyOf(ARANARTHIUM_SECTIONS);
-    private static final Set<String> INCANTATION_SET = Set.copyOf(INCANTATION_SECTIONS);
+    private static final Set<String> ESSENCE_SET = Set.copyOf(ESSENCE_SECTIONS);
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
@@ -60,9 +60,9 @@ public class CommandAranarth implements CommandExecutor {
                 if (args.length == 1) sendAranarthiumMenu(player);
                 else sendAranarthiumChapter(player, args[1].toLowerCase());
             }
-            case "incantations" -> {
-                if (args.length == 1) sendIncantationsMenu(player);
-                else sendIncantationsChapter(player, args[1].toLowerCase());
+            case "essences" -> {
+                if (args.length == 1) sendEssencesMenu(player);
+                else sendEssencesChapter(player, args[1].toLowerCase());
             }
             case "rules" -> sendRules(player);
             default -> player.sendMessage(ChatUtils.chatMessage(
@@ -178,57 +178,57 @@ public class CommandAranarth implements CommandExecutor {
                 .append(buildNavBtn(Lang.get("guide.nav_next"), Lang.get("aranarthium.section_" + nextSection + "_label"), "/aranarth aranarthium " + nextSection)));
     }
 
-    private void sendIncantationsMenu(Player player) {
-        player.sendMessage(ChatUtils.translateToColor(Lang.get("incantations.guide_title")));
-        player.sendMessage(ChatUtils.translateToColor("  " + Lang.get("incantations.guide_select_section")));
+    private void sendEssencesMenu(Player player) {
+        player.sendMessage(ChatUtils.translateToColor(Lang.get("essences.guide_title")));
+        player.sendMessage(ChatUtils.translateToColor("  " + Lang.get("essences.guide_select_section")));
         player.sendMessage(Component.empty());
 
         player.sendMessage(Component.text("        ").append(buildRow(new String[][]{
-                {Lang.get("incantations.section_overview_label"), Lang.get("guide.click_to_view"), "/aranarth incantations overview"},
-                {Lang.get("incantations.section_applying_label"), Lang.get("guide.click_to_view"), "/aranarth incantations applying"}
+                {Lang.get("essences.section_overview_label"), Lang.get("guide.click_to_view"), "/aranarth essences overview"},
+                {Lang.get("essences.section_applying_label"), Lang.get("guide.click_to_view"), "/aranarth essences applying"}
         })));
         player.sendMessage(Component.text("  ").append(buildRow(new String[][]{
-                {Lang.get("incantations.section_beheading_label"), Lang.get("guide.click_to_view"), "/aranarth incantations beheading"},
-                {Lang.get("incantations.section_lifesteal_label"), Lang.get("guide.click_to_view"), "/aranarth incantations lifesteal"},
-                {Lang.get("incantations.section_plentiful_label"), Lang.get("guide.click_to_view"), "/aranarth incantations plentiful"}
+                {Lang.get("essences.section_beheading_label"), Lang.get("guide.click_to_view"), "/aranarth essences beheading"},
+                {Lang.get("essences.section_lifesteal_label"), Lang.get("guide.click_to_view"), "/aranarth essences lifesteal"},
+                {Lang.get("essences.section_plentiful_label"), Lang.get("guide.click_to_view"), "/aranarth essences plentiful"}
         })));
         player.sendMessage(Component.text("  ").append(buildRow(new String[][]{
-                {Lang.get("incantations.section_magnetism_label"), Lang.get("guide.click_to_view"), "/aranarth incantations magnetism"},
-                {Lang.get("incantations.section_resilience_label"), Lang.get("guide.click_to_view"), "/aranarth incantations resilience"},
-                {Lang.get("incantations.section_preservation_label"), Lang.get("guide.click_to_view"), "/aranarth incantations preservation"}
+                {Lang.get("essences.section_magnetism_label"), Lang.get("guide.click_to_view"), "/aranarth essences magnetism"},
+                {Lang.get("essences.section_resilience_label"), Lang.get("guide.click_to_view"), "/aranarth essences resilience"},
+                {Lang.get("essences.section_preservation_label"), Lang.get("guide.click_to_view"), "/aranarth essences preservation"}
         })));
 
         player.sendMessage(Component.empty());
         player.sendMessage(Component.text("              ").append(buildNavBtn(Lang.get("guide.back_to_menu"), "/aranarth")));
     }
 
-    private void sendIncantationsChapter(Player player, String section) {
-        if (!INCANTATION_SET.contains(section)) {
+    private void sendEssencesChapter(Player player, String section) {
+        if (!ESSENCE_SET.contains(section)) {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("guide.invalid_chapter", "chapter", section)));
             return;
         }
 
-        int sectionIdx = INCANTATION_SECTIONS.indexOf(section);
-        int prevIdx = (sectionIdx - 1 + INCANTATION_SECTIONS.size()) % INCANTATION_SECTIONS.size();
-        int nextIdx = (sectionIdx + 1) % INCANTATION_SECTIONS.size();
-        String prevSection = INCANTATION_SECTIONS.get(prevIdx);
-        String nextSection = INCANTATION_SECTIONS.get(nextIdx);
+        int sectionIdx = ESSENCE_SECTIONS.indexOf(section);
+        int prevIdx = (sectionIdx - 1 + ESSENCE_SECTIONS.size()) % ESSENCE_SECTIONS.size();
+        int nextIdx = (sectionIdx + 1) % ESSENCE_SECTIONS.size();
+        String prevSection = ESSENCE_SECTIONS.get(prevIdx);
+        String nextSection = ESSENCE_SECTIONS.get(nextIdx);
 
         player.sendMessage(ChatUtils.translateToColor(Lang.get("guide.divider")));
         if (section.equals("overview")) {
-            sendMultilineIndented(player, Lang.get("incantations.section_overview_content1"));
+            sendMultilineIndented(player, Lang.get("essences.section_overview_content1"));
             player.sendMessage(Component.empty());
-            sendMultilineIndented(player, Lang.get("incantations.section_overview_content2"));
+            sendMultilineIndented(player, Lang.get("essences.section_overview_content2"));
         } else {
-            sendMultilineIndented(player, Lang.get("incantations.section_" + section + "_content"));
+            sendMultilineIndented(player, Lang.get("essences.section_" + section + "_content"));
         }
         player.sendMessage(ChatUtils.translateToColor(Lang.get("guide.divider")));
         player.sendMessage(Component.text("  ")
-                .append(buildNavBtn(Lang.get("guide.nav_prev"), Lang.get("incantations.section_" + prevSection + "_label"), "/aranarth incantations " + prevSection))
+                .append(buildNavBtn(Lang.get("guide.nav_prev"), Lang.get("essences.section_" + prevSection + "_label"), "/aranarth essences " + prevSection))
                 .append(Component.text("   "))
-                .append(buildNavBtn(Lang.get("incantations.guide_back"), "/aranarth incantations"))
+                .append(buildNavBtn(Lang.get("essences.guide_back"), "/aranarth essences"))
                 .append(Component.text("   "))
-                .append(buildNavBtn(Lang.get("guide.nav_next"), Lang.get("incantations.section_" + nextSection + "_label"), "/aranarth incantations " + nextSection)));
+                .append(buildNavBtn(Lang.get("guide.nav_next"), Lang.get("essences.section_" + nextSection + "_label"), "/aranarth essences " + nextSection)));
     }
 
     private void sendRules(Player player) {

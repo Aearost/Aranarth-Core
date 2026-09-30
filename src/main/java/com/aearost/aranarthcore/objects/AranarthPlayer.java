@@ -1415,18 +1415,18 @@ public class AranarthPlayer {
     }
 
     /**
-     * Provides the temporary variable tracking the number of blocks to destroy from the Incantation of Plentiful.
+     * Provides the temporary variable tracking the number of blocks to destroy from the Essence of Plentiful.
      *
-     * @return The temporary variable tracking the number of blocks to destroy from the Incantation of Plentiful.
+     * @return The temporary variable tracking the number of blocks to destroy from the Essence of Plentiful.
      */
     public int getPlentifulBlocksToDestroy() {
         return plentifulBlocksToDestroy;
     }
 
     /**
-     * Updates the temporary variable tracking the number of blocks to destroy from the Incantation of Plentiful.
+     * Updates the temporary variable tracking the number of blocks to destroy from the Essence of Plentiful.
      *
-     * @param plentifulBlocksToDestroy The temporary variable tracking the number of blocks to destroy from the Incantation of Plentiful.
+     * @param plentifulBlocksToDestroy The temporary variable tracking the number of blocks to destroy from the Essence of Plentiful.
      */
     public void setPlentifulBlocksToDestroy(int plentifulBlocksToDestroy) {
         this.plentifulBlocksToDestroy = plentifulBlocksToDestroy;

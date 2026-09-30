@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class CommandAranarthCompleter implements TabCompleter {
 
-    private static final List<String> TOPICS = List.of("calendar", "aranarthium", "incantations", "rules");
+    private static final List<String> TOPICS = List.of("calendar", "aranarthium", "essences", "rules");
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
@@ -25,7 +25,7 @@ public class CommandAranarthCompleter implements TabCompleter {
             List<String> chapters = switch (args[0].toLowerCase()) {
                 case "calendar" -> CommandAranarth.CALENDAR_MONTHS;
                 case "aranarthium" -> CommandAranarth.ARANARTHIUM_SECTIONS;
-                case "incantations" -> CommandAranarth.INCANTATION_SECTIONS;
+                case "essences" -> CommandAranarth.ESSENCE_SECTIONS;
                 default -> List.of();
             };
             return chapters.stream()

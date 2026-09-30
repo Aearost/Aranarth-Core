@@ -16,9 +16,9 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Handles logic when breaking a block with a tool with the incantation of plentiful.
+ * Handles logic when breaking a block with a tool with the essence of plentiful.
  */
-public class IncantationPlentifulBlockBreak {
+public class EssencePlentifulBlockBreak {
 	public void execute(BlockBreakEvent e) {
 		Player player = e.getPlayer();
 		UUID uuid = player.getUniqueId();

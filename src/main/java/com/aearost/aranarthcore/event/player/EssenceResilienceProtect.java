@@ -6,12 +6,12 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
 
 /**
- * Handles the effects of Incantation of Resilience.
+ * Handles the effects of Essence of Resilience.
  */
-public class IncantationResilienceProtect {
+public class EssenceResilienceProtect {
 
     public void executeDurability(PlayerItemDamageEvent e) {
-        if (AranarthUtils.hasIncantation(e.getItem(), "incantation_resilience")) {
+        if (AranarthUtils.hasEssence(e.getItem(), "essence_resilience")) {
             e.setCancelled(true);
         }
     }
@@ -24,7 +24,7 @@ public class IncantationResilienceProtect {
                 && cause != EntityDamageEvent.DamageCause.LAVA) {
             return;
         }
-        if (AranarthUtils.hasIncantation(itemEntity.getItemStack(), "incantation_resilience")) {
+        if (AranarthUtils.hasEssence(itemEntity.getItemStack(), "essence_resilience")) {
             e.setCancelled(true);
         }
     }

@@ -442,7 +442,7 @@ public class PermissionUtils {
         perms.setPermission("aranarth.heads", true);
         perms.setPermission("aranarth.home", true);
         perms.setPermission("aranarth.homepad", true);
-        perms.setPermission("aranarth.incantations", true);
+        perms.setPermission("aranarth.essences", true);
         perms.setPermission("aranarth.info", true);
         perms.setPermission("aranarth.keyclaim", true);
         perms.setPermission("aranarth.kills", true);

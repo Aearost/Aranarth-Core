@@ -19,8 +19,8 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.Random;
 import java.util.Set;
 
-import static com.aearost.aranarthcore.objects.CustomKeys.INCANTATION_LEVEL;
-import static com.aearost.aranarthcore.objects.CustomKeys.INCANTATION_TYPE;
+import static com.aearost.aranarthcore.objects.CustomKeys.ESSENCE_LEVEL;
+import static com.aearost.aranarthcore.objects.CustomKeys.ESSENCE_TYPE;
 
 /**
  * Increases damage for various weapons depending on the Aranarthium armor set that is worn.
@@ -135,12 +135,12 @@ public class WeaponsExtraDamage {
                         }
                     }
 
-                    // If there's an incantation
+                    // If there's an essence
                     if (weapon.hasItemMeta()) {
-                        if (weapon.getItemMeta().getPersistentDataContainer().has(INCANTATION_TYPE, PersistentDataType.STRING)) {
-                            String incantationType = weapon.getItemMeta().getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
-                            int level = weapon.getItemMeta().getPersistentDataContainer().get(INCANTATION_LEVEL, PersistentDataType.INTEGER);
-                            if (incantationType.equals("incantation_lifesteal")) {
+                        if (weapon.getItemMeta().getPersistentDataContainer().has(ESSENCE_TYPE, PersistentDataType.STRING)) {
+                            String essenceType = weapon.getItemMeta().getPersistentDataContainer().get(ESSENCE_TYPE, PersistentDataType.STRING);
+                            int level = weapon.getItemMeta().getPersistentDataContainer().get(ESSENCE_LEVEL, PersistentDataType.INTEGER);
+                            if (essenceType.equals("essence_lifesteal")) {
                                 if (e.getDamageSource().getDamageType() == DamageType.PLAYER_ATTACK) {
                                     double healAmount = 0;
                                     if (level == 1) {
