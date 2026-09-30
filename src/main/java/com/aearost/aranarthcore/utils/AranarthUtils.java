@@ -3989,11 +3989,12 @@ public class AranarthUtils {
             }
             aranarthPlayer.setAfkStartTime(System.currentTimeMillis());
 
+            String strippedName = ChatUtils.stripColorFormatting(aranarthPlayer.getNickname());
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
-                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("afk.now_afk")));
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "afk.now_afk")));
                 } else {
-                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("afk.player_now_afk", "name", ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()))));
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "afk.player_now_afk", "name", strippedName)));
                 }
             }
             Bukkit.getLogger().info("[AC] " + ChatUtils.translateToColor(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " is now AFK"));
@@ -4006,11 +4007,12 @@ public class AranarthUtils {
             }
             aranarthPlayer.setAfkLocation(null);
             aranarthPlayer.setAfkStartTime(0);
+            String strippedName = ChatUtils.stripColorFormatting(aranarthPlayer.getNickname());
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
-                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("afk.no_longer_afk")));
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "afk.no_longer_afk")));
                 } else {
-                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("afk.player_no_longer_afk", "name", ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()))));
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "afk.player_no_longer_afk", "name", strippedName)));
                 }
             }
             Bukkit.getLogger().info("[AC] " + ChatUtils.translateToColor(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " is no longer AFK"));

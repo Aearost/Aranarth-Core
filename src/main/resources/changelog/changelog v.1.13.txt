@@ -61,6 +61,7 @@ Chat, UI & Sounds
 [+] Centralized all help menus under a single /aranarth menu
 [~] Fixed literal keys being displayed in messages instead of the strings
 [~] Fixed AFK broadcast messages showing nickname color codes incorrectly
+[~] Fixed AFK broadcast not showing player name in color due to stale lang files
 
 Quality of Life
 [+] Added /language command (alias /lang) to toggle preferred display language (English, German, French)
