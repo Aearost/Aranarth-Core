@@ -12,6 +12,7 @@ World & Events
 [+] Added frostbite to winter months after prolonged outdoor exposure
 [~] Rebalanced month lengths to have longer summer months and shorter winter months
 [+] Added number of days in a given month to /aranarth calendar pages
+[~] Fixed phantom spawns leaking into nether and end during Obscurvor
 
 Bending & Abilities
 [+] Implemented AranarthCore's Tremorsense ability, which includes a glowing effect to nearby mobs and players
