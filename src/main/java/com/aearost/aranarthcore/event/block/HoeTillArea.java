@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DominionLevelUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Material;
@@ -10,9 +11,6 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
-
-import static com.aearost.aranarthcore.objects.CustomKeys.ESSENCE_TYPE;
 
 /**
  * Tills the surrounding 3x3 area for the essence of plentiful.
@@ -27,11 +25,7 @@ public class HoeTillArea {
         }
 
         ItemStack heldItem = player.getInventory().getItemInMainHand();
-        if (!heldItem.hasItemMeta()) {
-            return;
-        }
-        String essenceType = heldItem.getItemMeta().getPersistentDataContainer().get(ESSENCE_TYPE, PersistentDataType.STRING);
-        if (!"essence_plentiful".equals(essenceType)) {
+        if (!"essence_plentiful".equals(AranarthUtils.getEssenceType(heldItem))) {
             return;
         }
 

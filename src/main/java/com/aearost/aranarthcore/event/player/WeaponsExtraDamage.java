@@ -14,13 +14,10 @@ import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Random;
 import java.util.Set;
 
-import static com.aearost.aranarthcore.objects.CustomKeys.ESSENCE_LEVEL;
-import static com.aearost.aranarthcore.objects.CustomKeys.ESSENCE_TYPE;
 
 /**
  * Increases damage for various weapons depending on the Aranarthium armor set that is worn.
@@ -136,27 +133,25 @@ public class WeaponsExtraDamage {
                     }
 
                     // If there's an essence
-                    if (weapon.hasItemMeta()) {
-                        if (weapon.getItemMeta().getPersistentDataContainer().has(ESSENCE_TYPE, PersistentDataType.STRING)) {
-                            String essenceType = weapon.getItemMeta().getPersistentDataContainer().get(ESSENCE_TYPE, PersistentDataType.STRING);
-                            int level = weapon.getItemMeta().getPersistentDataContainer().get(ESSENCE_LEVEL, PersistentDataType.INTEGER);
-                            if (essenceType.equals("essence_lifesteal")) {
-                                if (e.getDamageSource().getDamageType() == DamageType.PLAYER_ATTACK) {
-                                    double healAmount = 0;
-                                    if (level == 1) {
-                                        healAmount = e.getDamage() * 0.15;
-                                    } else if (level == 2) {
-                                        healAmount = e.getDamage() * 0.3;
-                                    } else if (level == 3) {
-                                        healAmount = e.getDamage() * 0.5;
-                                    }
-                                    Player player = (Player) e.getDamageSource().getCausingEntity();
-                                    double maxHealth = player.getAttribute(Attribute.MAX_HEALTH).getValue();
-                                    if ((player.getHealth() + healAmount) <= maxHealth) {
-                                        player.setHealth(player.getHealth() + healAmount);
-                                    } else {
-                                        player.setHealth(maxHealth);
-                                    }
+                    String essenceType = AranarthUtils.getEssenceType(weapon);
+                    if (essenceType != null) {
+                        int level = AranarthUtils.getEssenceLevel(weapon);
+                        if (essenceType.equals("essence_lifesteal")) {
+                            if (e.getDamageSource().getDamageType() == DamageType.PLAYER_ATTACK) {
+                                double healAmount = 0;
+                                if (level == 1) {
+                                    healAmount = e.getDamage() * 0.15;
+                                } else if (level == 2) {
+                                    healAmount = e.getDamage() * 0.3;
+                                } else if (level == 3) {
+                                    healAmount = e.getDamage() * 0.5;
+                                }
+                                Player player = (Player) e.getDamageSource().getCausingEntity();
+                                double maxHealth = player.getAttribute(Attribute.MAX_HEALTH).getValue();
+                                if ((player.getHealth() + healAmount) <= maxHealth) {
+                                    player.setHealth(player.getHealth() + healAmount);
+                                } else {
+                                    player.setHealth(maxHealth);
                                 }
                             }
                         }

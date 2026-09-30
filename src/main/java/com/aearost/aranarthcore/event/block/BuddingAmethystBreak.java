@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.block;
 
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Location;
@@ -56,10 +57,7 @@ public class BuddingAmethystBreak {
 	}
 
 	private boolean hasPreservation(ItemStack item) {
-		if (!item.hasItemMeta()) return false;
-		var pdc = item.getItemMeta().getPersistentDataContainer();
-		return pdc.has(ESSENCE_TYPE) &&
-				"essence_preservation".equals(pdc.get(ESSENCE_TYPE, PersistentDataType.STRING));
+		return "essence_preservation".equals(AranarthUtils.getEssenceType(item));
 	}
 
 	private boolean isHoldingPickaxe(ItemStack heldItem) {

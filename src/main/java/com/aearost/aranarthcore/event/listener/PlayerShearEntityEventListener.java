@@ -8,9 +8,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
-
-import static com.aearost.aranarthcore.objects.CustomKeys.ESSENCE_TYPE;
 
 public class PlayerShearEntityEventListener implements Listener {
 
@@ -26,11 +23,7 @@ public class PlayerShearEntityEventListener implements Listener {
         }
 
         ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
-        if (!heldItem.hasItemMeta()) return;
-        if (!heldItem.getItemMeta().getPersistentDataContainer().has(ESSENCE_TYPE)) return;
-
-        String type = heldItem.getItemMeta().getPersistentDataContainer().get(ESSENCE_TYPE, PersistentDataType.STRING);
-        if (type.equals("essence_plentiful")) {
+        if ("essence_plentiful".equals(AranarthUtils.getEssenceType(heldItem))) {
             new EssencePlentifulShear().execute(e);
         }
     }

@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.gui.GuiEnhancedAranarthium;
 import com.aearost.aranarthcore.items.aranarthium.armour.*;
 import com.aearost.aranarthcore.items.netherite.NetheriteElytra;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
@@ -321,17 +322,16 @@ public class AranarthiumArmourCraft {
      */
     private void transferEssence(ItemStack source, ItemStack result) {
         if (!source.hasItemMeta() || !result.hasItemMeta()) return;
-        ItemMeta sourceMeta = source.getItemMeta();
-        if (!sourceMeta.getPersistentDataContainer().has(ESSENCE_TYPE)) return;
+        String essenceType = AranarthUtils.getEssenceType(source);
+        if (essenceType == null) return;
 
         ItemMeta resultMeta = result.getItemMeta();
-        String essenceType = sourceMeta.getPersistentDataContainer().get(ESSENCE_TYPE, PersistentDataType.STRING);
-        int essenceLevel = sourceMeta.getPersistentDataContainer().get(ESSENCE_LEVEL, PersistentDataType.INTEGER);
+        int essenceLevel = AranarthUtils.getEssenceLevel(source);
         resultMeta.getPersistentDataContainer().set(ESSENCE_TYPE, PersistentDataType.STRING, essenceType);
         resultMeta.getPersistentDataContainer().set(ESSENCE_LEVEL, PersistentDataType.INTEGER, essenceLevel);
 
         // Copy essence lore lines - any line in source that isn't already in result
-        List<String> sourceLore = sourceMeta.getLore();
+        List<String> sourceLore = source.getItemMeta().getLore();
         List<String> resultLore = resultMeta.getLore();
         if (sourceLore != null && resultLore != null) {
             for (String loreLine : sourceLore) {

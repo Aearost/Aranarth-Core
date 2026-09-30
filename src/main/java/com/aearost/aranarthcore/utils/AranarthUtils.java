@@ -3672,21 +3672,21 @@ public class AranarthUtils {
     }
 
     /**
-     * Determines whether the input item contains an Aranarth essence.
+     * Returns the essence type string on an item.
      *
-     * @param item    The item.
-     * @param essence The essence name.
-     * @return Whether the input item contains an Aranarth essence.
+     * @param item The item to inspect.
+     * @return The essence type (e.g. "essence_beheading"), or null if the item has no essence.
      */
-    public static boolean hasEssence(ItemStack item, String essence) {
-        if (item.hasItemMeta()) {
-            if (item.getItemMeta().getPersistentDataContainer().has(ESSENCE_TYPE, PersistentDataType.STRING)) {
-                if (item.getItemMeta().getPersistentDataContainer().get(ESSENCE_TYPE, PersistentDataType.STRING).equals(essence)) {
-                    return true;
-                }
-            }
+    public static String getEssenceType(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) return null;
+        if (item.getItemMeta().getPersistentDataContainer().has(LEGACY_INCANTATION_TYPE, PersistentDataType.STRING)) {
+            migrateEssenceItem(item);
         }
-        return false;
+        return item.getItemMeta().getPersistentDataContainer().get(ESSENCE_TYPE, PersistentDataType.STRING);
+    }
+
+    public static boolean hasEssence(ItemStack item, String essence) {
+        return essence.equals(getEssenceType(item));
     }
 
     /**
@@ -3696,13 +3696,19 @@ public class AranarthUtils {
      * @return The level of the applied essence. -1 if the level is not determined.
      */
     public static int getEssenceLevel(ItemStack item) {
-        if (item.hasItemMeta()) {
-            if (item.getItemMeta().getPersistentDataContainer().has(ESSENCE_LEVEL, PersistentDataType.INTEGER)) {
-                return item.getItemMeta().getPersistentDataContainer().get(ESSENCE_LEVEL, PersistentDataType.INTEGER);
-            }
+        if (item == null || !item.hasItemMeta()) return -1;
+        if (item.getItemMeta().getPersistentDataContainer().has(LEGACY_INCANTATION_TYPE, PersistentDataType.STRING)) {
+            migrateEssenceItem(item);
+        }
+        if (item.getItemMeta().getPersistentDataContainer().has(ESSENCE_LEVEL, PersistentDataType.INTEGER)) {
+            return item.getItemMeta().getPersistentDataContainer().get(ESSENCE_LEVEL, PersistentDataType.INTEGER);
         }
         return -1;
     }
+
+    // Legacy PDC keys from before the Incantation -> Essence rename
+    private static final NamespacedKey LEGACY_INCANTATION_TYPE = new NamespacedKey(AranarthCore.getInstance(), "incantation_type");
+    private static final NamespacedKey LEGACY_INCANTATION_LEVEL = new NamespacedKey(AranarthCore.getInstance(), "incantation_level");
 
     /**
      * Migrates a single item from the old Incantation PDC keys/values to the new Essence ones.
@@ -3712,8 +3718,8 @@ public class AranarthUtils {
     public static boolean migrateEssenceItem(ItemStack item) {
         if (item == null || item.getType() == Material.AIR || !item.hasItemMeta()) return false;
 
-        NamespacedKey oldTypeKey = new NamespacedKey(AranarthCore.getInstance(), "incantation_type");
-        NamespacedKey oldLevelKey = new NamespacedKey(AranarthCore.getInstance(), "incantation_level");
+        NamespacedKey oldTypeKey = LEGACY_INCANTATION_TYPE;
+        NamespacedKey oldLevelKey = LEGACY_INCANTATION_LEVEL;
 
         ItemMeta meta = item.getItemMeta();
         if (!meta.getPersistentDataContainer().has(oldTypeKey, PersistentDataType.STRING)) return false;

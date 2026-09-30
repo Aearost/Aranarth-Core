@@ -21,11 +21,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
-
 import java.util.UUID;
-
-import static com.aearost.aranarthcore.objects.CustomKeys.ESSENCE_TYPE;
 
 /**
  * Centralizes all logic to be called by blocks being broken.
@@ -118,23 +114,21 @@ public class BlockBreakEventListener implements Listener {
                 aranarthPlayer.setPlentifulBlocksToDestroy(aranarthPlayer.getPlentifulBlocksToDestroy() - 1);
             } else {
                 ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
-                if (heldItem.hasItemMeta() && heldItem.getItemMeta().getPersistentDataContainer().has(ESSENCE_TYPE)) {
-                    String type = heldItem.getItemMeta().getPersistentDataContainer().get(ESSENCE_TYPE, PersistentDataType.STRING);
-                    if (type.equals("essence_plentiful")) {
-                        // Only activate plentiful for fully matured crops to avoid durability draining
-                        if (heldItem.getType().name().endsWith("_HOE")) {
-                            Block block = e.getBlock();
-                            if (block.getBlockData() instanceof Ageable ageable) {
-                                if (ageable.getAge() < ageable.getMaximumAge()) {
-                                    e.setCancelled(true);
-                                    AranarthUtils.setPlayer(uuid, aranarthPlayer);
-                                    return;
-                                }
+                String type = AranarthUtils.getEssenceType(heldItem);
+                if ("essence_plentiful".equals(type)) {
+                    // Only activate plentiful for fully matured crops to avoid durability draining
+                    if (heldItem.getType().name().endsWith("_HOE")) {
+                        Block block = e.getBlock();
+                        if (block.getBlockData() instanceof Ageable ageable) {
+                            if (ageable.getAge() < ageable.getMaximumAge()) {
+                                e.setCancelled(true);
+                                AranarthUtils.setPlayer(uuid, aranarthPlayer);
+                                return;
                             }
                         }
-                        aranarthPlayer.setPlentifulBlocksToDestroy(9);
-                        new EssencePlentifulBlockBreak().execute(e);
                     }
+                    aranarthPlayer.setPlentifulBlocksToDestroy(9);
+                    new EssencePlentifulBlockBreak().execute(e);
                 }
             }
             AranarthUtils.setPlayer(uuid, aranarthPlayer);
@@ -149,11 +143,8 @@ public class BlockBreakEventListener implements Listener {
         String worldName = e.getBlock().getWorld().getName();
         if (worldName.startsWith("world") || AranarthUtils.isSmpWorld(worldName) || worldName.startsWith("resource")) {
             ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
-            if (heldItem.hasItemMeta() && heldItem.getItemMeta().getPersistentDataContainer().has(ESSENCE_TYPE)) {
-                String type = heldItem.getItemMeta().getPersistentDataContainer().get(ESSENCE_TYPE, PersistentDataType.STRING);
-                if (type.equals("essence_preservation")) {
-                    new EssencePreservationBlockBreak().execute(e);
-                }
+            if ("essence_preservation".equals(AranarthUtils.getEssenceType(heldItem))) {
+                new EssencePreservationBlockBreak().execute(e);
             }
         }
     }
@@ -166,11 +157,8 @@ public class BlockBreakEventListener implements Listener {
         String worldName = e.getBlock().getWorld().getName();
         if (worldName.startsWith("world") || AranarthUtils.isSmpWorld(worldName) || worldName.startsWith("resource")) {
             ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
-            if (heldItem.hasItemMeta() && heldItem.getItemMeta().getPersistentDataContainer().has(ESSENCE_TYPE)) {
-                String type = heldItem.getItemMeta().getPersistentDataContainer().get(ESSENCE_TYPE, PersistentDataType.STRING);
-                if (type.equals("essence_magnetism")) {
-                    new EssenceMagnetismBlockBreak().execute(e);
-                }
+            if ("essence_magnetism".equals(AranarthUtils.getEssenceType(heldItem))) {
+                new EssenceMagnetismBlockBreak().execute(e);
             }
         }
     }
