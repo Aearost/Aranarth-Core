@@ -12,6 +12,7 @@ World & Events
 [+] Added frostbite to winter months after prolonged outdoor exposure
 [~] Rebalanced month lengths to have longer summer months and shorter winter months
 [~] Fixed phantom spawns leaking into nether and end during Obscurvor
+[~] Disabled admin mode on combat tag while the target is in Survival mode
 
 Bending & Abilities
 [+] Implemented AranarthCore's Tremorsense ability, which includes a glowing effect to nearby mobs and players
@@ -29,6 +30,7 @@ Dominion
 [~] Reduced mountain biome emerald ore drops to 50% chance of 1 per claim
 [~] Reverted elytra odds in end city simulations back to pre-nerf values
 [~] Fixed /d resources prompt ignoring the resources permission
+[~] Added missing space before Resources in biome preview GUI title
 
 Items & Crafting
 [~] Renamed Incantations to Essences

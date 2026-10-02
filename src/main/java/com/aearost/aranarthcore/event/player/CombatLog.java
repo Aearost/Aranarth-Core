@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.Lang;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -70,10 +71,18 @@ public class CombatLog {
 								HashMap<UUID, Long> combatLog = new HashMap<>();
 								combatLog.put(attacker.getUniqueId(), hitTime);
 								aranarthPlayer.setCombatLogTime(combatLog);
+								if (isNotTaggedByAttacker && player.getGameMode() == GameMode.SURVIVAL && aranarthPlayer.isInAdminMode()) {
+									aranarthPlayer.setInAdminMode(false);
+									player.sendMessage(ChatUtils.chatMessage(Lang.get("admin.mode_exit_combat")));
+								}
 								AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 								HashMap<UUID, Long> attackerCombatLog = new HashMap<>();
 								attackerCombatLog.put(player.getUniqueId(), hitTime);
 								attackerAranarthPlayer.setCombatLogTime(attackerCombatLog);
+								if (isAlreadyTaggingPlayer && attacker.getGameMode() == GameMode.SURVIVAL && attackerAranarthPlayer.isInAdminMode()) {
+									attackerAranarthPlayer.setInAdminMode(false);
+									attacker.sendMessage(ChatUtils.chatMessage(Lang.get("admin.mode_exit_combat")));
+								}
 								AranarthUtils.setPlayer(attacker.getUniqueId(), attackerAranarthPlayer);
 
 								new BukkitRunnable() {
