@@ -1633,24 +1633,24 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.KELP, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 8)));
             rares.add(new ResourceDrop(new ItemStack(Material.NAUTILUS_SHELL, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
         } else if (biome == Biome.RIVER) {
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRAVEL, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.CLAY, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SUGAR_CANE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.SALMON, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SALMON, 8)));
         } else if (biome == Biome.FROZEN_OCEAN) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRAVEL, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 32)));
@@ -1659,10 +1659,10 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.ICE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.PACKED_ICE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BLUE_ICE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SALMON, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 2)));
             rares.add(new ResourceDrop(new ItemStack(Material.NAUTILUS_SHELL, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
         } else if (biome == Biome.FROZEN_RIVER) {
@@ -1670,18 +1670,18 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.DIRT, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.CLAY, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.ICE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SUGAR_CANE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.SALMON, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SALMON, 8)));
         } else if (biome == Biome.BEACH) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SUGAR_CANE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 8)));
             rares.add(new ResourceDrop(new ItemStack(Material.TURTLE_SCUTE, 1), 0, rareOdds[rank - 1],
                     "Rare Drop (" + formatPct(rareOdds[rank - 1]) + " chance)"));
             rares.add(new ResourceDrop(new ItemStack(Material.HEART_OF_THE_SEA, 1), 0, 25,
@@ -1692,34 +1692,34 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.KELP, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 8)));
             rares.add(new ResourceDrop(new ItemStack(Material.NAUTILUS_SHELL, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
             simulations.add(seaTemple);
         } else if (biome == Biome.STONY_SHORE) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRAVEL, 64)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 8)));
         } else if (biome == Biome.SNOWY_BEACH) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SNOW, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SALMON, 8)));
         } else if (biome == Biome.WARM_OCEAN) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SEA_PICKLE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.TROPICAL_FISH, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.TROPICAL_FISH, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.PUFFERFISH, 2)));
             // Coral - previewOnly variety items, actual selection done in getResourcesByDominionAndBiome
             String coralNote = "1 of 5 coral types per claim";
@@ -1744,9 +1744,9 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.KELP, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 4)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.TROPICAL_FISH, 4)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.PUFFERFISH, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 8)));
@@ -1756,21 +1756,21 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRAVEL, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.KELP, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SALMON, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 4)));
             rares.add(new ResourceDrop(new ItemStack(Material.NAUTILUS_SHELL, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
         } else if (biome == Biome.DEEP_LUKEWARM_OCEAN) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.KELP, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 4)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.TROPICAL_FISH, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.TROPICAL_FISH, 8)));
             rares.add(new ResourceDrop(new ItemStack(Material.NAUTILUS_SHELL, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
             simulations.add(seaTemple);
@@ -1779,10 +1779,10 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.KELP, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 8)));
             rares.add(new ResourceDrop(new ItemStack(Material.NAUTILUS_SHELL, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
             simulations.add(seaTemple);
@@ -1790,10 +1790,10 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRAVEL, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.KELP, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.SALMON, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SALMON, 8)));
             rares.add(new ResourceDrop(new ItemStack(Material.NAUTILUS_SHELL, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
             simulations.add(seaTemple);
@@ -1803,7 +1803,7 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.RED_MUSHROOM_BLOCK, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BROWN_MUSHROOM_BLOCK, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.MUSHROOM_STEM, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
             rares.add(new ResourceDrop(new ItemStack(Material.DIAMOND, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
@@ -1813,10 +1813,10 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.DANDELION, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.BEEF, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BEEF, 8)));
             String flowerNote3 = "1 of 3 possible per claim";
             guaranteed.add(new ResourceDrop(new ItemStack(Material.POPPY, 8), 0, 0, flowerNote3, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.OXEYE_DAISY, 8), 0, 0, flowerNote3, true));
@@ -1825,11 +1825,11 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.DANDELION, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SUNFLOWER, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.BEEF, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BEEF, 8)));
             String flowerNote3s = "1 of 3 possible per claim";
             guaranteed.add(new ResourceDrop(new ItemStack(Material.POPPY, 8), 0, 0, flowerNote3s, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.OXEYE_DAISY, 8), 0, 0, flowerNote3s, true));
@@ -1843,26 +1843,25 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.MELON, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.PUMPKIN, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COCOA_BEANS, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.CHICKEN, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CHICKEN, 8)));
         } else if (biome == Biome.SNOWY_PLAINS) {
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SNOW, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SPRUCE_LOG, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 4)));
         } else if (biome == Biome.ICE_SPIKES) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SNOW_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.PACKED_ICE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.ICE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 4)));
 
         // Forests
         } else if (biome == Biome.FOREST) {
@@ -1871,10 +1870,10 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BIRCH_LOG, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.LEAF_LITTER, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.APPLE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 4)));
             int godOddsF = godAppleOdds[rank - 1];
             if (AranarthUtils.getMonth() == Month.SOLARVOR) {
                 godOddsF = Math.max(1, godOddsF / 4);
@@ -1886,19 +1885,19 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SPRUCE_LOG, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SWEET_BERRIES, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 4)));
         } else if (biome == Biome.SWAMP) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.CLAY, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.FIREFLY_BUSH, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BROWN_MUSHROOM, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.RED_MUSHROOM, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.LILY_PAD, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SLIME_BALL, 2)));
         } else if (biome == Biome.MANGROVE_SWAMP) {
@@ -1911,7 +1910,7 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.MUDDY_MANGROVE_ROOTS, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.MOSS_CARPET, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.LILY_PAD, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
         } else if (biome == Biome.JUNGLE) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
@@ -1922,9 +1921,9 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.VINE, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.MELON, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COCOA_BEANS, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.CHICKEN, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CHICKEN, 8)));
         } else if (biome == Biome.BAMBOO_JUNGLE) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.PODZOL, 64)));
@@ -1933,17 +1932,17 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BAMBOO, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.MELON, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.CHICKEN, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CHICKEN, 8)));
         } else if (biome == Biome.BIRCH_FOREST || biome == Biome.OLD_GROWTH_BIRCH_FOREST) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BIRCH_LOG, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.WILDFLOWERS, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 4)));
         } else if (biome == Biome.DARK_FOREST) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
@@ -1953,8 +1952,7 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.RED_MUSHROOM_BLOCK, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.MUSHROOM_STEM, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.LEAF_LITTER, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.APPLE, 4)));
             int godOddsD = godAppleOdds[rank - 1];
@@ -1969,7 +1967,7 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.PALE_OAK_LOG, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.PALE_MOSS_BLOCK, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.PALE_HANGING_MOSS, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.RESIN_CLUMP, 8)));
         } else if (biome == Biome.SNOWY_TAIGA) {
@@ -1977,9 +1975,9 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SPRUCE_LOG, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SNOW, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 4)));
         } else if (biome == Biome.OLD_GROWTH_PINE_TAIGA || biome == Biome.OLD_GROWTH_SPRUCE_TAIGA) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.PODZOL, 32)));
@@ -1987,10 +1985,10 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.MOSSY_COBBLESTONE, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SPRUCE_LOG, 64)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BROWN_MUSHROOM, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 4)));
         } else if (biome == Biome.FLOWER_FOREST) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
@@ -1998,8 +1996,8 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BIRCH_LOG, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.LEAF_LITTER, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.APPLE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
             String flowerNote14 = "1 of 14 possible per claim";
             guaranteed.add(new ResourceDrop(new ItemStack(Material.DANDELION, 8), 0, 0, flowerNote14, true));
@@ -2033,12 +2031,12 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.ANDESITE, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SPRUCE_LOG, 4)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
             rares.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 1), 0, 2, "Emerald Ore (" + formatPct(2) + " chance)"));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 8)));
         } else if (biome == Biome.WINDSWEPT_FOREST) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
@@ -2048,100 +2046,100 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.ANDESITE, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SPRUCE_LOG, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
             rares.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 1), 0, 2, "Emerald Ore (" + formatPct(2) + " chance)"));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 8)));
         } else if (biome == Biome.WINDSWEPT_GRAVELLY_HILLS) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRAVEL, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SPRUCE_LOG, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
             rares.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 1), 0, 2, "Emerald Ore (" + formatPct(2) + " chance)"));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 8)));
         } else if (biome == Biome.WINDSWEPT_SAVANNA) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COARSE_DIRT, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.ACACIA_LOG, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
             rares.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 1), 0, 2, "Emerald Ore (" + formatPct(2) + " chance)"));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.BEEF, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BEEF, 8)));
         } else if (biome == Biome.GROVE) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SNOW_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SPRUCE_LOG, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
             rares.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 1), 0, 2, "Emerald Ore (" + formatPct(2) + " chance)"));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 4)));
         } else if (biome == Biome.FROZEN_PEAKS) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SNOW_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.PACKED_ICE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
             rares.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 1), 0, 2, "Emerald Ore (" + formatPct(2) + " chance)"));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 8)));
         } else if (biome == Biome.MEADOW) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.DANDELION, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.CORNFLOWER, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.WILDFLOWERS, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
             rares.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 1), 0, 2, "Emerald Ore (" + formatPct(2) + " chance)"));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 8)));
         } else if (biome == Biome.JAGGED_PEAKS || biome == Biome.SNOWY_SLOPES) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SNOW_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
             rares.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 1), 0, 2, "Emerald Ore (" + formatPct(2) + " chance)"));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 8)));
         } else if (biome == Biome.STONY_PEAKS) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.CALCITE, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
             rares.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 1), 0, 2, "Emerald Ore (" + formatPct(2) + " chance)"));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 8)));
         } else if (biome == Biome.CHERRY_GROVE) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.CHERRY_LOG, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.PINK_PETALS, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
             rares.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 1), 0, 2, "Emerald Ore (" + formatPct(2) + " chance)"));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 4)));
 
         // Dry and Desert Biomes
         } else if (biome == Biome.DESERT) {
@@ -2151,18 +2149,18 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.CACTUS, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.CACTUS_FLOWER, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 4)));
             rares.add(new ResourceDrop(new ItemStack(Material.BONE_BLOCK, 32), 0, rareOdds[rank - 1],
                     "Rare Drop (" + formatPct(rareOdds[rank - 1]) + " chance)"));
         } else if (biome == Biome.SAVANNA || biome == Biome.SAVANNA_PLATEAU) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.ACACIA_LOG, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.BEEF, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BEEF, 8)));
             rares.add(new ResourceDrop(new ItemStack(Material.ARMADILLO_SCUTE, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
         } else if (biome == Biome.BADLANDS || biome == Biome.ERODED_BADLANDS) {
@@ -2170,8 +2168,8 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.RED_SANDSTONE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.TERRACOTTA, 64)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
             String terracottaNote = "1 of 6 possible per claim";
             guaranteed.add(new ResourceDrop(new ItemStack(Material.RED_TERRACOTTA, 16), 0, 0, terracottaNote, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.ORANGE_TERRACOTTA, 16), 0, 0, terracottaNote, true));
@@ -2188,8 +2186,8 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.TERRACOTTA, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.LEAF_LITTER, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
             String terracottaNoteW = "1 of 6 possible per claim";
             guaranteed.add(new ResourceDrop(new ItemStack(Material.RED_TERRACOTTA, 8), 0, 0, terracottaNoteW, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.ORANGE_TERRACOTTA, 8), 0, 0, terracottaNoteW, true));
@@ -2206,8 +2204,8 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHERRACK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BLACKSTONE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.MAGMA_BLOCK, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_QUARTZ_ORE, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_GOLD_ORE, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_QUARTZ_ORE, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_GOLD_ORE, 8)));
             rares.add(new ResourceDrop(new ItemStack(Material.GHAST_TEAR, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
             rares.add(new ResourceDrop(new ItemStack(Material.NETHERITE_SCRAP, 2), 0, commonOdds[rank - 1],
@@ -2222,8 +2220,8 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BASALT, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BLACKSTONE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BONE_BLOCK, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_QUARTZ_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_QUARTZ_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_GOLD_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BONE, 4)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GHAST_TEAR, rank)));
             rares.add(new ResourceDrop(new ItemStack(Material.NETHERITE_SCRAP, 1), 0, commonOdds[rank - 1],
@@ -2240,9 +2238,9 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SHROOMLIGHT, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.WEEPING_VINES, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.CRIMSON_FUNGUS, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_QUARTZ_ORE, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_GOLD_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.PORKCHOP, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_QUARTZ_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.PORKCHOP, 8)));
             rares.add(new ResourceDrop(new ItemStack(Material.NETHERITE_SCRAP, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
             simulations.add(netherFortress);
@@ -2255,8 +2253,8 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SHROOMLIGHT, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.TWISTING_VINES, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.WARPED_FUNGUS, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_QUARTZ_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_QUARTZ_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_GOLD_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.ENDER_PEARL, rank)));
             rares.add(new ResourceDrop(new ItemStack(Material.NETHERITE_SCRAP, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
@@ -2269,8 +2267,8 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BLACKSTONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BLACKSTONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.MAGMA_BLOCK, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_QUARTZ_ORE, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_GOLD_ORE, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_QUARTZ_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_GOLD_ORE, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.MAGMA_CREAM, 4)));
             rares.add(new ResourceDrop(new ItemStack(Material.NETHERITE_SCRAP, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));

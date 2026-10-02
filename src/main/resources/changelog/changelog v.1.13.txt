@@ -27,10 +27,10 @@ Dominion
 [+] Added Resources shortcut button to the dominion GUI
 [~] Fixed dominion relation/role permissions reverting to defaults on reload
 [+] Added dominion flag control per outpost as well
-[~] Reduced mountain biome emerald ore drops to 50% chance of 1 per claim
 [~] Reverted elytra odds in end city simulations back to pre-nerf values
 [~] Fixed /d resources prompt ignoring the resources permission
 [~] Added missing space before Resources in biome preview GUI title
+[~] Reduced all dominion resource claim reward quantities
 
 Items & Crafting
 [~] Renamed Incantations to Essences
