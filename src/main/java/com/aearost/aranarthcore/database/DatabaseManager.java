@@ -164,13 +164,14 @@ public class DatabaseManager {
             CREATE TABLE IF NOT EXISTS network_roster (
                 uuid VARCHAR(36) PRIMARY KEY,
                 username VARCHAR(64) NOT NULL,
-                nickname TEXT DEFAULT '',
+                nickname VARCHAR(1000) DEFAULT '',
                 server VARCHAR(64) NOT NULL,
-                rank INT DEFAULT 0,
+                `rank` INT DEFAULT 0,
                 council_rank INT DEFAULT 0,
                 saint_rank INT DEFAULT 0,
                 architect_rank INT DEFAULT 0,
                 vanished TINYINT(1) DEFAULT 0,
+                pronouns VARCHAR(64) DEFAULT '',
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
@@ -485,7 +486,7 @@ public class DatabaseManager {
         String[] migrations = {
                 "ALTER TABLE aranarth_players ADD COLUMN IF NOT EXISTS raw_data LONGTEXT",
                 "ALTER TABLE player_votes ADD COLUMN IF NOT EXISTS history_json MEDIUMTEXT",
-                "ALTER TABLE network_roster MODIFY COLUMN nickname TEXT DEFAULT ''",
+                "ALTER TABLE network_roster MODIFY COLUMN nickname VARCHAR(1000) DEFAULT ''",
                 "ALTER TABLE player_chat_game_guesses ADD COLUMN IF NOT EXISTS total_earnings DOUBLE NOT NULL DEFAULT 0",
                 "ALTER TABLE player_chat_game_guesses ADD COLUMN IF NOT EXISTS best_time DOUBLE NOT NULL DEFAULT 0",
                 "ALTER TABLE player_chat_game_guesses ADD COLUMN IF NOT EXISTS highest_streak INT NOT NULL DEFAULT 0",
@@ -1068,10 +1069,10 @@ public class DatabaseManager {
                                   int rank, int councilRank, int saintRank, int architectRank, boolean vanished,
                                   String pronouns) {
         String sql = """
-                INSERT INTO network_roster (uuid, username, nickname, server, rank, council_rank, saint_rank, architect_rank, vanished, pronouns)
+                INSERT INTO network_roster (uuid, username, nickname, server, `rank`, council_rank, saint_rank, architect_rank, vanished, pronouns)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE username=VALUES(username), nickname=VALUES(nickname), server=VALUES(server),
-                rank=VALUES(rank), council_rank=VALUES(council_rank), saint_rank=VALUES(saint_rank),
+                `rank`=VALUES(`rank`), council_rank=VALUES(council_rank), saint_rank=VALUES(saint_rank),
                 architect_rank=VALUES(architect_rank), vanished=VALUES(vanished), pronouns=VALUES(pronouns)
                 """;
         try (Connection conn = dataSource.getConnection();
@@ -1137,7 +1138,7 @@ public class DatabaseManager {
      * Loads all roster entries NOT from thisServer.
      */
     public Map<UUID, NetworkPlayer> loadRemoteRoster(String thisServer) {
-        String sql = "SELECT uuid, username, nickname, server, rank, council_rank, saint_rank, architect_rank, vanished, pronouns FROM network_roster WHERE server != ?";
+        String sql = "SELECT uuid, username, nickname, server, `rank`, council_rank, saint_rank, architect_rank, vanished, pronouns FROM network_roster WHERE server != ?";
         Map<UUID, NetworkPlayer> roster = new HashMap<>();
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

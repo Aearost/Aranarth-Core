@@ -137,15 +137,15 @@ public class GuiMcstats {
         inv.setItem(49, barrier);
 
         // Place each section
-        placeSection(inv, GATHERING_ORDER,   GATHERING_SLOTS,   isSelf, targetLevels, targetRanks, viewerRanks);
-        placeSection(inv, COMBAT_ROW1_ORDER, COMBAT_ROW1_SLOTS, isSelf, targetLevels, targetRanks, viewerRanks);
-        placeSection(inv, COMBAT_ROW2_ORDER, COMBAT_ROW2_SLOTS, isSelf, targetLevels, targetRanks, viewerRanks);
-        placeSection(inv, MISC_ORDER,        MISC_SLOTS,        isSelf, targetLevels, targetRanks, viewerRanks);
+        placeSection(inv, GATHERING_ORDER,   GATHERING_SLOTS,   "gui.mcstats.category_gathering", isSelf, targetLevels, targetRanks, viewerRanks);
+        placeSection(inv, COMBAT_ROW1_ORDER, COMBAT_ROW1_SLOTS, "gui.mcstats.category_combat",    isSelf, targetLevels, targetRanks, viewerRanks);
+        placeSection(inv, COMBAT_ROW2_ORDER, COMBAT_ROW2_SLOTS, "gui.mcstats.category_combat",    isSelf, targetLevels, targetRanks, viewerRanks);
+        placeSection(inv, MISC_ORDER,        MISC_SLOTS,        "gui.mcstats.category_misc",       isSelf, targetLevels, targetRanks, viewerRanks);
 
         return inv;
     }
 
-    private void placeSection(Inventory inv, String[] skillNames, int[] slots, boolean isSelf,
+    private void placeSection(Inventory inv, String[] skillNames, int[] slots, String categoryKey, boolean isSelf,
                               Map<PrimarySkillType, Integer> targetLevels,
                               Map<PrimarySkillType, Integer> targetRanks,
                               Map<PrimarySkillType, Integer> viewerRanks) {
@@ -164,7 +164,8 @@ public class GuiMcstats {
             ItemStack item = new ItemStack(getSkillMaterial(skill));
             ItemMeta meta = item.getItemMeta();
             if (Objects.nonNull(meta)) {
-                meta.setDisplayName(ChatUtils.translateToColor("&e&l" + toDisplayName(skill)));
+                String category = Lang.getFor(viewer, categoryKey);
+                meta.setDisplayName(ChatUtils.translateToColor("&e&l" + toDisplayName(skill) + " &7(" + category + ")"));
 
                 List<String> lore = new ArrayList<>();
                 lore.add(Lang.getFor(viewer, "gui.mcstats.skill_level", "level", String.valueOf(level)));

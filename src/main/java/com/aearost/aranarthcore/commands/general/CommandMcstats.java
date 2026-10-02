@@ -67,6 +67,7 @@ public class CommandMcstats implements CommandExecutor {
      */
     public static void openGui(Player viewer, UUID targetUuid, String targetName, boolean isSelf) {
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+            long t0 = System.currentTimeMillis();
             Map<PrimarySkillType, Integer> targetLevels = new LinkedHashMap<>();
             Map<PrimarySkillType, Integer> targetRanks = new LinkedHashMap<>();
             for (PrimarySkillType skill : DISPLAY_SKILLS) {
@@ -75,22 +76,32 @@ public class CommandMcstats implements CommandExecutor {
                 } catch (Exception ignored) {
                     targetLevels.put(skill, 0);
                 }
+                long tRankStart = System.currentTimeMillis();
                 try {
                     targetRanks.put(skill, ExperienceAPI.getPlayerRankSkill(targetUuid, skill.name()));
                 } catch (Exception ignored) {
                     targetRanks.put(skill, 0);
                 }
+                long tRankMs = System.currentTimeMillis() - tRankStart;
+                if (tRankMs > 100) {
+                    AranarthCore.getInstance().getLogger().info("[mcstats] getPlayerRankSkill(" + skill.name() + ") took " + tRankMs + "ms");
+                }
             }
+            AranarthCore.getInstance().getLogger().info("[mcstats] skill loop took " + (System.currentTimeMillis() - t0) + "ms");
 
+            long tPower = System.currentTimeMillis();
             int targetPowerLevel = 0;
             try {
                 targetPowerLevel = ExperienceAPI.getPowerLevelOffline(targetUuid);
             } catch (Exception ignored) {}
+            AranarthCore.getInstance().getLogger().info("[mcstats] getPowerLevelOffline took " + (System.currentTimeMillis() - tPower) + "ms");
 
+            long tOverall = System.currentTimeMillis();
             int targetOverallRank = 0;
             try {
                 targetOverallRank = ExperienceAPI.getPlayerRankOverall(targetUuid);
             } catch (Exception ignored) {}
+            AranarthCore.getInstance().getLogger().info("[mcstats] getPlayerRankOverall took " + (System.currentTimeMillis() - tOverall) + "ms");
 
             Map<PrimarySkillType, Integer> viewerRanks = new LinkedHashMap<>();
             int viewerOverallRank = 0;
@@ -111,6 +122,7 @@ public class CommandMcstats implements CommandExecutor {
             final int finalTargetOverallRank = targetOverallRank;
             final int finalViewerOverallRank = viewerOverallRank;
 
+            AranarthCore.getInstance().getLogger().info("[mcstats] total async time: " + (System.currentTimeMillis() - t0) + "ms");
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                 if (!viewer.isOnline()) {
                     return;

@@ -555,7 +555,14 @@
       "Bash(/dev/null __NEW_LINE_db90428d9a0ccfd0__ echo echo '=== Lang file value check \\(English incantation words\\) ===' grep -rn =.*[Ii]ncantation /c/Users/liamh/IdeaProjects/AranarthCore/src/main/resources/lang/en_US.properties)",
       "Bash(find C:/Users/liamh/IdeaProjects/AranarthCore/src -name *ommand*efend* -o -name *ommand*onquest*)",
       "Bash(find C:/Users/liamh/IdeaProjects/AranarthCore/src -name *lot* -o -name *Plot*)",
-      "Bash(sed 's/ \\(.*//')"
+      "Bash(sed 's/ \\(.*//')",
+      "Bash(find 'C:/Users/liamh/Desktop/Folders/Minecraft/Testing/Velocity Test' -name *.log)",
+      "Bash(taskkill /F /IM java.exe)",
+      "Bash(cmd /c \"rename \"\"C:\\\\Users\\\\liamh\\\\Desktop\\\\Folders\\\\Minecraft\\\\Testing\\\\Survival Test\"\" Survival\")",
+      "Bash(cmd /c \"rename \"\"C:\\\\Users\\\\liamh\\\\Desktop\\\\Folders\\\\Minecraft\\\\Testing\\\\SMP Test\"\" SMP\")",
+      "Bash(powershell -Command \"Rename-Item -Path ''C:\\\\Users\\\\liamh\\\\Desktop\\\\Folders\\\\Minecraft\\\\Testing\\\\Survival Test'' -NewName ''Survival''\")",
+      "Bash(powershell -Command \"Rename-Item -Path ''C:\\\\Users\\\\liamh\\\\Desktop\\\\Folders\\\\Minecraft\\\\Testing\\\\SMP Test'' -NewName ''SMP''\")",
+      "Bash(powershell -Command \"\\(Get-Item ''''C:\\\\Users\\\\liamh\\\\Desktop\\\\Folders\\\\Minecraft\\\\Testing\\\\Survival\\\\plugins\\\\AranarthCore.jar''''\\).IsReadOnly\")"
     ]
   }
 }

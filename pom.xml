@@ -58,7 +58,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <outputFile>${deploy.dir}/AranarthCore.jar</outputFile>
+                            <outputFile>${project.build.directory}/AranarthCore.jar</outputFile>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <relocations>
                                 <relocation>
@@ -70,6 +70,25 @@
                                     <shadedPattern>com.aearost.aranarthcore.libs.io.packetevents</shadedPattern>
                                 </relocation>
                             </relocations>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target xmlns:if="ant:if">
+                                <copy if:set="deploy.dir" file="${project.build.directory}/AranarthCore.jar" tofile="${deploy.dir}/AranarthCore.jar" overwrite="true"/>
+                                <copy if:set="deploy.dir2" file="${project.build.directory}/AranarthCore.jar" tofile="${deploy.dir2}/AranarthCore.jar" overwrite="true"/>
+                            </target>
                         </configuration>
                     </execution>
                 </executions>

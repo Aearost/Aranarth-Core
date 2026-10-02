@@ -63,6 +63,7 @@ Chat, UI & Sounds
 [~] Fixed literal keys being displayed in messages instead of the strings
 [~] Fixed AFK broadcast messages showing nickname color codes incorrectly
 [~] Fixed AFK broadcast not showing player name in color due to stale lang files
+[+] Added category label on skill items in /mcstats GUI
 
 Quality of Life
 [+] Added /language command (alias /lang) to toggle preferred display language (English, German, French)
@@ -86,6 +87,8 @@ Cross-server & Technical
 [~] Fixed issue where online player checks were displaying two messages and not one in server chat
 [~] Fixed issue where server shutdown was causing inventory loss
 [~] Fixed issue where server join/quit messages were not appearing correctly in-game and in discord
+[+] Allowed Console to use /ac og
+[+] Added automatic deploying of AranarthCore to both Survival and SMP test servers simultaneously
 
 Miscellaneous
 [+] Fixed AFK color formatting
