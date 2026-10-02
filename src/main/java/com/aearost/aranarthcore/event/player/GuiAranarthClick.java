@@ -19,6 +19,26 @@ public class GuiAranarthClick {
         int slot = e.getSlot();
 
         switch (slot) {
+            case GuiAranarth.SLOT_RULES -> {
+                player.closeInventory();
+                player.performCommand("aranarth rules");
+            }
+            case GuiAranarth.SLOT_BENDING -> {
+                player.closeInventory();
+                player.performCommand("aranarth bending");
+            }
+            case GuiAranarth.SLOT_DOMINIONS -> {
+                player.closeInventory();
+                player.performCommand("aranarth dominions");
+            }
+            case GuiAranarth.SLOT_RANKS -> {
+                player.closeInventory();
+                player.performCommand("aranarth ranks");
+            }
+            case GuiAranarth.SLOT_ECONOMY -> {
+                player.closeInventory();
+                player.performCommand("aranarth economy");
+            }
             case GuiAranarth.SLOT_CALENDAR -> {
                 player.closeInventory();
                 player.performCommand("aranarth calendar");
@@ -31,9 +51,17 @@ public class GuiAranarthClick {
                 player.closeInventory();
                 player.performCommand("aranarth essences");
             }
-            case GuiAranarth.SLOT_RULES -> {
+            case GuiAranarth.SLOT_PERKS -> {
                 player.closeInventory();
-                player.performCommand("aranarth rules");
+                player.performCommand("aranarth perks");
+            }
+            case GuiAranarth.SLOT_MECHANICS -> {
+                player.closeInventory();
+                player.performCommand("aranarth mechanics");
+            }
+            case GuiAranarth.SLOT_RECIPES -> {
+                player.closeInventory();
+                player.performCommand("aranarth recipes");
             }
         }
     }

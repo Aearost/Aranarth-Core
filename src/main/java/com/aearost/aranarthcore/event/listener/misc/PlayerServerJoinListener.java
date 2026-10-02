@@ -247,6 +247,9 @@ public class PlayerServerJoinListener implements Listener {
         boolean needsServerRouting = lastLoc != null && thisServerName != null && !lastLoc.server.equals(thisServerName);
         boolean hasPendingTp = NetworkManager.isActive() && NetworkManager.getInstance().getPendingTeleport(player.getUniqueId()) != null;
         boolean isCrossServerTransfer = needsServerRouting || hasPendingTp;
+        // True when the player's lastLoc points to SMP but no pending TP exists - this means SMP
+        // crashed/restarted and Velocity routed them here directly. Treat as a real join arrival.
+        boolean isSurvivalFallbackLanding = needsServerRouting && !hasPendingTp && !AranarthCore.isSmpServer();
         Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
                 + " - lastLoc=" + (lastLoc == null ? "null" : lastLoc.server + "/" + lastLoc.world
                 + " @ (" + String.format("%.1f", lastLoc.x) + "," + String.format("%.1f", lastLoc.y) + "," + String.format("%.1f", lastLoc.z) + ")")
@@ -345,7 +348,7 @@ public class PlayerServerJoinListener implements Listener {
             NetworkManager.getInstance().publishPlayerJoin(player.getUniqueId(), apForNetwork);
         }
 
-        if (isCrossServerTransfer) {
+        if (isCrossServerTransfer && !isSurvivalFallbackLanding) {
             e.setJoinMessage(null);
             PendingTeleport pendingForDiscord = NetworkManager.isActive()
                     ? NetworkManager.getInstance().getPendingTeleport(player.getUniqueId()) : null;
@@ -356,6 +359,10 @@ public class PlayerServerJoinListener implements Listener {
                 if (NetworkManager.isActive()) {
                     NetworkManager.getInstance().markCrossServerJoin(player.getUniqueId());
                 }
+            } else if (pendingForDiscord != null && pendingForDiscord.isJoinAlreadyAnnounced()) {
+                // Join was already announced on Survival before routing here; suppress Discord
+                // to prevent a duplicate announcement in the chat channel.
+                player.addAttachment(AranarthCore.getInstance(), "discordsrv.silentjoin", true);
             }
         } else {
             if (!isNewPlayer) {
@@ -539,7 +546,9 @@ public class PlayerServerJoinListener implements Listener {
                             // routing on login (e.g. last logged off on SMP, routed here from Survival).
                             // No inventory apply needed (Minecraft restores state from player data), but
                             // we DO need to publish a join announcement since the routing server suppressed it.
-                            if (isLoginRouting) {
+                            // Skip if joinAlreadyAnnounced: the intermediate server (Survival fallback
+                            // landing) already broadcast the join to avoid a duplicate announcement here.
+                            if (isLoginRouting && !pending.isJoinAlreadyAnnounced()) {
                                 int nonNull = 0;
                                 for (org.bukkit.inventory.ItemStack is : player.getInventory().getContents()) {
 									if (is != null) {
@@ -557,31 +566,33 @@ public class PlayerServerJoinListener implements Listener {
                                         + " non-null main slot(s), " + armorNonNull + " armor piece(s)."
                                         + (nonNull == 0 ? " WARNING: main inventory is empty - player.dat may be stale." : ""));
                             }
-                            AranarthPlayer apJoin = AranarthUtils.getPlayer(player.getUniqueId());
-                            if (apJoin != null && !apJoin.isVanished()) {
-                                String routedName = "&7" + AranarthUtils.getNickname(player);
-                                DateUtils routedDateUtils = new DateUtils();
-                                String routedJoinMsg;
-                                if (routedDateUtils.isValentinesDay()) {
-                                    routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.VALENTINES));
-                                } else if (routedDateUtils.isEaster()) {
-                                    routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.EASTER));
-                                } else if (routedDateUtils.isHalloween()) {
-                                    routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.HALLOWEEN));
-                                } else if (routedDateUtils.isChristmas()) {
-                                    routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.CHRISTMAS));
-                                } else {
-                                    routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + routedName);
-                                }
-                                for (Player online : Bukkit.getOnlinePlayers()) {
-                                    if (!online.getUniqueId().equals(player.getUniqueId())) {
-                                        online.sendMessage(routedJoinMsg);
+                            if (!pending.isJoinAlreadyAnnounced()) {
+                                AranarthPlayer apJoin = AranarthUtils.getPlayer(player.getUniqueId());
+                                if (apJoin != null && !apJoin.isVanished()) {
+                                    String routedName = "&7" + AranarthUtils.getNickname(player);
+                                    DateUtils routedDateUtils = new DateUtils();
+                                    String routedJoinMsg;
+                                    if (routedDateUtils.isValentinesDay()) {
+                                        routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.VALENTINES));
+                                    } else if (routedDateUtils.isEaster()) {
+                                        routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.EASTER));
+                                    } else if (routedDateUtils.isHalloween()) {
+                                        routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.HALLOWEEN));
+                                    } else if (routedDateUtils.isChristmas()) {
+                                        routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.CHRISTMAS));
+                                    } else {
+                                        routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + routedName);
                                     }
+                                    for (Player online : Bukkit.getOnlinePlayers()) {
+                                        if (!online.getUniqueId().equals(player.getUniqueId())) {
+                                            online.sendMessage(routedJoinMsg);
+                                        }
+                                    }
+                                    if (NetworkManager.isActive()) {
+                                        NetworkManager.getInstance().publishJoinMsg(routedJoinMsg, false);
+                                    }
+                                    PlayerServerJoinListener.this.playJoinSound();
                                 }
-                                if (NetworkManager.isActive()) {
-                                    NetworkManager.getInstance().publishJoinMsg(routedJoinMsg, false);
-                                }
-                                PlayerServerJoinListener.this.playJoinSound();
                             }
                         }
 
@@ -772,15 +783,37 @@ public class PlayerServerJoinListener implements Listener {
                                                     + "; player stays on Survival with existing Survival inventory.");
                                         }
                                     } else {
-                                        // No snapshot available (crash or TTL expired). Let the player
-                                        // stay on Survival with whatever Survival player.dat loaded -
-                                        // we have no SMP inventory to apply. Their SMP items are safe
-                                        // in SMP's player.dat and will be there when SMP comes back.
-                                        // The quit listener will update MySQL (last_loc + survivalInventory)
-                                        // correctly when they eventually leave.
-                                        Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
-                                                + " - no SMP fallback snapshot found for '" + sourceServer
-                                                + "'; player stays on Survival with existing Survival inventory.");
+                                        // No snapshot in MySQL. Two possible causes:
+                                        //  a) SMP is healthy - player logged off normally (no shutdown wrote
+                                        //     a snapshot). Route them to SMP the same way the original login-
+                                        //     routing path did before the snapshot feature was added.
+                                        //  b) SMP crashed without writing a snapshot (ungraceful). Routing
+                                        //     would fail. Keep the player on Survival.
+                                        // Distinguish the two cases using the heartbeat-based isServerOnline check.
+                                        if (NetworkManager.isActive()
+                                                && NetworkManager.getInstance().isServerOnline(sourceServer)) {
+                                            // SMP is online - route the player there (old behavior).
+                                            // Mark joinAlreadyAnnounced so the SMP arrival handler doesn't
+                                            // broadcast a second join message.
+                                            final String velocityTarget = AranarthCore.getInstance().getConfig()
+                                                    .getString("network.servers." + sourceServer, sourceServer);
+                                            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
+                                                    + " - no snapshot but " + sourceServer + " is online; routing to "
+                                                    + velocityTarget + ".");
+                                            PendingTeleport pt = new PendingTeleport(
+                                                    lastLoc.world, lastLoc.x, lastLoc.y, lastLoc.z,
+                                                    lastLoc.yaw, lastLoc.pitch, "", "");
+                                            pt.setLoginRouting(true);
+                                            pt.setJoinAlreadyAnnounced(true);
+                                            NetworkManager.getInstance().setPendingAndTransfer(player, velocityTarget, pt);
+                                        } else {
+                                            // SMP is offline (crashed or not yet reachable). Keep the player
+                                            // on Survival - their SMP items are safe in SMP's player.dat and
+                                            // will be there when SMP comes back up.
+                                            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
+                                                    + " - no SMP fallback snapshot found and " + sourceServer
+                                                    + " is offline; player stays on Survival with existing Survival inventory.");
+                                        }
                                     }
                                 });
                             });
@@ -934,7 +967,7 @@ public class PlayerServerJoinListener implements Listener {
                     online.playSound(online, Sound.UI_TOAST_CHALLENGE_COMPLETE, vol / 100f, 0.8F);
                 }
             }
-        } else if (!isCrossServerTransfer) {
+        } else if (!isCrossServerTransfer || isSurvivalFallbackLanding) {
             playJoinSound();
         }
         AranarthUtils.updateTab();

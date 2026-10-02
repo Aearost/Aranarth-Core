@@ -20,11 +20,17 @@ public class GuiAranarth {
 
     public static final String TITLE_KEY = "gui.aranarth.title";
 
-    // Slot positions for each topic
-    public static final int SLOT_RULES = 4;
-    public static final int SLOT_CALENDAR = 11;
-    public static final int SLOT_ARANARTHIUM = 13;
-    public static final int SLOT_ESSENCES = 15;
+    public static final int SLOT_RULES = 10;
+    public static final int SLOT_BENDING = 12;
+    public static final int SLOT_DOMINIONS = 14;
+    public static final int SLOT_RANKS = 16;
+    public static final int SLOT_ECONOMY = 19;
+    public static final int SLOT_CALENDAR = 21;
+    public static final int SLOT_ARANARTHIUM = 23;
+    public static final int SLOT_ESSENCES = 25;
+    public static final int SLOT_PERKS = 29;
+    public static final int SLOT_MECHANICS = 31;
+    public static final int SLOT_RECIPES = 33;
 
     private final Player player;
     private final Inventory gui;
@@ -39,33 +45,56 @@ public class GuiAranarth {
     }
 
     private Inventory initializeGui() {
-        Inventory inv = Bukkit.createInventory(player, 27, Lang.getFor(player, TITLE_KEY));
+        Inventory inv = Bukkit.createInventory(player, 45, Lang.getFor(player, TITLE_KEY));
 
         ItemStack grayPane = buildPane(Material.GRAY_STAINED_GLASS_PANE);
 
-        // Top row (outline) - all slots except Rules
-        for (int i = 0; i < 9; i++) {
-            if (i != SLOT_RULES) {
-                inv.setItem(i, grayPane);
-            }
-        }
-
-        // Middle row - left and right edges only
-        inv.setItem(9, grayPane);
-        inv.setItem(17, grayPane);
-
-        // Bottom row (outline) - all slots
-        for (int i = 18; i < 27; i++) {
+        // Fill all slots with gray panes
+        for (int i = 0; i < 45; i++) {
             inv.setItem(i, grayPane);
         }
 
-        // Topic items
+        // Row 1 items
         inv.setItem(SLOT_RULES, buildItem(
                 Material.WRITABLE_BOOK,
                 Lang.getFor(player, "gui.aranarth.rules_name"),
                 List.of(
                         Lang.getFor(player, "gui.aranarth.rules_lore1"),
                         Lang.getFor(player, "gui.aranarth.rules_lore2")
+                )
+        ));
+        inv.setItem(SLOT_BENDING, buildItem(
+                Material.BLAZE_POWDER,
+                Lang.getFor(player, "gui.aranarth.bending_name"),
+                List.of(
+                        Lang.getFor(player, "gui.aranarth.bending_lore1"),
+                        Lang.getFor(player, "gui.aranarth.bending_lore2")
+                )
+        ));
+        inv.setItem(SLOT_DOMINIONS, buildItem(
+                Material.WHITE_BANNER,
+                Lang.getFor(player, "gui.aranarth.dominions_name"),
+                List.of(
+                        Lang.getFor(player, "gui.aranarth.dominions_lore1"),
+                        Lang.getFor(player, "gui.aranarth.dominions_lore2")
+                )
+        ));
+        inv.setItem(SLOT_RANKS, buildItem(
+                Material.GOLDEN_HELMET,
+                Lang.getFor(player, "gui.aranarth.ranks_name"),
+                List.of(
+                        Lang.getFor(player, "gui.aranarth.ranks_lore1"),
+                        Lang.getFor(player, "gui.aranarth.ranks_lore2")
+                )
+        ));
+
+        // Row 2 items
+        inv.setItem(SLOT_ECONOMY, buildItem(
+                Material.GOLD_INGOT,
+                Lang.getFor(player, "gui.aranarth.economy_name"),
+                List.of(
+                        Lang.getFor(player, "gui.aranarth.economy_lore1"),
+                        Lang.getFor(player, "gui.aranarth.economy_lore2")
                 )
         ));
         inv.setItem(SLOT_CALENDAR, buildItem(
@@ -95,6 +124,32 @@ public class GuiAranarth {
         ));
         essenceItem.setItemMeta(essenceMeta);
         inv.setItem(SLOT_ESSENCES, essenceItem);
+
+        // Row 3 items
+        inv.setItem(SLOT_PERKS, buildItem(
+                Material.NETHER_STAR,
+                Lang.getFor(player, "gui.aranarth.perks_name"),
+                List.of(
+                        Lang.getFor(player, "gui.aranarth.perks_lore1"),
+                        Lang.getFor(player, "gui.aranarth.perks_lore2")
+                )
+        ));
+        inv.setItem(SLOT_MECHANICS, buildItem(
+                Material.PISTON,
+                Lang.getFor(player, "gui.aranarth.mechanics_name"),
+                List.of(
+                        Lang.getFor(player, "gui.aranarth.mechanics_lore1"),
+                        Lang.getFor(player, "gui.aranarth.mechanics_lore2")
+                )
+        ));
+        inv.setItem(SLOT_RECIPES, buildItem(
+                Material.KNOWLEDGE_BOOK,
+                Lang.getFor(player, "gui.aranarth.recipes_name"),
+                List.of(
+                        Lang.getFor(player, "gui.aranarth.recipes_lore1"),
+                        Lang.getFor(player, "gui.aranarth.recipes_lore2")
+                )
+        ));
 
         return inv;
     }

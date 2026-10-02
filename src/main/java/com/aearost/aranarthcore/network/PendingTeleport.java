@@ -37,6 +37,11 @@ public class PendingTeleport {
      * is already authoritative and the async DB write from the quit event may not have finished.
      */
     private boolean loginRouting = false;
+    /**
+     * True when a join announcement was already broadcast on the intermediate server
+     * (e.g. Survival) before routing the player to their final destination.
+     */
+    private boolean joinAlreadyAnnounced = false;
     private long createdAt = 0;
 
     public PendingTeleport() {}
@@ -96,4 +101,6 @@ public class PendingTeleport {
     public void setApplyInventory(boolean applyInventory) { this.applyInventory = applyInventory; }
     public boolean isLoginRouting() { return loginRouting; }
     public void setLoginRouting(boolean loginRouting) { this.loginRouting = loginRouting; }
+    public boolean isJoinAlreadyAnnounced() { return joinAlreadyAnnounced; }
+    public void setJoinAlreadyAnnounced(boolean joinAlreadyAnnounced) { this.joinAlreadyAnnounced = joinAlreadyAnnounced; }
 }

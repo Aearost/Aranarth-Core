@@ -11,7 +11,10 @@ import java.util.List;
  */
 public class CommandAranarthCompleter implements TabCompleter {
 
-    private static final List<String> TOPICS = List.of("calendar", "aranarthium", "essences", "rules");
+    private static final List<String> TOPICS = List.of(
+            "calendar", "aranarthium", "essences", "rules",
+            "dominions", "bending", "ranks", "economy", "perks", "mechanics", "recipes"
+    );
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
@@ -26,10 +29,22 @@ public class CommandAranarthCompleter implements TabCompleter {
                 case "calendar" -> CommandAranarth.CALENDAR_MONTHS;
                 case "aranarthium" -> CommandAranarth.ARANARTHIUM_SECTIONS;
                 case "essences" -> CommandAranarth.ESSENCE_SECTIONS;
+                case "dominions" -> CommandAranarth.DOMINION_SECTIONS;
+                case "bending" -> CommandAranarth.BENDING_SECTIONS;
+                case "ranks" -> CommandAranarth.RANKS_SECTIONS;
+                case "economy" -> CommandAranarth.ECONOMY_SECTIONS;
+                case "perks" -> CommandAranarth.PERKS_SECTIONS;
+                case "mechanics" -> CommandAranarth.MECHANICS_SECTIONS;
                 default -> List.of();
             };
             return chapters.stream()
                     .filter(c -> c.startsWith(args[1].toLowerCase()))
+                    .toList();
+        }
+
+        if (args.length == 3 && args[0].equalsIgnoreCase("calendar") && args[1].equalsIgnoreCase("events")) {
+            return CommandAranarth.CALENDAR_EVENTS.stream()
+                    .filter(e -> e.startsWith(args[2].toLowerCase()))
                     .toList();
         }
 

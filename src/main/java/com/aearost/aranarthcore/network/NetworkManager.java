@@ -111,6 +111,7 @@ public class NetworkManager {
     public static final String CH_TRADE_EXECUTE = "aranarth:trade_execute";
     public static final String CH_PRONOUNS_UPDATE = "aranarth:pronouns_update";
     public static final String CH_PING_UPDATE = "aranarth:ping_update";
+    public static final String CH_HEARTBEAT = "aranarth:heartbeat";
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
     private static final String KEY_RETURN_LOC = "return_loc:";
@@ -144,6 +145,11 @@ public class NetworkManager {
      */
     private final Set<UUID> crossServerJoinPlayers = ConcurrentHashMap.newKeySet();
     /**
+     * Last time (epoch ms) a heartbeat was received from each remote server name.
+     * Used to determine whether a peer server is currently online.
+     */
+    private final Map<String, Long> serverLastSeen = new ConcurrentHashMap<>();
+    /**
      * Pending cross-server TP requests received from another server.
      */
     private final Map<UUID, CrossServerTpContext> pendingCrossServerRequests = new ConcurrentHashMap<>();
@@ -163,6 +169,7 @@ public class NetworkManager {
     private BukkitTask pollingTask;
     private BukkitTask cleanupTask;
     private BukkitTask smpSnapshotTask;
+    private BukkitTask heartbeatTask;
     private final ExecutorService publishExecutor = Executors.newSingleThreadExecutor();
     /**
      * Number of players currently sleeping on other servers. Updated by handleSleepMessage.
@@ -185,6 +192,7 @@ public class NetworkManager {
         if (AranarthCore.isSmpServer()) {
             startSmpFallbackSnapshots();
         }
+        startHeartbeat();
     }
 
     public static NetworkManager getInstance() {
@@ -275,6 +283,39 @@ public class NetworkManager {
                 600L,  // 30s initial delay
                 600L   // every 30s
         );
+    }
+
+    /**
+     * Sends a lightweight heartbeat to all other servers every 2 minutes so they can
+     * determine whether this server is currently online via {@link #isServerOnline(String)}.
+     */
+    private void startHeartbeat() {
+        heartbeatTask = Bukkit.getScheduler().runTaskTimerAsynchronously(
+                AranarthCore.getInstance(),
+                this::publishHeartbeat,
+                0L,    // fire immediately so peer servers see us as online within one polling cycle
+                600L   // every 30 seconds
+        );
+    }
+
+    /**
+     * Publishes a heartbeat message so other servers know this server is online.
+     */
+    public void publishHeartbeat() {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        publish(CH_HEARTBEAT, json);
+    }
+
+    /**
+     * Returns true if the given server name has sent a heartbeat within the last 5 minutes.
+     * Uses a 5-minute window against a 2-minute heartbeat interval, giving 2.5 cycles of
+     * safety margin. Returns false if no heartbeat has ever been received (e.g. right after
+     * Survival restarts while SMP is already running - the first heartbeat arrives within 2 min).
+     */
+    public boolean isServerOnline(String serverName) {
+        Long lastSeen = serverLastSeen.get(serverName);
+        return lastSeen != null && System.currentTimeMillis() - lastSeen < 5 * 60 * 1000L;
     }
 
     /**
@@ -396,6 +437,10 @@ public class NetworkManager {
             smpSnapshotTask.cancel();
             smpSnapshotTask = null;
         }
+        if (heartbeatTask != null) {
+            heartbeatTask.cancel();
+            heartbeatTask = null;
+        }
         publishExecutor.shutdown();
         // Clear this server's roster entries from the DB so stale entries don't appear on other servers
         try {
@@ -468,6 +513,7 @@ public class NetworkManager {
             case CH_TRADE_EXECUTE -> handleTradeExecute(json);
             case CH_PRONOUNS_UPDATE -> handlePronounsUpdate(json);
             case CH_PING_UPDATE -> handlePingUpdate(json);
+            case CH_HEARTBEAT -> handleHeartbeat(json);
         }
     }
 
@@ -1558,6 +1604,12 @@ public class NetworkManager {
             if (!remoteRoster.isEmpty()) {
                 Bukkit.getLogger().info(AranarthCore.LOG_PREFIX
                         + "Synced " + remoteRoster.size() + " remote player(s) from MySQL");
+                // Seed serverLastSeen so isServerOnline() works immediately at startup
+                // when a peer server is already running and has players in the roster.
+                long now = System.currentTimeMillis();
+                for (NetworkPlayer np : loaded.values()) {
+                    serverLastSeen.put(np.getServer(), now);
+                }
             }
         } catch (Exception e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Failed to sync roster from MySQL: " + e.getMessage());
@@ -2097,6 +2149,13 @@ public class NetworkManager {
                 NetworkTabManager.updateLatencyInTab(np);
             }
         }
+    }
+
+    private void handleHeartbeat(JsonObject json) {
+        if (!json.has("server")) return;
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) return;
+        serverLastSeen.put(originServer, System.currentTimeMillis());
     }
 
     private void handleRankUpdate(JsonObject json) {
