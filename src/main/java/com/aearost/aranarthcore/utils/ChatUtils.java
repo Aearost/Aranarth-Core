@@ -529,7 +529,7 @@ public class ChatUtils {
         if (tips.isEmpty()) {
             tips.add("&7&oNeed some materials? Gather them in &e&o/resource");
             tips.add("&7&oGet your roles in &5&oDiscord &7&owith &e&o/discord link");
-            tips.add("&7&oHave any questions about &6&oAranarth&7&o? Go to &e&o/tutorial");
+            tips.add("&7&oHave any questions about &6&oAranarth&7&o? Check out &e&o/aranarth");
             tips.add("&7&oInterested in special &d&operks? &7&oCheck out &e&o/store");
             tips.add("&7&oUse &e&o/vote &7&oto get daily &a&oVote Crate Keys &7&oto redeem at &e&o/crates");
             tips.add("&7&oFound a &c&obug &7&oor have a &6&osuggestion&7&o? Log it in our &5&oDiscord");
@@ -540,7 +540,6 @@ public class ChatUtils {
             tips.add("&7&oCreate your own shop island with &e&o/shop create");
             tips.add("&7&oHave you completed your quests today? Check out &e&o/quests");
             tips.add("&7&oMake sure you claim your &e&o/streak &7&oreward every day!");
-            tips.add("&7&oLearn about the calendar, aranarthium, and essences with &e&o/aranarth");
             tips.add("&7&oMake sure to use your &e&o/mount &7&oto level them up!");
             tips.add("&7&oNeed some money? Join up to 5 with &e&o/jobs");
             tips.add("&7&oCheck out the different brewable drinks with &e&o/brewbook");
