@@ -1,12 +1,15 @@
 package com.aearost.aranarthcore.commands.council;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.items.essence.Essence;
 import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
 import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -16,6 +19,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.UUID;
 
 /**
  * Provides a specified player an AranarthCore item.
@@ -112,13 +116,17 @@ public class CommandGive {
 
                     // For crate keys in non-survival worlds, store as pending instead of giving directly
                     if (isKey) {
+                        // Store purchases (broadcast flag) must only be processed on the Survival server
+                        if (isBroadcast && AranarthCore.isSmpServer()) {
+                            return;
+                        }
+
                         if (isBroadcast) {
                             String broadcastMessage = ChatUtils.chatMessage(Lang.get("give.purchased_broadcast", "player", player.getName(), "item", itemName, "amount", String.valueOf(quantity)));
                             DiscordUtils.donationNotification(player.getName() + " has purchased " + itemName + " x" + quantity, player.getUniqueId(), Color.CYAN);
                             for (Player online : Bukkit.getOnlinePlayers()) {
                                 online.sendMessage(broadcastMessage);
                             }
-                            Bukkit.getConsoleSender().sendMessage(broadcastMessage);
                             if (NetworkManager.isActive()) {
                                 NetworkManager.getInstance().publishBroadcast(broadcastMessage);
                             }
@@ -128,6 +136,11 @@ public class CommandGive {
                         if (!AranarthUtils.isSurvivalWorld(worldName)) {
                             AranarthUtils.addPendingKey(player.getUniqueId(), item, quantity);
                             player.sendMessage(ChatUtils.chatMessage(Lang.get("give.keyclaim_hint")));
+                            // Persist immediately so /keyclaim can see the keys even if the player
+                            // switches servers before the next periodic save.
+                            final UUID pendingUuid = player.getUniqueId();
+                            Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                                    () -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(pendingUuid));
                             return;
                         }
                     }
@@ -187,7 +200,70 @@ public class CommandGive {
                     player.sendMessage(ChatUtils.chatMessage(Lang.get("give.no_such_item")));
                 }
             } else {
-                sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
+                // Player not on this server - check if this is a store key purchase and
+                // the player is on the remote server, so we can deliver cross-server.
+                boolean isStorePurchase = args[2].startsWith("Key")
+                        && !args[2].equals("KeyVote")
+                        && args.length >= 5 && args[4].equalsIgnoreCase("broadcast")
+                        && NetworkManager.isActive();
+                if (isStorePurchase) {
+                    UUID remoteUuid = null;
+                    String remoteName = null;
+                    for (NetworkPlayer np : NetworkManager.getInstance().getRemoteRoster().values()) {
+                        if (np.getUsername().equalsIgnoreCase(args[1])) {
+                            remoteUuid = np.getUuid();
+                            remoteName = np.getUsername();
+                            break;
+                        }
+                    }
+                    if (remoteUuid != null) {
+                        int quantity = 1;
+                        if (args.length >= 4) {
+                            try {
+                                quantity = Math.max(1, Integer.parseInt(args[3]));
+                            } catch (NumberFormatException ignored) {
+                            }
+                        }
+                        // Map class name to key type string
+                        String keyType = switch (args[2]) {
+                            case "KeyRare" -> "key_rare";
+                            case "KeyEpic" -> "key_epic";
+                            case "KeyGodly" -> "key_godly";
+                            default -> null;
+                        };
+                        if (keyType != null) {
+                            // Derive item display name for the broadcast
+                            String itemName;
+                            try {
+                                Class<?> cls = Class.forName("com.aearost.aranarthcore.items.key." + args[2]);
+                                Object inst = cls.getDeclaredConstructor().newInstance();
+                                if (inst instanceof AranarthItem ai) {
+                                    ItemStack tmp = ai.getItem();
+                                    ItemMeta tmpMeta = tmp.getItemMeta();
+                                    itemName = (tmpMeta != null && tmpMeta.hasDisplayName())
+                                            ? tmpMeta.getDisplayName()
+                                            : ChatUtils.getFormattedItemName(tmp.getType().name());
+                                } else {
+                                    itemName = args[2];
+                                }
+                            } catch (Exception ignored) {
+                                itemName = args[2];
+                            }
+                            String broadcastMessage = ChatUtils.chatMessage(Lang.get("give.purchased_broadcast", "player", remoteName, "item", itemName, "amount", String.valueOf(quantity)));
+                            DiscordUtils.donationNotification(remoteName + " has purchased " + itemName + " x" + quantity, remoteUuid, Color.CYAN);
+                            for (Player online : Bukkit.getOnlinePlayers()) {
+                                online.sendMessage(broadcastMessage);
+                            }
+                            NetworkManager.getInstance().publishBroadcast(broadcastMessage);
+                            NetworkManager.getInstance().publishPurchaseKey(remoteUuid, keyType, quantity);
+                            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[STORE] Player " + remoteName + " is on remote server - forwarding " + keyType + " x" + quantity + " cross-server");
+                        }
+                    } else {
+                        sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
+                    }
+                } else {
+                    sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
+                }
             }
         }
     }

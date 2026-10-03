@@ -562,7 +562,15 @@
       "Bash(cmd /c \"rename \"\"C:\\\\Users\\\\liamh\\\\Desktop\\\\Folders\\\\Minecraft\\\\Testing\\\\SMP Test\"\" SMP\")",
       "Bash(powershell -Command \"Rename-Item -Path ''C:\\\\Users\\\\liamh\\\\Desktop\\\\Folders\\\\Minecraft\\\\Testing\\\\Survival Test'' -NewName ''Survival''\")",
       "Bash(powershell -Command \"Rename-Item -Path ''C:\\\\Users\\\\liamh\\\\Desktop\\\\Folders\\\\Minecraft\\\\Testing\\\\SMP Test'' -NewName ''SMP''\")",
-      "Bash(powershell -Command \"\\(Get-Item ''''C:\\\\Users\\\\liamh\\\\Desktop\\\\Folders\\\\Minecraft\\\\Testing\\\\Survival\\\\plugins\\\\AranarthCore.jar''''\\).IsReadOnly\")"
+      "Bash(powershell -Command \"\\(Get-Item ''''C:\\\\Users\\\\liamh\\\\Desktop\\\\Folders\\\\Minecraft\\\\Testing\\\\Survival\\\\plugins\\\\AranarthCore.jar''''\\).IsReadOnly\")",
+      "Bash(find /c/Users/liamh/Downloads/Logs -name *.log -newer /c/Users/liamh/Downloads/Logs/Survival/latest.log)",
+      "Bash(zcat 2026-10-01-3.log.gz)",
+      "Bash(zcat 2026-10-03-1.log.gz)",
+      "Bash(zcat \"/c/Users/liamh/Downloads/Logs/Survival/2026-10-03-1.log.gz\")",
+      "Bash(zcat /c/Users/liamh/Downloads/Logs/Survival/latest.log)",
+      "Bash(zcat \"/c/Users/liamh/Downloads/Logs/SMP/2026-10-03-1.log.gz\")",
+      "Bash(zcat \"/c/Users/liamh/Downloads/Logs/Survival/2026-10-02-3.log.gz\")",
+      "Bash(zcat \"/c/Users/liamh/Downloads/Logs/SMP/2026-10-02-3.log.gz\")"
     ]
   }
 }

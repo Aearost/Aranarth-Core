@@ -5,6 +5,9 @@ import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.enums.Weather;
+import com.aearost.aranarthcore.items.key.KeyEpic;
+import com.aearost.aranarthcore.items.key.KeyGodly;
+import com.aearost.aranarthcore.items.key.KeyRare;
 import com.aearost.aranarthcore.items.key.KeyVote;
 import com.aearost.aranarthcore.objects.*;
 import com.aearost.aranarthcore.utils.*;
@@ -94,6 +97,7 @@ public class NetworkManager {
     public static final String CH_JOB_UPDATE = "aranarth:job_update";
     public static final String CH_VOTE_AWARD = "aranarth:vote_award";
     public static final String CH_VOTE_KEY = "aranarth:vote_key";
+    public static final String CH_PURCHASE_KEY = "aranarth:purchase_key";
     public static final String CH_VP_TRANSFER = "aranarth:vp_transfer";
     public static final String CH_INVSEE_REQUEST = "aranarth:invsee_request";
     public static final String CH_INVSEE_RESPONSE = "aranarth:invsee_response";
@@ -496,6 +500,7 @@ public class NetworkManager {
             case CH_JOB_UPDATE -> handleJobUpdate(json);
             case CH_VOTE_AWARD -> handleVoteAward(json);
             case CH_VOTE_KEY -> handleVoteKey(json);
+            case CH_PURCHASE_KEY -> handlePurchaseKey(json);
             case CH_VP_TRANSFER -> handleVpTransfer(json);
             case CH_INVSEE_REQUEST -> handleInvseeRequest(json);
             case CH_INVSEE_RESPONSE -> handleInvseeResponse(json);
@@ -2787,6 +2792,89 @@ public class NetworkManager {
                 AranarthUtils.addPendingVoteKeys(uuid, 1);
                 onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("crate.cannot_receive_here")));
                 Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[VOTE] Remote key delivery: " + onlinePlayer.getName() + " is in invalid world (" + worldName + ") - stored as pending");
+            }
+            if (DatabaseManager.isActive()) {
+                Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                        () -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(uuid));
+            }
+        });
+    }
+
+    /**
+     * Tells the remote server to deliver purchased crate keys to the player.
+     * Used when Survival processes a store command but the player is currently on SMP.
+     *
+     * @param uuid     The UUID of the player to receive keys.
+     * @param keyType  The key type string ("key_rare", "key_epic", "key_godly").
+     * @param quantity The number of keys to deliver.
+     */
+    public void publishPurchaseKey(UUID uuid, String keyType, int quantity) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", uuid.toString());
+        json.addProperty("keyType", keyType);
+        json.addProperty("quantity", quantity);
+        publish(CH_PURCHASE_KEY, json);
+    }
+
+    private void handlePurchaseKey(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        String keyType = json.get("keyType").getAsString();
+        int quantity = json.get("quantity").getAsInt();
+
+        ItemStack key = switch (keyType) {
+            case "key_rare" -> new KeyRare().getItem();
+            case "key_epic" -> new KeyEpic().getItem();
+            case "key_godly" -> new KeyGodly().getItem();
+            default -> null;
+        };
+        if (key == null) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[STORE] Unknown purchase key type: " + keyType);
+            return;
+        }
+        final ItemStack finalKey = key;
+
+        Player player = Bukkit.getPlayer(uuid);
+        if (player == null || !player.isOnline()) {
+            AranarthUtils.addPendingKey(uuid, finalKey, quantity);
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[STORE] Cross-server purchase key for " + uuid + " but player is not online - stored as pending");
+            if (DatabaseManager.isActive()) {
+                Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                        () -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(uuid));
+            }
+            return;
+        }
+
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+            Player onlinePlayer = Bukkit.getPlayer(uuid);
+            if (onlinePlayer == null || !onlinePlayer.isOnline()) {
+                AranarthUtils.addPendingKey(uuid, finalKey, quantity);
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[STORE] Cross-server purchase key: " + uuid + " logged off before delivery - stored as pending");
+                if (DatabaseManager.isActive()) {
+                    Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                            () -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(uuid));
+                }
+                return;
+            }
+            finalKey.setAmount(quantity);
+            String worldName = onlinePlayer.getWorld().getName();
+            if (AranarthUtils.isSurvivalWorld(worldName)) {
+                HashMap<Integer, ItemStack> remainder = onlinePlayer.getInventory().addItem(finalKey);
+                if (!remainder.isEmpty()) {
+                    AranarthUtils.addPendingKey(uuid, finalKey, quantity);
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("crate.inventory_full_keyclaim")));
+                    Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[STORE] Cross-server purchase key: inventory full for " + onlinePlayer.getName() + " - stored as pending");
+                } else {
+                    Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[STORE] Cross-server purchase key: delivered " + keyType + " x" + quantity + " to " + onlinePlayer.getName());
+                }
+            } else {
+                AranarthUtils.addPendingKey(uuid, finalKey, quantity);
+                onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("give.keyclaim_hint")));
+                Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[STORE] Cross-server purchase key: " + onlinePlayer.getName() + " in invalid world (" + worldName + ") - stored as pending");
             }
             if (DatabaseManager.isActive()) {
                 Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),

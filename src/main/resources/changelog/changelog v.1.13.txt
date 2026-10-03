@@ -91,6 +91,7 @@ Cross-server & Technical
 [~] Fixed issue where server join/quit messages were not appearing correctly in-game and in discord
 [+] Allowed Console to use /ac og
 [+] Added automatic deploying of AranarthCore to both Survival and SMP test servers simultaneously
+[~] Fixed purchased crate keys being given on both SMP and Survival
 
 Miscellaneous
 [+] Fixed AFK color formatting
