@@ -87,6 +87,7 @@
                         <configuration>
                             <target xmlns:if="ant:if">
                                 <copy if:set="deploy.dir" file="${project.build.directory}/AranarthCore.jar" tofile="${deploy.dir}/AranarthCore.jar" overwrite="true"/>
+                                <!--suppress UnresolvedMavenProperty -->
                                 <copy if:set="deploy.dir2" file="${project.build.directory}/AranarthCore.jar" tofile="${deploy.dir2}/AranarthCore.jar" overwrite="true"/>
                             </target>
                         </configuration>

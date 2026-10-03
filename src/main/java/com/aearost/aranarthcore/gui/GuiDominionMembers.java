@@ -17,6 +17,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Shows a list of all Dominion members with their current rank.
@@ -24,6 +27,8 @@ import java.util.*;
  * Title: Lang.getFor(player, "gui.dominionmembers.title")
  */
 public class GuiDominionMembers {
+
+    private static final ExecutorService SKIN_EXECUTOR = Executors.newFixedThreadPool(8);
 
     private final Player player;
     private final Inventory initializedGui;
@@ -53,15 +58,22 @@ public class GuiDominionMembers {
         List<UUID> members = new ArrayList<>(dominion.getMembers());
 
         int expectedSize = calculateSize(members.size() + 1);
-        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
-            Map<UUID, PlayerProfile> profiles = new LinkedHashMap<>();
-            for (UUID uuid : members) {
+        List<CompletableFuture<Map.Entry<UUID, PlayerProfile>>> futures = new ArrayList<>();
+        for (UUID uuid : members) {
+            futures.add(CompletableFuture.supplyAsync(() -> {
                 OfflinePlayer op = Bukkit.getOfflinePlayer(uuid);
                 PlayerProfile profile = Bukkit.createProfile(uuid, op.getName());
                 profile.complete(true);
-                profiles.put(uuid, profile);
-            }
+                return Map.entry(uuid, profile);
+            }, SKIN_EXECUTOR));
+        }
 
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).thenRun(() -> {
+            Map<UUID, PlayerProfile> profiles = new LinkedHashMap<>();
+            for (CompletableFuture<Map.Entry<UUID, PlayerProfile>> f : futures) {
+                Map.Entry<UUID, PlayerProfile> entry = f.join();
+                profiles.put(entry.getKey(), entry.getValue());
+            }
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                 String openTitle = ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
                 if (player.isOnline() && openTitle.equals(Lang.getFor(player, "gui.dominionmembers.title"))

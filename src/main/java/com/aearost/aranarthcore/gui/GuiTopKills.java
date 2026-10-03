@@ -16,8 +16,13 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class GuiTopKills {
+
+    private static final ExecutorService SKIN_EXECUTOR = Executors.newFixedThreadPool(8);
 
     public static final String TITLE_KEY = "gui.topkills.title";
 
@@ -47,15 +52,22 @@ public class GuiTopKills {
             pageUuids.add(uuidList.get(i));
         }
 
-        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
-            Map<UUID, PlayerProfile> profiles = new LinkedHashMap<>();
-            for (UUID uuid : pageUuids) {
+        List<CompletableFuture<Map.Entry<UUID, PlayerProfile>>> futures = new ArrayList<>();
+        for (UUID uuid : pageUuids) {
+            futures.add(CompletableFuture.supplyAsync(() -> {
                 OfflinePlayer op = Bukkit.getOfflinePlayer(uuid);
                 PlayerProfile profile = Bukkit.createProfile(uuid, op.getName());
                 profile.complete(true);
-                profiles.put(uuid, profile);
-            }
+                return Map.entry(uuid, profile);
+            }, SKIN_EXECUTOR));
+        }
 
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).thenRun(() -> {
+            Map<UUID, PlayerProfile> profiles = new LinkedHashMap<>();
+            for (CompletableFuture<Map.Entry<UUID, PlayerProfile>> f : futures) {
+                Map.Entry<UUID, PlayerProfile> entry = f.join();
+                profiles.put(entry.getKey(), entry.getValue());
+            }
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                 aranarthPlayer.setCurrentGuiPageNum(pageNum);

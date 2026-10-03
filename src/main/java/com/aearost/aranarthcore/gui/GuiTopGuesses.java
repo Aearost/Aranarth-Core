@@ -20,8 +20,13 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 import java.text.NumberFormat;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class GuiTopGuesses {
+
+    private static final ExecutorService SKIN_EXECUTOR = Executors.newFixedThreadPool(8);
 
     public static final String TITLE_KEY = "gui.topguesses.title";
 
@@ -75,26 +80,36 @@ public class GuiTopGuesses {
                 pageUuids.add(sortedUuids.get(i));
             }
 
-            Map<UUID, PlayerProfile> profiles = new LinkedHashMap<>();
+            final int totalCount = sortedUuids.size();
+
+            List<CompletableFuture<Map.Entry<UUID, PlayerProfile>>> futures = new ArrayList<>();
             for (UUID uuid : pageUuids) {
-                OfflinePlayer op = Bukkit.getOfflinePlayer(uuid);
-                PlayerProfile profile = Bukkit.createProfile(uuid, op.getName());
-                profile.complete(true);
-                profiles.put(uuid, profile);
+                futures.add(CompletableFuture.supplyAsync(() -> {
+                    OfflinePlayer op = Bukkit.getOfflinePlayer(uuid);
+                    PlayerProfile profile = Bukkit.createProfile(uuid, op.getName());
+                    profile.complete(true);
+                    return Map.entry(uuid, profile);
+                }, SKIN_EXECUTOR));
             }
 
-            final int totalCount = sortedUuids.size();
-            Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
-                totalCountCache.put(player.getUniqueId(), totalCount);
-                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                aranarthPlayer.setCurrentGuiPageNum(pageNum);
-                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                String openTitle = ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
-                if (player.isOnline() && openTitle.equals(ChatUtils.stripColorFormatting(Lang.get(TITLE_KEY)))) {
-                    populate(player, player.getOpenInventory().getTopInventory(), pageNum, sortedUuids, dbData, profiles);
-                } else {
-                    new GuiTopGuesses(player, pageNum, sortedUuids, dbData, profiles).openGui();
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).thenRun(() -> {
+                Map<UUID, PlayerProfile> profiles = new LinkedHashMap<>();
+                for (CompletableFuture<Map.Entry<UUID, PlayerProfile>> f : futures) {
+                    Map.Entry<UUID, PlayerProfile> entry = f.join();
+                    profiles.put(entry.getKey(), entry.getValue());
                 }
+                Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+                    totalCountCache.put(player.getUniqueId(), totalCount);
+                    AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+                    aranarthPlayer.setCurrentGuiPageNum(pageNum);
+                    AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    String openTitle = ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
+                    if (player.isOnline() && openTitle.equals(ChatUtils.stripColorFormatting(Lang.get(TITLE_KEY)))) {
+                        populate(player, player.getOpenInventory().getTopInventory(), pageNum, sortedUuids, dbData, profiles);
+                    } else {
+                        new GuiTopGuesses(player, pageNum, sortedUuids, dbData, profiles).openGui();
+                    }
+                });
             });
         });
     }

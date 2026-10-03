@@ -180,6 +180,7 @@ public class DatabaseManager {
                 uuid VARCHAR(36) PRIMARY KEY,
                 username VARCHAR(64) NOT NULL,
                 data_json MEDIUMTEXT NOT NULL,
+                raw_data MEDIUMTEXT DEFAULT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,

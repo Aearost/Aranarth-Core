@@ -11,6 +11,7 @@ import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.MarketUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
+import com.aearost.aranarthcore.utils.TradeMarketUtils;
 import org.bukkit.*;
 import org.bukkit.block.*;
 import org.bukkit.entity.Player;
@@ -382,6 +383,9 @@ public class ShopInteract {
                 player.sendMessage(ChatUtils.chatMessage(
                         "&7You have purchased &e" + shop.getQuantity() + " " + itemname
                                 + ChatUtils.translateToColor(" &7for &6" + formatter.format(shop.getBuyPrice()))));
+                ItemStack marketBuyItem = shop.getItem().clone();
+                marketBuyItem.setAmount(shop.getQuantity());
+                TradeMarketUtils.recordTradeTransaction(new ItemStack[]{marketBuyItem}, shop.getBuyPrice());
                 clickUser.setBulkTransactionNum(-1);
                 AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
 
@@ -556,6 +560,9 @@ public class ShopInteract {
                 player.sendMessage(ChatUtils.chatMessage(
                         "&7You have sold &e" + shop.getQuantity() + " " + itemname
                                 + ChatUtils.translateToColor(" &7for &6" + formatter.format(shop.getSellPrice()))));
+                ItemStack marketSellItem = shop.getItem().clone();
+                marketSellItem.setAmount(shop.getQuantity());
+                TradeMarketUtils.recordTradeTransaction(new ItemStack[]{marketSellItem}, shop.getSellPrice());
                 clickUser.setBulkTransactionNum(-1);
                 AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
 

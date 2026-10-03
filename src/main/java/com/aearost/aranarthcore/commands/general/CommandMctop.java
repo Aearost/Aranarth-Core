@@ -22,12 +22,17 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
  * Opens a GUI showing the top players in a given mcMMO skill.
  */
 public class CommandMctop implements CommandExecutor {
+
+    private static final ExecutorService SKIN_EXECUTOR = Executors.newFixedThreadPool(8);
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
@@ -83,29 +88,36 @@ public class CommandMctop implements CommandExecutor {
                 return;
             }
 
-            // Complete each player's profile
-            Map<String, PlayerProfile> profiles = new LinkedHashMap<>();
-            for (PlayerStat stat : leaderboard) {
-                PlayerProfile profile = Bukkit.createProfile(null, stat.playerName());
-                profile.complete(true);
-                profiles.put(stat.playerName(), profile);
+            // Complete each player's profile in parallel
+            final List<PlayerStat> finalLeaderboard = leaderboard;
+            List<CompletableFuture<Map.Entry<String, PlayerProfile>>> futures = new ArrayList<>();
+            for (PlayerStat stat : finalLeaderboard) {
+                futures.add(CompletableFuture.supplyAsync(() -> {
+                    PlayerProfile profile = Bukkit.createProfile(null, stat.playerName());
+                    profile.complete(true);
+                    return Map.entry(stat.playerName(), profile);
+                }, SKIN_EXECUTOR));
             }
 
-            final List<PlayerStat> finalLeaderboard = leaderboard;
-            final Map<String, PlayerProfile> finalProfiles = profiles;
-
-            Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
-                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                aranarthPlayer.setCurrentGuiPageNum(pageNum);
-                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                String skillDisplay = skill == null ? "Overall" : skill.name().charAt(0) + skill.name().substring(1).toLowerCase();
-                String expectedTitle = ChatUtils.stripColorFormatting(Lang.getFor(player, "gui.mctop.title", "skill", skillDisplay));
-                String openTitle = ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
-                if (player.isOnline() && openTitle.equals(expectedTitle)) {
-                    GuiMctop.populate(player, player.getOpenInventory().getTopInventory(), skill, finalLeaderboard, finalProfiles);
-                } else {
-                    new GuiMctop(player, skill, pageNum, finalLeaderboard, finalProfiles).openGui();
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).thenRun(() -> {
+                Map<String, PlayerProfile> profiles = new LinkedHashMap<>();
+                for (CompletableFuture<Map.Entry<String, PlayerProfile>> f : futures) {
+                    Map.Entry<String, PlayerProfile> entry = f.join();
+                    profiles.put(entry.getKey(), entry.getValue());
                 }
+                Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+                    AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+                    aranarthPlayer.setCurrentGuiPageNum(pageNum);
+                    AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    String skillDisplay = skill == null ? "Overall" : skill.name().charAt(0) + skill.name().substring(1).toLowerCase();
+                    String expectedTitle = ChatUtils.stripColorFormatting(Lang.getFor(player, "gui.mctop.title", "skill", skillDisplay));
+                    String openTitle = ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
+                    if (player.isOnline() && openTitle.equals(expectedTitle)) {
+                        GuiMctop.populate(player, player.getOpenInventory().getTopInventory(), skill, finalLeaderboard, profiles);
+                    } else {
+                        new GuiMctop(player, skill, pageNum, finalLeaderboard, profiles).openGui();
+                    }
+                });
             });
         });
     }

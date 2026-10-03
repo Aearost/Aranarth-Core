@@ -20,8 +20,13 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class GuiVoteTop {
+
+    private static final ExecutorService SKIN_EXECUTOR = Executors.newFixedThreadPool(8);
 
     private final Player player;
     private final Inventory initializedGui;
@@ -102,26 +107,32 @@ public class GuiVoteTop {
         final String finalTitle = title;
         final List<Map.Entry<UUID, Integer>> finalPageEntries = pageEntries;
 
-        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
-            Map<UUID, PlayerProfile> profiles = new LinkedHashMap<>();
-            for (Map.Entry<UUID, Integer> entry : finalPageEntries) {
-                UUID uuid = entry.getKey();
+        List<CompletableFuture<Map.Entry<UUID, PlayerProfile>>> futures = new ArrayList<>();
+        for (Map.Entry<UUID, Integer> entry : finalPageEntries) {
+            UUID uuid = entry.getKey();
+            futures.add(CompletableFuture.supplyAsync(() -> {
                 OfflinePlayer op = Bukkit.getOfflinePlayer(uuid);
                 PlayerProfile profile = Bukkit.createProfile(uuid, op.getName());
                 profile.complete(true);
-                profiles.put(uuid, profile);
-            }
+                return Map.entry(uuid, profile);
+            }, SKIN_EXECUTOR));
+        }
 
-            final Map<UUID, PlayerProfile> finalProfiles = profiles;
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).thenRun(() -> {
+            Map<UUID, PlayerProfile> profiles = new LinkedHashMap<>();
+            for (CompletableFuture<Map.Entry<UUID, PlayerProfile>> f : futures) {
+                Map.Entry<UUID, PlayerProfile> entry = f.join();
+                profiles.put(entry.getKey(), entry.getValue());
+            }
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                 aranarthPlayer.setCurrentGuiPageNum(pageNum);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 String openTitle = com.aearost.aranarthcore.utils.ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
                 if (player.isOnline() && openTitle.equals(com.aearost.aranarthcore.utils.ChatUtils.stripColorFormatting(finalTitle))) {
-                    populate(player, player.getOpenInventory().getTopInventory(), finalPageEntries, finalProfiles);
+                    populate(player, player.getOpenInventory().getTopInventory(), finalPageEntries, profiles);
                 } else {
-                    new GuiVoteTop(player, finalTitle, finalPageEntries, finalProfiles).openGui();
+                    new GuiVoteTop(player, finalTitle, finalPageEntries, profiles).openGui();
                 }
             });
         });
