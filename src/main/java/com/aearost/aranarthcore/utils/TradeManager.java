@@ -513,6 +513,17 @@ public class TradeManager {
             return;
         }
 
+        // Initiator may have moved to a non-survival world since sending the invite
+        if (!AranarthUtils.isSurvivalWorld(initiator.getWorld().getName())) {
+            AranarthPlayer initiatorAp = AranarthUtils.getPlayer(initiatorUuid);
+            String initiatorNick = initiatorAp != null ? initiatorAp.getNickname() : initiator.getName();
+            initiator.sendMessage(ChatUtils.chatMessage(Lang.getFor(initiator, "trade.wrong_world")));
+            if (NetworkManager.isActive()) {
+                NetworkManager.getInstance().publishTradeCancel(initiatorUuid, initiatorUuid, initiatorNick);
+            }
+            return;
+        }
+
         Trade trade = new Trade(initiatorUuid, targetUuid);
         registerTrade(trade);
         markCrossServer(trade);

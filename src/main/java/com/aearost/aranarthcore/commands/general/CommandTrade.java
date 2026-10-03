@@ -32,6 +32,11 @@ public class CommandTrade implements CommandExecutor {
             return true;
         }
 
+        if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "trade.wrong_world")));
+            return true;
+        }
+
         if (args.length < 1) {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "trade <player>")));
             return true;
@@ -81,6 +86,13 @@ public class CommandTrade implements CommandExecutor {
 
         // Accept flow - check for a pending same-server invite from target
         if (TradeManager.hasInviteFrom(uuid, targetUuid)) {
+            // Inviter may have moved to a non-survival world since sending the invite
+            if (targetOnThisServer && !AranarthUtils.isSurvivalWorld(target.getWorld().getName())) {
+                TradeManager.removeInvite(uuid);
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "trade.wrong_world")));
+                target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "trade.wrong_world")));
+                return true;
+            }
             TradeManager.removeInvite(uuid);
             Trade trade = new Trade(targetUuid, uuid); // Original inviter is initiator
             TradeManager.registerTrade(trade);
