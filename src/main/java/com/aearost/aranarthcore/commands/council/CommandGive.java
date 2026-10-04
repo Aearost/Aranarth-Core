@@ -5,21 +5,27 @@ import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.items.essence.Essence;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.NetworkPlayer;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.UUID;
+
+import static com.aearost.aranarthcore.objects.CustomKeys.COUPON_DISCOUNT;
 
 /**
  * Provides a specified player an AranarthCore item.
@@ -52,6 +58,37 @@ public class CommandGive {
             }
 
             if (player != null) {
+                // Inline handling for store coupons
+                if (args[2].equals("Coupon10") || args[2].equals("Coupon30")) {
+                    if (sender instanceof Player senderPlayer) {
+                        AranarthPlayer senderAranarthPlayer = AranarthUtils.getPlayer(senderPlayer.getUniqueId());
+                        if (senderAranarthPlayer == null || senderAranarthPlayer.getCouncilRank() < 2) {
+                            senderPlayer.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+                            return;
+                        }
+                    }
+                    int discountPercentage = args[2].equals("Coupon10") ? 10 : 30;
+                    ItemStack coupon = new ItemStack(Material.PAPER, 1);
+                    ItemMeta couponMeta = coupon.getItemMeta();
+                    couponMeta.setMaxStackSize(1);
+                    couponMeta.setDisplayName(ChatUtils.translateToColor("&6&l" + discountPercentage + "% Store Coupon"));
+                    couponMeta.setLore(Collections.singletonList(ChatUtils.translateToColor("&7&oSneak and Right-Click to Redeem")));
+                    couponMeta.getPersistentDataContainer().set(COUPON_DISCOUNT, PersistentDataType.INTEGER, discountPercentage);
+                    coupon.setItemMeta(couponMeta);
+                    HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(coupon);
+                    if (!remainder.isEmpty()) {
+                        for (ItemStack value : remainder.values()) {
+                            player.getWorld().dropItemNaturally(player.getLocation(), value);
+                        }
+                    }
+                    String itemName = couponMeta.getDisplayName();
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("give.received", "item", itemName + " x1")));
+                    if (sender instanceof Player senderPlayer && !senderPlayer.getUniqueId().equals(player.getUniqueId())) {
+                        sender.sendMessage(ChatUtils.chatMessage(Lang.get("give.success", "player", player.getName(), "amount", "1", "item", itemName)));
+                    }
+                    return;
+                }
+
                 boolean isKey = false;
                 String fullPathName = "";
                 if (args[2].startsWith("Aranarthium")) {

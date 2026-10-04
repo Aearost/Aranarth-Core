@@ -21,7 +21,9 @@ import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.AranarthVote;
 import com.aearost.aranarthcore.objects.CrateType;
+import static com.aearost.aranarthcore.objects.CustomKeys.COUPON_DISCOUNT;
 import com.aearost.aranarthcore.utils.*;
+import org.bukkit.persistence.PersistentDataType;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
 import com.gmail.nossr50.datatypes.player.PlayerProfile;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
@@ -1075,8 +1077,7 @@ public class CrateOpen {
                 couponMeta.setMaxStackSize(1);
                 couponMeta.setDisplayName(ChatUtils.translateToColor("&6&l30% Store Coupon"));
                 List<String> couponLore = new ArrayList<>();
-                couponLore.add(ChatUtils.translateToColor("&eContact a Council member to obtain this reward!"));
-                couponLore.add(ChatUtils.translateToColor("&7Acquired on " + getCurrentTime()));
+                couponLore.add(ChatUtils.translateToColor("&7&oSneak and Right-Click to Redeem"));
                 couponMeta.setLore(couponLore);
                 coupon.setItemMeta(couponMeta);
                 displayItem = coupon;
@@ -1177,16 +1178,14 @@ public class CrateOpen {
                     reward.setAmount(2);
                     name = "&5&lGodly Crate Key x2";
                 } else if (chance <= 90) {
-                    DiscordUtils.createNotification(player.getName() + " has earned a 30% Store Coupon", player.getUniqueId());
                     reward = new ItemStack(Material.PAPER);
                     ItemMeta rewardMeta = reward.getItemMeta();
                     rewardMeta.setMaxStackSize(1);
                     rewardMeta.setDisplayName(ChatUtils.translateToColor("&6&l30% Store Coupon"));
                     List<String> rewardLore = new ArrayList<>();
-                    rewardLore.add(ChatUtils.translateToColor("&eContact a Council member to obtain this reward!"));
-                    String dayCouponWasAcquired = getCurrentTime();
-                    rewardLore.add(ChatUtils.translateToColor("&7Acquired on " + dayCouponWasAcquired));
+                    rewardLore.add(ChatUtils.translateToColor("&7&oSneak and Right-Click to Redeem"));
                     rewardMeta.setLore(rewardLore);
+                    rewardMeta.getPersistentDataContainer().set(COUPON_DISCOUNT, PersistentDataType.INTEGER, 30);
                     reward.setItemMeta(rewardMeta);
                     name = rewardMeta.getDisplayName() + " x1";
                 } else if (chance <= 95) {

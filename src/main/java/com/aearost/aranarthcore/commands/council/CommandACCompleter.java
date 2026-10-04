@@ -127,7 +127,21 @@ public class CommandACCompleter implements TabCompleter {
                     yield filterPlayers(args[1]);
                 }
                 yield switch (args[0].toLowerCase()) {
-                    case "give" -> args.length == 3 ? filter(ITEM_NAMES, args[2]) : List.of();
+                    case "give" -> {
+                        if (args.length != 3) {
+                            yield List.of();
+                        }
+                        List<String> giveItems = new ArrayList<>(ITEM_NAMES);
+                        if (sender instanceof Player givePlayer) {
+                            AranarthPlayer giveAranarthPlayer = AranarthUtils.getPlayer(givePlayer.getUniqueId());
+                            if (giveAranarthPlayer != null && giveAranarthPlayer.getCouncilRank() >= 2) {
+                                giveItems.add("Coupon10");
+                                giveItems.add("Coupon30");
+                                Collections.sort(giveItems);
+                            }
+                        }
+                        yield filter(giveItems, args[2]);
+                    }
                     case "mute", "ban" -> {
                         if (args.length == 3) {
                             yield args[2].isEmpty() ? List.of("1m", "1h", "1d", "1w", "-1") : List.of();

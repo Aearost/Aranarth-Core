@@ -38,6 +38,12 @@ build/
 .claude/worktrees/
 announcement_draft.txt
 
+### Sensitive data ###
+coupons.txt
+
+### Lang files (excluded due to commit performance - see src/main/resources/lang/README.txt) ###
+src/main/resources/lang/*.properties
+
 ### Mac OS ###
 .DS_Store
 /src/main/resources/pack/

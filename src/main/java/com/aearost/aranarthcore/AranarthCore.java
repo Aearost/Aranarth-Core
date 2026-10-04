@@ -1101,6 +1101,7 @@ public class AranarthCore extends JavaPlugin {
         BrewRecipeUtils.initialize(this);
         MobHeadUtils.initialize(this);
         HeadsDatabaseManager.initialize(this);
+        CouponUtils.initialize(getDataFolder());
         // Load shared quest reset timestamps from DB so both servers stay synchronized
         if (db) {
             try {

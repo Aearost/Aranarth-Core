@@ -143,19 +143,23 @@ public class CommandMail implements CommandExecutor {
                     Mail mail = mailList.get(i);
                     int entryNum = i + 1;
 
-                    AranarthPlayer senderPlayer = AranarthUtils.getPlayer(mail.getSenderUUID());
                     String senderName;
-                    if (senderPlayer != null) {
-                        senderName = senderPlayer.getNickname();
+                    if (new UUID(0L, 0L).equals(mail.getSenderUUID())) {
+                        senderName = "Aranarth";
                     } else {
-                        com.aearost.aranarthcore.network.NetworkPlayer remoteSender = NetworkManager.isActive()
-                                ? NetworkManager.getInstance().getRemotePlayer(mail.getSenderUUID()) : null;
-                        if (remoteSender != null) {
-                            String nick = remoteSender.getNickname();
-                            senderName = (nick == null || nick.isEmpty()) ? remoteSender.getUsername() : ChatUtils.stripColorFormatting(nick);
+                        AranarthPlayer senderPlayer = AranarthUtils.getPlayer(mail.getSenderUUID());
+                        if (senderPlayer != null) {
+                            senderName = senderPlayer.getNickname();
                         } else {
-                            String bukkit = Bukkit.getOfflinePlayer(mail.getSenderUUID()).getName();
-                            senderName = bukkit != null ? bukkit : "Unknown";
+                            com.aearost.aranarthcore.network.NetworkPlayer remoteSender = NetworkManager.isActive()
+                                    ? NetworkManager.getInstance().getRemotePlayer(mail.getSenderUUID()) : null;
+                            if (remoteSender != null) {
+                                String nick = remoteSender.getNickname();
+                                senderName = (nick == null || nick.isEmpty()) ? remoteSender.getUsername() : ChatUtils.stripColorFormatting(nick);
+                            } else {
+                                String bukkit = Bukkit.getOfflinePlayer(mail.getSenderUUID()).getName();
+                                senderName = bukkit != null ? bukkit : "Unknown";
+                            }
                         }
                     }
 

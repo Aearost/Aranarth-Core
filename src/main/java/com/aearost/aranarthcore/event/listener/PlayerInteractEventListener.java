@@ -42,6 +42,8 @@ public class PlayerInteractEventListener implements Listener {
                 new QuiverClick().execute(e);
             } else if (e.getItem().getType().name().contains("SHULKER_BOX")) {
                 new ShulkerClick().execute(e);
+            } else if (e.getItem().getType().name().equals("PAPER")) {
+                new CouponRedeem().execute(e);
             } else if (e.getItem().hasItemMeta()) {
                 if (e.getItem().getItemMeta() instanceof MusicInstrumentMeta) {
                     new GoatHornUse().execute(e);

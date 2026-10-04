@@ -101,3 +101,5 @@ Miscellaneous
 [-] Removed rule that prevented the creation of large automated farms
 [+] Added rule to prevent the creation/use of lag-inducing builds
 [+] Added /heads adminbuy command for free head acquisition for server builds
+[+] Reworked coupon redemption to now sneak & right-click the held item, consume pre-defined code from file, send as mail
+[+] Added /ac give support for coupons
