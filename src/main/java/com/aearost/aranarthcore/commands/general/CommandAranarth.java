@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.gui.GuiAranarth;
+import com.aearost.aranarthcore.gui.GuiRecipes;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
 import com.aearost.aranarthcore.utils.Lang;
@@ -140,7 +141,10 @@ public class CommandAranarth implements CommandExecutor {
                 if (args.length == 1) sendMechanicsMenu(player);
                 else sendMechanicsChapter(player, args[1].toLowerCase());
             }
-            case "recipes" -> player.sendMessage(ChatUtils.chatMessage(Lang.get("recipes.coming_soon")));
+            case "recipes" -> {
+                GuiRecipes.clearFilter(player.getUniqueId());
+                new GuiRecipes(player, 0).openGui();
+            }
             default -> player.sendMessage(ChatUtils.chatMessage(
                     Lang.get("guide.invalid_topic", "topic", args[0])));
         }

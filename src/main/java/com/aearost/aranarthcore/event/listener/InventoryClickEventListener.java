@@ -95,6 +95,10 @@ public class InventoryClickEventListener implements Listener {
                 new ShulkerPreventSlotSwitch().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiAranarth.TITLE_KEY))) {
                 new GuiAranarthClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiRecipes.TITLE_KEY))) {
+                new GuiRecipesClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiRecipeView.TITLE_KEY))) {
+                new GuiRecipeViewClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.ranks.title"))) {
                 new GuiRanksClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.rankup.title"))) {

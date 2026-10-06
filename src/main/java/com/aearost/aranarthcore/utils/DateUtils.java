@@ -793,8 +793,11 @@ public class DateUtils {
             AranarthCore.launchMonthFireworks(month);
             if (month == Month.IGNIVOR) {
                 AranarthCore.resetResourceWorlds();
-                for (Boost boost : Boost.values()) {
-                    AranarthUtils.addServerBoost(boost, null, null, false);
+                // Survival applies the boosts and syncs them to SMP, so SMP must not forward a second add
+                if (!AranarthCore.isSmpServer()) {
+                    for (Boost boost : Boost.values()) {
+                        AranarthUtils.addServerBoost(boost, null, null, false);
+                    }
                 }
             }
         }
