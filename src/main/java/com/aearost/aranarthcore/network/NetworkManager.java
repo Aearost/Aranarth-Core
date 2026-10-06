@@ -106,6 +106,7 @@ public class NetworkManager {
     public static final String CH_RANK_UPDATE = "aranarth:rank_update";
     public static final String CH_MARKET_UPDATE = "aranarth:market_update";
     public static final String CH_PERM_RELOAD = "aranarth:perm_reload";
+    public static final String CH_CONFIG_RELOAD = "aranarth:config_reload";
     public static final String CH_TRADE_INVITE = "aranarth:trade_invite";
     public static final String CH_TRADE_ACCEPT = "aranarth:trade_accept";
     public static final String CH_TRADE_CANCEL = "aranarth:trade_cancel";
@@ -509,6 +510,7 @@ public class NetworkManager {
             case CH_RANK_UPDATE -> handleRankUpdate(json);
             case CH_MARKET_UPDATE -> handleMarketUpdate(json);
             case CH_PERM_RELOAD -> handlePermReload(json);
+            case CH_CONFIG_RELOAD -> handleConfigReload(json);
             case CH_TRADE_INVITE -> handleTradeInvite(json);
             case CH_TRADE_ACCEPT -> handleTradeAccept(json);
             case CH_TRADE_CANCEL -> handleTradeCancel(json);
@@ -1006,6 +1008,15 @@ public class NetworkManager {
             json.addProperty("uuid", uuid.toString());
         }
         publish(CH_PERM_RELOAD, json);
+    }
+
+    /**
+     * Tells the other server to reload its config.yml and import its own coupons.txt.
+     */
+    public void publishConfigReload() {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        publish(CH_CONFIG_RELOAD, json);
     }
 
     /**
@@ -2274,6 +2285,17 @@ public class NetworkManager {
                     PermissionUtils.evaluatePlayerPermissions(player);
                 }
             }
+        });
+    }
+
+    private void handleConfigReload(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+            AranarthCore.getInstance().reloadConfig();
+            Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), CouponUtils::importCoupons);
         });
     }
 

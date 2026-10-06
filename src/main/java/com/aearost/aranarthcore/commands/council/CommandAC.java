@@ -119,8 +119,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandInvSwap.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("discordreload")) {
 			commandResult = CommandDiscordReload.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("reloadperms")) {
-			commandResult = CommandReloadPerms.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("reload")) {
+			commandResult = CommandReload.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("reloadlang")) {
 			LangManager.getInstance().load();
 			sender.sendMessage(ChatUtils.chatMessage(Lang.get("ac.lang_reloaded")));
@@ -131,8 +131,6 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandUnscramble.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("og")) {
 			commandResult = CommandOG.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("reloadshops")) {
-			commandResult = CommandReloadShops.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("worldevent")) {
 			commandResult = CommandWorldEvent.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("disband")) {

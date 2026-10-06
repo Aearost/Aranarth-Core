@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.database;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.network.NetworkPlayer;
+import com.aearost.aranarthcore.objects.Coupon;
 import com.aearost.aranarthcore.objects.TradeMarketData;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -464,6 +465,14 @@ public class DatabaseManager {
                 total_units BIGINT NOT NULL DEFAULT 0,
                 first_price DOUBLE NOT NULL DEFAULT 0,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+                """
+            CREATE TABLE IF NOT EXISTS server_coupons (
+                id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                discount INT NOT NULL,
+                code VARCHAR(64) NOT NULL UNIQUE,
+                INDEX idx_discount (discount, id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """
         };
@@ -1560,6 +1569,100 @@ public class DatabaseManager {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load boosts: " + e.getMessage());
         }
         return null;
+    }
+
+    public record ClaimedCoupon(String code, int remaining) {
+    }
+
+    /**
+     * Inserts the given coupons into the shared pool, skipping codes that are already stored.
+     *
+     * @param coupons The coupons to insert.
+     * @return {added, skipped}, or null if the import failed and nothing was committed.
+     */
+    public int[] importCoupons(List<Coupon> coupons) {
+        String sql = "INSERT IGNORE INTO server_coupons (discount, code) VALUES (?, ?)";
+        try (Connection conn = dataSource.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                int added = 0;
+                for (Coupon coupon : coupons) {
+                    ps.setInt(1, coupon.getDiscountPercentage());
+                    ps.setString(2, coupon.getCode());
+                    added += ps.executeUpdate();
+                }
+                conn.commit();
+                return new int[]{added, coupons.size() - added};
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to import coupons: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Removes and returns the oldest coupon of the given discount tier.
+     *
+     * @param discount The discount tier (e.g. 10 or 30).
+     * @return The claimed code and how many of that tier remain, or null if none are available.
+     */
+    public ClaimedCoupon claimCoupon(int discount) {
+        String select = "SELECT id, code FROM server_coupons WHERE discount = ? ORDER BY id LIMIT 1 FOR UPDATE";
+        String delete = "DELETE FROM server_coupons WHERE id = ?";
+        String count = "SELECT COUNT(*) FROM server_coupons WHERE discount = ?";
+        try (Connection conn = dataSource.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                // Retry in case the other server deleted the selected row first
+                for (int attempt = 0; attempt < 3; attempt++) {
+                    long id;
+                    String code;
+                    try (PreparedStatement ps = conn.prepareStatement(select)) {
+                        ps.setInt(1, discount);
+                        try (ResultSet rs = ps.executeQuery()) {
+                            if (!rs.next()) {
+                                conn.commit();
+                                return null;
+                            }
+                            id = rs.getLong("id");
+                            code = rs.getString("code");
+                        }
+                    }
+                    try (PreparedStatement ps = conn.prepareStatement(delete)) {
+                        ps.setLong(1, id);
+                        if (ps.executeUpdate() == 0) {
+                            continue;
+                        }
+                    }
+                    int remaining = 0;
+                    try (PreparedStatement ps = conn.prepareStatement(count)) {
+                        ps.setInt(1, discount);
+                        try (ResultSet rs = ps.executeQuery()) {
+                            if (rs.next()) {
+                                remaining = rs.getInt(1);
+                            }
+                        }
+                    }
+                    conn.commit();
+                    return new ClaimedCoupon(code, remaining);
+                }
+                conn.commit();
+                return null;
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to claim a " + discount + "% coupon: " + e.getMessage());
+            return null;
+        }
     }
 
     // -------------------------------------------------------------------------
