@@ -1,8 +1,8 @@
 name: AranarthCore
-version: 1.11
+version: 1.13
 authors: [ Aearost ]
 main: com.aearost.aranarthcore.AranarthCore
-api-version: 26.2
+api-version: 26.3
 depend: [ mcMMO, ProjectKorra, DiscordSRV ]
 softdepend: [ VotifierPlus, BreweryX, squaremap ]
 description: A core plugin to incorporate any features we desire into our Minecraft world
