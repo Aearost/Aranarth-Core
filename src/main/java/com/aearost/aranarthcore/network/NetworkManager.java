@@ -1072,6 +1072,24 @@ public class NetworkManager {
     }
 
     /**
+     * Forwards a boost add from SMP to Survival so Survival applies it as the source of truth.
+     *
+     * @param boostName    Boost enum name (e.g. "MINER").
+     * @param uuid         The UUID of the player applying the boost, or null if none.
+     * @param fromVoteShop Whether the boost was purchased from the vote shop.
+     */
+    public void publishBoostAddRequest(String boostName, UUID uuid, boolean fromVoteShop) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("boost", boostName);
+        json.addProperty("request", true);
+        json.addProperty("uuid", uuid == null ? "" : uuid.toString());
+        json.addProperty("fromVoteShop", fromVoteShop);
+        json.addProperty("removing", false);
+        publish(CH_BOOST_SYNC, json);
+    }
+
+    /**
      * Forces a remotely-online player to transfer to the specified server.
      * Use alongside {@link #setPendingTeleport(UUID, PendingTeleport)} when the pending TP
      * must be saved to the DB before the transfer message is received.
@@ -2443,6 +2461,15 @@ public class NetworkManager {
         }
         if (boost == null) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "handleBoostSync: unknown boost: " + boostName);
+            return;
+        }
+        // SMP forwarded a boost add - only Survival applies it, then syncs the end time back
+        if (json.has("request") && json.get("request").getAsBoolean()) {
+            if (!AranarthCore.isSmpServer()) {
+                String uuidStr = json.get("uuid").getAsString();
+                UUID uuid = uuidStr.isEmpty() ? null : UUID.fromString(uuidStr);
+                AranarthUtils.addServerBoost(boost, null, uuid, json.get("fromVoteShop").getAsBoolean());
+            }
             return;
         }
         if (removing) {

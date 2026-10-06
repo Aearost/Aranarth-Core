@@ -93,6 +93,7 @@ Cross-server & Technical
 [+] Allowed Console to use /ac og
 [+] Added automatic deploying of AranarthCore to both Survival and SMP test servers simultaneously
 [~] Fixed purchased crate keys being given on both SMP and Survival
+[~] Fixed issue where boosts were not applying to both servers at once
 
 Miscellaneous
 [+] Fixed AFK color formatting

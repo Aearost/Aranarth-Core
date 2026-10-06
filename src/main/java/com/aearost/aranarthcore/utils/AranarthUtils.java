@@ -2682,6 +2682,12 @@ public class AranarthUtils {
 
         // A new boost will automatically apply for 24 hours
         if (duration == null) {
+            // SMP forwards the add to Survival, which applies it and syncs the end time back
+            if (AranarthCore.isSmpServer() && NetworkManager.isActive()) {
+                NetworkManager.getInstance().publishBoostAddRequest(boost.name(), uuid, fromVoteShop);
+                return;
+            }
+
             // Increase by 24 hours if it already exists i.e the same boost was purchased twice
             if (serverBoosts.get(boost) != null) {
                 LocalDateTime currentBoostEnd = serverBoosts.get(boost);
@@ -2704,24 +2710,27 @@ public class AranarthUtils {
             // Handles messages - only broadcast and notify Discord on the primary (Survival) server
             // to avoid duplicate messages when both servers independently receive a boost event.
             if (!AranarthCore.isSmpServer()) {
+                String appliedMessage;
                 if (uuid == null) {
-                    Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("boost.applied", "boost", name)));
+                    appliedMessage = ChatUtils.chatMessage(Lang.get("boost.applied", "boost", name));
                     if (AranarthCore.isPublicServer()) {
                         DiscordUtils.updateBoostInDiscord(null, boost, true, fromVoteShop);
                     }
                 } else {
                     AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
                     if (fromVoteShop) {
-                        Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("boost.player_purchased", "player", aranarthPlayer.getNickname(), "boost", name)));
+                        appliedMessage = ChatUtils.chatMessage(Lang.get("boost.player_purchased", "player", aranarthPlayer.getNickname(), "boost", name));
                     } else {
-                        Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("boost.player_applied", "player", aranarthPlayer.getNickname(), "boost", name)));
+                        appliedMessage = ChatUtils.chatMessage(Lang.get("boost.player_applied", "player", aranarthPlayer.getNickname(), "boost", name));
                     }
                     if (AranarthCore.isPublicServer()) {
                         DiscordUtils.updateBoostInDiscord(uuid, boost, true, fromVoteShop);
                     }
                 }
+                Bukkit.broadcastMessage(appliedMessage);
                 // Sync boost end-time to other servers so they apply effects without re-broadcasting
                 if (NetworkManager.isActive()) {
+                    NetworkManager.getInstance().publishBroadcast(appliedMessage);
                     LocalDateTime endTime = serverBoosts.get(boost);
                     if (endTime != null) {
                         NetworkManager.getInstance().publishBoostSync(boost.name(), endTime.toString(), false);
