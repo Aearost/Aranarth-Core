@@ -570,7 +570,15 @@
       "Bash(zcat /c/Users/liamh/Downloads/Logs/Survival/latest.log)",
       "Bash(zcat \"/c/Users/liamh/Downloads/Logs/SMP/2026-10-03-1.log.gz\")",
       "Bash(zcat \"/c/Users/liamh/Downloads/Logs/Survival/2026-10-02-3.log.gz\")",
-      "Bash(zcat \"/c/Users/liamh/Downloads/Logs/SMP/2026-10-02-3.log.gz\")"
+      "Bash(zcat \"/c/Users/liamh/Downloads/Logs/SMP/2026-10-02-3.log.gz\")",
+      "Bash(sshpass -V)",
+      "Bash(sftp -V)",
+      "Bash(pip install:*)",
+      "Bash(py /tmp/analyze_regions.py)",
+      "Bash(echo \"$TEMP\")",
+      "Bash(echo \"$TMP\")",
+      "Bash(T=\"C:/Users/liamh/AppData/Local/Temp\")",
+      "Bash(printf '%s\\\\n' 'T=\"\"\"\"C:/Users/liamh/AppData/Local/Temp\"\"\"\"' 'a=open\\(T+\"\"\"\"/d7a.txt\"\"\"\"\\).read\\(\\).strip\\(\\)' 'print\\(\"\"\"\"a chunks:\"\"\"\", len\\(a.split\\(\"\"\"\"***\"\"\"\"\\)\\)\\)')"
     ]
   }
 }

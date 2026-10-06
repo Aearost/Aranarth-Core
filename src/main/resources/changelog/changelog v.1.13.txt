@@ -54,6 +54,7 @@ Economy, Jobs & Quests
 [~] Fixed NPE in handleMarketUpdate on SMP by skipping sign refresh when shop world does not exist
 [~] Fixed bulk transactions showing unclear messages when inventory space, item quantity, or chest capacity prevents the transaction
 [~] Allowed shop signs to be placed directly on the front face of chests
+[~] Fixed cluster market prices never changing
 
 Chat, UI & Sounds
 [+] Added support for French in /lang

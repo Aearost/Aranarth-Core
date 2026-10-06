@@ -431,7 +431,7 @@ public class DatabaseManager {
             CREATE TABLE IF NOT EXISTS player_blacklist_presets (
                 uuid VARCHAR(36) PRIMARY KEY,
                 active_preset_index INT NOT NULL DEFAULT -1,
-                preset_data_json MEDIUMTEXT NOT NULL DEFAULT '{}'
+                preset_data_json MEDIUMTEXT NOT NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
                 """
@@ -471,11 +471,15 @@ public class DatabaseManager {
         try (Connection conn = dataSource.getConnection();
              Statement stmt = conn.createStatement()) {
             for (String sql : ddl) {
-                stmt.execute(sql.trim());
+                try {
+                    stmt.execute(sql.trim());
+                } catch (SQLException e) {
+                    Bukkit.getLogger().log(Level.SEVERE, AranarthCore.LOG_PREFIX + "Failed to create MySQL schema: " + e.getMessage(), e);
+                }
             }
             Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "MySQL schema verified/created");
         } catch (SQLException e) {
-            Bukkit.getLogger().log(Level.SEVERE, AranarthCore.LOG_PREFIX + "Failed to create MySQL schema: " + e.getMessage(), e);
+            Bukkit.getLogger().log(Level.SEVERE, AranarthCore.LOG_PREFIX + "Failed to connect for schema creation: " + e.getMessage(), e);
         }
     }
 

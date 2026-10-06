@@ -8116,7 +8116,8 @@ public class PersistenceUtils {
             MarketUtils.addMarketData(data);
         }
 
-        // Auto-create entries for any server shop that has no market dynamics row yet
+        // Auto-create entries for any server shop that has no market dynamics row yet,
+        // and immediately persist them so addMarketSellPressure (an UPDATE) can find the row.
         List<Shop> serverShops = ShopUtils.getShops().get(null);
         if (serverShops != null) {
             for (Shop shop : serverShops) {
@@ -8127,6 +8128,7 @@ public class PersistenceUtils {
                 if (MarketUtils.getMarketData(key) == null) {
                     MarketDynamics data = new MarketDynamics(key, shop.getSellPrice(), 1.0, 0.0);
                     MarketUtils.addMarketData(data);
+                    db.saveMarketDynamic(key, shop.getSellPrice(), 1.0, 0.0);
                 }
             }
         }
