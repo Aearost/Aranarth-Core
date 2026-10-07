@@ -5,6 +5,7 @@ World & Events
 Bending & Abilities
 
 Dominion
+[+] Dominion resource claims now provide leaves
 
 Items & Crafting
 

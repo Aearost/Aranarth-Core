@@ -1530,6 +1530,8 @@ public class DominionUtils {
                     PRISMARINE, PRISMARINE_BRICKS, DARK_PRISMARINE,
                     SHROOMLIGHT, VINE, KELP, SEAGRASS, SEA_PICKLE, LILY_PAD, FIREFLY_BUSH,
                     MANGROVE_ROOTS, MUDDY_MANGROVE_ROOTS,
+                    OAK_LEAVES, SPRUCE_LEAVES, BIRCH_LEAVES, JUNGLE_LEAVES, ACACIA_LEAVES, DARK_OAK_LEAVES,
+                    MANGROVE_LEAVES, CHERRY_LEAVES, PALE_OAK_LEAVES, NETHER_WART_BLOCK, WARPED_WART_BLOCK,
                     MOSS_CARPET, PALE_MOSS_BLOCK, PALE_HANGING_MOSS, LEAF_LITTER,
                     RESIN_CLUMP, PINK_PETALS, WILDFLOWERS,
                     RED_MUSHROOM, BROWN_MUSHROOM, RED_MUSHROOM_BLOCK, BROWN_MUSHROOM_BLOCK, MUSHROOM_STEM,
@@ -2285,7 +2287,54 @@ public class DominionUtils {
             simulations.add(endCity);
         }
 
+        addLeavesForLogs(guaranteed);
+
         return new BiomeTable(guaranteed, simulations, rares, varieties);
+    }
+
+    /**
+     * Adds the associated leaves directly after every log drop, at double the log amount.
+     *
+     * @param drops The drops to add the leaves to.
+     */
+    private static void addLeavesForLogs(List<ResourceDrop> drops) {
+        for (int i = 0; i < drops.size(); i++) {
+            ResourceDrop drop = drops.get(i);
+            Material leaves = getLeavesForLog(drop.item.getType());
+            if (leaves == null) {
+                continue;
+            }
+
+            int remaining = drop.item.getAmount() * 2;
+            while (remaining > 0) {
+                int amount = Math.min(remaining, 64);
+                drops.add(++i, new ResourceDrop(new ItemStack(leaves, amount), 0, 0, drop.lore, drop.previewOnly));
+                remaining -= amount;
+            }
+        }
+    }
+
+    /**
+     * Provides the leaves (or wart block for stems) associated to the log.
+     *
+     * @param log The log.
+     * @return The leaves, or null if the material has no associated leaves.
+     */
+    private static Material getLeavesForLog(Material log) {
+        return switch (log) {
+            case OAK_LOG -> Material.OAK_LEAVES;
+            case SPRUCE_LOG -> Material.SPRUCE_LEAVES;
+            case BIRCH_LOG -> Material.BIRCH_LEAVES;
+            case JUNGLE_LOG -> Material.JUNGLE_LEAVES;
+            case ACACIA_LOG -> Material.ACACIA_LEAVES;
+            case DARK_OAK_LOG -> Material.DARK_OAK_LEAVES;
+            case MANGROVE_LOG -> Material.MANGROVE_LEAVES;
+            case CHERRY_LOG -> Material.CHERRY_LEAVES;
+            case PALE_OAK_LOG -> Material.PALE_OAK_LEAVES;
+            case CRIMSON_STEM -> Material.NETHER_WART_BLOCK;
+            case WARPED_STEM -> Material.WARPED_WART_BLOCK;
+            default -> null;
+        };
     }
 
     /**
