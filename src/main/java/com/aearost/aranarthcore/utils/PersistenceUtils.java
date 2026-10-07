@@ -8160,10 +8160,16 @@ public class PersistenceUtils {
                     continue;
                 }
                 String key = MarketUtils.getShopKey(shop);
-                if (MarketUtils.getMarketData(key) == null) {
+                MarketDynamics existing = MarketUtils.getMarketData(key);
+                if (existing == null) {
                     MarketDynamics data = new MarketDynamics(key, shop.getSellPrice(), 1.0, 0.0);
                     MarketUtils.addMarketData(data);
                     db.saveMarketDynamic(key, shop.getSellPrice(), 1.0, 0.0);
+                } else {
+                    // The modifier is the source of truth - the server shops blob can hold a stale
+                    // sell price (e.g. written by SMP, which never runs the price tick)
+                    double price = existing.getDefaultSellPrice() * existing.getCurrentPriceModifier();
+                    shop.setSellPrice(Math.round(price * 100.0) / 100.0);
                 }
             }
         }

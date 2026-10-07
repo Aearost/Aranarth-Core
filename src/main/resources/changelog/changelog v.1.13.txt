@@ -58,6 +58,8 @@ Economy, Jobs & Quests
 [~] Fixed bulk transactions showing unclear messages when inventory space, item quantity, or chest capacity prevents the transaction
 [~] Allowed shop signs to be placed directly on the front face of chests
 [~] Fixed cluster market prices never changing
+[~] Fixed server shop prices never rising above their base price when the item is not being sold
+[~] Fixed server shop prices resetting to stale values after a restart
 
 Chat, UI & Sounds
 [+] Added support for French in /lang
