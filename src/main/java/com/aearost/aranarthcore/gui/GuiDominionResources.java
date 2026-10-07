@@ -256,6 +256,8 @@ public class GuiDominionResources {
 			return Material.STONE;
 		} else if (biome == Biome.CHERRY_GROVE) {
 			return Material.CHERRY_LEAVES;
+		} else if (biome == Biome.DAPPLED_FOREST) {
+			return Material.ORANGE_POPLAR_LEAVES;
 		}
 		// Assume the void or new biomes
 		else {

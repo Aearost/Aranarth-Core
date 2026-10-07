@@ -1524,7 +1524,7 @@ public class DominionUtils {
                     SANDSTONE, RED_SANDSTONE, MOSSY_COBBLESTONE,
                     CRIMSON_NYLIUM, WARPED_NYLIUM -> DominionResourceCategory.DIRTS;
             case OAK_LOG, SPRUCE_LOG, BIRCH_LOG, JUNGLE_LOG, ACACIA_LOG, DARK_OAK_LOG,
-                    MANGROVE_LOG, CHERRY_LOG, PALE_OAK_LOG, BAMBOO,
+                    MANGROVE_LOG, CHERRY_LOG, PALE_OAK_LOG, POPLAR_LOG, BAMBOO,
                     CRIMSON_STEM, WARPED_STEM -> DominionResourceCategory.WOODS;
             case MAGMA_BLOCK, OBSIDIAN, SEA_LANTERN,
                     PRISMARINE, PRISMARINE_BRICKS, DARK_PRISMARINE,
@@ -1532,6 +1532,7 @@ public class DominionUtils {
                     MANGROVE_ROOTS, MUDDY_MANGROVE_ROOTS,
                     OAK_LEAVES, SPRUCE_LEAVES, BIRCH_LEAVES, JUNGLE_LEAVES, ACACIA_LEAVES, DARK_OAK_LEAVES,
                     MANGROVE_LEAVES, CHERRY_LEAVES, PALE_OAK_LEAVES, NETHER_WART_BLOCK, WARPED_WART_BLOCK,
+                    RED_POPLAR_LEAVES, ORANGE_POPLAR_LEAVES, YELLOW_POPLAR_LEAVES, RED_SHRUB,
                     MOSS_CARPET, PALE_MOSS_BLOCK, PALE_HANGING_MOSS, LEAF_LITTER,
                     RESIN_CLUMP, PINK_PETALS, WILDFLOWERS,
                     RED_MUSHROOM, BROWN_MUSHROOM, RED_MUSHROOM_BLOCK, BROWN_MUSHROOM_BLOCK, MUSHROOM_STEM,
@@ -2022,6 +2023,17 @@ public class DominionUtils {
             }
             rares.add(new ResourceDrop(new GodAppleFragment().getItem(), 0, godOddsFF,
                     "Rare Drop (" + formatPct(godOddsFF) + " chance)"));
+        } else if (biome == Biome.DAPPLED_FOREST) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COARSE_DIRT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.POPLAR_LOG, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LEAF_LITTER, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RED_SHRUB, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SHELF_MUSHROOM, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 8)));
 
         // Mountains and Large Hills
         } else if (biome == Biome.WINDSWEPT_HILLS) {
@@ -2293,23 +2305,39 @@ public class DominionUtils {
     }
 
     /**
-     * Adds the associated leaves directly after every log drop, at double the log amount.
+     * Adds the associated leaves (or wart blocks for stems) directly after every log drop, at double the log amount.
+     * Logs with multiple leaf types split the amount between them by weight, and amounts above 64 are split into
+     * multiple full stacks.
      *
      * @param drops The drops to add the leaves to.
      */
     private static void addLeavesForLogs(List<ResourceDrop> drops) {
         for (int i = 0; i < drops.size(); i++) {
             ResourceDrop drop = drops.get(i);
-            Material leaves = getLeavesForLog(drop.item.getType());
-            if (leaves == null) {
+            Material[] leaves = getLeavesForLog(drop.item.getType());
+            if (leaves.length == 0) {
                 continue;
             }
 
-            int remaining = drop.item.getAmount() * 2;
-            while (remaining > 0) {
-                int amount = Math.min(remaining, 64);
-                drops.add(++i, new ResourceDrop(new ItemStack(leaves, amount), 0, 0, drop.lore, drop.previewOnly));
-                remaining -= amount;
+            int total = drop.item.getAmount() * 2;
+            int totalWeight = 0;
+            for (Material leaf : leaves) {
+                totalWeight += getLeafWeight(leaf);
+            }
+
+            int distributed = 0;
+            for (int j = 0; j < leaves.length; j++) {
+                int remaining = total * getLeafWeight(leaves[j]) / totalWeight;
+                // Any remainder from an uneven split goes to the last leaf type
+                if (j == leaves.length - 1) {
+                    remaining = total - distributed;
+                }
+                distributed += remaining;
+                while (remaining > 0) {
+                    int amount = Math.min(remaining, 64);
+                    drops.add(++i, new ResourceDrop(new ItemStack(leaves[j], amount), 0, 0, drop.lore, drop.previewOnly));
+                    remaining -= amount;
+                }
             }
         }
     }
@@ -2318,22 +2346,36 @@ public class DominionUtils {
      * Provides the leaves (or wart block for stems) associated to the log.
      *
      * @param log The log.
-     * @return The leaves, or null if the material has no associated leaves.
+     * @return The leaves, or an empty array if the material has no associated leaves.
      */
-    private static Material getLeavesForLog(Material log) {
+    private static Material[] getLeavesForLog(Material log) {
         return switch (log) {
-            case OAK_LOG -> Material.OAK_LEAVES;
-            case SPRUCE_LOG -> Material.SPRUCE_LEAVES;
-            case BIRCH_LOG -> Material.BIRCH_LEAVES;
-            case JUNGLE_LOG -> Material.JUNGLE_LEAVES;
-            case ACACIA_LOG -> Material.ACACIA_LEAVES;
-            case DARK_OAK_LOG -> Material.DARK_OAK_LEAVES;
-            case MANGROVE_LOG -> Material.MANGROVE_LEAVES;
-            case CHERRY_LOG -> Material.CHERRY_LEAVES;
-            case PALE_OAK_LOG -> Material.PALE_OAK_LEAVES;
-            case CRIMSON_STEM -> Material.NETHER_WART_BLOCK;
-            case WARPED_STEM -> Material.WARPED_WART_BLOCK;
-            default -> null;
+            case OAK_LOG -> new Material[] { Material.OAK_LEAVES };
+            case SPRUCE_LOG -> new Material[] { Material.SPRUCE_LEAVES };
+            case BIRCH_LOG -> new Material[] { Material.BIRCH_LEAVES };
+            case JUNGLE_LOG -> new Material[] { Material.JUNGLE_LEAVES };
+            case ACACIA_LOG -> new Material[] { Material.ACACIA_LEAVES };
+            case DARK_OAK_LOG -> new Material[] { Material.DARK_OAK_LEAVES };
+            case MANGROVE_LOG -> new Material[] { Material.MANGROVE_LEAVES };
+            case CHERRY_LOG -> new Material[] { Material.CHERRY_LEAVES };
+            case PALE_OAK_LOG -> new Material[] { Material.PALE_OAK_LEAVES };
+            case POPLAR_LOG -> new Material[] { Material.ORANGE_POPLAR_LEAVES, Material.RED_POPLAR_LEAVES, Material.YELLOW_POPLAR_LEAVES };
+            case CRIMSON_STEM -> new Material[] { Material.NETHER_WART_BLOCK };
+            case WARPED_STEM -> new Material[] { Material.WARPED_WART_BLOCK };
+            default -> new Material[0];
+        };
+    }
+
+    /**
+     * Provides the share of a log's leaves that the leaf type receives, relative to the log's other leaf types.
+     *
+     * @param leaves The leaves.
+     * @return The weight of the leaves.
+     */
+    private static int getLeafWeight(Material leaves) {
+        return switch (leaves) {
+            case ORANGE_POPLAR_LEAVES -> 2;
+            default -> 1;
         };
     }
 

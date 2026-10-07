@@ -6,6 +6,7 @@ Bending & Abilities
 
 Dominion
 [+] Dominion resource claims now provide leaves
+[+] Added Dappled Forests to be claimable in /d resources
 
 Items & Crafting
 
