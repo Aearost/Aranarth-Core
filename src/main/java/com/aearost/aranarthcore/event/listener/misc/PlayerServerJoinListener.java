@@ -732,10 +732,25 @@ public class PlayerServerJoinListener implements Listener {
                                     + "; checking for fallback snapshot in MySQL.");
                             NetworkManager.getInstance().markFallbackLanding(uuidForAsync);
                             Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
-                                String snapJson = DatabaseManager.isActive()
+                                String loadedSnapJson = DatabaseManager.isActive()
                                         ? DatabaseManager.getInstance().loadTempData(
                                                 NetworkManager.KEY_SMP_RESTART_INV + uuidForAsync)
                                         : null;
+                                // A snapshot written before SMP's latest startup means SMP has already
+                                // come back up since, so route the player there instead of keeping them here
+                                if (loadedSnapJson != null && isSnapshotFromPreviousRun(loadedSnapJson, sourceServer)) {
+                                    DatabaseManager.getInstance().deleteTempData(NetworkManager.KEY_SMP_RESTART_INV + uuidForAsync);
+                                    Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
+                                            + " - fallback snapshot predates " + sourceServer + "'s latest startup; discarded.");
+                                    loadedSnapJson = null;
+                                }
+                                final String snapJson = loadedSnapJson;
+                                // Read from MySQL rather than relying only on heartbeat messages, which this
+                                // server misses if it started up after the source server's last heartbeat
+                                final boolean sourceOnline = NetworkManager.isActive()
+                                        && (DatabaseManager.isActive()
+                                                ? NetworkManager.getInstance().isServerOnlineInDatabase(sourceServer)
+                                                : NetworkManager.getInstance().isServerOnline(sourceServer));
                                 Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                                     if (!player.isOnline()) return;
                                     if (snapJson != null) {
@@ -797,9 +812,8 @@ public class PlayerServerJoinListener implements Listener {
                                         //     routing path did before the snapshot feature was added.
                                         //  b) SMP crashed without writing a snapshot (ungraceful). Routing
                                         //     would fail. Keep the player on Survival.
-                                        // Distinguish the two cases using the heartbeat-based isServerOnline check.
-                                        if (NetworkManager.isActive()
-                                                && NetworkManager.getInstance().isServerOnline(sourceServer)) {
+                                        // Distinguish the two cases using the source server's heartbeat.
+                                        if (sourceOnline) {
                                             // SMP is online - route the player there (old behavior).
                                             // Mark joinAlreadyAnnounced so the SMP arrival handler doesn't
                                             // broadcast a second join message.
@@ -1045,6 +1059,27 @@ public class PlayerServerJoinListener implements Listener {
                 }
             }
         }.runTaskTimer(AranarthCore.getInstance(), 0, 5); // Runs every 5 ticks
+    }
+
+    /**
+     * Determines whether the SMP fallback snapshot was written before the source server's most
+     * recent startup.
+     *
+     * @param snapJson     The fallback snapshot JSON.
+     * @param sourceServer The server the snapshot came from.
+     * @return Whether the source server has restarted since the snapshot was written.
+     */
+    private boolean isSnapshotFromPreviousRun(String snapJson, String sourceServer) {
+        try {
+            JsonObject snap = JsonParser.parseString(snapJson).getAsJsonObject();
+            if (!snap.has("ts")) {
+                return false;
+            }
+            String startedAt = DatabaseManager.getInstance().loadTempData(NetworkManager.KEY_SERVER_STARTED + sourceServer);
+            return startedAt != null && snap.get("ts").getAsLong() < Long.parseLong(startedAt);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     /**

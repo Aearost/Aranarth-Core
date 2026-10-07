@@ -181,10 +181,15 @@ public class PlayerServerQuitListener implements Listener {
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName() + " - WARNING: rawRow was null, player row NOT flushed to MySQL.");
             }
         }
-        // Keep the SMP fallback snapshot in step with the latest player data, since Survival applies
-        // the row it carries if the player lands there before the snapshot expires
+        // The SMP fallback snapshot is only meant for players pushed off SMP by a restart or crash.
+        // On a normal logout or server switch, remove it so their next login is routed back to SMP
+        // instead of keeping them on Survival. A restart kicks players, so keep it fresh in that case.
         if (AranarthCore.isSmpServer() && NetworkManager.isActive()) {
-            NetworkManager.getInstance().writeSmpFallbackSnapshot(player);
+            if (e.getReason() == PlayerQuitEvent.QuitReason.DISCONNECTED) {
+                DatabaseManager.getInstance().deleteTempData(NetworkManager.KEY_SMP_RESTART_INV + player.getUniqueId());
+            } else {
+                NetworkManager.getInstance().writeSmpFallbackSnapshot(player);
+            }
         }
 
         // Called to save the Avatar's abilities to prevent loss of avatar abilities

@@ -100,6 +100,7 @@ Cross-server & Technical
 [~] Fixed homes and other player data set on SMP being lost when the servers restarted
 [~] Fixed players on SMP being sent to Survival on their next login after the servers restarted
 [~] Fixed money earned or spent on one server overwriting a player's homes and other data saved on the other server
+[~] Fixed players who logged out of SMP being kept on Survival if they rejoined within 10 minutes
 
 Miscellaneous
 [+] Fixed AFK color formatting

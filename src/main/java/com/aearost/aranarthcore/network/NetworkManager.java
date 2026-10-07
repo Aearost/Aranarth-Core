@@ -122,6 +122,9 @@ public class NetworkManager {
     private static final String KEY_RETURN_LOC = "return_loc:";
     private static final String KEY_LAST_MSG = "last_msg:";
     public static final String KEY_SMP_RESTART_INV = "smp_restart_inv:";
+    public static final String KEY_SERVER_STARTED = "server_started:";
+    public static final String KEY_HEARTBEAT = "heartbeat:";
+    private static final int HEARTBEAT_TTL_SECONDS = 90;
     private static NetworkManager instance;
     private final String thisServer;
     private final DatabaseManager db;
@@ -199,6 +202,9 @@ public class NetworkManager {
         startPolling();
         startCleanup();
         if (AranarthCore.isSmpServer()) {
+            // Lets Survival tell a fallback snapshot from SMP's previous run apart from one written
+            // while SMP is down, so players are only kept on Survival while SMP is unavailable
+            db.saveTempData(KEY_SERVER_STARTED + thisServer, String.valueOf(System.currentTimeMillis()), 30 * 24 * 60 * 60);
             startSmpFallbackSnapshots();
         }
         startHeartbeat();
@@ -314,6 +320,18 @@ public class NetworkManager {
         JsonObject json = new JsonObject();
         json.addProperty("server", thisServer);
         publish(CH_HEARTBEAT, json);
+        // Also keep a heartbeat row in MySQL, since a server that has just started misses heartbeat
+        // messages sent before its own NetworkManager came up
+        db.saveTempData(KEY_HEARTBEAT + thisServer, String.valueOf(System.currentTimeMillis()), HEARTBEAT_TTL_SECONDS);
+    }
+
+    /**
+     * Returns true if the given server is online according to its heartbeat row in MySQL. The row is
+     * refreshed every 30 seconds, expires shortly after a crash and is deleted on shutdown, so a
+     * restarting server is reported as offline right away. Blocks on a DB read, call off the main thread.
+     */
+    public boolean isServerOnlineInDatabase(String serverName) {
+        return db.loadTempData(KEY_HEARTBEAT + serverName) != null;
     }
 
     /**
@@ -333,6 +351,7 @@ public class NetworkManager {
      */
     private String buildFallbackSnapshot(Player p) {
         JsonObject snap = new JsonObject();
+        snap.addProperty("ts", System.currentTimeMillis());
         snap.addProperty("inventory", ItemUtils.itemStackArrayToBase64(p.getInventory().getContents()));
         snap.addProperty("enderChest", ItemUtils.itemStackArrayToBase64(p.getEnderChest().getContents()));
         snap.addProperty("health", p.getHealth());
@@ -455,6 +474,8 @@ public class NetworkManager {
         } catch (Exception e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Failed to clear roster on shutdown: " + e.getMessage());
         }
+        // Remove the heartbeat row so other servers see this one as offline immediately
+        db.deleteTempData(KEY_HEARTBEAT + thisServer);
         Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "NetworkManager shut down");
     }
 
