@@ -1249,6 +1249,7 @@ public class AranarthCore extends JavaPlugin {
         new BrewingListener(this);
         new BrewRecipeUnlockListener(this);
         new BrewRecipeAutoUnlockListener(this);
+        new BrewAlchemyXpListener(this);
         new ShopCreateListener(this);
         new ShopHologramChunkListener(this);
         new WeatherChangeListener(this);

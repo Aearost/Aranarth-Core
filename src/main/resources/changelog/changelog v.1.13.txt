@@ -15,6 +15,7 @@ World & Events
 [~] Disabled admin mode on combat tag while the target is in Survival mode
 [~] Fixed fire tick deaths triggering twice and winners not being fully healed
 [~] Deaths with no attacker (fire tick, falls, void, etc) are now credited to the player the victim was last hit or combat tagged by
+[+] Brewery now provides mcMMO Alchemy XP
 
 Bending & Abilities
 [+] Implemented AranarthCore's Tremorsense ability, which includes a glowing effect to nearby mobs and players
