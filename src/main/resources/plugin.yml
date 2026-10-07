@@ -1,5 +1,5 @@
 name: AranarthCore
-version: 1.13
+version: 1.14
 authors: [ Aearost ]
 main: com.aearost.aranarthcore.AranarthCore
 api-version: 26.3
