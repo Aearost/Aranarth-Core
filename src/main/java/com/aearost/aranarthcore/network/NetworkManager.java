@@ -130,6 +130,10 @@ public class NetworkManager {
      * Players currently online on OTHER servers.
      */
     private final Map<UUID, NetworkPlayer> remoteRoster = new ConcurrentHashMap<>();
+    /**
+     * Players that landed on this server as a fallback (other server restarting) mapped to when it happened.
+     */
+    private final Map<UUID, Long> fallbackLandings = new ConcurrentHashMap<>();
 
     // -------------------------------------------------------------------------
     // State
@@ -336,12 +340,18 @@ public class NetworkManager {
         snap.addProperty("saturation", p.getSaturation());
         snap.addProperty("expLevel", p.getLevel());
         snap.addProperty("expProgress", p.getExp());
+        // Carry the full player row (homes, balance, etc.) so Survival does not keep using its
+        // stale copy - and later write it back to MySQL - when the player lands there as a fallback
+        String rawRow = PersistenceUtils.buildPlayerRowForTransfer(p.getUniqueId());
+        if (rawRow != null) {
+            snap.addProperty("raw", rawRow);
+        }
         return snap.toString();
     }
 
     /**
      * Writes a one-off SMP fallback snapshot for this player synchronously (no async
-     * dispatch). Intended for use during shutdown where async tasks may not complete.
+     * dispatch). Used during shutdown where async tasks may not complete, and on quit.
      * Safe to call from any thread.
      */
     public void writeSmpFallbackSnapshot(Player player) {
@@ -349,17 +359,9 @@ public class NetworkManager {
             return;
         }
         try {
-            JsonObject snap = new JsonObject();
-            snap.addProperty("inventory", ItemUtils.itemStackArrayToBase64(player.getInventory().getContents()));
-            snap.addProperty("enderChest", ItemUtils.itemStackArrayToBase64(player.getEnderChest().getContents()));
-            snap.addProperty("health", player.getHealth());
-            snap.addProperty("food", player.getFoodLevel());
-            snap.addProperty("saturation", player.getSaturation());
-            snap.addProperty("expLevel", player.getLevel());
-            snap.addProperty("expProgress", player.getExp());
-            db.saveTempData(KEY_SMP_RESTART_INV + player.getUniqueId(), snap.toString(), 600);
+            db.saveTempData(KEY_SMP_RESTART_INV + player.getUniqueId(), buildFallbackSnapshot(player), 600);
             Bukkit.getLogger().info(AranarthCore.LOG_PREFIX
-                    + "[SmpSnapshot] Shutdown snapshot written for " + player.getName());
+                    + "[SmpSnapshot] Snapshot written for " + player.getName());
         } catch (Exception e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
                     + "[SmpSnapshot] Failed to write shutdown snapshot for " + player.getName() + ": " + e.getMessage());
@@ -1622,6 +1624,23 @@ public class NetworkManager {
         return remoteRoster.get(uuid);
     }
 
+    /**
+     * Records that the player just landed on this server as a fallback because their server went down.
+     */
+    public void markFallbackLanding(UUID uuid) {
+        fallbackLandings.put(uuid, System.currentTimeMillis());
+    }
+
+    /**
+     * Returns true if the player landed on this server as a fallback within the last minute.
+     * When both servers auto-restart together, SMP players get bounced here seconds before this
+     * server also shuts down, and their last location should keep pointing at SMP.
+     */
+    public boolean isRecentFallbackLanding(UUID uuid) {
+        Long landedAt = fallbackLandings.get(uuid);
+        return landedAt != null && System.currentTimeMillis() - landedAt < 60 * 1000L;
+    }
+
     public String getThisServer() {
         return thisServer;
     }
@@ -2371,9 +2390,15 @@ public class NetworkManager {
         AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
         if (ap != null) {
             ap.setBalance(ap.getBalance() + delta);
-            // Immediately persist so the next periodic save cannot overwrite
-            // the updated balance with a stale value.
-            PersistenceUtils.saveAranarthPlayerImmediately(uuid);
+            if (Bukkit.getPlayer(uuid) != null) {
+                // This server is authoritative for the player, persist so the next periodic
+                // save cannot overwrite the updated balance with a stale value
+                PersistenceUtils.saveAranarthPlayerImmediately(uuid);
+            } else if (ap.getBalanceSnapshot() >= 0.0) {
+                // The origin server persists the delta for players not online here, so shift the
+                // snapshot too, otherwise this delta would be re-applied as a local change later
+                ap.setBalanceSnapshot(ap.getBalanceSnapshot() + delta);
+            }
         }
     }
 

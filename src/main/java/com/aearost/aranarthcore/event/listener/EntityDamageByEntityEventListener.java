@@ -5,7 +5,6 @@ import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.event.mob.BabyZombiePreventVillagerDamage;
 import com.aearost.aranarthcore.event.mob.DefenderCombat;
 import com.aearost.aranarthcore.event.mob.DefenderFollowAssist;
-import com.aearost.aranarthcore.event.player.ArenaPlayerKill;
 import com.aearost.aranarthcore.event.player.CombatLog;
 import com.aearost.aranarthcore.event.player.FaunivorExtraAttackDamage;
 import com.aearost.aranarthcore.event.player.InvisibilityBreakOnDamage;
@@ -28,9 +27,7 @@ public class EntityDamageByEntityEventListener implements Listener {
      */
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onEntityDamageEntity(EntityDamageByEntityEvent e) {
-        if (e.getDamager().getWorld().getName().equalsIgnoreCase("arena")) {
-            new ArenaPlayerKill().execute(e);
-        } else {
+        if (!e.getDamager().getWorld().getName().equalsIgnoreCase("arena")) {
             if (e.getEntity() instanceof Villager villager) {
                 new BabyZombiePreventVillagerDamage().execute(e);
             }

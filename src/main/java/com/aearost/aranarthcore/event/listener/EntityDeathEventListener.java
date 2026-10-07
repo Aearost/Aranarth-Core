@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.event.mob.*;
 import com.aearost.aranarthcore.event.player.*;
+import com.aearost.aranarthcore.event.listener.grouped.PlayerRespawnEventListener;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DefenderUtils;
@@ -34,7 +35,8 @@ public class EntityDeathEventListener implements Listener {
             new GoatDeath().execute(e);
         } else if (e.getEntityType() == EntityType.PHANTOM) {
             new PhantomSpawnNotify().execute(e);
-        } else if (e.getEntityType() == EntityType.PLAYER) {
+        } else if (e.getEntityType() == EntityType.PLAYER
+                && !PlayerRespawnEventListener.isDuplicateDeath(e.getEntity().getUniqueId())) {
             new PlayerHeadDrop().execute(e);
             new DominionDeath().execute(e);
             new PlayerKillDeathStats().execute(e);
@@ -42,6 +44,9 @@ public class EntityDeathEventListener implements Listener {
             new MountKillDeathMessage().execute((PlayerDeathEvent) e);
             new DefenderKillDeathMessage().execute((PlayerDeathEvent) e);
             new PlayerReaperCapture().execute((PlayerDeathEvent) e);
+            if (e.getEntity().getWorld().getName().equalsIgnoreCase("arena")) {
+                new ArenaPlayerKill().execute((PlayerDeathEvent) e);
+            }
             PlayerDeathEvent playerDeath = (PlayerDeathEvent) e;
             String deathMessage = playerDeath.getDeathMessage();
             if (deathMessage != null && NetworkManager.isActive()) {

@@ -36,7 +36,8 @@ public class DominionDeath {
                 || player.getWorld().getName().startsWith("resource")) {
             Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
             if (dominion != null) {
-                boolean wasKilledByPlayer = e.getDamageSource().getCausingEntity() != null && e.getDamageSource().getCausingEntity() instanceof Player;
+                Player killer = AranarthUtils.getKillingPlayer(e);
+                boolean wasKilledByPlayer = killer != null;
 
                 double roleMultiplier = getRoleMultiplier(dominion, player);
                 int scaledAmount = (int) Math.min(dominion.getBalance() * BALANCE_LOSS_PERCENT * roleMultiplier, BALANCE_LOSS_MAX);
@@ -45,7 +46,6 @@ public class DominionDeath {
 
                 int warMultiplier = 1;
                 if (wasKilledByPlayer) {
-                    Player killer = (Player) e.getDamageSource().getCausingEntity();
                     warMultiplier = DominionUtils.getDeathPenaltyMultiplier(player.getUniqueId(), killer.getUniqueId());
                     moneyToConsume *= warMultiplier;
                 }

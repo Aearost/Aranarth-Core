@@ -730,6 +730,7 @@ public class PlayerServerJoinListener implements Listener {
                             Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
                                     + " - unplanned landing from " + sourceServer
                                     + "; checking for fallback snapshot in MySQL.");
+                            NetworkManager.getInstance().markFallbackLanding(uuidForAsync);
                             Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
                                 String snapJson = DatabaseManager.isActive()
                                         ? DatabaseManager.getInstance().loadTempData(
@@ -741,6 +742,13 @@ public class PlayerServerJoinListener implements Listener {
                                         // Apply the SMP snapshot so the player has their correct items
                                         try {
                                             JsonObject snap = JsonParser.parseString(snapJson).getAsJsonObject();
+                                            // This server's copy of the player is from its own startup load,
+                                            // so it is missing anything done on SMP since (homes, balance, etc.).
+                                            // Without this, quitting or a restart here writes that stale copy
+                                            // back to MySQL and wipes the SMP changes.
+                                            boolean rowApplied = snap.has("raw")
+                                                    && PersistenceUtils.reloadPlayerFromRow(uuidForAsync, snap.get("raw").getAsString());
+                                            reloadFallbackLandingData(uuidForAsync, !rowApplied);
                                             player.getInventory().setContents(
                                                     ItemUtils.itemStackArrayFromBase64(snap.get("inventory").getAsString()));
                                             player.getEnderChest().setContents(
@@ -810,6 +818,7 @@ public class PlayerServerJoinListener implements Listener {
                                             // SMP is offline (crashed or not yet reachable). Keep the player
                                             // on Survival - their SMP items are safe in SMP's player.dat and
                                             // will be there when SMP comes back up.
+                                            reloadFallbackLandingData(uuidForAsync, true);
                                             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
                                                     + " - no SMP fallback snapshot found and " + sourceServer
                                                     + " is offline; player stays on Survival with existing Survival inventory.");
@@ -1038,5 +1047,29 @@ public class PlayerServerJoinListener implements Listener {
         }.runTaskTimer(AranarthCore.getInstance(), 0, 5); // Runs every 5 ticks
     }
 
+    /**
+     * Reloads the player's per-player data from MySQL after an unplanned landing on Survival
+     * (SMP restarted or crashed), matching what a normal cross-server arrival reloads.
+     *
+     * @param uuid             The UUID of the player.
+     * @param reloadPlayerData Whether the AranarthPlayer row itself should also be reloaded from MySQL.
+     */
+    private void reloadFallbackLandingData(UUID uuid, boolean reloadPlayerData) {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        if (reloadPlayerData) {
+            PersistenceUtils.reloadPlayerFromDatabase(uuid);
+        }
+        PersistenceUtils.reloadPlayerSentinelsFromDatabase(uuid);
+        PersistenceUtils.loadPlayerTogglesFromDatabase(uuid);
+        PersistenceUtils.reloadQuestProgressForPlayer(uuid);
+        PersistenceUtils.loadJobDataForPlayer(uuid);
+        PersistenceUtils.reloadDominionForPlayer(uuid);
+        PersistenceUtils.reloadPlayerLoginStreakFromDatabase(uuid);
+        PersistenceUtils.reloadPlayerMailFromDatabase(uuid);
+        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] " + uuid
+                + " - reloaded player data after unplanned landing (playerRow=" + (reloadPlayerData ? "MySQL" : "snapshot") + ")");
+    }
 
 }

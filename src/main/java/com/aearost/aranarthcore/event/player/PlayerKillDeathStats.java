@@ -18,10 +18,8 @@ public class PlayerKillDeathStats {
         Player victim = (Player) e.getEntity();
         Entity causingEntity = e.getDamageSource().getCausingEntity();
 
-        Player killer = null;
-        if (causingEntity instanceof Player p) {
-            killer = p;
-        } else if (causingEntity != null) {
+        Player killer = AranarthUtils.getKillingPlayer(e);
+        if (killer == null && causingEntity != null) {
             // If the killing entity is an active mount, attribute the kill to its owner
             String[] info = MountUtils.getActiveMountInfo(causingEntity.getUniqueId());
             if (info != null) {

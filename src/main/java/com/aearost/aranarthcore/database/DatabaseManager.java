@@ -617,6 +617,56 @@ public class DatabaseManager {
     }
 
     /**
+     * Atomically adds a delta to the balance field of the player's stored raw row, leaving every
+     * other field untouched. Used by a server that is NOT authoritative for the player (they are
+     * not online on it), so it never overwrites homes, inventory, etc. with its stale in-memory copy.
+     *
+     * @return true if the row existed and was updated.
+     */
+    public boolean adjustRawBalance(UUID uuid, double delta) {
+        String select = "SELECT raw_data FROM aranarth_players WHERE uuid = ? AND raw_data IS NOT NULL AND raw_data != '' FOR UPDATE";
+        String update = "UPDATE aranarth_players SET raw_data = ? WHERE uuid = ?";
+        try (Connection conn = dataSource.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                String raw;
+                try (PreparedStatement ps = conn.prepareStatement(select)) {
+                    ps.setString(1, uuid.toString());
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (!rs.next()) {
+                            conn.commit();
+                            return false;
+                        }
+                        raw = rs.getString("raw_data");
+                    }
+                }
+                // Field 9 is the balance (see PersistenceUtils.buildAranarthPlayerRow)
+                String[] fields = raw.split("\\|", -1);
+                if (fields.length < 10) {
+                    conn.commit();
+                    return false;
+                }
+                fields[9] = String.valueOf(Double.parseDouble(fields[9]) + delta);
+                try (PreparedStatement ps = conn.prepareStatement(update)) {
+                    ps.setString(1, String.join("|", fields));
+                    ps.setString(2, uuid.toString());
+                    ps.executeUpdate();
+                }
+                conn.commit();
+                return true;
+            } catch (SQLException | NumberFormatException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        } catch (SQLException | NumberFormatException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to adjust raw balance for " + uuid + ": " + e.getMessage());
+        }
+        return false;
+    }
+
+    /**
      * Returns the raw pipe-delimited row for the given uuid, or null if not found.
      */
     public String loadAranarthPlayerRaw(UUID uuid) {

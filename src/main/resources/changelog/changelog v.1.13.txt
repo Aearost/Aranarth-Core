@@ -13,6 +13,8 @@ World & Events
 [~] Rebalanced month lengths to have longer summer months and shorter winter months
 [~] Fixed phantom spawns leaking into nether and end during Obscurvor
 [~] Disabled admin mode on combat tag while the target is in Survival mode
+[~] Fixed fire tick deaths triggering twice and winners not being fully healed
+[~] Deaths with no attacker (fire tick, falls, void, etc) are now credited to the player the victim was last hit or combat tagged by
 
 Bending & Abilities
 [+] Implemented AranarthCore's Tremorsense ability, which includes a glowing effect to nearby mobs and players
@@ -95,6 +97,9 @@ Cross-server & Technical
 [~] Fixed purchased crate keys being given on both SMP and Survival
 [~] Fixed issue where boosts were not applying to both servers at once
 [+] Added /ac reload to reload config.yml, import coupons, refresh shop signs and reload perms on both servers
+[~] Fixed homes and other player data set on SMP being lost when the servers restarted
+[~] Fixed players on SMP being sent to Survival on their next login after the servers restarted
+[~] Fixed money earned or spent on one server overwriting a player's homes and other data saved on the other server
 
 Miscellaneous
 [+] Fixed AFK color formatting

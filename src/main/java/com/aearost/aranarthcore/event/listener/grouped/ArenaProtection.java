@@ -18,7 +18,6 @@ import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
@@ -28,6 +27,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionType;
 
 import java.util.Random;
+import java.util.UUID;
 
 /**
  * Handles preventing behaviour in the arena world.
@@ -145,12 +145,8 @@ public class ArenaProtection implements Listener {
 		return (x >= -10 && x <= 10) && (y >= 100 && y <= 111) && (z >= -10 && z <= 10);
 	}
 
-	/**
-	 * Tracks the arena-capped damage value from AbilityDamageEntityEvent so it can be enforced
-	 * in EntityDamageByEntityEvent at HIGHEST priority (after any other plugins inflate the value).
-	 * Set to null when not in an ability damage pipeline.
-	 */
 	private Double pendingArenaCap = null;
+	private UUID pendingArenaCapTarget = null;
 
 	/**
 	 * Reduces bending ability damage in the arena world using a tiered scale.
@@ -181,23 +177,41 @@ public class ArenaProtection implements Listener {
 		}
 
 		// Store the intended cap - enforced at HIGHEST in onBendingEntityDamageInArena
-		// since another plugin inflates the EntityDamageByEntityEvent after LOWEST
+		// since another plugin inflates the damage event after LOWEST
 		pendingArenaCap = reducedHp;
+		pendingArenaCapTarget = e.getEntity().getUniqueId();
 		e.setDamage(reducedHp);
 	}
 
 	/**
-	 * Enforces the arena damage cap at HIGHEST priority on the EntityDamageByEntityEvent
-	 * that ProjectKorra fires internally after AbilityDamageEntityEvent. This counteracts
-	 * any other plugin that inflates bending damage between LOWEST and HIGHEST.
+	 * Clears the pending arena cap if the ability damage was cancelled after it was stored,
+	 * since no damage event will follow to consume it.
+	 */
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void onBendingDamageInArenaCancelled(AbilityDamageEntityEvent e) {
+		if (e.isCancelled() && e.getEntity().getUniqueId().equals(pendingArenaCapTarget)) {
+			pendingArenaCap = null;
+			pendingArenaCapTarget = null;
+		}
+	}
+
+	/**
+	 * Enforces the arena damage cap at HIGHEST priority on the damage event that ProjectKorra
+	 * fires internally after AbilityDamageEntityEvent. This counteracts any other plugin that
+	 * inflates bending damage between LOWEST and HIGHEST. Listens to EntityDamageEvent so that
+	 * sourceless bending damage (such as bending fire tick) is also consumed and capped.
 	 */
 	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onBendingEntityDamageInArena(EntityDamageByEntityEvent e) {
+	public void onBendingEntityDamageInArena(EntityDamageEvent e) {
 		if (pendingArenaCap == null) {
+			return;
+		}
+		if (!e.getEntity().getUniqueId().equals(pendingArenaCapTarget)) {
 			return;
 		}
 		double cap = pendingArenaCap;
 		pendingArenaCap = null;
+		pendingArenaCapTarget = null;
 
 		if (!e.getEntity().getWorld().getName().equalsIgnoreCase("arena")) {
 			return;

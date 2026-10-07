@@ -181,6 +181,11 @@ public class PlayerServerQuitListener implements Listener {
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName() + " - WARNING: rawRow was null, player row NOT flushed to MySQL.");
             }
         }
+        // Keep the SMP fallback snapshot in step with the latest player data, since Survival applies
+        // the row it carries if the player lands there before the snapshot expires
+        if (AranarthCore.isSmpServer() && NetworkManager.isActive()) {
+            NetworkManager.getInstance().writeSmpFallbackSnapshot(player);
+        }
 
         // Called to save the Avatar's abilities to prevent loss of avatar abilities
         if (AvatarUtils.getCurrentAvatar() != null) {

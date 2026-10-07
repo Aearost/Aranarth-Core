@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.utils;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.*;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -5271,6 +5272,23 @@ public class PersistenceUtils {
         if (ap == null) {
             return;
         }
+        // Only the server the player is online on holds an up-to-date copy of their row. Writing the
+        // full row from any other server would overwrite their homes, inventory, etc. with stale data,
+        // so a non-authoritative server only persists its local balance change.
+        if (NetworkManager.isActive() && Bukkit.getPlayer(uuid) == null) {
+            double snapshot = ap.getBalanceSnapshot();
+            double delta = snapshot >= 0.0 ? ap.getBalance() - snapshot : 0.0;
+            ap.setBalanceSnapshot(ap.getBalance());
+            // If they are online on the other server, that server persists the delta it receives
+            // via publishBalanceAdjust; otherwise this server is responsible for it
+            if (delta != 0.0 && NetworkManager.getInstance().getRemotePlayer(uuid) == null) {
+                DatabaseManager db = DatabaseManager.getInstance();
+                Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
+                        db.adjustRawBalance(uuid, delta)
+                );
+            }
+            return;
+        }
         String rawRow = buildAranarthPlayerRow(uuid, ap);
         // Advance the snapshot to reflect what we are about to write
         ap.setBalanceSnapshot(ap.getBalance());
@@ -5303,6 +5321,23 @@ public class PersistenceUtils {
             loadBlacklistPresetsForPlayer(uuid);
         } catch (Exception e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to reload player " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Replaces a single player's in-memory AranarthPlayer with the given raw pipe-delimited row
+     * (e.g. one carried inside the SMP fallback snapshot). Call on the main thread only.
+     *
+     * @return true if the row was parsed and applied.
+     */
+    public static boolean reloadPlayerFromRow(UUID uuid, String rawRow) {
+        try {
+            parseAndAddAranarthPlayer(rawRow);
+            loadBlacklistPresetsForPlayer(uuid);
+            return true;
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to apply player row for " + uuid + ": " + e.getMessage());
+            return false;
         }
     }
 

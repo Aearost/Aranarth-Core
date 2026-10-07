@@ -25,7 +25,8 @@ public class PlayerKillMoneySteal {
         if (!victim.getWorld().getName().startsWith("world")) {
             return;
         }
-        if (!(e.getDamageSource().getCausingEntity() instanceof Player killer)) {
+        Player killer = AranarthUtils.getKillingPlayer(e);
+        if (killer == null) {
             return;
         }
 

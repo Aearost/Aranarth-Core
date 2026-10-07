@@ -4224,7 +4224,6 @@ public class AranarthUtils {
 
     /**
      * Provides the number of kills/deaths the player has in the input world.
-     *
      * @param uuid           The UUID of the player.
      * @param world          The world to verify the number of kills/deaths in.
      * @param isGettingKills Whether the method is getting the player's kills/deaths. False if getting deaths.
@@ -4255,6 +4254,47 @@ public class AranarthUtils {
             }
         }
         return 0;
+    }
+
+    /**
+     * Determines the player responsible for a death.
+     * If the final damage had no source (such as fire tick, fall damage or the void),
+     * the death is credited to the last player who hit them, then the player they are combat tagged by.
+     *
+     * @param e The death event.
+     * @return The player responsible for the death, or null if it was not caused by a player.
+     */
+    public static Player getKillingPlayer(EntityDeathEvent e) {
+        Entity causingEntity = e.getDamageSource().getCausingEntity();
+        if (causingEntity instanceof Player killer) {
+            return killer;
+        }
+        if (causingEntity != null) {
+            return null;
+        }
+
+        // Covers projectiles, which do not combat tag
+        Player lastHitBy = e.getEntity().getKiller();
+        if (lastHitBy != null && !lastHitBy.equals(e.getEntity())) {
+            return lastHitBy;
+        }
+
+        if (!(e.getEntity() instanceof Player victim)) {
+            return null;
+        }
+        AranarthPlayer aranarthPlayer = getPlayer(victim.getUniqueId());
+        if (aranarthPlayer == null) {
+            return null;
+        }
+        UUID taggedBy = null;
+        long latestTime = 0;
+        for (Map.Entry<UUID, Long> entry : aranarthPlayer.getCombatLogTime().entrySet()) {
+            if (entry.getValue() > latestTime) {
+                latestTime = entry.getValue();
+                taggedBy = entry.getKey();
+            }
+        }
+        return taggedBy != null ? Bukkit.getPlayer(taggedBy) : null;
     }
 
     /**

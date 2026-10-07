@@ -1710,6 +1710,15 @@ public class AranarthCore extends JavaPlugin {
         Bukkit.getLogger().info(LOG_PREFIX + "[Shutdown] saveAll() called - " + onlinePlayers.size() + " player(s) still online.");
         for (Player p : onlinePlayers) {
             try {
+                // Both servers auto-restart around the same time, so SMP players can get bounced here
+                // seconds before this server also shuts down. SMP already saved their data and location,
+                // so writing ours would send them to Survival on next login and could overwrite SMP's data.
+                if (NetworkManager.isActive() && NetworkManager.getInstance().isRecentFallbackLanding(p.getUniqueId())) {
+                    Bukkit.getLogger().info(LOG_PREFIX + "[Shutdown] Skipping player row and last location for "
+                            + p.getName() + " - landed here as a fallback less than a minute ago");
+                    p.saveData();
+                    continue;
+                }
                 if (AranarthUtils.isSurvivalWorld(p.getWorld().getName())) {
                     AranarthPlayer ap = AranarthUtils.getPlayer(p.getUniqueId());
                     if (ap != null) {
