@@ -4000,12 +4000,12 @@ public class AranarthUtils {
             }
             aranarthPlayer.setAfkStartTime(System.currentTimeMillis());
 
-            String strippedName = ChatUtils.stripColorFormatting(aranarthPlayer.getNickname());
+            String nickname = aranarthPlayer.getNickname();
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
                     onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "afk.now_afk")));
                 } else {
-                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "afk.player_now_afk", "name", strippedName)));
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "afk.player_now_afk", "name", nickname)));
                 }
             }
             Bukkit.getLogger().info("[AC] " + ChatUtils.translateToColor(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " is now AFK"));
@@ -4018,12 +4018,12 @@ public class AranarthUtils {
             }
             aranarthPlayer.setAfkLocation(null);
             aranarthPlayer.setAfkStartTime(0);
-            String strippedName = ChatUtils.stripColorFormatting(aranarthPlayer.getNickname());
+            String nickname = aranarthPlayer.getNickname();
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
                     onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "afk.no_longer_afk")));
                 } else {
-                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "afk.player_no_longer_afk", "name", strippedName)));
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "afk.player_no_longer_afk", "name", nickname)));
                 }
             }
             Bukkit.getLogger().info("[AC] " + ChatUtils.translateToColor(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " is no longer AFK"));

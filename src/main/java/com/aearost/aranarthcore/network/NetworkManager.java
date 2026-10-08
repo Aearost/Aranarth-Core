@@ -2200,8 +2200,8 @@ public class NetworkManager {
 
         // Broadcast the AFK message to locally online players
         String message = isAfk
-                ? "&e" + ChatUtils.stripColorFormatting(nickname) + " &7is now AFK"
-                : "&e" + ChatUtils.stripColorFormatting(nickname) + " &7is no longer AFK";
+                ? "&e" + nickname + " &7is now AFK"
+                : "&e" + nickname + " &7is no longer AFK";
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.sendMessage(ChatUtils.chatMessage(message));
         }

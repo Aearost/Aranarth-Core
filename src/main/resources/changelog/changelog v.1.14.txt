@@ -3,6 +3,7 @@ AranarthCore v. 1.14
 World & Events
 [+] Added custom toggleable /sit functionality
 [~] Wandering Enchanter over-leveled lockout is now per-player
+[~] Fixed AFK messages not displaying nicknames in color correctly
 
 Bending & Abilities
 
