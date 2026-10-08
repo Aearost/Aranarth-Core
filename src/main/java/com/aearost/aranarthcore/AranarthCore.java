@@ -1225,6 +1225,7 @@ public class AranarthCore extends JavaPlugin {
         new LeafDropsListener(this);
         new AranarthCoreBendingListener(this);
         new MountStatsListener(this);
+        new SitListener(this);
         new MountListener(this);
         new PotionAlchemyExpListener(this);
         new TamedPetStealPreventListener(this);
@@ -1481,6 +1482,8 @@ public class AranarthCore extends JavaPlugin {
         getCommand("streak").setExecutor(new CommandStreak());
         getCommand("mount").setExecutor(new CommandMount());
         getCommand("mount").setTabCompleter(new CommandMountCompleter());
+        getCommand("sit").setExecutor(new CommandSit());
+        getCommand("sit").setTabCompleter(new CommandSitCompleter());
         getCommand("mctop").setExecutor(new CommandMctop());
         getCommand("mctop").setTabCompleter(new CommandMctopCompleter());
         getCommand("mcstats").setExecutor(new CommandMcstats());
@@ -1676,6 +1679,7 @@ public class AranarthCore extends JavaPlugin {
     @Override
     public void onDisable() {
         savedOnDisable = true;
+        SitUtils.standUpAll();
         saveAll();
 
         if (squaremapIntegration != null) {

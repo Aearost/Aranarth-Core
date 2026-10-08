@@ -1,6 +1,7 @@
 AranarthCore v. 1.14
 
 World & Events
+[+] Added custom toggleable /sit functionality
 
 Bending & Abilities
 

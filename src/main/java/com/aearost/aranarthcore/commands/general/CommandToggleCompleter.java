@@ -17,7 +17,7 @@ public class CommandToggleCompleter implements TabCompleter {
             "barbarian", "blacklist", "changeclaim", "chat", "chestlock",
             "emoji", "firetype", "compressor", "daymessage", "dmsgcompact", "gate",
             "gradientchat", "inventory", "invisiblearmor", "messages", "pethurt",
-            "reaper", "shulker", "shulkerbulk", "size", "spawnboost", "teleport", "weathermessage"
+            "reaper", "shulker", "shulkerbulk", "sit", "size", "spawnboost", "teleport", "weathermessage"
     );
 
     /**

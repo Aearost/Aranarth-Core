@@ -10,6 +10,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.GateUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PermissionUtils;
+import com.aearost.aranarthcore.utils.SitUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -410,6 +411,21 @@ public class CommandToggle implements CommandExecutor {
 						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.servertips_disabled")));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				} else if (args[0].equalsIgnoreCase("sit")) {
+					if (aranarthPlayer.getSaintRank() < 1) {
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.no_sit_perk")));
+						return true;
+					}
+					if (aranarthPlayer.isSitDisabled()) {
+						aranarthPlayer.setSitDisabled(false);
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.sit_enabled")));
+					} else {
+						aranarthPlayer.setSitDisabled(true);
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.sit_disabled")));
+						SitUtils.standUp(player);
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+					PermissionUtils.evaluatePlayerPermissions(player);
 				} else {
 					player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "toggle <option>")));
 				}

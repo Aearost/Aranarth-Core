@@ -10,6 +10,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.GateUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PermissionUtils;
+import com.aearost.aranarthcore.utils.SitUtils;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -364,6 +365,23 @@ public class GuiToggleClick {
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.KNOWLEDGE_BOOK, "&f&lServer Tips", !aranarthPlayer.isServerTipsDisabled()));
+            }
+            // Sit
+            case 39 -> {
+                if (aranarthPlayer.getSaintRank() < 1) {
+                    return;
+                }
+                if (aranarthPlayer.isSitDisabled()) {
+                    aranarthPlayer.setSitDisabled(false);
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.enabled", "feature", "sitting")));
+                } else {
+                    aranarthPlayer.setSitDisabled(true);
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.disabled", "feature", "sitting")));
+                    SitUtils.standUp(player);
+                }
+                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                PermissionUtils.evaluatePlayerPermissions(player);
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.WHITE_CUSHION, "&f&lSit", !aranarthPlayer.isSitDisabled()));
             }
         }
     }

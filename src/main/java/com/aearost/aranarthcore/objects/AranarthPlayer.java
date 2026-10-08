@@ -113,6 +113,8 @@ public class AranarthPlayer {
     private boolean isSizeScaleEnabled = true;
     private boolean isReaperDisabled = false;
     private boolean isServerTipsDisabled = false;
+    private boolean isSitDisabled = false;
+    private String sitCushionColor = "WHITE";
     private int joinSoundVolume = 100;
     private int leaveSoundVolume = 100;
     private int voteSoundVolume = 100;
@@ -2044,6 +2046,22 @@ public class AranarthPlayer {
 
     public void setServerTipsDisabled(boolean serverTipsDisabled) {
         this.isServerTipsDisabled = serverTipsDisabled;
+    }
+
+    public boolean isSitDisabled() {
+        return isSitDisabled;
+    }
+
+    public void setSitDisabled(boolean sitDisabled) {
+        this.isSitDisabled = sitDisabled;
+    }
+
+    public String getSitCushionColor() {
+        return sitCushionColor;
+    }
+
+    public void setSitCushionColor(String sitCushionColor) {
+        this.sitCushionColor = sitCushionColor;
     }
 
     public String getLanguage() {

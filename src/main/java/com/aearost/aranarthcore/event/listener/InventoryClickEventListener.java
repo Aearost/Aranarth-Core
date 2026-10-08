@@ -177,6 +177,8 @@ public class InventoryClickEventListener implements Listener {
                 new GuiLoginStreakClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.toggle.title"))) {
                 new GuiToggleClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.sitcolor.title"))) {
+                new GuiSitColorClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.sounds.title"))) {
                 new GuiSoundsClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Top Voters")) {

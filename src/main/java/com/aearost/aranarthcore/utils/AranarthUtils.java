@@ -480,6 +480,7 @@ public class AranarthUtils {
                     player.getInventory().clear();
                 }
                 player.setGameMode(GameMode.CREATIVE);
+                player.setAllowFlight(true);
                 return;
             }
             player.getInventory().clear();
@@ -511,6 +512,7 @@ public class AranarthUtils {
                     player.getInventory().clear();
                 }
                 player.setGameMode(GameMode.CREATIVE);
+                player.setAllowFlight(true);
                 PermissionUtils.evaluatePlayerPermissions(player);
                 return;
             }

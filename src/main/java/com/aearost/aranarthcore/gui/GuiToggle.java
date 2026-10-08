@@ -195,6 +195,13 @@ public class GuiToggle {
         // Server Tips
         gui.setItem(38, buildToggleItem(Material.KNOWLEDGE_BOOK, Lang.getFor(player, "gui.toggle.server_tips"), !aranarthPlayer.isServerTipsDisabled()));
 
+        // Sit
+        if (aranarthPlayer.getSaintRank() >= 1) {
+            gui.setItem(39, buildToggleItem(Material.WHITE_CUSHION, Lang.getFor(player, "gui.toggle.sit"), !aranarthPlayer.isSitDisabled()));
+        } else {
+            gui.setItem(39, buildLockedItem(Material.WHITE_CUSHION, Lang.getFor(player, "gui.toggle.sit")));
+        }
+
         return gui;
     }
 

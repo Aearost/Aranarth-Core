@@ -221,6 +221,9 @@ commands:
   shop:
     description: Opens the GUI to players' shops
     permission: aranarth.shop
+  sit:
+    description: Sits the player on a cushion, or opens the cushion color GUI
+    permission: aranarth.sit
   smithing:
     description: Opens a smithing table GUI
     permission: aranarth.tables

@@ -61,6 +61,11 @@ public class PermissionUtils {
         setArchitectPermissions(perms, aranarthPlayer.getArchitectRank());
         refreshPlayerPerks(perms, player);
 
+        // Sitting can be disabled via /toggle sit
+        if (aranarthPlayer.isSitDisabled()) {
+            perms.setPermission("aranarth.sit", false);
+        }
+
         Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
         // If the player is the avatar
         if (currentAvatar != null && currentAvatar.getUuid().equals(player.getUniqueId())) {
@@ -547,6 +552,8 @@ public class PermissionUtils {
         perms.setPermission("aranarth.chat.gradientbold", false);
         perms.setPermission("aranarth.gate", false);
         perms.setPermission("aranarth.mount", false);
+        perms.setPermission("aranarth.sit", false);
+        perms.setPermission("aranarth.sit.color", false);
         perms.setPermission("aranarth.whitefire", false);
         perms.setPermission("aranarth.prismaticfire", false);
 
@@ -1070,6 +1077,7 @@ public class PermissionUtils {
 
         if (saintRank >= 1) {
             perms.setPermission("aranarth.armorstand.lock", true);
+            perms.setPermission("aranarth.sit", true);
             perms.setPermission("aranarth.chat.color", true);
             perms.setPermission("aranarth.hat", true);
             perms.setPermission("aranarth.trash", true);
@@ -1091,6 +1099,7 @@ public class PermissionUtils {
 
         if (saintRank >= 2) {
             perms.setPermission("aranarth.enderchest", true);
+            perms.setPermission("aranarth.sit.color", true);
             perms.setPermission("aranarth.itemname", true);
             perms.setPermission("aranarth.chat.hex", true);
             perms.setPermission("aranarth.nick.hex", true);
