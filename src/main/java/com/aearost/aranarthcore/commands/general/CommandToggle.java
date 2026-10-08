@@ -412,8 +412,8 @@ public class CommandToggle implements CommandExecutor {
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("sit")) {
-					if (aranarthPlayer.getSaintRank() < 1) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.no_sit_perk")));
+					if (aranarthPlayer.getSaintRank() < 1 && aranarthPlayer.getCouncilRank() < 1) {
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 						return true;
 					}
 					if (aranarthPlayer.isSitDisabled()) {

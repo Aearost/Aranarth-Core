@@ -368,7 +368,7 @@ public class GuiToggleClick {
             }
             // Sit
             case 39 -> {
-                if (aranarthPlayer.getSaintRank() < 1) {
+                if (aranarthPlayer.getSaintRank() < 1 && aranarthPlayer.getCouncilRank() < 1) {
                     return;
                 }
                 if (aranarthPlayer.isSitDisabled()) {
