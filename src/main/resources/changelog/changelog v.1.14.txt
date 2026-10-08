@@ -4,6 +4,8 @@ World & Events
 [+] Added custom toggleable /sit functionality
 [~] Wandering Enchanter over-leveled lockout is now per-player
 [~] Fixed AFK messages not displaying nicknames in color correctly
+[~] Changed double jump trigger with Elven Aranarthium to be tapping sneak while mid-air
+[-] Removed the double jump cooldown of Elven Aranarthium
 
 Bending & Abilities
 
