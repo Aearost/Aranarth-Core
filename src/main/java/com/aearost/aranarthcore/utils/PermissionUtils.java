@@ -61,6 +61,11 @@ public class PermissionUtils {
         setArchitectPermissions(perms, aranarthPlayer.getArchitectRank());
         refreshPlayerPerks(perms, player);
 
+        // Operators receive all non-rank AranarthCore permissions
+        if (player.isOp()) {
+            setOperatorPermissions(perms);
+        }
+
         // Sitting can be disabled via /toggle sit
         if (aranarthPlayer.isSitDisabled()) {
             perms.setPermission("aranarth.sit", false);
@@ -1187,6 +1192,44 @@ public class PermissionUtils {
         } else {
             return;
         }
+    }
+
+    /**
+     * Sets the permissions for server operators.
+     * Grants every Saint, Council, Architect, and perk permission, but leaves in-game rank permissions untouched.
+     *
+     * @param perms The permissions the player will have access to.
+     */
+    private static void setOperatorPermissions(PermissionAttachment perms) {
+        setSaintPermissions(perms, 3);
+        setCouncilPermissions(perms, 3);
+        setArchitectPermissions(perms, 1);
+
+        // Perks
+        perms.setPermission("aranarth.compressor", true);
+        perms.setPermission("aranarth.randomizer", true);
+        perms.setPermission("aranarth.blacklist", true);
+        perms.setPermission("aranarth.tables", true);
+        perms.setPermission("aranarth.itemname", true);
+        perms.setPermission("aranarth.itemname.gradient", true);
+        perms.setPermission("aranarth.chat.color", true);
+        perms.setPermission("aranarth.chat.hex", true);
+        perms.setPermission("aranarth.shulker", true);
+        perms.setPermission("aranarth.inventory", true);
+        perms.setPermission("aranarth.invisible_item_frame", true);
+        perms.setPermission("aranarth.whitefire", true);
+        perms.setPermission("aranarth.prismaticfire", true);
+        perms.setPermission("aranarth.nick", true);
+        perms.setPermission("aranarth.nick.color", true);
+        perms.setPermission("aranarth.nick.hex", true);
+        perms.setPermission("aranarth.nick.gradient", true);
+        perms.setPermission("aranarth.invisiblearmor", true);
+
+        // Remaining staff and special permissions
+        perms.setPermission("aranarth.boost.modify", true);
+        perms.setPermission("aranarth.heads.admin", true);
+        perms.setPermission("aranarth.perk.modify", true);
+        perms.setPermission("aranarth.smpmap", true);
     }
 
     /**
