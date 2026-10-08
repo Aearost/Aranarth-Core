@@ -124,6 +124,7 @@ public class GuiMarketPrice {
         for (int i = start; i < end; i++) {
             TradeMarketUtils.MarketEntry entry = entries.get(i);
             ItemStack displayItem = entry.displayItem().clone();
+            displayItem.setAmount(1);
             ItemMeta meta = displayItem.getItemMeta();
             if (meta == null) {
                 meta = Bukkit.getItemFactory().getItemMeta(displayItem.getType());

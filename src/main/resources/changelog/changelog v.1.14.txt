@@ -16,6 +16,7 @@ Dominion
 Items & Crafting
 
 Economy, Jobs & Quests
+[~] Made items in /mp all be single-stacks
 
 Chat, UI & Sounds
 
