@@ -4,8 +4,6 @@ World & Events
 [+] Added custom toggleable /sit functionality
 [~] Wandering Enchanter over-leveled lockout is now per-player
 [~] Fixed AFK messages not displaying nicknames in color correctly
-[~] Changed double jump trigger with Elven Aranarthium to be tapping sneak while mid-air
-[-] Removed the double jump cooldown of Elven Aranarthium
 
 Bending & Abilities
 
@@ -15,7 +13,10 @@ Dominion
 [+] Added Lush Caves, Dripstone Caves, Deep Dark and Sulfur Caves to be claimable in /d resources
 [+] Added Poplar wood to the Sawmill
 
-Items & Crafting
+Aranarthium, Items & Crafting
+[~] Changed double jump trigger with Elven Aranarthium to be tapping sneak while mid-air
+[-] Removed the double jump cooldown of Elven Aranarthium
+[~] Fixed elytras not being usable while Invisible Armor is enabled
 
 Economy, Jobs & Quests
 [~] Made items in /mp all be single-stacks
