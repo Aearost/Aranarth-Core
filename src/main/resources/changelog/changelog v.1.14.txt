@@ -21,5 +21,6 @@ Quality of Life
 
 Cross-server & Technical
 [~] Fixed players sometimes missing flight when entering the Creative world
+[~] Fixed cross-server join error for players new to a server, and SMP deaths respawning into a null world
 
 Miscellaneous

@@ -282,8 +282,8 @@ public class PlayerServerJoinListener implements Listener {
                 isNewPlayer = true;
             }
         }
-        // If the player changed their username
-        else if (AranarthUtils.getUsername(player) != null && !AranarthUtils.getUsername(player).equals(player.getName())) {
+        // If the player changed their username/it was never resolved
+        else if (!player.getName().equals(AranarthUtils.getUsername(player))) {
             AranarthUtils.setUsername(player);
         }
 

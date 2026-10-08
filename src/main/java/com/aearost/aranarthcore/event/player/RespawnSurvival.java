@@ -33,10 +33,11 @@ public class RespawnSurvival {
 
         if (!e.isBedSpawn() && !e.isAnchorSpawn()) {
             String deathWorld = e.getPlayer().getLastDeathLocation().getWorld().getName();
-            if (deathWorld.startsWith("world") || deathWorld.startsWith("resource")) {
-                e.setRespawnLocation(new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0));
-            } else if (AranarthUtils.isSmpWorld(deathWorld)) {
+            // SMP check must come first, as the SMP server's worlds are also named "world"
+            if (AranarthUtils.isSmpWorld(deathWorld)) {
                 e.setRespawnLocation(new Location(Bukkit.getWorld(AranarthCore.getSmpMainWorldName()), 0.5, 120, 3.5, 180, 0));
+            } else if (deathWorld.startsWith("world") || deathWorld.startsWith("resource")) {
+                e.setRespawnLocation(new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0));
             }
         }
 
