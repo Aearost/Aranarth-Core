@@ -76,7 +76,8 @@ public class PlayerGameModeChangeEventListener implements Listener {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    if (!player.isOnline()) {
+                    // Skip if the player has since left survival (i.e survival then creative in the same tick)
+                    if (!player.isOnline() || player.getGameMode() != GameMode.SURVIVAL) {
                         return;
                     }
                     player.setAllowFlight(false);
@@ -90,9 +91,11 @@ public class PlayerGameModeChangeEventListener implements Listener {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    if (!player.isOnline()) {
+                    if (!player.isOnline() || player.getGameMode() != GameMode.CREATIVE) {
                         return;
                     }
+                    // Always allow toggling flight in creative
+                    player.setAllowFlight(true);
                     if (player.getFlySpeed() < 0.09f) {
                         player.setFlySpeed(0.1f);
                     }

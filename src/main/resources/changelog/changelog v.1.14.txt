@@ -18,5 +18,6 @@ Chat, UI & Sounds
 Quality of Life
 
 Cross-server & Technical
+[~] Fixed players sometimes missing flight when entering the Creative world
 
 Miscellaneous
