@@ -578,7 +578,9 @@
       "Bash(echo \"$TEMP\")",
       "Bash(echo \"$TMP\")",
       "Bash(T=\"C:/Users/liamh/AppData/Local/Temp\")",
-      "Bash(printf '%s\\\\n' 'T=\"\"\"\"C:/Users/liamh/AppData/Local/Temp\"\"\"\"' 'a=open\\(T+\"\"\"\"/d7a.txt\"\"\"\"\\).read\\(\\).strip\\(\\)' 'print\\(\"\"\"\"a chunks:\"\"\"\", len\\(a.split\\(\"\"\"\"***\"\"\"\"\\)\\)\\)')"
+      "Bash(printf '%s\\\\n' 'T=\"\"\"\"C:/Users/liamh/AppData/Local/Temp\"\"\"\"' 'a=open\\(T+\"\"\"\"/d7a.txt\"\"\"\"\\).read\\(\\).strip\\(\\)' 'print\\(\"\"\"\"a chunks:\"\"\"\", len\\(a.split\\(\"\"\"\"***\"\"\"\"\\)\\)\\)')",
+      "PowerShell(foreach \\($f in \"$env:USERPROFILE\\\\.claude\\\\settings.json\",\"$env:USERPROFILE\\\\.claude\\\\settings.local.json\",\".claude\\\\settings.json\",\".claude\\\\settings.local.json\"\\) { if \\(Test-Path $f\\) { \"=== $f\"; Get-Content $f -Raw } })",
+      "PowerShell(gh issue *)"
     ]
   }
 }

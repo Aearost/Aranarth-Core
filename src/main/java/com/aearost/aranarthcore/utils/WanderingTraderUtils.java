@@ -412,7 +412,7 @@ public class WanderingTraderUtils {
             trades.add(buy(buildEnchantedBook(book.enchantment(), book.level()), 4, book.price()));
         }
 
-        // 2 over-leveled trades (1 max use each, all lock on first purchase)
+        // 2 over-leveled trades (1 max use each, a player is locked out of the rest after their first purchase)
         List<OverLeveledEnchant> shuffledOver = new ArrayList<>(OVER_LEVELED_ENCHANTS);
         Collections.shuffle(shuffledOver, RANDOM);
         int overCount = 2;

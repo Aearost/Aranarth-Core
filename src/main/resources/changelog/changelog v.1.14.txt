@@ -2,6 +2,7 @@ AranarthCore v. 1.14
 
 World & Events
 [+] Added custom toggleable /sit functionality
+[~] Wandering Enchanter over-leveled lockout is now per-player
 
 Bending & Abilities
 
