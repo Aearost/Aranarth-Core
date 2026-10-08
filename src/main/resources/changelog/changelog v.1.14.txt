@@ -10,6 +10,7 @@ Bending & Abilities
 Dominion
 [+] Dominion resource claims now provide leaves
 [+] Added Dappled Forests to be claimable in /d resources
+[+] Added Lush Caves, Dripstone Caves, Deep Dark and Sulfur Caves to be claimable in /d resources
 [+] Added Poplar wood to the Sawmill
 
 Items & Crafting

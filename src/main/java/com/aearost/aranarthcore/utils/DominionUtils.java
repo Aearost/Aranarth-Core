@@ -1354,7 +1354,8 @@ public class DominionUtils {
      * for example, an outpost in the nether should never pick up overworld biomes at the same chunk
      * coordinates, even if a different world happens to have claims there.
      * Overworld chunks are sampled at the surface height of each column so that underground biome
-     * zones (e.g. Cherry Grove extending below a mountain at Y=63) are not included. Non-overworld
+     * zones (e.g. Cherry Grove extending below a mountain at Y=63) are not included. Cave biomes are
+     * then picked up separately by scanning beneath the surface of each overworld chunk. Non-overworld
      * chunks are sampled every 16 blocks across the world's full height range to account for 3D
      * biome placement.
      *
@@ -1375,6 +1376,7 @@ public class DominionUtils {
             Chunk live = world.getChunkAt(chunk.getX(), chunk.getZ());
             if (world.getEnvironment() == World.Environment.NORMAL) {
                 sampleBiomesAtSurface(live, biomes);
+                sampleCaveBiomes(live, biomes);
             } else {
                 for (int y = world.getMinHeight(); y < world.getMaxHeight(); y += 16) {
                     sampleBiomesAtY(live, y, biomes);
@@ -1388,8 +1390,7 @@ public class DominionUtils {
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
                 Biome biome = chunk.getBlock(x, y, z).getBiome();
-                if (biome != Biome.LUSH_CAVES && biome != Biome.DRIPSTONE_CAVES
-                        && biome != Biome.DEEP_DARK) {
+                if (!isCaveBiome(biome)) {
                     biomes.add(biome);
                 }
             }
@@ -1409,12 +1410,44 @@ public class DominionUtils {
             for (int z = 0; z < 16; z++) {
                 int surfaceY = world.getHighestBlockYAt(baseX + x, baseZ + z);
                 Biome biome = chunk.getBlock(x, surfaceY, z).getBiome();
-                if (biome != Biome.LUSH_CAVES && biome != Biome.DRIPSTONE_CAVES
-                        && biome != Biome.DEEP_DARK) {
+                if (!isCaveBiome(biome)) {
                     biomes.add(biome);
                 }
             }
         }
+    }
+
+    /**
+     * Samples cave biomes from an overworld chunk by scanning beneath the surface of each column.
+     * Biomes are stored in 4x4x4 cells, so only one block per cell is checked rather than every block.
+     * Only cave biomes are added, so that regular biomes extending underground are still ignored.
+     */
+    private static void sampleCaveBiomes(Chunk chunk, Set<Biome> biomes) {
+        World world = chunk.getWorld();
+        int baseX = chunk.getX() << 4;
+        int baseZ = chunk.getZ() << 4;
+        for (int x = 0; x < 16; x += 4) {
+            for (int z = 0; z < 16; z += 4) {
+                int surfaceY = world.getHighestBlockYAt(baseX + x, baseZ + z);
+                for (int y = world.getMinHeight(); y < surfaceY; y += 4) {
+                    Biome biome = chunk.getBlock(x, y, z).getBiome();
+                    if (isCaveBiome(biome)) {
+                        biomes.add(biome);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Determines if the biome is an underground cave biome.
+     *
+     * @param biome The biome.
+     * @return Whether the biome is a cave biome.
+     */
+    private static boolean isCaveBiome(Biome biome) {
+        return biome == Biome.LUSH_CAVES || biome == Biome.DRIPSTONE_CAVES
+                || biome == Biome.DEEP_DARK || biome == Biome.SULFUR_CAVES;
     }
 
     /**
@@ -1515,19 +1548,21 @@ public class DominionUtils {
     public static DominionResourceCategory getCategoryForMaterial(Material material) {
         return switch (material) {
             case STONE, COBBLESTONE, BLACKSTONE, NETHERRACK, END_STONE, BASALT,
-                    SMOOTH_BASALT, CALCITE, GRANITE, DIORITE, ANDESITE -> DominionResourceCategory.STONES;
+                    SMOOTH_BASALT, CALCITE, GRANITE, DIORITE, ANDESITE,
+                    COBBLED_DEEPSLATE, DRIPSTONE_BLOCK, SULFUR, CINNABAR -> DominionResourceCategory.STONES;
             case COAL_ORE, IRON_ORE, COPPER_ORE, GOLD_ORE, EMERALD_ORE, LAPIS_ORE,
-                    NETHER_QUARTZ_ORE, NETHER_GOLD_ORE -> DominionResourceCategory.ORES;
+                    NETHER_QUARTZ_ORE, NETHER_GOLD_ORE, DEEPSLATE_IRON_ORE, DEEPSLATE_GOLD_ORE,
+                    DEEPSLATE_REDSTONE_ORE, DEEPSLATE_LAPIS_ORE -> DominionResourceCategory.ORES;
             case DIRT, COARSE_DIRT, GRASS_BLOCK, PODZOL, MYCELIUM, MUD,
                     SAND, RED_SAND, GRAVEL, CLAY, SNOW, SNOW_BLOCK,
                     ICE, PACKED_ICE, BLUE_ICE, SOUL_SAND, SOUL_SOIL,
                     SANDSTONE, RED_SANDSTONE, MOSSY_COBBLESTONE,
-                    CRIMSON_NYLIUM, WARPED_NYLIUM -> DominionResourceCategory.DIRTS;
+                    CRIMSON_NYLIUM, WARPED_NYLIUM, ROOTED_DIRT, MOSS_BLOCK -> DominionResourceCategory.DIRTS;
             case OAK_LOG, SPRUCE_LOG, BIRCH_LOG, JUNGLE_LOG, ACACIA_LOG, DARK_OAK_LOG,
                     MANGROVE_LOG, CHERRY_LOG, PALE_OAK_LOG, POPLAR_LOG, BAMBOO,
                     CRIMSON_STEM, WARPED_STEM -> DominionResourceCategory.WOODS;
             case MAGMA_BLOCK, OBSIDIAN, SEA_LANTERN,
-                    PRISMARINE, PRISMARINE_BRICKS, DARK_PRISMARINE,
+                    PRISMARINE, DARK_PRISMARINE,
                     SHROOMLIGHT, VINE, KELP, SEAGRASS, SEA_PICKLE, LILY_PAD, FIREFLY_BUSH,
                     MANGROVE_ROOTS, MUDDY_MANGROVE_ROOTS,
                     OAK_LEAVES, SPRUCE_LEAVES, BIRCH_LEAVES, JUNGLE_LEAVES, ACACIA_LEAVES, DARK_OAK_LEAVES,
@@ -1545,22 +1580,78 @@ public class DominionUtils {
                     BUBBLE_CORAL_BLOCK, BUBBLE_CORAL, BUBBLE_CORAL_FAN,
                     FIRE_CORAL_BLOCK, FIRE_CORAL, FIRE_CORAL_FAN,
                     HORN_CORAL_BLOCK, HORN_CORAL, HORN_CORAL_FAN,
-                    INK_SAC, SLIME_BALL, MAGMA_CREAM, BONE -> DominionResourceCategory.NATURAL_BLOCKS;
+                    INK_SAC, SLIME_BALL, MAGMA_CREAM, BONE,
+                    AZALEA_LEAVES, FLOWERING_AZALEA_LEAVES, AZALEA, FLOWERING_AZALEA,
+                    BIG_DRIPLEAF, SMALL_DRIPLEAF, HANGING_ROOTS, SPORE_BLOSSOM, POINTED_DRIPSTONE,
+                    SCULK, SCULK_VEIN, SULFUR_SPIKE -> DominionResourceCategory.NATURAL_BLOCKS;
             case COD, SALMON, TROPICAL_FISH, PUFFERFISH,
                     BEEF, PORKCHOP, CHICKEN, RABBIT, MUTTON,
-                    APPLE, GOLDEN_CARROT -> DominionResourceCategory.FOOD;
-            case STONE_BRICKS, END_STONE_BRICKS, PURPUR_BLOCK, PURPUR_PILLAR -> DominionResourceCategory.BRICKS;
-            case NETHER_BRICKS, NETHER_WART, POLISHED_BLACKSTONE_BRICKS, GILDED_BLACKSTONE,
+                    APPLE, GOLDEN_CARROT, GLOW_BERRIES -> DominionResourceCategory.FOOD;
+            case STONE_BRICKS, END_STONE_BRICKS, PURPUR_BLOCK, PURPUR_PILLAR,
+                    DEEPSLATE_BRICKS, DEEPSLATE_TILES, NETHER_BRICKS, POLISHED_BLACKSTONE_BRICKS,
+                    PRISMARINE_BRICKS -> DominionResourceCategory.BRICKS;
+            case NETHER_WART, GILDED_BLACKSTONE,
                     END_ROD, BONE_BLOCK,
                     TERRACOTTA, RED_TERRACOTTA, ORANGE_TERRACOTTA, YELLOW_TERRACOTTA,
-                    BROWN_TERRACOTTA, LIGHT_GRAY_TERRACOTTA, WHITE_TERRACOTTA -> DominionResourceCategory.MISC_BLOCKS;
+                    BROWN_TERRACOTTA, LIGHT_GRAY_TERRACOTTA, WHITE_TERRACOTTA,
+                    SOUL_LANTERN, SCULK_SENSOR, SCULK_CATALYST -> DominionResourceCategory.MISC_BLOCKS;
             case ELYTRA, HEART_OF_THE_SEA, NETHERITE_SCRAP, GHAST_TEAR,
                     NAUTILUS_SHELL, TURTLE_SCUTE, ARMADILLO_SCUTE,
                     BLAZE_ROD, WITHER_SKELETON_SKULL, DIAMOND,
                     NETHERITE_UPGRADE_SMITHING_TEMPLATE, ENCHANTED_BOOK,
-                    GOLD_NUGGET, ENDER_PEARL, DRIED_GHAST -> DominionResourceCategory.VALUABLES;
+                    GOLD_NUGGET, ENDER_PEARL, DRIED_GHAST,
+                    ECHO_SHARD, DISC_FRAGMENT_5, POTENT_SULFUR -> DominionResourceCategory.VALUABLES;
             default -> null;
         };
+    }
+
+    /**
+     * Rolls the Ancient City drops that cannot be expressed as 1 in X odds.
+     * Echo Shard has a 10% chance per Dominion rank, and the Swift Sneak Book has a 25% chance
+     * with its level chosen from the levels available at the Dominion's rank.
+     *
+     * @param items  The items being claimed.
+     * @param rank   The Dominion's rank.
+     * @param random The random instance.
+     */
+    private static void rollAncientCityExtras(List<ItemStack> items, int rank, Random random) {
+        if (random.nextInt(10) < rank) {
+            items.add(new ItemStack(Material.ECHO_SHARD, 1));
+        }
+        if (random.nextInt(4) == 0) {
+            int[] levels = getSwiftSneakLevels(rank);
+            items.add(createSwiftSneakBook(levels[random.nextInt(levels.length)]));
+        }
+    }
+
+    /**
+     * Provides the Swift Sneak levels obtainable at the Dominion rank, each being equally likely.
+     *
+     * @param rank The Dominion's rank.
+     * @return The Swift Sneak levels obtainable.
+     */
+    private static int[] getSwiftSneakLevels(int rank) {
+        return switch (rank) {
+            case 1 -> new int[] { 1 };
+            case 2 -> new int[] { 1, 2 };
+            case 3 -> new int[] { 2 };
+            case 4 -> new int[] { 2, 3 };
+            default -> new int[] { 3 };
+        };
+    }
+
+    /**
+     * Creates an enchanted book with Swift Sneak at the input level.
+     *
+     * @param level The level of Swift Sneak.
+     * @return The enchanted book.
+     */
+    private static ItemStack createSwiftSneakBook(int level) {
+        ItemStack book = new ItemStack(Material.ENCHANTED_BOOK, 1);
+        EnchantmentStorageMeta meta = (EnchantmentStorageMeta) book.getItemMeta();
+        meta.addStoredEnchant(Enchantment.SWIFT_SNEAK, level, true);
+        book.setItemMeta(meta);
+        return book;
     }
 
     private static ItemStack resolveAmount(ResourceDrop drop, Random random) {
@@ -1629,6 +1720,24 @@ public class DominionUtils {
         endCityDrops.add(new ResourceDrop(mendingBook, 0, mendingOdds[rank - 1],
                 "Mending Book (" + formatPct(mendingOdds[rank - 1]) + " if simulating End City)"));
         SimulationGroup endCity = new SimulationGroup("End City", 5, endCityDrops);
+
+        // Echo Shard and Swift Sneak Book are previewOnly, actual rolls done in rollAncientCityExtras
+        int[] swiftSneakLevels = getSwiftSneakLevels(rank);
+        String swiftSneakLevelText = AranarthUtils.getEssenceLevelInNumerals(swiftSneakLevels[0]);
+        if (swiftSneakLevels.length > 1) {
+            swiftSneakLevelText += " or " + AranarthUtils.getEssenceLevelInNumerals(swiftSneakLevels[1]);
+        }
+        List<ResourceDrop> ancientCityDrops = new ArrayList<>();
+        ancientCityDrops.add(new ResourceDrop(new ItemStack(Material.DEEPSLATE_BRICKS, 64)));
+        ancientCityDrops.add(new ResourceDrop(new ItemStack(Material.DEEPSLATE_TILES, 64)));
+        ancientCityDrops.add(new ResourceDrop(new ItemStack(Material.SOUL_LANTERN, 8)));
+        ancientCityDrops.add(new ResourceDrop(new ItemStack(Material.ECHO_SHARD, 1), 0, 0,
+                "Echo Shard (" + (rank * 10) + "% if simulating Ancient City)", true));
+        ancientCityDrops.add(new ResourceDrop(new ItemStack(Material.DISC_FRAGMENT_5, 1), 0, 4,
+                "Disc Fragment (" + formatPct(4) + " if simulating Ancient City)"));
+        ancientCityDrops.add(new ResourceDrop(createSwiftSneakBook(swiftSneakLevels[swiftSneakLevels.length - 1]), 0, 0,
+                "Swift Sneak " + swiftSneakLevelText + " Book (" + formatPct(4) + " if simulating Ancient City)", true));
+        SimulationGroup ancientCity = new SimulationGroup("Ancient City", 5, ancientCityDrops);
 
         // Oceans, Rivers, Beaches, Islands
         if (biome == Biome.OCEAN) {
@@ -2212,6 +2321,59 @@ public class DominionUtils {
             rares.add(new ResourceDrop(new ItemStack(Material.ARMADILLO_SCUTE, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
 
+        // Cave Biomes
+        } else if (biome == Biome.LUSH_CAVES) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MOSS_BLOCK, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CLAY, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.ROOTED_DIRT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.AZALEA_LEAVES, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.FLOWERING_AZALEA_LEAVES, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.AZALEA, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.FLOWERING_AZALEA, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BIG_DRIPLEAF, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SMALL_DRIPLEAF, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.HANGING_ROOTS, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GLOW_BERRIES, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
+            rares.add(new ResourceDrop(new ItemStack(Material.SPORE_BLOSSOM, 1), 0, commonOdds[rank - 1],
+                    "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
+        } else if (biome == Biome.DRIPSTONE_CAVES) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.DRIPSTONE_BLOCK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.POINTED_DRIPSTONE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
+            rares.add(new ResourceDrop(new ItemStack(Material.DIAMOND, 1), 0, rareOdds[rank - 1],
+                    "Rare Drop (" + formatPct(rareOdds[rank - 1]) + " chance)"));
+        } else if (biome == Biome.DEEP_DARK) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COBBLED_DEEPSLATE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COBBLED_DEEPSLATE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SCULK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SCULK_VEIN, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.DEEPSLATE_IRON_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.DEEPSLATE_GOLD_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.DEEPSLATE_REDSTONE_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.DEEPSLATE_LAPIS_ORE, 2)));
+            rares.add(new ResourceDrop(new ItemStack(Material.SCULK_SENSOR, 1), 0, commonOdds[rank - 1],
+                    "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
+            rares.add(new ResourceDrop(new ItemStack(Material.SCULK_CATALYST, 1), 0, rareOdds[rank - 1],
+                    "Rare Drop (" + formatPct(rareOdds[rank - 1]) + " chance)"));
+            simulations.add(ancientCity);
+        } else if (biome == Biome.SULFUR_CAVES) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SULFUR, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SULFUR, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CINNABAR, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SULFUR_SPIKE, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
+            rares.add(new ResourceDrop(new ItemStack(Material.POTENT_SULFUR, 1), 0, rareOdds[rank - 1],
+                    "Rare Drop (" + formatPct(rareOdds[rank - 1]) + " chance)"));
+
         // Nether and End
         } else if (biome == Biome.NETHER_WASTES) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHERRACK, 64)));
@@ -2404,6 +2566,9 @@ public class DominionUtils {
                     if (drop.previewOnly) continue;
                     if (drop.subChanceOdds > 0 && random.nextInt(drop.subChanceOdds) != 0) continue;
                     items.add(resolveAmount(drop, random));
+                }
+                if (sim.name.equals("Ancient City")) {
+                    rollAncientCityExtras(items, rank, random);
                 }
             }
         }

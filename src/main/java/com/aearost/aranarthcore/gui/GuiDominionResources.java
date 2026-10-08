@@ -258,6 +258,14 @@ public class GuiDominionResources {
 			return Material.CHERRY_LEAVES;
 		} else if (biome == Biome.DAPPLED_FOREST) {
 			return Material.ORANGE_POPLAR_LEAVES;
+		} else if (biome == Biome.LUSH_CAVES) {
+			return Material.MOSS_BLOCK;
+		} else if (biome == Biome.DRIPSTONE_CAVES) {
+			return Material.POINTED_DRIPSTONE;
+		} else if (biome == Biome.DEEP_DARK) {
+			return Material.SCULK;
+		} else if (biome == Biome.SULFUR_CAVES) {
+			return Material.SULFUR;
 		}
 		// Assume the void or new biomes
 		else {
