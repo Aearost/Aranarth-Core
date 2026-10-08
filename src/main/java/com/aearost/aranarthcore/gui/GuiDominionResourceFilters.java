@@ -115,7 +115,7 @@ public class GuiDominionResourceFilters {
             case WOODS -> Material.OAK_LOG;
             case NATURAL_BLOCKS -> Material.MAGMA_BLOCK;
             case BRICKS -> Material.STONE_BRICKS;
-            case MISC_BLOCKS -> Material.NETHER_BRICKS;
+            case MISC_BLOCKS -> Material.TERRACOTTA;
             case VALUABLES -> Material.ELYTRA;
             case FOOD -> Material.APPLE;
         };
