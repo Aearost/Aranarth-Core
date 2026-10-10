@@ -490,6 +490,7 @@ public class PermissionUtils {
         perms.setPermission("aranarth.trust", true);
         perms.setPermission("aranarth.unlock", true);
         perms.setPermission("aranarth.untrust", true);
+        perms.setPermission("aranarth.voicechat", true);
         perms.setPermission("aranarth.vote", true);
         perms.setPermission("aranarth.votetop", true);
         perms.setPermission("aranarth.voteshop", true);

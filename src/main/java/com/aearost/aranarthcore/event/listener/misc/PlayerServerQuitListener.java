@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Trade;
 import com.aearost.aranarthcore.utils.*;
+import com.aearost.aranarthcore.voice.VoiceChatManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -57,6 +58,10 @@ public class PlayerServerQuitListener implements Listener {
             TradeManager.cancelTrade(trade, player.getUniqueId());
         }
         TradeManager.clearAwaitingPayInput(player.getUniqueId());
+
+        // Must run before consumeTransferring() so transferring players keep their voice channel on the other server
+        VoiceChatManager.onPlayerQuit(player, NetworkManager.isActive()
+                && NetworkManager.getInstance().isTransferring(player.getUniqueId()));
 
         boolean isCrossServerTransfer = NetworkManager.isActive()
                 && NetworkManager.getInstance().consumeTransferring(player.getUniqueId());

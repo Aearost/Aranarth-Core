@@ -154,6 +154,13 @@ public class GuiSoundsClick {
                 player.sendMessage(ChatUtils.chatMessage(Lang.get("sounds.volume_set", "type", "Low health", "volume", vol)));
                 refreshGui(player, slot, Material.TOTEM_OF_UNDYING, "&f&lLow Health", vol);
             }
+            case 26 -> {
+                int vol = adjustVolume(aranarthPlayer.getVoiceChatSoundVolume(), e.isLeftClick(), e.isShiftClick());
+                aranarthPlayer.setVoiceChatSoundVolume(vol);
+                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("sounds.volume_set", "type", "Voice chat", "volume", vol)));
+                refreshGui(player, slot, Material.GOAT_HORN, "&f&lVoice Chat", vol);
+            }
         }
     }
 

@@ -6163,6 +6163,7 @@ public class PersistenceUtils {
             obj.addProperty("jobsSoundVolume", ap.getJobsSoundVolume());
             obj.addProperty("expStoreSoundVolume", ap.getExpStoreSoundVolume());
             obj.addProperty("lowHealthSoundVolume", ap.getLowHealthSoundVolume());
+            obj.addProperty("voiceChatSoundVolume", ap.getVoiceChatSoundVolume());
             obj.addProperty("interactiveChat", ap.isInteractiveChatEnabled());
             obj.addProperty("emojiEnabled", ap.isEmojiEnabled());
             obj.addProperty("sizeScaleEnabled", ap.isSizeScaleEnabled());
@@ -7832,6 +7833,9 @@ public class PersistenceUtils {
                 if (obj.has("lowHealthSoundVolume")) {
                     ap.setLowHealthSoundVolume(obj.get("lowHealthSoundVolume").getAsInt());
                 }
+                if (obj.has("voiceChatSoundVolume")) {
+                    ap.setVoiceChatSoundVolume(obj.get("voiceChatSoundVolume").getAsInt());
+                }
                 if (obj.has("interactiveChat")) {
                     ap.setInteractiveChatEnabled(obj.get("interactiveChat").getAsBoolean());
                 }
@@ -7908,6 +7912,7 @@ public class PersistenceUtils {
         obj.addProperty("jobsSoundVolume", ap.getJobsSoundVolume());
         obj.addProperty("expStoreSoundVolume", ap.getExpStoreSoundVolume());
         obj.addProperty("lowHealthSoundVolume", ap.getLowHealthSoundVolume());
+        obj.addProperty("voiceChatSoundVolume", ap.getVoiceChatSoundVolume());
         obj.addProperty("interactiveChat", ap.isInteractiveChatEnabled());
         obj.addProperty("emojiEnabled", ap.isEmojiEnabled());
         obj.addProperty("sizeScaleEnabled", ap.isSizeScaleEnabled());
@@ -8044,6 +8049,9 @@ public class PersistenceUtils {
             }
             if (obj.has("lowHealthSoundVolume")) {
                 ap.setLowHealthSoundVolume(obj.get("lowHealthSoundVolume").getAsInt());
+            }
+            if (obj.has("voiceChatSoundVolume")) {
+                ap.setVoiceChatSoundVolume(obj.get("voiceChatSoundVolume").getAsInt());
             }
             if (obj.has("adminMode")) {
                 ap.setInAdminMode(obj.get("adminMode").getAsBoolean());

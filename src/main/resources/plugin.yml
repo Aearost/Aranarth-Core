@@ -4,7 +4,7 @@ authors: [ Aearost ]
 main: com.aearost.aranarthcore.AranarthCore
 api-version: 26.3
 depend: [ mcMMO, ProjectKorra, DiscordSRV ]
-softdepend: [ VotifierPlus, BreweryX, squaremap ]
+softdepend: [ VotifierPlus, BreweryX, squaremap, voicechat ]
 description: A core plugin to incorporate any features we desire into our Minecraft world
 loadbefore: [ mcMMO ]
 # BungeeCord plugin messaging channel used to transfer players between servers via Velocity.
@@ -305,6 +305,10 @@ commands:
   untrust:
     description: Removes the input player from the next clicked chest's protection
     permission: aranarth.untrust
+  voicechat:
+    description: Joins or leaves a voice chat channel (global, local, or dominion)
+    aliases: [ vc ]
+    permission: aranarth.voicechat
   vote:
     description: Provides the player with a list of vote links
     aliases: [ v ]

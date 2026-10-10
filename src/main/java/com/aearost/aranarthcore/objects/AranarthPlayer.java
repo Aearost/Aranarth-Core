@@ -132,6 +132,7 @@ public class AranarthPlayer {
     private int jobsSoundVolume = 100;
     private int expStoreSoundVolume = 100;
     private int lowHealthSoundVolume = 100;
+    private int voiceChatSoundVolume = 100;
     private long containerToggleExpiry = 0;
     private long bulkTransactionExpiry = 0;
     private int bulkTransactionQuantity = 0;
@@ -1990,6 +1991,14 @@ public class AranarthPlayer {
 
     public void setLowHealthSoundVolume(int lowHealthSoundVolume) {
         this.lowHealthSoundVolume = lowHealthSoundVolume;
+    }
+
+    public int getVoiceChatSoundVolume() {
+        return voiceChatSoundVolume;
+    }
+
+    public void setVoiceChatSoundVolume(int voiceChatSoundVolume) {
+        this.voiceChatSoundVolume = voiceChatSoundVolume;
     }
 
     public boolean isInteractiveChatEnabled() {

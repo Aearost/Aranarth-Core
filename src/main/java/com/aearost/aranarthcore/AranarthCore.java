@@ -26,6 +26,7 @@ import com.aearost.aranarthcore.objects.VoidChunkGenerator;
 import com.aearost.aranarthcore.recipes.*;
 import com.aearost.aranarthcore.recipes.aranarthium.*;
 import com.aearost.aranarthcore.utils.*;
+import com.aearost.aranarthcore.voice.VoiceChatManager;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
@@ -439,6 +440,9 @@ public class AranarthCore extends JavaPlugin {
             commandMap.getKnownCommands().put("aranarthcore:mcstats", getCommand("mcstats"));
             commandMap.getKnownCommands().put("enchant", getCommand("enchant"));
             commandMap.getKnownCommands().put("aranarthcore:enchant", getCommand("enchant"));
+            // Simple Voice Chat registers its own /voicechat, so it must be overridden
+            commandMap.getKnownCommands().put("voicechat", getCommand("voicechat"));
+            commandMap.getKnownCommands().put("vc", getCommand("voicechat"));
         });
 
         // Purge expired reaper inventories once on startup, then every hour
@@ -491,6 +495,9 @@ public class AranarthCore extends JavaPlugin {
                 Bukkit.getLogger().info(LOG_PREFIX + "Cross-server networking enabled via MySQL");
             }
         }
+
+        // /vc channels (soft-depend - only if Simple Voice Chat is loaded)
+        VoiceChatManager.initialize(this);
 
         // Fallback shutdown hook for restarters (i.e UltimateAutoRestart) that may
         // terminate the JVM via System.exit() without triggering onDisable()
@@ -1475,6 +1482,8 @@ public class AranarthCore extends JavaPlugin {
         getCommand("voteshop").setExecutor(new CommandVoteShop());
         getCommand("vptransfer").setExecutor(new CommandVpTransfer());
         getCommand("vptransfer").setTabCompleter(new CommandVpTransferCompleter());
+        getCommand("voicechat").setExecutor(new CommandVoiceChat());
+        getCommand("voicechat").setTabCompleter(new CommandVoiceChatCompleter());
         getCommand("warp").setExecutor(new CommandWarp());
         getCommand("warp").setTabCompleter(new CommandWarpCompleter());
         getCommand("quests").setExecutor(new CommandQuests());
@@ -1686,6 +1695,7 @@ public class AranarthCore extends JavaPlugin {
             squaremapIntegration.disable();
         }
 
+        VoiceChatManager.shutdown();
         NetworkManager.shutdown();
         DatabaseManager.shutdown();
 

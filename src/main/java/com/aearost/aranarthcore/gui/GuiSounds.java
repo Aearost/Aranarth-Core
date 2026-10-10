@@ -103,6 +103,7 @@ public class GuiSounds {
         gui.setItem(23, buildVolumeItem(Material.IRON_PICKAXE, Lang.get("gui.sounds.jobs"), aranarthPlayer.getJobsSoundVolume()));
         gui.setItem(24, buildVolumeItem(Material.EXPERIENCE_BOTTLE, Lang.get("gui.sounds.exp_store"), aranarthPlayer.getExpStoreSoundVolume()));
         gui.setItem(25, buildVolumeItem(Material.TOTEM_OF_UNDYING, Lang.get("gui.sounds.low_health"), aranarthPlayer.getLowHealthSoundVolume()));
+        gui.setItem(26, buildVolumeItem(Material.GOAT_HORN, Lang.get("gui.sounds.voice_chat"), aranarthPlayer.getVoiceChatSoundVolume()));
 
         return gui;
     }

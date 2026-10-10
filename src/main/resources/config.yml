@@ -111,3 +111,17 @@ network:
   servers:
     survival: "survival"
     smp: "smp"
+
+# /vc voice chat channels. Requires the Simple Voice Chat plugin on both servers.
+voice-chat:
+  # Direct encrypted link that carries live voice between Survival and SMP.
+  link:
+    enabled: false
+    # Set to true on exactly ONE server. That server listens on the port below, which must be open in its firewall.
+    host-mode: false
+    # Only used when host-mode is false: the address of the host-mode server.
+    host: ""
+    # The port the host-mode server listens on (TCP). Must be the same on both servers.
+    port: 24460
+    # Must be identical on both servers and at least 16 characters. Keep it private.
+    secret: ""
