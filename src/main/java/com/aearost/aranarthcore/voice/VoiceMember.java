@@ -6,21 +6,23 @@ import java.util.UUID;
 
 /**
  * An immutable snapshot of a player in a /vc channel.
- * @param uuid              The player's UUID.
- * @param nickname          The player's nickname, used in join/leave messages.
- * @param channel           The channel the player is in.
- * @param dominionId        The player's dominion ID, or null if they are not in a dominion.
- * @param allowedDominions  The dominion IDs included by the player's toggled dominion chat type.
- * @param world             The player's world name, or null for players on the other server.
- * @param x                 The player's X coordinate.
- * @param y                 The player's eye Y coordinate.
- * @param z                 The player's Z coordinate.
+ *
+ * @param uuid             The player's UUID.
+ * @param nickname         The player's nickname, used in join/leave messages.
+ * @param channel          The channel the player is in.
+ * @param dominionId       The player's dominion ID, or null if they are not in a dominion.
+ * @param allowedDominions The dominion IDs included by the player's toggled dominion chat type.
+ * @param world            The player's world name, or null for players on the other server.
+ * @param x                The player's X coordinate.
+ * @param y                The player's eye Y coordinate.
+ * @param z                The player's Z coordinate.
  */
 public record VoiceMember(UUID uuid, String nickname, VoiceChannel channel, UUID dominionId,
                           Set<UUID> allowedDominions, String world, double x, double y, double z) {
 
     /**
      * Determines whether the listener can hear this member when they speak.
+     *
      * @param listener The member that would hear the audio.
      * @return Whether the listener can hear this member.
      */
@@ -29,7 +31,7 @@ public record VoiceMember(UUID uuid, String nickname, VoiceChannel channel, UUID
             return false;
         }
         return switch (channel) {
-            case GLOBAL -> true;
+            case GLOBAL, COUNCIL -> true;
             case LOCAL -> {
                 if (world == null || !world.equals(listener.world)) {
                     yield false;

@@ -21,10 +21,10 @@ import java.util.List;
 public class CommandVoiceChat implements CommandExecutor {
 
     /**
-     * @param sender The user that entered the command.
+     * @param sender  The user that entered the command.
      * @param command The command itself.
-     * @param alias The alias of the command.
-     * @param args The arguments of the command.
+     * @param alias   The alias of the command.
+     * @param args    The arguments of the command.
      * @return Confirmation of whether the command was a success or not.
      */
     @Override
@@ -55,7 +55,12 @@ public class CommandVoiceChat implements CommandExecutor {
             // Matches tab list vanish visibility - only admins can see vanished players
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
             boolean canSeeVanished = aranarthPlayer != null && aranarthPlayer.getCouncilRank() == 3;
+            boolean canUseCouncil = VoiceChatManager.canUseCouncil(player);
             for (VoiceChannel channel : VoiceChannel.values()) {
+                // The council channel is only shown to those who can join it
+                if (channel == VoiceChannel.COUNCIL && !canUseCouncil) {
+                    continue;
+                }
                 List<String> nicknames = VoiceChatManager.getNicknamesInChannel(channel, canSeeVanished);
                 String list;
                 if (nicknames.isEmpty()) {
@@ -84,7 +89,13 @@ public class CommandVoiceChat implements CommandExecutor {
 
         VoiceChannel channel = VoiceChannel.fromName(args[0]);
         if (channel == null) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "vc <global|local|dominion|leave|who>")));
+            String usage = VoiceChatManager.canUseCouncil(player)
+                    ? "vc <global|local|dominion|council|leave|who>" : "vc <global|local|dominion|leave|who>";
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", usage)));
+            return true;
+        }
+        if (channel == VoiceChannel.COUNCIL && !VoiceChatManager.canUseCouncil(player)) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
             return true;
         }
 

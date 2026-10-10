@@ -6,11 +6,7 @@ import de.maxhenkel.voicechat.api.VoicechatConnection;
 import de.maxhenkel.voicechat.api.VoicechatPlugin;
 import de.maxhenkel.voicechat.api.VoicechatServerApi;
 import de.maxhenkel.voicechat.api.audiochannel.StaticAudioChannel;
-import de.maxhenkel.voicechat.api.events.EventRegistration;
-import de.maxhenkel.voicechat.api.events.MicrophonePacketEvent;
-import de.maxhenkel.voicechat.api.events.PlayerConnectedEvent;
-import de.maxhenkel.voicechat.api.events.VoicechatServerStartedEvent;
-import de.maxhenkel.voicechat.api.events.VoicechatServerStoppedEvent;
+import de.maxhenkel.voicechat.api.events.*;
 import de.maxhenkel.voicechat.api.packets.MicrophonePacket;
 import org.bukkit.Bukkit;
 
@@ -27,6 +23,7 @@ public class VoicechatBridge implements VoicechatPlugin {
     private static final String CATEGORY_GLOBAL = "ac_global";
     private static final String CATEGORY_LOCAL = "ac_local";
     private static final String CATEGORY_DOMINION = "ac_dominion";
+    private static final String CATEGORY_COUNCIL = "ac_council";
 
     private static volatile VoicechatServerApi api;
     private static final Map<String, StaticAudioChannel> remoteChannels = new ConcurrentHashMap<>();
@@ -70,6 +67,8 @@ public class VoicechatBridge implements VoicechatPlugin {
                 .setDescription("/vc local").build());
         api.registerVolumeCategory(api.volumeCategoryBuilder().setId(CATEGORY_DOMINION).setName("Dominion")
                 .setDescription("/vc dominion").build());
+        api.registerVolumeCategory(api.volumeCategoryBuilder().setId(CATEGORY_COUNCIL).setName("Council")
+                .setDescription("/vc council").build());
     }
 
     private void onPlayerConnected(PlayerConnectedEvent e) {
@@ -104,14 +103,16 @@ public class VoicechatBridge implements VoicechatPlugin {
                 continue;
             }
             switch (speaker.channel()) {
-                case LOCAL -> currentApi.sendLocationalSoundPacketTo(listenerConnection, packet.locationalSoundPacketBuilder()
-                        .position(currentApi.createPosition(speaker.x(), speaker.y(), speaker.z()))
-                        .distance((float) VoiceChannel.LOCAL_RADIUS)
-                        .category(CATEGORY_LOCAL)
-                        .build());
-                case GLOBAL, DOMINION -> currentApi.sendStaticSoundPacketTo(listenerConnection, packet.staticSoundPacketBuilder()
-                        .category(getCategory(speaker.channel()))
-                        .build());
+                case LOCAL ->
+                        currentApi.sendLocationalSoundPacketTo(listenerConnection, packet.locationalSoundPacketBuilder()
+                                .position(currentApi.createPosition(speaker.x(), speaker.y(), speaker.z()))
+                                .distance((float) VoiceChannel.LOCAL_RADIUS)
+                                .category(CATEGORY_LOCAL)
+                                .build());
+                case GLOBAL, DOMINION, COUNCIL ->
+                        currentApi.sendStaticSoundPacketTo(listenerConnection, packet.staticSoundPacketBuilder()
+                                .category(getCategory(speaker.channel()))
+                                .build());
             }
         }
 
@@ -206,6 +207,7 @@ public class VoicechatBridge implements VoicechatPlugin {
             case GLOBAL -> CATEGORY_GLOBAL;
             case LOCAL -> CATEGORY_LOCAL;
             case DOMINION -> CATEGORY_DOMINION;
+            case COUNCIL -> CATEGORY_COUNCIL;
         };
     }
 }

@@ -5,12 +5,22 @@ package com.aearost.aranarthcore.voice;
  */
 public enum VoiceChannel {
 
-    /** Everyone in the global channel, across both servers. */
+    /**
+     * Everyone in the global channel, across both servers.
+     */
     GLOBAL,
-    /** Everyone in the local channel within LOCAL_RADIUS blocks, with 3D audio. Same server only. */
+    /**
+     * Everyone in the local channel within LOCAL_RADIUS blocks, with 3D audio. Same server only.
+     */
     LOCAL,
-    /** Dominion members, filtered by both players' toggled dominion chat type. Across both servers. */
-    DOMINION;
+    /**
+     * Dominion members, filtered by both players' toggled dominion chat type. Across both servers.
+     */
+    DOMINION,
+    /**
+     * Council members (any council rank) and architects, matching council chat. Across both servers.
+     */
+    COUNCIL;
 
     public static final double LOCAL_RADIUS = 250;
 

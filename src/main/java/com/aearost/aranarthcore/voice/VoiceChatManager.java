@@ -97,8 +97,8 @@ public class VoiceChatManager {
     /**
      * Provides the nicknames of every player in the channel across both servers, sorted alphabetically.
      *
-     * @param channel         The channel.
-     * @param canSeeVanished  Whether vanished players should be included.
+     * @param channel        The channel.
+     * @param canSeeVanished Whether vanished players should be included.
      */
     public static List<String> getNicknamesInChannel(VoiceChannel channel, boolean canSeeVanished) {
         List<String> nicknames = new ArrayList<>();
@@ -123,6 +123,14 @@ public class VoiceChatManager {
         }
         nicknames.sort(Comparator.comparing(nickname -> ChatUtils.stripColorFormatting(nickname).toLowerCase()));
         return nicknames;
+    }
+
+    /**
+     * Determines whether the player can use the council channel, matching council chat: any council rank, or an architect.
+     */
+    public static boolean canUseCouncil(Player player) {
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        return aranarthPlayer != null && (aranarthPlayer.getCouncilRank() > 0 || aranarthPlayer.getArchitectRank() >= 1);
     }
 
     /**
@@ -173,7 +181,8 @@ public class VoiceChatManager {
         sendState(uuid, null, true);
 
         if (isManual) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("voicechat.left", "channel", Lang.get(previous.channel().getLangKey()))));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "voicechat.left", "channel",
+                    Lang.getFor(player, previous.channel().getLangKey()))));
             playJingle(player, false);
         }
         updateDominionConnections();
@@ -321,6 +330,11 @@ public class VoiceChatManager {
                 dominionInfoCache.remove(uuid);
                 continue;
             }
+            // Removes players from the council channel once they are no longer council or an architect
+            if (isFullRefresh && current.channel() == VoiceChannel.COUNCIL && !canUseCouncil(player)) {
+                leaveChannel(player, true);
+                continue;
+            }
             if (isFullRefresh) {
                 dominionInfoCache.put(uuid, computeDominionInfo(player));
             }
@@ -411,10 +425,10 @@ public class VoiceChatManager {
     }
 
     /**
-     * Tells every local player in the global call that the subject joined or left, with a jingle.
+     * Tells every local player in the global or council call that the subject joined or left, with a jingle.
      */
     private static void notifyLocalPlayers(VoiceMember subject, boolean isJoining) {
-        if (subject.channel() != VoiceChannel.GLOBAL) {
+        if (subject.channel() != VoiceChannel.GLOBAL && subject.channel() != VoiceChannel.COUNCIL) {
             return;
         }
         String key = isJoining ? "voicechat.player_joined" : "voicechat.player_left";
