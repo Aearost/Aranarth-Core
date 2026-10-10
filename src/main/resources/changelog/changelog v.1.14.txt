@@ -26,6 +26,7 @@ Economy, Jobs & Quests
 Chat, UI & Sounds
 
 Quality of Life
+[+] Added command preview lore to /tables GUI items
 
 Cross-server & Technical
 [~] Fixed players sometimes missing flight when entering the Creative world
