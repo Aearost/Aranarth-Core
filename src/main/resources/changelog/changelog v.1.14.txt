@@ -4,6 +4,7 @@ World & Events
 [+] Added custom toggleable /sit functionality
 [~] Wandering Enchanter over-leveled lockout is now per-player
 [~] Fixed AFK messages not displaying nicknames in color correctly
+[~] Prevented block placing and table commands in the arena world outside of admin mode
 
 Bending & Abilities
 [~] Fixed AngeredSpirits and other effect abilities respecting dominion relations in the arena

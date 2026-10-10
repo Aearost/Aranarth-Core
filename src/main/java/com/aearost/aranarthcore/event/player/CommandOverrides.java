@@ -11,6 +11,7 @@ import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.MountUtils;
 import com.aearost.aranarthcore.utils.PermissionUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -84,6 +85,16 @@ public class CommandOverrides {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
             e.setCancelled(true);
             return;
+        }
+
+        // Prevent table commands (and their aliases) in the arena world unless in admin mode
+        if (player.getWorld().getName().equalsIgnoreCase("arena") && !aranarthPlayer.isInAdminMode()) {
+            PluginCommand pluginCommand = Bukkit.getPluginCommand(parts[0].substring(1).toLowerCase());
+            if (pluginCommand != null && "aranarth.tables".equals(pluginCommand.getPermission())) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("arena.no_tables")));
+                e.setCancelled(true);
+                return;
+            }
         }
 
         // Adding and removing the sub-elements upon changing element without relogging

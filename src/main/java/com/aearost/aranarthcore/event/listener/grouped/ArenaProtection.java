@@ -66,11 +66,11 @@ public class ArenaProtection implements Listener {
 	}
 
 	/**
-	 * Prevents blocks from being placed in the arena world spawn if somehow obtained.
+	 * Prevents blocks from being placed anywhere in the arena world unless in admin mode.
 	 */
 	@EventHandler
 	public void onBlockPlace(final BlockPlaceEvent e) {
-		if (isArenaSpawn(e.getBlock().getLocation())) {
+		if (e.getBlock().getWorld().getName().equalsIgnoreCase("arena")) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
 			if (!aranarthPlayer.isInAdminMode()) {
 				e.setCancelled(true);
