@@ -128,6 +128,12 @@ public class DominionUtils {
      * @return Whether the attacker may harm the target.
      */
     public static boolean canAttackPlayer(Player attacker, Player target) {
+        // Dominion relations only apply in the worlds DominionProtectionListener protects (not the arena, etc.)
+        String worldName = target.getWorld().getName();
+        if (!worldName.startsWith("world") && !AranarthUtils.isSmpWorld(worldName) && !worldName.startsWith("resource")) {
+            return true;
+        }
+
         Dominion attackerDominion = getPlayerDominion(attacker.getUniqueId());
         Dominion targetDominion = getPlayerDominion(target.getUniqueId());
 

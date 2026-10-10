@@ -6,6 +6,7 @@ World & Events
 [~] Fixed AFK messages not displaying nicknames in color correctly
 
 Bending & Abilities
+[~] Fixed AngeredSpirits and other effect abilities respecting dominion relations in the arena
 
 Dominion
 [+] Dominion resource claims now provide leaves
