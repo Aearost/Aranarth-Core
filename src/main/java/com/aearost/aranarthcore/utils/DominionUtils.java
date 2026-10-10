@@ -38,14 +38,9 @@ public class DominionUtils {
      */
     private static String lastFoodEvalDate = null;
     /**
-     * Dominion IDs that lost a chunk to auto-unclaim during yesterday's food evaluation cycle.
-     * Used to detect recovery (no chunk lost today after losing one yesterday).
+     * Remaining chunk counts at which a crumbling Dominion re-notifies Discord, after the initial crumble message.
      */
-    private static Set<UUID> yesterdayCrumblingDominionIds = new HashSet<>();
-    /**
-     * Dominion IDs that lost a chunk to auto-unclaim during today's food evaluation cycle.
-     */
-    private static final Set<UUID> todayCrumblingDominionIds = new HashSet<>();
+    private static final int[] CRUMBLE_NOTIFY_THRESHOLDS = {250, 100, 25, 5};
 
     /**
      * Provides the list of Dominions.
@@ -793,10 +788,6 @@ public class DominionUtils {
         }
         lastFoodEvalDate = today;
 
-        // Rotate crumbling sets
-        yesterdayCrumblingDominionIds = new HashSet<>(todayCrumblingDominionIds);
-        todayCrumblingDominionIds.clear();
-
         // Close all inventories before evaluating
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             String foodTitle = ChatUtils.stripColorFormatting(onlinePlayer.getOpenInventory().getTitle());
@@ -834,10 +825,7 @@ public class DominionUtils {
                 }
                 if (chunkToRemove != null) {
                     removePenaltyChunk(dominion, chunkToRemove);
-                    if (!todayCrumblingDominionIds.contains(dominion.getId())) {
-                        todayCrumblingDominionIds.add(dominion.getId());
-                        DiscordUtils.dominionMessage(dominion, dominion.getName() + " is starting to crumble", new Color(180, 70, 0));
-                    }
+                    notifyCrumble(dominion);
                     for (UUID memberUuid : dominion.getMembers()) {
                         if (Bukkit.getOfflinePlayer(memberUuid).isOnline()) {
                             Player member = Bukkit.getPlayer(memberUuid);
@@ -855,29 +843,26 @@ public class DominionUtils {
 
             if (totalFoodPower >= powerBeingConsumed) {
                 consumeFood(dominion, powerBeingConsumed);
+                notifyCrumbleRecovery(dominion);
                 PersistenceUtils.saveSingleDominionToDatabase(dominion);
                 if (Bukkit.getOfflinePlayer(dominion.getLeader()).isOnline()) {
                     Player onlineLeader = Bukkit.getPlayer(dominion.getLeader());
                     onlineLeader.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.food_consumed", "name", dominion.getName())));
                 }
-                // No chunk lost today but lost one yesterday
-                if (yesterdayCrumblingDominionIds.contains(dominion.getId())) {
-                    DiscordUtils.dominionMessage(dominion, dominion.getName() + " has recovered and prevented their demise", new Color(50, 180, 50));
-                }
             } else {
                 double dailyCost = DominionLevelUtils.getDailyBalanceCost(dominion.getDominionLevel());
                 int result = consumeMoneyOrLand(dominion, dailyCost);
                 if (result == -1) {
+                    DiscordUtils.dominionMessage(dominion, dominion.getName() + " has crumbled", new Color(120, 40, 0), true);
                     updateDominionLeader(dominion, null, true);
                 } else {
-                    // Land was consumed - mark as crumbling
-                    if (result == 0 && !todayCrumblingDominionIds.contains(dominion.getId())) {
-                        todayCrumblingDominionIds.add(dominion.getId());
-                        DiscordUtils.dominionMessage(dominion, dominion.getName() + " is starting to crumble", new Color(180, 70, 0));
+                    // Land was consumed
+                    if (result == 0) {
+                        notifyCrumble(dominion);
                     }
-                    // Money was consumed - check recovery
-                    if (result == 1 && yesterdayCrumblingDominionIds.contains(dominion.getId())) {
-                        DiscordUtils.dominionMessage(dominion, dominion.getName() + " has recovered and prevented their demise", new Color(50, 180, 50));
+                    // Money was consumed
+                    else {
+                        notifyCrumbleRecovery(dominion);
                     }
                     for (UUID memberUuid : dominion.getMembers()) {
                         if (Bukkit.getOfflinePlayer(memberUuid).isOnline()) {
@@ -896,6 +881,51 @@ public class DominionUtils {
                 }
             }
         }
+    }
+
+    /**
+     * Notifies Discord that a Dominion has lost a chunk to auto-unclaim.
+     *
+     * @param dominion The Dominion that lost a chunk.
+     */
+    private static void notifyCrumble(Dominion dominion) {
+        int remainingChunks = dominion.getChunks().size();
+        int lastNotifiedChunks = dominion.getCrumbleNotifiedChunks();
+
+        if (lastNotifiedChunks == 0) {
+            dominion.setCrumbleNotifiedChunks(remainingChunks);
+            PersistenceUtils.saveSingleDominionToDatabase(dominion);
+            DiscordUtils.dominionMessage(dominion, dominion.getName() + " is starting to crumble", new Color(180, 70, 0), true);
+            return;
+        }
+
+        // Only notify for the lowest threshold crossed since the last notification
+        int crossedThreshold = -1;
+        for (int threshold : CRUMBLE_NOTIFY_THRESHOLDS) {
+            if (remainingChunks <= threshold && lastNotifiedChunks > threshold) {
+                crossedThreshold = threshold;
+            }
+        }
+        if (crossedThreshold != -1) {
+            dominion.setCrumbleNotifiedChunks(remainingChunks);
+            PersistenceUtils.saveSingleDominionToDatabase(dominion);
+            String chunkWord = remainingChunks == 1 ? " chunk" : " chunks";
+            DiscordUtils.dominionMessage(dominion, dominion.getName() + " is crumbling and has " + remainingChunks + chunkWord + " remaining", new Color(180, 70, 0), true);
+        }
+    }
+
+    /**
+     * Notifies Discord that a crumbling Dominion has paid its daily tax and is no longer crumbling.
+     *
+     * @param dominion The Dominion that paid its daily tax.
+     */
+    private static void notifyCrumbleRecovery(Dominion dominion) {
+        if (dominion.getCrumbleNotifiedChunks() == 0) {
+            return;
+        }
+        dominion.setCrumbleNotifiedChunks(0);
+        PersistenceUtils.saveSingleDominionToDatabase(dominion);
+        DiscordUtils.dominionMessage(dominion, dominion.getName() + " has recovered and prevented their demise", new Color(50, 180, 50));
     }
 
     /**

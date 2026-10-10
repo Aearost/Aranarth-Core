@@ -989,6 +989,17 @@ public class DiscordUtils {
 	 * @param color The color of the Discord message.
 	 */
 	public static void dominionMessage(Dominion dominion, String message, Color color) {
+		dominionMessage(dominion, message, color, false);
+	}
+
+	/**
+	 * Handles sending messages to the dominions relations channel.
+	 * @param dominion The Dominion involved with the message that will show its leader's head in the message.
+	 * @param message The message to be sent.
+	 * @param color The color of the Discord message.
+	 * @param isPingingLeadership Whether the Dominion's Leader and Lieutenants with linked Discord accounts are pinged.
+	 */
+	public static void dominionMessage(Dominion dominion, String message, Color color, boolean isPingingLeadership) {
 		Guild guild = getGuild();
 		EmbedBuilder embed = new EmbedBuilder();
 		message = ChatUtils.stripColorFormatting(message);
@@ -996,7 +1007,27 @@ public class DiscordUtils {
 		String uuidNoDashes = dominion.getLeader().toString().replaceAll("-", "");
 		String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
 		embed.setAuthor(message, null, url).setColor(color);
-		dominions.sendMessageEmbeds(embed.build()).queue();
+
+		StringBuilder mentions = new StringBuilder();
+		if (isPingingLeadership) {
+			for (UUID memberUuid : dominion.getMembers()) {
+				DominionRank rank = dominion.getMemberRank(memberUuid);
+				if (rank != DominionRank.LEADER && rank != DominionRank.LIEUTENANT) {
+					continue;
+				}
+				String discordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(memberUuid);
+				if (discordId != null) {
+					mentions.append("<@").append(discordId).append("> ");
+				}
+			}
+		}
+
+		if (mentions.isEmpty()) {
+			dominions.sendMessageEmbeds(embed.build()).queue();
+		} else {
+			dominions.sendMessage(mentions.toString().trim()).setEmbeds(embed.build())
+					.allowedMentions(EnumSet.of(Message.MentionType.USER)).queue();
+		}
 	}
 
 }

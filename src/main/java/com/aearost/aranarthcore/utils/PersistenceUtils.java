@@ -1614,6 +1614,12 @@ public class PersistenceUtils {
                         }
                     }
                 }
+                if (fields.length > 43) {
+                    try {
+                        dominion.setCrumbleNotifiedChunks(Integer.parseInt(fields[43]));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
                 dominion.setMemberPvpEnabled(memberPvpEnabled);
                 dominion.setMobSpawningEnabled(mobSpawningEnabled);
                 dominion.setExplosionEnabled(explosionEnabled);
@@ -1844,7 +1850,8 @@ public class PersistenceUtils {
                 .collect(java.util.stream.Collectors.joining(","))
                 + "|" + dominion.getDisabledResourceCategories().stream()
                 .map(Enum::name)
-                .collect(java.util.stream.Collectors.joining(","));
+                .collect(java.util.stream.Collectors.joining(","))
+                + "|" + dominion.getCrumbleNotifiedChunks();
     }
 
     /**
@@ -8483,6 +8490,12 @@ public class PersistenceUtils {
                     dominion.getDisabledResourceCategories().add(DominionResourceCategory.valueOf(s));
                 } catch (IllegalArgumentException ignored) {
                 }
+            }
+        }
+        if (fields.length > 43) {
+            try {
+                dominion.setCrumbleNotifiedChunks(Integer.parseInt(fields[43]));
+            } catch (NumberFormatException ignored) {
             }
         }
         dominion.setMemberPvpEnabled(memberPvpEnabled);

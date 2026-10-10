@@ -12,6 +12,7 @@ Dominion
 [+] Added Dappled Forests to be claimable in /d resources
 [+] Added Lush Caves, Dripstone Caves, Deep Dark and Sulfur Caves to be claimable in /d resources
 [+] Added Poplar wood to the Sawmill
+[~] Fixed dominion crumble message being sent to Discord every day
 
 Aranarthium, Items & Crafting
 [~] Changed double jump trigger with Elven Aranarthium to be tapping sneak while mid-air

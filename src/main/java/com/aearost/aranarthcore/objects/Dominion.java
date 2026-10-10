@@ -60,6 +60,7 @@ public class Dominion {
 	private final Map<String, Integer> cachedLivestockByWorld = new HashMap<>();
 	private long foundedTimestamp;     // ms epoch; 0 = "ancient" (pre-feature legacy dominion)
 	private long levelDropTimestamp;   // ms epoch when this dominion first dropped a level; 0 = compliant
+	private int crumbleNotifiedChunks; // chunk count at the last crumble Discord notification; 0 = not crumbling
 
 	private int boughtOutpostChunks;
 	private int storedChunkCount = -1; // set when chunks can't be loaded (cross-server stub)
@@ -611,6 +612,22 @@ public class Dominion {
 	 */
 	public void setFoodPowerBeingConsumed(int foodPowerBeingConsumed) {
 		this.foodPowerBeingConsumed = foodPowerBeingConsumed;
+	}
+
+	/**
+	 * Provides the chunk count of the Dominion when its last crumble notification was sent to Discord.
+	 * @return The chunk count at the last crumble notification, or 0 if the Dominion is not crumbling.
+	 */
+	public int getCrumbleNotifiedChunks() {
+		return crumbleNotifiedChunks;
+	}
+
+	/**
+	 * Updates the chunk count of the Dominion when its last crumble notification was sent to Discord.
+	 * @param crumbleNotifiedChunks The chunk count at the last crumble notification, or 0 if the Dominion is not crumbling.
+	 */
+	public void setCrumbleNotifiedChunks(int crumbleNotifiedChunks) {
+		this.crumbleNotifiedChunks = crumbleNotifiedChunks;
 	}
 
 	/**
