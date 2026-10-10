@@ -27,6 +27,7 @@ Chat, UI & Sounds
 
 Quality of Life
 [+] Added command preview lore to /tables GUI items
+[~] Fixed sent mail preview not being color formatted for lang files
 
 Cross-server & Technical
 [~] Fixed players sometimes missing flight when entering the Creative world
