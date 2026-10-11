@@ -703,7 +703,7 @@ public class DateUtils {
         String dayNumAsString = getDayNumWithSuffix(dayNum);
         for (Player player : Bukkit.getOnlinePlayers()) {
             String worldName = player.getWorld().getName();
-            boolean skipDayMessage = worldName.equals("arena") || worldName.equals("creative");
+            boolean skipDayMessage = worldName.equals("arena") || worldName.startsWith("creative");
             if (!skipDayMessage) {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                 skipDayMessage = aranarthPlayer.isDayMessageDisabled();
@@ -748,7 +748,7 @@ public class DateUtils {
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             String worldName = player.getWorld().getName();
-            if (worldName.equals("arena") || worldName.equals("creative")) {
+            if (worldName.equals("arena") || worldName.startsWith("creative")) {
                 continue;
             }
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
@@ -2452,7 +2452,7 @@ public class DateUtils {
                 if (!isNewDay) {
                     for (Player player : Bukkit.getOnlinePlayers()) {
                         String playerWorld = player.getWorld().getName();
-                        if (playerWorld.equals("arena") || playerWorld.equals("creative")) {
+                        if (playerWorld.equals("arena") || playerWorld.startsWith("creative")) {
                             continue;
                         }
                         int vol = AranarthUtils.getPlayer(player.getUniqueId()).getWeatherSoundVolume();
@@ -2473,7 +2473,7 @@ public class DateUtils {
                 if (!isNewDay) {
                     for (Player player : Bukkit.getOnlinePlayers()) {
                         String playerWorld = player.getWorld().getName();
-                        if (playerWorld.equals("arena") || playerWorld.equals("creative")) {
+                        if (playerWorld.equals("arena") || playerWorld.startsWith("creative")) {
                             continue;
                         }
                         int vol = AranarthUtils.getPlayer(player.getUniqueId()).getWeatherSoundVolume();
@@ -2494,7 +2494,7 @@ public class DateUtils {
                 if (!isNewDay) {
                     for (Player player : Bukkit.getOnlinePlayers()) {
                         String playerWorld = player.getWorld().getName();
-                        if (playerWorld.equals("arena") || playerWorld.equals("creative")) {
+                        if (playerWorld.equals("arena") || playerWorld.startsWith("creative")) {
                             continue;
                         }
                         int vol = AranarthUtils.getPlayer(player.getUniqueId()).getWeatherSoundVolume();
@@ -2521,7 +2521,7 @@ public class DateUtils {
             if (!isNewDay) {
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     String playerWorld = player.getWorld().getName();
-                    if (playerWorld.equals("arena") || playerWorld.equals("creative")) {
+                    if (playerWorld.equals("arena") || playerWorld.startsWith("creative")) {
                         continue;
                     }
                     int vol = AranarthUtils.getPlayer(player.getUniqueId()).getWeatherSoundVolume();
@@ -2534,7 +2534,7 @@ public class DateUtils {
         }
         for (Player player : Bukkit.getOnlinePlayers()) {
             String playerWorld = player.getWorld().getName();
-            if (playerWorld.equals("arena") || playerWorld.equals("creative")) {
+            if (playerWorld.equals("arena") || playerWorld.startsWith("creative")) {
                 continue;
             }
             if (AranarthUtils.getPlayer(player.getUniqueId()).isWeatherMessageDisabled()) {

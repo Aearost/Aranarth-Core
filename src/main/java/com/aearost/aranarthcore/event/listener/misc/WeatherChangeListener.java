@@ -99,7 +99,7 @@ public class WeatherChangeListener implements Listener {
 
 					for (Player player : Bukkit.getOnlinePlayers()) {
 							String worldName = player.getWorld().getName();
-							if (worldName.equals("arena") || worldName.equals("creative")) {
+							if (worldName.equals("arena") || worldName.startsWith("creative")) {
 								continue;
 							}
 							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());

@@ -94,6 +94,9 @@ public class NetworkManager {
     public static final String CH_OUTPOST_DISBAND = "aranarth:outpost_disband";
     public static final String CH_OUTPOST_CREATE = "aranarth:outpost_create";
     public static final String CH_OUTPOST_UPDATE = "aranarth:outpost_update";
+    public static final String CH_CREATIVE_PLOT_UPDATE = "aranarth:creative_plot_update";
+    public static final String CH_CREATIVE_PLOT_DELETE = "aranarth:creative_plot_delete";
+    public static final String CH_CREATIVE_EXPAND = "aranarth:creative_expand";
     public static final String CH_JOB_UPDATE = "aranarth:job_update";
     public static final String CH_VOTE_AWARD = "aranarth:vote_award";
     public static final String CH_VOTE_KEY = "aranarth:vote_key";
@@ -521,6 +524,9 @@ public class NetworkManager {
             case CH_OUTPOST_DISBAND -> handleOutpostDisband(json);
             case CH_OUTPOST_CREATE -> handleOutpostCreate(json);
             case CH_OUTPOST_UPDATE -> handleOutpostUpdate(json);
+            case CH_CREATIVE_PLOT_UPDATE -> handleCreativePlotUpdate(json);
+            case CH_CREATIVE_PLOT_DELETE -> handleCreativePlotDelete(json);
+            case CH_CREATIVE_EXPAND -> handleCreativeExpand(json);
             case CH_JOB_UPDATE -> handleJobUpdate(json);
             case CH_VOTE_AWARD -> handleVoteAward(json);
             case CH_VOTE_KEY -> handleVoteKey(json);
@@ -2055,7 +2061,7 @@ public class NetworkManager {
                 }
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     String pWorld = p.getWorld().getName();
-                    if (pWorld.equals("arena") || pWorld.equals("creative")) {
+                    if (pWorld.equals("arena") || pWorld.startsWith("creative")) {
                         continue;
                     }
                     AranarthPlayer ap = AranarthUtils.getPlayer(p.getUniqueId());
@@ -2091,7 +2097,7 @@ public class NetworkManager {
                 String broadcastMsg = isThunder ? Lang.get("weather.thunder") : Lang.get("weather.rain");
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     String pWorld = p.getWorld().getName();
-                    if (pWorld.equals("arena") || pWorld.equals("creative")) {
+                    if (pWorld.equals("arena") || pWorld.startsWith("creative")) {
                         continue;
                     }
                     AranarthPlayer ap = AranarthUtils.getPlayer(p.getUniqueId());
@@ -2128,7 +2134,7 @@ public class NetworkManager {
                 }
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     String pWorld = p.getWorld().getName();
-                    if (pWorld.equals("arena") || pWorld.equals("creative")) {
+                    if (pWorld.equals("arena") || pWorld.startsWith("creative")) {
                         continue;
                     }
                     AranarthPlayer ap = AranarthUtils.getPlayer(p.getUniqueId());
@@ -2689,6 +2695,97 @@ public class NetworkManager {
         UUID dominionId = UUID.fromString(json.get("dominionId").getAsString());
         Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () ->
                 PersistenceUtils.loadSingleDominionFromDatabase(dominionId));
+    }
+
+    /**
+     * Publishes a claimed or changed Creative plot so the other server's copy stays current.
+     */
+    public void publishCreativePlotUpdate(CreativePlot plot) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.add("data", PlotUtils.toJson(plot));
+        publish(CH_CREATIVE_PLOT_UPDATE, json);
+    }
+
+    private void handleCreativePlotUpdate(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        JsonObject data = json.getAsJsonObject("data");
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () ->
+                PlotUtils.loadPlot(PlotUtils.fromJson(data)));
+    }
+
+    /**
+     * Publishes an unclaimed Creative plot so the other server removes it from memory.
+     */
+    public void publishCreativePlotDelete(String plotKey) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("plotKey", plotKey);
+        publish(CH_CREATIVE_PLOT_DELETE, json);
+    }
+
+    /**
+     * Asks the Survival server to expand the Creative plots world, as the world only exists there.
+     */
+    public void publishCreativeExpand(UUID requester, int rings) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("requester", requester.toString());
+        json.addProperty("rings", rings);
+        publish(CH_CREATIVE_EXPAND, json);
+    }
+
+    /**
+     * Tells the requester's server how large the Creative plots world now is.
+     */
+    private void publishCreativeExpanded(UUID requester, int plotsAcross) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("requester", requester.toString());
+        json.addProperty("plotsAcross", plotsAcross);
+        publish(CH_CREATIVE_EXPAND, json);
+    }
+
+    private void handleCreativeExpand(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        UUID requester = UUID.fromString(json.get("requester").getAsString());
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+            if (json.has("rings")) {
+                // The request - only the server with the plots world expands it
+                if (!PlotUtils.isPlotServer()) {
+                    return;
+                }
+                int plotsAcross = PlotUtils.expand(json.get("rings").getAsInt());
+                publishCreativeExpanded(requester, plotsAcross);
+            } else {
+                // The result - tell the requester if they are on this server
+                Player player = Bukkit.getPlayer(requester);
+                if (player == null) {
+                    return;
+                }
+                int plotsAcross = json.get("plotsAcross").getAsInt();
+                if (plotsAcross < 0) {
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.could_not_creative")));
+                } else {
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "creative.expanded", "size", plotsAcross)));
+                }
+            }
+        });
+    }
+
+    private void handleCreativePlotDelete(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        String plotKey = json.get("plotKey").getAsString();
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> PlotUtils.unloadPlot(plotKey));
     }
 
     /**

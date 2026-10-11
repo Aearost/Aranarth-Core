@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.PlotUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
@@ -55,7 +56,7 @@ public class CommandTpAccept implements CommandExecutor {
                 // If both players are still online
                 if (target != null) {
                     String destinationWorld = target.getLocation().getWorld().getName();
-                    if (AranarthUtils.isSmpWorld(destinationWorld) || destinationWorld.equals("creative")) {
+                    if (AranarthUtils.isSmpWorld(destinationWorld) || PlotUtils.isSmpCreativeWorld(destinationWorld)) {
                         if (!AranarthUtils.isOriginalPlayer(player.getUniqueId())) {
                             player.sendMessage(ChatUtils.chatMessage(Lang.get("access.smp_restricted")));
                             target.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.target_smp_restricted", "player", aranarthPlayer.getNickname())));
@@ -93,7 +94,7 @@ public class CommandTpAccept implements CommandExecutor {
                 if (target != null) {
                     AranarthPlayer targetPlayer = AranarthUtils.getPlayer(target.getUniqueId());
                     String destinationWorld = player.getLocation().getWorld().getName();
-                    if (AranarthUtils.isSmpWorld(destinationWorld) || destinationWorld.equals("creative")) {
+                    if (AranarthUtils.isSmpWorld(destinationWorld) || PlotUtils.isSmpCreativeWorld(destinationWorld)) {
                         if (!AranarthUtils.isOriginalPlayer(target.getUniqueId())) {
                             target.sendMessage(ChatUtils.chatMessage(Lang.get("access.smp_restricted")));
                             player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.target_smp_restricted", "player", targetPlayer.getNickname())));

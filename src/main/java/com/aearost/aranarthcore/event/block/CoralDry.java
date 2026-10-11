@@ -10,7 +10,7 @@ public class CoralDry {
 	public void execute(BlockFadeEvent e) {
 		if (e.getBlock().getWorld().getName().equalsIgnoreCase("world") ||
 				AranarthUtils.isSmpWorld(e.getBlock().getWorld().getName()) ||
-			e.getBlock().getWorld().getName().equalsIgnoreCase("creative")) {
+			e.getBlock().getWorld().getName().startsWith("creative")) {
 			e.setCancelled(true);
 		}
 	}

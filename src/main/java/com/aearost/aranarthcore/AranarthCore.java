@@ -18,10 +18,12 @@ import com.aearost.aranarthcore.event.mob.CaveSpiderPoisonExtract;
 import com.aearost.aranarthcore.event.mob.MountListener;
 import com.aearost.aranarthcore.event.world.WorldEventManager;
 import com.aearost.aranarthcore.integration.SquaremapIntegration;
+import com.aearost.aranarthcore.integration.WorldEditPlotIntegration;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.PlotChunkGenerator;
 import com.aearost.aranarthcore.objects.VoidChunkGenerator;
 import com.aearost.aranarthcore.recipes.*;
 import com.aearost.aranarthcore.recipes.aranarthium.*;
@@ -217,7 +219,7 @@ public class AranarthCore extends JavaPlugin {
                 }
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     String worldName = player.getWorld().getName();
-                    if (worldName.equals("arena") || worldName.equals("creative")) {
+                    if (worldName.equals("arena") || worldName.startsWith("creative")) {
                         continue;
                     }
                     double offsetX = (random.nextDouble() - 0.5) * 5;
@@ -480,6 +482,11 @@ public class AranarthCore extends JavaPlugin {
         if (Bukkit.getPluginManager().isPluginEnabled("squaremap")) {
             squaremapIntegration = new SquaremapIntegration();
             squaremapIntegration.enable();
+        }
+
+        // Restrict WorldEdit to the player's own plots in the Creative plots world (soft-depend)
+        if (!isSmpServer() && Bukkit.getPluginManager().isPluginEnabled("WorldEdit")) {
+            WorldEditPlotIntegration.enable();
         }
 
         // Start cross-server networking (NetworkManager) now that the DB is already connected.
@@ -1069,6 +1076,12 @@ public class AranarthCore extends JavaPlugin {
                 PersistenceUtils.loadShopCollaborators();
             }
         }
+        // Creative plots are loaded on both servers so /plot list and /plot home work from the SMP
+        if (db) {
+            PersistenceUtils.loadCreativePlotsFromDatabase();
+        } else {
+            PersistenceUtils.loadCreativePlots();
+        }
         // Sentinels and toggles must load after aranarth players
         if (db) {
             PersistenceUtils.loadSentinelsFromDatabase();
@@ -1223,6 +1236,7 @@ public class AranarthCore extends JavaPlugin {
         new DominionProtectionListener(this);
         new SpawnProtectionListener(this);
         new ShopProtectionListener(this);
+        new PlotProtectionListener(this);
         new PortalEventListener(this);
         new ArenaProtection(this);
         new FireProtectionListener(this);
@@ -1384,6 +1398,7 @@ public class AranarthCore extends JavaPlugin {
         getCommand("countdown").setExecutor(new CommandCountdown());
         getCommand("countdown").setTabCompleter(new CommandCountdownCompleter());
         getCommand("creative").setExecutor(new CommandCreative());
+        getCommand("creative").setTabCompleter(new CommandCreativeCompleter());
         getCommand("date").setExecutor(new CommandDate());
         getCommand("deaths").setExecutor(new CommandDeaths());
         getCommand("deaths").setTabCompleter(new CommandDeathsCompleter());
@@ -1425,6 +1440,8 @@ public class AranarthCore extends JavaPlugin {
         getCommand("pay").setTabCompleter(new CommandPayCompleter());
         getCommand("pettransfer").setExecutor(new CommandPetTransfer());
         getCommand("pettransfer").setTabCompleter(new CommandPetTransferCompleter());
+        getCommand("plot").setExecutor(new CommandPlot());
+        getCommand("plot").setTabCompleter(new CommandPlotCompleter());
         getCommand("ping").setExecutor(new CommandPing());
         getCommand("ping").setTabCompleter(new CommandPingCompleter());
         getCommand("potions").setExecutor(new CommandPotions());
@@ -1448,6 +1465,7 @@ public class AranarthCore extends JavaPlugin {
         getCommand("shop").setTabCompleter(new CommandShopCompleter());
         getCommand("smithing").setExecutor(new CommandSmithing());
         getCommand("smp").setExecutor(new CommandSMP());
+        getCommand("smpcreative").setExecutor(new CommandSmpCreative());
         getCommand("sounds").setExecutor(new CommandSounds());
         getCommand("spawn").setExecutor(new CommandSpawn());
         getCommand("stonecutter").setExecutor(new CommandStonecutter());
@@ -1506,6 +1524,73 @@ public class AranarthCore extends JavaPlugin {
     }
 
     /**
+     * Loads or creates the Creative plots world.
+     */
+    private void loadCreativePlotsWorld() {
+        PlotUtils.loadPattern();
+        if (Bukkit.getWorld(PlotUtils.WORLD_NAME) != null) {
+            return;
+        }
+        File worldFolder = PlotUtils.getWorldFolder(PlotUtils.WORLD_NAME);
+        boolean isNewWorld = worldFolder == null;
+        if (!isNewWorld && !new File(worldFolder, PlotUtils.MARKER_FILE).exists()) {
+            Bukkit.getLogger().severe(LOG_PREFIX + "[Plots] The \"" + PlotUtils.WORLD_NAME + "\" folder is the SMP creative world."
+                    + " It was NOT loaded to protect it. Move it to the SMP server and restart to generate the plots world");
+            return;
+        }
+
+        WorldCreator wc = new WorldCreator(PlotUtils.WORLD_NAME);
+        wc.environment(World.Environment.NORMAL);
+        wc.generator(new PlotChunkGenerator());
+        World world = wc.createWorld();
+        if (world == null) {
+            return;
+        }
+        world.setGameRule(GameRules.SPAWN_MOBS, false);
+        world.setGameRule(GameRules.ADVANCE_WEATHER, false);
+        world.setGameRule(GameRules.ADVANCE_TIME, false);
+        world.setGameRule(GameRules.SHOW_ADVANCEMENT_MESSAGES, false);
+        world.setGameRule(GameRules.LOCATOR_BAR, false);
+        world.setSpawnLocation(PlotUtils.getSpawnLocation(world));
+
+        if (isNewWorld) {
+            try {
+                File marker = new File(PlotUtils.getWorldFolder(PlotUtils.WORLD_NAME), PlotUtils.MARKER_FILE);
+                if (!marker.createNewFile()) {
+                    Bukkit.getLogger().warning(LOG_PREFIX + "[Plots] Could not create the plots world marker file");
+                }
+            } catch (Exception e) {
+                Bukkit.getLogger().warning(LOG_PREFIX + "[Plots] Could not create the plots world marker file: " + e.getMessage());
+            }
+            // The border is fitted to whole rings of plots, as close to the configured size as possible
+            int borderSize = getConfig().getInt("creative-plots.border-size", 2500); // Expandable via /creative expand <amount>
+            PlotUtils.setRings(world, PlotUtils.getRingsForBorderSize(borderSize));
+        }
+    }
+
+    /**
+     * Loads the SMP creative world.
+     */
+    private void loadCreativeSmpWorld() {
+        if (Bukkit.getWorld(PlotUtils.WORLD_NAME) != null) {
+            return;
+        }
+        File worldFolder = PlotUtils.getWorldFolder(PlotUtils.WORLD_NAME);
+        if (worldFolder == null || !new File(worldFolder, "region").isDirectory()) {
+            Bukkit.getLogger().info(LOG_PREFIX + "[Plots] No \"" + PlotUtils.WORLD_NAME + "\" world folder found - skipping");
+            return;
+        }
+        WorldCreator wc = new WorldCreator(PlotUtils.WORLD_NAME);
+        wc.environment(World.Environment.NORMAL);
+        wc.type(WorldType.FLAT);
+        World world = wc.createWorld();
+        if (world != null) {
+            world.setGameRule(GameRules.SHOW_ADVANCEMENT_MESSAGES, false);
+            world.setGameRule(GameRules.LOCATOR_BAR, false);
+        }
+    }
+
+    /**
      * Initializes the AranarthCore worlds.
      */
     private void initializeWorlds() {
@@ -1530,6 +1615,9 @@ public class AranarthCore extends JavaPlugin {
                 wc.type(WorldType.NORMAL);
                 wc.createWorld();
             }
+
+            // The creative world, transferred from the Survival server
+            loadCreativeSmpWorld();
 
             // Disable advancement announcements and locator bar in SMP worlds
             for (World w : Bukkit.getWorlds()) {
@@ -1611,12 +1699,7 @@ public class AranarthCore extends JavaPlugin {
             wc.type(WorldType.FLAT);
             wc.createWorld();
         }
-        if (Bukkit.getWorld("creative") == null) {
-            WorldCreator wc = new WorldCreator("creative");
-            wc.environment(World.Environment.NORMAL);
-            wc.type(WorldType.FLAT);
-            wc.createWorld();
-        }
+        loadCreativePlotsWorld();
 
         // Spawn (void world)
         if (Bukkit.getWorld("spawn") == null) {

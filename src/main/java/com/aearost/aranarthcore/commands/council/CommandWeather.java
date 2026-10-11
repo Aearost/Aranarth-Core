@@ -65,7 +65,7 @@ public class CommandWeather {
 
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     String pWorld = p.getWorld().getName();
-					if (pWorld.equals("arena") || pWorld.equals("creative")) {
+					if (pWorld.equals("arena") || pWorld.startsWith("creative")) {
 						continue;
 					}
                     AranarthPlayer ap = AranarthUtils.getPlayer(p.getUniqueId());
@@ -122,7 +122,7 @@ public class CommandWeather {
                     String broadcastMsg = isThunder ? Lang.get("weather.thunder") : Lang.get("weather.rain");
                     for (Player p : Bukkit.getOnlinePlayers()) {
                         String pWorld = p.getWorld().getName();
-						if (pWorld.equals("arena") || pWorld.equals("creative")) {
+						if (pWorld.equals("arena") || pWorld.startsWith("creative")) {
 							continue;
 						}
                         AranarthPlayer ap = AranarthUtils.getPlayer(p.getUniqueId());
@@ -203,7 +203,7 @@ public class CommandWeather {
 
         for (Player p : Bukkit.getOnlinePlayers()) {
             String pWorld = p.getWorld().getName();
-			if (pWorld.equals("arena") || pWorld.equals("creative")) {
+			if (pWorld.equals("arena") || pWorld.startsWith("creative")) {
 				continue;
 			}
             AranarthPlayer ap = AranarthUtils.getPlayer(p.getUniqueId());

@@ -90,16 +90,12 @@ public class PermissionUtils {
             }
         }
 
-        // Grant creative world access and SMP map link to original players
+        // Grant the SMP map link to original players
         if (AranarthUtils.isOriginalPlayer(player.getUniqueId())) {
-            perms.setPermission("aranarth.creative", true);
             perms.setPermission("aranarth.smpmap", true);
         }
 
-        // Grant WorldEdit permissions if the player is in the creative world
-        if (player.getWorld().getName().equalsIgnoreCase("creative")) {
-            perms.setPermission("worldedit.*", true);
-        }
+        setCreativeWorldEditPermissions(player, perms, aranarthPlayer);
 
         // Must update arena permissions after base permissions apply
         toggleArenaBendingPermissions(player, player.getWorld().getName().equalsIgnoreCase("arena"));
@@ -501,10 +497,11 @@ public class PermissionUtils {
         perms.setPermission("aranarth.brewbook", true);
         perms.setPermission("aranarth.jobs", true);
         perms.setPermission("aranarth.marketprice", true);
+        perms.setPermission("aranarth.creative", true);
+        perms.setPermission("aranarth.plot", true);
 
         // Disable aranarth functionality
         perms.setPermission("aranarth.ac", false);
-        perms.setPermission("aranarth.creative", false);
         perms.setPermission("aranarth.exp", false);
         perms.setPermission("aranarth.seen", false);
         perms.setPermission("aranarth.back", false);
@@ -1133,6 +1130,74 @@ public class PermissionUtils {
             perms.setPermission("aranarthcore.armorstand.engardemirrored", true);
         } else {
             return;
+        }
+    }
+
+    /**
+     * Sets the WorldEdit permissions for the player's current world.
+     *
+     * @param player         The player.
+     * @param perms          The permissions the player will have access to.
+     * @param aranarthPlayer The player's AranarthPlayer.
+     */
+    private static void setCreativeWorldEditPermissions(Player player, PermissionAttachment perms, AranarthPlayer aranarthPlayer) {
+        String worldName = player.getWorld().getName();
+        if (PlotUtils.isSmpCreativeWorld(worldName)) {
+            perms.setPermission("worldedit.*", true);
+            return;
+        }
+        if (!PlotUtils.isPlotWorld(worldName)) {
+            return;
+        }
+
+        if (aranarthPlayer.getCouncilRank() > 0) {
+            perms.setPermission("worldedit.*", true);
+            return;
+        }
+
+        // Negate everything first so that only the permissions below are granted
+        perms.setPermission("worldedit.*", false);
+        int tier = PlotUtils.getSaintTier(aranarthPlayer);
+        if (tier == 0) {
+            return;
+        }
+
+        // Saint I - selection and basic edits
+        for (String node : List.of(
+                "worldedit.wand", "worldedit.wand.toggle", "worldedit.selection.pos", "worldedit.selection.hpos",
+                "worldedit.selection.expand", "worldedit.selection.contract", "worldedit.selection.shift",
+                "worldedit.selection.size", "worldedit.analysis.sel", "worldedit.analysis.count", "worldedit.analysis.distr",
+                "worldedit.region.set", "worldedit.region.replace", "worldedit.region.walls", "worldedit.region.faces",
+                "worldedit.history.undo", "worldedit.history.redo",
+                "worldedit.clipboard.copy", "worldedit.clipboard.cut", "worldedit.clipboard.paste",
+                "worldedit.clipboard.rotate", "worldedit.clipboard.flip", "worldedit.clipboard.clear")) {
+            perms.setPermission(node, true);
+        }
+        if (tier < 2) {
+            return;
+        }
+
+        // Saint II - shapes and region operations
+        for (String node : List.of(
+                "worldedit.region.stack", "worldedit.region.move", "worldedit.region.overlay",
+                "worldedit.region.naturalize", "worldedit.region.smooth", "worldedit.region.center",
+                "worldedit.region.line", "worldedit.region.curve", "worldedit.region.hollow",
+                "worldedit.generation.sphere", "worldedit.generation.cylinder", "worldedit.generation.pyramid")) {
+            perms.setPermission(node, true);
+        }
+        if (tier < 3) {
+            return;
+        }
+
+        // Saint III and Architect - brushes and masks
+        for (String node : List.of(
+                "worldedit.brush.sphere", "worldedit.brush.cylinder", "worldedit.brush.smooth",
+                "worldedit.brush.clipboard", "worldedit.brush.gravity",
+                "worldedit.brush.options.mask", "worldedit.brush.options.material",
+                "worldedit.brush.options.size", "worldedit.brush.options.range",
+                "worldedit.global-mask", "worldedit.replacenear",
+                "worldedit.region.forest", "worldedit.region.flora", "worldedit.generation.forest")) {
+            perms.setPermission(node, true);
         }
     }
 

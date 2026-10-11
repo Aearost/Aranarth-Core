@@ -282,7 +282,7 @@ public class SpawnProtectionListener implements Listener {
      */
     @EventHandler
     private void onEnderPearlThrow(ProjectileLaunchEvent e) {
-        if (e.getLocation().getWorld().getName().equals("spawn")) {
+        if (AranarthUtils.isSpawnLocation(e.getLocation())) {
             if (e.getEntityType() == EntityType.ENDER_PEARL || e.getEntityType() == EntityType.ARROW
                     || e.getEntityType() == EntityType.SPECTRAL_ARROW || e.getEntityType() == EntityType.TRIDENT
                     || e.getEntityType() == EntityType.FIREBALL || e.getEntityType() == EntityType.SMALL_FIREBALL
@@ -304,7 +304,7 @@ public class SpawnProtectionListener implements Listener {
      */
     @EventHandler
     private void onChorusFruitEat(PlayerItemConsumeEvent e) {
-        if (e.getPlayer().getLocation().getWorld().getName().equals("spawn")) {
+        if (AranarthUtils.isSpawnLocation(e.getPlayer().getLocation())) {
             if (e.getItem().getType() == Material.CHORUS_FRUIT) {
                 e.setCancelled(true);
                 e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "spawn.no_item_use")));

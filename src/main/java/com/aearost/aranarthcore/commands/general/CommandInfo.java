@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.FireType;
 import com.aearost.aranarthcore.network.NetworkManager;
@@ -131,7 +132,7 @@ public class CommandInfo implements CommandExecutor {
 				return "in the &eArena";
 			}
 			case "creative" -> {
-				return "in &eCreative";
+				return AranarthCore.isSmpServer() ? "in &eSMP Creative" : "in &eCreative";
 			}
 			case "shops" -> {
 				return "in the &eShops World";

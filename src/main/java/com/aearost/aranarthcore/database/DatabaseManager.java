@@ -468,6 +468,12 @@ public class DatabaseManager {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
                 """
+            CREATE TABLE IF NOT EXISTS server_creative_plots (
+                plot_key VARCHAR(32) PRIMARY KEY,
+                data_json MEDIUMTEXT NOT NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+                """
             CREATE TABLE IF NOT EXISTS server_coupons (
                 id BIGINT AUTO_INCREMENT PRIMARY KEY,
                 discount INT NOT NULL,
@@ -2178,6 +2184,41 @@ public class DatabaseManager {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all outposts: " + e.getMessage());
         }
         return result;
+    }
+
+    public void saveCreativePlot(String plotKey, String dataJson) {
+        String sql = "INSERT INTO server_creative_plots (plot_key, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, plotKey);
+            ps.setString(2, dataJson);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save creative plot " + plotKey + ": " + e.getMessage());
+        }
+    }
+
+    public Map<String, String> loadAllCreativePlots() {
+        String sql = "SELECT plot_key, data_json FROM server_creative_plots";
+        Map<String, String> result = new HashMap<>();
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                result.put(rs.getString("plot_key"), rs.getString("data_json"));
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load creative plots: " + e.getMessage());
+        }
+        return result;
+    }
+
+    public void deleteCreativePlot(String plotKey) {
+        String sql = "DELETE FROM server_creative_plots WHERE plot_key = ?";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, plotKey);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to delete creative plot " + plotKey + ": " + e.getMessage());
+        }
     }
 
     public void deleteOutpost(UUID id) {

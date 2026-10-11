@@ -105,7 +105,7 @@ public class PlayerRespawnEventListener implements Listener {
 
         aranarthPlayer.setLastKnownTeleportLocation(player.getLocation());
 
-        if (world.equalsIgnoreCase("arena") || world.equalsIgnoreCase("creative")) {
+        if (world.equalsIgnoreCase("arena") || world.startsWith("creative")) {
             aranarthPlayer.setLevelBeforeDeath(player.getLevel());
             aranarthPlayer.setExpBeforeDeath(player.getExp());
             e.getDrops().clear();
@@ -143,7 +143,7 @@ public class PlayerRespawnEventListener implements Listener {
         String world = (deathLocation != null && deathLocation.getWorld() != null)
                 ? deathLocation.getWorld().getName()
                 : e.getPlayer().getWorld().getName();
-        if (world.equalsIgnoreCase("arena") || world.equalsIgnoreCase("creative")) {
+        if (world.equalsIgnoreCase("arena") || world.startsWith("creative")) {
             new RespawnNonSurvival().execute(e);
         } else {
             new RespawnSurvival().execute(e);

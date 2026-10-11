@@ -125,3 +125,20 @@ voice-chat:
     port: 24460
     # Must be identical on both servers and at least 16 characters. Keep it private.
     secret: ""
+
+# Creative plots world ("creative" on the Survival server).
+creative-plots:
+  # Size of one plot's buildable area and the width of everything between two plots (both borders + the road), in blocks.
+  # Must match plot_tile.schem if it is used (plot-size + road-width = the tile's width).
+  plot-size: 100
+  road-width: 11
+  # Starting world border diameter, rounded down to whole rings of plots around plot 0,0. Chunky pre-generates
+  # this area when the world is first created. Use /creative expand <rings> to grow it afterwards.
+  border-size: 2500
+  # Where /creative and /plot spawn teleport to.
+  spawn:
+    x: 0.5
+    y: 75.0
+    z: 0.5
+    yaw: 0.0
+    pitch: 0.0

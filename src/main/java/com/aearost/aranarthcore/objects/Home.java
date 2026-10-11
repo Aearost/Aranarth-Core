@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.objects;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.PlotUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -9,12 +10,6 @@ import org.bukkit.World;
 
 /**
  * Handles all necessary functionality relating to homes in Aranarth.
- *
- * <p>World names use a server-aware convention so homes survive cross-server transfers:
- * <ul>
- *   <li>SMP homes: {@code "smp:world"}, {@code "smp:world_nether"}, {@code "smp:world_the_end"}</li>
- *   <li>Survival/other homes: plain world name (e.g. {@code "world"}, {@code "spawn"})</li>
- * </ul>
  */
 public class Home {
 
@@ -59,6 +54,7 @@ public class Home {
 			if (wn.equals("world"))           return "smp:world";
 			if (wn.equals("world_nether"))    return "smp:world_nether";
 			if (wn.equals("world_the_end"))   return "smp:world_the_end";
+			if (wn.equals(PlotUtils.WORLD_NAME))   return "smp:" + wn;
 		} else {
 			// Survival server: old local SMP world names get the prefix
 			if (wn.equals("smp"))             return "smp:world";

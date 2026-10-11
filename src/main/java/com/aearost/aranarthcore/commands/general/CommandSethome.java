@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.PlotUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -32,10 +33,15 @@ public class CommandSethome implements CommandExecutor {
 				Location loc = AranarthUtils.getSafeTeleportLocation(player.getLocation());
 				String worldName = loc == null ? null : loc.getWorld().getName();
 				boolean isOG = AranarthUtils.isOriginalPlayer(player.getUniqueId());
+				// Plots are reached with /plot home instead
+				if (worldName != null && PlotUtils.isPlotWorld(worldName)) {
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("home.cannot_set_plots")));
+					return true;
+				}
 				if (worldName == null
 						|| worldName.equals("arena")
 						|| worldName.startsWith("resource")
-						|| (!isOG && worldName.equals("creative"))
+						|| (!isOG && PlotUtils.isSmpCreativeWorld(worldName))
 						|| (!isOG && AranarthUtils.isSmpWorld(worldName))) {
 					player.sendMessage(ChatUtils.chatMessage(Lang.get("home.cannot_set_here")));
 					return true;

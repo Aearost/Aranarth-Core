@@ -14,7 +14,7 @@ public class EnderChestOpenPrevent {
 	public void execute(PlayerInteractEvent e) {
 		if (e.getHand() == EquipmentSlot.HAND) {
 			if (e.getClickedBlock().getType() == Material.ENDER_CHEST) {
-				if (e.getPlayer().getWorld().getName().equalsIgnoreCase("creative")) {
+				if (e.getPlayer().getWorld().getName().startsWith("creative")) {
 					if (!e.getPlayer().isOp()) {
 						e.setCancelled(true);
 						e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("access.cannot_ender_creative")));

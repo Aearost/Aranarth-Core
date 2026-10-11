@@ -60,7 +60,7 @@ public class CommandInvSwap {
                 currentType = "SURVIVAL";
             } else if (worldName.startsWith("arena")) {
                 currentType = "ARENA";
-            } else if (worldName.equals("creative")) {
+            } else if (worldName.startsWith("creative")) {
                 currentType = "CREATIVE";
             } else {
                 player.sendMessage(ChatUtils.chatMessage(Lang.get("invswap.unknown_type")));

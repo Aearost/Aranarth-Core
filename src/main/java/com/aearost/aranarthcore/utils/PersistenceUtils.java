@@ -294,6 +294,8 @@ public class PersistenceUtils {
                                 savedWorldName = "smp:world_nether";
                             } else if (fileWorldName.equals("smp_the_end")) {
                                 savedWorldName = "smp:world_the_end";
+                            } else if (fileWorldName.equals(PlotUtils.WORLD_NAME)) {
+                                savedWorldName = "smp:" + PlotUtils.WORLD_NAME;
                             } else {
                                 savedWorldName = fileWorldName;
                             }
@@ -7078,6 +7080,8 @@ public class PersistenceUtils {
                     savedWorldName = "smp:world_nether";
                 } else if (fileWorldName.equals("smp_the_end")) {
                     savedWorldName = "smp:world_the_end";
+                } else if (fileWorldName.equals(PlotUtils.WORLD_NAME)) {
+                    savedWorldName = "smp:" + PlotUtils.WORLD_NAME;
                 } else {
                     savedWorldName = fileWorldName;
                 }
@@ -9158,6 +9162,85 @@ public class PersistenceUtils {
     // -------------------------------------------------------------------------
     // Job Data (MySQL only - shared across servers)
     // -------------------------------------------------------------------------
+
+    /**
+     * Loads the Creative plots from MySQL.
+     */
+    public static void loadCreativePlotsFromDatabase() {
+        Map<String, String> all = DatabaseManager.getInstance().loadAllCreativePlots();
+        if (all.isEmpty()) {
+            loadCreativePlots();
+            return;
+        }
+        for (Map.Entry<String, String> entry : all.entrySet()) {
+            try {
+                PlotUtils.loadPlot(PlotUtils.fromJson(GSON.fromJson(entry.getValue(), JsonObject.class)));
+            } catch (Exception e) {
+                Bukkit.getLogger().warning("[AC] Failed to parse creative plot " + entry.getKey() + " from DB: " + e.getMessage());
+            }
+        }
+        Bukkit.getLogger().info("[AC] " + all.size() + " creative plots initialized from MySQL");
+    }
+
+    /**
+     * Loads the Creative plots from creative_plots.json, used on the test server.
+     */
+    public static void loadCreativePlots() {
+        File file = new File(AranarthCore.getInstance().getDataFolder(), "creative_plots.json");
+        if (!file.exists()) {
+            return;
+        }
+        try {
+            JsonArray array = GSON.fromJson(Files.readString(file.toPath()), JsonArray.class);
+            if (array == null) {
+                return;
+            }
+            for (int i = 0; i < array.size(); i++) {
+                PlotUtils.loadPlot(PlotUtils.fromJson(array.get(i).getAsJsonObject()));
+            }
+            Bukkit.getLogger().info("[AC] " + array.size() + " creative plots initialized from creative_plots.json");
+        } catch (Exception e) {
+            Bukkit.getLogger().warning("[AC] Failed to load creative_plots.json: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Saves a single Creative plot immediately to MySQL, or to creative_plots.json on the test server.
+     */
+    public static void saveCreativePlot(CreativePlot plot) {
+        if (DatabaseManager.isActive()) {
+            DatabaseManager.getInstance().saveCreativePlot(plot.getKey(), GSON.toJson(PlotUtils.toJson(plot)));
+        } else {
+            saveCreativePlotsFile();
+        }
+    }
+
+    /**
+     * Deletes a single Creative plot immediately from MySQL, or from creative_plots.json on the test server.
+     */
+    public static void deleteCreativePlot(String plotKey) {
+        if (DatabaseManager.isActive()) {
+            DatabaseManager.getInstance().deleteCreativePlot(plotKey);
+        } else {
+            saveCreativePlotsFile();
+        }
+    }
+
+    private static void saveCreativePlotsFile() {
+        File folder = AranarthCore.getInstance().getDataFolder();
+        if (!folder.isDirectory() && !folder.mkdirs()) {
+            return;
+        }
+        JsonArray array = new JsonArray();
+        for (CreativePlot plot : PlotUtils.getPlots()) {
+            array.add(PlotUtils.toJson(plot));
+        }
+        try (FileWriter writer = new FileWriter(new File(folder, "creative_plots.json"))) {
+            writer.write(GSON.toJson(array));
+        } catch (IOException e) {
+            Bukkit.getLogger().warning("[AC] Failed to save creative_plots.json: " + e.getMessage());
+        }
+    }
 
     /**
      * Loads outposts from MySQL. Must be called after loadDominionsFromDatabase().

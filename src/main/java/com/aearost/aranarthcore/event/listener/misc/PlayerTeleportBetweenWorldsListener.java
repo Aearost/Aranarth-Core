@@ -38,7 +38,7 @@ public class PlayerTeleportBetweenWorldsListener implements Listener {
             String destinationWorld = e.getTo().getWorld().getName();
             if (!currentWorld.equals(destinationWorld)) {
                 GameMode newMode = GameMode.SURVIVAL;
-                if (destinationWorld.equalsIgnoreCase("creative")) {
+                if (destinationWorld.startsWith("creative")) {
                     newMode = GameMode.CREATIVE;
                 }
                 // Shops world uses the survival game mode

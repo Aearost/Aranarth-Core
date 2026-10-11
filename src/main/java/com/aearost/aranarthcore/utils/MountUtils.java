@@ -69,7 +69,7 @@ public class MountUtils {
      */
     public static void summonMount(Player player, String element) {
         String worldName = player.getWorld().getName();
-        if (worldName.equals("spawn") || worldName.equals("arena") || worldName.equals("creative")) {
+        if (worldName.equals("spawn") || worldName.equals("arena") || worldName.startsWith("creative")) {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("mount.wrong_world")));
             return;
         }

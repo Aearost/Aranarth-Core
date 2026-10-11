@@ -34,7 +34,6 @@ import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -419,7 +418,7 @@ public class AranarthUtils {
 
         // No need to change inventory
         if (isSurvivalToSurvival || isSameWorld) {
-            if (!destinationWorld.equals("creative")) {
+            if (!destinationWorld.startsWith("creative")) {
                 if (aranarthPlayer.getCouncilRank() != 3) {
                     player.setGameMode(GameMode.SURVIVAL);
                 }
@@ -431,15 +430,6 @@ public class AranarthUtils {
                 player.removePotionEffect(effect.getType());
             }
         }
-
-        // World edit permissions
-        PermissionAttachment perms = PermissionUtils.addTrackedAttachment(player);
-        if (destinationWorld.equals("creative")) {
-            perms.setPermission("worldedit.*", true);
-        } else {
-            perms.setPermission("worldedit.*", false);
-        }
-        player.updateCommands();
 
         if (currentWorld.startsWith("world")) {
             aranarthPlayer.setSurvivalInventory(ItemUtils.toBase64(player.getInventory()));
@@ -556,7 +546,8 @@ public class AranarthUtils {
                 PermissionUtils.updateSubElements(player);
                 player.updateCommands();
                 return;
-            } else if (destinationWorld.equals("creative")) {
+            } else if (destinationWorld.startsWith("creative")) {
+                // Both creative worlds share the same creative inventory
                 return;
             }
             player.getInventory().clear();
@@ -2018,7 +2009,7 @@ public class AranarthUtils {
      * @return Confirmation if the input coordinate is within the server Spawn world.
      */
     public static boolean isSpawnLocation(Location loc) {
-        return loc.getWorld().getName().equals("spawn");
+        return loc.getWorld().getName().equals("spawn") || PlotUtils.isSpawnPlotLocation(loc);
     }
 
     /**

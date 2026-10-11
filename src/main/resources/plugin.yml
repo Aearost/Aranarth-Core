@@ -4,7 +4,7 @@ authors: [ Aearost ]
 main: com.aearost.aranarthcore.AranarthCore
 api-version: 26.3
 depend: [ mcMMO, ProjectKorra, DiscordSRV ]
-softdepend: [ VotifierPlus, BreweryX, squaremap, voicechat ]
+softdepend: [ VotifierPlus, BreweryX, squaremap, voicechat, WorldEdit ]
 description: A core plugin to incorporate any features we desire into our Minecraft world
 loadbefore: [ mcMMO ]
 # BungeeCord plugin messaging channel used to transfer players between servers via Velocity.
@@ -69,7 +69,7 @@ commands:
     aliases: [ workbench, wb, ct ]
     permission: aranarth.tables
   creative:
-    description: Teleports the player to the Creative world
+    description: Teleports the player to the Creative plots world
     permission: aranarth.creative
   date:
     description: Lists the current Aranarth calendar date
@@ -145,6 +145,10 @@ commands:
     description: Opens the Market Price GUI showing current item prices
     aliases: [ mp ]
     permission: aranarth.marketprice
+  smpcreative:
+    description: Teleports original players to the SMP Creative world
+    aliases: [ smpc ]
+    permission: aranarth.creative
   smpmap:
     description: Sends OG players a clickable link to the Aranarth SMP live map
     permission: aranarth.smpmap
@@ -178,6 +182,9 @@ commands:
   pettransfer:
     description: Allows the player to specify a player to transfer their pet's ownership to
     permission: aranarth.pettransfer
+  plot:
+    description: Claims and manages plots in the Creative world
+    permission: aranarth.plot
   ping:
     description: Shows the input player's ping
     permission: aranarth.ping

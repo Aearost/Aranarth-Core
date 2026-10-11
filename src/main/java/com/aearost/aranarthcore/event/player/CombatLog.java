@@ -37,7 +37,7 @@ public class CombatLog {
 						return;
 					}
 				}
-				if (!player.getWorld().getName().startsWith("resource") && !player.getWorld().getName().equals("creative")
+				if (!player.getWorld().getName().startsWith("resource") && !player.getWorld().getName().startsWith("creative")
 					&& !player.getWorld().getName().equals("spawn")) {
 					new BukkitRunnable() {
 						@Override
