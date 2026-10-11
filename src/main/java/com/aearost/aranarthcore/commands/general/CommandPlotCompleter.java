@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  */
 public class CommandPlotCompleter implements TabCompleter {
 
-	private static final List<String> SUBCOMMANDS = List.of("claim", "unclaim", "reset", "merge", "rename", "add", "remove", "home", "list", "info", "spawn");
+	private static final List<String> SUBCOMMANDS = List.of("claim", "unclaim", "reset", "merge", "rename", "add", "remove", "home", "tp", "list", "info", "spawn");
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
@@ -41,8 +41,20 @@ public class CommandPlotCompleter implements TabCompleter {
 				case "home", "merge", "rename" -> {
 					return filter(getPlotNames(player.getUniqueId()), args[1]);
 				}
-				case "add" -> {
+				case "add", "tp" -> {
 					return AranarthUtils.getNetworkPlayerNames(args[1]);
+				}
+				case "unclaim", "reset" -> {
+					// Staff in admin mode can also target another player's plot by name
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+					List<String> options = new ArrayList<>();
+					if ("confirm".startsWith(args[1].toLowerCase())) {
+						options.add("confirm");
+					}
+					if (aranarthPlayer.isInAdminMode()) {
+						options.addAll(AranarthUtils.getNetworkPlayerNames(args[1]));
+					}
+					return options;
 				}
 				case "remove" -> {
 					return filter(getStandingPlotMembers(player), args[1]);
@@ -60,6 +72,10 @@ public class CommandPlotCompleter implements TabCompleter {
 		if (args.length == 3 && subcommand.equals("merge")) {
 			return filter(getPlotNames(player.getUniqueId()), args[2]);
 		}
+		if (args.length == 3 && (subcommand.equals("tp") || subcommand.equals("unclaim") || subcommand.equals("reset"))) {
+			UUID target = AranarthUtils.getUUIDFromUsername(args[1]);
+			return target == null ? List.of() : filter(getPlotNames(target), args[2]);
+		}
 		if (args.length == 3 && subcommand.equals("rename")) {
 			return args[2].isEmpty() ? List.of("name") : List.of();
 		}
@@ -72,7 +88,7 @@ public class CommandPlotCompleter implements TabCompleter {
 	private static List<String> getPlotNames(UUID uuid) {
 		List<String> names = new ArrayList<>();
 		for (CreativePlot plot : PlotUtils.getOwnedPlotGroups(uuid)) {
-			names.add(plot.getName());
+			names.add(PlotUtils.stripName(plot.getName()));
 		}
 		return names;
 	}

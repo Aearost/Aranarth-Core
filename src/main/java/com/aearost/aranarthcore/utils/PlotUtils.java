@@ -266,12 +266,21 @@ public class PlotUtils {
      * Provides the player's plot with the name. Merged plots share one name, so the earliest claimed plot of the group is used.
      */
     public static CreativePlot getOwnedPlotByName(UUID uuid, String name) {
+        // Names are matched without their color codes
+        String stripped = stripName(name);
         for (CreativePlot plot : getOwnedPlots(uuid)) {
-            if (plot.getName().equalsIgnoreCase(name)) {
+            if (stripName(plot.getName()).equalsIgnoreCase(stripped)) {
                 return plot;
             }
         }
         return null;
+    }
+
+    /**
+     * Provides the plot name without its color codes, which is what players type to refer to it.
+     */
+    public static String stripName(String name) {
+        return ChatUtils.stripColorFormatting(name);
     }
 
     /**
@@ -304,8 +313,16 @@ public class PlotUtils {
         }
     }
 
+    /**
+     * Provides whether the plot name is allowed. Color codes may be used, and the rest of the name
+     * can only contain letters, numbers, - and _, up to 16 characters.
+     */
     public static boolean isValidName(String name) {
-        return name.length() <= MAX_NAME_LENGTH && name.matches("[A-Za-z0-9_-]+");
+        if (!name.matches("([A-Za-z0-9_-]|&[0-9a-fA-Fk-oK-OrR])+")) {
+            return false;
+        }
+        String stripped = stripName(name);
+        return !stripped.isEmpty() && stripped.length() <= MAX_NAME_LENGTH;
     }
 
     /**
@@ -482,7 +499,11 @@ public class PlotUtils {
     private static String getUnusedName(UUID owner, String base) {
         for (int i = 2; ; i++) {
             String suffix = "_" + i;
-            String candidate = base.substring(0, Math.min(base.length(), MAX_NAME_LENGTH - suffix.length())) + suffix;
+            String stripped = stripName(base);
+            // Keeps the color codes unless the name has to be shortened to fit the suffix
+            String candidate = stripped.length() + suffix.length() <= MAX_NAME_LENGTH
+                    ? base + suffix
+                    : stripped.substring(0, MAX_NAME_LENGTH - suffix.length()) + suffix;
             if (getOwnedPlotByName(owner, candidate) == null) {
                 return candidate;
             }
@@ -506,6 +527,42 @@ public class PlotUtils {
         }
         File legacy = new File(container, worldName);
         return legacy.isDirectory() ? legacy : null;
+    }
+
+    /**
+     * Unclaims every plot of a merged group, calling onComplete once all of them are done.
+     */
+    public static void unclaimGroup(CreativePlot plot, Runnable onComplete) {
+        List<CreativePlot> group = getMergedGroup(plot);
+        Runnable groupComplete = countDown(group.size(), onComplete);
+        // Every merge is removed before any regeneration runs, so the roads come back everywhere
+        for (CreativePlot groupPlot : group) {
+            unclaimPlot(groupPlot, groupComplete);
+        }
+    }
+
+    /**
+     * Resets every plot of a merged group, calling onComplete once all of them are done.
+     */
+    public static void resetGroup(CreativePlot plot, Runnable onComplete) {
+        List<CreativePlot> group = getMergedGroup(plot);
+        Runnable groupComplete = countDown(group.size(), onComplete);
+        for (CreativePlot groupPlot : group) {
+            resetPlot(groupPlot, groupComplete);
+        }
+    }
+
+    /**
+     * Provides a runnable that only runs onComplete after it has been run the given number of times.
+     */
+    private static Runnable countDown(int count, Runnable onComplete) {
+        int[] remaining = {count};
+        return () -> {
+            remaining[0]--;
+            if (remaining[0] == 0 && onComplete != null) {
+                onComplete.run();
+            }
+        };
     }
 
     /**

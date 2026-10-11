@@ -30,7 +30,7 @@ public class CommandPlot implements CommandExecutor {
 
     private static final long CONFIRM_MILLIS = 30_000;
 
-    private record PendingConfirm(String action, String plotKey, long expiresAt) {
+    private record PendingConfirm(String action, String plotKey, boolean wholeGroup, long expiresAt) {
     }
 
     private static final Map<UUID, PendingConfirm> pendingConfirms = new HashMap<>();
@@ -50,7 +50,7 @@ public class CommandPlot implements CommandExecutor {
         }
         if (args.length == 0) {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage",
-                    "plot <claim|unclaim|reset|merge|rename|add|remove|home|list|info|spawn>")));
+                    "plot <claim|unclaim|reset|merge|rename|add|remove|home|tp|list|info|spawn>")));
             return true;
         }
 
@@ -63,11 +63,12 @@ public class CommandPlot implements CommandExecutor {
             case "add" -> add(player, args);
             case "remove" -> remove(player, args);
             case "home" -> home(player, args);
+            case "tp" -> tp(player, args);
             case "list" -> list(player);
             case "info" -> info(player);
             case "spawn" -> spawn(player, args);
             default -> player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage",
-                    "plot <claim|unclaim|reset|merge|rename|add|remove|home|list|info|spawn>")));
+                    "plot <claim|unclaim|reset|merge|rename|add|remove|home|tp|list|info|spawn>")));
         }
         return true;
     }
@@ -106,23 +107,37 @@ public class CommandPlot implements CommandExecutor {
 
     private void unclaim(Player player, String[] args) {
         if (args.length == 2 && args[1].equalsIgnoreCase("confirm")) {
+            PendingConfirm pending = pendingConfirms.get(player.getUniqueId());
             CreativePlot plot = consumeConfirm(player, "unclaim");
             if (plot == null) {
                 return;
             }
             String name = plot.getName();
-            PlotUtils.unclaimPlot(plot, () -> {
+            Runnable onComplete = () -> {
                 if (player.isOnline()) {
                     player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "plot.unclaimed", "plot", name)));
                 }
-            });
+            };
+            if (pending.wholeGroup()) {
+                PlotUtils.unclaimGroup(plot, onComplete);
+            } else {
+                PlotUtils.unclaimPlot(plot, onComplete);
+            }
+            return;
+        }
+        // Staff in admin mode can unclaim another player's plot by name
+        if (args.length == 3) {
+            CreativePlot plot = getOtherPlayersPlot(player, args);
+            if (plot != null) {
+                requestConfirm(player, "unclaim", plot, true, "plot.confirm_unclaim");
+            }
             return;
         }
         CreativePlot plot = getManageablePlot(player);
         if (plot == null) {
             return;
         }
-        requestConfirm(player, "unclaim", plot, "plot.confirm_unclaim");
+        requestConfirm(player, "unclaim", plot, false, "plot.confirm_unclaim");
     }
 
     private void reset(Player player, String[] args) {
@@ -137,7 +152,7 @@ public class CommandPlot implements CommandExecutor {
             int gridZ = Integer.parseInt(parts[1]);
             CreativePlot plot = PlotUtils.getPlot(gridX, gridZ);
             String name = plot != null ? plot.getName() : pending.plotKey();
-            if (plot != null && PlotUtils.isBusy(plot)) {
+            if (plot != null && isGroupBusy(plot, pending.wholeGroup())) {
                 player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.busy")));
                 return;
             }
@@ -146,10 +161,21 @@ public class CommandPlot implements CommandExecutor {
                     player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "plot.reset", "plot", name)));
                 }
             };
-            if (plot != null) {
+            if (plot != null && pending.wholeGroup()) {
+                PlotUtils.resetGroup(plot, onComplete);
+            } else if (plot != null) {
                 PlotUtils.resetPlot(plot, onComplete);
             } else {
                 PlotUtils.resetPlotArea(gridX, gridZ, onComplete);
+            }
+            return;
+        }
+
+        // Staff in admin mode can reset another player's plot by name
+        if (args.length == 3) {
+            CreativePlot plot = getOtherPlayersPlot(player, args);
+            if (plot != null) {
+                requestConfirm(player, "reset", plot, true, "plot.confirm_reset");
             }
             return;
         }
@@ -163,7 +189,7 @@ public class CommandPlot implements CommandExecutor {
         // Staff in admin mode can reset unclaimed plots too
         if (plot == null && aranarthPlayer.isInAdminMode()) {
             String key = PlotUtils.getKey(coordinates[0], coordinates[1]);
-            pendingConfirms.put(player.getUniqueId(), new PendingConfirm("reset", key, System.currentTimeMillis() + CONFIRM_MILLIS));
+            pendingConfirms.put(player.getUniqueId(), new PendingConfirm("reset", key, false, System.currentTimeMillis() + CONFIRM_MILLIS));
             sendConfirmMessage(player, "plot.confirm_reset", key, "/plot reset confirm");
             return;
         }
@@ -171,7 +197,7 @@ public class CommandPlot implements CommandExecutor {
         if (plot == null) {
             return;
         }
-        requestConfirm(player, "reset", plot, "plot.confirm_reset");
+        requestConfirm(player, "reset", plot, false, "plot.confirm_reset");
     }
 
     private void merge(Player player, String[] args) {
@@ -330,6 +356,33 @@ public class CommandPlot implements CommandExecutor {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.not_found", "plot", args[1])));
             return;
         }
+        teleportToPlot(player, plot, "plot home " + PlotUtils.stripName(plot.getName()));
+    }
+
+    private void tp(Player player, String[] args) {
+        if (args.length != 3) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "plot tp <player> <plot>")));
+            return;
+        }
+        UUID targetUuid = AranarthUtils.getUUIDFromUsername(args[1]);
+        if (targetUuid == null) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
+            return;
+        }
+        CreativePlot plot = PlotUtils.getOwnedPlotByName(targetUuid, args[2]);
+        if (plot == null) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.not_found_player", "player", args[1], "plot", args[2])));
+            return;
+        }
+        teleportToPlot(player, plot, "plot tp " + args[1] + " " + PlotUtils.stripName(plot.getName()));
+    }
+
+    /**
+     * Teleports the player to the road along the south side of the plot, transferring to Survival first if needed.
+     *
+     * @param transferCommand The command to run on Survival when the player is transferred from the SMP.
+     */
+    private void teleportToPlot(Player player, CreativePlot plot, String transferCommand) {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
         if (!PlotUtils.canAccessPlotWorld(aranarthPlayer)) {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("access.world_restricted")));
@@ -342,7 +395,7 @@ public class CommandPlot implements CommandExecutor {
 
         // The plots world lives on Survival - count down then transfer
         if (!PlotUtils.isPlotServer()) {
-            transferToPlotServer(player, aranarthPlayer, "plot home " + plot.getName(), "&e&l" + plot.getName());
+            transferToPlotServer(player, aranarthPlayer, transferCommand, "&e&l" + plot.getName());
             return;
         }
 
@@ -500,8 +553,55 @@ public class CommandPlot implements CommandExecutor {
         return plot;
     }
 
-    private void requestConfirm(Player player, String action, CreativePlot plot, String messageKey) {
-        pendingConfirms.put(player.getUniqueId(), new PendingConfirm(action, plot.getKey(), System.currentTimeMillis() + CONFIRM_MILLIS));
+    /**
+     * Provides another player's plot by name for staff in admin mode, or null with a message.
+     *
+     * @param args The command arguments, with the player at index 1 and the plot name at index 2.
+     */
+    private CreativePlot getOtherPlayersPlot(Player player, String[] args) {
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        if (!aranarthPlayer.isInAdminMode()) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+            return null;
+        }
+        if (!PlotUtils.isPlotServer()) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.not_in_world")));
+            return null;
+        }
+        UUID targetUuid = AranarthUtils.getUUIDFromUsername(args[1]);
+        if (targetUuid == null) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
+            return null;
+        }
+        CreativePlot plot = PlotUtils.getOwnedPlotByName(targetUuid, args[2]);
+        if (plot == null) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.not_found_player", "player", args[1], "plot", args[2])));
+            return null;
+        }
+        if (isGroupBusy(plot, true)) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.busy")));
+            return null;
+        }
+        return plot;
+    }
+
+    /**
+     * Provides whether the plot, or any plot merged with it when the whole group is included, is being regenerated.
+     */
+    private boolean isGroupBusy(CreativePlot plot, boolean wholeGroup) {
+        if (!wholeGroup) {
+            return PlotUtils.isBusy(plot);
+        }
+        for (CreativePlot groupPlot : PlotUtils.getMergedGroup(plot)) {
+            if (PlotUtils.isBusy(groupPlot)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void requestConfirm(Player player, String action, CreativePlot plot, boolean wholeGroup, String messageKey) {
+        pendingConfirms.put(player.getUniqueId(), new PendingConfirm(action, plot.getKey(), wholeGroup, System.currentTimeMillis() + CONFIRM_MILLIS));
         sendConfirmMessage(player, messageKey, plot.getName(), "/plot " + action + " confirm");
     }
 
@@ -532,7 +632,7 @@ public class CommandPlot implements CommandExecutor {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.nothing_to_confirm")));
             return null;
         }
-        if (PlotUtils.isBusy(plot)) {
+        if (isGroupBusy(plot, pending.wholeGroup())) {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.busy")));
             return null;
         }

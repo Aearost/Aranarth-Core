@@ -1,6 +1,7 @@
 AranarthCore v. 1.14
 
 World & Events
+[+] Added in creative plots functionality, accessible by /creative
 [+] Added custom toggleable /sit functionality
 [~] Wandering Enchanter over-leveled lockout is now per-player
 [~] Fixed AFK messages not displaying nicknames in color correctly
@@ -31,6 +32,7 @@ Quality of Life
 [~] Fixed sent mail preview not being color formatted for lang files
 
 Cross-server & Technical
+[~] The previous /creative is now available in the SMP server via /smpcreative or /smpc as an alias
 [~] Fixed players sometimes missing flight when entering the Creative world
 [~] Fixed cross-server join error for players new to a server, and SMP deaths respawning into a null world
 [~] Opped players now receive all Saint, Council, Architect and perk permissions
