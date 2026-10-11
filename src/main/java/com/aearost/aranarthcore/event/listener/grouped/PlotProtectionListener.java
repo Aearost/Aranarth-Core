@@ -340,12 +340,13 @@ public class PlotProtectionListener implements Listener {
         if (from.getBlockX() == to.getBlockX() && from.getBlockZ() == to.getBlockZ() && from.getWorld() == to.getWorld()) {
             return;
         }
-        updateCurrentPlot(e.getPlayer(), to);
+        updateCurrentPlot(e.getPlayer(), to, true);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onTeleport(PlayerTeleportEvent e) {
-        updateCurrentPlot(e.getPlayer(), e.getTo());
+        // The teleport title already shows when teleporting to the Creative spawn
+        updateCurrentPlot(e.getPlayer(), e.getTo(), false);
     }
 
     @EventHandler
@@ -357,11 +358,18 @@ public class PlotProtectionListener implements Listener {
      * Tracks the plot the player is standing in, showing a title when it changes.
      * Only the inside of a plot counts, so walking along the roads and borders shows nothing.
      */
-    private void updateCurrentPlot(Player player, Location to) {
+    private void updateCurrentPlot(Player player, Location to, boolean showSpawnTitle) {
         CreativePlot plot = PlotUtils.getAreaPlot(to);
         UUID uuid = player.getUniqueId();
-        if (plot == null || plot.isSpawn()) {
+        if (plot == null) {
             currentPlots.remove(uuid);
+            return;
+        }
+        if (plot.isSpawn()) {
+            // Spawn plots are merged together, so they count as a single area
+            if (!"spawn".equals(currentPlots.put(uuid, "spawn")) && showSpawnTitle) {
+                player.sendTitle(ChatUtils.translateToColor(Lang.getFor(player, "plot.title_spawn")),
+                        ChatUtils.translateToColor(Lang.getFor(player, "plot.title_spawn_subtitle")));            }
             return;
         }
         // Merged plots share a name, so walking between them does not show the title again

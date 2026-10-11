@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.PlotUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import io.papermc.paper.event.player.PlayerOpenSignEvent;
 import org.bukkit.*;
@@ -39,13 +40,22 @@ public class SpawnProtectionListener implements Listener {
     }
 
     /**
+     * Provides whether the player bypasses the spawn protections at the location.
+     * Architects can temporarily build in the Creative spawn plots.
+     */
+    private boolean canModify(Player player, Location loc) {
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        return aranarthPlayer.isInAdminMode()
+                || (PlotUtils.canBuildInSpawnPlots(aranarthPlayer) && PlotUtils.isSpawnPlotLocation(loc));
+    }
+
+    /**
      * Prevents players from placing blocks at spawn.
      */
     @EventHandler
     public void onPlace(BlockPlaceEvent e) {
         if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-            if (!aranarthPlayer.isInAdminMode()) {
+            if (!canModify(e.getPlayer(), e.getBlock().getLocation())) {
                 e.setCancelled(true);
             }
         }
@@ -57,8 +67,7 @@ public class SpawnProtectionListener implements Listener {
     @EventHandler
     public void onBucketEmpty(PlayerBucketEmptyEvent e) {
         if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-            if (!aranarthPlayer.isInAdminMode()) {
+            if (!canModify(e.getPlayer(), e.getBlock().getLocation())) {
                 e.setCancelled(true);
             }
         }
@@ -74,8 +83,7 @@ public class SpawnProtectionListener implements Listener {
             return;
         }
         if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-            if (!aranarthPlayer.isInAdminMode()) {
+            if (!canModify(e.getPlayer(), e.getBlock().getLocation())) {
                 e.setCancelled(true);
             }
         }
@@ -87,8 +95,7 @@ public class SpawnProtectionListener implements Listener {
     @EventHandler
     public void onBreak(BlockBreakEvent e) {
         if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-            if (!aranarthPlayer.isInAdminMode()) {
+            if (!canModify(e.getPlayer(), e.getBlock().getLocation())) {
                 e.setCancelled(true);
             }
         }
@@ -101,8 +108,7 @@ public class SpawnProtectionListener implements Listener {
     public void onInteractEntity(PlayerInteractEntityEvent e) {
         if (e.getRightClicked() != null) {
             if (AranarthUtils.isSpawnLocation(e.getRightClicked().getLocation())) {
-                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-                if (!aranarthPlayer.isInAdminMode()) {
+                if (!canModify(e.getPlayer(), e.getRightClicked().getLocation())) {
                     e.setCancelled(true);
                 }
             }
@@ -115,8 +121,7 @@ public class SpawnProtectionListener implements Listener {
     @EventHandler
     public void onArmorStandManipulate(PlayerArmorStandManipulateEvent e) {
         if (AranarthUtils.isSpawnLocation(e.getRightClicked().getLocation())) {
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-            if (!aranarthPlayer.isInAdminMode()) {
+            if (!canModify(e.getPlayer(), e.getRightClicked().getLocation())) {
                 e.setCancelled(true);
             }
         }
@@ -129,8 +134,7 @@ public class SpawnProtectionListener implements Listener {
     public void onPlaceEntity(EntityPlaceEvent e) {
         if (e.getEntity() != null) {
             if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
-                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-                if (!aranarthPlayer.isInAdminMode()) {
+                if (e.getPlayer() != null && !canModify(e.getPlayer(), e.getEntity().getLocation())) {
                     e.setCancelled(true);
                 }
             }
@@ -145,8 +149,7 @@ public class SpawnProtectionListener implements Listener {
         if (e.getEntity() != null) {
             if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
                 if (e.getDamageSource().getCausingEntity() instanceof Player player) {
-                    AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                    if (!aranarthPlayer.isInAdminMode()) {
+                    if (!canModify(player, e.getEntity().getLocation())) {
                         e.setCancelled(true);
                     }
                 }
@@ -161,8 +164,7 @@ public class SpawnProtectionListener implements Listener {
     public void onHangingBreak(HangingBreakByEntityEvent e) {
         if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
             if (e.getRemover() instanceof Player player) {
-                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                if (!aranarthPlayer.isInAdminMode()) {
+                if (!canModify(player, e.getEntity().getLocation())) {
                     e.setCancelled(true);
                 }
             }
@@ -175,8 +177,7 @@ public class SpawnProtectionListener implements Listener {
     @EventHandler
     public void onEntityPlace(HangingPlaceEvent e) {
         if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-            if (!aranarthPlayer.isInAdminMode()) {
+            if (e.getPlayer() != null && !canModify(e.getPlayer(), e.getEntity().getLocation())) {
                 e.setCancelled(true);
             }
         }
@@ -188,8 +189,7 @@ public class SpawnProtectionListener implements Listener {
     @EventHandler
     public void onSignOpen(PlayerOpenSignEvent e) {
         if (AranarthUtils.isSpawnLocation(e.getSign().getLocation())) {
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-            if (!aranarthPlayer.isInAdminMode()) {
+            if (!canModify(e.getPlayer(), e.getSign().getLocation())) {
                 e.setCancelled(true);
             }
         }
@@ -250,8 +250,7 @@ public class SpawnProtectionListener implements Listener {
                         || block.getType() == Material.CRAFTER || block.getType() == Material.HOPPER || block.getType().name().endsWith("_SHELF")
                         || block.getType() == Material.DECORATED_POT || block.getType() == Material.FLOWER_POT || block.getType() == Material.CHISELED_BOOKSHELF
                         || block.getType() == Material.SWEET_BERRY_BUSH || block.getType() == Material.CAVE_VINES || block.getType() == Material.CAVE_VINES_PLANT) {
-                    AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-                    if (!aranarthPlayer.isInAdminMode()) {
+                    if (!canModify(e.getPlayer(), block.getLocation())) {
                         // Allow server shops to be used at spawn
                         if (block.getType().name().endsWith("_SIGN") && ShopUtils.getShopFromLocation(block.getLocation()) != null) {
                             return;
@@ -270,8 +269,7 @@ public class SpawnProtectionListener implements Listener {
     @EventHandler
     public void onTakeLecternBook(PlayerTakeLecternBookEvent e) {
         if (AranarthUtils.isSpawnLocation(e.getLectern().getLocation())) {
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-            if (!aranarthPlayer.isInAdminMode()) {
+            if (!canModify(e.getPlayer(), e.getLectern().getLocation())) {
                 e.setCancelled(true);
             }
         }

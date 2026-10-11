@@ -50,7 +50,7 @@ public class CommandPlot implements CommandExecutor {
         }
         if (args.length == 0) {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage",
-                    "plot <claim|unclaim|reset|merge|rename|add|remove|home|tp|list|info|spawn>")));
+                    "plot <sub-command>")));
             return true;
         }
 
@@ -68,7 +68,7 @@ public class CommandPlot implements CommandExecutor {
             case "info" -> info(player);
             case "spawn" -> spawn(player, args);
             default -> player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage",
-                    "plot <claim|unclaim|reset|merge|rename|add|remove|home|tp|list|info|spawn>")));
+                    "plot <sub-command>")));
         }
         return true;
     }

@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.integration;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.CreativePlot;
 import com.aearost.aranarthcore.objects.PlotPattern;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.PlotUtils;
@@ -64,11 +65,14 @@ public class WorldEditPlotIntegration {
         Actor actor = event.getActor();
         UUID uuid = actor != null && actor.isPlayer() ? actor.getUniqueId() : null;
         boolean bypass = false;
+        boolean spawnBuilder = false;
         if (uuid != null) {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
             bypass = aranarthPlayer != null && aranarthPlayer.isInAdminMode();
+            spawnBuilder = PlotUtils.canBuildInSpawnPlots(aranarthPlayer);
         }
         final boolean isAdmin = bypass;
+        final boolean canBuildSpawn = spawnBuilder;
 
         event.setExtent(new AbstractDelegateExtent(event.getExtent()) {
             private boolean isAllowed(int x, int y, int z) {
@@ -77,6 +81,12 @@ public class WorldEditPlotIntegration {
                 }
                 if (isAdmin) {
                     return true;
+                }
+                if (canBuildSpawn) {
+                    CreativePlot plot = PlotUtils.getAreaPlot(x, z);
+                    if (plot != null && plot.isSpawn()) {
+                        return true;
+                    }
                 }
                 return uuid != null && PlotUtils.canBuild(uuid, x, z);
             }
