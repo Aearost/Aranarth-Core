@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -120,27 +121,27 @@ public class Lightning extends LightningAbility implements AddonAbility {
         this.tasks = new ArrayList<>();
         this.locations = new ArrayList<>();
 
-        this.damage = 10.0;
-        this.range = 20.0;
-        this.chargeTime = 3000;
-        this.cooldown = 10000;
-        this.stunChance = 0.3;
-        this.stunDuration = 30.0;
-        this.maxArcAngle = 2.5;
-        this.subArcChance = 0.00125;
-        this.chainRange = 6.0;
-        this.chainArcChance = 0.5;
-        this.maxChainArcs = 2;
-        this.waterArcs = 4;
-        this.waterArcRange = 20.0;
-        this.conductivityRange = 5.0;
-        this.maxCopperArcs = 8;
-        this.selfHitWater = true;
-        this.selfHitClose = true;
-        this.arcOnIce = true;
-        this.arcOnCopper = true;
-        this.allowOnFireJet = true;
-        this.chainLightningRods = true;
+        this.damage = AbilityConfig.getDouble("Lightning.Damage");
+        this.range = AbilityConfig.getDouble("Lightning.Range");
+        this.chargeTime = AbilityConfig.getDouble("Lightning.ChargeDuration");
+        this.cooldown = AbilityConfig.getLong("Lightning.Cooldown");
+        this.stunChance = AbilityConfig.getDouble("Lightning.StunChance");
+        this.stunDuration = AbilityConfig.getDouble("Lightning.StunDuration");
+        this.maxArcAngle = AbilityConfig.getDouble("Lightning.MaxArcAngle");
+        this.subArcChance = AbilityConfig.getDouble("Lightning.SubArcChance");
+        this.chainRange = AbilityConfig.getDouble("Lightning.ChainRange");
+        this.chainArcChance = AbilityConfig.getDouble("Lightning.ChainArcChance");
+        this.maxChainArcs = AbilityConfig.getInt("Lightning.MaxChainArcs");
+        this.waterArcs = AbilityConfig.getInt("Lightning.WaterArcs");
+        this.waterArcRange = AbilityConfig.getDouble("Lightning.WaterArcRange");
+        this.conductivityRange = AbilityConfig.getDouble("Lightning.ConductivityRange");
+        this.maxCopperArcs = AbilityConfig.getInt("Lightning.MaxCopperArcs");
+        this.selfHitWater = AbilityConfig.getBoolean("Lightning.SelfHitWater");
+        this.selfHitClose = AbilityConfig.getBoolean("Lightning.SelfHitClose");
+        this.arcOnIce = AbilityConfig.getBoolean("Lightning.ArcOnIce");
+        this.arcOnCopper = AbilityConfig.getBoolean("Lightning.ArcOnCopper");
+        this.allowOnFireJet = AbilityConfig.getBoolean("Lightning.AllowOnFireJet");
+        this.chainLightningRods = AbilityConfig.getBoolean("Lightning.ChainLightningRods");
 
         this.chargedCopperBlocks = new Block[this.maxCopperArcs];
 

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.airbending.soundbending;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -27,12 +28,12 @@ public class SonicClap extends SoundAbility implements AddonAbility {
             AranarthBendingUtils.SOUND_COLOR_PULSE, 0.6f);
 
     private static final double HALO_RADIUS = 0.55;
-    private static final double HIT_RADIUS_H = 1.2; // horizontal (left/right)
-    private static final double HIT_RADIUS_V = 1.55; // vertical (up/down)
+    private final double hitRadiusHorizontal; // horizontal (left/right)
+    private final double hitRadiusVertical; // vertical (up/down)
     private static final double HALO_SPACING = 1.2;
-    private static final double CLAP_SPEED = 1.5; // blocks per tick
-    private static final double BASE_PLAYER_DAMAGE = 3.0;
-    private static final double MOB_DAMAGE_MULTIPLIER = 1.5;
+    private final double speed; // blocks per tick
+    private final double playerDamage;
+    private final double mobDamageMultiplier;
 
     @Attribute(Attribute.COOLDOWN)
     private long cooldown;
@@ -45,8 +46,13 @@ public class SonicClap extends SoundAbility implements AddonAbility {
     public SonicClap(Player player) {
         super(player);
 
-        this.cooldown = 2250L;
-        this.range = 12.0;
+        this.cooldown = AbilityConfig.getLong("SonicClap.Cooldown");
+        this.range = AbilityConfig.getDouble("SonicClap.Range");
+        this.hitRadiusHorizontal = AbilityConfig.getDouble("SonicClap.HitRadiusHorizontal");
+        this.hitRadiusVertical = AbilityConfig.getDouble("SonicClap.HitRadiusVertical");
+        this.speed = AbilityConfig.getDouble("SonicClap.Speed");
+        this.playerDamage = AbilityConfig.getDouble("SonicClap.Damage");
+        this.mobDamageMultiplier = AbilityConfig.getDouble("SonicClap.MobDamageMultiplier");
 
         if (!bPlayer.canBend(this)) {
             remove();
@@ -90,8 +96,8 @@ public class SonicClap extends SoundAbility implements AddonAbility {
             }
 
             wave.prevLocation = wave.location.clone();
-            wave.location.add(wave.direction.clone().multiply(CLAP_SPEED));
-            wave.distanceTraveled += CLAP_SPEED;
+            wave.location.add(wave.direction.clone().multiply(speed));
+            wave.distanceTraveled += speed;
 
             if (isGlass(wave.location.getBlock().getType())) {
                 shatterGlass(player, wave.location.getBlock());
@@ -190,14 +196,14 @@ public class SonicClap extends SoundAbility implements AddonAbility {
 
             Vector closest = p1.clone().add(step.clone().multiply(t));
             Vector diff = entityCenter.clone().subtract(closest);
-            double normalizedDistSq = (diff.getX() * diff.getX() + diff.getZ() * diff.getZ()) / (HIT_RADIUS_H * HIT_RADIUS_H)
-                    + (diff.getY() * diff.getY()) / (HIT_RADIUS_V * HIT_RADIUS_V);
+            double normalizedDistSq = (diff.getX() * diff.getX() + diff.getZ() * diff.getZ()) / (hitRadiusHorizontal * hitRadiusHorizontal)
+                    + (diff.getY() * diff.getY()) / (hitRadiusVertical * hitRadiusVertical);
             if (normalizedDistSq > 1.0) {
                 continue;
             }
 
             hitEntities.add(entity.getUniqueId());
-            double damage = (entity instanceof Player) ? BASE_PLAYER_DAMAGE : BASE_PLAYER_DAMAGE * MOB_DAMAGE_MULTIPLIER;
+            double damage = (entity instanceof Player) ? playerDamage : playerDamage * mobDamageMultiplier;
             DamageHandler.damageEntity(entity, damage, this);
             entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_WARDEN_SONIC_BOOM, 0.7f, 1.8f);
         }

@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.firebending.combustion;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.CombustionAbility;
@@ -51,13 +52,13 @@ public class CombustionStrike extends CombustionAbility implements AddonAbility 
     private double nextSoundDistance;
 
     // 100 blocks / 2 seconds / 20 ticks per second = 2.5 blocks per tick
-    private static final double SPEED = 2.5;
+    private double speed;
     private static final double STEP = 0.4;
-    private static final double HIT_RADIUS = 0.8;
+    private double hitRadius;
     private static final double RING_ROTATION_PER_TICK = 2.0 * Math.PI / 50.0;
     private static final double RING_RADIUS = 1.5;
     // Radius within which nearby entities take damage from the impact explosion
-    private static final double AOE_ENTITY_RADIUS = 3.0;
+    private double damageRadius;
 
     private static final Map<UUID, CombustionStrike> activeInstances = new HashMap<>();
 
@@ -68,12 +69,15 @@ public class CombustionStrike extends CombustionAbility implements AddonAbility 
             return;
         }
 
-        cooldown = 14000;
-        range = 100.0;
-        damage = 20.0;        // 10 hearts
-        chargeDuration = 5000;
-        misfireDamage = 8.0;  // 4 hearts
-        explosionRadius = 3.5;
+        cooldown = AbilityConfig.getLong("CombustionStrike.Cooldown");
+        range = AbilityConfig.getDouble("CombustionStrike.Range");
+        damage = AbilityConfig.getDouble("CombustionStrike.Damage");
+        chargeDuration = AbilityConfig.getLong("CombustionStrike.ChargeDuration");
+        misfireDamage = AbilityConfig.getDouble("CombustionStrike.MisfireDamage");
+        explosionRadius = AbilityConfig.getDouble("CombustionStrike.ExplosionRadius");
+        speed = AbilityConfig.getDouble("CombustionStrike.Speed");
+        hitRadius = AbilityConfig.getDouble("CombustionStrike.HitRadius");
+        damageRadius = AbilityConfig.getDouble("CombustionStrike.DamageRadius");
 
         phase = Phase.CHARGING;
         chargeStartTime = System.currentTimeMillis();
@@ -140,7 +144,7 @@ public class CombustionStrike extends CombustionAbility implements AddonAbility 
     }
 
     private void progressTraveling() {
-        double targetDistance = distanceTraveled + SPEED;
+        double targetDistance = distanceTraveled + speed;
 
         while (distanceTraveled < targetDistance) {
             double step = Math.min(STEP, targetDistance - distanceTraveled);
@@ -163,7 +167,7 @@ public class CombustionStrike extends CombustionAbility implements AddonAbility 
             }
 
             // Center the explosion on the entity's body
-            LivingEntity hit = findNearbyLivingEntity(strikePosition, HIT_RADIUS);
+            LivingEntity hit = findNearbyLivingEntity(strikePosition, hitRadius);
             if (hit != null) {
                 createExplosion(hit.getLocation().add(0, hit.getHeight() / 2.0, 0));
                 finishAbility();
@@ -249,7 +253,7 @@ public class CombustionStrike extends CombustionAbility implements AddonAbility 
         center.getWorld().playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 2.0f, 0.9f);
         scatterBlockDamage(center);
 
-        for (Entity entity : center.getWorld().getNearbyEntities(center, AOE_ENTITY_RADIUS, AOE_ENTITY_RADIUS, AOE_ENTITY_RADIUS)) {
+        for (Entity entity : center.getWorld().getNearbyEntities(center, damageRadius, damageRadius, damageRadius)) {
             if (!(entity instanceof LivingEntity living)) {
                 continue;
             }

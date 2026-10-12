@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.waterbending.healing;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
@@ -31,15 +32,12 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
 
     public enum Phase {WATER, PURPLE}
 
-    private static final long WATER_DURATION_MS = 4000L;
-    private static final long PURPLE_DURATION_MS = 4000L;
-    private static final long SLOWNESS_INTERVAL_MS = 1000L;
-    private static final long DAMAGE_INTERVAL_MS = 500L;
-    private static final double DAMAGE_PER_TICK = 1.0;
-    private static final int MAX_WATER_SLOWNESS = 4;
+    private long slownessInterval;
+    private long damageInterval;
+    private double damage;
+    private int maxSlowness;
     private static final double HELIX_RADIUS = 0.6;
-    private static final double TARGET_HIT_RADIUS = 0.6;
-    private static final double SOURCE_RANGE = 5.0;
+    private double hitRadius;
 
     private static final Set<Material> VALID_SOURCES = Set.of(
             Material.WATER,
@@ -89,10 +87,15 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
         }
         clearPendingSource(player.getUniqueId());
 
-        this.cooldown = 15000L;
-        this.range = 15.0;
-        this.waterDuration = WATER_DURATION_MS;
-        this.purpleDuration = PURPLE_DURATION_MS;
+        this.cooldown = AbilityConfig.getLong("CorruptingHelix.Cooldown");
+        this.range = AbilityConfig.getDouble("CorruptingHelix.Range");
+        this.slownessInterval = AbilityConfig.getLong("CorruptingHelix.SlownessInterval");
+        this.damageInterval = AbilityConfig.getLong("CorruptingHelix.DamageInterval");
+        this.damage = AbilityConfig.getDouble("CorruptingHelix.Damage");
+        this.maxSlowness = AbilityConfig.getInt("CorruptingHelix.MaxSlowness");
+        this.hitRadius = AbilityConfig.getDouble("CorruptingHelix.HitRadius");
+        this.waterDuration = AbilityConfig.getLong("CorruptingHelix.WaterDuration");
+        this.purpleDuration = AbilityConfig.getLong("CorruptingHelix.CorruptedDuration");
 
         LivingEntity found = findTarget();
         if (found == null) {
@@ -162,12 +165,12 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
 
         if (!rootApplied && elapsed >= 2000L) {
             target.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 80, 127, false, true, true), true);
-            slownessLevel = MAX_WATER_SLOWNESS;
+            slownessLevel = maxSlowness;
             rootApplied = true;
         }
 
-        if (!rootApplied && slownessLevel < MAX_WATER_SLOWNESS
-                && System.currentTimeMillis() - lastSlownessTime >= SLOWNESS_INTERVAL_MS) {
+        if (!rootApplied && slownessLevel < maxSlowness
+                && System.currentTimeMillis() - lastSlownessTime >= slownessInterval) {
             applySlownessTick();
             lastSlownessTime = System.currentTimeMillis();
         }
@@ -175,8 +178,8 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
 
     private void beginPurplePhase() {
         // Guarantee Slowness IV is active before the purple phase begins
-        if (slownessLevel < MAX_WATER_SLOWNESS) {
-            slownessLevel = MAX_WATER_SLOWNESS;
+        if (slownessLevel < maxSlowness) {
+            slownessLevel = maxSlowness;
             if (target.isValid()) {
                 target.addPotionEffect(new PotionEffect(
                         PotionEffectType.SLOWNESS, 40, slownessLevel - 1, false, true, true), true);
@@ -206,7 +209,7 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
         // Keep the target fully immobilized throughout the purple phase
         target.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 40, 127, false, true, true), true);
 
-        if (System.currentTimeMillis() - lastDamageTime >= DAMAGE_INTERVAL_MS) {
+        if (System.currentTimeMillis() - lastDamageTime >= damageInterval) {
             applyDamageTick();
             lastDamageTime = System.currentTimeMillis();
         }
@@ -229,7 +232,7 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
             finishWithCooldown(false);
             return;
         }
-        target.setHealth(Math.max(0.0, target.getHealth() - DAMAGE_PER_TICK));
+        target.setHealth(Math.max(0.0, target.getHealth() - damage));
         player.getWorld().playSound(target.getLocation(), Sound.ENTITY_PLAYER_HURT, 0.4f, 1.2f);
     }
 
@@ -247,7 +250,7 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
         int startLevel;
         if (phase == Phase.PURPLE) {
             target.removePotionEffect(PotionEffectType.SLOWNESS);
-            startLevel = MAX_WATER_SLOWNESS;
+            startLevel = maxSlowness;
         } else {
             startLevel = slownessLevel;
         }
@@ -417,7 +420,7 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
                 continue;
             }
 
-            if (entity.getBoundingBox().expand(TARGET_HIT_RADIUS)
+            if (entity.getBoundingBox().expand(hitRadius)
                     .rayTrace(eye.toVector(), direction, range) == null) {
                 continue;
             }
@@ -464,7 +467,7 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
         if (!block.getWorld().equals(player.getWorld())) {
             return;
         }
-        if (block.getLocation().distance(player.getLocation()) > SOURCE_RANGE) {
+        if (block.getLocation().distance(player.getLocation()) > AbilityConfig.getDouble("CorruptingHelix.SourceRange")) {
             return;
         }
         if (bp != null && bp.isOnCooldown("CorruptingHelix")) {

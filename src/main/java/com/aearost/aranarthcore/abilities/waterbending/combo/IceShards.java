@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.waterbending.combo;
 
 import com.aearost.aranarthcore.enums.Weather;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -50,11 +51,11 @@ public class IceShards extends IceAbility implements AddonAbility, ComboAbility 
     @Attribute(Attribute.DAMAGE)
     private double damage;
 
-    private final int domeRadius = 10;
-    private final long chargeTime = 3000L;
-    private final long chargeHoldGrace = 5000L;
-    private final double projectileSpeed = 2.5;
-    private final long projectileMaxLifetime = 5000L;
+    private int domeRadius;
+    private long chargeTime;
+    private long chargeHoldGrace;
+    private double projectileSpeed;
+    private long projectileMaxLifetime;
 
     private Phase phase;
     private long chargeStartTime;
@@ -118,8 +119,13 @@ public class IceShards extends IceAbility implements AddonAbility, ComboAbility 
             return;
         }
 
-        this.cooldown = 14000L;
-        this.damage = 12.0;
+        this.cooldown = AbilityConfig.getLong("IceShards.Cooldown");
+        this.damage = AbilityConfig.getDouble("IceShards.Damage");
+        this.domeRadius = AbilityConfig.getInt("IceShards.DomeRadius");
+        this.chargeTime = AbilityConfig.getLong("IceShards.ChargeDuration");
+        this.chargeHoldGrace = AbilityConfig.getLong("IceShards.ChargeHoldGrace");
+        this.projectileSpeed = AbilityConfig.getDouble("IceShards.Speed");
+        this.projectileMaxLifetime = AbilityConfig.getLong("IceShards.ProjectileMaxLifetime");
         this.phase = Phase.CHARGING;
         this.chargeStartTime = System.currentTimeMillis();
         this.heldSlot = player.getInventory().getHeldItemSlot();

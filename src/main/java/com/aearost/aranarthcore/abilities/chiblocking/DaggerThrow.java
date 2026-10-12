@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.abilities.chiblocking;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.CustomKeys;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -32,13 +33,13 @@ import java.util.stream.Collectors;
 
 public class DaggerThrow extends ChiAbility implements AddonAbility {
 
-    private static final double DAMAGE = 1.0;
-    private static final int MAX_SHOTS = 5;
-    private static final long SHOT_COOLDOWN_MS = 100L;
-    private static final long WINDOW_MS = 500L;
+    private double damage;
+    private int maxShots;
+    private long shotCooldown;
+    private long window;
 
     @Attribute(Attribute.COOLDOWN)
-    private long cooldown = 3000L;
+    private long cooldown;
 
     private final List<AbstractArrow> arrows = new ArrayList<>();
     private int shots = 0;
@@ -51,10 +52,16 @@ public class DaggerThrow extends ChiAbility implements AddonAbility {
             return;
         }
 
+        cooldown = AbilityConfig.getLong("DaggerThrow.Cooldown");
+        damage = AbilityConfig.getDouble("DaggerThrow.Damage");
+        maxShots = AbilityConfig.getInt("DaggerThrow.Shots");
+        shotCooldown = AbilityConfig.getLong("DaggerThrow.ShotCooldown");
+        window = AbilityConfig.getLong("DaggerThrow.ShotWindow");
+
         // If an active instance exists, route the click to it for a follow-up throw
         if (hasAbility(player, DaggerThrow.class)) {
             final DaggerThrow dt = getAbility(player, DaggerThrow.class);
-            if (!dt.bPlayer.isOnCooldown("DaggerThrowShot") && dt.shots < MAX_SHOTS) {
+            if (!dt.bPlayer.isOnCooldown("DaggerThrowShot") && dt.shots < dt.maxShots) {
                 dt.shootArrow();
             }
             return;
@@ -79,8 +86,8 @@ public class DaggerThrow extends ChiAbility implements AddonAbility {
         }
 
         shots++;
-        endTime = System.currentTimeMillis() + WINDOW_MS;
-        bPlayer.addCooldown("DaggerThrowShot", SHOT_COOLDOWN_MS);
+        endTime = System.currentTimeMillis() + window;
+        bPlayer.addCooldown("DaggerThrowShot", shotCooldown);
 
         final Location eyeLoc = player.getEyeLocation();
         final Vector velocity = eyeLoc.getDirection().normalize().multiply(4.0);
@@ -88,7 +95,7 @@ public class DaggerThrow extends ChiAbility implements AddonAbility {
         final AbstractArrow arrow = launchTypedArrow(template);
         arrow.setVelocity(velocity);
         arrow.setPickupStatus(AbstractArrow.PickupStatus.ALLOWED);
-        arrow.setMetadata("daggerthrow", new FixedMetadataValue(AranarthCore.getInstance(), DAMAGE));
+        arrow.setMetadata("daggerthrow", new FixedMetadataValue(AranarthCore.getInstance(), damage));
 
         final String arrowType = template.getItemMeta() != null
                 ? template.getItemMeta().getPersistentDataContainer().get(CustomKeys.ARROW, PersistentDataType.STRING)
@@ -186,7 +193,7 @@ public class DaggerThrow extends ChiAbility implements AddonAbility {
         }
 
         entity.setNoDamageTicks(0);
-        DamageHandler.damageEntity(entity, DAMAGE, this);
+        DamageHandler.damageEntity(entity, damage, this);
         arrow.remove();
         arrows.remove(arrow);
     }
@@ -198,7 +205,7 @@ public class DaggerThrow extends ChiAbility implements AddonAbility {
             return;
         }
 
-        if (System.currentTimeMillis() > endTime || shots >= MAX_SHOTS) {
+        if (System.currentTimeMillis() > endTime || shots >= maxShots) {
             bPlayer.addCooldown(this);
             remove();
             return;

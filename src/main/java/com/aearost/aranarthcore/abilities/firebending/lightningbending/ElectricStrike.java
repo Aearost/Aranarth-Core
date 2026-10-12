@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.firebending.lightningbending;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.GeneralMethods;
@@ -25,12 +26,7 @@ public class ElectricStrike extends LightningAbility implements AddonAbility {
 
     public enum Phase { CHARGING, TRAVELING, FIZZLING }
 
-    private static final long CHARGE_DURATION_MS = 1000L;
-    private static final double PROJECTILE_SPEED = 5.0;
     private static final double STEP = 0.2;
-    private static final double HIT_RADIUS = 0.5;
-
-    private static final double AOE_RADIUS = 3.5;
     private static final long FIZZLE_DURATION_MS = 1200L;
 
     private static final Map<UUID, ElectricStrike> ACTIVE_INSTANCES = new HashMap<>();
@@ -42,6 +38,11 @@ public class ElectricStrike extends LightningAbility implements AddonAbility {
     private long cooldown;
     @Attribute(Attribute.RANGE)
     private double range;
+    private long chargeDuration;
+    private double speed;
+    private double hitRadius;
+    private double aoeRadius;
+    private double aoeDamageMultiplier;
 
     private Phase phase;
     private long chargeStart;
@@ -62,9 +63,14 @@ public class ElectricStrike extends LightningAbility implements AddonAbility {
             return;
         }
 
-        damage = 12.0;
-        cooldown = 7000L;
-        range = 50.0;
+        damage = AbilityConfig.getDouble("ElectricStrike.Damage");
+        cooldown = AbilityConfig.getLong("ElectricStrike.Cooldown");
+        range = AbilityConfig.getDouble("ElectricStrike.Range");
+        chargeDuration = AbilityConfig.getLong("ElectricStrike.ChargeDuration");
+        speed = AbilityConfig.getDouble("ElectricStrike.Speed");
+        hitRadius = AbilityConfig.getDouble("ElectricStrike.HitRadius");
+        aoeRadius = AbilityConfig.getDouble("ElectricStrike.AoeRadius");
+        aoeDamageMultiplier = AbilityConfig.getDouble("ElectricStrike.AoeDamageMultiplier");
 
         phase = Phase.CHARGING;
         chargeStart = System.currentTimeMillis();
@@ -100,7 +106,7 @@ public class ElectricStrike extends LightningAbility implements AddonAbility {
 
         spawnChargingParticles();
 
-        if (!chargeComplete && System.currentTimeMillis() - chargeStart >= CHARGE_DURATION_MS) {
+        if (!chargeComplete && System.currentTimeMillis() - chargeStart >= chargeDuration) {
             chargeComplete = true;
             player.getWorld().playSound(player.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 0.4f, 2.0f);
         }
@@ -119,7 +125,7 @@ public class ElectricStrike extends LightningAbility implements AddonAbility {
     }
 
     private void progressTraveling() {
-        double remaining = PROJECTILE_SPEED;
+        double remaining = speed;
         int stepIndex = 0;
 
         while (remaining > 0) {
@@ -159,7 +165,7 @@ public class ElectricStrike extends LightningAbility implements AddonAbility {
      * Returns the hit entity, or null if none was found.
      */
     private LivingEntity checkEntityHit(Location loc) {
-        for (Entity entity : loc.getWorld().getNearbyEntities(loc, HIT_RADIUS, HIT_RADIUS, HIT_RADIUS)) {
+        for (Entity entity : loc.getWorld().getNearbyEntities(loc, hitRadius, hitRadius, hitRadius)) {
             if (!(entity instanceof LivingEntity living) || entity.equals(player)) continue;
 
             DamageHandler.damageEntity(living, damage, this);
@@ -189,20 +195,20 @@ public class ElectricStrike extends LightningAbility implements AddonAbility {
             Particle.DustOptions dust = (i % 2 == 0)
                     ? AranarthBendingUtils.LIGHTNING_DUST_BRIGHT
                     : AranarthBendingUtils.LIGHTNING_DUST_BLUE;
-            double rx = (Math.random() - 0.5) * AOE_RADIUS * 2;
-            double ry = (Math.random() - 0.5) * AOE_RADIUS * 2;
-            double rz = (Math.random() - 0.5) * AOE_RADIUS * 2;
+            double rx = (Math.random() - 0.5) * aoeRadius * 2;
+            double ry = (Math.random() - 0.5) * aoeRadius * 2;
+            double rz = (Math.random() - 0.5) * aoeRadius * 2;
             loc.getWorld().spawnParticle(Particle.DUST, loc.clone().add(rx, ry, rz), 1, 0, 0, 0, 0, dust);
         }
-        loc.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, loc, 40, AOE_RADIUS * 0.4, AOE_RADIUS * 0.4, AOE_RADIUS * 0.4, 0.05);
+        loc.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, loc, 40, aoeRadius * 0.4, aoeRadius * 0.4, aoeRadius * 0.4, 0.05);
         loc.getWorld().playSound(loc, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 0.7f, 1.8f);
 
-        // Damage all nearby entities (half damage for AOE)
-        for (Entity entity : loc.getWorld().getNearbyEntities(loc, AOE_RADIUS, AOE_RADIUS, AOE_RADIUS)) {
+        // Damage all nearby entities (reduced damage for AOE)
+        for (Entity entity : loc.getWorld().getNearbyEntities(loc, aoeRadius, aoeRadius, aoeRadius)) {
             if (!(entity instanceof LivingEntity living) || entity.equals(player)) continue;
             if (entity.equals(directHit)) continue;
 
-            DamageHandler.damageEntity(living, damage * 0.5, this);
+            DamageHandler.damageEntity(living, damage * aoeDamageMultiplier, this);
 
             for (int k = 0; k < 6; k++) {
                 Particle.DustOptions dust = (k % 2 == 0)
@@ -233,9 +239,9 @@ public class ElectricStrike extends LightningAbility implements AddonAbility {
         // Erratic electric sparks that thin out as the fizzle dies
         int sparkCount = (int) (5 * (1.0 - progress * 0.6));
         for (int i = 0; i < sparkCount; i++) {
-            double rx = (Math.random() - 0.5) * AOE_RADIUS * 1.6;
-            double ry = (Math.random() - 0.5) * AOE_RADIUS * 1.0;
-            double rz = (Math.random() - 0.5) * AOE_RADIUS * 1.6;
+            double rx = (Math.random() - 0.5) * aoeRadius * 1.6;
+            double ry = (Math.random() - 0.5) * aoeRadius * 1.0;
+            double rz = (Math.random() - 0.5) * aoeRadius * 1.6;
             fizzleLocation.getWorld().spawnParticle(Particle.ELECTRIC_SPARK,
                     fizzleLocation.clone().add(rx, ry, rz), 1, 0, 0, 0, 0.03);
         }
@@ -245,9 +251,9 @@ public class ElectricStrike extends LightningAbility implements AddonAbility {
             Particle.DustOptions dust = (Math.random() < 0.5)
                     ? AranarthBendingUtils.LIGHTNING_DUST_BRIGHT
                     : AranarthBendingUtils.LIGHTNING_DUST_BLUE;
-            double rx = (Math.random() - 0.5) * AOE_RADIUS;
-            double ry = (Math.random() - 0.5) * AOE_RADIUS * 0.8;
-            double rz = (Math.random() - 0.5) * AOE_RADIUS;
+            double rx = (Math.random() - 0.5) * aoeRadius;
+            double ry = (Math.random() - 0.5) * aoeRadius * 0.8;
+            double rz = (Math.random() - 0.5) * aoeRadius;
             fizzleLocation.getWorld().spawnParticle(Particle.DUST,
                     fizzleLocation.clone().add(rx, ry, rz), 1, 0, 0, 0, 0, dust);
         }

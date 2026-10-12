@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.airbending.spiritual;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.GeneralMethods;
@@ -32,7 +33,7 @@ import java.util.UUID;
 
 public class AstralShot extends SpiritualAbility implements AddonAbility, ComboAbility {
 
-    private static final double HIT_RADIUS = 1.5;
+    private double hitRadius;
     private static final double STEP_SIZE = 0.1;
 
     @Attribute(Attribute.COOLDOWN)
@@ -62,10 +63,11 @@ public class AstralShot extends SpiritualAbility implements AddonAbility, ComboA
             return;
         }
 
-        this.cooldown = 8000L;
-        this.damage = 2.0;
-        this.range = 24.0;
-        this.speed = 2.0; // blocks per tick
+        this.cooldown = AbilityConfig.getLong("AstralShot.Cooldown");
+        this.damage = AbilityConfig.getDouble("AstralShot.Damage");
+        this.range = AbilityConfig.getDouble("AstralShot.Range");
+        this.speed = AbilityConfig.getDouble("AstralShot.Speed");
+        this.hitRadius = AbilityConfig.getDouble("AstralShot.HitRadius");
 
         // AirBlast fires before the combo is recognised; remove it and wipe its cooldown so the player isn't penalised.
         AranarthBendingUtils.suppressComboTrigger(this.bPlayer, player, "AirBlast");
@@ -166,7 +168,7 @@ public class AstralShot extends SpiritualAbility implements AddonAbility, ComboA
             if (this.hitEntities.contains(entity.getUniqueId())) continue;
 
             final Location entityCenter = entity.getLocation().add(0, entity.getHeight() / 2.0, 0);
-            if (entityCenter.distance(this.shotLocation) <= HIT_RADIUS) {
+            if (entityCenter.distance(this.shotLocation) <= hitRadius) {
                 this.hitEntities.add(entity.getUniqueId());
                 this.applyHitEffects(entity);
             }
@@ -174,7 +176,7 @@ public class AstralShot extends SpiritualAbility implements AddonAbility, ComboA
     }
 
     private void applyHitEffects(final LivingEntity entity) {
-        final int durationTicks = 60; // 3 seconds
+        final int durationTicks = AbilityConfig.getInt("AstralShot.EffectDurationTicks");
         entity.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, durationTicks, 1, false, true, true));
         entity.addPotionEffect(new PotionEffect(PotionEffectType.POISON, durationTicks, 1, false, true, true));
         entity.addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, durationTicks, 0, false, true, true));

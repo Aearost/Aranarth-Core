@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.earthbending.metalbending;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.GeneralMethods;
@@ -26,13 +27,13 @@ import java.util.UUID;
 public class CableWhip extends MetalAbility implements AddonAbility {
 
     public enum Phase { CHARGING, READY, WHIPPING }
-    private static final long CHARGE_DURATION_MS = 500L;
-    private static final long READY_DURATION_MS = 3000L;
-    private static final int MAX_WHIPS = 3;
+    private long chargeDuration;
+    private long readyDuration;
+    private int maxWhips;
     private static final int WHIP_TICKS = 20;
     private static final int IDLE_TICKS = 4;
     private static final int POST_HIT_LINGER_TICKS = 4;
-    private static final double WHIP_HIT_RADIUS = 0.8;
+    private double hitRadius;
     private static final double HIT_DELAY_FRACTION = 0.3;
     private static final int HANG_STEPS = 8;
     private static final double HANG_STEP_SIZE = 0.25;
@@ -73,9 +74,13 @@ public class CableWhip extends MetalAbility implements AddonAbility {
             return;
         }
 
-        this.cooldown        = 6000L;
-        this.damage          = 3.0;
-        this.range           = 6.0;
+        this.cooldown        = AbilityConfig.getLong("CableWhip.Cooldown");
+        this.damage          = AbilityConfig.getDouble("CableWhip.Damage");
+        this.range           = AbilityConfig.getDouble("CableWhip.Range");
+        this.chargeDuration = AbilityConfig.getLong("CableWhip.ChargeDuration");
+        this.readyDuration = AbilityConfig.getLong("CableWhip.ReadyDuration");
+        this.maxWhips = AbilityConfig.getInt("CableWhip.Whips");
+        this.hitRadius = AbilityConfig.getDouble("CableWhip.HitRadius");
         this.phase           = Phase.CHARGING;
         this.chargeStartTime = System.currentTimeMillis();
         this.whipsDone       = 0;
@@ -107,7 +112,7 @@ public class CableWhip extends MetalAbility implements AddonAbility {
 
         spawnHangingCables();
 
-        if (System.currentTimeMillis() - chargeStartTime >= CHARGE_DURATION_MS) {
+        if (System.currentTimeMillis() - chargeStartTime >= chargeDuration) {
             readyStartTime = System.currentTimeMillis();
             phase = Phase.READY;
             // Light metallic chime signals that the cables are ready to crack.
@@ -127,7 +132,7 @@ public class CableWhip extends MetalAbility implements AddonAbility {
         }
 
         // 3-second ready window elapsed
-        if (System.currentTimeMillis() - readyStartTime >= READY_DURATION_MS) {
+        if (System.currentTimeMillis() - readyStartTime >= readyDuration) {
             finishWithCooldown();
             return;
         }
@@ -209,7 +214,7 @@ public class CableWhip extends MetalAbility implements AddonAbility {
      */
     private void consumeCrack() {
         whipsDone++;
-        if (whipsDone >= MAX_WHIPS) {
+        if (whipsDone >= maxWhips) {
             finishWithCooldown();
         } else {
             whipHitEntities.clear();
@@ -230,7 +235,7 @@ public class CableWhip extends MetalAbility implements AddonAbility {
 
     private void checkLineHits(final Location hand) {
         final Location end = hand.clone().add(whipDirection.clone().multiply(range));
-        final double r = WHIP_HIT_RADIUS;
+        final double r = hitRadius;
         final BoundingBox lineBounds = new BoundingBox(
                 Math.min(hand.getX(), end.getX()) - r,
                 Math.min(hand.getY(), end.getY()) - r,

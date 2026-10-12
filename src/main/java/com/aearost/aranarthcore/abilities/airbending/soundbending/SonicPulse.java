@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.airbending.soundbending;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -24,23 +25,23 @@ public class SonicPulse extends SoundAbility implements AddonAbility {
     private static final double MIN_HALO_RADIUS = 0.45;
     private static final double MAX_HALO_RADIUS = 1.67;
 
-    private static final double MAX_PLAYER_DAMAGE = 6.0;
-    private static final double MIN_PLAYER_DAMAGE = 2.0;
-    private static final double MOB_DAMAGE_MULTIPLIER = 1.5;
+    private final double maxDamage;
+    private final double minDamage;
+    private final double mobDamageMultiplier;
 
-    private static final double MIN_KNOCKBACK = 0.5;
-    private static final double MAX_KNOCKBACK = 2.8;
-    private static final double KNOCKBACK_VERTICAL = 0.4;
+    private final double minKnockback;
+    private final double maxKnockback;
+    private final double knockbackVertical;
 
-    private static final double HIT_THICKNESS = 0.6;
-    private static final double PULSE_SPEED = 1.6; // blocks per tick
+    private final double hitThickness;
+    private final double speed; // blocks per tick
 
     // Player recoil - triggers when a pulse hits a solid block within this distance.
     // Scale is curved so ring 1 is 3x its proportional share while ring 4 stays full strength.
-    private static final double MAX_RECOIL_DISTANCE = 4.0;
-    private static final double RECOIL_HORIZONTAL = 1.5;
-    private static final double RECOIL_VERTICAL = 0.6;
-    private static final double RECOIL_MIN_SCALE = 3.0 * MIN_KNOCKBACK / MAX_KNOCKBACK; // ~0.536
+    private final double maxRecoilDistance;
+    private final double recoilHorizontal;
+    private final double recoilVertical;
+    private final double recoilMinScale;
 
     @Attribute(Attribute.COOLDOWN)
     private long cooldown;
@@ -58,9 +59,21 @@ public class SonicPulse extends SoundAbility implements AddonAbility {
     public SonicPulse(Player player) {
         super(player);
 
-        this.cooldown = 6000L;
-        this.range = 10.0;
-        this.numPulses = 4;
+        this.cooldown = AbilityConfig.getLong("SonicPulse.Cooldown");
+        this.range = AbilityConfig.getDouble("SonicPulse.Range");
+        this.numPulses = AbilityConfig.getInt("SonicPulse.Pulses");
+        this.maxDamage = AbilityConfig.getDouble("SonicPulse.MaxDamage");
+        this.minDamage = AbilityConfig.getDouble("SonicPulse.MinDamage");
+        this.mobDamageMultiplier = AbilityConfig.getDouble("SonicPulse.MobDamageMultiplier");
+        this.minKnockback = AbilityConfig.getDouble("SonicPulse.MinKnockback");
+        this.maxKnockback = AbilityConfig.getDouble("SonicPulse.MaxKnockback");
+        this.knockbackVertical = AbilityConfig.getDouble("SonicPulse.KnockbackVertical");
+        this.hitThickness = AbilityConfig.getDouble("SonicPulse.HitThickness");
+        this.speed = AbilityConfig.getDouble("SonicPulse.Speed");
+        this.maxRecoilDistance = AbilityConfig.getDouble("SonicPulse.MaxRecoilDistance");
+        this.recoilHorizontal = AbilityConfig.getDouble("SonicPulse.RecoilHorizontal");
+        this.recoilVertical = AbilityConfig.getDouble("SonicPulse.RecoilVertical");
+        this.recoilMinScale = 3.0 * minKnockback / maxKnockback;
 
         if (!bPlayer.canBend(this)) {
             remove();
@@ -69,7 +82,7 @@ public class SonicPulse extends SoundAbility implements AddonAbility {
 
         long now = System.currentTimeMillis();
         this.startTime = now;
-        this.pulseInterval = 2500L / numPulses; // evenly spaced across the duration window
+        this.pulseInterval = AbilityConfig.getLong("SonicPulse.Duration") / numPulses; // evenly spaced across the duration window
         this.lastPulseTime = now - pulseInterval; // emit the first ring on the very first tick
         this.pulsesEmitted = 0;
         this.expired = false;
@@ -122,9 +135,9 @@ public class SonicPulse extends SoundAbility implements AddonAbility {
 
         double visualRadius = MIN_HALO_RADIUS + t * (MAX_HALO_RADIUS - MIN_HALO_RADIUS);
         double hitRadius = visualRadius + 0.3;
-        double pDamage = MAX_PLAYER_DAMAGE - t * (MAX_PLAYER_DAMAGE - MIN_PLAYER_DAMAGE);
-        double mDamage = pDamage * MOB_DAMAGE_MULTIPLIER;
-        double knockback = MIN_KNOCKBACK + t * (MAX_KNOCKBACK - MIN_KNOCKBACK);
+        double pDamage = maxDamage - t * (maxDamage - minDamage);
+        double mDamage = pDamage * mobDamageMultiplier;
+        double knockback = minKnockback + t * (maxKnockback - minKnockback);
 
         Location eyeLoc = player.getEyeLocation();
         Vector dir = eyeLoc.getDirection().normalize();
@@ -144,8 +157,8 @@ public class SonicPulse extends SoundAbility implements AddonAbility {
                 continue;
             }
 
-            pulse.location.add(pulse.direction.clone().multiply(PULSE_SPEED));
-            pulse.distanceTraveled += PULSE_SPEED;
+            pulse.location.add(pulse.direction.clone().multiply(speed));
+            pulse.distanceTraveled += speed;
 
             // Shatter glass and ice blocks without stopping the pulse
             Block block = pulse.location.getBlock();
@@ -157,7 +170,7 @@ public class SonicPulse extends SoundAbility implements AddonAbility {
 
             // Block collision - pulse stops; close enough to the caster triggers recoil
             if (block.getType().isSolid()) {
-                if (pulse.distanceTraveled <= MAX_RECOIL_DISTANCE) {
+                if (pulse.distanceTraveled <= maxRecoilDistance) {
                     applyPlayerRecoil(pulse);
                 }
                 it.remove();
@@ -213,7 +226,7 @@ public class SonicPulse extends SoundAbility implements AddonAbility {
             Vector toEntity = entityCenter.toVector().subtract(pulse.location.toVector());
 
             double axialDist = Math.abs(toEntity.dot(pulse.direction));
-            if (axialDist > HIT_THICKNESS) {
+            if (axialDist > hitThickness) {
                 continue;
             }
 
@@ -231,9 +244,9 @@ public class SonicPulse extends SoundAbility implements AddonAbility {
 
     private void applyPlayerRecoil(Pulse pulse) {
         // This makes ring 1 roughly 3x stronger than a straight proportional scale would give.
-        double scale = RECOIL_MIN_SCALE + pulse.t * (1.0 - RECOIL_MIN_SCALE);
-        Vector recoil = pulse.direction.clone().multiply(-(RECOIL_HORIZONTAL * scale))
-                .add(new Vector(0, RECOIL_VERTICAL * scale, 0));
+        double scale = recoilMinScale + pulse.t * (1.0 - recoilMinScale);
+        Vector recoil = pulse.direction.clone().multiply(-(recoilHorizontal * scale))
+                .add(new Vector(0, recoilVertical * scale, 0));
         player.setVelocity(recoil);
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WARDEN_SONIC_BOOM, 0.8f, 0.7f);
     }
@@ -244,7 +257,7 @@ public class SonicPulse extends SoundAbility implements AddonAbility {
         applySoundDebuff(entity);
 
         Vector knockback = pulse.direction.clone().multiply(pulse.knockbackStrength)
-                .add(new Vector(0, KNOCKBACK_VERTICAL, 0));
+                .add(new Vector(0, knockbackVertical, 0));
         entity.setVelocity(knockback);
 
         entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_WARDEN_SONIC_BOOM, 0.9f, 1.6f);

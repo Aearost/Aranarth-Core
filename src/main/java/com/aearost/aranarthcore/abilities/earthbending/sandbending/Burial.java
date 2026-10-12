@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.earthbending.sandbending;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -21,7 +22,7 @@ import java.util.*;
 public class Burial extends SandAbility implements AddonAbility {
 
     public enum Phase { CASTING, OPENING, SEALING, BURIED, RELEASING }
-    private static final double TRAVEL_SPEED = 16.0;
+    private double speed;
     private static final double PATH_STEP = 0.35;
     private static final double MAX_JITTER = 0.65;
     private static final int PIT_DEPTH = 5;
@@ -74,11 +75,12 @@ public class Burial extends SandAbility implements AddonAbility {
             return;
         }
 
-        cooldown = 12000;
-        damage = 1.0;
-        range = 24.0;
-        duration = 3000L;
-        damageInterval = 500L;
+        cooldown = AbilityConfig.getLong("Burial.Cooldown");
+        damage = AbilityConfig.getDouble("Burial.Damage");
+        range = AbilityConfig.getDouble("Burial.Range");
+        duration = AbilityConfig.getLong("Burial.Duration");
+        damageInterval = AbilityConfig.getLong("Burial.DamageInterval");
+        speed = AbilityConfig.getDouble("Burial.Speed");
 
         LivingEntity foundTarget = findTarget();
         if (foundTarget == null) {
@@ -203,7 +205,7 @@ public class Burial extends SandAbility implements AddonAbility {
         }
 
         long now = System.currentTimeMillis();
-        distanceTraveled = Math.min(totalDistance, TRAVEL_SPEED * (now - castStartTime) / 1000.0);
+        distanceTraveled = Math.min(totalDistance, speed * (now - castStartTime) / 1000.0);
 
         renderCrevice();
 

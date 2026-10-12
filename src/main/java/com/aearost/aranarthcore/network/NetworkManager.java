@@ -1042,7 +1042,7 @@ public class NetworkManager {
     }
 
     /**
-     * Tells the other server to reload its config.yml and import its own coupons.txt.
+     * Tells the other server to reload its config.yml and abilities.yml, and import its own coupons.txt.
      */
     public void publishConfigReload() {
         JsonObject json = new JsonObject();
@@ -2354,6 +2354,7 @@ public class NetworkManager {
         }
         Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
             AranarthCore.getInstance().reloadConfig();
+            AbilityConfig.load(AranarthCore.getInstance());
             Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), CouponUtils::importCoupons);
         });
     }

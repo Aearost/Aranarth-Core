@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.listener.misc.PotionEffectListener;
 import com.aearost.aranarthcore.event.mob.MountListener;
 import com.aearost.aranarthcore.objects.CustomKeys;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.projectkorra.projectkorra.Element;
@@ -115,11 +116,11 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
             PotionEffectType.BAD_OMEN, PotionEffectType.DARKNESS
     );
 
-    public static final double ROKU_MIN_SPEED = 1.0;   // 20 m/s
-    private static final double ROKU_MAX_SPEED = 3.75;  // 75 m/s
+    private double rokuMinSpeed;
+    private double rokuMaxSpeed;
     // Over 10 seconds
-    private static final double ROKU_RAMP_RATE = (ROKU_MAX_SPEED - ROKU_MIN_SPEED) / 200.0;
-    static final long ROKU_DEATH_COOLDOWN_MS = 900_000L; // 15 minutes
+    private double rokuRampRate;
+    private long rokuDeathCooldown;
 
     @Attribute(Attribute.COOLDOWN)
     private long cooldown;
@@ -137,18 +138,18 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
     private UUID kurukCurrentTarget = null;
     private int kurukHitCount = 0;
     private long kurukLastHitTime = 0L;
-    private static final long KURUK_STREAK_TIMEOUT_MS = 5_000L;
+    private long kurukStreakTimeout;
     // 50% HP = 10 hearts = 20 half-hearts
-    private static final double KURUK_LOW_HP_FRACTION = 0.5;
+    private double kurukLowHpFraction;
 
     // Aang state - speed level 3–10 (amplifier = level - 1)
     private int aangSpeedLevel = 3; // Speed III minimum
     private int aangSecondTimer = 0; // counts ticks toward next 1-second step
-    private static final long AANG_END_COOLDOWN_MS = 10_000L;
+    private long aangEndCooldown;
 
     // Roku state
     private UUID fangUUID = null;
-    private double rokuCurrentSpeed = ROKU_MIN_SPEED;
+    private double rokuCurrentSpeed;
 
     public PastLives(final Player player) {
         super(player);
@@ -164,8 +165,17 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
             return;
         }
 
-        this.cooldown = 300_000L;    // 5 minutes
-        this.duration = 1_800_000L;  // 30 minutes
+        this.cooldown = AbilityConfig.getLong("PastLives.Cooldown");
+        this.duration = AbilityConfig.getLong("PastLives.Duration");
+        this.rokuMinSpeed = AbilityConfig.getDouble("PastLives.RokuMinSpeed");
+        this.rokuMaxSpeed = AbilityConfig.getDouble("PastLives.RokuMaxSpeed");
+        this.rokuDeathCooldown = AbilityConfig.getLong("PastLives.RokuDeathCooldown");
+        this.kurukStreakTimeout = AbilityConfig.getLong("PastLives.KurukStreakTimeout");
+        this.kurukLowHpFraction = AbilityConfig.getDouble("PastLives.KurukLowHpFraction");
+        this.aangEndCooldown = AbilityConfig.getLong("PastLives.AangEndCooldown");
+        // Reaches max speed over 10 seconds
+        this.rokuRampRate = (rokuMaxSpeed - rokuMinSpeed) / 200.0;
+        this.rokuCurrentSpeed = rokuMinSpeed;
         this.state = State.SELECTING;
 
         start();
@@ -313,7 +323,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
         if (applyCooldown) {
             // Aang form uses a short cooldown so the player can reactivate quickly
             if (activeForm == AvatarForm.AANG) {
-                bPlayer.addCooldown(getName(), AANG_END_COOLDOWN_MS);
+                bPlayer.addCooldown(getName(), aangEndCooldown);
             } else {
                 bPlayer.addCooldown(this);
             }
@@ -440,7 +450,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
 
     private void tickKuruk() {
         double maxHp = player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH).getValue();
-        boolean lowHp = player.getHealth() < maxHp * KURUK_LOW_HP_FRACTION;
+        boolean lowHp = player.getHealth() < maxHp * kurukLowHpFraction;
 
         if (lowHp) {
             // Below 50% HP
@@ -457,7 +467,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
             player.removePotionEffect(PotionEffectType.SPEED);
             player.removePotionEffect(PotionEffectType.REGENERATION);
             // Expire streak if 5s without hitting the current target
-            if (kurukHitCount > 0 && System.currentTimeMillis() - kurukLastHitTime > KURUK_STREAK_TIMEOUT_MS) {
+            if (kurukHitCount > 0 && System.currentTimeMillis() - kurukLastHitTime > kurukStreakTimeout) {
                 kurukHitCount = 0;
                 kurukCurrentTarget = null;
             }
@@ -517,7 +527,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
             return;
         }
 
-        rokuCurrentSpeed = ROKU_MIN_SPEED;
+        rokuCurrentSpeed = rokuMinSpeed;
 
         Location spawnLoc = player.getLocation().clone().add(0, 4, 0);
         EnderDragon dragon = player.getWorld().spawn(spawnLoc, EnderDragon.class, entity -> {
@@ -546,7 +556,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
         Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
             if (!dragon.isDead() && fangUUID != null) {
                 dragon.addPassenger(player);
-                MountListener.getInstance().registerFang(dragon, player, ROKU_MIN_SPEED);
+                MountListener.getInstance().registerFang(dragon, player, rokuMinSpeed);
             }
         }, 3L);
 
@@ -565,7 +575,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
         if (!playerIsRiding) {
             dragon.setGravity(false); // Handled manually so AI doesn't fight the descent
             dragon.setPhase(EnderDragon.Phase.HOVER);
-            rokuCurrentSpeed = ROKU_MIN_SPEED;
+            rokuCurrentSpeed = rokuMinSpeed;
 
             // Descend toward the ground so the player can easily reach Fang again
             Location loc = dragon.getLocation();
@@ -590,7 +600,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
         dragon.setPhase(EnderDragon.Phase.HOVER);
 
         // Ramp speed toward maximum each tick
-        rokuCurrentSpeed = Math.min(ROKU_MAX_SPEED, rokuCurrentSpeed + ROKU_RAMP_RATE);
+        rokuCurrentSpeed = Math.min(rokuMaxSpeed, rokuCurrentSpeed + rokuRampRate);
 
         // Push the updated speed into MountListener
         MountListener.getInstance().updateFangSpeed(fangUUID, rokuCurrentSpeed);
@@ -668,13 +678,13 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
     private void onKurukHit(EntityDamageByEntityEvent e) {
         // Only applies above 50% HP
         double maxHp = player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH).getValue();
-        if (player.getHealth() < maxHp * KURUK_LOW_HP_FRACTION) return;
+        if (player.getHealth() < maxHp * kurukLowHpFraction) return;
 
         UUID targetId = e.getEntity().getUniqueId();
 
         // Reset streak if switched target, or 5s elapsed since last hit on the same target
         if (!targetId.equals(kurukCurrentTarget)
-                || (kurukLastHitTime > 0 && System.currentTimeMillis() - kurukLastHitTime > KURUK_STREAK_TIMEOUT_MS)) {
+                || (kurukLastHitTime > 0 && System.currentTimeMillis() - kurukLastHitTime > kurukStreakTimeout)) {
             kurukHitCount = 0;
         }
 
@@ -723,7 +733,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
         fangInstances.remove(fangUUID);
         fangUUID = null;
         player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.past_lives_fang_fallen")));
-        bPlayer.addCooldown(getName(), ROKU_DEATH_COOLDOWN_MS);
+        bPlayer.addCooldown(getName(), rokuDeathCooldown);
         remove();
     }
 

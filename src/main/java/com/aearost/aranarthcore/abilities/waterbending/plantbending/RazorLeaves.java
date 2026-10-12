@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.waterbending.plantbending;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.PlantAbility;
@@ -44,9 +45,9 @@ public class RazorLeaves extends PlantAbility implements AddonAbility {
     // Static instance registry (one active RazorLeaves per player)
     private static final Map<UUID, RazorLeaves> activeInstances = new HashMap<>();
 
-    private static final double SPEED = 2.5;     // blocks per tick
+    private double speed;     // blocks per tick
     private static final double STEP = 0.2;      // sub-step size in blocks
-    private static final double HIT_RADIUS = 0.8;
+    private double hitRadius;
 
     // Deep forest green
     private static final Particle.DustOptions LEAF_DUST =
@@ -71,12 +72,14 @@ public class RazorLeaves extends PlantAbility implements AddonAbility {
             return;
         }
 
-        cooldown = 8000;
-        selectRange = 6;
-        range = 20;
-        damage = 2.0;
-        sourceLeashRange = 10.0;
-        leavesRemaining = 5;
+        cooldown = AbilityConfig.getLong("RazorLeaves.Cooldown");
+        selectRange = AbilityConfig.getInt("RazorLeaves.SelectRange");
+        range = AbilityConfig.getInt("RazorLeaves.Range");
+        damage = AbilityConfig.getDouble("RazorLeaves.Damage");
+        sourceLeashRange = AbilityConfig.getDouble("RazorLeaves.SourceLeashRange");
+        leavesRemaining = AbilityConfig.getInt("RazorLeaves.Leaves");
+        speed = AbilityConfig.getDouble("RazorLeaves.Speed");
+        hitRadius = AbilityConfig.getDouble("RazorLeaves.HitRadius");
         phase = Phase.SOURCED;
 
         Block found = BlockSource.getWaterSourceBlock(player, selectRange, ClickType.SHIFT_DOWN, false, false, bPlayer.canPlantbend());
@@ -180,7 +183,7 @@ public class RazorLeaves extends PlantAbility implements AddonAbility {
      * Returns true when the projectile should be removed.
      */
     private boolean progressProjectile(LeafProjectile proj) {
-        double targetDistance = proj.distanceTraveled + SPEED;
+        double targetDistance = proj.distanceTraveled + speed;
         Location sourceCenter = sourceBlock.getLocation().add(0.5, 0.5, 0.5);
 
         while (proj.distanceTraveled < targetDistance) {
@@ -201,7 +204,7 @@ public class RazorLeaves extends PlantAbility implements AddonAbility {
             }
 
             // Entity hit
-            LivingEntity hit = findNearbyLivingEntity(proj.position, HIT_RADIUS);
+            LivingEntity hit = findNearbyLivingEntity(proj.position, hitRadius);
             if (hit != null) {
                 hit.damage(damage, player);
                 return true;

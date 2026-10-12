@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.abilities.waterbending.bloodbending;
 
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionRank;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
@@ -28,12 +29,6 @@ import java.util.*;
 
 public class LifeRip extends BloodAbility implements AddonAbility {
 
-    private static final long CAST_DURATION_MS = 6000L;
-    private static final double DRAIN_DAMAGE = 2.0;
-    private static final double TARGET_MAX_HEALTH_LOSS = 2.0;
-    private static final double CASTER_MAX_HEALTH_GAIN = 1.0;
-    private static final double CASTER_MAX_GAIN_CAP = 20.0;
-    private static final double TARGET_HIT_RADIUS = 0.5;
 
     /**
      * PDC key tracking the total maximum health drained from a player by LifeRip.
@@ -69,14 +64,14 @@ public class LifeRip extends BloodAbility implements AddonAbility {
 
         double currentGain = player.getPersistentDataContainer()
                 .getOrDefault(CASTER_GAIN_KEY, PersistentDataType.DOUBLE, 0.0);
-        if (currentGain >= CASTER_MAX_GAIN_CAP) {
+        if (currentGain >= AbilityConfig.getDouble("LifeRip.CasterMaxGainCap")) {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.life_rip_max")));
             return;
         }
 
-        this.cooldown = 30000L;
-        this.range = 7.0;
-        this.castDuration = CAST_DURATION_MS;
+        this.cooldown = AbilityConfig.getLong("LifeRip.Cooldown");
+        this.range = AbilityConfig.getDouble("LifeRip.Range");
+        this.castDuration = AbilityConfig.getLong("LifeRip.Duration");
 
         Player found = findTarget();
         if (found == null) {
@@ -149,10 +144,10 @@ public class LifeRip extends BloodAbility implements AddonAbility {
         AttributeInstance targetAttr = target.getAttribute(MAX_HEALTH);
         if (targetAttr != null) {
             missingHP = targetAttr.getValue() - target.getHealth();
-            target.setHealth(Math.max(0.0, target.getHealth() - DRAIN_DAMAGE));
+            target.setHealth(Math.max(0.0, target.getHealth() - AbilityConfig.getDouble("LifeRip.DrainDamage")));
 
             // Reduce max health by the standard 1 heart plus whatever the target was already missing
-            double totalMaxReduction = TARGET_MAX_HEALTH_LOSS + missingHP;
+            double totalMaxReduction = AbilityConfig.getDouble("LifeRip.TargetMaxHealthLoss") + missingHP;
             double newBaseValue = Math.max(2.0, targetAttr.getBaseValue() - totalMaxReduction);
             double actualReduction = targetAttr.getBaseValue() - newBaseValue;
             targetAttr.setBaseValue(newBaseValue);
@@ -168,11 +163,11 @@ public class LifeRip extends BloodAbility implements AddonAbility {
 
         AttributeInstance casterAttr = player.getAttribute(MAX_HEALTH);
         if (casterAttr != null) {
-            casterAttr.setBaseValue(casterAttr.getBaseValue() + CASTER_MAX_HEALTH_GAIN);
+            casterAttr.setBaseValue(casterAttr.getBaseValue() + AbilityConfig.getDouble("LifeRip.CasterMaxHealthGain"));
             double existingGain = player.getPersistentDataContainer()
                     .getOrDefault(CASTER_GAIN_KEY, PersistentDataType.DOUBLE, 0.0);
             player.getPersistentDataContainer()
-                    .set(CASTER_GAIN_KEY, PersistentDataType.DOUBLE, existingGain + CASTER_MAX_HEALTH_GAIN);
+                    .set(CASTER_GAIN_KEY, PersistentDataType.DOUBLE, existingGain + AbilityConfig.getDouble("LifeRip.CasterMaxHealthGain"));
             // Restore half of whatever health the target was missing as current health to the caster
             if (missingHP > 0.0) {
                 player.setHealth(Math.min(player.getHealth() + missingHP / 2.0, casterAttr.getValue()));
@@ -289,7 +284,7 @@ public class LifeRip extends BloodAbility implements AddonAbility {
                 continue;
             }
 
-            if (entity.getBoundingBox().expand(TARGET_HIT_RADIUS)
+            if (entity.getBoundingBox().expand(AbilityConfig.getDouble("LifeRip.HitRadius"))
                     .rayTrace(eye.toVector(), direction, range) == null) {
                 continue;
             }

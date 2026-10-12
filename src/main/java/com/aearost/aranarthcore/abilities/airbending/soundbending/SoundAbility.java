@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.abilities.airbending.soundbending;
 
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.ability.Ability;
@@ -75,14 +76,14 @@ public abstract class SoundAbility extends AirAbility implements SubAbility {
     }
 
     /**
-     * Applies the standard Sound bending debuff: Slowness I for 3 seconds and
-     * Darkness for 2 seconds. Intended for use by all Sound bending abilities.
+     * Applies the standard Sound bending debuff: Slowness I and Darkness, with durations
+     * set in abilities.yml. Intended for use by all Sound bending abilities.
      *
      * @param entity The entity to apply the effects to.
      */
     protected static void applySoundDebuff(LivingEntity entity) {
-        entity.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 60, 0, false, true));
-        entity.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 40, 0, false, true));
+        entity.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, AbilityConfig.getInt("SoundDebuff.SlownessDurationTicks"), 0, false, true));
+        entity.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, AbilityConfig.getInt("SoundDebuff.DarknessDurationTicks"), 0, false, true));
     }
 
 }

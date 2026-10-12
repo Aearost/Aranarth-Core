@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.firebending.combustion;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -47,7 +48,7 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
     private long channelingStartTime;
     private long lastTravelerLaunchTime;
 
-    private static final long CHARGE_DURATION_MS = 1500;
+    private long chargeDuration;
 
     private final List<SmokeTraveler> travelers = new ArrayList<>();
     private final List<SmokePuff> puffs = new ArrayList<>();
@@ -59,8 +60,8 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
     // Launch a new smoke traveler every ~83ms during channeling (3x the original 250ms rate)
     private static final long TRAVELER_LAUNCH_INTERVAL_MS = 83;
     // Apply escalating effects every 500ms while an entity is in the fumes
-    private static final long EFFECT_INTERVAL_MS = 500;
-    private static final int BASE_EFFECT_DURATION_TICKS = 60; // +20 ticks per 0.5s interval in fumes
+    private long effectInterval;
+    private int baseEffectDurationTicks; // +20 ticks per 0.5s interval in fumes
 
     private static final Map<UUID, NoxiousFumes> activeInstances  = new HashMap<>();
     // Tracks when a player's NoxiousFumes reached full charge - consumed by JetFumes activation.
@@ -147,13 +148,16 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
             return;
         }
 
-        cooldown = 12000;
-        range = 10.0;
-        smokeSpeed = 12.0;
-        maxChannelingDuration = 4000;
-        puffLifespan = 7000;
-        puffRadius = 3.0;
-        sourceCheckRadius = 6.0;
+        cooldown = AbilityConfig.getLong("NoxiousFumes.Cooldown");
+        range = AbilityConfig.getDouble("NoxiousFumes.Range");
+        smokeSpeed = AbilityConfig.getDouble("NoxiousFumes.SmokeSpeed");
+        maxChannelingDuration = AbilityConfig.getLong("NoxiousFumes.MaxChannelingDuration");
+        puffLifespan = AbilityConfig.getLong("NoxiousFumes.PuffLifespan");
+        puffRadius = AbilityConfig.getDouble("NoxiousFumes.PuffRadius");
+        sourceCheckRadius = AbilityConfig.getDouble("NoxiousFumes.SourceCheckRadius");
+        chargeDuration = AbilityConfig.getLong("NoxiousFumes.ChargeDuration");
+        effectInterval = AbilityConfig.getLong("NoxiousFumes.EffectInterval");
+        baseEffectDurationTicks = AbilityConfig.getInt("NoxiousFumes.BaseEffectDurationTicks");
 
         if (player.getFireTicks() > 0) {
             selfOnFire = true;
@@ -163,7 +167,7 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
             if (alliedSourcePlayer != null) {
                 sourceLocation = getPlayerFireSourceLocation(alliedSourcePlayer);
             } else {
-                findNearestSources(isDay() ? 5 : 1);
+                findNearestSources(isDay() ? AbilityConfig.getInt("NoxiousFumes.MaxSourcesDay") : AbilityConfig.getInt("NoxiousFumes.MaxSourcesNight"));
                 if (sourceLocations.isEmpty()) {
                     return;
                 }
@@ -186,7 +190,7 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
     public void startChanneling() {
         if (phase != Phase.READY) return;
         // Require the 2-second charge to be complete before channeling can begin
-        if (System.currentTimeMillis() - readyStartTime < CHARGE_DURATION_MS) return;
+        if (System.currentTimeMillis() - readyStartTime < chargeDuration) return;
         phase = Phase.CHANNELING;
         channelingStartTime = System.currentTimeMillis();
         lastTravelerLaunchTime = 0;
@@ -250,7 +254,7 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
             }
             sourceLocation = getPlayerFireSourceLocation(alliedSourcePlayer);
         } else {
-            findNearestSources(isDay() ? 5 : 1);
+            findNearestSources(isDay() ? AbilityConfig.getInt("NoxiousFumes.MaxSourcesDay") : AbilityConfig.getInt("NoxiousFumes.MaxSourcesNight"));
             if (sourceLocations.isEmpty()) {
                 remove();
                 return;
@@ -258,7 +262,7 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
         }
         // Gradually extend the line from source to hand over the charge duration
         double chargeFraction = Math.min(1.0,
-                (double)(System.currentTimeMillis() - readyStartTime) / CHARGE_DURATION_MS);
+                (double)(System.currentTimeMillis() - readyStartTime) / chargeDuration);
         drawSourceLine(chargeFraction);
         if (isCharged()) {
             if (selfOnFire && !selfFireExtinguished) {
@@ -467,13 +471,13 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
 
                 long lastEffect = entityLastEffectTime.get(id);
                 // Apply effects on first contact (after 0.5s) and every 0.5s thereafter
-                if (!firstContact && now - lastEffect >= EFFECT_INTERVAL_MS) {
+                if (!firstContact && now - lastEffect >= effectInterval) {
                     int hits = entityHitCounts.getOrDefault(id, 0) + 1;
                     entityHitCounts.put(id, hits);
                     entityLastEffectTime.put(id, now);
 
                     // Duration grows by 1s (20 ticks) for every 0.5s interval in fumes
-                    int durationTicks = BASE_EFFECT_DURATION_TICKS + hits * 20;
+                    int durationTicks = baseEffectDurationTicks + hits * 20;
                     // Poison amplifier: Poison I on first interval (amp 0), II on second, etc.
                     int poisonAmp = hits - 1;
 
@@ -752,6 +756,6 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
      * full charge duration - i.e., the smoke path has fully reached the player's hand.
      */
     public boolean isCharged() {
-        return phase == Phase.READY && System.currentTimeMillis() - readyStartTime >= CHARGE_DURATION_MS;
+        return phase == Phase.READY && System.currentTimeMillis() - readyStartTime >= chargeDuration;
     }
 }

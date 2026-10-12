@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.abilities.waterbending.healing;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -33,13 +34,12 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
 
     public enum Phase {CHARGING, READY}
 
-    private static final long CHARGE_DURATION_MS = 500L;
-    private static final long SHOT_COOLDOWN_MS = 200L;
-    private static final double SOURCE_RANGE = 5.0;
-    private static final double PROJECTILE_SPEED = 1.5;
+    private long chargeDuration;
+    private long shotCooldown;
+    private double speed;
     private static final double STEP = 0.25;
-    private static final double HIT_RADIUS = 0.8;
-    private static final double BASE_HEAL = 2.0; // 1 heart = 2 HP
+    private double hitRadius;
+    private double baseHeal; // 1 heart = 2 HP
 
     private static final double[] RANK_MULTIPLIERS = {
             1.0, 1.05, 1.15, 1.3, 1.5, 1.75, 2.0, 2.25, 2.5
@@ -103,9 +103,14 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
         }
         clearPendingSource(player.getUniqueId());
 
-        this.cooldown = 8000L;
-        this.range = 20.0;
-        this.maxShots = 5;
+        this.cooldown = AbilityConfig.getLong("MendingWaters.Cooldown");
+        this.range = AbilityConfig.getDouble("MendingWaters.Range");
+        this.maxShots = AbilityConfig.getInt("MendingWaters.Shots");
+        this.chargeDuration = AbilityConfig.getLong("MendingWaters.ChargeDuration");
+        this.shotCooldown = AbilityConfig.getLong("MendingWaters.ShotCooldown");
+        this.speed = AbilityConfig.getDouble("MendingWaters.Speed");
+        this.hitRadius = AbilityConfig.getDouble("MendingWaters.HitRadius");
+        this.baseHeal = AbilityConfig.getDouble("MendingWaters.BaseHeal");
         this.phase = Phase.CHARGING;
         this.chargeStart = System.currentTimeMillis();
         this.shotsRemaining = this.maxShots;
@@ -122,7 +127,7 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
     private double computeHealAmount() {
         final AranarthPlayer ap = AranarthUtils.getAranarthPlayers().get(player.getUniqueId());
         final int rank = (ap != null) ? ap.getRank() : 0;
-        return BASE_HEAL * RANK_MULTIPLIERS[Math.min(rank, RANK_MULTIPLIERS.length - 1)];
+        return baseHeal * RANK_MULTIPLIERS[Math.min(rank, RANK_MULTIPLIERS.length - 1)];
     }
 
     @Override
@@ -159,7 +164,7 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
 
         spawnHandParticles(false);
 
-        if (System.currentTimeMillis() - chargeStart >= CHARGE_DURATION_MS) {
+        if (System.currentTimeMillis() - chargeStart >= chargeDuration) {
             phase = Phase.READY;
             player.getWorld().playSound(player.getLocation(), Sound.BLOCK_WATER_AMBIENT, 0.6f, 1.3f);
         }
@@ -180,7 +185,7 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
             LivingEntity hitEntity = null;
             Location hitPos = null;
 
-            double remaining = PROJECTILE_SPEED;
+            double remaining = speed;
             while (remaining > 0 && !remove) {
                 final double step = Math.min(STEP, remaining);
                 shot.location.add(lookDir.clone().multiply(step));
@@ -203,7 +208,7 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
                 }
 
                 for (final Entity entity : shot.location.getWorld().getNearbyEntities(
-                        shot.location, HIT_RADIUS, HIT_RADIUS, HIT_RADIUS)) {
+                        shot.location, hitRadius, hitRadius, hitRadius)) {
                     if (!(entity instanceof LivingEntity living)) {
                         continue;
                     }
@@ -298,7 +303,7 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
         }
 
         final long now = System.currentTimeMillis();
-        if (now - lastShotTime < SHOT_COOLDOWN_MS) {
+        if (now - lastShotTime < shotCooldown) {
             return;
         }
         lastShotTime = now;
@@ -335,7 +340,7 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
         if (!block.getWorld().equals(player.getWorld())) {
             return;
         }
-        if (block.getLocation().distance(player.getLocation()) > SOURCE_RANGE) {
+        if (block.getLocation().distance(player.getLocation()) > AbilityConfig.getDouble("MendingWaters.SourceRange")) {
             return;
         }
 

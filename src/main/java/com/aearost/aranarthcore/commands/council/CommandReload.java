@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands.council;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.Shop;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.CouponUtils;
 import com.aearost.aranarthcore.utils.Lang;
@@ -16,7 +17,7 @@ import org.bukkit.entity.Player;
 import java.util.List;
 
 /**
- * Reloads config.yml, coupons, server shop signs, and permissions on both servers.
+ * Reloads config.yml, abilities.yml, coupons, server shop signs, and permissions on both servers.
  */
 public class CommandReload {
 
@@ -29,6 +30,8 @@ public class CommandReload {
 		AranarthCore plugin = AranarthCore.getInstance();
 		plugin.reloadConfig();
 		sender.sendMessage(ChatUtils.chatMessage(Lang.get("reload.config")));
+		AbilityConfig.load(plugin);
+		sender.sendMessage(ChatUtils.chatMessage(Lang.get("reload.abilities")));
 
 		// Server shops only exist on Survival
 		if (!AranarthCore.isSmpServer()) {

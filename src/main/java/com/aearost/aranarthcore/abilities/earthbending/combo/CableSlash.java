@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.earthbending.combo;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -28,7 +29,7 @@ public class CableSlash extends MetalAbility implements AddonAbility, ComboAbili
 
     private static final int SLASH_TICKS = 20;
     private static final int SUB_STEPS = 4;
-    private static final double HIT_RADIUS = 1.5;
+    private double hitRadius;
     private static final double YAW_THRESHOLD = 0.01;
 
     private static final Particle.DustOptions CABLE_DUST =
@@ -63,10 +64,11 @@ public class CableSlash extends MetalAbility implements AddonAbility, ComboAbili
             return;
         }
 
-        this.damage    = 5.0;
-        this.range     = 10.0;
-        this.knockback = 0.3;
-        this.cooldown  = 8000L;
+        this.damage    = AbilityConfig.getDouble("CableSlash.Damage");
+        this.range     = AbilityConfig.getDouble("CableSlash.Range");
+        this.knockback = AbilityConfig.getDouble("CableSlash.Knockback");
+        this.cooldown  = AbilityConfig.getLong("CableSlash.Cooldown");
+        this.hitRadius = AbilityConfig.getDouble("CableSlash.HitRadius");
 
         this.direction     = player.getEyeLocation().getDirection().normalize();
         this.prevDirection = this.direction.clone();
@@ -150,7 +152,7 @@ public class CableSlash extends MetalAbility implements AddonAbility, ComboAbili
 
     private void checkHits(final Location hand) {
         final Location end = hand.clone().add(direction.clone().multiply(range));
-        final double r = HIT_RADIUS;
+        final double r = hitRadius;
         final BoundingBox lineBounds = new BoundingBox(
                 Math.min(hand.getX(), end.getX()) - r,
                 Math.min(hand.getY(), end.getY()) - r,

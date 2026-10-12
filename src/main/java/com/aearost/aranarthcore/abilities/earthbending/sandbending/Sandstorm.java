@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.earthbending.sandbending;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -70,16 +71,16 @@ public class Sandstorm extends SandAbility implements AddonAbility {
             return;
         }
 
-        cooldown = 12000;
-        maxRadius = 10.0;
-        baseDamage = 1.0;
-        damageIncrement = 1.0;
-        maxDamagePerInterval = 3.0;
-        expansionInterval = 500;
-        damageInterval = 500;
-        maxCastingDuration = 10000L;
-        selectSourceRange = 5.0;
-        slownessUpgradeInterval = 1500;
+        cooldown = AbilityConfig.getLong("Sandstorm.Cooldown");
+        maxRadius = AbilityConfig.getDouble("Sandstorm.MaxRadius");
+        baseDamage = AbilityConfig.getDouble("Sandstorm.BaseDamage");
+        damageIncrement = AbilityConfig.getDouble("Sandstorm.DamageIncrement");
+        maxDamagePerInterval = AbilityConfig.getDouble("Sandstorm.MaxDamagePerInterval");
+        expansionInterval = AbilityConfig.getLong("Sandstorm.ExpansionInterval");
+        damageInterval = AbilityConfig.getLong("Sandstorm.DamageInterval");
+        maxCastingDuration = AbilityConfig.getLong("Sandstorm.MaxCastingDuration");
+        selectSourceRange = AbilityConfig.getDouble("Sandstorm.SelectSourceRange");
+        slownessUpgradeInterval = AbilityConfig.getLong("Sandstorm.SlownessUpgradeInterval");
 
         phase = Phase.SELECTED;
         activeInstances.put(player.getUniqueId(), this);

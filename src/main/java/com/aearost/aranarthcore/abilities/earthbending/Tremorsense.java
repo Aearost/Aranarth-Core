@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.earthbending;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
@@ -49,9 +50,9 @@ public class Tremorsense extends EarthAbility implements AddonAbility {
     private static final int SMOKE_RADIUS = 10;
 
     // Active entity glow settings
-    private static final int MAX_ENTITY_RADIUS = 50;
-    private static final long EXPAND_DURATION_MS = 5000L;
-    private static final long MAX_ACTIVE_DURATION_MS = 15000L;
+    private int radius;
+    private long expandDuration;
+    private long duration;
 
     @Attribute(Attribute.COOLDOWN)
     private long cooldown;
@@ -70,7 +71,10 @@ public class Tremorsense extends EarthAbility implements AddonAbility {
             return;
         }
 
-        cooldown = 10000L;
+        cooldown = AbilityConfig.getLong("Tremorsense.Cooldown");
+        radius = AbilityConfig.getInt("Tremorsense.Radius");
+        expandDuration = AbilityConfig.getLong("Tremorsense.ExpandDuration");
+        duration = AbilityConfig.getLong("Tremorsense.Duration");
         startTime = System.currentTimeMillis();
         activeInstances.put(player.getUniqueId(), this);
         start();
@@ -87,13 +91,13 @@ public class Tremorsense extends EarthAbility implements AddonAbility {
             return;
         }
         long elapsed = System.currentTimeMillis() - startTime;
-        if (elapsed >= MAX_ACTIVE_DURATION_MS) {
+        if (elapsed >= duration) {
             endWithCooldown();
             return;
         }
 
-        double currentRadius = Math.min(MAX_ENTITY_RADIUS,
-                (double) elapsed / EXPAND_DURATION_MS * MAX_ENTITY_RADIUS);
+        double currentRadius = Math.min(radius,
+                (double) elapsed / expandDuration * radius);
         double radiusSq = currentRadius * currentRadius;
 
         for (Entity entity : player.getNearbyEntities(currentRadius, currentRadius, currentRadius)) {

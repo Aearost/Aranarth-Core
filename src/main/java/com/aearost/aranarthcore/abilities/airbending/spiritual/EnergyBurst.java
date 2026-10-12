@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.airbending.spiritual;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.GeneralMethods;
@@ -21,14 +22,14 @@ import java.util.UUID;
 
 public class EnergyBurst extends SpiritualAbility implements AddonAbility {
 
-    private static final double BURST_RADIUS = 8.0;
-    private static final long BURST_DURATION = 1500L; // 30 ticks
+    private final double burstRadius;
+    private final long burstDuration;
     private static final int BOLTS_PER_TICK = 7;
 
     // Fall burst scaling: 0.5 hearts (1.0 HP) at the vanilla fall-damage threshold, full damage at 75 blocks
-    static final double FALL_BURST_MIN_DISTANCE = 3.0;
-    static final double FALL_BURST_MAX_DISTANCE = 75.0;
-    private static final double FALL_BURST_MIN_DAMAGE = 1.0; // 0.5 hearts
+    private final double fallBurstMinDistance;
+    private final double fallBurstMaxDistance;
+    private final double fallBurstMinDamage;
 
     private static final Map<UUID, EnergyBurst> activeInstances = new HashMap<>();
 
@@ -48,9 +49,14 @@ public class EnergyBurst extends SpiritualAbility implements AddonAbility {
     public EnergyBurst(final Player player) {
         super(player);
 
-        this.cooldown = 12000L;
-        this.chargeDuration = 1500L;
-        this.damage = 10.0; // 5 hearts
+        this.cooldown = AbilityConfig.getLong("EnergyBurst.Cooldown");
+        this.chargeDuration = AbilityConfig.getLong("EnergyBurst.ChargeDuration");
+        this.damage = AbilityConfig.getDouble("EnergyBurst.Damage");
+        this.burstRadius = AbilityConfig.getDouble("EnergyBurst.Radius");
+        this.burstDuration = AbilityConfig.getLong("EnergyBurst.BurstDuration");
+        this.fallBurstMinDistance = AbilityConfig.getDouble("EnergyBurst.FallBurstMinDistance");
+        this.fallBurstMaxDistance = AbilityConfig.getDouble("EnergyBurst.FallBurstMaxDistance");
+        this.fallBurstMinDamage = AbilityConfig.getDouble("EnergyBurst.FallBurstMinDamage");
         this.state = State.CHARGING;
         this.heldSlot = player.getInventory().getHeldItemSlot();
 
@@ -64,14 +70,19 @@ public class EnergyBurst extends SpiritualAbility implements AddonAbility {
 
     /**
      * Fall-proc constructor. Immediately fires the burst with damage scaled by fall distance:
-     * 0.5 hearts at the vanilla fall threshold, full damage at FALL_BURST_MAX_DISTANCE blocks.
+     * 0.5 hearts at the vanilla fall threshold, full damage at fallBurstMaxDistance blocks.
      */
     public EnergyBurst(final Player player, final float fallDistance) {
         super(player);
 
-        this.cooldown = 12000L;
-        this.chargeDuration = 1500L;
-        this.damage = 10.0;
+        this.cooldown = AbilityConfig.getLong("EnergyBurst.Cooldown");
+        this.chargeDuration = AbilityConfig.getLong("EnergyBurst.ChargeDuration");
+        this.damage = AbilityConfig.getDouble("EnergyBurst.Damage");
+        this.burstRadius = AbilityConfig.getDouble("EnergyBurst.Radius");
+        this.burstDuration = AbilityConfig.getLong("EnergyBurst.BurstDuration");
+        this.fallBurstMinDistance = AbilityConfig.getDouble("EnergyBurst.FallBurstMinDistance");
+        this.fallBurstMaxDistance = AbilityConfig.getDouble("EnergyBurst.FallBurstMaxDistance");
+        this.fallBurstMinDamage = AbilityConfig.getDouble("EnergyBurst.FallBurstMinDamage");
         this.heldSlot = player.getInventory().getHeldItemSlot();
 
         if (!bPlayer.canBend(this)) {
@@ -79,8 +90,8 @@ public class EnergyBurst extends SpiritualAbility implements AddonAbility {
         }
 
         final double t = Math.min(1.0, Math.max(0.0,
-                (fallDistance - FALL_BURST_MIN_DISTANCE) / (FALL_BURST_MAX_DISTANCE - FALL_BURST_MIN_DISTANCE)));
-        final double scaledDamage = FALL_BURST_MIN_DAMAGE + t * (this.damage - FALL_BURST_MIN_DAMAGE);
+                (fallDistance - fallBurstMinDistance) / (fallBurstMaxDistance - fallBurstMinDistance)));
+        final double scaledDamage = fallBurstMinDamage + t * (this.damage - fallBurstMinDamage);
 
         applyBurstEffects(scaledDamage);
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.5f);
@@ -150,7 +161,7 @@ public class EnergyBurst extends SpiritualAbility implements AddonAbility {
     }
 
     private void handleBursting() {
-        if (System.currentTimeMillis() - burstStart >= BURST_DURATION) {
+        if (System.currentTimeMillis() - burstStart >= burstDuration) {
             bPlayer.addCooldown(this);
             remove();
             return;
@@ -173,7 +184,7 @@ public class EnergyBurst extends SpiritualAbility implements AddonAbility {
             }
 
             final Location entityCenter = entity.getLocation().add(0, entity.getHeight() / 2.0, 0);
-            if (entityCenter.distance(center) > BURST_RADIUS) {
+            if (entityCenter.distance(center) > burstRadius) {
                 continue;
             }
 
@@ -241,7 +252,7 @@ public class EnergyBurst extends SpiritualAbility implements AddonAbility {
                 }
 
                 pos.add(dir);
-                if (pos.distance(center) > BURST_RADIUS) {
+                if (pos.distance(center) > burstRadius) {
                     break;
                 }
 

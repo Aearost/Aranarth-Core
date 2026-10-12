@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.airbending.spiritual;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.projectkorra.projectkorra.Element;
@@ -32,10 +33,10 @@ import java.util.UUID;
 
 public class AstralProjection extends SpiritualAbility implements AddonAbility, MultiAbility {
 
-    public static final int MAX_USES = 5;
-    public static final long AURA_COOLDOWN_MS = 8000;
-    public static final long SCREAM_COOLDOWN_MS = 3000;
-    public static final long POSSESS_COOLDOWN_MS = 12000;
+    private int maxUses;
+    private long auraCooldown;
+    private long screamCooldown;
+    private long possessCooldown;
 
     // PDC keys for crash-safe armor persistence (index matches getArmorContents: 0=boots,1=legs,2=chest,3=helmet)
     private static final String PDC_ARMOR_PREFIX = "astral_armor_";
@@ -76,11 +77,15 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
             return;
         }
 
-        cooldown = 60000;
-        range = 30;
-        duration = 30000;
-        chargeDuration = 4000;
-        usesRemaining = MAX_USES;
+        cooldown = AbilityConfig.getLong("AstralProjection.Cooldown");
+        range = AbilityConfig.getInt("AstralProjection.Range");
+        duration = AbilityConfig.getInt("AstralProjection.Duration");
+        chargeDuration = AbilityConfig.getInt("AstralProjection.ChargeDuration");
+        maxUses = AbilityConfig.getInt("AstralProjection.MaxUses");
+        auraCooldown = AbilityConfig.getLong("AstralProjection.AuraCooldown");
+        screamCooldown = AbilityConfig.getLong("AstralProjection.ScreamCooldown");
+        possessCooldown = AbilityConfig.getLong("AstralProjection.PossessCooldown");
+        usesRemaining = maxUses;
 
         start();
     }
@@ -373,7 +378,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
             }
         }
 
-        bPlayer.addCooldown("Aura", AURA_COOLDOWN_MS);
+        bPlayer.addCooldown("Aura", auraCooldown);
     }
 
     /** Slot 1: Release a ghastly scream that erupts soul particles and damages nearby entities. */
@@ -410,7 +415,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
         }
         subAbilityDamaging.remove(player.getUniqueId());
 
-        bPlayer.addCooldown("Scream", SCREAM_COOLDOWN_MS);
+        bPlayer.addCooldown("Scream", screamCooldown);
     }
 
     /** Slot 2: Possess a player in line of sight within 8 blocks, scrambling their movement. */
@@ -451,7 +456,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
             }
         }.runTaskTimer(AranarthCore.getInstance(), 0L, 1L);
 
-        bPlayer.addCooldown("Possess", POSSESS_COOLDOWN_MS);
+        bPlayer.addCooldown("Possess", possessCooldown);
     }
 
     /**
@@ -484,7 +489,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
             return false;
         }
         usesRemaining--;
-        player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.astral_uses_remaining", "current", usesRemaining, "max", MAX_USES)));
+        player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.astral_uses_remaining", "current", usesRemaining, "max", maxUses)));
         return true;
     }
 
@@ -619,7 +624,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
     @Override
     public String getDescription() {
         return "This Spiritual ability allows the bender to leave their body, and project themselves as a flying, invisible, and invulnerable form. " +
-                "While projecting, up to " + MAX_USES + " sub-abilities can be used: " +
+                "While projecting, up to " + AbilityConfig.getInt("AstralProjection.MaxUses") + " sub-abilities can be used: " +
                 "Aura (Slowness + Nausea in radius), Scream (soul burst + damage), and Possess (disorient a nearby player's movement). " +
                 "Enemies who strike your body will snap you back and deal that damage to you. " +
                 "Travel too far away from your body, or double-tap sneak to return early.\n" +

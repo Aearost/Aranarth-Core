@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.earthbending.metalbending;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -30,10 +31,10 @@ public class MetalShred extends MetalAbility implements AddonAbility {
 
     public enum Phase { SOURCING, SOURCED, FIRING, STAYING }
 
-    private static final int MAX_BLOCKS = 50;
-    private static final long STAY_DURATION_MS = 5000L;
+    private int maxBlocks;
+    private long duration;
     private static final long EXTEND_INTERVAL_MS = 20L;
-    private static final double DAMAGE_RADIUS = 2.0;
+    private double damageRadius;
     private static final BlockFace[] HORIZONTAL_FACES = {
         BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST
     };
@@ -81,9 +82,12 @@ public class MetalShred extends MetalAbility implements AddonAbility {
             return;
         }
 
-        this.cooldown = 9000L;
-        this.damage = 6.0;
-        this.range = 1.0;
+        this.cooldown = AbilityConfig.getLong("MetalShred.Cooldown");
+        this.damage = AbilityConfig.getDouble("MetalShred.Damage");
+        this.range = AbilityConfig.getDouble("MetalShred.Range");
+        this.maxBlocks = AbilityConfig.getInt("MetalShred.MaxBlocks");
+        this.duration = AbilityConfig.getLong("MetalShred.Duration");
+        this.damageRadius = AbilityConfig.getDouble("MetalShred.DamageRadius");
         this.source = adjacent;
         this.horizontal = isHorizontalWall(adjacent);
         this.phase = Phase.SOURCING;
@@ -121,7 +125,7 @@ public class MetalShred extends MetalAbility implements AddonAbility {
             return;
         }
         sourcingStarted = true;
-        if (sourcedVectors.size() >= MAX_BLOCKS) {
+        if (sourcedVectors.size() >= maxBlocks) {
             phase = Phase.SOURCED;
             return;
         }
@@ -153,7 +157,7 @@ public class MetalShred extends MetalAbility implements AddonAbility {
         }
         extendCoil(next);
 
-        for (final Entity entity : GeneralMethods.getEntitiesAroundPoint(next.getLocation(), DAMAGE_RADIUS)) {
+        for (final Entity entity : GeneralMethods.getEntitiesAroundPoint(next.getLocation(), damageRadius)) {
             if (!(entity instanceof LivingEntity) || entity.getEntityId() == player.getEntityId()) {
                 continue;
             }
@@ -167,7 +171,7 @@ public class MetalShred extends MetalAbility implements AddonAbility {
     }
 
     private void progressStaying() {
-        if (System.currentTimeMillis() - stayStartTime >= STAY_DURATION_MS) {
+        if (System.currentTimeMillis() - stayStartTime >= duration) {
             endWithCooldown();
         }
     }

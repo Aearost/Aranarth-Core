@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.waterbending.plantbending;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.PlantAbility;
@@ -39,10 +40,10 @@ public class RootSnare extends PlantAbility implements AddonAbility {
     private final Set<UUID> snaredEntities = new HashSet<>();
     private final Map<UUID, LivingEntity> snaredEntityRefs = new HashMap<>();
 
-    private static final long CHARGE_DURATION_MS = 1000;
-    private static final long CHARGED_TIMEOUT_MS = 5000;
-    private static final int MIN_WOOD_PILLARS = 2;
-    private static final int MAX_TARGET_PATHS = 5;
+    private long chargeDuration;
+    private long chargedTimeout;
+    private int minWoodPillars;
+    private int maxTargets;
     private static final int DECORATIVE_PATHS = 3;
     private static final double PATH_STEP = 0.4;
     private static final double MAX_JITTER = 0.6;
@@ -81,11 +82,15 @@ public class RootSnare extends PlantAbility implements AddonAbility {
             return;
         }
 
-        cooldown = 8000;
-        range = 12.0;
-        damage = 2.0;
-        snareDuration = 2000;
-        spreadDuration = 750;
+        cooldown = AbilityConfig.getLong("RootSnare.Cooldown");
+        range = AbilityConfig.getDouble("RootSnare.Range");
+        damage = AbilityConfig.getDouble("RootSnare.Damage");
+        snareDuration = AbilityConfig.getLong("RootSnare.SnareDuration");
+        spreadDuration = AbilityConfig.getLong("RootSnare.SpreadDuration");
+        chargeDuration = AbilityConfig.getLong("RootSnare.ChargeDuration");
+        chargedTimeout = AbilityConfig.getLong("RootSnare.ChargedTimeout");
+        minWoodPillars = AbilityConfig.getInt("RootSnare.MinWoodPillars");
+        maxTargets = AbilityConfig.getInt("RootSnare.MaxTargets");
 
         phase = Phase.CHARGING;
         chargeStartTime = System.currentTimeMillis();
@@ -114,8 +119,8 @@ public class RootSnare extends PlantAbility implements AddonAbility {
             return;
         }
         long elapsed = System.currentTimeMillis() - chargeStartTime;
-        spawnChargeParticles(Math.min(1.0, (double) elapsed / CHARGE_DURATION_MS));
-        if (elapsed < CHARGE_DURATION_MS) {
+        spawnChargeParticles(Math.min(1.0, (double) elapsed / chargeDuration));
+        if (elapsed < chargeDuration) {
             return;
         }
         if (!hasForestNearby()) {
@@ -129,7 +134,7 @@ public class RootSnare extends PlantAbility implements AddonAbility {
     }
 
     private void progressCharged() {
-        if (System.currentTimeMillis() - chargedStartTime >= CHARGED_TIMEOUT_MS) {
+        if (System.currentTimeMillis() - chargedStartTime >= chargedTimeout) {
             remove();
             return;
         }
@@ -275,7 +280,7 @@ public class RootSnare extends PlantAbility implements AddonAbility {
         List<Location> treeOrigins = findTreeOrigins();
         List<LivingEntity> targets = findGroundTargets();
 
-        int targetCount = Math.min(targets.size(), MAX_TARGET_PATHS);
+        int targetCount = Math.min(targets.size(), maxTargets);
         for (int i = 0; i < targetCount; i++) {
             LivingEntity target = targets.get(i);
             Location origin = nearestOrigin(treeOrigins, target.getLocation());
@@ -457,7 +462,7 @@ public class RootSnare extends PlantAbility implements AddonAbility {
                     long key = ((long) (playerLoc.getBlockX() + x)) << 32
                              | ((playerLoc.getBlockZ() + z) & 0xFFFFFFFFL);
                     pillarKeys.add(key);
-                    if (pillarKeys.size() >= MIN_WOOD_PILLARS) {
+                    if (pillarKeys.size() >= minWoodPillars) {
                         return true;
                     }
                 }

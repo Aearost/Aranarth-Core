@@ -336,6 +336,7 @@ public class AranarthCore extends JavaPlugin {
     public void onEnable() {
         plugin = this;
         saveDefaultConfig();
+        AbilityConfig.load(this);
 
         PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
         PacketEvents.getAPI().getSettings().reEncodeByDefault(false).checkForUpdates(false);

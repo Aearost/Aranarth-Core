@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.waterbending.plantbending;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
@@ -40,11 +41,11 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
     private long channelingStartTime;
     private long lastTravelerLaunchTime;
 
-    private static final long CHARGE_DURATION_MS = 500;
+    private long chargeDuration;
     private static final long TRAVELER_LAUNCH_INTERVAL_MS = 100;
-    private static final long EFFECT_INTERVAL_MS = 500;
-    private static final int EFFECT_DURATION_TICKS = 80; // 4 seconds
-    private static final int POISON_AMPLIFIER = 4; // Poison V
+    private long effectInterval;
+    private int effectDurationTicks;
+    private int poisonAmplifier;
 
     private static final Particle.DustOptions SPORE_DUST =
             new Particle.DustOptions(Color.fromRGB(0, 90, 10), 0.6f);
@@ -123,13 +124,17 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
             return;
         }
 
-        cooldown = 12000;
-        range = 10.0;
-        sporeSpeed = 35.0;
-        maxChannelingDuration = 2000;
-        puffLifespan = 7000;
-        puffRadius = 1.5;
-        sourceCheckRadius = 6.0;
+        cooldown = AbilityConfig.getLong("ToxicSpores.Cooldown");
+        range = AbilityConfig.getDouble("ToxicSpores.Range");
+        sporeSpeed = AbilityConfig.getDouble("ToxicSpores.SporeSpeed");
+        maxChannelingDuration = AbilityConfig.getLong("ToxicSpores.MaxChannelingDuration");
+        puffLifespan = AbilityConfig.getLong("ToxicSpores.PuffLifespan");
+        puffRadius = AbilityConfig.getDouble("ToxicSpores.PuffRadius");
+        sourceCheckRadius = AbilityConfig.getDouble("ToxicSpores.SourceCheckRadius");
+        chargeDuration = AbilityConfig.getLong("ToxicSpores.ChargeDuration");
+        effectInterval = AbilityConfig.getLong("ToxicSpores.EffectInterval");
+        effectDurationTicks = AbilityConfig.getInt("ToxicSpores.EffectDurationTicks");
+        poisonAmplifier = AbilityConfig.getInt("ToxicSpores.PoisonAmplifier");
 
         sourceBlock = findNearestFlower();
         if (sourceBlock == null) {
@@ -153,7 +158,7 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
         if (phase != Phase.READY) {
             return;
         }
-        if (System.currentTimeMillis() - readyStartTime < CHARGE_DURATION_MS) {
+        if (System.currentTimeMillis() - readyStartTime < chargeDuration) {
             return;
         }
         phase = Phase.CHANNELING;
@@ -206,7 +211,7 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
             return;
         }
         double chargeFraction = Math.min(1.0,
-                (double) (System.currentTimeMillis() - readyStartTime) / CHARGE_DURATION_MS);
+                (double) (System.currentTimeMillis() - readyStartTime) / chargeDuration);
         drawSourceLine(chargeFraction);
     }
 
@@ -393,13 +398,13 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
                 entityLastEffectTime.putIfAbsent(id, now);
 
                 long lastEffect = entityLastEffectTime.get(id);
-                if (!firstContact && now - lastEffect >= EFFECT_INTERVAL_MS) {
+                if (!firstContact && now - lastEffect >= effectInterval) {
                     entityLastEffectTime.put(id, now);
 
                     living.addPotionEffect(
-                            new PotionEffect(PotionEffectType.NAUSEA, EFFECT_DURATION_TICKS, 0, false, true), true);
+                            new PotionEffect(PotionEffectType.NAUSEA, effectDurationTicks, 0, false, true), true);
                     living.addPotionEffect(
-                            new PotionEffect(PotionEffectType.POISON, EFFECT_DURATION_TICKS, POISON_AMPLIFIER, false, true), true);
+                            new PotionEffect(PotionEffectType.POISON, effectDurationTicks, poisonAmplifier, false, true), true);
                 }
             }
         }

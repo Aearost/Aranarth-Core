@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.firebending.lightningbending;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -25,10 +26,7 @@ import java.util.UUID;
 
 public class Static extends LightningAbility implements AddonAbility {
 
-    private static final double PROJECTILE_SPEED = 1.5;
     private static final double STEP = 0.15;
-    private static final double HIT_RADIUS = 0.8;
-    private static final long ELECTROCUTION_DURATION_MS = 500L;
 
     private static final Map<UUID, Static> ACTIVE_INSTANCES = new HashMap<>();
 
@@ -42,6 +40,12 @@ public class Static extends LightningAbility implements AddonAbility {
     private double bounceRadius;
     @Attribute("MaxBounces")
     private int maxBounces;
+    private long bounceDelayTicks;
+    private double speed;
+    private double hitRadius;
+    private double nonPlayerDamageMultiplier;
+    private double stunChance;
+    private long stunDuration;
 
     private Location shotLocation;
     private final Vector direction;
@@ -58,11 +62,17 @@ public class Static extends LightningAbility implements AddonAbility {
             return;
         }
 
-        damage = 2.0;
-        cooldown = 7000L;
-        range = 7.0;
-        bounceRadius = 5.0;
-        maxBounces = 6;
+        damage = AbilityConfig.getDouble("Static.Damage");
+        cooldown = AbilityConfig.getLong("Static.Cooldown");
+        range = AbilityConfig.getDouble("Static.Range");
+        bounceRadius = AbilityConfig.getDouble("Static.BounceRadius");
+        maxBounces = AbilityConfig.getInt("Static.MaxBounces");
+        bounceDelayTicks = AbilityConfig.getLong("Static.BounceDelayTicks");
+        speed = AbilityConfig.getDouble("Static.Speed");
+        hitRadius = AbilityConfig.getDouble("Static.HitRadius");
+        nonPlayerDamageMultiplier = AbilityConfig.getDouble("Static.NonPlayerDamageMultiplier");
+        stunChance = AbilityConfig.getDouble("Static.StunChance");
+        stunDuration = AbilityConfig.getLong("Static.StunDuration");
         shotLocation = player.getEyeLocation().clone();
         distanceTraveled = 0.0;
         stepIndex = 0;
@@ -87,7 +97,7 @@ public class Static extends LightningAbility implements AddonAbility {
     }
 
     private void progressTraveling() {
-        double remaining = PROJECTILE_SPEED;
+        double remaining = speed;
 
         while (remaining > 0) {
             double step = Math.min(STEP, remaining);
@@ -129,7 +139,7 @@ public class Static extends LightningAbility implements AddonAbility {
     }
 
     /**
-     * Schedules the next chain bounce 5 ticks after the previous strike
+     * Schedules the next chain bounce a short delay after the previous strike
      *
      * @param from        The entity the bolt last struck.
      * @param alreadyHit  UUIDs of all entities already struck this cast.
@@ -158,7 +168,7 @@ public class Static extends LightningAbility implements AddonAbility {
                 alreadyHit.add(next.getUniqueId());
                 chain(next, alreadyHit, bouncesDone + 1);
             }
-        }.runTaskLater(AranarthCore.getInstance(), 5L);
+        }.runTaskLater(AranarthCore.getInstance(), bounceDelayTicks);
     }
 
     /**
@@ -167,9 +177,9 @@ public class Static extends LightningAbility implements AddonAbility {
      * @param target The entity to strike.
      */
     private void strikeEntity(LivingEntity target) {
-        double actualDamage = (target instanceof Player) ? damage : damage * 3.0;
+        double actualDamage = (target instanceof Player) ? damage : damage * nonPlayerDamageMultiplier;
         DamageHandler.damageEntity(target, actualDamage, this);
-        AranarthBendingUtils.applyElectrocution(target, ELECTROCUTION_DURATION_MS, 0.1);
+        AranarthBendingUtils.applyElectrocution(target, stunDuration, stunChance);
 
         for (int k = 0; k < 6; k++) {
             Particle.DustOptions dust = (k % 2 == 0)
@@ -227,14 +237,14 @@ public class Static extends LightningAbility implements AddonAbility {
     }
 
     /**
-     * Returns the first living entity within HIT_RADIUS of the given location,
+     * Returns the first living entity within hitRadius of the given location,
      * excluding the caster.
      *
      * @param loc The location to check.
      * @return The first living entity found, or null.
      */
     private LivingEntity findEntityAt(Location loc) {
-        for (Entity entity : loc.getWorld().getNearbyEntities(loc, HIT_RADIUS, HIT_RADIUS, HIT_RADIUS)) {
+        for (Entity entity : loc.getWorld().getNearbyEntities(loc, hitRadius, hitRadius, hitRadius)) {
             if (!(entity instanceof LivingEntity living) || entity.equals(player)) {
                 continue;
             }

@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.firebending.combustion;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -22,11 +23,13 @@ public class JetFumes extends CombustionAbility implements AddonAbility, ComboAb
 
     public enum Phase {FLYING, DISPERSING}
 
-    private static final long TRAIL_PUFF_LIFESPAN_MS = 5500L;
+    private long puffLifespan;
     private static final long TRAIL_PUFF_INTERVAL_MS = 100L;
     private static final long SOUND_INTERVAL_MS = 50L;
-    private static final long EFFECT_INTERVAL_MS = 500L;
-    private static final int BASE_EFFECT_DURATION_TICKS = 20;
+    private long effectInterval;
+    private double sourceRadius;
+    private long fireJetCooldown;
+    private int baseEffectDurationTicks;
 
     @Attribute(Attribute.DURATION)
     private long duration;
@@ -46,7 +49,7 @@ public class JetFumes extends CombustionAbility implements AddonAbility, ComboAb
     private final Map<UUID, Integer> entityHitCounts = new HashMap<>();
 
     private static final Map<UUID, JetFumes> ACTIVE_INSTANCES = new HashMap<>();
-    private static final long COOLDOWN_MS = 12000L;
+    private long cooldown;
     private final Random random = new Random();
 
     private boolean started = false;
@@ -91,9 +94,15 @@ public class JetFumes extends CombustionAbility implements AddonAbility, ComboAb
             return;
         }
 
-        duration = 4000L;
-        flightSpeed = 1.6;
-        puffRadius = 3.0;
+        duration = AbilityConfig.getLong("JetFumes.Duration");
+        flightSpeed = AbilityConfig.getDouble("JetFumes.FlightSpeed");
+        puffRadius = AbilityConfig.getDouble("JetFumes.PuffRadius");
+        cooldown = AbilityConfig.getLong("JetFumes.Cooldown");
+        puffLifespan = AbilityConfig.getLong("JetFumes.PuffLifespan");
+        effectInterval = AbilityConfig.getLong("JetFumes.EffectInterval");
+        sourceRadius = AbilityConfig.getDouble("JetFumes.SourceRadius");
+        fireJetCooldown = AbilityConfig.getLong("JetFumes.FireJetCooldown");
+        baseEffectDurationTicks = AbilityConfig.getInt("JetFumes.BaseEffectDurationTicks");
 
         phase = Phase.FLYING;
         flightStartTime = System.currentTimeMillis();
@@ -101,7 +110,7 @@ public class JetFumes extends CombustionAbility implements AddonAbility, ComboAb
         lastSoundTime = 0L;
 
         // Must be near a fire or lava source to launch
-        if (!isNearFireOrLava(player, 6.0)) {
+        if (!isNearFireOrLava(player, sourceRadius)) {
             return;
         }
 
@@ -177,8 +186,8 @@ public class JetFumes extends CombustionAbility implements AddonAbility, ComboAb
     private void endFlight() {
         phase = Phase.DISPERSING;
         flightEndTime = System.currentTimeMillis();
-        bPlayer.addCooldown("JetFumes", COOLDOWN_MS);
-        bPlayer.addCooldown("FireJet", 5000L);
+        bPlayer.addCooldown("JetFumes", cooldown);
+        bPlayer.addCooldown("FireJet", fireJetCooldown);
     }
 
     private void tickFlight() {
@@ -195,7 +204,7 @@ public class JetFumes extends CombustionAbility implements AddonAbility, ComboAb
 
     private void tickTrail(long now) {
         if (now - lastTrailPuffTime >= TRAIL_PUFF_INTERVAL_MS) {
-            puffs.add(new TrailPuff(player.getLocation().add(0, 1, 0), TRAIL_PUFF_LIFESPAN_MS));
+            puffs.add(new TrailPuff(player.getLocation().add(0, 1, 0), puffLifespan));
             lastTrailPuffTime = now;
         }
     }
@@ -271,12 +280,12 @@ public class JetFumes extends CombustionAbility implements AddonAbility, ComboAb
                 entityEntryTime.putIfAbsent(id, now);
                 entityLastEffectTime.putIfAbsent(id, now);
 
-                if (!firstContact && now - entityLastEffectTime.get(id) >= EFFECT_INTERVAL_MS) {
+                if (!firstContact && now - entityLastEffectTime.get(id) >= effectInterval) {
                     int hits = entityHitCounts.getOrDefault(id, 0) + 1;
                     entityHitCounts.put(id, hits);
                     entityLastEffectTime.put(id, now);
 
-                    int durationTicks = BASE_EFFECT_DURATION_TICKS + hits * 20;
+                    int durationTicks = baseEffectDurationTicks + hits * 20;
                     int poisonAmp = hits - 1;
 
                     living.addPotionEffect(
@@ -342,12 +351,12 @@ public class JetFumes extends CombustionAbility implements AddonAbility, ComboAb
             if (flightEndTime == 0) {
                 // endFlight() was never called (e.g. player died or disconnected mid-flight)
                 bPlayer.addCooldown("FireJet", fireJetCooldown);
-                bPlayer.addCooldown("JetFumes", COOLDOWN_MS);
+                bPlayer.addCooldown("JetFumes", cooldown);
             } else {
                 // endFlight() already started both cooldowns, but super.remove() just reset
                 // JetFumes to a fresh 12s. Restore the correct remaining time.
                 long elapsed = System.currentTimeMillis() - flightEndTime;
-                long remaining = COOLDOWN_MS - elapsed;
+                long remaining = cooldown - elapsed;
                 if (remaining > 0) {
                     bPlayer.addCooldown("JetFumes", remaining);
                 } else {
@@ -369,7 +378,7 @@ public class JetFumes extends CombustionAbility implements AddonAbility, ComboAb
 
     @Override
     public long getCooldown() {
-        return COOLDOWN_MS;
+        return cooldown;
     }
 
     @Override

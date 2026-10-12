@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.waterbending.combo;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.GeneralMethods;
@@ -43,13 +44,13 @@ public class IceDiscs extends IceAbility implements AddonAbility, ComboAbility {
 
     public enum Phase {CHARGING, FIRING}
 
-    private static final double SPEED = 3;
+    private double speed;
     private static final double STEP = 0.3;
-    private static final double HIT_RADIUS = 0.7;
-    private static final long INTER_DISC_COOLDOWN = 100L;
+    private double hitRadius;
+    private long discCooldown;
     private static final int MAX_LAYERS = 12;
-    private static final long CHARGE_TIME = 2000L;
-    private static final long LAYER_INTERVAL = CHARGE_TIME / MAX_LAYERS; // 250 ms per layer
+    private long chargeDuration;
+    private long layerInterval;
 
     private static NamespacedKey discKey;
 
@@ -127,9 +128,14 @@ public class IceDiscs extends IceAbility implements AddonAbility, ComboAbility {
             return;
         }
 
-        this.cooldown = 12000L;
-        this.damage = 2.0;
-        this.range = 20.0;
+        this.cooldown = AbilityConfig.getLong("IceDiscs.Cooldown");
+        this.damage = AbilityConfig.getDouble("IceDiscs.Damage");
+        this.range = AbilityConfig.getDouble("IceDiscs.Range");
+        this.speed = AbilityConfig.getDouble("IceDiscs.Speed");
+        this.hitRadius = AbilityConfig.getDouble("IceDiscs.HitRadius");
+        this.discCooldown = AbilityConfig.getLong("IceDiscs.DiscCooldown");
+        this.chargeDuration = AbilityConfig.getLong("IceDiscs.ChargeDuration");
+        this.layerInterval = chargeDuration / MAX_LAYERS;
         this.pillarBase = above1.getLocation();
         this.phase = Phase.CHARGING;
         this.lastLayerTime = System.currentTimeMillis();
@@ -185,8 +191,8 @@ public class IceDiscs extends IceAbility implements AddonAbility, ComboAbility {
 
         final long now = System.currentTimeMillis();
 
-        // Add one layer every LAYER_INTERVAL ms until MAX_LAYERS
-        if (this.currentLayers < MAX_LAYERS && now - this.lastLayerTime >= LAYER_INTERVAL) {
+        // Add one layer every layerInterval ms until MAX_LAYERS
+        if (this.currentLayers < MAX_LAYERS && now - this.lastLayerTime >= layerInterval) {
             this.lastLayerTime = now;
             this.currentLayers++;
             this.updatePillar();
@@ -272,7 +278,7 @@ public class IceDiscs extends IceAbility implements AddonAbility, ComboAbility {
                     }
 
                     // Each disc hits at most one entity, but any entity can be hit by multiple discs
-                    for (final Entity ent : GeneralMethods.getEntitiesAroundPoint(checkPos, HIT_RADIUS)) {
+                    for (final Entity ent : GeneralMethods.getEntitiesAroundPoint(checkPos, hitRadius)) {
                         if (!(ent instanceof LivingEntity living)) {
                             continue;
                         }
@@ -328,7 +334,7 @@ public class IceDiscs extends IceAbility implements AddonAbility, ComboAbility {
         }
 
         final long now = System.currentTimeMillis();
-        if (this.lastFireTime != -1L && now - this.lastFireTime < INTER_DISC_COOLDOWN) {
+        if (this.lastFireTime != -1L && now - this.lastFireTime < discCooldown) {
             return;
         }
         this.lastFireTime = now;
@@ -362,9 +368,9 @@ public class IceDiscs extends IceAbility implements AddonAbility, ComboAbility {
         disc.setDropItem(false);
         disc.setHurtEntities(false);
         disc.getPersistentDataContainer().set(getDiscKey(), PersistentDataType.BYTE, (byte) 1);
-        disc.setVelocity(direction.clone().multiply(SPEED));
+        disc.setVelocity(direction.clone().multiply(speed));
 
-        this.discs.add(new Disc(disc, direction.clone().multiply(SPEED), spawnLoc));
+        this.discs.add(new Disc(disc, direction.clone().multiply(speed), spawnLoc));
 
         // Ice break sound at a random pitch between 1.15 and 1.35
         final float pitch = 1.15f + new Random().nextFloat() * 0.20f;

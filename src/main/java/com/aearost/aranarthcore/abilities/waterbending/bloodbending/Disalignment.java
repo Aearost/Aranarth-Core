@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.waterbending.bloodbending;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
@@ -32,10 +33,8 @@ public class Disalignment extends BloodAbility implements AddonAbility {
 
     public enum Phase { CHARGING, CHARGED, DISALIGNING }
 
-    private static final long CHARGE_DURATION_MS = 5000L;
-    private static final long DISALIGNMENT_DURATION_MS = 10000L;
     private static final long ACTION_BAR_INTERVAL_MS = 500L;
-    private static final double TARGET_HIT_RADIUS = 0.5;
+    private double hitRadius;
 
     private static final Set<EntityType> UNDEAD_TYPES = EnumSet.of(
             EntityType.ZOMBIE,
@@ -84,10 +83,11 @@ public class Disalignment extends BloodAbility implements AddonAbility {
             return;
         }
 
-        this.cooldown = 15000L;
-        this.range = 6.0;
-        this.chargeDuration = CHARGE_DURATION_MS;
-        this.disalignmentDuration = DISALIGNMENT_DURATION_MS;
+        this.cooldown = AbilityConfig.getLong("Disalignment.Cooldown");
+        this.range = AbilityConfig.getDouble("Disalignment.Range");
+        this.hitRadius = AbilityConfig.getDouble("Disalignment.HitRadius");
+        this.chargeDuration = AbilityConfig.getLong("Disalignment.ChargeDuration");
+        this.disalignmentDuration = AbilityConfig.getLong("Disalignment.Duration");
 
         LivingEntity found = findTarget();
         if (found == null) {
@@ -367,7 +367,7 @@ public class Disalignment extends BloodAbility implements AddonAbility {
                 continue;
             }
 
-            if (entity.getBoundingBox().expand(TARGET_HIT_RADIUS)
+            if (entity.getBoundingBox().expand(hitRadius)
                     .rayTrace(eye.toVector(), direction, range) == null) {
                 continue;
             }

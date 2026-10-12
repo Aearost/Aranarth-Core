@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.firebending.lightningbending;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.GeneralMethods;
@@ -28,16 +29,8 @@ public class LightningBurst extends LightningAbility implements AddonAbility {
 
     private static final Map<UUID, LightningBurst> activeInstances = new HashMap<>();
 
-    private static final long COOLDOWN = 12000L;
-    private static final long CHARGE_UP = 1750L;
-    private static final long AVATAR_COOLDOWN = 1000L;
-    private static final long AVATAR_CHARGE_UP = 750L;
-    private static final double RADIUS = 12.0;
-    private static final double DAMAGE = 8.0;
     private static final float SOUND_VOLUME = 0.6f;
     private static final int SOUND_INTERVAL = 6;
-    private static final double STUN_CHANCE = 0.25;
-    private static final long STUN_DURATION_MS = 1000L;
 
     private final Random rand = new Random();
 
@@ -45,6 +38,10 @@ public class LightningBurst extends LightningAbility implements AddonAbility {
     private long cooldown;
     @Attribute(Attribute.CHARGE_DURATION)
     private long chargeUp;
+    private double radius;
+    private double damage;
+    private double stunChance;
+    private long stunDuration;
 
     private boolean charged;
     private double chargeParticleAngle = 0;
@@ -55,13 +52,17 @@ public class LightningBurst extends LightningAbility implements AddonAbility {
             return;
         }
 
-        this.cooldown = COOLDOWN;
-        this.chargeUp = CHARGE_UP;
+        this.cooldown = AbilityConfig.getLong("LightningBurst.Cooldown");
+        this.chargeUp = AbilityConfig.getLong("LightningBurst.ChargeDuration");
+        this.radius = AbilityConfig.getDouble("LightningBurst.Radius");
+        this.damage = AbilityConfig.getDouble("LightningBurst.Damage");
+        this.stunChance = AbilityConfig.getDouble("LightningBurst.StunChance");
+        this.stunDuration = AbilityConfig.getLong("LightningBurst.StunDuration");
         this.charged = false;
 
         if (bPlayer.isAvatarState()) {
-            this.chargeUp = AVATAR_CHARGE_UP;
-            this.cooldown = AVATAR_COOLDOWN;
+            this.chargeUp = AbilityConfig.getLong("LightningBurst.AvatarChargeDuration");
+            this.cooldown = AbilityConfig.getLong("LightningBurst.AvatarCooldown");
         }
 
         start();
@@ -95,7 +96,7 @@ public class LightningBurst extends LightningAbility implements AddonAbility {
                         temp.add(dir);
                         temp.setY(temp.getY() + 2 + (2 * Math.sin(Math.toRadians(j))));
                         dir = GeneralMethods.getDirection(player.getLocation().add(0, 0, 0), temp);
-                        spawnBolt(player.getLocation().clone().add(0, 1, 0).setDirection(dir), RADIUS, 1, 20, true);
+                        spawnBolt(player.getLocation().clone().add(0, 1, 0).setDirection(dir), radius, 1, 20, true);
                     }
                 }
                 bPlayer.addCooldown(this);
@@ -275,8 +276,8 @@ public class LightningBurst extends LightningAbility implements AddonAbility {
             if (doDamage) {
                 for (final Entity entity : GeneralMethods.getEntitiesAroundPoint(location, 2)) {
                     if (entity instanceof LivingEntity lent && entity.getEntityId() != player.getEntityId()) {
-                        DamageHandler.damageEntity(lent, DAMAGE, LightningBurst.this);
-                        AranarthBendingUtils.applyElectrocution(lent, STUN_DURATION_MS, STUN_CHANCE);
+                        DamageHandler.damageEntity(lent, damage, LightningBurst.this);
+                        AranarthBendingUtils.applyElectrocution(lent, stunDuration, stunChance);
                     }
                 }
             }

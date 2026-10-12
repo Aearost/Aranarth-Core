@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.earthbending.sandbending;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -69,7 +70,7 @@ public class SandWave extends SandAbility implements AddonAbility {
         return (val - 1.0) / 7.0; // normalise 1–8 → 0–1
     }
 
-    private static final long WAVE_DURATION = 1500L;
+    private long waveDuration;
     private static final long SOUND_INTERVAL = 350L;
 
     // -------------------------------------------------------------------------
@@ -120,11 +121,12 @@ public class SandWave extends SandAbility implements AddonAbility {
 
         dustPalette = AranarthBendingUtils.pickSandDustPalette(sourceBlock.getType());
 
-        cooldown = 12000;
-        damage = 4.0;
-        range = 16.0;
-        width = 5.0;
-        knockbackForce = 1.5;
+        cooldown = AbilityConfig.getLong("SandWave.Cooldown");
+        damage = AbilityConfig.getDouble("SandWave.Damage");
+        range = AbilityConfig.getDouble("SandWave.Range");
+        width = AbilityConfig.getDouble("SandWave.Width");
+        knockbackForce = AbilityConfig.getDouble("SandWave.Knockback");
+        waveDuration = AbilityConfig.getLong("SandWave.Duration");
 
         Vector dir = player.getLocation().getDirection();
         dir.setY(0);
@@ -158,7 +160,7 @@ public class SandWave extends SandAbility implements AddonAbility {
 
         long elapsed = System.currentTimeMillis() - startTime;
 
-        double targetDistance = Math.min((elapsed / (double) WAVE_DURATION) * range, range);
+        double targetDistance = Math.min((elapsed / (double) waveDuration) * range, range);
         while (distanceTraveled < targetDistance) {
             double step = Math.min(0.25, targetDistance - distanceTraveled);
             distanceTraveled += step;
@@ -199,7 +201,7 @@ public class SandWave extends SandAbility implements AddonAbility {
             lastSoundTime = now;
         }
 
-        if (distanceTraveled >= range || elapsed >= WAVE_DURATION + 200) {
+        if (distanceTraveled >= range || elapsed >= waveDuration + 200) {
             bPlayer.addCooldown(this);
             remove();
         }

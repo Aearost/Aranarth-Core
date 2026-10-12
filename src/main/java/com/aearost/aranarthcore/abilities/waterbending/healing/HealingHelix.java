@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.waterbending.healing;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.attribute.AttributeInstance;
@@ -39,15 +40,12 @@ public class HealingHelix extends HealingAbility implements AddonAbility {
 
     public enum Phase {WATER, GOLDEN}
 
-    private static final long WATER_DURATION_MS = 4000L;
-    private static final long GOLDEN_DURATION_MS = 4000L;
-    private static final long HEAL_INTERVAL_MS = 500L;
-    private static final double HEAL_PER_TICK = 1.0;
-    private static final double MAX_ABSORB = 8.0;
-    private static final long ABSORPTION_EXPIRY_TICKS = 240L;
+    private long healInterval;
+    private double heal;
+    private double maxAbsorption;
+    private long absorptionExpiryTicks;
     private static final double HELIX_RADIUS = 0.6;
-    private static final double TARGET_HIT_RADIUS = 0.6;
-    private static final double SOURCE_RANGE = 5.0;
+    private double hitRadius;
 
     private static final Set<Material> VALID_SOURCES = Set.of(
             Material.WATER,
@@ -107,10 +105,15 @@ public class HealingHelix extends HealingAbility implements AddonAbility {
         }
         clearPendingSource(player.getUniqueId());
 
-        this.cooldown = 15000L;
-        this.range = 15.0;
-        this.waterDuration = WATER_DURATION_MS;
-        this.goldenDuration = GOLDEN_DURATION_MS;
+        this.cooldown = AbilityConfig.getLong("HealingHelix.Cooldown");
+        this.range = AbilityConfig.getDouble("HealingHelix.Range");
+        this.healInterval = AbilityConfig.getLong("HealingHelix.HealInterval");
+        this.heal = AbilityConfig.getDouble("HealingHelix.Heal");
+        this.maxAbsorption = AbilityConfig.getDouble("HealingHelix.MaxAbsorption");
+        this.absorptionExpiryTicks = AbilityConfig.getLong("HealingHelix.AbsorptionExpiryTicks");
+        this.hitRadius = AbilityConfig.getDouble("HealingHelix.HitRadius");
+        this.waterDuration = AbilityConfig.getLong("HealingHelix.WaterDuration");
+        this.goldenDuration = AbilityConfig.getLong("HealingHelix.GoldenDuration");
 
         LivingEntity found = findTarget();
         if (found == null) {
@@ -169,7 +172,7 @@ public class HealingHelix extends HealingAbility implements AddonAbility {
             target.getWorld().playSound(target.getLocation(), Sound.BLOCK_WATER_AMBIENT, 0.2f, 0.7f);
         }
 
-        if (System.currentTimeMillis() - lastHealTime >= HEAL_INTERVAL_MS) {
+        if (System.currentTimeMillis() - lastHealTime >= healInterval) {
             applyHeal();
             lastHealTime = System.currentTimeMillis();
         }
@@ -186,7 +189,7 @@ public class HealingHelix extends HealingAbility implements AddonAbility {
         long elapsed = System.currentTimeMillis() - phaseStart;
         if (elapsed >= goldenDuration) {
             // Fill any remaining absorption so a full cast always delivers the full amount.
-            double remaining = MAX_ABSORB - absorptionGranted;
+            double remaining = maxAbsorption - absorptionGranted;
             if (remaining > 0) {
                 grantAbsorption(remaining);
             }
@@ -205,7 +208,7 @@ public class HealingHelix extends HealingAbility implements AddonAbility {
             target.getWorld().playSound(target.getLocation(), Sound.BLOCK_WATER_AMBIENT, 0.2f, 0.7f);
         }
 
-        if (absorptionGranted < MAX_ABSORB && System.currentTimeMillis() - lastHealTime >= HEAL_INTERVAL_MS) {
+        if (absorptionGranted < maxAbsorption && System.currentTimeMillis() - lastHealTime >= healInterval) {
             grantAbsorption(1.0);
             lastHealTime = System.currentTimeMillis();
         }
@@ -240,14 +243,14 @@ public class HealingHelix extends HealingAbility implements AddonAbility {
                     expiryTarget.setAbsorptionAmount(Math.max(0.0, expiryTarget.getAbsorptionAmount() - toRemove));
                 }
             }
-        }.runTaskLater(AranarthCore.getInstance(), ABSORPTION_EXPIRY_TICKS);
+        }.runTaskLater(AranarthCore.getInstance(), absorptionExpiryTicks);
     }
 
     private void applyHeal() {
         if (!target.isValid()) {
             return;
         }
-        double healed = Math.min(target.getHealth() + HEAL_PER_TICK, target.getMaxHealth());
+        double healed = Math.min(target.getHealth() + heal, target.getMaxHealth());
         if (target.getHealth() < target.getMaxHealth()) {
             target.setHealth(healed);
         }
@@ -415,7 +418,7 @@ public class HealingHelix extends HealingAbility implements AddonAbility {
                 continue;
             }
 
-            if (entity.getBoundingBox().expand(TARGET_HIT_RADIUS)
+            if (entity.getBoundingBox().expand(hitRadius)
                     .rayTrace(eye.toVector(), direction, range) == null) {
                 continue;
             }
@@ -469,7 +472,7 @@ public class HealingHelix extends HealingAbility implements AddonAbility {
         if (!block.getWorld().equals(player.getWorld())) {
             return;
         }
-        if (block.getLocation().distance(player.getLocation()) > SOURCE_RANGE) {
+        if (block.getLocation().distance(player.getLocation()) > AbilityConfig.getDouble("HealingHelix.SourceRange")) {
             return;
         }
         if (bp != null && bp.isOnCooldown("HealingHelix")) {

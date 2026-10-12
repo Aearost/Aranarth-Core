@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.firebending.lightningbending;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.GeneralMethods;
@@ -45,6 +46,7 @@ public class Discharge extends LightningAbility implements AddonAbility {
     private double stunChance;
     @Attribute("StunDuration")
     private long stunDuration;
+    private double knockbackStrength;
 
     private Location location;
     private final Vector direction;
@@ -65,13 +67,14 @@ public class Discharge extends LightningAbility implements AddonAbility {
             return;
         }
 
-        damage = 4.0;
-        cooldown = 5000;
-        avatarCooldown = 500;
-        duration = 1000;
-        entityCollisionRadius = 1.0;
-        stunChance = 0.25;
-        stunDuration = 1000;
+        damage = AbilityConfig.getDouble("Discharge.Damage");
+        cooldown = AbilityConfig.getLong("Discharge.Cooldown");
+        avatarCooldown = AbilityConfig.getLong("Discharge.AvatarCooldown");
+        duration = AbilityConfig.getLong("Discharge.Duration");
+        entityCollisionRadius = AbilityConfig.getDouble("Discharge.EntityCollisionRadius");
+        stunChance = AbilityConfig.getDouble("Discharge.StunChance");
+        stunDuration = AbilityConfig.getLong("Discharge.StunDuration");
+        knockbackStrength = AbilityConfig.getDouble("Discharge.Knockback");
         branchSpace = 0.2;
 
         if (bPlayer.isAvatarState()) {
@@ -170,7 +173,7 @@ public class Discharge extends LightningAbility implements AddonAbility {
                 continue;
             }
 
-            Vector knockback = entity.getLocation().toVector().subtract(vec).normalize().multiply(0.8);
+            Vector knockback = entity.getLocation().toVector().subtract(vec).normalize().multiply(knockbackStrength);
             GeneralMethods.setVelocity(this, entity, knockback);
             DamageHandler.damageEntity(living, damage, this);
 

@@ -37,6 +37,7 @@ import com.aearost.aranarthcore.enums.FireType;
 import com.aearost.aranarthcore.event.listener.misc.FireParticleListener;
 import com.aearost.aranarthcore.event.mob.MountListener;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -2148,7 +2149,7 @@ public class AranarthCoreBendingListener implements Listener {
         Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
             if (!dragon.isDead() && !dragon.getPassengers().contains(player)) {
                 dragon.addPassenger(player);
-                MountListener.getInstance().registerFang(dragon, player, PastLives.ROKU_MIN_SPEED);
+                MountListener.getInstance().registerFang(dragon, player, AbilityConfig.getDouble("PastLives.RokuMinSpeed"));
             }
         }, 2L);
     }
