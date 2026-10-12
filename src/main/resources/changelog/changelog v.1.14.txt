@@ -40,5 +40,6 @@ Cross-server & Technical
 [~] Opped players now receive all Saint, Council, Architect and perk permissions
 [+] Added /voicechat command with global, local, and dominion channels
 [~] Fixed store-purchased boosts and crate keys being applied twice, and saint rank Discord notifications being posted twice
+[~] Fixed performance issues at new year by resetting and pre-generating the resource worlds one at a time, and adding detailed reset logging
 
 Miscellaneous

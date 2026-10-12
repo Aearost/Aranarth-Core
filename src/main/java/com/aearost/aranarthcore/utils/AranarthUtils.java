@@ -2088,6 +2088,11 @@ public class AranarthUtils {
      * @return Confirmation if the teleportation was successful.
      */
     private static boolean handleTeleportLogic(Player player, Location from, Location to) {
+        // The resource world is still being reset and pre-generated
+        if (to.getWorld() != null && ResourceWorldUtils.isLockedFor(player, to.getWorld().getName())) {
+            ResourceWorldUtils.sendLockedMessage(player);
+            return false;
+        }
         Location locToTeleportTo = getSafeTeleportLocation(to);
         // If i.e over the void
         if (locToTeleportTo == null) {

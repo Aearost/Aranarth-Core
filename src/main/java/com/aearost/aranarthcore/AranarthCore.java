@@ -39,7 +39,6 @@ import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
@@ -129,72 +128,21 @@ public class AranarthCore extends JavaPlugin {
     /**
      * Resets the resource world automatically.
      * Called automatically on the 1st of Ignivór (new year).
+     * The resource worlds are only used on Survival, so the SMP server only launches the fireworks.
      */
     public static void resetResourceWorlds() {
-        String[] worldNames = {"resource", "resource_nether", "resource_the_end"};
-        World.Environment[] environments = {
-                World.Environment.NORMAL,
-                World.Environment.NETHER,
-                World.Environment.THE_END
-        };
+        if (!isSmpServer()) {
+            // Relayed to the SMP server by the broadcast relay
+            Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("resource.reset_broadcast")));
 
-        Location spawnLocation = new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0);
+            // Record the reset time so offline players can be detected on next login
+            AranarthUtils.setLastResourceWorldResetTime(System.currentTimeMillis());
+            PersistenceUtils.saveServerDate();
 
-        Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("resource.reset_broadcast")));
-
-        // Record the reset time so offline players can be detected on next login
-        AranarthUtils.setLastResourceWorldResetTime(System.currentTimeMillis());
-        PersistenceUtils.saveServerDate();
-
-        // Teleport any players in a resource world to Spawn immediately
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            String worldName = player.getWorld().getName();
-            for (String rWorld : worldNames) {
-                if (worldName.equals(rWorld)) {
-                    player.teleport(spawnLocation);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.resource_reset")));
-                    break;
-                }
-            }
+            ResourceWorldUtils.startReset();
+        } else {
+            Bukkit.getLogger().info(LOG_PREFIX + "[ResourceReset] Skipping the resource world reset on the SMP server");
         }
-
-        // Unload, delete, and recreate each resource world
-        for (int i = 0; i < worldNames.length; i++) {
-            String worldName = worldNames[i];
-            World world = Bukkit.getWorld(worldName);
-
-            File worldFolder = null;
-            if (world != null) {
-                worldFolder = world.getWorldFolder();
-                Bukkit.unloadWorld(world, false);
-            } else {
-                worldFolder = new File(Bukkit.getWorldContainer(), worldName);
-            }
-
-            if (worldFolder.exists()) {
-                deleteDirectory(worldFolder);
-            }
-
-            WorldCreator wc = new WorldCreator(worldName);
-            wc.environment(environments[i]);
-            wc.type(WorldType.NORMAL);
-            World newWorld = wc.createWorld();
-
-            if (newWorld != null) {
-                newWorld.setGameRule(GameRules.SHOW_ADVANCEMENT_MESSAGES, false);
-                newWorld.setGameRule(GameRules.LOCATOR_BAR, false);
-                newWorld.getWorldBorder().setCenter(0, 0);
-                newWorld.getWorldBorder().setSize(5000);
-                ConsoleCommandSender console = Bukkit.getConsoleSender();
-                Bukkit.dispatchCommand(console, "chunky world " + worldName);
-                Bukkit.dispatchCommand(console, "chunky center 0 0");
-                Bukkit.dispatchCommand(console, "chunky radius 2500");
-                Bukkit.dispatchCommand(console, "chunky start");
-                Bukkit.getLogger().info(LOG_PREFIX + "Chunky pre-generation started for world: " + worldName);
-            }
-        }
-
-        Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("resource.reset_complete")));
         launchNewYearFireworks();
     }
 
@@ -343,20 +291,6 @@ public class AranarthCore extends JavaPlugin {
                 iterations++;
             }
         }.runTaskTimer(plugin, 0L, 10L);
-    }
-
-    private static void deleteDirectory(File directory) {
-        File[] files = directory.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    deleteDirectory(file);
-                } else {
-                    boolean isFileDeleted = file.delete();
-                }
-            }
-        }
-        boolean isDirectoryDeleted = directory.delete();
     }
 
     private static Material getFaeTrailFlower(Biome biome) {

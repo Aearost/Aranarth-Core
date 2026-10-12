@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.PlotUtils;
+import com.aearost.aranarthcore.utils.ResourceWorldUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import io.papermc.paper.event.player.PlayerOpenSignEvent;
 import org.bukkit.*;
@@ -563,6 +564,12 @@ public class SpawnProtectionListener implements Listener {
                 player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "spawn.wait", "seconds", wait)));
                 return;
             }
+        }
+
+        // The resource world is still being reset and pre-generated
+        if (ResourceWorldUtils.isLockedFor(player, worldName)) {
+            ResourceWorldUtils.sendLockedMessage(player);
+            return;
         }
 
         String adjustedName = "&eSurvival";

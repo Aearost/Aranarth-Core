@@ -120,6 +120,7 @@ public class NetworkManager {
     public static final String CH_PRONOUNS_UPDATE = "aranarth:pronouns_update";
     public static final String CH_PING_UPDATE = "aranarth:ping_update";
     public static final String CH_HEARTBEAT = "aranarth:heartbeat";
+    public static final String CH_RESOURCE_WORLD_LOCK = "aranarth:resource_world_lock";
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
     private static final String KEY_RETURN_LOC = "return_loc:";
@@ -550,6 +551,7 @@ public class NetworkManager {
             case CH_PRONOUNS_UPDATE -> handlePronounsUpdate(json);
             case CH_PING_UPDATE -> handlePingUpdate(json);
             case CH_HEARTBEAT -> handleHeartbeat(json);
+            case CH_RESOURCE_WORLD_LOCK -> handleResourceWorldLock(json);
         }
     }
 
@@ -1046,6 +1048,17 @@ public class NetworkManager {
         JsonObject json = new JsonObject();
         json.addProperty("server", thisServer);
         publish(CH_CONFIG_RELOAD, json);
+    }
+
+    /**
+     * Notifies all other servers whether Survival's resource world is locked while it is being reset,
+     * so that /resource is refused on the SMP server instead of transferring the player.
+     */
+    public void publishResourceWorldLock(boolean isLocked) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("locked", isLocked);
+        publish(CH_RESOURCE_WORLD_LOCK, json);
     }
 
     /**
@@ -2343,6 +2356,15 @@ public class NetworkManager {
             AranarthCore.getInstance().reloadConfig();
             Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), CouponUtils::importCoupons);
         });
+    }
+
+    private void handleResourceWorldLock(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        boolean isLocked = json.get("locked").getAsBoolean();
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> ResourceWorldUtils.setRemoteResourceLocked(isLocked));
     }
 
     private void handleMarketUpdate(JsonObject json) {

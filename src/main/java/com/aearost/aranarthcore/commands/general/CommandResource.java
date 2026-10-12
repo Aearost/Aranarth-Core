@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.ResourceWorldUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -39,6 +40,12 @@ public class CommandResource implements CommandExecutor {
 			}
 
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+
+			// The resource world is still being reset and pre-generated
+			if (ResourceWorldUtils.isLockedFor(player, "resource")) {
+				ResourceWorldUtils.sendLockedMessage(player);
+				return true;
+			}
 
 			// On the SMP server: transfer to Survival, which will dispatch /resource on arrival.
 			if (AranarthCore.isSmpServer() && NetworkManager.isActive()) {
