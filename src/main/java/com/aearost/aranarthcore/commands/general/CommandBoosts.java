@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -55,6 +56,11 @@ public class CommandBoosts implements CommandExecutor {
 					if (applied != null) {
 						// Adding a boost
 						if (args[0].equals("add")) {
+							// Store purchases are run from console on both servers and must only be processed on the Survival server
+							if (!(sender instanceof Player) && AranarthCore.isSmpServer()) {
+								return true;
+							}
+
 							// If a user was entered, attempt to resolve their UUID
 							UUID uuid = null;
 							if (args.length >= 3) {

@@ -49,6 +49,14 @@ public class CommandGive {
             sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac give <player> <item> <quantity>")));
             return;
         } else {
+            // Store purchases must only be processed on the Survival server, which forwards
+            // the key to the SMP server if the player is there
+            boolean isStoreKeyPurchase = args[2].startsWith("Key") && !args[2].equals("KeyVote")
+                    && args.length >= 5 && args[4].equalsIgnoreCase("broadcast");
+            if (isStoreKeyPurchase && AranarthCore.isSmpServer()) {
+                return;
+            }
+
             Player player = null;
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (onlinePlayer.getName().equals(args[1])) {
@@ -153,11 +161,6 @@ public class CommandGive {
 
                     // For crate keys in non-survival worlds, store as pending instead of giving directly
                     if (isKey) {
-                        // Store purchases (broadcast flag) must only be processed on the Survival server
-                        if (isBroadcast && AranarthCore.isSmpServer()) {
-                            return;
-                        }
-
                         if (isBroadcast) {
                             String broadcastMessage = ChatUtils.chatMessage(Lang.get("give.purchased_broadcast", "player", player.getName(), "item", itemName, "amount", String.valueOf(quantity)));
                             DiscordUtils.donationNotification(player.getName() + " has purchased " + itemName + " x" + quantity, player.getUniqueId(), Color.CYAN);
@@ -239,11 +242,7 @@ public class CommandGive {
             } else {
                 // Player not on this server - check if this is a store key purchase and
                 // the player is on the remote server, so we can deliver cross-server.
-                boolean isStorePurchase = args[2].startsWith("Key")
-                        && !args[2].equals("KeyVote")
-                        && args.length >= 5 && args[4].equalsIgnoreCase("broadcast")
-                        && NetworkManager.isActive();
-                if (isStorePurchase) {
+                if (isStoreKeyPurchase && NetworkManager.isActive()) {
                     UUID remoteUuid = null;
                     String remoteName = null;
                     for (NetworkPlayer np : NetworkManager.getInstance().getRemoteRoster().values()) {

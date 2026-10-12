@@ -77,6 +77,9 @@ public class CommandRankSet {
                         name = player.getName();
                     }
 
+                    // Store purchases are run from console on both servers, so only Survival posts the Discord notifications
+                    boolean canNotifyDiscord = sender instanceof Player || !AranarthCore.isSmpServer();
+
                     boolean isSuccessful = false;
                     // Limited from 0 to 8
                     if (args[1].equals("rank")) {
@@ -108,7 +111,7 @@ public class CommandRankSet {
                                 aranarthPlayer.setSaintExpireDate(0);
                                 aranarthPlayer.setSaintRank(rank);
                             }
-                            DiscordUtils.updateSaint(player, rank, true);
+                            DiscordUtils.updateSaint(player, rank, canNotifyDiscord);
                             isSuccessful = true;
                         } else {
                             sender.sendMessage(ChatUtils.chatMessage(Lang.get("rank.not_found")));
@@ -156,7 +159,7 @@ public class CommandRankSet {
                                 aranarthPlayer.setSaintRank(Math.max(rank, aranarthPlayer.getPermanentSaintRank()));
                                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                             }
-                            DiscordUtils.updateSaint(player, rank, !silent);
+                            DiscordUtils.updateSaint(player, rank, !silent && canNotifyDiscord);
                             if (silent && rank > 0 && (sender instanceof Player || !AranarthCore.isSmpServer())) {
                                 String[] saintRankNames = {"", "&5&lAcolyte", "&5&lDisciple", "&5&lSeraph"};
                                 Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("rankset.voteshop_broadcast", "player", name, "rank", saintRankNames[rank])));
