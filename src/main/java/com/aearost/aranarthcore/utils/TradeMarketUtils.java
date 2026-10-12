@@ -26,7 +26,8 @@ public class TradeMarketUtils {
     private static final Map<String, TradeMarketData> tradeMarketData = new HashMap<>();
 
     public record MarketEntry(String key, String displayName, ItemStack displayItem,
-                              double basePrice, double currentPrice, double tradePrice, boolean fromServerShop) {}
+                              double basePrice, double currentPrice, double tradePrice, boolean fromServerShop,
+                              MarketUtils.PriceLimit priceLimit) {}
 
     public static Map<String, TradeMarketData> getAllTradeMarketData() {
         return tradeMarketData;
@@ -241,7 +242,7 @@ public class TradeMarketUtils {
                 double tradeUnitPrice = (tradeData != null && tradeData.getTotalUnits() > 0)
                         ? tradeData.getCurrentPrice() : 0;
                 entries.add(new MarketEntry(key, displayName, shop.getItem().clone(),
-                        baseUnitPrice, currentUnitPrice, tradeUnitPrice, true));
+                        baseUnitPrice, currentUnitPrice, tradeUnitPrice, true, MarketUtils.getPriceLimit(shop)));
             }
         }
 
@@ -249,7 +250,7 @@ public class TradeMarketUtils {
         for (TradeMarketData data : tradeMarketData.values()) {
             if (addedKeys.contains(data.getMarketKey())) continue;
             entries.add(new MarketEntry(data.getMarketKey(), data.getDisplayName(),
-                    buildDisplayItem(data), 0, data.getCurrentPrice(), 0, false));
+                    buildDisplayItem(data), 0, data.getCurrentPrice(), 0, false, MarketUtils.PriceLimit.NONE));
         }
 
         entries.sort(Comparator.comparing(e -> ChatUtils.stripColorFormatting(e.displayName()).toLowerCase()));

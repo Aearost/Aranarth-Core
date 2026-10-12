@@ -36,6 +36,31 @@ public class MarketUtils {
     private static final double CHANGE_THRESHOLD = 0.005;
 
     /**
+     * Whether a server shop's sell price is currently sitting at its floor or ceiling.
+     */
+    public enum PriceLimit { NONE, MAXIMUM, MINIMUM }
+
+    /**
+     * Returns whether the given server shop's sell price is at its ceiling, its floor, or neither.
+     * A price within the change threshold of a limit is considered to be at that limit,
+     * since the price tick will not move it any closer.
+     */
+    public static PriceLimit getPriceLimit(Shop shop) {
+        MarketDynamics data = marketData.get(getShopKey(shop));
+        if (data == null || data.getDefaultSellPrice() <= 0 || shop.getSellPrice() <= 0) {
+            return PriceLimit.NONE;
+        }
+        double sellPrice = shop.getSellPrice();
+        double defaultPrice = data.getDefaultSellPrice();
+        if (defaultPrice * PRICE_CEILING_MODIFIER - sellPrice <= CHANGE_THRESHOLD) {
+            return PriceLimit.MAXIMUM;
+        } else if (sellPrice - defaultPrice * PRICE_FLOOR_MODIFIER <= CHANGE_THRESHOLD) {
+            return PriceLimit.MINIMUM;
+        }
+        return PriceLimit.NONE;
+    }
+
+    /**
      * Returns the unique shop key for the given shop ("worldName,x,y,z").
      */
     public static String getShopKey(Shop shop) {
@@ -158,6 +183,9 @@ public class MarketUtils {
                         double rounded = Math.round(newPrice * 100.0) / 100.0;
                         shop.setSellPrice(rounded);
                         refreshServerShopSign(shop);
+                    } else if (getPriceLimit(shop) != PriceLimit.NONE) {
+                        // Ensures signs that were already at a limit before the indicator existed get colored
+                        refreshServerShopSign(shop);
                     }
                 }
 
@@ -187,11 +215,15 @@ public class MarketUtils {
         double buyPrice = shop.getBuyPrice();
         double sellPrice = shop.getSellPrice();
 
+        // Colors the sell price green at its maximum and red at its minimum
+        PriceLimit limit = getPriceLimit(shop);
+        String sellColor = limit == PriceLimit.MAXIMUM ? "&a" : limit == PriceLimit.MINIMUM ? "&c" : "";
+
         String priceLine;
         if (buyPrice > 0 && sellPrice > 0) {
-            priceLine = "&0&lB &r" + formatPrice(buyPrice) + " | &0&lS &r" + formatPrice(sellPrice);
+            priceLine = "&0&lB &r" + formatPrice(buyPrice) + " | &0&lS &r" + sellColor + formatPrice(sellPrice);
         } else if (sellPrice > 0) {
-            priceLine = "&0&lS &r" + formatPrice(sellPrice);
+            priceLine = "&0&lS &r" + sellColor + formatPrice(sellPrice);
         } else {
             // Buy-only shop - sell price not shown, nothing to update
             return;

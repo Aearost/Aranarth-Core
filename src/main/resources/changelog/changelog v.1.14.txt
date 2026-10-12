@@ -24,6 +24,8 @@ Aranarthium, Items & Crafting
 
 Economy, Jobs & Quests
 [~] Made items in /mp all be single-stacks
+[+] Added a max/min indicator to server shop prices in /marketprice
+[+] Colored the sell price on server shop signs when at its limit
 
 Chat, UI & Sounds
 

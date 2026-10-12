@@ -147,7 +147,12 @@ public class GuiMarketPrice {
         List<String> lore = new ArrayList<>();
 
         if (entry.fromServerShop()) {
-            lore.add(Lang.getFor(player, "gui.marketprice.shop_current_price",
+            String currentPriceKey = switch (entry.priceLimit()) {
+                case MAXIMUM -> "gui.marketprice.shop_current_price_max";
+                case MINIMUM -> "gui.marketprice.shop_current_price_min";
+                case NONE -> "gui.marketprice.shop_current_price";
+            };
+            lore.add(Lang.getFor(player, currentPriceKey,
                     "price", TradeMarketUtils.formatPrice(entry.currentPrice())));
             lore.add(Lang.getFor(player, "gui.marketprice.shop_base_price",
                     "price", TradeMarketUtils.formatPrice(entry.basePrice())));

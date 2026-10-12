@@ -610,7 +610,8 @@
       "PowerShell(foreach \\($h in \"aranarth.net\",\"play.aranarth.net\",\"mc.aranarth.net\",\"smp.aranarth.net\",\"survival.aranarth.net\"\\) { $r = Resolve-DnsName $h -ErrorAction SilentlyContinue | Where-Object { $_.Type -in 'A','CNAME' }; if \\($r\\) { \"$h -> \" + \\(\\($r | ForEach-Object { if \\($_.IPAddress\\) { $_.IPAddress } else { $_.NameHost } }\\) -join ', '\\) }; $srv = Resolve-DnsName \"_minecraft._tcp.$h\" -Type SRV -ErrorAction SilentlyContinue | Where-Object { $_.Type -eq 'SRV' }; if \\($srv\\) { \"  SRV _minecraft._tcp.$h -> $\\($srv.NameTarget\\):$\\($srv.Port\\)\" } })",
       "PowerShell($m = Get-ChildItem \"$env:ProgramFiles\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1; if \\($m\\) { & $m.FullName -q -o compile } else { \"no maven found\" })",
       "Bash(sed *)",
-      "PowerShell(git log *)"
+      "PowerShell(git log *)",
+      "PowerShell($m = Get-ChildItem \"$env:ProgramFiles\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1; if \\(-not $m\\) { $m = Get-ChildItem \"$env:LOCALAPPDATA\\\\Programs\",\"$env:USERPROFILE\\\\AppData\\\\Local\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1 }; $m.FullName; & $m.FullName -q -o compile 2>&1 | Select-Object -Last 30; \"exit: $LASTEXITCODE\")"
     ]
   }
 }
