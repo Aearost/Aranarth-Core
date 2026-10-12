@@ -284,7 +284,7 @@ public class PlotPattern {
 
         int ix = lx - plotSize;
         int iz = lz - plotSize;
-        PatternGrid custom = getCustomIntersection(gx, gz, lookup);
+        PatternGrid custom = getCustomIntersection(gx, gz, ix, iz, lookup);
         if (custom != null) {
             int margin = getMargin(custom);
             return new Column(custom, ix + margin, iz + margin);
@@ -322,8 +322,11 @@ public class PlotPattern {
     /**
      * Provides the custom T-junction or corner schematic used by the intersection to the south-east of plot (gx, gz),
      * or null if it has none.
+     *
+     * @param ix The column's X relative to the intersection's north-west corner, used to pick the half of a straight road.
+     * @param iz The column's Z relative to the intersection's north-west corner, used to pick the half of a straight road.
      */
-    private PatternGrid getCustomIntersection(int gx, int gz, MergeLookup lookup) {
+    private PatternGrid getCustomIntersection(int gx, int gz, int ix, int iz, MergeLookup lookup) {
         if (tJunctions == null && corners == null) {
             return null;
         }
@@ -342,6 +345,14 @@ public class PlotPattern {
             }
             return corners[east ? 2 : 3];
         }
+        // Two opposite merged sides leave a straight road, built from the closed halves of the two matching T-junctions
+        if (mergedSides == 2 && north == south && tJunctions != null) {
+            double half = roadWidth / 2.0;
+            if (north) {
+                return tJunctions[iz < half ? 2 : 0];
+            }
+            return tJunctions[ix < half ? 1 : 3];
+        }
         return null;
     }
 
@@ -352,7 +363,9 @@ public class PlotPattern {
      * @param distance How many blocks the road block is from the intersection, 0 being right next to it.
      */
     private Column getIntersectionArm(int x, int z, int gx, int gz, int distance, MergeLookup lookup) {
-        PatternGrid custom = getCustomIntersection(gx, gz, lookup);
+        int ix = x - (gx * tileSize + plotSize);
+        int iz = z - (gz * tileSize + plotSize);
+        PatternGrid custom = getCustomIntersection(gx, gz, ix, iz, lookup);
         if (custom == null) {
             return null;
         }
@@ -360,7 +373,7 @@ public class PlotPattern {
         if (distance >= margin) {
             return null;
         }
-        return new Column(custom, x - (gx * tileSize + plotSize) + margin, z - (gz * tileSize + plotSize) + margin);
+        return new Column(custom, ix + margin, iz + margin);
     }
 
     /**
