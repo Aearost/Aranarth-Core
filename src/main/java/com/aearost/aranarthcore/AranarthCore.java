@@ -1182,6 +1182,7 @@ public class AranarthCore extends JavaPlugin {
         new WrenchEnchantListener(this);
         new EnchanterLockoutListener(this);
         new OverLeveledAnvilListener(this);
+        new EssenceImbueListener(this);
 
         // Multi-event listeners for single purpose
         new InvisibleItemFrameListener(this);
@@ -1323,6 +1324,7 @@ public class AranarthCore extends JavaPlugin {
         new RecipeScorchedAranarthium(this);
         new RecipeArdentAranarthium(this);
         new RecipeSoulboundAranarthium(this);
+        new RecipeEssences(this);
         new com.aearost.aranarthcore.recipes.aranarthium.RecipeFaeAranarthium(this);
         new RecipeGodApple(this);
         new RecipeGreenDye(this);

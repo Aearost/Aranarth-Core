@@ -16,6 +16,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import static com.aearost.aranarthcore.objects.CustomKeys.ARANARTHIUM_INGOT;
 import static com.aearost.aranarthcore.objects.CustomKeys.CLUSTER;
+import static com.aearost.aranarthcore.objects.CustomKeys.ESSENCE_TYPE;
 
 /**
  * Handles the overrides when crafting involving an Aranarthium Ingot.
@@ -73,6 +74,11 @@ public class CraftingOverridesAranarthium {
         ItemMeta resultMeta = result.getItemMeta();
 
         if (ingredient.getType() == Material.NETHERITE_INGOT) {
+            return;
+        }
+
+        // Clusters used to craft essences are validated in EssenceImbueListener
+        if (resultMeta != null && resultMeta.getPersistentDataContainer().has(ESSENCE_TYPE)) {
             return;
         }
 

@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.RecipeStation;
+import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.items.ChorusDiamond;
 import com.aearost.aranarthcore.items.GodAppleFragment;
 import com.aearost.aranarthcore.items.SugarcaneBlock;
@@ -9,8 +10,10 @@ import com.aearost.aranarthcore.items.aranarthium.armour.*;
 import com.aearost.aranarthcore.items.aranarthium.clusters.*;
 import com.aearost.aranarthcore.items.aranarthium.ingots.*;
 import com.aearost.aranarthcore.items.arrowhead.*;
+import com.aearost.aranarthcore.items.essence.EssenceBlank;
 import com.aearost.aranarthcore.items.netherite.NetheriteElytra;
 import com.aearost.aranarthcore.objects.RecipeGuideEntry;
+import com.aearost.aranarthcore.recipes.RecipeEssences;
 import org.bukkit.Bukkit;
 import org.bukkit.Keyed;
 import org.bukkit.Material;
@@ -71,6 +74,10 @@ public class RecipeGuideUtils {
                     }
                 }
             } else if (recipe instanceof ShapedRecipe shaped) {
+                // The swapped cluster orientation of an essence recipe is not shown separately
+                if (key.startsWith(RecipeEssences.KEY_PREFIX) && key.endsWith(RecipeEssences.ALT_SUFFIX)) {
+                    continue;
+                }
                 Map<Material, ItemStack> substitutions = getSubstitutions(key);
                 ItemStack[] grid = new ItemStack[9];
                 List<List<Material>> alternatives = emptyAlternatives();
@@ -204,6 +211,11 @@ public class RecipeGuideUtils {
                 anvilGrid(new ItemStack(Material.ELYTRA), new ItemStack(Material.NETHERITE_INGOT)),
                 emptyAlternatives(), List.of(netheriteElytra), notes));
 
+        all.add(createEntry(RecipeStation.ANVIL,
+                anvilGrid(new AranarthiumIngot().getItem(), new ItemStack(Material.MACE)),
+                emptyAlternatives(), List.of(new EssenceBlank().getItem()),
+                List.of("gui.recipes.note_anvil", "gui.recipes.note_essence_crush")));
+
         ItemStack[] bases = {
                 new ItemStack(Material.NETHERITE_HELMET), new ItemStack(Material.NETHERITE_CHESTPLATE),
                 new ItemStack(Material.NETHERITE_LEGGINGS), new ItemStack(Material.NETHERITE_BOOTS), netheriteElytra
@@ -257,6 +269,13 @@ public class RecipeGuideUtils {
             default -> {
                 if (ARANARTHIUM_VARIANT_KEYS.contains(key)) {
                     substitutions.put(Material.ECHO_SHARD, new AranarthiumIngot().getItem());
+                } else if (key.startsWith(RecipeEssences.KEY_PREFIX)) {
+                    for (AranarthItem cluster : List.of(new CopperCluster(), new DiamondCluster(), new EmeraldCluster(), new GoldCluster(),
+                            new IronCluster(), new LapisCluster(), new QuartzCluster(), new RedstoneCluster())) {
+                        ItemStack clusterItem = cluster.getItem();
+                        substitutions.put(clusterItem.getType(), clusterItem);
+                    }
+                    substitutions.put(Material.PRISMARINE_SHARD, new EssenceBlank().getItem());
                 }
             }
         }
@@ -266,6 +285,9 @@ public class RecipeGuideUtils {
     private static List<String> getCraftingNotes(String key) {
         if (key.equals("ac_home_pad")) {
             return List.of("gui.recipes.note_smp");
+        }
+        if (key.startsWith(RecipeEssences.KEY_PREFIX)) {
+            return List.of("gui.recipes.note_essence_imbued", "gui.recipes.note_essence_guide");
         }
         return List.of();
     }

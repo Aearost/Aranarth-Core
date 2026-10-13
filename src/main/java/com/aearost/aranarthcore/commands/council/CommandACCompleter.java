@@ -127,6 +127,9 @@ public class CommandACCompleter implements TabCompleter {
                 }
                 yield switch (args[0].toLowerCase()) {
                     case "give" -> {
+                        if (args.length == 4 && args[2].equals("EssenceBlank")) {
+                            yield filter(List.of("0", "10", "30", "100"), args[3]);
+                        }
                         if (args.length != 3) {
                             yield List.of();
                         }

@@ -18,6 +18,7 @@ public class CustomKeys {
     public static final NamespacedKey CRATE_KEY = new NamespacedKey(AranarthCore.getInstance(), "crate_key");
     public static final NamespacedKey ESSENCE_TYPE = new NamespacedKey(AranarthCore.getInstance(), "essence_type");
     public static final NamespacedKey ESSENCE_LEVEL = new NamespacedKey(AranarthCore.getInstance(), "essence_level");
+    public static final NamespacedKey ESSENCE_IMBUED_XP = new NamespacedKey(AranarthCore.getInstance(), "essence_imbued_xp");
     public static final NamespacedKey MOUNT_HEALTH = new NamespacedKey(AranarthCore.getInstance(), "mount_health");
     public static final NamespacedKey MOUNT_JUMP = new NamespacedKey(AranarthCore.getInstance(), "mount_jump");
     public static final NamespacedKey MOUNT_SPEED = new NamespacedKey(AranarthCore.getInstance(), "mount_speed");

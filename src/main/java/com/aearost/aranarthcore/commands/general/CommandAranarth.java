@@ -34,9 +34,9 @@ public class CommandAranarth implements CommandExecutor {
     );
 
     static final List<String> ESSENCE_SECTIONS = List.of(
-            "overview", "applying", "beheading",
-            "lifesteal", "plentiful", "magnetism",
-            "resilience", "preservation"
+            "overview", "applying", "imbuing",
+            "beheading", "lifesteal", "plentiful",
+            "magnetism", "resilience", "preservation"
     );
 
     static final List<String> CALENDAR_EVENTS = List.of(
@@ -339,14 +339,15 @@ public class CommandAranarth implements CommandExecutor {
         player.sendMessage(Component.text("       ").append(buildRow(new String[][]{
                 {Lang.get("essences.section_overview_label"), Lang.get("guide.click_to_view"), "/aranarth essences overview"},
                 {Lang.get("essences.section_applying_label"), Lang.get("guide.click_to_view"), "/aranarth essences applying"},
-                {Lang.get("essences.section_beheading_label"), Lang.get("guide.click_to_view"), "/aranarth essences beheading"}
+                {Lang.get("essences.section_imbuing_label"), Lang.get("guide.click_to_view"), "/aranarth essences imbuing"}
         })));
         player.sendMessage(Component.text("       ").append(buildRow(new String[][]{
+                {Lang.get("essences.section_beheading_label"), Lang.get("guide.click_to_view"), "/aranarth essences beheading"},
                 {Lang.get("essences.section_lifesteal_label"), Lang.get("guide.click_to_view"), "/aranarth essences lifesteal"},
-                {Lang.get("essences.section_plentiful_label"), Lang.get("guide.click_to_view"), "/aranarth essences plentiful"},
-                {Lang.get("essences.section_magnetism_label"), Lang.get("guide.click_to_view"), "/aranarth essences magnetism"}
+                {Lang.get("essences.section_plentiful_label"), Lang.get("guide.click_to_view"), "/aranarth essences plentiful"}
         })));
-        player.sendMessage(Component.text("             ").append(buildRow(new String[][]{
+        player.sendMessage(Component.text("       ").append(buildRow(new String[][]{
+                {Lang.get("essences.section_magnetism_label"), Lang.get("guide.click_to_view"), "/aranarth essences magnetism"},
                 {Lang.get("essences.section_resilience_label"), Lang.get("guide.click_to_view"), "/aranarth essences resilience"},
                 {Lang.get("essences.section_preservation_label"), Lang.get("guide.click_to_view"), "/aranarth essences preservation"}
         })));
@@ -370,10 +371,10 @@ public class CommandAranarth implements CommandExecutor {
         player.sendMessage(Component.empty());
         player.sendMessage(Component.empty());
         player.sendMessage(ChatUtils.translateToColor(Lang.get("guide.divider")));
-        if (section.equals("overview")) {
-            sendMultilineIndented(player, Lang.get("essences.section_overview_content1"));
+        if (section.equals("overview") || section.equals("imbuing")) {
+            sendMultilineIndented(player, Lang.get("essences.section_" + section + "_content1"));
             player.sendMessage(Component.empty());
-            sendMultilineIndented(player, Lang.get("essences.section_overview_content2"));
+            sendMultilineIndented(player, Lang.get("essences.section_" + section + "_content2"));
         } else {
             sendMultilineIndented(player, Lang.get("essences.section_" + section + "_content"));
         }

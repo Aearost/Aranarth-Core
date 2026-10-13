@@ -3,12 +3,14 @@ package com.aearost.aranarthcore.commands.council;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.items.essence.Essence;
+import com.aearost.aranarthcore.items.essence.EssenceBlank;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
+import com.aearost.aranarthcore.utils.EssenceImbueUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Bukkit;
@@ -137,7 +139,21 @@ public class CommandGive {
                 if (instance instanceof AranarthItem aranarthItem) {
                     ItemStack item = aranarthItem.getItem();
                     int quantity = 1;
-                    if (args.length >= 4) {
+                    // The blank Essence takes an optional imbued percentage instead of a quantity
+                    if (aranarthItem instanceof EssenceBlank) {
+                        if (args.length >= 4) {
+                            try {
+                                double percent = Double.parseDouble(args[3]);
+                                if (percent < 0 || percent > 100) {
+                                    throw new NumberFormatException();
+                                }
+                                EssenceImbueUtils.setImbuedXp(item, (int) Math.round(EssenceImbueUtils.getMaxImbuedXp() * percent / 100));
+                            } catch (NumberFormatException e) {
+                                sender.sendMessage(ChatUtils.chatMessage(Lang.get("particles.invalid_range")));
+                                return;
+                            }
+                        }
+                    } else if (args.length >= 4) {
                         try {
                             quantity = Integer.parseInt(args[3]);
                             if (quantity <= 0 || quantity > item.getMaxStackSize()) {
