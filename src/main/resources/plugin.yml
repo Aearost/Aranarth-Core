@@ -196,6 +196,7 @@ commands:
     permission: aranarth.pronouns
   quests:
     description: Opens the Aranarth Quests GUI
+    aliases: [ q ]
     permission: aranarth.quests
   reaper:
     description: Opens the Reaper Inventory GUI to purchase back items lost on death

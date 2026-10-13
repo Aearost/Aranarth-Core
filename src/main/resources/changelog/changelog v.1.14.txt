@@ -27,6 +27,7 @@ Economy, Jobs & Quests
 [+] Added a max/min indicator to server shop prices in /marketprice
 [+] Colored the sell price on server shop signs when at its limit
 [~] Fixed perk purchase messages not displaying when bought from the vote shop on SMP
+[+] Added /q alias for quests
 
 Chat, UI & Sounds
 
