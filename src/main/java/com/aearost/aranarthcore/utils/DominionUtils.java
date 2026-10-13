@@ -2362,18 +2362,18 @@ public class DominionUtils {
 
         // Cave Biomes
         } else if (biome == Biome.LUSH_CAVES) {
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.MOSS_BLOCK, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MOSS_BLOCK, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.CLAY, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.ROOTED_DIRT, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.AZALEA_LEAVES, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.FLOWERING_AZALEA_LEAVES, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.AZALEA, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.FLOWERING_AZALEA, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.BIG_DRIPLEAF, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.SMALL_DRIPLEAF, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.HANGING_ROOTS, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GLOW_BERRIES, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.FLOWERING_AZALEA, 1)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BIG_DRIPLEAF, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SMALL_DRIPLEAF, 1)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.HANGING_ROOTS, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GLOW_BERRIES, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 4)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
