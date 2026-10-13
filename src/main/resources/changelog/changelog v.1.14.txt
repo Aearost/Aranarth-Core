@@ -22,6 +22,8 @@ Aranarthium, Items & Crafting
 [~] Changed double jump trigger with Elven Aranarthium to be tapping sneak while mid-air
 [-] Removed the double jump cooldown of Elven Aranarthium
 [~] Fixed elytras not being usable while Invisible Armor is enabled
+[-] Removed the Bone Arrow and Bone Arrowhead
+[~] Fixed the Rooting Arrow using the Bone Arrow model
 
 Economy, Jobs & Quests
 [~] Made items in /mp all be single-stacks

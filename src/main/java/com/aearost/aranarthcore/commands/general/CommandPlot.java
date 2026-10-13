@@ -384,10 +384,6 @@ public class CommandPlot implements CommandExecutor {
      */
     private void teleportToPlot(Player player, CreativePlot plot, String transferCommand) {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-        if (!PlotUtils.canAccessPlotWorld(aranarthPlayer)) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("access.world_restricted")));
-            return;
-        }
         if (AranarthUtils.getTeleportTask(player.getUniqueId()) != null) {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("general.already_teleporting")));
             return;

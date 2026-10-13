@@ -1571,7 +1571,6 @@ public class AranarthUtils {
             case "rooting" -> new ArrowRooting().getItem();
             case "gust" -> new ArrowGust().getItem();
             case "dragon" -> new ArrowDragon().getItem();
-            case "bone" -> new ArrowBone().getItem();
             default -> null;
         };
     }

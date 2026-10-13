@@ -133,8 +133,7 @@ public class RecipeGuideUtils {
                 {Material.GOLD_INGOT, new ArrowheadGold().getItem(), 1},
                 {Material.AMETHYST_SHARD, new ArrowheadAmethyst().getItem(), 1},
                 {Material.OBSIDIAN, new ArrowheadObsidian().getItem(), 2},
-                {Material.DIAMOND, new ArrowheadDiamond().getItem(), 1},
-                {Material.BONE, new ArrowheadBone().getItem(), 2}
+                {Material.DIAMOND, new ArrowheadDiamond().getItem(), 1}
         };
         for (Object[] arrowhead : basicArrowheads) {
             ItemStack result = ((ItemStack) arrowhead[1]).clone();
@@ -173,7 +172,6 @@ public class RecipeGuideUtils {
         arrowheadsByType.put("amethyst", new ArrowheadAmethyst().getItem());
         arrowheadsByType.put("obsidian", new ArrowheadObsidian().getItem());
         arrowheadsByType.put("diamond", new ArrowheadDiamond().getItem());
-        arrowheadsByType.put("bone", new ArrowheadBone().getItem());
         arrowheadsByType.put("explosive", new ArrowheadExplosive().getItem());
         arrowheadsByType.put("lightning", new ArrowheadLightning().getItem());
         arrowheadsByType.put("spectral", new ArrowheadSpectral().getItem());

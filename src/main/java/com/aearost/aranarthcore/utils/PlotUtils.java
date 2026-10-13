@@ -361,13 +361,6 @@ public class PlotUtils {
     }
 
     /**
-     * Provides whether the player may enter the plots world.
-     */
-    public static boolean canAccessPlotWorld(AranarthPlayer aranarthPlayer) {
-        return aranarthPlayer.getCouncilRank() > 0 || aranarthPlayer.getArchitectRank() > 0;
-    }
-
-    /**
      * Provides the Saint tier used for plot limits and WorldEdit access. Architects count as Saint III.
      */
     public static int getSaintTier(AranarthPlayer aranarthPlayer) {

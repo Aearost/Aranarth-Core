@@ -61,8 +61,6 @@ public class EntityDeathEventListener implements Listener {
         }
 
         if (e.getEntity() instanceof Animals) {
-            new ExtraDropsFromBoneArrow().execute(e);
-            // Applies even further buffs
             if (AranarthUtils.getMonth() == Month.FAUNIVOR) {
                 new FaunivorExtraDeathDrops().execute(e);
             }

@@ -34,11 +34,6 @@ public class CommandCreative implements CommandExecutor {
 				return true;
 			}
 
-			if (!PlotUtils.canAccessPlotWorld(aranarthPlayer)) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("access.world_restricted")));
-				return false;
-			}
-
 			if (AranarthUtils.getTeleportTask(player.getUniqueId()) != null) {
 				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.already_teleporting")));
 				return false;
