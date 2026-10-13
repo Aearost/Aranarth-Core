@@ -87,7 +87,7 @@ public class CommandPerks {
 
                                 boolean isSilent = args.length == 4 && args[3].equalsIgnoreCase("silent");
                                 String message = Lang.get("perk.purchased_homes", "player", aranarthPlayer.getNickname());
-                                if (sender instanceof Player || !AranarthCore.isSmpServer()) {
+                                if (sender instanceof Player || isSilent || !AranarthCore.isSmpServer()) {
                                     String formatted = ChatUtils.chatMessage(message);
                                     for (Player online : Bukkit.getOnlinePlayers()) {
                                         online.sendMessage(formatted);
@@ -169,7 +169,7 @@ public class CommandPerks {
                             boolean isSilent = args.length >= 5 && args[4].equalsIgnoreCase("silent");
                             if (!args[3].equals("0")) {
                                 String message = Lang.get("perk.purchased", "player", aranarthPlayer.getNickname(), "perk", perk);
-                                if (sender instanceof Player || !AranarthCore.isSmpServer()) {
+                                if (sender instanceof Player || isSilent || !AranarthCore.isSmpServer()) {
                                     String formatted = ChatUtils.chatMessage(message);
                                     for (Player online : Bukkit.getOnlinePlayers()) {
                                         online.sendMessage(formatted);
@@ -209,7 +209,7 @@ public class CommandPerks {
                             boolean isSilent = args.length >= 5 && args[4].equalsIgnoreCase("silent");
                             if (!args[3].equals("0")) {
                                 String message = Lang.get("perk.purchased_homes", "player", aranarthPlayer.getNickname());
-                                if (sender instanceof Player || !AranarthCore.isSmpServer()) {
+                                if (sender instanceof Player || isSilent || !AranarthCore.isSmpServer()) {
                                     String formatted = ChatUtils.chatMessage(message);
                                     for (Player online : Bukkit.getOnlinePlayers()) {
                                         online.sendMessage(formatted);
@@ -237,7 +237,7 @@ public class CommandPerks {
                         boolean isSilent = args.length >= 5 && args[4].equalsIgnoreCase("silent");
                         if (!args[3].equals("0")) {
                             String message = Lang.get("perk.purchased_discord", "player", aranarthPlayer.getNickname());
-                            if (sender instanceof Player || !AranarthCore.isSmpServer()) {
+                            if (sender instanceof Player || isSilent || !AranarthCore.isSmpServer()) {
                                 String formatted = ChatUtils.chatMessage(message);
                                 for (Player online : Bukkit.getOnlinePlayers()) {
                                     online.sendMessage(formatted);
