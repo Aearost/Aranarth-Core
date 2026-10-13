@@ -40,6 +40,8 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.command.SimpleCommandMap;
+import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.FireworkMeta;
@@ -326,6 +328,28 @@ public class AranarthCore extends JavaPlugin {
             return rng.nextBoolean() ? Material.BROWN_MUSHROOM : Material.RED_MUSHROOM;
         }
         return null;
+    }
+
+    /**
+     * Reloads config.yml, adding any values from the bundled copy that are missing from the server's copy
+     * so newly added settings appear in the file with their defaults. Existing values are left untouched.
+     */
+    @Override
+    public void reloadConfig() {
+        super.reloadConfig();
+        FileConfiguration config = getConfig();
+        Configuration defaults = config.getDefaults();
+        if (defaults == null) {
+            return;
+        }
+
+        for (String key : defaults.getKeys(true)) {
+            if (!defaults.isConfigurationSection(key) && !config.isSet(key)) {
+                config.options().copyDefaults(true);
+                saveConfig();
+                return;
+            }
+        }
     }
 
     /**
