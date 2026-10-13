@@ -98,6 +98,7 @@ public class NetworkManager {
     public static final String CH_CREATIVE_PLOT_DELETE = "aranarth:creative_plot_delete";
     public static final String CH_CREATIVE_EXPAND = "aranarth:creative_expand";
     public static final String CH_JOB_UPDATE = "aranarth:job_update";
+    public static final String CH_MOUNT_UPDATE = "aranarth:mount_update";
     public static final String CH_VOTE_AWARD = "aranarth:vote_award";
     public static final String CH_VOTE_KEY = "aranarth:vote_key";
     public static final String CH_PURCHASE_KEY = "aranarth:purchase_key";
@@ -529,6 +530,7 @@ public class NetworkManager {
             case CH_CREATIVE_PLOT_DELETE -> handleCreativePlotDelete(json);
             case CH_CREATIVE_EXPAND -> handleCreativeExpand(json);
             case CH_JOB_UPDATE -> handleJobUpdate(json);
+            case CH_MOUNT_UPDATE -> handleMountUpdate(json);
             case CH_VOTE_AWARD -> handleVoteAward(json);
             case CH_VOTE_KEY -> handleVoteKey(json);
             case CH_PURCHASE_KEY -> handlePurchaseKey(json);
@@ -2928,6 +2930,29 @@ public class NetworkManager {
         if (Bukkit.getPlayer(uuid) != null) {
             Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
                     () -> PersistenceUtils.loadJobDataForPlayer(uuid));
+        }
+    }
+
+    /**
+     * Notifies other servers that a player's mount progress was saved to the database.
+     *
+     * @param uuid The UUID of the player whose mounts were saved.
+     */
+    public void publishMountUpdate(UUID uuid) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", uuid.toString());
+        publish(CH_MOUNT_UPDATE, json);
+    }
+
+    private void handleMountUpdate(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        if (Bukkit.getPlayer(uuid) != null) {
+            PersistenceUtils.loadMountsForPlayer(uuid);
         }
     }
 

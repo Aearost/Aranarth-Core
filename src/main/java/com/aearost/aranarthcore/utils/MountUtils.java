@@ -136,6 +136,7 @@ public class MountUtils {
 
         mount.eject();
         mount.remove();
+        PersistenceUtils.saveMountsForPlayer(player.getUniqueId());
 
         String displayName = info != null
                 ? getDisplayName(player.getUniqueId(), info[1])
@@ -461,6 +462,7 @@ public class MountUtils {
                 if (ml != null) {
                     ml.updateMountStats(mountEntityUUID);
                 }
+                PersistenceUtils.saveMountsForPlayer(ownerUUID);
             }
         }
     }
@@ -503,6 +505,7 @@ public class MountUtils {
                 if (ml != null) {
                     ml.updateMountStats(mountEntityUUID);
                 }
+                PersistenceUtils.saveMountsForPlayer(ownerUUID);
             }
         }
     }
@@ -538,6 +541,7 @@ public class MountUtils {
                 if (ml != null) {
                     ml.updateMountStats(mountEntityUUID);
                 }
+                PersistenceUtils.saveMountsForPlayer(ownerUUID);
             }
         }
     }
@@ -576,6 +580,7 @@ public class MountUtils {
                 if (ml != null) {
                     ml.updateMountStats(mountEntityUUID);
                 }
+                PersistenceUtils.saveMountsForPlayer(ownerUUID);
             }
         }
     }
@@ -614,6 +619,7 @@ public class MountUtils {
                 if (ml != null) {
                     ml.updateMountStats(mountEntityUUID);
                 }
+                PersistenceUtils.saveMountsForPlayer(ownerUUID);
             }
         }
     }
@@ -652,6 +658,7 @@ public class MountUtils {
                 if (ml != null) {
                     ml.updateMountStats(mountEntityUUID);
                 }
+                PersistenceUtils.saveMountsForPlayer(ownerUUID);
             }
         }
     }

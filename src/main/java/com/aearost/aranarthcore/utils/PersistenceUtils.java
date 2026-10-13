@@ -28,6 +28,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -38,6 +39,9 @@ public class PersistenceUtils {
 
     private static final Gson GSON = new Gson();
     private static final Gson JOB_GSON = new Gson();
+    // Latest unsaved mount snapshot per player; only the newest is ever written
+    private static final Map<UUID, String> pendingMountWrites = new ConcurrentHashMap<>();
+    private static final Object MOUNT_WRITE_LOCK = new Object();
     // Used for one-time migration.
     private static final long[] OLD_CUMULATIVE_XP = {0, 500, 2500, 8500, 23500, 63500, 153500, 328500, 628500, 1128500};
 
@@ -4741,10 +4745,10 @@ public class PersistenceUtils {
         } catch (IOException e) {
             Bukkit.getLogger().info("[AC] There was an error in saving mount progress");
         }
-        // MySQL sync
+        // MySQL sync - snapshot on the main thread, write async
         if (DatabaseManager.isActive()) {
-            runDbSync(
-                    PersistenceUtils::syncMountsToDatabase);
+            pendingMountWrites.putAll(serializeOnlineMounts());
+            runDbSync(PersistenceUtils::flushPendingMountWrites);
         }
     }
 
@@ -6006,37 +6010,171 @@ public class PersistenceUtils {
     }
 
     /**
-     * Syncs mount data to MySQL. Call after the file has been saved.
+     * Syncs every player's mount data to MySQL. Only used by the file-to-DB migration;
+     * regular saves go through saveMounts(), which writes online players only.
      * Each player's mounts map is serialized as a JSON object.
      */
     public static void syncMountsToDatabase() {
+        Map<UUID, String> serialized = new HashMap<>();
+        for (Map.Entry<UUID, Map<String, Mount>> playerEntry : MountUtils.getAllMounts().entrySet()) {
+            serialized.put(playerEntry.getKey(), serializePlayerMounts(playerEntry.getValue()));
+        }
+        writeMountsToDatabase(serialized);
+    }
+
+    private static void writeMountsToDatabase(Map<UUID, String> serialized) {
         if (!DatabaseManager.isActive()) {
             return;
         }
         DatabaseManager db = DatabaseManager.getInstance();
-        for (Map.Entry<UUID, Map<String, Mount>> playerEntry : MountUtils.getAllMounts().entrySet()) {
-            UUID uuid = playerEntry.getKey();
-            JsonObject playerMounts = new JsonObject();
-            for (Map.Entry<String, Mount> elementEntry : playerEntry.getValue().entrySet()) {
-                Mount pm = elementEntry.getValue();
-                JsonObject m = new JsonObject();
-                m.addProperty("healthLevel", pm.getHealthLevel());
-                m.addProperty("healthXp", pm.getHealthXp());
-                m.addProperty("speedLevel", pm.getSpeedLevel());
-                m.addProperty("speedXp", pm.getSpeedXp());
-                m.addProperty("thirdLevel", pm.getThirdLevel());
-                m.addProperty("thirdXp", pm.getThirdXp());
-                m.addProperty("rechargeEnd", pm.getRechargeEndMs());
-                m.addProperty("curHealth", pm.getCurrentHealth());
-                m.addProperty("nickname", pm.hasNickname() ? pm.getNickname() : "");
-                m.addProperty("harnessColor", pm.getHarnessColor() != null ? pm.getHarnessColor() : "");
-                playerMounts.add(elementEntry.getKey(), m);
-            }
+        for (Map.Entry<UUID, String> entry : serialized.entrySet()) {
             try {
-                db.saveMountData(uuid, GSON.toJson(playerMounts));
+                db.saveMountData(entry.getKey(), entry.getValue());
             } catch (Exception e) {
-                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync mount data for " + uuid + ": " + e.getMessage());
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync mount data for " + entry.getKey() + ": " + e.getMessage());
             }
+        }
+    }
+
+    /**
+     * Serializes the mounts of every player online on this server.
+     * Offline (or other-server) players are skipped, since this server's in-memory copy of their
+     * mounts may be stale and would overwrite progress made on the other server.
+     * Must be called on the main thread so the snapshot is consistent.
+     */
+    private static Map<UUID, String> serializeOnlineMounts() {
+        Map<UUID, String> result = new HashMap<>();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            Map<String, Mount> playerMounts = MountUtils.getAllMounts().get(player.getUniqueId());
+            if (playerMounts != null && !playerMounts.isEmpty()) {
+                result.put(player.getUniqueId(), serializePlayerMounts(playerMounts));
+            }
+        }
+        return result;
+    }
+
+    private static String serializePlayerMounts(Map<String, Mount> mounts) {
+        JsonObject playerMounts = new JsonObject();
+        for (Map.Entry<String, Mount> elementEntry : mounts.entrySet()) {
+            Mount pm = elementEntry.getValue();
+            JsonObject m = new JsonObject();
+            m.addProperty("healthLevel", pm.getHealthLevel());
+            m.addProperty("healthXp", pm.getHealthXp());
+            m.addProperty("speedLevel", pm.getSpeedLevel());
+            m.addProperty("speedXp", pm.getSpeedXp());
+            m.addProperty("thirdLevel", pm.getThirdLevel());
+            m.addProperty("thirdXp", pm.getThirdXp());
+            m.addProperty("rechargeEnd", pm.getRechargeEndMs());
+            m.addProperty("curHealth", pm.getCurrentHealth());
+            m.addProperty("nickname", pm.hasNickname() ? pm.getNickname() : "");
+            m.addProperty("harnessColor", pm.getHarnessColor() != null ? pm.getHarnessColor() : "");
+            playerMounts.add(elementEntry.getKey(), m);
+        }
+        return GSON.toJson(playerMounts);
+    }
+
+    /**
+     * Saves a single player's mounts to MySQL asynchronously.
+     * Call whenever mount progress meaningfully changes (level up, death, dismiss, nickname, harness)
+     * so a crash cannot lose it. Without MySQL, falls back to rewriting petprogress.txt.
+     */
+    public static void saveMountsForPlayer(UUID uuid) {
+        if (!DatabaseManager.isActive()) {
+            saveMounts();
+            return;
+        }
+        Map<String, Mount> playerMounts = MountUtils.getAllMounts().get(uuid);
+        if (playerMounts == null || playerMounts.isEmpty()) {
+            return;
+        }
+        pendingMountWrites.put(uuid, serializePlayerMounts(playerMounts));
+        runDbSync(PersistenceUtils::flushPendingMountWrites);
+    }
+
+    /**
+     * Saves a single player's mounts to MySQL synchronously.
+     * Used on quit so the row is up to date before the other server reloads it.
+     */
+    public static void saveMountsForPlayerSync(UUID uuid) {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        Map<String, Mount> playerMounts = MountUtils.getAllMounts().get(uuid);
+        if (playerMounts == null || playerMounts.isEmpty()) {
+            return;
+        }
+        String json = serializePlayerMounts(playerMounts);
+        synchronized (MOUNT_WRITE_LOCK) {
+            // Drop any older queued snapshot so it can never land after this one
+            pendingMountWrites.remove(uuid);
+            writeMountRow(uuid, json);
+        }
+    }
+
+    /**
+     * Writes every queued mount snapshot. Each row is written under the lock so an older queued
+     * snapshot can never overwrite a newer synchronous quit-time save.
+     */
+    private static void flushPendingMountWrites() {
+        for (UUID uuid : new ArrayList<>(pendingMountWrites.keySet())) {
+            synchronized (MOUNT_WRITE_LOCK) {
+                String json = pendingMountWrites.remove(uuid);
+                if (json != null) {
+                    writeMountRow(uuid, json);
+                }
+            }
+        }
+    }
+
+    private static void writeMountRow(UUID uuid, String json) {
+        try {
+            DatabaseManager.getInstance().saveMountData(uuid, json);
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save mount data for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Reloads a single player's mounts from MySQL, replacing this server's in-memory copy.
+     * The DB read runs async and the result is applied on the main thread.
+     * Used on join and when the other server reports that the player's mounts changed.
+     */
+    public static void loadMountsForPlayer(UUID uuid) {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+            String json = DatabaseManager.getInstance().loadMountData(uuid);
+            if (json == null || json.isEmpty()) {
+                return;
+            }
+            Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> applyPlayerMountsJson(uuid, json));
+        });
+    }
+
+    private static void applyPlayerMountsJson(UUID uuid, String json) {
+        try {
+            JsonObject playerMounts = GSON.fromJson(json, JsonObject.class);
+            for (Map.Entry<String, com.google.gson.JsonElement> me : playerMounts.entrySet()) {
+                String element = me.getKey();
+                JsonObject m = me.getValue().getAsJsonObject();
+                Mount pm = new Mount(
+                        m.get("healthLevel").getAsInt(), m.get("healthXp").getAsLong(),
+                        m.get("speedLevel").getAsInt(), m.get("speedXp").getAsLong(),
+                        m.get("thirdLevel").getAsInt(), m.get("thirdXp").getAsLong(),
+                        m.get("rechargeEnd").getAsLong(), m.get("curHealth").getAsDouble());
+                String nick = m.has("nickname") ? m.get("nickname").getAsString() : "";
+                if (!nick.isEmpty()) {
+                    pm.setNickname(nick);
+                }
+                String harness = m.has("harnessColor") ? m.get("harnessColor").getAsString() : "";
+                if (!harness.isEmpty()) {
+                    pm.setHarnessColor(harness);
+                }
+                MountUtils.put(uuid, element, pm);
+            }
+        } catch (Exception e) {
+            Bukkit.getLogger().warning("[AC] Failed to parse mounts for " + uuid + ": " + e.getMessage());
         }
     }
 
@@ -7589,30 +7727,7 @@ public class PersistenceUtils {
         }
         Bukkit.getLogger().info("[AC] Loading mounts from MySQL...");
         for (Map.Entry<UUID, String> entry : all.entrySet()) {
-            UUID uuid = entry.getKey();
-            try {
-                JsonObject playerMounts = GSON.fromJson(entry.getValue(), JsonObject.class);
-                for (Map.Entry<String, com.google.gson.JsonElement> me : playerMounts.entrySet()) {
-                    String element = me.getKey();
-                    JsonObject m = me.getValue().getAsJsonObject();
-                    Mount pm = new Mount(
-                            m.get("healthLevel").getAsInt(), m.get("healthXp").getAsLong(),
-                            m.get("speedLevel").getAsInt(), m.get("speedXp").getAsLong(),
-                            m.get("thirdLevel").getAsInt(), m.get("thirdXp").getAsLong(),
-                            m.get("rechargeEnd").getAsLong(), m.get("curHealth").getAsDouble());
-                    String nick = m.has("nickname") ? m.get("nickname").getAsString() : "";
-                    if (!nick.isEmpty()) {
-                        pm.setNickname(nick);
-                    }
-                    String harness = m.has("harnessColor") ? m.get("harnessColor").getAsString() : "";
-                    if (!harness.isEmpty()) {
-                        pm.setHarnessColor(harness);
-                    }
-                    MountUtils.put(uuid, element, pm);
-                }
-            } catch (Exception e) {
-                Bukkit.getLogger().warning("[AC] Failed to parse mounts for " + uuid + ": " + e.getMessage());
-            }
+            applyPlayerMountsJson(entry.getKey(), entry.getValue());
         }
         Bukkit.getLogger().info("[AC] Mounts initialized from MySQL");
     }

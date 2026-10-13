@@ -1,6 +1,8 @@
 package com.aearost.aranarthcore.event.mob;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.database.DatabaseManager;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthMount;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.CustomKeys;
@@ -9,6 +11,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.MountUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
@@ -22,6 +25,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityDismountEvent;
 import org.bukkit.event.player.PlayerInputEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -507,6 +511,7 @@ public class MountListener implements Listener {
                     Mount mountData = MountUtils.get(ownerUUID, "AIR");
                     if (mountData != null) {
                         mountData.setHarnessColor(colorName);
+                        PersistenceUtils.saveMountsForPlayer(ownerUUID);
                     }
                     mainHand.setAmount(mainHand.getAmount() - 1);
                     player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.harness_updated")));
@@ -648,6 +653,7 @@ public class MountListener implements Listener {
                     UUID ownerUUID = UUID.fromString(ownerStr);
                     Mount mountData = MountUtils.getOrCreate(ownerUUID, mountElement);
                     mountData.startRecharge();
+                    PersistenceUtils.saveMountsForPlayer(ownerUUID);
                     Player owner = Bukkit.getPlayer(ownerUUID);
                     if (owner != null) {
                         String mountDisplayName = MountUtils.getDisplayName(ownerUUID, mountElement);
@@ -671,8 +677,31 @@ public class MountListener implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         MountUtils.cleanupPlayerBars(player.getUniqueId());
+        despawnMountOnQuit(player);
 
+        // Persist this player's mounts now and tell the other server to reload them
+        if (DatabaseManager.isActive()) {
+            PersistenceUtils.saveMountsForPlayerSync(player.getUniqueId());
+            NetworkManager nm = NetworkManager.getInstance();
+            if (nm != null) {
+                nm.publishMountUpdate(player.getUniqueId());
+            }
+        }
+    }
 
+    /**
+     * Refreshes the player's mount progress from MySQL on join, picking up any progress
+     * made on the other server since this server last loaded it.
+     */
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        PersistenceUtils.loadMountsForPlayer(event.getPlayer().getUniqueId());
+    }
+
+    /**
+     * Saves the HP of the quitting player's mount and removes the entity.
+     */
+    private void despawnMountOnQuit(Player player) {
         // If the mount is dismounted but alive in the world, save its HP and remove it
         UUID wanderingId = MountUtils.getActiveMountEntityUUID(player.getUniqueId());
         if (wanderingId != null) {

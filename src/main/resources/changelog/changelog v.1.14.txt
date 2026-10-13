@@ -46,5 +46,6 @@ Cross-server & Technical
 [~] Fixed performance issues at new year by resetting and pre-generating the resource worlds one at a time, and adding detailed reset logging
 [~] Centralized all AC ability variables into a new abilities.yml that is reloaded on both servers via /ac reload
 [+] Added missing config.yml settings being filled in with their defaults on startup and reload
+[~] Fixed SMP overwriting Survival mount progress with stale data, and increased mount progress saving frequency
 
 Miscellaneous

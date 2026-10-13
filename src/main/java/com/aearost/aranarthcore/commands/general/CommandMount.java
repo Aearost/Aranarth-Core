@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.Mount;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.MountUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -127,6 +128,7 @@ public class CommandMount implements CommandExecutor {
         }
         Mount mount = MountUtils.getOrCreate(player.getUniqueId(), element);
         mount.setNickname(name);
+        PersistenceUtils.saveMountsForPlayer(player.getUniqueId());
         updateMountNametag(player.getUniqueId(), name);
 
         player.sendMessage(ChatUtils.chatMessage(Lang.get("mount.nicknamed", "mount", MountUtils.getElementColor(element) + MountUtils.getMountNameForElement(element), "name", name)));
@@ -140,6 +142,7 @@ public class CommandMount implements CommandExecutor {
         }
         Mount mount = MountUtils.getOrCreate(player.getUniqueId(), element);
         mount.setNickname(null);
+        PersistenceUtils.saveMountsForPlayer(player.getUniqueId());
         updateMountNametag(player.getUniqueId(), MountUtils.getMountNameForElement(element));
 
         player.sendMessage(ChatUtils.chatMessage(Lang.get("mount.nickname_removed", "mount", MountUtils.getElementColor(element) + MountUtils.getMountNameForElement(element))));
