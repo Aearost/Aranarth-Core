@@ -47,5 +47,6 @@ Cross-server & Technical
 [~] Centralized all AC ability variables into a new abilities.yml that is reloaded on both servers via /ac reload
 [+] Added missing config.yml settings being filled in with their defaults on startup and reload
 [~] Fixed SMP overwriting Survival mount progress with stale data, and increased mount progress saving frequency
+[~] Fixed voice link scheduling tasks while the plugin is disabling, causing an error on shutdown
 
 Miscellaneous

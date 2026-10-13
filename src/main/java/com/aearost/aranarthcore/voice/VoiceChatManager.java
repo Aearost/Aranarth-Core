@@ -236,7 +236,7 @@ public class VoiceChatManager {
      * Applies a channel state change for a player on the other server.
      */
     public static void onRemoteState(UUID uuid, VoiceMember member, boolean announce) {
-        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+        runSync(() -> {
             // A stale state for a player who has since moved to this server
             if (Bukkit.getPlayer(uuid) != null) {
                 return;
@@ -275,7 +275,7 @@ public class VoiceChatManager {
      * Stores the channel of a player transferring here from the other server, so it can be restored once their voice chat connects.
      */
     public static void onRemoteHandoff(UUID uuid, VoiceChannel channel) {
-        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+        runSync(() -> {
             VoiceMember previous = remoteMembers.remove(uuid);
             pendingHandoffs.put(uuid, new PendingHandoff(channel, previous, System.currentTimeMillis() + HANDOFF_EXPIRY_MS));
             silentChanges.add(uuid);
@@ -291,7 +291,7 @@ public class VoiceChatManager {
      * Sends every local member's state to the other server once the voice link connects.
      */
     public static void onLinkConnected() {
-        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+        runSync(() -> {
             lastSentStates.clear();
             for (VoiceMember member : localMembers.values()) {
                 sendState(member.uuid(), member, false);
@@ -303,7 +303,7 @@ public class VoiceChatManager {
      * Forgets every player on the other server when the voice link drops. They are re-synced when it reconnects.
      */
     public static void onLinkDisconnected() {
-        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+        runSync(() -> {
             silentChanges.addAll(remoteMembers.keySet());
             remoteMembers.clear();
             if (isAvailable) {
@@ -311,6 +311,16 @@ public class VoiceChatManager {
             }
             updateDominionConnections();
         });
+    }
+
+    /**
+     * Runs a task on the main thread from a voice link thread, skipping it if the plugin is disabling.
+     */
+    private static void runSync(Runnable task) {
+        AranarthCore plugin = AranarthCore.getInstance();
+        if (plugin.isEnabled()) {
+            Bukkit.getScheduler().runTask(plugin, task);
+        }
     }
 
     /**
