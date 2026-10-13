@@ -1641,9 +1641,12 @@ public class DominionUtils {
         };
     }
 
+    // 1 in X odds of a Swift Sneak Book when simulating an Ancient City
+    private static final int SWIFT_SNEAK_BOOK_ODDS = 10;
+
     /**
      * Rolls the Ancient City drops that cannot be expressed as 1 in X odds.
-     * Echo Shard has a 10% chance per Dominion rank, and the Swift Sneak Book has a 25% chance
+     * Echo Shard has a 10% chance per Dominion rank, and the Swift Sneak Book has a 10% chance
      * with its level chosen from the levels available at the Dominion's rank.
      *
      * @param items  The items being claimed.
@@ -1654,7 +1657,7 @@ public class DominionUtils {
         if (random.nextInt(10) < rank) {
             items.add(new ItemStack(Material.ECHO_SHARD, 1));
         }
-        if (random.nextInt(4) == 0) {
+        if (random.nextInt(SWIFT_SNEAK_BOOK_ODDS) == 0) {
             int[] levels = getSwiftSneakLevels(rank);
             items.add(createSwiftSneakBook(levels[random.nextInt(levels.length)]));
         }
@@ -1772,7 +1775,7 @@ public class DominionUtils {
         ancientCityDrops.add(new ResourceDrop(new ItemStack(Material.DISC_FRAGMENT_5, 1), 0, 4,
                 "Disc Fragment (" + formatPct(4) + " if simulating Ancient City)"));
         ancientCityDrops.add(new ResourceDrop(createSwiftSneakBook(swiftSneakLevels[swiftSneakLevels.length - 1]), 0, 0,
-                "Swift Sneak " + swiftSneakLevelText + " Book (" + formatPct(4) + " if simulating Ancient City)", true));
+                "Swift Sneak " + swiftSneakLevelText + " Book (" + formatPct(SWIFT_SNEAK_BOOK_ODDS) + " if simulating Ancient City)", true));
         SimulationGroup ancientCity = new SimulationGroup("Ancient City", 5, ancientCityDrops);
 
         // Oceans, Rivers, Beaches, Islands
