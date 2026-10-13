@@ -620,7 +620,8 @@
       "PowerShell(ssh -o BatchMode=yes -o ConnectTimeout=10 aranarth \"whoami; hostname; sudo -n true 2>/dev/null && echo SUDO_NOPASSWD || echo SUDO_NEEDS_PASSWORD; id claude 2>/dev/null || echo NO_CLAUDE_USER; ps -eo user,args | grep -i -E 'java|velocity' | grep -v grep | cut -c1-200\")",
       "PowerShell(foreach \\($h in 'aranarth-survival','aranarth-smp','aranarth-velocity'\\) { \"== $h\"; \"pwd`nls\" | sftp -o StrictHostKeyChecking=accept-new -o ConnectTimeout=10 -b - $h 2>&1 | Select-Object -First 15 })",
       "PowerShell(sftp *)",
-      "Bash(\"/c/Program Files/JetBrains/IntelliJ IDEA\"*/plugins/maven/lib/maven3/bin/mvn -q -o compile)"
+      "Bash(\"/c/Program Files/JetBrains/IntelliJ IDEA\"*/plugins/maven/lib/maven3/bin/mvn -q -o compile)",
+      "PowerShell($mvn = Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1; & $mvn.FullName -q -o compile; \"EXIT $LASTEXITCODE\")"
     ]
   }
 }

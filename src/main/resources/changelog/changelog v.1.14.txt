@@ -49,5 +49,6 @@ Cross-server & Technical
 [+] Added missing config.yml settings being filled in with their defaults on startup and reload
 [~] Fixed SMP overwriting Survival mount progress with stale data, and increased mount progress saving frequency
 [~] Fixed voice link scheduling tasks while the plugin is disabling, causing an error on shutdown
+[~] Fixed /tphere not tab completing or finding players on another server
 
 Miscellaneous

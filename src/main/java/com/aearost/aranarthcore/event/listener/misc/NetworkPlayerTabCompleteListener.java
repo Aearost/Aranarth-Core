@@ -32,6 +32,7 @@ public class NetworkPlayerTabCompleteListener implements Listener {
         "ping",
         "seen",
         "teleport", "tp",
+        "tphere", "tph",
         "trust",
         "untrust"
     );
