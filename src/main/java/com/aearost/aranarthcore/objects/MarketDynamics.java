@@ -9,12 +9,15 @@ public class MarketDynamics {
     private double defaultSellPrice;
     private double currentPriceModifier;
     private double sellPressure;
+    // In-memory only - the pressure already priced in by the last price tick, used to isolate new sales
+    private double appliedPressure;
 
     public MarketDynamics(String shopKey, double defaultSellPrice, double currentPriceModifier, double sellPressure) {
         this.shopKey = shopKey;
         this.defaultSellPrice = defaultSellPrice;
         this.currentPriceModifier = currentPriceModifier;
         this.sellPressure = sellPressure;
+        this.appliedPressure = sellPressure;
     }
 
     /** Returns the unique key for this shop. */
@@ -56,10 +59,19 @@ public class MarketDynamics {
         this.sellPressure = sellPressure;
     }
 
+    /** Returns the sell pressure that was already priced in by the last price tick. */
+    public double getAppliedPressure() {
+        return appliedPressure;
+    }
+
+    public void setAppliedPressure(double appliedPressure) {
+        this.appliedPressure = appliedPressure;
+    }
+
     /**
      * Adds the given delta to the current sell pressure.
      *
-     * @param delta The amount of pressure to add (typically quantitySold / 2304.0 - total inventory).
+     * @param delta The amount of pressure to add (quantitySold / a full inventory of the item).
      */
     public void addPressure(double delta) {
         this.sellPressure += delta;

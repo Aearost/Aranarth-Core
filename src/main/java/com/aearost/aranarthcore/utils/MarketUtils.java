@@ -20,8 +20,8 @@ public class MarketUtils {
 
     private static final Map<String, MarketDynamics> marketData = new HashMap<>();
 
-    // 36 slots * 64 items per slot
-    private static final double INVENTORY_EQUIVALENT = 2304.0;
+    // Pressure is measured in full inventories (36 slots * the item's max stack size)
+    private static final int INVENTORY_SLOTS = 36;
 
     // Price floor and ceiling relative to default
     private static final double PRICE_FLOOR_MODIFIER = 0.25;
@@ -30,6 +30,9 @@ public class MarketUtils {
     // Per-tick constants
     private static final double DECAY_RATE = 0.95;
     private static final double SENSITIVITY = 0.000691;
+    // Immediate drop from sales made since the last tick, applied as price * e^(-SALE_IMPACT * inventoriesSold)
+    // 1 inventory drops ~5%, 1 inventory of full shulker boxes (27 inventories) drops ~74%
+    private static final double SALE_IMPACT = 0.05;
     // Price rises from 0.25x to 1.0x in ~3.5 days, and from 1.0x to the 2.5x ceiling in ~2.3 days
     private static final double RISE_RATE = 0.01664;
     private static final double PRESSURE_THRESHOLD = 0.01;
@@ -98,7 +101,7 @@ public class MarketUtils {
         if (marketData.get(key) == null) {
             return;
         }
-        double delta = quantitySold / INVENTORY_EQUIVALENT;
+        double delta = quantitySold / (double) (INVENTORY_SLOTS * shop.getItem().getMaxStackSize());
         // Write atomically to DB so both servers contribute to the same counter
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
                 () -> DatabaseManager.getInstance().addMarketSellPressure(key, delta));
@@ -160,18 +163,21 @@ public class MarketUtils {
 
                     // Use fresh DB pressure (combines Survival + SMP sells since last tick)
                     double combinedPressure = freshPressures.getOrDefault(key, data.getSellPressure());
+                    // Sales made since the last tick hit the price all at once instead of trickling in
+                    double newSales = Math.max(0.0, combinedPressure - data.getAppliedPressure());
                     double newPressure = combinedPressure * DECAY_RATE;
                     data.setSellPressure(newPressure);
+                    data.setAppliedPressure(newPressure);
 
                     double newPrice;
                     if (newPressure > PRESSURE_THRESHOLD) {
                         // Sell pressure is driving the price down
-                        double dropRate = newPressure * SENSITIVITY;
+                        double dropRate = newSales * SALE_IMPACT + newPressure * SENSITIVITY;
                         if (currentPrice > defaultPrice) {
                             double excess = currentPrice / defaultPrice - 1.0;
                             dropRate *= 1.0 + excess * 2.0;
                         }
-                        newPrice = Math.max(defaultPrice * PRICE_FLOOR_MODIFIER, currentPrice * (1.0 - dropRate));
+                        newPrice = Math.max(defaultPrice * PRICE_FLOOR_MODIFIER, currentPrice * Math.exp(-dropRate));
                     } else {
                         // No meaningful pressure - price recovers toward ceiling
                         newPrice = Math.min(defaultPrice * PRICE_CEILING_MODIFIER, currentPrice * (1.0 + RISE_RATE));

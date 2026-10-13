@@ -8310,6 +8310,11 @@ public class PersistenceUtils {
             double modifier = (double) row[2];
             double pressure = (double) row[3];
             MarketDynamics data = new MarketDynamics(shopKey, defaultSellPrice, modifier, pressure);
+            // Keeps sales made since the last price tick from being treated as already applied
+            MarketDynamics previous = MarketUtils.getMarketData(shopKey);
+            if (previous != null) {
+                data.setAppliedPressure(previous.getAppliedPressure());
+            }
             MarketUtils.addMarketData(data);
         }
 

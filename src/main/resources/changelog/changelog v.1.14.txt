@@ -31,6 +31,7 @@ Economy, Jobs & Quests
 [+] Colored the sell price on server shop signs when at its limit
 [~] Fixed perk purchase messages not displaying when bought from the vote shop on SMP
 [+] Added /q alias for quests
+[~] Market prices now drop sharply on mass sales, scaled by item stack size
 
 Chat, UI & Sounds
 
