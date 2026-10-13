@@ -612,7 +612,8 @@
       "Bash(sed *)",
       "PowerShell(git log *)",
       "PowerShell($m = Get-ChildItem \"$env:ProgramFiles\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1; if \\(-not $m\\) { $m = Get-ChildItem \"$env:LOCALAPPDATA\\\\Programs\",\"$env:USERPROFILE\\\\AppData\\\\Local\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1 }; $m.FullName; & $m.FullName -q -o compile 2>&1 | Select-Object -Last 30; \"exit: $LASTEXITCODE\")",
-      "PowerShell(& \"C:\\\\Program Files\\\\JetBrains\\\\IntelliJ IDEA Community Edition 2024.3.4\\\\plugins\\\\maven\\\\lib\\\\maven3\\\\bin\\\\mvn.cmd\" -q -o compile 2>&1 | Select-Object -Last 30)"
+      "PowerShell(& \"C:\\\\Program Files\\\\JetBrains\\\\IntelliJ IDEA Community Edition 2024.3.4\\\\plugins\\\\maven\\\\lib\\\\maven3\\\\bin\\\\mvn.cmd\" -q -o compile 2>&1 | Select-Object -Last 30)",
+      "Bash(\"/c/Program Files/JetBrains/IntelliJ IDEA Community Edition 2024.3.4/plugins/maven/lib/maven3/bin/mvn\" -q -o compile)"
     ]
   }
 }

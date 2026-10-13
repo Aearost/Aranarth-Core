@@ -107,10 +107,10 @@ public class PlotUtils {
     public static Location getSpawnLocation(World world) {
         FileConfiguration config = AranarthCore.getInstance().getConfig();
         return new Location(world,
-                config.getDouble("creative-plots.spawn.x", 0.5),
-                config.getDouble("creative-plots.spawn.y", PlotPattern.FEET_Y),
-                config.getDouble("creative-plots.spawn.z", 0.5),
-                (float) config.getDouble("creative-plots.spawn.yaw", 0),
+                config.getDouble("creative-plots.spawn.x", -5.5),
+                config.getDouble("creative-plots.spawn.y", 91),
+                config.getDouble("creative-plots.spawn.z", -5.5),
+                (float) config.getDouble("creative-plots.spawn.yaw", 180),
                 (float) config.getDouble("creative-plots.spawn.pitch", 0));
     }
 

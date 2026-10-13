@@ -137,8 +137,8 @@ creative-plots:
   border-size: 2500
   # Where /creative and /plot spawn teleport to.
   spawn:
-    x: 0.5
-    y: 75.0
-    z: 0.5
-    yaw: 0.0
+    x: -5.5
+    y: 91.0
+    z: -5.5
+    yaw: 180.0
     pitch: 0.0
