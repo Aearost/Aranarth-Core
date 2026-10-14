@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.abilities.airbending.combo.AirSnipe;
+import com.aearost.aranarthcore.abilities.airbending.combo.JetStream;
 import com.aearost.aranarthcore.abilities.airbending.soundbending.*;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.*;
 import com.aearost.aranarthcore.abilities.chiblocking.DaggerThrow;
@@ -46,6 +47,7 @@ import com.aearost.aranarthcore.utils.ShopIslandUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.ability.*;
+import com.projectkorra.projectkorra.ability.util.ComboManager;
 import com.projectkorra.projectkorra.airbending.AirBlast;
 import com.projectkorra.projectkorra.event.*;
 import com.projectkorra.projectkorra.util.TempBlock;
@@ -129,6 +131,7 @@ public class AranarthCoreBendingListener implements Listener {
         AstralProjection.endAllProjections();
         PastLives.endAllInstances();
         new ArrayList<>(CoreAbility.getAbilities(AirSnipe.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(JetStream.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(AstralShot.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(CableSlash.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(EarthRush.class)).forEach(CoreAbility::remove);
@@ -263,6 +266,33 @@ public class AranarthCoreBendingListener implements Listener {
     }
 
     /**
+     * Prevents the AirBlast from the final left-click of the JetStream combo from firing at all.
+     * PK only starts the combo a tick after the click, so the AirBlast would otherwise get to travel briefly.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onJetStreamAirBlastStart(final AbilityStartEvent e) {
+        if (!(e.getAbility() instanceof AirBlast airBlast)) {
+            return;
+        }
+        Player player = airBlast.getPlayer();
+        ComboManager.ComboAbilityInfo combo = ComboManager.checkForValidCombo(player);
+        if (combo == null || !combo.getName().equals("JetStream")) {
+            return;
+        }
+        // Only suppress the AirBlast if JetStream will actually start
+        BendingPlayer bendingPlayer = airBlast.getBendingPlayer();
+        CoreAbility jetStream = CoreAbility.getAbility(JetStream.class);
+        if (jetStream == null || bendingPlayer.isOnCooldown(jetStream)
+                || !bendingPlayer.canBendIgnoreBindsCooldowns(jetStream)
+                || CoreAbility.hasAbility(player, JetStream.class)) {
+            return;
+        }
+        e.setCancelled(true);
+        // AirBlast applies its cooldown before starting
+        bendingPlayer.removeCooldown("AirBlast");
+    }
+
+    /**
      * Registers the initial position of a fire ability as a fire source immediately on start,
      * before the per-tick scheduler can pick it up. This eliminates the 1-tick gap on the
      * first frame of a new ability.
@@ -353,6 +383,16 @@ public class AranarthCoreBendingListener implements Listener {
 
         CoreAbility ability = bendingPlayer.getBoundAbility();
         String abilityName = bendingPlayer.getBoundAbilityName();
+
+        // Sneaking while riding a JetStream - cancel so PK cannot activate the bound ability, and double-tapping ends the stream
+        JetStream jetStream = CoreAbility.getAbility(player, JetStream.class);
+        if (jetStream != null && jetStream.isCasterRiding()) {
+            e.setCancelled(true);
+            if (e.isSneaking()) {
+                jetStream.onSneakPress();
+            }
+            return;
+        }
 
         // Sneak press during FIRING - cancel so PK cannot activate IceSpike via SHIFT_DOWN
         if (e.isSneaking()) {
@@ -1444,6 +1484,16 @@ public class AranarthCoreBendingListener implements Listener {
         BloodFreeze bloodFreeze = BloodFreeze.getActiveInstance(player.getUniqueId());
         if (bloodFreeze != null) {
             bloodFreeze.cancelFromDamage();
+        }
+    }
+
+    /**
+     * Keeps players caught in a JetStream gliding, even without an elytra equipped.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onJetStreamGlideToggle(final EntityToggleGlideEvent e) {
+        if (!e.isGliding() && JetStream.isGliding(e.getEntity().getUniqueId())) {
+            e.setCancelled(true);
         }
     }
 

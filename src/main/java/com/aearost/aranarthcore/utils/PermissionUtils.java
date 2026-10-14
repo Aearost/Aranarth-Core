@@ -257,6 +257,7 @@ public class PermissionUtils {
             perms.setPermission("bending.ability.SwiftStream", true);
             // Aranarth abilities now rank-gated
             perms.setPermission("bending.ability.airsnipe", true);
+            perms.setPermission("bending.ability.jetstream", true);
             perms.setPermission("bending.ability.astralprojection", true);
             perms.setPermission("bending.ability.astralshot", true);
             perms.setPermission("bending.ability.vinewhip", true);
@@ -401,6 +402,7 @@ public class PermissionUtils {
         perms.setPermission("bending.ability.cablethrash", true);
         perms.setPermission("bending.ability.daggervolley", true);
         perms.setPermission("bending.ability.airsnipe", true);
+        perms.setPermission("bending.ability.jetstream", true);
         perms.setPermission("bending.ability.mendingwaters", true);
         perms.setPermission("bending.ability.healinghelix", true);
         perms.setPermission("bending.ability.corruptinghelix", true);
@@ -730,6 +732,7 @@ public class PermissionUtils {
                     perms.setPermission("bending.ability.SwiftStream", true);
                     // Aranarth abilities now rank-gated
                     perms.setPermission("bending.ability.airsnipe", true);
+                    perms.setPermission("bending.ability.jetstream", true);
                     perms.setPermission("bending.ability.astralprojection", true);
                     perms.setPermission("bending.ability.astralshot", true);
                     perms.setPermission("bending.ability.vinewhip", true);
@@ -959,6 +962,7 @@ public class PermissionUtils {
         if (rank >= 4) {
             perms.setPermission("bending.ability.healinghelix", true);        // healing
             perms.setPermission("bending.ability.angeredspirits", true);      // spiritual
+            perms.setPermission("bending.ability.jetstream", true);           // air combo
             perms.setPermission("bending.ability.iceshards", true);           // ice
             perms.setPermission("bending.ability.daggervolley", true);        // chi
             perms.setPermission("bending.ability.metalshots", true);          // metal

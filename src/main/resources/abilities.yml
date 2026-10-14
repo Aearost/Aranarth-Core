@@ -310,6 +310,24 @@ AirSnipe:
   Speed: 20.0
   HitRadius: 0.4
 
+JetStream:
+  Cooldown: 8000
+  Duration: 2500
+  # Blocks per tick (3.0 = 60 blocks/s, 150 blocks over the full duration)
+  Speed: 3.0
+  # Radius of the stream (1.0 = 2 block diameter)
+  Radius: 1.0
+  # Max radians per tick the stream can turn toward where the caster is looking
+  TurnRate: 0.03
+  # How strongly carried entities are pulled toward the stream each tick
+  PullStrength: 0.4
+  # Carried entities (including the caster) further than this from the stream (e.g. stuck behind a wall) are freed from it
+  CarryRange: 3.0
+  # How long the caster and carried entities stay protected from fall damage after release
+  FallProtection: 5000
+  # Max time between two sneak presses for a double-tap to end the stream early
+  DoubleTapWindow: 400
+
 # ==================== Water - Plant ====================
 
 LeafScythe:

@@ -19,6 +19,7 @@ Dominion
 
 Aranarthium, Items & Crafting
 [+] Implemented Essence Imbuing, allowing players to create Essence items and imbue them with XP to craft the various essences
+[+] Implemented the JetStream combo for airbenders
 [~] Changed double jump trigger with Elven Aranarthium to be tapping sneak while mid-air
 [-] Removed the double jump cooldown of Elven Aranarthium
 [~] Fixed elytras not being usable while Invisible Armor is enabled

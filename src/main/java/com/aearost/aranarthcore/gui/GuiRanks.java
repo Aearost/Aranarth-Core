@@ -190,7 +190,7 @@ public class GuiRanks {
 			}
 		}
 		countLore.add(Lang.getFor(player, "gui.ranks.bending"));
-		countLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] " + Element.SPIRITUAL.getColor() + "&oAngeredSpirits"));
+		countLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] &7&oJetStream, " + Element.SPIRITUAL.getColor() + "&oAngeredSpirits"));
 		countLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] &b&oIceShards, &3&oHealingHelix"));
 		countLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.METAL.getColor() + "&oMetalShots, MetalStrips"));
 		countLore.add(ChatUtils.translateToColor("&f&o- &6[&eC&6] &6&oDaggerVolley"));

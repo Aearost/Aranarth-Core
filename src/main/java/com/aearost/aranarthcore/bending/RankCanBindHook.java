@@ -38,6 +38,7 @@ public class RankCanBindHook implements CanBindHook {
         ABILITY_MIN_RANKS.put("metalfragments", 3);
 
         // Count
+        ABILITY_MIN_RANKS.put("jetstream", 4);
         ABILITY_MIN_RANKS.put("iceshards", 4);
         ABILITY_MIN_RANKS.put("angeredspirits", 4);
         ABILITY_MIN_RANKS.put("daggervolley", 4);
