@@ -1,11 +1,14 @@
 package com.aearost.aranarthcore.utils;
 
+import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
 import com.aearost.aranarthcore.items.key.KeyRare;
 import com.aearost.aranarthcore.items.key.KeyVote;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -202,12 +205,26 @@ public class LoginStreakUtils {
             }
         }
 
+        String countStr = count == 1 ? "" : count + "x ";
+        UUID uuid = player.getUniqueId();
+
+        // Player has a separate inventory than survival, so the keys are queued for /keyclaim instead
+        if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
+            AranarthUtils.addPendingKey(uuid, key, count);
+            if (DatabaseManager.isActive()) {
+                Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                        () -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(uuid));
+            }
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("streak.reward_keyclaim",
+                    "day", String.valueOf(day), "item", keyColor + countStr + keyName)));
+            return;
+        }
+
         key.setAmount(count);
         Map<Integer, ItemStack> leftover = player.getInventory().addItem(key);
         for (ItemStack overflow : leftover.values()) {
             player.getWorld().dropItemNaturally(player.getLocation(), overflow);
         }
-        String countStr = count == 1 ? "" : count + "x ";
         player.sendMessage(ChatUtils.chatMessage(
                 "&7Day &e" + day + " &7streak reward: " + keyColor + countStr + keyName));
     }

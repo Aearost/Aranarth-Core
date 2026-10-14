@@ -33,6 +33,7 @@ Economy, Jobs & Quests
 [~] Fixed perk purchase messages not displaying when bought from the vote shop on SMP
 [+] Added /q alias for quests
 [~] Market prices now drop sharply on mass sales, scaled by item stack size
+[~] Login streak rewards can now be claimed in creative, with crate keys sent to /keyclaim
 
 Chat, UI & Sounds
 
