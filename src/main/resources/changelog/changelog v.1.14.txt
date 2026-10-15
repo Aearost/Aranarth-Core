@@ -56,5 +56,6 @@ Cross-server & Technical
 [~] Fixed SMP overwriting Survival mount progress with stale data, and increased mount progress saving frequency
 [~] Fixed voice link scheduling tasks while the plugin is disabling, causing an error on shutdown
 [~] Fixed /tphere not tab completing or finding players on another server
+[~] Fixed ender pearls landing after a world change teleporting players between Survival and Creative without swapping their inventory or game mode, and fixed failed teleports still swapping the player's inventory
 
 Miscellaneous

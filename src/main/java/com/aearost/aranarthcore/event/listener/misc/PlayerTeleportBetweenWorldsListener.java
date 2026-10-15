@@ -67,6 +67,29 @@ public class PlayerTeleportBetweenWorldsListener implements Listener {
         }
     }
 
+    /**
+     * Prevents teleports that do not switch the player's inventory from moving the player between worlds that use different inventories.
+     *
+     * @param e The event.
+     */
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onCrossInventoryTeleport(PlayerTeleportEvent e) {
+        // Command teleports are handled above, and plugin teleports handle the inventory themselves
+        if (e.getCause() == TeleportCause.COMMAND || e.getCause() == TeleportCause.PLUGIN) {
+            return;
+        }
+        if (e.getTo() == null || e.getTo().getWorld() == null || e.getFrom().getWorld() == null) {
+            return;
+        }
+        String fromGroup = AranarthUtils.getInventoryGroup(e.getFrom().getWorld().getName());
+        String toGroup = AranarthUtils.getInventoryGroup(e.getTo().getWorld().getName());
+        if (!fromGroup.equals(toGroup)) {
+            e.setCancelled(true);
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Inv] Blocked " + e.getCause() + " teleport for "
+                    + e.getPlayer().getName() + " from " + e.getFrom().getWorld().getName() + " to " + e.getTo().getWorld().getName());
+        }
+    }
+
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onSoulboundTeleport(PlayerTeleportEvent e) {
         if (e.getCause() == TeleportCause.SPECTATE || e.getCause() == TeleportCause.DISMOUNT) {

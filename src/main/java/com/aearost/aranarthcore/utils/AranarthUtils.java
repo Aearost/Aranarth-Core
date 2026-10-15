@@ -399,6 +399,21 @@ public class AranarthUtils {
         return count;
     }
 
+    /**
+     * Provides the inventory that is used in the input world.
+     *
+     * @param worldName The name of the world.
+     * @return "arena" or "creative" for those worlds, otherwise "world" as all other worlds share the Survival inventory.
+     */
+    public static String getInventoryGroup(String worldName) {
+        if (worldName.startsWith("arena")) {
+            return "arena";
+        } else if (worldName.startsWith("creative")) {
+            return "creative";
+        }
+        return "world";
+    }
+
     public static void switchInventory(Player player, String currentWorld, String destinationWorld) throws IOException {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
@@ -2128,7 +2143,11 @@ public class AranarthUtils {
                 ? player.getLocation().getWorld().getName()
                 : from.getWorld().getName();
 
-        player.teleport(locToTeleportTo);
+        // The inventory must not be switched if the player never left (i.e the teleport was cancelled)
+        if (!player.teleport(locToTeleportTo)) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.failed")));
+            return false;
+        }
         for (Entity leashed : leashedEntities) {
             leashed.teleport(locToTeleportTo);
         }
