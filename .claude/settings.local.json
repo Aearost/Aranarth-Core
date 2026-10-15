@@ -621,7 +621,8 @@
       "PowerShell(foreach \\($h in 'aranarth-survival','aranarth-smp','aranarth-velocity'\\) { \"== $h\"; \"pwd`nls\" | sftp -o StrictHostKeyChecking=accept-new -o ConnectTimeout=10 -b - $h 2>&1 | Select-Object -First 15 })",
       "PowerShell(sftp *)",
       "Bash(\"/c/Program Files/JetBrains/IntelliJ IDEA\"*/plugins/maven/lib/maven3/bin/mvn -q -o compile)",
-      "PowerShell($mvn = Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1; & $mvn.FullName -q -o compile; \"EXIT $LASTEXITCODE\")"
+      "PowerShell($mvn = Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1; & $mvn.FullName -q -o compile; \"EXIT $LASTEXITCODE\")",
+      "PowerShell(gh issue view 458 --json number,title,body,state,comments; \"exit: $LASTEXITCODE\")"
     ]
   }
 }

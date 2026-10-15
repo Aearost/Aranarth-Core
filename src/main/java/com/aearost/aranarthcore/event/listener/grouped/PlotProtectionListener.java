@@ -14,8 +14,10 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.Directional;
+import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.FallingBlock;
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -24,9 +26,13 @@ import org.bukkit.event.block.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import io.papermc.paper.event.entity.EntityKnockbackEvent;
 import org.bukkit.event.entity.EntityPlaceEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
@@ -140,23 +146,36 @@ public class PlotProtectionListener implements Listener {
     }
 
     /**
-     * Prevents spawn eggs from being used in a plot that has reached its entity limit.
+     * Prevents spawn eggs from being used anywhere in the plots world, as mobs can wander into other plots.
      */
     @EventHandler(priority = EventPriority.LOW)
     public void onSpawnEggUse(PlayerInteractEvent e) {
-        ItemStack item = e.getItem();
-        Block block = e.getClickedBlock();
-        if (e.getAction() != Action.RIGHT_CLICK_BLOCK || item == null || block == null
-                || !item.getType().name().endsWith("_SPAWN_EGG") || !PlotUtils.isPlotWorld(block.getWorld())) {
+        if (e.getAction() != Action.RIGHT_CLICK_BLOCK && e.getAction() != Action.RIGHT_CLICK_AIR) {
             return;
         }
-        if (isEntityLimitReached(e.getPlayer(), block.getRelative(e.getBlockFace()).getLocation())) {
+        if (isSpawnEgg(e.getItem()) && PlotUtils.isPlotWorld(e.getPlayer().getWorld())) {
             e.setCancelled(true);
+            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("plot.no_spawn_eggs")));
         }
     }
 
     /**
-     * Limits the number of entities in each plot, catching every way of spawning one (i.e breeding and dispensers).
+     * Prevents spawn eggs from being used on mobs in the plots world to spawn their babies.
+     */
+    @EventHandler(priority = EventPriority.LOW)
+    public void onSpawnEggUseOnEntity(PlayerInteractEntityEvent e) {
+        if (isSpawnEgg(e.getPlayer().getInventory().getItem(e.getHand())) && PlotUtils.isPlotWorld(e.getPlayer().getWorld())) {
+            e.setCancelled(true);
+            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("plot.no_spawn_eggs")));
+        }
+    }
+
+    private boolean isSpawnEgg(ItemStack item) {
+        return item != null && item.getType().name().endsWith("_SPAWN_EGG");
+    }
+
+    /**
+     * Limits the number of entities in each plot, catching every way of spawning one (i.e dispensers).
      */
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onEntitySpawn(EntitySpawnEvent e) {
@@ -300,19 +319,89 @@ public class PlotProtectionListener implements Listener {
     }
 
     /**
-     * Prevents explosions from destroying any blocks in the plots world.
+     * Prevents TNT from being primed in the plots world.
+     */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onTntPrime(TNTPrimeEvent e) {
+        if (PlotUtils.isPlotWorld(e.getBlock().getWorld())) {
+            e.setCancelled(true);
+        }
+    }
+
+    /**
+     * Prevents entities from exploding in the plots world (i.e end crystals and TNT minecarts).
+     */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onExplosionPrime(ExplosionPrimeEvent e) {
+        if (PlotUtils.isPlotWorld(e.getEntity().getWorld())) {
+            e.setCancelled(true);
+        }
+    }
+
+    /**
+     * Prevents any remaining explosions from destroying blocks in the plots world.
      */
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onEntityExplode(EntityExplodeEvent e) {
         if (PlotUtils.isPlotWorld(e.getEntity().getWorld())) {
-            e.blockList().clear();
+            e.setCancelled(true);
         }
     }
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onBlockExplode(BlockExplodeEvent e) {
         if (PlotUtils.isPlotWorld(e.getBlock().getWorld())) {
-            e.blockList().clear();
+            e.setCancelled(true);
+        }
+    }
+
+    /**
+     * Prevents explosions that cannot be stopped beforehand from hurting anything (i.e beds and respawn anchors).
+     */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onExplosionDamage(EntityDamageEvent e) {
+        EntityDamageEvent.DamageCause cause = e.getCause();
+        if ((cause == EntityDamageEvent.DamageCause.BLOCK_EXPLOSION || cause == EntityDamageEvent.DamageCause.ENTITY_EXPLOSION)
+                && PlotUtils.isPlotWorld(e.getEntity().getWorld())) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onExplosionKnockback(EntityKnockbackEvent e) {
+        if (e.getCause() == EntityKnockbackEvent.Cause.EXPLOSION && PlotUtils.isPlotWorld(e.getEntity().getWorld())) {
+            e.setCancelled(true);
+        }
+    }
+
+    /**
+     * Prevents projectiles from being launched in the plots world, as they can reach other plots.
+     * This includes arrows, tridents, and splash and lingering potions. Ender pearls are still allowed.
+     */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onProjectileLaunch(ProjectileLaunchEvent e) {
+        if (PlotUtils.isPlotWorld(e.getEntity().getWorld()) && !(e.getEntity() instanceof EnderPearl)) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onFish(PlayerFishEvent e) {
+        if (e.getState() == PlayerFishEvent.State.FISHING && PlotUtils.isPlotWorld(e.getPlayer().getWorld())) {
+            e.setCancelled(true);
+        }
+    }
+
+    /**
+     * Prevents entities from forming blocks where they cannot build (i.e frost walker and snow golem trails).
+     */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onEntityBlockForm(EntityBlockFormEvent e) {
+        if (!PlotUtils.isPlotWorld(e.getBlock().getWorld())) {
+            return;
+        }
+        if (!(e.getEntity() instanceof Player player) || !PlotUtils.canBuild(player, e.getBlock().getLocation())) {
+            e.setCancelled(true);
         }
     }
 
@@ -358,18 +447,12 @@ public class PlotProtectionListener implements Listener {
     }
 
     /**
-     * Prevents mobs from spawning naturally in the plots world. Spawn eggs are still allowed in a player's own plots.
+     * Prevents all mobs from spawning in the plots world, including spawners, breeding, and built golems and withers.
+     * Armor stands and mannequins are not mobs, so they can still be placed.
      */
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onCreatureSpawn(CreatureSpawnEvent e) {
-        if (!PlotUtils.isPlotWorld(e.getLocation().getWorld())) {
-            return;
-        }
-        CreatureSpawnEvent.SpawnReason reason = e.getSpawnReason();
-        if (reason == CreatureSpawnEvent.SpawnReason.NATURAL || reason == CreatureSpawnEvent.SpawnReason.SPAWNER
-                || reason == CreatureSpawnEvent.SpawnReason.REINFORCEMENTS || reason == CreatureSpawnEvent.SpawnReason.PATROL
-                || reason == CreatureSpawnEvent.SpawnReason.RAID || reason == CreatureSpawnEvent.SpawnReason.VILLAGE_DEFENSE
-                || reason == CreatureSpawnEvent.SpawnReason.TRAP || reason == CreatureSpawnEvent.SpawnReason.JOCKEY) {
+        if (PlotUtils.isPlotWorld(e.getLocation().getWorld()) && e.getEntity() instanceof Mob) {
             e.setCancelled(true);
         }
     }
