@@ -292,6 +292,9 @@ public class NetworkManager {
                         try {
                             String key = KEY_SMP_RESTART_INV + p.getUniqueId();
                             String json = buildFallbackSnapshot(p);
+                            if (json == null) {
+                                continue;
+                            }
                             Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
                                     () -> db.saveTempData(key, json, 600)); // 10-min TTL
                         } catch (Exception e) {
@@ -353,17 +356,34 @@ public class NetworkManager {
     /**
      * Serializes the player's current inventory + stats into a JSON string suitable for
      * storing as an SMP fallback snapshot. Must be called from the main thread.
+     *
+     * @return The snapshot, or null if the player has no survival inventory to snapshot.
      */
     private String buildFallbackSnapshot(Player p) {
         JsonObject snap = new JsonObject();
         snap.addProperty("ts", System.currentTimeMillis());
-        snap.addProperty("inventory", ItemUtils.itemStackArrayToBase64(p.getInventory().getContents()));
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(p.getUniqueId());
+        if (AranarthUtils.isSurvivalWorld(p.getWorld().getName()) || aranarthPlayer == null) {
+            snap.addProperty("inventory", ItemUtils.itemStackArrayToBase64(p.getInventory().getContents()));
+            snap.addProperty("health", p.getHealth());
+            snap.addProperty("food", p.getFoodLevel());
+            snap.addProperty("saturation", p.getSaturation());
+            snap.addProperty("expLevel", p.getLevel());
+            snap.addProperty("expProgress", p.getExp());
+        } else {
+            // In a world with another inventory (i.e SMP Creative), so the survival inventory saved when they left is used
+            if (aranarthPlayer.getSurvivalInventory().isEmpty()) {
+                return null;
+            }
+            snap.addProperty("inventory", aranarthPlayer.getSurvivalInventory());
+            snap.addProperty("health", aranarthPlayer.getSurvivalHealth());
+            snap.addProperty("food", aranarthPlayer.getSurvivalFoodLevel());
+            snap.addProperty("saturation", aranarthPlayer.getSurvivalSaturation());
+            snap.addProperty("expLevel", aranarthPlayer.getSurvivalExpLevel());
+            snap.addProperty("expProgress", aranarthPlayer.getSurvivalExpProgress());
+        }
+        // The ender chest is shared by every world
         snap.addProperty("enderChest", ItemUtils.itemStackArrayToBase64(p.getEnderChest().getContents()));
-        snap.addProperty("health", p.getHealth());
-        snap.addProperty("food", p.getFoodLevel());
-        snap.addProperty("saturation", p.getSaturation());
-        snap.addProperty("expLevel", p.getLevel());
-        snap.addProperty("expProgress", p.getExp());
         // Carry the full player row (homes, balance, etc.) so Survival does not keep using its
         // stale copy - and later write it back to MySQL - when the player lands there as a fallback
         String rawRow = PersistenceUtils.buildPlayerRowForTransfer(p.getUniqueId());
@@ -383,7 +403,11 @@ public class NetworkManager {
             return;
         }
         try {
-            db.saveTempData(KEY_SMP_RESTART_INV + player.getUniqueId(), buildFallbackSnapshot(player), 600);
+            String json = buildFallbackSnapshot(player);
+            if (json == null) {
+                return;
+            }
+            db.saveTempData(KEY_SMP_RESTART_INV + player.getUniqueId(), json, 600);
             Bukkit.getLogger().info(AranarthCore.LOG_PREFIX
                     + "[SmpSnapshot] Snapshot written for " + player.getName());
         } catch (Exception e) {

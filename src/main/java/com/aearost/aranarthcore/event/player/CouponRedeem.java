@@ -1,14 +1,17 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.objects.Mail;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.CouponUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.MailUtils;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -39,6 +42,15 @@ public class CouponRedeem {
         }
 
         e.setCancelled(true);
+
+        // Coupons can be created at will in creative mode, so they can only be redeemed in survival
+        Player redeemer = e.getPlayer();
+        if (!AranarthUtils.isSurvivalWorld(redeemer.getWorld().getName()) || redeemer.getGameMode() != GameMode.SURVIVAL) {
+            if (e.getHand() == EquipmentSlot.HAND) {
+                redeemer.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.must_be_gameplay_world")));
+            }
+            return;
+        }
 
         int discountPercentage = item.getItemMeta().getPersistentDataContainer()
                 .get(COUPON_DISCOUNT, PersistentDataType.INTEGER);

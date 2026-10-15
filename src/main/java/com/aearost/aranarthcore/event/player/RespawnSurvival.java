@@ -9,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.potion.PotionEffect;
@@ -37,6 +38,16 @@ public class RespawnSurvival {
             if (AranarthUtils.isSmpWorld(deathWorld)) {
                 e.setRespawnLocation(new Location(Bukkit.getWorld(AranarthCore.getSmpMainWorldName()), 0.5, 120, 3.5, 180, 0));
             } else if (deathWorld.startsWith("world") || deathWorld.startsWith("resource")) {
+                e.setRespawnLocation(new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0));
+            }
+        }
+
+        // Never respawn in a world with another inventory (i.e a bed in a Creative plot), as the inventory would not be switched
+        World respawnWorld = e.getRespawnLocation().getWorld();
+        if (respawnWorld != null && !AranarthUtils.getInventoryGroup(respawnWorld.getName()).equals("world")) {
+            if (AranarthCore.isSmpServer()) {
+                e.setRespawnLocation(new Location(Bukkit.getWorld(AranarthCore.getSmpMainWorldName()), 0.5, 120, 3.5, 180, 0));
+            } else {
                 e.setRespawnLocation(new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0));
             }
         }

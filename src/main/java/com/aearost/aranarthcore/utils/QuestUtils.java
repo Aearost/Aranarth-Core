@@ -829,11 +829,21 @@ public class QuestUtils {
             return false;
         }
 
+        Quest quest = active.get(index);
+        // Item rewards would be given to the Creative or Arena inventory instead, though crate keys are sent to /keyclaim
+        if (quest.hasItemReward() && !AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
+            ItemStack reward = quest.getItemReward();
+            boolean isCrateKeyReward = reward.hasItemMeta()
+                    && reward.getItemMeta().getPersistentDataContainer().has(CRATE_KEY, PersistentDataType.STRING);
+            if (!isCrateKeyReward) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.must_be_gameplay_world")));
+                return false;
+            }
+        }
+
         claimed[index] = true;
         locallyModifiedUuids.add(uuid);
         sessionModifiedUuids.add(uuid);
-
-        Quest quest = active.get(index);
 
         if (quest.hasItemReward()) {
             ItemStack rewardItem = quest.getItemReward().clone();

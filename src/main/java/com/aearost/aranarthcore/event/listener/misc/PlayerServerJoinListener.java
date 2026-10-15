@@ -789,6 +789,17 @@ public class PlayerServerJoinListener implements Listener {
                                                 if (snap.has("expProgress")) ap.setSurvivalExpProgress(player.getExp());
                                                 AranarthUtils.setPlayer(uuidForAsync, ap);
                                             }
+                                            // Paper restored their last position on this server, which may be in a world with another inventory
+                                            if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
+                                                World fallbackWorld = Bukkit.getWorld("spawn");
+                                                if (fallbackWorld == null) {
+                                                    fallbackWorld = Bukkit.getWorld("world");
+                                                }
+                                                if (fallbackWorld != null) {
+                                                    player.teleport(new Location(fallbackWorld, 0.5, 101, 0.5, 180, 0));
+                                                }
+                                            }
+                                            player.setGameMode(GameMode.SURVIVAL);
                                             // Consume the snapshot (one-use) so it cannot be applied again.
                                             Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
                                                     () -> DatabaseManager.getInstance().deleteTempData(

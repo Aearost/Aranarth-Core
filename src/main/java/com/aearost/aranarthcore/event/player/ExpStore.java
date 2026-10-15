@@ -27,6 +27,11 @@ public class ExpStore {
 
                 if (totalExp >= amountToReduce) {
                     if (player.isSneaking()) {
+                        // The bottle would otherwise go to the Creative or Arena inventory, losing the player's EXP
+                        if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
+                            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.must_be_gameplay_world")));
+                            return;
+                        }
                         if (player.hasPermission("aranarth.exp")) {
                             // Reduces by a less than what is gained
                             amountToReduce = amountToReduce * -1;

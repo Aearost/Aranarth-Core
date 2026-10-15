@@ -17,8 +17,16 @@ import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.AreaEffectCloud;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EvokerFangs;
+import org.bukkit.entity.ExperienceOrb;
+import org.bukkit.entity.FallingBlock;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.LightningStrike;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BoundingBox;
 
@@ -34,6 +42,7 @@ public class PlotUtils {
     public static final String WORLD_NAME = "creative";
     public static final String MARKER_FILE = "aranarth_plots.marker";
     public static final int MAX_PLOTS = 36;
+    public static final int MAX_ENTITIES_PER_PLOT = 50;
     private static final int MAX_NAME_LENGTH = 16;
     private static final long REGENERATE_NANOS_PER_TICK = 15_000_000L;
 
@@ -409,6 +418,38 @@ public class PlotUtils {
 
     public static boolean isBusy(CreativePlot plot) {
         return busyPlots.contains(plot.getKey());
+    }
+
+    /**
+     * Provides whether the entity counts toward a plot's entity limit. Short-lived entities such as dropped items and projectiles do not.
+     */
+    public static boolean countsTowardEntityLimit(Entity entity) {
+        return !(entity instanceof Player || entity instanceof Item || entity instanceof ExperienceOrb
+                || entity instanceof Projectile || entity instanceof FallingBlock || entity instanceof TNTPrimed
+                || entity instanceof AreaEffectCloud || entity instanceof LightningStrike || entity instanceof EvokerFangs);
+    }
+
+    /**
+     * Provides whether the plot at the location already has the maximum number of entities.
+     */
+    public static boolean isEntityLimitReached(Location loc) {
+        CreativePlot plot = getAreaPlot(loc);
+        World world = loc.getWorld();
+        if (plot == null || world == null) {
+            return false;
+        }
+        // A plot's area, including the merged roads that belong to it, is always within its tile
+        int tileSize = pattern.getTileSize();
+        int minX = plot.getGridX() * tileSize;
+        int minZ = plot.getGridZ() * tileSize;
+        BoundingBox box = new BoundingBox(minX, world.getMinHeight(), minZ, minX + tileSize, world.getMaxHeight(), minZ + tileSize);
+        int count = 0;
+        for (Entity entity : world.getNearbyEntities(box, PlotUtils::countsTowardEntityLimit)) {
+            if (getAreaPlot(entity.getLocation()) == plot) {
+                count++;
+            }
+        }
+        return count >= MAX_ENTITIES_PER_PLOT;
     }
 
     /**

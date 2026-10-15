@@ -13,7 +13,9 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.data.Directional;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -24,6 +26,8 @@ import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPlaceEvent;
+import org.bukkit.event.entity.EntitySpawnEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.*;
@@ -117,6 +121,10 @@ public class PlotProtectionListener implements Listener {
     public void onEntityPlace(EntityPlaceEvent e) {
         if (e.getPlayer() != null && isDenied(e.getPlayer(), e.getEntity().getLocation())) {
             e.setCancelled(true);
+            return;
+        }
+        if (e.getPlayer() != null && isEntityLimitReached(e.getPlayer(), e.getEntity().getLocation())) {
+            e.setCancelled(true);
         }
     }
 
@@ -124,7 +132,52 @@ public class PlotProtectionListener implements Listener {
     public void onHangingPlace(HangingPlaceEvent e) {
         if (e.getPlayer() != null && isDenied(e.getPlayer(), e.getEntity().getLocation())) {
             e.setCancelled(true);
+            return;
         }
+        if (e.getPlayer() != null && isEntityLimitReached(e.getPlayer(), e.getEntity().getLocation())) {
+            e.setCancelled(true);
+        }
+    }
+
+    /**
+     * Prevents spawn eggs from being used in a plot that has reached its entity limit.
+     */
+    @EventHandler(priority = EventPriority.LOW)
+    public void onSpawnEggUse(PlayerInteractEvent e) {
+        ItemStack item = e.getItem();
+        Block block = e.getClickedBlock();
+        if (e.getAction() != Action.RIGHT_CLICK_BLOCK || item == null || block == null
+                || !item.getType().name().endsWith("_SPAWN_EGG") || !PlotUtils.isPlotWorld(block.getWorld())) {
+            return;
+        }
+        if (isEntityLimitReached(e.getPlayer(), block.getRelative(e.getBlockFace()).getLocation())) {
+            e.setCancelled(true);
+        }
+    }
+
+    /**
+     * Limits the number of entities in each plot, catching every way of spawning one (i.e breeding and dispensers).
+     */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onEntitySpawn(EntitySpawnEvent e) {
+        Entity entity = e.getEntity();
+        if (!PlotUtils.isPlotWorld(entity.getWorld()) || !PlotUtils.countsTowardEntityLimit(entity)) {
+            return;
+        }
+        if (PlotUtils.isEntityLimitReached(e.getLocation())) {
+            e.setCancelled(true);
+        }
+    }
+
+    /**
+     * Provides whether the plot at the location has reached its entity limit, notifying the player if so.
+     */
+    private boolean isEntityLimitReached(Player player, Location loc) {
+        if (!PlotUtils.isPlotWorld(loc.getWorld()) || !PlotUtils.isEntityLimitReached(loc)) {
+            return false;
+        }
+        player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.entity_limit", "limit", PlotUtils.MAX_ENTITIES_PER_PLOT)));
+        return true;
     }
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
@@ -219,7 +272,29 @@ public class PlotProtectionListener implements Listener {
             if (!PlotUtils.canBuild(player, e.getBlock().getLocation())) {
                 e.setCancelled(true);
             }
-        } else if (PlotUtils.getAreaPlot(e.getBlock().getLocation()) == null) {
+        } else if (entity instanceof FallingBlock) {
+            // Falling blocks can only land in the plot they started falling in
+            Location origin = entity.getOrigin() != null ? entity.getOrigin() : entity.getLocation();
+            if (PlotUtils.getAreaPlot(e.getBlock().getLocation()) == null
+                    || !PlotUtils.isSameArea(origin, e.getBlock().getLocation())) {
+                e.setCancelled(true);
+            }
+        } else {
+            // Mobs from spawn eggs can wander into other plots, so they cannot change blocks (i.e endermen and withers)
+            e.setCancelled(true);
+        }
+    }
+
+    /**
+     * Prevents dispensers and droppers from placing fluids, blocks, or entities outside of their plot.
+     */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onDispense(BlockDispenseEvent e) {
+        Block block = e.getBlock();
+        if (!PlotUtils.isPlotWorld(block.getWorld()) || !(block.getBlockData() instanceof Directional directional)) {
+            return;
+        }
+        if (!PlotUtils.isSameArea(block.getLocation(), block.getRelative(directional.getFacing()).getLocation())) {
             e.setCancelled(true);
         }
     }
