@@ -156,6 +156,9 @@ public class NetworkManager {
      * Populated in PlayerServerQuitListener, consumed in DiscordChatListener.
      */
     private final Set<UUID> crossServerQuitPlayers = ConcurrentHashMap.newKeySet();
+    private final Set<UUID> lockedPlayers = ConcurrentHashMap.newKeySet();
+    private final Set<UUID> nonAuthoritativePlayers = ConcurrentHashMap.newKeySet();
+    private static final long TRANSFER_TIMEOUT_TICKS = 400L;
     /**
      * Players whose cross-server join should suppress DiscordSRV's join announcement.
      * Populated in PlayerServerJoinListener, consumed in DiscordChatListener.
@@ -360,6 +363,10 @@ public class NetworkManager {
      * @return The snapshot, or null if the player has no survival inventory to snapshot.
      */
     private String buildFallbackSnapshot(Player p) {
+        // The inventory on this server is not the player's while they wait to be routed elsewhere
+        if (isNonAuthoritative(p.getUniqueId())) {
+            return null;
+        }
         JsonObject snap = new JsonObject();
         snap.addProperty("ts", System.currentTimeMillis());
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(p.getUniqueId());
@@ -1436,6 +1443,87 @@ public class NetworkManager {
     }
 
     /**
+     * Freezes the player's inventory and interactions while a transfer or arrival is in progress,
+     * so nothing can change between the inventory being serialized and the player leaving.
+     */
+    public void lockPlayer(UUID uuid) {
+        lockedPlayers.add(uuid);
+    }
+
+    public void unlockPlayer(UUID uuid) {
+        lockedPlayers.remove(uuid);
+    }
+
+    public boolean isLocked(UUID uuid) {
+        return lockedPlayers.contains(uuid);
+    }
+
+    /**
+     * Marks that this server's copy of the player's inventory is not theirs (they landed on the
+     * wrong server and are waiting to be routed), so a quit here must not save it.
+     */
+    public void markNonAuthoritative(UUID uuid) {
+        nonAuthoritativePlayers.add(uuid);
+    }
+
+    public void clearNonAuthoritative(UUID uuid) {
+        nonAuthoritativePlayers.remove(uuid);
+    }
+
+    public boolean isNonAuthoritative(UUID uuid) {
+        return nonAuthoritativePlayers.contains(uuid);
+    }
+
+    /**
+     * Clears every transfer-related flag for the player. Called once their quit has been handled.
+     */
+    public void clearTransferState(UUID uuid) {
+        lockedPlayers.remove(uuid);
+        nonAuthoritativePlayers.remove(uuid);
+    }
+
+    /**
+     * Velocity does not tell the backend when a Connect fails, so the player would otherwise stay
+     * here flagged as transferring forever. Once the timeout passes with the player still online,
+     * the transfer is treated as failed: the pending teleport is removed and the player is either
+     * unlocked or, if this server's inventory is not theirs, kicked so they can reconnect.
+     */
+    private void scheduleTransferTimeout(Player player) {
+        final UUID uuid = player.getUniqueId();
+        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
+            if (!player.isOnline() || !transferringPlayers.remove(uuid)) {
+                return;
+            }
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Net] Transfer of " + player.getName()
+                    + " timed out; the player is still on this server.");
+            clearPendingTeleport(uuid);
+            if (isNonAuthoritative(uuid)) {
+                player.kickPlayer(ChatUtils.translateToColor(Lang.get("teleport.server_unreachable")));
+            } else {
+                unlockPlayer(uuid);
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.failed")));
+            }
+        }, TRANSFER_TIMEOUT_TICKS);
+    }
+
+    /**
+     * Writes the pending teleport and only then tells the other server to send the player, so the
+     * other server can never read the transfer before the pending teleport exists.
+     */
+    public void setPendingAndPublishTransfer(UUID uuid, PendingTeleport pending, String targetServer) {
+        final String pendingJson = gson.toJson(pending);
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+            try {
+                db.saveTempData(KEY_PENDING_TP + uuid, pendingJson, 300);
+            } catch (Exception e) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "DB: failed to set pending TP for " + uuid);
+                return;
+            }
+            publishTransfer(uuid, targetServer);
+        });
+    }
+
+    /**
      * Marks this player's quit as a cross-server transfer for DiscordSRV suppression.
      */
     public void markCrossServerQuit(UUID uuid) {
@@ -1475,6 +1563,19 @@ public class NetworkManager {
      */
     public void saveInventoryAndTransfer(Player player, String targetServer, PendingTeleport pending) {
         UUID uuid = player.getUniqueId();
+
+        // The combat-log kill is skipped for transfers, so a tagged player must not be able to leave this way
+        AranarthPlayer apCombat = AranarthUtils.getPlayer(uuid);
+        if (apCombat != null && !apCombat.isInAdminMode() && !apCombat.getCombatLogTime().isEmpty()) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.combat_tagged")));
+            return;
+        }
+
+        // Closing first runs every GUI close handler (held shulker, quiver, potions, dominion food)
+        // and returns the crafting grid and cursor, so the serialized inventory is the final one
+        player.closeInventory();
+        // Nothing may change between serialization and the player leaving this server
+        lockPlayer(uuid);
 
         // Serialize inventory and ender chest into AranarthPlayer. handleTeleportLogic() already
         // does this for teleports that go through the normal countdown, but callers like
@@ -1571,12 +1672,15 @@ public class NetworkManager {
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                 if (!player.isOnline()) {
                     // Player disconnected during the async write - quit message was not suppressed
-                    // (flag was never set), so no cleanup needed here.
+                    // (flag was never set). Remove the pending teleport so their next login is not
+                    // treated as an arrival from this transfer.
+                    clearPendingTeleport(uuid);
                     return;
                 }
                 if (!transferAllowed) {
                     // The pending-TP write failed: transferring now would leave the player on the
                     // destination with no inventory state. Abort and notify the player instead.
+                    unlockPlayer(uuid);
                     player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.failed")));
                     return;
                 }
@@ -1589,10 +1693,14 @@ public class NetworkManager {
                     // Velocity-triggered quit is treated as a server switch, not a real disconnect.
                     transferringPlayers.add(uuid);
                     player.sendPluginMessage(AranarthCore.getInstance(), "BungeeCord", bos.toByteArray());
+                    scheduleTransferTimeout(player);
                 } catch (Exception e) {
                     Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
                             + "Failed to transfer " + player.getName() + " to " + targetServer + ": " + e.getMessage());
                     transferringPlayers.remove(uuid);
+                    clearPendingTeleport(uuid);
+                    unlockPlayer(uuid);
+                    player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.failed")));
                 }
             });
         });
@@ -1607,6 +1715,8 @@ public class NetworkManager {
         UUID uuid = player.getUniqueId();
         final String pendingJson = gson.toJson(pending);
         // NOTE: transferringPlayers is NOT set here - see saveInventoryAndTransfer for rationale.
+        player.closeInventory();
+        lockPlayer(uuid);
 
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
             boolean dbWriteSucceeded = true;
@@ -1620,9 +1730,16 @@ public class NetworkManager {
             final boolean transferAllowed = dbWriteSucceeded;
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                 if (!player.isOnline()) {
+                    // Otherwise their next login would be treated as an arrival from this transfer
+                    clearPendingTeleport(uuid);
                     return;
                 }
                 if (!transferAllowed) {
+                    if (isNonAuthoritative(uuid)) {
+                        player.kickPlayer(ChatUtils.translateToColor(Lang.get("teleport.server_unreachable")));
+                        return;
+                    }
+                    unlockPlayer(uuid);
                     player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.failed")));
                     return;
                 }
@@ -1633,30 +1750,21 @@ public class NetworkManager {
                     dos.writeUTF(targetServer);
                     transferringPlayers.add(uuid);
                     player.sendPluginMessage(AranarthCore.getInstance(), "BungeeCord", bos.toByteArray());
+                    scheduleTransferTimeout(player);
                 } catch (Exception e) {
                     Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
                             + "Failed to transfer " + player.getName() + " to " + targetServer + ": " + e.getMessage());
                     transferringPlayers.remove(uuid);
+                    clearPendingTeleport(uuid);
+                    if (isNonAuthoritative(uuid)) {
+                        player.kickPlayer(ChatUtils.translateToColor(Lang.get("teleport.server_unreachable")));
+                    } else {
+                        unlockPlayer(uuid);
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.failed")));
+                    }
                 }
             });
         });
-    }
-
-    /**
-     * Instructs the proxy to move {@code player} to {@code targetServer}.
-     */
-    public void transferPlayer(Player player, String targetServer) {
-        transferringPlayers.add(player.getUniqueId());
-        try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            DataOutputStream dos = new DataOutputStream(bos);
-            dos.writeUTF("Connect");
-            dos.writeUTF(targetServer);
-            player.sendPluginMessage(AranarthCore.getInstance(), "BungeeCord", bos.toByteArray());
-        } catch (Exception e) {
-            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
-                    + "Failed to transfer " + player.getName() + " to " + targetServer + ": " + e.getMessage());
-        }
     }
 
     // -------------------------------------------------------------------------
@@ -1972,12 +2080,9 @@ public class NetworkManager {
             String requesterNick = requester != null
                     ? AranarthUtils.getNickname(requester)
                     : accepterNick; // fallback to accepter nick if requester somehow offline
-            setPendingTeleport(accepterUuid,
-                    new PendingTeleport(requesterUuid.toString(), accepterNick, "&7You have teleported to " + requesterNick));
-            JsonObject transfer = new JsonObject();
-            transfer.addProperty("uuid", accepterUuid.toString());
-            transfer.addProperty("targetServer", thisServer);
-            publish(CH_TRANSFER, transfer);
+            setPendingAndPublishTransfer(accepterUuid,
+                    new PendingTeleport(requesterUuid.toString(), accepterNick, "&7You have teleported to " + requesterNick),
+                    thisServer);
             if (requester != null) {
                 requester.sendMessage(ChatUtils.chatMessage(Lang.get("tp.accepted", "player", accepterNick)));
             }
@@ -2020,11 +2125,15 @@ public class NetworkManager {
 
         // Read the pending TP that was set on the requester's server so we can embed this
         // player's inventory into it before the DB write + transfer sequence fires.
+        // The pending teleport is always written before the transfer is published. Without it the
+        // destination would keep its own stale copy of the inventory, so never transfer bare.
         PendingTeleport existing = getPendingTeleport(uuid);
         if (existing != null) {
             saveInventoryAndTransfer(player, velocityName, existing);
         } else {
-            transferPlayer(player, velocityName);
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Net] Transfer of " + player.getName()
+                    + " to " + toServer + " skipped: no pending teleport was found.");
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.failed")));
         }
     }
 

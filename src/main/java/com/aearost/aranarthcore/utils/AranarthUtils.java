@@ -446,6 +446,9 @@ public class AranarthUtils {
             }
         }
 
+        // The 2x2 crafting grid and the cursor are not part of the inventory contents
+        player.closeInventory();
+
         if (currentWorld.startsWith("world")) {
             aranarthPlayer.setSurvivalInventory(ItemUtils.toBase64(player.getInventory()));
             if (destinationWorld.startsWith("arena")) {

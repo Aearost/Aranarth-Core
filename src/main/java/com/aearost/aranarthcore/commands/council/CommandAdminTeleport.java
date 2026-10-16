@@ -172,8 +172,7 @@ public class CommandAdminTeleport {
 								destWorld.getName(), loc.getX(), loc.getY(), loc.getZ(),
 								loc.getYaw(), loc.getPitch(),
 								"&e&lCoordinates", "&7You have been teleported to the input coordinates");
-						NetworkManager.getInstance().setPendingTeleport(remoteTarget.getUuid(), pending);
-						NetworkManager.getInstance().publishTransfer(remoteTarget.getUuid(), NetworkManager.getInstance().getThisServer());
+						NetworkManager.getInstance().setPendingAndPublishTransfer(remoteTarget.getUuid(), pending, NetworkManager.getInstance().getThisServer());
 						sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.teleporting_player_coords", "player", remoteTarget.getNickname())));
 					} else {
 						sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
@@ -276,8 +275,7 @@ public class CommandAdminTeleport {
 								target2.getUniqueId().toString(),
 								"&e&l" + NetworkManager.getInstance().getThisServer().toUpperCase(),
 								Lang.get("admin.teleported_to_player", "player", nick2));
-						NetworkManager.getInstance().setPendingTeleport(remote1.getUuid(), pending);
-						NetworkManager.getInstance().publishTransfer(remote1.getUuid(), NetworkManager.getInstance().getThisServer());
+						NetworkManager.getInstance().setPendingAndPublishTransfer(remote1.getUuid(), pending, NetworkManager.getInstance().getThisServer());
 						sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.teleport_p1_to_p2", "player1", nick1, "player2", nick2)));
 					} else {
 						// both remote
@@ -331,8 +329,7 @@ public class CommandAdminTeleport {
 								destWorld.getName(), loc.getX(), loc.getY(), loc.getZ(),
 								loc.getYaw(), loc.getPitch(),
 								"&e&lCoordinates", "&7You have been teleported to the input coordinates");
-						NetworkManager.getInstance().setPendingTeleport(remoteTarget.getUuid(), pending);
-						NetworkManager.getInstance().publishTransfer(remoteTarget.getUuid(), NetworkManager.getInstance().getThisServer());
+						NetworkManager.getInstance().setPendingAndPublishTransfer(remoteTarget.getUuid(), pending, NetworkManager.getInstance().getThisServer());
 						sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.teleporting_player_coords", "player", remoteTarget.getNickname())));
 					} else {
 						sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));

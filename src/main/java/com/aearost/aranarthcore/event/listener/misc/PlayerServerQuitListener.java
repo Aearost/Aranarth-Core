@@ -65,13 +65,17 @@ public class PlayerServerQuitListener implements Listener {
 
         boolean isCrossServerTransfer = NetworkManager.isActive()
                 && NetworkManager.getInstance().consumeTransferring(player.getUniqueId());
+        // The player landed on the wrong server and left before being routed: this server's copy of
+        // their inventory and location is not theirs, so nothing about it may be saved
+        boolean isNonAuthoritative = NetworkManager.isActive()
+                && NetworkManager.getInstance().isNonAuthoritative(player.getUniqueId());
 
         // Persist the player's logout location so they are returned here on next login.
         // Skipped for cross-server transfers; the receiving server will track their location.
         // Saved synchronously (not async) to prevent a race with DatabaseManager.shutdown():
         // an async task queued here may never run if the connection pool closes first, leaving
         // a stale location in MySQL that causes the player to spawn at the wrong position.
-        if (!isCrossServerTransfer && DatabaseManager.isActive()) {
+        if (!isCrossServerTransfer && !isNonAuthoritative && DatabaseManager.isActive()) {
             final String server = NetworkManager.isActive() ? NetworkManager.getInstance().getThisServer() : "survival";
             final Location loc = player.getLocation();
             final String world = loc.getWorld().getName();
@@ -90,7 +94,7 @@ public class PlayerServerQuitListener implements Listener {
             AranarthPlayer apForQuit = AranarthUtils.getPlayer(player.getUniqueId());
             boolean isVanished = apForQuit != null && apForQuit.isVanished();
             String crossServerQuitMsg = null;
-            if (!isCrossServerTransfer && !isVanished) {
+            if (!isCrossServerTransfer && !isNonAuthoritative && !isVanished) {
                 DateUtils dateUtils = new DateUtils();
                 String nameToDisplay = "&7" + AranarthUtils.getNickname(player);
                 if (dateUtils.isValentinesDay()) {
@@ -134,7 +138,8 @@ public class PlayerServerQuitListener implements Listener {
         PermissionUtils.clearPlayerAttachments(player.getUniqueId());
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
         aranarthPlayer.setAfkLocation(null);
-        if (!aranarthPlayer.getCombatLogTime().isEmpty()) {
+        // The inventory was already handed to the other server, so dying here would drop a second copy of it
+        if (!isCrossServerTransfer && !isNonAuthoritative && !aranarthPlayer.getCombatLogTime().isEmpty()) {
             player.setHealth(0);
         }
 
@@ -142,7 +147,7 @@ public class PlayerServerQuitListener implements Listener {
         // Snapshot survival inventory so MySQL is current at logout time.
         // The same-server login path uses this as a fallback if player.dat is stale
         // (e.g. the server crashed on the previous session without saving player.dat).
-        if (!isCrossServerTransfer) {
+        if (!isCrossServerTransfer && !isNonAuthoritative) {
             String quitWorld = player.getWorld() != null ? player.getWorld().getName() : "";
             if (AranarthUtils.isSurvivalWorld(quitWorld)) {
                 try {
@@ -176,7 +181,7 @@ public class PlayerServerQuitListener implements Listener {
         // Saved synchronously (matching saveJobDataSync above) to prevent the same shutdown race:
         // if this were async, the connection pool could close before the task executes, leaving
         // a stale inventory snapshot that causes inventory rollbacks on next login.
-        if (!isCrossServerTransfer && DatabaseManager.isActive()) {
+        if (!isCrossServerTransfer && !isNonAuthoritative && DatabaseManager.isActive()) {
             final String rawRow = PersistenceUtils.buildPlayerRowForTransfer(player.getUniqueId());
             if (rawRow != null) {
                 DatabaseManager.getInstance().saveAranarthPlayerRaw(player.getUniqueId(), player.getName(), rawRow);
@@ -204,7 +209,8 @@ public class PlayerServerQuitListener implements Listener {
             }
         }
 
-        if (isCrossServerTransfer) {
+        // A wrong-server landing never announced a join, so its quit is not announced either
+        if (isCrossServerTransfer || isNonAuthoritative) {
             e.setQuitMessage(null);
             // Suppress DiscordSRV leave announcement for server-switch departures
             if (NetworkManager.isActive()) {
@@ -228,6 +234,10 @@ public class PlayerServerQuitListener implements Listener {
             }
 
             playQuitSound();
+        }
+
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().clearTransferState(player.getUniqueId());
         }
 
         AranarthUtils.updateTab();

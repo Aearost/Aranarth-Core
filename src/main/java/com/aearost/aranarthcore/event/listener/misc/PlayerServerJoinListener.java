@@ -26,6 +26,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -44,6 +45,30 @@ public class PlayerServerJoinListener implements Listener {
 
     public PlayerServerJoinListener(AranarthCore plugin) {
         Bukkit.getPluginManager().registerEvents(this, plugin);
+    }
+
+    /**
+     * Only original players may be on the SMP.
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPreLogin(final AsyncPlayerPreLoginEvent e) {
+        if (e.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
+            return;
+        }
+        if (!AranarthCore.isSmpServer() || !NetworkManager.isActive()) {
+            return;
+        }
+        UUID uuid = e.getUniqueId();
+        if (AranarthUtils.isOriginalPlayer(uuid)) {
+            return;
+        }
+        if (NetworkManager.getInstance().getPendingTeleport(uuid) != null) {
+            return;
+        }
+        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] Refused SMP connection for " + e.getName()
+                + ": not an original player and no transfer is pending.");
+        e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST,
+                ChatUtils.translateToColor(Lang.get("access.smp_restricted")));
     }
 
     /**
@@ -400,6 +425,11 @@ public class PlayerServerJoinListener implements Listener {
             }
         }
 
+        // Paper has already loaded this server's copy of the inventory, which may not be the player's
+        if (NetworkManager.isActive() && isCrossServerTransfer) {
+            NetworkManager.getInstance().lockPlayer(player.getUniqueId());
+        }
+
         boolean finalIsNewPlayer = isNewPlayer;
         new BukkitRunnable() {
             @Override
@@ -415,6 +445,8 @@ public class PlayerServerJoinListener implements Listener {
                     PendingTeleport pending = NetworkManager.getInstance().getPendingTeleport(player.getUniqueId());
                     if (pending != null) {
                         hadPendingTp = true;
+                        // The arrival is planned, so the inventory applied below is theirs
+                        NetworkManager.getInstance().unlockPlayer(player.getUniqueId());
                         isLoginRouting = pending.isLoginRouting();
                         NetworkManager.getInstance().clearPendingTeleport(player.getUniqueId());
 
@@ -725,6 +757,10 @@ public class PlayerServerJoinListener implements Listener {
                         // unchanged, so every reconnect would hit SMP first and loop forever.
                         final String sourceServer = lastLoc.server;
                         final UUID uuidForAsync = player.getUniqueId();
+                        // Until this is resolved the inventory here is not theirs: keep them frozen
+                        // and make sure a quit, restart or periodic save never writes it back
+                        NetworkManager.getInstance().lockPlayer(uuidForAsync);
+                        NetworkManager.getInstance().markNonAuthoritative(uuidForAsync);
                         if (!AranarthCore.isSmpServer()) {
                             // --- Survival side: snapshot check ---
                             Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
@@ -754,6 +790,10 @@ public class PlayerServerJoinListener implements Listener {
                                 Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                                     if (!player.isOnline()) return;
                                     if (snapJson != null) {
+                                        // The player stays here, so this server now holds their inventory
+                                        // (the snapshot below, or the existing one if applying it fails)
+                                        NetworkManager.getInstance().clearNonAuthoritative(uuidForAsync);
+                                        NetworkManager.getInstance().unlockPlayer(uuidForAsync);
                                         // Apply the SMP snapshot so the player has their correct items
                                         try {
                                             JsonObject snap = JsonParser.parseString(snapJson).getAsJsonObject();
@@ -843,6 +883,8 @@ public class PlayerServerJoinListener implements Listener {
                                             // SMP is offline (crashed or not yet reachable). Keep the player
                                             // on Survival - their SMP items are safe in SMP's player.dat and
                                             // will be there when SMP comes back up.
+                                            NetworkManager.getInstance().clearNonAuthoritative(uuidForAsync);
+                                            NetworkManager.getInstance().unlockPlayer(uuidForAsync);
                                             reloadFallbackLandingData(uuidForAsync, true);
                                             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
                                                     + " - no SMP fallback snapshot found and " + sourceServer
@@ -944,6 +986,11 @@ public class PlayerServerJoinListener implements Listener {
                                 + " - same-server MySQL inventory restore skipped: snapshot is "
                                 + (apInv == null ? "null (no AranarthPlayer)" : "empty"));
                     }
+                }
+
+                // Anyone not waiting to be routed elsewhere now holds their own inventory
+                if (NetworkManager.isActive() && !NetworkManager.getInstance().isNonAuthoritative(player.getUniqueId())) {
+                    NetworkManager.getInstance().unlockPlayer(player.getUniqueId());
                 }
 
                 // Displays a welcome message after the join message

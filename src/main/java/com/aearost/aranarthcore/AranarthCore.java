@@ -41,7 +41,9 @@ import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.FireworkMeta;
@@ -51,6 +53,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -63,6 +66,7 @@ public class AranarthCore extends JavaPlugin {
     private RoleReactionListener roleReactionListener;
     private FireParticleListener fireParticleListener;
     private volatile boolean savedOnDisable = false;
+    private boolean configLoadFailed = false;
     private static volatile boolean shutdownHookMode = false;
 
     public static boolean isShutdownHookMode() {
@@ -333,10 +337,23 @@ public class AranarthCore extends JavaPlugin {
     /**
      * Reloads config.yml, adding any values from the bundled copy that are missing from the server's copy
      * so newly added settings appear in the file with their defaults. Existing values are left untouched.
+     * If the server's copy cannot be parsed, saving is blocked until it is fixed so it is never overwritten with defaults.
      */
     @Override
     public void reloadConfig() {
         super.reloadConfig();
+        File configFile = new File(getDataFolder(), "config.yml");
+        configLoadFailed = false;
+        if (configFile.exists()) {
+            try {
+                new YamlConfiguration().load(configFile);
+            } catch (IOException | InvalidConfigurationException e) {
+                configLoadFailed = true;
+                getLogger().severe("config.yml could not be parsed - it will NOT be saved until fixed, to avoid overwriting it with defaults: " + e.getMessage());
+                return;
+            }
+        }
+
         FileConfiguration config = getConfig();
         Configuration defaults = config.getDefaults();
         if (defaults == null) {
@@ -350,6 +367,18 @@ public class AranarthCore extends JavaPlugin {
                 return;
             }
         }
+    }
+
+    /**
+     * Saves config.yml, unless the server's copy failed to parse on the last load.
+     */
+    @Override
+    public void saveConfig() {
+        if (configLoadFailed) {
+            getLogger().severe("Skipped saving config.yml because it failed to parse on load - fix the file and restart");
+            return;
+        }
+        super.saveConfig();
     }
 
     /**
@@ -489,6 +518,10 @@ public class AranarthCore extends JavaPlugin {
                 // has a recent copy - limits inventory loss to at most 30 minutes on ungraceful shutdown.
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     try {
+                        // Their inventory and location here are not theirs until they are routed
+                        if (NetworkManager.isActive() && NetworkManager.getInstance().isNonAuthoritative(p.getUniqueId())) {
+                            continue;
+                        }
                         if (AranarthUtils.isSurvivalWorld(p.getWorld().getName())) {
                             AranarthPlayer ap = AranarthUtils.getPlayer(p.getUniqueId());
                             if (ap != null) {
@@ -1216,6 +1249,7 @@ public class AranarthCore extends JavaPlugin {
         new PlayerCommandSendEventListener(this);
         new PlayerServerJoinListener(this);
         new PlayerServerQuitListener(this);
+        new TransferLockListener(this);
         new ChatGameListener(this);
         new PlayerChatListener(this);
         new BroadcastRelayListener(this);
@@ -1772,7 +1806,9 @@ public class AranarthCore extends JavaPlugin {
                 // Both servers auto-restart around the same time, so SMP players can get bounced here
                 // seconds before this server also shuts down. SMP already saved their data and location,
                 // so writing ours would send them to Survival on next login and could overwrite SMP's data.
-                if (NetworkManager.isActive() && NetworkManager.getInstance().isRecentFallbackLanding(p.getUniqueId())) {
+                // The same applies to anyone still waiting to be routed to the server that holds their inventory
+                if (NetworkManager.isActive() && (NetworkManager.getInstance().isRecentFallbackLanding(p.getUniqueId())
+                        || NetworkManager.getInstance().isNonAuthoritative(p.getUniqueId()))) {
                     Bukkit.getLogger().info(LOG_PREFIX + "[Shutdown] Skipping player row and last location for "
                             + p.getName() + " - landed here as a fallback less than a minute ago");
                     p.saveData();

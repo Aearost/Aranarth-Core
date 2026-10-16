@@ -628,7 +628,8 @@
       "PowerShell($javap = \\(Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\",\"$env:USERPROFILE\\\\.jdks\" -Recurse -Filter javap.exe -ErrorAction SilentlyContinue | Select-Object -First 1\\).FullName; $jar = \"C:\\\\Users\\\\liamh\\\\.m2\\\\repository\\\\com\\\\gmail\\\\nossr50\\\\mcMMO\\\\mcMMO\\\\2.2.018\\\\mcMMO-2.2.018.jar\"; & $javap -p -cp $jar com.gmail.nossr50.util.skills.CombatUtils | Select-String \"Ranged|CombatXP|Archery\"; & $javap -p -cp $jar com.gmail.nossr50.skills.archery.ArcheryManager)",
       "PowerShell(Out-File *)",
       "PowerShell($mvn = Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1; & $mvn.FullName -q -o compile 2>&1 | Select-String -NotMatch \"^WARNING\")",
-      "PowerShell(Out-Null *)"
+      "PowerShell(Out-Null *)",
+      "Bash(awk 'NR>=410 && NR<=1010 && /return;/ {print NR\": \"$0}' src/main/java/com/aearost/aranarthcore/event/listener/misc/PlayerServerJoinListener.java)"
     ]
   }
 }
