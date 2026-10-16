@@ -1230,6 +1230,7 @@ public class AranarthCore extends JavaPlugin {
         new SpawnProtectionListener(this);
         new ShopProtectionListener(this);
         new PlotProtectionListener(this);
+        new CreativeItemListener(this);
         new PortalEventListener(this);
         new ArenaProtection(this);
         new FireProtectionListener(this);
