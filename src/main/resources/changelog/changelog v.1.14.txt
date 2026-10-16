@@ -59,6 +59,7 @@ Cross-server & Technical
 [~] Fixed /tphere not tab completing or finding players on another server
 [~] Fixed ender pearls landing after a world change teleporting players between Survival and Creative without swapping their inventory or game mode, and fixed failed teleports still swapping the player's inventory
 [~] Fixed several cross-server item duplication exploits by freezing players during server transfers and other individual fixes
+[~] Fixed GUI exploits by identifying plugin GUIs with an internal tag instead of their title, and hardened GUIs against forged items and drags
 
 Miscellaneous
 [~] Fixed WorldEdit commands not appearing in tab completion or autofilling block names #456

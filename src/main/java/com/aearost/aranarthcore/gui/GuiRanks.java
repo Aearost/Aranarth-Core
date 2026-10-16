@@ -7,7 +7,6 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.projectkorra.projectkorra.Element;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -39,7 +38,7 @@ public class GuiRanks {
 	}
 
 	private Inventory initializeGui(Player player) {
-		Inventory gui = Bukkit.getServer().createInventory(player, 45,
+		Inventory gui = GuiHolder.create(player, 45,
 				Lang.getFor(player, "gui.ranks.title"));
 
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());

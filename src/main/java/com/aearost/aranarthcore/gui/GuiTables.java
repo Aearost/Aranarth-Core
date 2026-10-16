@@ -1,7 +1,6 @@
 package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -26,7 +25,7 @@ public class GuiTables {
 	}
 	
 	private Inventory initializeGui(Player player) {
-		Inventory gui = Bukkit.getServer().createInventory(player, 9, Lang.getFor(player, "gui.tables.title"));
+		Inventory gui = GuiHolder.create(player, 9, Lang.getFor(player, "gui.tables.title"));
 
 		gui.setItem(0, createTableItem(player, new ItemStack(Material.CRAFTING_TABLE), "/craft, /workbench, /wb, /ct"));
 		gui.setItem(1, createTableItem(player, new ItemStack(Material.FLETCHING_TABLE), "/fletching"));

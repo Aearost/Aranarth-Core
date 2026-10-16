@@ -5,7 +5,6 @@ import com.aearost.aranarthcore.objects.Trade;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.TradeManager;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -34,7 +33,7 @@ public class GuiTrade {
         String otherNick = other != null ? other.getNickname() : "Unknown";
         String title = Lang.getFor(player, "gui.trade.title", "player", otherNick);
 
-        Inventory gui = Bukkit.createInventory(player, 54, title);
+        Inventory gui = GuiHolder.create(player, 54, title);
 
         // Full gray border row
         for (int i = 0; i < 9; i++) {

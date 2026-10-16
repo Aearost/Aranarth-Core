@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.BrewerInventory;
@@ -55,17 +56,38 @@ public class InventoryClickEventListener implements Listener {
         }
     }
 
+    /**
+     * Drags skip every click handler, so they could place items into slots that the GUI would never
+     * accept from a click.
+     */
+    @EventHandler
+    public void onInventoryDrag(InventoryDragEvent e) {
+        GuiHolder holder = GuiHolder.of(e.getView().getTopInventory());
+        if (holder == null || holder.isDragAllowed()) {
+            return;
+        }
+        int topSize = e.getView().getTopInventory().getSize();
+        for (int rawSlot : e.getRawSlots()) {
+            if (rawSlot < topSize) {
+                e.setCancelled(true);
+                return;
+            }
+        }
+    }
+
     @EventHandler
     public void onInventoryClick(InventoryClickEvent e) {
+        // Only inventories created by AranarthCore are GUIs, so a chest renamed in an anvil can never reach a handler
+        boolean isGui = GuiHolder.isGui(e.getView());
         // Chat snapshot GUIs are purely view-only
-        if (GuiChatSnapshot.isSnapshotGui(ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
+        if (isGui && GuiChatSnapshot.isSnapshotGui(ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
             e.setCancelled(true);
             return;
         }
         if (!(e.getWhoClicked() instanceof Player player)) {
             return;
         }
-        if (e.getView().getType() == InventoryType.CHEST) {
+        if (isGui && e.getView().getType() == InventoryType.CHEST) {
             if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.wrench.title"))) {
                 new GuiWrenchClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.teleport.title"))) {
@@ -204,7 +226,7 @@ public class InventoryClickEventListener implements Listener {
             } else if (TradeManager.isTradeGuiOpen(player)) {
                 new GuiTradeClick().execute(e);
             }
-        } else {
+        } else if (e.getView().getType() != InventoryType.CHEST) {
             if (e.getClickedInventory() != null) {
                 if (e.getView().getType() == InventoryType.ANVIL || e.getView().getType() == InventoryType.SMITHING) {
                     new AranarthiumArmourCraft().execute(e);

@@ -7,7 +7,6 @@ import com.aearost.aranarthcore.utils.Lang;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.gmail.nossr50.datatypes.database.PlayerStat;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -78,7 +77,7 @@ public class GuiMctop {
 	private Inventory initializeGui(Player player, @org.jetbrains.annotations.Nullable PrimarySkillType skill,
 									List<PlayerStat> leaderboard, Map<String, PlayerProfile> profiles) {
 		String skillDisplayName = skill == null ? "Overall" : skill.name().charAt(0) + skill.name().substring(1).toLowerCase();
-		Inventory gui = Bukkit.getServer().createInventory(player, 54, Lang.getFor(player, "gui.mctop.title", "skill", skillDisplayName));
+		Inventory gui = GuiHolder.create(player, 54, Lang.getFor(player, "gui.mctop.title", "skill", skillDisplayName));
 
 		ItemStack previous = new ItemStack(Material.RED_WOOL);
 		ItemStack barrier = new ItemStack(Material.BARRIER);

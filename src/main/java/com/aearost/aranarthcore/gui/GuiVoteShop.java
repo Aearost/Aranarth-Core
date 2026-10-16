@@ -40,7 +40,7 @@ public class GuiVoteShop {
         int[] randomKeyIndex = {1};
         int[] taskId = {-1};
         taskId[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(AranarthCore.getInstance(), () -> {
-            if (player.getOpenInventory() != null
+            if (player.getOpenInventory() != null && GuiHolder.isGui(player.getOpenInventory())
                     && ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle()).equals(com.aearost.aranarthcore.utils.ChatUtils.stripColorFormatting(Lang.getFor(player, "gui.voteshop.title")))) {
                 updateRandomKeyItem(randomKeyIndex[0]);
                 randomKeyIndex[0] = (randomKeyIndex[0] + 1) % 4;
@@ -74,7 +74,7 @@ public class GuiVoteShop {
     }
 
     private Inventory initializeGui(Player player) {
-        Inventory gui = Bukkit.getServer().createInventory(player, 54, Lang.getFor(player, "gui.voteshop.title"));
+        Inventory gui = GuiHolder.create(player, 54, Lang.getFor(player, "gui.voteshop.title"));
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
         ItemStack headerFooter = new ItemStack(Material.LIME_STAINED_GLASS_PANE);

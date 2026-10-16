@@ -1,6 +1,8 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.gui.GuiHolder;
+import com.aearost.aranarthcore.gui.GuiRankup;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.*;
@@ -27,24 +29,40 @@ public class GuiRankupClick {
 
         e.setCancelled(true);
 
+        // Only the buttons of the GUI itself count, never the player's own inventory
+        if (e.getClickedInventory() != e.getView().getTopInventory()) {
+            return;
+        }
+        GuiHolder holder = GuiHolder.of(e.getView().getTopInventory());
+        if (holder == null || !(holder.getData() instanceof GuiRankup.RankupOffer(int fromRank, String nextRankName))) {
+            return;
+        }
+
         int slot = e.getSlot();
         // Rankup
         if (slot == 14) {
             Player player = (Player) e.getWhoClicked();
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
+            // The rank must not have changed since the GUI was opened, otherwise a stale GUI could rank up twice
+            int currentRank = aranarthPlayer.getRank();
+            List<Double> rankupCosts = AranarthCore.getInstance().getConfig().getDoubleList("economy.rankup-costs");
+            if (currentRank != fromRank || currentRank >= 8 || currentRank < 0 || currentRank >= rankupCosts.size()) {
+                player.closeInventory();
+                return;
+            }
+            // Index 0 of the config is the cost to go from rank 0 to rank 1
+            double price = rankupCosts.get(currentRank);
+            if (!Double.isFinite(price) || price < 0) {
+                player.closeInventory();
+                return;
+            }
+
             double balance = aranarthPlayer.getBalance();
-            String clickedItem = e.getClickedInventory().getItem(slot).getItemMeta().getDisplayName();
-            String[] parts = clickedItem.split(" ");
-
-            String priceWithoutDollarSign = ChatUtils.stripColorFormatting(parts[parts.length - 1]).substring(1);
-            String priceWithoutCommas = priceWithoutDollarSign.replaceAll(",", "");
-            double price = Double.parseDouble(priceWithoutCommas);
-
             if (balance >= price) {
                 if (hasMinimumMcmmoTotal(player)) {
                     if (hasMinimumMcmmoPerSkill(player)) {
-                        String rankDisplay = clickedItem.split(" ")[2];
+                        String rankDisplay = ChatUtils.translateToColor(nextRankName);
                         String aOrAn = "a";
 
                         NumberFormat formatter = NumberFormat.getCurrencyInstance();

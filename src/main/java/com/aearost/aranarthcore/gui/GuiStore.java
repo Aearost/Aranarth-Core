@@ -4,7 +4,6 @@ import com.aearost.aranarthcore.items.InvisibleItemFrame;
 import com.aearost.aranarthcore.objects.StorePage;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -58,7 +57,7 @@ public class GuiStore {
     }
 
     private Inventory initializeGuiMain(Player player) {
-        Inventory gui = Bukkit.getServer().createInventory(player, 27, Lang.getFor(player, "gui.store.title_main"));
+        Inventory gui = GuiHolder.create(player, 27, Lang.getFor(player, "gui.store.title_main"));
 
         // Set empty spaces
         gui.setItem(0, blank);
@@ -129,7 +128,7 @@ public class GuiStore {
     }
 
     private Inventory initializeGuiSaint(Player player) {
-        Inventory gui = Bukkit.getServer().createInventory(player, 36, Lang.getFor(player, "gui.store.title_saint"));
+        Inventory gui = GuiHolder.create(player, 36, Lang.getFor(player, "gui.store.title_saint"));
 
         // Set empty spaces
         gui.setItem(0, blank);
@@ -226,7 +225,7 @@ public class GuiStore {
     }
 
     private Inventory initializeGuiPerks(Player player) {
-        Inventory gui = Bukkit.getServer().createInventory(player, 45, Lang.getFor(player, "gui.store.title_perks"));
+        Inventory gui = GuiHolder.create(player, 45, Lang.getFor(player, "gui.store.title_perks"));
 
         // Set empty spaces
         gui.setItem(0, blank);
@@ -397,7 +396,7 @@ public class GuiStore {
     }
 
     private Inventory initializeGuiBoosts(Player player) {
-        Inventory gui = Bukkit.getServer().createInventory(player, 27, Lang.getFor(player, "gui.store.title_boosts"));
+        Inventory gui = GuiHolder.create(player, 27, Lang.getFor(player, "gui.store.title_boosts"));
 
         // Set empty spaces
         gui.setItem(0, blank);
@@ -468,7 +467,7 @@ public class GuiStore {
     }
 
     private Inventory initializeGuiCrates(Player player) {
-        Inventory gui = Bukkit.getServer().createInventory(player, 27, Lang.getFor(player, "gui.store.title_crates"));
+        Inventory gui = GuiHolder.create(player, 27, Lang.getFor(player, "gui.store.title_crates"));
 
         // Set empty spaces
         gui.setItem(0, blank);

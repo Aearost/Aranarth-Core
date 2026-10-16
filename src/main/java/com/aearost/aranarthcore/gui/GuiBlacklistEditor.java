@@ -5,7 +5,6 @@ import com.aearost.aranarthcore.objects.BlacklistPreset;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -71,7 +70,7 @@ public class GuiBlacklistEditor {
         String presetName = presetIndex < presets.size() ? presets.get(presetIndex).getName() : "";
         String defaultName = Lang.getFor(player, "gui.blacklisteditor.default_name", "n", String.valueOf(presetIndex + 1));
         String title = Lang.getFor(player, TITLE_PREFIX_KEY) + ChatUtils.translateToColor(presetName.isEmpty() ? defaultName : presetName);
-        Inventory inv = Bukkit.createInventory(player, 54, title);
+        Inventory inv = GuiHolder.create(player, 54, title);
 
         // Gray pane filler
         ItemStack pane = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);

@@ -25,6 +25,10 @@ public class GuiBrewShopClick {
 
     public void execute(InventoryClickEvent e) {
         e.setCancelled(true);
+        // Only the GUI's own buttons count, never the player's inventory
+        if (e.getClickedInventory() != e.getView().getTopInventory()) {
+            return;
+        }
         if (!(e.getWhoClicked() instanceof Player player)) return;
         ItemStack clicked = e.getCurrentItem();
         if (clicked == null || clicked.getType() == Material.AIR) return;

@@ -1,6 +1,5 @@
 package com.aearost.aranarthcore.gui;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
@@ -28,7 +27,12 @@ public class GuiFletchingTable {
 	}
 	
 	private Inventory initializeGui(Player player, ItemStack[] inventory) {
-        Inventory gui = Bukkit.getServer().createInventory(player, InventoryType.WORKBENCH, "Fletching Table");
+        Inventory gui = GuiHolder.create(player, InventoryType.WORKBENCH, "Fletching Table");
+		// Behaves like the vanilla block, so items can be dragged across its slots
+		GuiHolder holder = GuiHolder.of(gui);
+		if (holder != null) {
+			holder.allowDrag();
+		}
 		ItemStack blank = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
 		gui.setItem(1, blank);
 		gui.setItem(3, blank);

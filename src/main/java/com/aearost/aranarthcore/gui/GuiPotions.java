@@ -3,7 +3,6 @@ package com.aearost.aranarthcore.gui;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -42,7 +41,7 @@ public class GuiPotions {
 	}
 
 	public Inventory initializeAddGui(Player player) {
-		return Bukkit.getServer().createInventory(player, 54, Lang.getFor(player, "gui.potions.title_add",
+		return GuiHolder.create(player, 54, Lang.getFor(player, "gui.potions.title_add",
 				"count", String.valueOf(AranarthUtils.getPlayerStoredPotionNum(player)),
 				"max", String.valueOf(AranarthUtils.getMaxPotionNum(player))));
 	}
@@ -58,7 +57,7 @@ public class GuiPotions {
 		if (size % 9 != 0) {
 			size = ((int) (double) (size / 9) + 1) * 9;
 		}
-		Inventory inventory = Bukkit.getServer().createInventory(player, size, Lang.getFor(player, "gui.potions.title_remove",
+		Inventory inventory = GuiHolder.create(player, size, Lang.getFor(player, "gui.potions.title_remove",
 				"count", String.valueOf(AranarthUtils.getPlayerStoredPotionNum(player)),
 				"max", String.valueOf(AranarthUtils.getMaxPotionNum(player))));
 
@@ -91,7 +90,7 @@ public class GuiPotions {
 		if (size % 9 != 0) {
 			size = ((int) (double) (size / 9) + 1) * 9;
 		}
-		Inventory inventory = Bukkit.getServer().createInventory(player, size, Lang.getFor(player, "gui.potions.title_view",
+		Inventory inventory = GuiHolder.create(player, size, Lang.getFor(player, "gui.potions.title_view",
 				"count", String.valueOf(AranarthUtils.getPlayerStoredPotionNum(player)),
 				"max", String.valueOf(AranarthUtils.getMaxPotionNum(player))));
 

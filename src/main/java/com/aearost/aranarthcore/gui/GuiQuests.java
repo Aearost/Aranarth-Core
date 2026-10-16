@@ -61,7 +61,7 @@ public class GuiQuests {
     }
 
     private Inventory initializeGui() {
-        Inventory inv = Bukkit.createInventory(player, 45, Lang.getFor(player, TITLE_KEY));
+        Inventory inv = GuiHolder.create(player, 45, Lang.getFor(player, TITLE_KEY));
 
         UUID uuid = player.getUniqueId();
 

@@ -7,7 +7,6 @@ import com.aearost.aranarthcore.utils.DefenderUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.OutpostUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -56,7 +55,7 @@ public class GuiDefenders {
         int total = DefenderUtils.getTotalDefenderCount(dominion.getId());
         int limit = DefenderUtils.getDefenderLimit(dominion.getDominionLevel());
         String title = Lang.getFor(player, TITLE_PREFIX_KEY, "total", String.valueOf(total), "limit", String.valueOf(limit));
-        Inventory gui = Bukkit.createInventory(player, 45, title);
+        Inventory gui = GuiHolder.create(player, 45, title);
 
         // Top and bottom border rows
         ItemStack border = buildBorder();

@@ -12,7 +12,6 @@ import com.aearost.aranarthcore.objects.CrateType;
 import com.aearost.aranarthcore.utils.BrewRecipeUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -63,7 +62,7 @@ public class GuiCrate {
 	 * @return The initialized inventory of the Vote Crate.
 	 */
 	private Inventory initializeVoteCrate(Player player) {
-		Inventory gui = Bukkit.getServer().createInventory(player, 27, Lang.getFor(player, "gui.crate.title_vote"));
+		Inventory gui = GuiHolder.create(player, 27, Lang.getFor(player, "gui.crate.title_vote"));
 
 		ItemStack money250 = new ItemStack(Material.GOLD_INGOT);
 		ItemMeta money250Meta = money250.getItemMeta();
@@ -192,7 +191,7 @@ public class GuiCrate {
 	 * @return The initialized inventory of the Rare Crate.
 	 */
 	private Inventory initializeRareCrate(Player player) {
-		Inventory gui = Bukkit.getServer().createInventory(player, 27, Lang.getFor(player, "gui.crate.title_rare"));
+		Inventory gui = GuiHolder.create(player, 27, Lang.getFor(player, "gui.crate.title_rare"));
 
 		ItemStack money1000 = new ItemStack(Material.GOLD_INGOT);
 		ItemMeta money1000Meta = money1000.getItemMeta();
@@ -303,7 +302,7 @@ public class GuiCrate {
 	 * @return The initialized inventory of the Epic Crate.
 	 */
 	private Inventory initializeEpicCrate(Player player) {
-		Inventory gui = Bukkit.getServer().createInventory(player, 27, Lang.getFor(player, "gui.crate.title_epic"));
+		Inventory gui = GuiHolder.create(player, 27, Lang.getFor(player, "gui.crate.title_epic"));
 
 		ItemStack money5000 = new ItemStack(Material.GOLD_INGOT);
 		ItemMeta money5000Meta = money5000.getItemMeta();
@@ -389,7 +388,7 @@ public class GuiCrate {
 	 * @return The initialized inventory of the Godly Crate.
 	 */
 	private Inventory initializeGodlyCrate(Player player) {
-		Inventory gui = Bukkit.getServer().createInventory(player, 27, Lang.getFor(player, "gui.crate.title_godly"));
+		Inventory gui = GuiHolder.create(player, 27, Lang.getFor(player, "gui.crate.title_godly"));
 
 		ItemStack money25000 = new ItemStack(Material.GOLD_INGOT);
 		ItemMeta money25000Meta = money25000.getItemMeta();

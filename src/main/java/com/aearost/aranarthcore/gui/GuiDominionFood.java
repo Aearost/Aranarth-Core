@@ -5,7 +5,6 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionLevelUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -132,7 +131,9 @@ public class GuiDominionFood {
 
 		int inventorySize = multiPage ? 54 : DominionUtils.getFoodArraySize(dominion);
 		int totalPower = DominionUtils.getTotalFoodPower(dominion);
-		Inventory gui = Bukkit.getServer().createInventory(player, inventorySize, buildFoodTitle(player, dominion, totalPower));
+		Inventory gui = GuiHolder.create(player, inventorySize, buildFoodTitle(player, dominion, totalPower));
+		// The contents are only ever written back to the Dominion that was opened
+		GuiHolder.of(gui).setData(dominion.getId());
 
 		ItemStack[] food = dominion.getFood();
 		int foodOffset = pageNum * FOOD_SLOTS_PER_PAGE;

@@ -4,7 +4,6 @@ import com.aearost.aranarthcore.items.aranarthium.ingots.AranarthiumIngot;
 import com.aearost.aranarthcore.items.essence.EssencePlentiful;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -45,7 +44,7 @@ public class GuiAranarth {
     }
 
     private Inventory initializeGui() {
-        Inventory inv = Bukkit.createInventory(player, 45, Lang.getFor(player, TITLE_KEY));
+        Inventory inv = GuiHolder.create(player, 45, Lang.getFor(player, TITLE_KEY));
 
         ItemStack grayPane = buildPane(Material.GRAY_STAINED_GLASS_PANE);
 

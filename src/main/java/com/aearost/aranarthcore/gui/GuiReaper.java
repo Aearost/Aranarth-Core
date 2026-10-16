@@ -2,7 +2,6 @@ package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -27,7 +26,13 @@ public class GuiReaper {
     }
 
     private Inventory initializeGui(Player player, ItemStack[] drops, double cost, long deathTime, Location deathLocation) {
-        Inventory inv = Bukkit.createInventory(null, 54, Lang.getFor(player, TITLE_KEY));
+        Inventory inv = GuiHolder.create(player, 54, Lang.getFor(player, TITLE_KEY));
+        // The click handler only ever uses this server-side copy, never what the GUI displays
+        ItemStack[] dropsCopy = new ItemStack[drops.length];
+        for (int i = 0; i < drops.length; i++) {
+            dropsCopy[i] = drops[i] == null ? null : drops[i].clone();
+        }
+        GuiHolder.of(inv).setData(new ReaperState(dropsCopy, cost, deathLocation.clone()));
 
         // Display the drop items
         int displaySlots = Math.min(drops.length, 45);
@@ -94,5 +99,11 @@ public class GuiReaper {
 
     public void openGui(Player player) {
         player.openInventory(inventory);
+    }
+
+    /**
+     * The Reaper Inventory as it was loaded when the GUI was opened.
+     */
+    public record ReaperState(ItemStack[] drops, double cost, Location deathLocation) {
     }
 }

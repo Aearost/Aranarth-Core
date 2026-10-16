@@ -5,7 +5,6 @@ import com.aearost.aranarthcore.objects.HeadEntry;
 import com.aearost.aranarthcore.utils.HeadsDatabaseManager;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.MobHeadUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -38,7 +37,7 @@ public class GuiHeadExchange {
     }
 
     public void openGui() {
-        Inventory gui = Bukkit.createInventory(player, 27, Lang.getFor(player, TITLE_KEY));
+        Inventory gui = GuiHolder.create(player, 27, Lang.getFor(player, TITLE_KEY));
 
         ItemStack glass = makeGlass();
         for (int i = 0; i < 27; i++) {

@@ -78,7 +78,7 @@ public class GuiInvsee {
      */
     public static void openRemote(Player viewer, UUID targetUuid, String targetName, ItemStack[] guiItems) {
         String title = Lang.getFor(viewer, "gui.invsee.title", "name", targetName);
-        Inventory gui = Bukkit.createInventory(null, 45, title);
+        Inventory gui = GuiHolder.create(null, 45, title);
 
         ItemStack filler = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
         ItemMeta meta = filler.getItemMeta();
@@ -152,7 +152,7 @@ public class GuiInvsee {
 
     private static Inventory buildGui(Player viewer, Player target) {
         String title = Lang.getFor(viewer, "gui.invsee.title", "name", target.getName());
-        Inventory gui = Bukkit.createInventory(null, 45, title);
+        Inventory gui = GuiHolder.create(null, 45, title);
 
         // Row 0 (armor and off-hand)
         ItemStack filler = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);

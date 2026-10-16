@@ -5,7 +5,6 @@ import com.aearost.aranarthcore.objects.Outpost;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.OutpostUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -50,7 +49,7 @@ public class GuiDominionFlagSelect {
 
         List<Outpost> outposts = OutpostUtils.getDominionOutposts(dominion.getId());
 
-        Inventory gui = Bukkit.createInventory(player, 27, Lang.getFor(player, titleKey));
+        Inventory gui = GuiHolder.create(player, 27, Lang.getFor(player, titleKey));
         populate(gui, dominion, outposts, titleKey);
         gui.setItem(BACK_SLOT, GuiDominionPermissions.buildBackButton());
 

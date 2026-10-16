@@ -14,6 +14,10 @@ public class GuiAranarthClick {
             return;
         }
         e.setCancelled(true);
+        // Only the GUI's own buttons count, never the player's inventory
+        if (e.getClickedInventory() != e.getView().getTopInventory()) {
+            return;
+        }
 
         Player player = (Player) e.getWhoClicked();
         int slot = e.getSlot();

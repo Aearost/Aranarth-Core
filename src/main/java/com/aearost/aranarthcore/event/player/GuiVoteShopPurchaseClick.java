@@ -68,6 +68,12 @@ public class GuiVoteShopPurchaseClick {
                 else if (e.getSlot() == 14) {
                     String pointsAsString = clicked.getItemMeta().getLore().get(0).split(" ")[0];
                     int requiredPoints = Integer.parseInt(ChatUtils.stripColorFormatting(pointsAsString));
+                    // The points may have been spent since the shop was opened
+                    if (requiredPoints <= 0 || AranarthUtils.getAvailableVotePoints(player.getUniqueId()) < requiredPoints) {
+                        player.closeInventory();
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_enough_vote_points")));
+                        return;
+                    }
                     aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() + requiredPoints);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 

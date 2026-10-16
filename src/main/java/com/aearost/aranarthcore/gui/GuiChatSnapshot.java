@@ -4,7 +4,6 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.InteractiveChatManager;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.InteractiveChatManager.Snapshot;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -61,7 +60,7 @@ public class GuiChatSnapshot {
 
     private static Inventory buildItemGui(Snapshot snap) {
         String title = snap.getOwnerDisplayName() + TITLE_SUFFIX_ITEM;
-        Inventory gui = Bukkit.createInventory(null, 27, title);
+        Inventory gui = GuiHolder.create(null, 27, title);
 
         ItemStack filler = makeFiller();
         for (int i = 0; i < 27; i++) {
@@ -80,7 +79,7 @@ public class GuiChatSnapshot {
      */
     private static Inventory buildInvGui(Snapshot snap) {
         String title = snap.getOwnerDisplayName() + TITLE_SUFFIX_INV;
-        Inventory gui = Bukkit.createInventory(null, 45, title);
+        Inventory gui = GuiHolder.create(null, 45, title);
 
         ItemStack filler = makeFiller();
         gui.setItem(0, filler.clone());
@@ -113,7 +112,7 @@ public class GuiChatSnapshot {
      */
     private static Inventory buildEcGui(Snapshot snap) {
         String title = snap.getOwnerDisplayName() + TITLE_SUFFIX_EC;
-        Inventory gui = Bukkit.createInventory(null, 27, title);
+        Inventory gui = GuiHolder.create(null, 27, title);
 
         ItemStack[] items = snap.getItems();
         for (int i = 0; i < 27; i++) {

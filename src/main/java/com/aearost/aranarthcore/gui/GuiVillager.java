@@ -1,7 +1,6 @@
 package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
@@ -27,7 +26,7 @@ public class GuiVillager {
 	}
 	
 	private Inventory initializeGui(Player player, Villager villager) {
-		Inventory gui = Bukkit.getServer().createInventory(player, 9, Lang.getFor(player, "gui.villager.title"));
+		Inventory gui = GuiHolder.create(player, 9, Lang.getFor(player, "gui.villager.title"));
 		Inventory villagerInventory = villager.getInventory();
 		
 		ItemStack barrier = new ItemStack(Material.BARRIER);

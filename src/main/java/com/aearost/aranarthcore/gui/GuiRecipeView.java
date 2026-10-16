@@ -3,7 +3,6 @@ package com.aearost.aranarthcore.gui;
 import com.aearost.aranarthcore.objects.RecipeGuideEntry;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -39,7 +38,7 @@ public class GuiRecipeView {
     }
 
     private Inventory build() {
-        Inventory inv = Bukkit.createInventory(player, 54, Lang.getFor(player, TITLE_KEY));
+        Inventory inv = GuiHolder.create(player, 54, Lang.getFor(player, TITLE_KEY));
 
         ItemStack glass = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta glassMeta = glass.getItemMeta();

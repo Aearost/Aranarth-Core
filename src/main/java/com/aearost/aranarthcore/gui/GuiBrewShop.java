@@ -6,7 +6,6 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.BrewRecipeUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -35,7 +34,7 @@ public class GuiBrewShop {
     }
 
     private Inventory build() {
-        Inventory inv = Bukkit.createInventory(player, 54, Lang.getFor(player, TITLE_KEY));
+        Inventory inv = GuiHolder.create(player, 54, Lang.getFor(player, TITLE_KEY));
 
         List<BrewRecipe> locked = BrewRecipeUtils.getLockedCommonRecipes(player.getUniqueId());
         int start = page * PAGE_SIZE;

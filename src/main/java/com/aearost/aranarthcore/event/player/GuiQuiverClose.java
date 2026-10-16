@@ -20,26 +20,30 @@ public class GuiQuiverClose {
 			Player player = (Player) e.getPlayer();
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
-			List<ItemStack> arrows = aranarthPlayer.getArrows();
 			List<ItemStack> inventoryArrows = new LinkedList<>(Arrays.asList(inventory.getContents()));
 
-			if (Objects.isNull(arrows)) {
-				arrows = new ArrayList<>();
-			}
-
-			for (ItemStack inventoryArrow : inventoryArrows) {
-				if (inventoryArrow == null) {
+			// Only arrows can be stored, anything else goes back to the player
+			for (int i = 0; i < inventoryArrows.size(); i++) {
+				ItemStack item = inventoryArrows.get(i);
+				if (item == null || item.getType() == Material.BLACK_STAINED_GLASS_PANE || isArrow(item)) {
 					continue;
 				}
-
-				if (inventoryArrow.getType() == Material.BLACK_STAINED_GLASS_PANE) {
-					continue;
+				inventoryArrows.set(i, null);
+				if (item.getType() != Material.AIR) {
+					HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(item);
+					for (ItemStack drop : leftover.values()) {
+						player.getWorld().dropItemNaturally(player.getLocation(), drop);
+					}
 				}
-
-				arrows.add(inventoryArrow);
 			}
 			aranarthPlayer.setArrows(inventoryArrows);
 			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 		}
+	}
+
+	private boolean isArrow(ItemStack item) {
+		return item.getType() == Material.ARROW
+				|| item.getType() == Material.TIPPED_ARROW
+				|| item.getType() == Material.SPECTRAL_ARROW;
 	}
 }

@@ -21,6 +21,10 @@ public class GuiRanksClick {
 		}
 
 		e.setCancelled(true);
+		// Only the GUI's own buttons count, never the player's inventory
+		if (e.getClickedInventory() != e.getView().getTopInventory()) {
+		    return;
+		}
 
 		Player player = (Player) e.getWhoClicked();
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());

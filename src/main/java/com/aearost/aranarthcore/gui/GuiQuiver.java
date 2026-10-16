@@ -4,7 +4,6 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -79,7 +78,7 @@ public class GuiQuiver {
 			}
 
 			String guiName = Lang.getFor(player, "gui.quiver.title_select");
-			gui = Bukkit.getServer().createInventory(player, guiSize, guiName);
+			gui = GuiHolder.create(player, guiSize, guiName);
 
 			for (ItemStack arrow : initializedArrows) {
 				gui.addItem(arrow);
@@ -146,7 +145,7 @@ public class GuiQuiver {
 	private Inventory getPeasantQuiver(int saintRank) {
 		Inventory gui  = null;
 		if (saintRank == 0) {
-			gui = Bukkit.getServer().createInventory(player, 9, Lang.getFor(player, "gui.quiver.title"));
+			gui = GuiHolder.create(player, 9, Lang.getFor(player, "gui.quiver.title"));
 			gui.setItem(0, blank);
 			gui.setItem(1, blank);
 			gui.setItem(2, blank);
@@ -154,7 +153,7 @@ public class GuiQuiver {
 			gui.setItem(7, blank);
 			gui.setItem(8, blank);
 		} else {
-			gui = Bukkit.getServer().createInventory(player, 18, "Quiver");
+			gui = GuiHolder.create(player, 18, "Quiver");
 			gui.setItem(0, blank);
 			gui.setItem(1, blank);
 			gui.setItem(2, blank);
@@ -186,13 +185,13 @@ public class GuiQuiver {
 	private Inventory getEsquireQuiver(int saintRank) {
 		Inventory gui  = null;
 		if (saintRank == 0) {
-			gui = Bukkit.getServer().createInventory(player, 9, "Quiver");
+			gui = GuiHolder.create(player, 9, "Quiver");
 			gui.setItem(0, blank);
 			gui.setItem(1, blank);
 			gui.setItem(7, blank);
 			gui.setItem(8, blank);
 		} else {
-			gui = Bukkit.getServer().createInventory(player, 18, "Quiver");
+			gui = GuiHolder.create(player, 18, "Quiver");
 			gui.setItem(0, blank);
 			gui.setItem(1, blank);
 			gui.setItem(7, blank);
@@ -222,9 +221,9 @@ public class GuiQuiver {
 	private Inventory getKnightQuiver(int saintRank) {
 		Inventory gui  = null;
 		if (saintRank == 0) {
-			gui = Bukkit.getServer().createInventory(player, 9, "Quiver");
+			gui = GuiHolder.create(player, 9, "Quiver");
 		} else {
-			gui = Bukkit.getServer().createInventory(player, 18, "Quiver");
+			gui = GuiHolder.create(player, 18, "Quiver");
 			if (saintRank == 1) {
 				gui.setItem(9, blank);
 				gui.setItem(10, blank);
@@ -249,7 +248,7 @@ public class GuiQuiver {
 	private Inventory getBaronQuiver(int saintRank) {
 		Inventory gui  = null;
 		if (saintRank == 0) {
-			gui = Bukkit.getServer().createInventory(player, 18, "Quiver");
+			gui = GuiHolder.create(player, 18, "Quiver");
 			gui.setItem(0, blank);
 			gui.setItem(1, blank);
 			gui.setItem(7, blank);
@@ -257,7 +256,7 @@ public class GuiQuiver {
 			gui.setItem(9, blank);
 			gui.setItem(17, blank);
 		} else {
-			gui = Bukkit.getServer().createInventory(player, 27, "Quiver");
+			gui = GuiHolder.create(player, 27, "Quiver");
 			gui.setItem(0, blank);
 			gui.setItem(1, blank);
 			gui.setItem(7, blank);
@@ -289,9 +288,9 @@ public class GuiQuiver {
 	private Inventory getCountQuiver(int saintRank) {
 		Inventory gui  = null;
 		if (saintRank == 0) {
-			gui = Bukkit.getServer().createInventory(player, 18, "Quiver");
+			gui = GuiHolder.create(player, 18, "Quiver");
 		} else {
-			gui = Bukkit.getServer().createInventory(player, 27, "Quiver");
+			gui = GuiHolder.create(player, 27, "Quiver");
 			if (saintRank == 1) {
 				gui.setItem(18, blank);
 				gui.setItem(19, blank);
@@ -316,11 +315,11 @@ public class GuiQuiver {
 	private Inventory getDukeQuiver(int saintRank) {
 		Inventory gui  = null;
 		if (saintRank == 0) {
-			gui = Bukkit.getServer().createInventory(player, 27, "Quiver");
+			gui = GuiHolder.create(player, 27, "Quiver");
 			gui.setItem(0, blank);
 			gui.setItem(8, blank);
 		} else {
-			gui = Bukkit.getServer().createInventory(player, 36, "Quiver");
+			gui = GuiHolder.create(player, 36, "Quiver");
 			gui.setItem(0, blank);
 			gui.setItem(8, blank);
 
@@ -348,7 +347,7 @@ public class GuiQuiver {
 	private Inventory getPrinceQuiver(int saintRank) {
 		Inventory gui  = null;
 		if (saintRank == 0) {
-			gui = Bukkit.getServer().createInventory(player, 36, "Quiver");
+			gui = GuiHolder.create(player, 36, "Quiver");
 			gui.setItem(0, blank);
 			gui.setItem(1, blank);
 			gui.setItem(2, blank);
@@ -356,7 +355,7 @@ public class GuiQuiver {
 			gui.setItem(7, blank);
 			gui.setItem(8, blank);
 		} else {
-			gui = Bukkit.getServer().createInventory(player, 45, "Quiver");
+			gui = GuiHolder.create(player, 45, "Quiver");
 			gui.setItem(0, blank);
 			gui.setItem(1, blank);
 			gui.setItem(2, blank);
@@ -388,9 +387,9 @@ public class GuiQuiver {
 	private Inventory getKingQuiver(int saintRank) {
 		Inventory gui  = null;
 		if (saintRank == 0) {
-			gui = Bukkit.getServer().createInventory(player, 36, "Quiver");
+			gui = GuiHolder.create(player, 36, "Quiver");
 		} else {
-			gui = Bukkit.getServer().createInventory(player, 45, "Quiver");
+			gui = GuiHolder.create(player, 45, "Quiver");
 			if (saintRank == 1) {
 				gui.setItem(36, blank);
 				gui.setItem(37, blank);
@@ -415,9 +414,9 @@ public class GuiQuiver {
 	private Inventory getEmperorQuiver(int saintRank) {
 		Inventory gui  = null;
 		if (saintRank == 0) {
-			gui = Bukkit.getServer().createInventory(player, 45, "Quiver");
+			gui = GuiHolder.create(player, 45, "Quiver");
 		} else {
-			gui = Bukkit.getServer().createInventory(player, 54, "Quiver");
+			gui = GuiHolder.create(player, 54, "Quiver");
 			if (saintRank == 1) {
 				gui.setItem(45, blank);
 				gui.setItem(46, blank);

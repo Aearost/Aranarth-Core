@@ -4,7 +4,6 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -42,7 +41,7 @@ public class GuiHomes {
 			guiSize = ((int) (double) (guiSize / 9) + 1) * 9;
 		}
 
-		Inventory gui = Bukkit.getServer().createInventory(player, guiSize, guiName);
+		Inventory gui = GuiHolder.create(player, guiSize, guiName);
 
 		int slot = 0;
 

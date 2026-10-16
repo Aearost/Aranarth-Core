@@ -2,7 +2,6 @@ package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -44,7 +43,7 @@ public class GuiWrench {
     public GuiWrench(Player player, Block block) {
         this.player = player;
         this.block = block;
-        this.gui = Bukkit.createInventory(player, 27, Lang.getFor(player, TITLE_KEY));
+        this.gui = GuiHolder.create(player, 27, Lang.getFor(player, TITLE_KEY));
         populate();
     }
 
@@ -63,7 +62,8 @@ public class GuiWrench {
         if (block == null) {
             return;
         }
-        if (!ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle()).equals(Lang.getFor(player, TITLE_KEY))) {
+        if (!GuiHolder.isGui(player.getOpenInventory())
+                || !ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle()).equals(Lang.getFor(player, TITLE_KEY))) {
             return;
         }
         GuiWrench rebuilt = new GuiWrench(player, block);

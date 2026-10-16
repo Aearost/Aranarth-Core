@@ -224,6 +224,10 @@ public class PlayerChatListener implements Listener {
 
                         final int count = enteredNumber;
                         final Biome capturedBiome = dominion.getBiomeResourcesBeingClaimed();
+                        // Fallback in case the chunk is unclaimed
+                        if (!DominionUtils.getResourceClaimTypes(dominion).contains(capturedBiome)) {
+                            throw new NumberFormatException();
+                        }
 
                         // Compute the average yield
                         List<Double> yields = dominion.getClaimFoodYields();

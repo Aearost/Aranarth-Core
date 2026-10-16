@@ -1,7 +1,7 @@
 package com.aearost.aranarthcore.gui;
 
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -31,8 +31,10 @@ public class GuiRankup {
 	}
 
 	private Inventory initializeGui(Player player, String rankName, String rankupCost) {
-		Inventory gui = Bukkit.getServer().createInventory(player, 27,
+		Inventory gui = GuiHolder.create(player, 27,
 				Lang.getFor(player, "gui.rankup.title"));
+		// The click handler prices the rankup from the config, the button name is only for display
+		GuiHolder.of(gui).setData(new RankupOffer(AranarthUtils.getPlayer(player.getUniqueId()).getRank(), rankName));
 
 		// Initialize Items
 		ItemStack yellowPane = new ItemStack(Material.YELLOW_STAINED_GLASS_PANE);
@@ -74,6 +76,12 @@ public class GuiRankup {
 		gui.setItem(17, blackPane);
 
 		return gui;
+	}
+
+	/**
+	 * The rank the player had when the GUI was opened and the display name of the next rank.
+	 */
+	public record RankupOffer(int fromRank, String nextRankName) {
 	}
 
 }

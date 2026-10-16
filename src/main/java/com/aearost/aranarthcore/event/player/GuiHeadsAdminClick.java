@@ -34,6 +34,12 @@ public class GuiHeadsAdminClick {
             return;
         }
 
+        // Re-check the opener's permission, as the heads are handed out for free
+        if (!player.hasPermission("aranarth.heads.admin")) {
+            player.closeInventory();
+            return;
+        }
+
         int slot = e.getSlot();
         Inventory topInv = e.getView().getTopInventory();
         int currentPage = GuiHeads.playerPage.getOrDefault(player.getUniqueId(), 0);

@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.gui.GuiHolder;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiMctop;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
@@ -112,7 +113,7 @@ public class CommandMctop implements CommandExecutor {
                     String skillDisplay = skill == null ? "Overall" : skill.name().charAt(0) + skill.name().substring(1).toLowerCase();
                     String expectedTitle = ChatUtils.stripColorFormatting(Lang.getFor(player, "gui.mctop.title", "skill", skillDisplay));
                     String openTitle = ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
-                    if (player.isOnline() && openTitle.equals(expectedTitle)) {
+                    if (player.isOnline() && GuiHolder.isGui(player.getOpenInventory()) && openTitle.equals(expectedTitle)) {
                         GuiMctop.populate(player, player.getOpenInventory().getTopInventory(), skill, finalLeaderboard, profiles);
                     } else {
                         new GuiMctop(player, skill, pageNum, finalLeaderboard, profiles).openGui();

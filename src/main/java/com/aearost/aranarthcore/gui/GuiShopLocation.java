@@ -120,7 +120,7 @@ public class GuiShopLocation {
     }
 
     private Inventory build(int pageNum, String filter, Map<UUID, PlayerProfile> profiles) {
-        Inventory inv = Bukkit.createInventory(player, 54, Lang.getFor(player, TITLE_KEY));
+        Inventory inv = GuiHolder.create(player, 54, Lang.getFor(player, TITLE_KEY));
 
         ItemStack grayPane = makeGlass(Material.GRAY_STAINED_GLASS_PANE);
 

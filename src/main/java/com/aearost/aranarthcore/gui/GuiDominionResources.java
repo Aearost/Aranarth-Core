@@ -4,7 +4,6 @@ import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.Player;
@@ -50,7 +49,7 @@ public class GuiDominionResources {
 		// Always 45 slots
 		int size = 45;
 
-		Inventory gui = Bukkit.getServer().createInventory(player, size,
+		Inventory gui = GuiHolder.create(player, size,
 				Lang.getFor(player, "gui.dominionresources.title", "dominion", dominion.getName()));
 
 		ItemStack filler = makeFiller();
@@ -74,8 +73,12 @@ public class GuiDominionResources {
 		int start = safePage * CONTENT_PER_PAGE;
 		int end = Math.min(start + CONTENT_PER_PAGE, totalBiomes);
 		int slot = 9;
+		// The click handler reads the biome from here, never from the item name
+		Map<Integer, Biome> biomeBySlot = new HashMap<>();
+		GuiHolder.of(gui).setData(biomeBySlot);
 		for (int i = start; i < end; i++) {
 			Biome biome = biomes.get(i);
+			biomeBySlot.put(slot, biome);
 			ItemStack item = new ItemStack(getIconByBiome(biome));
 			ItemMeta itemMeta = item.getItemMeta();
 			itemMeta.setDisplayName(ChatUtils.translateToColor("&l" + DominionUtils.getBiomeName(biome)));

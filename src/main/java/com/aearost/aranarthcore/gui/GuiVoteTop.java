@@ -129,7 +129,7 @@ public class GuiVoteTop {
                 aranarthPlayer.setCurrentGuiPageNum(pageNum);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 String openTitle = com.aearost.aranarthcore.utils.ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
-                if (player.isOnline() && openTitle.equals(com.aearost.aranarthcore.utils.ChatUtils.stripColorFormatting(finalTitle))) {
+                if (player.isOnline() && GuiHolder.isGui(player.getOpenInventory()) && openTitle.equals(com.aearost.aranarthcore.utils.ChatUtils.stripColorFormatting(finalTitle))) {
                     populate(player, player.getOpenInventory().getTopInventory(), finalPageEntries, profiles);
                 } else {
                     new GuiVoteTop(player, finalTitle, finalPageEntries, profiles).openGui();
@@ -182,7 +182,7 @@ public class GuiVoteTop {
 
     private Inventory initializeGui(String title, List<Map.Entry<UUID, Integer>> pageEntries,
                                     Map<UUID, PlayerProfile> profiles) {
-        Inventory gui = Bukkit.getServer().createInventory(player, 54, title);
+        Inventory gui = GuiHolder.create(player, 54, title);
 
         ItemStack previous = new ItemStack(Material.RED_WOOL);
         ItemStack barrier = new ItemStack(Material.BARRIER);

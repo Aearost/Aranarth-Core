@@ -4,7 +4,6 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -39,7 +38,7 @@ public class GuiWarps {
 			guiSize = ((int) (double) (guiSize / 9) + 1) * 9;
 		}
 
-		gui = Bukkit.getServer().createInventory(player, guiSize, guiName);
+		gui = GuiHolder.create(player, guiSize, guiName);
 
 		for (Home warp : AranarthUtils.getWarps()) {
 			ItemStack homeItem = new ItemStack(warp.getIcon(), 1);

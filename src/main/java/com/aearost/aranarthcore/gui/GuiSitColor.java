@@ -5,7 +5,6 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.SitUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -44,7 +43,7 @@ public class GuiSitColor {
 
     private Inventory initializeGui(Player player) {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-        Inventory gui = Bukkit.getServer().createInventory(player, 36, Lang.getFor(player, "gui.sitcolor.title"));
+        Inventory gui = GuiHolder.create(player, 36, Lang.getFor(player, "gui.sitcolor.title"));
 
         ItemStack blank = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta blankMeta = blank.getItemMeta();

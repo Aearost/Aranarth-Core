@@ -4,7 +4,6 @@ import com.aearost.aranarthcore.commands.general.CommandMcstats;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -95,7 +94,7 @@ public class GuiMcstats {
                                     Map<PrimarySkillType, Integer> targetLevels, int targetPowerLevel,
                                     Map<PrimarySkillType, Integer> targetRanks, int targetOverallRank,
                                     Map<PrimarySkillType, Integer> viewerRanks, int viewerOverallRank) {
-        Inventory inv = Bukkit.createInventory(viewer, 54, title);
+        Inventory inv = GuiHolder.create(viewer, 54, title);
 
         // Top and bottom border rows only
         ItemStack glass = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);

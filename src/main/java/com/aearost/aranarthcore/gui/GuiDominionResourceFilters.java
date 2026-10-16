@@ -5,7 +5,6 @@ import com.aearost.aranarthcore.objects.DominionResourceCategory;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -48,7 +47,7 @@ public class GuiDominionResourceFilters {
 
     private Inventory initializeGui(Player player) {
         Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
-        Inventory gui = Bukkit.createInventory(player, 27,
+        Inventory gui = GuiHolder.create(player, 27,
                 Lang.getFor(player, "gui.dominionresourcefilters.title", "dominion", dominion != null ? dominion.getName() : ""));
 
         Set<DominionResourceCategory> disabled = dominion != null ? dominion.getDisabledResourceCategories() : Set.of();

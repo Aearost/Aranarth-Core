@@ -5,7 +5,6 @@ import com.aearost.aranarthcore.objects.BlacklistPreset;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -33,7 +32,7 @@ public class GuiBlacklistSelect {
     }
 
     private Inventory initializeGui(boolean isClear) {
-        Inventory inv = Bukkit.createInventory(player, 36, isClear ? Lang.getFor(player, TITLE_CLEAR_KEY) : Lang.getFor(player, TITLE_USE_KEY));
+        Inventory inv = GuiHolder.create(player, 36, isClear ? Lang.getFor(player, TITLE_CLEAR_KEY) : Lang.getFor(player, TITLE_USE_KEY));
 
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
         List<BlacklistPreset> presets = ap.getBlacklistPresets();

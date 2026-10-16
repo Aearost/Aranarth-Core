@@ -7,7 +7,6 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.JobUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -34,7 +33,7 @@ public class GuiJobsStats {
     }
 
     private Inventory initializeGui() {
-        Inventory inv = Bukkit.createInventory(player, 45, Lang.getFor(player, TITLE_KEY));
+        Inventory inv = GuiHolder.create(player, 45, Lang.getFor(player, TITLE_KEY));
 
         ItemStack grayPane = makePane(Material.GRAY_STAINED_GLASS_PANE);
 

@@ -4,7 +4,6 @@ import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -49,7 +48,7 @@ public class GuiTeleport {
 		int totalHomesOnPage = homes.size();
 		int homeNumber = pageNum * 27;
 		
-		Inventory gui = Bukkit.getServer().createInventory(player, 36, Lang.getFor(player, "gui.teleport.title"));
+		Inventory gui = GuiHolder.create(player, 36, Lang.getFor(player, "gui.teleport.title"));
 
 		// Initialize Items
 		ItemStack previous = new ItemStack(Material.RED_WOOL);

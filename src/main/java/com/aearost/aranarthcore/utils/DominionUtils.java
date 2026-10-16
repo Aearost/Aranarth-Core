@@ -1218,6 +1218,13 @@ public class DominionUtils {
     }
 
     /**
+     * Returns true if the food inventory is locked by the given player.
+     */
+    public static boolean isFoodInventoryLockedBy(UUID dominionId, UUID playerUUID) {
+        return playerUUID.equals(foodInventoryLocks.get(dominionId));
+    }
+
+    /**
      * Compacts the food array by merging identical items and shifting everything to the front.
      * Respects each item's max stack size.
      */

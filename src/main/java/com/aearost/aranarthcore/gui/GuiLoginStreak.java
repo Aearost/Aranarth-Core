@@ -5,7 +5,6 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.LoginStreakUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -47,7 +46,7 @@ public class GuiLoginStreak {
     }
 
     private Inventory initializeGui() {
-        Inventory inv = Bukkit.createInventory(player, 54, Lang.getFor(player, "gui.loginstreak.title"));
+        Inventory inv = GuiHolder.create(player, 54, Lang.getFor(player, "gui.loginstreak.title"));
 
         UUID uuid = player.getUniqueId();
 

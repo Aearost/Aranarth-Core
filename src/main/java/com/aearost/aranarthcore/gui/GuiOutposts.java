@@ -6,7 +6,6 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.OutpostUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -32,7 +31,7 @@ public class GuiOutposts {
         }
 
         String title = Lang.getFor(player, TITLE_KEY);
-        Inventory gui = Bukkit.createInventory(player, 27, title);
+        Inventory gui = GuiHolder.create(player, 27, title);
 
         ItemStack filler = buildFiller();
         for (int i = 0; i < 27; i++) {

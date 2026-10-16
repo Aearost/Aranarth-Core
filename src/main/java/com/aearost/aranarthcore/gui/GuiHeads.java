@@ -52,7 +52,7 @@ public class GuiHeads {
     }
 
     private Inventory build() {
-        Inventory inv = Bukkit.createInventory(player, 54,
+        Inventory inv = GuiHolder.create(player, 54,
                 Lang.getFor(player, adminMode ? ADMIN_TITLE_KEY : TITLE_KEY));
 
         ItemStack glass = makeGlass(Material.PURPLE_STAINED_GLASS_PANE);

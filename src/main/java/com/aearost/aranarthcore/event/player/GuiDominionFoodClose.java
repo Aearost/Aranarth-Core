@@ -1,15 +1,19 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.gui.GuiDominionFood;
+import com.aearost.aranarthcore.gui.GuiHolder;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.UUID;
 
 /**
  * Updates the food contents of the Dominion's Food inventory.
@@ -22,7 +26,20 @@ public class GuiDominionFoodClose {
 		}
 
 		Player player = (Player) e.getPlayer();
-		Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+		GuiHolder holder = GuiHolder.of(inventory);
+		if (holder == null || !(holder.getData() instanceof UUID dominionId)) {
+			return;
+		}
+		// Only the player holding the lock may write, otherwise two open copies could both be saved
+		if (!DominionUtils.isFoodInventoryLockedBy(dominionId, player.getUniqueId())) {
+			Bukkit.getLogger().warning("[AC] " + player.getName() + " closed a Dominion food inventory without holding its lock, the changes were discarded");
+			return;
+		}
+		Dominion dominion = DominionUtils.getDominionById(dominionId);
+		if (dominion == null) {
+			DominionUtils.unlockFoodInventory(dominionId);
+			return;
+		}
 		player.playSound(player, Sound.BLOCK_CHEST_CLOSE, 1F, 1F);
 
 		// Save the current page's items into the full food array

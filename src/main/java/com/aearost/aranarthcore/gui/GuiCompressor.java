@@ -4,7 +4,6 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -49,7 +48,7 @@ public class GuiCompressor {
 		Inventory gui = null;
 		int guiSize = 54;
 		String guiName = Lang.getFor(player, "gui.compressor.title");
-		gui = Bukkit.getServer().createInventory(player, guiSize, guiName);
+		gui = GuiHolder.create(player, guiSize, guiName);
 
 		ItemStack blank = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
 		ItemMeta blankMeta = blank.getItemMeta();

@@ -143,7 +143,7 @@ public class GuiDominionPlayerPermissions {
         AranarthPlayer aranarthTarget = AranarthUtils.getPlayer(targetUuid);
         String nickname = aranarthTarget != null ? aranarthTarget.getNickname() : targetName;
         String title = Lang.get("gui.dominionplayerperms.title", "nickname", nickname);
-        Inventory gui = Bukkit.createInventory(leader, 45, title);
+        Inventory gui = GuiHolder.create(leader, 45, title);
 
         // Filler top and bottom rows
         ItemStack filler = buildFiller();

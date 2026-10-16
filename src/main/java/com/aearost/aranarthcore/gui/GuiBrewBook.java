@@ -45,7 +45,7 @@ public class GuiBrewBook {
     }
 
     private Inventory build() {
-        Inventory inv = Bukkit.createInventory(player, 54, Lang.getFor(player, TITLE_KEY));
+        Inventory inv = GuiHolder.create(player, 54, Lang.getFor(player, TITLE_KEY));
 
         ItemStack glass = makeGlass();
 

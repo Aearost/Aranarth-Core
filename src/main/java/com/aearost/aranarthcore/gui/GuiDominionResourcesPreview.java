@@ -5,7 +5,6 @@ import com.aearost.aranarthcore.objects.DominionResourceCategory;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.Player;
@@ -72,7 +71,7 @@ public class GuiDominionResourcesPreview {
 		int size = contentRows * 9 + 18;
 		int backSlot = size - 5;
 
-		Inventory gui = Bukkit.getServer().createInventory(player, size, biomeName + Lang.getFor(player, TITLE_SUFFIX_KEY));
+		Inventory gui = GuiHolder.create(player, size, biomeName + Lang.getFor(player, TITLE_SUFFIX_KEY));
 
 		ItemStack filler = makeFiller();
 		for (int i = 0; i < 9; i++) { gui.setItem(i, filler); }

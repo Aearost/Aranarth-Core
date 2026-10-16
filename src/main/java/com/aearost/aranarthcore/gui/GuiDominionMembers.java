@@ -49,7 +49,7 @@ public class GuiDominionMembers {
     public static void open(Player player) {
         Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
         if (dominion == null) {
-            Inventory emptyGui = Bukkit.createInventory(player, 9, Lang.getFor(player, "gui.dominionmembers.title"));
+            Inventory emptyGui = GuiHolder.create(player, 9, Lang.getFor(player, "gui.dominionmembers.title"));
             player.closeInventory();
             player.openInventory(emptyGui);
             return;
@@ -76,7 +76,7 @@ public class GuiDominionMembers {
             }
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                 String openTitle = ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
-                if (player.isOnline() && openTitle.equals(Lang.getFor(player, "gui.dominionmembers.title"))
+                if (player.isOnline() && GuiHolder.isGui(player.getOpenInventory()) && openTitle.equals(Lang.getFor(player, "gui.dominionmembers.title"))
                         && player.getOpenInventory().getTopInventory().getSize() == expectedSize) {
                     populate(player, player.getOpenInventory().getTopInventory(), dominion, profiles);
                 } else {
@@ -106,7 +106,7 @@ public class GuiDominionMembers {
         // +1 ensures there is always at least one free slot for the back button
         int size = calculateSize(members.size() + 1);
 
-        Inventory gui = Bukkit.createInventory(player, size, Lang.getFor(player, "gui.dominionmembers.title"));
+        Inventory gui = GuiHolder.create(player, size, Lang.getFor(player, "gui.dominionmembers.title"));
 
         for (int i = 0; i < members.size(); i++) {
             UUID memberUuid = members.get(i);

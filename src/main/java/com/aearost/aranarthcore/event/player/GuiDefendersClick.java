@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
-import com.aearost.aranarthcore.gui.GuiDefenderAreaSelect;
+
+import com.aearost.aranarthcore.gui.GuiHolder;import com.aearost.aranarthcore.gui.GuiDefenderAreaSelect;
 import com.aearost.aranarthcore.gui.GuiDefenders;
 import com.aearost.aranarthcore.objects.*;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -82,7 +83,7 @@ public class GuiDefendersClick {
         player.sendMessage(ChatUtils.chatMessage(result));
         String openTitle = ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
         String defendersTitlePrefix = ChatUtils.stripColorFormatting(Lang.getFor(player, GuiDefenders.TITLE_PREFIX_KEY, "total", "", "limit", "")).split("\\(")[0].trim();
-        if (openTitle.startsWith(defendersTitlePrefix)) {
+        if (GuiHolder.isGui(player.getOpenInventory()) && openTitle.startsWith(defendersTitlePrefix)) {
             GuiDefenders.populate(player.getOpenInventory().getTopInventory(), dominion);
         } else {
             GuiDefenders.open(player);

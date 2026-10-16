@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.event.player.*;
 import com.aearost.aranarthcore.gui.GuiChatSnapshot;
 import com.aearost.aranarthcore.gui.GuiDominionFood;
 import com.aearost.aranarthcore.gui.GuiHeadExchange;
+import com.aearost.aranarthcore.gui.GuiHolder;
 import com.aearost.aranarthcore.gui.GuiWrench;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
@@ -27,14 +28,16 @@ public class InventoryCloseEventListener implements Listener {
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent e) {
-        if (GuiChatSnapshot.isSnapshotGui(ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
+        // Only inventories created by AranarthCore are GUIs, so a chest renamed in an anvil can never reach a handler
+        boolean isGui = GuiHolder.isGui(e.getView());
+        if (isGui && GuiChatSnapshot.isSnapshotGui(ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
             GuiChatSnapshot.close(e.getInventory());
             return;
         }
         if (!(e.getPlayer() instanceof Player player)) {
             return;
         }
-        if (e.getView().getType() == InventoryType.CHEST) {
+        if (isGui && e.getView().getType() == InventoryType.CHEST) {
             if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.wrench.title"))) {
                 GuiWrench.openBlocks.remove(player.getUniqueId());
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(Lang.getFor(player, "gui.potions.title_add").split("\\(")[0].trim())) {
@@ -54,7 +57,9 @@ public class InventoryCloseEventListener implements Listener {
             } else if (TradeManager.isTradeGuiOpen(player)) {
                 new GuiTradeClose().execute(e);
             }
-        } else if (e.getView().getType() == InventoryType.ANVIL) {
+        }
+        // Anvils and crafting tables cannot be given a custom title, so these titles can be trusted
+        else if (e.getView().getType() == InventoryType.ANVIL) {
             if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarthium Anvil")) {
                 new GuiEnhancedAranarthiumClose().execute(e);
             }

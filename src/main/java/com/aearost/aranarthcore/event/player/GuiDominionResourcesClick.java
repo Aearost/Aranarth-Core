@@ -2,23 +2,22 @@ package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiDominionPermissions;
+import com.aearost.aranarthcore.gui.GuiHolder;
 import com.aearost.aranarthcore.gui.GuiDominionResourceFilters;
 import com.aearost.aranarthcore.gui.GuiDominionResources;
 import com.aearost.aranarthcore.gui.GuiDominionResourcesPreview;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.DominionResourceCategory;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -40,7 +39,11 @@ public class GuiDominionResourcesClick {
     public void execute(InventoryClickEvent e) {
         e.setCancelled(true);
 
-        if (e.getClickedInventory() == null || e.getClickedInventory().getType() != InventoryType.CHEST) {
+        if (e.getClickedInventory() == null || e.getClickedInventory() != e.getView().getTopInventory()) {
+            return;
+        }
+        GuiHolder holder = GuiHolder.of(e.getView().getTopInventory());
+        if (holder == null || !(holder.getData() instanceof Map<?, ?> biomeBySlot)) {
             return;
         }
 
@@ -82,16 +85,10 @@ public class GuiDominionResourcesClick {
         }
 
         // Content area - biome items
-        ItemStack clickedItem = e.getClickedInventory().getItem(slot);
-        if (clickedItem == null || !clickedItem.hasItemMeta()) {
+        if (!(biomeBySlot.get(slot) instanceof Biome biome)) {
             return;
         }
-        String biomeNameUnformatted = ChatUtils.stripColorFormatting(clickedItem.getItemMeta().getDisplayName());
-        String biomeNameFormatted = "minecraft:" + biomeNameUnformatted.replaceAll(" ", "_").toLowerCase();
-        Biome biome = Registry.BIOME.get(NamespacedKey.fromString(biomeNameFormatted));
-        if (biome == null) {
-            return;
-        }
+        String biomeNameUnformatted = DominionUtils.getBiomeName(biome);
 
         if (e.getClick() == ClickType.RIGHT) {
             new GuiDominionResourcesPreview(player, biome).openGui();
@@ -104,6 +101,12 @@ public class GuiDominionResourcesClick {
 
         // Left-click - begin claim flow
         Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+        // The biome must be one the Dominion owns, and only members allowed to claim resources may start a claim
+        if (dominion == null || !DominionUtils.hasPermission(player, dominion, DominionPermission.RESOURCES)
+                || !DominionUtils.getResourceClaimTypes(dominion).contains(biome)) {
+            player.closeInventory();
+            return;
+        }
         dominion.setBiomeResourcesBeingClaimed(biome);
         DominionUtils.updateDominion(dominion);
 

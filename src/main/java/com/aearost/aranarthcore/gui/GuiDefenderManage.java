@@ -41,7 +41,7 @@ public class GuiDefenderManage {
 
         playerToDefender.put(player.getUniqueId(), defenderEntityUUID);
 
-        Inventory gui = Bukkit.createInventory(player, 27, Lang.getFor(player, TITLE_KEY));
+        Inventory gui = GuiHolder.create(player, 27, Lang.getFor(player, TITLE_KEY));
 
         ItemStack border = buildBorder();
         for (int i = 0; i < 9; i++) {

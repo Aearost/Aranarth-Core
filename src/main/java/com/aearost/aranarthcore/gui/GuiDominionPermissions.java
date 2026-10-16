@@ -166,7 +166,7 @@ public class GuiDominionPermissions {
         }
 
         Set<DominionPermission> enabled = dominion.getDominionPermissions().getPermissions(rank);
-        Inventory gui = Bukkit.createInventory(player, 54, getPermissionsTitle(rank));
+        Inventory gui = GuiHolder.create(player, 54, getPermissionsTitle(rank));
 
         gui.setItem(9, buildSectionHeader(Material.LIGHT_BLUE_STAINED_GLASS_PANE, Lang.get("gui.dominionperms.section_interactions")));
         gui.setItem(18, buildSectionHeader(Material.YELLOW_STAINED_GLASS_PANE, Lang.get("gui.dominionperms.section_blocks")));
@@ -198,7 +198,7 @@ public class GuiDominionPermissions {
         }
 
         Set<DominionPermission> enabled = dominion.getDominionPermissions().getPermissions(rank);
-        Inventory gui = Bukkit.createInventory(player, 45, getPermissionsTitle(rank));
+        Inventory gui = GuiHolder.create(player, 45, getPermissionsTitle(rank));
 
         gui.setItem(9, buildSectionHeader(Material.LIGHT_BLUE_STAINED_GLASS_PANE, Lang.get("gui.dominionperms.section_interactions")));
         gui.setItem(18, buildSectionHeader(Material.YELLOW_STAINED_GLASS_PANE, Lang.get("gui.dominionperms.section_blocks")));
@@ -227,10 +227,10 @@ public class GuiDominionPermissions {
     private Inventory initializeMainGui(Player player) {
         Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
         if (dominion == null) {
-            return Bukkit.createInventory(player, 9, Lang.getFor(player, HUB_TITLE_KEY));
+            return GuiHolder.create(player, 9, Lang.getFor(player, HUB_TITLE_KEY));
         }
 
-        Inventory gui = Bukkit.createInventory(player, 45, Lang.getFor(player, HUB_TITLE_KEY));
+        Inventory gui = GuiHolder.create(player, 45, Lang.getFor(player, HUB_TITLE_KEY));
 
         ItemStack filler = buildFiller();
         for (int i = 0; i < 9; i++) {

@@ -41,7 +41,7 @@ public class GuiMarketPrice {
     }
 
     private Inventory build() {
-        Inventory inv = Bukkit.createInventory(player, 54,
+        Inventory inv = GuiHolder.create(player, 54,
                 Lang.getFor(player, TITLE_KEY));
 
         ItemStack grayGlass = makeGlass(Material.GRAY_STAINED_GLASS_PANE);

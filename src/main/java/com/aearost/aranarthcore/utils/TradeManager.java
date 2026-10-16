@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.utils;
 
+import com.aearost.aranarthcore.gui.GuiHolder;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
@@ -862,6 +863,10 @@ public class TradeManager {
 
     public static boolean isTradeGuiOpen(Player player) {
         if (player == null || !player.isOnline()) {
+            return false;
+        }
+        // A chest renamed to the trade title is not a trade
+        if (!GuiHolder.isGui(player.getOpenInventory())) {
             return false;
         }
         String stripped = ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());

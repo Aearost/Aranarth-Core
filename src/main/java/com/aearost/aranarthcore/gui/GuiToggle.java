@@ -8,7 +8,6 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.GateUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -34,7 +33,7 @@ public class GuiToggle {
 
     private Inventory initializeGui(Player player) {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-        Inventory gui = Bukkit.getServer().createInventory(player, 54, Lang.getFor(player, "gui.toggle.title"));
+        Inventory gui = GuiHolder.create(player, 54, Lang.getFor(player, "gui.toggle.title"));
 
         ItemStack blank = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta blankMeta = blank.getItemMeta();

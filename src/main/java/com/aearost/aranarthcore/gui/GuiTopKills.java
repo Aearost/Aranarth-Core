@@ -73,7 +73,7 @@ public class GuiTopKills {
                 aranarthPlayer.setCurrentGuiPageNum(pageNum);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 String openTitle = com.aearost.aranarthcore.utils.ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
-                if (player.isOnline() && openTitle.equals(ChatUtils.stripColorFormatting(Lang.get(TITLE_KEY)))) {
+                if (player.isOnline() && GuiHolder.isGui(player.getOpenInventory()) && openTitle.equals(ChatUtils.stripColorFormatting(Lang.get(TITLE_KEY)))) {
                     populate(player.getOpenInventory().getTopInventory(), player, pageNum, profiles);
                 } else {
                     new GuiTopKills(player, pageNum, profiles).openGui();
@@ -122,7 +122,7 @@ public class GuiTopKills {
     private Inventory initializeGui(Player player, int pageNum, Map<UUID, PlayerProfile> profiles) {
         List<UUID> uuidList = AranarthUtils.getTopKills(player.getWorld());
         int startIndex = pageNum * 45;
-        Inventory gui = Bukkit.getServer().createInventory(player, 54, Lang.getFor(player, TITLE_KEY));
+        Inventory gui = GuiHolder.create(player, 54, Lang.getFor(player, TITLE_KEY));
 
         ItemStack previous = new ItemStack(Material.RED_WOOL);
         ItemStack barrier = new ItemStack(Material.BARRIER);
