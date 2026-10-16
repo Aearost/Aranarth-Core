@@ -26,11 +26,9 @@ public class PlayerCommandSendEventListener implements Listener {
             if (command == null) {
                 return false;
             }
-            String permission = command.getPermission();
-            if (permission == null || permission.isEmpty()) {
-                return false;
-            }
-            return !player.hasPermission(permission);
+            // testPermissionSilent defers to the owning plugin's own permission logic, which is required
+            // for WorldEdit since its commands store ';'-joined nodes and rely on worldedit.* wildcards
+            return !command.testPermissionSilent(player);
         });
     }
 }

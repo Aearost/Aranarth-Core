@@ -59,3 +59,4 @@ Cross-server & Technical
 [~] Fixed ender pearls landing after a world change teleporting players between Survival and Creative without swapping their inventory or game mode, and fixed failed teleports still swapping the player's inventory
 
 Miscellaneous
+[~] Fixed WorldEdit commands not appearing in tab completion or autofilling block names #456
