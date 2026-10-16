@@ -43,7 +43,12 @@ public class ArrowConsume {
         }
     }
 
-    private void replaceArrow(Player player, ItemStack launchedArrow) {
+    /**
+     * Refills the player's inventory with a matching arrow from their Quiver.
+     * @param player The player.
+     * @param launchedArrow The arrow that was launched.
+     */
+    public void replaceArrow(Player player, ItemStack launchedArrow) {
         if (player.getGameMode() != GameMode.SURVIVAL) {
             return;
         }

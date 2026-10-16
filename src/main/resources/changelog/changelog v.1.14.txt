@@ -9,6 +9,7 @@ World & Events
 
 Bending & Abilities
 [~] Fixed AngeredSpirits and other effect abilities respecting dominion relations in the arena
+[+] Airbenders with level 100 Archery now launch the arrow they are holding when using AirBlast while sneaking
 
 Dominion
 [+] Dominion resource claims now provide leaves

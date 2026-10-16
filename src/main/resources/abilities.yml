@@ -159,6 +159,13 @@ JetFumes:
   # Cooldown applied to FireJet once the flight ends
   FireJetCooldown: 5000
 
+# ==================== Air - AirBlast ====================
+
+# Arrow launched by AirBlast while holding arrows with level 100+ Archery
+AirBlastArrow:
+  # Blocks travelled per tick at launch (a fully drawn bow is 3.0), arrow damage scales with this
+  Speed: 3.0
+
 # ==================== Air - Sound ====================
 
 # Debuff applied by most Sound abilities on hit (20 ticks = 1 second)

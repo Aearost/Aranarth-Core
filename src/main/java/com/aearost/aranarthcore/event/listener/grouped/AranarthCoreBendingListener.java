@@ -37,15 +37,21 @@ import com.aearost.aranarthcore.abilities.waterbending.plantbending.*;
 import com.aearost.aranarthcore.enums.FireType;
 import com.aearost.aranarthcore.event.listener.misc.FireParticleListener;
 import com.aearost.aranarthcore.event.mob.MountListener;
+import com.aearost.aranarthcore.event.player.ArrowConsume;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.ShopIslandUtils;
+import com.gmail.nossr50.api.ExperienceAPI;
+import com.gmail.nossr50.api.exceptions.McMMOPlayerNotFoundException;
+import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
+import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.*;
 import com.projectkorra.projectkorra.ability.util.ComboManager;
 import com.projectkorra.projectkorra.airbending.AirBlast;
@@ -67,8 +73,12 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -81,6 +91,7 @@ import java.util.UUID;
 public class AranarthCoreBendingListener implements Listener {
 
     private static Field airBlastOriginsField;
+    private static final String AIR_BLAST_ARROW = "airblastarrow";
 
     static {
         try {
@@ -290,6 +301,125 @@ public class AranarthCoreBendingListener implements Listener {
         e.setCancelled(true);
         // AirBlast applies its cooldown before starting
         bendingPlayer.removeCooldown("AirBlast");
+    }
+
+    /**
+     * Launches the held arrow into the AirBlast when an airbender with 100+ Archery fires it while sneaking and holding arrows.
+     */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onAirBlastArrowLaunch(final AbilityStartEvent e) {
+        if (!(e.getAbility() instanceof AirBlast airBlast) || airBlast.getSource() != null) {
+            return;
+        }
+        Player player = airBlast.getPlayer();
+        if (!player.isSneaking()) {
+            return;
+        }
+        ItemStack held = player.getInventory().getItemInMainHand();
+        Material type = held.getType();
+        if (type != Material.ARROW && type != Material.TIPPED_ARROW && type != Material.SPECTRAL_ARROW) {
+            return;
+        }
+        try {
+            if (ExperienceAPI.getLevel(player, PrimarySkillType.ARCHERY) < 100) {
+                return;
+            }
+        } catch (McMMOPlayerNotFoundException ex) {
+            return;
+        }
+
+        // AstralShot removes this AirBlast on the next tick, so the arrow would have nothing to carry it
+        ComboManager.ComboAbilityInfo combo = ComboManager.checkForValidCombo(player);
+        if (combo != null && combo.getName().equals("AstralShot")) {
+            CoreAbility astralShot = CoreAbility.getAbility(AstralShot.class);
+            BendingPlayer bendingPlayer = airBlast.getBendingPlayer();
+            if (astralShot != null && !bendingPlayer.isOnCooldown(astralShot)
+                    && bendingPlayer.canBendIgnoreBindsCooldowns(astralShot)) {
+                return;
+            }
+        }
+
+        Vector direction = airBlast.getDirection().clone().normalize();
+        Location spawnLocation = airBlast.getOrigin().clone().add(direction.clone().multiply(0.5));
+        // Arrows use a different rotation convention than players, matching it prevents the arrow from visibly spinning into place
+        spawnLocation.setYaw((float) Math.toDegrees(Math.atan2(direction.getX(), direction.getZ())));
+        spawnLocation.setPitch((float) Math.toDegrees(Math.atan2(direction.getY(),
+                Math.sqrt(direction.getX() * direction.getX() + direction.getZ() * direction.getZ()))));
+        Vector velocity = direction.clone().multiply(AbilityConfig.getDouble("AirBlastArrow.Speed"));
+        if (!spawnLocation.getBlock().isPassable() || spawnLocation.getBlock().isLiquid()
+                || GeneralMethods.isRegionProtectedFromBuild(airBlast, spawnLocation)) {
+            return;
+        }
+
+        ItemStack template = held.clone();
+        template.setAmount(1);
+
+        // The shooter and velocity are set before the arrow is added to the world so the launch event treats it like a bow shot,
+        // letting mcMMO track it for Archery XP and letting launch protections cancel it
+        AbstractArrow arrow;
+        if (type == Material.SPECTRAL_ARROW) {
+            arrow = player.getWorld().spawn(spawnLocation, SpectralArrow.class, spectralArrow -> {
+                spectralArrow.setShooter(player);
+                spectralArrow.setVelocity(velocity);
+                spectralArrow.setMetadata(AIR_BLAST_ARROW, new FixedMetadataValue(AranarthCore.getInstance(), true));
+                spectralArrow.setItemStack(template.clone());
+            });
+        } else {
+            arrow = player.getWorld().spawn(spawnLocation, Arrow.class, normalArrow -> {
+                normalArrow.setShooter(player);
+                normalArrow.setVelocity(velocity);
+                normalArrow.setMetadata(AIR_BLAST_ARROW, new FixedMetadataValue(AranarthCore.getInstance(), true));
+                normalArrow.setItemStack(template.clone());
+                if (type == Material.TIPPED_ARROW && template.getItemMeta() instanceof PotionMeta meta) {
+                    if (meta.getBasePotionType() != null) {
+                        normalArrow.setBasePotionType(meta.getBasePotionType());
+                    }
+                    for (PotionEffect effect : meta.getCustomEffects()) {
+                        normalArrow.addCustomEffect(effect, true);
+                    }
+                }
+            });
+        }
+        if (!arrow.isValid()) {
+            return;
+        }
+
+        String arrowType = template.getItemMeta() != null
+                ? template.getItemMeta().getPersistentDataContainer().get(CustomKeys.ARROW, PersistentDataType.STRING)
+                : null;
+        if (arrowType != null) {
+            arrow.getPersistentDataContainer().set(CustomKeys.ARROW, PersistentDataType.STRING, arrowType);
+        }
+
+        if (player.getGameMode() == GameMode.CREATIVE) {
+            arrow.setPickupStatus(AbstractArrow.PickupStatus.CREATIVE_ONLY);
+            return;
+        }
+        arrow.setPickupStatus(AbstractArrow.PickupStatus.ALLOWED);
+        // Quiver refill runs before the arrow is removed, the same as when shooting a bow
+        int heldSlot = player.getInventory().getHeldItemSlot();
+        new ArrowConsume().replaceArrow(player, template.clone());
+        // Re-read the slot as the refill replaces the held stack, so the earlier reference would no longer be in the inventory
+        ItemStack heldAfterRefill = player.getInventory().getItem(heldSlot);
+        if (heldAfterRefill != null && heldAfterRefill.isSimilar(template)) {
+            heldAfterRefill.setAmount(heldAfterRefill.getAmount() - 1);
+            player.getInventory().setItem(heldSlot, heldAfterRefill.getAmount() > 0 ? heldAfterRefill : null);
+        } else {
+            player.getInventory().removeItem(template.clone());
+        }
+    }
+
+    /**
+     * Prevents the player's own AirBlast from overriding the launch velocity of the arrow it fired.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onAirBlastArrowPush(final AbilityVelocityAffectEntityEvent e) {
+        if (!(e.getAbility() instanceof AirBlast airBlast) || !(e.getAffected() instanceof AbstractArrow arrow)) {
+            return;
+        }
+        if (arrow.hasMetadata(AIR_BLAST_ARROW) && airBlast.getPlayer().equals(arrow.getShooter())) {
+            e.setCancelled(true);
+        }
     }
 
     /**

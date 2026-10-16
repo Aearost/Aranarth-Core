@@ -622,7 +622,13 @@
       "PowerShell(sftp *)",
       "Bash(\"/c/Program Files/JetBrains/IntelliJ IDEA\"*/plugins/maven/lib/maven3/bin/mvn -q -o compile)",
       "PowerShell($mvn = Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1; & $mvn.FullName -q -o compile; \"EXIT $LASTEXITCODE\")",
-      "PowerShell(gh issue view 458 --json number,title,body,state,comments; \"exit: $LASTEXITCODE\")"
+      "PowerShell(gh issue view 458 --json number,title,body,state,comments; \"exit: $LASTEXITCODE\")",
+      "PowerShell($javap = Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\",\"$env:USERPROFILE\\\\.jdks\" -Recurse -Filter javap.exe -ErrorAction SilentlyContinue | Select-Object -First 1; & $javap.FullName -cp \"C:\\\\Users\\\\liamh\\\\.m2\\\\repository\\\\com\\\\gmail\\\\nossr50\\\\mcMMO\\\\mcMMO\\\\2.2.018\\\\mcMMO-2.2.018.jar\" com.gmail.nossr50.api.ExperienceAPI | Select-String \"getLevel\\\\\\(\")",
+      "PowerShell($mvn = Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1; & $mvn.FullName -q -o compile)",
+      "PowerShell($javap = \\(Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\",\"$env:USERPROFILE\\\\.jdks\" -Recurse -Filter javap.exe -ErrorAction SilentlyContinue | Select-Object -First 1\\).FullName; $jar = \"C:\\\\Users\\\\liamh\\\\.m2\\\\repository\\\\com\\\\gmail\\\\nossr50\\\\mcMMO\\\\mcMMO\\\\2.2.018\\\\mcMMO-2.2.018.jar\"; & $javap -p -cp $jar com.gmail.nossr50.util.skills.CombatUtils | Select-String \"Ranged|CombatXP|Archery\"; & $javap -p -cp $jar com.gmail.nossr50.skills.archery.ArcheryManager)",
+      "PowerShell(Out-File *)",
+      "PowerShell($mvn = Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1; & $mvn.FullName -q -o compile 2>&1 | Select-String -NotMatch \"^WARNING\")",
+      "PowerShell(Out-Null *)"
     ]
   }
 }
