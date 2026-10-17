@@ -11,6 +11,8 @@ import org.bukkit.Bukkit;
 import java.sql.*;
 import java.util.*;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Central MySQL persistence layer for AranarthCore.
@@ -443,7 +445,8 @@ public class DatabaseManager {
                 death_world VARCHAR(64) NOT NULL DEFAULT 'world',
                 death_x DOUBLE NOT NULL DEFAULT 0,
                 death_y DOUBLE NOT NULL DEFAULT 64,
-                death_z DOUBLE NOT NULL DEFAULT 0
+                death_z DOUBLE NOT NULL DEFAULT 0,
+                death_server VARCHAR(32) NULL DEFAULT NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
                 """
@@ -514,18 +517,41 @@ public class DatabaseManager {
                 "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_x DOUBLE NOT NULL DEFAULT 0",
                 "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_y DOUBLE NOT NULL DEFAULT 64",
                 "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_z DOUBLE NOT NULL DEFAULT 0",
+                "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_server VARCHAR(32) NULL DEFAULT NULL",
                 "ALTER TABLE network_temp_data MODIFY COLUMN value_json MEDIUMTEXT NOT NULL",
                 "ALTER TABLE network_roster ADD COLUMN IF NOT EXISTS pronouns VARCHAR(10) NOT NULL DEFAULT 'MALE'"
         };
         try (Connection conn = dataSource.getConnection(); Statement stmt = conn.createStatement()) {
             for (String sql : migrations) {
                 try {
-                    stmt.execute(sql);
-                } catch (SQLException ignored) {
+                    // MySQL does not support ADD COLUMN IF NOT EXISTS (only MariaDB does), so the column is
+                    // checked first and added with a plain ADD COLUMN when it is missing
+                    Matcher addColumn = ADD_COLUMN_IF_NOT_EXISTS.matcher(sql);
+                    if (addColumn.matches()) {
+                        String table = addColumn.group(1);
+                        String column = addColumn.group(2);
+                        if (!columnExists(conn, table, column)) {
+                            stmt.execute("ALTER TABLE " + table + " ADD COLUMN " + column + " " + addColumn.group(3));
+                            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[DB] Added column " + table + "." + column);
+                        }
+                    } else {
+                        stmt.execute(sql);
+                    }
+                } catch (SQLException e) {
+                    Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Schema migration failed (" + sql + "): " + e.getMessage());
                 }
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Schema migration error: " + e.getMessage());
+        }
+    }
+
+    private static final Pattern ADD_COLUMN_IF_NOT_EXISTS = Pattern.compile(
+            "ALTER TABLE (\\w+) ADD COLUMN IF NOT EXISTS (\\w+) (.+)", Pattern.CASE_INSENSITIVE);
+
+    private boolean columnExists(Connection conn, String table, String column) throws SQLException {
+        try (ResultSet rs = conn.getMetaData().getColumns(conn.getCatalog(), null, table, column)) {
+            return rs.next();
         }
     }
 
@@ -2869,12 +2895,14 @@ public class DatabaseManager {
     // player_reaper
     // -------------------------------------------------------------------------
 
-    public void upsertReaperInventory(UUID uuid, String dropsB64, long deathTime, String deathWorld, double deathX, double deathY, double deathZ) {
+    public void upsertReaperInventory(UUID uuid, String dropsB64, long deathTime, String deathWorld, double deathX, double deathY, double deathZ,
+                                      String deathServer) {
         String sql = """
-                INSERT INTO player_reaper (uuid, drops_b64, death_time, death_world, death_x, death_y, death_z)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO player_reaper (uuid, drops_b64, death_time, death_world, death_x, death_y, death_z, death_server)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE drops_b64=VALUES(drops_b64), death_time=VALUES(death_time),
-                death_world=VALUES(death_world), death_x=VALUES(death_x), death_y=VALUES(death_y), death_z=VALUES(death_z)
+                death_world=VALUES(death_world), death_x=VALUES(death_x), death_y=VALUES(death_y), death_z=VALUES(death_z),
+                death_server=VALUES(death_server)
                 """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -2885,6 +2913,7 @@ public class DatabaseManager {
             ps.setDouble(5, deathX);
             ps.setDouble(6, deathY);
             ps.setDouble(7, deathZ);
+            ps.setString(8, deathServer);
             ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to upsert reaper inventory for " + uuid + ": " + e.getMessage());
@@ -2892,10 +2921,11 @@ public class DatabaseManager {
     }
 
     /**
-     * Returns {dropsB64, deathTimeString, deathWorld, deathXStr, deathYStr, deathZStr} or null if not found.
+     * Returns {dropsB64, deathTimeString, deathWorld, deathXStr, deathYStr, deathZStr, deathServer} or null if not found.
+     * deathServer is null for entries saved before it was recorded.
      */
     public String[] loadReaperInventory(UUID uuid) {
-        String sql = "SELECT drops_b64, death_time, death_world, death_x, death_y, death_z FROM player_reaper WHERE uuid = ?";
+        String sql = "SELECT drops_b64, death_time, death_world, death_x, death_y, death_z, death_server FROM player_reaper WHERE uuid = ?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
@@ -2907,7 +2937,8 @@ public class DatabaseManager {
                             rs.getString("death_world"),
                             String.valueOf(rs.getDouble("death_x")),
                             String.valueOf(rs.getDouble("death_y")),
-                            String.valueOf(rs.getDouble("death_z"))
+                            String.valueOf(rs.getDouble("death_z")),
+                            rs.getString("death_server")
                     };
                 }
             }
@@ -2915,6 +2946,23 @@ public class DatabaseManager {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load reaper inventory for " + uuid + ": " + e.getMessage());
         }
         return null;
+    }
+
+    /**
+     * Deletes the Reaper Inventory only if it is still the one from the given death. Returns true if
+     * this call removed it, so a death can only ever be claimed once across both servers.
+     */
+    public boolean claimReaperInventory(UUID uuid, long deathTime) {
+        String sql = "DELETE FROM player_reaper WHERE uuid = ? AND death_time = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            ps.setLong(2, deathTime);
+            return ps.executeUpdate() == 1;
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to claim reaper inventory for " + uuid + ": " + e.getMessage());
+            return false;
+        }
     }
 
     public void deleteReaperInventory(UUID uuid) {

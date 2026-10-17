@@ -34,7 +34,8 @@ public class GuiReaperClick {
         }
         GuiHolder holder = GuiHolder.of(e.getView().getTopInventory());
         if (holder == null || !(holder.getData() instanceof GuiReaper.ReaperState(
-                ItemStack[] drops, double cost, Location deathLocation
+                ItemStack[] drops, double cost, Location deathLocation, boolean deathLocationKnown, long deathTime,
+                String[] record
         ))) {
             return;
         }
@@ -64,28 +65,28 @@ public class GuiReaperClick {
 
         // Drop to death location button
         if (slot == 47) {
+            // The death world only exists on the server the player died on
+            if (!deathLocationKnown) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("reaper.wrong_server")));
+                player.closeInventory();
+                return;
+            }
+
             // A second click on the same GUI can never claim again
             holder.setData(null);
+            player.closeInventory();
 
-            // Load the chunk at the death location, then drop items there
-            final Location finalDropLocation = deathLocation;
-            Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
-                finalDropLocation.getWorld().getChunkAt(finalDropLocation).load(true);
+            claim(player, deathTime, record, () -> {
+                deathLocation.getWorld().getChunkAt(deathLocation).load(true);
                 for (ItemStack item : drops) {
                     if (item != null) {
-                        finalDropLocation.getWorld().dropItemNaturally(finalDropLocation, item.clone());
+                        deathLocation.getWorld().dropItemNaturally(deathLocation, item.clone());
                     }
                 }
+                player.playSound(player, Sound.ENTITY_ENDER_EYE_DEATH, 0.8F, 0.5F);
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("player.items_dropped")));
+            }, () -> {
             });
-
-            // Delete from cache and DB
-            ReaperManager.remove(player.getUniqueId());
-            Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
-                    DatabaseManager.getInstance().deleteReaperInventory(player.getUniqueId()));
-
-            player.playSound(player, Sound.ENTITY_ENDER_EYE_DEATH, 0.8F, 0.5F);
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("player.items_dropped")));
-            player.closeInventory();
             return;
         }
 
@@ -105,40 +106,89 @@ public class GuiReaperClick {
             }
 
             holder.setData(null);
+            player.closeInventory();
 
-            // Deduct balance
-            aranarthPlayer.setBalance(aranarthPlayer.getBalance() - cost);
-            AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-            PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
-            if (NetworkManager.isActive()) {
-                NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), -cost);
-            }
-
-            // Give items back - drop at feet if no space
-            for (ItemStack item : drops) {
-                if (item != null) {
-                    ItemStack copy = item.clone();
-                    int remainder = ItemUtils.addToInventory(player, copy);
-                    if (remainder == -1) {
-                        // No space at all - drop full item
-                        player.getWorld().dropItemNaturally(player.getLocation(), item.clone());
-                    } else if (remainder > 0) {
-                        // Partial - drop the leftover amount
-                        ItemStack leftover = item.clone();
-                        leftover.setAmount(remainder);
-                        player.getWorld().dropItemNaturally(player.getLocation(), leftover);
+            // Charge first so the money cannot be spent while the claim is checked, and refund if the
+            // Reaper Inventory was already claimed
+            adjustBalance(player, -cost);
+            claim(player, deathTime, record, () -> {
+                // Give items back - drop at feet if no space
+                for (ItemStack item : drops) {
+                    if (item != null) {
+                        ItemStack copy = item.clone();
+                        int remainder = ItemUtils.addToInventory(player, copy);
+                        if (remainder == -1) {
+                            // No space at all - drop full item
+                            player.getWorld().dropItemNaturally(player.getLocation(), item.clone());
+                        } else if (remainder > 0) {
+                            // Partial - drop the leftover amount
+                            ItemStack leftover = item.clone();
+                            leftover.setAmount(remainder);
+                            player.getWorld().dropItemNaturally(player.getLocation(), leftover);
+                        }
                     }
                 }
-            }
+                player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("player.inventory_recovered")));
+            }, () -> adjustBalance(player, cost));
+        }
+    }
 
-            // Delete from cache and DB
-            ReaperManager.remove(player.getUniqueId());
+    /**
+     * Removes the Reaper Inventory from the database, and only runs onClaimed if this server is the one
+     * that removed it.
+     */
+    private void claim(Player player, long deathTime, String[] record, Runnable onClaimed, Runnable onAlreadyClaimed) {
+        ReaperManager.remove(player.getUniqueId());
+        if (!DatabaseManager.isActive()) {
+            onClaimed.run();
+            return;
+        }
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+            boolean claimed = DatabaseManager.getInstance().claimReaperInventory(player.getUniqueId(), deathTime);
+            Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+                if (claimed && player.isOnline()) {
+                    onClaimed.run();
+                } else {
+                    onAlreadyClaimed.run();
+                    if (claimed) {
+                        // The player left before the items could be handed over, so put the Reaper Inventory back
+                        restore(player, record);
+                    } else if (player.isOnline()) {
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("reaper.no_inventory")));
+                    }
+                }
+            });
+        });
+    }
+
+    /**
+     * Puts the Reaper Inventory back exactly as it was loaded, including where and on which server the
+     * player died.
+     */
+    private void restore(Player player, String[] record) {
+        try {
+            String world = record.length >= 6 && record[2] != null ? record[2] : "world";
+            double x = record.length >= 6 ? Double.parseDouble(record[3]) : 0;
+            double y = record.length >= 6 ? Double.parseDouble(record[4]) : 64;
+            double z = record.length >= 6 ? Double.parseDouble(record[5]) : 0;
+            String server = record.length >= 7 ? record[6] : null;
             Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
-                    DatabaseManager.getInstance().deleteReaperInventory(player.getUniqueId()));
+                    DatabaseManager.getInstance().upsertReaperInventory(player.getUniqueId(), record[0],
+                            Long.parseLong(record[1]), world, x, y, z, server));
+        } catch (Exception e) {
+            Bukkit.getLogger().severe(AranarthCore.LOG_PREFIX + "Could not restore the Reaper Inventory of "
+                    + player.getName() + ": " + e.getMessage());
+        }
+    }
 
-            player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("player.inventory_recovered")));
-            player.closeInventory();
+    private void adjustBalance(Player player, double delta) {
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        aranarthPlayer.setBalance(aranarthPlayer.getBalance() + delta);
+        AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+        PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), delta);
         }
     }
 }

@@ -629,7 +629,12 @@
       "PowerShell(Out-File *)",
       "PowerShell($mvn = Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1; & $mvn.FullName -q -o compile 2>&1 | Select-String -NotMatch \"^WARNING\")",
       "PowerShell(Out-Null *)",
-      "Bash(awk 'NR>=410 && NR<=1010 && /return;/ {print NR\": \"$0}' src/main/java/com/aearost/aranarthcore/event/listener/misc/PlayerServerJoinListener.java)"
+      "Bash(awk 'NR>=410 && NR<=1010 && /return;/ {print NR\": \"$0}' src/main/java/com/aearost/aranarthcore/event/listener/misc/PlayerServerJoinListener.java)",
+      "PowerShell($b=\"C:\\\\Users\\\\liamh\\\\Desktop\\\\Folders\\\\Minecraft\\\\Testing\"; foreach\\($s in \"SMP\",\"Survival\",\"Velocity Test\"\\){ $f=\"$b\\\\$s\\\\logs\\\\latest.log\"; \"===== $s \\($\\(\\(Get-Item $f\\).LastWriteTime\\)\\)\"; Get-Content $f -Tail 40 })",
+      "PowerShell(New-Item *)",
+      "PowerShell(Copy-Item *)",
+      "PowerShell(Get-Content *)",
+      "PowerShell($p = \"$env:APPDATA\\\\ModrinthApp\\\\profiles\\\\Fabric 26.3 \\(1\\)\"; $good = \"$env:APPDATA\\\\ModrinthApp\\\\profiles\\\\Fabric 26.3\"; $files = 'do_a_barrel_roll-client.json','eg_particle_interactions.json','fallingleaves2.json','sodium-options.json','visuality.json','xaero\\\\minimap\\\\profiles\\\\entity_radar_categories\\\\default.cfg.json','xaero\\\\minimap\\\\profiles\\\\info_display_config\\\\default.cfg.txt'; foreach \\($f in $files\\) { $bad = \"$p\\\\config\\\\$f\"; $src = \"$good\\\\config\\\\$f\"; Move-Item $bad \"$bad.corrupt.bak\" -Force; $ok = $false; if \\(Test-Path $src\\) { $b = [IO.File]::ReadAllBytes\\($src\\); if \\($b | Where-Object { $_ -ne 0 } | Select-Object -First 1\\) { Copy-Item $src $bad; $ok = $true } }; if \\($ok\\) { \"COPIED   $f\" } else { \"REMOVED  $f \\(will regenerate\\)\" } })"
     ]
   }
 }

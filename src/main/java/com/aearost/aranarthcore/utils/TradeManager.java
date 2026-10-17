@@ -39,6 +39,16 @@ public class TradeManager {
     private static final Map<UUID, BukkitTask> animationTasks = new HashMap<>();
     private static final Map<UUID, Boolean> animationToggle = new HashMap<>();
     private static final Map<UUID, List<BukkitTask>> completionTasks = new HashMap<>();
+    // Cross-server trades whose initiator side is held in escrow while the target's server commits
+    private static final Map<UUID, PendingCommit> pendingCommits = new HashMap<>();
+    private static final long COMMIT_TIMEOUT_TICKS = 20L * 60;
+
+    /**
+     * The initiator's offer, taken out of their hands while the target's server decides the trade.
+     */
+    private record PendingCommit(UUID initiatorUuid, UUID targetUuid, ItemStack[] initiatorItems,
+                                 double initiatorMoney, BukkitTask timeout) {
+    }
 
     private TradeManager() {
     }
@@ -326,7 +336,17 @@ public class TradeManager {
         AranarthPlayer initiatorAp = AranarthUtils.getPlayer(trade.getInitiatorUuid());
         AranarthPlayer targetAp = AranarthUtils.getPlayer(trade.getTargetUuid());
 
-        // Balance validation (same-server: both local; cross-server: initiator is local)
+        if (!isValidMoney(initiatorMoney) || !isValidMoney(targetMoney)) {
+            cancelTrade(trade, trade.getInitiatorUuid());
+            return;
+        }
+
+        if (crossServer) {
+            beginCrossServerCommit(trade, initiator, initiatorAp, initiatorMoney, targetMoney);
+            return;
+        }
+
+        // Balance validation (both players are on this server)
         if (initiatorMoney > 0 && initiatorAp != null && initiatorAp.getBalance() < initiatorMoney) {
             unregisterTrade(trade);
             if (initiator != null) {
@@ -346,7 +366,7 @@ public class TradeManager {
             }
             return;
         }
-        if (!crossServer && targetMoney > 0 && targetAp != null && targetAp.getBalance() < targetMoney) {
+        if (targetMoney > 0 && targetAp != null && targetAp.getBalance() < targetMoney) {
             unregisterTrade(trade);
             if (target != null) {
                 target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "trade.not_enough_money")));
@@ -384,47 +404,203 @@ public class TradeManager {
 
         unregisterTrade(trade);
 
-        if (!crossServer) {
-            // Same-server - apply balances for both players
-            if (initiatorMoney != 0 || targetMoney != 0) {
-                if (initiatorAp != null) {
-                    initiatorAp.setBalance(initiatorAp.getBalance() - initiatorMoney + targetMoney);
-                }
-                if (targetAp != null) {
-                    targetAp.setBalance(targetAp.getBalance() - targetMoney + initiatorMoney);
-                }
-                PersistenceUtils.saveAranarthPlayerImmediately(trade.getInitiatorUuid());
-                PersistenceUtils.saveAranarthPlayerImmediately(trade.getTargetUuid());
-            }
-            if (initiator != null) {
-                giveItems(initiator, toInitiator);
-                initiator.closeInventory();
-                initiator.sendMessage(ChatUtils.chatMessage(Lang.getFor(initiator, "trade.completed")));
-                initiator.playSound(initiator, Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.2F);
-            }
-            if (target != null) {
-                giveItems(target, toTarget);
-                target.closeInventory();
-                target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "trade.completed")));
-                target.playSound(target, Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.2F);
-            }
-        } else {
-            // Cross-server - handle initiator locally, then publish to target's server
-            if ((initiatorMoney != 0 || targetMoney != 0) && initiatorAp != null) {
+        // Same-server - apply balances for both players
+        if (initiatorMoney != 0 || targetMoney != 0) {
+            if (initiatorAp != null) {
                 initiatorAp.setBalance(initiatorAp.getBalance() - initiatorMoney + targetMoney);
-                PersistenceUtils.saveAranarthPlayerImmediately(trade.getInitiatorUuid());
             }
-            if (initiator != null) {
-                giveItems(initiator, toInitiator);
-                initiator.closeInventory();
-                initiator.sendMessage(ChatUtils.chatMessage(Lang.getFor(initiator, "trade.completed")));
-                initiator.playSound(initiator, Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.2F);
+            if (targetAp != null) {
+                targetAp.setBalance(targetAp.getBalance() - targetMoney + initiatorMoney);
             }
-            if (NetworkManager.isActive()) {
-                NetworkManager.getInstance().publishTradeExecute(
-                        trade.getInitiatorUuid(), toTarget, initiatorMoney, targetMoney);
+            PersistenceUtils.saveAranarthPlayerImmediately(trade.getInitiatorUuid());
+            PersistenceUtils.saveAranarthPlayerImmediately(trade.getTargetUuid());
+        }
+        if (initiator != null) {
+            giveItems(initiator, toInitiator);
+            initiator.closeInventory();
+            initiator.sendMessage(ChatUtils.chatMessage(Lang.getFor(initiator, "trade.completed")));
+            initiator.playSound(initiator, Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.2F);
+        }
+        if (target != null) {
+            giveItems(target, toTarget);
+            target.closeInventory();
+            target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "trade.completed")));
+            target.playSound(target, Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.2F);
+        }
+    }
+
+    /**
+     * First half of a cross-server trade, run on the initiator's server. The initiator's items and
+     * money are taken into escrow, and the target's server is asked to commit the trade only if both
+     * offers are still exactly what each player agreed to. Nothing is given to the initiator until
+     * the target's server reports back what it actually took from the target.
+     */
+    private static void beginCrossServerCommit(Trade trade, Player initiator, AranarthPlayer initiatorAp,
+                                               double initiatorMoney, double targetMoney) {
+        if (initiatorAp == null || !isTradeGuiOpen(initiator) || !NetworkManager.isActive()) {
+            cancelTrade(trade, trade.getInitiatorUuid());
+            return;
+        }
+        if (initiatorAp.getBalance() < initiatorMoney) {
+            cancelTrade(trade, trade.getInitiatorUuid());
+            initiator.sendMessage(ChatUtils.chatMessage(Lang.getFor(initiator, "trade.not_enough_money")));
+            return;
+        }
+
+        ItemStack[] initiatorItems = cloneItemArray(trade.getMyItems(trade.getInitiatorUuid()));
+        ItemStack[] expectedTargetItems = cloneItemArray(trade.getMyItems(trade.getTargetUuid()));
+
+        // Take the initiator's side into escrow. The trade is unregistered first so closing the GUI
+        // does not hand the offered items back.
+        unregisterTrade(trade);
+        Inventory inv = initiator.getOpenInventory().getTopInventory();
+        for (int i = 0; i < 12; i++) {
+            inv.setItem(leftIndexToGuiSlot(i), null);
+        }
+        initiator.closeInventory();
+        if (initiatorMoney > 0) {
+            applyBalanceDelta(trade.getInitiatorUuid(), -initiatorMoney);
+        }
+
+        UUID commitId = UUID.randomUUID();
+        BukkitTask timeout = Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
+            PendingCommit expired = pendingCommits.remove(commitId);
+            if (expired != null) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Cross-server trade " + commitId
+                        + " got no reply from the other server, refunding " + expired.initiatorUuid());
+                refundEscrow(expired, null);
+            }
+        }, COMMIT_TIMEOUT_TICKS);
+        pendingCommits.put(commitId, new PendingCommit(trade.getInitiatorUuid(), trade.getTargetUuid(),
+                initiatorItems, initiatorMoney, timeout));
+
+        NetworkManager.getInstance().publishTradeExecute(commitId, trade.getInitiatorUuid(), initiatorItems,
+                initiatorMoney, expectedTargetItems, targetMoney);
+    }
+
+    /**
+     * Gives the escrowed offer back to the initiator after the target's server refused the trade.
+     */
+    private static void refundEscrow(PendingCommit pending, String otherNick) {
+        if (pending.initiatorMoney() > 0) {
+            applyBalanceDelta(pending.initiatorUuid(), pending.initiatorMoney());
+        }
+        Player initiator = Bukkit.getPlayer(pending.initiatorUuid());
+        if (initiator != null) {
+            giveItems(initiator, pending.initiatorItems());
+            String nick = otherNick != null ? otherNick : "?";
+            initiator.sendMessage(ChatUtils.chatMessage(Lang.getFor(initiator, "trade.cancelled_other", "player", nick)));
+        } else {
+            logUndeliveredItems(pending.initiatorUuid(), pending.initiatorItems(), "refund");
+        }
+    }
+
+    /**
+     * Second half of a cross-server trade, run on the initiator's server once the target's server
+     * has either committed or refused the trade.
+     */
+    public static void onRemoteTradeResult(UUID commitId, boolean success, ItemStack[] itemsForInitiator,
+                                           double targetMoney, String targetNick) {
+        PendingCommit pending = pendingCommits.remove(commitId);
+        if (pending == null) {
+            if (success) {
+                // The escrow was already refunded after the timeout, so the initiator must not also be paid
+                Bukkit.getLogger().severe(AranarthCore.LOG_PREFIX + "Cross-server trade " + commitId
+                        + " completed after its timeout, the initiator was already refunded. Check for duplicated items");
+            }
+            return;
+        }
+        pending.timeout().cancel();
+
+        if (!success) {
+            refundEscrow(pending, targetNick);
+            return;
+        }
+
+        if (isValidMoney(targetMoney) && targetMoney > 0) {
+            applyBalanceDelta(pending.initiatorUuid(), targetMoney);
+        }
+
+        // Record market price data from this trade
+        if (!isEmptyOffer(itemsForInitiator)) {
+            double price = pending.initiatorMoney() > 0 ? pending.initiatorMoney() : computeFullyKnownValue(pending.initiatorItems());
+            if (price > 0) {
+                TradeMarketUtils.recordTradeTransaction(itemsForInitiator, price);
             }
         }
+        if (!isEmptyOffer(pending.initiatorItems())) {
+            double price = targetMoney > 0 ? targetMoney : computeFullyKnownValue(itemsForInitiator);
+            if (price > 0) {
+                TradeMarketUtils.recordTradeTransaction(pending.initiatorItems(), price);
+            }
+        }
+
+        Player initiator = Bukkit.getPlayer(pending.initiatorUuid());
+        if (initiator != null) {
+            giveItems(initiator, itemsForInitiator);
+            initiator.sendMessage(ChatUtils.chatMessage(Lang.getFor(initiator, "trade.completed")));
+            initiator.playSound(initiator, Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.2F);
+        } else {
+            logUndeliveredItems(pending.initiatorUuid(), itemsForInitiator, "completed trade");
+        }
+    }
+
+    /**
+     * Logs items that could not be handed to a player who left mid-trade, so staff can restore them.
+     */
+    private static void logUndeliveredItems(UUID uuid, ItemStack[] items, String reason) {
+        if (isEmptyOffer(items)) {
+            return;
+        }
+        try {
+            Bukkit.getLogger().severe(AranarthCore.LOG_PREFIX + "Could not deliver " + reason + " items to offline player "
+                    + uuid + ", restore manually: " + ItemUtils.itemStackArrayToBase64(items));
+        } catch (Exception e) {
+            Bukkit.getLogger().severe(AranarthCore.LOG_PREFIX + "Could not deliver " + reason + " items to offline player "
+                    + uuid + " and could not serialize them: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Changes a player's balance and keeps the other server's copy in step.
+     */
+    private static void applyBalanceDelta(UUID uuid, double delta) {
+        AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+        if (ap == null) {
+            return;
+        }
+        ap.setBalance(ap.getBalance() + delta);
+        AranarthUtils.setPlayer(uuid, ap);
+        PersistenceUtils.saveAranarthPlayerImmediately(uuid);
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishBalanceAdjust(uuid, delta);
+        }
+    }
+
+    /**
+     * Whether a trade money amount is a real, non-negative number.
+     */
+    public static boolean isValidMoney(double amount) {
+        return Double.isFinite(amount) && amount >= 0;
+    }
+
+    /**
+     * Whether two offers hold exactly the same items in the same slots.
+     */
+    private static boolean offersMatch(ItemStack[] a, ItemStack[] b) {
+        for (int i = 0; i < 12; i++) {
+            ItemStack x = i < a.length ? a[i] : null;
+            ItemStack y = i < b.length ? b[i] : null;
+            boolean xEmpty = x == null || x.getType().isAir();
+            boolean yEmpty = y == null || y.getType().isAir();
+            if (xEmpty != yEmpty) {
+                return false;
+            }
+            if (!xEmpty && !x.equals(y)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -471,7 +647,7 @@ public class TradeManager {
     /**
      * Called on the invitee's server when a cross-server invite arrives.
      */
-    public static void onCrossServerInvite(UUID inviterUuid, String inviterName, UUID inviteeUuid) {
+    public static void onCrossServerInvite(UUID inviterUuid, String inviterName, String inviterUsername, UUID inviteeUuid) {
         addCrossServerInvite(inviteeUuid, inviterUuid);
         Player invitee = Bukkit.getPlayer(inviteeUuid);
         if (invitee == null) {
@@ -484,15 +660,15 @@ public class TradeManager {
                 .deserialize(ChatUtils.chatMessage(Lang.getFor(invitee, "trade.invite_line2_pre") + " "));
         Component line2Cmd = ChatUtils.clickableCommand(
                 LegacyComponentSerializer.legacySection()
-                        .deserialize(ChatUtils.translateToColor("&e/trade " + inviterName)),
+                        .deserialize(ChatUtils.translateToColor("&e/trade " + inviterUsername)),
                 ChatUtils.translateToColor(Lang.getFor(invitee, "trade.invite_hover")),
-                "/trade " + inviterName,
+                "/trade " + inviterUsername,
                 true);
         Component line2Suf = LegacyComponentSerializer.legacySection()
                 .deserialize(ChatUtils.translateToColor(Lang.getFor(invitee, "trade.invite_line2_suf")));
         Component hereLink = LegacyComponentSerializer.legacySection()
                 .deserialize(ChatUtils.translateToColor(Lang.getFor(invitee, "trade.invite_here")))
-                .clickEvent(ClickEvent.runCommand("/trade " + inviterName));
+                .clickEvent(ClickEvent.runCommand("/trade " + inviterUsername));
         Component message = line1
                 .append(Component.newline())
                 .append(line2Pre)
@@ -572,7 +748,7 @@ public class TradeManager {
      */
     public static void onRemoteMoneyUpdate(UUID changerUuid, UUID initiatorUuid, double amount) {
         Trade trade = activeTrades.get(initiatorUuid);
-        if (trade == null) {
+        if (trade == null || !isValidMoney(amount)) {
             return;
         }
 
@@ -656,42 +832,89 @@ public class TradeManager {
     }
 
     /**
-     * Called on the target's server when the initiator's server executes the trade.
+     * Called on the target's server when the initiator's server has taken its side into escrow. The
+     * trade only goes through if both offers are still exactly what each player agreed to and the
+     * target can still pay, and the result is always reported back so the initiator is either paid
+     * or refunded.
      */
-    public static void onRemoteExecute(UUID initiatorUuid, ItemStack[] itemsForLocal,
-                                       double initiatorMoney, double targetMoney) {
+    public static void onRemoteExecute(UUID commitId, UUID initiatorUuid, ItemStack[] itemsForLocal, double initiatorMoney,
+                                       ItemStack[] expectedLocalItems, double targetMoney) {
         Trade trade = activeTrades.get(initiatorUuid);
         if (trade == null) {
+            publishResult(commitId, initiatorUuid, false, new ItemStack[12], 0, null);
             return;
         }
 
         UUID localUuid = trade.getTargetUuid();
         Player local = Bukkit.getPlayer(localUuid);
         AranarthPlayer localAp = AranarthUtils.getPlayer(localUuid);
+        String localNick = localAp != null ? localAp.getNickname() : localUuid.toString();
 
-        // Validate local (target) player's balance
-        if (targetMoney > 0 && localAp != null && localAp.getBalance() < targetMoney) {
+        boolean guiOpen = isTradeGuiOpen(local);
+        if (guiOpen) {
+            syncLeftSlots(local, trade);
+        }
+
+        boolean valid = guiOpen && localAp != null
+                && trade.areBothConfirmed()
+                && isValidMoney(initiatorMoney) && isValidMoney(targetMoney)
+                && trade.getMyMoney(localUuid) == targetMoney
+                && trade.getMyMoney(initiatorUuid) == initiatorMoney
+                && offersMatch(trade.getMyItems(localUuid), expectedLocalItems)
+                && offersMatch(trade.getMyItems(initiatorUuid), itemsForLocal)
+                && localAp.getBalance() >= targetMoney;
+
+        if (!valid) {
             unregisterTrade(trade);
             if (local != null) {
-                local.sendMessage(ChatUtils.chatMessage(Lang.getFor(local, "trade.not_enough_money")));
+                if (localAp != null && localAp.getBalance() < targetMoney) {
+                    local.sendMessage(ChatUtils.chatMessage(Lang.getFor(local, "trade.not_enough_money")));
+                } else {
+                    local.sendMessage(ChatUtils.chatMessage(Lang.getFor(local, "trade.cancelled_self")));
+                }
                 returnItemsToPlayer(local, trade.getMyItems(localUuid));
                 local.closeInventory();
             }
+            publishResult(commitId, initiatorUuid, false, new ItemStack[12], 0, localNick);
             return;
         }
 
+        // Commit the target's side. The trade is unregistered first so closing the GUI does not hand
+        // the offered items back.
+        ItemStack[] itemsForInitiator = cloneItemArray(trade.getMyItems(localUuid));
         unregisterTrade(trade);
-
-        if (localAp != null && (initiatorMoney != 0 || targetMoney != 0)) {
-            localAp.setBalance(localAp.getBalance() - targetMoney + initiatorMoney);
-            PersistenceUtils.saveAranarthPlayerImmediately(localUuid);
+        Inventory inv = local.getOpenInventory().getTopInventory();
+        for (int i = 0; i < 12; i++) {
+            inv.setItem(leftIndexToGuiSlot(i), null);
         }
+        if (initiatorMoney != 0 || targetMoney != 0) {
+            applyBalanceDelta(localUuid, initiatorMoney - targetMoney);
+        }
+        giveItems(local, itemsForLocal);
+        local.closeInventory();
+        local.sendMessage(ChatUtils.chatMessage(Lang.getFor(local, "trade.completed")));
+        local.playSound(local, Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.2F);
 
-        if (local != null) {
-            giveItems(local, itemsForLocal);
-            local.closeInventory();
-            local.sendMessage(ChatUtils.chatMessage(Lang.getFor(local, "trade.completed")));
-            local.playSound(local, Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.2F);
+        publishResult(commitId, initiatorUuid, true, itemsForInitiator, targetMoney, localNick);
+    }
+
+    private static void publishResult(UUID commitId, UUID initiatorUuid, boolean success, ItemStack[] itemsForInitiator,
+                                      double targetMoney, String targetNick) {
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishTradeResult(commitId, initiatorUuid, success, itemsForInitiator,
+                    targetMoney, targetNick != null ? targetNick : "?");
+        }
+    }
+
+    /**
+     * Cancels the trade of a player who is leaving this server, so their offered items are returned
+     * before their inventory is saved.
+     */
+    public static void handleQuit(Player player) {
+        clearAwaitingPayInput(player.getUniqueId());
+        Trade trade = activeTrades.get(player.getUniqueId());
+        if (trade != null) {
+            cancelTrade(trade, player.getUniqueId());
         }
     }
 

@@ -21,18 +21,20 @@ public class GuiReaper {
 
     private final Inventory inventory;
 
-    public GuiReaper(Player player, ItemStack[] drops, double cost, long deathTime, Location deathLocation) {
-        this.inventory = initializeGui(player, drops, cost, deathTime, deathLocation);
+    public GuiReaper(Player player, ItemStack[] drops, double cost, long deathTime, Location deathLocation, boolean deathLocationKnown,
+                     String[] record) {
+        this.inventory = initializeGui(player, drops, cost, deathTime, deathLocation, deathLocationKnown, record);
     }
 
-    private Inventory initializeGui(Player player, ItemStack[] drops, double cost, long deathTime, Location deathLocation) {
+    private Inventory initializeGui(Player player, ItemStack[] drops, double cost, long deathTime, Location deathLocation, boolean deathLocationKnown,
+                                    String[] record) {
         Inventory inv = GuiHolder.create(player, 54, Lang.getFor(player, TITLE_KEY));
         // The click handler only ever uses this server-side copy, never what the GUI displays
         ItemStack[] dropsCopy = new ItemStack[drops.length];
         for (int i = 0; i < drops.length; i++) {
             dropsCopy[i] = drops[i] == null ? null : drops[i].clone();
         }
-        GuiHolder.of(inv).setData(new ReaperState(dropsCopy, cost, deathLocation.clone()));
+        GuiHolder.of(inv).setData(new ReaperState(dropsCopy, cost, deathLocation.clone(), deathLocationKnown, deathTime, record.clone()));
 
         // Display the drop items
         int displaySlots = Math.min(drops.length, 45);
@@ -104,6 +106,7 @@ public class GuiReaper {
     /**
      * The Reaper Inventory as it was loaded when the GUI was opened.
      */
-    public record ReaperState(ItemStack[] drops, double cost, Location deathLocation) {
+    public record ReaperState(ItemStack[] drops, double cost, Location deathLocation, boolean deathLocationKnown, long deathTime,
+                              String[] record) {
     }
 }

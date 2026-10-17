@@ -37,6 +37,8 @@ public class MarketUtils {
     private static final double RISE_RATE = 0.01664;
     private static final double PRESSURE_THRESHOLD = 0.01;
     private static final double CHANGE_THRESHOLD = 0.005;
+    // A server shop never pays more than this share of the cheapest server shop buy price for the same item
+    private static final double MAX_SELL_TO_BUY_RATIO = 0.9;
 
     /**
      * Whether a server shop's sell price is currently sitting at its floor or ceiling.
@@ -98,10 +100,25 @@ public class MarketUtils {
      */
     public static void addSellPressure(Shop shop, int quantitySold) {
         String key = getShopKey(shop);
-        if (marketData.get(key) == null) {
+        MarketDynamics data = marketData.get(key);
+        if (data == null) {
             return;
         }
         double delta = quantitySold / (double) (INVENTORY_SLOTS * shop.getItem().getMaxStackSize());
+
+        // Lower the price right away instead of at the next tick, so a burst of sales cannot all get the high price
+        Shop liveShop = ShopUtils.getShopFromLocation(shop.getLocation());
+        if (liveShop != null && liveShop.getUuid() == null && liveShop.getSellPrice() > 0 && data.getDefaultSellPrice() > 0) {
+            double floor = data.getDefaultSellPrice() * PRICE_FLOOR_MODIFIER;
+            double dropped = Math.max(floor, liveShop.getSellPrice() * Math.exp(-SALE_IMPACT * delta));
+            dropped = Math.round(clampToBuyPrices(liveShop, dropped) * 100.0) / 100.0;
+            data.setAppliedPressure(data.getAppliedPressure() + delta);
+            if (dropped != liveShop.getSellPrice()) {
+                liveShop.setSellPrice(dropped);
+                data.setCurrentPriceModifier(dropped / data.getDefaultSellPrice());
+                refreshServerShopSign(liveShop);
+            }
+        }
         // Write atomically to DB so both servers contribute to the same counter
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
                 () -> DatabaseManager.getInstance().addMarketSellPressure(key, delta));
@@ -116,13 +133,15 @@ public class MarketUtils {
         if (existing == null) {
             MarketDynamics data = new MarketDynamics(key, adminTypedSellPrice, 1.0, 0.0);
             marketData.put(key, data);
-            shop.setSellPrice(adminTypedSellPrice);
+            shop.setSellPrice(Math.round(clampToBuyPrices(shop, adminTypedSellPrice) * 100.0) / 100.0);
         } else {
             double modifier = existing.getCurrentPriceModifier();
             existing.setDefaultSellPrice(adminTypedSellPrice);
-            double newPrice = Math.round(adminTypedSellPrice * modifier * 100.0) / 100.0;
+            double newPrice = Math.round(clampToBuyPrices(shop, adminTypedSellPrice * modifier) * 100.0) / 100.0;
             shop.setSellPrice(newPrice);
         }
+        // The sign is written by the sign change event, so it is corrected once that has finished
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> refreshServerShopSign(shop));
     }
 
     /**
@@ -183,6 +202,8 @@ public class MarketUtils {
                         newPrice = Math.min(defaultPrice * PRICE_CEILING_MODIFIER, currentPrice * (1.0 + RISE_RATE));
                     }
 
+                    newPrice = clampToBuyPrices(shop, newPrice);
+
                     if (Math.abs(newPrice - currentPrice) > CHANGE_THRESHOLD) {
                         double modifier = newPrice / defaultPrice;
                         data.setCurrentPriceModifier(modifier);
@@ -204,6 +225,36 @@ public class MarketUtils {
                 }
             });
         });
+    }
+
+    /**
+     * Caps a server shop's sell price so that, per item, it is at most MAX_SELL_TO_BUY_RATIO of the
+     * cheapest buy price of any server shop selling the same item (including this one).
+     */
+    public static double clampToBuyPrices(Shop shop, double sellPrice) {
+        List<Shop> serverShops = ShopUtils.getShops().get(null);
+        if (serverShops == null || shop.getItem() == null || shop.getQuantity() <= 0) {
+            return sellPrice;
+        }
+        String itemKey = TradeMarketUtils.getMarketKey(shop.getItem());
+        if (itemKey == null) {
+            return sellPrice;
+        }
+        double cheapestBuyPerUnit = Double.MAX_VALUE;
+        for (Shop other : serverShops) {
+            if (other.getBuyPrice() <= 0 || other.getQuantity() <= 0 || other.getItem() == null) {
+                continue;
+            }
+            if (!itemKey.equals(TradeMarketUtils.getMarketKey(other.getItem()))) {
+                continue;
+            }
+            cheapestBuyPerUnit = Math.min(cheapestBuyPerUnit, other.getBuyPrice() / other.getQuantity());
+        }
+        if (cheapestBuyPerUnit == Double.MAX_VALUE) {
+            return sellPrice;
+        }
+        double maxSellPrice = cheapestBuyPerUnit * MAX_SELL_TO_BUY_RATIO * shop.getQuantity();
+        return Math.min(sellPrice, maxSellPrice);
     }
 
     /**

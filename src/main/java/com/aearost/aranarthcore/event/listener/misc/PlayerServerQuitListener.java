@@ -5,7 +5,6 @@ import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.SpecialDay;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
-import com.aearost.aranarthcore.objects.Trade;
 import com.aearost.aranarthcore.utils.*;
 import com.aearost.aranarthcore.voice.VoiceChatManager;
 import org.bukkit.Bukkit;
@@ -53,11 +52,7 @@ public class PlayerServerQuitListener implements Listener {
         DateUtils.clearOutdoorExposure(player.getUniqueId());
 
         // Cancel any active trade when a player disconnects
-        Trade trade = TradeManager.getTrade(player.getUniqueId());
-        if (trade != null) {
-            TradeManager.cancelTrade(trade, player.getUniqueId());
-        }
-        TradeManager.clearAwaitingPayInput(player.getUniqueId());
+        TradeManager.handleQuit(player);
 
         // Must run before consumeTransferring() so transferring players keep their voice channel on the other server
         VoiceChatManager.onPlayerQuit(player, NetworkManager.isActive()

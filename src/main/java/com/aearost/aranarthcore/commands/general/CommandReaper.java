@@ -28,6 +28,7 @@ public class CommandReaper implements CommandExecutor {
 
     // 24 hours in milliseconds
     private static final long EXPIRY_MS = 24L * 60 * 60 * 1000;
+    private static final long CACHE_GRACE_MS = 10_000L;
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
@@ -37,18 +38,30 @@ public class CommandReaper implements CommandExecutor {
         }
 
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+            // The database is the only copy both servers share, so it decides whether a Reaper
+            // Inventory still exists. The local cache only covers the moment right after a death,
+            // before the database write has landed.
             String[] cached = ReaperManager.get(player.getUniqueId());
-            String[] data = cached != null ? cached
-                    : DatabaseManager.isActive() ? DatabaseManager.getInstance().loadReaperInventory(player.getUniqueId())
-                    : null;
+            String[] loaded;
+            if (DatabaseManager.isActive()) {
+                loaded = DatabaseManager.getInstance().loadReaperInventory(player.getUniqueId());
+                if (loaded == null && cached != null && System.currentTimeMillis() - Long.parseLong(cached[1]) < CACHE_GRACE_MS) {
+                    loaded = cached;
+                } else if (loaded == null && cached != null) {
+                    ReaperManager.remove(player.getUniqueId());
+                }
+            } else {
+                loaded = cached;
+            }
+            final String[] finalData = loaded;
 
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
-                if (data == null) {
+                if (finalData == null) {
                     player.sendMessage(ChatUtils.chatMessage(Lang.get("reaper.no_inventory")));
                     return;
                 }
 
-                long deathTime = Long.parseLong(data[1]);
+                long deathTime = Long.parseLong(finalData[1]);
                 if (System.currentTimeMillis() - deathTime > EXPIRY_MS) {
                     ReaperManager.remove(player.getUniqueId());
                     Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
@@ -59,7 +72,7 @@ public class CommandReaper implements CommandExecutor {
 
                 ItemStack[] drops;
                 try {
-                    drops = ItemUtils.itemStackArrayFromBase64(data[0]);
+                    drops = ItemUtils.itemStackArrayFromBase64(finalData[0]);
                 } catch (IOException e) {
                     player.sendMessage(ChatUtils.chatMessage(Lang.get("reaper.load_failed")));
                     Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Failed to deserialize reaper drops for " + player.getName() + ": " + e.getMessage());
@@ -68,14 +81,19 @@ public class CommandReaper implements CommandExecutor {
 
                 // Parse death location - fall back to player's current location for old entries without location data
                 Location deathLocation = player.getLocation();
-                if (data.length >= 6 && data[2] != null && !data[2].isEmpty()) {
-                    World deathWorld = Bukkit.getWorld(data[2]);
+                boolean deathLocationKnown = false;
+                // Both servers have worlds with the same names, so the death must also have been on this server
+                String thisServer = AranarthCore.getInstance().getConfig().getString("network.this-server", "survival");
+                boolean diedOnThisServer = finalData.length < 7 || finalData[6] == null || finalData[6].equals(thisServer);
+                if (diedOnThisServer && finalData.length >= 6 && finalData[2] != null && !finalData[2].isEmpty()) {
+                    World deathWorld = Bukkit.getWorld(finalData[2]);
                     if (deathWorld != null) {
                         try {
-                            double x = Double.parseDouble(data[3]);
-                            double y = Double.parseDouble(data[4]);
-                            double z = Double.parseDouble(data[5]);
+                            double x = Double.parseDouble(finalData[3]);
+                            double y = Double.parseDouble(finalData[4]);
+                            double z = Double.parseDouble(finalData[5]);
                             deathLocation = new Location(deathWorld, x, y, z);
+                            deathLocationKnown = true;
                         } catch (NumberFormatException ignored) {
                         }
                     }
@@ -84,7 +102,7 @@ public class CommandReaper implements CommandExecutor {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                 double cost = getReaperCost(aranarthPlayer.getRank());
 
-                GuiReaper gui = new GuiReaper(player, drops, cost, deathTime, deathLocation);
+                GuiReaper gui = new GuiReaper(player, drops, cost, deathTime, deathLocation, deathLocationKnown, finalData);
                 gui.openGui(player);
             });
         });

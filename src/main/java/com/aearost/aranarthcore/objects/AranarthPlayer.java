@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.objects;
 
 import com.aearost.aranarthcore.enums.FireType;
 import com.aearost.aranarthcore.enums.Pronouns;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.MusicInstrument;
 import org.bukkit.entity.EntityType;
@@ -731,6 +732,11 @@ public class AranarthPlayer {
      * @param balance The new value for the player's balance.
      */
     public void setBalance(double balance) {
+        // A NaN or infinite balance would pass every "balance < price" check, so it is never stored
+        if (!Double.isFinite(balance)) {
+            Bukkit.getLogger().warning("[AC] Refused to set a non-finite balance for " + username);
+            return;
+        }
         this.balance = balance;
     }
 

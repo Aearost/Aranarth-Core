@@ -62,11 +62,13 @@ public class PlayerReaperCapture {
         double deathX = deathLocation.getX();
         double deathY = deathLocation.getY();
         double deathZ = deathLocation.getZ();
+        // Both servers have worlds with the same names, so the server is needed to know where the death was
+        String deathServer = AranarthCore.getInstance().getConfig().getString("network.this-server", "survival");
 
-        ReaperManager.put(player.getUniqueId(), dropsB64, deathTime, deathWorld, deathX, deathY, deathZ);
+        ReaperManager.put(player.getUniqueId(), dropsB64, deathTime, deathWorld, deathX, deathY, deathZ, deathServer);
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
             if (DatabaseManager.getInstance() != null) {
-                DatabaseManager.getInstance().upsertReaperInventory(player.getUniqueId(), dropsB64, deathTime, deathWorld, deathX, deathY, deathZ);
+                DatabaseManager.getInstance().upsertReaperInventory(player.getUniqueId(), dropsB64, deathTime, deathWorld, deathX, deathY, deathZ, deathServer);
             }
         });
 

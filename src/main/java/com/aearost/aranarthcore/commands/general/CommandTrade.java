@@ -175,7 +175,7 @@ public class CommandTrade implements CommandExecutor {
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "trade.invite_sent", "player", targetNick)));
 
             if (NetworkManager.isActive()) {
-                NetworkManager.getInstance().publishTradeInvite(uuid, senderAp.getNickname(), targetUuid);
+                NetworkManager.getInstance().publishTradeInvite(uuid, senderAp.getNickname(), player.getName(), targetUuid);
             }
         }
         return true;

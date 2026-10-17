@@ -89,6 +89,14 @@ public class PlayerChatListener implements Listener {
                 return;
             }
 
+            // NaN and Infinity parse fine but would corrupt both balances
+            if (!Double.isFinite(amount)) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_number")));
+                Bukkit.getScheduler().runTask(plugin, () -> new GuiTrade(player, trade).openGui());
+                return;
+            }
+            amount = Math.round(amount * 100) / 100.0;
+
             if (amount < 0) {
                 player.sendMessage(ChatUtils.chatMessage(Lang.get("economy.pay_negative")));
                 Bukkit.getScheduler().runTask(plugin, () -> new GuiTrade(player, trade).openGui());

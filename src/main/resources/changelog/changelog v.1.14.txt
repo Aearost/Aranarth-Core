@@ -6,6 +6,7 @@ World & Events
 [~] Wandering Enchanter over-leveled lockout is now per-player
 [~] Fixed AFK messages not displaying nicknames in color correctly
 [~] Prevented block placing and table commands in the arena world outside of admin mode
+[~] Fixed a creative crash exploit where nested containers could be created with ctrl + pick block and burned to spawn hundreds of thousands of items
 
 Bending & Abilities
 [~] Fixed AngeredSpirits and other effect abilities respecting dominion relations in the arena
@@ -35,6 +36,7 @@ Economy, Jobs & Quests
 [+] Added /q alias for quests
 [~] Market prices now drop sharply on mass sales, scaled by item stack size
 [~] Login streak rewards can now be claimed in creative, with crate keys sent to /keyclaim
+[~] Fixed cross-server trade and Reaper Inventory duplication, invalid trade money entries, job pay loops, server shop redundancy, colored-nickaname trade invites and MySQL column migrations
 
 Chat, UI & Sounds
 
