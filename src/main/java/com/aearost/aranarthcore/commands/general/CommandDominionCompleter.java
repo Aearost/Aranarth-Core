@@ -236,7 +236,14 @@ public class CommandDominionCompleter implements TabCompleter {
 				}
 				yield List.of();
 			}
-			case "mapcolor" -> filter(MAP_COLOR_OPTIONS, args[1]);
+			case "mapcolor" -> {
+				if (args.length == 2) {
+					List<String> opts = new ArrayList<>(MAP_COLOR_OPTIONS);
+					if (sender.hasPermission("aranarth.chat.gradient")) opts.add("#RRGGBB");
+					yield filter(opts, args[1]);
+				}
+				yield List.of();
+			}
 			case "outpost" -> {
 				if (args.length == 2) {
 					yield filter(OUTPOST_OPTIONS, args[1]);

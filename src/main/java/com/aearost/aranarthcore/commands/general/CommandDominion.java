@@ -2331,7 +2331,7 @@ public class CommandDominion implements CommandExecutor {
     /**
      * Sets the map color used to display this dominion on /dominion map.
      * Only the dominion leader may change this.
-     * Accepts named colors (e.g. "red", "blue") or hex codes (e.g. "#FF5500").
+     * Accepts named colors (e.g. "red", "blue") or, with gradient access, hex codes (e.g. "#FF5500").
      * Use "reset" or "none" to restore the default white color.
      *
      * @param args     The command arguments (args[1] is the color).
@@ -2347,16 +2347,22 @@ public class CommandDominion implements CommandExecutor {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.mapcolor_only_leader")));
             return;
         }
+        // Hex map colors are restricted to Saints with gradient access
+        boolean canUseHex = player.hasPermission("aranarth.chat.gradient");
         if (args.length < 2) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.mapcolor_usage")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get(canUseHex ? "dominion.mapcolor_usage" : "dominion.mapcolor_usage_no_hex")));
             player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.mapcolor_colors")));
             return;
         }
         String input = args[1].toLowerCase();
         String colorCode = parseMapColor(input);
         if (colorCode == null) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.mapcolor_invalid")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.get(canUseHex ? "dominion.mapcolor_invalid" : "dominion.mapcolor_invalid_no_hex")));
             player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.mapcolor_colors")));
+            return;
+        }
+        if (colorCode.startsWith("&#") && !canUseHex) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.mapcolor_no_hex_perm")));
             return;
         }
         dominion.setMapColor(colorCode);
