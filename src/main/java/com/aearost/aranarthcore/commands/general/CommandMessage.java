@@ -57,6 +57,14 @@ public class CommandMessage implements CommandExecutor {
 						return true;
 					}
 
+					// Vanished players appear offline
+					if (AranarthUtils.isVanishedFrom(player, targetUuid)) {
+						String displayName = targetAranarthPlayer != null && !targetAranarthPlayer.getNickname().isEmpty()
+								? ChatUtils.stripColorFormatting(targetAranarthPlayer.getNickname()) : args[0];
+						player.sendMessage(ChatUtils.chatMessage(Lang.get("player.offline", "name", displayName)));
+						return true;
+					}
+
 					// If the player is online locally
 					if (target != null) {
 						if (ChatUtils.isPlayerMuted(player)) {

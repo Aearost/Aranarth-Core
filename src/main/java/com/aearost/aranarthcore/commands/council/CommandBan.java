@@ -139,6 +139,10 @@ public class CommandBan {
 			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_number")));
 			return null;
 		}
+		if (time <= 0) {
+			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_number")));
+			return null;
+		}
 
 		LocalDateTime date = LocalDateTime.now();
 		// Minute

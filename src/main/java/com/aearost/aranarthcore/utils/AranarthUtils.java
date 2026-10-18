@@ -13,6 +13,8 @@ import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.network.NetworkTabManager;
 import com.aearost.aranarthcore.objects.*;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.projectkorra.projectkorra.BendingPlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -21,6 +23,7 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.ban.ProfileBanList;
 import org.bukkit.block.*;
 import org.bukkit.block.data.Levelled;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -41,15 +44,16 @@ import org.bukkit.profile.PlayerProfile;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 import static com.aearost.aranarthcore.objects.CustomKeys.*;
@@ -1614,6 +1618,73 @@ public class AranarthUtils {
     }
 
     /**
+     * Provides whether the player is vanished from the viewer.
+     *
+     * @param viewer The sender looking up the player.
+     * @param uuid   The player being looked up.
+     * @return Whether the player must be treated as offline for the viewer.
+     */
+    public static boolean isVanishedFrom(CommandSender viewer, UUID uuid) {
+        if (!(viewer instanceof Player viewerPlayer) || viewerPlayer.getUniqueId().equals(uuid)) {
+            return false;
+        }
+        AranarthPlayer viewerAranarthPlayer = getPlayer(viewerPlayer.getUniqueId());
+        if (viewerAranarthPlayer != null && viewerAranarthPlayer.getCouncilRank() == 3) {
+            return false;
+        }
+        if (Bukkit.getPlayer(uuid) != null) {
+            AranarthPlayer aranarthPlayer = getPlayer(uuid);
+            return aranarthPlayer != null && aranarthPlayer.isVanished();
+        }
+        if (NetworkManager.isActive()) {
+            NetworkPlayer remotePlayer = NetworkManager.getInstance().getRemotePlayer(uuid);
+            return remotePlayer != null && remotePlayer.isVanished();
+        }
+        return false;
+    }
+
+    /**
+     * Provides whether the player is online anywhere on the network and not vanished from the viewer.
+     *
+     * @param viewer The sender looking up the player.
+     * @param uuid   The player being looked up.
+     * @return Whether the player should be shown as online.
+     */
+    public static boolean isVisiblyOnline(CommandSender viewer, UUID uuid) {
+        boolean isOnline = Bukkit.getPlayer(uuid) != null
+                || (NetworkManager.isActive() && NetworkManager.getInstance().getRemotePlayer(uuid) != null);
+        return isOnline && !isVanishedFrom(viewer, uuid);
+    }
+
+    /**
+     * Provides whether the name matches another player's username or nickname, ignoring colors and case.
+     *
+     * @param strippedName The name without color codes.
+     * @param ownUuid      The player choosing the name, whose own names are allowed.
+     * @return Whether another player already uses the name.
+     */
+    public static boolean isNameTakenByOther(String strippedName, UUID ownUuid) {
+        if (strippedName == null || strippedName.isEmpty()) {
+            return false;
+        }
+        for (Map.Entry<UUID, AranarthPlayer> entry : players.entrySet()) {
+            if (entry.getKey().equals(ownUuid)) {
+                continue;
+            }
+            AranarthPlayer other = entry.getValue();
+            if (strippedName.equalsIgnoreCase(other.getUsername())) {
+                return true;
+            }
+            String otherNickname = other.getNickname();
+            if (otherNickname != null && !otherNickname.isEmpty()
+                    && strippedName.equalsIgnoreCase(ChatUtils.stripColorFormatting(otherNickname))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Provides the UUID associated to the given username or nickname.
      * Searches usernames first, then nicknames if no username match is found.
      *
@@ -2265,20 +2336,38 @@ public class AranarthUtils {
     }
 
     /**
+     * Each player's timezone, looked up once from their IP address.
+     */
+    private static final Map<UUID, ZoneId> playerTimezones = new ConcurrentHashMap<>();
+
+    /**
      * Provides the player's timezone.
      *
      * @param player   The player.
      * @param callback The player's timezone.
      */
     public static void getPlayerTimezone(Player player, Consumer<ZoneId> callback) {
+        // Looked up once per player per server start, so the lookup service is never spammed
+        UUID uuid = player.getUniqueId();
+        ZoneId cachedZone = playerTimezones.get(uuid);
+        if (cachedZone != null) {
+            callback.accept(cachedZone);
+            return;
+        }
         String ip = player.getAddress().getAddress().getHostAddress();
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
             try {
-                URL url = new URL("http://ip-api.com/json/" + ip + "?fields=timezone");
-                BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
-                String[] lineSplit = reader.readLine().split("\"");
-                ZoneId zoneId = ZoneId.of(lineSplit[3]);
-                reader.close();
+                HttpURLConnection connection = (HttpURLConnection) new URL("http://ip-api.com/json/" + ip + "?fields=timezone").openConnection();
+                connection.setConnectTimeout(3000);
+                connection.setReadTimeout(3000);
+                ZoneId zoneId;
+                try (InputStreamReader reader = new InputStreamReader(connection.getInputStream())) {
+                    JsonObject response = JsonParser.parseReader(reader).getAsJsonObject();
+                    zoneId = ZoneId.of(response.get("timezone").getAsString());
+                } finally {
+                    connection.disconnect();
+                }
+                playerTimezones.put(uuid, zoneId);
 
                 // Switch back to main thread for player messaging
                 Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> callback.accept(zoneId));
@@ -4033,7 +4122,7 @@ public class AranarthUtils {
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
                     onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "afk.now_afk")));
-                } else {
+                } else if (!isVanishedFrom(onlinePlayer, uuid)) {
                     onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "afk.player_now_afk", "name", nickname)));
                 }
             }
@@ -4051,7 +4140,7 @@ public class AranarthUtils {
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
                     onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "afk.no_longer_afk")));
-                } else {
+                } else if (!isVanishedFrom(onlinePlayer, uuid)) {
                     onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "afk.player_no_longer_afk", "name", nickname)));
                 }
             }

@@ -156,7 +156,14 @@ public class CommandJobs implements CommandExecutor {
     }
 
     private void handleTop(Player player, JobType job) {
-        List<DatabaseManager.JobTopEntry> entries = DatabaseManager.getInstance().loadAllJobEntries();
+        // Read off the main thread and reused for a minute, as this reads every player's job data
+        DatabaseManager.getInstance().getCachedJobEntries(entries -> showTop(player, job, entries));
+    }
+
+    private void showTop(Player player, JobType job, List<DatabaseManager.JobTopEntry> entries) {
+        if (!player.isOnline()) {
+            return;
+        }
 
         record RankedEntry(String name, double totalXp) {
         }

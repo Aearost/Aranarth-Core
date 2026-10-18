@@ -117,6 +117,10 @@ public class CommandMount implements CommandExecutor {
     }
 
     private void setNickname(Player player, String name) {
+        if (!ChatUtils.isSafeStoredText(name)) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.invalid_characters")));
+            return;
+        }
         if (ChatUtils.stripColorFormatting(name).length() > 32) {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("mount.nickname_too_long")));
             return;

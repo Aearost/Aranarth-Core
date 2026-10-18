@@ -155,7 +155,7 @@ public class PersistenceUtils {
                 }
 
                 try {
-                    FileWriter writer = new FileWriter(filePath);
+                    FileWriter writer = new AtomicFileWriter(filePath);
                     writer.write("#homeName|worldName|x|y|z|yaw|pitch|icon\n");
 
                     for (Home homepad : homes) {
@@ -961,7 +961,7 @@ public class PersistenceUtils {
                 }
 
                 try {
-                    FileWriter writer = new FileWriter(filePath);
+                    FileWriter writer = new AtomicFileWriter(filePath);
                     // Template line
                     writer.write("#uuid|chat|messages|teleport|spawnboost|changeclaim|inventory|shulker|blacklist|compressing|chestlock|firetype|gradientchatenabled|gradientchatcolors|daymessage|weathermessage|dominionmsgcompact|joinsound|leavesound|votesound|cratesound|weathersound|newdaysound|newmonthsound|privatemsgsound|teleportsound|avatarsound|dominionSound|aranarthiumsound|chatgamesound|chestsortsound|jobssound|expstoresponud|interactivechat|emojienabled|sizescaleenabled|servertipsdisabled|sitdisabled|sitcushioncolor\n");
 
@@ -1120,7 +1120,7 @@ public class PersistenceUtils {
                 }
 
                 try {
-                    FileWriter writer = new FileWriter(filePath);
+                    FileWriter writer = new AtomicFileWriter(filePath);
                     writer.write("#uuid|worldName|x|y|z|item|quantity|buyPrice|sellPrice\n");
 
                     for (UUID uuid : playerShops.keySet()) {
@@ -1269,7 +1269,7 @@ public class PersistenceUtils {
             }
 
             try {
-                FileWriter writer = new FileWriter(filePath);
+                FileWriter writer = new AtomicFileWriter(filePath);
 
                 writer.write("day:" + AranarthUtils.getDay() + "\n");
                 writer.write("weekday:" + AranarthUtils.getWeekday() + "\n");
@@ -1393,7 +1393,7 @@ public class PersistenceUtils {
             List<LockedContainer> lockedContainers = AranarthUtils.getLockedContainers();
 
             try {
-                FileWriter writer = new FileWriter(filePath);
+                FileWriter writer = new AtomicFileWriter(filePath);
                 writer.write("#owner|trusted|worldName|x1|y1|z1|x2|y2|z2\n");
 
                 if (lockedContainers != null && !lockedContainers.isEmpty()) {
@@ -1704,7 +1704,7 @@ public class PersistenceUtils {
                 }
 
                 List<Dominion> dominions = DominionUtils.getDominions();
-                try (FileWriter writer = new FileWriter(filePath)) {
+                try (FileWriter writer = new AtomicFileWriter(filePath)) {
                     writer.write("#id|name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance|memberRanks|memberPvpEnabled|mobSpawningEnabled|conqueredRequestTimestamp|lastConquerAttemptTimestamp|rebelRequestTimestamp|conqueredRequestDefenderLastSeen|rebelRequestConquerorLastSeen|lastRebelAttemptTimestamp|conqueredTimestamp|boughtChunks|dominionLevel|cachedFarmlandCount|cachedLivestockCount|foundedTimestamp|levelDropTimestamp|boughtOutpostChunks|cachedLivestockByWorld|bendingEnabled|conqueredRequest|rebelRequest\n");
 
                     if (dominions != null && !dominions.isEmpty()) {
@@ -1974,7 +1974,7 @@ public class PersistenceUtils {
             }
 
             try {
-                FileWriter writer = new FileWriter(filePath);
+                FileWriter writer = new AtomicFileWriter(filePath);
                 writer.write("#dominionId|permissions\n");
                 writer.write("#permissions format: RANK:PERM1,PERM2;RANK2:PERM3,...\n");
 
@@ -2127,7 +2127,7 @@ public class PersistenceUtils {
             }
 
             try {
-                FileWriter writer = new FileWriter(filePath);
+                FileWriter writer = new AtomicFileWriter(filePath);
                 writer.write("#dominionId|playerOverrides\n");
                 writer.write("#format: dominionId|playerUUID:PERM1=true,PERM2=false;playerUUID2:PERM3=true\n");
 
@@ -2257,7 +2257,7 @@ public class PersistenceUtils {
             }
 
             try {
-                FileWriter writer = new FileWriter(filePath);
+                FileWriter writer = new AtomicFileWriter(filePath);
                 writer.write("#dominionId|plots\n");
                 writer.write("#format: dominionId|plotName=uuid1,uuid2+world:chunkX:chunkZ,world:chunkX:chunkZ;plotName2=...\n");
 
@@ -2527,7 +2527,7 @@ public class PersistenceUtils {
                 }
 
                 try {
-                    FileWriter writer = new FileWriter(filePath);
+                    FileWriter writer = new AtomicFileWriter(filePath);
                     writer.write("#warpName|worldName|x|y|z|yaw|pitch|icon\n");
 
                     for (Home warp : AranarthUtils.getWarps()) {
@@ -2633,7 +2633,7 @@ public class PersistenceUtils {
             }
 
             try {
-                FileWriter writer = new FileWriter(filePath);
+                FileWriter writer = new AtomicFileWriter(filePath);
                 writer.write("#uuid|date|type|reason|appliedBy\n");
 
                 for (UUID uuid : AranarthUtils.getAllPunishments().keySet()) {
@@ -2760,7 +2760,7 @@ public class PersistenceUtils {
             }
 
             try {
-                FileWriter writer = new FileWriter(filePath);
+                FileWriter writer = new AtomicFileWriter(filePath);
 
                 // Saving the avatar's binds to ensure they are not reset upon relogging
                 Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
@@ -2868,7 +2868,7 @@ public class PersistenceUtils {
             }
 
             try {
-                FileWriter writer = new FileWriter(filePath);
+                FileWriter writer = new AtomicFileWriter(filePath);
 
                 // Saving the avatar's binds to ensure they are not reset upon relogging
                 Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
@@ -2957,7 +2957,7 @@ public class PersistenceUtils {
             }
 
             try {
-                FileWriter writer = new FileWriter(filePath);
+                FileWriter writer = new AtomicFileWriter(filePath);
 
                 HashMap<Boost, LocalDateTime> boosts = AranarthUtils.getServerBoosts();
                 if (!boosts.isEmpty()) {
@@ -3040,7 +3040,7 @@ public class PersistenceUtils {
             }
 
             try {
-                FileWriter writer = new FileWriter(filePath);
+                FileWriter writer = new AtomicFileWriter(filePath);
                 HashMap<UUID, List<Material>> compressibleTypes = AranarthUtils.getCompressibleTypes();
                 for (UUID uuid : compressibleTypes.keySet()) {
                     String line = uuid.toString() + "*";
@@ -3157,7 +3157,7 @@ public class PersistenceUtils {
             }
 
             try {
-                FileWriter writer = new FileWriter(filePath);
+                FileWriter writer = new AtomicFileWriter(filePath);
                 HashMap<UUID, Location> shopLocations = AranarthUtils.getShopLocations();
                 HashMap<UUID, int[]> shopIslandCenters = AranarthUtils.getShopIslandCenters();
                 for (UUID uuid : shopLocations.keySet()) {
@@ -3300,7 +3300,7 @@ public class PersistenceUtils {
             }
 
             try {
-                FileWriter writer = new FileWriter(filePath);
+                FileWriter writer = new AtomicFileWriter(filePath);
                 for (Map.Entry<UUID, Set<UUID>> entry : AranarthUtils.getShopCollaborators().entrySet()) {
                     if (entry.getValue().isEmpty()) {
                         continue;
@@ -3386,7 +3386,7 @@ public class PersistenceUtils {
             }
 
             try {
-                FileWriter writer = new FileWriter(filePath);
+                FileWriter writer = new AtomicFileWriter(filePath);
                 writer.write("#uuid|keyNum|timestamp\n");
                 for (AranarthVote vote : AranarthUtils.getVotes()) {
                     UUID uuid = vote.getUuid();
@@ -3522,7 +3522,7 @@ public class PersistenceUtils {
             }
 
             try {
-                FileWriter writer = new FileWriter(filePath);
+                FileWriter writer = new AtomicFileWriter(filePath);
                 HashMap<UUID, AranarthPlayer> aranarthPlayers = AranarthUtils.getAranarthPlayers();
                 for (UUID uuid : aranarthPlayers.keySet()) {
                     AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
@@ -3663,7 +3663,7 @@ public class PersistenceUtils {
             }
 
             try {
-                FileWriter writer = new FileWriter(filePath);
+                FileWriter writer = new AtomicFileWriter(filePath);
 
                 writer.write("#uuid|worldPrefix|kills|deaths\n");
 
@@ -3761,7 +3761,7 @@ public class PersistenceUtils {
                 Bukkit.getLogger().info("[AC] An error occurred in the creation of chat_game_guesses.txt");
             }
 
-            try (FileWriter writer = new FileWriter(filePath)) {
+            try (FileWriter writer = new AtomicFileWriter(filePath)) {
                 writer.write("#uuid|count|earnings|bestTime|highestStreak\n");
                 for (Map.Entry<UUID, Integer> entry : AranarthUtils.getChatGameGuesses().entrySet()) {
                     double earnings = AranarthUtils.getChatGameEarnings().getOrDefault(entry.getKey(), 0.0);
@@ -3838,7 +3838,7 @@ public class PersistenceUtils {
             }
 
             try {
-                FileWriter writer = new FileWriter(filePath);
+                FileWriter writer = new AtomicFileWriter(filePath);
                 writer.write("#uuid|amount\n");
                 for (Map.Entry<UUID, Integer> entry : AranarthUtils.getPendingVoteKeys().entrySet()) {
                     writer.write(entry.getKey().toString() + "|" + entry.getValue() + "\n");
@@ -3892,7 +3892,7 @@ public class PersistenceUtils {
                 Bukkit.getLogger().info("[AC] An error occurred in the creation of rare_keys.txt");
             }
             try {
-                FileWriter writer = new FileWriter(filePath);
+                FileWriter writer = new AtomicFileWriter(filePath);
                 writer.write("#uuid|amount\n");
                 for (Map.Entry<UUID, Integer> entry : AranarthUtils.getPendingRareKeys().entrySet()) {
                     writer.write(entry.getKey().toString() + "|" + entry.getValue() + "\n");
@@ -3946,7 +3946,7 @@ public class PersistenceUtils {
                 Bukkit.getLogger().info("[AC] An error occurred in the creation of epic_keys.txt");
             }
             try {
-                FileWriter writer = new FileWriter(filePath);
+                FileWriter writer = new AtomicFileWriter(filePath);
                 writer.write("#uuid|amount\n");
                 for (Map.Entry<UUID, Integer> entry : AranarthUtils.getPendingEpicKeys().entrySet()) {
                     writer.write(entry.getKey().toString() + "|" + entry.getValue() + "\n");
@@ -4004,7 +4004,7 @@ public class PersistenceUtils {
                 Bukkit.getLogger().info("[AC] An error occurred in the creation of godly_keys.txt");
             }
             try {
-                FileWriter writer = new FileWriter(filePath);
+                FileWriter writer = new AtomicFileWriter(filePath);
                 writer.write("#uuid|amount\n");
                 for (Map.Entry<UUID, Integer> entry : AranarthUtils.getPendingGodlyKeys().entrySet()) {
                     writer.write(entry.getKey().toString() + "|" + entry.getValue() + "\n");
@@ -4091,7 +4091,7 @@ public class PersistenceUtils {
         }
 
         try {
-            FileWriter writer = new FileWriter(filePath);
+            FileWriter writer = new AtomicFileWriter(filePath);
             writer.write("#Quest state - do not edit manually\n");
             writer.write("lastDailyReset|" + QuestUtils.getLastDailyReset() + "\n");
             writer.write("lastWeeklyReset|" + QuestUtils.getLastWeeklyReset() + "\n");
@@ -4293,7 +4293,7 @@ public class PersistenceUtils {
         }
 
         try {
-            FileWriter writer = new FileWriter(filePath);
+            FileWriter writer = new AtomicFileWriter(filePath);
             writer.write("#uuid|rank|d0task|d0reward|d0prog|d0done|d0claimed|d1task|d1reward|d1prog|d1done|d1claimed|d2task|d2reward|d2prog|d2done|d2claimed|w0task|w0reward|w0prog|w0done|w0claimed|w1task|w1reward|w1prog|w1done|w1claimed|w2task|w2reward|w2prog|w2done|w2claimed\n");
 
             Set<UUID> allUuids = new HashSet<>();
@@ -4421,7 +4421,7 @@ public class PersistenceUtils {
         }
 
         try {
-            FileWriter writer = new FileWriter(filePath);
+            FileWriter writer = new AtomicFileWriter(filePath);
             writer.write("#uuid|currentDay|lastClaimEpochDay|lastLoginEpochDay\n");
 
             HashMap<UUID, Integer> days = LoginStreakUtils.getCurrentStreakDayMap();
@@ -4582,7 +4582,7 @@ public class PersistenceUtils {
             }
 
             try {
-                FileWriter writer = new FileWriter(filePath);
+                FileWriter writer = new AtomicFileWriter(filePath);
                 writer.write("#id|ownerUuid|gateType|isOpen|axis|world|x1:y1:z1:MAT1,x2:y2:z2:MAT2,...\n");
 
                 for (Gate gate : GateUtils.getGates()) {
@@ -4720,7 +4720,7 @@ public class PersistenceUtils {
         }
 
         try {
-            FileWriter writer = new FileWriter(filePath);
+            FileWriter writer = new AtomicFileWriter(filePath);
             writer.write("#playerUUID|element|healthLevel|healthXp|speedLevel|speedXp|thirdLevel|thirdXp|rechargeEndMs|currentHealth|nickname|harnessColor\n");
             for (Map.Entry<UUID, Map<String, Mount>> playerEntry
                     : MountUtils.getAllMounts().entrySet()) {
@@ -4825,7 +4825,7 @@ public class PersistenceUtils {
         }
 
         try {
-            FileWriter writer = new FileWriter(filePath);
+            FileWriter writer = new AtomicFileWriter(filePath);
             writer.write("#Mail data - do not edit manually\n");
             for (Map.Entry<UUID, List<Mail>> entry : MailUtils.getAllMail().entrySet()) {
                 UUID recipientUUID = entry.getKey();
@@ -4966,7 +4966,7 @@ public class PersistenceUtils {
         }
 
         try {
-            FileWriter writer = new FileWriter(filePath);
+            FileWriter writer = new AtomicFileWriter(filePath);
             writer.write("#id|dominionId|name|outpostIndex|worldName|homeX|homeY|homeZ|homeYaw|homePitch|chunks|createdTimestamp|boughtChunks|icon|mobSpawningEnabled|memberPvpEnabled|bendingEnabled|explosionEnabled\n");
 
             for (Dominion dominion : DominionUtils.getDominions()) {
@@ -5182,7 +5182,7 @@ public class PersistenceUtils {
         }
 
         try {
-            FileWriter writer = new FileWriter(filePath);
+            FileWriter writer = new AtomicFileWriter(filePath);
             writer.write("#dominionId|type|world|x|y|z|mode|followPlayerId|guardWorld|guardX|guardY|guardZ|assignedOutpostId\n");
 
             for (Map.Entry<UUID, UUID> entry : DefenderUtils.getEntityToDominion().entrySet()) {
@@ -9538,7 +9538,7 @@ public class PersistenceUtils {
         for (CreativePlot plot : PlotUtils.getPlots()) {
             array.add(PlotUtils.toJson(plot));
         }
-        try (FileWriter writer = new FileWriter(new File(folder, "creative_plots.json"))) {
+        try (FileWriter writer = new AtomicFileWriter(new File(folder, "creative_plots.json"))) {
             writer.write(GSON.toJson(array));
         } catch (IOException e) {
             Bukkit.getLogger().warning("[AC] Failed to save creative_plots.json: " + e.getMessage());

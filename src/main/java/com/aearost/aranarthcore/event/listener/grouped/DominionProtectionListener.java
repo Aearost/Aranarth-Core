@@ -672,13 +672,21 @@ public class DominionProtectionListener implements Listener {
      */
     @EventHandler
     public void onHangingBreak(HangingBreakByEntityEvent e) {
-        if (e.getRemover() instanceof Player player) {
+        // Projectiles count as the player who shot them
+        Entity remover = e.getRemover();
+        if (remover instanceof Projectile projectile && projectile.getShooter() instanceof Player shooter) {
+            remover = shooter;
+        }
+        if (remover instanceof Player player) {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
             if (!aranarthPlayer.isInAdminMode()) {
                 if (applyLogic(player, null, e.getEntity(), DominionPermission.BUILD)) {
                     e.setCancelled(true);
                 }
             }
+        } else if (DominionUtils.getDominionOfChunkAnywhere(e.getEntity().getLocation().getChunk()) != null) {
+            // Mobs and other non-player removers cannot break item frames or paintings in claimed land
+            e.setCancelled(true);
         }
     }
 

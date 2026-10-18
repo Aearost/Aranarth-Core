@@ -44,6 +44,11 @@ public class PlayerChatListener implements Listener {
     private final AranarthCore plugin;
 
     /**
+     * The most interactive keywords turned into components in a single message.
+     */
+    private static final int MAX_INTERACTIVE_KEYWORDS = 3;
+
+    /**
      * Matches [item], [inv], [ec], [coords], [pos] case-insensitively.
      */
     private static final Pattern INTERACTIVE_PATTERN =
@@ -412,8 +417,11 @@ public class PlayerChatListener implements Listener {
 
         Matcher matcher = INTERACTIVE_PATTERN.matcher(rawMessage);
         int lastEnd = 0;
+        int keywordCount = 0;
 
-        while (matcher.find()) {
+        // Only the first few keywords become interactive, so one message cannot store dozens of snapshots
+        while (keywordCount < MAX_INTERACTIVE_KEYWORDS && matcher.find()) {
+            keywordCount++;
             // Append the text segment before this keyword
             if (matcher.start() > lastEnd) {
                 String rawSegment = rawMessage.substring(lastEnd, matcher.start());

@@ -1709,6 +1709,10 @@ public class CommandDominion implements CommandExecutor {
             return null;
         }
         String cleaned = ChatUtils.removeSpecialCharacters(rawName).trim();
+        // Color codes are a perk, so they are removed for everyone else
+        if (!player.hasPermission("aranarth.chat.color") && !player.hasPermission("aranarth.chat.hex")) {
+            cleaned = ChatUtils.stripColorFormatting(cleaned).trim();
+        }
         if (cleaned.isEmpty()) {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.outpost_name_invalid")));
             return null;
@@ -2160,6 +2164,9 @@ public class CommandDominion implements CommandExecutor {
                 player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.invalid_formatting")));
                 return null;
             }
+        } else {
+            // Color codes are a perk, so they are removed for everyone else
+            dominionName = ChatUtils.stripColorFormatting(dominionName);
         }
 
         dominionName = ChatUtils.removeSpecialCharacters(dominionName);

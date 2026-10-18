@@ -10,6 +10,7 @@ import org.bukkit.Bukkit;
 
 import java.sql.*;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -586,6 +587,30 @@ public class DatabaseManager {
     }
 
     /**
+     * Every player's balance, loaded asynchronously and reused for a minute.
+     */
+    private final CachedQuery<Map<UUID, BalanceEntry>> cachedBalances = new CachedQuery<>(this::loadAllPlayerBalances, 60_000L);
+
+    /**
+     * Every player's job data, loaded asynchronously and reused for a minute.
+     */
+    private final CachedQuery<List<JobTopEntry>> cachedJobEntries = new CachedQuery<>(this::loadAllJobEntries, 60_000L);
+
+    /**
+     * Provides every player's balance on the main thread, reusing a result up to a minute old.
+     */
+    public void getCachedPlayerBalances(Consumer<Map<UUID, BalanceEntry>> callback) {
+        cachedBalances.get(callback);
+    }
+
+    /**
+     * Provides every player's job data on the main thread, reusing a result up to a minute old.
+     */
+    public void getCachedJobEntries(Consumer<List<JobTopEntry>> callback) {
+        cachedJobEntries.get(callback);
+    }
+
+    /**
      * Row returned by {@link #loadAllPlayerBalances()}.
      */
     public record BalanceEntry(double balance, String username, String nickname) {
@@ -596,7 +621,8 @@ public class DatabaseManager {
      * Includes username and nickname so /baltop can display players not loaded on this server.
      */
     public Map<UUID, BalanceEntry> loadAllPlayerBalances() {
-        String sql = "SELECT uuid, username, raw_data FROM aranarth_players WHERE raw_data IS NOT NULL AND raw_data != ''";
+        // Only the first 10 fields (up to the balance) are read, never the serialized inventories
+        String sql = "SELECT uuid, username, SUBSTRING_INDEX(raw_data, '|', 10) AS raw_data FROM aranarth_players WHERE raw_data IS NOT NULL AND raw_data != ''";
         Map<UUID, BalanceEntry> result = new HashMap<>();
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);

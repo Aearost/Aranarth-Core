@@ -15,6 +15,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -276,6 +277,16 @@ public class ChatUtils {
     }
 
     /**
+     * Provides whether free text typed by a player is safe to store.
+     *
+     * @param value The text as typed by the player.
+     * @return Whether the text can be stored.
+     */
+    public static boolean isSafeStoredText(String value) {
+        return value != null && !value.matches("(?s).*[|*\\[\\]§\\p{Cntrl}].*");
+    }
+
+    /**
      * Removes all special characters from the input string.
      *
      * @param value The input string.
@@ -481,7 +492,8 @@ public class ChatUtils {
         LocalDateTime currentDate = LocalDateTime.now();
         LocalDateTime definedMuteDate = getMuteEndAsLocalDateTime(aranarthPlayer);
 
-        return definedMuteDate.isBefore(currentDate);
+        // An unreadable end date keeps the player muted until staff unmute them
+        return definedMuteDate == null || definedMuteDate.isAfter(currentDate);
     }
 
     /**
@@ -495,13 +507,13 @@ public class ChatUtils {
 
         LocalDateTime definedMuteDate = null;
         try {
-            int year = Integer.parseInt(muteEndDate.substring(0, 2));
+            int year = Integer.parseInt("20" + muteEndDate.substring(0, 2));
             int month = Integer.parseInt(trimZero(muteEndDate.substring(2, 4)));
             int day = Integer.parseInt(trimZero(muteEndDate.substring(4, 6)));
             int hour = Integer.parseInt(trimZero(muteEndDate.substring(6, 8)));
             int minute = Integer.parseInt(trimZero(muteEndDate.substring(8, 10)));
             definedMuteDate = LocalDateTime.of(year, month, day, hour, minute);
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException | DateTimeException | IndexOutOfBoundsException e) {
             Bukkit.getLogger().info("[AC] Something went wrong with parsing the player's mute date...");
             return null;
         }

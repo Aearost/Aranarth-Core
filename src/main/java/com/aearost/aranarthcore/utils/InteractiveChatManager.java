@@ -3,6 +3,9 @@ package com.aearost.aranarthcore.utils;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -39,6 +42,7 @@ public class InteractiveChatManager {
     }
 
     private static final long EXPIRY_MS = 10 * 60 * 1000L;
+    private static final int MAX_SNAPSHOTS_PER_OWNER = 20;
     private static final ConcurrentHashMap<UUID, Snapshot> snapshots = new ConcurrentHashMap<>();
 
     /**
@@ -46,14 +50,36 @@ public class InteractiveChatManager {
      */
     public static UUID storeSnapshot(UUID ownerId, String ownerDisplayName, SnapshotType type, ItemStack[] items) {
         UUID id = UUID.randomUUID();
+        removeOldestIfAtLimit(ownerId);
         snapshots.put(id, new Snapshot(id, ownerId, ownerDisplayName, type, items));
         return id;
+    }
+
+    /**
+     * Keeps each player under MAX_SNAPSHOTS_PER_OWNER by dropping their oldest snapshot, so chat spam
+     * cannot fill the server's memory with copies of inventories.
+     */
+    private static void removeOldestIfAtLimit(UUID ownerId) {
+        List<Snapshot> owned = new ArrayList<>();
+        for (Snapshot snapshot : snapshots.values()) {
+            if (snapshot.getOwnerId().equals(ownerId)) {
+                owned.add(snapshot);
+            }
+        }
+        if (owned.size() < MAX_SNAPSHOTS_PER_OWNER) {
+            return;
+        }
+        owned.sort(Comparator.comparingLong(Snapshot::getCreatedAt));
+        for (int i = 0; i <= owned.size() - MAX_SNAPSHOTS_PER_OWNER; i++) {
+            snapshots.remove(owned.get(i).getId());
+        }
     }
 
     /**
      * Stores a snapshot using a pre-determined UUID (used when replicating a snapshot from another server).
      */
     public static void storeSnapshotWithId(UUID id, UUID ownerId, String ownerDisplayName, SnapshotType type, ItemStack[] items) {
+        removeOldestIfAtLimit(ownerId);
         snapshots.put(id, new Snapshot(id, ownerId, ownerDisplayName, type, items));
     }
 

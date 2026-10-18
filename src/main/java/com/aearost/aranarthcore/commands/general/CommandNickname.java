@@ -9,6 +9,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -38,22 +39,34 @@ public class CommandNickname implements CommandExecutor {
 				player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.removed")));
 				return true;
 
-			} else if (args.length == 1) {
+			}
+
+			// The typed text, which excludes the gradient keyword and colors
+			boolean isGradient = args[0].equalsIgnoreCase("gradient") || args[0].equalsIgnoreCase("gradientbold");
+			int textStart = isGradient ? 2 : 0;
+			String typedText = String.join(" ", Arrays.copyOfRange(args, Math.min(textStart, args.length), args.length));
+			if (!ChatUtils.isSafeStoredText(typedText)) {
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.invalid_characters")));
+				return true;
+			}
+			if (!isGradient) {
+				if (typedText.contains("&") && !player.hasPermission("aranarth.nick.color")) {
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+					return true;
+				}
+				if (typedText.contains("#") && !player.hasPermission("aranarth.nick.hex")) {
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+					return true;
+				}
+			}
+			// Nobody can take another player's name
+			if (AranarthUtils.isNameTakenByOther(ChatUtils.stripColorFormatting(typedText), player.getUniqueId())) {
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.taken")));
+				return true;
+			}
+
+			if (args.length == 1) {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-				if (args[0].contains("&")) {
-					if (!player.hasPermission("aranarth.nick.color")) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
-						return true;
-					}
-				}
-
-				if (args[0].contains("#")) {
-					if (!player.hasPermission("aranarth.nick.hex")) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
-						return true;
-					}
-				}
-
 				if (ChatUtils.stripColorFormatting(args[0]).length() > 20) {
 					player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.too_long")));
 					return true;

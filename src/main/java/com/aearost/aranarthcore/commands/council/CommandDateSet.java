@@ -21,6 +21,15 @@ public class CommandDateSet {
 			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac dateset <field> <value>")));
 			return true;
 		}
+		// Every field other than the month is a number
+		if (!args[1].equals("month")) {
+			try {
+				Integer.parseInt(args[2]);
+			} catch (NumberFormatException e) {
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_number")));
+				return true;
+			}
+		}
 		switch (args[1]) {
 			case "month" -> {
 				for (Month enumMonth : Month.values()) {

@@ -13,6 +13,7 @@ import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputFilter;
 import java.util.Objects;
 
 /**
@@ -244,6 +245,30 @@ public class ItemUtils {
     }
     
     /**
+     * Only the classes that serialized items are made of may be read, so stored or received item data can
+     * never load other classes.
+     */
+    private static final ObjectInputFilter ITEM_DATA_FILTER = ObjectInputFilter.Config.createFilter(
+            "maxdepth=64;maxrefs=1000000;maxbytes=67108864;maxarray=100000;"
+                    + "java.lang.*;java.util.*;java.math.*;org.bukkit.**;com.google.common.collect.*;!*");
+
+    /**
+     * The most items a serialized inventory or list may contain.
+     */
+    private static final int MAX_ITEM_COUNT = 10_000;
+
+    /**
+     * Reads the number of serialized items, refusing counts that could not come from a real inventory.
+     */
+    private static int readItemCount(BukkitObjectInputStream dataInput) throws IOException {
+        int count = dataInput.readInt();
+        if (count < 0 || count > MAX_ITEM_COUNT) {
+            throw new IOException("Invalid serialized item count: " + count);
+        }
+        return count;
+    }
+
+    /**
      * 
      * A method to get an {@link Inventory} from an encoded, Base64, string.
      * <p />
@@ -266,7 +291,8 @@ public class ItemUtils {
         try {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(noNewlines));
             BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);
-            Inventory inventory = Bukkit.getServer().createInventory(null, dataInput.readInt());
+            dataInput.setObjectInputFilter(ITEM_DATA_FILTER);
+            Inventory inventory = Bukkit.getServer().createInventory(null, readItemCount(dataInput));
 
             // Read the serialized inventory
             for (int i = 0; i < inventory.getSize(); i++) {
@@ -298,7 +324,8 @@ public class ItemUtils {
     	try {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(noNewlines));
             BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);
-            ItemStack[] items = new ItemStack[dataInput.readInt()];
+            dataInput.setObjectInputFilter(ITEM_DATA_FILTER);
+            ItemStack[] items = new ItemStack[readItemCount(dataInput)];
             
             // Read the serialized inventory
             for (int i = 0; i < items.length; i++) {

@@ -149,7 +149,7 @@ public class CouponUtils {
         if (!parent.isDirectory()) {
             boolean result = parent.mkdirs();
         }
-        try (FileWriter writer = new FileWriter(file)) {
+        try (FileWriter writer = new AtomicFileWriter(file)) {
             writer.write(HEADER + "\n");
             for (String line : lines) {
                 writer.write(line + "\n");

@@ -2385,12 +2385,13 @@ public class NetworkManager {
             NetworkTabManager.addToTab(np);
         }
 
-        // Broadcast the AFK message to locally online players
-        String message = isAfk
-                ? "&e" + nickname + " &7is now AFK"
-                : "&e" + nickname + " &7is no longer AFK";
+        // Broadcast the AFK message to locally online players who can see the player
+        String langKey = isAfk ? "afk.player_now_afk" : "afk.player_no_longer_afk";
         for (Player p : Bukkit.getOnlinePlayers()) {
-            p.sendMessage(ChatUtils.chatMessage(message));
+            if (AranarthUtils.isVanishedFrom(p, uuid)) {
+                continue;
+            }
+            p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, langKey, "name", nickname)));
         }
     }
 

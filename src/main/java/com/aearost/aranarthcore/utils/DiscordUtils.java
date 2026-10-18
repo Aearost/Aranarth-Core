@@ -551,8 +551,8 @@ public class DiscordUtils {
 				embed.setColor(new Color(255, 255, 0));
 
 				String formattedEndDate = "None";
-				if (!aranarthPlayer.getMuteEndDate().equals("none")) {
-					LocalDateTime endDate = ChatUtils.getMuteEndAsLocalDateTime(aranarthPlayer);
+				LocalDateTime endDate = ChatUtils.getMuteEndAsLocalDateTime(aranarthPlayer);
+				if (!aranarthPlayer.getMuteEndDate().equals("none") && endDate != null) {
 					String year = endDate.getYear() + "";
 					String month = endDate.getMonthValue() < 10 ? "0" + endDate.getMonthValue() : endDate.getMonthValue() + "";
 					String day = endDate.getDayOfMonth() < 10 ? "0" + endDate.getDayOfMonth() : endDate.getDayOfMonth() + "";

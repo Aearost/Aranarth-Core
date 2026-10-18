@@ -43,6 +43,11 @@ public class CommandReply implements CommandExecutor {
 				return false;
 			} else {
 				OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(lastMessaged);
+				// Vanished players appear offline
+				if (AranarthUtils.isVanishedFrom(player, lastMessaged)) {
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("message.player_offline")));
+					return false;
+				}
 				if (!offlinePlayer.isOnline()) {
 					// Check if the target is on another server before giving up
 					if (NetworkManager.isActive()) {

@@ -73,7 +73,7 @@ public class CommandSeen implements CommandExecutor {
 					displayName = bukkit != null ? bukkit : args[0];
 				}
 
-				boolean isOnline = offlinePlayer.isOnline() || remotePlayer != null;
+				boolean isOnline = AranarthUtils.isVisiblyOnline(sender, uuid);
 				if (isOnline) {
 					sender.sendMessage(ChatUtils.chatMessage(Lang.get("seen.online", "prefix", rankPrefix, "player", displayName)));
 					return true;

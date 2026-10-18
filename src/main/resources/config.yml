@@ -125,6 +125,9 @@ voice-chat:
     port: 24460
     # Must be identical on both servers and at least 16 characters. Keep it private.
     secret: ""
+    # Only used on the host-mode server: the IP address of the other server. When set, connections from any other
+    # address are refused before the handshake. Leave empty to accept any address.
+    allowed-ip: ""
 
 # Creative plots world ("creative" on the Survival server).
 creative-plots:

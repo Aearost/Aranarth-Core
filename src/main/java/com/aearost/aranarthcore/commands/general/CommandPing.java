@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.NetworkPlayer;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
@@ -55,7 +56,8 @@ public class CommandPing implements CommandExecutor {
                     return true;
 				}
 				// If the user is running the command on another player
-				else if (onlinePlayer.getName().equalsIgnoreCase(args[0])) {
+				else if (onlinePlayer.getName().equalsIgnoreCase(args[0])
+						&& !AranarthUtils.isVanishedFrom(sender, onlinePlayer.getUniqueId())) {
 					int ping = onlinePlayer.getPing();
 					if (ping <= 150) {
 						sender.sendMessage(ChatUtils.chatMessage(Lang.get("ping.other_good", "player", onlinePlayer.getName(), "ping", String.valueOf(ping))));
@@ -70,7 +72,8 @@ public class CommandPing implements CommandExecutor {
             // Check the remote roster for cross-server players
             if (NetworkManager.isActive()) {
                 for (NetworkPlayer np : NetworkManager.getInstance().getRemoteRoster().values()) {
-                    if (np.getUsername().equalsIgnoreCase(args[0])) {
+                    if (np.getUsername().equalsIgnoreCase(args[0])
+                            && !AranarthUtils.isVanishedFrom(sender, np.getUuid())) {
                         int ping = np.getPing();
                         if (ping < 0) {
                             // Ping not yet received from remote server

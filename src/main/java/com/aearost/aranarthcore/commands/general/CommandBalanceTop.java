@@ -34,7 +34,16 @@ public class CommandBalanceTop implements CommandExecutor {
 	 */
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
-		List<String> lines = baltopSetup();
+		// Read off the main thread and reused for a minute, as this reads every player's balance
+		DatabaseManager.getInstance().getCachedPlayerBalances(balances -> showPage(sender, args, balances));
+		return true;
+	}
+
+	/**
+	 * Sends the requested page of balances.
+	 */
+	private static void showPage(CommandSender sender, String[] args, Map<UUID, DatabaseManager.BalanceEntry> balances) {
+		List<String> lines = baltopSetup(balances);
 
 		double generalPageAmount = lines.size() / 10.0;
 		int totalPageNumber = (int) generalPageAmount;
@@ -56,7 +65,7 @@ public class CommandBalanceTop implements CommandExecutor {
 				}
 			} catch (NumberFormatException e) {
 				sender.sendMessage(ChatUtils.chatMessage(Lang.get("baltop.invalid_page")));
-				return false;
+				return;
 			}
 
 			if (page > totalPageNumber) {
@@ -97,7 +106,6 @@ public class CommandBalanceTop implements CommandExecutor {
 			}
 		}
 
-		return true;
 	}
 
 	/**
@@ -105,8 +113,7 @@ public class CommandBalanceTop implements CommandExecutor {
 	 * so that balances from other servers are included.
 	 * @return The full list of all player's balances.
 	 */
-	private static List<String> baltopSetup() {
-		Map<UUID, DatabaseManager.BalanceEntry> balances = DatabaseManager.getInstance().loadAllPlayerBalances();
+	private static List<String> baltopSetup(Map<UUID, DatabaseManager.BalanceEntry> balances) {
 		List<Map.Entry<UUID, DatabaseManager.BalanceEntry>> sorted = new ArrayList<>(balances.entrySet());
 		sorted.sort(Comparator.<Map.Entry<UUID, DatabaseManager.BalanceEntry>>comparingDouble(e -> e.getValue().balance()).reversed());
 

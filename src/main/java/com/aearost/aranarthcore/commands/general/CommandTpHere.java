@@ -44,6 +44,11 @@ public class CommandTpHere implements CommandExecutor {
 						}
 					}
 				}
+				// Vanished players appear offline
+				if (targetUUID != null && AranarthUtils.isVanishedFrom(player, targetUUID)) {
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("player.offline", "name", args[0])));
+					return true;
+				}
 				if (targetUUID != null) {
 					Player target = Bukkit.getPlayer(targetUUID);
 					if (target != null) {

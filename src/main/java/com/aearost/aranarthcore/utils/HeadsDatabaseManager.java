@@ -11,6 +11,10 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.Plugin;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -65,13 +69,14 @@ public class HeadsDatabaseManager {
                             .uri(URI.create(API_BASE + cat))
                             .timeout(Duration.ofSeconds(15))
                             .build();
-                    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-                    JsonArray array = JsonParser.parseString(response.body()).getAsJsonArray();
+                    JsonArray array = JsonParser.parseString(fetchBody(client, request)).getAsJsonArray();
                     for (JsonElement el : array) {
                         JsonObject obj = el.getAsJsonObject();
                         String name = obj.get("name").getAsString();
                         String texture = obj.get("value").getAsString();
+                        if (!isTrustedTexture(texture)) {
+                            continue;
+                        }
 
                         Material material = resolveMaterial(name, overrides);
                         HeadEntry entry = new HeadEntry(name, texture, material, cat);
@@ -95,12 +100,14 @@ public class HeadsDatabaseManager {
                             .uri(URI.create(API_BASE + category))
                             .timeout(Duration.ofSeconds(15))
                             .build();
-                    HttpResponse<String> res = client.send(req, HttpResponse.BodyHandlers.ofString());
-                    JsonArray array = JsonParser.parseString(res.body()).getAsJsonArray();
+                    JsonArray array = JsonParser.parseString(fetchBody(client, req)).getAsJsonArray();
                     for (JsonElement el : array) {
                         JsonObject obj = el.getAsJsonObject();
                         String name = obj.get("name").getAsString().toLowerCase();
                         String texture = obj.get("value").getAsString();
+                        if (!isTrustedTexture(texture)) {
+                            continue;
+                        }
                         mobHeadTextures.putIfAbsent(name, texture);
                     }
                 } catch (Exception ex) {
@@ -119,6 +126,43 @@ public class HeadsDatabaseManager {
                         + " heads had no vanilla material match and were skipped (use material-overrides in config.yml to include them).");
             }
         });
+    }
+
+    /**
+     * The largest response accepted from the heads API.
+     */
+    private static final int MAX_RESPONSE_BYTES = 32 * 1024 * 1024;
+
+    /**
+     * Downloads a response body, refusing anything larger than MAX_RESPONSE_BYTES so a bad response
+     * cannot run the server out of memory.
+     */
+    private static String fetchBody(HttpClient client, HttpRequest request) throws IOException, InterruptedException {
+        HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+        try (InputStream body = response.body()) {
+            byte[] bytes = body.readNBytes(MAX_RESPONSE_BYTES + 1);
+            if (bytes.length > MAX_RESPONSE_BYTES) {
+                throw new IOException("Response is larger than " + MAX_RESPONSE_BYTES + " bytes");
+            }
+            return new String(bytes, StandardCharsets.UTF_8);
+        }
+    }
+
+    /**
+     * Returns true if the head texture points to Minecraft's own texture server. Skins from anywhere else
+     * would make every client that sees the head download from that address.
+     */
+    private static boolean isTrustedTexture(String textureBase64) {
+        try {
+            String decoded = new String(Base64.getDecoder().decode(textureBase64), StandardCharsets.UTF_8);
+            String url = JsonParser.parseString(decoded).getAsJsonObject()
+                    .getAsJsonObject("textures").getAsJsonObject("SKIN").get("url").getAsString();
+            URI uri = URI.create(url);
+            return "textures.minecraft.net".equalsIgnoreCase(uri.getHost())
+                    && ("http".equalsIgnoreCase(uri.getScheme()) || "https".equalsIgnoreCase(uri.getScheme()));
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     /**

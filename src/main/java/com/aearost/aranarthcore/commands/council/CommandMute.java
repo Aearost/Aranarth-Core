@@ -88,6 +88,11 @@ public class CommandMute {
 					sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_number")));
 					return;
 				}
+				// The end date is stored with a 2-digit year, so a mute must end before 2100
+				if (time <= 0) {
+					sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_number")));
+					return;
+				}
 
 				LocalDateTime date = LocalDateTime.now();
 
@@ -111,6 +116,10 @@ public class CommandMute {
 					return;
 				}
 
+				if (date.getYear() > 2099) {
+					sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_number")));
+					return;
+				}
 				int year = date.getYear();
 				int month = date.getMonthValue();
 				int day = date.getDayOfMonth();

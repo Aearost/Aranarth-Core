@@ -275,7 +275,9 @@ public class CommandInfo implements CommandExecutor {
 
 		if (sender instanceof Player player) {
 			if (player.hasPermission("aranarth.seen")) {
-				if (offlinePlayer.isOnline()) {
+				// Vanished players appear offline
+				boolean isVanished = AranarthUtils.isVanishedFrom(sender, uuid);
+				if (offlinePlayer.isOnline() && !isVanished) {
 					Player onlinePlayer = offlinePlayer.getPlayer();
 					boolean isAfk = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation() != null &&
 							AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount();
@@ -286,7 +288,7 @@ public class CommandInfo implements CommandExecutor {
 					}
 				} else if (NetworkManager.isActive()) {
 					NetworkPlayer networkPlayer = NetworkManager.getInstance().getRemotePlayer(uuid);
-					if (networkPlayer != null) {
+					if (networkPlayer != null && !isVanished) {
 						sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently online " + getRemoteServerDisplay(networkPlayer.getServer())));
 					} else {
 						AranarthUtils.getPlayerTimezone(player, zoneId -> {
