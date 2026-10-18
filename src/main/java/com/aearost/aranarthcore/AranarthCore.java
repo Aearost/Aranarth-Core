@@ -1240,6 +1240,7 @@ public class AranarthCore extends JavaPlugin {
         new ArenaProtection(this);
         new FireProtectionListener(this);
         new SleepSkipListener(this);
+        new AfkActivityListener(this);
         new BoostEffectsListener(this);
         new McMMOListener(this);
         new LeafDropsListener(this);

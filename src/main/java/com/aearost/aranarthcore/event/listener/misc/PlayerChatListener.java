@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.gui.GuiHeads;
 import com.aearost.aranarthcore.gui.GuiMarketPrice;
 import com.aearost.aranarthcore.gui.GuiRecipes;
 import com.aearost.aranarthcore.gui.GuiShopLocation;
+import com.aearost.aranarthcore.event.player.AfkCancelByInteract;
 import com.aearost.aranarthcore.event.player.GuiDominionResourcesClick;
 import com.aearost.aranarthcore.gui.GuiDominionPlayerPermissions;
 import com.aearost.aranarthcore.gui.GuiTrade;
@@ -311,17 +312,9 @@ public class PlayerChatListener implements Listener {
         }
         e.getRecipients().removeAll(toRemove);
 
-        if (aranarthPlayer.getAfkLocation() != null) {
-            // Automatically un-afk the player if they type a message
-            if (aranarthPlayer.getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount()) {
-                AranarthUtils.toggleAfkStatus(player.getUniqueId(), false);
-            }
-            // Reset their AFK timer
-            else {
-                aranarthPlayer.setAfkLocation(null);
-                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-            }
-        }
+        // Automatically un-afk the player or reset their AFK timer if they type a message
+        // Done on the main thread as chat is async and the AFK sampler runs sync
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> new AfkCancelByInteract().execute(player));
 
         if (ChatUtils.isPlayerMuted(player)) {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("general.muted")));

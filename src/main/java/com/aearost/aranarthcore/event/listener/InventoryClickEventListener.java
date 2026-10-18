@@ -99,6 +99,9 @@ public class InventoryClickEventListener implements Listener {
         // Chat snapshot GUIs are purely view-only
         if (isGui && GuiChatSnapshot.isSnapshotGui(ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
             e.setCancelled(true);
+            if (e.getWhoClicked() instanceof Player snapshotViewer) {
+                new AfkCancelByInteract().execute(snapshotViewer);
+            }
             return;
         }
         if (!(e.getWhoClicked() instanceof Player player)) {

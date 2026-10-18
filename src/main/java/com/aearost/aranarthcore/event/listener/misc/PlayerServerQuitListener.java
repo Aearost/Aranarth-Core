@@ -133,6 +133,7 @@ public class PlayerServerQuitListener implements Listener {
         PermissionUtils.clearPlayerAttachments(player.getUniqueId());
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
         aranarthPlayer.setAfkLocation(null);
+        aranarthPlayer.setAfkStartTime(0);
         // The inventory was already handed to the other server, so dying here would drop a second copy of it
         if (!isCrossServerTransfer && !isNonAuthoritative && !aranarthPlayer.getCombatLogTime().isEmpty()) {
             player.setHealth(0);

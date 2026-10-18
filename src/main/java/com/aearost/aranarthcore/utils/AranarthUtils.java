@@ -4171,8 +4171,8 @@ public class AranarthUtils {
                         aranarthPlayer.setAfkLocation(afkLocation);
                         setPlayer(player.getUniqueId(), aranarthPlayer);
                     }
-                    // Auto-afk after 5 minutes
-                    else if (afkLocation.getSeconds() == getAfkSecondsAmount()) {
+                    // Auto-afk after the timeout, even if the timeout is not a multiple of 5
+                    else if (aranarthPlayer.getAfkStartTime() == 0) {
                         toggleAfkStatus(player.getUniqueId(), true);
                         // Prevents further calls
                         afkLocation.setSeconds(AranarthUtils.getAfkSecondsAmount() + 5);
