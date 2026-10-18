@@ -155,10 +155,10 @@ public class SquaremapIntegration {
                     SimpleLayerProvider provider = providers.get(entry.getKey());
                     if (provider == null) continue;
 
-                    List<List<Point>> polygons = buildBoundaryPolygons(entry.getValue());
+                    List<Region> regions = buildRegions(entry.getValue());
                     int regionIdx = 0;
-                    for (List<Point> points : polygons) {
-                        Marker polygon = Marker.polygon(points);
+                    for (Region region : regions) {
+                        Marker polygon = Marker.polygon(region.outer(), region.holes());
                         polygon.markerOptions(options);
                         Key markerKey = Key.of("d-" + dominion.getId() + "-" + entry.getKey().hashCode() + "-r" + regionIdx++);
                         provider.addMarker(markerKey, polygon);
@@ -193,10 +193,10 @@ public class SquaremapIntegration {
                     SimpleLayerProvider provider = outpostProviders.get(entry.getKey());
                     if (provider == null) continue;
 
-                    List<List<Point>> polygons = buildBoundaryPolygons(entry.getValue());
+                    List<Region> regions = buildRegions(entry.getValue());
                     int regionIdx = 0;
-                    for (List<Point> points : polygons) {
-                        Marker polygon = Marker.polygon(points);
+                    for (Region region : regions) {
+                        Marker polygon = Marker.polygon(region.outer(), region.holes());
                         polygon.markerOptions(outpostOptions);
                         Key markerKey = Key.of("op-" + outpost.getId() + "-" + entry.getKey().hashCode() + "-r" + regionIdx++);
                         provider.addMarker(markerKey, polygon);
@@ -207,12 +207,20 @@ public class SquaremapIntegration {
     }
 
     /**
-     * Computes the outer boundary polygons for all contiguous regions.
-     * @param chunkCoords Set of "cx,cz" strings for a single dominion in one world.
-     * @return A list of vertex lists, one per contiguous region.
+     * A contiguous claimed region: its outer boundary plus any unclaimed gaps enclosed by it.
      */
-    private static List<List<Point>> buildBoundaryPolygons(Set<String> chunkCoords) {
-        // Collect all outer boundary edges - sides of chunks that have no same-dominion neighbor
+    private record Region(List<Point> outer, List<List<Point>> holes) {}
+
+    /**
+     * Computes the boundary of every contiguous region, separating outer boundaries from the
+     * enclosed unclaimed gaps so the gaps render as negative space instead of a second fill layer.
+     * @param chunkCoords Set of "cx,cz" strings for a single dominion in one world.
+     * @return A list of regions, one per contiguous area.
+     */
+    private static List<Region> buildRegions(Set<String> chunkCoords) {
+        // Collect directed boundary edges - sides of chunks that have no same-dominion neighbor.
+        // Each chunk is wound clockwise (x east, z south), so the claimed side is always on the right
+        // of travel. Outer rings therefore have a positive signed area and holes a negative one.
         List<int[]> edges = new ArrayList<>();
 
         for (String coord : chunkCoords) {
@@ -222,81 +230,153 @@ public class SquaremapIntegration {
             int bx = cx * 16;
             int bz = cz * 16;
 
-            // No northern neighbor
+            // No northern neighbor - travel east
             if (!chunkCoords.contains(cx + "," + (cz - 1))) {
                 edges.add(new int[]{bx, bz, bx + 16, bz});
             }
-            // No southern neighbor
-            if (!chunkCoords.contains(cx + "," + (cz + 1))) {
-                edges.add(new int[]{bx, bz + 16, bx + 16, bz + 16});
-            }
-            // No western neighbor
-            if (!chunkCoords.contains((cx - 1) + "," + cz)) {
-                edges.add(new int[]{bx, bz, bx, bz + 16});
-            }
-            // No eastern neighbor
+            // No eastern neighbor - travel south
             if (!chunkCoords.contains((cx + 1) + "," + cz)) {
                 edges.add(new int[]{bx + 16, bz, bx + 16, bz + 16});
+            }
+            // No southern neighbor - travel west
+            if (!chunkCoords.contains(cx + "," + (cz + 1))) {
+                edges.add(new int[]{bx + 16, bz + 16, bx, bz + 16});
+            }
+            // No western neighbor - travel north
+            if (!chunkCoords.contains((cx - 1) + "," + cz)) {
+                edges.add(new int[]{bx, bz + 16, bx, bz});
             }
         }
 
         if (edges.isEmpty()) return List.of();
 
-        // List of edge indices that touch that point
-        Map<String, List<Integer>> adj = new HashMap<>();
+        // Edge indices that start at each point
+        Map<String, List<Integer>> outgoing = new HashMap<>();
         for (int i = 0; i < edges.size(); i++) {
             int[] e = edges.get(i);
-            String k1 = e[0] + "," + e[1];
-            String k2 = e[2] + "," + e[3];
-            adj.computeIfAbsent(k1, k -> new ArrayList<>()).add(i);
-            adj.computeIfAbsent(k2, k -> new ArrayList<>()).add(i);
+            outgoing.computeIfAbsent(e[0] + "," + e[1], k -> new ArrayList<>()).add(i);
         }
 
-        // Trace each connected chain of edges into a closed polygon
+        // Trace each closed ring of edges
         boolean[] used = new boolean[edges.size()];
-        List<List<Point>> polygons = new ArrayList<>();
+        List<List<int[]>> outerRings = new ArrayList<>();
+        List<List<int[]>> holeRings = new ArrayList<>();
 
         for (int startIdx = 0; startIdx < edges.size(); startIdx++) {
             if (used[startIdx]) continue;
 
-            List<Point> polygon = new ArrayList<>();
-            int[] startEdge = edges.get(startIdx);
-            String startPtKey = startEdge[0] + "," + startEdge[1];
-            String curPtKey = startPtKey;
+            List<int[]> ring = new ArrayList<>();
             int curIdx = startIdx;
-
-            do {
+            while (true) {
                 used[curIdx] = true;
-                String[] ptParts = curPtKey.split(",");
-                polygon.add(Point.of(Integer.parseInt(ptParts[0]), Integer.parseInt(ptParts[1])));
-
-                // Determine which end of this edge we're at, then move to the other end
                 int[] curEdge = edges.get(curIdx);
-                String k1 = curEdge[0] + "," + curEdge[1];
-                String nextPtKey = curPtKey.equals(k1)
-                        ? curEdge[2] + "," + curEdge[3]
-                        : k1;
+                ring.add(new int[]{curEdge[0], curEdge[1]});
 
-                // Pick the next unvisited edge from nextPtKey
-                int nextIdx = -1;
-                for (int neighborIdx : adj.getOrDefault(nextPtKey, List.of())) {
-                    if (!used[neighborIdx]) {
-                        nextIdx = neighborIdx;
-                        break;
-                    }
-                }
-
-                if (nextIdx == -1) break;
-                curPtKey = nextPtKey;
+                int nextIdx = pickNextEdge(edges, outgoing, curEdge);
+                if (nextIdx == -1 || nextIdx == startIdx || used[nextIdx]) break;
                 curIdx = nextIdx;
-            } while (!curPtKey.equals(startPtKey));
+            }
 
-            if (polygon.size() >= 3) {
-                polygons.add(polygon);
+            if (ring.size() < 3) continue;
+            if (signedArea(ring) > 0) {
+                outerRings.add(ring);
+            } else {
+                holeRings.add(ring);
             }
         }
 
-        return polygons;
+        // Assign each hole to the smallest outer ring that contains it
+        List<List<List<Point>>> holesPerOuter = new ArrayList<>();
+        for (int i = 0; i < outerRings.size(); i++) {
+            holesPerOuter.add(new ArrayList<>());
+        }
+        for (List<int[]> hole : holeRings) {
+            // Test point just inside the hole - the unclaimed side is on the left of travel
+            int[] a = hole.get(0);
+            int[] b = hole.get(1);
+            int dx = Integer.signum(b[0] - a[0]);
+            int dz = Integer.signum(b[1] - a[1]);
+            double testX = (a[0] + b[0]) / 2.0 + dz * 0.5;
+            double testZ = (a[1] + b[1]) / 2.0 - dx * 0.5;
+
+            int bestOuter = -1;
+            long bestArea = Long.MAX_VALUE;
+            for (int i = 0; i < outerRings.size(); i++) {
+                List<int[]> outer = outerRings.get(i);
+                long area = signedArea(outer);
+                if (area < bestArea && containsPoint(outer, testX, testZ)) {
+                    bestOuter = i;
+                    bestArea = area;
+                }
+            }
+            if (bestOuter != -1) {
+                holesPerOuter.get(bestOuter).add(toPoints(hole));
+            }
+        }
+
+        List<Region> regions = new ArrayList<>();
+        for (int i = 0; i < outerRings.size(); i++) {
+            regions.add(new Region(toPoints(outerRings.get(i)), holesPerOuter.get(i)));
+        }
+        return regions;
+    }
+
+    /**
+     * Picks the edge that continues the ring from the end of the current edge. Where two regions
+     * touch diagonally at a corner, the rightmost turn is preferred so each ring hugs its own chunks.
+     */
+    private static int pickNextEdge(List<int[]> edges, Map<String, List<Integer>> outgoing, int[] curEdge) {
+        List<Integer> candidates = outgoing.getOrDefault(curEdge[2] + "," + curEdge[3], List.of());
+        int dx = Integer.signum(curEdge[2] - curEdge[0]);
+        int dz = Integer.signum(curEdge[3] - curEdge[1]);
+        // Right, straight, then left (z points south, so right of (dx, dz) is (-dz, dx))
+        int[][] preferred = {{-dz, dx}, {dx, dz}, {dz, -dx}};
+        for (int[] dir : preferred) {
+            for (int idx : candidates) {
+                int[] e = edges.get(idx);
+                if (Integer.signum(e[2] - e[0]) == dir[0] && Integer.signum(e[3] - e[1]) == dir[1]) {
+                    return idx;
+                }
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Shoelace signed area (doubled). Positive for clockwise rings in x east / z south space.
+     */
+    private static long signedArea(List<int[]> ring) {
+        long sum = 0;
+        for (int i = 0; i < ring.size(); i++) {
+            int[] p = ring.get(i);
+            int[] q = ring.get((i + 1) % ring.size());
+            sum += (long) p[0] * q[1] - (long) q[0] * p[1];
+        }
+        return sum;
+    }
+
+    /**
+     * Ray-casting point-in-polygon test.
+     */
+    private static boolean containsPoint(List<int[]> ring, double x, double z) {
+        boolean inside = false;
+        for (int i = 0, j = ring.size() - 1; i < ring.size(); j = i++) {
+            int[] p = ring.get(i);
+            int[] q = ring.get(j);
+            if ((p[1] > z) != (q[1] > z)
+                    && x < (double) (q[0] - p[0]) * (z - p[1]) / (q[1] - p[1]) + p[0]) {
+                inside = !inside;
+            }
+        }
+        return inside;
+    }
+
+    private static List<Point> toPoints(List<int[]> ring) {
+        List<Point> points = new ArrayList<>(ring.size());
+        for (int[] p : ring) {
+            points.add(Point.of(p[0], p[1]));
+        }
+        return points;
     }
 
     /**

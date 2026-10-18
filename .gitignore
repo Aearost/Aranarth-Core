@@ -36,6 +36,7 @@ build/
 
 ### Claude Code ###
 .claude/worktrees/
+.claude/settings.local.json
 announcement_draft.txt
 
 ### Sensitive data ###

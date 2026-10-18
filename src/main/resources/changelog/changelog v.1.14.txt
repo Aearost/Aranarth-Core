@@ -21,6 +21,7 @@ Dominion
 [+] Added Poplar wood to the Sawmill
 [~] Fixed dominion crumble message being sent to Discord every day
 [~] Protected outposts and Dominion borders from explosions, pistons, liquids, dispensers and hopper minecarts, protected animals and beds
+[~] Fixed issue where Squaremap was not rendering unclaimed chunks as invisible when surrounded by claimed chunks
 
 Aranarthium, Items & Crafting
 [+] Implemented Essence Imbuing, allowing players to create Essence items and imbue them with XP to craft the various essences
