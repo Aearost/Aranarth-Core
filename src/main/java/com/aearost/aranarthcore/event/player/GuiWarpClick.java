@@ -31,6 +31,8 @@ public class GuiWarpClick {
 				}
 
 				if (e.getClickedInventory().getType() == InventoryType.CHEST) {
+					// The icon must never be picked up, even if the teleport is cancelled
+					e.setCancelled(true);
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 					for (int i = 0; i < warps.size(); i++) {
 						if (e.getSlot() == i) {

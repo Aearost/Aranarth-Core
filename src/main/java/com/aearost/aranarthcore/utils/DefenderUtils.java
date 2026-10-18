@@ -415,6 +415,10 @@ public class DefenderUtils {
                     }
                 }
             }
+            // Only refund a defender that is actually tracked here
+            if (entityUUID == null) {
+                return "&cThis defender could not be found";
+            }
         } else {
             // Selling a specific defender via the manage defender GUI
             if (!entityToType.containsKey(entityUUID)) {

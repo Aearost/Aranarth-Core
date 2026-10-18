@@ -142,6 +142,8 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
         Mannequin m = (Mannequin) player.getWorld().spawnEntity(player.getLocation(), EntityType.MANNEQUIN);
         m.setProfile(ResolvableProfile.resolvableProfile(player.getPlayerProfile()));
         m.setPose(Pose.SNEAKING);
+        // Never saved with the chunk, so a crash cannot leave a mannequin wearing the armor behind
+        m.setPersistent(false);
         this.mannequin = m;
         abilityStart = System.currentTimeMillis();
 

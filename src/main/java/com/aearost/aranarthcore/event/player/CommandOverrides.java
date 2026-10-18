@@ -10,6 +10,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.MountUtils;
 import com.aearost.aranarthcore.utils.PermissionUtils;
+import com.projectkorra.projectkorra.BendingPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Entity;
@@ -108,7 +109,10 @@ public class CommandOverrides {
                         }
                         // Saints always get their element change cooldown reset
                         if (aranarthPlayer.getSaintRank() >= 1) {
-                            Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "b cooldown reset " + player.getName());
+                            BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+                            if (bendingPlayer != null) {
+                                bendingPlayer.removeCooldown("ChooseElement");
+                            }
                         }
                         // Dismiss any active mount as the new element may have a different mount
                         dismissActiveMountIfPresent(player);

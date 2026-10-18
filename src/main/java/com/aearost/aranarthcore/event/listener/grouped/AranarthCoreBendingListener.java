@@ -2012,7 +2012,7 @@ public class AranarthCoreBendingListener implements Listener {
     /**
      * Ends the projection when the player disconnects.
      */
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onDisconnect(PlayerQuitEvent e) {
         Player player = e.getPlayer();
         if (AstralProjection.isProjecting(player.getUniqueId())) {

@@ -195,6 +195,10 @@ public class PetInventoryUtils {
      * @param missingHealthAfterHit Health missing after the hit is applied (half-hearts).
      */
     public static void tryAutoEat(LivingEntity pet, double missingHealthAfterHit) {
+        // Closing the GUI writes back what was shown when it opened, which would restore eaten food
+        if (openInventories.containsValue(pet.getUniqueId())) {
+            return;
+        }
         ItemStack[] food = getFoodItems(pet);
         for (int i = 0; i < food.length; i++) {
             ItemStack item = food[i];

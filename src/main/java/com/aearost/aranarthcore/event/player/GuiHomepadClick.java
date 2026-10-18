@@ -116,10 +116,11 @@ public class GuiHomepadClick {
 
                 // Only proceed if the slot they click is actually a homepad
                 if (!Objects.isNull(home)) {
+                    // The icon must never be picked up, even if the teleport is cancelled
+                    e.setCancelled(true);
 
                     // If the user is trying to update the icon of a home
                     if (heldItem != Material.AIR) {
-                        e.setCancelled(true);
                         if (heldItem == home.getIcon()) {
                             player.sendMessage(ChatUtils.chatMessage(Lang.get("player.home_same_icon")));
                         } else {
@@ -127,9 +128,22 @@ public class GuiHomepadClick {
                             player.sendMessage(ChatUtils.chatMessage(Lang.get("home.icon_set", "name", home.getName(), "icon", ChatUtils.getFormattedItemName(heldItem.name()))));
                         }
                     } else {
+                        // Homepads are instant, so they cannot be used to escape combat
+                        if (!aranarthPlayer.isInAdminMode() && !aranarthPlayer.getCombatLogTime().isEmpty()) {
+                            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.combat_tagged")));
+                            player.closeInventory();
+                            return;
+                        }
+                        // Mounts only travel between survival worlds, so creative mounts never reach survival
+                        boolean canBringMount = (player.getVehicle() instanceof Horse || player.getVehicle() instanceof Camel)
+                                && AranarthUtils.isSurvivalWorld(player.getWorld().getName())
+                                && AranarthUtils.isSurvivalWorld(home.getLocation().getWorld().getName());
+                        if (player.isInsideVehicle() && !canBringMount) {
+                            player.leaveVehicle();
+                        }
                         if (player.isInsideVehicle()) {
                             Entity mount = player.getVehicle();
-                            if (player.getVehicle() instanceof Horse || player.getVehicle() instanceof Camel) {
+                            if (canBringMount) {
                                 String fromWorld = player.getLocation().getWorld().getName();
                                 aranarthPlayer.setLastKnownTeleportLocation(player.getLocation().clone());
                                 Location destination = home.getLocation();

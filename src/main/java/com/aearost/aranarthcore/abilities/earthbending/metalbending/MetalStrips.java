@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.abilities.earthbending.metalbending;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.AbilityConfig;
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.MetalAbility;
@@ -9,6 +10,7 @@ import com.projectkorra.projectkorra.attribute.Attribute;
 import com.projectkorra.projectkorra.util.DamageHandler;
 import org.bukkit.*;
 import org.bukkit.entity.*;
+import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -398,6 +400,11 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
                             getStripOwnerKey(), PersistentDataType.STRING)) {
                         continue;
                     }
+                    // Only pull items the player could pick up by hand, so ability projectiles (such as
+                    // MetalShots) never become real items and protected land cannot be drained
+                    if (!canRecallAmbientItem(player, item)) {
+                        continue;
+                    }
 
                     final double distSq = item.getLocation().distanceSquared(playerAnchor);
                     if (distSq > recallRange * recallRange) {
@@ -406,6 +413,13 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
 
                     // Within pickup radius, add the item's actual stack to inventory
                     if (distSq <= pickupRadius * pickupRadius) {
+                        // Let other plugins and protections refuse the pickup like a normal one
+                        final PlayerAttemptPickupItemEvent attemptEvent =
+                                new PlayerAttemptPickupItemEvent(player, item, 0);
+                        Bukkit.getPluginManager().callEvent(attemptEvent);
+                        if (attemptEvent.isCancelled()) {
+                            continue;
+                        }
                         final ItemStack stack = item.getItemStack().clone();
                         final HashMap<Integer, ItemStack> overflow =
                                 player.getInventory().addItem(stack);
@@ -492,6 +506,19 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
     private static Particle.DustOptions getParticleForItem(final Item item) {
         final Material mat = getStoredMaterial(item);
         return METAL_PARTICLES.getOrDefault(mat, METAL_PARTICLES.get(Material.IRON_INGOT));
+    }
+
+    /**
+     * Returns true if a dropped metal item may be recalled by the player.
+     */
+    private static boolean canRecallAmbientItem(Player player, Item item) {
+        if (!item.canPlayerPickup() || item.getPickupDelay() == Integer.MAX_VALUE) {
+            return false;
+        }
+        if (item.getOwner() != null && !item.getOwner().equals(player.getUniqueId())) {
+            return false;
+        }
+        return AranarthBendingUtils.canBendBlock(player, item.getLocation().getBlock());
     }
 
     public static NamespacedKey getStripOwnerKey() {

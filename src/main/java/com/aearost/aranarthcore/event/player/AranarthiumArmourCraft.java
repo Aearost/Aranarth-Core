@@ -19,7 +19,6 @@ import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -97,11 +96,15 @@ public class AranarthiumArmourCraft {
                         boolean netheriteElytraArmorFirst = hasPlainElytra(inventory.getItem(0)) && hasNetheriteIngot(inventory.getItem(1)) && inventory.getItem(2) != null;
                         boolean netheriteElytraIngotFirst = hasNetheriteIngot(inventory.getItem(0)) && hasPlainElytra(inventory.getItem(1)) && inventory.getItem(2) != null;
                         if (armorInFirst || ingotInFirst || netheriteElytraArmorFirst || netheriteElytraIngotFirst) {
+                            ItemStack result = inventory.getItem(2).clone();
                             if (e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
-                                HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(inventory.getItem(2));
-                                if (!remainder.isEmpty()) {
+                                // The result is handed out here, so the vanilla shift-click must not also move it
+                                e.setCancelled(true);
+                                if (player.getInventory().firstEmpty() == -1) {
                                     return;
                                 }
+                                inventory.setItem(2, null);
+                                player.getInventory().addItem(result);
                             }
 
 
@@ -109,7 +112,7 @@ public class AranarthiumArmourCraft {
                             inventory.getItem(1).setAmount(inventory.getItem(1).getAmount() - 1);
 
 
-                            ItemMeta meta = inventory.getItem(2).getItemMeta();
+                            ItemMeta meta = result.getItemMeta();
                             player.playSound(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.5F, 1.5F);
                             String displayName = meta.getDisplayName();
                             String strippedName = ChatUtils.stripColorFormatting(displayName).toLowerCase();

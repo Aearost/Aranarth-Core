@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.network;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralProjection;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Pronouns;
@@ -1581,6 +1582,10 @@ public class NetworkManager {
 
         // An open trade is cancelled first so the offered items are back in the inventory
         TradeManager.handleQuit(player);
+        // An astral projection keeps the armor on its mannequin, so end it to put the armor back on first
+        if (AstralProjection.isProjecting(uuid)) {
+            AstralProjection.getActiveProjection(uuid).endAbility();
+        }
         // Closing first runs every GUI close handler (held shulker, quiver, potions, dominion food)
         // and returns the crafting grid and cursor, so the serialized inventory is the final one
         player.closeInventory();

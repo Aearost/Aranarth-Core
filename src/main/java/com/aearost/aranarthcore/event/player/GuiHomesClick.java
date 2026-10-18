@@ -36,6 +36,8 @@ public class GuiHomesClick {
 				}
 
 				if (e.getClickedInventory().getType() == InventoryType.CHEST) {
+					// The icon must never be picked up, even if the teleport is cancelled
+					e.setCancelled(true);
 					// Bed spawn is always at slot 0 when present
 					if (hasBedSpawn && e.getSlot() == 0) {
 						Material heldItem = e.getCursor().getType();
