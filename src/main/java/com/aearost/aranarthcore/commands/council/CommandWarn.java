@@ -58,32 +58,36 @@ public class CommandWarn {
 		boolean wasPlayerWarned = false;
 		String playerName = args[1];
 		String nickname = "";
-		for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
-			if (player.getName().equalsIgnoreCase(args[1])) {
-				wasPlayerWarned = true;
-				playerName = player.getName();
-				nickname = AranarthUtils.getNickname(player);
-				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		UUID targetUuid = AranarthUtils.getUUIDFromUsername(args[1]);
+		if (targetUuid != null) {
+			wasPlayerWarned = true;
+			OfflinePlayer player = Bukkit.getOfflinePlayer(targetUuid);
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(targetUuid);
+			playerName = aranarthPlayer.getUsername();
+			nickname = AranarthUtils.getNickname(player);
+			if (!PunishmentUtils.outranks(sender, targetUuid)) {
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("warn.cannot_warn")));
+				return;
+			}
 
-				if (args.length >= 3) {
-					StringBuilder reason = new StringBuilder();
-					for (int i = 2; i < args.length; i++) {
-						reason.append(args[i]);
-						if (i < args.length - 1) {
-							reason.append(" ");
-						}
+			if (args.length >= 3) {
+				StringBuilder reason = new StringBuilder();
+				for (int i = 2; i < args.length; i++) {
+					reason.append(args[i]);
+					if (i < args.length - 1) {
+						reason.append(" ");
 					}
-
-					Punishment punishment = new Punishment(AranarthUtils.getUUIDFromUsername(args[1]), LocalDateTime.ofInstant(Instant.now(),
-							ZoneId.systemDefault()), "WARN", reason.toString(), senderUuid);
-					AranarthUtils.addPunishment(AranarthUtils.getUUIDFromUsername(args[1]), punishment, false);
-
-					PunishmentUtils.notifyWarn(player.getUniqueId(), nickname, reason.toString());
-					PunishmentUtils.issued(punishment, nickname, "", -1);
-				} else {
-					sender.sendMessage(ChatUtils.chatMessage(Lang.get("warn.must_specify_reason")));
-					return;
 				}
+
+				Punishment punishment = new Punishment(targetUuid, LocalDateTime.ofInstant(Instant.now(),
+						ZoneId.systemDefault()), "WARN", reason.toString(), senderUuid);
+				AranarthUtils.addPunishment(targetUuid, punishment, false);
+
+				PunishmentUtils.notifyWarn(targetUuid, nickname, reason.toString());
+				PunishmentUtils.issued(punishment, nickname, "", -1);
+			} else {
+				sender.sendMessage(ChatUtils.chatMessage(Lang.get("warn.must_specify_reason")));
+				return;
 			}
 		}
 

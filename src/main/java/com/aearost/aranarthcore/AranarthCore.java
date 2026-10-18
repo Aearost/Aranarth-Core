@@ -19,6 +19,7 @@ import com.aearost.aranarthcore.event.mob.MountListener;
 import com.aearost.aranarthcore.event.world.WorldEventManager;
 import com.aearost.aranarthcore.integration.SquaremapIntegration;
 import com.aearost.aranarthcore.integration.WorldEditPlotIntegration;
+import com.aearost.aranarthcore.integration.WorldEditWorldGuard;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
@@ -475,6 +476,10 @@ public class AranarthCore extends JavaPlugin {
         // Restrict WorldEdit to the player's own plots in the Creative plots world (soft-depend)
         if (!isSmpServer() && Bukkit.getPluginManager().isPluginEnabled("WorldEdit")) {
             WorldEditPlotIntegration.enable();
+        }
+        // Players only get WorldEdit in the creative worlds, so it can never change a survival world
+        if (Bukkit.getPluginManager().isPluginEnabled("WorldEdit")) {
+            WorldEditWorldGuard.enable();
         }
 
         // Start cross-server networking (NetworkManager) now that the DB is already connected.

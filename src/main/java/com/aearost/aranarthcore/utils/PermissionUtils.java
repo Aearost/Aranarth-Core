@@ -337,6 +337,14 @@ public class PermissionUtils {
 
         perms.setPermission("bending.command.rechoose", true);
 
+        // Vanilla messaging bypasses mutes and /ac spy through namespaced commands like /minecraft:msg,
+        // and the plugin provides its own /msg
+        perms.setPermission("minecraft.command.msg", false);
+        perms.setPermission("minecraft.command.me", false);
+        perms.setPermission("minecraft.command.teammsg", false);
+        // Party teleports would move players between worlds without switching their inventory
+        perms.setPermission("mcmmo.commands.ptp", false);
+
         // Disable sub-elements
         perms.setPermission("bending.water.healing", false);
         perms.setPermission("bending.water.plantbending", false);
@@ -1148,6 +1156,16 @@ public class PermissionUtils {
         String worldName = player.getWorld().getName();
         if (PlotUtils.isSmpCreativeWorld(worldName)) {
             perms.setPermission("worldedit.*", true);
+            if (aranarthPlayer.getCouncilRank() == 0 && aranarthPlayer.getArchitectRank() == 0) {
+                // Nothing that reaches another world, the server's files, or other players' mobs
+                for (String node : List.of("worldedit.world", "worldedit.schematic.*", "worldedit.schematic.load",
+                        "worldedit.schematic.save", "worldedit.schematic.delete", "worldedit.schematic.list",
+                        "worldedit.regen", "worldedit.butcher", "worldedit.remove", "worldedit.calc",
+                        "worldedit.generation.shape", "worldedit.generation.shape.biome", "worldedit.scripting.execute",
+                        "worldedit.scripting.execute.last", "worldedit.snapshots.restore", "worldedit.snapshots.list")) {
+                    perms.setPermission(node, false);
+                }
+            }
             return;
         }
         if (!PlotUtils.isPlotWorld(worldName)) {

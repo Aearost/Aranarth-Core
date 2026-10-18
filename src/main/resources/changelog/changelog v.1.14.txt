@@ -66,6 +66,7 @@ Cross-server & Technical
 [~] Fixed several cross-server item duplication exploits by freezing players during server transfers and other individual fixes
 [~] Fixed GUI exploits by identifying plugin GUIs with an internal tag instead of their title, and hardened GUIs against forged items and drags
 [~] Synced bans/mutes/warnings and dominion changes across servers, gave cross-server teleports their countdown and combat checks, and stopped transfers and demoted staff from bypassing permissions
+[~] Tightened council commands and permissions with rank checks on punishments and ranksets, admin-only destructive /ac commands, blocked vanilla messaging, WorldEdit outside creative, and cross-inventory plugin teleports
 
 Miscellaneous
 [~] Fixed WorldEdit commands not appearing in tab completion or autofilling block names #456

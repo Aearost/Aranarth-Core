@@ -77,7 +77,7 @@ public class CommandBan {
 			wasPlayerBanned = true;
 			nickname = AranarthUtils.getNickname(player);
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			if (aranarthPlayer.getCouncilRank() == 3) {
+			if (!PunishmentUtils.outranks(sender, uuid)) {
 				sender.sendMessage(ChatUtils.chatMessage(Lang.get("ban.cannot_ban")));
 				return;
 			}

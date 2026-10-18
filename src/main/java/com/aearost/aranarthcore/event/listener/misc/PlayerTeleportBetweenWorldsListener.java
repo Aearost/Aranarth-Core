@@ -76,8 +76,13 @@ public class PlayerTeleportBetweenWorldsListener implements Listener {
      */
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onCrossInventoryTeleport(PlayerTeleportEvent e) {
-        // Command teleports are handled above, and plugin teleports handle the inventory themselves
-        if (e.getCause() == TeleportCause.COMMAND || e.getCause() == TeleportCause.PLUGIN) {
+        // Command teleports are handled above
+        if (e.getCause() == TeleportCause.COMMAND) {
+            return;
+        }
+        // AranarthCore's own teleports switch the inventory themselves, but other plugins' teleports
+        // (i.e mcMMO party teleport) never do, so only ours may cross inventory groups
+        if (e.getCause() == TeleportCause.PLUGIN && isCalledByAranarthCore()) {
             return;
         }
         if (e.getTo() == null || e.getTo().getWorld() == null || e.getFrom().getWorld() == null) {
@@ -90,6 +95,17 @@ public class PlayerTeleportBetweenWorldsListener implements Listener {
             Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Inv] Blocked " + e.getCause() + " teleport for "
                     + e.getPlayer().getName() + " from " + e.getFrom().getWorld().getName() + " to " + e.getTo().getWorld().getName());
         }
+    }
+
+    /**
+     * Provides whether the current teleport was started by AranarthCore's own code.
+     */
+    private boolean isCalledByAranarthCore() {
+        String ownPackage = AranarthCore.class.getPackageName();
+        String thisClass = PlayerTeleportBetweenWorldsListener.class.getName();
+        return StackWalker.getInstance().walk(frames -> frames
+                .map(StackWalker.StackFrame::getClassName)
+                .anyMatch(name -> name.startsWith(ownPackage) && !name.equals(thisClass)));
     }
 
     /**

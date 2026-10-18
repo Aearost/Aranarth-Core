@@ -10,6 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.ban.ProfileBanList;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.time.Instant;
@@ -105,6 +106,30 @@ public class PunishmentUtils {
             }
             case WARN -> notifyWarn(uuid, nickname, reason);
         }
+    }
+
+    /**
+     * Provides whether the sender ranks above the target, so staff can never punish or change the ranks
+     * of a peer or a superior.
+     *
+     * @param sender     The staff member using the command.
+     * @param targetUuid The player being acted upon.
+     * @return Whether the sender may act on the target.
+     */
+    public static boolean outranks(CommandSender sender, UUID targetUuid) {
+        if (!(sender instanceof Player player)) {
+            return true;
+        }
+        AranarthPlayer senderPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        AranarthPlayer targetPlayer = AranarthUtils.getPlayer(targetUuid);
+        if (targetPlayer == null) {
+            return true;
+        }
+        int senderRank = senderPlayer == null ? 0 : senderPlayer.getCouncilRank();
+        if (player.isOp()) {
+            senderRank = Math.max(senderRank, 3);
+        }
+        return targetPlayer.getCouncilRank() < senderRank;
     }
 
     public static void notifyBan(String nickname, String duration, String reason, boolean isPermanent) {

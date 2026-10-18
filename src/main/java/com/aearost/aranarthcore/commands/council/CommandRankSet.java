@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PermissionUtils;
+import com.aearost.aranarthcore.utils.PunishmentUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -15,6 +16,7 @@ import org.bukkit.entity.Player;
 
 import java.awt.*;
 import java.time.Instant;
+import java.util.UUID;
 
 /**
  * Allows for the manual assignment of a player's rank.
@@ -43,10 +45,22 @@ public class CommandRankSet {
                 OfflinePlayer player = null;
 
                 // Does the player exist
-                for (OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
-                    if (offlinePlayer.getName().equals(args[2])) {
-                        player = offlinePlayer;
-                    }
+                UUID targetUuid;
+                try {
+                    targetUuid = UUID.fromString(args[2]);
+                } catch (IllegalArgumentException e) {
+                    targetUuid = AranarthUtils.getUUIDFromUsername(args[2]);
+                }
+                if (targetUuid != null && AranarthUtils.getPlayer(targetUuid) != null) {
+                    player = Bukkit.getOfflinePlayer(targetUuid);
+                }
+
+                // Staff can only change the ranks of players below them, or their own
+                if (player != null && sender instanceof Player senderPlayer
+                        && !senderPlayer.getUniqueId().equals(player.getUniqueId())
+                        && !PunishmentUtils.outranks(sender, player.getUniqueId())) {
+                    sender.sendMessage(ChatUtils.chatMessage(Lang.get("rankset.cannot_modify")));
+                    return true;
                 }
 
                 if (player != null) {
@@ -74,7 +88,7 @@ public class CommandRankSet {
                     if (!aranarthPlayer.getNickname().isEmpty()) {
                         name = aranarthPlayer.getNickname();
                     } else {
-                        name = player.getName();
+                        name = aranarthPlayer.getUsername();
                     }
 
                     // Store purchases are run from console on both servers, so only Survival posts the Discord notifications

@@ -257,19 +257,19 @@ public class GuiVoteShopPurchaseClick {
                     // Acolyte
                     else if (clicked.getType() == Material.PINK_CONCRETE_POWDER) {
                         player.sendMessage(ChatUtils.chatMessage(Lang.get("vote_shop.purchased", "item", itemName)));
-                        Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac rankset saintmonth " + player.getName() + " 1 silent");
+                        Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac rankset saintmonth " + player.getUniqueId() + " 1 silent");
                         return;
                     }
                     // Disciple
                     else if (clicked.getType() == Material.MAGENTA_CONCRETE_POWDER) {
                         player.sendMessage(ChatUtils.chatMessage(Lang.get("vote_shop.purchased", "item", itemName)));
-                        Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac rankset saintmonth " + player.getName() + " 2 silent");
+                        Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac rankset saintmonth " + player.getUniqueId() + " 2 silent");
                         return;
                     }
                     // Seraph
                     else if (clicked.getType() == Material.PURPLE_CONCRETE_POWDER) {
                         player.sendMessage(ChatUtils.chatMessage(Lang.get("vote_shop.purchased", "item", itemName)));
-                        Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac rankset saintmonth " + player.getName() + " 3 silent");
+                        Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac rankset saintmonth " + player.getUniqueId() + " 3 silent");
                         return;
                     }
                     // Boost of the Miner

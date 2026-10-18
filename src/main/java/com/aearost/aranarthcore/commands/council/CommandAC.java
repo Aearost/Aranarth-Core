@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.council;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -7,16 +8,24 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.LangManager;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import java.util.Set;
 
 /**
  * This is the master command for all commands related to AranarthCore.
  * All sub-commands have their own classes that are called from here.
  */
 public class CommandAC implements CommandExecutor {
+
+	/**
+	 * Sub-commands that are destructive or affect the whole server, limited to Council rank 3 and the console.
+	 */
+	private static final Set<String> OWNER_SUBCOMMANDS = Set.of("disband", "reload", "reloadlang", "dateset", "discordreload");
 
 	/**
 	 * @param sender The user that entered the command.
@@ -59,6 +68,22 @@ public class CommandAC implements CommandExecutor {
 
 	private boolean isCouncil(CommandSender sender, String[] args) {
 		boolean commandResult = false;
+		String subCommand = args[0].toLowerCase();
+		if (sender instanceof Player player) {
+			// Pushing this server's player rows to the database can roll back the whole network
+			if (subCommand.equals("migrate")) {
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				return true;
+			}
+			// Destructive and server-wide sub-commands are limited to the highest Council rank
+			if (OWNER_SUBCOMMANDS.contains(subCommand) && AranarthUtils.getPlayer(player.getUniqueId()).getCouncilRank() < 3) {
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				return true;
+			}
+		}
+		if (OWNER_SUBCOMMANDS.contains(subCommand) || subCommand.equals("migrate")) {
+			Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + sender.getName() + " used /ac " + String.join(" ", args));
+		}
 		if (args[0].equalsIgnoreCase("whereis")) {
 			CommandWhereIs.onCommand(sender, args);
 			commandResult = true;

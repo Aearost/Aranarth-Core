@@ -16,6 +16,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -97,7 +98,16 @@ public class CommandAdminTeleport {
 				return true;
 			}
 			Location loc = AranarthUtils.getSafeTeleportLocation(new Location(world, 0, world.getHighestBlockYAt(0, 0), 0));
-			player.teleport(loc);
+			String fromWorld = player.getWorld().getName();
+			if (!player.teleport(loc)) {
+				return true;
+			}
+			// Swap to the destination's inventory so items never cross between creative, arena and survival
+			try {
+				AranarthUtils.switchInventory(player, fromWorld, world.getName());
+			} catch (IOException e) {
+				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.error_changing_world")));
+			}
 			player.sendMessage(ChatUtils.chatMessage(Lang.get("admin.teleport_world_success", "world", world.getName())));
 			return true;
 		} else if (args[0].equalsIgnoreCase("tpf")) {
