@@ -11,6 +11,7 @@ World & Events
 Bending & Abilities
 [~] Fixed AngeredSpirits and other effect abilities respecting dominion relations in the arena
 [+] Airbenders with level 100 Archery now launch the arrow they are holding when using AirBlast while sneaking
+[~] Stopped bloodbending and sound abilities bypassing PvP and build protection
 
 Dominion
 [+] Dominion resource claims now provide leaves
@@ -18,6 +19,7 @@ Dominion
 [+] Added Lush Caves, Dripstone Caves, Deep Dark and Sulfur Caves to be claimable in /d resources
 [+] Added Poplar wood to the Sawmill
 [~] Fixed dominion crumble message being sent to Discord every day
+[~] Protected outposts and Dominion borders from explosions, pistons, liquids, dispensers and hopper minecarts, protected animals and beds
 
 Aranarthium, Items & Crafting
 [+] Implemented Essence Imbuing, allowing players to create Essence items and imbue them with XP to craft the various essences

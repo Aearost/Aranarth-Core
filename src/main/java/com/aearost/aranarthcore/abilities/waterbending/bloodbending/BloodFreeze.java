@@ -194,8 +194,8 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
     }
 
     /**
-     * Deals one damage tick directly to the target's health, bypassing armor and rank multipliers,
-     * then applies or escalates the Slowness effect up to the maximum level.
+     * Deals one damage tick to the target, bypassing armor, then applies or escalates the Slowness
+     * effect up to the maximum level.
      */
     private void applyDamageTick() {
         if (!target.isValid()) {
@@ -203,7 +203,11 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
             return;
         }
 
-        target.setHealth(Math.max(0.0, target.getHealth() - damage));
+        // Real damage so protection, combat tagging and kill attribution all apply
+        if (!AranarthBendingUtils.damageIgnoringArmor(target, damage, this)) {
+            finishWithCooldown();
+            return;
+        }
 
         slownessLevel = Math.min(slownessLevel + 1, maxSlowness);
         target.addPotionEffect(new PotionEffect(

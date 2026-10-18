@@ -119,65 +119,114 @@ public class DominionUtils {
     }
 
     /**
-     * Returns true if the attacker is permitted to apply harmful PvP effects to the target
-     * under the current dominion relation rules. Mirrors the logic in DominionProtectionListener
-     * so that abilities bypassing EntityDamageEvent (potion effects, stuns, etc.) are still gated.
+     * Returns true if the attacker is permitted to apply harmful PvP effects to the target. Uses the
+     * same rules as normal PvP damage, so abilities that bypass EntityDamageEvent (potion effects,
+     * stuns, direct health changes, etc.) cannot harm anyone a regular attack could not. Players at
+     * spawn can never be harmed this way.
      *
      * @param attacker The player using the ability.
      * @param target   The player being targeted.
      * @return Whether the attacker may harm the target.
      */
     public static boolean canAttackPlayer(Player attacker, Player target) {
+        if (AranarthUtils.isSpawnLocation(target.getLocation()) || AranarthUtils.isSpawnLocation(attacker.getLocation())) {
+            return false;
+        }
+        return getPvpDenyMessage(attacker, target) == null;
+    }
+
+    /**
+     * Applies the dominion PvP rules between two players.
+     *
+     * @param attacker The attacking player.
+     * @param target   The player being attacked.
+     * @return The message explaining why the attack is blocked, or null if it is allowed.
+     */
+    public static String getPvpDenyMessage(Player attacker, Player target) {
         // Dominion relations only apply in the worlds DominionProtectionListener protects (not the arena, etc.)
         String worldName = target.getWorld().getName();
         if (!worldName.startsWith("world") && !AranarthUtils.isSmpWorld(worldName) && !worldName.startsWith("resource")) {
-            return true;
+            return null;
+        }
+        // Spawn has its own protection
+        if (AranarthUtils.isSpawnLocation(target.getLocation())) {
+            return null;
         }
 
         Dominion attackerDominion = getPlayerDominion(attacker.getUniqueId());
         Dominion targetDominion = getPlayerDominion(target.getUniqueId());
+        AranarthPlayer aranarthAttacker = AranarthUtils.getPlayer(attacker.getUniqueId());
+        AranarthPlayer aranarthTarget = AranarthUtils.getPlayer(target.getUniqueId());
 
-        // Same dominion - respect the member PvP flag
+        // Same dominion - check per-area PvP flag (outpost overrides dominion flag)
         if (attackerDominion != null && targetDominion != null
                 && attackerDominion.isSameDominion(targetDominion)) {
-            return attackerDominion.isMemberPvpEnabled();
+            Outpost fightOutpost = OutpostUtils.getOutpostOfChunk(attacker.getLocation().getChunk());
+            boolean pvpEnabled = (fightOutpost != null && fightOutpost.getDominionId().equals(attackerDominion.getId()))
+                    ? fightOutpost.isMemberPvpEnabled()
+                    : attackerDominion.isMemberPvpEnabled();
+            if (!pvpEnabled) {
+                return Lang.get("dominion.cannot_harm_pvp_disabled", "target", aranarthTarget.getNickname(), "name", attackerDominion.getName());
+            }
+            return null;
         }
 
         // Both players belong to different dominions
         if (attackerDominion != null && targetDominion != null) {
             DominionRank relation = getRelationKey(attackerDominion, targetDominion);
-            Dominion chunkDominion = getDominionOfChunk(target.getLocation().getChunk());
 
             if (relation == DominionRank.ALLIED || relation == DominionRank.TRUCED) {
                 // Per-player overrides take precedence; either side allowing PvP permits the attack
                 boolean attackerPvp = hasPermission(target, attackerDominion, DominionPermission.PVP);
                 boolean targetPvp = hasPermission(attacker, targetDominion, DominionPermission.PVP);
-                return attackerPvp || targetPvp;
+                if (!attackerPvp && !targetPvp) {
+                    return Lang.get("dominion.cannot_harm_player_relation", "target", aranarthTarget.getNickname(), "relation", getFormattedRankName(relation));
+                }
+                return null;
             }
 
             if (relation == DominionRank.NEUTRAL) {
-                // Blocked only when the target is in their own dominion's land
-                return chunkDominion == null || !chunkDominion.isSameDominion(targetDominion);
+                // Blocked only when the target is in their own dominion's land (including its outposts)
+                Dominion chunkDominion = getDominionOfChunkAnywhere(target.getLocation().getChunk());
+                if (chunkDominion != null && chunkDominion.isSameDominion(targetDominion)) {
+                    return Lang.get("dominion.cannot_harm_player_neutral", "target", aranarthTarget.getNickname(), "relation", getFormattedRankName(DominionRank.NEUTRAL));
+                }
+                return null;
             }
 
             // ENEMIED - always allowed
-            return true;
+            return null;
         }
 
-        // Attacker has a dominion, target is a wanderer - always allowed
+        // Attacker has a dominion, target is a wanderer - blocked if target is not a barbarian
         if (attackerDominion != null) {
-            return true;
-        }
-
-        // Attacker is a wanderer, target has a dominion - blocked in target's own land
-        if (targetDominion != null) {
-            Dominion chunkDominion = getDominionOfChunk(target.getLocation().getChunk());
-            if (chunkDominion != null && chunkDominion.isSameDominion(targetDominion)) {
-                return false;
+            if (!aranarthTarget.isBarbarian()) {
+                return Lang.get("dominion.cannot_harm_wanderer", "target", aranarthTarget.getNickname());
             }
+            return null;
         }
 
-        return true;
+        // Attacker is a wanderer, target has a dominion
+        if (targetDominion != null) {
+            if (!aranarthAttacker.isBarbarian()) {
+                return Lang.get("pvp.wanderer_cannot_damage");
+            }
+            Dominion chunkDominion = getDominionOfChunkAnywhere(target.getLocation().getChunk());
+            if (chunkDominion != null && chunkDominion.isSameDominion(targetDominion)) {
+                return Lang.get("dominion.cannot_harm_in_lands", "target", aranarthTarget.getNickname());
+            }
+            return null;
+        }
+
+        // Both are wanderers (neither has a dominion)
+        if (!aranarthAttacker.isBarbarian()) {
+            return Lang.get("pvp.wanderer_cannot_damage");
+        }
+        if (!aranarthTarget.isBarbarian()) {
+            return Lang.get("dominion.cannot_harm_wanderer", "target", aranarthTarget.getNickname());
+        }
+        // Both are barbarians - allowed
+        return null;
     }
 
     /**

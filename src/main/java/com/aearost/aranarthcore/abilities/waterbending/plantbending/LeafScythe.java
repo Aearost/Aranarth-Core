@@ -2,10 +2,10 @@ package com.aearost.aranarthcore.abilities.waterbending.plantbending;
 
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.QuestTaskType;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AbilityConfig;
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.CropUtils;
@@ -301,24 +301,23 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
             return;
         }
 
-        // Dominion protection check
+        // Same protection as harvesting by hand, where enemies may also harvest crops (including in outposts)
         if (AranarthUtils.isSpawnLocation(block.getLocation())) {
             return;
         }
-        Dominion blockDominion = DominionUtils.getDominionOfChunk(block.getChunk());
-        if (blockDominion != null) {
-            Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
-            if (playerDominion == null || !playerDominion.isSameDominion(blockDominion)) {
-                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                boolean isEnemied = playerDominion != null && playerDominion.isEnemied(blockDominion);
-                if (!aranarthPlayer.isInAdminMode() && !isEnemied) {
-                    return;
-                }
-            }
+        Dominion blockDominion = DominionUtils.getDominionOfChunkAnywhere(block.getChunk());
+        Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+        boolean isEnemyCrop = blockDominion != null && playerDominion != null && playerDominion.isEnemied(blockDominion);
+        if (!isEnemyCrop && !AranarthBendingUtils.canBendBlock(player, block)) {
+            return;
         }
 
-        JobUtils.awardFarmerCropHarvest(player, block.getType());
-        QuestUtils.updateProgress(player, QuestTaskType.HARVEST_CROPS, 1);
+        // Rewards are only given in the survival worlds, like harvesting by hand
+        boolean isRewarded = AranarthUtils.isSurvivalWorld(block.getWorld().getName());
+        if (isRewarded) {
+            JobUtils.awardFarmerCropHarvest(player, block.getType());
+            QuestUtils.updateProgress(player, QuestTaskType.HARVEST_CROPS, 1);
+        }
 
         // Get vanilla fortune-based drops, then scale by seasonal yield multiplier
         ArrayList<ItemStack> drops = new ArrayList<>(block.getDrops(player.getInventory().getItemInMainHand()));
@@ -371,7 +370,7 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
         block.setBlockData(crop);
 
         McMMOPlayer mcmmoPlayer = EventUtils.getMcMMOPlayer(player);
-        if (mcmmoPlayer != null) {
+        if (isRewarded && mcmmoPlayer != null) {
             HerbalismManager herbalismManager = new HerbalismManager(mcmmoPlayer);
             HashSet<Block> brokenBlocks = new HashSet<>();
             brokenBlocks.add(block);

@@ -1,9 +1,7 @@
 package com.aearost.aranarthcore.abilities.airbending.soundbending;
 
-import com.aearost.aranarthcore.objects.Dominion;
-import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.utils.AbilityConfig;
-import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.ability.Ability;
 import com.projectkorra.projectkorra.ability.AirAbility;
@@ -44,11 +42,10 @@ public abstract class SoundAbility extends AirAbility implements SubAbility {
 
     /**
      * Breaks a glass block and plays the glass break sound at its location,
-     * respecting dominion build permissions. Returns true if the block was shattered.
+     * respecting the same protection as breaking it by hand.
      */
     protected static void shatterGlass(Player player, Block block) {
-        Dominion dominion = DominionUtils.getDominionOfChunk(block.getChunk());
-        if (dominion != null && !DominionUtils.hasPermission(player, dominion, DominionPermission.BUILD)) {
+        if (!AranarthBendingUtils.canBendBlock(player, block)) {
             return;
         }
         block.getWorld().playSound(block.getLocation(), Sound.BLOCK_GLASS_BREAK, 1.0f, 1.0f);
@@ -64,11 +61,10 @@ public abstract class SoundAbility extends AirAbility implements SubAbility {
 
     /**
      * Shatters an ice block into water and plays the glass break sound at its location,
-     * respecting dominion build permissions. Returns true if the block was shattered.
+     * respecting the same protection as breaking it by hand.
      */
     protected static void shatterIce(Player player, Block block) {
-        Dominion dominion = DominionUtils.getDominionOfChunk(block.getChunk());
-        if (dominion != null && !DominionUtils.hasPermission(player, dominion, DominionPermission.BUILD)) {
+        if (!AranarthBendingUtils.canBendBlock(player, block)) {
             return;
         }
         block.getWorld().playSound(block.getLocation(), Sound.BLOCK_GLASS_BREAK, 1.0f, 0.8f);

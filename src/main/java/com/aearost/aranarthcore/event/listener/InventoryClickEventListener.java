@@ -6,11 +6,14 @@ import com.aearost.aranarthcore.event.mob.GuiVillagerClick;
 import com.aearost.aranarthcore.event.player.*;
 import com.aearost.aranarthcore.gui.*;
 import com.aearost.aranarthcore.objects.CustomKeys;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.TradeManager;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.minecart.HopperMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -32,6 +35,20 @@ public class InventoryClickEventListener implements Listener {
 
     private static boolean isDominionFoodTitle(String title) {
         return title.startsWith(GuiDominionFood.TITLE_PREFIX);
+    }
+
+    /**
+     * Prevents hopper minecarts from draining locked containers.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onHopperMinecartPull(InventoryMoveItemEvent e) {
+        if (!(e.getDestination().getHolder() instanceof HopperMinecart)) {
+            return;
+        }
+        Location sourceLocation = e.getSource().getLocation();
+        if (sourceLocation != null && AranarthUtils.getLockedContainerAtBlock(sourceLocation.getBlock()) != null) {
+            e.setCancelled(true);
+        }
     }
 
     /**

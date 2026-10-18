@@ -140,11 +140,23 @@ public class LifeRip extends BloodAbility implements AddonAbility {
     }
 
     private void applyLifeRip() {
+        // The target may have moved somewhere protected while the drain was charging
+        if (!DominionUtils.canAttackPlayer(player, target)
+                || AranarthBendingUtils.isBendingBlockedAtLocation(player, target.getLocation())) {
+            return;
+        }
         double missingHP = 0.0;
         AttributeInstance targetAttr = target.getAttribute(MAX_HEALTH);
         if (targetAttr != null) {
             missingHP = targetAttr.getValue() - target.getHealth();
-            target.setHealth(Math.max(0.0, target.getHealth() - AbilityConfig.getDouble("LifeRip.DrainDamage")));
+            // Real damage so protection, combat tagging and kill attribution all apply. The max health
+            // drain only happens if the hit actually landed
+            if (!AranarthBendingUtils.damageIgnoringArmor(target, AbilityConfig.getDouble("LifeRip.DrainDamage"), this)) {
+                return;
+            }
+            if (target.isDead()) {
+                return;
+            }
 
             // Reduce max health by the standard 1 heart plus whatever the target was already missing
             double totalMaxReduction = AbilityConfig.getDouble("LifeRip.TargetMaxHealthLoss") + missingHP;
@@ -264,6 +276,12 @@ public class LifeRip extends BloodAbility implements AddonAbility {
                 continue;
             }
             if (!entity.isValid()) {
+                continue;
+            }
+
+            // Only players that could be attacked normally, outside of areas where bending is blocked
+            if (!DominionUtils.canAttackPlayer(player, targetPlayer)
+                    || AranarthBendingUtils.isBendingBlockedAtLocation(player, targetPlayer.getLocation())) {
                 continue;
             }
 

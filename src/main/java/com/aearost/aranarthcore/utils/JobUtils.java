@@ -110,6 +110,10 @@ public class JobUtils {
     }
 
     public static void awardJob(Player player, JobType job, double basePay) {
+        // Jobs only pay in the survival worlds, never in the arena, creative or other worlds
+        if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
+            return;
+        }
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
         if (ap == null) {
             return;

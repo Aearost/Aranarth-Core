@@ -10,13 +10,19 @@ import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.OutpostUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.persistence.PersistentDataType;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Handles all logic regarding preventing specified explosions.
@@ -57,21 +63,51 @@ public class ExplosionListener implements Listener {
                 return;
             }
 
-            Chunk explodeChunk = e.getEntity().getLocation().getChunk();
-            Outpost explodeOutpost = OutpostUtils.getOutpostOfChunk(explodeChunk);
-            boolean explosionAllowed;
-            if (explodeOutpost != null) {
-                explosionAllowed = explodeOutpost.isExplosionEnabled();
-            } else {
-                Dominion chunkDominion = DominionUtils.getDominionOfChunk(explodeChunk);
-                explosionAllowed = chunkDominion == null || chunkDominion.isExplosionEnabled();
-            }
-            if (explosionAllowed) {
-                e.blockList().removeIf(block -> AranarthUtils.getLockedContainerAtBlock(block) != null);
+            if (isExplosionAllowed(e.getEntity().getLocation().getChunk())) {
+                filterBlocks(e.blockList());
             } else {
                 e.setCancelled(true);
             }
         }
+    }
+
+    /**
+     * Deals with block explosions such as beds and respawn anchors.
+     * @param e The event.
+     */
+    @EventHandler
+    public void onBlockExplode(final BlockExplodeEvent e) {
+        if (isExplosionAllowed(e.getBlock().getChunk())) {
+            filterBlocks(e.blockList());
+        } else {
+            e.setCancelled(true);
+        }
+    }
+
+    /**
+     * Removes locked containers and blocks in land where explosions are disabled, so an explosion just
+     * outside a border cannot destroy protected blocks.
+     */
+    private void filterBlocks(List<Block> blocks) {
+        Map<Long, Boolean> allowedByChunk = new HashMap<>();
+        blocks.removeIf(block -> {
+            long chunkKey = ((long) (block.getX() >> 4) << 32) | ((block.getZ() >> 4) & 0xFFFFFFFFL);
+            boolean allowed = allowedByChunk.computeIfAbsent(chunkKey, k -> isExplosionAllowed(block.getChunk()));
+            return !allowed || AranarthUtils.getLockedContainerAtBlock(block) != null;
+        });
+    }
+
+    /**
+     * Provides whether explosions may damage blocks in the chunk, using the outpost flag first and then
+     * the dominion flag. Unclaimed land always allows explosions.
+     */
+    private boolean isExplosionAllowed(Chunk chunk) {
+        Outpost outpost = OutpostUtils.getOutpostOfChunk(chunk);
+        if (outpost != null) {
+            return outpost.isExplosionEnabled();
+        }
+        Dominion chunkDominion = DominionUtils.getDominionOfChunk(chunk);
+        return chunkDominion == null || chunkDominion.isExplosionEnabled();
     }
 
     /**
@@ -83,16 +119,7 @@ public class ExplosionListener implements Listener {
     public void onExplodeItem(final EntityDamageEvent e) {
         if (e.getEntity() instanceof Item) {
             if (e.getCause() == DamageCause.BLOCK_EXPLOSION || e.getCause() == DamageCause.ENTITY_EXPLOSION) {
-                Chunk itemChunk = e.getEntity().getLocation().getChunk();
-                Outpost itemOutpost = OutpostUtils.getOutpostOfChunk(itemChunk);
-                boolean itemExplosionAllowed;
-                if (itemOutpost != null) {
-                    itemExplosionAllowed = itemOutpost.isExplosionEnabled();
-                } else {
-                    Dominion chunkDominion = DominionUtils.getDominionOfChunk(itemChunk);
-                    itemExplosionAllowed = chunkDominion == null || chunkDominion.isExplosionEnabled();
-                }
-                if (!itemExplosionAllowed) {
+                if (!isExplosionAllowed(e.getEntity().getLocation().getChunk())) {
                     e.setCancelled(true);
                 }
             }

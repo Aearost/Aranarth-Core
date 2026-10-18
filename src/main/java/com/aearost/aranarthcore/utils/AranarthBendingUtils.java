@@ -5,10 +5,13 @@ import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.Outpost;
 import com.projectkorra.projectkorra.BendingPlayer;
+import com.projectkorra.projectkorra.ability.Ability;
 import com.projectkorra.projectkorra.ability.CoreAbility;
+import com.projectkorra.projectkorra.util.DamageHandler;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -286,6 +289,52 @@ public class AranarthBendingUtils {
     }
 
     /**
+     * Returns true if the player may permanently change the block with an ability.
+     *
+     * @param player The player using the ability.
+     * @param block  The block being changed.
+     * @return Whether the block may be changed.
+     */
+    public static boolean canBendBlock(Player player, Block block) {
+        if (AranarthUtils.getPlayer(player.getUniqueId()).isInAdminMode()) {
+            return true;
+        }
+        Location location = block.getLocation();
+        if (AranarthUtils.isSpawnLocation(location)) {
+            return false;
+        }
+        if (block.getWorld().getName().equals(ShopIslandUtils.SHOPS_WORLD)) {
+            UUID owner = ShopIslandUtils.getIslandOwnerAtLocation(location);
+            return owner != null && (owner.equals(player.getUniqueId())
+                    || AranarthUtils.isShopCollaborator(owner, player.getUniqueId()));
+        }
+        if (PlotUtils.isPlotWorld(block.getWorld())) {
+            return PlotUtils.canBuild(player, location);
+        }
+        Dominion dominion = DominionUtils.getDominionOfChunkAnywhere(block.getChunk());
+        return dominion == null || DominionUtils.hasPermission(player, dominion, DominionPermission.BUILD);
+    }
+
+    /**
+     * Deals ability damage that ignores armor and invulnerability frames without knocking the target
+     * back. Unlike setting health directly, this fires the damage events, so protection, combat tagging
+     * and kill attribution all apply.
+     *
+     * @param target  The entity being damaged.
+     * @param damage  The amount of damage.
+     * @param ability The ability dealing the damage.
+     * @return Whether the damage landed, which is false when a protection listener cancelled it.
+     */
+    public static boolean damageIgnoringArmor(LivingEntity target, double damage, Ability ability) {
+        double healthBefore = target.getHealth() + target.getAbsorptionAmount();
+        Vector velocity = target.getVelocity();
+        target.setNoDamageTicks(0);
+        DamageHandler.damageEntity(target, damage, ability, true);
+        target.setVelocity(velocity);
+        return target.isDead() || target.getHealth() + target.getAbsorptionAmount() < healthBefore;
+    }
+
+    /**
      * Returns true if the player's ability should be prevented near a Dominion where they
      * do not have the Build permission.
      *
@@ -298,7 +347,7 @@ public class AranarthBendingUtils {
         for (int x = chunkX - 1; x <= chunkX + 1; x++) {
             for (int z = chunkZ - 1; z <= chunkZ + 1; z++) {
                 Chunk chunk = player.getWorld().getChunkAt(x, z);
-                Dominion dominion = DominionUtils.getDominionOfChunk(chunk);
+                Dominion dominion = DominionUtils.getDominionOfChunkAnywhere(chunk);
                 if (dominion == null) {
                     continue;
                 }

@@ -195,8 +195,7 @@ public class LightOfRaava extends AvatarAbility implements AddonAbility {
     }
 
     private boolean canDamagePlayer(final Player target) {
-        final Dominion targetDominion = DominionUtils.getPlayerDominion(target.getUniqueId());
-        return canDamageByDominion(targetDominion, target.getLocation());
+        return DominionUtils.canAttackPlayer(player, target);
     }
 
     private boolean canDamageDefender(final UUID defenderEntityId) {
