@@ -304,11 +304,91 @@ public class DominionUtils {
             chunkKeyToDominion.put(getChunkKey(chunk), dominion);
         }
 
-        // Hot-save to MySQL immediately so changes are not lost between 30-minute periodic saves.
-        // Skip during shutdown - saveAll()/saveDominions() handles that path synchronously.
-        if (!dominion.getChunks().isEmpty()
-                && AranarthCore.getInstance() != null && AranarthCore.getInstance().isEnabled()) {
-            PersistenceUtils.saveSingleDominionToDatabase(dominion);
+        // Hot-save to MySQL immediately so changes are not lost between 30-minute periodic saves, and
+        // refresh the other server's copy. Skip during shutdown - saveAll()/saveDominions() handles that
+        // path synchronously.
+        if (AranarthCore.getInstance() != null && AranarthCore.getInstance().isEnabled()) {
+            PersistenceUtils.saveDominionAndPublish(dominion);
+        }
+    }
+
+    /**
+     * Whether this server hosts the dominion's land.
+     */
+    public static boolean isHostedHere(Dominion dominion) {
+        return !dominion.getChunks().isEmpty();
+    }
+
+    /**
+     * The name of the server hosting the dominion, for messages.
+     */
+    public static String getHostingServerDisplayName(Dominion dominion) {
+        String worldName = dominion.getDominionHomeWorldName();
+        return worldName != null && worldName.startsWith("smp") ? "SMP" : "Survival";
+    }
+
+    /**
+     * Copies a dominion freshly loaded from MySQL into the copy held in memory, keeping the same object
+     * so open GUIs and pending tasks keep working.
+     *
+     * @param fullCopy True on the server that does not host the dominion, which takes everything except
+     *                 the land. False on the hosting server, which only takes the settings the other
+     *                 server may change.
+     */
+    public static void applySyncedDominion(Dominion live, Dominion loaded, boolean fullCopy) {
+        List<UUID> oldMembers = new ArrayList<>(live.getMembers());
+
+        live.setName(loaded.getName());
+        live.setLeader(loaded.getLeader());
+        live.setMembers(loaded.getMembers());
+        live.setMemberRanks(loaded.getMemberRanks());
+        live.setMemberPvpEnabled(loaded.isMemberPvpEnabled());
+        live.setMobSpawningEnabled(loaded.isMobSpawningEnabled());
+        live.setBendingEnabled(loaded.isBendingEnabled());
+        live.setExplosionEnabled(loaded.isExplosionEnabled());
+        live.setMapColor(loaded.getMapColor());
+        live.getDisabledResourceCategories().clear();
+        live.getDisabledResourceCategories().addAll(loaded.getDisabledResourceCategories());
+        live.setDominionPermissions(loaded.getDominionPermissions());
+        live.setPlayerPermissionOverrides(loaded.getPlayerPermissionOverrides());
+
+        if (fullCopy) {
+            live.setAllied(loaded.getAllied());
+            live.setTruced(loaded.getTruced());
+            live.setEnemied(loaded.getEnemied());
+            live.setFood(loaded.getFood());
+            live.setClaimableResources(loaded.getClaimableResources());
+            live.getClaimFoodYields().clear();
+            live.getClaimFoodYields().addAll(loaded.getClaimFoodYields());
+            live.setConquered(loaded.getConquered());
+            live.setConqueredRequest(loaded.getConqueredRequest());
+            live.setConqueredRequestTimestamp(loaded.getConqueredRequestTimestamp());
+            live.setConqueredRequestDefenderLastSeen(loaded.getConqueredRequestDefenderLastSeen());
+            live.setRebelRequest(loaded.getRebelRequest());
+            live.setRebelRequestTimestamp(loaded.getRebelRequestTimestamp());
+            live.setRebelRequestConquerorLastSeen(loaded.getRebelRequestConquerorLastSeen());
+            live.setLastConquerAttemptTimestamp(loaded.getLastConquerAttemptTimestamp());
+            live.setLastRebelAttemptTimestamp(loaded.getLastRebelAttemptTimestamp());
+            live.setConqueredTimestamp(loaded.getConqueredTimestamp());
+            live.setBalance(loaded.getBalance());
+            live.setBoughtChunks(loaded.getBoughtChunks());
+            live.setStoredChunkCount(loaded.getChunkCount());
+            live.setDominionLevel(loaded.getDominionLevel());
+            live.setCachedFarmlandCount(loaded.getCachedFarmlandCount());
+            live.setCachedLivestockCount(loaded.getCachedLivestockCount());
+            live.setFoundedTimestamp(loaded.getFoundedTimestamp());
+            live.setLevelDropTimestamp(loaded.getLevelDropTimestamp());
+            live.setCrumbleNotifiedChunks(loaded.getCrumbleNotifiedChunks());
+        }
+
+        // Keep the member lookup in sync, including members who were removed
+        for (UUID oldMember : oldMembers) {
+            if (!live.getMembers().contains(oldMember) && playerToDominion.get(oldMember) == live) {
+                playerToDominion.remove(oldMember);
+            }
+        }
+        for (UUID member : live.getMembers()) {
+            playerToDominion.put(member, live);
         }
     }
 
@@ -2750,6 +2830,10 @@ public class DominionUtils {
      */
     public static void provideDominionRewards() {
         for (Dominion dominion : getDominions()) {
+            // The hosting server gives the rewards and the other server receives them through the sync
+            if (!isHostedHere(dominion)) {
+                continue;
+            }
             int claimableAmount = dominion.getClaimableResources();
             OfflinePlayer player = Bukkit.getOfflinePlayer(dominion.getLeader());
 

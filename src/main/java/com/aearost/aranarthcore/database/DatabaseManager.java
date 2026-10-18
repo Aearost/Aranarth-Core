@@ -251,6 +251,14 @@ public class DatabaseManager {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
                 """
+            CREATE TABLE IF NOT EXISTS network_bans (
+                uuid VARCHAR(36) PRIMARY KEY,
+                reason TEXT NOT NULL,
+                expires_at BIGINT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+                """
             CREATE TABLE IF NOT EXISTS server_boosts (
                 data_json MEDIUMTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -696,6 +704,49 @@ public class DatabaseManager {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to adjust raw balance for " + uuid + ": " + e.getMessage());
         }
         return false;
+    }
+
+    /**
+     * Replaces a single field of a stored player row, for players who are not online on any server.
+     */
+    public void setRawPlayerField(UUID uuid, int index, String value) {
+        String select = "SELECT raw_data FROM aranarth_players WHERE uuid = ? AND raw_data IS NOT NULL AND raw_data != '' FOR UPDATE";
+        String update = "UPDATE aranarth_players SET raw_data = ? WHERE uuid = ?";
+        try (Connection conn = dataSource.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                String raw;
+                try (PreparedStatement ps = conn.prepareStatement(select)) {
+                    ps.setString(1, uuid.toString());
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (!rs.next()) {
+                            conn.commit();
+                            return;
+                        }
+                        raw = rs.getString("raw_data");
+                    }
+                }
+                String[] fields = raw.split("\\|", -1);
+                if (fields.length <= index) {
+                    conn.commit();
+                    return;
+                }
+                fields[index] = value;
+                try (PreparedStatement ps = conn.prepareStatement(update)) {
+                    ps.setString(1, String.join("|", fields));
+                    ps.setString(2, uuid.toString());
+                    ps.executeUpdate();
+                }
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to set field " + index + " for " + uuid + ": " + e.getMessage());
+        }
     }
 
     /**
@@ -1604,6 +1655,54 @@ public class DatabaseManager {
         }
     }
 
+    /**
+     * @param expiresAt When the ban ends in epoch milliseconds, or -1 for a permanent ban.
+     */
+    public void upsertNetworkBan(UUID uuid, String reason, long expiresAt) {
+        String sql = """
+                INSERT INTO network_bans (uuid, reason, expires_at)
+                VALUES (?, ?, ?)
+                ON DUPLICATE KEY UPDATE reason=VALUES(reason), expires_at=VALUES(expires_at)
+                """;
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            ps.setString(2, reason);
+            ps.setLong(3, expiresAt);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save network ban for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    public void deleteNetworkBan(UUID uuid) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement("DELETE FROM network_bans WHERE uuid = ?")) {
+            ps.setString(1, uuid.toString());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to delete network ban for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Returns {reason, expiresAtString} or null if the player is not banned.
+     */
+    public String[] loadNetworkBan(UUID uuid) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement("SELECT reason, expires_at FROM network_bans WHERE uuid = ?")) {
+            ps.setString(1, uuid.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new String[]{rs.getString("reason"), String.valueOf(rs.getLong("expires_at"))};
+                }
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load network ban for " + uuid + ": " + e.getMessage());
+        }
+        return null;
+    }
+
     public String loadPunishments(UUID uuid) {
         String sql = "SELECT data_json FROM server_punishments WHERE uuid = ?";
         try (Connection conn = dataSource.getConnection();
@@ -1986,6 +2085,53 @@ public class DatabaseManager {
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save dominion " + id + ": " + e.getMessage());
         }
+    }
+
+    /**
+     * Copies the given fields of sourceRow into the stored row of the dominion, leaving every other
+     * field as stored.
+     */
+    public boolean mergeDominionFields(UUID id, String sourceRow, int[] fieldIndexes) {
+        String select = "SELECT raw_data FROM server_dominions WHERE id = ? FOR UPDATE";
+        String update = "UPDATE server_dominions SET raw_data = ? WHERE id = ?";
+        try (Connection conn = dataSource.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                String stored;
+                try (PreparedStatement ps = conn.prepareStatement(select)) {
+                    ps.setString(1, id.toString());
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (!rs.next()) {
+                            conn.commit();
+                            return false;
+                        }
+                        stored = rs.getString("raw_data");
+                    }
+                }
+                String[] storedFields = stored.split("\\|", -1);
+                String[] sourceFields = sourceRow.split("\\|", -1);
+                for (int index : fieldIndexes) {
+                    if (index < storedFields.length && index < sourceFields.length) {
+                        storedFields[index] = sourceFields[index];
+                    }
+                }
+                try (PreparedStatement ps = conn.prepareStatement(update)) {
+                    ps.setString(1, String.join("|", storedFields));
+                    ps.setString(2, id.toString());
+                    ps.executeUpdate();
+                }
+                conn.commit();
+                return true;
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to merge dominion " + id + ": " + e.getMessage());
+        }
+        return false;
     }
 
     public String loadDominion(UUID id) {

@@ -232,8 +232,9 @@ public class PlayerChatListener implements Listener {
 
                         final int count = enteredNumber;
                         final Biome capturedBiome = dominion.getBiomeResourcesBeingClaimed();
-                        // Fallback in case the chunk is unclaimed
-                        if (!DominionUtils.getResourceClaimTypes(dominion).contains(capturedBiome)) {
+                        // Fallback in case the chunk is unclaimed, or the claim was started on the server
+                        // that does not host the dominion
+                        if (!DominionUtils.isHostedHere(dominion) || !DominionUtils.getResourceClaimTypes(dominion).contains(capturedBiome)) {
                             throw new NumberFormatException();
                         }
 

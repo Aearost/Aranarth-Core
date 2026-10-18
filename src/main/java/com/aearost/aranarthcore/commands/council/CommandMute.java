@@ -5,9 +5,9 @@ import com.aearost.aranarthcore.objects.Punishment;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.PunishmentUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -144,17 +144,8 @@ public class CommandMute {
 					ZoneId.systemDefault()), "MUTE", reason.toString(), senderUuid);
 			AranarthUtils.addPunishment(AranarthUtils.getUUIDFromUsername(args[1]), punishment, false);
 
-			UUID targetUuid = AranarthUtils.getUUIDFromUsername(args[1]);
-			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-				if (onlinePlayer.getUniqueId().equals(targetUuid)) {
-					onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("mute.received", "duration", args[2], "reason", reason.toString())));
-					onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_GHAST_HURT, 1F, 1.1F);
-				} else if (AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getCouncilRank() > 0) {
-					onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("mute.issued", "player", nickname, "duration", args[2], "reason", reason.toString())));
-				} else {
-					onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("mute.permanent", "player", nickname, "reason", reason.toString())));
-				}
-			}
+			PunishmentUtils.notifyMute(punishment.getUuid(), nickname, args[2], reason.toString());
+			PunishmentUtils.issued(punishment, nickname, args[2], -1);
 		}
 	}
 

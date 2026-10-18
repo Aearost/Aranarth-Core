@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionLevelUtils;
 import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.PunishmentUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -97,6 +98,7 @@ public class CommandBan {
 			player.ban(reason, unbanDate, null);
 			Punishment punishment = new Punishment(player.getUniqueId(), currentTime, "BAN", reason, senderUuid);
 			AranarthUtils.addPunishment(player.getUniqueId(), punishment, false);
+			PunishmentUtils.issued(punishment, nickname, args[2], unbanDate == null ? -1 : unbanDate.getTime());
 
 			// Permanent bans (unbanDate == null) remove the player from their dominion.
 			// If they are the leader, the dominion and all its outposts are disbanded.
@@ -118,14 +120,7 @@ public class CommandBan {
 			sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
 			return;
 		}
-
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-			if (AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getCouncilRank() > 0) {
-				onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("ban.issued", "player", nickname, "duration", args[2], "reason", reason)));
-			} else {
-				onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("ban.permanent", "player", nickname, "reason", reason)));
-			}
-		}
+		PunishmentUtils.notifyBan(nickname, args[2], reason, args[2].equals("-1"));
 	}
 
 	/**

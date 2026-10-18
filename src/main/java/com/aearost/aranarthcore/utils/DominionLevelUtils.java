@@ -671,6 +671,10 @@ public class DominionLevelUtils {
         NumberFormat formatter = NumberFormat.getCurrencyInstance();
 
         for (Dominion dominion : dominions) {
+            // Skip cross-server stubs, the hosting server applies the penalty
+            if (!DominionUtils.isHostedHere(dominion)) {
+                continue;
+            }
             long dropTs = dominion.getLevelDropTimestamp();
             if (dropTs == 0L) {
                 continue; // No penalty

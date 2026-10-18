@@ -40,6 +40,14 @@ public class CommandSurvival implements CommandExecutor {
 
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
+			if (System.currentTimeMillis() < aranarthPlayer.getLastWorldCommandUse() + 60000) {
+				if (!aranarthPlayer.isInAdminMode()) {
+					int wait = (int) ((aranarthPlayer.getLastWorldCommandUse() + 60000) - System.currentTimeMillis()) / 1000;
+					player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.world_cooldown", "seconds", String.valueOf(wait))));
+					return true;
+				}
+			}
+
 			// On the SMP server: countdown here first, then transfer to Survival for RTP on arrival.
 			if (AranarthCore.isSmpServer() && NetworkManager.isActive()) {
 				AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
@@ -56,13 +64,6 @@ public class CommandSurvival implements CommandExecutor {
 				return true;
 			}
 
-			if (System.currentTimeMillis() < aranarthPlayer.getLastWorldCommandUse() + 60000) {
-				if (!aranarthPlayer.isInAdminMode()) {
-					int wait = (int) ((aranarthPlayer.getLastWorldCommandUse() + 60000) - System.currentTimeMillis()) / 1000;
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.world_cooldown", "seconds", String.valueOf(wait))));
-					return true;
-				}
-			}
 
 			World world = Bukkit.getWorld("world");
 			Random random = new Random();

@@ -123,6 +123,14 @@ public class GuiOutpostsClick {
             return;
         }
 
+        AranarthPlayer clicker = AranarthUtils.getPlayer(player.getUniqueId());
+        if (!clicker.isInAdminMode() && !dominion.getLeader().equals(player.getUniqueId())
+                && !DominionUtils.hasPermission(player, dominion, DominionPermission.OUTPOST_HOME)) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.outpost_no_permission_home")));
+            player.closeInventory();
+            return;
+        }
+
         // If the outpost's dominion lives on a different server, transfer there and re-run the command
         if (NetworkManager.isActive()) {
             String currentServer = AranarthCore.getInstance().getConfig().getString("network.this-server", "survival");

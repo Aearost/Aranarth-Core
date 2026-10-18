@@ -5,9 +5,9 @@ import com.aearost.aranarthcore.objects.Punishment;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.PunishmentUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -78,17 +78,8 @@ public class CommandWarn {
 							ZoneId.systemDefault()), "WARN", reason.toString(), senderUuid);
 					AranarthUtils.addPunishment(AranarthUtils.getUUIDFromUsername(args[1]), punishment, false);
 
-					UUID targetUuid = Bukkit.getOfflinePlayer(playerName).getUniqueId();
-					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-						if (onlinePlayer.getUniqueId().equals(targetUuid)) {
-							onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("warn.received", "reason", reason.toString())));
-							onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_GHAST_HURT, 1F, 1.1F);
-						} else if (AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getCouncilRank() > 0) {
-							onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("warn.issued", "player", nickname, "reason", reason.toString())));
-						} else {
-							onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("warn.issued_public", "player", nickname)));
-						}
-					}
+					PunishmentUtils.notifyWarn(player.getUniqueId(), nickname, reason.toString());
+					PunishmentUtils.issued(punishment, nickname, "", -1);
 				} else {
 					sender.sendMessage(ChatUtils.chatMessage(Lang.get("warn.must_specify_reason")));
 					return;

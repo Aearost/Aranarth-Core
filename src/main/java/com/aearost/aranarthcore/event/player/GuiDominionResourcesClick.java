@@ -102,7 +102,8 @@ public class GuiDominionResourcesClick {
         // Left-click - begin claim flow
         Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
         // The biome must be one the Dominion owns, and only members allowed to claim resources may start a claim
-        if (dominion == null || !DominionUtils.hasPermission(player, dominion, DominionPermission.RESOURCES)
+        if (dominion == null || !DominionUtils.isHostedHere(dominion)
+                || !DominionUtils.hasPermission(player, dominion, DominionPermission.RESOURCES)
                 || !DominionUtils.getResourceClaimTypes(dominion).contains(biome)) {
             player.closeInventory();
             return;

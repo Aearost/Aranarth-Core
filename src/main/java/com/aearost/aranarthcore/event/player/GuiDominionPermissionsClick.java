@@ -122,6 +122,11 @@ public class GuiDominionPermissionsClick {
                         player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.resources_gameplay_world")));
                         return;
                     }
+                    // Resources are claimed only on the server hosting the dominion's land
+                    if (!DominionUtils.isHostedHere(dominion)) {
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.home_server_only", "server", DominionUtils.getHostingServerDisplayName(dominion))));
+                        return;
+                    }
                     if (DominionUtils.hasPermission(player, dominion, DominionPermission.RESOURCES)) {
                         if (dominion.getClaimableResources() > 0) {
                             new GuiDominionResources(player).openGui();

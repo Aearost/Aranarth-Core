@@ -6179,17 +6179,13 @@ public class PersistenceUtils {
     }
 
     /**
-     * Syncs punishment data to MySQL. Call after the file has been saved.
-     * Each player's punishment list is stored as a JSON array.
+     * Serializes one player's punishment history as stored in server_punishments.
      */
-    public static void syncPunishmentsToDatabase() {
-        if (!DatabaseManager.isActive()) {
-            return;
-        }
-        DatabaseManager db = DatabaseManager.getInstance();
-        for (UUID uuid : AranarthUtils.getAllPunishments().keySet()) {
-            JsonArray arr = new JsonArray();
-            for (Punishment p : AranarthUtils.getPunishments(uuid)) {
+    public static String buildPunishmentsJson(UUID uuid) {
+        JsonArray arr = new JsonArray();
+        List<Punishment> punishments = AranarthUtils.getPunishments(uuid);
+        if (punishments != null) {
+            for (Punishment p : punishments) {
                 JsonObject po = new JsonObject();
                 po.addProperty("date", p.getDate().atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli());
                 po.addProperty("type", p.getType());
@@ -6197,8 +6193,18 @@ public class PersistenceUtils {
                 po.addProperty("appliedBy", p.getAppliedBy() != null ? p.getAppliedBy().toString() : "CONSOLE");
                 arr.add(po);
             }
+        }
+        return GSON.toJson(arr);
+    }
+
+    public static void syncPunishmentsToDatabase() {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        DatabaseManager db = DatabaseManager.getInstance();
+        for (UUID uuid : AranarthUtils.getAllPunishments().keySet()) {
             try {
-                db.savePunishments(uuid, GSON.toJson(arr));
+                db.savePunishments(uuid, buildPunishmentsJson(uuid));
             } catch (Exception e) {
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync punishments for " + uuid + ": " + e.getMessage());
             }
@@ -6490,6 +6496,191 @@ public class PersistenceUtils {
     }
 
     /**
+     * Serializes a dominion's rank and relation permissions as stored in server_dominion_permissions.
+     */
+    public static String buildDominionPermissionsString(Dominion dominion) {
+        StringBuilder builder = new StringBuilder();
+        for (Map.Entry<DominionRank, Set<DominionPermission>> entry : dominion.getDominionPermissions().getPermissionsMap().entrySet()) {
+            if (!builder.isEmpty()) {
+                builder.append(";");
+            }
+            String permList = entry.getValue().stream()
+                    .map(DominionPermission::name)
+                    .collect(Collectors.joining(","));
+            builder.append(entry.getKey().name()).append(":").append(permList);
+        }
+        return builder.toString();
+    }
+
+    /**
+     * Serializes a dominion's per-player overrides as stored in server_dominion_player_perms.
+     */
+    public static String buildDominionPlayerPermsString(Dominion dominion) {
+        StringBuilder builder = new StringBuilder();
+        for (Map.Entry<UUID, Map<DominionPermission, Boolean>> playerEntry : dominion.getPlayerPermissionOverrides().entrySet()) {
+            if (playerEntry.getValue().isEmpty()) {
+                continue;
+            }
+            if (!builder.isEmpty()) {
+                builder.append(";");
+            }
+            builder.append(playerEntry.getKey().toString()).append(":");
+            String permStr = playerEntry.getValue().entrySet().stream()
+                    .map(e -> e.getKey().name() + "=" + e.getValue())
+                    .collect(Collectors.joining(","));
+            builder.append(permStr);
+        }
+        return builder.toString();
+    }
+
+    private static DominionPermissions parseDominionPermissions(String permsData) {
+        Map<DominionRank, Set<DominionPermission>> allPerms = new EnumMap<>(DominionRank.class);
+        for (String rankEntry : permsData.split(";")) {
+            String[] parts = rankEntry.split(":", 2);
+            if (parts.length == 2) {
+                try {
+                    DominionRank rank = DominionRank.valueOf(parts[0]);
+                    Set<DominionPermission> perms = new HashSet<>();
+                    if (!parts[1].isEmpty()) {
+                        for (String permName : parts[1].split(",")) {
+                            try {
+                                perms.add(DominionPermission.valueOf(permName));
+                            } catch (IllegalArgumentException ignored) {
+                            }
+                        }
+                    }
+                    allPerms.put(rank, perms);
+                } catch (IllegalArgumentException ignored) {
+                }
+            }
+        }
+        allPerms.put(DominionRank.LEADER, new HashSet<>(Arrays.asList(DominionPermission.values())));
+        DominionPermissions defaults = DominionPermissions.createDefaults();
+        for (DominionRank rank : DominionRank.values()) {
+            if (rank != DominionRank.LEADER && !allPerms.containsKey(rank)) {
+                allPerms.put(rank, new HashSet<>(defaults.getPermissions(rank)));
+            }
+        }
+        return new DominionPermissions(allPerms);
+    }
+
+    private static Map<UUID, Map<DominionPermission, Boolean>> parseDominionPlayerPerms(String playerPermsData) {
+        Map<UUID, Map<DominionPermission, Boolean>> allOverrides = new HashMap<>();
+        for (String playerEntry : playerPermsData.split(";")) {
+            String[] parts = playerEntry.split(":", 2);
+            if (parts.length != 2) {
+                continue;
+            }
+            try {
+                UUID pUuid = UUID.fromString(parts[0]);
+                Map<DominionPermission, Boolean> overrides = new HashMap<>();
+                if (!parts[1].isEmpty()) {
+                    for (String permEntry : parts[1].split(",")) {
+                        String[] kv = permEntry.split("=", 2);
+                        if (kv.length == 2) {
+                            try {
+                                overrides.put(DominionPermission.valueOf(kv[0]), Boolean.parseBoolean(kv[1]));
+                            } catch (IllegalArgumentException ignored) {
+                            }
+                        }
+                    }
+                }
+                if (!overrides.isEmpty()) {
+                    allOverrides.put(pUuid, overrides);
+                }
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+        return allOverrides;
+    }
+
+    /**
+     * The row fields the server that is not hosting a dominion may change: name, leader, members,
+     * member ranks, the member PvP, mob spawning, bending and explosion flags, map color and resource
+     * filters. Everything else (land, food, resources, balance, conquest, levels) belongs to the
+     * hosting server. Indexes follow buildDominionRow.
+     */
+    private static final int[] DOMINION_SETTINGS_FIELDS = {1, 2, 3, 18, 19, 20, 36, 39, 40, 42};
+
+    /**
+     * Saves a changed dominion and tells the other server to refresh its copy. The hosting server saves
+     * the whole row. The other server only holds a stub without land, so it writes just the settings
+     * fields into the stored row.
+     */
+    public static void saveDominionAndPublish(Dominion dominion) {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        UUID id = dominion.getId();
+        boolean hosted = DominionUtils.isHostedHere(dominion);
+        String row = buildDominionRow(dominion);
+        String perms = dominion.getDominionPermissions() != null ? buildDominionPermissionsString(dominion) : null;
+        String playerPerms = buildDominionPlayerPermsString(dominion);
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+            DatabaseManager db = DatabaseManager.getInstance();
+            boolean saved;
+            if (hosted) {
+                db.saveDominion(id, row);
+                saved = true;
+            } else {
+                saved = db.mergeDominionFields(id, row, DOMINION_SETTINGS_FIELDS);
+            }
+            if (!saved) {
+                return;
+            }
+            if (perms != null) {
+                db.saveDominionPermissions(id, perms);
+            }
+            if (playerPerms.isEmpty()) {
+                db.deleteDominionPlayerPerms(id);
+            } else {
+                db.saveDominionPlayerPerms(id, playerPerms);
+            }
+            Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+                if (NetworkManager.isActive()) {
+                    NetworkManager.getInstance().publishDominionUpdate(id);
+                }
+            });
+        });
+    }
+
+    /**
+     * Refreshes this server's copy of a dominion after the other server changed it. The hosting server
+     * only takes the settings fields, while a stub takes everything except the land.
+     */
+    public static void reloadSyncedDominion(UUID dominionId) {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+            DatabaseManager db = DatabaseManager.getInstance();
+            String raw = db.loadDominion(dominionId);
+            if (raw == null) {
+                return;
+            }
+            String permsData = db.loadDominionPermissionsById(dominionId);
+            String playerPermsData = db.loadDominionPlayerPermsById(dominionId);
+            Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+                Dominion live = DominionUtils.getDominionById(dominionId);
+                if (live == null) {
+                    loadSingleDominionFromDatabase(dominionId);
+                    return;
+                }
+                try {
+                    Dominion loaded = parseDominionRow(raw, false);
+                    loaded.setDominionPermissions(permsData != null && !permsData.isEmpty()
+                            ? parseDominionPermissions(permsData) : live.getDominionPermissions());
+                    loaded.setPlayerPermissionOverrides(playerPermsData != null && !playerPermsData.isEmpty()
+                            ? parseDominionPlayerPerms(playerPermsData) : new HashMap<>());
+                    DominionUtils.applySyncedDominion(live, loaded, !DominionUtils.isHostedHere(live));
+                } catch (Exception e) {
+                    Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to refresh dominion " + dominionId + ": " + e.getMessage());
+                }
+            });
+        });
+    }
+
+    /**
      * Syncs dominion permissions to MySQL.
      */
     public static void syncDominionPermissionsToDatabase() {
@@ -6502,22 +6693,15 @@ public class PersistenceUtils {
             return;
         }
         for (Dominion dominion : dominions) {
-            DominionPermissions perms = dominion.getDominionPermissions();
-            if (perms == null) {
+            // The other server's copy is a stub, and its edits are saved when they are made
+            if (!DominionUtils.isHostedHere(dominion)) {
                 continue;
             }
-            StringBuilder builder = new StringBuilder();
-            for (Map.Entry<DominionRank, Set<DominionPermission>> entry : perms.getPermissionsMap().entrySet()) {
-                if (!builder.isEmpty()) {
-                    builder.append(";");
-                }
-                String permList = entry.getValue().stream()
-                        .map(DominionPermission::name)
-                        .collect(Collectors.joining(","));
-                builder.append(entry.getKey().name()).append(":").append(permList);
+            if (dominion.getDominionPermissions() == null) {
+                continue;
             }
             try {
-                db.saveDominionPermissions(dominion.getId(), builder.toString());
+                db.saveDominionPermissions(dominion.getId(), buildDominionPermissionsString(dominion));
             } catch (Exception e) {
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync dominion permissions for " + dominion.getId() + ": " + e.getMessage());
             }
@@ -6537,27 +6721,14 @@ public class PersistenceUtils {
             return;
         }
         for (Dominion dominion : dominions) {
-            Map<UUID, Map<DominionPermission, Boolean>> allOverrides = dominion.getPlayerPermissionOverrides();
-            if (allOverrides.isEmpty()) {
+            // The other server's copy is a stub, and its edits are saved when they are made
+            if (!DominionUtils.isHostedHere(dominion)) {
                 continue;
             }
-            StringBuilder builder = new StringBuilder();
-            for (Map.Entry<UUID, Map<DominionPermission, Boolean>> playerEntry : allOverrides.entrySet()) {
-                if (playerEntry.getValue().isEmpty()) {
-                    continue;
-                }
-                if (!builder.isEmpty()) {
-                    builder.append(";");
-                }
-                builder.append(playerEntry.getKey().toString()).append(":");
-                String permStr = playerEntry.getValue().entrySet().stream()
-                        .map(e -> e.getKey().name() + "=" + e.getValue())
-                        .collect(Collectors.joining(","));
-                builder.append(permStr);
-            }
-            if (!builder.isEmpty()) {
+            String overrides = buildDominionPlayerPermsString(dominion);
+            if (!overrides.isEmpty()) {
                 try {
-                    db.saveDominionPlayerPerms(dominion.getId(), builder.toString());
+                    db.saveDominionPlayerPerms(dominion.getId(), overrides);
                 } catch (Exception e) {
                     Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync dominion player perms for " + dominion.getId() + ": " + e.getMessage());
                 }
@@ -8461,6 +8632,16 @@ public class PersistenceUtils {
      * Mirrors the while-loop body of loadDominions().
      */
     private static void parseAndAddDominionRow(String row) throws Exception {
+        DominionUtils.createDominion(parseDominionRow(row, true));
+    }
+
+    /**
+     * Parses a stored dominion row without registering it.
+     *
+     * @param resolveChunks False to skip loading the claimed chunks, for example when only the other
+     *                      fields of an already loaded dominion are being refreshed.
+     */
+    private static Dominion parseDominionRow(String row, boolean resolveChunks) throws Exception {
         String[] fields = row.split("\\|");
 
         UUID id = null;
@@ -8512,7 +8693,9 @@ public class PersistenceUtils {
         // On Survival: "smp:*" names return null from Bukkit.getWorld() naturally (no such world),
         //   so no special handling needed.
         World world;
-        if (AranarthCore.isSmpServer()) {
+        if (!resolveChunks) {
+            world = null;
+        } else if (AranarthCore.isSmpServer()) {
             world = worldName.startsWith("smp:") ? Bukkit.getWorld(worldName.substring(4)) : null;
         } else {
             world = Bukkit.getWorld(worldName);
@@ -8662,7 +8845,7 @@ public class PersistenceUtils {
             }
         }
         DominionUtils.resizeFoodArray(dominion);
-        DominionUtils.createDominion(dominion);
+        return dominion;
     }
 
     /**

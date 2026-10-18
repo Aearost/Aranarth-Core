@@ -62,6 +62,7 @@ Cross-server & Technical
 [~] Fixed ender pearls landing after a world change teleporting players between Survival and Creative without swapping their inventory or game mode, and fixed failed teleports still swapping the player's inventory
 [~] Fixed several cross-server item duplication exploits by freezing players during server transfers and other individual fixes
 [~] Fixed GUI exploits by identifying plugin GUIs with an internal tag instead of their title, and hardened GUIs against forged items and drags
+[~] Synced bans/mutes/warnings and dominion changes across servers, gave cross-server teleports their countdown and combat checks, and stopped transfers and demoted staff from bypassing permissions
 
 Miscellaneous
 [~] Fixed WorldEdit commands not appearing in tab completion or autofilling block names #456

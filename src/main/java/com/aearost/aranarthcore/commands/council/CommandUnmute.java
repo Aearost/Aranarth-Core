@@ -5,7 +5,7 @@ import com.aearost.aranarthcore.objects.Punishment;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
+import com.aearost.aranarthcore.utils.PunishmentUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -75,11 +75,8 @@ public class CommandUnmute {
 				AranarthUtils.addPunishment(uuid, punishment, false);
 				sender.sendMessage(ChatUtils.chatMessage(Lang.get("unmute.player_unmuted", "name", aranarthPlayer.getNickname())));
 
-				for (Player player : Bukkit.getOnlinePlayers()) {
-					if (player.getUniqueId().equals(uuid)) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("mute.unmuted")));
-					}
-				}
+				PunishmentUtils.notifyUnmute(uuid);
+				PunishmentUtils.issued(punishment, aranarthPlayer.getNickname(), "", -1);
 			} else {
 				sender.sendMessage(ChatUtils.chatMessage(Lang.get("unmute.must_specify_reason")));
 			}

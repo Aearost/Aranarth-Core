@@ -48,6 +48,28 @@ public class PlayerServerJoinListener implements Listener {
     }
 
     /**
+     * Bans are shared by both servers, so a player banned on one server cannot join the other.
+     */
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPreLoginBanCheck(final AsyncPlayerPreLoginEvent e) {
+        if (e.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED || !DatabaseManager.isActive()) {
+            return;
+        }
+        String[] ban = DatabaseManager.getInstance().loadNetworkBan(e.getUniqueId());
+        if (ban == null) {
+            return;
+        }
+        String kickMessage = PunishmentUtils.getBanKickMessage(ban);
+        if (kickMessage == null) {
+            // The ban has ended
+            DatabaseManager.getInstance().deleteNetworkBan(e.getUniqueId());
+            return;
+        }
+        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] Refused connection for " + e.getName() + ": banned");
+        e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, kickMessage);
+    }
+
+    /**
      * Only original players may be on the SMP.
      */
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -637,17 +659,10 @@ public class PlayerServerJoinListener implements Listener {
                                         });
                             }
                         } else if ("command".equals(pending.getType())) {
-                            // Dispatch a command as if the player ran it on this server.
-                            // Force admin mode so the command skips its own countdown
-                            // (the countdown already happened on the source server).
-                            AranarthPlayer apCmd = AranarthUtils.getPlayer(player.getUniqueId());
-                            boolean wasAdmin = apCmd.isInAdminMode();
-                            apCmd.setInAdminMode(true);
-                            AranarthUtils.setPlayer(player.getUniqueId(), apCmd);
-                            Bukkit.dispatchCommand(player, pending.getCommand());
-                            AranarthPlayer apCmdAfter = AranarthUtils.getPlayer(player.getUniqueId());
-                            apCmdAfter.setInAdminMode(wasAdmin);
-                            AranarthUtils.setPlayer(player.getUniqueId(), apCmdAfter);
+                            // Dispatch a command as if the player ran it on this server. The countdown
+                            // already happened on the source server so it is skipped, but every permission
+                            // check of the command still applies.
+                            AranarthUtils.runWithoutCountdown(player, () -> Bukkit.dispatchCommand(player, pending.getCommand()));
                         } else {
                             // TP to the stored coordinates
                             World w = Bukkit.getWorld(pending.getWorld());

@@ -77,15 +77,8 @@ public class CommandDominion implements CommandExecutor {
             return;
         }
 
-        if (!isAdmin) {
-            boolean isConquered = playerDominion.getConquered().contains(target.getLeader());
-            if (!isConquered) {
-                DominionRank relationRank = DominionUtils.getRelationKey(playerDominion, target);
-                if (!target.getDominionPermissions().hasPermission(relationRank, DominionPermission.HOME)) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.home_access_disabled", "name", target.getName())));
-                    return;
-                }
-            }
+        if (!canUseOtherDominionHome(player, target, false)) {
+            return;
         }
 
         AranarthUtils.teleportPlayer(player, player.getLocation(), target.getDominionHome(), isAdmin, target.getName(), Lang.get("dominion.teleported_to", "name", target.getName()), success -> {
@@ -104,20 +97,8 @@ public class CommandDominion implements CommandExecutor {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
         boolean isAdmin = aranarthPlayer.isInAdminMode();
 
-        if (!isAdmin) {
-            Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
-            if (playerDominion == null) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_in_dominion")));
-                return;
-            }
-            boolean isConquered = playerDominion.getConquered().contains(target.getLeader());
-            if (!isConquered) {
-                DominionRank relationRank = DominionUtils.getRelationKey(playerDominion, target);
-                if (!target.getDominionPermissions().hasPermission(relationRank, DominionPermission.OUTPOST_HOME)) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.outpost_home_access_disabled", "name", target.getName())));
-                    return;
-                }
-            }
+        if (!canUseOtherDominionHome(player, target, true)) {
+            return;
         }
 
         Outpost outpost = OutpostUtils.getDominionOutposts(target.getId()).stream()
@@ -136,6 +117,55 @@ public class CommandDominion implements CommandExecutor {
                 player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.could_not_teleport_outpost", "name", target.getName(), "outpost", outpost.getName())));
             }
         });
+    }
+
+    /**
+     * Whether the player may use another dominion's home or outpost homes, based on that dominion's
+     * relation permissions. Sends the reason to the player when they may not.
+     */
+    private static boolean canUseOtherDominionHome(Player player, Dominion target, boolean isOutpost) {
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        if (aranarthPlayer.isInAdminMode()) {
+            return true;
+        }
+        Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+        if (playerDominion == null) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_in_dominion")));
+            return false;
+        }
+        if (playerDominion.getConquered().contains(target.getLeader())) {
+            return true;
+        }
+        DominionRank relationRank = DominionUtils.getRelationKey(playerDominion, target);
+        DominionPermission permission = isOutpost ? DominionPermission.OUTPOST_HOME : DominionPermission.HOME;
+        if (!target.getDominionPermissions().hasPermission(relationRank, permission)) {
+            String key = isOutpost ? "dominion.outpost_home_access_disabled" : "dominion.home_access_disabled";
+            player.sendMessage(ChatUtils.chatMessage(Lang.get(key, "name", target.getName())));
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Finds the dominion named by the longest leading run of the arguments, and the outpost name made of
+     * the rest. Returns null when no dominion matches.
+     */
+    private static HomeTarget resolveHomeTarget(String[] remaining) {
+        for (int split = remaining.length; split >= 1; split--) {
+            String dominionPart = String.join(" ", Arrays.copyOfRange(remaining, 0, split));
+            Dominion match = DominionUtils.getDominions().stream()
+                    .filter(d -> ChatUtils.stripColorFormatting(d.getName()).equalsIgnoreCase(dominionPart))
+                    .findFirst().orElse(null);
+            if (match != null) {
+                String outpostPart = split < remaining.length
+                        ? String.join(" ", Arrays.copyOfRange(remaining, split, remaining.length)) : null;
+                return new HomeTarget(match, outpostPart);
+            }
+        }
+        return null;
+    }
+
+    private record HomeTarget(Dominion dominion, String outpostPart) {
     }
 
     /**
@@ -2403,6 +2433,11 @@ public class CommandDominion implements CommandExecutor {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.food_no_permission")));
             return;
         }
+        // The food storage only exists on the server hosting the dominion's land
+        if (!DominionUtils.isHostedHere(playerDominion)) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.home_server_only", "server", DominionUtils.getHostingServerDisplayName(playerDominion))));
+            return;
+        }
         if (DominionUtils.isFoodInventoryLockedByOther(playerDominion.getId(), player.getUniqueId())) {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.food_in_use")));
             return;
@@ -2429,6 +2464,11 @@ public class CommandDominion implements CommandExecutor {
             return;
         }
         if (dominion != null) {
+            // Resources are claimed only on the server hosting the dominion's land
+            if (!DominionUtils.isHostedHere(dominion)) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.home_server_only", "server", DominionUtils.getHostingServerDisplayName(dominion))));
+                return;
+            }
             if (DominionUtils.hasPermission(player, dominion, DominionPermission.RESOURCES)) {
                 if (dominion.getClaimableResources() > 0) {
                     GuiDominionResources gui = new GuiDominionResources(player);
@@ -3036,29 +3076,15 @@ public class CommandDominion implements CommandExecutor {
             }
             return getServerForWorld(playerDominion.getDominionHomeWorldName());
         }
-        String[] remaining = Arrays.copyOfRange(args, 1, args.length);
-        Dominion targetDominion = null;
-        String outpostPart = null;
-        for (int split = remaining.length; split >= 1; split--) {
-            String dominionPart = String.join(" ", Arrays.copyOfRange(remaining, 0, split));
-            Dominion match = DominionUtils.getDominions().stream()
-                    .filter(d -> ChatUtils.stripColorFormatting(d.getName()).equalsIgnoreCase(dominionPart))
-                    .findFirst().orElse(null);
-            if (match != null) {
-                targetDominion = match;
-                if (split < remaining.length) {
-                    outpostPart = String.join(" ", Arrays.copyOfRange(remaining, split, remaining.length));
-                }
-                break;
-            }
-        }
-        if (targetDominion == null) {
+        HomeTarget homeTarget = resolveHomeTarget(Arrays.copyOfRange(args, 1, args.length));
+        if (homeTarget == null) {
             return null;
         }
+        Dominion targetDominion = homeTarget.dominion();
+        String outpostPart = homeTarget.outpostPart();
         if (outpostPart != null) {
-            String finalOutpostPart = outpostPart;
             Outpost outpost = OutpostUtils.getDominionOutposts(targetDominion.getId()).stream()
-                    .filter(o -> ChatUtils.stripColorFormatting(o.getName()).equalsIgnoreCase(finalOutpostPart))
+                    .filter(o -> ChatUtils.stripColorFormatting(o.getName()).equalsIgnoreCase(outpostPart))
                     .findFirst().orElse(null);
             if (outpost != null && outpost.getHomeWorldName() != null) {
                 return getServerForWorld(outpost.getHomeWorldName());
@@ -3138,6 +3164,16 @@ public class CommandDominion implements CommandExecutor {
                         player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_in_dominion")));
                     }
                 } else if (args[0].equalsIgnoreCase("home")) {
+                    if (!player.hasPermission("aranarth.dominion.home")) {
+                        player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+                        return true;
+                    }
+                    HomeTarget homeTarget = args.length >= 2 ? resolveHomeTarget(Arrays.copyOfRange(args, 1, args.length)) : null;
+                    // Check access to another dominion's home before any transfer, so the destination
+                    // server is never asked to teleport a player who is not allowed there
+                    if (homeTarget != null && !canUseOtherDominionHome(player, homeTarget.dominion(), homeTarget.outpostPart() != null)) {
+                        return true;
+                    }
                     // Cross-server: transfer to whichever server the target dominion/outpost lives on.
                     if (NetworkManager.isActive()) {
                         String currentServer = AranarthCore.getInstance().getConfig()
@@ -3158,30 +3194,10 @@ public class CommandDominion implements CommandExecutor {
                             return true;
                         }
                     }
-                    if (!player.hasPermission("aranarth.dominion.home")) {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
-                        return true;
-                    }
                     if (args.length >= 2) {
                         String[] remaining = Arrays.copyOfRange(args, 1, args.length);
-                        // Try longest dominion-name prefix first
-                        Dominion targetDominion = null;
-                        String outpostPart = null;
-                        for (int split = remaining.length; split >= 1; split--) {
-                            String dominionPart = String.join(" ", Arrays.copyOfRange(remaining, 0, split));
-                            Dominion match = DominionUtils.getDominions().stream()
-                                    .filter(d -> ChatUtils.stripColorFormatting(d.getName()).equalsIgnoreCase(dominionPart))
-                                    .findFirst().orElse(null);
-                            if (match != null) {
-                                targetDominion = match;
-                                if (split < remaining.length) {
-                                    outpostPart = String.join(" ", Arrays.copyOfRange(remaining, split, remaining.length));
-                                }
-                                break;
-                            }
-                        }
-                        if (targetDominion != null && outpostPart != null) {
-                            teleportToAllyOutpostHome(player, targetDominion, outpostPart);
+                        if (homeTarget != null && homeTarget.outpostPart() != null) {
+                            teleportToAllyOutpostHome(player, homeTarget.dominion(), homeTarget.outpostPart());
                         } else {
                             teleportToAllyDominionHome(player, String.join(" ", remaining));
                         }

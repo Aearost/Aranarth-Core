@@ -31,7 +31,9 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -80,6 +82,7 @@ public class NetworkManager {
     public static final String CH_DOMINION_RELATION_UPDATE = "aranarth:dominion_relation_update";
     public static final String CH_DOMINION_CONQUEST_UPDATE = "aranarth:dominion_conquest_update";
     public static final String CH_DOMINION_BALANCE_ADJUST = "aranarth:dominion_balance_adjust";
+    public static final String CH_DOMINION_UPDATE = "aranarth:dominion_update";
     public static final String CH_CHAT_GAME_START = "aranarth:chat_game_start";
     public static final String CH_CHAT_GAME_WIN = "aranarth:chat_game_win";
     public static final String CH_CHAT_GAME_EXPIRE = "aranarth:chat_game_expire";
@@ -119,6 +122,7 @@ public class NetworkManager {
     public static final String CH_TRADE_CONFIRM = "aranarth:trade_confirm";
     public static final String CH_TRADE_EXECUTE = "aranarth:trade_execute";
     public static final String CH_TRADE_RESULT = "aranarth:trade_result";
+    public static final String CH_PUNISHMENT = "aranarth:punishment";
     public static final String CH_PRONOUNS_UPDATE = "aranarth:pronouns_update";
     public static final String CH_PING_UPDATE = "aranarth:ping_update";
     public static final String CH_HEARTBEAT = "aranarth:heartbeat";
@@ -544,6 +548,7 @@ public class NetworkManager {
             case CH_DOMINION_RELATION_UPDATE -> handleDominionRelationUpdate(json);
             case CH_DOMINION_CONQUEST_UPDATE -> handleDominionConquestUpdate(json);
             case CH_DOMINION_BALANCE_ADJUST -> handleDominionBalanceAdjust(json);
+            case CH_DOMINION_UPDATE -> handleDominionUpdate(json);
             case CH_CHAT_GAME_START -> handleChatGameStart(json);
             case CH_CHAT_GAME_WIN -> handleChatGameWin(json);
             case CH_CHAT_GAME_EXPIRE -> handleChatGameExpire(json);
@@ -583,6 +588,7 @@ public class NetworkManager {
             case CH_TRADE_CONFIRM -> handleTradeConfirm(json);
             case CH_TRADE_EXECUTE -> handleTradeExecute(json);
             case CH_TRADE_RESULT -> handleTradeResult(json);
+            case CH_PUNISHMENT -> handlePunishment(json);
             case CH_PRONOUNS_UPDATE -> handlePronounsUpdate(json);
             case CH_PING_UPDATE -> handlePingUpdate(json);
             case CH_HEARTBEAT -> handleHeartbeat(json);
@@ -1777,11 +1783,21 @@ public class NetworkManager {
     // -------------------------------------------------------------------------
 
     public void storeCrossServerTpContext(UUID localPlayerUuid, CrossServerTpContext ctx) {
+        long now = System.currentTimeMillis();
+        pendingCrossServerRequests.values().removeIf(c -> now - c.createdAt() > AranarthPlayer.TELEPORT_REQUEST_TTL_MS);
         pendingCrossServerRequests.put(localPlayerUuid, ctx);
     }
 
+    /**
+     * Provides the cross-server request the local player received, or null if there is none or it expired.
+     */
     public CrossServerTpContext getCrossServerTpContext(UUID localPlayerUuid) {
-        return pendingCrossServerRequests.get(localPlayerUuid);
+        CrossServerTpContext ctx = pendingCrossServerRequests.get(localPlayerUuid);
+        if (ctx != null && System.currentTimeMillis() - ctx.createdAt() > AranarthPlayer.TELEPORT_REQUEST_TTL_MS) {
+            pendingCrossServerRequests.remove(localPlayerUuid);
+            return null;
+        }
+        return ctx;
     }
 
     public void clearCrossServerTpContext(UUID localPlayerUuid) {
@@ -1972,6 +1988,7 @@ public class NetworkManager {
 
         UUID uuid = UUID.fromString(json.get("uuid").getAsString());
         remoteRoster.remove(uuid);
+        pendingCrossServerRequests.values().removeIf(c -> c.remotePlayerUuid().equals(uuid));
 
         // Close any remote invsee GUIs local players have open for this player
         com.aearost.aranarthcore.gui.GuiInvsee.closeAllRemoteFor(uuid);
@@ -2048,7 +2065,7 @@ public class NetworkManager {
             return;
         }
 
-        storeCrossServerTpContext(toUuid, new CrossServerTpContext(fromUuid, fromNickname, fromServer, isTpHere));
+        storeCrossServerTpContext(toUuid, new CrossServerTpContext(fromUuid, fromNickname, fromServer, isTpHere, System.currentTimeMillis()));
 
         // Do NOT set teleportToUuid/teleportFromUuid here - those fields resolve the UUID via
         // Bukkit.getPlayer(), which only works for locally-online players. The remote requester is
@@ -2099,7 +2116,14 @@ public class NetworkManager {
                         .getString("network.servers." + accepterServer, accepterServer);
                 PendingTeleport ptForRequester = new PendingTeleport(accepterUuid.toString(),
                         "&e&l" + accepterServer.toUpperCase(), "&7You have teleported to " + accepterNick);
-                saveInventoryAndTransfer(requester, targetServer, ptForRequester);
+                // Same countdown and combat check as a same-server teleport
+                AranarthPlayer requesterAp = AranarthUtils.getPlayer(requesterUuid);
+                AranarthUtils.teleportPlayer(requester, requester.getLocation(), requester.getLocation(),
+                        requesterAp.isInAdminMode(), "&e&l" + accepterServer.toUpperCase(), "&7Transferring to " + accepterNick + "&7...", success -> {
+                            if (success) {
+                                saveInventoryAndTransfer(requester, targetServer, ptForRequester);
+                            }
+                        });
             }
         }
     }
@@ -2113,7 +2137,6 @@ public class NetworkManager {
         if (requester != null) {
             requester.sendMessage(ChatUtils.chatMessage(Lang.get("tp.denied_by", "player", denierNick)));
         }
-        clearCrossServerTpContext(requesterUuid);
     }
 
     private void handleTransfer(JsonObject json) {
@@ -2837,6 +2860,24 @@ public class NetworkManager {
             }
             DominionUtils.evictDominionFromMemory(dominion);
         });
+    }
+
+    /**
+     * Publishes that a dominion was saved, so the other server refreshes its copy from MySQL.
+     */
+    public void publishDominionUpdate(UUID dominionId) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("dominionId", dominionId.toString());
+        publish(CH_DOMINION_UPDATE, json);
+    }
+
+    private void handleDominionUpdate(JsonObject json) {
+        if (json.get("server").getAsString().equals(thisServer)) {
+            return;
+        }
+        UUID dominionId = UUID.fromString(json.get("dominionId").getAsString());
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> PersistenceUtils.reloadSyncedDominion(dominionId));
     }
 
     /**
@@ -4357,5 +4398,40 @@ public class NetworkManager {
                         + "Failed to deserialize trade result " + commitId + ": " + e.getMessage());
             }
         });
+    }
+
+    // -------------------------------------------------------------------------
+    // Punishments
+    // -------------------------------------------------------------------------
+
+    /**
+     * Sends a ban, unban, mute, unmute or warning to the other server so it applies it immediately.
+     */
+    public void publishPunishment(Punishment punishment, String nickname, String duration, long banExpiresAt, String muteEndDate) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", punishment.getUuid().toString());
+        json.addProperty("type", punishment.getType());
+        json.addProperty("reason", punishment.getReason());
+        json.addProperty("date", punishment.getDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+        json.addProperty("appliedBy", punishment.getAppliedBy() != null ? punishment.getAppliedBy().toString() : "");
+        json.addProperty("nickname", nickname);
+        json.addProperty("duration", duration);
+        json.addProperty("banExpiresAt", banExpiresAt);
+        json.addProperty("muteEndDate", muteEndDate != null ? muteEndDate : "");
+        publish(CH_PUNISHMENT, json);
+    }
+
+    private void handlePunishment(JsonObject json) {
+        if (json.get("server").getAsString().equals(thisServer)) {
+            return;
+        }
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        String appliedBy = json.get("appliedBy").getAsString();
+        LocalDateTime date = LocalDateTime.ofInstant(Instant.ofEpochMilli(json.get("date").getAsLong()), ZoneId.systemDefault());
+        Punishment punishment = new Punishment(uuid, date, json.get("type").getAsString(), json.get("reason").getAsString(),
+                appliedBy.isEmpty() ? null : UUID.fromString(appliedBy));
+        PunishmentUtils.onRemotePunishment(punishment, json.get("nickname").getAsString(), json.get("duration").getAsString(),
+                json.get("banExpiresAt").getAsLong(), json.get("muteEndDate").getAsString());
     }
 }

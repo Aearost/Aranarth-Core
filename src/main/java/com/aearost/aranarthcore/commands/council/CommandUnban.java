@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.Punishment;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.PunishmentUtils;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -77,6 +78,7 @@ public class CommandUnban {
 
 				Punishment punishment = new Punishment(uuid, LocalDateTime.now(), "UNBAN", reason.toString(), senderUuid);
 				AranarthUtils.addPunishment(uuid, punishment, false);
+				PunishmentUtils.issued(punishment, AranarthUtils.getNickname(player), "", -1);
 				sender.sendMessage(ChatUtils.chatMessage(Lang.get("unban.success", "player", AranarthUtils.getNickname(player), "reason", reason.toString())));
 			} else {
 				sender.sendMessage(ChatUtils.chatMessage(Lang.get("unban.must_specify_reason")));

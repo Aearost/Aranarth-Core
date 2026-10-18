@@ -163,9 +163,23 @@ public class CommandTpAccept implements CommandExecutor {
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
                     player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.accepted_request", "player", ctx.remotePlayerNickname())));
-                    NetworkManager.getInstance().publishTpAccepted(
-                            player.getUniqueId(), localNickname,
-                            ctx.remotePlayerUuid(), ctx.isTpHere());
+                    if (ctx.isTpHere()) {
+                        // This player is the one leaving, so they get the same countdown and combat
+                        // check as a same-server teleport before the other server transfers them
+                        AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
+                                aranarthPlayer.isInAdminMode(), "&e&l" + ctx.remoteServer().toUpperCase(),
+                                "&7Transferring to " + ctx.remotePlayerNickname() + "&7...", success -> {
+                                    if (success) {
+                                        NetworkManager.getInstance().publishTpAccepted(
+                                                player.getUniqueId(), localNickname,
+                                                ctx.remotePlayerUuid(), true);
+                                    }
+                                });
+                    } else {
+                        NetworkManager.getInstance().publishTpAccepted(
+                                player.getUniqueId(), localNickname,
+                                ctx.remotePlayerUuid(), false);
+                    }
                 } else {
                     player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.no_pending_request")));
                 }

@@ -88,6 +88,7 @@ public class AranarthUtils {
     private static final HashMap<UUID, UUID> pendingShopInvites = new HashMap<>(); // invitee UUID → owner UUID
     private static final HashMap<UUID, String> shopNames = new HashMap<>();
     private static final HashMap<UUID, BukkitTask> teleportingPlayers = new HashMap<>();
+    private static final Set<UUID> skipCountdown = new HashSet<>();
     private static final List<AranarthVote> votes = new ArrayList<>();
     private static final HashMap<UUID, List<PlayerKillDeathScore>> killDeathScores = new HashMap<>();
     private static final HashMap<UUID, Integer> chatGameGuesses = new HashMap<>();
@@ -2041,7 +2042,7 @@ public class AranarthUtils {
      * @param resultCallback      Confirmation whether the teleportation was successful or not.
      */
     public static void teleportPlayer(Player player, Location from, Location to, boolean isImmediateTeleport, String teleportTitle, String teleportSubtitle, Consumer<Boolean> resultCallback) {
-        if (isImmediateTeleport) {
+        if (isImmediateTeleport || skipCountdown.contains(player.getUniqueId())) {
             boolean result = handleTeleportLogic(player, from, to);
             if (result) {
                 sendTeleportTitle(player, teleportTitle, teleportSubtitle);
@@ -2062,6 +2063,18 @@ public class AranarthUtils {
                 }
                 resultCallback.accept(result);
             });
+        }
+    }
+
+    /**
+     * Runs the action with any teleport it starts skipping the countdown and combat check.
+     */
+    public static void runWithoutCountdown(Player player, Runnable action) {
+        skipCountdown.add(player.getUniqueId());
+        try {
+            action.run();
+        } finally {
+            skipCountdown.remove(player.getUniqueId());
         }
     }
 

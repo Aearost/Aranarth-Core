@@ -62,6 +62,8 @@ public class AranarthPlayer {
     private String muteEndDate;
     private UUID teleportToUuid;
     private UUID teleportFromUuid;
+    private long teleportRequestTime;
+    public static final long TELEPORT_REQUEST_TTL_MS = 2 * 60 * 1000L;
     private Location lastKnownTeleportLocation;
     private int particleNum = 100;
     private boolean isAddingPotions = false;
@@ -914,6 +916,9 @@ public class AranarthPlayer {
      */
     public void setCouncilRank(int councilRank) {
         this.councilRank = councilRank;
+        if (councilRank != 3) {
+            this.isInAdminMode = false;
+        }
     }
 
     /**
@@ -998,6 +1003,9 @@ public class AranarthPlayer {
      * @return The UUID of the player that sent the request to teleport to them.
      */
     public UUID getTeleportToUuid() {
+        if (teleportToUuid != null && System.currentTimeMillis() - teleportRequestTime > TELEPORT_REQUEST_TTL_MS) {
+            teleportToUuid = null;
+        }
         return teleportToUuid;
     }
 
@@ -1008,6 +1016,9 @@ public class AranarthPlayer {
      */
     public void setTeleportToUuid(UUID teleportToUuid) {
         this.teleportToUuid = teleportToUuid;
+        if (teleportToUuid != null) {
+            teleportRequestTime = System.currentTimeMillis();
+        }
     }
 
     /**
@@ -1016,6 +1027,9 @@ public class AranarthPlayer {
      * @return The UUID of the player that sent the request to teleport to this player.
      */
     public UUID getTeleportFromUuid() {
+        if (teleportFromUuid != null && System.currentTimeMillis() - teleportRequestTime > TELEPORT_REQUEST_TTL_MS) {
+            teleportFromUuid = null;
+        }
         return teleportFromUuid;
     }
 
@@ -1026,6 +1040,9 @@ public class AranarthPlayer {
      */
     public void setTeleportFromUuid(UUID teleportFromUuid) {
         this.teleportFromUuid = teleportFromUuid;
+        if (teleportFromUuid != null) {
+            teleportRequestTime = System.currentTimeMillis();
+        }
     }
 
     /**
@@ -1106,7 +1123,8 @@ public class AranarthPlayer {
      * @return Whether the player is in admin mode.
      */
     public boolean isInAdminMode() {
-        return isInAdminMode;
+        // Only Council rank 3 can use admin mode, so a demoted player loses it immediately
+        return isInAdminMode && councilRank == 3;
     }
 
     /**
