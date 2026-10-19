@@ -15,6 +15,7 @@ Bending & Abilities
 [~] Stopped bloodbending and sound abilities bypassing PvP and build protection
 [~] Fixed Saint cooldown resets, MetalShots and MetalStrips ingot exploits, Aranarthium Anvil and pet food duplication, homepad combat escapes and creative mounts, and AstralProjection armor loss
 [+] HealingHelix, CorruptingHelix, and MendingWaters can now be sourced from a water bottle
+[~] Fixed AstralProjection flight being revoked by the Survival orphaned-flight check
 
 Dominion
 [+] Dominion resource claims now provide leaves

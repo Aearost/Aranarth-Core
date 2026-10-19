@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralProjection;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.airbending.AirScooter;
 import com.projectkorra.projectkorra.airbending.AirSpout;
@@ -56,10 +57,11 @@ public class PlayerGameModeChangeEventListener implements Listener {
     }
 
     /**
-     * Returns true if the player has an active PK ability that legitimately grants flight.
+     * Returns true if the player has an active PK or custom ability that legitimately grants flight.
      */
     private boolean hasActiveFlightAbility(Player player) {
-        return CoreAbility.hasAbility(player, AirSpout.class)
+        return AstralProjection.isProjecting(player.getUniqueId())
+                || CoreAbility.hasAbility(player, AirSpout.class)
                 || CoreAbility.hasAbility(player, AirScooter.class)
                 || CoreAbility.hasAbility(player, Tornado.class)
                 || CoreAbility.hasAbility(player, WaterSpout.class)
