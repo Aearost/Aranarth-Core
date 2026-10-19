@@ -8,12 +8,14 @@ import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.ability.Ability;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.util.DamageHandler;
+import com.projectkorra.projectkorra.waterbending.util.WaterReturn;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -421,6 +423,28 @@ public class AranarthBendingUtils {
      */
     public static boolean hasMetalRequirement(final Player player) {
         return hasMetalArmor(player) || hasMetalIngot(player);
+    }
+
+    /**
+     * Refills one empty glass bottle in the player's inventory with water.
+     */
+    public static void fillWaterBottle(Player player) {
+        PlayerInventory inventory = player.getInventory();
+        int index = inventory.first(Material.GLASS_BOTTLE);
+        if (index < 0) {
+            return;
+        }
+
+        ItemStack item = inventory.getItem(index);
+        ItemStack water = WaterReturn.waterBottleItem();
+        if (item.getAmount() == 1) {
+            inventory.setItem(index, water);
+        } else {
+            item.setAmount(item.getAmount() - 1);
+            inventory.setItem(index, item);
+            Map<Integer, ItemStack> leftover = inventory.addItem(water);
+            leftover.values().forEach(left -> player.getWorld().dropItemNaturally(player.getLocation(), left));
+        }
     }
 
     /**

@@ -11,6 +11,7 @@ import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.HealingAbility;
 import com.projectkorra.projectkorra.attribute.Attribute;
+import com.projectkorra.projectkorra.waterbending.util.WaterReturn;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -61,6 +62,7 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
     );
 
     private static final Map<UUID, MendingWaters> ACTIVE_INSTANCES = new HashMap<>();
+    // Without a selected block source, the user's water bottle is used as the source instead
     private static final Map<UUID, Block> PENDING_SOURCES = new HashMap<>();
     private static final Map<UUID, BukkitRunnable> PENDING_SOURCE_TASKS = new HashMap<>();
 
@@ -76,6 +78,7 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
     private int shotsRemaining;
     private long lastShotTime;
     private double healAmount;
+    private boolean usesBottle;
     private final List<WaterShot> shots = new ArrayList<>();
 
     /**
@@ -98,7 +101,8 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
             return;
         }
 
-        if (!PENDING_SOURCES.containsKey(player.getUniqueId())) {
+        final boolean bottleSource = !PENDING_SOURCES.containsKey(player.getUniqueId());
+        if (bottleSource && !WaterReturn.hasWaterBottle(player)) {
             return;
         }
         clearPendingSource(player.getUniqueId());
@@ -116,6 +120,11 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
         this.shotsRemaining = this.maxShots;
         this.lastShotTime = 0L;
         this.healAmount = computeHealAmount();
+
+        if (bottleSource) {
+            WaterReturn.emptyWaterBottle(player);
+            this.usesBottle = true;
+        }
 
         ACTIVE_INSTANCES.put(player.getUniqueId(), this);
         start();
@@ -380,6 +389,11 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
 
     @Override
     public void remove() {
+        // Return the water to the bottle, matching ProjectKorra's HealingWaters
+        if (usesBottle) {
+            usesBottle = false;
+            AranarthBendingUtils.fillWaterBottle(player);
+        }
         shots.clear();
         ACTIVE_INSTANCES.remove(player.getUniqueId());
         super.remove();
@@ -443,6 +457,6 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
     public String getDescription() {
         return "Channel your healing abilities to launchable streams of water, allowing you to heal your allies " +
                 "from a distance. You also benefit from half of the heal!\n" +
-                ChatUtils.translateToColor("&fUsage: Left-click (water source) > Hold Sneak (charge) > Left-click (up to 5x)");
+                ChatUtils.translateToColor("&fUsage: Left-click (water source, or skip with a water bottle) > Hold Sneak (charge) > Left-click (up to 5x)");
     }
 }

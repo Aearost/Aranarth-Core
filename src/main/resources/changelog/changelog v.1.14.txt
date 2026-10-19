@@ -14,6 +14,7 @@ Bending & Abilities
 [+] Airbenders with level 100 Archery now launch the arrow they are holding when using AirBlast while sneaking
 [~] Stopped bloodbending and sound abilities bypassing PvP and build protection
 [~] Fixed Saint cooldown resets, MetalShots and MetalStrips ingot exploits, Aranarthium Anvil and pet food duplication, homepad combat escapes and creative mounts, and AstralProjection armor loss
+[+] HealingHelix, CorruptingHelix, and MendingWaters can now be sourced from a water bottle
 
 Dominion
 [+] Dominion resource claims now provide leaves

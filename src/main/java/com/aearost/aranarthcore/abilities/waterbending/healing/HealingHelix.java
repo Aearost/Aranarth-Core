@@ -10,6 +10,7 @@ import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.HealingAbility;
 import com.projectkorra.projectkorra.attribute.Attribute;
+import com.projectkorra.projectkorra.waterbending.util.WaterReturn;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -75,6 +76,7 @@ public class HealingHelix extends HealingAbility implements AddonAbility {
     private static final Particle.DustOptions GOLDEN_DUST_PALE = new Particle.DustOptions(Color.fromRGB(255, 245, 130), 0.8f);
 
     private static final Map<UUID, HealingHelix> ACTIVE_INSTANCES = new HashMap<>();
+    // Without a selected block source, the user's water bottle is used as the source instead
     private static final Map<UUID, Block> PENDING_SOURCES = new HashMap<>();
     private static final Map<UUID, BukkitRunnable> PENDING_SOURCE_TASKS = new HashMap<>();
 
@@ -89,6 +91,7 @@ public class HealingHelix extends HealingAbility implements AddonAbility {
 
     private Phase phase;
     private LivingEntity target;
+    private boolean usesBottle;
     private long phaseStart;
     private long lastHealTime;
     private double absorptionGranted;
@@ -100,7 +103,8 @@ public class HealingHelix extends HealingAbility implements AddonAbility {
             return;
         }
 
-        if (!PENDING_SOURCES.containsKey(player.getUniqueId())) {
+        final boolean bottleSource = !PENDING_SOURCES.containsKey(player.getUniqueId());
+        if (bottleSource && !WaterReturn.hasWaterBottle(player)) {
             return;
         }
         clearPendingSource(player.getUniqueId());
@@ -125,6 +129,11 @@ public class HealingHelix extends HealingAbility implements AddonAbility {
         this.phaseStart = System.currentTimeMillis();
         this.lastHealTime = System.currentTimeMillis();
         this.absorptionGranted = 0.0;
+
+        if (bottleSource) {
+            WaterReturn.emptyWaterBottle(player);
+            this.usesBottle = true;
+        }
 
         ACTIVE_INSTANCES.put(player.getUniqueId(), this);
         start();
@@ -530,6 +539,11 @@ public class HealingHelix extends HealingAbility implements AddonAbility {
 
     @Override
     public void remove() {
+        // Return the water to the bottle, matching ProjectKorra's HealingWaters
+        if (usesBottle) {
+            usesBottle = false;
+            AranarthBendingUtils.fillWaterBottle(player);
+        }
         ACTIVE_INSTANCES.remove(player.getUniqueId());
         super.remove();
     }
@@ -593,7 +607,7 @@ public class HealingHelix extends HealingAbility implements AddonAbility {
         return "Cleanse a target of all of their impurities, rapidly healing their health, " +
                 "providing them with additional absorption hearts, " +
                 "and cleanse them of all negative status effects.\n" +
-                ChatUtils.translateToColor("&fUsage: Left-click (water source) > Sneak (Hold at target)");
+                ChatUtils.translateToColor("&fUsage: Left-click (water source, or skip with a water bottle) > Sneak (Hold at target)");
     }
 
 }

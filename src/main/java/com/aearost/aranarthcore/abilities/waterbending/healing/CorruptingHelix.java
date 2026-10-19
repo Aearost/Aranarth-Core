@@ -9,6 +9,7 @@ import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.HealingAbility;
 import com.projectkorra.projectkorra.attribute.Attribute;
+import com.projectkorra.projectkorra.waterbending.util.WaterReturn;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -53,6 +54,7 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
     private static final Particle.DustOptions PURPLE_DUST_PALE = new Particle.DustOptions(Color.fromRGB(160, 90, 220), 1.0f);
 
     private static final Map<UUID, CorruptingHelix> ACTIVE_INSTANCES = new HashMap<>();
+    // Without a selected block source, the user's water bottle is used as the source instead
     private static final Map<UUID, Block> PENDING_SOURCES = new HashMap<>();
     private static final Map<UUID, BukkitRunnable> PENDING_SOURCE_TASKS = new HashMap<>();
 
@@ -67,6 +69,7 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
 
     private Phase phase;
     private LivingEntity target;
+    private boolean usesBottle;
     private long phaseStart;
     private long lastSlownessTime;
     private long lastDamageTime;
@@ -82,7 +85,8 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
             return;
         }
 
-        if (!PENDING_SOURCES.containsKey(player.getUniqueId())) {
+        final boolean bottleSource = !PENDING_SOURCES.containsKey(player.getUniqueId());
+        if (bottleSource && !WaterReturn.hasWaterBottle(player)) {
             return;
         }
         clearPendingSource(player.getUniqueId());
@@ -111,6 +115,11 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
         this.decayStarted = false;
         this.blindnessApplied = false;
         this.rootApplied = false;
+
+        if (bottleSource) {
+            WaterReturn.emptyWaterBottle(player);
+            this.usesBottle = true;
+        }
 
         ACTIVE_INSTANCES.put(player.getUniqueId(), this);
         start();
@@ -508,6 +517,11 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
 
     @Override
     public void remove() {
+        // Return the water to the bottle, matching ProjectKorra's HealingWaters
+        if (usesBottle) {
+            usesBottle = false;
+            AranarthBendingUtils.fillWaterBottle(player);
+        }
         scheduleSlownessDecay();
         ACTIVE_INSTANCES.remove(player.getUniqueId());
         super.remove();
@@ -575,7 +589,7 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
     public String getDescription() {
         return "Channel a dark form of spiritual waterbending, and corrupt the soul of a target, " +
                 "applying an increasing slow to a full stop, and draining the target's health.\n" +
-                ChatUtils.translateToColor("&fUsage: Left-click (water source) > Sneak (Hold at target)");
+                ChatUtils.translateToColor("&fUsage: Left-click (water source, or skip with a water bottle) > Sneak (Hold at target)");
     }
 
     private static final class SlownessDecayRunnable extends BukkitRunnable {
