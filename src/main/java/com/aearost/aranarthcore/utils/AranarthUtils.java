@@ -26,6 +26,7 @@ import org.bukkit.block.data.Levelled;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -666,6 +667,36 @@ public class AranarthUtils {
                     regenAmp = PotionEffectListener.determineEffectAmplifierRestriction(regenAmp, PotionEffectType.REGENERATION, player);
                     player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 320, regenAmp), true);
                 }
+            }
+        }
+    }
+
+    /**
+     * Pulls nearby XP orbs towards players wearing a full set of Soulbound Aranarthium armour.
+     */
+    public static void applySoulboundXpMagnet() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.isDead() || player.getGameMode() == GameMode.SPECTATOR) {
+                continue;
+            }
+            if (!isWearingArmorType(player, "soulbound")) {
+                continue;
+            }
+
+            Location target = player.getLocation().add(0, 0.5, 0);
+            for (Entity entity : player.getNearbyEntities(5, 5, 5)) {
+                if (!(entity instanceof ExperienceOrb orb) || !orb.isValid()) {
+                    continue;
+                }
+                double distance = orb.getLocation().distance(target);
+                if (distance > 6 || distance < 1) {
+                    continue;
+                }
+                // Prevents pulling orbs through walls
+                if (!player.hasLineOfSight(orb)) {
+                    continue;
+                }
+                orb.setVelocity(target.toVector().subtract(orb.getLocation().toVector()).normalize().multiply(0.8));
             }
         }
     }

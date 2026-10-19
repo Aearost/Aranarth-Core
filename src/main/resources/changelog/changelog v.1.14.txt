@@ -37,6 +37,7 @@ Aranarthium, Items & Crafting
 [-] Removed the Bone Arrow and Bone Arrowhead
 [~] Fixed the Rooting Arrow using the Bone Arrow model
 [+] Soulbound Aranarthium armour now has Mending by default
+[+] Soulbound Aranarthium now pulls in XP orbs from a greater range
 
 Economy, Jobs & Quests
 [~] Renamed /marketprice to /marketvalue (alias /mv)

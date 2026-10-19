@@ -819,6 +819,9 @@ public class AranarthCore extends JavaPlugin {
             }
         }, 0, 3);
 
+        // Increased XP orb pickup range for Soulbound Aranarthium
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, AranarthUtils::applySoulboundXpMagnet, 0, 2);
+
         // Flower trail for Fae Aranarthium in Fae biomes - random 1-10 tick interval, only when moving
         scheduleFaeFlowerTrail();
 
