@@ -54,6 +54,7 @@ Quality of Life
 [+] Added the filling of empty held shulker boxes from a container via Shulker Assist
 [~] Fixed sent mail preview not being color formatted for lang files
 [~] Fixed color codes in blacklist preset names displaying as literals
+[+] Added /ac architect for Architects and Council, allowing you to bypass the build restrictions
 
 Cross-server & Technical
 [~] The previous /creative is now available in the SMP server via /smpcreative or /smpc as an alias

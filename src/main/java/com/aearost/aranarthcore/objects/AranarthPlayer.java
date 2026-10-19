@@ -69,6 +69,7 @@ public class AranarthPlayer {
     private boolean isAddingPotions = false;
     private HashMap<Perk, Integer> perks = new HashMap<>();
     private boolean isInAdminMode = false;
+    private boolean isInArchitectMode = false;
     private long saintExpireDate;
     private int permanentSaintRank;
     private long conquestDisbandCooldownEnd = 0;
@@ -1134,6 +1135,25 @@ public class AranarthPlayer {
      */
     public void setInAdminMode(boolean isInAdminMode) {
         this.isInAdminMode = isInAdminMode;
+    }
+
+    /**
+     * Provides whether the player is in architect mode.
+     *
+     * @return Whether the player is in architect mode.
+     */
+    public boolean isInArchitectMode() {
+        // Only Architects and Council can use architect mode, so a demoted player loses it immediately
+        return isInArchitectMode && (councilRank > 0 || architectRank >= 1);
+    }
+
+    /**
+     * Updates the variable tracking whether the player is in architect mode.
+     *
+     * @param isInArchitectMode Whether the player is in architect mode.
+     */
+    public void setInArchitectMode(boolean isInArchitectMode) {
+        this.isInArchitectMode = isInArchitectMode;
     }
 
     /**

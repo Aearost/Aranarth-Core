@@ -220,17 +220,10 @@ public class PlotUtils {
         if (aranarthPlayer != null && aranarthPlayer.isInAdminMode()) {
             return true;
         }
-        if (canBuildInSpawnPlots(aranarthPlayer) && isSpawnPlotLocation(loc)) {
+        if (aranarthPlayer != null && aranarthPlayer.isInArchitectMode() && isSpawnPlotLocation(loc)) {
             return true;
         }
         return canBuild(player.getUniqueId(), loc.getBlockX(), loc.getBlockZ());
-    }
-
-    /**
-     * Provides whether the player can build in the plots designated as part of the Creative spawn.
-     */
-    public static boolean canBuildInSpawnPlots(AranarthPlayer aranarthPlayer) {
-        return aranarthPlayer != null && aranarthPlayer.getArchitectRank() >= 1;
     }
 
     /**

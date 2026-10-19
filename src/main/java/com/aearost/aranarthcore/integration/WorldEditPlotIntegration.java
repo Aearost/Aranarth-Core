@@ -65,14 +65,14 @@ public class WorldEditPlotIntegration {
         Actor actor = event.getActor();
         UUID uuid = actor != null && actor.isPlayer() ? actor.getUniqueId() : null;
         boolean bypass = false;
-        boolean spawnBuilder = false;
+        boolean architectMode = false;
         if (uuid != null) {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
             bypass = aranarthPlayer != null && aranarthPlayer.isInAdminMode();
-            spawnBuilder = PlotUtils.canBuildInSpawnPlots(aranarthPlayer);
+            architectMode = aranarthPlayer != null && aranarthPlayer.isInArchitectMode();
         }
         final boolean isAdmin = bypass;
-        final boolean canBuildSpawn = spawnBuilder;
+        final boolean canBuildSpawn = architectMode;
 
         event.setExtent(new AbstractDelegateExtent(event.getExtent()) {
             private boolean isAllowed(int x, int y, int z) {

@@ -52,13 +52,20 @@ public class ArenaProtection implements Listener {
 	}
 
 	/**
+	 * Provides whether the player bypasses the building protections in the arena world.
+	 */
+	private boolean canModify(Player player) {
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		return aranarthPlayer.isInAdminMode() || aranarthPlayer.isInArchitectMode();
+	}
+
+	/**
 	 * Prevents blocks from being destroyed in the arena world spawn.
 	 */
 	@EventHandler
 	public void onBlockBreak(final BlockBreakEvent e) {
 		if (isArenaSpawn(e.getBlock().getLocation())) {
-			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-			if (!aranarthPlayer.isInAdminMode()) {
+			if (!canModify(e.getPlayer())) {
 				e.setCancelled(true);
 				e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("access.no_break")));
 			}
@@ -66,13 +73,12 @@ public class ArenaProtection implements Listener {
 	}
 
 	/**
-	 * Prevents blocks from being placed anywhere in the arena world unless in admin mode.
+	 * Prevents blocks from being placed anywhere in the arena world unless in admin or architect mode.
 	 */
 	@EventHandler
 	public void onBlockPlace(final BlockPlaceEvent e) {
 		if (e.getBlock().getWorld().getName().equalsIgnoreCase("arena")) {
-			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-			if (!aranarthPlayer.isInAdminMode()) {
+			if (!canModify(e.getPlayer())) {
 				e.setCancelled(true);
 				e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("arena.cannot_place")));
 			}
@@ -313,8 +319,7 @@ public class ArenaProtection implements Listener {
 	@EventHandler
 	public void onSignOpen(PlayerOpenSignEvent e) {
 		if (e.getSign().getLocation().getWorld().getName().equalsIgnoreCase("arena")) {
-			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-			if (!aranarthPlayer.isInAdminMode()) {
+			if (!canModify(e.getPlayer())) {
 				e.setCancelled(true);
 			}
 		}

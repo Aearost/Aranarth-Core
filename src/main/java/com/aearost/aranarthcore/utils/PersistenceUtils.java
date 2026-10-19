@@ -8214,6 +8214,7 @@ public class PersistenceUtils {
         obj.addProperty("emojiEnabled", ap.isEmojiEnabled());
         obj.addProperty("sizeScaleEnabled", ap.isSizeScaleEnabled());
         obj.addProperty("adminMode", ap.isInAdminMode());
+        obj.addProperty("architectMode", ap.isInArchitectMode());
         obj.addProperty("isBarbarian", ap.isBarbarian());
         obj.addProperty("barbarianCooldownEnd", ap.getBarbarianCooldownEnd());
         obj.addProperty("reaperDisabled", ap.isReaperDisabled());
@@ -8352,6 +8353,9 @@ public class PersistenceUtils {
             }
             if (obj.has("adminMode")) {
                 ap.setInAdminMode(obj.get("adminMode").getAsBoolean());
+            }
+            if (obj.has("architectMode")) {
+                ap.setInArchitectMode(obj.get("architectMode").getAsBoolean());
             }
             if (obj.has("interactiveChat")) {
                 ap.setInteractiveChatEnabled(obj.get("interactiveChat").getAsBoolean());

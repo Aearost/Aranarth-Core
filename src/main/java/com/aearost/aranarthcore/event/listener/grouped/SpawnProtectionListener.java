@@ -42,12 +42,13 @@ public class SpawnProtectionListener implements Listener {
 
     /**
      * Provides whether the player bypasses the spawn protections at the location.
-     * Architects can temporarily build in the Creative spawn plots.
+     * Players in architect mode can build in the spawn world and in the Creative spawn plots.
      */
     private boolean canModify(Player player, Location loc) {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
         return aranarthPlayer.isInAdminMode()
-                || (PlotUtils.canBuildInSpawnPlots(aranarthPlayer) && PlotUtils.isSpawnPlotLocation(loc));
+                || (aranarthPlayer.isInArchitectMode()
+                && (loc.getWorld().getName().equals("spawn") || PlotUtils.isSpawnPlotLocation(loc)));
     }
 
     /**

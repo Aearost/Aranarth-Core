@@ -45,7 +45,8 @@ public class CommandAC implements CommandExecutor {
 				return false;
 			}
 			if (!isCouncil && isArchitect) {
-				if (args.length == 0 || (!args[0].equalsIgnoreCase("msg") && !args[0].equalsIgnoreCase("speed"))) {
+				if (args.length == 0 || (!args[0].equalsIgnoreCase("msg") && !args[0].equalsIgnoreCase("speed")
+						&& !args[0].equalsIgnoreCase("architect"))) {
 					player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
 					return false;
 				}
@@ -110,6 +111,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandPerks.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("admin")) {
 			commandResult = CommandAdmin.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("architect")) {
+			commandResult = CommandArchitect.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("spy")) {
 			commandResult = CommandSpy.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("speed")) {

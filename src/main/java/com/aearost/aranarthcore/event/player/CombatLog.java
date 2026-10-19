@@ -75,6 +75,10 @@ public class CombatLog {
 									aranarthPlayer.setInAdminMode(false);
 									player.sendMessage(ChatUtils.chatMessage(Lang.get("admin.mode_exit_combat")));
 								}
+								if (isNotTaggedByAttacker && player.getGameMode() == GameMode.SURVIVAL && aranarthPlayer.isInArchitectMode()) {
+									aranarthPlayer.setInArchitectMode(false);
+									player.sendMessage(ChatUtils.chatMessage(Lang.get("architect.mode_exit_combat")));
+								}
 								AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 								HashMap<UUID, Long> attackerCombatLog = new HashMap<>();
 								attackerCombatLog.put(player.getUniqueId(), hitTime);
@@ -82,6 +86,10 @@ public class CombatLog {
 								if (isAlreadyTaggingPlayer && attacker.getGameMode() == GameMode.SURVIVAL && attackerAranarthPlayer.isInAdminMode()) {
 									attackerAranarthPlayer.setInAdminMode(false);
 									attacker.sendMessage(ChatUtils.chatMessage(Lang.get("admin.mode_exit_combat")));
+								}
+								if (isAlreadyTaggingPlayer && attacker.getGameMode() == GameMode.SURVIVAL && attackerAranarthPlayer.isInArchitectMode()) {
+									attackerAranarthPlayer.setInArchitectMode(false);
+									attacker.sendMessage(ChatUtils.chatMessage(Lang.get("architect.mode_exit_combat")));
 								}
 								AranarthUtils.setPlayer(attacker.getUniqueId(), attackerAranarthPlayer);
 

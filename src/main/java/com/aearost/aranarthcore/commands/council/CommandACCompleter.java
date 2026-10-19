@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 public class CommandACCompleter implements TabCompleter {
 
     private static final List<String> COUNCIL_OPTIONS = List.of(
-            "admin", "ban", "broadcast", "clearchat", "dateset", "discordreload", "give",
+            "admin", "architect", "ban", "broadcast", "clearchat", "dateset", "discordreload", "give",
             "home", "invsee", "invswap", "msg", "mute", "og", "perks", "punishments", "questnpc", "rankset",
             "reload", "resetquest", "speed", "spy", "sudo", "time", "tp", "tpf", "tpw", "unban", "unmute",
             "unscramble", "vanish", "vpedit", "warn", "weather", "whereis", "worldevent"
@@ -97,7 +97,7 @@ public class CommandACCompleter implements TabCompleter {
             return List.of();
         }
         if (args.length == 1) {
-            return filter(isArchitectOnly ? List.of("msg") : COUNCIL_OPTIONS, args[0]);
+            return filter(isArchitectOnly ? List.of("architect", "msg") : COUNCIL_OPTIONS, args[0]);
         }
         return councilArgs(sender, args);
     }
