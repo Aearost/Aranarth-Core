@@ -601,10 +601,26 @@ public class NetworkManager {
      * Publishes a public chat message so the other server can relay it to its players.
      */
     public void publishChat(String prefix, String chatMessage) {
+        publishChat(prefix, chatMessage, null);
+    }
+
+    /**
+     * Publishes a public chat message along with the exact Component shown on this server, so the
+     * other server renders it identically (gradients, clickable URLs, clickable prefix) instead of
+     * re-parsing the legacy string.
+     *
+     * @param prefix      the formatted prefix string (legacy colour codes already applied)
+     * @param chatMessage the legacy version of the message (for console fallback)
+     * @param fullMessage the fully assembled Component including prefix, or null to send legacy only
+     */
+    public void publishChat(String prefix, String chatMessage, Component fullMessage) {
         JsonObject json = new JsonObject();
         json.addProperty("server", thisServer);
         json.addProperty("prefix", prefix);
         json.addProperty("message", chatMessage);
+        if (fullMessage != null) {
+            json.addProperty("componentJson", GsonComponentSerializer.gson().serialize(fullMessage));
+        }
         publish(CH_CHAT, json);
     }
 
@@ -1882,8 +1898,18 @@ public class NetworkManager {
         String prefix = json.get("prefix").getAsString();
         String message = json.get("message").getAsString();
 
-        String formatted = ChatUtils.translateToColor(prefix + message);
-        Component component = LegacyComponentSerializer.legacySection().deserialize(formatted);
+        Component component = null;
+        if (json.has("componentJson")) {
+            try {
+                component = GsonComponentSerializer.gson().deserialize(json.get("componentJson").getAsString());
+            } catch (Exception ignored) {
+                // Falls back to the legacy string below
+            }
+        }
+        if (component == null) {
+            String formatted = ChatUtils.translateToColor(prefix + message);
+            component = LegacyComponentSerializer.legacySection().deserialize(formatted);
+        }
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.sendMessage(component);
         }

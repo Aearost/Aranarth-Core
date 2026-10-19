@@ -392,7 +392,7 @@ public class PlayerChatListener implements Listener {
                             .collect(java.util.stream.Collectors.toList());
                     NetworkManager.getInstance().publishInteractiveChat(prefix, chatMessage, fullMessage, snapshots);
                 } else {
-                    NetworkManager.getInstance().publishChat(prefix, chatMessage);
+                    NetworkManager.getInstance().publishChat(prefix, chatMessage, fullMessage);
                 }
             }
         }
