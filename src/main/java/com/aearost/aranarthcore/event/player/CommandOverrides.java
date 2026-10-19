@@ -33,7 +33,7 @@ public class CommandOverrides {
 
         if (!parts[0].equals("/afk")) {
             if (aranarthPlayer.getAfkLocation() != null) {
-                if (aranarthPlayer.getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount()) {
+                if (AranarthUtils.isAfk(aranarthPlayer)) {
                     Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
                         @Override
                         public void run() {

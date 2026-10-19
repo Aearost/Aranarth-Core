@@ -15,7 +15,7 @@ public class AfkCancelByInteract {
 			return;
 		}
 
-		if (aranarthPlayer.getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount()) {
+		if (AranarthUtils.isAfk(aranarthPlayer)) {
 			AranarthUtils.toggleAfkStatus(player.getUniqueId(), false);
 		}
 		// Reset their AFK timer so activity without changing blocks still counts

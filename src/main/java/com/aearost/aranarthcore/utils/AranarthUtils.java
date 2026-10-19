@@ -3733,8 +3733,7 @@ public class AranarthUtils {
                 UUID uuid = player.getUniqueId();
                 String display = ChatUtils.providePrefixAndName(uuid);
                 AranarthPlayer aranarthPlayer = getPlayer(uuid);
-                if (aranarthPlayer.getAfkLocation() != null
-                        && aranarthPlayer.getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount()) {
+                if (isAfk(aranarthPlayer)) {
                     display += " &7[AFK]";
                 }
                 int ping = player.getPing();
@@ -4134,6 +4133,12 @@ public class AranarthUtils {
             if (aranarthPlayer.getAfkLocation() == null) {
                 return;
             }
+            // They reached the timeout but were never announced as AFK, so only reset their timer
+            if (!isAfk(aranarthPlayer)) {
+                aranarthPlayer.setAfkLocation(null);
+                setPlayer(uuid, aranarthPlayer);
+                return;
+            }
             aranarthPlayer.setAfkLocation(null);
             aranarthPlayer.setAfkStartTime(0);
             String nickname = aranarthPlayer.getNickname();
@@ -4182,7 +4187,7 @@ public class AranarthUtils {
                 }
                 // The player has moved
                 else {
-                    if (afkLocation.getSeconds() >= getAfkSecondsAmount()) {
+                    if (isAfk(aranarthPlayer)) {
                         toggleAfkStatus(player.getUniqueId(), false);
                     } else {
                         aranarthPlayer.setAfkLocation(null);
@@ -4296,6 +4301,16 @@ public class AranarthUtils {
      */
     public static int getAfkSecondsAmount() {
         return AranarthCore.getInstance().getConfig().getInt("players.afk-timeout-seconds", 300);
+    }
+
+    /**
+     * Determines whether the player has actually been placed in the AFK status, rather than just reaching the timeout.
+     *
+     * @param aranarthPlayer The player.
+     * @return Whether the player is currently AFK.
+     */
+    public static boolean isAfk(AranarthPlayer aranarthPlayer) {
+        return aranarthPlayer != null && aranarthPlayer.getAfkStartTime() != 0;
     }
 
     /**

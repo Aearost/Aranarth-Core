@@ -279,8 +279,7 @@ public class CommandInfo implements CommandExecutor {
 				boolean isVanished = AranarthUtils.isVanishedFrom(sender, uuid);
 				if (offlinePlayer.isOnline() && !isVanished) {
 					Player onlinePlayer = offlinePlayer.getPlayer();
-					boolean isAfk = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation() != null &&
-							AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount();
+					boolean isAfk = AranarthUtils.isAfk(AranarthUtils.getPlayer(onlinePlayer.getUniqueId()));
 					if (isAfk) {
 						sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently AFK " + getWorldName(onlinePlayer.getWorld().getName())));
 					} else {
@@ -316,8 +315,7 @@ public class CommandInfo implements CommandExecutor {
 		} else {
 			if (offlinePlayer.isOnline()) {
 				Player onlinePlayer = offlinePlayer.getPlayer();
-				boolean isAfk = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation() != null
-						&& AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount();
+				boolean isAfk = AranarthUtils.isAfk(AranarthUtils.getPlayer(onlinePlayer.getUniqueId()));
 				if (isAfk) {
 					sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently AFK " + getWorldName(onlinePlayer.getWorld().getName())));
 				} else {
