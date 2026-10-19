@@ -34,6 +34,8 @@ public class VoiceChatManager {
     private static final Map<UUID, VoiceChannel> lastComputedChannels = new HashMap<>();
     private static final Set<UUID> silentChanges = new HashSet<>();
     private static final Map<UUID, String> lastKnownNicknames = new HashMap<>();
+    // Read by Simple Voice Chat's network threads
+    private static final Set<UUID> mutedMembers = ConcurrentHashMap.newKeySet();
 
     private static boolean isAvailable = false;
 
@@ -126,6 +128,13 @@ public class VoiceChatManager {
     }
 
     /**
+     * Determines whether the local member is muted with /ac mute, in which case they can listen but are never heard.
+     */
+    public static boolean isMuted(UUID uuid) {
+        return mutedMembers.contains(uuid);
+    }
+
+    /**
      * Determines whether the player can use the council channel, matching council chat: any council rank, or an architect.
      */
     public static boolean canUseCouncil(Player player) {
@@ -148,6 +157,8 @@ public class VoiceChatManager {
         UUID uuid = player.getUniqueId();
         VoiceMember previous = localMembers.get(uuid);
         dominionInfoCache.put(uuid, computeDominionInfo(player));
+        // Updated before they become a member so none of their audio slips through
+        updateMuted(player);
         VoiceMember member = buildMember(player, channel);
         localMembers.put(uuid, member);
         VoicechatBridge.clearRemoteChannels();
@@ -159,6 +170,9 @@ public class VoiceChatManager {
         sendState(uuid, member, true);
 
         player.sendMessage(ChatUtils.chatMessage(Lang.get("voicechat.joined", "channel", Lang.get(channel.getLangKey()))));
+        if (isMuted(uuid)) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("voicechat.muted")));
+        }
         playJingle(player, true);
         updateDominionConnections();
     }
@@ -173,6 +187,7 @@ public class VoiceChatManager {
         UUID uuid = player.getUniqueId();
         VoiceMember previous = localMembers.remove(uuid);
         dominionInfoCache.remove(uuid);
+        mutedMembers.remove(uuid);
         if (previous == null) {
             return;
         }
@@ -202,6 +217,7 @@ public class VoiceChatManager {
         if (isTransferring && VoiceLink.isConnected()) {
             localMembers.remove(uuid);
             dominionInfoCache.remove(uuid);
+            mutedMembers.remove(uuid);
             lastSentStates.remove(uuid);
             VoicechatBridge.clearRemoteChannels();
             link.sendHandoff(uuid, member.channel());
@@ -222,12 +238,16 @@ public class VoiceChatManager {
             return;
         }
         dominionInfoCache.put(uuid, computeDominionInfo(player));
+        updateMuted(player);
         VoiceMember member = buildMember(player, handoff.channel());
         localMembers.put(uuid, member);
         VoicechatBridge.clearRemoteChannels();
         sendState(uuid, member, false);
         player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "voicechat.rejoined", "channel",
                 Lang.getFor(player, handoff.channel().getLangKey()))));
+        if (isMuted(uuid)) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "voicechat.muted")));
+        }
         silentChanges.add(uuid);
         updateDominionConnections();
     }
@@ -338,6 +358,7 @@ public class VoiceChatManager {
             if (player == null) {
                 localMembers.remove(uuid);
                 dominionInfoCache.remove(uuid);
+                mutedMembers.remove(uuid);
                 continue;
             }
             // Removes players from the council channel once they are no longer council or an architect
@@ -347,6 +368,10 @@ public class VoiceChatManager {
             }
             if (isFullRefresh) {
                 dominionInfoCache.put(uuid, computeDominionInfo(player));
+                // Picks up mutes issued on either server, and unmutes once the mute ends
+                if (updateMuted(player)) {
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "voicechat.muted")));
+                }
             }
             VoiceMember member = buildMember(player, current.channel());
             localMembers.put(uuid, member);
@@ -389,6 +414,19 @@ public class VoiceChatManager {
             // since players on the other server have no world in their snapshot
             link.sendState(uuid, member, announce);
         }
+    }
+
+    /**
+     * Updates whether the player is muted with /ac mute.
+     *
+     * @return Whether the player has just become muted.
+     */
+    private static boolean updateMuted(Player player) {
+        if (ChatUtils.isPlayerMuted(player)) {
+            return mutedMembers.add(player.getUniqueId());
+        }
+        mutedMembers.remove(player.getUniqueId());
+        return false;
     }
 
     private static VoiceMember buildMember(Player player, VoiceChannel channel) {

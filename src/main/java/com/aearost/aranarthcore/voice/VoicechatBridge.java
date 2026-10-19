@@ -89,7 +89,8 @@ public class VoicechatBridge implements VoicechatPlugin {
 
         UUID speakerUuid = senderConnection.getPlayer().getUuid();
         VoiceMember speaker = VoiceChatManager.getLocalMember(speakerUuid);
-        if (speaker == null) {
+        // Players muted with /ac mute can still listen, but are never heard on either server
+        if (speaker == null || VoiceChatManager.isMuted(speakerUuid)) {
             return;
         }
 
