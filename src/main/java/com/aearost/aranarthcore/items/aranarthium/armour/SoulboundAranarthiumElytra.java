@@ -7,6 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
@@ -39,6 +40,7 @@ public class SoulboundAranarthiumElytra implements AranarthItem {
             meta.addAttributeModifier(Attribute.KNOCKBACK_RESISTANCE,
                     new AttributeModifier(new NamespacedKey(AranarthCore.getInstance(), "soulbound_elytra_knockback"),
                             0.1, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.CHEST));
+            meta.addEnchant(Enchantment.MENDING, 1, true);
             meta.getPersistentDataContainer().set(ARMOR_TYPE, PersistentDataType.STRING, "soulbound");
             ((Damageable) meta).setMaxDamage(592);
             meta.setFireResistant(true);

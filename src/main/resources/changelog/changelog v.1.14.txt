@@ -36,6 +36,7 @@ Aranarthium, Items & Crafting
 [~] Fixed elytras not being usable while Invisible Armor is enabled
 [-] Removed the Bone Arrow and Bone Arrowhead
 [~] Fixed the Rooting Arrow using the Bone Arrow model
+[+] Soulbound Aranarthium armour now has Mending by default
 
 Economy, Jobs & Quests
 [~] Renamed /marketprice to /marketvalue (alias /mv)
