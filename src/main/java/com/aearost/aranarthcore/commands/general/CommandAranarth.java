@@ -58,7 +58,7 @@ public class CommandAranarth implements CommandExecutor {
 
     static final List<String> ECONOMY_SECTIONS = List.of(
             "intro", "jobs", "shopoverview", "shopcreation", "shopusage", "quests", "shopcommands", "shoplisting",
-            "trading", "marketprice"
+            "trading", "marketvalue"
     );
 
     static final List<String> PERKS_SECTIONS = List.of(
@@ -593,7 +593,7 @@ public class CommandAranarth implements CommandExecutor {
         })));
         player.sendMessage(Component.text("              ").append(buildRow(new String[][]{
                 {Lang.get("economy.section_trading_label"), Lang.get("guide.click_to_view"), "/aranarth economy trading"},
-                {Lang.get("economy.section_marketprice_label"), Lang.get("guide.click_to_view"), "/aranarth economy marketprice"}
+                {Lang.get("economy.section_marketvalue_label"), Lang.get("guide.click_to_view"), "/aranarth economy marketvalue"}
         })));
 
         player.sendMessage(Component.empty());

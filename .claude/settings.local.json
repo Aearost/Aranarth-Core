@@ -635,7 +635,9 @@
       "PowerShell(Copy-Item *)",
       "PowerShell(Get-Content *)",
       "PowerShell($p = \"$env:APPDATA\\\\ModrinthApp\\\\profiles\\\\Fabric 26.3 \\(1\\)\"; $good = \"$env:APPDATA\\\\ModrinthApp\\\\profiles\\\\Fabric 26.3\"; $files = 'do_a_barrel_roll-client.json','eg_particle_interactions.json','fallingleaves2.json','sodium-options.json','visuality.json','xaero\\\\minimap\\\\profiles\\\\entity_radar_categories\\\\default.cfg.json','xaero\\\\minimap\\\\profiles\\\\info_display_config\\\\default.cfg.txt'; foreach \\($f in $files\\) { $bad = \"$p\\\\config\\\\$f\"; $src = \"$good\\\\config\\\\$f\"; Move-Item $bad \"$bad.corrupt.bak\" -Force; $ok = $false; if \\(Test-Path $src\\) { $b = [IO.File]::ReadAllBytes\\($src\\); if \\($b | Where-Object { $_ -ne 0 } | Select-Object -First 1\\) { Copy-Item $src $bad; $ok = $true } }; if \\($ok\\) { \"COPIED   $f\" } else { \"REMOVED  $f \\(will regenerate\\)\" } })",
-      "PowerShell(node --check discord-bot/handlers/purgeCommandHandler.js; node --check discord-bot/handlers/messageHandler.js; node --check discord-bot/config.js)"
+      "PowerShell(node --check discord-bot/handlers/purgeCommandHandler.js; node --check discord-bot/handlers/messageHandler.js; node --check discord-bot/config.js)",
+      "Bash(sed -i 's|&a/market price\\\\\\\\n|\\\\&a/marketvalue\\\\\\\\n|' en_US.properties de_DE.properties fr_FR.properties pt_BR.properties)",
+      "PowerShell(Set-Location C:\\\\Users\\\\liamh\\\\IdeaProjects\\\\AranarthCore; $mvn = Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1; & $mvn.FullName -q -o compile; \"exit $LASTEXITCODE\")"
     ]
   }
 }

@@ -35,7 +35,7 @@ public class TradeMarketData {
     public void setFirstPrice(double firstPrice) { this.firstPrice = firstPrice; }
 
     /**
-     * Returns the current weighted-average market price per unit.
+     * Returns the current weighted-average market value per unit.
      */
     public double getCurrentPrice() {
         return totalUnits > 0 ? totalValue / totalUnits : firstPrice;

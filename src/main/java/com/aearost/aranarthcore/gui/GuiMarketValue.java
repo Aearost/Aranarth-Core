@@ -13,9 +13,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
 
-public class GuiMarketPrice {
+public class GuiMarketValue {
 
-    public static final String TITLE_KEY = "gui.marketprice.title";
+    public static final String TITLE_KEY = "gui.marketvalue.title";
     public static final int ITEMS_START = 9;
     public static final int ITEMS_END = 44; // Inclusive
     public static final int ITEMS_PER_PAGE = ITEMS_END - ITEMS_START + 1; // 36
@@ -33,7 +33,7 @@ public class GuiMarketPrice {
     private final String filter;
     private final Inventory gui;
 
-    public GuiMarketPrice(Player player, int page, String filter) {
+    public GuiMarketValue(Player player, int page, String filter) {
         this.player = player;
         this.page = page;
         this.filter = filter;
@@ -55,19 +55,19 @@ public class GuiMarketPrice {
         if (filter != null) {
             ItemStack back = new ItemStack(Material.ARROW);
             ItemMeta backMeta = back.getItemMeta();
-            backMeta.setDisplayName(Lang.getFor(player, "gui.marketprice.back"));
+            backMeta.setDisplayName(Lang.getFor(player, "gui.marketvalue.back"));
             List<String> backLore = new ArrayList<>();
-            backLore.add(Lang.getFor(player, "gui.marketprice.searching", "filter", filter));
-            backLore.add(Lang.getFor(player, "gui.marketprice.return_all"));
+            backLore.add(Lang.getFor(player, "gui.marketvalue.searching", "filter", filter));
+            backLore.add(Lang.getFor(player, "gui.marketvalue.return_all"));
             backMeta.setLore(backLore);
             back.setItemMeta(backMeta);
             inv.setItem(SLOT_SEARCH, back);
         } else {
             ItemStack search = new ItemStack(Material.SPYGLASS);
             ItemMeta searchMeta = search.getItemMeta();
-            searchMeta.setDisplayName(Lang.getFor(player, "gui.marketprice.search"));
+            searchMeta.setDisplayName(Lang.getFor(player, "gui.marketvalue.search"));
             List<String> searchLore = new ArrayList<>();
-            searchLore.add(Lang.getFor(player, "gui.marketprice.search_lore"));
+            searchLore.add(Lang.getFor(player, "gui.marketvalue.search_lore"));
             searchMeta.setLore(searchLore);
             search.setItemMeta(searchMeta);
             inv.setItem(SLOT_SEARCH, search);
@@ -93,8 +93,8 @@ public class GuiMarketPrice {
 
         // Prev button
         if (safePage > 0) {
-            inv.setItem(SLOT_PREV, makeNavButton(Material.ARROW, Lang.getFor(player, "gui.marketprice.prev"),
-                    Lang.getFor(player, "gui.marketprice.page", "n", String.valueOf(safePage), "total", String.valueOf(totalPages))));
+            inv.setItem(SLOT_PREV, makeNavButton(Material.ARROW, Lang.getFor(player, "gui.marketvalue.prev"),
+                    Lang.getFor(player, "gui.marketvalue.page", "n", String.valueOf(safePage), "total", String.valueOf(totalPages))));
         } else {
             inv.setItem(SLOT_PREV, makeGlass(Material.RED_STAINED_GLASS_PANE));
         }
@@ -102,17 +102,17 @@ public class GuiMarketPrice {
         // Close / page indicator
         ItemStack closeBtn = new ItemStack(Material.BARRIER);
         ItemMeta closeMeta = closeBtn.getItemMeta();
-        closeMeta.setDisplayName(Lang.getFor(player, "gui.marketprice.close"));
+        closeMeta.setDisplayName(Lang.getFor(player, "gui.marketvalue.close"));
         List<String> closeLore = new ArrayList<>();
-        closeLore.add(Lang.getFor(player, "gui.marketprice.page", "n", String.valueOf(safePage + 1), "total", String.valueOf(totalPages)));
+        closeLore.add(Lang.getFor(player, "gui.marketvalue.page", "n", String.valueOf(safePage + 1), "total", String.valueOf(totalPages)));
         closeMeta.setLore(closeLore);
         closeBtn.setItemMeta(closeMeta);
         inv.setItem(SLOT_CLOSE, closeBtn);
 
         // Next button
         if (safePage < totalPages - 1) {
-            inv.setItem(SLOT_NEXT, makeNavButton(Material.ARROW, Lang.getFor(player, "gui.marketprice.next"),
-                    Lang.getFor(player, "gui.marketprice.page", "n", String.valueOf(safePage + 2), "total", String.valueOf(totalPages))));
+            inv.setItem(SLOT_NEXT, makeNavButton(Material.ARROW, Lang.getFor(player, "gui.marketvalue.next"),
+                    Lang.getFor(player, "gui.marketvalue.page", "n", String.valueOf(safePage + 2), "total", String.valueOf(totalPages))));
         } else {
             inv.setItem(SLOT_NEXT, makeGlass(Material.RED_STAINED_GLASS_PANE));
         }
@@ -148,20 +148,20 @@ public class GuiMarketPrice {
 
         if (entry.fromServerShop()) {
             String currentPriceKey = switch (entry.priceLimit()) {
-                case MAXIMUM -> "gui.marketprice.shop_current_price_max";
-                case MINIMUM -> "gui.marketprice.shop_current_price_min";
-                case NONE -> "gui.marketprice.shop_current_price";
+                case MAXIMUM -> "gui.marketvalue.shop_current_price_max";
+                case MINIMUM -> "gui.marketvalue.shop_current_price_min";
+                case NONE -> "gui.marketvalue.shop_current_price";
             };
             lore.add(Lang.getFor(player, currentPriceKey,
                     "price", TradeMarketUtils.formatPrice(entry.currentPrice())));
-            lore.add(Lang.getFor(player, "gui.marketprice.shop_base_price",
+            lore.add(Lang.getFor(player, "gui.marketvalue.shop_base_price",
                     "price", TradeMarketUtils.formatPrice(entry.basePrice())));
             if (entry.tradePrice() > 0) {
-                lore.add(Lang.getFor(player, "gui.marketprice.market_price",
+                lore.add(Lang.getFor(player, "gui.marketvalue.market_value",
                         "price", TradeMarketUtils.formatPrice(entry.tradePrice())));
             }
         } else {
-            lore.add(Lang.getFor(player, "gui.marketprice.market_price",
+            lore.add(Lang.getFor(player, "gui.marketvalue.market_value",
                     "price", TradeMarketUtils.formatPrice(entry.currentPrice())));
         }
 
@@ -183,7 +183,7 @@ public class GuiMarketPrice {
     public static void initiateSearch(Player player) {
         awaitingSearch.add(player.getUniqueId());
         player.closeInventory();
-        player.sendMessage(ChatUtils.chatMessage(Lang.get("marketprice.search_prompt")));
+        player.sendMessage(ChatUtils.chatMessage(Lang.get("marketvalue.search_prompt")));
         player.sendMessage(ChatUtils.chatMessage(Lang.get("general.type_cancel_abort")));
     }
 
@@ -196,12 +196,12 @@ public class GuiMarketPrice {
         if (query.equalsIgnoreCase("cancel")) {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("general.search_cancelled")));
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(),
-                    () -> new GuiMarketPrice(player, 0, null).openGui());
+                    () -> new GuiMarketValue(player, 0, null).openGui());
             return;
         }
         activeFilters.put(player.getUniqueId(), query);
         Bukkit.getScheduler().runTask(AranarthCore.getInstance(),
-                () -> new GuiMarketPrice(player, 0, query).openGui());
+                () -> new GuiMarketValue(player, 0, query).openGui());
     }
 
     public static void clearFilter(UUID uuid) {

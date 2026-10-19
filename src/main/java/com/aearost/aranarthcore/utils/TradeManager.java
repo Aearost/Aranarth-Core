@@ -386,7 +386,7 @@ public class TradeManager {
         ItemStack[] toInitiator = cloneItemArray(trade.getOtherItems(trade.getInitiatorUuid()));
         ItemStack[] toTarget = cloneItemArray(trade.getOtherItems(trade.getTargetUuid()));
 
-        // Record market price data from this trade
+        // Record market value data from this trade
         boolean initiatorHasItems = !isEmptyOffer(toTarget); // toTarget = initiator's items
         boolean targetHasItems = !isEmptyOffer(toInitiator);  // toInitiator = target's items
         if (targetHasItems) {
@@ -521,7 +521,7 @@ public class TradeManager {
             applyBalanceDelta(pending.initiatorUuid(), targetMoney);
         }
 
-        // Record market price data from this trade
+        // Record market value data from this trade
         if (!isEmptyOffer(itemsForInitiator)) {
             double price = pending.initiatorMoney() > 0 ? pending.initiatorMoney() : computeFullyKnownValue(pending.initiatorItems());
             if (price > 0) {

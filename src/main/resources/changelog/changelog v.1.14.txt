@@ -34,6 +34,7 @@ Aranarthium, Items & Crafting
 [~] Fixed the Rooting Arrow using the Bone Arrow model
 
 Economy, Jobs & Quests
+[~] Renamed /marketprice to /marketvalue (alias /mv)
 [~] Made items in /mp all be single-stacks
 [+] Added a max/min indicator to server shop prices in /marketprice
 [+] Colored the sell price on server shop signs when at its limit

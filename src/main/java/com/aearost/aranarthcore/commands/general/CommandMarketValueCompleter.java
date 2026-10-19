@@ -8,10 +8,10 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Tab completer for /marketprice - shows "item" as a hint when the argument is empty,
+ * Tab completer for /marketvalue - shows "item" as a hint when the argument is empty,
  * and returns nothing once the player starts typing (to avoid cluttering with player names).
  */
-public class CommandMarketPriceCompleter implements TabCompleter {
+public class CommandMarketValueCompleter implements TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {

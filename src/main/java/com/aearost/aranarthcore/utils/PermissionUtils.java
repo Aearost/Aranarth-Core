@@ -506,7 +506,7 @@ public class PermissionUtils {
         perms.setPermission("aranarth.topguesses", true);
         perms.setPermission("aranarth.brewbook", true);
         perms.setPermission("aranarth.jobs", true);
-        perms.setPermission("aranarth.marketprice", true);
+        perms.setPermission("aranarth.marketvalue", true);
         perms.setPermission("aranarth.creative", true);
         perms.setPermission("aranarth.plot", true);
 

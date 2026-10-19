@@ -19,7 +19,7 @@ import org.bukkit.potion.PotionType;
 import java.util.*;
 
 /**
- * Manages trade-derived market pricing and provides a unified view of all market prices.
+ * Manages trade-derived market pricing and provides a unified view of all market prices and values.
  */
 public class TradeMarketUtils {
 
@@ -123,7 +123,7 @@ public class TradeMarketUtils {
     }
 
     /**
-     * Records a completed "money for items" trade into the market price history.
+     * Records a completed "money for items" trade into the market value history.
      * @param items       The items given in the trade (the "items" side).
      * @param totalMoney  The total money paid for those items.
      */
@@ -215,7 +215,7 @@ public class TradeMarketUtils {
 
     /**
      * Returns a sorted list of all market entries (server shops + trade-derived)
-     * suitable for display in the market price GUI.
+     * suitable for display in the market value GUI.
      */
     public static List<MarketEntry> getAllEntries() {
         List<MarketEntry> entries = new ArrayList<>();
