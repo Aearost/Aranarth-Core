@@ -5,6 +5,7 @@ Each file follows the Java .properties format and is named after its locale:
   fr_FR.properties - French
   de_DE.properties - German
   pt_BR.properties - Brazilian Portuguese
+  es_ES.properties - Spanish
 
 All .properties files in this directory are excluded from version control via .gitignore.
 This is because their large size causes commit analysis to take several minutes to complete.

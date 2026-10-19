@@ -27,6 +27,7 @@ public class LangManager {
         m.put("en_US", "English");
         m.put("de_DE", "German");
         m.put("fr_FR", "French");
+        m.put("es_ES", "Spanish");
         LOCALE_DISPLAY_NAMES = Collections.unmodifiableMap(m);
     }
 
@@ -58,7 +59,7 @@ public class LangManager {
         messages.putAll(enUs);
         localeMessages.put("en_US", new HashMap<>(enUs));
 
-        for (String locale : new String[]{"de_DE", "fr_FR"}) {
+        for (String locale : new String[]{"de_DE", "fr_FR", "es_ES"}) {
             Map<String, String> localeMap = loadLocaleFile(locale);
             if (!localeMap.isEmpty()) {
                 localeMessages.put(locale, localeMap);

@@ -102,15 +102,15 @@ public class GuiVoteShopPurchaseClick {
                                 addOrDropItem(player, new KeyGodly().getItem());
                             }
                         } else {
-                            String type = ChatUtils.stripColorFormatting(clicked.getItemMeta().getDisplayName()).split(" ")[1].toLowerCase();
-                            Bukkit.getLogger().info("[AC] " + type);
-                            if (type.equals("vote")) {
+                            // Match against the localized names so this works in every language
+                            String displayName = ChatUtils.stripColorFormatting(clicked.getItemMeta().getDisplayName());
+                            if (displayName.equals(getPurchaseName(player, "gui.voteshop.vote_key"))) {
                                 addOrDropItem(player, new KeyVote().getItem());
-                            } else if (type.equals("rare")) {
+                            } else if (displayName.equals(getPurchaseName(player, "gui.voteshop.rare_key"))) {
                                 addOrDropItem(player, new KeyRare().getItem());
-                            } else if (type.equals("epic")) {
+                            } else if (displayName.equals(getPurchaseName(player, "gui.voteshop.epic_key"))) {
                                 addOrDropItem(player, new KeyEpic().getItem());
-                            } else if (type.equals("godly")) {
+                            } else if (displayName.equals(getPurchaseName(player, "gui.voteshop.godly_key"))) {
                                 addOrDropItem(player, new KeyGodly().getItem());
                             }
                         }
@@ -223,11 +223,11 @@ public class GuiVoteShopPurchaseClick {
                     }
                     // mcMMO Boost
                     else if (clicked.getType() == Material.PAPER) {
-                        String amount = clicked.getItemMeta().getDisplayName().split(" ")[4];
+                        String displayName = ChatUtils.stripColorFormatting(clicked.getItemMeta().getDisplayName());
                         int levelsToIncrease = 0;
-                        if (amount.equals("+10")) {
+                        if (displayName.equals(getPurchaseName(player, "gui.voteshop.mcmmo_10"))) {
                             levelsToIncrease = 10;
-                        } else if (amount.equals("+50")) {
+                        } else if (displayName.equals(getPurchaseName(player, "gui.voteshop.mcmmo_50"))) {
                             levelsToIncrease = 50;
                         }
                         McMMOPlayer mcMMOPlayer = EventUtils.getMcMMOPlayer(player);
@@ -301,6 +301,17 @@ public class GuiVoteShopPurchaseClick {
                 }
             }
         }
+    }
+
+    /**
+     * Builds the color-stripped purchase button name for a vote shop item, in the player's language.
+     *
+     * @param player  The player.
+     * @param itemKey The lang key of the vote shop item.
+     * @return The purchase button name without color formatting.
+     */
+    private String getPurchaseName(Player player, String itemKey) {
+        return ChatUtils.stripColorFormatting(Lang.getFor(player, "gui.voteshoppurchase.purchase", "item", Lang.getFor(player, itemKey)));
     }
 
     /**

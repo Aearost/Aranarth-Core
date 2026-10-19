@@ -638,7 +638,10 @@
       "PowerShell(node --check discord-bot/handlers/purgeCommandHandler.js; node --check discord-bot/handlers/messageHandler.js; node --check discord-bot/config.js)",
       "Bash(sed -i 's|&a/market price\\\\\\\\n|\\\\&a/marketvalue\\\\\\\\n|' en_US.properties de_DE.properties fr_FR.properties pt_BR.properties)",
       "PowerShell(Set-Location C:\\\\Users\\\\liamh\\\\IdeaProjects\\\\AranarthCore; $mvn = Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1; & $mvn.FullName -q -o compile; \"exit $LASTEXITCODE\")",
-      "PowerShell(gh issue view 382 --json title,body,comments,state,labels | Out-String; \"exit: $LASTEXITCODE\")"
+      "PowerShell(gh issue view 382 --json title,body,comments,state,labels | Out-String; \"exit: $LASTEXITCODE\")",
+      "PowerShell(gh issue view 389 --json title,body,comments,state | Out-String; \"exit: $LASTEXITCODE\")",
+      "PowerShell(git log --oneline -5 -- src/main/resources/lang/pt_BR.properties; git log --oneline -3 -- src/main/java/com/aearost/aranarthcore/utils/LangManager.java; Get-ChildItem src/main/resources/lang | Select Name,Length; \\(Get-Content src/main/resources/lang/en_US.properties -Encoding UTF8 | Measure-Object -Line\\).Lines; Get-ChildItem src/main/resources/changelog | Sort-Object Name | Select -Last 3 Name)",
+      "PowerShell(& \"C:\\\\Users\\\\liamh\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-liamh-IdeaProjects-AranarthCore\\\\9bf7cdc9-b656-49ed-a2f6-ce778b42ee57\\\\scratchpad\\\\build_es.ps1\" \\(Get-Location\\).Path)"
     ]
   }
 }
