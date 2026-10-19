@@ -1070,6 +1070,8 @@ public class AranarthUtils {
                 || type == Material.CRYING_OBSIDIAN || type == Material.WARPED_NYLIUM
                 || type == Material.BLACKSTONE || type == Material.GLOWSTONE
                 || type == Material.SULFUR || type == Material.CINNABAR
+                || type == Material.TERRACOTTA
+                || (type.name().endsWith("_TERRACOTTA"))
                 || type.name().endsWith("_ORE") || type.name().endsWith("_CORAL_BLOCK");
     }
 
