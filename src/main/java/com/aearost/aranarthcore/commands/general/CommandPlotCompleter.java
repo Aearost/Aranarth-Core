@@ -79,6 +79,10 @@ public class CommandPlotCompleter implements TabCompleter {
 		if (args.length == 3 && subcommand.equals("rename")) {
 			return args[2].isEmpty() ? List.of("name") : List.of();
 		}
+		if (args.length == 4 && (subcommand.equals("unclaim") || subcommand.equals("reset"))) {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			return aranarthPlayer.isInAdminMode() ? filter(List.of("confirm"), args[3]) : List.of();
+		}
 		if (args.length == 4 && subcommand.equals("merge")) {
 			return args[3].isEmpty() ? List.of("name") : List.of();
 		}

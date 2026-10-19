@@ -107,29 +107,19 @@ public class CommandPlot implements CommandExecutor {
 
     private void unclaim(Player player, String[] args) {
         if (args.length == 2 && args[1].equalsIgnoreCase("confirm")) {
-            PendingConfirm pending = pendingConfirms.get(player.getUniqueId());
-            CreativePlot plot = consumeConfirm(player, "unclaim");
-            if (plot == null) {
+            PendingConfirm pending = takePendingConfirm(player, "unclaim");
+            if (pending != null) {
+                executeUnclaim(player, pending);
                 return;
             }
-            String name = plot.getName();
-            Runnable onComplete = () -> {
-                if (player.isOnline()) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "plot.unclaimed", "plot", name)));
-                }
-            };
-            if (pending.wholeGroup()) {
-                PlotUtils.unclaimGroup(plot, onComplete);
-            } else {
-                PlotUtils.unclaimPlot(plot, onComplete);
-            }
-            return;
         }
+        // Running confirm without first requesting it acts on the target immediately
+        boolean confirmed = isConfirmed(args);
         // Staff in admin mode can unclaim another player's plot by name
-        if (args.length == 3) {
+        if (args.length == 3 || (args.length == 4 && confirmed)) {
             CreativePlot plot = getOtherPlayersPlot(player, args);
             if (plot != null) {
-                requestConfirm(player, "unclaim", plot, true, "plot.confirm_unclaim");
+                confirmOrRequest(player, "unclaim", plot.getKey(), plot.getName(), true, confirmed, "plot.confirm_unclaim");
             }
             return;
         }
@@ -137,45 +127,25 @@ public class CommandPlot implements CommandExecutor {
         if (plot == null) {
             return;
         }
-        requestConfirm(player, "unclaim", plot, false, "plot.confirm_unclaim");
+        confirmOrRequest(player, "unclaim", plot.getKey(), plot.getName(), false, confirmed, "plot.confirm_unclaim");
     }
 
     private void reset(Player player, String[] args) {
         if (args.length == 2 && args[1].equalsIgnoreCase("confirm")) {
-            PendingConfirm pending = pendingConfirms.remove(player.getUniqueId());
-            if (pending == null || !pending.action().equals("reset") || System.currentTimeMillis() > pending.expiresAt()) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.nothing_to_confirm")));
+            PendingConfirm pending = takePendingConfirm(player, "reset");
+            if (pending != null) {
+                executeReset(player, pending);
                 return;
             }
-            String[] parts = pending.plotKey().split(";");
-            int gridX = Integer.parseInt(parts[0]);
-            int gridZ = Integer.parseInt(parts[1]);
-            CreativePlot plot = PlotUtils.getPlot(gridX, gridZ);
-            String name = plot != null ? plot.getName() : pending.plotKey();
-            if (plot != null && isGroupBusy(plot, pending.wholeGroup())) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.busy")));
-                return;
-            }
-            Runnable onComplete = () -> {
-                if (player.isOnline()) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "plot.reset", "plot", name)));
-                }
-            };
-            if (plot != null && pending.wholeGroup()) {
-                PlotUtils.resetGroup(plot, onComplete);
-            } else if (plot != null) {
-                PlotUtils.resetPlot(plot, onComplete);
-            } else {
-                PlotUtils.resetPlotArea(gridX, gridZ, onComplete);
-            }
-            return;
         }
+        // Running confirm without first requesting it acts on the target immediately
+        boolean confirmed = isConfirmed(args);
 
         // Staff in admin mode can reset another player's plot by name
-        if (args.length == 3) {
+        if (args.length == 3 || (args.length == 4 && confirmed)) {
             CreativePlot plot = getOtherPlayersPlot(player, args);
             if (plot != null) {
-                requestConfirm(player, "reset", plot, true, "plot.confirm_reset");
+                confirmOrRequest(player, "reset", plot.getKey(), plot.getName(), true, confirmed, "plot.confirm_reset");
             }
             return;
         }
@@ -189,15 +159,68 @@ public class CommandPlot implements CommandExecutor {
         // Staff in admin mode can reset unclaimed plots too
         if (plot == null && aranarthPlayer.isInAdminMode()) {
             String key = PlotUtils.getKey(coordinates[0], coordinates[1]);
-            pendingConfirms.put(player.getUniqueId(), new PendingConfirm("reset", key, false, System.currentTimeMillis() + CONFIRM_MILLIS));
-            sendConfirmMessage(player, "plot.confirm_reset", key, "/plot reset confirm");
+            confirmOrRequest(player, "reset", key, key, false, confirmed, "plot.confirm_reset");
             return;
         }
         plot = getManageablePlot(player);
         if (plot == null) {
             return;
         }
-        requestConfirm(player, "reset", plot, false, "plot.confirm_reset");
+        confirmOrRequest(player, "reset", plot.getKey(), plot.getName(), false, confirmed, "plot.confirm_reset");
+    }
+
+    /**
+     * Unclaims the plot of the confirmation if it is still manageable by the player.
+     */
+    private void executeUnclaim(Player player, PendingConfirm pending) {
+        CreativePlot plot = PlotUtils.getPlot(pending.plotKey());
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        if (plot == null || (!player.getUniqueId().equals(plot.getOwner()) && !aranarthPlayer.isInAdminMode())) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.nothing_to_confirm")));
+            return;
+        }
+        if (isGroupBusy(plot, pending.wholeGroup())) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.busy")));
+            return;
+        }
+        String name = plot.getName();
+        Runnable onComplete = () -> {
+            if (player.isOnline()) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "plot.unclaimed", "plot", name)));
+            }
+        };
+        if (pending.wholeGroup()) {
+            PlotUtils.unclaimGroup(plot, onComplete);
+        } else {
+            PlotUtils.unclaimPlot(plot, onComplete);
+        }
+    }
+
+    /**
+     * Resets the plot of the confirmation, or the unclaimed plot area if nobody owns it.
+     */
+    private void executeReset(Player player, PendingConfirm pending) {
+        String[] parts = pending.plotKey().split(";");
+        int gridX = Integer.parseInt(parts[0]);
+        int gridZ = Integer.parseInt(parts[1]);
+        CreativePlot plot = PlotUtils.getPlot(gridX, gridZ);
+        String name = plot != null ? plot.getName() : pending.plotKey();
+        if (plot != null && isGroupBusy(plot, pending.wholeGroup())) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.busy")));
+            return;
+        }
+        Runnable onComplete = () -> {
+            if (player.isOnline()) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "plot.reset", "plot", name)));
+            }
+        };
+        if (plot != null && pending.wholeGroup()) {
+            PlotUtils.resetGroup(plot, onComplete);
+        } else if (plot != null) {
+            PlotUtils.resetPlot(plot, onComplete);
+        } else {
+            PlotUtils.resetPlotArea(gridX, gridZ, onComplete);
+        }
     }
 
     private void merge(Player player, String[] args) {
@@ -596,9 +619,30 @@ public class CommandPlot implements CommandExecutor {
         return false;
     }
 
-    private void requestConfirm(Player player, String action, CreativePlot plot, boolean wholeGroup, String messageKey) {
-        pendingConfirms.put(player.getUniqueId(), new PendingConfirm(action, plot.getKey(), wholeGroup, System.currentTimeMillis() + CONFIRM_MILLIS));
-        sendConfirmMessage(player, messageKey, plot.getName(), "/plot " + action + " confirm");
+    /**
+     * Provides whether the command ends with confirm, either on its own or after a player and plot name.
+     */
+    private boolean isConfirmed(String[] args) {
+        return (args.length == 2 || args.length == 4) && args[args.length - 1].equalsIgnoreCase("confirm");
+    }
+
+    /**
+     * Runs the action immediately when already confirmed, otherwise asks the player to confirm it.
+     */
+    private void confirmOrRequest(Player player, String action, String plotKey, String plotName, boolean wholeGroup,
+                                  boolean confirmed, String messageKey) {
+        PendingConfirm pending = new PendingConfirm(action, plotKey, wholeGroup, System.currentTimeMillis() + CONFIRM_MILLIS);
+        if (confirmed) {
+            pendingConfirms.remove(player.getUniqueId());
+            if (action.equals("reset")) {
+                executeReset(player, pending);
+            } else {
+                executeUnclaim(player, pending);
+            }
+            return;
+        }
+        pendingConfirms.put(player.getUniqueId(), pending);
+        sendConfirmMessage(player, messageKey, plotName, "/plot " + action + " confirm");
     }
 
     /**
@@ -614,25 +658,14 @@ public class CommandPlot implements CommandExecutor {
     }
 
     /**
-     * Provides the plot of a pending confirmation if it is still valid and manageable by the player.
+     * Removes and provides the player's pending confirmation if it is for the action and has not expired.
      */
-    private CreativePlot consumeConfirm(Player player, String action) {
+    private PendingConfirm takePendingConfirm(Player player, String action) {
         PendingConfirm pending = pendingConfirms.remove(player.getUniqueId());
         if (pending == null || !pending.action().equals(action) || System.currentTimeMillis() > pending.expiresAt()) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.nothing_to_confirm")));
             return null;
         }
-        CreativePlot plot = PlotUtils.getPlot(pending.plotKey());
-        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-        if (plot == null || (!player.getUniqueId().equals(plot.getOwner()) && !aranarthPlayer.isInAdminMode())) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.nothing_to_confirm")));
-            return null;
-        }
-        if (isGroupBusy(plot, pending.wholeGroup())) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.busy")));
-            return null;
-        }
-        return plot;
+        return pending;
     }
 
     /**
