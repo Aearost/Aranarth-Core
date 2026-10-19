@@ -110,6 +110,7 @@ public class PlayerInteractEventListener implements Listener {
             new ContainerInteract().execute(e);
             new ExpStore().execute(e);
             new CrateOpen().execute(e);
+            new LightLevelCycle().execute(e);
         } else if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
             new ShulkerDump().execute(e);
             new ChestSort().execute(e);

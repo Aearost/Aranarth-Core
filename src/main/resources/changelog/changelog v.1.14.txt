@@ -7,6 +7,7 @@ World & Events
 [~] Fixed AFK messages not displaying nicknames in color correctly
 [~] Prevented block placing and table commands in the arena world outside of admin mode
 [~] Fixed a creative crash exploit where nested containers could be created with ctrl + pick block and burned to spawn hundreds of thousands of items
+[~] Fixed light blocks not changing brightness when right-clicked by non-op players in creative
 
 Bending & Abilities
 [~] Fixed AngeredSpirits and other effect abilities respecting dominion relations in the arena
