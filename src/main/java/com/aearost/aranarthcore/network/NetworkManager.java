@@ -2804,7 +2804,7 @@ public class NetworkManager {
      */
     public void publishChatGameWin(String winnerNickname, String answer, java.util.UUID winnerUUID,
                                    double elapsedSeconds, boolean newGlobalRecord, String newHolderNickname,
-                                   java.util.UUID newHolderUUID, double newGlobalBestTime) {
+                                   java.util.UUID newHolderUUID, double newGlobalBestTime, int streakCount) {
         JsonObject json = new JsonObject();
         json.addProperty("server", thisServer);
         json.addProperty("winner", winnerNickname);
@@ -2812,6 +2812,7 @@ public class NetworkManager {
         json.addProperty("winnerUUID", winnerUUID.toString());
         json.addProperty("elapsedSeconds", elapsedSeconds);
         json.addProperty("newGlobalRecord", newGlobalRecord);
+        json.addProperty("streakCount", streakCount);
         if (newGlobalRecord && newHolderUUID != null) {
             json.addProperty("newHolderNickname", newHolderNickname);
             json.addProperty("newHolderUUID", newHolderUUID.toString());
@@ -3893,8 +3894,9 @@ public class NetworkManager {
         java.util.UUID newHolderUUID = newGlobalRecord && json.has("newHolderUUID")
                 ? java.util.UUID.fromString(json.get("newHolderUUID").getAsString()) : null;
         double newGlobalBestTime = newGlobalRecord && json.has("newGlobalBestTime") ? json.get("newGlobalBestTime").getAsDouble() : 0;
+        int streakCount = json.has("streakCount") ? json.get("streakCount").getAsInt() : 0;
         ChatGameUtils.applyNetworkGameWin(AranarthCore.getInstance(), winner, answer, winnerUUID,
-                elapsedSeconds, newGlobalRecord, newHolderNickname, newHolderUUID, newGlobalBestTime);
+                elapsedSeconds, newGlobalRecord, newHolderNickname, newHolderUUID, newGlobalBestTime, streakCount);
     }
 
     private void handleChatGameExpire(JsonObject json) {

@@ -424,7 +424,7 @@ public class ChatGameUtils {
 
             if (NetworkManager.isActive()) {
                 NetworkManager.getInstance().publishChatGameWin(winnerNickname, answer, player.getUniqueId(),
-                        elapsedSeconds, newGlobalRecord, winnerNickname, player.getUniqueId(), elapsedSeconds);
+                        elapsedSeconds, newGlobalRecord, winnerNickname, player.getUniqueId(), elapsedSeconds, localStreakCount);
             }
 
             // Only the server that originated the game schedules the next one
@@ -522,7 +522,7 @@ public class ChatGameUtils {
             }
 
             NetworkManager.getInstance().publishChatGameWin(winnerNickname, answer, winnerUUID,
-                    elapsedSeconds, newGlobalRecord, winnerNickname, winnerUUID, elapsedSeconds);
+                    elapsedSeconds, newGlobalRecord, winnerNickname, winnerUUID, elapsedSeconds, localStreakCount);
 
             boolean isOrigin = !NetworkManager.isActive()
                     || NetworkManager.getInstance().getThisServer().equals(origin);
@@ -553,7 +553,8 @@ public class ChatGameUtils {
      * Called by NetworkManager when a player on another server has won the chat game.
      */
     public static void applyNetworkGameWin(Plugin plugin, String winnerNickname, String answer, UUID winnerUUID,
-                                           double elapsedSeconds, boolean newGlobalRecord, String newHolderNickname, UUID newHolderUUID, double newGlobalBestTime) {
+                                           double elapsedSeconds, boolean newGlobalRecord, String newHolderNickname, UUID newHolderUUID, double newGlobalBestTime,
+                                           int originStreakCount) {
         final boolean wasOrigin;
         final int networkStreakCount;
         synchronized (gameLock) {
@@ -566,7 +567,11 @@ public class ChatGameUtils {
                 timeoutTask.cancel();
                 timeoutTask = null;
             }
-            if (winnerUUID.equals(streakWinnerUUID)) {
+            if (originStreakCount > 0) {
+                streakWinnerUUID = winnerUUID;
+                streakCount = originStreakCount;
+            } else if (winnerUUID.equals(streakWinnerUUID)) {
+                // Fallback for messages from an origin running an older version
                 streakCount++;
             } else {
                 streakWinnerUUID = winnerUUID;
@@ -657,6 +662,10 @@ public class ChatGameUtils {
     public static void applyNetworkGameExpire(Plugin plugin, String answer) {
         final boolean wasOrigin;
         synchronized (gameLock) {
+            // Always break the streak, even if this server already cleared the game (e.g. a local
+            // guess that the origin rejected because it had already timed out)
+            streakWinnerUUID = null;
+            streakCount = 0;
             if (!answer.equals(currentAnswer)) {
                 return; // Already handled locally
             }
@@ -669,8 +678,6 @@ public class ChatGameUtils {
                 timeoutTask.cancel();
                 timeoutTask = null;
             }
-            streakWinnerUUID = null;
-            streakCount = 0;
         }
         String expireMsg = ChatUtils.chatMessage(Lang.get("unscramble.nobody_guessed", "word", toTitleCase(answer)));
         for (Player p : Bukkit.getOnlinePlayers()) {
