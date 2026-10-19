@@ -30,7 +30,7 @@ public class CommandPlot implements CommandExecutor {
 
     private static final long CONFIRM_MILLIS = 30_000;
 
-    private record PendingConfirm(String action, String plotKey, boolean wholeGroup, long expiresAt) {
+    private record PendingConfirm(String action, String plotKey, long expiresAt) {
     }
 
     private static final Map<UUID, PendingConfirm> pendingConfirms = new HashMap<>();
@@ -59,6 +59,7 @@ public class CommandPlot implements CommandExecutor {
             case "unclaim" -> unclaim(player, args);
             case "reset" -> reset(player, args);
             case "merge" -> merge(player, args);
+            case "unmerge" -> unmerge(player, args);
             case "rename" -> rename(player, args);
             case "add" -> add(player, args);
             case "remove" -> remove(player, args);
@@ -119,7 +120,7 @@ public class CommandPlot implements CommandExecutor {
         if (args.length == 3 || (args.length == 4 && confirmed)) {
             CreativePlot plot = getOtherPlayersPlot(player, args);
             if (plot != null) {
-                confirmOrRequest(player, "unclaim", plot.getKey(), plot.getName(), true, confirmed, "plot.confirm_unclaim");
+                confirmOrRequest(player, "unclaim", plot.getKey(), plot, confirmed);
             }
             return;
         }
@@ -127,7 +128,7 @@ public class CommandPlot implements CommandExecutor {
         if (plot == null) {
             return;
         }
-        confirmOrRequest(player, "unclaim", plot.getKey(), plot.getName(), false, confirmed, "plot.confirm_unclaim");
+        confirmOrRequest(player, "unclaim", plot.getKey(), plot, confirmed);
     }
 
     private void reset(Player player, String[] args) {
@@ -145,7 +146,7 @@ public class CommandPlot implements CommandExecutor {
         if (args.length == 3 || (args.length == 4 && confirmed)) {
             CreativePlot plot = getOtherPlayersPlot(player, args);
             if (plot != null) {
-                confirmOrRequest(player, "reset", plot.getKey(), plot.getName(), true, confirmed, "plot.confirm_reset");
+                confirmOrRequest(player, "reset", plot.getKey(), plot, confirmed);
             }
             return;
         }
@@ -159,68 +160,136 @@ public class CommandPlot implements CommandExecutor {
         // Staff in admin mode can reset unclaimed plots too
         if (plot == null && aranarthPlayer.isInAdminMode()) {
             String key = PlotUtils.getKey(coordinates[0], coordinates[1]);
-            confirmOrRequest(player, "reset", key, key, false, confirmed, "plot.confirm_reset");
+            confirmOrRequest(player, "reset", key, null, confirmed);
             return;
         }
         plot = getManageablePlot(player);
         if (plot == null) {
             return;
         }
-        confirmOrRequest(player, "reset", plot.getKey(), plot.getName(), false, confirmed, "plot.confirm_reset");
+        confirmOrRequest(player, "reset", plot.getKey(), plot, confirmed);
+    }
+
+    private void unmerge(Player player, String[] args) {
+        if (args.length == 2 && args[1].equalsIgnoreCase("confirm")) {
+            PendingConfirm pending = takePendingConfirm(player, "unmerge");
+            if (pending != null) {
+                executeUnmerge(player, pending);
+                return;
+            }
+        }
+        // Running confirm without first requesting it acts on the target immediately
+        boolean confirmed = args.length >= 2 && args[args.length - 1].equalsIgnoreCase("confirm");
+        int targetArgs = confirmed ? args.length - 1 : args.length;
+        if (targetArgs > 2) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "plot unmerge [name]")));
+            return;
+        }
+        if (!isInPlotWorld(player)) {
+            return;
+        }
+        CreativePlot plot;
+        if (targetArgs == 2) {
+            plot = PlotUtils.getOwnedPlotByName(player.getUniqueId(), args[1]);
+            if (plot == null) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.not_found", "plot", args[1])));
+                return;
+            }
+        } else {
+            plot = getManageablePlot(player);
+            if (plot == null) {
+                return;
+            }
+        }
+        if (PlotUtils.getMergedGroup(plot).size() < 2) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.not_merged", "plot", plot.getName())));
+            return;
+        }
+        if (isGroupBusy(plot)) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.busy")));
+            return;
+        }
+        confirmOrRequest(player, "unmerge", plot.getKey(), plot, confirmed);
     }
 
     /**
-     * Unclaims the plot of the confirmation if it is still manageable by the player.
+     * Provides the plot of the confirmation if it is still claimed, manageable by the player, and not being regenerated.
      */
-    private void executeUnclaim(Player player, PendingConfirm pending) {
+    private CreativePlot getConfirmedPlot(Player player, PendingConfirm pending) {
         CreativePlot plot = PlotUtils.getPlot(pending.plotKey());
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
         if (plot == null || (!player.getUniqueId().equals(plot.getOwner()) && !aranarthPlayer.isInAdminMode())) {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.nothing_to_confirm")));
-            return;
+            return null;
         }
-        if (isGroupBusy(plot, pending.wholeGroup())) {
+        if (isGroupBusy(plot)) {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.busy")));
-            return;
+            return null;
         }
-        String name = plot.getName();
-        Runnable onComplete = () -> {
-            if (player.isOnline()) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "plot.unclaimed", "plot", name)));
-            }
-        };
-        if (pending.wholeGroup()) {
-            PlotUtils.unclaimGroup(plot, onComplete);
-        } else {
-            PlotUtils.unclaimPlot(plot, onComplete);
-        }
+        return plot;
     }
 
     /**
-     * Resets the plot of the confirmation, or the unclaimed plot area if nobody owns it.
+     * Unclaims every plot of the confirmation's merged group.
      */
-    private void executeReset(Player player, PendingConfirm pending) {
-        String[] parts = pending.plotKey().split(";");
-        int gridX = Integer.parseInt(parts[0]);
-        int gridZ = Integer.parseInt(parts[1]);
-        CreativePlot plot = PlotUtils.getPlot(gridX, gridZ);
-        String name = plot != null ? plot.getName() : pending.plotKey();
-        if (plot != null && isGroupBusy(plot, pending.wholeGroup())) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.busy")));
+    private void executeUnclaim(Player player, PendingConfirm pending) {
+        CreativePlot plot = getConfirmedPlot(player, pending);
+        if (plot == null) {
             return;
         }
-        Runnable onComplete = () -> {
+        String name = plot.getName();
+        PlotUtils.unclaimGroup(plot, () -> {
+            if (player.isOnline()) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "plot.unclaimed", "plot", name)));
+            }
+        });
+    }
+
+    /**
+     * Resets every plot of the confirmation's merged group, or the unclaimed plot area if nobody owns it.
+     */
+    private void executeReset(Player player, PendingConfirm pending) {
+        // Staff in admin mode can reset unclaimed plots too
+        if (PlotUtils.getPlot(pending.plotKey()) == null && AranarthUtils.getPlayer(player.getUniqueId()).isInAdminMode()) {
+            String[] parts = pending.plotKey().split(";");
+            PlotUtils.resetPlotArea(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), () -> {
+                if (player.isOnline()) {
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "plot.reset", "plot", pending.plotKey())));
+                }
+            });
+            return;
+        }
+        CreativePlot plot = getConfirmedPlot(player, pending);
+        if (plot == null) {
+            return;
+        }
+        String name = plot.getName();
+        PlotUtils.resetGroup(plot, () -> {
             if (player.isOnline()) {
                 player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "plot.reset", "plot", name)));
             }
-        };
-        if (plot != null && pending.wholeGroup()) {
-            PlotUtils.resetGroup(plot, onComplete);
-        } else if (plot != null) {
-            PlotUtils.resetPlot(plot, onComplete);
-        } else {
-            PlotUtils.resetPlotArea(gridX, gridZ, onComplete);
+        });
+    }
+
+    /**
+     * Unmerges the confirmation's merged group back into individual plots.
+     */
+    private void executeUnmerge(Player player, PendingConfirm pending) {
+        CreativePlot plot = getConfirmedPlot(player, pending);
+        if (plot == null) {
+            return;
         }
+        int count = PlotUtils.getMergedGroup(plot).size();
+        if (count < 2) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.not_merged", "plot", plot.getName())));
+            return;
+        }
+        String name = plot.getName();
+        PlotUtils.unmergeGroup(plot, () -> {
+            if (player.isOnline()) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "plot.unmerged", "plot", name, "count", count)));
+            }
+        });
     }
 
     private void merge(Player player, String[] args) {
@@ -597,7 +666,7 @@ public class CommandPlot implements CommandExecutor {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.not_found_player", "player", args[1], "plot", args[2])));
             return null;
         }
-        if (isGroupBusy(plot, true)) {
+        if (isGroupBusy(plot)) {
             player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.busy")));
             return null;
         }
@@ -605,12 +674,9 @@ public class CommandPlot implements CommandExecutor {
     }
 
     /**
-     * Provides whether the plot, or any plot merged with it when the whole group is included, is being regenerated.
+     * Provides whether the plot or any plot merged with it is being regenerated.
      */
-    private boolean isGroupBusy(CreativePlot plot, boolean wholeGroup) {
-        if (!wholeGroup) {
-            return PlotUtils.isBusy(plot);
-        }
+    private boolean isGroupBusy(CreativePlot plot) {
         for (CreativePlot groupPlot : PlotUtils.getMergedGroup(plot)) {
             if (PlotUtils.isBusy(groupPlot)) {
                 return true;
@@ -629,28 +695,36 @@ public class CommandPlot implements CommandExecutor {
     /**
      * Runs the action immediately when already confirmed, otherwise asks the player to confirm it.
      */
-    private void confirmOrRequest(Player player, String action, String plotKey, String plotName, boolean wholeGroup,
-                                  boolean confirmed, String messageKey) {
-        PendingConfirm pending = new PendingConfirm(action, plotKey, wholeGroup, System.currentTimeMillis() + CONFIRM_MILLIS);
+    private void confirmOrRequest(Player player, String action, String plotKey, CreativePlot plot, boolean confirmed) {
+        PendingConfirm pending = new PendingConfirm(action, plotKey, System.currentTimeMillis() + CONFIRM_MILLIS);
         if (confirmed) {
             pendingConfirms.remove(player.getUniqueId());
-            if (action.equals("reset")) {
-                executeReset(player, pending);
-            } else {
-                executeUnclaim(player, pending);
+            switch (action) {
+                case "reset" -> executeReset(player, pending);
+                case "unclaim" -> executeUnclaim(player, pending);
+                case "unmerge" -> executeUnmerge(player, pending);
             }
             return;
         }
         pendingConfirms.put(player.getUniqueId(), pending);
-        sendConfirmMessage(player, messageKey, plotName, "/plot " + action + " confirm");
+        String message;
+        if (plot == null) {
+            message = Lang.get("plot.confirm_" + action, "plot", plotKey);
+        } else {
+            // Warns that a reset or unclaim applies to every plot of a merged group
+            int count = PlotUtils.getMergedGroup(plot).size();
+            String messageKey = "plot.confirm_" + action + (count > 1 && !action.equals("unmerge") ? "_merged" : "");
+            message = Lang.get(messageKey, "plot", plot.getName(), "count", count);
+        }
+        sendConfirmMessage(player, message, "/plot " + action + " confirm");
     }
 
     /**
      * Sends a confirmation prompt that runs the confirm command when clicked.
      */
-    private void sendConfirmMessage(Player player, String messageKey, String plotName, String confirmCommand) {
+    private void sendConfirmMessage(Player player, String prompt, String confirmCommand) {
         Component message = LegacyComponentSerializer.legacySection()
-                .deserialize(ChatUtils.chatMessage(Lang.get(messageKey, "plot", plotName)))
+                .deserialize(ChatUtils.chatMessage(prompt))
                 .clickEvent(ClickEvent.runCommand(confirmCommand))
                 .hoverEvent(HoverEvent.showText(LegacyComponentSerializer.legacySection()
                         .deserialize(ChatUtils.translateToColor("&e" + confirmCommand))));

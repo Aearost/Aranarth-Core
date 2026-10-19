@@ -586,13 +586,71 @@ public class PlotUtils {
     }
 
     /**
-     * Resets every plot of a merged group, calling onComplete once all of them are done.
+     * Resets every plot of a merged group, unmerging them back into individual plots first.
      */
     public static void resetGroup(CreativePlot plot, Runnable onComplete) {
         List<CreativePlot> group = getMergedGroup(plot);
+        if (group.size() == 1) {
+            resetPlot(plot, onComplete);
+            return;
+        }
+        splitGroup(group);
         Runnable groupComplete = countDown(group.size(), onComplete);
+        // Every merge is removed before any regeneration runs, so the roads come back everywhere
         for (CreativePlot groupPlot : group) {
-            resetPlot(groupPlot, groupComplete);
+            regenerateAroundPlot(groupPlot.getGridX(), groupPlot.getGridZ(), true, true, groupComplete);
+        }
+    }
+
+    /**
+     * Unmerges every plot of a merged group back into individual plots.
+     */
+    public static void unmergeGroup(CreativePlot plot, Runnable onComplete) {
+        List<CreativePlot> group = getMergedGroup(plot);
+        List<CreativePlot[]> pairs = new ArrayList<>();
+        for (CreativePlot groupPlot : group) {
+            CreativePlot east = getPlot(groupPlot.getGridX() + 1, groupPlot.getGridZ());
+            if (groupPlot.isMergedEast() && east != null) {
+                pairs.add(new CreativePlot[]{groupPlot, east});
+            }
+            CreativePlot south = getPlot(groupPlot.getGridX(), groupPlot.getGridZ() + 1);
+            if (groupPlot.isMergedSouth() && south != null) {
+                pairs.add(new CreativePlot[]{groupPlot, south});
+            }
+        }
+        splitGroup(group);
+        if (pairs.isEmpty()) {
+            if (onComplete != null) {
+                onComplete.run();
+            }
+            return;
+        }
+        Runnable groupComplete = countDown(pairs.size(), onComplete);
+        for (CreativePlot[] pair : pairs) {
+            regenerateRoadsBetween(pair[0], pair[1], groupComplete);
+        }
+    }
+
+    /**
+     * Removes every merge within the group and saves it.
+     */
+    private static void splitGroup(List<CreativePlot> group) {
+        List<CreativePlot> sorted = new ArrayList<>(group);
+        sorted.sort(Comparator.comparingLong(CreativePlot::getClaimedAt));
+        String name = sorted.get(0).getName();
+        for (CreativePlot groupPlot : sorted) {
+            groupPlot.setMergedEast(false);
+            groupPlot.setMergedSouth(false);
+        }
+        for (int i = 1; i < sorted.size(); i++) {
+            CreativePlot groupPlot = sorted.get(i);
+            if (groupPlot.getOwner() != null) {
+                // Each name is set before the next is generated so they all differ
+                groupPlot.setName(getUnusedName(groupPlot.getOwner(), name));
+            }
+        }
+        for (CreativePlot groupPlot : sorted) {
+            savePlot(groupPlot);
         }
     }
 

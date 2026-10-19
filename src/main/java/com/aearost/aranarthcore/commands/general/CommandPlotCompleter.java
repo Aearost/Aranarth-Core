@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  */
 public class CommandPlotCompleter implements TabCompleter {
 
-	private static final List<String> SUBCOMMANDS = List.of("claim", "unclaim", "reset", "merge", "rename", "add", "remove", "home", "tp", "list", "info", "spawn");
+	private static final List<String> SUBCOMMANDS = List.of("claim", "unclaim", "reset", "merge", "unmerge", "rename", "add", "remove", "home", "tp", "list", "info", "spawn");
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
@@ -56,6 +56,11 @@ public class CommandPlotCompleter implements TabCompleter {
 					}
 					return options;
 				}
+				case "unmerge" -> {
+					List<String> options = new ArrayList<>(getPlotNames(player.getUniqueId()));
+					options.add("confirm");
+					return filter(options, args[1]);
+				}
 				case "remove" -> {
 					return filter(getStandingPlotMembers(player), args[1]);
 				}
@@ -75,6 +80,9 @@ public class CommandPlotCompleter implements TabCompleter {
 		if (args.length == 3 && (subcommand.equals("tp") || subcommand.equals("unclaim") || subcommand.equals("reset"))) {
 			UUID target = AranarthUtils.getUUIDFromUsername(args[1]);
 			return target == null ? List.of() : filter(getPlotNames(target), args[2]);
+		}
+		if (args.length == 3 && subcommand.equals("unmerge") && !args[1].equalsIgnoreCase("confirm")) {
+			return filter(List.of("confirm"), args[2]);
 		}
 		if (args.length == 3 && subcommand.equals("rename")) {
 			return args[2].isEmpty() ? List.of("name") : List.of();
