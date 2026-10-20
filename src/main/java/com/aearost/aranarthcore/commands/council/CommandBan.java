@@ -35,7 +35,7 @@ public class CommandBan {
 			if (player.hasPermission("aranarth.ban")) {
 				banPlayer(sender, args);
 			} else {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 			}
         } else {
 			banPlayer(sender, args);
@@ -50,7 +50,7 @@ public class CommandBan {
 	 */
 	private static void banPlayer(CommandSender sender, String[] args) {
 		if (args.length < 4) {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac ban <player> <duration> <reason>")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac ban <player> <duration> <reason>")));
 			return;
 		}
 
@@ -78,7 +78,7 @@ public class CommandBan {
 			nickname = AranarthUtils.getNickname(player);
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (!PunishmentUtils.outranks(sender, uuid)) {
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("ban.cannot_ban")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ban.cannot_ban")));
 				return;
 			}
 
@@ -117,7 +117,7 @@ public class CommandBan {
 				}
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", args[1])));
 			return;
 		}
 		PunishmentUtils.notifyBan(nickname, args[2], reason, args[2].equals("-1"));
@@ -136,11 +136,11 @@ public class CommandBan {
 		try {
 			time = Integer.parseInt(timeAsString);
 		} catch (NumberFormatException e) {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_number")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_number")));
 			return null;
 		}
 		if (time <= 0) {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_number")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_number")));
 			return null;
 		}
 
@@ -161,7 +161,7 @@ public class CommandBan {
 		else if (last == 'w') {
 			date = date.plusWeeks(time);
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("ban.invalid_time_unit")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ban.invalid_time_unit")));
 			return null;
 		}
 

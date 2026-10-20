@@ -82,9 +82,9 @@ public class GuiJobsLeave {
         int level = jobData.getLevel(job);
         double currentXp = jobData.getCurrentXp(job);
         long required = JobUtils.getXpRequired(level);
-        String xpStr = level >= 10 ? "Max Level" : (int) currentXp + " / " + required;
+        String xpStr = level >= 10 ? Lang.getFor(player, "jobs.max_level") : (int) currentXp + " / " + required;
 
-        meta.setDisplayName(ChatUtils.translateToColor("&c&l" + job.getDisplayName()));
+        meta.setDisplayName(ChatUtils.translateToColor("&c&l" + Lang.getFor(player, job.getNameKey())));
         List<String> lore = new ArrayList<>();
         lore.add(Lang.getFor(player, "gui.jobsleave.level", "level", String.valueOf(level)));
         lore.add(Lang.getFor(player, "gui.jobsleave.xp", "xp", xpStr));

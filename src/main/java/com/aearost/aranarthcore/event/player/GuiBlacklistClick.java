@@ -53,10 +53,10 @@ public class GuiBlacklistClick {
             int next = current == 0 ? 1 : current == 1 ? -1 : 0;
             ap.setBlacklistingMethod(next);
             AranarthUtils.setPlayer(player.getUniqueId(), ap);
-            String modeName = next == 0 ? "&eIgnore" : next == 1 ? "&eTrash" : "&cOff";
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("blacklist.mode_set", "mode", modeName)));
+            String modeName = Lang.getFor(player, next == 0 ? "blacklist.mode_ignore" : next == 1 ? "blacklist.mode_trash" : "blacklist.mode_off");
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "blacklist.mode_set", "mode", modeName)));
             player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1.0F);
-            player.getOpenInventory().getTopInventory().setItem(28, GuiBlacklist.buildToggleButton(next));
+            player.getOpenInventory().getTopInventory().setItem(28, GuiBlacklist.buildToggleButton(player, next));
             return;
         }
 

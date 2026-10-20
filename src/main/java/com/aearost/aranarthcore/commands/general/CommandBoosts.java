@@ -42,7 +42,7 @@ public class CommandBoosts implements CommandExecutor {
 			}
 
 			if (args.length <= 1) {
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "boosts <add/remove> <type> [user]")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "boosts <add/remove> <type> [user]")));
 				return true;
 			} else {
 				if (args[0].equals("add") || args[0].equals("remove")) {
@@ -75,11 +75,11 @@ public class CommandBoosts implements CommandExecutor {
 							return true;
 						}
 					} else {
-						sender.sendMessage(ChatUtils.chatMessage(Lang.get("boost.not_found")));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "boost.not_found")));
 						return true;
 					}
 				} else {
-					sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "boosts <add/remove> <type> <user>")));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "boosts <add/remove> <type> <user>")));
 					return true;
 				}
 			}
@@ -90,12 +90,12 @@ public class CommandBoosts implements CommandExecutor {
 	private void displayBoosts(CommandSender sender) {
 		HashMap<Boost, LocalDateTime> boosts = AranarthUtils.getServerBoosts();
 		if (boosts.isEmpty()) {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("boost.no_active")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "boost.no_active")));
 		} else {
-			sender.sendMessage(ChatUtils.translateToColor("&8      - - - &6&lActive Server Boosts &8- - -"));
+			sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "boost.list_header")));
 			HashMap<String, String> activeBoosts = AranarthUtils.getActiveServerBoostsMessages();
 			for (String boost : activeBoosts.keySet()) {
-				sender.sendMessage(ChatUtils.translateToColor(boost + " &7| " + activeBoosts.get(boost)));
+				sender.sendMessage(ChatUtils.translateToColor(Lang.resolve(sender, boost) + " &7| " + activeBoosts.get(boost)));
 			}
 		}
 	}

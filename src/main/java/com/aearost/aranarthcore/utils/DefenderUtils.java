@@ -360,25 +360,26 @@ public class DefenderUtils {
     /**
      * Attempts to purchase one defender of the given type for the dominion.
      *
+     * @param player   The player the result message is shown to.
      * @param dominion The owning dominion.
      * @param type     The defender type to purchase.
      * @param outpost  The outpost to assign the defender to, or {@code null} for the main dominion.
      */
-    public static String purchaseDefender(Dominion dominion, DefenderType type, Outpost outpost) {
+    public static String purchaseDefender(Player player, Dominion dominion, DefenderType type, Outpost outpost) {
         int limit = getDefenderLimit(dominion.getDominionLevel());
         int current = getTotalDefenderCount(dominion.getId());
         if (current >= limit) {
-            return "&cYour dominion cannot purchase any more defenders";
+            return Lang.getFor(player, "defender.limit_reached");
         }
         if (type.getPerRankLimit() > 0) {
             int typeMax = type.getPerRankLimit() * dominion.getDominionLevel();
             if (getDefenderCount(dominion.getId(), type) >= typeMax) {
-                return "&cYour dominion cannot purchase any more Elder Guardian defenders at this dominion rank";
+                return Lang.getFor(player, "defender.elder_limit_reached");
             }
         }
         double price = type.getPurchasePrice();
         if (dominion.getBalance() < price) {
-            return "&cYour dominion cannot afford this";
+            return Lang.getFor(player, "defender.cannot_afford");
         }
         dominion.setBalance(dominion.getBalance() - price);
         PersistenceUtils.saveSingleDominionToDatabase(dominion);
@@ -389,22 +390,22 @@ public class DefenderUtils {
                 .merge(type, 1, Integer::sum);
         spawnEntity(dominion, type, outpost);
         DominionUtils.updateDominion(dominion);
-        return "&7A &e" + type.getDisplayName()
-                + " defender &7has been purchased for &6$" + NumberFormat.getInstance().format((long) price);
+        return Lang.getFor(player, "defender.purchased", "type", Lang.key(type.getNameKey()), "price", NumberFormat.getInstance().format((long) price));
     }
 
     /**
      * Sells a defender and refunds the dominion.
      *
+     * @param player     The player the result message is shown to.
      * @param dominion   The owning dominion.
      * @param type       The defender type to sell.
      * @param entityUUID The specific entity to sell, or {@code null} to pick an arbitrary one of {@code type}.
      */
-    public static String sellDefender(Dominion dominion, DefenderType type, UUID entityUUID) {
+    public static String sellDefender(Player player, Dominion dominion, DefenderType type, UUID entityUUID) {
         if (entityUUID == null) {
             // Selling any tracked entity of this type
             if (getDefenderCount(dominion.getId(), type) <= 0) {
-                return "&cYou do not have any &e" + type.getDisplayName() + " &cdefenders &7to sell";
+                return Lang.getFor(player, "defender.none_to_sell", "type", Lang.key(type.getNameKey()));
             }
             List<UUID> entities = dominionToEntities.get(dominion.getId());
             if (entities != null) {
@@ -417,12 +418,12 @@ public class DefenderUtils {
             }
             // Only refund a defender that is actually tracked here
             if (entityUUID == null) {
-                return "&cThis defender could not be found";
+                return Lang.getFor(player, "defender.not_found");
             }
         } else {
             // Selling a specific defender via the manage defender GUI
             if (!entityToType.containsKey(entityUUID)) {
-                return "&cThis defender could not be found";
+                return Lang.getFor(player, "defender.not_found");
             }
         }
 
@@ -443,8 +444,7 @@ public class DefenderUtils {
             NetworkManager.getInstance().publishDominionBalanceAdjust(dominion.getId(), refund);
         }
         DominionUtils.updateDominion(dominion);
-        return "&7A &e" + type.getDisplayName()
-                + " defender &7has been sold for &6$" + NumberFormat.getInstance().format((long) refund);
+        return Lang.getFor(player, "defender.sold", "type", Lang.key(type.getNameKey()), "price", NumberFormat.getInstance().format((long) refund));
     }
 
     /**

@@ -104,7 +104,7 @@ public class GuiTopGuesses {
                     aranarthPlayer.setCurrentGuiPageNum(pageNum);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                     String openTitle = ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
-                    if (player.isOnline() && GuiHolder.isGui(player.getOpenInventory()) && openTitle.equals(ChatUtils.stripColorFormatting(Lang.get(TITLE_KEY)))) {
+                    if (player.isOnline() && GuiHolder.isGui(player.getOpenInventory()) && openTitle.equals(ChatUtils.stripColorFormatting(Lang.getFor(player, TITLE_KEY)))) {
                         populate(player, player.getOpenInventory().getTopInventory(), pageNum, sortedUuids, dbData, profiles);
                     } else {
                         new GuiTopGuesses(player, pageNum, sortedUuids, dbData, profiles).openGui();

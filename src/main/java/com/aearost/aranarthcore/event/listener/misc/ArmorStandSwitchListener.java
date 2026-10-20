@@ -40,7 +40,7 @@ public class ArmorStandSwitchListener implements Listener {
 			// Do not proceed if the player lacks ARMOR_STAND permission in this dominion
 			if (dominion != null) {
 				if (!DominionUtils.hasPermission(player, dominion, DominionPermission.ARMOR_STAND)) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.no_permission_in", "name", dominion.getName())));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.no_permission_in", "name", dominion.getName())));
 					e.setCancelled(true);
 					return;
 				}
@@ -52,7 +52,7 @@ public class ArmorStandSwitchListener implements Listener {
 					// Block swap if player is wearing any armor with Curse of Binding
 					for (ItemStack piece : player.getInventory().getArmorContents()) {
 						if (piece != null && piece.containsEnchantment(Enchantment.BINDING_CURSE)) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("access.curse_binding")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "access.curse_binding")));
 							e.setCancelled(true);
 							return;
 						}

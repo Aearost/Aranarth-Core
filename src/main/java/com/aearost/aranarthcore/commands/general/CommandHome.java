@@ -43,7 +43,7 @@ public class CommandHome implements CommandExecutor {
 				for (Home home : aranarthPlayer.getHomes()) {
 					if (homeName.equalsIgnoreCase(ChatUtils.stripColorFormatting(home.getName()))) {
 						if (home.isSmpHome() && !AranarthUtils.isOriginalPlayer(player.getUniqueId())) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("home.no_og_smp")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.no_og_smp")));
 							return true;
 						}
 						boolean networkActive = NetworkManager.isActive();
@@ -59,11 +59,11 @@ public class CommandHome implements CommandExecutor {
 							String smpServer = AranarthCore.getInstance().getConfig()
 									.getString("network.servers.smp", "smp");
 							AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
-									aranarthPlayer.isInAdminMode(), home.getName(), "&7Transferring to your home...", success -> {
+									aranarthPlayer.isInAdminMode(), home.getName(), Lang.getFor(player, "teleport.transferring_named", "name", home.getName()), success -> {
 								if (success) {
 									NetworkManager.getInstance().saveInventoryAndTransfer(player, smpServer,
 											new PendingTeleport(smpWorldPart, hx, hy, hz, hyaw, hpitch,
-													home.getName(), "&7You have teleported to your home"));
+													home.getName(), Lang.getFor(player, "home.teleported", "name", home.getName())));
 								}
 							});
 							return true;
@@ -79,31 +79,31 @@ public class CommandHome implements CommandExecutor {
 							String survivalServer = AranarthCore.getInstance().getConfig()
 									.getString("network.servers.survival", "survival");
 							AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
-									aranarthPlayer.isInAdminMode(), home.getName(), "&7Transferring to your home...", success -> {
+									aranarthPlayer.isInAdminMode(), home.getName(), Lang.getFor(player, "teleport.transferring_named", "name", home.getName()), success -> {
 								if (success) {
 									NetworkManager.getInstance().saveInventoryAndTransfer(player, survivalServer,
 											new PendingTeleport(home.getWorldName(), hx, hy, hz, hyaw, hpitch,
-													home.getName(), "&7You have teleported to your home"));
+													home.getName(), Lang.getFor(player, "home.teleported", "name", home.getName())));
 								}
 							});
 							return true;
 						}
 
 						// Same-server home
-						AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation(), aranarthPlayer.isInAdminMode(), home.getName(), Lang.get("home.teleported", "name", home.getName()), success -> {
+						AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation(), aranarthPlayer.isInAdminMode(), home.getName(), Lang.getFor(player, "home.teleported", "name", home.getName()), success -> {
 							if (success) {
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("home.teleported", "name", home.getName())));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.teleported", "name", home.getName())));
 							} else {
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("home.failed", "name", home.getName())));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.failed", "name", home.getName())));
 							}
 						});
 						return true;
 					}
 				}
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("home.not_found")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.not_found")));
 			} else {
 				if (aranarthPlayer.getHomes().isEmpty()) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("home.no_homes")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.no_homes")));
 				} else {
 					GuiHomes gui = new GuiHomes(player);
 					gui.openGui();
@@ -111,7 +111,7 @@ public class CommandHome implements CommandExecutor {
 				}
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 		}
 		return false;
 	}

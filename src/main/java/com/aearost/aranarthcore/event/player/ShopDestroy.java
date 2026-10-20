@@ -74,7 +74,7 @@ public class ShopDestroy {
 				Shop shop = ShopUtils.getShopFromLocation(signBlock.getLocation());
 
 				if (shop.getUuid() == null || shop.getUuid().equals(player.getUniqueId())) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.must_destroy_first")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.must_destroy_first")));
 					e.setCancelled(true);
 					return;
 				} else {
@@ -86,13 +86,13 @@ public class ShopDestroy {
 		}
 
 		if (deletionResult == 1) {
-			player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.destroyed")));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.destroyed")));
 			player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 0.1F);
 		} else if (deletionResult == 0) {
-			player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.cannot_destroy_others")));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.cannot_destroy_others")));
 			e.setCancelled(true);
 		} else {
-			player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.delete_error")));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.delete_error")));
 			e.setCancelled(true);
 		}
 	}

@@ -23,16 +23,16 @@ public class CommandSmpMap implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
             return true;
         }
 
         if (!AranarthUtils.isOriginalPlayer(player.getUniqueId())) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
             return true;
         }
 
-        player.sendMessage(ChatUtils.buildMessageWithUrls(ChatUtils.chatMessage(Lang.get("smpmap.link"))));
+        player.sendMessage(ChatUtils.buildMessageWithUrls(ChatUtils.chatMessage(Lang.getFor(player, "smpmap.link"))));
         return true;
     }
 

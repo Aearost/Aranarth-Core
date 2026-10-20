@@ -106,7 +106,7 @@ public class WeatherChangeListener implements Listener {
 							if (aranarthPlayer.isWeatherMessageDisabled()) {
 								continue;
 							}
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("weather.clear")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "weather.clear")));
 						}
 				}
 			}

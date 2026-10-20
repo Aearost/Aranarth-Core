@@ -175,7 +175,7 @@ public class MountListener implements Listener {
                 // Still on cooldown - give the player a quiet hint via action bar
                 long remaining = (end - now + 999) / 1000;
                 rider.sendActionBar(LegacyComponentSerializer.legacySection().deserialize(
-                        ChatUtils.translateToColor("&7Bellow is ready in &e" + remaining + "s")));
+                        ChatUtils.translateToColor(Lang.getFor(rider, "mount.bellow_ready_in", "seconds", remaining))));
                 return;
             }
             double maxDamage = mountData.getThirdAttribute() != null
@@ -209,7 +209,7 @@ public class MountListener implements Listener {
             if (now < end) {
                 long remaining = (end - now + 999) / 1000;
                 rider.sendActionBar(LegacyComponentSerializer.legacySection().deserialize(
-                        ChatUtils.translateToColor("&7Bite is ready in &e" + remaining + "s")));
+                        ChatUtils.translateToColor(Lang.getFor(rider, "mount.bite_ready_in", "seconds", remaining))));
                 return;
             }
             if (activeLunges.containsKey(id)) {
@@ -445,7 +445,7 @@ public class MountListener implements Listener {
                     && clickedEntity.getPersistentDataContainer()
                             .has(CustomKeys.MOUNT_ELEMENT, PersistentDataType.STRING)) {
                 event.setCancelled(true);
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.cannot_lead_bison")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "pet.cannot_lead_bison")));
                 return;
             }
             return;
@@ -471,7 +471,7 @@ public class MountListener implements Listener {
 
         if (!isOwner) {
             if (!"AIR".equals(mountElement)) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.cannot_ride_bison_no_owner")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "pet.cannot_ride_bison_no_owner")));
                 return;
             }
             // Flying Bison: non-owners may join when the owner is already riding
@@ -480,7 +480,7 @@ public class MountListener implements Listener {
                     && passengers.get(0) instanceof Player firstRider
                     && firstRider.getUniqueId().equals(ownerUUID);
             if (!ownerIsRiding) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.cannot_ride_bison_not_riding")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "pet.cannot_ride_bison_not_riding")));
                 return;
             }
             if (!passengers.contains(player)) {
@@ -514,7 +514,7 @@ public class MountListener implements Listener {
                         PersistenceUtils.saveMountsForPlayer(ownerUUID);
                     }
                     mainHand.setAmount(mainHand.getAmount() - 1);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.harness_updated")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "pet.harness_updated")));
                 }
                 return;
             }
@@ -657,10 +657,7 @@ public class MountListener implements Listener {
                     Player owner = Bukkit.getPlayer(ownerUUID);
                     if (owner != null) {
                         String mountDisplayName = MountUtils.getDisplayName(ownerUUID, mountElement);
-                        owner.sendMessage(ChatUtils.chatMessage(
-                                MountUtils.getElementColor(mountElement) + mountDisplayName
-                                        + " &7needs some time to recover! "
-                                        + "Use &e/mount info &7to check their status"));
+                        owner.sendMessage(ChatUtils.chatMessage(Lang.getFor(owner, "mount.needs_recovery", "mount", MountUtils.getElementColor(mountElement) + mountDisplayName)));
                     }
                 } catch (IllegalArgumentException ignored) {
                 }
@@ -1072,7 +1069,7 @@ public class MountListener implements Listener {
         double actualHeal = Math.min(baseHeal, maxHp - currentHp);
 
         if (actualHeal <= 0) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("mount.already_full_health")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mount.already_full_health")));
             return;
         }
         mount.setHealth(currentHp + actualHeal);
@@ -1157,8 +1154,7 @@ public class MountListener implements Listener {
         mount.setCustomName(displayName);
         mount.setCustomNameVisible(true);
 
-        player.sendMessage(ChatUtils.chatMessage(
-                MountUtils.getElementColor(element) + displayName + " &7has been summoned!"));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mount.summoned", "mount", MountUtils.getElementColor(element) + displayName)));
     }
 
     /**

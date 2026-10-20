@@ -24,22 +24,22 @@ public class CommandHeads implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
             return true;
         }
 
         // Using /heads adminbuy
         if (args.length >= 1 && args[0].equalsIgnoreCase("adminbuy")) {
             if (!player.hasPermission("aranarth.heads.admin")) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
                 return true;
             }
             if (!HeadsDatabaseManager.isLoaded()) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("heads.loading")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "heads.loading")));
                 return true;
             }
             if (HeadsDatabaseManager.getExchangeableHeads().isEmpty()) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("heads.unavailable")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "heads.unavailable")));
                 return true;
             }
             new GuiHeads(player, 0, true).openGui();
@@ -49,12 +49,12 @@ public class CommandHeads implements CommandExecutor {
         // Using /heads <username>
         if (args.length >= 1) {
             if (!player.hasPermission("aranarth.heads.player")) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
                 return true;
             }
             UUID skullUuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
             if (skullUuid == null) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[0])));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.not_found", "name", args[0])));
                 return true;
             }
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(skullUuid);
@@ -65,19 +65,19 @@ public class CommandHeads implements CommandExecutor {
             String displayName = aranarthPlayer != null ? aranarthPlayer.getNickname() : skullPlayer.getName();
             meta.setDisplayName(ChatUtils.translateToColor("&e" + displayName + "&e's Skull"));
             skull.setItemMeta(meta);
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("heads.skull_given", "player", skullPlayer.getName())));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "heads.skull_given", "player", skullPlayer.getName())));
             player.getInventory().addItem(skull);
             return true;
         }
 
         // Using /heads
         if (!HeadsDatabaseManager.isLoaded()) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("heads.loading")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "heads.loading")));
             return true;
         }
 
         if (HeadsDatabaseManager.getExchangeableHeads().isEmpty()) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("heads.unavailable")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "heads.unavailable")));
             return true;
         }
 

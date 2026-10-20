@@ -66,7 +66,7 @@ public class GuiJobs {
         if (!jobData.getActiveJobs().isEmpty()) {
             lore.add("");
             for (JobType job : jobData.getActiveJobs()) {
-                lore.add(ChatUtils.translateToColor("&e" + job.getDisplayName() + " &7- Level &e" + jobData.getLevel(job)));
+                lore.add(ChatUtils.translateToColor(Lang.getFor(player, "jobs.gui_level_line", "job", Lang.key(job.getNameKey()), "level", jobData.getLevel(job))));
             }
         }
         lore.add("");
@@ -88,8 +88,8 @@ public class GuiJobs {
                 int level = jobData.getLevel(job);
                 double currentXp = jobData.getCurrentXp(job);
                 long required = JobUtils.getXpRequired(level);
-                String xpStr = level >= 10 ? "Max Level" : (int) currentXp + " / " + required;
-                lore.add(ChatUtils.translateToColor("&e" + job.getDisplayName() + " &7Lvl &e" + level + " &8- &7" + xpStr));
+                String xpStr = level >= 10 ? Lang.getFor(player, "jobs.max_level") : (int) currentXp + " / " + required;
+                lore.add(ChatUtils.translateToColor(Lang.getFor(player, "jobs.gui_stats_line", "job", Lang.key(job.getNameKey()), "level", level, "xp", xpStr)));
             }
         }
         lore.add("");
@@ -109,7 +109,7 @@ public class GuiJobs {
         } else {
             lore.add(Lang.getFor(player, "gui.jobs.current_jobs"));
             for (JobType job : jobData.getActiveJobs()) {
-                lore.add(ChatUtils.translateToColor("&e  " + job.getDisplayName() + " &7- Level &e" + jobData.getLevel(job)));
+                lore.add(ChatUtils.translateToColor(Lang.getFor(player, "jobs.gui_leave_line", "job", Lang.key(job.getNameKey()), "level", jobData.getLevel(job))));
             }
             lore.add("");
             lore.add(Lang.getFor(player, "gui.jobs.leave_click"));

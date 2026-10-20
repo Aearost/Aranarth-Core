@@ -147,18 +147,16 @@ public class JobUtils {
     }
 
     public static void handleLevelUp(Player player, AranarthPlayer ap, JobType job, int newLevel) {
-        String jobName = job.getDisplayName();
         String nickname = ap.getNickname();
 
         player.sendTitle(
-                ChatUtils.translateToColor("&6&lLevel Up!"),
-                ChatUtils.translateToColor("&e" + jobName + " &fis now &e&lLevel " + newLevel),
+                ChatUtils.translateToColor(Lang.getFor(player, "jobs.level_up_title")),
+                ChatUtils.translateToColor(Lang.getFor(player, "jobs.level_up_subtitle", "job", Lang.key(job.getNameKey()), "level", newLevel)),
                 10, 60, 20
         );
 
-        String broadcastMsg = ChatUtils.chatMessage(Lang.get("jobs.level_up_broadcast", "player", nickname, "level", newLevel, "job", jobName));
 
-        Bukkit.broadcastMessage(broadcastMsg);
+        Lang.broadcast("jobs.level_up_broadcast", "player", nickname, "level", newLevel, "job", Lang.key(job.getNameKey()));
     }
 
     /**
@@ -240,19 +238,6 @@ public class JobUtils {
         if (pay > 0) {
             awardJob(player, JobType.FARMER, pay);
         }
-    }
-
-    public static String getJobDescription(JobType job) {
-        return switch (job) {
-            case BUILDER -> "Place blocks to build the world around you";
-            case FARMER -> "Harvest crops, tend animals, and collect honey";
-            case MINER -> "Mine ores, stone, and precious materials underground";
-            case EXCAVATOR -> "Dig up dirt, sand, gravel, clay, and ancient artifacts";
-            case LUMBERJACK -> "Chop wood, strip logs, and craft wooden items";
-            case EXPLORER -> "Travel the world, ride horses, and open new chests";
-            case ALCHEMIST -> "Brew potions, enchant items, and visit the grindstone";
-            case HUNTER -> "Hunt mobs, catch fish, and take on powerful enemies";
-        };
     }
 
     public static String getJobColor(JobType job) {

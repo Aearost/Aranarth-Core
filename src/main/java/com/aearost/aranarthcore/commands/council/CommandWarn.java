@@ -31,7 +31,7 @@ public class CommandWarn {
 			if (player.hasPermission("aranarth.warn")) {
 				warnPlayer(sender, args);
 			} else {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 			}
         } else {
 			warnPlayer(sender, args);
@@ -46,7 +46,7 @@ public class CommandWarn {
 	 */
 	private static void warnPlayer(CommandSender sender, String[] args) {
 		if (args.length == 1) {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac warn <player> <reason>")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac warn <player> <reason>")));
 			return;
 		}
 
@@ -66,7 +66,7 @@ public class CommandWarn {
 			playerName = aranarthPlayer.getUsername();
 			nickname = AranarthUtils.getNickname(player);
 			if (!PunishmentUtils.outranks(sender, targetUuid)) {
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("warn.cannot_warn")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "warn.cannot_warn")));
 				return;
 			}
 
@@ -86,13 +86,13 @@ public class CommandWarn {
 				PunishmentUtils.notifyWarn(targetUuid, nickname, reason.toString());
 				PunishmentUtils.issued(punishment, nickname, "", -1);
 			} else {
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("warn.must_specify_reason")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "warn.must_specify_reason")));
 				return;
 			}
 		}
 
 		if (!wasPlayerWarned) {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", args[1])));
 		}
 	}
 

@@ -28,18 +28,18 @@ public class CommandUntrust implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (args.length == 0) {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "untrust <player>")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "untrust <player>")));
 			return true;
 		} else {
 			if (sender instanceof Player player) {
 				UUID targetUuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
 				if (targetUuid == null) {
-					sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[0])));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", args[0])));
 					return true;
 				}
 
 				if (targetUuid.equals(player.getUniqueId())) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("lock.untrust_self")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.untrust_self")));
 					return true;
 				}
 
@@ -48,7 +48,7 @@ public class CommandUntrust implements CommandExecutor {
 				if (targetUuid.equals(aranarthPlayer.getUntrustedPlayerUUID())) {
 					aranarthPlayer.setUntrustedPlayerUUID(null);
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-					sender.sendMessage(ChatUtils.chatMessage(Lang.get("lock.mode_exit_lock")));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "lock.mode_exit_lock")));
 				} else {
 					aranarthPlayer.setTrustedPlayerUUID(null);
 					aranarthPlayer.setUntrustedPlayerUUID(targetUuid);
@@ -57,8 +57,8 @@ public class CommandUntrust implements CommandExecutor {
 					aranarthPlayer.setContainerToggleExpiry(System.currentTimeMillis() + 5000);
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					String nickname = CommandTrust.resolveDisplayName(targetUuid, args[0]);
-					sender.sendMessage(ChatUtils.chatMessage(Lang.get("lock.untrust_mode_enter", "player", nickname)));
-					sender.sendMessage(ChatUtils.chatMessage(Lang.get("lock.untrust_mode_hint", "player", nickname)));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "lock.untrust_mode_enter", "player", nickname)));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "lock.untrust_mode_hint", "player", nickname)));
 					scheduleToggleExpiry(player.getUniqueId());
 				}
 				return true;

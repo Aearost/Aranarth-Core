@@ -30,7 +30,7 @@ public class CommandDeaths implements CommandExecutor {
 			// List their own deaths
 			if (args.length == 0) {
 				int deathCount = AranarthUtils.getKillsOrDeathsInWorld(player.getUniqueId(), player.getWorld(), false);
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("deaths.self", "count", deathCount)));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "deaths.self", "count", deathCount)));
 				return true;
 			} else {
 				java.util.UUID targetUuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
@@ -50,14 +50,14 @@ public class CommandDeaths implements CommandExecutor {
 							displayName = bukkit != null ? bukkit : args[0];
 						}
 					}
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("deaths.other", "player", displayName, "count", deathCount)));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "deaths.other", "player", displayName, "count", deathCount)));
 				} else {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[0])));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.not_found", "name", args[0])));
 				}
 				return true;
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
 		}
 	}

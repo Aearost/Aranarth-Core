@@ -20,7 +20,7 @@ public class CommandBroadcast {
     public static boolean onCommand(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
             if (!player.hasPermission("aranarth.broadcast")) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
                 return true;
             }
         }
@@ -42,11 +42,11 @@ public class CommandBroadcast {
                 }
                 return true;
             } else {
-                sender.sendMessage(ChatUtils.chatMessage(Lang.get("broadcast.must_enter_message")));
+                sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "broadcast.must_enter_message")));
                 return true;
             }
         } else {
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac broadcast <msg>")));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac broadcast <msg>")));
             return true;
         }
 

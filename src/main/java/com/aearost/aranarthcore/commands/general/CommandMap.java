@@ -20,7 +20,7 @@ public class CommandMap implements CommandExecutor {
 	 */
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
-		sender.sendMessage(ChatUtils.buildMessageWithUrls(ChatUtils.chatMessage(Lang.get("map.url"))));
+		sender.sendMessage(ChatUtils.buildMessageWithUrls(ChatUtils.chatMessage(Lang.getFor(sender, "map.url"))));
 		return true;
 	}
 

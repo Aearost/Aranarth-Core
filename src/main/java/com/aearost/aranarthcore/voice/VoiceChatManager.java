@@ -169,9 +169,9 @@ public class VoiceChatManager {
         notifyLocalPlayers(member, true);
         sendState(uuid, member, true);
 
-        player.sendMessage(ChatUtils.chatMessage(Lang.get("voicechat.joined", "channel", Lang.get(channel.getLangKey()))));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "voicechat.joined", "channel", Lang.getFor(player, channel.getLangKey()))));
         if (isMuted(uuid)) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("voicechat.muted")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "voicechat.muted")));
         }
         playJingle(player, true);
         updateDominionConnections();

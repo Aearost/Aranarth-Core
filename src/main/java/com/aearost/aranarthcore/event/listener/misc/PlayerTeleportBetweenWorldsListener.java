@@ -55,14 +55,14 @@ public class PlayerTeleportBetweenWorldsListener implements Listener {
                         player.removePotionEffect(effect.getType());
                     }
                 } catch (IOException exception) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("general.error")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.error")));
                     e.setCancelled(true);
                 }
             } else {
                 try {
                     AranarthUtils.switchInventory(player, currentWorld, currentWorld);
                 } catch (IOException exception) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("general.error")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.error")));
                     e.setCancelled(true);
                 }
             }

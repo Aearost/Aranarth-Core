@@ -178,12 +178,13 @@ public class PunishmentUtils {
     /**
      * The message shown to a banned player who tries to join, or null if the ban has ended.
      *
+     * @param uuid The UUID of the banned player.
      * @param ban {reason, expiresAt} as loaded from the database.
      */
-    public static String getBanKickMessage(String[] ban) {
+    public static String getBanKickMessage(UUID uuid, String[] ban) {
         long expiresAt = Long.parseLong(ban[1]);
         if (expiresAt < 0) {
-            return ChatUtils.translateToColor(Lang.get("ban.kick_permanent", "reason", ban[0]));
+            return ChatUtils.translateToColor(Lang.getFor(uuid, "ban.kick_permanent", "reason", ban[0]));
         }
         if (expiresAt <= System.currentTimeMillis()) {
             return null;
@@ -191,7 +192,7 @@ public class PunishmentUtils {
         LocalDateTime until = LocalDateTime.ofInstant(Instant.ofEpochMilli(expiresAt), ZoneId.systemDefault());
         String untilText = until.getYear() + "-" + pad(until.getMonthValue()) + "-" + pad(until.getDayOfMonth())
                 + " " + pad(until.getHour()) + ":" + pad(until.getMinute());
-        return ChatUtils.translateToColor(Lang.get("ban.kick_temporary", "until", untilText, "reason", ban[0]));
+        return ChatUtils.translateToColor(Lang.getFor(uuid, "ban.kick_temporary", "until", untilText, "reason", ban[0]));
     }
 
     private static String pad(int value) {

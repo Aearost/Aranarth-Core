@@ -29,9 +29,9 @@ public class CommandReload {
 		// /ac reload
 		AranarthCore plugin = AranarthCore.getInstance();
 		plugin.reloadConfig();
-		sender.sendMessage(ChatUtils.chatMessage(Lang.get("reload.config")));
+		sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "reload.config")));
 		AbilityConfig.load(plugin);
-		sender.sendMessage(ChatUtils.chatMessage(Lang.get("reload.abilities")));
+		sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "reload.abilities")));
 
 		// Server shops only exist on Survival
 		if (!AranarthCore.isSmpServer()) {
@@ -43,7 +43,7 @@ public class CommandReload {
 					updated++;
 				}
 			}
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("reload.shops", "count", String.valueOf(updated))));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "reload.shops", "count", String.valueOf(updated))));
 		}
 
 		int count = 0;
@@ -51,14 +51,14 @@ public class CommandReload {
 			PermissionUtils.evaluatePlayerPermissions(player);
 			count++;
 		}
-		sender.sendMessage(ChatUtils.chatMessage(Lang.get("reload.perms", "count", String.valueOf(count))));
-		sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.offline_perms")));
+		sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "reload.perms", "count", String.valueOf(count))));
+		sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "admin.offline_perms")));
 
 		if (NetworkManager.isActive()) {
 			NetworkManager.getInstance().publishConfigReload();
 			NetworkManager.getInstance().publishMarketUpdate();
 			NetworkManager.getInstance().publishPermReload(null);
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("reload.other_server")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "reload.other_server")));
 		}
 
 		// The coupon import may hit the database, so it runs off the main thread
@@ -66,9 +66,9 @@ public class CommandReload {
 			int[] result = CouponUtils.importCoupons();
 			Bukkit.getScheduler().runTask(plugin, () -> {
 				if (result == null) {
-					sender.sendMessage(ChatUtils.chatMessage(Lang.get("reload.coupons_failed")));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "reload.coupons_failed")));
 				} else {
-					sender.sendMessage(ChatUtils.chatMessage(Lang.get("reload.coupons",
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "reload.coupons",
 							"added", String.valueOf(result[0]),
 							"skipped", String.valueOf(result[1]),
 							"invalid", String.valueOf(result[2]))));

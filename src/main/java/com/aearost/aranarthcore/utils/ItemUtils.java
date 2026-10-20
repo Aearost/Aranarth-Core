@@ -34,7 +34,7 @@ public class ItemUtils {
 			int remainder = ItemUtils.addToInventory(target, copyForHasSpace);
 			sendMessages(itemToAdd, target, sender, remainder);
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", "?")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", "?")));
 		}
 	}
 	
@@ -57,19 +57,19 @@ public class ItemUtils {
 					// If the whole ItemStack was added
 					if (remainingAmount == 0) {
 						target.sendMessage(ChatUtils
-								.chatMessage(Lang.get("item.given_you", "amount", itemToGive.getAmount(), "item", itemName)));
+								.chatMessage(Lang.getFor(target, "item.given_you", "amount", itemToGive.getAmount(), "item", itemName)));
 					}
 					// If some but not all was added, and being the quantity that was added
 					else if (remainingAmount > 0) {
 						int amountGiven = itemToGive.getAmount() - remainingAmount;
 						target.sendMessage(
-								ChatUtils.chatMessage(Lang.get("item.given_you", "amount", amountGiven, "item", itemName)));
+								ChatUtils.chatMessage(Lang.getFor(target, "item.given_you", "amount", amountGiven, "item", itemName)));
 						target.sendMessage(
-								ChatUtils.chatMessage(Lang.get("item.thrown_away", "amount", remainingAmount, "item", itemName)));
+								ChatUtils.chatMessage(Lang.getFor(target, "item.thrown_away", "amount", remainingAmount, "item", itemName)));
 					}
 					// If none of the ItemStack was added
 					else {
-						target.sendMessage(ChatUtils.chatMessage(Lang.get("item.no_space")));
+						target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "item.no_space")));
 					}
 				}
 			}
@@ -77,19 +77,19 @@ public class ItemUtils {
 			// If someone else (including console) gave them the item
 			if (remainingAmount == 0) {
 				target.sendMessage(ChatUtils
-						.chatMessage(Lang.get("item.given_you", "amount", itemToGive.getAmount(), "item", itemName)));
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("item.given_other", "player", target.getName(),
+						.chatMessage(Lang.getFor(target, "item.given_you", "amount", itemToGive.getAmount(), "item", itemName)));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "item.given_other", "player", target.getName(),
 						"amount", itemToGive.getAmount(), "item", itemName)));
 			} else if (remainingAmount > 0) {
 				int amountGiven = itemToGive.getAmount() - remainingAmount;
 				target.sendMessage(
-						ChatUtils.chatMessage(Lang.get("item.given_you", "amount", amountGiven, "item", itemName)));
+						ChatUtils.chatMessage(Lang.getFor(target, "item.given_you", "amount", amountGiven, "item", itemName)));
 				sender.sendMessage(ChatUtils.chatMessage(
-						Lang.get("item.given_other", "player", target.getName(), "amount", amountGiven, "item", itemName)));
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("item.thrown_away", "amount", remainingAmount, "item", itemName)));
+						Lang.getFor(sender, "item.given_other", "player", target.getName(), "amount", amountGiven, "item", itemName)));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "item.thrown_away", "amount", remainingAmount, "item", itemName)));
 			} else {
 				sender.sendMessage(
-						ChatUtils.chatMessage(Lang.get("item.no_space_other", "player", target.getName())));
+						ChatUtils.chatMessage(Lang.getFor(sender, "item.no_space_other", "player", target.getName())));
 			}
 		}
 	}

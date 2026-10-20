@@ -32,20 +32,20 @@ public class CommandReply implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (args.length == 0) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "reply <message>")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "reply <message>")));
 				return false;
 			}
 
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			UUID lastMessaged = aranarthPlayer.getLastReceivedMessage();
 			if (lastMessaged == null) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("message.no_reply")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "message.no_reply")));
 				return false;
 			} else {
 				OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(lastMessaged);
 				// Vanished players appear offline
 				if (AranarthUtils.isVanishedFrom(player, lastMessaged)) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("message.player_offline")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "message.player_offline")));
 					return false;
 				}
 				if (!offlinePlayer.isOnline()) {
@@ -58,7 +58,7 @@ public class CommandReply implements CommandExecutor {
 								String targetNick = targetAp.getNickname().isEmpty()
 										? remoteTarget.getUsername()
 										: ChatUtils.stripColorFormatting(targetAp.getNickname());
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("message.toggling", "player", targetNick)));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "message.toggling", "player", targetNick)));
 								return true;
 							}
 							StringBuilder msg = new StringBuilder();
@@ -83,22 +83,22 @@ public class CommandReply implements CommandExecutor {
 									: remoteTarget.getNickname();
 							String prefixStart = "&7⊰&r";
 							String prefixEnd = "&7⊱&r";
-							Component senderPrefixComp = LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(prefixStart + "&7&l&oTo: &r&e" + targetNickname + prefixEnd + " &7&o>> &e&o"));
+							Component senderPrefixComp = LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(prefixStart + Lang.getFor(player, "message.to") + targetNickname + prefixEnd + " &7&o>> &e&o"));
 							Component senderMsgComp = senderPrefixComp.append(LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor("&e&o") + formattedMsg));
-							player.sendMessage(ChatUtils.clickableCommand(senderMsgComp, ChatUtils.translateToColor("&7Message &e" + targetNickname), "/msg " + remoteTarget.getUsername() + " ", true));
+							player.sendMessage(ChatUtils.clickableCommand(senderMsgComp, ChatUtils.translateToColor(Lang.getFor(player, "message.hover_message", "player", targetNickname)), "/msg " + remoteTarget.getUsername() + " ", true));
 							aranarthPlayer.setLastReceivedMessage(lastMessaged);
 							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 							NetworkManager.getInstance().publishDirectMessage(player.getUniqueId(), senderNickname, lastMessaged, formattedMsg);
 							return true;
 						}
 					}
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("message.player_offline")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "message.player_offline")));
 					return false;
 				}
 
 				AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(lastMessaged);
 				if (targetAranarthPlayer.isTogglingMessages() && aranarthPlayer.getCouncilRank() == 0) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("message.toggling", "player", targetAranarthPlayer.getNickname())));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "message.toggling", "player", targetAranarthPlayer.getNickname())));
 					return true;
 				}
 
@@ -106,7 +106,7 @@ public class CommandReply implements CommandExecutor {
 				return true;
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return false;
 		}
 	}

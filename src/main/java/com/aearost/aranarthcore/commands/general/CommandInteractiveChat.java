@@ -27,7 +27,7 @@ public class CommandInteractiveChat implements CommandExecutor {
         try {
             snapshotId = UUID.fromString(args[1]);
         } catch (IllegalArgumentException e) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("chat_snapshot.expired")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "chat_snapshot.expired")));
             return true;
         }
         GuiChatSnapshot.open(player, snapshotId);

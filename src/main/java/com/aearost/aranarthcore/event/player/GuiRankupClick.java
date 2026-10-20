@@ -9,7 +9,6 @@ import com.aearost.aranarthcore.utils.*;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
 import com.gmail.nossr50.util.EventUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -34,7 +33,7 @@ public class GuiRankupClick {
             return;
         }
         GuiHolder holder = GuiHolder.of(e.getView().getTopInventory());
-        if (holder == null || !(holder.getData() instanceof GuiRankup.RankupOffer(int fromRank, String nextRankName))) {
+        if (holder == null || !(holder.getData() instanceof GuiRankup.RankupOffer(int fromRank, String nextRankId))) {
             return;
         }
 
@@ -62,8 +61,6 @@ public class GuiRankupClick {
             if (balance >= price) {
                 if (hasMinimumMcmmoTotal(player)) {
                     if (hasMinimumMcmmoPerSkill(player)) {
-                        String rankDisplay = ChatUtils.translateToColor(nextRankName);
-                        String aOrAn = "a";
 
                         NumberFormat formatter = NumberFormat.getCurrencyInstance();
                         aranarthPlayer.setBalance(balance - price);
@@ -74,14 +71,9 @@ public class GuiRankupClick {
                         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                         PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
 
-                        if (ChatUtils.stripColorFormatting(rankDisplay).equals("Esquire")
-                                || ChatUtils.stripColorFormatting(rankDisplay).equals("Emperor")
-                                || ChatUtils.stripColorFormatting(rankDisplay).equals("Empress")) {
-                            aOrAn = "an";
-                        }
                         DiscordUtils.updateRank(player, aranarthPlayer.getRank(), true);
 
-                        Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("rank.ranked_up", "player", aranarthPlayer.getNickname(), "article", aOrAn, "rank", rankDisplay)));
+                        Lang.broadcast("rank.ranked_up", "player", aranarthPlayer.getNickname(), "article", Lang.key("rank.article_" + nextRankId), "rank", Lang.key("rank.title_" + nextRankId));
                         PermissionUtils.evaluatePlayerPermissions(player);
                         if (NetworkManager.isActive()) {
                             NetworkManager.getInstance().publishRankUpdate(player.getUniqueId(), aranarthPlayer.getRank(), aranarthPlayer.getCouncilRank(), aranarthPlayer.getSaintRank(), aranarthPlayer.getArchitectRank());
@@ -89,15 +81,15 @@ public class GuiRankupClick {
                         player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
                         player.closeInventory();
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("rank.missing_mcmmo_category")));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "rank.missing_mcmmo_category")));
                         player.closeInventory();
                     }
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("rank.missing_mcmmo")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "rank.missing_mcmmo")));
                     player.closeInventory();
                 }
             } else {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("rank.not_enough_money")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "rank.not_enough_money")));
                 player.closeInventory();
             }
         }

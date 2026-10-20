@@ -72,12 +72,12 @@ public class GuiJobsStats {
         int level = jobData.getLevel(job);
         double currentXp = jobData.getCurrentXp(job);
         long required = JobUtils.getXpRequired(level);
-        String xpStr = level >= 10 ? "Max Level" : (int) currentXp + " &8/ &e" + required;
+        String xpStr = level >= 10 ? Lang.getFor(player, "jobs.max_level") : (int) currentXp + " &8/ &e" + required;
 
         if (isActive) {
-            meta.setDisplayName(ChatUtils.translateToColor(JobUtils.getJobColor(job) + job.getDisplayName() + " " + Lang.getFor(player, "gui.jobsstats.active")));
+            meta.setDisplayName(ChatUtils.translateToColor(JobUtils.getJobColor(job) + Lang.getFor(player, job.getNameKey()) + " " + Lang.getFor(player, "gui.jobsstats.active")));
         } else {
-            meta.setDisplayName(ChatUtils.translateToColor(JobUtils.getJobColor(job) + job.getDisplayName()));
+            meta.setDisplayName(ChatUtils.translateToColor(JobUtils.getJobColor(job) + Lang.getFor(player, job.getNameKey())));
         }
 
         List<String> lore = new ArrayList<>();

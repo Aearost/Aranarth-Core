@@ -140,7 +140,7 @@ public class AranarthCore extends JavaPlugin {
     public static void resetResourceWorlds() {
         if (!isSmpServer()) {
             // Relayed to the SMP server by the broadcast relay
-            Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("resource.reset_broadcast")));
+            Lang.broadcast("resource.reset_broadcast");
 
             // Record the reset time so offline players can be detected on next login
             AranarthUtils.setLastResourceWorldResetTime(System.currentTimeMillis());
@@ -847,7 +847,7 @@ public class AranarthCore extends JavaPlugin {
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                     if (aranarthPlayer.isTogglingChat()) {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("general.chat_muted_toggle")));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.chat_muted_toggle")));
                     }
                 }
             }

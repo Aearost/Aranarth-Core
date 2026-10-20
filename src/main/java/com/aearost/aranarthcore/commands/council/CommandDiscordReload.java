@@ -17,12 +17,12 @@ public class CommandDiscordReload {
 	 */
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (!AranarthCore.isPublicServer()) {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("discord.test_server_only")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "discord.test_server_only")));
 			return false;
 		}
-		sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.discord_refresh")));
+		sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "admin.discord_refresh")));
 		DiscordUtils.updateAllDiscordRoles();
-		sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.discord_refresh_done")));
+		sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "admin.discord_refresh_done")));
 		return true;
 	}
 }

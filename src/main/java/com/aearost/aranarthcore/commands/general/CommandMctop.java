@@ -38,7 +38,7 @@ public class CommandMctop implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
             return true;
         }
 
@@ -47,12 +47,12 @@ public class CommandMctop implements CommandExecutor {
             try {
                 skill = PrimarySkillType.valueOf(args[0].toUpperCase());
             } catch (IllegalArgumentException e) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("mctop.unknown_skill", "skill", args[0])));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mctop.unknown_skill", "skill", args[0])));
                 return true;
             }
 
             if (SkillTools.isChildSkill(skill)) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("mctop.child_skill", "skill", args[0])));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mctop.child_skill", "skill", args[0])));
                 return true;
             }
         }
@@ -110,7 +110,7 @@ public class CommandMctop implements CommandExecutor {
                     AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                     aranarthPlayer.setCurrentGuiPageNum(pageNum);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                    String skillDisplay = skill == null ? "Overall" : skill.name().charAt(0) + skill.name().substring(1).toLowerCase();
+                    String skillDisplay = skill == null ? Lang.getFor(player, "mcmmo.overall") : skill.name().charAt(0) + skill.name().substring(1).toLowerCase();
                     String expectedTitle = ChatUtils.stripColorFormatting(Lang.getFor(player, "gui.mctop.title", "skill", skillDisplay));
                     String openTitle = ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
                     if (player.isOnline() && GuiHolder.isGui(player.getOpenInventory()) && openTitle.equals(expectedTitle)) {

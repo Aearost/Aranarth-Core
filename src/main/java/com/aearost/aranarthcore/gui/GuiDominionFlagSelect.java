@@ -50,8 +50,8 @@ public class GuiDominionFlagSelect {
         List<Outpost> outposts = OutpostUtils.getDominionOutposts(dominion.getId());
 
         Inventory gui = GuiHolder.create(player, 27, Lang.getFor(player, titleKey));
-        populate(gui, dominion, outposts, titleKey);
-        gui.setItem(BACK_SLOT, GuiDominionPermissions.buildBackButton());
+        populate(player, gui, dominion, outposts, titleKey);
+        gui.setItem(BACK_SLOT, GuiDominionPermissions.buildBackButton(player));
 
         player.closeInventory();
         player.openInventory(gui);
@@ -60,30 +60,30 @@ public class GuiDominionFlagSelect {
     /**
      * Fills the filler rows and places dominion + outpost items in the middle row.
      */
-    private static void populate(Inventory gui, Dominion dominion, List<Outpost> outposts, String titleKey) {
+    private static void populate(Player player, Inventory gui, Dominion dominion, List<Outpost> outposts, String titleKey) {
         ItemStack filler = buildFiller();
         for (int i = 0; i < 9; i++) {
             gui.setItem(i, filler);
             gui.setItem(18 + i, filler);
         }
-        refreshItems(gui, dominion, outposts, titleKey);
+        refreshItems(player, gui, dominion, outposts, titleKey);
     }
 
     /**
      * Rebuilds all area items in the middle row without touching the filler or back button.
      */
-    public static void refreshItems(Inventory gui, Dominion dominion, List<Outpost> outposts, String titleKey) {
+    public static void refreshItems(Player player, Inventory gui, Dominion dominion, List<Outpost> outposts, String titleKey) {
         int domSlot = getDominionSlot(outposts.size());
 
         boolean dominionFlag = getDominionFlag(dominion, titleKey);
         Material dominionMaterial = getMaterialForFlag(titleKey);
-        gui.setItem(domSlot, buildAreaItem(dominionMaterial, dominion.getName(), dominionFlag, null));
+        gui.setItem(domSlot, buildAreaItem(player, dominionMaterial, dominion.getName(), dominionFlag, null));
 
         for (int i = 0; i < outposts.size(); i++) {
             Outpost outpost = outposts.get(i);
             boolean outpostFlag = getOutpostFlag(outpost, titleKey);
             // domSlot + 1 is left as a gap; outposts start at domSlot + 2
-            gui.setItem(domSlot + 2 + i, buildAreaItem(outpost.getIcon(), outpost.getName(), outpostFlag, outpost.getOutpostIndex()));
+            gui.setItem(domSlot + 2 + i, buildAreaItem(player, outpost.getIcon(), outpost.getName(), outpostFlag, outpost.getOutpostIndex()));
         }
     }
 
@@ -131,15 +131,15 @@ public class GuiDominionFlagSelect {
     /**
      * Builds the toggle item for a single area (dominion or outpost).
      */
-    public static ItemStack buildAreaItem(Material material, String areaName, boolean enabled, Integer outpostIndex) {
+    public static ItemStack buildAreaItem(Player player, Material material, String areaName, boolean enabled, Integer outpostIndex) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
-        String status = Lang.get(enabled ? "gui.yes" : "gui.no");
+        String status = Lang.getFor(player, enabled ? "gui.yes" : "gui.no");
         if (outpostIndex == null) {
-            meta.setDisplayName(Lang.get("gui.dominionflagselect.area_name_dominion", "name", areaName, "status", status));
-            meta.setLore(List.of(Lang.get("gui.dominionflagselect.area_lore_dominion")));
+            meta.setDisplayName(Lang.getFor(player, "gui.dominionflagselect.area_name_dominion", "name", areaName, "status", status));
+            meta.setLore(List.of(Lang.getFor(player, "gui.dominionflagselect.area_lore_dominion")));
         } else {
-            meta.setDisplayName(Lang.get("gui.dominionflagselect.area_name_outpost", "name", areaName, "status", status));
+            meta.setDisplayName(Lang.getFor(player, "gui.dominionflagselect.area_name_outpost", "name", areaName, "status", status));
         }
         item.setItemMeta(meta);
         return item;

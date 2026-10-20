@@ -13,4 +13,11 @@ public enum JobType {
     public String getDisplayName() {
         return name().charAt(0) + name().substring(1).toLowerCase();
     }
+
+    /**
+     * The lang key of the job's localized name.
+     */
+    public String getNameKey() {
+        return "jobs.name_" + name().toLowerCase();
+    }
 }

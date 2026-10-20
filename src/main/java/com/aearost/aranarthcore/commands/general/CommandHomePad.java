@@ -31,7 +31,7 @@ public class CommandHomePad implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
             if (args.length == 0) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "homepad <create|delete|reorder>")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "homepad <create|delete|reorder>")));
 				return true;
 			} else {
                 switch (args[0]) {
@@ -55,17 +55,17 @@ public class CommandHomePad implements CommandExecutor {
                                     AranarthUtils.updateHomepad(homeName.toString(), locationDirection,
                                             Material.HEAVY_WEIGHTED_PRESSURE_PLATE);
                                     player.sendMessage(
-                                            ChatUtils.chatMessage(Lang.get("homepad.created", "name", homeName)));
+                                            ChatUtils.chatMessage(Lang.getFor(player, "homepad.created", "name", homeName)));
                                     return true;
                                 } else {
-                                    player.sendMessage(ChatUtils.chatMessage(Lang.get("home.cannot_use_quote")));
+                                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.cannot_use_quote")));
                                 }
                             } else {
-                                player.sendMessage(ChatUtils.chatMessage(Lang.get("home.cannot_rename")));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.cannot_rename")));
                             }
                         } else {
                             player.sendMessage(
-                                    ChatUtils.chatMessage(Lang.get("home.must_stand_on_pad")));
+                                    ChatUtils.chatMessage(Lang.getFor(player, "home.must_stand_on_pad")));
                         }
                     }
                     case "delete" -> {
@@ -74,22 +74,22 @@ public class CommandHomePad implements CommandExecutor {
                                 final int homeIndex = Integer.parseInt(args[1]);
                                 List<Home> homes = AranarthUtils.getHomepads();
                                 if (Objects.isNull(homes) || homes.isEmpty()) {
-                                    player.sendMessage(ChatUtils.chatMessage(Lang.get("home.no_homes")));
+                                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.no_homes")));
                                     return false;
                                 }
                                 if (homeIndex < 0 || homeIndex >= homes.size()) {
-                                    player.sendMessage(ChatUtils.chatMessage(Lang.get("home.index_not_found")));
+                                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.index_not_found")));
                                     return false;
                                 }
                                 String homeName = homes.get(homeIndex).getName();
                                 homes.remove(homeIndex);
-                                player.sendMessage(ChatUtils.chatMessage(Lang.get("homepad.deleted", "name", homeName)));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "homepad.deleted", "name", homeName)));
                                 return true;
                             } catch (NumberFormatException e) {
-                                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_number")));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_number")));
                             }
                         } else {
-                            player.sendMessage(ChatUtils.chatMessage(Lang.get("homepad.enter_index")));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "homepad.enter_index")));
                         }
                     }
                     case "reorder" -> {
@@ -98,14 +98,14 @@ public class CommandHomePad implements CommandExecutor {
                                 final int homeNumber = Integer.parseInt(args[1]);
                                 final int newNumber = Integer.parseInt(args[2]);
                                 if (newNumber == homeNumber) {
-                                    sender.sendMessage(ChatUtils.chatMessage(Lang.get("homepad.reorder_same")));
+                                    sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "homepad.reorder_same")));
                                     return false;
                                 }
 
                                 List<Home> homes = AranarthUtils.getHomepads();
                                 ArrayList<Home> newHomes = new ArrayList<>();
                                 if (Objects.isNull(homes) || homes.isEmpty()) {
-                                    sender.sendMessage(ChatUtils.chatMessage(Lang.get("home.no_homes")));
+                                    sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "home.no_homes")));
                                     return false;
                                 }
 
@@ -127,20 +127,20 @@ public class CommandHomePad implements CommandExecutor {
                                 }
                                 AranarthUtils.setHomepads(newHomes);
                                 sender.sendMessage(ChatUtils.chatMessage(
-                                        Lang.get("homepad.reordered", "name", homes.get(homeNumber).getName())));
+                                        Lang.getFor(sender, "homepad.reordered", "name", homes.get(homeNumber).getName())));
                                 return true;
                             } catch (NumberFormatException e) {
-                                sender.sendMessage(ChatUtils.chatMessage(Lang.get("home.updated")));
+                                sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "home.updated")));
                             }
                         }
                     }
                     default -> {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_toggle")));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_toggle")));
                     }
                 }
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 		}
 		return false;
 	}

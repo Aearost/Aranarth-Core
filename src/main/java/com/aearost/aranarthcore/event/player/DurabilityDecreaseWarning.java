@@ -28,11 +28,11 @@ public class DurabilityDecreaseWarning {
 
 			Player player = e.getPlayer();
 			if (damagedDurability == thresholdA) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("durability.low", "item", ChatUtils.getFormattedItemName(e.getItem().getType().name()))));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "durability.low", "item", ChatUtils.getFormattedItemName(e.getItem().getType().name()))));
 			} else if (damagedDurability == thresholdB) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("durability.very_low", "item", ChatUtils.getFormattedItemName(e.getItem().getType().name()))));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "durability.very_low", "item", ChatUtils.getFormattedItemName(e.getItem().getType().name()))));
 			} else if (damagedDurability == thresholdC) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("durability.almost_broken", "item", ChatUtils.getFormattedItemName(e.getItem().getType().name()))));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "durability.almost_broken", "item", ChatUtils.getFormattedItemName(e.getItem().getType().name()))));
 			}
 		}
 	}

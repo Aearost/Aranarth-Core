@@ -57,14 +57,14 @@ public class CommandOverrides {
                 sb.append(plugins[i].isEnabled() ? "&7" : "&c");
                 sb.append(plugins[i].getName());
             }
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("plugins.list", "count", plugins.length, "list", sb)));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "plugins.list", "count", plugins.length, "list", sb)));
             e.setCancelled(true);
             return;
         }
 
         if (aranarthPlayer.getCouncilRank() != 3) {
             if (parts[0].equals("/w")) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
                 e.setCancelled(true);
                 return;
             }
@@ -73,9 +73,9 @@ public class CommandOverrides {
         // Prevent the command entirely
         if (parts[0].equals("/time") && AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
             if (aranarthPlayer.getCouncilRank() < 2) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
             } else {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("commands.use_ac_time")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "commands.use_ac_time")));
             }
             e.setCancelled(true);
             return;
@@ -83,7 +83,7 @@ public class CommandOverrides {
 
         // Prevent the command entirely
         if (parts[0].equals("/me")) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
             e.setCancelled(true);
             return;
         }
@@ -92,7 +92,7 @@ public class CommandOverrides {
         if (player.getWorld().getName().equalsIgnoreCase("arena") && !aranarthPlayer.isInAdminMode()) {
             PluginCommand pluginCommand = Bukkit.getPluginCommand(parts[0].substring(1).toLowerCase());
             if (pluginCommand != null && "aranarth.tables".equals(pluginCommand.getPermission())) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("arena.no_tables")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arena.no_tables")));
                 e.setCancelled(true);
                 return;
             }
@@ -152,8 +152,7 @@ public class CommandOverrides {
 
         if (info != null) {
             String displayName = MountUtils.getDisplayName(player.getUniqueId(), info[1]);
-            player.sendMessage(ChatUtils.chatMessage(
-                    MountUtils.getElementColor(info[1]) + displayName + " &7has returned."));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mount.returned", "mount", MountUtils.getElementColor(info[1]) + displayName)));
         }
     }
 

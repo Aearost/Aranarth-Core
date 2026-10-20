@@ -18,7 +18,7 @@ public class CommandDateSet {
 	 */
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (args.length <= 2) {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac dateset <field> <value>")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac dateset <field> <value>")));
 			return true;
 		}
 		// Every field other than the month is a number
@@ -26,7 +26,7 @@ public class CommandDateSet {
 			try {
 				Integer.parseInt(args[2]);
 			} catch (NumberFormatException e) {
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_number")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_number")));
 				return true;
 			}
 		}
@@ -35,23 +35,23 @@ public class CommandDateSet {
 				for (Month enumMonth : Month.values()) {
 					if (enumMonth.name().equals(args[2])) {
 						AranarthUtils.setMonth(Month.valueOf(args[2]));
-						sender.sendMessage(ChatUtils.chatMessage(Lang.get("dateset.success", "field", "month", "value", AranarthUtils.getMonth().name())));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "dateset.success", "field", "month", "value", AranarthUtils.getMonth().name())));
 					}
 				}
 			}
 			case "day" -> {
 				AranarthUtils.setDay(Integer.parseInt(args[2]));
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("dateset.success", "field", "day", "value", String.valueOf(AranarthUtils.getDay()))));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "dateset.success", "field", "day", "value", String.valueOf(AranarthUtils.getDay()))));
 			}
 			case "weekday" -> {
 				AranarthUtils.setWeekday(Integer.parseInt(args[2]));
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("dateset.success", "field", "weekday", "value", DateUtils.provideWeekdayName(AranarthUtils.getWeekday()))));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "dateset.success", "field", "weekday", "value", DateUtils.provideWeekdayName(AranarthUtils.getWeekday()))));
 			}
 			case "year" -> {
 				AranarthUtils.setYear(Integer.parseInt(args[2]));
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("dateset.success", "field", "year", "value", String.valueOf(AranarthUtils.getYear()))));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "dateset.success", "field", "year", "value", String.valueOf(AranarthUtils.getYear()))));
 			}
-			default -> sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac dateset <field> <value>")));
+			default -> sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac dateset <field> <value>")));
 		}
 		return true;
 	}

@@ -72,7 +72,7 @@ public class GuiOutpostsClick {
 
         // Locked slot
         if (clicked.getType() == Material.RED_CONCRETE) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.outpost_not_unlocked")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.outpost_not_unlocked")));
             return;
         }
 
@@ -82,8 +82,9 @@ public class GuiOutpostsClick {
 
         // Empty slot (outpost available but not yet created)
         String displayName = ChatUtils.stripColorFormatting(clicked.getItemMeta().getDisplayName());
-        if (displayName.startsWith("Outpost Slot")) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.outpost_how_to_create")));
+        String emptySlotPrefix = ChatUtils.stripColorFormatting(Lang.getFor(player, "gui.outposts.empty", "n", "\u0000")).split("\u0000")[0];
+        if (displayName.startsWith(emptySlotPrefix)) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.outpost_how_to_create")));
             player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
             return;
         }
@@ -96,7 +97,7 @@ public class GuiOutpostsClick {
                 .findFirst().orElse(null);
 
         if (outpost == null) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.outpost_not_found", "name", displayName)));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.outpost_not_found", "name", displayName)));
             return;
         }
 
@@ -105,16 +106,16 @@ public class GuiOutpostsClick {
         if (heldItem != Material.AIR) {
             if (!dominion.getLeader().equals(player.getUniqueId())
                     && !DominionUtils.hasPermission(player, dominion, DominionPermission.MANAGE_OUTPOSTS)) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.outpost_icon_no_permission")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.outpost_icon_no_permission")));
                 player.closeInventory();
                 return;
             }
             if (heldItem == outpost.getIcon()) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.outpost_icon_same")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.outpost_icon_same")));
             } else {
                 outpost.setIcon(heldItem);
                 Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), PersistenceUtils::saveOutposts);
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("outpost.icon_set", "name", ChatUtils.stripColorFormatting(outpost.getName()), "icon", ChatUtils.getFormattedItemName(heldItem.name()))));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "outpost.icon_set", "name", ChatUtils.stripColorFormatting(outpost.getName()), "icon", ChatUtils.getFormattedItemName(heldItem.name()))));
                 if (NetworkManager.isActive()) {
                     NetworkManager.getInstance().publishOutpostUpdate(outpost);
                 }
@@ -126,7 +127,7 @@ public class GuiOutpostsClick {
         AranarthPlayer clicker = AranarthUtils.getPlayer(player.getUniqueId());
         if (!clicker.isInAdminMode() && !dominion.getLeader().equals(player.getUniqueId())
                 && !DominionUtils.hasPermission(player, dominion, DominionPermission.OUTPOST_HOME)) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.outpost_no_permission_home")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.outpost_no_permission_home")));
             player.closeInventory();
             return;
         }
@@ -148,10 +149,10 @@ public class GuiOutpostsClick {
                 String cmd = "dominion outpost home " + ChatUtils.stripColorFormatting(outpost.getName());
                 player.closeInventory();
                 AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
-                        ap.isInAdminMode(), "&e&lDominion", "&7Transferring to your outpost...", success -> {
+                        ap.isInAdminMode(), Lang.getFor(player, "teleport.title_dominion"), Lang.getFor(player, "teleport.transferring_outpost"), success -> {
                     if (success) {
                         NetworkManager.getInstance().saveInventoryAndTransfer(player, targetServer,
-                                PendingTeleport.forCommand(cmd, "&e&lDominion", "&7You have teleported to your outpost"));
+                                PendingTeleport.forCommand(cmd, Lang.getFor(player, "teleport.title_dominion"), Lang.getFor(player, "teleport.to_outpost")));
                     }
                 });
                 return;
@@ -161,9 +162,9 @@ public class GuiOutpostsClick {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
         AranarthUtils.teleportPlayer(player, player.getLocation(), outpost.getHome(), aranarthPlayer.isInAdminMode(), outpost.getName(), Lang.getFor(player, "outpost.teleported", "name", outpost.getName()), success -> {
             if (success) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("outpost.teleported", "name", outpost.getName())));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "outpost.teleported", "name", outpost.getName())));
             } else {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("outpost.teleport_failed", "name", outpost.getName())));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "outpost.teleport_failed", "name", outpost.getName())));
             }
         });
         player.closeInventory();

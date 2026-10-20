@@ -78,7 +78,7 @@ public class GuiDominionMembers {
                 String openTitle = ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
                 if (player.isOnline() && GuiHolder.isGui(player.getOpenInventory()) && openTitle.equals(Lang.getFor(player, "gui.dominionmembers.title"))
                         && player.getOpenInventory().getTopInventory().getSize() == expectedSize) {
-                    populate(player, player.getOpenInventory().getTopInventory(), dominion, profiles);
+                    populate(player, player, player.getOpenInventory().getTopInventory(), dominion, profiles);
                 } else {
                     new GuiDominionMembers(player, dominion, profiles).openGui();
                 }
@@ -89,7 +89,7 @@ public class GuiDominionMembers {
     /**
      * Updates an already-open Dominion Members inventory in-place without closing it.
      */
-    public static void populate(Player viewer, Inventory inv, Dominion dominion, Map<UUID, PlayerProfile> profiles) {
+    public static void populate(Player player, Player viewer, Inventory inv, Dominion dominion, Map<UUID, PlayerProfile> profiles) {
         List<UUID> members = dominion.getMembers();
         for (int i = 0; i < members.size(); i++) {
             UUID memberUuid = members.get(i);
@@ -98,7 +98,7 @@ public class GuiDominionMembers {
             PlayerProfile profile = profiles.get(memberUuid);
             inv.setItem(i, buildMemberSkull(viewer, memberUuid, rank, dominion.getLeader().equals(memberUuid), profile));
         }
-        inv.setItem(inv.getSize() - 1, GuiDominionPermissions.buildBackButton());
+        inv.setItem(inv.getSize() - 1, GuiDominionPermissions.buildBackButton(player));
     }
 
     private Inventory initializeGui(Player player, Dominion dominion, Map<UUID, PlayerProfile> profiles) {
@@ -121,7 +121,7 @@ public class GuiDominionMembers {
         }
 
         // Back button at the slot immediately after the last member
-        gui.setItem(gui.getSize() - 1, GuiDominionPermissions.buildBackButton());
+        gui.setItem(gui.getSize() - 1, GuiDominionPermissions.buildBackButton(player));
 
         return gui;
     }
@@ -147,7 +147,7 @@ public class GuiDominionMembers {
         meta.setDisplayName(ChatUtils.translateToColor("&e" + nickname));
 
         List<String> lore = new ArrayList<>();
-        lore.add(Lang.getFor(viewer, "gui.dominionmembers.rank", "rank", DominionUtils.getFormattedRankName(rank)));
+        lore.add(Lang.getFor(viewer, "gui.dominionmembers.rank", "rank", DominionUtils.getFormattedRankName(viewer, rank)));
         if (!isLeader) {
             lore.add(Lang.getFor(viewer, "gui.dominionmembers.click_manage"));
         } else {

@@ -72,12 +72,12 @@ public class GuiBlacklistSelectClick {
                 ap.setActivePresetIndex(-1);
             }
             PersistenceUtils.saveBlacklistPresetsAsync(player.getUniqueId());
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("blacklist.preset_cleared", "number", (presetIndex + 1))));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "blacklist.preset_cleared", "number", (presetIndex + 1))));
             player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 0.5F, 0.8F);
         } else {
             ap.setActivePresetIndex(presetIndex);
             PersistenceUtils.saveBlacklistPresetsAsync(player.getUniqueId());
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("blacklist.preset_selected", "number", (presetIndex + 1))));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "blacklist.preset_selected", "number", (presetIndex + 1))));
             player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 0.5F, 1.75F);
         }
 

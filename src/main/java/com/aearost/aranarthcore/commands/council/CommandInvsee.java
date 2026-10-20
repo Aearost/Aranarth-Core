@@ -21,12 +21,12 @@ public class CommandInvsee {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.invsee")) {
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission")));
 				return true;
 			}
 
 			if (args.length == 1) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac invsee <player>")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "ac invsee <player>")));
 				return true;
 			} else {
 				Player target = Bukkit.getPlayer(args[1]);
@@ -39,18 +39,18 @@ public class CommandInvsee {
 							.findFirst().orElse(null);
 					if (remotePlayer != null) {
 						NetworkManager.getInstance().publishInvseeRequest(player.getUniqueId(), remotePlayer.getUuid());
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("reaper.loading")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "reaper.loading")));
 					} else {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.not_found", "name", args[1])));
 					}
 					return true;
 				} else {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.not_found", "name", args[1])));
 					return true;
 				}
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
 		}
 	}

@@ -15,7 +15,7 @@ public class ResourceWorldDamagePrevent {
             if (e.getEntity() instanceof Player target) {
                 if (target.getWorld().getName().startsWith("resource")) {
                     e.setCancelled(true);
-                    attacker.sendMessage(ChatUtils.chatMessage(Lang.get("resource.cannot_attack")));
+                    attacker.sendMessage(ChatUtils.chatMessage(Lang.getFor(attacker, "resource.cannot_attack")));
                 }
             }
         }

@@ -176,6 +176,13 @@ public enum DefenderType {
         return displayName;
     }
 
+    /**
+     * The lang key of the defender type's localized name.
+     */
+    public String getNameKey() {
+        return "defender.name_" + name().toLowerCase();
+    }
+
     public EntityType getEntityType() {
         return entityType;
     }

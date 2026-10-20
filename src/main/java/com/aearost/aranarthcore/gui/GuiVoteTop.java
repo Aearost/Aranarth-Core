@@ -113,7 +113,7 @@ public class GuiVoteTop {
                 .toList();
 
         if (sorted.isEmpty()) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("votetop.no_votes")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "votetop.no_votes")));
             return;
         }
 

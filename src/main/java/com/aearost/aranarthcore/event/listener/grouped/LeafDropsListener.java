@@ -111,7 +111,7 @@ public class LeafDropsListener implements Listener {
 
 							// If the player is within 48 blocks of the spawn location
 							if (block.getLocation().distance(player.getLocation()) <= 48) {
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("leaf.god_apple_nearby")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "leaf.god_apple_nearby")));
 							}
 						}
 					}
@@ -166,7 +166,7 @@ public class LeafDropsListener implements Listener {
 
 						// If the player is within 48 blocks of the spawn location
 						if (block.getLocation().distance(player.getLocation()) <= 48) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("leaf.god_apple_nearby")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "leaf.god_apple_nearby")));
 						}
 					}
 				}

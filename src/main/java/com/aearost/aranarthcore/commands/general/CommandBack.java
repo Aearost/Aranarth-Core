@@ -28,17 +28,17 @@ public class CommandBack implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.back")) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return true;
 			}
 
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (aranarthPlayer.getLastKnownTeleportLocation() != null) {
-				AranarthUtils.teleportPlayer(player, player.getLocation(), aranarthPlayer.getLastKnownTeleportLocation(), aranarthPlayer.isInAdminMode(), "&e&lPrevious Location", Lang.get("teleport.returned"), success -> {
+				AranarthUtils.teleportPlayer(player, player.getLocation(), aranarthPlayer.getLastKnownTeleportLocation(), aranarthPlayer.isInAdminMode(), Lang.getFor(player, "teleport.title_previous"), Lang.getFor(player, "teleport.returned"), success -> {
 					if (success) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.returned")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.returned")));
 					} else {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.could_not_return")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.could_not_return")));
 					}
 				});
 				return true;
@@ -59,24 +59,24 @@ public class CommandBack implements CommandExecutor {
 						String targetServer = AranarthCore.getInstance().getConfig()
 								.getString("network.servers." + serverKey, serverKey);
 						AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
-								aranarthPlayer.isInAdminMode(), "&e&lPrevious Location", "&7Transferring to your previous location...", success -> {
+								aranarthPlayer.isInAdminMode(), Lang.getFor(player, "teleport.title_previous"), Lang.getFor(player, "teleport.transferring_previous"), success -> {
 							if (success) {
 								NetworkManager.getInstance().saveInventoryAndTransfer(player, targetServer,
 										new PendingTeleport(world, bx, by, bz, byaw, bpitch,
-												"&e&lPrevious Location", "&7You have returned to your previous location"));
+												Lang.getFor(player, "teleport.title_previous"), Lang.getFor(player, "teleport.returned")));
 							}
 						});
 						return true;
 					}
 				}
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.no_previous")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.no_previous")));
 				return true;
 			} else {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.no_previous")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.no_previous")));
 				return true;
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
 		}
 	}

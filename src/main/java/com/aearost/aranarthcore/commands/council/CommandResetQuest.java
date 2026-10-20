@@ -15,13 +15,13 @@ public class CommandResetQuest {
     public static boolean onCommand(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
             if (!player.hasPermission("aranarth.resetquests")) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
                 return true;
             }
         }
 
         if (args.length < 3) {
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac resetquest <player> <daily|weekly>")));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac resetquest <player> <daily|weekly>")));
             return true;
         }
 
@@ -29,28 +29,28 @@ public class CommandResetQuest {
         String type = args[2].toLowerCase();
 
         if (!type.equals("daily") && !type.equals("weekly")) {
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac resetquest <player> <daily|weekly>")));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac resetquest <player> <daily|weekly>")));
             return true;
         }
 
         UUID uuid = AranarthUtils.getUUIDFromUsername(targetName);
         if (uuid == null) {
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", targetName)));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", targetName)));
             return true;
         }
 
         Player target = Bukkit.getPlayer(uuid);
         if (type.equals("daily")) {
             QuestUtils.resetPlayerDailyQuests(uuid);
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("quest.reset_success", "player", targetName)));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "quest.reset_success", "player", targetName)));
             if (target != null) {
-                target.sendMessage(ChatUtils.chatMessage(Lang.get("quest.daily_reset_personal")));
+                target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "quest.daily_reset_personal")));
             }
         } else {
             QuestUtils.resetPlayerWeeklyQuests(uuid);
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("quest.reset_success", "player", targetName)));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "quest.reset_success", "player", targetName)));
             if (target != null) {
-                target.sendMessage(ChatUtils.chatMessage(Lang.get("quest.weekly_reset_personal")));
+                target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "quest.weekly_reset_personal")));
             }
         }
 

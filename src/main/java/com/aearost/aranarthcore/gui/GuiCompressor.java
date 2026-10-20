@@ -310,7 +310,7 @@ public class GuiCompressor {
 	 */
 	private String getStatusOfItem(UUID uuid, Material material) {
 		boolean isBeingCompressed = AranarthUtils.isItemBeingCompressed(uuid, material);
-		return isBeingCompressed ? Lang.get("gui.yes") : Lang.get("gui.no");
+		return isBeingCompressed ? Lang.getFor(player, "gui.yes") : Lang.getFor(player, "gui.no");
 	}
 
 }

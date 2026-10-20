@@ -161,7 +161,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
         }
 
         if (bPlayer.isAvatarState()) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.avatar_state_exit", "color", Element.AVATAR.getColor())));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.avatar_state_exit", "color", Element.AVATAR.getColor())));
             return;
         }
 
@@ -201,12 +201,12 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
 
     private void handleActive() {
         if (bPlayer.isAvatarState()) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.past_lives_avatar_disrupts")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.past_lives_avatar_disrupts")));
             endAbility(true);
             return;
         }
         if (System.currentTimeMillis() - getStartTime() >= duration) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.past_lives_faded")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.past_lives_faded")));
             endAbility(true);
             return;
         }
@@ -288,7 +288,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
         this.state = State.ACTIVE;
         MultiAbilityManager.unbindMultiAbility(player);
         player.playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 1.0f, 0.7f);
-        player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.past_lives_channeled", "name", form.getDisplayName())));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.past_lives_channeled", "name", form.getDisplayName())));
         switch (form) {
             case WAN      -> activateWan();
             case SZETO    -> activateSzeto();
@@ -317,7 +317,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
 
     public void endAbility(final boolean applyCooldown) {
         if (activeForm != null) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.past_lives_connection_faded", "name", activeForm.getDisplayName())));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.past_lives_connection_faded", "name", activeForm.getDisplayName())));
             removeFormEffects();
         }
         if (applyCooldown) {
@@ -333,7 +333,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
 
     public void endAbilityWithCooldown(final long overrideCooldownMs) {
         if (activeForm != null) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.past_lives_connection_faded", "name", activeForm.getDisplayName())));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.past_lives_connection_faded", "name", activeForm.getDisplayName())));
             removeFormEffects();
         }
         bPlayer.addCooldown(getName(), overrideCooldownMs);
@@ -522,7 +522,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
 
     private void activateRoku() {
         if (player.getWorld().getName().equalsIgnoreCase("arena")) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.past_lives_fang_arena")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.past_lives_fang_arena")));
             remove();
             return;
         }
@@ -732,7 +732,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
     public void onFangDeath() {
         fangInstances.remove(fangUUID);
         fangUUID = null;
-        player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.past_lives_fang_fallen")));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.past_lives_fang_fallen")));
         bPlayer.addCooldown(getName(), rokuDeathCooldown);
         remove();
     }

@@ -34,7 +34,7 @@ public class CommandSurvival implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (AranarthUtils.getTeleportTask(player.getUniqueId()) != null) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.already_teleporting")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.already_teleporting")));
 				return true;
 			}
 
@@ -43,7 +43,7 @@ public class CommandSurvival implements CommandExecutor {
 			if (System.currentTimeMillis() < aranarthPlayer.getLastWorldCommandUse() + 60000) {
 				if (!aranarthPlayer.isInAdminMode()) {
 					int wait = (int) ((aranarthPlayer.getLastWorldCommandUse() + 60000) - System.currentTimeMillis()) / 1000;
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.world_cooldown", "seconds", String.valueOf(wait))));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.world_cooldown", "seconds", String.valueOf(wait))));
 					return true;
 				}
 			}
@@ -51,11 +51,11 @@ public class CommandSurvival implements CommandExecutor {
 			// On the SMP server: countdown here first, then transfer to Survival for RTP on arrival.
 			if (AranarthCore.isSmpServer() && NetworkManager.isActive()) {
 				AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
-						aranarthPlayer.isInAdminMode(), "&e&lSurvival", "&7Transferring to Survival...", success -> {
+						aranarthPlayer.isInAdminMode(), Lang.getFor(player, "teleport.title_survival"), Lang.getFor(player, "teleport.transferring_survival"), success -> {
 					if (success) {
 						com.aearost.aranarthcore.network.PendingTeleport survivalPt =
 								com.aearost.aranarthcore.network.PendingTeleport.forCommand(
-										"survival", "&e&lSurvival", "&7You have teleported to Survival");
+										"survival", Lang.getFor(player, "teleport.title_survival"), Lang.getFor(player, "teleport.to_survival"));
 						String survivalServerName = AranarthCore.getInstance().getConfig()
 								.getString("network.servers.survival", "survival");
 						NetworkManager.getInstance().saveInventoryAndTransfer(player, survivalServerName, survivalPt);
@@ -80,18 +80,18 @@ public class CommandSurvival implements CommandExecutor {
 				}
 			}
 
-			AranarthUtils.teleportPlayer(player, player.getLocation(), selectedLocation, aranarthPlayer.isInAdminMode(), "&e&lSurvival", Lang.get("teleport.to_survival"), success -> {
+			AranarthUtils.teleportPlayer(player, player.getLocation(), selectedLocation, aranarthPlayer.isInAdminMode(), Lang.getFor(player, "teleport.title_survival"), Lang.getFor(player, "teleport.to_survival"), success -> {
 				if (success) {
 					aranarthPlayer.setLastWorldCommandUse(System.currentTimeMillis());
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.to_survival")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.to_survival")));
 				} else {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.could_not_survival")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.could_not_survival")));
 				}
 			});
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
 		}
 	}

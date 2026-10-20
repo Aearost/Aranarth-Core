@@ -1,7 +1,6 @@
 package com.aearost.aranarthcore.commands.council;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Perk;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -29,7 +28,7 @@ public class CommandPerks {
     public static boolean onCommand(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
             if (!player.hasPermission("aranarth.perk.modify")) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
                 return true;
             }
         }
@@ -40,7 +39,7 @@ public class CommandPerks {
             if (AranarthUtils.getPlayer(uuid) != null) {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
                 HashMap<Perk, Integer> perks = aranarthPlayer.getPerks();
-                sender.sendMessage(ChatUtils.translateToColor("&8      - - - &e" + aranarthPlayer.getNickname() + "&e's &6&lPerks &8- - -"));
+                sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "perk.list_header", "player", aranarthPlayer.getNickname())));
                 sender.sendMessage(ChatUtils.translateToColor("&6Compressor: &e" + perks.get(Perk.COMPRESSOR)));
                 sender.sendMessage(ChatUtils.translateToColor("&6Randomizer: &e" + perks.get(Perk.RANDOMIZER)));
                 sender.sendMessage(ChatUtils.translateToColor("&6Blacklist: &e" + perks.get(Perk.BLACKLIST)));
@@ -59,7 +58,7 @@ public class CommandPerks {
                 sender.sendMessage(ChatUtils.translateToColor("&6InvisibleArmor: &e" + perks.get(Perk.INVISIBLEARMOR)));
                 return true;
             } else {
-                sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
+                sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", args[1])));
                 return true;
             }
         }
@@ -86,16 +85,9 @@ public class CommandPerks {
                                 }
 
                                 boolean isSilent = args.length == 4 && args[3].equalsIgnoreCase("silent");
-                                String message = Lang.get("perk.purchased_homes", "player", aranarthPlayer.getNickname());
+                                String message = Lang.getDefault("perk.purchased_homes", "player", aranarthPlayer.getNickname());
                                 if (sender instanceof Player || isSilent || !AranarthCore.isSmpServer()) {
-                                    String formatted = ChatUtils.chatMessage(message);
-                                    for (Player online : Bukkit.getOnlinePlayers()) {
-                                        online.sendMessage(formatted);
-                                    }
-                                    Bukkit.getConsoleSender().sendMessage(formatted);
-                                    if (NetworkManager.isActive()) {
-                                        NetworkManager.getInstance().publishBroadcast(formatted);
-                                    }
+                                    Lang.broadcast("perk.purchased_homes", "player", aranarthPlayer.getNickname());
                                     if (!isSilent) {
                                         DiscordUtils.donationNotification(message, uuid, Color.CYAN);
                                     }
@@ -103,20 +95,20 @@ public class CommandPerks {
 
                                 return true;
                             } else {
-                                sender.sendMessage(ChatUtils.chatMessage(Lang.get("perk.max_homes")));
+                                sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "perk.max_homes")));
                                 return true;
                             }
                         } else {
-                            sender.sendMessage(ChatUtils.chatMessage(Lang.get("perk.invalid")));
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "perk.invalid")));
                             return true;
                         }
                     } else {
-                        sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
+                        sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", args[1])));
                         return true;
                     }
                 }
             }
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac perks <player> <perk> <value>")));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac perks <player> <perk> <value>")));
             return true;
         } else {
             UUID uuid = AranarthUtils.getUUIDFromUsername(args[1]);
@@ -137,20 +129,8 @@ public class CommandPerks {
 
                             String perk = "";
                             switch (args[2]) {
-                                case "compressor" -> perk = "&6&lCompressor";
-                                case "randomizer" -> perk = "&a&lRandomizer";
-                                case "blacklist" -> perk = "&8&lBlacklist";
-                                case "tables" -> perk = "&6&lTables";
-                                case "itemname" -> perk = "&c&lItem Name";
-                                case "chat" -> perk = "&e&lColored Chat";
-                                case "shulker" -> perk = "&5&lShulker Assist";
-                                case "inventory" -> perk = "&3&lInventory Assist";
-                                case "itemframe" -> perk = "&f&lInvisible Item Frames";
-                                case "bluefire" -> perk = "&b&lBlue Fire";
-                                case "whitefire" -> perk = "&f&lWhite Fire";
-                                case "prismaticfire" -> perk = "&5&lPrismatic Fire";
-                                case "nickname" -> perk = "&6&lColored Nickname";
-                                case "invisiblearmor" -> perk = "&7&lInvisible Armor";
+                                case "compressor", "randomizer", "blacklist", "tables", "itemname", "chat", "shulker", "inventory",
+                                     "itemframe", "bluefire", "whitefire", "prismaticfire", "nickname", "invisiblearmor" -> perk = Lang.key("perk.name_" + args[2]);
                             }
 
                             aranarthPlayer.setPerks(perks);
@@ -168,31 +148,24 @@ public class CommandPerks {
 
                             boolean isSilent = args.length >= 5 && args[4].equalsIgnoreCase("silent");
                             if (!args[3].equals("0")) {
-                                String message = Lang.get("perk.purchased", "player", aranarthPlayer.getNickname(), "perk", perk);
+                                String message = Lang.getDefault("perk.purchased", "player", aranarthPlayer.getNickname(), "perk", perk);
                                 if (sender instanceof Player || isSilent || !AranarthCore.isSmpServer()) {
-                                    String formatted = ChatUtils.chatMessage(message);
-                                    for (Player online : Bukkit.getOnlinePlayers()) {
-                                        online.sendMessage(formatted);
-                                    }
-                                    Bukkit.getConsoleSender().sendMessage(formatted);
-                                    if (NetworkManager.isActive()) {
-                                        NetworkManager.getInstance().publishBroadcast(formatted);
-                                    }
+                                    Lang.broadcast("perk.purchased", "player", aranarthPlayer.getNickname(), "perk", perk);
                                     if (!isSilent) {
                                         DiscordUtils.donationNotification(ChatUtils.stripColorFormatting(message), uuid, Color.CYAN);
                                     }
                                 }
                             } else {
-                                sender.sendMessage(ChatUtils.chatMessage(Lang.get("perk.updated", "perk", perk, "player", aranarthPlayer.getNickname(), "value", args[3])));
+                                sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "perk.updated", "perk", perk, "player", aranarthPlayer.getNickname(), "value", args[3])));
                                 // If the sender is either console or if the sender player is not the one the perk is being applied to
                                 if (Bukkit.getOfflinePlayer(uuid).isOnline() &&
                                         (!(sender instanceof Player) || sender instanceof Player senderPlayer && !senderPlayer.getUniqueId().equals(uuid))) {
                                     Player player = Bukkit.getPlayer(uuid);
-                                    player.sendMessage(ChatUtils.chatMessage(Lang.get("perk.removed", "perk", perk)));
+                                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "perk.removed", "perk", perk)));
                                 }
                             }
                         } else {
-                            sender.sendMessage(ChatUtils.chatMessage(Lang.get("perk.invalid_value")));
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "perk.invalid_value")));
                         }
                         return true;
                     } else if (args[2].equals("homes")) {
@@ -208,23 +181,16 @@ public class CommandPerks {
 
                             boolean isSilent = args.length >= 5 && args[4].equalsIgnoreCase("silent");
                             if (!args[3].equals("0")) {
-                                String message = Lang.get("perk.purchased_homes", "player", aranarthPlayer.getNickname());
+                                String message = Lang.getDefault("perk.purchased_homes", "player", aranarthPlayer.getNickname());
                                 if (sender instanceof Player || isSilent || !AranarthCore.isSmpServer()) {
-                                    String formatted = ChatUtils.chatMessage(message);
-                                    for (Player online : Bukkit.getOnlinePlayers()) {
-                                        online.sendMessage(formatted);
-                                    }
-                                    Bukkit.getConsoleSender().sendMessage(formatted);
-                                    if (NetworkManager.isActive()) {
-                                        NetworkManager.getInstance().publishBroadcast(formatted);
-                                    }
+                                    Lang.broadcast("perk.purchased_homes", "player", aranarthPlayer.getNickname());
                                     if (!isSilent) {
                                         DiscordUtils.donationNotification(ChatUtils.stripColorFormatting(message), uuid, Color.CYAN);
                                     }
                                 }
                             }
                         } else {
-                            sender.sendMessage(ChatUtils.chatMessage(Lang.get("perk.invalid_value")));
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "perk.invalid_value")));
                         }
                         return true;
                     } else if (args[2].equals("discord")) {
@@ -236,16 +202,9 @@ public class CommandPerks {
 
                         boolean isSilent = args.length >= 5 && args[4].equalsIgnoreCase("silent");
                         if (!args[3].equals("0")) {
-                            String message = Lang.get("perk.purchased_discord", "player", aranarthPlayer.getNickname());
+                            String message = Lang.getDefault("perk.purchased_discord", "player", aranarthPlayer.getNickname());
                             if (sender instanceof Player || isSilent || !AranarthCore.isSmpServer()) {
-                                String formatted = ChatUtils.chatMessage(message);
-                                for (Player online : Bukkit.getOnlinePlayers()) {
-                                    online.sendMessage(formatted);
-                                }
-                                Bukkit.getConsoleSender().sendMessage(formatted);
-                                if (NetworkManager.isActive()) {
-                                    NetworkManager.getInstance().publishBroadcast(formatted);
-                                }
+                                Lang.broadcast("perk.purchased_discord", "player", aranarthPlayer.getNickname());
                                 if (!isSilent) {
                                     DiscordUtils.donationNotification(ChatUtils.stripColorFormatting(message), uuid, Color.CYAN);
                                 }
@@ -254,15 +213,15 @@ public class CommandPerks {
 
                         return true;
                     } else {
-                        sender.sendMessage(ChatUtils.chatMessage(Lang.get("perk.error")));
+                        sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "perk.error")));
                         return true;
                     }
                 } else {
-                    sender.sendMessage(ChatUtils.chatMessage(Lang.get("perk.invalid")));
+                    sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "perk.invalid")));
                     return true;
                 }
             } else {
-                sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
+                sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", args[1])));
                 return true;
             }
         }

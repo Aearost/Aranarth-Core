@@ -29,16 +29,16 @@ public class CommandPing implements CommandExecutor {
 			if (sender instanceof Player player) {
 				int ping = player.getPing();
 				if (ping <= 150) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("ping.self_good", "ping", String.valueOf(ping))));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "ping.self_good", "ping", String.valueOf(ping))));
 				} else if (ping <= 250) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("ping.self_ok", "ping", String.valueOf(ping))));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "ping.self_ok", "ping", String.valueOf(ping))));
 				} else {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("ping.self_bad", "ping", String.valueOf(ping))));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "ping.self_bad", "ping", String.valueOf(ping))));
 				}
 
 				return true;
 			} else {
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ping <player>")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ping <player>")));
 				return true;
 			}
 		} else {
@@ -47,11 +47,11 @@ public class CommandPing implements CommandExecutor {
 				if (sender.getName().equalsIgnoreCase(args[0])) {
 					int ping = onlinePlayer.getPing();
 					if (ping <= 150) {
-						sender.sendMessage(ChatUtils.chatMessage(Lang.get("ping.self_good", "ping", String.valueOf(ping))));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ping.self_good", "ping", String.valueOf(ping))));
 					} else if (ping <= 250) {
-						sender.sendMessage(ChatUtils.chatMessage(Lang.get("ping.self_ok", "ping", String.valueOf(ping))));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ping.self_ok", "ping", String.valueOf(ping))));
 					} else {
-						sender.sendMessage(ChatUtils.chatMessage(Lang.get("ping.self_bad", "ping", String.valueOf(ping))));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ping.self_bad", "ping", String.valueOf(ping))));
 					}
                     return true;
 				}
@@ -60,11 +60,11 @@ public class CommandPing implements CommandExecutor {
 						&& !AranarthUtils.isVanishedFrom(sender, onlinePlayer.getUniqueId())) {
 					int ping = onlinePlayer.getPing();
 					if (ping <= 150) {
-						sender.sendMessage(ChatUtils.chatMessage(Lang.get("ping.other_good", "player", onlinePlayer.getName(), "ping", String.valueOf(ping))));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ping.other_good", "player", onlinePlayer.getName(), "ping", String.valueOf(ping))));
 					} else if (ping <= 250) {
-						sender.sendMessage(ChatUtils.chatMessage(Lang.get("ping.other_ok", "player", onlinePlayer.getName(), "ping", String.valueOf(ping))));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ping.other_ok", "player", onlinePlayer.getName(), "ping", String.valueOf(ping))));
 					} else {
-						sender.sendMessage(ChatUtils.chatMessage(Lang.get("ping.other_bad", "player", onlinePlayer.getName(), "ping", String.valueOf(ping))));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ping.other_bad", "player", onlinePlayer.getName(), "ping", String.valueOf(ping))));
 					}
 					return true;
 				}
@@ -78,21 +78,21 @@ public class CommandPing implements CommandExecutor {
                         if (ping < 0) {
                             // Ping not yet received from remote server
                             sender.sendMessage(ChatUtils.chatMessage(
-                                    Lang.get("ping.other_good", "player", np.getUsername(), "ping", "?")));
+                                    Lang.getFor(sender, "ping.other_good", "player", np.getUsername(), "ping", "?")));
                             return true;
                         }
                         if (ping <= 150) {
-                            sender.sendMessage(ChatUtils.chatMessage(Lang.get("ping.other_good", "player", np.getUsername(), "ping", String.valueOf(ping))));
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ping.other_good", "player", np.getUsername(), "ping", String.valueOf(ping))));
                         } else if (ping <= 250) {
-                            sender.sendMessage(ChatUtils.chatMessage(Lang.get("ping.other_ok", "player", np.getUsername(), "ping", String.valueOf(ping))));
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ping.other_ok", "player", np.getUsername(), "ping", String.valueOf(ping))));
                         } else {
-                            sender.sendMessage(ChatUtils.chatMessage(Lang.get("ping.other_bad", "player", np.getUsername(), "ping", String.valueOf(ping))));
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ping.other_bad", "player", np.getUsername(), "ping", String.valueOf(ping))));
                         }
                         return true;
                     }
                 }
             }
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.offline", "name", args[0])));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.offline", "name", args[0])));
 			return true;
         }
 	}

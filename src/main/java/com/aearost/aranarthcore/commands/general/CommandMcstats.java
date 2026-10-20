@@ -40,7 +40,7 @@ public class CommandMcstats implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
         if (!(sender instanceof Player viewer)) {
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
             return true;
         }
 
@@ -49,7 +49,7 @@ public class CommandMcstats implements CommandExecutor {
         } else {
             UUID targetUuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
             if (targetUuid == null) {
-                viewer.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[0])));
+                viewer.sendMessage(ChatUtils.chatMessage(Lang.getFor(viewer, "player.not_found", "name", args[0])));
                 return true;
             }
             boolean isSelf = viewer.getUniqueId().equals(targetUuid);

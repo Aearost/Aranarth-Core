@@ -62,7 +62,7 @@ public class GuiMctop {
 			AranarthPlayer aranarthPlayer = uuid != null ? AranarthUtils.getPlayer(uuid) : null;
 			String displayName = aranarthPlayer != null ? aranarthPlayer.getNickname() : stat.playerName();
 			if (displayName == null) {
-				displayName = stat.playerName() != null ? stat.playerName() : "Unknown";
+				displayName = stat.playerName() != null ? stat.playerName() : Lang.getFor(player, "info.unknown");
 			}
 			skullMeta.setDisplayName(ChatUtils.translateToColor(displayName));
 
@@ -76,7 +76,7 @@ public class GuiMctop {
 
 	private Inventory initializeGui(Player player, @org.jetbrains.annotations.Nullable PrimarySkillType skill,
 									List<PlayerStat> leaderboard, Map<String, PlayerProfile> profiles) {
-		String skillDisplayName = skill == null ? "Overall" : skill.name().charAt(0) + skill.name().substring(1).toLowerCase();
+		String skillDisplayName = skill == null ? Lang.getFor(player, "mcmmo.overall") : skill.name().charAt(0) + skill.name().substring(1).toLowerCase();
 		Inventory gui = GuiHolder.create(player, 54, Lang.getFor(player, "gui.mctop.title", "skill", skillDisplayName));
 
 		ItemStack previous = new ItemStack(Material.RED_WOOL);
@@ -138,7 +138,7 @@ public class GuiMctop {
 			AranarthPlayer aranarthPlayer = uuid != null ? AranarthUtils.getPlayer(uuid) : null;
 			String displayName = aranarthPlayer != null ? aranarthPlayer.getNickname() : stat.playerName();
 			if (displayName == null) {
-				displayName = stat.playerName() != null ? stat.playerName() : "Unknown";
+				displayName = stat.playerName() != null ? stat.playerName() : Lang.getFor(player, "info.unknown");
 			}
 			skullMeta.setDisplayName(ChatUtils.translateToColor(displayName));
 

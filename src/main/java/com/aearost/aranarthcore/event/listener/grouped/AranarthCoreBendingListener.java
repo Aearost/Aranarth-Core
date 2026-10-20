@@ -1823,7 +1823,7 @@ public class AranarthCoreBendingListener implements Listener {
     public void onCommand(PlayerCommandPreprocessEvent e) {
         if (AstralProjection.isProjecting(e.getPlayer().getUniqueId())) {
             e.setCancelled(true);
-            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("bending.no_commands_astral")));
+            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "bending.no_commands_astral")));
         }
     }
 

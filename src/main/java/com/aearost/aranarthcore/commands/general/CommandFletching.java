@@ -24,14 +24,14 @@ public class CommandFletching implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.tables")) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return true;
 			}
 
 			GuiFletchingTable gui = new GuiFletchingTable(player);
 			gui.openGui();
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 		}
 		return true;
 	}

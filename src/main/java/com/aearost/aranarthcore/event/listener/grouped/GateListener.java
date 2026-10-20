@@ -44,7 +44,7 @@ public class GateListener implements Listener {
         Gate occupant = GateUtils.getGateAt(placedLoc);
         if (occupant != null && occupant.isOpen()) {
             e.setCancelled(true);
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("gate.cannot_place_inside")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "gate.cannot_place_inside")));
             return;
         }
 
@@ -53,7 +53,7 @@ public class GateListener implements Listener {
         String error = GateUtils.handleBlockPlaced(e.getBlockPlaced(), player);
         if (error != null) {
             e.setCancelled(true);
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("gate.error", "message", error)));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "gate.error", "message", error)));
         }
     }
 
@@ -130,14 +130,14 @@ public class GateListener implements Listener {
         if (!aranarthPlayer.isInAdminMode()) {
             Dominion dominion = DominionUtils.getDominionOfChunk(e.getClickedBlock().getChunk());
             if (dominion != null && !DominionUtils.hasPermission(player, dominion, DominionPermission.FENCE_GATE)) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("gate.no_permission")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "gate.no_permission")));
                 return;
             }
         }
 
         String error = GateUtils.toggleGate(gate);
         if (error != null) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("gate.error", "message", error)));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "gate.error", "message", error)));
             return;
         }
     }

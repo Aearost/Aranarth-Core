@@ -31,7 +31,7 @@ public class CommandMute {
 			if (player.hasPermission("aranarth.mute")) {
 				mutePlayer(sender, args);
 			} else {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 			}
         } else {
 			mutePlayer(sender, args);
@@ -46,7 +46,7 @@ public class CommandMute {
 	 */
 	private static void mutePlayer(CommandSender sender, String[] args) {
 		if (args.length < 4) {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac mute <player> <duration> <reason>")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac mute <player> <duration> <reason>")));
 			return;
 		}
 
@@ -64,12 +64,12 @@ public class CommandMute {
 			nickname = AranarthUtils.getNickname(player);
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (!PunishmentUtils.outranks(sender, uuid)) {
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("mute.cannot_mute")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "mute.cannot_mute")));
 				return;
 			}
 
 			if (!aranarthPlayer.getMuteEndDate().isEmpty()) {
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.already_muted", "name", aranarthPlayer.getNickname())));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.already_muted", "name", aranarthPlayer.getNickname())));
 				return;
 			}
 
@@ -85,12 +85,12 @@ public class CommandMute {
 				try {
 					time = Integer.parseInt(timeAsString);
 				} catch (NumberFormatException e) {
-					sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_number")));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_number")));
 					return;
 				}
 				// The end date is stored with a 2-digit year, so a mute must end before 2100
 				if (time <= 0) {
-					sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_number")));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_number")));
 					return;
 				}
 
@@ -112,12 +112,12 @@ public class CommandMute {
 				else if (last == 'w') {
 					date = date.plusWeeks(time);
 				} else {
-					sender.sendMessage(ChatUtils.chatMessage(Lang.get("mute.invalid_time_unit")));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "mute.invalid_time_unit")));
 					return;
 				}
 
 				if (date.getYear() > 2099) {
-					sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_number")));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_number")));
 					return;
 				}
 				int year = date.getYear();
@@ -137,7 +137,7 @@ public class CommandMute {
 			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 			AranarthUtils.addMutedPlayer(player.getUniqueId());
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", args[1])));
 		}
 
 		if (wasPlayerMuted) {

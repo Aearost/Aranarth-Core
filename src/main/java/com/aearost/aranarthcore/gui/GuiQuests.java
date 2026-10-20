@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.enums.QuestType;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Quest;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -127,7 +128,7 @@ public class GuiQuests {
                 int progress = QuestUtils.getDailyProgress(uuid, i);
                 boolean completed = QuestUtils.isDailyCompleted(uuid, i);
                 boolean claimed = QuestUtils.isDailyClaimed(uuid, i);
-                inv.setItem(dailySlots[i], makeQuestItem(dailyQuests.get(i), progress, completed, claimed));
+                inv.setItem(dailySlots[i], makeQuestItem(player, dailyQuests.get(i), progress, completed, claimed));
             } else {
                 inv.setItem(dailySlots[i], makeNoQuestItem());
             }
@@ -141,7 +142,7 @@ public class GuiQuests {
                 int progress = QuestUtils.getWeeklyProgress(uuid, i);
                 boolean completed = QuestUtils.isWeeklyCompleted(uuid, i);
                 boolean claimed = QuestUtils.isWeeklyClaimed(uuid, i);
-                inv.setItem(weeklySlots[i], makeQuestItem(weeklyQuests.get(i), progress, completed, claimed));
+                inv.setItem(weeklySlots[i], makeQuestItem(player, weeklyQuests.get(i), progress, completed, claimed));
             } else {
                 inv.setItem(weeklySlots[i], makeNoQuestItem());
             }
@@ -153,38 +154,37 @@ public class GuiQuests {
         return inv;
     }
 
-    public static ItemStack makeQuestItem(Quest quest, int progress, boolean claimable, boolean completed) {
+    public static ItemStack makeQuestItem(Player player, Quest quest, int progress, boolean claimable, boolean completed) {
         Material mat;
         String statusText;
 
         if (completed) {
             mat = Material.GRAY_CONCRETE;
-            statusText = Lang.get("gui.quests.completed");
+            statusText = Lang.getFor(player, "gui.quests.completed");
         } else if (claimable) {
             mat = Material.LIME_CONCRETE;
-            statusText = Lang.get("gui.quests.click_claim");
+            statusText = Lang.getFor(player, "gui.quests.click_claim");
         } else if (progress > 0) {
             mat = Material.YELLOW_CONCRETE;
-            statusText = Lang.get("gui.quests.in_progress");
+            statusText = Lang.getFor(player, "gui.quests.in_progress");
         } else {
             mat = Material.RED_CONCRETE;
-            statusText = Lang.get("gui.quests.not_started");
+            statusText = Lang.getFor(player, "gui.quests.not_started");
         }
 
         ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&f&l" + quest.getDisplayName()));
+        meta.setDisplayName(ChatUtils.translateToColor("&f&l" + QuestUtils.getDisplayName(player, quest)));
 
-        String typeName = quest.getQuestType().name().charAt(0)
-                + quest.getQuestType().name().substring(1).toLowerCase();
+        String typeName = Lang.getFor(player, quest.getQuestType() == QuestType.DAILY ? "quest.type_daily" : "quest.type_weekly");
         List<String> lore = new ArrayList<>();
-        lore.add(Lang.get("gui.quests.type", "type", typeName));
+        lore.add(Lang.getFor(player, "gui.quests.type", "type", typeName));
         lore.add("");
-        lore.add(Lang.get("gui.quests.progress", "progress", String.valueOf(progress), "required", String.valueOf(quest.getRequired())));
+        lore.add(Lang.getFor(player, "gui.quests.progress", "progress", String.valueOf(progress), "required", String.valueOf(quest.getRequired())));
         if (quest.hasItemReward()) {
-            lore.add(Lang.get("gui.quests.reward_item", "item", QuestUtils.getItemRewardDisplayName(quest.getItemReward())));
+            lore.add(Lang.getFor(player, "gui.quests.reward_item", "item", QuestUtils.getItemRewardDisplayName(quest.getItemReward())));
         } else {
-            lore.add(Lang.get("gui.quests.reward_money", "money", MONEY_FORMAT.format(quest.getReward())));
+            lore.add(Lang.getFor(player, "gui.quests.reward_money", "money", MONEY_FORMAT.format(quest.getReward())));
         }
         lore.add("");
         lore.add(statusText);
@@ -274,14 +274,17 @@ public class GuiQuests {
         int hour12 = hour % 12;
         if (hour12 == 0) hour12 = 12;
         String minuteStr = minute < 10 ? "0" + minute : String.valueOf(minute);
-        return month + " " + day + " at " + hour12 + ":" + minuteStr + " " + amPm;
+        return Lang.getFor(player, "quest.reset_time", "month", month, "day", day, "time", hour12 + ":" + minuteStr + " " + amPm);
     }
 
     private String getMonthName(int month) {
         return switch (month) {
-            case 1 -> "Jan"; case 2 -> "Feb"; case 3 -> "Mar"; case 4 -> "Apr";
-            case 5 -> "May"; case 6 -> "Jun"; case 7 -> "Jul"; case 8 -> "Aug";
-            case 9 -> "Sep"; case 10 -> "Oct"; case 11 -> "Nov"; case 12 -> "Dec";
+            case 1 -> Lang.getFor(player, "date.month_short_jan"); case 2 -> Lang.getFor(player, "date.month_short_feb");
+            case 3 -> Lang.getFor(player, "date.month_short_mar"); case 4 -> Lang.getFor(player, "date.month_short_apr");
+            case 5 -> Lang.getFor(player, "date.month_short_may"); case 6 -> Lang.getFor(player, "date.month_short_jun");
+            case 7 -> Lang.getFor(player, "date.month_short_jul"); case 8 -> Lang.getFor(player, "date.month_short_aug");
+            case 9 -> Lang.getFor(player, "date.month_short_sep"); case 10 -> Lang.getFor(player, "date.month_short_oct");
+            case 11 -> Lang.getFor(player, "date.month_short_nov"); case 12 -> Lang.getFor(player, "date.month_short_dec");
             default -> "???";
         };
     }

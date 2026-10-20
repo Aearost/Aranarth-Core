@@ -30,15 +30,15 @@ public class CommandRankup implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
-			String[] maleRanks = new String[] { "&a&lPeasant", "&d&lEsquire", "&7&lKnight", "&5&lBaron", "&8&lCount",
-					"&6&lDuke", "&b&lPrince", "&9&lKing", "&4&lEmperor" };
-			String[] femaleRanks = new String[] { "&a&lPeasant", "&d&lEsquire", "&7&lKnight", "&5&lBaroness",
-					"&8&lCountess", "&6&lDuchess", "&b&lPrincess", "&9&lQueen", "&4&lEmpress" };
+			String[] maleRanks = new String[] { "peasant", "esquire", "knight", "baron", "count",
+					"duke", "prince", "king", "emperor" };
+			String[] femaleRanks = new String[] { "peasant", "esquire", "knight", "baroness",
+					"countess", "duchess", "princess", "queen", "empress" };
 			List<Double> configCosts = AranarthCore.getInstance().getConfig().getDoubleList("economy.rankup-costs");
 			NumberFormat nf = NumberFormat.getNumberInstance();
 			// Index 0 is a placeholder so that rankupCosts[currentRank+1] lines up after the increment below
 			String[] rankupCosts = new String[configCosts.size() + 1];
-			rankupCosts[0] = "FREE";
+			rankupCosts[0] = Lang.getFor(player, "rank.cost_free");
 			for (int i = 0; i < configCosts.size(); i++) {
 				rankupCosts[i + 1] = "$" + nf.format(configCosts.get(i).longValue());
 			}
@@ -48,7 +48,7 @@ public class CommandRankup implements CommandExecutor {
 
 			// If the player is already an Emperor, there are no further ranks
 			if (currentRank == 8) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("rank.already_highest")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "rank.already_highest")));
 				return true;
 			}
 
@@ -65,7 +65,7 @@ public class CommandRankup implements CommandExecutor {
 			GuiRankup gui = new GuiRankup(player, rankName, rankupCosts[currentRank]);
 			gui.openGui();
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 		}
 		return true;
 	}

@@ -155,7 +155,7 @@ public class PlotProtectionListener implements Listener {
         }
         if (isSpawnEgg(e.getItem()) && PlotUtils.isPlotWorld(e.getPlayer().getWorld())) {
             e.setCancelled(true);
-            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("plot.no_spawn_eggs")));
+            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "plot.no_spawn_eggs")));
         }
     }
 
@@ -166,7 +166,7 @@ public class PlotProtectionListener implements Listener {
     public void onSpawnEggUseOnEntity(PlayerInteractEntityEvent e) {
         if (isSpawnEgg(e.getPlayer().getInventory().getItem(e.getHand())) && PlotUtils.isPlotWorld(e.getPlayer().getWorld())) {
             e.setCancelled(true);
-            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("plot.no_spawn_eggs")));
+            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "plot.no_spawn_eggs")));
         }
     }
 
@@ -195,7 +195,7 @@ public class PlotProtectionListener implements Listener {
         if (!PlotUtils.isPlotWorld(loc.getWorld()) || !PlotUtils.isEntityLimitReached(loc)) {
             return false;
         }
-        player.sendMessage(ChatUtils.chatMessage(Lang.get("plot.entity_limit", "limit", PlotUtils.MAX_ENTITIES_PER_PLOT)));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "plot.entity_limit", "limit", PlotUtils.MAX_ENTITIES_PER_PLOT)));
         return true;
     }
 

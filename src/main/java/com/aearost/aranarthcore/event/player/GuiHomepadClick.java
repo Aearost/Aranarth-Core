@@ -122,15 +122,15 @@ public class GuiHomepadClick {
                     // If the user is trying to update the icon of a home
                     if (heldItem != Material.AIR) {
                         if (heldItem == home.getIcon()) {
-                            player.sendMessage(ChatUtils.chatMessage(Lang.get("player.home_same_icon")));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.home_same_icon")));
                         } else {
                             AranarthUtils.updateHomepad(home.getName(), home.getLocation(), heldItem);
-                            player.sendMessage(ChatUtils.chatMessage(Lang.get("home.icon_set", "name", home.getName(), "icon", ChatUtils.getFormattedItemName(heldItem.name()))));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.icon_set", "name", home.getName(), "icon", ChatUtils.getFormattedItemName(heldItem.name()))));
                         }
                     } else {
                         // Homepads are instant, so they cannot be used to escape combat
                         if (!aranarthPlayer.isInAdminMode() && !aranarthPlayer.getCombatLogTime().isEmpty()) {
-                            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.combat_tagged")));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.combat_tagged")));
                             player.closeInventory();
                             return;
                         }
@@ -155,11 +155,11 @@ public class GuiHomepadClick {
 									player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, tpVol / 100f, 0.9F);
 								}
                                 Bukkit.getLogger().info("[AC] " + player.getName() + " has teleported to " + home.getName() + " via homepad");
-                                player.sendMessage(ChatUtils.chatMessage(Lang.get("home.wooshed", "name", home.getName())));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.wooshed", "name", home.getName())));
                                 try {
                                     AranarthUtils.switchInventory(player, fromWorld, destination.getWorld().getName());
                                 } catch (IOException ex) {
-                                    player.sendMessage(ChatUtils.chatMessage(Lang.get("general.error")));
+                                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.error")));
                                 }
                                 new BukkitRunnable() {
                                     @Override
@@ -178,11 +178,11 @@ public class GuiHomepadClick {
 								player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, tpVol / 100f, 0.9F);
 							}
                             player.sendMessage(ChatUtils
-                                    .chatMessage(Lang.get("home.wooshed", "name", home.getName())));
+                                    .chatMessage(Lang.getFor(player, "home.wooshed", "name", home.getName())));
                             try {
                                 AranarthUtils.switchInventory(player, fromWorld, home.getLocation().getWorld().getName());
                             } catch (IOException ex) {
-                                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.error")));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.error")));
                             }
                         }
                         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);

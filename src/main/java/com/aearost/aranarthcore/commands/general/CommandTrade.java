@@ -28,7 +28,7 @@ public class CommandTrade implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
             return true;
         }
 
@@ -38,7 +38,7 @@ public class CommandTrade implements CommandExecutor {
         }
 
         if (args.length < 1) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "trade <player>")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "trade <player>")));
             return true;
         }
 

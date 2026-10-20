@@ -110,13 +110,13 @@ public class GuiShopLocationClick {
 
             if (AranarthCore.isSmpServer() && NetworkManager.isActive() && shopLoc.getWorld() == null) {
                 AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
-                        aranarthPlayer.isInAdminMode(), shopName, "&7Transferring to shop...", success -> {
+                        aranarthPlayer.isInAdminMode(), shopName, Lang.getFor(player, "teleport.transferring_shop"), success -> {
                     if (success) {
                         PendingTeleport pt = new PendingTeleport(
                                 ShopIslandUtils.SHOPS_WORLD,
                                 shopLoc.getX(), shopLoc.getY(), shopLoc.getZ(),
                                 shopLoc.getYaw(), shopLoc.getPitch(),
-                                "&e&l" + shopName, "&7You have teleported to " + shopName);
+                                "&e&l" + shopName, Lang.getFor(player, "shop.teleported_to", "name", shopName));
                         String survivalServerName = AranarthCore.getInstance().getConfig()
                                 .getString("network.servers.survival", "survival");
                         NetworkManager.getInstance().saveInventoryAndTransfer(player, survivalServerName, pt);
@@ -126,9 +126,9 @@ public class GuiShopLocationClick {
                 AranarthUtils.teleportPlayer(player, player.getLocation(), shopLoc, aranarthPlayer.isInAdminMode(),
                         shopName, Lang.getFor(player, "shop.teleported", "name", shopName), success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.teleported", "name", shopName)));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.teleported", "name", shopName)));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.teleport_failed", "name", shopName)));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.teleport_failed", "name", shopName)));
                     }
                 });
             }

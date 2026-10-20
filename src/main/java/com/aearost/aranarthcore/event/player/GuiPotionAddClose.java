@@ -83,10 +83,10 @@ public class GuiPotionAddClose {
             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
             if (potionAmountAdded > 0) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("potions.added", "count", potionAmountAdded)));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "potions.added", "count", potionAmountAdded)));
             }
             if (potionAmountUnableToAdd > 0) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("potions.add_failed", "count", potionAmountUnableToAdd)));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "potions.add_failed", "count", potionAmountUnableToAdd)));
             }
         }
 	}

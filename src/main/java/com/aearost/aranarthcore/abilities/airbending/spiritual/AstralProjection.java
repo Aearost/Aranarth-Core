@@ -223,7 +223,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
         if (!player.isDead()) {
             player.teleport(bodyLocation);
             player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 1.3F);
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.astral_body_struck")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.astral_body_struck")));
         }
         bPlayer.addCooldown(this);
         remove();
@@ -344,7 +344,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
         }
         if (found) {
             player.getInventory().setArmorContents(armor);
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.astral_armor_restored")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.astral_armor_restored")));
         }
     }
 
@@ -356,7 +356,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
     public void activateAura() {
         if (!isAuraReady()) {
             int cooldown = (int) (bPlayer.getCooldown("Aura") - System.currentTimeMillis()) / 1000 + 1;
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.astral_cooldown", "ability", "Aura", "seconds", cooldown)));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.astral_cooldown", "ability", "Aura", "seconds", cooldown)));
             return;
         }
         if (!consumeUse()) return;
@@ -387,7 +387,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
     public void activateScream() {
         if (!isScreamReady()) {
             int cooldown = (int) (bPlayer.getCooldown("Scream") - System.currentTimeMillis()) / 1000 + 1;
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.astral_cooldown", "ability", "Scream", "seconds", cooldown)));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.astral_cooldown", "ability", "Scream", "seconds", cooldown)));
             return;
         }
         if (!consumeUse()) return;
@@ -424,7 +424,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
     public void activatePossess() {
         if (!isPossessReady()) {
             int cooldown = (int) (bPlayer.getCooldown("Possess") - System.currentTimeMillis()) / 1000 + 1;
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.astral_cooldown", "ability", "Possess", "seconds", cooldown)));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.astral_cooldown", "ability", "Possess", "seconds", cooldown)));
             return;
         }
 
@@ -436,7 +436,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
         if (!consumeUse()) return;
 
         victim.addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, 80, 1, false, true, true));
-        victim.sendMessage(ChatUtils.chatMessage(Lang.get("bending.astral_force_seizes")));
+        victim.sendMessage(ChatUtils.chatMessage(Lang.getFor(victim, "bending.astral_force_seizes")));
 
         new BukkitRunnable() {
             private int ticks = 0;
@@ -445,7 +445,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
             @Override
             public void run() {
                 if (ticks >= 60 || !victim.isOnline() || victim.isDead()) {
-                    victim.sendMessage(ChatUtils.chatMessage(Lang.get("bending.astral_regain_control")));
+                    victim.sendMessage(ChatUtils.chatMessage(Lang.getFor(victim, "bending.astral_regain_control")));
                     cancel();
                     return;
                 }
@@ -487,11 +487,11 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
 
     private boolean consumeUse() {
         if (usesRemaining <= 0) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.astral_no_uses")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.astral_no_uses")));
             return false;
         }
         usesRemaining--;
-        player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.astral_uses_remaining", "current", usesRemaining, "max", maxUses)));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.astral_uses_remaining", "current", usesRemaining, "max", maxUses)));
         return true;
     }
 

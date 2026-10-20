@@ -18,7 +18,7 @@ public class CommandQuests implements CommandExecutor {
         if (sender instanceof Player player) {
             new GuiQuests(player).openGui();
         } else {
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
         }
         return true;
     }

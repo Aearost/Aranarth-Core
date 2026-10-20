@@ -30,7 +30,7 @@ public class GuiTrade {
 
     private Inventory buildInventory() {
         AranarthPlayer other = AranarthUtils.getPlayer(trade.getOther(player.getUniqueId()));
-        String otherNick = other != null ? other.getNickname() : "Unknown";
+        String otherNick = other != null ? other.getNickname() : Lang.getFor(player, "info.unknown");
         String title = Lang.getFor(player, "gui.trade.title", "player", otherNick);
 
         Inventory gui = GuiHolder.create(player, 54, title);

@@ -2,7 +2,6 @@ package com.aearost.aranarthcore.commands.council;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
@@ -26,9 +25,9 @@ public class CommandClearChat {
 
 			if (sender instanceof Player player) {
 				DiscordUtils.createNotification(AranarthUtils.getNickname(player) + " has cleared the chat", player.getUniqueId());
-				Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("chat.cleared", "player", AranarthUtils.getNickname(player))));
+				Lang.broadcast("chat.cleared", "player", AranarthUtils.getNickname(player));
 			} else {
-				Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("general.chat_cleared")));
+				Lang.broadcast("general.chat_cleared");
 			}
 		}
 		return true;

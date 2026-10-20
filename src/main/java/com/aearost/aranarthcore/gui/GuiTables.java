@@ -37,7 +37,7 @@ public class GuiTables {
 		gui.setItem(7, createTableItem(player, new ItemStack(Material.STONECUTTER), "/stonecutter"));
 		ItemStack sawmill = new ItemStack(Material.OAK_LOG);
 		ItemMeta sawmillMeta = sawmill.getItemMeta();
-		sawmillMeta.setDisplayName("Sawmill");
+		sawmillMeta.setDisplayName(Lang.getFor(player, "gui.recipes.station_sawmill"));
 		sawmill.setItemMeta(sawmillMeta);
 		gui.setItem(8, createTableItem(player, sawmill, "/sawmill"));
 

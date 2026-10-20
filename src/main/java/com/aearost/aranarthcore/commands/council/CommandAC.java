@@ -41,27 +41,27 @@ public class CommandAC implements CommandExecutor {
 			boolean isCouncil = aranarthPlayer.getCouncilRank() > 0;
 			boolean isArchitect = aranarthPlayer.getArchitectRank() >= 1;
 			if (!isCouncil && !isArchitect) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return false;
 			}
 			if (!isCouncil && isArchitect) {
 				if (args.length == 0 || (!args[0].equalsIgnoreCase("msg") && !args[0].equalsIgnoreCase("speed")
 						&& !args[0].equalsIgnoreCase("architect"))) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 					return false;
 				}
 			}
 		}
 
 		if (args.length == 0) {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac <sub-command>")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac <sub-command>")));
 			return false;
 		} else {
 			boolean commandResult = false;
 			commandResult = isCouncil(sender, args);
 
 			if (!commandResult) {
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("ac.invalid_subcommand")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ac.invalid_subcommand")));
 			}
 			return commandResult;
 		}
@@ -73,12 +73,12 @@ public class CommandAC implements CommandExecutor {
 		if (sender instanceof Player player) {
 			// Pushing this server's player rows to the database can roll back the whole network
 			if (subCommand.equals("migrate")) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return true;
 			}
 			// Destructive and server-wide sub-commands are limited to the highest Council rank
 			if (OWNER_SUBCOMMANDS.contains(subCommand) && AranarthUtils.getPlayer(player.getUniqueId()).getCouncilRank() < 3) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return true;
 			}
 		}
@@ -151,7 +151,7 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandReload.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("reloadlang")) {
 			LangManager.getInstance().load();
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("ac.lang_reloaded")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ac.lang_reloaded")));
 			commandResult = true;
 		} else if (args[0].equalsIgnoreCase("migrate")) {
 			commandResult = CommandMigrate.onCommand(sender, args);
@@ -163,7 +163,7 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandWorldEvent.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("disband")) {
 			if (args.length < 2) {
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac disband <dominion name>")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac disband <dominion name>")));
 			} else {
 				StringBuilder nameBuilder = new StringBuilder();
 				for (int i = 1; i < args.length; i++) {
@@ -175,7 +175,7 @@ public class CommandAC implements CommandExecutor {
 						.filter(d -> ChatUtils.stripColorFormatting(d.getName()).equalsIgnoreCase(targetName))
 						.findFirst().orElse(null);
 				if (target == null) {
-					sender.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.not_found", "name", targetName)));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "dominion.not_found", "name", targetName)));
 				} else {
 					DominionUtils.disbandDominion(target);
 					commandResult = true;

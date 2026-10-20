@@ -32,7 +32,7 @@ public class CommandLock implements CommandExecutor {
 			if (aranarthPlayer.isLockingContainer()) {
 				aranarthPlayer.setLockingContainer(false);
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("lock.mode_exit_lock")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "lock.mode_exit_lock")));
 			} else {
 				aranarthPlayer.setTrustedPlayerUUID(null);
 				aranarthPlayer.setUntrustedPlayerUUID(null);
@@ -40,12 +40,12 @@ public class CommandLock implements CommandExecutor {
 				aranarthPlayer.setLockingContainer(true);
 				aranarthPlayer.setContainerToggleExpiry(System.currentTimeMillis() + 5000);
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("lock.mode_lock")));
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("lock.mode_run_exit")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "lock.mode_lock")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "lock.mode_run_exit")));
 				scheduleToggleExpiry(player.getUniqueId());
 			}
         } else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
         }
         return true;
     }
@@ -69,7 +69,7 @@ public class CommandLock implements CommandExecutor {
             AranarthUtils.setPlayer(uuid, ap);
             Player online = Bukkit.getPlayer(uuid);
             if (online != null) {
-                online.sendMessage(ChatUtils.chatMessage(Lang.get("lock.exiting_mode")));
+                online.sendMessage(ChatUtils.chatMessage(Lang.getFor(online, "lock.exiting_mode")));
             }
         }, 100L);
     }

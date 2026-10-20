@@ -32,7 +32,7 @@ public class CommandMessage implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (args.length <= 1) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "msg <player> <message>")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "msg <player> <message>")));
 				return true;
 			} else {
 				UUID targetUuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
@@ -53,7 +53,7 @@ public class CommandMessage implements CommandExecutor {
 					AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(targetUuid);
 					if (targetAranarthPlayer != null && targetAranarthPlayer.isTogglingMessages() && aranarthPlayer.getCouncilRank() == 0) {
 						String targetNick = targetAranarthPlayer.getNickname().isEmpty() ? args[0] : ChatUtils.stripColorFormatting(targetAranarthPlayer.getNickname());
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("message.toggling", "player", targetNick)));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "message.toggling", "player", targetNick)));
 						return true;
 					}
 
@@ -61,14 +61,14 @@ public class CommandMessage implements CommandExecutor {
 					if (AranarthUtils.isVanishedFrom(player, targetUuid)) {
 						String displayName = targetAranarthPlayer != null && !targetAranarthPlayer.getNickname().isEmpty()
 								? ChatUtils.stripColorFormatting(targetAranarthPlayer.getNickname()) : args[0];
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("player.offline", "name", displayName)));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.offline", "name", displayName)));
 						return true;
 					}
 
 					// If the player is online locally
 					if (target != null) {
 						if (ChatUtils.isPlayerMuted(player)) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("message.muted")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "message.muted")));
 							return true;
 						}
 						ChatUtils.sendPrivateMessage(player, target, args, false);
@@ -80,7 +80,7 @@ public class CommandMessage implements CommandExecutor {
 						NetworkPlayer remoteTarget = NetworkManager.getInstance().getRemotePlayer(targetUuid);
 						if (remoteTarget != null) {
 							if (ChatUtils.isPlayerMuted(player)) {
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("message.muted")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "message.muted")));
 								return true;
 							}
 
@@ -108,9 +108,9 @@ public class CommandMessage implements CommandExecutor {
 							// Show confirmation to sender
 							String prefixStart = "&7⊰&r";
 							String prefixEnd = "&7⊱&r";
-							Component senderPrefixComp = LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(prefixStart + "&7&l&oTo: &r&e" + targetNickname + prefixEnd + " &7&o>> &e&o"));
+							Component senderPrefixComp = LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(prefixStart + Lang.getFor(player, "message.to") + targetNickname + prefixEnd + " &7&o>> &e&o"));
 							Component senderMsgComp = senderPrefixComp.append(LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor("&e&o") + formattedMsg));
-							player.sendMessage(ChatUtils.clickableCommand(senderMsgComp, ChatUtils.translateToColor("&7Message &e" + targetNickname), "/msg " + remoteTarget.getUsername() + " ", true));
+							player.sendMessage(ChatUtils.clickableCommand(senderMsgComp, ChatUtils.translateToColor(Lang.getFor(player, "message.hover_message", "player", targetNickname)), "/msg " + remoteTarget.getUsername() + " ", true));
 
 							// Store last received for /reply on sender side
 							aranarthPlayer.setLastReceivedMessage(targetUuid);
@@ -125,15 +125,15 @@ public class CommandMessage implements CommandExecutor {
 
 					String displayName = targetAranarthPlayer != null && !targetAranarthPlayer.getNickname().isEmpty()
 							? ChatUtils.stripColorFormatting(targetAranarthPlayer.getNickname()) : args[0];
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("player.offline", "name", displayName)));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.offline", "name", displayName)));
 					return true;
 				} else {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[0])));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.not_found", "name", args[0])));
 					return true;
 				}
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
 		}
 	}

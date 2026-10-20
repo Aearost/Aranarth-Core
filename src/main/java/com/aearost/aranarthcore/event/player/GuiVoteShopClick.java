@@ -45,7 +45,7 @@ public class GuiVoteShopClick {
 					gui.openGui();
 				} else {
 					player.closeInventory();
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_enough_vote_points")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.not_enough_vote_points")));
 				}
 			}
 		}

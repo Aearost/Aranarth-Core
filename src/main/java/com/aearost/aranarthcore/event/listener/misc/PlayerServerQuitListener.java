@@ -93,13 +93,13 @@ public class PlayerServerQuitListener implements Listener {
                 DateUtils dateUtils = new DateUtils();
                 String nameToDisplay = "&7" + AranarthUtils.getNickname(player);
                 if (dateUtils.isValentinesDay()) {
-                    crossServerQuitMsg = ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.VALENTINES));
+                    crossServerQuitMsg = ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.VALENTINES);
                 } else if (dateUtils.isEaster()) {
-                    crossServerQuitMsg = ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.EASTER));
+                    crossServerQuitMsg = ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.EASTER);
                 } else if (dateUtils.isHalloween()) {
-                    crossServerQuitMsg = ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.HALLOWEEN));
+                    crossServerQuitMsg = ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.HALLOWEEN);
                 } else if (dateUtils.isChristmas()) {
-                    crossServerQuitMsg = ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.CHRISTMAS));
+                    crossServerQuitMsg = ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.CHRISTMAS);
                 } else {
                     crossServerQuitMsg = ChatUtils.translateToColor("&8[&c-&8] &7" + nameToDisplay);
                 }
@@ -218,13 +218,17 @@ public class PlayerServerQuitListener implements Listener {
             nameToDisplay = "&7" + AranarthUtils.getNickname(player);
 
             if (dateUtils.isValentinesDay()) {
-                e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.VALENTINES)));
+                e.setQuitMessage(null);
+                Lang.sendToAll(ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.VALENTINES));
             } else if (dateUtils.isEaster()) {
-                e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.EASTER)));
+                e.setQuitMessage(null);
+                Lang.sendToAll(ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.EASTER));
             } else if (dateUtils.isHalloween()) {
-                e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.HALLOWEEN)));
+                e.setQuitMessage(null);
+                Lang.sendToAll(ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.HALLOWEEN));
             } else if (dateUtils.isChristmas()) {
-                e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.CHRISTMAS)));
+                e.setQuitMessage(null);
+                Lang.sendToAll(ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.CHRISTMAS));
             } else {
                 e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + nameToDisplay));
             }

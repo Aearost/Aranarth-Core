@@ -105,7 +105,7 @@ public class DominionProtectionListener implements Listener {
         long now = System.currentTimeMillis();
         Long last = lastDenyMessageTime.get(player.getUniqueId());
         if (last == null || now - last >= DENY_MESSAGE_COOLDOWN_MS) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.no_permission_in", "name", chunkDominion.getName())));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.no_permission_in", "name", chunkDominion.getName())));
             lastDenyMessageTime.put(player.getUniqueId(), now);
         }
         return false;
@@ -336,7 +336,7 @@ public class DominionProtectionListener implements Listener {
         long now = System.currentTimeMillis();
         Long last = lastDenyMessageTime.get(attacker.getUniqueId());
         if (last == null || now - last >= DENY_MESSAGE_COOLDOWN_MS) {
-            attacker.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.cannot_harm_passive", "name", chunkDominion.getName())));
+            attacker.sendMessage(ChatUtils.chatMessage(Lang.getFor(attacker, "dominion.cannot_harm_passive", "name", chunkDominion.getName())));
             lastDenyMessageTime.put(attacker.getUniqueId(), now);
         }
     }
@@ -367,7 +367,7 @@ public class DominionProtectionListener implements Listener {
                 if (!aranarthOwnerPlayer.isBarbarian()) {
                     e.setCancelled(true);
                     String petType = ChatUtils.getFormattedItemName(pet.getType().name());
-                    attacker.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.cannot_harm_pet_relation", "owner", aranarthOwnerPlayer.getNickname(), "pet", petType, "relation", "a wanderer")));
+                    attacker.sendMessage(ChatUtils.chatMessage(Lang.getFor(attacker, "dominion.cannot_harm_pet_relation", "owner", aranarthOwnerPlayer.getNickname(), "pet", petType, "relation", "a wanderer")));
                 }
             }
             return;
@@ -395,7 +395,7 @@ public class DominionProtectionListener implements Listener {
                 if (!aranarthOwnerPlayer.isBarbarian()) {
                     e.setCancelled(true);
                     String petType = ChatUtils.getFormattedItemName(pet.getType().name());
-                    attacker.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.cannot_harm_pet_relation", "owner", aranarthOwnerPlayer.getNickname(), "pet", petType, "relation", "a wanderer")));
+                    attacker.sendMessage(ChatUtils.chatMessage(Lang.getFor(attacker, "dominion.cannot_harm_pet_relation", "owner", aranarthOwnerPlayer.getNickname(), "pet", petType, "relation", "a wanderer")));
                 }
             }
             return;
@@ -430,11 +430,11 @@ public class DominionProtectionListener implements Listener {
         if (!pvpAllowed) {
             e.setCancelled(true);
             String petType = ChatUtils.getFormattedItemName(pet.getType().name());
-            String relationName = DominionUtils.getFormattedRankName(attackerRelation);
+            String relationName = DominionUtils.getFormattedRankName(attacker, attackerRelation);
             if (attackerDominion.isSameDominion(chunkDominion)) {
-                attacker.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.cannot_harm_pet", "owner", aranarthOwner.getNickname(), "pet", petType, "name", chunkDominion.getName())));
+                attacker.sendMessage(ChatUtils.chatMessage(Lang.getFor(attacker, "dominion.cannot_harm_pet", "owner", aranarthOwner.getNickname(), "pet", petType, "name", chunkDominion.getName())));
             } else {
-                attacker.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.cannot_harm_pet_relation", "owner", aranarthOwner.getNickname(), "pet", petType, "relation", relationName)));
+                attacker.sendMessage(ChatUtils.chatMessage(Lang.getFor(attacker, "dominion.cannot_harm_pet_relation", "owner", aranarthOwner.getNickname(), "pet", petType, "relation", relationName)));
             }
         }
     }
@@ -468,7 +468,7 @@ public class DominionProtectionListener implements Listener {
                     : attackerDominion.isMemberPvpEnabled();
             if (!pvpEnabled) {
                 e.setCancelled(true);
-                attacker.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.cannot_harm_pet", "owner", aranarthOwner.getNickname(), "pet", mountTypeName, "name", attackerDominion.getName())));
+                attacker.sendMessage(ChatUtils.chatMessage(Lang.getFor(attacker, "dominion.cannot_harm_pet", "owner", aranarthOwner.getNickname(), "pet", mountTypeName, "name", attackerDominion.getName())));
             }
             return;
         }
@@ -484,7 +484,7 @@ public class DominionProtectionListener implements Listener {
                 boolean ownerPvp = ownerDominion.getDominionPermissions().hasPermission(relation, DominionPermission.PVP);
                 if (!attackerPvp && !ownerPvp) {
                     e.setCancelled(true);
-                    attacker.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.cannot_harm_pet_relation", "owner", aranarthOwner.getNickname(), "pet", mountTypeName, "relation", DominionUtils.getFormattedRankName(relation))));
+                    attacker.sendMessage(ChatUtils.chatMessage(Lang.getFor(attacker, "dominion.cannot_harm_pet_relation", "owner", aranarthOwner.getNickname(), "pet", mountTypeName, "relation", DominionUtils.getFormattedRankName(relation))));
                 }
                 return;
             }
@@ -493,7 +493,7 @@ public class DominionProtectionListener implements Listener {
                 // Blocked only when the mount owner is in their own dominion's land
                 if (chunkDominion != null && chunkDominion.isSameDominion(ownerDominion)) {
                     e.setCancelled(true);
-                    attacker.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.cannot_harm_pet_relation", "owner", aranarthOwner.getNickname(), "pet", mountTypeName, "relation", DominionUtils.getFormattedRankName(DominionRank.NEUTRAL))));
+                    attacker.sendMessage(ChatUtils.chatMessage(Lang.getFor(attacker, "dominion.cannot_harm_pet_relation", "owner", aranarthOwner.getNickname(), "pet", mountTypeName, "relation", DominionUtils.getFormattedRankName(DominionRank.NEUTRAL))));
                 }
                 return;
             }
@@ -509,7 +509,7 @@ public class DominionProtectionListener implements Listener {
         if (attackerDominion != null) {
             if (!aranarthOwner.isBarbarian()) {
                 e.setCancelled(true);
-                attacker.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.cannot_harm_pet_relation", "owner", aranarthOwner.getNickname(), "pet", mountTypeName, "relation", "a wanderer")));
+                attacker.sendMessage(ChatUtils.chatMessage(Lang.getFor(attacker, "dominion.cannot_harm_pet_relation", "owner", aranarthOwner.getNickname(), "pet", mountTypeName, "relation", "a wanderer")));
             }
             return;
         }
@@ -524,7 +524,7 @@ public class DominionProtectionListener implements Listener {
             Dominion chunkDominion = DominionUtils.getDominionOfChunkAnywhere(e.getEntity().getLocation().getChunk());
             if (chunkDominion != null && chunkDominion.isSameDominion(ownerDominion)) {
                 e.setCancelled(true);
-                attacker.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.cannot_harm_pet_relation", "owner", aranarthOwner.getNickname(), "pet", mountTypeName, "relation", "a wanderer in their dominion's lands")));
+                attacker.sendMessage(ChatUtils.chatMessage(Lang.getFor(attacker, "dominion.cannot_harm_pet_relation", "owner", aranarthOwner.getNickname(), "pet", mountTypeName, "relation", "a wanderer in their dominion's lands")));
             }
             return;
         }
@@ -537,7 +537,7 @@ public class DominionProtectionListener implements Listener {
         }
         if (!aranarthOwner.isBarbarian()) {
             e.setCancelled(true);
-            attacker.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.cannot_harm_pet_relation", "owner", aranarthOwner.getNickname(), "pet", mountTypeName, "relation", "a wanderer")));
+            attacker.sendMessage(ChatUtils.chatMessage(Lang.getFor(attacker, "dominion.cannot_harm_pet_relation", "owner", aranarthOwner.getNickname(), "pet", mountTypeName, "relation", "a wanderer")));
         }
         // Both are barbarians - allowed
     }
@@ -835,7 +835,7 @@ public class DominionProtectionListener implements Listener {
                     long now = System.currentTimeMillis();
                     Long last = lastDenyMessageTime.get(playerUuid);
                     if (last == null || now - last >= DENY_MESSAGE_COOLDOWN_MS) {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.plot_not_yours")));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.plot_not_yours")));
                         lastDenyMessageTime.put(playerUuid, now);
                     }
                     return true;
@@ -846,7 +846,7 @@ public class DominionProtectionListener implements Listener {
                 long now = System.currentTimeMillis();
                 Long last = lastDenyMessageTime.get(player.getUniqueId());
                 if (last == null || now - last >= DENY_MESSAGE_COOLDOWN_MS) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.no_permission_in", "name", dominion.getName())));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.no_permission_in", "name", dominion.getName())));
                     lastDenyMessageTime.put(player.getUniqueId(), now);
                 }
                 return true;

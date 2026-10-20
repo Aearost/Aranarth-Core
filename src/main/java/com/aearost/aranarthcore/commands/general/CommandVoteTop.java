@@ -31,14 +31,14 @@ public class CommandVoteTop implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (args.length == 0) {
-			openOrDisplay(sender, null, null, "All-Time");
+			openOrDisplay(sender, null, null, Lang.getFor(sender, "votetop.label_all"));
 		} else if (args.length == 2 && args[0].equalsIgnoreCase("year")) {
 			try {
 				int year = Integer.parseInt(args[1]);
 				if (year < 1000 || year > 9999) throw new NumberFormatException();
-				openOrDisplay(sender, year, null, "Year " + year);
+				openOrDisplay(sender, year, null, Lang.getFor(sender, "votetop.label_year", "year", year));
 			} catch (NumberFormatException e) {
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("votetop.invalid_year")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "votetop.invalid_year")));
 			}
 		} else if (args.length == 2 && args[0].equalsIgnoreCase("month")) {
 			try {
@@ -50,10 +50,10 @@ public class CommandVoteTop implements CommandExecutor {
 				String label = String.format("%02d-%d", month, year);
 				openOrDisplay(sender, year, month, label);
 			} catch (Exception e) {
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("votetop.invalid_month")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "votetop.invalid_month")));
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "votetop [month|year] [MM-YYYY|YYYY]")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "votetop [month|year] [MM-YYYY|YYYY]")));
 		}
 		return true;
 	}
@@ -106,11 +106,11 @@ public class CommandVoteTop implements CommandExecutor {
 				.toList();
 
 		if (sorted.isEmpty()) {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("votetop.no_votes")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "votetop.no_votes")));
 			return;
 		}
 
-		sender.sendMessage(ChatUtils.translateToColor("&8      - - - &6&lTop Voters (&e&l" + label + "&6&l) &8- - -"));
+		sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "vote.top_header", "label", label)));
 
 		int rank = 1;
 		for (Map.Entry<UUID, Integer> entry : sorted) {

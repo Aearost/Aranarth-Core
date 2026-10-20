@@ -28,7 +28,7 @@ public class RespawnSurvival {
         try {
             AranarthUtils.switchInventory(player, player.getLocation().getWorld().getName(), player.getLocation().getWorld().getName());
         } catch (IOException ex) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.error_changing_world")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.error_changing_world")));
             return;
         }
 

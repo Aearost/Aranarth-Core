@@ -36,13 +36,13 @@ public class PlayerTeleportCancelByMove {
             if (positionChanged) {
                 task.cancel();
                 AranarthUtils.removeTeleportTask(player.getUniqueId());
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.teleport_moved")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.teleport_moved")));
 
                 // /ac tphere was sent
                 if (aranarthPlayer.getTeleportToUuid() != null) {
                     Player target = Bukkit.getPlayer(aranarthPlayer.getTeleportToUuid());
                     if (target != null) {
-                        target.sendMessage(ChatUtils.chatMessage(Lang.get("tp_request.moved_cancelled", "player", aranarthPlayer.getNickname())));
+                        target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "tp_request.moved_cancelled", "player", aranarthPlayer.getNickname())));
                     }
                 }
                 // /ac tp was sent
@@ -51,7 +51,7 @@ public class PlayerTeleportCancelByMove {
                         AranarthPlayer aranarthPlayerOnline = AranarthUtils.getPlayer(onlinePlayer.getUniqueId());
                         if (aranarthPlayerOnline.getTeleportFromUuid() != null) {
                             if (aranarthPlayerOnline.getTeleportFromUuid().equals(player.getUniqueId())) {
-                                onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("tp_request.moved_cancelled", "player", aranarthPlayer.getNickname())));
+                                onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "tp_request.moved_cancelled", "player", aranarthPlayer.getNickname())));
                                 return;
                             }
                         }

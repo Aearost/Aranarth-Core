@@ -116,7 +116,7 @@ public class TransferLockListener implements Listener {
     public void onCommand(final PlayerCommandPreprocessEvent e) {
         if (isLocked(e.getPlayer())) {
             e.setCancelled(true);
-            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("general.already_teleporting")));
+            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "general.already_teleporting")));
         }
     }
 

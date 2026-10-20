@@ -17,36 +17,36 @@ public class CommandQuestNpc {
 
     public static boolean onCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
             return true;
         }
 
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
         if (aranarthPlayer.getCouncilRank() != 3) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
             return true;
         }
 
         // args[0] = "questnpc", args[1] = subcommand
         if (args.length < 2) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac questnpc <spawn|remove>")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "ac questnpc <spawn|remove>")));
             return true;
         }
 
         switch (args[1].toLowerCase()) {
             case "spawn" -> {
                 QuestUtils.spawnQuestNpc(player.getLocation());
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("quest.npc_spawned")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "quest.npc_spawned")));
             }
             case "remove" -> {
                 boolean removed = QuestUtils.removeNearestQuestNpc(player.getLocation());
                 if (removed) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("quest.npc_removed")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "quest.npc_removed")));
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("quest.npc_not_found")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "quest.npc_not_found")));
                 }
             }
-            default -> player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac questnpc <spawn|remove>")));
+            default -> player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "ac questnpc <spawn|remove>")));
         }
 
         return true;

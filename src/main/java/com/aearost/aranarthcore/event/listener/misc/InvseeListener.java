@@ -58,7 +58,7 @@ public class InvseeListener implements Listener {
             e.setCancelled(true);
             if (!GuiInvsee.isRemote(e.getInventory())) {
                 viewer.closeInventory();
-                viewer.sendMessage(ChatUtils.chatMessage(Lang.get("invsee.offline")));
+                viewer.sendMessage(ChatUtils.chatMessage(Lang.getFor(viewer, "invsee.offline")));
             }
             return;
         }

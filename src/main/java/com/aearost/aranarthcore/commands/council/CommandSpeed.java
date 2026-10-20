@@ -20,12 +20,12 @@ public class CommandSpeed {
         if (sender instanceof Player player) {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
             if (aranarthPlayer.getCouncilRank() == 0 && aranarthPlayer.getArchitectRank() == 0) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
                 return false;
             }
 
             if (args.length < 2) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("speed.must_enter")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "speed.must_enter")));
                 return true;
             }
 
@@ -40,20 +40,20 @@ public class CommandSpeed {
                 }
                 speed = speed / 10;
             } catch (NumberFormatException e) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("speed.must_enter_range")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "speed.must_enter_range")));
                 return true;
             }
 
             if (player.isFlying()) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("speed.set_success", "player", player.getName(), "value", String.valueOf(speed * 10))));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "speed.set_success", "player", player.getName(), "value", String.valueOf(speed * 10))));
                 player.setFlySpeed(speed);
             } else {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("speed.set_success", "player", player.getName(), "value", String.valueOf(speed * 10))));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "speed.set_success", "player", player.getName(), "value", String.valueOf(speed * 10))));
                 player.setWalkSpeed(speed);
             }
             return true;
         } else {
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
             return true;
         }
     }

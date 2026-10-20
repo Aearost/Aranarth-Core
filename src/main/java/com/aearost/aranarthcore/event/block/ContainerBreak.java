@@ -31,9 +31,9 @@ public class ContainerBreak {
                     Location[] singleContainerLocation = new Location[] { e.getBlock().getLocation(), null };
                     int breakResult = AranarthUtils.removeLockedContainer(singleContainerLocation);
                     if (breakResult == 0) {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("lock.container_destroyed")));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.container_destroyed")));
                     } else if (breakResult == -1) {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("lock.no_permission_destroy")));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.no_permission_destroy")));
                         e.setCancelled(true);
                     }
                 }
@@ -47,10 +47,10 @@ public class ContainerBreak {
                         if (breakResult == 0) {
                             // If there's a shop on this chest, ShopDestroy will handle the success message
                             if (!hasShop) {
-                                player.sendMessage(ChatUtils.chatMessage(Lang.get("lock.container_destroyed")));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.container_destroyed")));
                             }
                         } else if (breakResult == -1) {
-                            player.sendMessage(ChatUtils.chatMessage(Lang.get("lock.no_permission_destroy")));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.no_permission_destroy")));
                             e.setCancelled(true);
                         }
                     } else {
@@ -61,7 +61,7 @@ public class ContainerBreak {
                         boolean hasShop = ShopUtils.getShopForContainer(locations[0].getBlock()) != null
                                 || (locations[1] != null && ShopUtils.getShopForContainer(locations[1].getBlock()) != null);
                         if (!hasShop) {
-                            player.sendMessage(ChatUtils.chatMessage(Lang.get("lock.no_permission_destroy")));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.no_permission_destroy")));
                             e.setCancelled(true);
                         }
                     }

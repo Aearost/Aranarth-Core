@@ -20,21 +20,21 @@ public class CommandVanish {
 		if (sender instanceof Player player) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (aranarthPlayer.getCouncilRank() < 3) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return false;
 			}
 
 			aranarthPlayer.setVanished(!aranarthPlayer.isVanished());
 			player.setInvisible(aranarthPlayer.isVanished());
 			String langKey = aranarthPlayer.isVanished() ? "vanish.now_vanished" : "vanish.no_longer_vanished";
-			player.sendMessage(ChatUtils.chatMessage(Lang.get(langKey)));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, langKey)));
 
 
 
 			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
 		}
 	}

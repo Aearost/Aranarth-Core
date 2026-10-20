@@ -51,7 +51,7 @@ public class CaveSpiderPoisonExtract {
         UUID spiderId = e.getRightClicked().getUniqueId();
         int count = extractionCounts.getOrDefault(spiderId, 0);
         if (count >= MAX_EXTRACTIONS) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("spider.no_venom")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "spider.no_venom")));
             return;
         }
         extractionCounts.put(spiderId, count + 1);
@@ -72,6 +72,6 @@ public class CaveSpiderPoisonExtract {
         }
 
         player.playSound(player.getLocation(), Sound.ENTITY_COW_MILK, 1.0f, 1.7f);
-        player.sendMessage(ChatUtils.chatMessage(Lang.get("spider.extract")));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "spider.extract")));
     }
 }

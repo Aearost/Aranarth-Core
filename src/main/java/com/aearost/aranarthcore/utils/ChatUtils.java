@@ -330,37 +330,23 @@ public class ChatUtils {
      *
      * @param displayName The player's displayed name.
      * @param specialDay  The date that the message should be reflective of.
-     * @return The randomly selected and formatted custom join message.
+     * @return The randomly selected join message as a nested lang key (see Lang.key), including the join prefix.
      */
     public static String getSpecialJoinMessage(String displayName, SpecialDay specialDay) {
         Random random = new Random();
         int randomInt = random.nextInt(4);
-        String[] messages = new String[4];
 
-        if (specialDay == SpecialDay.VALENTINES) {
-            messages[0] = "Cupid must have striked " + displayName + "&7, say hello!";
-            messages[1] = "Will " + displayName + " &7be your Valentine?";
-            messages[2] = "Your heart just skipped a beat, " + displayName + " &7has joined!";
-            messages[3] = "Roses are red, I can't rhyme, " + displayName + " &7is here!";
-        } else if (specialDay == SpecialDay.EASTER) {
-            messages[0] = displayName + " &7has joined the egg hunt!";
-            messages[1] = displayName + " &7thinks they're the Easter bunny...";
-            messages[2] = "Spring has sprung now that " + displayName + " &7is here!";
-            messages[3] = "Hippity-hoppity, it's " + displayName + "&7!";
-        } else if (specialDay == SpecialDay.HALLOWEEN) {
-            messages[0] = "Double double toil and trouble! " + displayName + " &7is here!";
-            messages[1] = displayName + " &7is here to haunt you! BOO!";
-            messages[2] = "Trick or treat! It's " + displayName + "&7...";
-            messages[3] = displayName + " &7is ready to scare the monsters...";
-        } else if (specialDay == SpecialDay.CHRISTMAS) {
-            messages[0] = displayName + " &7is looking for someone under the mistletoe!";
-            messages[1] = "The caroling is about to begin, thanks, " + displayName + "&7!";
-            messages[2] = displayName + " &7is on Santa's nice list...";
-            messages[3] = "Is that Santa? Nevermind, it's just " + displayName;
-        } else {
+        String day = switch (specialDay) {
+            case VALENTINES -> "valentines";
+            case EASTER -> "easter";
+            case HALLOWEEN -> "halloween";
+            case CHRISTMAS -> "christmas";
+        };
+        if (day == null) {
             return displayName;
         }
-        return messages[randomInt];
+        // A nested key, so every recipient (on either server) sees the message in their own language
+        return Lang.key("join." + day + "_" + (randomInt + 1), "player", displayName);
     }
 
     /**
@@ -368,37 +354,23 @@ public class ChatUtils {
      *
      * @param displayName The player's displayed name.
      * @param specialDay  The date that the message should be reflective of.
-     * @return The randomly selected and formatted custom quit message.
+     * @return The randomly selected quit message as a nested lang key (see Lang.key), including the quit prefix.
      */
     public static String getSpecialQuitMessage(String displayName, SpecialDay specialDay) {
         Random random = new Random();
         int randomInt = random.nextInt(4);
-        String[] messages = new String[4];
 
-        if (specialDay == SpecialDay.VALENTINES) {
-            messages[0] = displayName + " &7has left to spend time with their Valentine";
-            messages[1] = displayName + " &7has left, along with their love...";
-            messages[2] = "The love story of " + displayName + " &7is over";
-            messages[3] = "Hearts are broken, as " + displayName + " &7has departed";
-        } else if (specialDay == SpecialDay.EASTER) {
-            messages[0] = displayName + " &7has hopped off the server!";
-            messages[1] = displayName + " &7took all of the Easter eggs and ran away!";
-            messages[2] = displayName + " &7ate too much chocolate and had to leave...";
-            messages[3] = displayName + " &7bounced away into the distance...";
-        } else if (specialDay == SpecialDay.HALLOWEEN) {
-            messages[0] = displayName + " &7has closed their coffin";
-            messages[1] = displayName + " &7ate too much candy and felt sick...";
-            messages[2] = displayName + " &7is not a zombie, they just disconnected";
-            messages[3] = displayName + " &7fell for one of their own tricks!";
-        } else if (specialDay == SpecialDay.CHRISTMAS) {
-            messages[0] = displayName + " &7has to unwrap all their gifts!";
-            messages[1] = "Santa's helper, " + displayName + "&7, is offline";
-            messages[2] = "It's the First Noel without " + displayName + "&7...";
-            messages[3] = "It's a Silent Night now that " + displayName + " &7has left...";
-        } else {
+        String day = switch (specialDay) {
+            case VALENTINES -> "valentines";
+            case EASTER -> "easter";
+            case HALLOWEEN -> "halloween";
+            case CHRISTMAS -> "christmas";
+        };
+        if (day == null) {
             return displayName;
         }
-        return messages[randomInt];
+        // A nested key, so every recipient (on either server) sees the message in their own language
+        return Lang.key("quit." + day + "_" + (randomInt + 1), "player", displayName);
     }
 
     /**
@@ -607,7 +579,7 @@ public class ChatUtils {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
             String prefixStart = "&7⊰&r";
             String prefixEnd = "&7⊱&r";
-            String senderPrefix = ChatUtils.translateToColor(prefixStart + "&7&l&oTo Yourself" + prefixEnd + " &7&o>> &e&o");
+            String senderPrefix = ChatUtils.translateToColor(prefixStart + Lang.getFor(player, "message.to_yourself") + prefixEnd + " &7&o>> &e&o");
             // Formats to color if the player sending has the permissions (no gradient for private messages)
             String formattedMsg;
             if (player.hasPermission("aranarth.chat.hex")) {
@@ -625,8 +597,8 @@ public class ChatUtils {
             String targetDisplay = targetAranarthPlayer.getNickname().isEmpty() ? target.getName() : targetAranarthPlayer.getNickname();
             String prefixStart = "&7⊰&r";
             String prefixEnd = "&7⊱&r";
-            String senderPrefixRaw = prefixStart + "&7&l&oTo: &r&e" + targetDisplay + prefixEnd + " &7&o>> &e&o";
-            String targetPrefixRaw = prefixStart + "&7&l&oFrom: &r&e" + senderDisplay + prefixEnd + " &7&o>> &e&o";
+            String senderPrefixRaw = prefixStart + Lang.getFor(player, "message.to") + targetDisplay + prefixEnd + " &7&o>> &e&o";
+            String targetPrefixRaw = prefixStart + Lang.getFor(target, "message.from") + senderDisplay + prefixEnd + " &7&o>> &e&o";
 
             // Formats to color if the player sending has the permissions (no gradient for private messages)
             String formattedMsg;
@@ -642,11 +614,11 @@ public class ChatUtils {
 
             Component senderComponent = LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(senderPrefixRaw))
                     .append(LegacyComponentSerializer.legacySection().deserialize(coloredFormattedMsg));
-            player.sendMessage(ChatUtils.clickableCommand(senderComponent, ChatUtils.translateToColor("&7Message &e" + targetDisplay), "/msg " + target.getName() + " ", true));
+            player.sendMessage(ChatUtils.clickableCommand(senderComponent, ChatUtils.translateToColor(Lang.getFor(player, "message.hover_message", "player", targetDisplay)), "/msg " + target.getName() + " ", true));
 
             Component targetComponent = LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(targetPrefixRaw))
                     .append(LegacyComponentSerializer.legacySection().deserialize(coloredFormattedMsg));
-            target.sendMessage(ChatUtils.clickableCommand(targetComponent, ChatUtils.translateToColor("&7Reply to &e" + senderDisplay), "/r ", true));
+            target.sendMessage(ChatUtils.clickableCommand(targetComponent, ChatUtils.translateToColor(Lang.getFor(target, "message.hover_reply", "player", senderDisplay)), "/r ", true));
             AranarthUtils.playPingSound(target);
 
             targetAranarthPlayer.setLastReceivedMessage(player.getUniqueId());
@@ -672,18 +644,18 @@ public class ChatUtils {
      *
      * @return The formatted Component ready to send to a player.
      */
-    public static Component buildTpAcceptDenyPrompt() {
-        Component prefix = LegacyComponentSerializer.legacySection().deserialize(chatMessage("&7Use "));
+    public static Component buildTpAcceptDenyPrompt(Player player) {
+        Component prefix = LegacyComponentSerializer.legacySection().deserialize(chatMessage(Lang.getFor(player, "tp.prompt_use")));
         Component tpa = clickableCommand(
                 LegacyComponentSerializer.legacySection().deserialize(translateToColor("&e/tpaccept")),
-                translateToColor("&7Click to accept"),
+                translateToColor(Lang.getFor(player, "tp.click_accept")),
                 "/tpaccept",
                 true
         );
-        Component or = LegacyComponentSerializer.legacySection().deserialize(translateToColor("&7 or "));
+        Component or = LegacyComponentSerializer.legacySection().deserialize(translateToColor(Lang.getFor(player, "tp.prompt_or")));
         Component tpd = clickableCommand(
                 LegacyComponentSerializer.legacySection().deserialize(translateToColor("&e/tpdeny")),
-                translateToColor("&7Click to deny"),
+                translateToColor(Lang.getFor(player, "tp.click_deny")),
                 "/tpdeny",
                 true
         );
@@ -904,14 +876,13 @@ public class ChatUtils {
         Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 
         if (dominion == null) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.not_in_dominion")));
             return;
         }
 
         if (isSingleMessage) {
             if (args.length == 1) {
-                String onOrOffMessage = aranarthPlayer.isInDominionChat() ? "&coff" : "&aon";
-                player.sendMessage(ChatUtils.chatMessage("&7You have toggled " + onOrOffMessage + " &7Dominion Chat"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, aranarthPlayer.isInDominionChat() ? "chat.dominion_off" : "chat.dominion_on")));
                 aranarthPlayer.setInDominionChat(!aranarthPlayer.isInDominionChat());
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 return;
@@ -922,7 +893,7 @@ public class ChatUtils {
                 if (typeArg.equals("dominion") || typeArg.equals("ally") || typeArg.equals("truce") || typeArg.equals("allytruce")) {
                     aranarthPlayer.setDominionChatType(typeArg);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                    player.sendMessage(ChatUtils.chatMessage("&7Dominion chat type set to &e" + typeArg));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "chat.dominion_type_set", "type", typeArg)));
                     return;
                 }
             }
@@ -1031,12 +1002,11 @@ public class ChatUtils {
             if (args.length == 1) {
                 if (sender instanceof Player player) {
                     AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                    String onOrOffMessage = aranarthPlayer.isInCouncilChat() ? "&coff" : "&aon";
-                    sender.sendMessage(ChatUtils.chatMessage("&7You have toggled " + onOrOffMessage + " &7Council Chat"));
+                    sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, aranarthPlayer.isInCouncilChat() ? "chat.council_off" : "chat.council_on")));
                     aranarthPlayer.setInCouncilChat(!aranarthPlayer.isInCouncilChat());
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 } else {
-                    sender.sendMessage(ChatUtils.chatMessage("&cOnly players can toggle Council Chat"));
+                    sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
                 }
                 return;
             }

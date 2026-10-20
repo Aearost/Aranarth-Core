@@ -22,6 +22,16 @@ import java.util.Map;
 public class GuiDominionPermissionsClick {
 
 
+    /**
+     * The rank edited by the open permission screen, or null if it is not a rank screen.
+     */
+    private static DominionRank getScreenRank(InventoryClickEvent e) {
+        GuiHolder holder = GuiHolder.of(e.getView().getTopInventory());
+        return holder != null && holder.getData() instanceof GuiDominionPermissions.RankScreen(
+                DominionRank rank
+        ) ? rank : null;
+    }
+
     public void execute(InventoryClickEvent e) {
         e.setCancelled(true);
 
@@ -37,7 +47,7 @@ public class GuiDominionPermissionsClick {
 
         // Only the leader can use this GUI
         if (!dominion.getLeader().equals(player.getUniqueId())) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.leader_only_permissions")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.leader_only_permissions")));
             return;
         }
 
@@ -119,12 +129,12 @@ public class GuiDominionPermissionsClick {
                 case 31 -> {
                     String worldName = player.getWorld().getName();
                     if (!worldName.startsWith("world") && !worldName.startsWith("smp")) {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.resources_gameplay_world")));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.resources_gameplay_world")));
                         return;
                     }
                     // Resources are claimed only on the server hosting the dominion's land
                     if (!DominionUtils.isHostedHere(dominion)) {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.home_server_only", "server", DominionUtils.getHostingServerDisplayName(dominion))));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.home_server_only", "server", DominionUtils.getHostingServerDisplayName(dominion))));
                         return;
                     }
                     if (DominionUtils.hasPermission(player, dominion, DominionPermission.RESOURCES)) {
@@ -132,10 +142,10 @@ public class GuiDominionPermissionsClick {
                             new GuiDominionResources(player).openGui();
                             player.playSound(player, Sound.BLOCK_CHEST_OPEN, 1F, 1F);
                         } else {
-                            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.resources_none")));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.resources_none")));
                         }
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.resources_no_permission")));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.resources_no_permission")));
                     }
                 }
             }
@@ -152,7 +162,7 @@ public class GuiDominionPermissionsClick {
 
             // Restore Defaults button (slot 4)
             if (e.getSlot() == 4 && clicked.getType() == Material.ENDER_PEARL) {
-                DominionRank rank = GuiDominionPermissions.getRankFromTitle(title);
+                DominionRank rank = getScreenRank(e);
                 if (rank != null && rank != DominionRank.LEADER) {
                     dominion.getDominionPermissions().restoreDefaults(rank);
                     DominionUtils.updateDominion(dominion);
@@ -166,13 +176,13 @@ public class GuiDominionPermissionsClick {
                 return;
             }
 
-            DominionRank rank = GuiDominionPermissions.getRankFromTitle(title);
+            DominionRank rank = getScreenRank(e);
             if (rank == null) {
                 return;
             }
 
             if (rank == DominionRank.LEADER) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.leader_full_permissions")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.leader_full_permissions")));
                 return;
             }
 
@@ -192,7 +202,7 @@ public class GuiDominionPermissionsClick {
             DominionUtils.updateDominion(dominion);
 
             boolean newState = dominion.getDominionPermissions().getPermissions(rank).contains(perm);
-            e.getClickedInventory().setItem(e.getSlot(), GuiDominionPermissions.buildPermissionItem(perm, newState));
+            e.getClickedInventory().setItem(e.getSlot(), GuiDominionPermissions.buildPermissionItem(player, perm, newState));
             player.updateInventory();
             player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 0.5F, 1.5F);
         }
@@ -227,7 +237,7 @@ public class GuiDominionPermissionsClick {
         }
         java.util.Set<DominionPermission> enabled = dominion.getDominionPermissions().getPermissions(rank);
         for (Map.Entry<Integer, DominionPermission> entry : GuiDominionPermissions.getRankSlotPermissions().entrySet()) {
-            inv.setItem(entry.getKey(), GuiDominionPermissions.buildPermissionItem(entry.getValue(), enabled.contains(entry.getValue())));
+            inv.setItem(entry.getKey(), GuiDominionPermissions.buildPermissionItem(player, entry.getValue(), enabled.contains(entry.getValue())));
         }
         player.updateInventory();
     }
@@ -246,7 +256,7 @@ public class GuiDominionPermissionsClick {
             if (omitPvp && entry.getValue() == DominionPermission.PVP) {
                 continue;
             }
-            inv.setItem(entry.getKey(), GuiDominionPermissions.buildPermissionItem(entry.getValue(), enabled.contains(entry.getValue())));
+            inv.setItem(entry.getKey(), GuiDominionPermissions.buildPermissionItem(player, entry.getValue(), enabled.contains(entry.getValue())));
         }
         player.updateInventory();
     }

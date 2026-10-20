@@ -44,7 +44,7 @@ public class GuiSitColorClick {
 
         if (!player.hasPermission("aranarth.sit.color")) {
             player.closeInventory();
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
             return;
         }
 
@@ -58,7 +58,7 @@ public class GuiSitColorClick {
         aranarthPlayer.setSitCushionColor(newColor.name());
         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
         SitUtils.updateCushionColor(player, newColor);
-        player.sendMessage(ChatUtils.chatMessage(Lang.get("sit.color_set", "color", ChatUtils.getFormattedItemName(newColor.name()))));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "sit.color_set", "color", ChatUtils.getFormattedItemName(newColor.name()))));
         player.playSound(player, Sound.UI_BUTTON_CLICK, 1F, 0.8F);
 
         // Update the previous and new selections in place

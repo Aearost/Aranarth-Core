@@ -20,7 +20,7 @@ public class CommandSudo {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.sudo")) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return true;
 			}
 		}
@@ -30,7 +30,7 @@ public class CommandSudo {
 				if (player.getName().equalsIgnoreCase(args[1])) {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 					if (aranarthPlayer.getCouncilRank() >= 2) {
-						sender.sendMessage(ChatUtils.chatMessage(Lang.get("sudo.cannot_target_player")));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "sudo.cannot_target_player")));
 						return true;
 					}
 
@@ -47,14 +47,14 @@ public class CommandSudo {
 					}
 
 					player.performCommand(command);
-					sender.sendMessage(ChatUtils.chatMessage(Lang.get("sudo.success", "command", command, "player", aranarthPlayer.getNickname())));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "sudo.success", "command", command, "player", aranarthPlayer.getNickname())));
 					return true;
 				}
 			}
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", args[1])));
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac sudo <player> <command>")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac sudo <player> <command>")));
 			return true;
 		}
 	}

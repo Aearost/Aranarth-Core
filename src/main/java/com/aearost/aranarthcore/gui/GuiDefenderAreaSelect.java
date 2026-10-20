@@ -31,14 +31,14 @@ public class GuiDefenderAreaSelect {
         List<Outpost> outposts = OutpostUtils.getDominionOutposts(dominion.getId());
 
         Inventory gui = GuiHolder.create(player, 27, Lang.getFor(player, TITLE_KEY));
-        populate(gui, dominion, outposts);
-        gui.setItem(BACK_SLOT, GuiDominionPermissions.buildBackButton());
+        populate(player, gui, dominion, outposts);
+        gui.setItem(BACK_SLOT, GuiDominionPermissions.buildBackButton(player));
 
         player.closeInventory();
         player.openInventory(gui);
     }
 
-    private static void populate(Inventory gui, Dominion dominion, List<Outpost> outposts) {
+    private static void populate(Player player, Inventory gui, Dominion dominion, List<Outpost> outposts) {
         ItemStack filler = buildFiller();
         for (int i = 0; i < 9; i++) {
             gui.setItem(i, filler);
@@ -46,11 +46,11 @@ public class GuiDefenderAreaSelect {
         }
 
         int domSlot = getDominionSlot(outposts.size());
-        gui.setItem(domSlot, buildDominionItem(dominion.getName()));
+        gui.setItem(domSlot, buildDominionItem(player, dominion.getName()));
 
         for (int i = 0; i < outposts.size(); i++) {
             // domSlot + 1 is the gap; outposts start at domSlot + 2
-            gui.setItem(domSlot + 2 + i, buildOutpostItem(outposts.get(i)));
+            gui.setItem(domSlot + 2 + i, buildOutpostItem(player, outposts.get(i)));
         }
     }
 
@@ -64,20 +64,20 @@ public class GuiDefenderAreaSelect {
         return 9 + (8 - outpostCount) / 2;
     }
 
-    private static ItemStack buildDominionItem(String dominionName) {
+    private static ItemStack buildDominionItem(Player player, String dominionName) {
         ItemStack item = new ItemStack(Material.GRASS_BLOCK);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(Lang.get("gui.defenderareaselect.dominion_name", "name", dominionName));
-        meta.setLore(List.of(Lang.get("gui.defenderareaselect.dominion_lore")));
+        meta.setDisplayName(Lang.getFor(player, "gui.defenderareaselect.dominion_name", "name", dominionName));
+        meta.setLore(List.of(Lang.getFor(player, "gui.defenderareaselect.dominion_lore")));
         item.setItemMeta(meta);
         return item;
     }
 
-    private static ItemStack buildOutpostItem(Outpost outpost) {
+    private static ItemStack buildOutpostItem(Player player, Outpost outpost) {
         ItemStack item = new ItemStack(outpost.getIcon());
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(Lang.get("gui.defenderareaselect.outpost_name", "name", outpost.getName()));
-        meta.setLore(List.of(Lang.get("gui.defenderareaselect.outpost_lore")));
+        meta.setDisplayName(Lang.getFor(player, "gui.defenderareaselect.outpost_name", "name", outpost.getName()));
+        meta.setLore(List.of(Lang.getFor(player, "gui.defenderareaselect.outpost_lore")));
         item.setItemMeta(meta);
         return item;
     }

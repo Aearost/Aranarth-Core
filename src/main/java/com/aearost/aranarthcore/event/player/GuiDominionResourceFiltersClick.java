@@ -47,7 +47,7 @@ public class GuiDominionResourceFiltersClick {
         }
 
         if (!dominion.getLeader().equals(player.getUniqueId())) {
-            player.sendMessage(com.aearost.aranarthcore.utils.ChatUtils.chatMessage(Lang.get("dominion.leader_only_permissions")));
+            player.sendMessage(com.aearost.aranarthcore.utils.ChatUtils.chatMessage(Lang.getFor(player, "dominion.leader_only_permissions")));
             return;
         }
 

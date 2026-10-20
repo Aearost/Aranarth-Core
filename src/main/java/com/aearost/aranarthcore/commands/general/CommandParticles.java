@@ -25,7 +25,7 @@ public class CommandParticles implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (args.length == 0) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("particles.must_enter_percent")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "particles.must_enter_percent")));
 				return true;
 			} else {
 				int percentage = 100;
@@ -35,18 +35,18 @@ public class CommandParticles implements CommandExecutor {
 						throw new NumberFormatException();
 					}
 				} catch (NumberFormatException e) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("particles.invalid_range")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "particles.invalid_range")));
 					return true;
 				}
 
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				aranarthPlayer.setParticleNum(percentage);
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("particles.set", "percent", String.valueOf(percentage))));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "particles.set", "percent", String.valueOf(percentage))));
 				return true;
 			}
         } else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
         }
     }

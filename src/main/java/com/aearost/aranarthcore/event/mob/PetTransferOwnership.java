@@ -49,15 +49,15 @@ public class PetTransferOwnership {
 				tameable.setOwner(offlinePlayer);
 				e.setCancelled(true);
 				AranarthPlayer offlineAranarthPlayer = AranarthUtils.getPlayer(transferUUID);
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.transferred_to", "pet", tameable.getName(), "player", offlineAranarthPlayer.getNickname())));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "pet.transferred_to", "pet", tameable.getName(), "player", offlineAranarthPlayer.getNickname())));
 				if (offlinePlayer.isOnline()) {
-					offlinePlayer.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("pet.transferred_notify", "from", aranarthPlayer.getNickname(), "pet", tameable.getName())));
+					offlinePlayer.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(offlinePlayer.getPlayer(), "pet.transferred_notify", "from", aranarthPlayer.getNickname(), "pet", tameable.getName())));
 				}
 			} else {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.not_owner_wolf")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "pet.not_owner_wolf")));
 			}
 		} else {
-			player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.not_tamed")));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "pet.not_tamed")));
 		}
 		aranarthPlayer.setPetTransferUuid(null);
 		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
@@ -82,7 +82,7 @@ public class PetTransferOwnership {
 		}
 
 		if (!ownerUUID.equals(player.getUniqueId())) {
-			player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.not_owner_horse")));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "pet.not_owner_horse")));
 			aranarthPlayer.setPetTransferUuid(null);
 			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 			return;
@@ -93,10 +93,10 @@ public class PetTransferOwnership {
 		e.setCancelled(true);
 
 		AranarthPlayer offlineAranarthPlayer = AranarthUtils.getPlayer(transferUUID);
-		player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.transferred_to", "pet", entity.getName(), "player", offlineAranarthPlayer.getNickname())));
+		player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "pet.transferred_to", "pet", entity.getName(), "player", offlineAranarthPlayer.getNickname())));
 		OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(transferUUID);
 		if (offlinePlayer.isOnline()) {
-			offlinePlayer.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("pet.transferred_notify", "from", aranarthPlayer.getNickname(), "pet", entity.getName())));
+			offlinePlayer.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(offlinePlayer.getPlayer(), "pet.transferred_notify", "from", aranarthPlayer.getNickname(), "pet", entity.getName())));
 		}
 
 		aranarthPlayer.setPetTransferUuid(null);

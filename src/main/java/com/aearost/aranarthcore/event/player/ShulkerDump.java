@@ -76,7 +76,7 @@ public class ShulkerDump {
         Dominion chunkDominion = DominionUtils.getDominionOfChunk(block.getChunk());
         if (chunkDominion != null && !DominionUtils.hasPermission(player, chunkDominion, DominionPermission.CONTAINER)) {
             e.setCancelled(true);
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.access_containers")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.access_containers")));
             return;
         }
 
@@ -88,7 +88,7 @@ public class ShulkerDump {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
                 if (!lockedContainer.getTrusted().contains(uuid) && !aranarthPlayer.isInAdminMode()) {
                     e.setCancelled(true);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("lock.no_permission_access")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.no_permission_access")));
                     return;
                 }
             }
@@ -150,9 +150,9 @@ public class ShulkerDump {
         e.setCancelled(true);
         player.playSound(player, Sound.BLOCK_SHULKER_BOX_CLOSE, 1F, 1F);
         if (anyLeftover) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("inventory.shulker_not_all_fit")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "inventory.shulker_not_all_fit")));
         } else {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("inventory.emptied_shulker")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "inventory.emptied_shulker")));
         }
     }
 
@@ -184,7 +184,7 @@ public class ShulkerDump {
             }
         }
         if (!hasItems) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("inventory.container_empty")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "inventory.container_empty")));
             return;
         }
 
@@ -223,9 +223,9 @@ public class ShulkerDump {
         }
 
         if (anyLeftover) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("inventory.container_not_all_moved")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "inventory.container_not_all_moved")));
         } else {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("inventory.filled_shulker")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "inventory.filled_shulker")));
         }
     }
 }

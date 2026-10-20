@@ -26,7 +26,7 @@ public class CommandRanks implements CommandExecutor {
 			GuiRanks gui = new GuiRanks(player);
 			gui.openGui();
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 		}
 		return true;
 	}

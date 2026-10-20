@@ -18,6 +18,7 @@ import org.bukkit.block.data.Levelled;
 import org.bukkit.block.data.type.Slab;
 import org.bukkit.block.data.type.Snow;
 import org.bukkit.block.data.type.Stairs;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.*;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -176,16 +177,17 @@ public class DateUtils {
     /**
      * Displays the server date on new days.
      *
+     * @param recipient   The player or console the date is shown to.
      * @param dayNum      The current server day.
      * @param weekdayName The current server weekday name.
      * @param monthName   The current server month name.
      * @param yearNum     The current server year.
      */
-    public static String[] determineServerDate(int dayNum, String weekdayName, String monthName, int yearNum) {
-        String dayNumAsString = getDayNumWithSuffix(dayNum);
+    public static String[] determineServerDate(CommandSender recipient, int dayNum, String weekdayName, String monthName, int yearNum) {
+        String dayNumAsString = getDayNumWithSuffix(recipient, dayNum);
         String[] messages = new String[3];
         messages[0] = ChatUtils.translateToColor("&6&l---------------------------------");
-        messages[1] = ChatUtils.translateToColor("&e&l" + weekdayName + " &f&lthe " + dayNumAsString + " of " + monthName + ", &e&l" + yearNum + "  ");
+        messages[1] = ChatUtils.translateToColor(Lang.getFor(recipient, "motd.date", "weekday", weekdayName, "day", dayNumAsString, "month", monthName, "year", yearNum) + "  ");
         messages[2] = ChatUtils.translateToColor("&6&l---------------------------------");
         return messages;
     }
@@ -252,43 +254,27 @@ public class DateUtils {
     }
 
     /**
-     * Provides the day number with the suffix.
+     * Provides the day number with the ordinal suffix in the recipient's language.
      *
-     * @param day The day.
+     * @param recipient The player or console the date is shown to.
+     * @param day       The day.
      * @return The day with the suffix.
      */
-    public static String getDayNumWithSuffix(int day) {
-        String dayNumAsString = day + "";
-        if (dayNumAsString.length() > 1) {
-            if (dayNumAsString.endsWith("11")) {
-                dayNumAsString += "th";
-            } else if (dayNumAsString.endsWith("12")) {
-                dayNumAsString += "th";
-            } else if (dayNumAsString.endsWith("13")) {
-                dayNumAsString += "th";
-            } else {
-                if (dayNumAsString.endsWith("1")) {
-                    dayNumAsString += "st";
-                } else if (dayNumAsString.endsWith("2")) {
-                    dayNumAsString += "nd";
-                } else if (dayNumAsString.endsWith("3")) {
-                    dayNumAsString += "rd";
-                } else {
-                    dayNumAsString += "th";
-                }
-            }
+    public static String getDayNumWithSuffix(CommandSender recipient, int day) {
+        String key;
+        if (day == 1) {
+            key = "date.ordinal_first";
+        } else if (day % 100 >= 11 && day % 100 <= 13) {
+            key = "date.ordinal_th";
         } else {
-            if (dayNumAsString.endsWith("1")) {
-                dayNumAsString += "st";
-            } else if (dayNumAsString.endsWith("2")) {
-                dayNumAsString += "nd";
-            } else if (dayNumAsString.endsWith("3")) {
-                dayNumAsString += "rd";
-            } else {
-                dayNumAsString += "th";
-            }
+            key = switch (day % 10) {
+                case 1 -> "date.ordinal_st";
+                case 2 -> "date.ordinal_nd";
+                case 3 -> "date.ordinal_rd";
+                default -> "date.ordinal_th";
+            };
         }
-        return dayNumAsString;
+        return day + Lang.getFor(recipient, key);
     }
 
     /**
@@ -698,9 +684,8 @@ public class DateUtils {
             return;
         }
 
-        String[] messages = determineServerDate(dayNum, weekdayName, monthName, yearNum);
+        String[] messages = determineServerDate(Bukkit.getConsoleSender(), dayNum, weekdayName, monthName, yearNum);
 
-        String dayNumAsString = getDayNumWithSuffix(dayNum);
         for (Player player : Bukkit.getOnlinePlayers()) {
             String worldName = player.getWorld().getName();
             boolean skipDayMessage = worldName.equals("arena") || worldName.startsWith("creative");
@@ -710,7 +695,7 @@ public class DateUtils {
             }
             if (!skipDayMessage) {
                 String mainTitle = ChatUtils.translateToColor("&e&l" + weekdayName);
-                String subTitle = ChatUtils.translateToColor("&f&lThe " + dayNumAsString + " of " + monthName + ", &e&l" + yearNum);
+                String subTitle = ChatUtils.translateToColor(Lang.getFor(player, "date.title_subtitle", "day", getDayNumWithSuffix(player, dayNum), "month", monthName, "year", yearNum));
                 player.sendTitle(mainTitle, subTitle);
             }
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
@@ -2428,7 +2413,7 @@ public class DateUtils {
      * @param duration The amount of ticks the storm will last.
      */
     private void updateStorm(Weather type, int duration) {
-        String message = null;
+        String messageKey = null;
         World mainWorld = Bukkit.getWorld("world");
         if (mainWorld == null) {
             return; // survival main world must always exist
@@ -2461,7 +2446,7 @@ public class DateUtils {
                         }
                     }
                 }
-                message = ChatUtils.chatMessage(Lang.get("weather.started_rain"));
+                messageKey = "weather.started_rain";
             } else if (type == Weather.THUNDER) {
                 for (World w : weatherWorlds) {
                     w.setClearWeatherDuration(0);
@@ -2482,7 +2467,7 @@ public class DateUtils {
                         }
                     }
                 }
-                message = ChatUtils.chatMessage(Lang.get("weather.started_thunderstorm"));
+                messageKey = "weather.started_thunderstorm";
             } else if (type == Weather.SNOW) {
                 for (World w : weatherWorlds) {
                     w.setThunderDuration(0);
@@ -2503,7 +2488,7 @@ public class DateUtils {
                         }
                     }
                 }
-                message = ChatUtils.chatMessage(Lang.get("weather.started_snow"));
+                messageKey = "weather.started_snow";
             } else {
                 Bukkit.getLogger().info("[AC] Something went wrong with starting the storm...");
                 AranarthUtils.setWeather(Weather.CLEAR);
@@ -2530,7 +2515,7 @@ public class DateUtils {
                     }
                 }
             }
-            message = ChatUtils.chatMessage(Lang.get("weather.storm_subsided"));
+            messageKey = "weather.storm_subsided";
         }
         for (Player player : Bukkit.getOnlinePlayers()) {
             String playerWorld = player.getWorld().getName();
@@ -2540,7 +2525,7 @@ public class DateUtils {
             if (AranarthUtils.getPlayer(player.getUniqueId()).isWeatherMessageDisabled()) {
                 continue;
             }
-            player.sendMessage(message);
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, messageKey)));
         }
     }
 

@@ -25,12 +25,12 @@ public class CommandVpTransfer implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (!(sender instanceof Player player)) {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
 		}
 
 		if (args.length != 2) {
-			player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "vptransfer <player> <amount>")));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "vptransfer <player> <amount>")));
 			return true;
 		}
 
@@ -38,23 +38,23 @@ public class CommandVpTransfer implements CommandExecutor {
 		try {
 			amount = Integer.parseInt(args[1]);
 		} catch (NumberFormatException e) {
-			player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_number")));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_number")));
 			return true;
 		}
 
 		if (amount <= 0) {
-			player.sendMessage(ChatUtils.chatMessage(Lang.get("economy.pay_zero")));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "economy.pay_zero")));
 			return true;
 		}
 
 		UUID receiverUuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
 		if (receiverUuid == null) {
-			player.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[0])));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.not_found", "name", args[0])));
 			return true;
 		}
 
 		if (receiverUuid.equals(player.getUniqueId())) {
-			player.sendMessage(ChatUtils.chatMessage(Lang.get("economy.pay_self")));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "economy.pay_self")));
 			return true;
 		}
 
@@ -63,7 +63,7 @@ public class CommandVpTransfer implements CommandExecutor {
 
 		int available = AranarthUtils.getAvailableVotePoints(player.getUniqueId());
 		if (amount > available) {
-			player.sendMessage(ChatUtils.chatMessage(Lang.get("vptransfer.not_enough", "amount", String.valueOf(available))));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "vptransfer.not_enough", "amount", String.valueOf(available))));
 			return true;
 		}
 
@@ -81,14 +81,14 @@ public class CommandVpTransfer implements CommandExecutor {
 				PersistenceUtils.syncVoteKeysForPlayerToDatabase(receiverUuid)
 		);
 
-		player.sendMessage(ChatUtils.chatMessage(Lang.get("vptransfer.sent", "amount", String.valueOf(amount), "player", receiverNickname)));
+		player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "vptransfer.sent", "amount", String.valueOf(amount), "player", receiverNickname)));
 
 		// Notify receiver
 		boolean receiverOnThisServer = Bukkit.getPlayer(receiverUuid) != null;
 		if (receiverOnThisServer) {
 			Player localReceiver = Bukkit.getPlayer(receiverUuid);
 			if (localReceiver != null) {
-				localReceiver.sendMessage(ChatUtils.chatMessage(Lang.get("vptransfer.received", "amount", String.valueOf(amount), "player", senderAp.getNickname())));
+				localReceiver.sendMessage(ChatUtils.chatMessage(Lang.getFor(localReceiver, "vptransfer.received", "amount", String.valueOf(amount), "player", senderAp.getNickname())));
 			}
 		} else if (NetworkManager.isActive()) {
 			NetworkPlayer networkReceiver = NetworkManager.getInstance().getRemoteRoster().get(receiverUuid);

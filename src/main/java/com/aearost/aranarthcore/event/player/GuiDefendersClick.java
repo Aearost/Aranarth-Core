@@ -38,7 +38,7 @@ public class GuiDefendersClick {
         boolean canManage = dominion.getLeader().equals(player.getUniqueId())
                 || (memberRank != null && dominion.getDominionPermissions().hasPermission(memberRank, DominionPermission.MANAGE_DEFENDERS));
         if (!canManage) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.no_permission_defenders")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.no_permission_defenders")));
             return;
         }
 
@@ -71,10 +71,10 @@ public class GuiDefendersClick {
 
         String result;
         if (e.getClick() == ClickType.RIGHT) {
-            result = DefenderUtils.purchaseDefender(dominion, clickedType, assignTo);
+            result = DefenderUtils.purchaseDefender(player, dominion, clickedType, assignTo);
             player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5F, 1F);
         } else if (e.getClick() == ClickType.LEFT) {
-            result = DefenderUtils.sellDefender(dominion, clickedType, null);
+            result = DefenderUtils.sellDefender(player, dominion, clickedType, null);
             player.playSound(player, Sound.ENTITY_ITEM_PICKUP, 0.5F, 1F);
         } else {
             return;
@@ -84,7 +84,7 @@ public class GuiDefendersClick {
         String openTitle = ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
         String defendersTitlePrefix = ChatUtils.stripColorFormatting(Lang.getFor(player, GuiDefenders.TITLE_PREFIX_KEY, "total", "", "limit", "")).split("\\(")[0].trim();
         if (GuiHolder.isGui(player.getOpenInventory()) && openTitle.startsWith(defendersTitlePrefix)) {
-            GuiDefenders.populate(player.getOpenInventory().getTopInventory(), dominion);
+            GuiDefenders.populate(player, player.getOpenInventory().getTopInventory(), dominion);
         } else {
             GuiDefenders.open(player);
         }

@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionLevelUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -144,13 +145,11 @@ public class DominionDeath {
      * @param warMultiplier The war penalty multiplier (1 = normal, 3 = at war).
      */
     private void displayFoodLoss(Dominion dominion, boolean wasKilledByPlayer, int warMultiplier) {
-        String severelyKeyword = wasKilledByPlayer ? "severely " : "";
-        String warSuffix = warMultiplier > 1 ? " &4(" + warMultiplier + "x war penalty)" : "";
         Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
-                    onlinePlayer.sendMessage(ChatUtils.chatMessage(
-                            "&cYour Dominion's food reserves have been " + severelyKeyword + "depleted" + warSuffix));
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, wasKilledByPlayer ? "dominion.food_severely_depleted" : "dominion.food_depleted",
+                            "war", warMultiplier > 1 ? Lang.getFor(onlinePlayer, "dominion.war_penalty_suffix", "multiplier", warMultiplier) : "")));
                 }
             }
         }, 1L);
@@ -163,13 +162,11 @@ public class DominionDeath {
      * @param warMultiplier The war penalty multiplier (1 = normal, 3 = at war).
      */
     private void displayMoneyLoss(Dominion dominion, boolean wasKilledByPlayer, int warMultiplier) {
-        String severelyKeyword = wasKilledByPlayer ? "severely " : "";
-        String warSuffix = warMultiplier > 1 ? " &4(" + warMultiplier + "x war penalty)" : "";
         Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
-                    onlinePlayer.sendMessage(ChatUtils.chatMessage(
-                            "&cYour Dominion's balance has been " + severelyKeyword + "depleted" + warSuffix));
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, wasKilledByPlayer ? "dominion.balance_severely_depleted" : "dominion.balance_depleted",
+                            "war", warMultiplier > 1 ? Lang.getFor(onlinePlayer, "dominion.war_penalty_suffix", "multiplier", warMultiplier) : "")));
                 }
             }
         }, 1L);
@@ -183,8 +180,7 @@ public class DominionDeath {
         Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
-                    onlinePlayer.sendMessage(ChatUtils.chatMessage(
-                            "&cYour Dominion has lost some of its land"));
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "dominion.land_lost")));
                 }
             }
         }, 1L);

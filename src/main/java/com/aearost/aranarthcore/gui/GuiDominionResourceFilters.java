@@ -18,7 +18,9 @@ import java.util.Set;
  */
 public class GuiDominionResourceFilters {
 
-    public static final String TITLE_SUFFIX_KEY = "gui.dominionresourcefilters.title_suffix";
+    /** Marks this screen, since its title is worded differently in each language. */
+    public record Screen() {
+    }
     private static final int[] CATEGORY_SLOTS = {9, 10, 11, 12, 13, 14, 15, 16, 17};
     private static final DominionResourceCategory[] SLOT_CATEGORIES = {
             DominionResourceCategory.DIRTS,
@@ -49,6 +51,7 @@ public class GuiDominionResourceFilters {
         Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
         Inventory gui = GuiHolder.create(player, 27,
                 Lang.getFor(player, "gui.dominionresourcefilters.title", "dominion", dominion != null ? dominion.getName() : ""));
+        GuiHolder.of(gui).setData(new Screen());
 
         Set<DominionResourceCategory> disabled = dominion != null ? dominion.getDisabledResourceCategories() : Set.of();
 
@@ -78,9 +81,9 @@ public class GuiDominionResourceFilters {
         ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();
 
-        String status = enabled ? Lang.get("gui.active") : Lang.get("gui.inactive");
+        String status = enabled ? Lang.getFor(player, "gui.active") : Lang.getFor(player, "gui.inactive");
         String nameKey = "gui.dominionresourcefilters.category_" + category.name().toLowerCase();
-        meta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, nameKey) + " " + Lang.get("gui.separator") + " " + status));
+        meta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, nameKey) + " " + Lang.getFor(player, "gui.separator") + " " + status));
 
         item.setItemMeta(meta);
         return item;

@@ -138,8 +138,8 @@ public class GuiBrewBook {
     public static void initiateSearch(Player player) {
         awaitingSearch.add(player.getUniqueId());
         player.closeInventory();
-        player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.search_prompt")));
-        player.sendMessage(ChatUtils.chatMessage(Lang.get("general.type_cancel_abort")));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "brew.search_prompt")));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.type_cancel_abort")));
     }
 
     public static boolean isAwaitingSearch(UUID uuid) {
@@ -149,7 +149,7 @@ public class GuiBrewBook {
     public static void handleSearchInput(Player player, String query) {
         awaitingSearch.remove(player.getUniqueId());
         if (query.equalsIgnoreCase("cancel")) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.search_cancelled")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.search_cancelled")));
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> new GuiBrewBook(player, 0).openGui());
             return;
         }

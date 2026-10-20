@@ -774,7 +774,7 @@ public class TradeManager {
             return;
         }
         AranarthPlayer changerAp = AranarthUtils.getPlayer(changerUuid);
-        String changerNick = changerAp != null ? changerAp.getNickname() : "Unknown";
+        String changerNick = changerAp != null ? changerAp.getNickname() : Lang.getFor(local, "info.unknown");
         Inventory inv = local.getOpenInventory().getTopInventory();
         inv.setItem(PAY_RIGHT, buildPayItem(local, amount, false, false, changerNick));
     }
@@ -1044,7 +1044,7 @@ public class TradeManager {
         UUID otherUuid = trade.getOther(player.getUniqueId());
         boolean otherConfirmed = trade.isMyConfirmed(otherUuid);
         AranarthPlayer otherAp = AranarthUtils.getPlayer(otherUuid);
-        String otherNick = otherAp != null ? otherAp.getNickname() : "Unknown";
+        String otherNick = otherAp != null ? otherAp.getNickname() : Lang.getFor(player, "info.unknown");
         if (otherConfirmed && trade.isCompleting()) {
             return namedItem(Material.LIME_TERRACOTTA, Lang.getFor(player, "gui.trade.other_confirmed", "player", otherNick));
         } else if (otherConfirmed) {

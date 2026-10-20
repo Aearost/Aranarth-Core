@@ -47,14 +47,14 @@ public class CraftingOverridesChorusDiamond {
                 if (resultMeta.getPersistentDataContainer().has(HOMEPAD)) {
                     // A normal diamond is used as an ingredient instead of a chorus diamond
                     if (!meta.getPersistentDataContainer().has(CHORUS_DIAMOND)) {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.must_use_item", "item", "Chorus Diamond")));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "crafting.must_use_item", "item", "Chorus Diamond")));
                         e.setCancelled(true);
                     }
                 }
                 // A chorus diamond is used as an ingredient incorrectly
                 else {
                     if (meta.getPersistentDataContainer().has(CHORUS_DIAMOND)) {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.special_item_restricted", "item", "Chorus Diamond")));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "crafting.special_item_restricted", "item", "Chorus Diamond")));
                         e.setCancelled(true);
                     }
                 }
@@ -62,7 +62,7 @@ public class CraftingOverridesChorusDiamond {
         }
         // Result has no meta, therefore not requiring Chorus Diamonds
         else {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.special_item_restricted", "item", "Chorus Diamond")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "crafting.special_item_restricted", "item", "Chorus Diamond")));
             e.setCancelled(true);
         }
     }

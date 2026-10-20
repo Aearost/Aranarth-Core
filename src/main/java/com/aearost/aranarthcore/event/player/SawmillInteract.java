@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.recipes.RecipeSawmill;
+import com.aearost.aranarthcore.utils.Lang;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -34,7 +35,7 @@ public class SawmillInteract {
 		e.setCancelled(true);
 		Player player = e.getPlayer();
 		MenuType.STONECUTTER.builder()
-				.title(Component.text("Sawmill"))
+				.title(Component.text(Lang.getFor(player, "gui.recipes.station_sawmill")))
 				.checkReachable(false)
 				.build(player)
 				.open();

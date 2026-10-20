@@ -171,26 +171,26 @@ public class CraftingOverridesAranarthium {
             String ingotType = resultMeta.getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING);
             if (ingotType.equals("aranarthium")) {
                 if (material == Material.IRON_INGOT || material == Material.TURTLE_SCUTE) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.must_use_item", "item", itemName)));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "crafting.must_use_item", "item", itemName)));
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.must_use_item", "item", itemName)));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "crafting.must_use_item", "item", itemName)));
                 }
             } else {
                 if (material == Material.ECHO_SHARD && ingredientItem instanceof AranarthiumIngot) {
                     // Plain echo shard used where an Aranarthium Ingot (custom) is required
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.must_use_item", "item", itemName)));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "crafting.must_use_item", "item", itemName)));
                 } else if (material == Material.IRON_INGOT || material == Material.TURTLE_SCUTE || material == Material.ECHO_SHARD) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.special_item_restricted", "item", itemName)));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "crafting.special_item_restricted", "item", itemName)));
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.special_item_restricted", "item", itemName)));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "crafting.special_item_restricted", "item", itemName)));
                 }
             }
         } else {
             e.setCancelled(true);
             if (material == Material.IRON_INGOT || material == Material.TURTLE_SCUTE || material == Material.ECHO_SHARD) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.special_item_restricted", "item", itemName)));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "crafting.special_item_restricted", "item", itemName)));
             } else {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.special_item_restricted", "item", itemName)));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "crafting.special_item_restricted", "item", itemName)));
             }
         }
     }

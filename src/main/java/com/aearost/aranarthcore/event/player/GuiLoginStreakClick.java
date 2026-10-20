@@ -72,7 +72,7 @@ public class GuiLoginStreakClick {
         for (int i = 0; i < GuiLoginStreak.DAY_SLOTS.length; i++) {
             e.getInventory().setItem(
                     GuiLoginStreak.DAY_SLOTS[i],
-                    GuiLoginStreak.makeDayItem(i + 1, newDay, canClaimNow, rank)
+                    GuiLoginStreak.makeDayItem(player, i + 1, newDay, canClaimNow, rank)
             );
         }
     }

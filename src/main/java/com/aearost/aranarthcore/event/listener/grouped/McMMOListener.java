@@ -36,7 +36,7 @@ public class McMMOListener implements Listener {
 		if (repairedObject != null && repairedObject.getItemMeta() != null
 				&& repairedObject.getItemMeta().getPersistentDataContainer().has(CustomKeys.ARMOR_TYPE, PersistentDataType.STRING)) {
 			e.setCancelled(true);
-			e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("aranarthium.cannot_repair")));
+			e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "aranarthium.cannot_repair")));
 		}
 	}
 
@@ -49,7 +49,7 @@ public class McMMOListener implements Listener {
 		if (salvageItem != null && salvageItem.getItemMeta() != null
 				&& salvageItem.getItemMeta().getPersistentDataContainer().has(CustomKeys.ARMOR_TYPE, PersistentDataType.STRING)) {
 			e.setCancelled(true);
-			e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("aranarthium.cannot_salvage")));
+			e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "aranarthium.cannot_salvage")));
 		}
 	}
 
@@ -66,14 +66,12 @@ public class McMMOListener implements Listener {
 		int skillLevel = e.getSkillLevel();
 		if (skillLevel % 100 == 0) {
 			String skillName = e.getSkill().getName();
-			Bukkit.broadcastMessage(ChatUtils.chatMessage(
-					"&e" + displayName + " &7has reached level &e" + skillLevel + " &7in &e" + skillName));
+			Lang.broadcast("mcmmo.skill_level", "player", displayName, "level", skillLevel, "skill", skillName);
 		}
 
 		int powerLevel = ExperienceAPI.getPowerLevel(player);
 		if (powerLevel % 100 == 0) {
-			Bukkit.broadcastMessage(ChatUtils.chatMessage(
-					"&e" + displayName + " &7has reached an mcMMO power level &6" + powerLevel));
+			Lang.broadcast("mcmmo.power_level", "player", displayName, "level", powerLevel);
 		}
 	}
 

@@ -36,25 +36,25 @@ public class CommandMail implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
             return true;
         }
 
         if (args.length == 0) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "mail <send|read|clear|clearall>")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "mail <send|read|clear|clearall>")));
             return true;
         }
 
         switch (args[0].toLowerCase()) {
             case "send" -> {
                 if (args.length < 3) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "mail send <player> <message>")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "mail send <player> <message>")));
                     return true;
                 }
 
                 UUID targetUUID = AranarthUtils.getUUIDFromUsernameOrNickname(args[1]);
                 if (targetUUID == null) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.not_found", "name", args[1])));
                     return true;
                 }
 
@@ -93,12 +93,12 @@ public class CommandMail implements CommandExecutor {
 
                 MailUtils.addMail(targetUUID, new Mail(player.getUniqueId(), targetUUID, System.currentTimeMillis(), processedMessage));
                 AranarthPlayer senderPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("mail.sent", "player", targetDisplayName, "message", processedMessage)));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mail.sent", "player", targetDisplayName, "message", processedMessage)));
                 if (Bukkit.getOfflinePlayer(targetUUID).isOnline()) {
                     // Recipient is on this server - notify directly
                     Player target = Bukkit.getPlayer(targetUUID);
-                    target.sendMessage(ChatUtils.chatMessage(Lang.get("mail.received", "sender", senderPlayer.getNickname())));
-                    target.sendMessage(ChatUtils.chatMessage(Lang.get("mail.view_prompt")));
+                    target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "mail.received", "sender", senderPlayer.getNickname())));
+                    target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "mail.view_prompt")));
                 } else if (NetworkManager.isActive()
                         && NetworkManager.getInstance().getRemotePlayer(targetUUID) != null) {
                     // Recipient is on a remote server
@@ -113,7 +113,7 @@ public class CommandMail implements CommandExecutor {
             case "read" -> {
                 List<Mail> mailList = new ArrayList<>(MailUtils.getMail(player.getUniqueId()));
                 if (mailList.isEmpty()) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("mail.no_mail")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mail.no_mail")));
                     return true;
                 }
 
@@ -124,17 +124,17 @@ public class CommandMail implements CommandExecutor {
                     try {
                         page = Integer.parseInt(args[1]);
                     } catch (NumberFormatException e) {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_number")));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_number")));
                         return true;
                     }
                 }
 
                 if (page < 1 || page > totalPages) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("mail.invalid_page", "pages", String.valueOf(totalPages))));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mail.invalid_page", "pages", String.valueOf(totalPages))));
                     return true;
                 }
 
-                player.sendMessage(ChatUtils.translateToColor("&8      - - - &6&lMail &e(Page " + page + "/" + totalPages + ") &8- - -"));
+                player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mail.list_header", "page", page, "total", totalPages)));
 
                 int start = (page - 1) * PAGE_SIZE;
                 int end = Math.min(start + PAGE_SIZE, mailList.size());
@@ -158,7 +158,7 @@ public class CommandMail implements CommandExecutor {
                                 senderName = (nick == null || nick.isEmpty()) ? remoteSender.getUsername() : ChatUtils.stripColorFormatting(nick);
                             } else {
                                 String bukkit = Bukkit.getOfflinePlayer(mail.getSenderUUID()).getName();
-                                senderName = bukkit != null ? bukkit : "Unknown";
+                                senderName = bukkit != null ? bukkit : Lang.getFor(player, "info.unknown");
                             }
                         }
                     }
@@ -178,39 +178,39 @@ public class CommandMail implements CommandExecutor {
             }
             case "clear" -> {
                 if (args.length < 2) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "mail clear <number>")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "mail clear <number>")));
                     return true;
                 }
                 List<Mail> mailList = MailUtils.getMail(player.getUniqueId());
                 if (mailList.isEmpty()) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("mail.no_mail")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mail.no_mail")));
                     return true;
                 }
                 int num;
                 try {
                     num = Integer.parseInt(args[1]);
                 } catch (NumberFormatException e) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_number")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_number")));
                     return true;
                 }
                 if (num < 1 || num > mailList.size()) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("mail.not_found", "number", String.valueOf(num))));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mail.not_found", "number", String.valueOf(num))));
                     return true;
                 }
                 MailUtils.removeMail(player.getUniqueId(), num - 1);
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("mail.deleted", "number", String.valueOf(num))));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mail.deleted", "number", String.valueOf(num))));
                 PersistenceUtils.syncPlayerMailToDatabase(player.getUniqueId());
             }
             case "clearall" -> {
                 if (MailUtils.getMail(player.getUniqueId()).isEmpty()) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("mail.no_mail")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mail.no_mail")));
                     return true;
                 }
                 MailUtils.clearMail(player.getUniqueId());
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("mail.all_deleted")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mail.all_deleted")));
                 PersistenceUtils.syncPlayerMailToDatabase(player.getUniqueId());
             }
-            default -> player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "mail <send|read|clear|clearall>")));
+            default -> player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "mail <send|read|clear|clearall>")));
         }
 
         return true;

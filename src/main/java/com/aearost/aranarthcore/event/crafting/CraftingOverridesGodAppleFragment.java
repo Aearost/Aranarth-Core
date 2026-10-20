@@ -39,14 +39,14 @@ public class CraftingOverridesGodAppleFragment {
             if (result.getType() == Material.ENCHANTED_GOLDEN_APPLE) {
                 // A normal gold nugget is used as an ingredient instead of a god apple fragment
                 if (meta == null || !meta.getPersistentDataContainer().has(GOD_APPLE_FRAGMENT)) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.must_use_item", "item", "God Apple Fragment")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "crafting.must_use_item", "item", "God Apple Fragment")));
                     e.setCancelled(true);
                 }
             }
             // A god apple fragment is used as an ingredient incorrectly
             else {
                 if (meta.getPersistentDataContainer().has(GOD_APPLE_FRAGMENT)) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.special_item_restricted", "item", "God Apple Fragment")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "crafting.special_item_restricted", "item", "God Apple Fragment")));
                     e.setCancelled(true);
                 }
             }

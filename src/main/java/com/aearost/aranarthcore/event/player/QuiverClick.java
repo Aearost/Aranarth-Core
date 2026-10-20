@@ -26,7 +26,7 @@ public class QuiverClick {
 						GuiQuiver gui = new GuiQuiver(e.getPlayer());
 						gui.openGui();
 					} else {
-						e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("market.must_survival_quiver")));
+						e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "market.must_survival_quiver")));
 					}
 				}
 			}

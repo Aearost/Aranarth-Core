@@ -9,6 +9,7 @@ import com.aearost.aranarthcore.objects.JobData;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.JobUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.dre.brewery.api.events.brew.BrewModifyEvent;
 import com.gmail.nossr50.mcMMO;
 import org.bukkit.Chunk;
@@ -691,7 +692,7 @@ public class JobEventListener implements Listener {
         }
         // Only award for Sawmill (stonecutter placed on wood block), identified by title
         String title = ChatColor.stripColor(e.getView().getTitle());
-        if (!title.equals("Sawmill")) {
+        if (!title.equals(ChatColor.stripColor(Lang.getFor(player, "gui.recipes.station_sawmill")))) {
             return;
         }
         if (e.getRawSlot() != 1) {

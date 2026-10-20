@@ -17,7 +17,7 @@ public class SugarcaneBlockPlace {
 			ItemMeta meta = e.getItemInHand().getItemMeta();
 			if (meta.getPersistentDataContainer().has(SUGARCANE_BLOCK)) {
 				e.setCancelled(true);
-				e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("shop.cannot_place_sugarcane")));
+				e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "shop.cannot_place_sugarcane")));
 			}
 		}
 	}

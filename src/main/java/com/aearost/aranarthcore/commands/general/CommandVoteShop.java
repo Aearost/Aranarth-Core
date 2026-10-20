@@ -30,11 +30,11 @@ public class CommandVoteShop implements CommandExecutor {
 				gui.openGui();
 				return true;
 			} else {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("access.must_survival")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "access.must_survival")));
 				return true;
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
 		}
 	}

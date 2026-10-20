@@ -58,7 +58,7 @@ public class GuiQuiver {
 			int guiSize = 0;
 
 			if (arrows.isEmpty()) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("quiver.no_arrows")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "quiver.no_arrows")));
 				return null;
 			}
 

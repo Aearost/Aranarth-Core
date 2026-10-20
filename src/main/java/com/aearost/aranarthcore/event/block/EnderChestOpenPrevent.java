@@ -23,9 +23,9 @@ public class EnderChestOpenPrevent {
 					e.setCancelled(true);
 					if (e.getHand() == EquipmentSlot.HAND) {
 						if (inventoryGroup.equals("creative")) {
-							e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("access.cannot_ender_creative")));
+							e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "access.cannot_ender_creative")));
 						} else {
-							e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("dominion.must_be_gameplay_world")));
+							e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "dominion.must_be_gameplay_world")));
 						}
 						DiscordUtils.createNotification(e.getPlayer().getName() + " tried to open an enderchest in " + worldName, e.getPlayer().getUniqueId());
 					}

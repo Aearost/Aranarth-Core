@@ -65,11 +65,11 @@ public class GuiVoteShopPurchase {
 		ItemMeta meta = randomKey.getItemMeta();
 		meta.setDisplayName(Lang.getFor(player, "gui.voteshoppurchase.purchase", "item", "&4&lRandom Crate Key"));
 		List<String> lore = new ArrayList<>();
-		lore.add(ChatUtils.translateToColor("&e10 vote points"));
-		lore.add(ChatUtils.translateToColor("&a&oVote &7&o- 65%"));
-		lore.add(ChatUtils.translateToColor("&6&oRare &7&o- 25%"));
-		lore.add(ChatUtils.translateToColor("&3&oEpic &7&o- 7%"));
-		lore.add(ChatUtils.translateToColor("&5&oGodly &7&o- 3%"));
+		lore.add(Lang.getFor(player, "gui.voteshop.random_key_points"));
+		lore.add(ChatUtils.translateToColor("&a&o" + Lang.getFor(player, "crate.tier_vote") + " &7&o- 65%"));
+		lore.add(ChatUtils.translateToColor("&6&o" + Lang.getFor(player, "crate.tier_rare") + " &7&o- 25%"));
+		lore.add(ChatUtils.translateToColor("&3&o" + Lang.getFor(player, "crate.tier_epic") + " &7&o- 7%"));
+		lore.add(ChatUtils.translateToColor("&5&o" + Lang.getFor(player, "crate.tier_godly") + " &7&o- 3%"));
 		meta.getPersistentDataContainer().set(randomKeyNSKey, PersistentDataType.STRING, "true");
 		meta.setLore(lore);
 		randomKey.setItemMeta(meta);

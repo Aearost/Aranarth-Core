@@ -115,13 +115,13 @@ public class GuiDominionResourcesClick {
         Set<DominionResourceCategory> disabled = dominion.getDisabledResourceCategories();
         if (!disabled.isEmpty()) {
             String categoryNames = disabled.stream()
-                    .map(cat -> ChatUtils.translateToColor("&c" + Lang.get("gui.dominionresourcefilters.category_" + cat.name().toLowerCase())))
+                    .map(cat -> ChatUtils.translateToColor("&c" + Lang.getFor(player, "gui.dominionresourcefilters.category_" + cat.name().toLowerCase())))
                     .collect(Collectors.joining("&7, "));
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.resources_categories_disabled", "categories", categoryNames)));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.resources_categories_disabled", "categories", categoryNames)));
         }
 
-        player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.resources_enter_claims", "biome", biomeNameUnformatted)));
-        player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.resources_available", "chunks", dominion.getClaimableResources() + "/" + DominionUtils.getMaxClaimableResourcesAmount(dominion), "biome", biomeNameUnformatted)));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.resources_enter_claims", "biome", biomeNameUnformatted)));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.resources_available", "chunks", dominion.getClaimableResources() + "/" + DominionUtils.getMaxClaimableResourcesAmount(dominion), "biome", biomeNameUnformatted)));
 
         // Show average claim yield across all pending slots
         List<Double> yields = dominion.getClaimFoodYields();
@@ -136,8 +136,8 @@ public class GuiDominionResourcesClick {
         }
         int avgYieldPct = (int) Math.round(avgYield * 100);
         String yieldColor = avgYieldPct >= 80 ? "&a" : avgYieldPct >= 50 ? "&e" : "&c";
-        player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.resources_avg_yield", "color", yieldColor, "yield", avgYieldPct)));
-        player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.resources_timer_hint")));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.resources_avg_yield", "color", yieldColor, "yield", avgYieldPct)));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.resources_timer_hint")));
         player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5F, 1F);
         player.closeInventory();
 

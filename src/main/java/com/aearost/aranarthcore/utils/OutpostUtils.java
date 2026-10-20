@@ -263,14 +263,14 @@ public class OutpostUtils {
     public static String claimOutpostChunk(Player player, Outpost outpost, Dominion dominion, Chunk chunkToClaim) {
         int claimPrice = 1000;
         if (dominion.getBalance() < claimPrice) {
-            return "&cYour dominion cannot afford this!";
+            return Lang.getFor(player, "dominion.cannot_afford");
         }
         int maxChunks = getOutpostMaxChunks(outpost);
         if (outpost.getChunks().size() >= maxChunks) {
-            return "&cOutpost &e" + outpost.getName() + " &chas reached the limit of &e" + maxChunks + " &cchunks";
+            return Lang.getFor(player, "outpost.chunk_limit", "name", outpost.getName(), "max", maxChunks);
         }
         if (!outpost.getChunks().isEmpty() && !isConnectedToOutpostClaims(outpost.getChunks(), chunkToClaim)) {
-            return "&cThis chunk is not connected to your outpost!";
+            return Lang.getFor(player, "outpost.claim_not_connected");
         }
         dominion.setBalance(dominion.getBalance() - claimPrice);
         PersistenceUtils.saveSingleDominionToDatabase(dominion);
@@ -281,8 +281,7 @@ public class OutpostUtils {
         chunkKeyToOutpost.put(getChunkKey(chunkToClaim), outpost);
         DominionUtils.updateDominion(dominion);
         DominionUtils.refreshOutpostBiomeCache(outpost);
-        return "&e" + outpost.getName() + " &7has claimed &e"
-                + outpost.getChunks().size() + "/" + maxChunks + " outpost chunks";
+        return Lang.getFor(player, "outpost.claimed_chunks", "name", outpost.getName(), "count", outpost.getChunks().size(), "max", maxChunks);
     }
 
     /**
@@ -292,19 +291,19 @@ public class OutpostUtils {
     public static String unclaimOutpostChunk(Player player, Outpost outpost, Dominion dominion, Chunk chunk) {
         if (!dominion.getLeader().equals(player.getUniqueId())
                 && dominion.getMemberRank(player.getUniqueId()) != DominionRank.LIEUTENANT) {
-            return "&cOnly the Leader or a Lieutenant can unclaim outpost land!";
+            return Lang.getFor(player, "outpost.unclaim_rank_required");
         }
         if (!DominionUtils.hasPermission(player, dominion, DominionPermission.MANAGE_OUTPOSTS)
                 && !dominion.getLeader().equals(player.getUniqueId())) {
-            return "&cYou do not have permission to manage outposts";
+            return Lang.getFor(player, "outpost.no_manage_permission");
         }
         Chunk homeChunk = outpost.getHome().getChunk();
         if (chunk.getX() == homeChunk.getX() && chunk.getZ() == homeChunk.getZ()
                 && chunk.getWorld().equals(homeChunk.getWorld())) {
-            return "&cYou cannot unclaim the outpost home chunk";
+            return Lang.getFor(player, "outpost.unclaim_home");
         }
         if (!isAllOutpostClaimsConnectedAfterUnclaiming(outpost, chunk)) {
-            return "&cYou cannot unclaim this chunk as it would disconnect your outpost";
+            return Lang.getFor(player, "outpost.unclaim_disconnect");
         }
         outpost.getChunks().remove(chunk);
         chunkKeyToOutpost.remove(getChunkKey(chunk));
@@ -320,7 +319,7 @@ public class OutpostUtils {
             NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), 500);
         }
 
-        return "&7Outpost chunk unclaimed successfully";
+        return Lang.getFor(player, "outpost.unclaimed");
     }
 
     /**

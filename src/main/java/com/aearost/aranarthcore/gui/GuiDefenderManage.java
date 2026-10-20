@@ -60,12 +60,12 @@ public class GuiDefenderManage {
         UUID assignedOutpostId = DefenderUtils.getAssignedOutpostId(defenderEntityUUID);
 
         gui.setItem(SLOT_MODE, followLocked
-                ? buildLockedModeButton(defenderEntityUUID)
-                : buildModeButton(mode, defenderEntityUUID));
-        gui.setItem(SLOT_TELEPORT_HOME, buildTeleportHomeButton(dominion, assignedOutpostId));
-        gui.setItem(SLOT_LOCATION, buildLocationButton(defenderEntityUUID, dominion));
-        gui.setItem(13, buildInfoItem(type, defenderEntityUUID, dominion, mode));
-        gui.setItem(SLOT_SELL, buildSellButton(type));
+                ? buildLockedModeButton(player, defenderEntityUUID)
+                : buildModeButton(player, mode, defenderEntityUUID));
+        gui.setItem(SLOT_TELEPORT_HOME, buildTeleportHomeButton(player, dominion, assignedOutpostId));
+        gui.setItem(SLOT_LOCATION, buildLocationButton(player, defenderEntityUUID, dominion));
+        gui.setItem(13, buildInfoItem(player, type, defenderEntityUUID, dominion, mode));
+        gui.setItem(SLOT_SELL, buildSellButton(player, type));
 
         player.closeInventory();
         player.openInventory(gui);
@@ -79,12 +79,12 @@ public class GuiDefenderManage {
         playerToDefender.remove(playerUUID);
     }
 
-    public static ItemStack buildModeButton(DefenderMode mode, UUID defenderEntityUUID) {
+    public static ItemStack buildModeButton(Player player, DefenderMode mode, UUID defenderEntityUUID) {
         ItemStack item = new ItemStack(modeToMaterial(mode));
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(Lang.get("gui.defendermanage.mode", "mode", mode.getDisplayName()));
+        meta.setDisplayName(Lang.getFor(player, "gui.defendermanage.mode", "mode", mode.getDisplayName()));
         List<String> lore = new ArrayList<>();
-        lore.add(Lang.get("gui.defendermanage.mode_desc", "desc", mode.getDescription()));
+        lore.add(Lang.getFor(player, "gui.defendermanage.mode_desc", "desc", mode.getDescription()));
         lore.add("");
 
         // Show follow player name if relevant
@@ -94,7 +94,7 @@ public class GuiDefenderManage {
                     ? (Bukkit.getOfflinePlayer(followId).getName() != null
                        ? Bukkit.getOfflinePlayer(followId).getName() : followId.toString())
                     : "none";
-            lore.add(Lang.get("gui.defendermanage.following", "name", name));
+            lore.add(Lang.getFor(player, "gui.defendermanage.following", "name", name));
             lore.add("");
         }
 
@@ -102,12 +102,12 @@ public class GuiDefenderManage {
         if (mode == DefenderMode.GUARD) {
             Location guardPos = DefenderUtils.getGuardPosition(defenderEntityUUID);
             if (guardPos != null) {
-                lore.add(Lang.get("gui.defendermanage.guard_pos", "x", String.valueOf((int) guardPos.getX()), "y", String.valueOf((int) guardPos.getY()), "z", String.valueOf((int) guardPos.getZ())));
+                lore.add(Lang.getFor(player, "gui.defendermanage.guard_pos", "x", String.valueOf((int) guardPos.getX()), "y", String.valueOf((int) guardPos.getY()), "z", String.valueOf((int) guardPos.getZ())));
                 lore.add("");
             }
         }
 
-        lore.add(Lang.get("gui.defendermanage.cycle_mode"));
+        lore.add(Lang.getFor(player, "gui.defendermanage.cycle_mode"));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
@@ -122,7 +122,7 @@ public class GuiDefenderManage {
         };
     }
 
-    public static ItemStack buildLockedModeButton(UUID defenderEntityUUID) {
+    public static ItemStack buildLockedModeButton(Player player, UUID defenderEntityUUID) {
         UUID followId = DefenderUtils.getFollowPlayerId(defenderEntityUUID);
         String name = followId != null
                 ? (Bukkit.getOfflinePlayer(followId).getName() != null
@@ -130,16 +130,16 @@ public class GuiDefenderManage {
                 : "someone";
         ItemStack item = new ItemStack(Material.BARRIER);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(Lang.get("gui.defendermanage.mode_locked"));
+        meta.setDisplayName(Lang.getFor(player, "gui.defendermanage.mode_locked"));
         List<String> lore = new ArrayList<>();
-        lore.add(Lang.get("gui.defendermanage.mode_locked_lore", "name", name));
-        lore.add(Lang.get("gui.defendermanage.mode_locked_lore2"));
+        lore.add(Lang.getFor(player, "gui.defendermanage.mode_locked_lore", "name", name));
+        lore.add(Lang.getFor(player, "gui.defendermanage.mode_locked_lore2"));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
     }
 
-    private static ItemStack buildTeleportHomeButton(Dominion dominion, UUID assignedOutpostId) {
+    private static ItemStack buildTeleportHomeButton(Player player, Dominion dominion, UUID assignedOutpostId) {
         String homeName;
         if (assignedOutpostId != null) {
             Outpost outpost = OutpostUtils.getOutpostById(assignedOutpostId);
@@ -149,44 +149,44 @@ public class GuiDefenderManage {
         }
         ItemStack item = new ItemStack(Material.ENDER_PEARL);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(Lang.get("gui.defendermanage.teleport_home"));
+        meta.setDisplayName(Lang.getFor(player, "gui.defendermanage.teleport_home"));
         List<String> lore = new ArrayList<>();
-        lore.add(Lang.get("gui.defendermanage.teleport_home_lore", "name", homeName));
+        lore.add(Lang.getFor(player, "gui.defendermanage.teleport_home_lore", "name", homeName));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
     }
 
-    public static ItemStack buildLocationButton(UUID defenderEntityUUID, Dominion dominion) {
+    public static ItemStack buildLocationButton(Player player, UUID defenderEntityUUID, Dominion dominion) {
         UUID assignedOutpostId = DefenderUtils.getAssignedOutpostId(defenderEntityUUID);
         String locationName;
         String description;
         if (assignedOutpostId == null) {
             locationName = dominion.getName() + " &7(Dominion)";
-            description = Lang.get("gui.defendermanage.patrols_main");
+            description = Lang.getFor(player, "gui.defendermanage.patrols_main");
         } else {
             Outpost outpost = OutpostUtils.getOutpostById(assignedOutpostId);
             if (outpost != null) {
                 locationName = outpost.getName() + " &7(Outpost " + outpost.getOutpostIndex() + ")";
-                description = Lang.get("gui.defendermanage.patrols_outpost", "name", outpost.getName());
+                description = Lang.getFor(player, "gui.defendermanage.patrols_outpost", "name", outpost.getName());
             } else {
                 locationName = dominion.getName() + " &7(Dominion)";
-                description = Lang.get("gui.defendermanage.patrols_main");
+                description = Lang.getFor(player, "gui.defendermanage.patrols_main");
             }
         }
         ItemStack item = new ItemStack(Material.FILLED_MAP);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(Lang.get("gui.defendermanage.territory", "name", ChatUtils.translateToColor(locationName)));
+        meta.setDisplayName(Lang.getFor(player, "gui.defendermanage.territory", "name", ChatUtils.translateToColor(locationName)));
         List<String> lore = new ArrayList<>();
         lore.add(description);
         lore.add("");
-        lore.add(Lang.get("gui.defendermanage.cycle_territory"));
+        lore.add(Lang.getFor(player, "gui.defendermanage.cycle_territory"));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
     }
 
-    public static ItemStack buildInfoItem(DefenderType type, UUID entityUUID, Dominion dominion, DefenderMode mode) {
+    public static ItemStack buildInfoItem(Player player, DefenderType type, UUID entityUUID, Dominion dominion, DefenderMode mode) {
         NumberFormat fmt = NumberFormat.getInstance();
 
         double currentHp = 0;
@@ -201,25 +201,25 @@ public class GuiDefenderManage {
 
         ItemStack item = new ItemStack(type.getSpawnEgg());
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(Lang.get("gui.defendermanage.info_name", "type", type.getDisplayName()));
+        meta.setDisplayName(Lang.getFor(player, "gui.defendermanage.info_name", "type", Lang.key(type.getNameKey())));
         List<String> lore = new ArrayList<>();
-        lore.add(Lang.get("gui.defendermanage.info_dominion", "name", dominion.getName()));
-        lore.add(Lang.get("gui.defenders.role", "role", type.getRole()));
-        lore.add(Lang.get("gui.defendermanage.info_hp", "hp", String.valueOf((int) (currentHp / 2)), "max", String.valueOf((int) (maxHp / 2))));
-        lore.add(Lang.get("gui.defendermanage.info_mode", "mode", mode.getDisplayName()));
+        lore.add(Lang.getFor(player, "gui.defendermanage.info_dominion", "name", dominion.getName()));
+        lore.add(Lang.getFor(player, "gui.defenders.role", "role", type.getRole()));
+        lore.add(Lang.getFor(player, "gui.defendermanage.info_hp", "hp", String.valueOf((int) (currentHp / 2)), "max", String.valueOf((int) (maxHp / 2))));
+        lore.add(Lang.getFor(player, "gui.defendermanage.info_mode", "mode", mode.getDisplayName()));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
     }
 
-    private static ItemStack buildSellButton(DefenderType type) {
+    private static ItemStack buildSellButton(Player player, DefenderType type) {
         NumberFormat fmt = NumberFormat.getInstance();
         ItemStack item = new ItemStack(Material.GOLD_INGOT);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(Lang.get("gui.defendermanage.sell"));
+        meta.setDisplayName(Lang.getFor(player, "gui.defendermanage.sell"));
         List<String> lore = new ArrayList<>();
-        lore.add(Lang.get("gui.defendermanage.sell_lore", "type", type.getDisplayName()));
-        lore.add(Lang.get("gui.defendermanage.sell_refund", "amount", fmt.format((long) type.getSellPrice())));
+        lore.add(Lang.getFor(player, "gui.defendermanage.sell_lore", "type", Lang.key(type.getNameKey())));
+        lore.add(Lang.getFor(player, "gui.defendermanage.sell_refund", "amount", fmt.format((long) type.getSellPrice())));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;

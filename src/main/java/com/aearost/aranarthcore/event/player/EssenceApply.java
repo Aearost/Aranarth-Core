@@ -86,7 +86,7 @@ public class EssenceApply {
 					if (itemMeta.getPersistentDataContainer().has(ESSENCE_TYPE)) {
 						String essenceTypeOnItem = itemMeta.getPersistentDataContainer().get(ESSENCE_TYPE, PersistentDataType.STRING);
 						if (!essenceTypeOnItem.equals(essenceType)) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("essence.one_only")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.one_only")));
 							return;
 						}
 					}
@@ -125,7 +125,7 @@ public class EssenceApply {
 							item.setItemMeta(itemMeta);
 							essenceFloorItem.remove();
 							floorItem.setItemStack(item);
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("essence.applied", "name", essence.getItem().getItemMeta().getDisplayName())));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.applied", "name", essence.getItem().getItemMeta().getDisplayName())));
 							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 						}
 					} else if (essenceType.equals("essence_resilience")) {
@@ -144,7 +144,7 @@ public class EssenceApply {
 							item.setItemMeta(itemMeta);
 							essenceFloorItem.remove();
 							floorItem.setItemStack(item);
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("essence.applied", "name", essence.getItem().getItemMeta().getDisplayName())));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.applied", "name", essence.getItem().getItemMeta().getDisplayName())));
 							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 						}
 					}
@@ -170,14 +170,14 @@ public class EssenceApply {
 					if (toolItem.getItemStack().getItemMeta().getPersistentDataContainer().has(ESSENCE_TYPE)) {
 						String essenceTypeOnItem = toolItem.getItemStack().getItemMeta().getPersistentDataContainer().get(ESSENCE_TYPE, PersistentDataType.STRING);
 						if (!essenceTypeOnItem.equals(essenceType)) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("essence.one_only")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.one_only")));
 							return;
 						}
 					}
 
 					if (essenceType.equals("essence_plentiful")) {
 						if (isExceedingLevel(toolItem.getItemStack())) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("essence.already_max_level")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.already_max_level")));
 							return;
 						}
 						Essence essence = new EssencePlentiful();
@@ -197,7 +197,7 @@ public class EssenceApply {
 						toolItem.setItemStack(tool);
 						aranarthiumItem.remove();
 						essenceFloorItem.remove();
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("essence.applied", "name", essence.getItem().getItemMeta().getDisplayName())));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.applied", "name", essence.getItem().getItemMeta().getDisplayName())));
 						player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 					} else if (essenceType.equals("essence_lifesteal")) {
 						if (isMeleeWeapon(toolItem.getItemStack()) && !isExceedingLevel(toolItem.getItemStack())) {
@@ -235,12 +235,12 @@ public class EssenceApply {
 							toolItem.setItemStack(tool);
 							aranarthiumItem.remove();
 							essenceFloorItem.remove();
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("essence.applied", "name", essence.getItem().getItemMeta().getDisplayName())));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.applied", "name", essence.getItem().getItemMeta().getDisplayName())));
 							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 						}
 					} else if (essenceType.equals("essence_magnetism")) {
 						if (isExceedingLevel(toolItem.getItemStack())) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("essence.already_max_level")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.already_max_level")));
 							return;
 						}
 						if (isTool(toolItem.getItemStack())) {
@@ -264,17 +264,17 @@ public class EssenceApply {
 							toolItem.setItemStack(tool);
 							aranarthiumItem.remove();
 							essenceFloorItem.remove();
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("essence.applied", "name", essence.getItem().getItemMeta().getDisplayName())));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.applied", "name", essence.getItem().getItemMeta().getDisplayName())));
 							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 						}
 					} else if (essenceType.equals("essence_preservation")) {
 						if (isExceedingLevel(toolItem.getItemStack())) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("essence.already_max_level")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.already_max_level")));
 							return;
 						}
 						if (isPickaxe(toolItem.getItemStack())) {
 							if (hasFortune(toolItem.getItemStack())) {
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("essence.preservation_no_fortune")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.preservation_no_fortune")));
 								return;
 							}
 							Essence essence = new EssencePreservation();
@@ -298,7 +298,7 @@ public class EssenceApply {
 							toolItem.setItemStack(tool);
 							aranarthiumItem.remove();
 							essenceFloorItem.remove();
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("essence.applied", "name", essence.getItem().getItemMeta().getDisplayName())));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.applied", "name", essence.getItem().getItemMeta().getDisplayName())));
 							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 						}
 					}

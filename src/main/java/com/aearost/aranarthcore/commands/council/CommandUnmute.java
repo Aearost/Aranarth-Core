@@ -27,7 +27,7 @@ public class CommandUnmute {
 			if (player.hasPermission("aranarth.unmute")) {
 				unmutePlayer(sender, args);
 			} else {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 			}
         } else {
 			unmutePlayer(sender, args);
@@ -42,7 +42,7 @@ public class CommandUnmute {
 	 */
 	private static void unmutePlayer(CommandSender sender, String[] args) {
 		if (args.length == 1) {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac unmute <player> <reason>")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac unmute <player> <reason>")));
 			return;
 		}
 
@@ -64,7 +64,7 @@ public class CommandUnmute {
 
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
 				if (aranarthPlayer.getMuteEndDate().isEmpty()) {
-					sender.sendMessage(ChatUtils.chatMessage(Lang.get("unmute.not_muted", "name", aranarthPlayer.getNickname())));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "unmute.not_muted", "name", aranarthPlayer.getNickname())));
 					return;
 				}
 				aranarthPlayer.setMuteEndDate("");
@@ -73,15 +73,15 @@ public class CommandUnmute {
 
 				Punishment punishment = new Punishment(uuid, LocalDateTime.now(), "UNMUTE", reason.toString(), senderUuid);
 				AranarthUtils.addPunishment(uuid, punishment, false);
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("unmute.player_unmuted", "name", aranarthPlayer.getNickname())));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "unmute.player_unmuted", "name", aranarthPlayer.getNickname())));
 
 				PunishmentUtils.notifyUnmute(uuid);
 				PunishmentUtils.issued(punishment, aranarthPlayer.getNickname(), "", -1);
 			} else {
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("unmute.must_specify_reason")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "unmute.must_specify_reason")));
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", args[1])));
 		}
 	}
 }

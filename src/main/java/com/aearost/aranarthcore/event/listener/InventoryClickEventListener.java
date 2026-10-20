@@ -93,7 +93,7 @@ public class InventoryClickEventListener implements Listener {
         // Only inventories created by AranarthCore are GUIs, so a chest renamed in an anvil can never reach a handler
         boolean isGui = GuiHolder.isGui(e.getView());
         // Chat snapshot GUIs are purely view-only
-        if (isGui && GuiChatSnapshot.isSnapshotGui(ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
+        if (isGui && GuiChatSnapshot.isSnapshotGui(e.getView().getTopInventory())) {
             e.setCancelled(true);
             if (e.getWhoClicked() instanceof Player snapshotViewer) {
                 new AfkCancelByInteract().execute(snapshotViewer);
@@ -159,7 +159,7 @@ public class InventoryClickEventListener implements Listener {
                 new GuiShopLocationClick().execute(e);
             } else if (GuiDominionFood.isFoodTitle(player, ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
                 new GuiDominionFoodClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(Lang.getFor(player, GuiDominionResourceFilters.TITLE_SUFFIX_KEY))) {
+            } else if (GuiHolder.of(e.getView().getTopInventory()).getData() instanceof GuiDominionResourceFilters.Screen) {
                 new GuiDominionResourceFiltersClick().execute(e);
             } else if (GuiDominionResources.isResourcesTitle(player, ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
                 new GuiDominionResourcesClick().execute(e);
@@ -171,10 +171,9 @@ public class InventoryClickEventListener implements Listener {
                     || ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiDominionFlagSelect.TITLE_EXPLOSIONS_KEY))) {
                 new GuiDominionFlagSelectClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiDominionPermissions.HUB_TITLE_KEY))
-                    || (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(Lang.getFor(player, "gui.dominionperms.title_suffix"))
-                    && !ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(Lang.getFor(player, "gui.dominionperms.title_suffix_player")))) {
+                    || GuiHolder.of(e.getView().getTopInventory()).getData() instanceof GuiDominionPermissions.RankScreen) {
                 new GuiDominionPermissionsClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(Lang.getFor(player, "gui.dominionperms.title_suffix_player"))) {
+            } else if (GuiHolder.of(e.getView().getTopInventory()).getData() instanceof GuiDominionPlayerPermissions.Screen) {
                 new GuiDominionPlayerPermissionsClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiDefenderAreaSelect.TITLE_KEY))) {
                 new GuiDefenderAreaSelectClick().execute(e);

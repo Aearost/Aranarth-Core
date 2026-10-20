@@ -54,7 +54,7 @@ public class GuiDominionResourcesPreview {
 
 		// Simulation drops - all always shown with sim context lore
 		for (DominionUtils.SimulationGroup sim : table.simulations) {
-			String simLore = sim.name + " Simulation (" + DominionUtils.formatPct(sim.odds) + " chance)";
+			String simLore = Lang.getFor(player, "gui.resources_simulation", "name", sim.name, "chance", DominionUtils.formatPct(sim.odds));
 			for (DominionUtils.ResourceDrop drop : sim.drops) {
 				displayItems.add(buildPreviewItem(drop.item, buildLore(categoryLine(drop.item), simLore, drop.lore)));
 			}
@@ -98,7 +98,7 @@ public class GuiDominionResourcesPreview {
 		List<String> lore = new ArrayList<>();
 		if (catLine != null) lore.add(ChatUtils.translateToColor(catLine));
 		if (simLine != null) lore.add(ChatUtils.translateToColor("&7&o" + simLine));
-		if (subLine != null) lore.add(ChatUtils.translateToColor("&7&o" + subLine));
+		if (subLine != null) lore.add(ChatUtils.translateToColor("&7&o" + Lang.resolve(player, subLine)));
 		return lore;
 	}
 

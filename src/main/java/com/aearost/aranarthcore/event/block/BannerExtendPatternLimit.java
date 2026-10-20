@@ -183,7 +183,7 @@ public class BannerExtendPatternLimit {
                 player.setItemOnCursor(onCursor);
 
                 if (cursorMeta.getPatterns().size() > 6) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("banner.pattern_limit")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "banner.pattern_limit")));
                 }
             });
         } else {
@@ -203,7 +203,7 @@ public class BannerExtendPatternLimit {
             finalResult.setItemMeta(resultMeta);
 
             if (resultMeta.getPatterns().size() > 6) {
-                player.sendMessage("You are now exceeding the banner pattern limit of 6 - proceed with caution!");
+                player.sendMessage(Lang.getFor(player, "banner.pattern_limit_warning"));
             }
 
             e.setCancelled(true);

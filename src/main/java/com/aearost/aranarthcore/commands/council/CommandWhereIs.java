@@ -28,13 +28,13 @@ public class CommandWhereIs {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.whereis")) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return true;
 			}
 		}
 
 		if (args.length == 1) {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.specify_player")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.specify_player")));
 			return true;
 		}
 
@@ -44,7 +44,7 @@ public class CommandWhereIs {
 		for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 			if (targetName.equalsIgnoreCase(onlinePlayer.getName())) {
 				Location location = onlinePlayer.getLocation();
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("whereis.online_local",
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "whereis.online_local",
 						"player", onlinePlayer.getDisplayName(),
 						"world", location.getWorld().getName(),
 						"x", String.valueOf(location.getBlockX()),
@@ -59,7 +59,7 @@ public class CommandWhereIs {
 			for (Map.Entry<UUID, NetworkPlayer> entry : NetworkManager.getInstance().getRemoteRoster().entrySet()) {
 				NetworkPlayer np = entry.getValue();
 				if (targetName.equalsIgnoreCase(np.getUsername())) {
-					sender.sendMessage(ChatUtils.chatMessage(Lang.get("whereis.online_remote",
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "whereis.online_remote",
 							"player", np.getUsername(),
 							"server", np.getServer().toUpperCase())));
 					return true;
@@ -79,7 +79,7 @@ public class CommandWhereIs {
 		if (uuid != null && DatabaseManager.isActive()) {
 			DatabaseManager.LastLocation last = DatabaseManager.getInstance().loadLastLocation(uuid);
 			if (last != null) {
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("whereis.offline",
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "whereis.offline",
 						"player", targetName,
 						"server", last.server.toUpperCase(),
 						"world", last.world,
@@ -90,7 +90,7 @@ public class CommandWhereIs {
 			}
 		}
 
-		sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", targetName)));
+		sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", targetName)));
 		return true;
 	}
 

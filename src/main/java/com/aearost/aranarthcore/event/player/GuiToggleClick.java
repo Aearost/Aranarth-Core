@@ -48,13 +48,13 @@ public class GuiToggleClick {
 				}
                 if (aranarthPlayer.getBlacklistingMethod() != -1) {
                     aranarthPlayer.setBlacklistingMethod(-1);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("market.blacklist_disabled")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "market.blacklist_disabled")));
                 } else {
                     aranarthPlayer.setBlacklistingMethod(0);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("market.sold_blacklist_ignore")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "market.sold_blacklist_ignore")));
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.LAVA_BUCKET, "&f&lBlacklist", aranarthPlayer.getBlacklistingMethod() != -1));
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.LAVA_BUCKET, "&f&lBlacklist", aranarthPlayer.getBlacklistingMethod() != -1));
             }
             // Fire Type
             case 11 -> {
@@ -67,12 +67,12 @@ public class GuiToggleClick {
                     return;
                 }
                 aranarthPlayer.setFireType(newType);
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.firetype_applied", "type", newType.getDisplayName())));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.firetype_applied", "type", newType.getDisplayName())));
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 if (oldType == FireType.BLUE || newType == FireType.BLUE) {
                     PermissionUtils.evaluatePlayerPermissions(player);
                 }
-                refreshSlot(player, slot, GuiToggle.buildFireTypeItem(newType));
+                refreshSlot(player, slot, GuiToggle.buildFireTypeItem(player, newType));
             }
             // Bulk Sell Shulker
             case 12 -> {
@@ -81,25 +81,25 @@ public class GuiToggleClick {
 				}
                 if (aranarthPlayer.isBulkSellShulkerEnabled()) {
                     aranarthPlayer.setBulkSellShulkerEnabled(false);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.disabled", "feature", "bulk sell shulker")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.disabled", "feature", "bulk sell shulker")));
                 } else {
                     aranarthPlayer.setBulkSellShulkerEnabled(true);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.enabled", "feature", "bulk sell shulker")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.enabled", "feature", "bulk sell shulker")));
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.PURPLE_SHULKER_BOX, "&f&lBulk Sell Shulker", aranarthPlayer.isBulkSellShulkerEnabled()));
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.PURPLE_SHULKER_BOX, "&f&lBulk Sell Shulker", aranarthPlayer.isBulkSellShulkerEnabled()));
             }
             // Dominion Claim Messages
             case 13 -> {
                 if (aranarthPlayer.isTogglingChangeClaim()) {
                     aranarthPlayer.setTogglingChangeClaim(false);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.enabled", "feature", "Dominion claim change messages")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.enabled", "feature", "Dominion claim change messages")));
                 } else {
                     aranarthPlayer.setTogglingChangeClaim(true);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.disabled", "feature", "Dominion claim change messages")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.disabled", "feature", "Dominion claim change messages")));
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.WHITE_BANNER, "&f&lDominion Claim Messages", !aranarthPlayer.isTogglingChangeClaim()));
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.WHITE_BANNER, "&f&lDominion Claim Messages", !aranarthPlayer.isTogglingChangeClaim()));
             }
             // Chat
             case 14 -> {
@@ -108,25 +108,25 @@ public class GuiToggleClick {
 				}
                 if (aranarthPlayer.isTogglingChat()) {
                     aranarthPlayer.setTogglingChat(false);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.enabled", "feature", "chat messages")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.enabled", "feature", "chat messages")));
                 } else {
                     aranarthPlayer.setTogglingChat(true);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.disabled", "feature", "chat messages")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.disabled", "feature", "chat messages")));
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.WRITTEN_BOOK, "&f&lChat", !aranarthPlayer.isTogglingChat()));
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.WRITTEN_BOOK, "&f&lChat", !aranarthPlayer.isTogglingChat()));
             }
             // Chest Lock
             case 15 -> {
                 if (aranarthPlayer.isAutoLockingChests()) {
                     aranarthPlayer.setAutoLockingChests(false);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.disabled", "feature", "automatic chest locking")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.disabled", "feature", "automatic chest locking")));
                 } else {
                     aranarthPlayer.setAutoLockingChests(true);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.enabled", "feature", "automatic chest locking")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.enabled", "feature", "automatic chest locking")));
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.TRIAL_KEY, "&f&lChest Lock", aranarthPlayer.isAutoLockingChests()));
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.TRIAL_KEY, "&f&lChest Lock", aranarthPlayer.isAutoLockingChests()));
             }
             // Compressor
             case 16 -> {
@@ -135,25 +135,25 @@ public class GuiToggleClick {
 				}
                 if (aranarthPlayer.isCompressingItems()) {
                     aranarthPlayer.setCompressingItems(false);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.disabled", "feature", "the compressor")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.disabled", "feature", "the compressor")));
                 } else {
                     aranarthPlayer.setCompressingItems(true);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.enabled", "feature", "the compressor")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.enabled", "feature", "the compressor")));
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.PISTON, "&f&lCompressor", aranarthPlayer.isCompressingItems()));
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.PISTON, "&f&lCompressor", aranarthPlayer.isCompressingItems()));
             }
             // Day Message
             case 19 -> {
                 if (aranarthPlayer.isDayMessageDisabled()) {
                     aranarthPlayer.setDayMessageDisabled(false);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.enabled", "feature", "the new day message")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.enabled", "feature", "the new day message")));
                 } else {
                     aranarthPlayer.setDayMessageDisabled(true);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.disabled", "feature", "the new day message")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.disabled", "feature", "the new day message")));
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.CLOCK, "&f&lNew Day Message", !aranarthPlayer.isDayMessageDisabled()));
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.CLOCK, "&f&lNew Day Message", !aranarthPlayer.isDayMessageDisabled()));
             }
             // Gate Creation
             case 20 -> {
@@ -162,11 +162,11 @@ public class GuiToggleClick {
 				}
                 boolean enabled = GateUtils.toggleGatePlacementMode(player.getUniqueId());
                 if (enabled) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("gate.mode_enabled")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "gate.mode_enabled")));
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("gate.mode_disabled")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "gate.mode_disabled")));
                 }
-                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.IRON_BARS, "&f&lGate Creation", enabled));
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.IRON_BARS, "&f&lGate Creation", enabled));
             }
             // Gradient Chat
             case 21 -> {
@@ -176,17 +176,17 @@ public class GuiToggleClick {
 				}
                 if (aranarthPlayer.isGradientChatEnabled()) {
                     aranarthPlayer.setGradientChatEnabled(false);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.disabled", "feature", "gradient chat")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.disabled", "feature", "gradient chat")));
                 } else {
                     if (aranarthPlayer.getGradientChatColors().isEmpty()) {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("gradient.no_saved")));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "gradient.no_saved")));
                         return;
                     }
                     aranarthPlayer.setGradientChatEnabled(true);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.enabled", "feature", "gradient chat")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.enabled", "feature", "gradient chat")));
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.ORANGE_GLAZED_TERRACOTTA, "&f&lGradient Chat", aranarthPlayer.isGradientChatEnabled()));
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.ORANGE_GLAZED_TERRACOTTA, "&f&lGradient Chat", aranarthPlayer.isGradientChatEnabled()));
             }
             // Inventory Assist
             case 22 -> {
@@ -195,13 +195,13 @@ public class GuiToggleClick {
 				}
                 if (aranarthPlayer.isTogglingInventoryAssist()) {
                     aranarthPlayer.setTogglingInventoryAssist(false);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.enabled", "feature", "the inventory assist perk")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.enabled", "feature", "the inventory assist perk")));
                 } else {
                     aranarthPlayer.setTogglingInventoryAssist(true);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.disabled", "feature", "the inventory assist perk")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.disabled", "feature", "the inventory assist perk")));
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.CHEST, "&f&lInventory Assist", !aranarthPlayer.isTogglingInventoryAssist()));
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.CHEST, "&f&lInventory Assist", !aranarthPlayer.isTogglingInventoryAssist()));
             }
             // Private Messages
             case 23 -> {
@@ -210,25 +210,25 @@ public class GuiToggleClick {
 				}
                 if (aranarthPlayer.isTogglingMessages()) {
                     aranarthPlayer.setTogglingMessages(false);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.enabled", "feature", "private messages")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.enabled", "feature", "private messages")));
                 } else {
                     aranarthPlayer.setTogglingMessages(true);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.disabled", "feature", "private messages")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.disabled", "feature", "private messages")));
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.PAPER, "&f&lPrivate Messages", !aranarthPlayer.isTogglingMessages()));
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.PAPER, "&f&lPrivate Messages", !aranarthPlayer.isTogglingMessages()));
             }
             // Pet Hurt
             case 24 -> {
                 if (aranarthPlayer.isHurtingOwnPets()) {
                     aranarthPlayer.setHurtingOwnPets(false);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.disabled", "feature", "the ability to hurt your own pets")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.disabled", "feature", "the ability to hurt your own pets")));
                 } else {
                     aranarthPlayer.setHurtingOwnPets(true);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.enabled", "feature", "the ability to hurt your own pets")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.enabled", "feature", "the ability to hurt your own pets")));
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.NAME_TAG, "&f&lPet Hurt", aranarthPlayer.isHurtingOwnPets()));
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.NAME_TAG, "&f&lPet Hurt", aranarthPlayer.isHurtingOwnPets()));
             }
             // Shulker Assist
             case 25 -> {
@@ -237,28 +237,28 @@ public class GuiToggleClick {
 				}
                 if (aranarthPlayer.isAddingToShulker()) {
                     aranarthPlayer.setAddingToShulker(false);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.disabled", "feature", "the shulker assist perk")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.disabled", "feature", "the shulker assist perk")));
                 } else {
                     aranarthPlayer.setAddingToShulker(true);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.enabled", "feature", "the shulker assist perk")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.enabled", "feature", "the shulker assist perk")));
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.SHULKER_BOX, "&f&lShulker Assist", aranarthPlayer.isAddingToShulker()));
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.SHULKER_BOX, "&f&lShulker Assist", aranarthPlayer.isAddingToShulker()));
             }
             // Spawn Boost
             case 28 -> {
                 if (aranarthPlayer.isUsingSpawnBoost()) {
                     aranarthPlayer.setUsingSpawnBoost(false);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.disabled", "feature", "the spawn boost effects")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.disabled", "feature", "the spawn boost effects")));
                     if (AranarthUtils.isSpawnLocation(player.getLocation())) {
                         player.clearActivePotionEffects();
                     }
                 } else {
                     aranarthPlayer.setUsingSpawnBoost(true);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.enabled", "feature", "the spawn boost effects")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.enabled", "feature", "the spawn boost effects")));
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.FEATHER, "&f&lSpawn Boost", aranarthPlayer.isUsingSpawnBoost()));
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.FEATHER, "&f&lSpawn Boost", aranarthPlayer.isUsingSpawnBoost()));
             }
             // Teleport Requests
             case 29 -> {
@@ -267,37 +267,37 @@ public class GuiToggleClick {
 				}
                 if (aranarthPlayer.isTogglingTp()) {
                     aranarthPlayer.setTogglingTp(false);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.enabled", "feature", "teleport requests")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.enabled", "feature", "teleport requests")));
                 } else {
                     aranarthPlayer.setTogglingTp(true);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.disabled", "feature", "teleport requests")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.disabled", "feature", "teleport requests")));
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.ENDER_PEARL, "&f&lTeleport Requests", !aranarthPlayer.isTogglingTp()));
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.ENDER_PEARL, "&f&lTeleport Requests", !aranarthPlayer.isTogglingTp()));
             }
             // Weather Messages
             case 30 -> {
                 if (aranarthPlayer.isWeatherMessageDisabled()) {
                     aranarthPlayer.setWeatherMessageDisabled(false);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.enabled", "feature", "weather change messages")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.enabled", "feature", "weather change messages")));
                 } else {
                     aranarthPlayer.setWeatherMessageDisabled(true);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.disabled", "feature", "weather change messages")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.disabled", "feature", "weather change messages")));
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.WIND_CHARGE, "&f&lWeather Messages", !aranarthPlayer.isWeatherMessageDisabled()));
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.WIND_CHARGE, "&f&lWeather Messages", !aranarthPlayer.isWeatherMessageDisabled()));
             }
             // Dominion Msg Compact
             case 31 -> {
                 if (aranarthPlayer.isDominionMsgCompact()) {
                     aranarthPlayer.setDominionMsgCompact(false);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.disabled", "feature", "compact dominion messages")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.disabled", "feature", "compact dominion messages")));
                 } else {
                     aranarthPlayer.setDominionMsgCompact(true);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.enabled", "feature", "compact dominion messages")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.enabled", "feature", "compact dominion messages")));
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.COMPASS, "&f&lDominion Msg Compact", aranarthPlayer.isDominionMsgCompact()));
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.COMPASS, "&f&lDominion Msg Compact", aranarthPlayer.isDominionMsgCompact()));
             }
             // Interactive Chat
             case 32 -> {
@@ -307,25 +307,25 @@ public class GuiToggleClick {
                 }
                 if (aranarthPlayer.isInteractiveChatEnabled()) {
                     aranarthPlayer.setInteractiveChatEnabled(false);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.disabled", "feature", "interactive chat")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.disabled", "feature", "interactive chat")));
                 } else {
                     aranarthPlayer.setInteractiveChatEnabled(true);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.enabled", "feature", "interactive chat")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.enabled", "feature", "interactive chat")));
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.RECOVERY_COMPASS, "&f&lInteractive Chat", aranarthPlayer.isInteractiveChatEnabled()));
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.RECOVERY_COMPASS, "&f&lInteractive Chat", aranarthPlayer.isInteractiveChatEnabled()));
             }
             // Emoji
             case 33 -> {
                 if (aranarthPlayer.isEmojiEnabled()) {
                     aranarthPlayer.setEmojiEnabled(false);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.disabled", "feature", "emoji translation")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.disabled", "feature", "emoji translation")));
                 } else {
                     aranarthPlayer.setEmojiEnabled(true);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.enabled", "feature", "emoji translation")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.enabled", "feature", "emoji translation")));
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.HEART_OF_THE_SEA, "&f&lEmoji", aranarthPlayer.isEmojiEnabled()));
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.HEART_OF_THE_SEA, "&f&lEmoji", aranarthPlayer.isEmojiEnabled()));
             }
             // Invisible Armor
             case 37 -> {
@@ -334,37 +334,37 @@ public class GuiToggleClick {
                 }
                 if (InvisibleArmorManager.isArmorHidden(player.getUniqueId())) {
                     InvisibleArmorManager.showArmor(player);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("armor.visible")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "armor.visible")));
                 } else {
                     InvisibleArmorManager.hideArmor(player);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("armor.hidden")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "armor.hidden")));
                 }
-                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.IRON_CHESTPLATE, "&f&lInvisible Armor", InvisibleArmorManager.isArmorHidden(player.getUniqueId())));
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.IRON_CHESTPLATE, "&f&lInvisible Armor", InvisibleArmorManager.isArmorHidden(player.getUniqueId())));
             }
             // Size Scale
             case 34 -> {
                 if (aranarthPlayer.isSizeScaleEnabled()) {
                     aranarthPlayer.setSizeScaleEnabled(false);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.disabled", "feature", "Aranarthium size scaling")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.disabled", "feature", "Aranarthium size scaling")));
                 } else {
                     aranarthPlayer.setSizeScaleEnabled(true);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.enabled", "feature", "Aranarthium size scaling")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.enabled", "feature", "Aranarthium size scaling")));
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 AranarthUtils.applyAranarthiumScale(player);
-                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.POPPED_CHORUS_FRUIT, "&f&lAranarthium Size Scale", aranarthPlayer.isSizeScaleEnabled()));
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.POPPED_CHORUS_FRUIT, "&f&lAranarthium Size Scale", aranarthPlayer.isSizeScaleEnabled()));
             }
             // Server Tips
             case 38 -> {
                 if (aranarthPlayer.isServerTipsDisabled()) {
                     aranarthPlayer.setServerTipsDisabled(false);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.enabled", "feature", "server tips")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.enabled", "feature", "server tips")));
                 } else {
                     aranarthPlayer.setServerTipsDisabled(true);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.disabled", "feature", "server tips")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.disabled", "feature", "server tips")));
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.KNOWLEDGE_BOOK, "&f&lServer Tips", !aranarthPlayer.isServerTipsDisabled()));
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.KNOWLEDGE_BOOK, "&f&lServer Tips", !aranarthPlayer.isServerTipsDisabled()));
             }
             // Sit
             case 39 -> {
@@ -373,15 +373,15 @@ public class GuiToggleClick {
                 }
                 if (aranarthPlayer.isSitDisabled()) {
                     aranarthPlayer.setSitDisabled(false);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.enabled", "feature", "sitting")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.enabled", "feature", "sitting")));
                 } else {
                     aranarthPlayer.setSitDisabled(true);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.disabled", "feature", "sitting")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.disabled", "feature", "sitting")));
                     SitUtils.standUp(player);
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 PermissionUtils.evaluatePlayerPermissions(player);
-                refreshSlot(player, slot, GuiToggle.buildToggleItem(Material.WHITE_CUSHION, "&f&lSit", !aranarthPlayer.isSitDisabled()));
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.WHITE_CUSHION, "&f&lSit", !aranarthPlayer.isSitDisabled()));
             }
         }
     }

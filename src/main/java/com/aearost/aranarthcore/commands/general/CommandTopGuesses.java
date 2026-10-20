@@ -19,7 +19,7 @@ public class CommandTopGuesses implements CommandExecutor {
 			GuiTopGuesses.open(player, 0);
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
 		}
 	}

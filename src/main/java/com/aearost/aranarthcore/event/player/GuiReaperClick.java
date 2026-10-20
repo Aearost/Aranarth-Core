@@ -51,7 +51,7 @@ public class GuiReaperClick {
 
         // Reaper inventory can only be claimed from a survival world
         if (slot != 45 && (player.getWorld() == null || !AranarthUtils.isSurvivalWorld(player.getWorld().getName()))) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("reaper.survival_only")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "reaper.survival_only")));
             player.closeInventory();
             return;
         }
@@ -67,7 +67,7 @@ public class GuiReaperClick {
         if (slot == 47) {
             // The death world only exists on the server the player died on
             if (!deathLocationKnown) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("reaper.wrong_server")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "reaper.wrong_server")));
                 player.closeInventory();
                 return;
             }
@@ -84,7 +84,7 @@ public class GuiReaperClick {
                     }
                 }
                 player.playSound(player, Sound.ENTITY_ENDER_EYE_DEATH, 0.8F, 0.5F);
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("player.items_dropped")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.items_dropped")));
             }, () -> {
             });
             return;
@@ -99,7 +99,7 @@ public class GuiReaperClick {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
             if (aranarthPlayer.getBalance() < cost) {
                 NumberFormat nf = NumberFormat.getNumberInstance();
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("reaper.not_enough_money", "amount", nf.format((long) cost))));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "reaper.not_enough_money", "amount", nf.format((long) cost))));
                 player.playSound(player, Sound.ENTITY_ENDER_EYE_DEATH, 0.8F, 0.5F);
                 player.closeInventory();
                 return;
@@ -129,7 +129,7 @@ public class GuiReaperClick {
                     }
                 }
                 player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("player.inventory_recovered")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.inventory_recovered")));
             }, () -> adjustBalance(player, cost));
         }
     }
@@ -155,7 +155,7 @@ public class GuiReaperClick {
                         // The player left before the items could be handed over, so put the Reaper Inventory back
                         restore(player, record);
                     } else if (player.isOnline()) {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("reaper.no_inventory")));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "reaper.no_inventory")));
                     }
                 }
             });

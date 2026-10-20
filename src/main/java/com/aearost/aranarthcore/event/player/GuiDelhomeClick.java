@@ -34,13 +34,13 @@ public class GuiDelhomeClick {
 					if (e.getSlot() == i) {
 						Home home = aranarthPlayer.getHomes().get(i);
 						AranarthUtils.deletePlayerHome(player, ChatUtils.stripColorFormatting(home.getName()));
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("home.deleted", "name", home.getName())));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.deleted", "name", home.getName())));
 						player.closeInventory();
 						return;
 					}
 				}
 				player.closeInventory();
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.error")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.error")));
 			}
 		}
 	}

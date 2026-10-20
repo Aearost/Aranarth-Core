@@ -33,7 +33,7 @@ public class CommandReaper implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
             return true;
         }
 
@@ -57,7 +57,7 @@ public class CommandReaper implements CommandExecutor {
 
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                 if (finalData == null) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("reaper.no_inventory")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "reaper.no_inventory")));
                     return;
                 }
 
@@ -66,7 +66,7 @@ public class CommandReaper implements CommandExecutor {
                     ReaperManager.remove(player.getUniqueId());
                     Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
                             DatabaseManager.getInstance().deleteReaperInventory(player.getUniqueId()));
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("reaper.expired")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "reaper.expired")));
                     return;
                 }
 
@@ -74,7 +74,7 @@ public class CommandReaper implements CommandExecutor {
                 try {
                     drops = ItemUtils.itemStackArrayFromBase64(finalData[0]);
                 } catch (IOException e) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("reaper.load_failed")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "reaper.load_failed")));
                     Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Failed to deserialize reaper drops for " + player.getName() + ": " + e.getMessage());
                     return;
                 }

@@ -46,8 +46,8 @@ public class WrenchInteract {
         BlockData data = block.getBlockData();
 
         // Check that this block actually has properties
-        if (GuiWrench.buildPropertyItems(data).isEmpty()) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("wrench.no_properties")));
+        if (GuiWrench.buildPropertyItems(player, data).isEmpty()) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "wrench.no_properties")));
             return;
         }
 
@@ -66,7 +66,7 @@ public class WrenchInteract {
                 if (newDamage >= damageable.getMaxDamage()) {
                     player.getInventory().setItemInMainHand(null);
                     player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1f, 1f);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("wrench.broken")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "wrench.broken")));
                     return;
                 }
                 damageable.setDamage(newDamage);

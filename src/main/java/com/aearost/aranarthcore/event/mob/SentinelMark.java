@@ -46,7 +46,7 @@ public class SentinelMark {
 							}
 							if (sentinelToUnmark != null) {
 								ironGolemSentinels.remove(sentinelToUnmark);
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("sentinel.unmarked_golem")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "sentinel.unmarked_golem")));
 								PersistenceUtils.syncPlayerSentinelsToDatabase(player.getUniqueId());
 								return;
 							}
@@ -57,11 +57,11 @@ public class SentinelMark {
 								ironGolemSentinels.add(newGolem);
 								sentinels.put(EntityType.IRON_GOLEM, ironGolemSentinels);
 								aranarthPlayer.setSentinels(sentinels);
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("sentinel.marked_golem")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "sentinel.marked_golem")));
 								player.playSound(player, Sound.BLOCK_BELL_RESONATE, 1F, 2F);
 								PersistenceUtils.syncPlayerSentinelsToDatabase(player.getUniqueId());
 							} else {
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("sentinel.max_golem")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "sentinel.max_golem")));
 							}
 						}
 					}
@@ -71,7 +71,7 @@ public class SentinelMark {
 							e.setCancelled(true);
 
 							if (!wolf.isTamed() || !wolf.getOwnerUniqueId().equals(player.getUniqueId())) {
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("sentinel.not_owner_wolf")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "sentinel.not_owner_wolf")));
 								return;
 							}
 
@@ -88,7 +88,7 @@ public class SentinelMark {
 							}
 							if (sentinelToUnmark != null) {
 								wolfSentinels.remove(sentinelToUnmark);
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("sentinel.unmarked_wolf")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "sentinel.unmarked_wolf")));
 								PersistenceUtils.syncPlayerSentinelsToDatabase(player.getUniqueId());
 								return;
 							}
@@ -99,11 +99,11 @@ public class SentinelMark {
 								wolfSentinels.add(newWolf);
 								sentinels.put(EntityType.WOLF, wolfSentinels);
 								aranarthPlayer.setSentinels(sentinels);
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("sentinel.marked_wolf")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "sentinel.marked_wolf")));
 								player.playSound(player, Sound.BLOCK_BELL_RESONATE, 1F, 2F);
 								PersistenceUtils.syncPlayerSentinelsToDatabase(player.getUniqueId());
 							} else {
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("sentinel.max_wolf")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "sentinel.max_wolf")));
 							}
 						}
 					}
@@ -113,7 +113,7 @@ public class SentinelMark {
 							e.setCancelled(true);
 
 							if (!horse.isTamed() || (horse.getOwnerUniqueId() != null && !horse.getOwnerUniqueId().equals(player.getUniqueId()))) {
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("sentinel.not_owner_horse")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "sentinel.not_owner_horse")));
 								return;
 							}
 
@@ -130,7 +130,7 @@ public class SentinelMark {
 							}
 							if (sentinelToUnmark != null) {
 								horseSentinel.remove(sentinelToUnmark);
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("sentinel.unmarked_horse")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "sentinel.unmarked_horse")));
 								PersistenceUtils.syncPlayerSentinelsToDatabase(player.getUniqueId());
 								return;
 							}
@@ -141,11 +141,11 @@ public class SentinelMark {
 								horseSentinel.add(newHorse);
 								sentinels.put(EntityType.HORSE, horseSentinel);
 								aranarthPlayer.setSentinels(sentinels);
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("sentinel.marked_horse")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "sentinel.marked_horse")));
 								player.playSound(player, Sound.BLOCK_BELL_RESONATE, 1F, 2F);
 								PersistenceUtils.syncPlayerSentinelsToDatabase(player.getUniqueId());
 							} else {
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("sentinel.max_horse")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "sentinel.max_horse")));
 							}
 						}
 					}

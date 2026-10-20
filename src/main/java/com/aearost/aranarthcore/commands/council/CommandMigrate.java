@@ -16,11 +16,11 @@ public class CommandMigrate {
 
     public static boolean onCommand(CommandSender sender, String[] args) {
         if (!DatabaseManager.isActive()) {
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("migrate.mysql_not_active")));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "migrate.mysql_not_active")));
             return true;
         }
 
-        sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.migration_start")));
+        sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "admin.migration_start")));
 
         Bukkit.getScheduler().runTaskAsynchronously(
                 AranarthCore.getInstance(), () -> {
@@ -37,11 +37,11 @@ public class CommandMigrate {
 
                 Bukkit.getScheduler().runTask(
                         AranarthCore.getInstance(),
-                        () -> sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.migration_done"))));
+                        () -> sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "admin.migration_done"))));
             } catch (Exception e) {
                 Bukkit.getScheduler().runTask(
                         AranarthCore.getInstance(),
-                        () -> sender.sendMessage(ChatUtils.chatMessage(Lang.get("migrate.failed"))));
+                        () -> sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "migrate.failed"))));
                 AranarthCore.getInstance().getLogger().severe("Migration error: " + e.getMessage());
             }
         });

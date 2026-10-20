@@ -101,7 +101,7 @@ public class GuiQuiverClick {
 
 														Color color = meta.getCustomEffects().getFirst().getType().getColor();
 														String rgbAsHex = String.format("#%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue());
-														player.sendMessage(ChatUtils.chatMessage(Lang.get("arrow.now_custom", "color", rgbAsHex, "name", newName)));
+														player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arrow.now_custom", "color", rgbAsHex, "name", newName)));
 														player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 													} else {
 														StringBuilder newNameSB = new StringBuilder();
@@ -120,7 +120,7 @@ public class GuiQuiverClick {
 														// Puts the text in the color of the potion
 														Color color = meta.getBasePotionType().getPotionEffects().getFirst().getType().getColor();
 														String rgbAsHex = String.format("#%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue());
-														player.sendMessage(ChatUtils.chatMessage(Lang.get("arrow.now_custom", "color", rgbAsHex, "name", newNameSB)));
+														player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arrow.now_custom", "color", rgbAsHex, "name", newNameSB)));
 														player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 													}
 												}
@@ -130,7 +130,7 @@ public class GuiQuiverClick {
 														String type = stackFromQuiver.getItemMeta().getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
 														ItemStack arrowItem = AranarthUtils.getArrowFromType(type);
 														String arrowName = arrowItem.getItemMeta().getDisplayName() + "s";
-														player.sendMessage(ChatUtils.chatMessage(Lang.get("arrow.now_named", "name", arrowName)));
+														player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arrow.now_named", "name", arrowName)));
 														player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 													}
 												}
@@ -138,10 +138,10 @@ public class GuiQuiverClick {
 											// Regular or Spectral Arrows
 											else {
 												if (selectedArrow.getType() == Material.ARROW) {
-													player.sendMessage(ChatUtils.chatMessage(Lang.get("arrow.now_regular")));
+													player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arrow.now_regular")));
 													player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 												} else if (selectedArrow.getType() == Material.SPECTRAL_ARROW) {
-													player.sendMessage(ChatUtils.chatMessage(Lang.get("arrow.now_spectral")));
+													player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arrow.now_spectral")));
 													player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 												}
 											}
@@ -164,7 +164,7 @@ public class GuiQuiverClick {
 							if (playerArrows.get(j) != null && AranarthUtils.verifyIsSameArrow(playerArrows.get(j), selectedArrow) != null) {
 								int freeSlot = player.getInventory().firstEmpty();
 								if (freeSlot == -1) {
-									player.sendMessage(ChatUtils.chatMessage(Lang.get("quiver.no_free_slots")));
+									player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "quiver.no_free_slots")));
 								} else {
 									ItemStack stackFromQuiver = playerArrows.get(j).clone();
 									playerArrows.set(j, null);
@@ -178,7 +178,7 @@ public class GuiQuiverClick {
 												newName = newName + arrowName.substring(1);
 												Color color = meta.getCustomEffects().getFirst().getType().getColor();
 												String rgbAsHex = String.format("#%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue());
-												player.sendMessage(ChatUtils.chatMessage(Lang.get("arrow.now_custom", "color", rgbAsHex, "name", newName)));
+												player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arrow.now_custom", "color", rgbAsHex, "name", newName)));
 												player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 											} else {
 												StringBuilder newNameSB = new StringBuilder();
@@ -196,7 +196,7 @@ public class GuiQuiverClick {
 												}
 												Color color = meta.getBasePotionType().getPotionEffects().getFirst().getType().getColor();
 												String rgbAsHex = String.format("#%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue());
-												player.sendMessage(ChatUtils.chatMessage(Lang.get("arrow.now_custom", "color", rgbAsHex, "name", newNameSB)));
+												player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arrow.now_custom", "color", rgbAsHex, "name", newNameSB)));
 												player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 											}
 										} else {
@@ -204,16 +204,16 @@ public class GuiQuiverClick {
 												String type = stackFromQuiver.getItemMeta().getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
 												ItemStack arrowItem = AranarthUtils.getArrowFromType(type);
 												String arrowName = arrowItem.getItemMeta().getDisplayName() + "s";
-												player.sendMessage(ChatUtils.chatMessage(Lang.get("arrow.now_named", "name", arrowName)));
+												player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arrow.now_named", "name", arrowName)));
 												player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 											}
 										}
 									} else {
 										if (selectedArrow.getType() == Material.ARROW) {
-											player.sendMessage(ChatUtils.chatMessage(Lang.get("arrow.now_regular")));
+											player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arrow.now_regular")));
 											player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 										} else if (selectedArrow.getType() == Material.SPECTRAL_ARROW) {
-											player.sendMessage(ChatUtils.chatMessage(Lang.get("arrow.now_spectral")));
+											player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arrow.now_spectral")));
 											player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 										}
 									}
@@ -223,7 +223,7 @@ public class GuiQuiverClick {
 							}
 						}
 					}
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("quiver.must_have_arrow")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "quiver.must_have_arrow")));
 					player.closeInventory();
 				}
 			}

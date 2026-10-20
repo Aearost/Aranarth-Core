@@ -19,7 +19,7 @@ public class LogWoodStripPrevent {
                 if (getMaterialIfLogOrWood(e.getClickedBlock()) != null) {
                     if (!e.getPlayer().isSneaking()) {
                         e.setCancelled(true);
-                        e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("log.must_sneak_strip")));
+                        e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "log.must_sneak_strip")));
                     }
                 }
             }

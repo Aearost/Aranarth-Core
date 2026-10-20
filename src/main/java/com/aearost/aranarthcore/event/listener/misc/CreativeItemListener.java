@@ -101,7 +101,7 @@ public class CreativeItemListener implements Listener {
 		if (player == null) {
 			return;
 		}
-		player.sendMessage(ChatUtils.chatMessage(Lang.get("creative.item_too_large")));
+		player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "creative.item_too_large")));
 		Bukkit.getLogger().warning("[AC] [Creative] Emptied an oversized " + item.getType().name() + " held by " + player.getName()
 				+ " in " + player.getWorld().getName() + " at " + player.getLocation().getBlockX() + ", "
 				+ player.getLocation().getBlockY() + ", " + player.getLocation().getBlockZ());

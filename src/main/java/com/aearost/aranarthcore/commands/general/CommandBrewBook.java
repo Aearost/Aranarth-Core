@@ -31,7 +31,7 @@ public class CommandBrewBook implements CommandExecutor {
         if (sender instanceof Player player) {
             new GuiBrewBook(player, 0).openGui();
         } else {
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
         }
         return true;
     }
@@ -40,20 +40,20 @@ public class CommandBrewBook implements CommandExecutor {
         if (sender instanceof Player player) {
             AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
             if (ap == null || ap.getCouncilRank() < 3) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
                 return true;
             }
         }
 
         if (args.length < 3) {
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "brewbook unlock <player> <brew name>")));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "brewbook unlock <player> <brew name>")));
             return true;
         }
 
         String targetName = args[1];
         UUID targetUuid = AranarthUtils.getUUIDFromUsername(targetName);
         if (targetUuid == null) {
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", targetName)));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", targetName)));
             return true;
         }
 
@@ -67,12 +67,12 @@ public class CommandBrewBook implements CommandExecutor {
         }
 
         if (recipe == null) {
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("brew.recipe_not_found", "name", brewName)));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "brew.recipe_not_found", "name", brewName)));
             return true;
         }
 
         if (BrewRecipeUtils.isUnlocked(targetUuid, recipe)) {
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("brew.already_unlocked_admin", "player", targetName, "recipe", recipe.getDisplayName())));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "brew.already_unlocked_admin", "player", targetName, "recipe", recipe.getDisplayName())));
             return true;
         }
 
@@ -84,16 +84,16 @@ public class CommandBrewBook implements CommandExecutor {
             if (questUpdated) {
                 Player targetOnline = Bukkit.getPlayer(targetUuid);
                 if (targetOnline != null) {
-                    targetOnline.sendMessage(ChatUtils.chatMessage(Lang.get("quest.weekly_reward_updated")));
+                    targetOnline.sendMessage(ChatUtils.chatMessage(Lang.getFor(targetOnline, "quest.weekly_reward_updated")));
                 }
             }
         }
 
-        sender.sendMessage(ChatUtils.chatMessage(Lang.get("brew.recipe_unlocked_admin", "recipe", recipe.getDisplayName(), "player", targetName)));
+        sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "brew.recipe_unlocked_admin", "recipe", recipe.getDisplayName(), "player", targetName)));
         Player targetOnline = Bukkit.getPlayer(targetUuid);
         if (targetOnline != null) {
-            targetOnline.sendMessage(ChatUtils.chatMessage(Lang.get("brew.recipe_unlocked", "recipe", recipe.getDisplayName())));
-            targetOnline.sendMessage(ChatUtils.chatMessage(Lang.get("brew.use_brewbook")));
+            targetOnline.sendMessage(ChatUtils.chatMessage(Lang.getFor(targetOnline, "brew.recipe_unlocked", "recipe", recipe.getDisplayName())));
+            targetOnline.sendMessage(ChatUtils.chatMessage(Lang.getFor(targetOnline, "brew.use_brewbook")));
         }
 
         return true;

@@ -3,9 +3,7 @@ package com.aearost.aranarthcore.event.mob;
 import com.aearost.aranarthcore.enums.WanderingTraderType;
 import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.WanderingTrader;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -21,15 +19,11 @@ public class WanderingTraderDeath {
         String typeName = resolveTypeName(wt);
 
         if (e.getDamageSource().getCausingEntity() instanceof Player player) {
-            Bukkit.broadcastMessage(ChatUtils.chatMessage(
-                "&7The " + typeName + " was slain by &e" + AranarthUtils.getNickname(player)
-            ));
+            Lang.broadcast("trader.slain_by_player", "type", typeName, "player", AranarthUtils.getNickname(player));
         } else if (e.getDamageSource().getCausingEntity() != null) {
-            Bukkit.broadcastMessage(ChatUtils.chatMessage(
-                "&7The " + typeName + " has been slain by &e" + e.getDamageSource().getCausingEntity().getName()
-            ));
+            Lang.broadcast("trader.slain_by", "type", typeName, "killer", e.getDamageSource().getCausingEntity().getName());
         } else {
-            Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("trader.died", "type", typeName)));
+            Lang.broadcast("trader.died", "type", typeName);
         }
     }
 

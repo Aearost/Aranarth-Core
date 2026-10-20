@@ -45,10 +45,10 @@ public class GuiWarpClick {
 								if (heldItem != Material.AIR) {
 									e.setCancelled(true);
 									if (heldItem == warp.getIcon()) {
-										player.sendMessage(ChatUtils.chatMessage(Lang.get("warp.icon_same")));
+										player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "warp.icon_same")));
 									} else {
 										AranarthUtils.updateWarp(warp.getName(), warp.getLocation(), heldItem);
-										player.sendMessage(ChatUtils.chatMessage(Lang.get("warp.icon_set", "name", warp.getName(), "icon", ChatUtils.getFormattedItemName(heldItem.name()))));
+										player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "warp.icon_set", "name", warp.getName(), "icon", ChatUtils.getFormattedItemName(heldItem.name()))));
 									}
 									player.closeInventory();
 									return;
@@ -57,9 +57,9 @@ public class GuiWarpClick {
 
 							AranarthUtils.teleportPlayer(player, player.getLocation(), warp.getLocation(), aranarthPlayer.isInAdminMode(), warp.getName(), Lang.getFor(player, "warp.teleported", "name", warp.getName()), success -> {
 								if (success) {
-									player.sendMessage(ChatUtils.chatMessage(Lang.get("warp.teleported", "name", warp.getName())));
+									player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "warp.teleported", "name", warp.getName())));
 								} else {
-									player.sendMessage(ChatUtils.chatMessage(Lang.get("warp.teleport_failed", "name", warp.getName())));
+									player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "warp.teleport_failed", "name", warp.getName())));
 								}
 							});
 
@@ -68,7 +68,7 @@ public class GuiWarpClick {
 						}
 					}
 					player.closeInventory();
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("general.error")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.error")));
 				}
 		}
 	}

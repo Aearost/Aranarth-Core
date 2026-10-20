@@ -121,7 +121,7 @@ public class ArrowHit {
 							center.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, center, 1);
 							center.getWorld().playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 1f, 1f);
 						} else {
-							shooter.sendMessage(ChatUtils.chatMessage(Lang.get("arrow.not_in_dominion", "name", chunkDominion.getName())));
+							shooter.sendMessage(ChatUtils.chatMessage(Lang.getFor(shooter, "arrow.not_in_dominion", "name", chunkDominion.getName())));
 						}
 						arrow.remove();
 					}
@@ -142,7 +142,7 @@ public class ArrowHit {
 				if (e.getHitEntity() != null) {
 					e.getHitEntity().getPersistentDataContainer().set(ARROW, PersistentDataType.STRING, "rooting");
 					if (e.getHitEntity() instanceof Player player) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.rooted")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.rooted")));
 					}
 
 					// Removes the attribute after 30 seconds

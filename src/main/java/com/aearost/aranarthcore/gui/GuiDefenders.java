@@ -73,11 +73,11 @@ public class GuiDefenders {
         // Defender type icons
         DefenderType[] types = DefenderType.values();
         for (int i = 0; i < types.length && i < DEFENDER_SLOTS.length; i++) {
-            gui.setItem(DEFENDER_SLOTS[i], buildDefenderItem(types[i], dominion));
+            gui.setItem(DEFENDER_SLOTS[i], buildDefenderItem(player, types[i], dominion));
         }
 
         // Back button in the centre of the bottom border row
-        gui.setItem(40, buildBackButton());
+        gui.setItem(40, buildBackButton(player));
 
         player.closeInventory();
         player.openInventory(gui);
@@ -86,14 +86,14 @@ public class GuiDefenders {
     /**
      * Updates only the defender-type item slots in an already-open inventory.
      */
-    public static void populate(Inventory inv, Dominion dominion) {
+    public static void populate(Player player, Inventory inv, Dominion dominion) {
         DefenderType[] types = DefenderType.values();
         for (int i = 0; i < types.length && i < DEFENDER_SLOTS.length; i++) {
-            inv.setItem(DEFENDER_SLOTS[i], buildDefenderItem(types[i], dominion));
+            inv.setItem(DEFENDER_SLOTS[i], buildDefenderItem(player, types[i], dominion));
         }
     }
 
-    private static ItemStack buildDefenderItem(DefenderType type, Dominion dominion) {
+    private static ItemStack buildDefenderItem(Player player, DefenderType type, Dominion dominion) {
         int count = DefenderUtils.getDefenderCount(dominion.getId(), type);
         int total = DefenderUtils.getTotalDefenderCount(dominion.getId());
         int limit = DefenderUtils.getDefenderLimit(dominion.getDominionLevel());
@@ -101,23 +101,23 @@ public class GuiDefenders {
 
         ItemStack item = new ItemStack(type.getSpawnEgg());
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(Lang.get("gui.defenders.type_count", "type", type.getDisplayName(), "count", String.valueOf(count)));
+        meta.setDisplayName(Lang.getFor(player, "gui.defenders.type_count", "type", Lang.key(type.getNameKey()), "count", String.valueOf(count)));
 
         List<String> lore = new ArrayList<>();
-        lore.add(Lang.get("gui.defenders.role", "role", type.getRole()));
-        lore.add(Lang.get("gui.defenders.max_hp", "hp", String.valueOf((int) (type.getMaxHealth() / 2))));
-        lore.add(Lang.get("gui.defenders.damage", "min", String.valueOf((int) (type.getMinDamage() / 2)), "max", String.valueOf((int) (type.getMaxDamage() / 2))));
+        lore.add(Lang.getFor(player, "gui.defenders.role", "role", type.getRole()));
+        lore.add(Lang.getFor(player, "gui.defenders.max_hp", "hp", String.valueOf((int) (type.getMaxHealth() / 2))));
+        lore.add(Lang.getFor(player, "gui.defenders.damage", "min", String.valueOf((int) (type.getMinDamage() / 2)), "max", String.valueOf((int) (type.getMaxDamage() / 2))));
         if (type.getSpecialAbility() != null) {
-            lore.add(Lang.get("gui.defenders.special", "ability", type.getSpecialAbility()));
+            lore.add(Lang.getFor(player, "gui.defenders.special", "ability", type.getSpecialAbility()));
         }
         if (type.getPerRankLimit() > 0) {
             int typeCount = DefenderUtils.getDefenderCount(dominion.getId(), type);
             int typeMax = type.getPerRankLimit() * dominion.getDominionLevel();
-            lore.add(Lang.get("gui.defenders.type_limit", "count", String.valueOf(typeCount), "max", String.valueOf(typeMax)));
+            lore.add(Lang.getFor(player, "gui.defenders.type_limit", "count", String.valueOf(typeCount), "max", String.valueOf(typeMax)));
         }
         lore.add("");
-        lore.add(Lang.get("gui.defenders.buy", "price", fmt.format((long) type.getPurchasePrice())));
-        lore.add(Lang.get("gui.defenders.sell", "price", fmt.format((long) type.getSellPrice())));
+        lore.add(Lang.getFor(player, "gui.defenders.buy", "price", fmt.format((long) type.getPurchasePrice())));
+        lore.add(Lang.getFor(player, "gui.defenders.sell", "price", fmt.format((long) type.getSellPrice())));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
@@ -139,10 +139,10 @@ public class GuiDefenders {
         return item;
     }
 
-    private static ItemStack buildBackButton() {
+    private static ItemStack buildBackButton(Player player) {
         ItemStack item = new ItemStack(Material.BARRIER);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(Lang.get("gui.back_red"));
+        meta.setDisplayName(Lang.getFor(player, "gui.back_red"));
         item.setItemMeta(meta);
         return item;
     }

@@ -39,14 +39,14 @@ public class CommandDelhome implements CommandExecutor {
 				for (Home home : aranarthPlayer.getHomes()) {
 					if (homeName.equalsIgnoreCase(ChatUtils.stripColorFormatting(home.getName()))) {
 						AranarthUtils.deletePlayerHome(player, homeName);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("home.deleted", "name", home.getName())));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.deleted", "name", home.getName())));
 						return true;
 					}
 				}
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("home.not_found")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.not_found")));
 			} else {
 				if (aranarthPlayer.getHomes().isEmpty()) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("home.no_homes")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.no_homes")));
 				} else {
 					GuiDelhome gui = new GuiDelhome(player);
 					gui.openGui();
@@ -54,7 +54,7 @@ public class CommandDelhome implements CommandExecutor {
 				}
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 		}
 		return false;
 	}

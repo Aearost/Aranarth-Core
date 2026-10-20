@@ -25,7 +25,7 @@ public class AvatarAbilityChange {
                         || parts[1].equals("p") || parts[1].equals("preset") || parts[1].equals("copy")) {
                     for (String name : bendingPlayer.getAbilities().values()) {
                         if (isSubAbility(ChatUtils.stripColorFormatting(name))) {
-                            player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.no_commands_ability")));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.no_commands_ability")));
                             e.setCancelled(true);
                             return;
                         }

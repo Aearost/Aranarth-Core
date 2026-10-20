@@ -102,13 +102,13 @@ public class IceShards extends IceAbility implements AddonAbility, ComboAbility 
 
         String worldName = player.getWorld().getName().toLowerCase();
         if (worldName.endsWith("_nether") || worldName.endsWith("_the_end")) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("ability.iceshards.overworld_only", "ability", Element.ICE.getColor() + this.getName())));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "ability.iceshards.overworld_only", "ability", Element.ICE.getColor() + this.getName())));
             return;
         }
 
         final Weather weather = AranarthUtils.getWeather();
         if (weather == Weather.CLEAR && this.countNearbyWaterSources(player.getLocation(), 50, 50) < 50) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("ability.iceshards.needs_water", "ability", Element.ICE.getColor() + this.getName())));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "ability.iceshards.needs_water", "ability", Element.ICE.getColor() + this.getName())));
             return;
         }
 

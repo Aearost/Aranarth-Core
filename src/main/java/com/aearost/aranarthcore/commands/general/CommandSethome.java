@@ -35,7 +35,7 @@ public class CommandSethome implements CommandExecutor {
 				boolean isOG = AranarthUtils.isOriginalPlayer(player.getUniqueId());
 				// Plots are reached with /plot home instead
 				if (worldName != null && PlotUtils.isPlotWorld(worldName)) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("home.cannot_set_plots")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.cannot_set_plots")));
 					return true;
 				}
 				if (worldName == null
@@ -43,7 +43,7 @@ public class CommandSethome implements CommandExecutor {
 						|| worldName.startsWith("resource")
 						|| (!isOG && PlotUtils.isSmpCreativeWorld(worldName))
 						|| (!isOG && AranarthUtils.isSmpWorld(worldName))) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("home.cannot_set_here")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.cannot_set_here")));
 					return true;
 				}
 
@@ -62,7 +62,7 @@ public class CommandSethome implements CommandExecutor {
 				} else if (player.hasPermission("aranarth.chat.color")) {
 					homeName = ChatUtils.playerColorChat(homeName);
 					if (homeName == null) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.no_permission_color")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "nickname.no_permission_color")));
 						return true;
 					}
 				}
@@ -72,7 +72,7 @@ public class CommandSethome implements CommandExecutor {
 
 				// Ensures that more than just color codes were entered
 				if (strippedName.isEmpty()) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("home.must_enter_name")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.must_enter_name")));
 					return true;
 				}
 
@@ -88,7 +88,7 @@ public class CommandSethome implements CommandExecutor {
 				if (homeNameToDelete.isEmpty()) {
 					int playerMaxHomeCount = AranarthUtils.getMaxHomeNum(player);
 					if (aranarthPlayer.getHomes().size() >= playerMaxHomeCount) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("home.max_homes", "max", String.valueOf(playerMaxHomeCount))));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.max_homes", "max", String.valueOf(playerMaxHomeCount))));
 						return true;
 					}
 				}
@@ -102,17 +102,17 @@ public class CommandSethome implements CommandExecutor {
 				AranarthUtils.addPlayerHome(player, home);
 
 				if (homeNameToDelete.isEmpty()) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("home.added", "name", homeName)));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.added", "name", homeName)));
 				} else {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("home.location_updated", "name", homeName)));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.location_updated", "name", homeName)));
 				}
 				return true;
 			} else {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "sethome <name>")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "sethome <name>")));
 				return true;
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
 		}
 	}

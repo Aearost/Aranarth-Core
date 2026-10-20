@@ -51,7 +51,7 @@ public class ShulkerBoxDye {
 
         if (block.getType() == targetMaterial) {
             e.setCancelled(true);
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("shulker.already_that_color")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shulker.already_that_color")));
             return;
         }
 
@@ -63,7 +63,7 @@ public class ShulkerBoxDye {
             boolean trusted = container.getTrusted().contains(uuid);
             if (!trusted && !aranarthPlayer.isInAdminMode()) {
                 e.setCancelled(true);
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("lock.no_permission_open")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.no_permission_open")));
                 return;
             }
         }
@@ -88,6 +88,6 @@ public class ShulkerBoxDye {
         }
 
         player.playSound(player, Sound.BLOCK_SHULKER_BOX_CLOSE, 1F, 1.5F);
-        player.sendMessage(ChatUtils.chatMessage(Lang.get("shulker.dyed")));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shulker.dyed")));
     }
 }

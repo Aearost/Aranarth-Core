@@ -67,7 +67,7 @@ public class ArenaProtection implements Listener {
 		if (isArenaSpawn(e.getBlock().getLocation())) {
 			if (!canModify(e.getPlayer())) {
 				e.setCancelled(true);
-				e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("access.no_break")));
+				e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "access.no_break")));
 			}
 		}
 	}
@@ -80,7 +80,7 @@ public class ArenaProtection implements Listener {
 		if (e.getBlock().getWorld().getName().equalsIgnoreCase("arena")) {
 			if (!canModify(e.getPlayer())) {
 				e.setCancelled(true);
-				e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("arena.cannot_place")));
+				e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "arena.cannot_place")));
 			}
 		}
 	}
@@ -232,7 +232,7 @@ public class ArenaProtection implements Listener {
 	private void onDamage(EntityDamageEvent e) {
 		if (isArenaSpawn(e.getEntity().getLocation())) {
 			if (e.getDamageSource().getCausingEntity() instanceof Player attacker) {
-				attacker.sendMessage(ChatUtils.chatMessage(Lang.get("spawn.no_harm_players")));
+				attacker.sendMessage(ChatUtils.chatMessage(Lang.getFor(attacker, "spawn.no_harm_players")));
 			}
 			// Additionally prevents the target from being damaged, regardless of the source of damage
 			e.setCancelled(true);
@@ -252,7 +252,7 @@ public class ArenaProtection implements Listener {
 				if (loc.getBlockX() == -1 && loc.getBlockY() == 106 && loc.getBlockZ() == -3) {
 					e.setCancelled(true);
 					Location arenaLoc = new Location(Bukkit.getWorld("arena"), 1000, 101, 1000);
-					AranarthUtils.teleportPlayer(player, player.getLocation(), arenaLoc, true, "&e&lSmall Arena", Lang.getFor(player, "arena.tp_small_success"), success -> {
+					AranarthUtils.teleportPlayer(player, player.getLocation(), arenaLoc, true, Lang.getFor(player, "teleport.title_small_arena"), Lang.getFor(player, "arena.tp_small_success"), success -> {
 						if (success) {
 							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arena.tp_small_success")));
 						} else {
@@ -276,7 +276,7 @@ public class ArenaProtection implements Listener {
 					} else if (locationNum == 4) {
 						arenaLoc = new Location(Bukkit.getWorld("arena"), -940, 104, -947, 135, 0);
 					}
-					AranarthUtils.teleportPlayer(player, player.getLocation(), arenaLoc, true, "&e&lLarge Arena", Lang.getFor(player, "arena.tp_large_success"), success -> {
+					AranarthUtils.teleportPlayer(player, player.getLocation(), arenaLoc, true, Lang.getFor(player, "teleport.title_large_arena"), Lang.getFor(player, "arena.tp_large_success"), success -> {
 						if (success) {
 							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arena.tp_large_success")));
 						} else {

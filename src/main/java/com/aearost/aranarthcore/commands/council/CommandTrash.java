@@ -24,7 +24,7 @@ public class CommandTrash implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.trash")) {
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission")));
 				return true;
 			}
 
@@ -32,7 +32,7 @@ public class CommandTrash implements CommandExecutor {
 			gui.openGui();
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
 		}
 	}

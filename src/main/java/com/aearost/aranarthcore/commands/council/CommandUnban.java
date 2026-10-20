@@ -31,7 +31,7 @@ public class CommandUnban {
 			if (player.hasPermission("aranarth.unban")) {
 				unbanPlayer(sender, args);
 			} else {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 			}
         } else {
 			unbanPlayer(sender, args);
@@ -46,7 +46,7 @@ public class CommandUnban {
 	 */
 	private static void unbanPlayer(CommandSender sender, String[] args) {
 		if (args.length == 1) {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac unban <player> <reason>")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac unban <player> <reason>")));
 			return;
 		}
 
@@ -71,7 +71,7 @@ public class CommandUnban {
 
 				ProfileBanList profileBanList = Bukkit.getBanList(BanList.Type.PROFILE);
 				if (profileBanList.getBanEntry(player.getPlayerProfile()) == null) {
-					sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_banned", "name", aranarthPlayer.getNickname())));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_banned", "name", aranarthPlayer.getNickname())));
 					return;
 				}
 				profileBanList.pardon(player.getPlayerProfile());
@@ -79,12 +79,12 @@ public class CommandUnban {
 				Punishment punishment = new Punishment(uuid, LocalDateTime.now(), "UNBAN", reason.toString(), senderUuid);
 				AranarthUtils.addPunishment(uuid, punishment, false);
 				PunishmentUtils.issued(punishment, AranarthUtils.getNickname(player), "", -1);
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("unban.success", "player", AranarthUtils.getNickname(player), "reason", reason.toString())));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "unban.success", "player", AranarthUtils.getNickname(player), "reason", reason.toString())));
 			} else {
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("unban.must_specify_reason")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "unban.must_specify_reason")));
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[1])));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", args[1])));
 		}
 	}
 }

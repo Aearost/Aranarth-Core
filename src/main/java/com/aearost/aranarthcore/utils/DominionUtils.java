@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.*;
 import org.bukkit.*;
 import org.bukkit.block.Biome;
+import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -166,7 +167,7 @@ public class DominionUtils {
                     ? fightOutpost.isMemberPvpEnabled()
                     : attackerDominion.isMemberPvpEnabled();
             if (!pvpEnabled) {
-                return Lang.get("dominion.cannot_harm_pvp_disabled", "target", aranarthTarget.getNickname(), "name", attackerDominion.getName());
+                return Lang.getFor(attacker, "dominion.cannot_harm_pvp_disabled", "target", aranarthTarget.getNickname(), "name", attackerDominion.getName());
             }
             return null;
         }
@@ -180,7 +181,7 @@ public class DominionUtils {
                 boolean attackerPvp = hasPermission(target, attackerDominion, DominionPermission.PVP);
                 boolean targetPvp = hasPermission(attacker, targetDominion, DominionPermission.PVP);
                 if (!attackerPvp && !targetPvp) {
-                    return Lang.get("dominion.cannot_harm_player_relation", "target", aranarthTarget.getNickname(), "relation", getFormattedRankName(relation));
+                    return Lang.getFor(attacker, "dominion.cannot_harm_player_relation", "target", aranarthTarget.getNickname(), "relation", getFormattedRankName(attacker, relation));
                 }
                 return null;
             }
@@ -189,7 +190,7 @@ public class DominionUtils {
                 // Blocked only when the target is in their own dominion's land (including its outposts)
                 Dominion chunkDominion = getDominionOfChunkAnywhere(target.getLocation().getChunk());
                 if (chunkDominion != null && chunkDominion.isSameDominion(targetDominion)) {
-                    return Lang.get("dominion.cannot_harm_player_neutral", "target", aranarthTarget.getNickname(), "relation", getFormattedRankName(DominionRank.NEUTRAL));
+                    return Lang.getFor(attacker, "dominion.cannot_harm_player_neutral", "target", aranarthTarget.getNickname(), "relation", getFormattedRankName(attacker, DominionRank.NEUTRAL));
                 }
                 return null;
             }
@@ -201,7 +202,7 @@ public class DominionUtils {
         // Attacker has a dominion, target is a wanderer - blocked if target is not a barbarian
         if (attackerDominion != null) {
             if (!aranarthTarget.isBarbarian()) {
-                return Lang.get("dominion.cannot_harm_wanderer", "target", aranarthTarget.getNickname());
+                return Lang.getFor(attacker, "dominion.cannot_harm_wanderer", "target", aranarthTarget.getNickname());
             }
             return null;
         }
@@ -209,21 +210,21 @@ public class DominionUtils {
         // Attacker is a wanderer, target has a dominion
         if (targetDominion != null) {
             if (!aranarthAttacker.isBarbarian()) {
-                return Lang.get("pvp.wanderer_cannot_damage");
+                return Lang.getFor(attacker, "pvp.wanderer_cannot_damage");
             }
             Dominion chunkDominion = getDominionOfChunkAnywhere(target.getLocation().getChunk());
             if (chunkDominion != null && chunkDominion.isSameDominion(targetDominion)) {
-                return Lang.get("dominion.cannot_harm_in_lands", "target", aranarthTarget.getNickname());
+                return Lang.getFor(attacker, "dominion.cannot_harm_in_lands", "target", aranarthTarget.getNickname());
             }
             return null;
         }
 
         // Both are wanderers (neither has a dominion)
         if (!aranarthAttacker.isBarbarian()) {
-            return Lang.get("pvp.wanderer_cannot_damage");
+            return Lang.getFor(attacker, "pvp.wanderer_cannot_damage");
         }
         if (!aranarthTarget.isBarbarian()) {
-            return Lang.get("dominion.cannot_harm_wanderer", "target", aranarthTarget.getNickname());
+            return Lang.getFor(attacker, "dominion.cannot_harm_wanderer", "target", aranarthTarget.getNickname());
         }
         // Both are barbarians - allowed
         return null;
@@ -454,29 +455,29 @@ public class DominionUtils {
         if (dominionOfChunk != null) {
             Dominion playerDominion = getPlayerDominion(player.getUniqueId());
             if (playerDominion != null && playerDominion.isSameDominion(dominionOfChunk)) {
-                return "&cThis chunk is already claimed by your dominion";
+                return Lang.getFor(player, "dominion.claim_already_yours");
             }
-            return "&cThis chunk is already claimed by &e" + dominionOfChunk.getName();
+            return Lang.getFor(player, "dominion.claim_already_other", "name", dominionOfChunk.getName());
         }
         Outpost outpostOfChunk = OutpostUtils.getOutpostOfChunk(chunkToClaim);
         if (outpostOfChunk != null) {
             Dominion playerDominion = getPlayerDominion(player.getUniqueId());
             if (playerDominion != null && outpostOfChunk.getDominionId().equals(playerDominion.getId())) {
-                return "&cThis chunk is already claimed by your outpost &e" + outpostOfChunk.getName();
+                return Lang.getFor(player, "dominion.claim_already_your_outpost", "name", outpostOfChunk.getName());
             }
-            return "&cThis chunk is already claimed by another dominion's outpost";
+            return Lang.getFor(player, "dominion.claim_already_other_outpost");
         }
 
         Dominion playerDominion = getPlayerDominion(player.getUniqueId());
         if (playerDominion == null) {
-            return "&cYou are not part of a dominion!";
+            return Lang.getFor(player, "dominion.not_part_of");
         }
         if (!playerDominion.getLeader().equals(player.getUniqueId())
                 && playerDominion.getMemberRank(player.getUniqueId()) != DominionRank.LIEUTENANT) {
-            return "&cOnly the Leader or Lieutenant can claim land!";
+            return Lang.getFor(player, "dominion.claim_rank_required");
         }
         if (playerDominion.getConqueredRequest() != null) {
-            return "&cYou cannot claim chunks while your Dominion is under active conquest!";
+            return Lang.getFor(player, "dominion.claim_conquest");
         }
 
         int claimPrice = 250;
@@ -484,10 +485,10 @@ public class DominionUtils {
         // Adjacent to main dominion
         if (isConnectedToClaims(playerDominion.getChunks(), chunkToClaim)) {
             if (playerDominion.getBalance() < claimPrice) {
-                return "&cYour dominion cannot afford this!";
+                return Lang.getFor(player, "dominion.cannot_afford");
             }
             if (playerDominion.getChunks().size() >= playerDominion.getMaxChunks()) {
-                return "&cYou cannot claim more than &e" + playerDominion.getMaxChunks() + " chunks!";
+                return Lang.getFor(player, "dominion.claim_limit", "max", playerDominion.getMaxChunks());
             }
             playerDominion.setBalance(playerDominion.getBalance() - claimPrice);
             PersistenceUtils.saveSingleDominionToDatabase(playerDominion);
@@ -500,8 +501,8 @@ public class DominionUtils {
             updateDominion(playerDominion);
             DominionLevelUtils.reevaluateDominion(playerDominion);
             refreshBiomeCache(playerDominion);
-            return "&e" + playerDominion.getName() + " &7has claimed &e"
-                    + playerDominion.getChunks().size() + "/" + playerDominion.getMaxChunks() + " chunks";
+            return Lang.getFor(player, "dominion.claimed_chunks", "name", playerDominion.getName(),
+                    "count", playerDominion.getChunks().size(), "max", playerDominion.getMaxChunks());
         }
 
         // Adjacent to an outpost (lowest index first)
@@ -512,7 +513,7 @@ public class DominionUtils {
             }
         }
 
-        return "&cThis chunk is not connected to your Dominion or an outpost";
+        return Lang.getFor(player, "dominion.claim_not_connected");
     }
 
     /**
@@ -555,10 +556,10 @@ public class DominionUtils {
         if (outpostOfChunk != null) {
             Dominion playerDominion = getPlayerDominion(player.getUniqueId());
             if (playerDominion == null) {
-                return "&cYou are not part of a Dominion";
+                return Lang.getFor(player, "dominion.not_part_of");
             }
             if (!outpostOfChunk.getDominionId().equals(playerDominion.getId())) {
-                return "&cThis chunk is claimed by another dominion's outpost!";
+                return Lang.getFor(player, "dominion.unclaim_other_outpost");
             }
             return OutpostUtils.unclaimOutpostChunk(player, outpostOfChunk, playerDominion, chunk);
         }
@@ -571,11 +572,11 @@ public class DominionUtils {
                 if (playerDominion.isSameDominion(dominionOfChunk)) {
                     if (playerDominion.getLeader().equals(player.getUniqueId()) || playerDominion.getMemberRank(player.getUniqueId()) == DominionRank.LIEUTENANT) {
                         if (playerDominion.getConqueredRequest() != null) {
-                            return "&cYou cannot unclaim chunks while your Dominion is under active conquest!";
+                            return Lang.getFor(player, "dominion.unclaim_conquest");
                         }
                         Chunk homeChunk = playerDominion.getDominionHome().getChunk();
                         if (chunk.getX() == homeChunk.getX() && chunk.getZ() == homeChunk.getZ()) {
-                            return "&cYou cannot unclaim the chunk that the home is in!";
+                            return Lang.getFor(player, "dominion.unclaim_home");
                         } else {
                             if (isAllClaimsConnectedAfterUnclaiming(dominionOfChunk, chunk)) {
                                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
@@ -591,22 +592,22 @@ public class DominionUtils {
                                 updateDominion(playerDominion);
                                 DominionLevelUtils.reevaluateDominion(playerDominion);
                                 refreshBiomeCache(playerDominion);
-                                return "&7This chunk has been unclaimed successfully";
+                                return Lang.getFor(player, "dominion.unclaimed");
                             } else {
-                                return "&cYou cannot unclaim this chunk as they all must remain connected!";
+                                return Lang.getFor(player, "dominion.unclaim_disconnect");
                             }
                         }
                     } else {
-                        return "&cOnly the Leader or Lieutenant can unclaim land!";
+                        return Lang.getFor(player, "dominion.unclaim_rank_required");
                     }
                 } else {
-                    return "&cThis chunk not claimed by " + dominionOfChunk.getName() + "!";
+                    return Lang.getFor(player, "dominion.unclaim_not_yours", "name", dominionOfChunk.getName());
                 }
             } else {
-                return "&cYou are not part of a Dominion";
+                return Lang.getFor(player, "dominion.not_part_of");
             }
         } else {
-            return "&cThis chunk is not claimed!";
+            return Lang.getFor(player, "dominion.unclaim_not_claimed");
         }
     }
 
@@ -616,7 +617,7 @@ public class DominionUtils {
      * @param dominion The Dominion to be disbanded.
      */
     public static void disbandDominion(Dominion dominion) {
-        Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("dominion.disbanded_broadcast", "name", dominion.getName())));
+        Lang.broadcast("dominion.disbanded_broadcast", "name", dominion.getName());
         DiscordUtils.dominionMessage(dominion, dominion.getName() + " &7has been disbanded", Color.RED);
         DefenderUtils.sellAllDominionDefenders(dominion);
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(dominion.getLeader());
@@ -627,7 +628,7 @@ public class DominionUtils {
         }
         if (Bukkit.getOfflinePlayer(dominion.getLeader()).isOnline()) {
             Player leader = Bukkit.getPlayer(dominion.getLeader());
-            leader.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.balance_returned")));
+            leader.sendMessage(ChatUtils.chatMessage(Lang.getFor(leader, "dominion.balance_returned")));
             ItemStack[] foodReserves = dominion.getFood();
             if (foodReserves != null) {
                 for (ItemStack item : foodReserves) {
@@ -964,8 +965,8 @@ public class DominionUtils {
                     for (UUID memberUuid : dominion.getMembers()) {
                         if (Bukkit.getOfflinePlayer(memberUuid).isOnline()) {
                             Player member = Bukkit.getPlayer(memberUuid);
-                            member.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.chunk_over_limit", "name", dominion.getName())));
-                            member.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.chunk_auto_unclaimed")));
+                            member.sendMessage(ChatUtils.chatMessage(Lang.getFor(member, "dominion.chunk_over_limit", "name", dominion.getName())));
+                            member.sendMessage(ChatUtils.chatMessage(Lang.getFor(member, "dominion.chunk_auto_unclaimed")));
                         }
                     }
                 }
@@ -982,7 +983,7 @@ public class DominionUtils {
                 PersistenceUtils.saveSingleDominionToDatabase(dominion);
                 if (Bukkit.getOfflinePlayer(dominion.getLeader()).isOnline()) {
                     Player onlineLeader = Bukkit.getPlayer(dominion.getLeader());
-                    onlineLeader.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.food_consumed", "name", dominion.getName())));
+                    onlineLeader.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlineLeader, "dominion.food_consumed", "name", dominion.getName())));
                 }
             } else {
                 double dailyCost = DominionLevelUtils.getDailyBalanceCost(dominion.getDominionLevel());
@@ -1002,14 +1003,14 @@ public class DominionUtils {
                     for (UUID memberUuid : dominion.getMembers()) {
                         if (Bukkit.getOfflinePlayer(memberUuid).isOnline()) {
                             Player member = Bukkit.getPlayer(memberUuid);
-                            member.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.food_not_enough", "name", dominion.getName())));
+                            member.sendMessage(ChatUtils.chatMessage(Lang.getFor(member, "dominion.food_not_enough", "name", dominion.getName())));
                             // Money was consumed
                             if (result == 1) {
-                                member.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.tax_paid_money", "amount", (int) dailyCost)));
+                                member.sendMessage(ChatUtils.chatMessage(Lang.getFor(member, "dominion.tax_paid_money", "amount", (int) dailyCost)));
                             }
                             // Land was consumed
                             else {
-                                member.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.tax_paid_chunk")));
+                                member.sendMessage(ChatUtils.chatMessage(Lang.getFor(member, "dominion.tax_paid_chunk")));
                             }
                         }
                     }
@@ -2009,7 +2010,7 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.TROPICAL_FISH, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.PUFFERFISH, 2)));
             // Coral - previewOnly variety items, actual selection done in getResourcesByDominionAndBiome
-            String coralNote = "1 of 5 coral types per claim";
+            String coralNote = Lang.key("dominion.resource_note_coral");
             guaranteed.add(new ResourceDrop(new ItemStack(Material.TUBE_CORAL_BLOCK, 8), 0, 0, coralNote, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.TUBE_CORAL, 4), 0, 0, coralNote, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.TUBE_CORAL_FAN, 4), 0, 0, coralNote, true));
@@ -2104,7 +2105,7 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.DANDELION, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BEEF, 8)));
-            String flowerNote3 = "1 of 3 possible per claim";
+            String flowerNote3 = Lang.key("dominion.resource_note_3");
             guaranteed.add(new ResourceDrop(new ItemStack(Material.POPPY, 8), 0, 0, flowerNote3, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.OXEYE_DAISY, 8), 0, 0, flowerNote3, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.CORNFLOWER, 8), 0, 0, flowerNote3, true));
@@ -2117,7 +2118,7 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.DANDELION, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SUNFLOWER, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BEEF, 8)));
-            String flowerNote3s = "1 of 3 possible per claim";
+            String flowerNote3s = Lang.key("dominion.resource_note_3");
             guaranteed.add(new ResourceDrop(new ItemStack(Material.POPPY, 8), 0, 0, flowerNote3s, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.OXEYE_DAISY, 8), 0, 0, flowerNote3s, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.CORNFLOWER, 8), 0, 0, flowerNote3s, true));
@@ -2286,7 +2287,7 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 4)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
-            String flowerNote14 = "1 of 14 possible per claim";
+            String flowerNote14 = Lang.key("dominion.resource_note_14");
             guaranteed.add(new ResourceDrop(new ItemStack(Material.DANDELION, 8), 0, 0, flowerNote14, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.POPPY, 8), 0, 0, flowerNote14, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.WHITE_TULIP, 8), 0, 0, flowerNote14, true));
@@ -2468,7 +2469,7 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.TERRACOTTA, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
-            String terracottaNote = "1 of 6 possible per claim";
+            String terracottaNote = Lang.key("dominion.resource_note_6");
             guaranteed.add(new ResourceDrop(new ItemStack(Material.RED_TERRACOTTA, 16), 0, 0, terracottaNote, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.ORANGE_TERRACOTTA, 16), 0, 0, terracottaNote, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.YELLOW_TERRACOTTA, 16), 0, 0, terracottaNote, true));
@@ -2486,7 +2487,7 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.LEAF_LITTER, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
-            String terracottaNoteW = "1 of 6 possible per claim";
+            String terracottaNoteW = Lang.key("dominion.resource_note_6");
             guaranteed.add(new ResourceDrop(new ItemStack(Material.RED_TERRACOTTA, 8), 0, 0, terracottaNoteW, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.ORANGE_TERRACOTTA, 8), 0, 0, terracottaNoteW, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.YELLOW_TERRACOTTA, 8), 0, 0, terracottaNoteW, true));
@@ -2935,9 +2936,8 @@ public class DominionUtils {
                     resizeFoodArray(dominion);
                     refreshBiomeCache(dominion);
                     if (player.isOnline()) {
-                        player.getPlayer().sendMessage(ChatUtils.chatMessage(
-                                "&cYour Dominion is over its chunk limit and has lost a chunk! "
-                                        + "&7(" + dominion.getChunks().size() + "/" + maxChunks + " chunks)"));
+                        player.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(player.getPlayer(), "dominion.over_chunk_limit",
+                                "count", dominion.getChunks().size(), "max", maxChunks)));
                     }
                 }
             }
@@ -2948,13 +2948,13 @@ public class DominionUtils {
                 if (isAmountIncreasing) {
                     int foodPct = (int) Math.round(getBaseFoodPercentage(dominion) * 100);
                     int yieldPct = (int) Math.round(foodPercentageToYield(foodPct / 100.0) * 100);
-                    player.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("dominion.new_week_resources")));
-                    player.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("dominion.new_week_yield", "food", foodPct, "yield", yieldPct)));
+                    player.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(player.getPlayer(), "dominion.new_week_resources")));
+                    player.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(player.getPlayer(), "dominion.new_week_yield", "food", foodPct, "yield", yieldPct)));
                 } else {
                     if (isClaimPrevented) {
-                        player.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("dominion.claim_failed")));
+                        player.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(player.getPlayer(), "dominion.claim_failed")));
                     } else {
-                        player.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("dominion.claim_available")));
+                        player.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(player.getPlayer(), "dominion.claim_available")));
                     }
                 }
 
@@ -3044,6 +3044,17 @@ public class DominionUtils {
     }
 
     /**
+     * Provides the colored name of the rank in the recipient's language.
+     *
+     * @param recipient The player or console the rank is shown to.
+     * @param rank      The rank.
+     * @return The colored, translated rank name.
+     */
+    public static String getFormattedRankName(CommandSender recipient, DominionRank rank) {
+        return getRankColor(rank) + Lang.getFor(recipient, "dominion.rank_" + rank.name().toLowerCase());
+    }
+
+    /**
      * Verifies active conquest/rebellion requests and resolves any that have reached a deadline or activity threshold.
      */
     public static void checkAndProcessConquestDeadlines() {
@@ -3105,17 +3116,16 @@ public class DominionUtils {
             defender.setConqueredTimestamp(now);
             updateDominion(defender);
             updateDominion(conqueror);
-            String conquestAutoMsg = ChatUtils.chatMessage(defender.getName() + " &4has been conquered by &e" + conqueror.getName());
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 int domVol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getDominionSoundVolume();
                 if (domVol > 0) {
                     onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_7, domVol / 100f, 1F);
                 }
-                onlinePlayer.sendMessage(conquestAutoMsg);
+                onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "dominion.conquered_broadcast", "name", defender.getName(), "conqueror", conqueror.getName())));
             }
             DiscordUtils.dominionMessage(defender, defender.getName() + " has been conquered by " + conqueror.getName(), new Color(101, 0, 0));
             if (nm != null) {
-                nm.publishBroadcast(conquestAutoMsg);
+                nm.publishLangBroadcast("dominion.conquered_broadcast", "name", defender.getName(), "conqueror", conqueror.getName());
                 // a=defender, b=conqueror
                 nm.publishDominionConquestUpdate("conquest_auto", defender, conqueror);
             }
@@ -3136,17 +3146,16 @@ public class DominionUtils {
             conqueror.setLastConquerAttemptTimestamp(now);
             updateDominion(defender);
             updateDominion(conqueror);
-            String conquestExpiredMsg = ChatUtils.chatMessage(Lang.get("dominion.conquest_failed_broadcast", "conqueror", conqueror.getName(), "defender", defender.getName()));
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 int domVol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getDominionSoundVolume();
                 if (domVol > 0) {
                     onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 1F);
                 }
-                onlinePlayer.sendMessage(conquestExpiredMsg);
+                onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "dominion.conquest_failed_broadcast", "conqueror", conqueror.getName(), "defender", defender.getName())));
             }
             DiscordUtils.dominionMessage(defender, conqueror.getName() + "'s conquest of " + defender.getName() + " has failed", new Color(135, 245, 220));
             if (nm != null) {
-                nm.publishBroadcast(conquestExpiredMsg);
+                nm.publishLangBroadcast("dominion.conquest_failed_broadcast", "conqueror", conqueror.getName(), "defender", defender.getName());
                 // a=defender, b=conqueror
                 nm.publishDominionConquestUpdate("conquest_expired", defender, conqueror);
             }
@@ -3170,17 +3179,16 @@ public class DominionUtils {
             rebel.setLastRebelAttemptTimestamp(now);
             updateDominion(conqueror);
             updateDominion(rebel);
-            String rebelAutoMsg = ChatUtils.chatMessage(rebel.getName() + " &dhas successfully rebelled against &e" + conqueror.getName());
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 int domVol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getDominionSoundVolume();
                 if (domVol > 0) {
                     onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 1F);
                 }
-                onlinePlayer.sendMessage(rebelAutoMsg);
+                onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "dominion.rebelled_broadcast", "name", rebel.getName(), "conqueror", conqueror.getName())));
             }
             DiscordUtils.dominionMessage(conqueror, rebel.getName() + " has successfully rebelled against " + conqueror.getName(), new Color(135, 245, 220));
             if (nm != null) {
-                nm.publishBroadcast(rebelAutoMsg);
+                nm.publishLangBroadcast("dominion.rebelled_broadcast", "name", rebel.getName(), "conqueror", conqueror.getName());
                 // a=rebel, b=conqueror
                 nm.publishDominionConquestUpdate("rebel_auto", rebel, conqueror);
             }
@@ -3200,17 +3208,16 @@ public class DominionUtils {
             updateDominion(conqueror);
 
             if (rebel != null) {
-                String rebelExpiredMsg = ChatUtils.chatMessage(Lang.get("dominion.rebellion_failed_broadcast", "rebel", rebel.getName(), "conqueror", conqueror.getName()));
                 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                     int domVol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getDominionSoundVolume();
                     if (domVol > 0) {
                         onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_4, domVol / 100f, 1F);
                     }
-                    onlinePlayer.sendMessage(rebelExpiredMsg);
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "dominion.rebellion_failed_broadcast", "rebel", rebel.getName(), "conqueror", conqueror.getName())));
                 }
                 DiscordUtils.dominionMessage(conqueror, rebel.getName() + "'s rebellion against " + conqueror.getName() + " has failed", new Color(101, 0, 0));
                 if (nm != null) {
-                    nm.publishBroadcast(rebelExpiredMsg);
+                    nm.publishLangBroadcast("dominion.rebellion_failed_broadcast", "rebel", rebel.getName(), "conqueror", conqueror.getName());
                     // a=rebel, b=conqueror
                     nm.publishDominionConquestUpdate("rebel_expired", rebel, conqueror);
                 }

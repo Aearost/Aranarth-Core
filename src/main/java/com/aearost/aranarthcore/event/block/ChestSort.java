@@ -224,7 +224,7 @@ public class ChestSort {
         Block block = e.getClickedBlock();
 
         if (!player.hasPermission("aranarth.inventory")) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("lock.no_permission_sort")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.no_permission_sort")));
             return;
         }
 
@@ -236,7 +236,7 @@ public class ChestSort {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(playerUuid);
             if (!isTrusted && !aranarthPlayer.isInAdminMode()) {
                 e.setCancelled(true);
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("lock.no_permission_sort")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.no_permission_sort")));
                 return;
             }
         }
@@ -266,7 +266,7 @@ public class ChestSort {
             inventory.setItem(i, items.get(i));
         }
 
-        player.sendMessage(ChatUtils.chatMessage(Lang.get("inventory.sorted")));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "inventory.sorted")));
         int sortVol = AranarthUtils.getPlayer(player.getUniqueId()).getChestSortSoundVolume();
         if (sortVol > 0) {
             player.playSound(player, Sound.UI_STONECUTTER_TAKE_RESULT, sortVol / 100f, 1F);

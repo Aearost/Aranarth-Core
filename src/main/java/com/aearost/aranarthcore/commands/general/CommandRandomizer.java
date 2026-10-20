@@ -31,23 +31,23 @@ public class CommandRandomizer implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.randomizer")) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return true;
 			}
 
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (args.length == 0) {
 				if (aranarthPlayer.isRandomizing()) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("randomizer.block_no_longer")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.block_no_longer")));
 				} else {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("randomizer.blocks_now")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.blocks_now")));
 				}
 				aranarthPlayer.isRandomizing(!aranarthPlayer.isRandomizing());
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				return true;
 			} else {
 				if (!args[0].contains(",")) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("randomizer.need_multiple_items")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.need_multiple_items")));
 					return true;
 				}
 
@@ -56,7 +56,7 @@ public class CommandRandomizer implements CommandExecutor {
 				for (String component : components) {
 					String[] percentageItem = component.split("%");
 					if (percentageItem.length != 2) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("randomizer.invalid_format")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.invalid_format")));
 						return true;
 					}
 
@@ -65,11 +65,11 @@ public class CommandRandomizer implements CommandExecutor {
 					try {
 						percentage = Integer.parseInt(percentageItem[0]);
 					} catch (NumberFormatException e) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("randomizer.invalid_percent")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.invalid_percent")));
 						return true;
 					}
 					if (percentage == 0) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("randomizer.zero_percent")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.zero_percent")));
 						return true;
 					}
 
@@ -78,7 +78,7 @@ public class CommandRandomizer implements CommandExecutor {
 					try {
 						material = Material.valueOf(percentageItem[1].toUpperCase());
 					} catch (IllegalArgumentException e) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("randomizer.invalid_material")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.invalid_material")));
 						return true;
 					}
 
@@ -93,16 +93,16 @@ public class CommandRandomizer implements CommandExecutor {
 					totalPercentageSum += randomItem.getPercentage();
 				}
 				if (totalPercentageSum != 100) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("randomizer.not_100_percent")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.not_100_percent")));
 					return true;
 				} else {
 					aranarthPlayer.setRandomItems(randomItems);
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("randomizer.pattern_updated")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.pattern_updated")));
 					return true;
 				}
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
 		}
 	}

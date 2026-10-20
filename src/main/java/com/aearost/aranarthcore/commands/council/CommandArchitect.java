@@ -21,21 +21,21 @@ public class CommandArchitect {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
 			if (aranarthPlayer.getCouncilRank() == 0 && aranarthPlayer.getArchitectRank() == 0) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return true;
 			}
 
 			if (aranarthPlayer.isInArchitectMode()) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("architect.mode_exit")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "architect.mode_exit")));
 				aranarthPlayer.setInArchitectMode(false);
 			} else {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("architect.mode_enter")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "architect.mode_enter")));
 				aranarthPlayer.setInArchitectMode(true);
 			}
 			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
 		}
 	}

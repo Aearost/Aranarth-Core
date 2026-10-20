@@ -15,16 +15,16 @@ public class CommandUnscramble {
 
     public static boolean onCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
             return true;
         }
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
         if (aranarthPlayer.getCouncilRank() < 3) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
             return true;
         }
         if (args.length < 3) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac unscramble <add|remove> <word>")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "ac unscramble <add|remove> <word>")));
             return true;
         }
         String subCommand = args[1].toLowerCase();
@@ -32,19 +32,19 @@ public class CommandUnscramble {
         switch (subCommand) {
             case "add" -> {
                 if (ChatGameUtils.addWord(word)) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("unscramble.word_added", "word", word)));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "unscramble.word_added", "word", word)));
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("unscramble.word_exists", "word", word)));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "unscramble.word_exists", "word", word)));
                 }
             }
             case "remove" -> {
                 if (ChatGameUtils.removeWord(word)) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("unscramble.word_removed", "word", word)));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "unscramble.word_removed", "word", word)));
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("unscramble.word_not_found", "word", word)));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "unscramble.word_not_found", "word", word)));
                 }
             }
-            default -> player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac unscramble <add|remove> <word>")));
+            default -> player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "ac unscramble <add|remove> <word>")));
         }
         return true;
     }

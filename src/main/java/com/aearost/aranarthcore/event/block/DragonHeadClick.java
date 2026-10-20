@@ -42,7 +42,7 @@ public class DragonHeadClick {
                                         remains.get(1));
                             }
                         } else {
-                            player.sendMessage(ChatUtils.chatMessage(Lang.get("dragon_head.no_fuel")));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dragon_head.no_fuel")));
                         }
                     }
                     else if (e.getItem().hasItemMeta()) {
@@ -52,7 +52,7 @@ public class DragonHeadClick {
                             int fuelAmountAdded = AranarthUtils.updateDragonHead(location, isPoweredByRedstone);
                             int newAmount = e.getItem().getAmount() - 1;
                             e.getItem().setAmount(newAmount);
-                            player.sendMessage(ChatUtils.chatMessage(Lang.get("dragon_head.fuel_added", "amount", fuelAmountAdded)));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dragon_head.fuel_added", "amount", fuelAmountAdded)));
                         }
                     }
                 }

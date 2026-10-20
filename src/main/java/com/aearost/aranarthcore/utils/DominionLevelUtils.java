@@ -10,6 +10,7 @@ import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -198,7 +199,7 @@ public class DominionLevelUtils {
      * formatted calendar string, e.g. "4th of Florivór, 108". Returns null for legacy
      * dominions (foundedTimestamp == 0).
      */
-    public static String formatFoundedDate(long totalDays) {
+    public static String formatFoundedDate(CommandSender recipient, long totalDays) {
         if (totalDays == 0L) {
             return null;
         }
@@ -215,9 +216,9 @@ public class DominionLevelUtils {
         }
         Month month = Month.values()[monthIdx];
         int day = (int) remaining;
-        String dayWithSuffix = DateUtils.getDayNumWithSuffix(day);
+        String dayWithSuffix = DateUtils.getDayNumWithSuffix(recipient, day);
         String monthName = DateUtils.provideMonthName(month);
-        return dayWithSuffix + " of " + monthName + ", " + year;
+        return Lang.getFor(recipient, "dominion.founded_date", "day", dayWithSuffix, "month", monthName, "year", year);
     }
 
     /**
@@ -656,8 +657,7 @@ public class DominionLevelUtils {
         for (UUID memberUuid : dominion.getMembers()) {
             Player member = Bukkit.getPlayer(memberUuid);
             if (member != null && member.isOnline()) {
-                member.sendMessage(ChatUtils.chatMessage(
-                        "&7Your Dominion has ranked up to &eLevel " + newLevel));
+                member.sendMessage(ChatUtils.chatMessage(Lang.getFor(member, "dominion.level_up", "level", newLevel)));
                 member.playSound(member, Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.5F);
             }
         }

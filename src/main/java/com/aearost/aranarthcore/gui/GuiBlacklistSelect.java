@@ -77,7 +77,7 @@ public class GuiBlacklistSelect {
 
         ItemStack item = new ItemStack(isActive ? Material.MAP : Material.PAPER);
         ItemMeta meta = item.getItemMeta();
-        String presetName = (i < presets.size() && !presets.get(i).getName().isEmpty()) ? presets.get(i).getName() : "Preset " + (i + 1);
+        String presetName = (i < presets.size() && !presets.get(i).getName().isEmpty()) ? presets.get(i).getName() : Lang.getFor(player, "blacklist.preset_default", "number", i + 1);
         meta.setDisplayName(ChatUtils.translateToColor("&7&l" + presetName));
 
         if (isActive) {

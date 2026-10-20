@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.mob;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Phantom;
 import org.bukkit.entity.Player;
@@ -75,8 +76,7 @@ public class PhantomSpawnNotify {
                 return;
             }
             int count = waveSize.getOrDefault(waveId, 1);
-            String message = count > 1 ? "&7Phantoms have started attacking you" : "&7A phantom has started attacking you";
-            player.sendMessage(ChatUtils.chatMessage(message));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, count > 1 ? "phantom.attacking_many" : "phantom.attacking_one")));
         }, 5L);
     }
 

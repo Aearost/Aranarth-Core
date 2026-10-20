@@ -92,9 +92,9 @@ public class BrewRecipeAutoUnlockListener implements Listener {
         BrewRecipeUtils.master(uuid, recipeId);
 
         if (!wasAlreadyUnlocked) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.recipe_mastered_added", "recipe", recipe.getDisplayName())));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "brew.recipe_mastered_added", "recipe", recipe.getDisplayName())));
         } else if (hasSecret) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.recipe_mastered_secret", "recipe", recipe.getDisplayName())));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "brew.recipe_mastered_secret", "recipe", recipe.getDisplayName())));
         }
     }
 }

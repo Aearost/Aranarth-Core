@@ -213,7 +213,7 @@ public class AranarthBendingUtils {
         int stunTicks = (int) (durationMs / 50L);
 
         if (target instanceof Player p) {
-            p.sendActionBar(Component.text("* ELECTROCUTED *").color(ELECTROCUTION_COLOR));
+            p.sendActionBar(Component.text(Lang.getFor(p, "bending.electrocuted")).color(ELECTROCUTION_COLOR));
         }
 
         new BukkitRunnable() {

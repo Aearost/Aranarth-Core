@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -219,7 +220,7 @@ public class Disalignment extends BloodAbility implements AddonAbility {
 
         if (target instanceof Player targetPlayer && target.isValid()) {
             if (System.currentTimeMillis() - lastActionBarTime >= ACTION_BAR_INTERVAL_MS) {
-                targetPlayer.sendActionBar(Component.text("* MISALIGNED *").color(NamedTextColor.DARK_RED));
+                targetPlayer.sendActionBar(Component.text(Lang.getFor(targetPlayer, "bending.misaligned")).color(NamedTextColor.DARK_RED));
                 lastActionBarTime = System.currentTimeMillis();
             }
         }

@@ -24,19 +24,19 @@ public class CommandSit implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (!(sender instanceof Player player)) {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
 		}
 
 		if (args.length >= 1) {
 			if (args[0].equalsIgnoreCase("color")) {
 				if (!player.hasPermission("aranarth.sit.color")) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("sit.no_color_perk")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "sit.no_color_perk")));
 					return true;
 				}
 				new GuiSitColor(player).openGui();
 			} else {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "sit [color]")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "sit [color]")));
 			}
 			return true;
 		}
@@ -47,7 +47,7 @@ public class CommandSit implements CommandExecutor {
 		}
 
 		if (!player.isOnGround() || !SitUtils.sitOnGround(player)) {
-			player.sendMessage(ChatUtils.chatMessage(Lang.get("sit.cannot_sit")));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "sit.cannot_sit")));
 		}
 		return true;
 	}

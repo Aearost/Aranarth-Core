@@ -30,7 +30,7 @@ public class CommandSpawn implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (AranarthUtils.getTeleportTask(player.getUniqueId()) != null) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.already_teleporting")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.already_teleporting")));
 				return true;
 			}
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
@@ -38,29 +38,29 @@ public class CommandSpawn implements CommandExecutor {
 			// On SMP: countdown here first, then transfer to Survival and teleport to spawn on arrival.
 			if (AranarthCore.isSmpServer() && NetworkManager.isActive()) {
 				AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
-						aranarthPlayer.isInAdminMode(), "&e&lSpawn", "&7Transferring to Spawn...", success -> {
+						aranarthPlayer.isInAdminMode(), "&e&lSpawn", Lang.getFor(player, "teleport.transferring_spawn"), success -> {
 					if (success) {
 						String survivalServerName = AranarthCore.getInstance().getConfig()
 								.getString("network.servers.survival", "survival");
 						NetworkManager.getInstance().saveInventoryAndTransfer(player, survivalServerName,
 								new PendingTeleport("spawn", 0.5, 101.0, 0.5, 180.0f, 0.0f,
-										"&e&lSpawn", "&7You have teleported to Spawn"));
+										"&e&lSpawn", Lang.getFor(player, "teleport.to_spawn")));
 					}
 				});
 				return true;
 			}
 
 			Location spawn = new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0);
-			AranarthUtils.teleportPlayer(player, player.getLocation(), spawn, aranarthPlayer.isInAdminMode(), "&e&lSpawn", Lang.get("teleport.to_spawn"), success -> {
+			AranarthUtils.teleportPlayer(player, player.getLocation(), spawn, aranarthPlayer.isInAdminMode(), "&e&lSpawn", Lang.getFor(player, "teleport.to_spawn"), success -> {
 				if (success) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.to_spawn")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.to_spawn")));
 				} else {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.could_not_spawn")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.could_not_spawn")));
 				}
 			});
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
 		}
 	}

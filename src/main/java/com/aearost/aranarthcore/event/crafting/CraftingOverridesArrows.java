@@ -38,12 +38,12 @@ public class CraftingOverridesArrows {
             }
 
             if (is.getType() == Material.FLINT) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.arrowhead_fletching")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "crafting.arrowhead_fletching")));
                 e.setCancelled(true);
                 return;
             }
 
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.cannot_use_ingredient")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "crafting.cannot_use_ingredient")));
             e.setCancelled(true);
         }
     }

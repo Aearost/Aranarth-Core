@@ -80,7 +80,7 @@ public class PlayerChatListener implements Listener {
             }
 
             if (message.equalsIgnoreCase("cancel")) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.cancelled")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.cancelled")));
                 // Reopen the GUI
                 Bukkit.getScheduler().runTask(plugin, () -> new GuiTrade(player, trade).openGui());
                 return;
@@ -90,21 +90,21 @@ public class PlayerChatListener implements Listener {
             try {
                 amount = Double.parseDouble(message);
             } catch (NumberFormatException ex) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_number")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_number")));
                 Bukkit.getScheduler().runTask(plugin, () -> new GuiTrade(player, trade).openGui());
                 return;
             }
 
             // NaN and Infinity parse fine but would corrupt both balances
             if (!Double.isFinite(amount)) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_number")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_number")));
                 Bukkit.getScheduler().runTask(plugin, () -> new GuiTrade(player, trade).openGui());
                 return;
             }
             amount = Math.round(amount * 100) / 100.0;
 
             if (amount < 0) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("economy.pay_negative")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "economy.pay_negative")));
                 Bukkit.getScheduler().runTask(plugin, () -> new GuiTrade(player, trade).openGui());
                 return;
             }
@@ -180,27 +180,27 @@ public class PlayerChatListener implements Listener {
             GuiBlacklistEditor.clearAwaitingRename(uuid);
 
             if (message.equalsIgnoreCase("cancel")) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.cancelled")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.cancelled")));
                 return;
             }
 
             if (message.contains("&") && !player.hasPermission("aranarth.nick.color")) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_color")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission_color")));
                 GuiBlacklistEditor.setAwaitingRename(uuid, renameIndex);
                 return;
             }
             if (message.contains("#") && !player.hasPermission("aranarth.nick.hex")) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_hex")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission_hex")));
                 GuiBlacklistEditor.setAwaitingRename(uuid, renameIndex);
                 return;
             }
             if (ChatUtils.stripColorFormatting(message).length() > 30) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("gradient.name_too_long")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "gradient.name_too_long")));
                 GuiBlacklistEditor.setAwaitingRename(uuid, renameIndex);
                 return;
             }
             if (ChatUtils.stripColorFormatting(message).isEmpty()) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("gradient.name_empty")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "gradient.name_empty")));
                 GuiBlacklistEditor.setAwaitingRename(uuid, renameIndex);
                 return;
             }
@@ -214,7 +214,7 @@ public class PlayerChatListener implements Listener {
                 }
                 ap.getBlacklistPresets().get(finalIndex).setName(presetName);
                 PersistenceUtils.saveBlacklistPresetsAsync(uuid);
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("gradient.preset_renamed", "name", ChatUtils.translateToColor(presetName))));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "gradient.preset_renamed", "name", ChatUtils.translateToColor(presetName))));
                 new GuiBlacklistEditor(player, finalIndex).openGui();
             });
             return;
@@ -272,7 +272,7 @@ public class PlayerChatListener implements Listener {
                             player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 0.5F, 1F);
                         });
                     } catch (NumberFormatException ex) {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.resources_invalid_number")));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.resources_invalid_number")));
                         dominion.setBiomeResourcesBeingClaimed(null);
                         org.bukkit.scheduler.BukkitTask timer = GuiDominionResourcesClick.claimTimerTasks.remove(dominion.getId());
                         if (timer != null) timer.cancel();
@@ -317,7 +317,7 @@ public class PlayerChatListener implements Listener {
         Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> new AfkCancelByInteract().execute(player));
 
         if (ChatUtils.isPlayerMuted(player)) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.muted")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.muted")));
             e.setCancelled(true);
             return;
         }
@@ -573,6 +573,6 @@ public class PlayerChatListener implements Listener {
         }
         int yieldPct = (int) Math.round(yieldMultiplier * 100);
         String yieldColor = yieldPct >= 80 ? "&a" : yieldPct >= 50 ? "&e" : "&c";
-        player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.resources_added", "color", yieldColor, "yield", yieldPct)));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.resources_added", "color", yieldColor, "yield", yieldPct)));
     }
 }

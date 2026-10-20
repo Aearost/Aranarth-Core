@@ -133,13 +133,13 @@ public class EssenceImbueListener implements Listener {
      */
     private void notifyThresholds(Player player, int previousXp, int newXp, int maxXp) {
         if (newXp >= maxXp && previousXp < maxXp) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("essence.imbue_complete")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.imbue_complete")));
             return;
         }
         for (EssenceImbueUtils.Tier tier : EssenceImbueUtils.Tier.values()) {
             int required = tier.getRequiredXp();
             if (previousXp < required && newXp >= required) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("essence.imbue_threshold", "tier", Lang.get(tier.getLangKey()))));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.imbue_threshold", "tier", Lang.getFor(player, tier.getLangKey()))));
             }
         }
     }
@@ -159,7 +159,7 @@ public class EssenceImbueListener implements Listener {
         if (getRemainingDurability(mace) < getMaceCost(mace)) {
             e.setResult(null);
             if (e.getView().getPlayer() instanceof Player player) {
-                sendActionBar(player, Lang.get("essence.crush_mace_durability"));
+                sendActionBar(player, Lang.getFor(player, "essence.crush_mace_durability"));
             }
             return;
         }
@@ -294,7 +294,7 @@ public class EssenceImbueListener implements Listener {
         }
         e.getInventory().setResult(null);
         if (!errorKey.isEmpty() && e.getView().getPlayer() instanceof Player player) {
-            sendActionBar(player, Lang.get(errorKey, "percent", getRequiredPercent(e.getRecipe())));
+            sendActionBar(player, Lang.getFor(player, errorKey, "percent", getRequiredPercent(e.getRecipe())));
         }
     }
 

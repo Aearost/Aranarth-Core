@@ -96,7 +96,7 @@ public class GuiPotionRemove {
 					aranarthPlayer.setPotions(potions);
 					aranarthPlayer.setPotionQuantityToRemove(0);
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("potions.removed", "count", amountRemoved)));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "potions.removed", "count", amountRemoved)));
 
 					for (ItemStack potionBeingAdded : potionsToRemove) {
 						HashMap<Integer, ItemStack> nonAdded = player.getInventory().addItem(potionBeingAdded);

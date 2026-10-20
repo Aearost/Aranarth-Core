@@ -20,7 +20,7 @@ public class HopperPlace {
 			LockedContainer lockedContainer = AranarthUtils.getLockedContainerAtBlock(locationAbove.getBlock());
 			if (lockedContainer != null) {
 				if (!lockedContainer.getOwner().equals(e.getPlayer().getUniqueId())) {
-					e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("access.no_hopper")));
+					e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "access.no_hopper")));
 					e.setCancelled(true);
 				}
 			}

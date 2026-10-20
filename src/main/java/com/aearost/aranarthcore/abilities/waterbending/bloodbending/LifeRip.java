@@ -65,7 +65,7 @@ public class LifeRip extends BloodAbility implements AddonAbility {
         double currentGain = player.getPersistentDataContainer()
                 .getOrDefault(CASTER_GAIN_KEY, PersistentDataType.DOUBLE, 0.0);
         if (currentGain >= AbilityConfig.getDouble("LifeRip.CasterMaxGainCap")) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("bending.life_rip_max")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.life_rip_max")));
             return;
         }
 

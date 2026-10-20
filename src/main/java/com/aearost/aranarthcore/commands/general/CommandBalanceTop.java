@@ -64,7 +64,7 @@ public class CommandBalanceTop implements CommandExecutor {
 					throw new NumberFormatException();
 				}
 			} catch (NumberFormatException e) {
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("baltop.invalid_page")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "baltop.invalid_page")));
 				return;
 			}
 
@@ -77,7 +77,7 @@ public class CommandBalanceTop implements CommandExecutor {
 		Component prevButton;
 		if (page > 1) {
 			Component prevDisplay = LegacyComponentSerializer.legacyAmpersand().deserialize("&8[&6&l<<&8]");
-			prevButton = ChatUtils.clickableCommand(prevDisplay, ChatUtils.translateToColor("&7Go to page &6" + (page - 1)), "/baltop " + (page - 1), false);
+			prevButton = ChatUtils.clickableCommand(prevDisplay, ChatUtils.translateToColor(Lang.getFor(sender, "general.go_to_page", "page", page - 1)), "/baltop " + (page - 1), false);
 		} else {
 			prevButton = LegacyComponentSerializer.legacyAmpersand().deserialize("&8[&7<<&8]");
 		}
@@ -85,15 +85,15 @@ public class CommandBalanceTop implements CommandExecutor {
 		Component nextButton;
 		if (page < totalPageNumber) {
 			Component nextDisplay = LegacyComponentSerializer.legacyAmpersand().deserialize("&8[&6&l>>&8]");
-			nextButton = ChatUtils.clickableCommand(nextDisplay, ChatUtils.translateToColor("&7Go to page &6" + (page + 1)), "/baltop " + (page + 1), false);
+			nextButton = ChatUtils.clickableCommand(nextDisplay, ChatUtils.translateToColor(Lang.getFor(sender, "general.go_to_page", "page", page + 1)), "/baltop " + (page + 1), false);
 		} else {
 			nextButton = LegacyComponentSerializer.legacyAmpersand().deserialize("&8[&7>>&8]");
 		}
 
-		Component titleMiddle = LegacyComponentSerializer.legacyAmpersand().deserialize("&8 - - - &6&lAranarth Balances &8- - - ");
+		Component titleMiddle = LegacyComponentSerializer.legacyAmpersand().deserialize(Lang.getFor(sender, "baltop.header"));
 		sender.sendMessage(prevButton.append(titleMiddle).append(nextButton));
 
-		sender.sendMessage(ChatUtils.translateToColor("&7Showing page &6" + page + " &7of &6" + totalPageNumber));
+		sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "general.showing_page", "page", page, "total", totalPageNumber)));
 
 		int line = (page * 10) - 10;
 		page++;

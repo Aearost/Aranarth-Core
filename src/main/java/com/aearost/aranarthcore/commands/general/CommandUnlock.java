@@ -30,7 +30,7 @@ public class CommandUnlock implements CommandExecutor {
 			if (aranarthPlayer.isUnlockingContainer()) {
 				aranarthPlayer.setUnlockingContainer(false);
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("lock.mode_exit_lock")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "lock.mode_exit_lock")));
 			} else {
 				aranarthPlayer.setTrustedPlayerUUID(null);
 				aranarthPlayer.setUntrustedPlayerUUID(null);
@@ -38,12 +38,12 @@ public class CommandUnlock implements CommandExecutor {
 				aranarthPlayer.setLockingContainer(false);
 				aranarthPlayer.setContainerToggleExpiry(System.currentTimeMillis() + 5000);
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("lock.unlock_mode_enter")));
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("lock.unlock_mode_hint")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "lock.unlock_mode_enter")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "lock.unlock_mode_hint")));
 				scheduleToggleExpiry(player.getUniqueId());
 			}
         } else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
         }
         return true;
     }

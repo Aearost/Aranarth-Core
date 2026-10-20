@@ -54,10 +54,10 @@ public class PlayerKillMoneySteal {
 
         NumberFormat formatter = NumberFormat.getCurrencyInstance();
         String formattedAmount = formatter.format(stolenAmount);
-        String warSuffix = warMultiplier > 1 ? " &4(" + warMultiplier + "x war penalty)" : "";
-
-        killer.sendMessage(ChatUtils.chatMessage(Lang.get("pvp.stolen_from", "amount", formattedAmount, "player", victimAranarthPlayer.getNickname(), "suffix", warSuffix)));
+        killer.sendMessage(ChatUtils.chatMessage(Lang.getFor(killer, "pvp.stolen_from", "amount", formattedAmount, "player", victimAranarthPlayer.getNickname(),
+                "suffix", warMultiplier > 1 ? Lang.getFor(killer, "dominion.war_penalty_suffix", "multiplier", warMultiplier) : "")));
         killer.playSound(killer, Sound.ENTITY_PLAYER_LEVELUP, 1F, 1F);
-        victim.sendMessage(ChatUtils.chatMessage(Lang.get("pvp.stolen_by", "player", killerAranarthPlayer.getNickname(), "amount", formattedAmount, "suffix", warSuffix)));
+        victim.sendMessage(ChatUtils.chatMessage(Lang.getFor(victim, "pvp.stolen_by", "player", killerAranarthPlayer.getNickname(), "amount", formattedAmount,
+                "suffix", warMultiplier > 1 ? Lang.getFor(victim, "dominion.war_penalty_suffix", "multiplier", warMultiplier) : "")));
     }
 }

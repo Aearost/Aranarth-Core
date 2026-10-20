@@ -29,14 +29,14 @@ public class CommandNickname implements CommandExecutor {
 
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.nick")) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return true;
 			}
 
 			if (args.length == 0) {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				aranarthPlayer.setNickname("");
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.removed")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "nickname.removed")));
 				return true;
 
 			}
@@ -46,45 +46,45 @@ public class CommandNickname implements CommandExecutor {
 			int textStart = isGradient ? 2 : 0;
 			String typedText = String.join(" ", Arrays.copyOfRange(args, Math.min(textStart, args.length), args.length));
 			if (!ChatUtils.isSafeStoredText(typedText)) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.invalid_characters")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "nickname.invalid_characters")));
 				return true;
 			}
 			if (!isGradient) {
 				if (typedText.contains("&") && !player.hasPermission("aranarth.nick.color")) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 					return true;
 				}
 				if (typedText.contains("#") && !player.hasPermission("aranarth.nick.hex")) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 					return true;
 				}
 			}
 			// Nobody can take another player's name
 			if (AranarthUtils.isNameTakenByOther(ChatUtils.stripColorFormatting(typedText), player.getUniqueId())) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.taken")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "nickname.taken")));
 				return true;
 			}
 
 			if (args.length == 1) {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				if (ChatUtils.stripColorFormatting(args[0]).length() > 20) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.too_long")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "nickname.too_long")));
 					return true;
 				} else if (ChatUtils.stripColorFormatting(args[0]).isEmpty()) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.must_enter")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "nickname.must_enter")));
 					return true;
 				}
 
 				aranarthPlayer.setNickname(args[0]);
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.set", "name", args[0])));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "nickname.set", "name", args[0])));
 				return true;
 			} else {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				int stringStart = 0;
 				if (args[0].equalsIgnoreCase("gradient") || args[0].equalsIgnoreCase("gradientbold")) {
 					if (!player.hasPermission("aranarth.nick.gradient")) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 						return true;
 					}
 
@@ -112,35 +112,35 @@ public class CommandNickname implements CommandExecutor {
 
 					if (Objects.nonNull(nickname)) {
 						if (nicknameSB.toString().length() > 20) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.too_long")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "nickname.too_long")));
 							return true;
 						} else if (nicknameSB.toString().isEmpty()) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.must_enter")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "nickname.must_enter")));
 							return true;
 						}
 
 						aranarthPlayer.setNickname(nickname);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.set", "name", nickname)));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "nickname.set", "name", nickname)));
 						return true;
 					}
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.gradient_failed")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "nickname.gradient_failed")));
 					return true;
 				}
 
 				if (ChatUtils.stripColorFormatting(nickname).length() > 20) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.too_long")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "nickname.too_long")));
 					return true;
 				} else if (ChatUtils.stripColorFormatting(nickname).isEmpty()) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.must_enter")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "nickname.must_enter")));
 					return true;
 				}
 
 				aranarthPlayer.setNickname(nickname);
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("nickname.set", "name", nickname)));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "nickname.set", "name", nickname)));
 				return true;
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
 		}
 	}

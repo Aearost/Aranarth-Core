@@ -32,7 +32,7 @@ public class CommandWarp implements CommandExecutor {
 		if (sender instanceof Player player) {
 			if (args.length == 0) {
 				if (AranarthUtils.getWarps().isEmpty()) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("warp.no_warps")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "warp.no_warps")));
 					return true;
 				}
 				GuiWarps gui = new GuiWarps(player);
@@ -41,10 +41,10 @@ public class CommandWarp implements CommandExecutor {
 			} else if (args.length == 1) {
 				if (args[0].equalsIgnoreCase("create") || args[0].equalsIgnoreCase("delete")) {
 					if (player.hasPermission("aranarth.warp.modify")) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "warp create|delete <name>")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "warp create|delete <name>")));
 						return true;
 					} else {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 						return true;
 					}
 				} else {
@@ -62,11 +62,11 @@ public class CommandWarp implements CommandExecutor {
 								String survivalServer = AranarthCore.getInstance().getConfig()
 										.getString("network.servers.survival", "survival");
 								AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
-										aranarthPlayer.isInAdminMode(), warp.getName(), "&7Transferring to " + warp.getName() + "...", success -> {
+										aranarthPlayer.isInAdminMode(), warp.getName(), Lang.getFor(player, "teleport.transferring_named", "name", warp.getName()), success -> {
 									if (success) {
 										NetworkManager.getInstance().saveInventoryAndTransfer(player, survivalServer,
 												new PendingTeleport(warp.getWorldName(), wx, wy, wz, wyaw, wpitch,
-														warp.getName(), "&7You have warped to " + warp.getName()));
+														warp.getName(), Lang.getFor(player, "warp.teleported", "name", warp.getName())));
 									}
 								});
 								return true;
@@ -83,11 +83,11 @@ public class CommandWarp implements CommandExecutor {
 								String smpServer = AranarthCore.getInstance().getConfig()
 										.getString("network.servers.smp", "smp");
 								AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
-										aranarthPlayer.isInAdminMode(), warp.getName(), "&7Transferring to " + warp.getName() + "...", success -> {
+										aranarthPlayer.isInAdminMode(), warp.getName(), Lang.getFor(player, "teleport.transferring_named", "name", warp.getName()), success -> {
 									if (success) {
 										NetworkManager.getInstance().saveInventoryAndTransfer(player, smpServer,
 												new PendingTeleport(smpWorldPart, wx, wy, wz, wyaw, wpitch,
-														warp.getName(), "&7You have warped to " + warp.getName()));
+														warp.getName(), Lang.getFor(player, "warp.teleported", "name", warp.getName())));
 									}
 								});
 								return true;
@@ -98,22 +98,22 @@ public class CommandWarp implements CommandExecutor {
 							// gracefully instead of trying a teleport that will fail as "unsafe".
 							boolean warpIsForOtherServer = (warp.isSmpHome() != AranarthCore.isSmpServer());
 							if (warpIsForOtherServer || warp.getLocation().getWorld() == null) {
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("warp.not_available")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "warp.not_available")));
 								return true;
 							}
 
 							// Same-server warp
-							AranarthUtils.teleportPlayer(player, player.getLocation(), warp.getLocation(), aranarthPlayer.isInAdminMode(), warp.getName(), Lang.get("warp.teleported", "name", warp.getName()), success -> {
+							AranarthUtils.teleportPlayer(player, player.getLocation(), warp.getLocation(), aranarthPlayer.isInAdminMode(), warp.getName(), Lang.getFor(player, "warp.teleported", "name", warp.getName()), success -> {
 								if (success) {
-									player.sendMessage(ChatUtils.chatMessage(Lang.get("warp.teleported", "name", warp.getName())));
+									player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "warp.teleported", "name", warp.getName())));
 								} else {
-									player.sendMessage(ChatUtils.chatMessage(Lang.get("warp.could_not", "name", warp.getName())));
+									player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "warp.could_not", "name", warp.getName())));
 								}
 							});
 							return true;
 						}
 					}
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("warp.not_found", "name", args[0])));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "warp.not_found", "name", args[0])));
 					return true;
 				}
 			} else {
@@ -123,17 +123,17 @@ public class CommandWarp implements CommandExecutor {
 						warpName = ChatUtils.removeSpecialCharacters(warpName);
 						for (Home warp : AranarthUtils.getWarps()) {
 							if (ChatUtils.stripColorFormatting(warp.getName()).equalsIgnoreCase(ChatUtils.stripColorFormatting(warpName))) {
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("warp.already_exists", "name", warpName)));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "warp.already_exists", "name", warpName)));
 								return true;
 							}
 						}
 
 						Home warp = new Home(warpName, player.getLocation(), Material.BARRIER);
 						AranarthUtils.addWarp(warp);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("warp.added", "name", warp.getName())));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "warp.added", "name", warp.getName())));
 						return true;
 					} else {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 						return true;
 					}
 				} else if (args[0].equalsIgnoreCase("delete")) {
@@ -147,21 +147,21 @@ public class CommandWarp implements CommandExecutor {
 						}
 
 						if (warpToDelete != null) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("warp.removed", "name", warpToDelete.getName())));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "warp.removed", "name", warpToDelete.getName())));
 							AranarthUtils.removeWarp(warpToDelete);
 							return true;
 						} else {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("warp.not_found", "name", args[1])));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "warp.not_found", "name", args[1])));
 							return true;
 						}
 					} else {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 						return true;
 					}
 				}
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
 		}
 		return false;

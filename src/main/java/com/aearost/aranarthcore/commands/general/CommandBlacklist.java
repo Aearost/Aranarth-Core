@@ -30,7 +30,7 @@ public class CommandBlacklist implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
         if (sender instanceof Player player) {
             if (!player.hasPermission("aranarth.blacklist")) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
                 return false;
             }
 
@@ -42,13 +42,13 @@ public class CommandBlacklist implements CommandExecutor {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                 if (args[0].equals("ignore")) {
                     aranarthPlayer.setBlacklistingMethod(0);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("market.sold_blacklist_ignore")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "market.sold_blacklist_ignore")));
                 } else if (args[0].equals("trash")) {
                     aranarthPlayer.setBlacklistingMethod(1);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("market.sold_blacklist_trash")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "market.sold_blacklist_trash")));
                 } else if (args[0].equals("off")) {
                     aranarthPlayer.setBlacklistingMethod(-1);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("market.blacklist_disabled")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "market.blacklist_disabled")));
                 } else if (args[0].equals("clear")) {
                     // Clear all presets
                     for (BlacklistPreset preset : aranarthPlayer.getBlacklistPresets()) {
@@ -56,16 +56,16 @@ public class CommandBlacklist implements CommandExecutor {
                     }
                     aranarthPlayer.setActivePresetIndex(-1);
                     PersistenceUtils.saveBlacklistPresetsAsync(player.getUniqueId());
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("blacklist.cleared")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "blacklist.cleared")));
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_toggle")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_toggle")));
                     return false;
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 return true;
             }
         } else {
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
             return false;
         }
     }

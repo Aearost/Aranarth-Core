@@ -59,34 +59,34 @@ public class GuiOutposts {
 
     private static ItemStack buildOutpostItem(Player player, int outpostIndex, Outpost outpost, boolean unlocked, Dominion dominion) {
         if (!unlocked) {
-            return buildLockedItem(outpostIndex);
+            return buildLockedItem(player, outpostIndex);
         }
         if (outpost == null) {
-            return buildEmptySlotItem(outpostIndex, dominion);
+            return buildEmptySlotItem(player, outpostIndex, dominion);
         }
         return buildActiveOutpostItem(player, outpost, dominion);
     }
 
-    private static ItemStack buildLockedItem(int outpostIndex) {
+    private static ItemStack buildLockedItem(Player player, int outpostIndex) {
         ItemStack item = new ItemStack(Material.RED_CONCRETE);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(Lang.get("gui.outposts.locked", "n", String.valueOf(outpostIndex)));
+        meta.setDisplayName(Lang.getFor(player, "gui.outposts.locked", "n", String.valueOf(outpostIndex)));
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&7Requires &eDominion Level " + (outpostIndex + 1)));
-        lore.add(ChatUtils.translateToColor("&7Cost to unlock: &6" + OutpostUtils.getFormattedOutpostCost(outpostIndex)));
+        lore.add(Lang.getFor(player, "gui.outposts_requires_level", "level", outpostIndex + 1));
+        lore.add(Lang.getFor(player, "gui.outposts_unlock_cost", "cost", OutpostUtils.getFormattedOutpostCost(outpostIndex)));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
     }
 
-    private static ItemStack buildEmptySlotItem(int outpostIndex, Dominion dominion) {
+    private static ItemStack buildEmptySlotItem(Player player, int outpostIndex, Dominion dominion) {
         ItemStack item = new ItemStack(Material.OAK_LOG);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(Lang.get("gui.outposts.empty", "n", String.valueOf(outpostIndex)));
+        meta.setDisplayName(Lang.getFor(player, "gui.outposts.empty", "n", String.valueOf(outpostIndex)));
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&7Use &e/d outpost create <name> &7to establish an outpost"));
-        lore.add(ChatUtils.translateToColor("&7Cost to create: &6" + OutpostUtils.getFormattedOutpostCost(outpostIndex)));
-        lore.add(ChatUtils.translateToColor("&7Base chunk limit: &e" + OutpostUtils.getBaseChunkLimit(outpostIndex)));
+        lore.add(Lang.getFor(player, "dominion.outpost_how_to_create"));
+        lore.add(Lang.getFor(player, "gui.outposts_create_cost", "cost", OutpostUtils.getFormattedOutpostCost(outpostIndex)));
+        lore.add(Lang.getFor(player, "gui.outposts_chunk_limit", "limit", OutpostUtils.getBaseChunkLimit(outpostIndex)));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;

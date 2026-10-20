@@ -29,24 +29,24 @@ public class CommandAvatar implements CommandExecutor {
 		if (args.length == 0) {
 			Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
 			if (currentAvatar == null) {
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("bending.no_avatar")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "bending.no_avatar")));
 				return true;
 			}
 			String element = AvatarUtils.getElementSymbol(currentAvatar.getUuid(), currentAvatar);
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(currentAvatar.getUuid());
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("avatar.current", "element", element, "player", aranarthPlayer.getNickname())));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "avatar.current", "element", element, "player", aranarthPlayer.getNickname())));
 			return true;
 		} else {
 			if (args[0].equalsIgnoreCase("set")) {
 				if (sender instanceof Player player) {
 					if (!player.hasPermission("aranarth.avatar.set")) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 						return false;
 					}
 				}
 				boolean wasAvatarFound = AvatarUtils.selectAvatar(true);
 				if (!wasAvatarFound) {
-					sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.no_avatar_selected")));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "admin.no_avatar_selected")));
 				}
 			}
 			return false;

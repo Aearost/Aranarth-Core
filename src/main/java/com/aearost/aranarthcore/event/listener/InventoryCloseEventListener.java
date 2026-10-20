@@ -30,7 +30,7 @@ public class InventoryCloseEventListener implements Listener {
     public void onInventoryClose(InventoryCloseEvent e) {
         // Only inventories created by AranarthCore are GUIs, so a chest renamed in an anvil can never reach a handler
         boolean isGui = GuiHolder.isGui(e.getView());
-        if (isGui && GuiChatSnapshot.isSnapshotGui(ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
+        if (isGui && GuiChatSnapshot.isSnapshotGui(e.getInventory())) {
             GuiChatSnapshot.close(e.getInventory());
             return;
         }

@@ -35,7 +35,7 @@ public class CommandResource implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (AranarthUtils.getTeleportTask(player.getUniqueId()) != null) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.already_teleporting")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.already_teleporting")));
 				return true;
 			}
 
@@ -50,7 +50,7 @@ public class CommandResource implements CommandExecutor {
 			if (System.currentTimeMillis() < aranarthPlayer.getLastWorldCommandUse() + 60000) {
 				if (!aranarthPlayer.isInAdminMode()) {
 					int wait = (int) ((aranarthPlayer.getLastWorldCommandUse() + 60000) - System.currentTimeMillis()) / 1000;
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.world_cooldown", "seconds", String.valueOf(wait))));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.world_cooldown", "seconds", String.valueOf(wait))));
 					return true;
 				}
 			}
@@ -58,10 +58,10 @@ public class CommandResource implements CommandExecutor {
 			// On the SMP server: transfer to Survival, which will dispatch /resource on arrival.
 			if (AranarthCore.isSmpServer() && NetworkManager.isActive()) {
 				AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
-						aranarthPlayer.isInAdminMode(), "&e&lResource World", "&7Transferring to the Resource World...", success -> {
+						aranarthPlayer.isInAdminMode(), Lang.getFor(player, "teleport.title_resource"), Lang.getFor(player, "teleport.transferring_resource"), success -> {
 					if (success) {
 						PendingTeleport resourcePt = PendingTeleport.forCommand(
-								"resource", "&e&lResource World", "&7You have teleported to the Resource World");
+								"resource", Lang.getFor(player, "teleport.title_resource"), Lang.getFor(player, "teleport.to_resource"));
 						String survivalServerName = AranarthCore.getInstance().getConfig()
 								.getString("network.servers.survival", "survival");
 						NetworkManager.getInstance().saveInventoryAndTransfer(player, survivalServerName, resourcePt);
@@ -84,18 +84,18 @@ public class CommandResource implements CommandExecutor {
 				}
 			}
 
-			AranarthUtils.teleportPlayer(player, player.getLocation(), selectedLocation, aranarthPlayer.isInAdminMode(), "&e&lResource World", Lang.get("teleport.to_resource"), success -> {
+			AranarthUtils.teleportPlayer(player, player.getLocation(), selectedLocation, aranarthPlayer.isInAdminMode(), Lang.getFor(player, "teleport.title_resource"), Lang.getFor(player, "teleport.to_resource"), success -> {
 				if (success) {
 					aranarthPlayer.setLastWorldCommandUse(System.currentTimeMillis());
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.to_resource")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.to_resource")));
 				} else {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.could_not_resource")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.could_not_resource")));
 				}
 			});
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
 		}
 	}

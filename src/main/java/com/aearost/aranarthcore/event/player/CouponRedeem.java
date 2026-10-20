@@ -47,7 +47,7 @@ public class CouponRedeem {
         Player redeemer = e.getPlayer();
         if (!AranarthUtils.isSurvivalWorld(redeemer.getWorld().getName()) || redeemer.getGameMode() != GameMode.SURVIVAL) {
             if (e.getHand() == EquipmentSlot.HAND) {
-                redeemer.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.must_be_gameplay_world")));
+                redeemer.sendMessage(ChatUtils.chatMessage(Lang.getFor(redeemer, "dominion.must_be_gameplay_world")));
             }
             return;
         }
@@ -72,22 +72,21 @@ public class CouponRedeem {
                 if (player.isOnline()) {
                     player.getInventory().addItem(refund).values()
                             .forEach(leftover -> player.getWorld().dropItemNaturally(player.getLocation(), leftover));
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("coupon.no_codes_available")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "coupon.no_codes_available")));
                 }
                 return;
             }
 
             // Send the coupon code as a mail message
-            String mailMessage = ChatUtils.translateToColor(
-                    "&7&l" + coupon.getDiscountPercentage() + "% Coupon &8- &e" + coupon.getCode()
-            );
+            String mailMessage = ChatUtils.translateToColor(Lang.getFor(playerUUID, "coupon.mail",
+                    "discount", coupon.getDiscountPercentage(), "code", coupon.getCode()));
             MailUtils.addMail(playerUUID, new Mail(new UUID(0L, 0L), playerUUID, System.currentTimeMillis(), mailMessage));
 
             DiscordUtils.createNotification(player.getName() + " has redeemed a " + discountPercentage + "% coupon: "
                     + coupon.getCode() + " (" + remaining + " remaining)", playerUUID);
 
             if (player.isOnline()) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("coupon.redeemed", "discount", String.valueOf(discountPercentage))));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "coupon.redeemed", "discount", String.valueOf(discountPercentage))));
             }
         });
     }

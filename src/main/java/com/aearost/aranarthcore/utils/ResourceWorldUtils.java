@@ -324,7 +324,7 @@ public class ResourceWorldUtils {
         Bukkit.getLogger().info(LOG + worldName + " can now be entered");
         if (worldName.equals("resource")) {
             publishLock(false);
-            Bukkit.broadcastMessage(ChatUtils.chatMessage(Lang.get("resource.reset_complete")));
+            Lang.broadcast("resource.reset_complete");
         }
     }
 

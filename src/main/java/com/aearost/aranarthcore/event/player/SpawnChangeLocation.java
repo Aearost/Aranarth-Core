@@ -31,11 +31,11 @@ public class SpawnChangeLocation {
 				Player player = e.getPlayer();
 				// Entering spawn
 				if (!fromSpawn && toSpawn) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("spawn.entered")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "spawn.entered")));
 				}
 				// Leaving spawn
 				else if (fromSpawn && !toSpawn) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("spawn.left")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "spawn.left")));
 				}
 			}
 		}

@@ -99,7 +99,7 @@ public class RandomizerBlockPlace {
 						if (!aranarthPlayer.isMissingItemMessageSent()) {
 							aranarthPlayer.isMissingItemMessageSent(!aranarthPlayer.isMissingItemMessageSent());
 							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("randomizer.missing_items")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.missing_items")));
                         }
 					}
 				}

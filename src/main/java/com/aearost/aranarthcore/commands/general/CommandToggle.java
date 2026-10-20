@@ -45,136 +45,136 @@ public class CommandToggle implements CommandExecutor {
 					if (player.hasPermission("aranarth.toggle.chat")) {
 						if (aranarthPlayer.isTogglingChat()) {
 							aranarthPlayer.setTogglingChat(false);
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.chat_enabled")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.chat_enabled")));
 						} else {
 							aranarthPlayer.setTogglingChat(true);
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.chat_disabled")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.chat_disabled")));
 						}
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					} else {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 						return true;
 					}
 				} else if (args[0].equalsIgnoreCase("messages")) {
 					if (player.hasPermission("aranarth.toggle.msg")) {
 						if (aranarthPlayer.isTogglingMessages()) {
 							aranarthPlayer.setTogglingMessages(false);
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.messages_enabled")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.messages_enabled")));
 						} else {
 							aranarthPlayer.setTogglingMessages(true);
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.messages_disabled")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.messages_disabled")));
 						}
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					} else {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 						return true;
 					}
 				} else if (args[0].equalsIgnoreCase("teleport")) {
 					if (player.hasPermission("aranarth.toggle.tp")) {
 						if (aranarthPlayer.isTogglingTp()) {
 							aranarthPlayer.setTogglingTp(false);
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.tp_enabled")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.tp_enabled")));
 						} else {
 							aranarthPlayer.setTogglingTp(true);
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.tp_disabled")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.tp_disabled")));
 						}
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					} else {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 						return true;
 					}
 				} else if (args[0].equalsIgnoreCase("spawnboost")) {
 					// Everyone has access
 					if (aranarthPlayer.isUsingSpawnBoost()) {
 						aranarthPlayer.setUsingSpawnBoost(false);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.spawnboost_disabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.spawnboost_disabled")));
 						if (AranarthUtils.isSpawnLocation(player.getLocation())) {
 							player.clearActivePotionEffects();
 						}
 					} else {
 						aranarthPlayer.setUsingSpawnBoost(true);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.spawnboost_enabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.spawnboost_enabled")));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("changeclaim")) {
 					// Everyone has access
 					if (aranarthPlayer.isTogglingChangeClaim()) {
 						aranarthPlayer.setTogglingChangeClaim(false);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.changeclaim_enabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.changeclaim_enabled")));
 					} else {
 						aranarthPlayer.setTogglingChangeClaim(true);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.changeclaim_disabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.changeclaim_disabled")));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("inventory")) {
 					if (player.hasPermission("aranarth.inventory")) {
 						if (aranarthPlayer.isTogglingInventoryAssist()) {
 							aranarthPlayer.setTogglingInventoryAssist(false);
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.inventory_enabled")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.inventory_enabled")));
 						} else {
 							aranarthPlayer.setTogglingInventoryAssist(true);
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.inventory_disabled")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.inventory_disabled")));
 						}
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					} else {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.no_inventory_perk")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.no_inventory_perk")));
 					}
 				} else if (args[0].equalsIgnoreCase("shulker")) {
 					if (player.hasPermission("aranarth.shulker")) {
 						if (aranarthPlayer.isAddingToShulker()) {
 							aranarthPlayer.setAddingToShulker(false);
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.shulker_disabled")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.shulker_disabled")));
 						} else {
 							aranarthPlayer.setAddingToShulker(true);
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.shulker_enabled")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.shulker_enabled")));
 						}
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					} else {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.no_shulker_perk")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.no_shulker_perk")));
 					}
 				} else if (args[0].equalsIgnoreCase("blacklist")) {
 					if (player.hasPermission("aranarth.blacklist")) {
 						if (args.length == 1) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "toggle blacklist <ignore|trash|off>")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "toggle blacklist <ignore|trash|off>")));
 						} else {
 							if (args[1].equals("ignore")) {
 								aranarthPlayer.setBlacklistingMethod(0);
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.blacklist_ignore")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.blacklist_ignore")));
 							} else if (args[1].equals("trash")) {
 								aranarthPlayer.setBlacklistingMethod(1);
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.blacklist_trash")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.blacklist_trash")));
 							} else if (args[1].equals("off")) {
 								aranarthPlayer.setBlacklistingMethod(-1);
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.blacklist_off")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.blacklist_off")));
 							} else {
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "toggle blacklist <ignore|trash|off>")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "toggle blacklist <ignore|trash|off>")));
 								return true;
 							}
 							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 						}
 					} else {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.no_blacklist_perk")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.no_blacklist_perk")));
 					}
 				} else if (args[0].equalsIgnoreCase("compressor")) {
 					if (player.hasPermission("aranarth.compressor")) {
 						if (aranarthPlayer.isCompressingItems()) {
 							aranarthPlayer.setCompressingItems(false);
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.compressor_disabled")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.compressor_disabled")));
 						} else {
 							aranarthPlayer.setCompressingItems(true);
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.compressor_enabled")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.compressor_enabled")));
 						}
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					} else {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.no_compressor_perk")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.no_compressor_perk")));
 					}
 				} else if (args[0].equalsIgnoreCase("chestlock")) {
 					if (aranarthPlayer.isAutoLockingChests()) {
 						aranarthPlayer.setAutoLockingChests(false);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.chestlock_disabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.chestlock_disabled")));
 					} else {
 						aranarthPlayer.setAutoLockingChests(true);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.chestlock_enabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.chestlock_enabled")));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("firetype")) {
@@ -182,36 +182,36 @@ public class CommandToggle implements CommandExecutor {
 						FireType oldType = aranarthPlayer.getFireType();
 						FireType newType = nextAvailableType(oldType, aranarthPlayer);
 						if (newType == oldType) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.firetype_no_others")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.firetype_no_others")));
 							return true;
 						}
 						aranarthPlayer.setFireType(newType);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.firetype_set", "type", newType.getDisplayName())));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.firetype_set", "type", newType.getDisplayName())));
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 						if (oldType == FireType.BLUE || newType == FireType.BLUE) {
 							PermissionUtils.evaluatePlayerPermissions(player);
 						}
 					} else {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.no_firetype_perks")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.no_firetype_perks")));
 					}
 				} else if (args[0].equalsIgnoreCase("pethurt")) {
 					if (aranarthPlayer.isHurtingOwnPets()) {
 						aranarthPlayer.setHurtingOwnPets(false);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.pethurt_disabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.pethurt_disabled")));
 					} else {
 						aranarthPlayer.setHurtingOwnPets(true);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.pethurt_enabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.pethurt_enabled")));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("gradientchat")) {
 					if (!aranarthPlayer.getPerks().containsKey(Perk.CHAT) && aranarthPlayer.getSaintRank() < 2) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.no_gradientchat_perk")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.no_gradientchat_perk")));
 						return true;
 					}
 					if (args.length >= 2) {
 						if (args[1].equalsIgnoreCase("get")) {
 							if (aranarthPlayer.getGradientChatColors().isEmpty()) {
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.no_gradient_colors")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.no_gradient_colors")));
 								return true;
 							}
 							player.sendMessage(ChatUtils.chatMessage(ChatUtils.formatGradientColorsDisplay(aranarthPlayer.getGradientChatColors())));
@@ -219,10 +219,10 @@ public class CommandToggle implements CommandExecutor {
 						} else if (args[1].equalsIgnoreCase("bold")) {
 							if (aranarthPlayer.isGradientChatBold()) {
 								aranarthPlayer.setGradientChatBold(false);
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.gradientchat_bold_disabled")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.gradientchat_bold_disabled")));
 							} else {
 								aranarthPlayer.setGradientChatBold(true);
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.gradientchat_bold_enabled")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.gradientchat_bold_enabled")));
 							}
 							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 							return true;
@@ -231,7 +231,7 @@ public class CommandToggle implements CommandExecutor {
 						String colors = args[1];
 						String[] colorArray = colors.split(",");
 						if (colorArray.length < 2) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.gradient_min_colors")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.gradient_min_colors")));
 							return true;
 						}
 						boolean validColors = true;
@@ -242,24 +242,24 @@ public class CommandToggle implements CommandExecutor {
 							}
 						}
 						if (!validColors) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.gradient_invalid_color")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.gradient_invalid_color")));
 							return true;
 						}
 						aranarthPlayer.setGradientChatColors(colors);
 						aranarthPlayer.setGradientChatEnabled(true);
-						player.sendMessage(ChatUtils.chatMessage(ChatUtils.translateToGradient(colors, "Your gradient chat colors have been updated", false)));
+						player.sendMessage(ChatUtils.chatMessage(ChatUtils.translateToGradient(colors, Lang.getFor(player, "toggle.gradient_updated"), false)));
 					} else {
 						// Toggle on/off using the saved pattern
 						if (aranarthPlayer.isGradientChatEnabled()) {
 							aranarthPlayer.setGradientChatEnabled(false);
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.gradientchat_disabled")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.gradientchat_disabled")));
 						} else {
 							if (aranarthPlayer.getGradientChatColors().isEmpty()) {
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.no_gradient_colors")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.no_gradient_colors")));
 								return true;
 							}
 							aranarthPlayer.setGradientChatEnabled(true);
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.gradientchat_enabled")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.gradientchat_enabled")));
 						}
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
@@ -267,74 +267,74 @@ public class CommandToggle implements CommandExecutor {
 					if (player.hasPermission("aranarth.gate")) {
 						boolean enabled = GateUtils.toggleGatePlacementMode(player.getUniqueId());
 						if (enabled) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.gate_enabled")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.gate_enabled")));
 						} else {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.gate_disabled")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.gate_disabled")));
 						}
 					} else {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 					}
 				} else if (args[0].equalsIgnoreCase("daymessage")) {
 					if (aranarthPlayer.isDayMessageDisabled()) {
 						aranarthPlayer.setDayMessageDisabled(false);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.daymessage_enabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.daymessage_enabled")));
 					} else {
 						aranarthPlayer.setDayMessageDisabled(true);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.daymessage_disabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.daymessage_disabled")));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("weathermessage")) {
 					if (aranarthPlayer.isWeatherMessageDisabled()) {
 						aranarthPlayer.setWeatherMessageDisabled(false);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.weathermessage_enabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.weathermessage_enabled")));
 					} else {
 						aranarthPlayer.setWeatherMessageDisabled(true);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.weathermessage_disabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.weathermessage_disabled")));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("shulkerbulk")) {
 					if (player.hasPermission("aranarth.shulker")) {
 						if (aranarthPlayer.isBulkSellShulkerEnabled()) {
 							aranarthPlayer.setBulkSellShulkerEnabled(false);
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.shulkerbulk_disabled")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.shulkerbulk_disabled")));
 						} else {
 							aranarthPlayer.setBulkSellShulkerEnabled(true);
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.shulkerbulk_enabled")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.shulkerbulk_enabled")));
 						}
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					} else {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.no_shulker_perk")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.no_shulker_perk")));
 					}
 				} else if (args[0].equalsIgnoreCase("dmsgcompact")) {
 					if (aranarthPlayer.isDominionMsgCompact()) {
 						aranarthPlayer.setDominionMsgCompact(false);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.dmsgcompact_disabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.dmsgcompact_disabled")));
 					} else {
 						aranarthPlayer.setDominionMsgCompact(true);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.dmsgcompact_enabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.dmsgcompact_enabled")));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("emoji")) {
 					if (aranarthPlayer.isEmojiEnabled()) {
 						aranarthPlayer.setEmojiEnabled(false);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.emoji_disabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.emoji_disabled")));
 					} else {
 						aranarthPlayer.setEmojiEnabled(true);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.emoji_enabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.emoji_enabled")));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("interactivechat")) {
 					boolean hasPerm = aranarthPlayer.getSaintRank() >= 2 || aranarthPlayer.getCouncilRank() > 0;
 					if (!hasPerm) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 						return true;
 					}
 					if (aranarthPlayer.isInteractiveChatEnabled()) {
 						aranarthPlayer.setInteractiveChatEnabled(false);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.interactivechat_disabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.interactivechat_disabled")));
 					} else {
 						aranarthPlayer.setInteractiveChatEnabled(true);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.interactivechat_enabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.interactivechat_enabled")));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("barbarian")) {
@@ -344,7 +344,7 @@ public class CommandToggle implements CommandExecutor {
 						long remainingMs = cooldownEnd - now;
 						long hours = remainingMs / 3_600_000L;
 						long minutes = (remainingMs % 3_600_000L) / 60_000L;
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.barbarian_cooldown", "hours", String.valueOf(hours), "minutes", String.valueOf(minutes))));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.barbarian_cooldown", "hours", String.valueOf(hours), "minutes", String.valueOf(minutes))));
 						return true;
 					}
 					boolean becomingBarbarian = !aranarthPlayer.isBarbarian();
@@ -353,11 +353,11 @@ public class CommandToggle implements CommandExecutor {
 						// First run - show confirmation prompt
 						pendingBarbarianToggle.put(player.getUniqueId(), now + BARBARIAN_CONFIRM_TIMEOUT_MS);
 						if (becomingBarbarian) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.barbarian_confirm_enable")));
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.barbarian_confirm_hint")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.barbarian_confirm_enable")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.barbarian_confirm_hint")));
 						} else {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.barbarian_confirm_disable")));
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.barbarian_confirm_hint")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.barbarian_confirm_disable")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.barbarian_confirm_hint")));
 						}
 						return true;
 					}
@@ -367,67 +367,67 @@ public class CommandToggle implements CommandExecutor {
 					aranarthPlayer.setBarbarianCooldownEnd(now + BARBARIAN_COOLDOWN_MS);
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					if (becomingBarbarian) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.barbarian_enabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.barbarian_enabled")));
 					} else {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.barbarian_disabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.barbarian_disabled")));
 					}
 				} else if (args[0].equalsIgnoreCase("invisiblearmor")) {
 					if (!player.hasPermission("aranarth.invisiblearmor")) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.no_invisiblearmor_perk")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.no_invisiblearmor_perk")));
 						return true;
 					}
 					if (InvisibleArmorManager.isArmorHidden(player.getUniqueId())) {
 						InvisibleArmorManager.showArmor(player);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.armor_visible")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.armor_visible")));
 					} else {
 						InvisibleArmorManager.hideArmor(player);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.armor_hidden")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.armor_hidden")));
 					}
 				} else if (args[0].equalsIgnoreCase("reaper")) {
 					if (aranarthPlayer.isReaperDisabled()) {
 						aranarthPlayer.setReaperDisabled(false);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.reaper_enabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.reaper_enabled")));
 					} else {
 						aranarthPlayer.setReaperDisabled(true);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.reaper_disabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.reaper_disabled")));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("size")) {
 					if (aranarthPlayer.isSizeScaleEnabled()) {
 						aranarthPlayer.setSizeScaleEnabled(false);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.size_disabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.size_disabled")));
 					} else {
 						aranarthPlayer.setSizeScaleEnabled(true);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.size_enabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.size_enabled")));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					AranarthUtils.applyAranarthiumScale(player);
 				} else if (args[0].equalsIgnoreCase("servertips")) {
 					if (aranarthPlayer.isServerTipsDisabled()) {
 						aranarthPlayer.setServerTipsDisabled(false);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.servertips_enabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.servertips_enabled")));
 					} else {
 						aranarthPlayer.setServerTipsDisabled(true);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.servertips_disabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.servertips_disabled")));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("sit")) {
 					if (aranarthPlayer.getSaintRank() < 1 && aranarthPlayer.getCouncilRank() < 1) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 						return true;
 					}
 					if (aranarthPlayer.isSitDisabled()) {
 						aranarthPlayer.setSitDisabled(false);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.sit_enabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.sit_enabled")));
 					} else {
 						aranarthPlayer.setSitDisabled(true);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("toggle.sit_disabled")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.sit_disabled")));
 						SitUtils.standUp(player);
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					PermissionUtils.evaluatePlayerPermissions(player);
 				} else {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "toggle <option>")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "toggle <option>")));
 				}
 				return true;
 			} else {
@@ -435,7 +435,7 @@ public class CommandToggle implements CommandExecutor {
 				return true;
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
 		}
 	}

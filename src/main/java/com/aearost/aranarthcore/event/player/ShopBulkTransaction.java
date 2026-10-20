@@ -36,7 +36,7 @@ public class ShopBulkTransaction {
         // If they click elsewhere or stop sneaking after enabling/completing a bulk transaction
         if ((aranarthPlayer.getBulkTransactionNum() == 1 || aranarthPlayer.getBulkTransactionNum() == -1) && (shop == null || !AranarthUtils.isPhysicallySneaking(player.getUniqueId()))) {
             if (aranarthPlayer.getBulkTransactionNum() == 1) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("inventory.bulk_disabled")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "inventory.bulk_disabled")));
             }
             aranarthPlayer.setBulkTransactionNum(0);
         }
@@ -58,41 +58,41 @@ public class ShopBulkTransaction {
             String saleOrPurchase = "";
             if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
                 if (shop.getBuyPrice() <= 0) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.no_buying")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.no_buying")));
                     return;
                 }
                 Shop bulkShop = ShopUtils.getBulkShop(shop, player, true);
                 if (bulkShop.getQuantity() == shop.getQuantity()) {
                     if (aranarthPlayer.getBalance() < shop.getBuyPrice() * 2) {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("general.not_enough_money")));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.not_enough_money")));
                     } else if (ShopUtils.computePlayerFreeSpaceForItem(player, shop) < shop.getQuantity() * 2) {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("general.not_enough_space")));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.not_enough_space")));
                     } else if (shop.getUuid() != null && ShopUtils.computeChestQuantityOfItem(shop) < shop.getQuantity() * 2) {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.not_enough_inventory")));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.not_enough_inventory")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.cannot_bulk_purchase")));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.cannot_bulk_purchase")));
                     }
                     return;
                 }
                 saleOrPurchase = "purchase";
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.bulk_buy_confirm", "quantity", bulkShop.getQuantity(), "item", itemName, "price", formatter.format(bulkShop.getBuyPrice()))));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.bulk_buy_confirm", "quantity", bulkShop.getQuantity(), "item", itemName, "price", formatter.format(bulkShop.getBuyPrice()))));
                 aranarthPlayer.setBulkTransactionQuantity(bulkShop.getQuantity());
                 aranarthPlayer.setBulkTransactionPrice(bulkShop.getBuyPrice());
             } else if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
                 if (shop.getSellPrice() <= 0) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.no_selling")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.no_selling")));
                     return;
                 }
                 Shop bulkShop = ShopUtils.getBulkShop(shop, player, false);
                 if (bulkShop.getQuantity() == shop.getQuantity()) {
                     if (ShopUtils.computePlayerQuantityOfItem(player, shop) < shop.getQuantity() * 2) {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("inventory.not_enough")));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "inventory.not_enough")));
                     } else if (shop.getUuid() != null && AranarthUtils.getPlayer(shop.getUuid()).getBalance() < shop.getSellPrice() * 2) {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.owner_not_enough_money")));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.owner_not_enough_money")));
                     } else if (shop.getUuid() != null && ShopUtils.computeChestFreeSpaceForItem(shop) < shop.getQuantity() * 2) {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.no_chest_space")));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.no_chest_space")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.cannot_bulk_sell")));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.cannot_bulk_sell")));
                     }
                     return;
                 }
@@ -100,7 +100,7 @@ public class ShopBulkTransaction {
                 if (player.hasPermission("aranarth.shulker") && !aranarthPlayer.isBulkSellShulkerEnabled()) {
                     int adjustedQuantity = ShopUtils.computeLeaveOneAdjustedQuantity(bulkShop, shop.getQuantity(), player);
                     if (adjustedQuantity <= 0) {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("inventory.not_enough")));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "inventory.not_enough")));
                         return;
                     }
                     if (adjustedQuantity != bulkShop.getQuantity()) {
@@ -110,11 +110,11 @@ public class ShopBulkTransaction {
                     }
                 }
                 saleOrPurchase = "sale";
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.bulk_sell_confirm", "quantity", bulkShop.getQuantity(), "item", itemName, "price", formatter.format(bulkShop.getSellPrice()))));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.bulk_sell_confirm", "quantity", bulkShop.getQuantity(), "item", itemName, "price", formatter.format(bulkShop.getSellPrice()))));
                 aranarthPlayer.setBulkTransactionQuantity(bulkShop.getQuantity());
                 aranarthPlayer.setBulkTransactionPrice(bulkShop.getSellPrice());
             }
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.bulk_click_confirm", "action", saleOrPurchase)));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.bulk_click_confirm", "action", saleOrPurchase)));
             aranarthPlayer.setBulkTransactionNum(1);
             aranarthPlayer.setBulkTransactionShopLocation(shop.getLocation());
             aranarthPlayer.setBulkTransactionExpiry(System.currentTimeMillis() + 5000);
@@ -144,7 +144,7 @@ public class ShopBulkTransaction {
             AranarthUtils.setPlayer(uuid, ap);
             Player online = Bukkit.getPlayer(uuid);
             if (online != null) {
-                online.sendMessage(ChatUtils.chatMessage(Lang.get("inventory.bulk_auto_disabled")));
+                online.sendMessage(ChatUtils.chatMessage(Lang.getFor(online, "inventory.bulk_auto_disabled")));
             }
         }, 100L);
     }

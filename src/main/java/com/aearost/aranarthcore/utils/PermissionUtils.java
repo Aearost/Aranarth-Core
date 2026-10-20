@@ -1074,7 +1074,7 @@ public class PermissionUtils {
                 aranarthPlayer.setSaintExpireDate(0);
                 aranarthPlayer.setSaintRank(aranarthPlayer.getPermanentSaintRank());
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("rank.saint_expired")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "rank.saint_expired")));
             }
         }
     }

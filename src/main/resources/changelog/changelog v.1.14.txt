@@ -53,6 +53,8 @@ Economy, Jobs & Quests
 
 Chat, UI & Sounds
 [+] Added Spanish to /lang
+[+] Enabled Portuguese in /lang (was implemented but never enabled unintentionally)
+[~] Fixed issues where different languages were causing issues for non-GUI functionality
 [~] Fixed multiple GUIs not working correctly for non-English languages
 [~] Added missing un-AFK checks and removed redundant ones
 [~] Fixed "You are no longer AFK" displaying without first going AFK, such as when being pushed by mobs right as the AFK timer ran out

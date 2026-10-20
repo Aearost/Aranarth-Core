@@ -23,13 +23,13 @@ public class CommandWorldEvent {
         if (sender instanceof Player player) {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
             if (aranarthPlayer.getCouncilRank() < 3) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
                 return true;
             }
         }
 
         if (args.length < 2) {
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac worldevent <name> [intensity]")));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac worldevent <name> [intensity]")));
             return true;
         }
 
@@ -37,7 +37,7 @@ public class CommandWorldEvent {
         try {
             event = WorldEvent.valueOf(args[1].toUpperCase());
         } catch (IllegalArgumentException e) {
-            sender.sendMessage(ChatUtils.chatMessage(Lang.get("worldevent.unknown", "name", args[1])));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "worldevent.unknown", "name", args[1])));
             return true;
         }
 
@@ -47,12 +47,12 @@ public class CommandWorldEvent {
             try {
                 int userIntensity = Integer.parseInt(args[2]);
                 if (userIntensity < 1 || userIntensity > 3) {
-                    sender.sendMessage(ChatUtils.chatMessage(Lang.get("worldevent.invalid_intensity")));
+                    sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "worldevent.invalid_intensity")));
                     return true;
                 }
                 intensity = userIntensity - 1;
             } catch (NumberFormatException e) {
-                sender.sendMessage(ChatUtils.chatMessage(Lang.get("worldevent.invalid_intensity")));
+                sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "worldevent.invalid_intensity")));
                 return true;
             }
         } else {
@@ -62,7 +62,7 @@ public class CommandWorldEvent {
         WorldEvent active = AranarthUtils.getActiveWorldEvent();
 
         if (active == event) {
-            sender.sendMessage(ChatUtils.chatMessage(event.getColor() + event.getName(AranarthUtils.getActiveWorldEventIntensity()) + " &7is already active!"));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "world_event.already_active", "event", event.getColor() + event.getName(AranarthUtils.getActiveWorldEventIntensity()))));
             return true;
         }
 

@@ -24,7 +24,7 @@ public class CommandTime {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.time")) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return true;
 			}
 		}
@@ -32,14 +32,14 @@ public class CommandTime {
 		if (args.length == 1) {
 			World survival = Bukkit.getWorld("world");
 			long ticks = survival != null ? survival.getTime() : 0;
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.time_current", "ticks", String.valueOf(ticks), "label", getTimeOfDay(ticks))));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "admin.time_current", "ticks", String.valueOf(ticks), "label", getTimeOfDay(sender, ticks))));
 			return true;
 		}
 
 		try {
 			long time = Long.parseLong(args[1]);
 			updateTime(time);
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.time_updated")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "admin.time_updated")));
 		} catch (NumberFormatException e) {
 			long time = -1;
 			if (args[1].equalsIgnoreCase("day")) {
@@ -53,10 +53,10 @@ public class CommandTime {
 			}
 
 			if (time == -1) {
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "ac time <time>")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac time <time>")));
 			} else {
 				updateTime(time);
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("admin.time_updated")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "admin.time_updated")));
 			}
 		}
 		return true;
@@ -65,22 +65,25 @@ public class CommandTime {
 	/**
 	 * Returns an approximate time-of-day label for the given tick value.
 	 * Minecraft day starts at tick 0 (dawn). One full day = 24000 ticks.
+	 * @param sender The sender the label is shown to.
 	 * @param ticks The world time in ticks.
 	 * @return A human-readable time-of-day label.
 	 */
-	private static String getTimeOfDay(long ticks) {
+	private static String getTimeOfDay(CommandSender sender, long ticks) {
 		long t = ticks % 24000;
-		if (t < 1000) return "Dawn";
-		if (t < 3000) return "Morning";
-		if (t < 6000) return "Late Morning";
-		if (t < 7000) return "Noon";
-		if (t < 9000) return "Afternoon";
-		if (t < 11000) return "Late Afternoon";
-		if (t < 12000) return "Dusk";
-		if (t < 13000) return "Evening";
-		if (t < 18000) return "Night";
-		if (t < 22000) return "Midnight";
-		return "Late Night";
+		String key;
+		if (t < 1000) key = "admin.time_dawn";
+		else if (t < 3000) key = "admin.time_morning";
+		else if (t < 6000) key = "admin.time_late_morning";
+		else if (t < 7000) key = "admin.time_noon";
+		else if (t < 9000) key = "admin.time_afternoon";
+		else if (t < 11000) key = "admin.time_late_afternoon";
+		else if (t < 12000) key = "admin.time_dusk";
+		else if (t < 13000) key = "admin.time_evening";
+		else if (t < 18000) key = "admin.time_night";
+		else if (t < 22000) key = "admin.time_midnight";
+		else key = "admin.time_late_night";
+		return Lang.getFor(sender, key);
 	}
 
 	/**

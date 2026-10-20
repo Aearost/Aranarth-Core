@@ -37,10 +37,10 @@ public class GuiCompressorClick {
 				player.playSound(player, Sound.UI_BUTTON_CLICK, 1F, 0.8F);
 				if (aranarthPlayer.isCompressingItems()) {
 					aranarthPlayer.setCompressingItems(false);
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("compress.no_longer")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "compress.no_longer")));
 				} else {
 					aranarthPlayer.setCompressingItems(true);
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("compress.now_compressing")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "compress.now_compressing")));
 				}
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 			}

@@ -33,7 +33,7 @@ public class CommandPay implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (args.length <= 1) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "pay <player> <amount>")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "pay <player> <amount>")));
 				return true;
 			} else {
 				UUID uuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
@@ -44,7 +44,7 @@ public class CommandPay implements CommandExecutor {
 
 				if (uuid != null && target != null) {
 					if (target.getUniqueId().equals(player.getUniqueId())) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("economy.pay_self")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "economy.pay_self")));
 						return false;
 					}
 
@@ -58,15 +58,15 @@ public class CommandPay implements CommandExecutor {
 						String noCommas = (formattedAmount.substring(1)).replaceAll(",", "");
 						amount = Double.parseDouble(noCommas); // The actual value will be two decimals
 					} catch (NumberFormatException e) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_number")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_number")));
 						return true;
 					}
 
 					if (amount < 0) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("economy.pay_negative")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "economy.pay_negative")));
 						return true;
 					} else if (amount == 0) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("economy.pay_zero")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "economy.pay_zero")));
 						return true;
 					} else {
 						AranarthPlayer aranarthPlayerSender = AranarthUtils.getPlayer(player.getUniqueId());
@@ -85,7 +85,7 @@ public class CommandPay implements CommandExecutor {
 							if (networkReceiver == null) {
 								// Target is fully offline - pay using local in-memory data and persist
 								if (aranarthPlayerReceiver == null) {
-									player.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[0])));
+									player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.not_found", "name", args[0])));
 									return true;
 								}
 								if (aranarthPlayerSender.getBalance() >= amount) {
@@ -93,9 +93,9 @@ public class CommandPay implements CommandExecutor {
 									aranarthPlayerReceiver.setBalance(aranarthPlayerReceiver.getBalance() + amount);
 									PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
 									PersistenceUtils.saveAranarthPlayerImmediately(target.getUniqueId());
-									player.sendMessage(ChatUtils.chatMessage(Lang.get("economy.paid", "player", aranarthPlayerReceiver.getNickname(), "amount", formattedAmount)));
+									player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "economy.paid", "player", aranarthPlayerReceiver.getNickname(), "amount", formattedAmount)));
 								} else {
-									player.sendMessage(ChatUtils.chatMessage(Lang.get("economy.not_enough")));
+									player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "economy.not_enough")));
 								}
 								return true;
 							}
@@ -110,9 +110,9 @@ public class CommandPay implements CommandExecutor {
 								NetworkManager.getInstance().publishBalanceAdjust(target.getUniqueId(), amount);
 								NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), -amount);
 								NetworkManager.getInstance().publishPayNotify(target.getUniqueId(), aranarthPlayerSender.getNickname(), formattedAmount);
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("economy.paid", "player", networkReceiver.getNickname(), "amount", formattedAmount)));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "economy.paid", "player", networkReceiver.getNickname(), "amount", formattedAmount)));
 							} else {
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("economy.not_enough")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "economy.not_enough")));
 							}
 							return true;
 						}
@@ -122,22 +122,22 @@ public class CommandPay implements CommandExecutor {
 							aranarthPlayerReceiver.setBalance(aranarthPlayerReceiver.getBalance() + amount);
 							PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
 							PersistenceUtils.saveAranarthPlayerImmediately(target.getUniqueId());
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("economy.paid", "player", aranarthPlayerReceiver.getNickname(), "amount", formattedAmount)));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "economy.paid", "player", aranarthPlayerReceiver.getNickname(), "amount", formattedAmount)));
 							Player onlineTarget = Bukkit.getPlayer(target.getUniqueId());
-							onlineTarget.sendMessage(ChatUtils.chatMessage(Lang.get("economy.received_payment", "amount", formattedAmount, "player", aranarthPlayerSender.getNickname())));
+							onlineTarget.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlineTarget, "economy.received_payment", "amount", formattedAmount, "player", aranarthPlayerSender.getNickname())));
 							return true;
 						} else {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("pay.not_enough")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "pay.not_enough")));
 							return true;
 						}
 					}
 				} else {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("pay.player_not_found", "name", args[0])));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "pay.player_not_found", "name", args[0])));
 					return true;
 				}
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
 		}
     }

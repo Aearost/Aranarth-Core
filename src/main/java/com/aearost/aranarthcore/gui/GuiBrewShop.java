@@ -48,7 +48,7 @@ public class GuiBrewShop {
         }
 
         for (int i = start; i < end; i++) {
-            inv.setItem(9 + (i - start), BrewRecipeUtils.createShopPotionDisplay(locked.get(i)));
+            inv.setItem(9 + (i - start), BrewRecipeUtils.createShopPotionDisplay(player, locked.get(i)));
         }
 
         ItemStack previous = new ItemStack(Material.RED_WOOL);

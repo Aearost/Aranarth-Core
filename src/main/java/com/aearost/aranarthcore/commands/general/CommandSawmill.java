@@ -18,17 +18,17 @@ public class CommandSawmill implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.tables")) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return true;
 			}
 
 			MenuType.STONECUTTER.builder()
-					.title(Component.text("Sawmill"))
+					.title(Component.text(Lang.getFor(player, "gui.recipes.station_sawmill")))
 					.checkReachable(false)
 					.build(player)
 					.open();
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 		}
 		return true;
 	}

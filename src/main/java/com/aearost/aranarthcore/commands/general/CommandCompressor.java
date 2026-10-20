@@ -25,7 +25,7 @@ public class CommandCompressor implements CommandExecutor {
 
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.compressor")) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return false;
 			}
 
@@ -33,7 +33,7 @@ public class CommandCompressor implements CommandExecutor {
 			gui.openGui();
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 		}
 		return false;
 	}

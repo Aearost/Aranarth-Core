@@ -73,6 +73,6 @@ public class PlayerReaperCapture {
         });
 
         Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("reaper.purchase_back"))), 1L);
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "reaper.purchase_back"))), 1L);
     }
 }

@@ -30,7 +30,7 @@ public class CommandTeleport implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (args.length == 0) {
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "tp <player>")));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "tp <player>")));
 				return true;
 			} else {
 				UUID targetUUID = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
@@ -46,7 +46,7 @@ public class CommandTeleport implements CommandExecutor {
 				}
 				// Vanished players appear offline
 				if (targetUUID != null && AranarthUtils.isVanishedFrom(player, targetUUID)) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("player.offline", "name", args[0])));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.offline", "name", args[0])));
 					return true;
 				}
 				if (targetUUID != null) {
@@ -54,13 +54,13 @@ public class CommandTeleport implements CommandExecutor {
 					if (target != null) {
 						// Same-server teleport request
 						if (player.getUniqueId().equals(target.getUniqueId())) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.cannot_self")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.cannot_self")));
 							return true;
 						}
 
 						AranarthPlayer targetPlayer = AranarthUtils.getPlayer(target.getUniqueId());
 						if (targetPlayer.isTogglingTp()) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.not_accepting", "player", targetPlayer.getNickname())));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.not_accepting", "player", targetPlayer.getNickname())));
 							return true;
 						}
 
@@ -69,24 +69,24 @@ public class CommandTeleport implements CommandExecutor {
 						targetPlayer.setTeleportToUuid(null);
 						targetPlayer.setTeleportFromUuid(player.getUniqueId());
 						AranarthUtils.setPlayer(target.getUniqueId(), targetPlayer);
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.request_sent", "player", targetPlayer.getNickname())));
-						target.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.request_received", "player", senderPlayer.getNickname())));
-						target.sendMessage(ChatUtils.buildTpAcceptDenyPrompt());
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.request_sent", "player", targetPlayer.getNickname())));
+						target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "teleport.request_received", "player", senderPlayer.getNickname())));
+						target.sendMessage(ChatUtils.buildTpAcceptDenyPrompt(target));
 						AranarthUtils.playTeleportSound(player);
 						AranarthUtils.playTeleportSound(target);
 					} else if (NetworkManager.isActive()) {
 						// Target is on another server
 						NetworkPlayer remoteTarget = NetworkManager.getInstance().getRemotePlayer(targetUUID);
 						if (remoteTarget == null) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("player.offline", "name", args[0])));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.offline", "name", args[0])));
 							return true;
 						}
 						if (player.getUniqueId().equals(targetUUID)) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.cannot_self")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.cannot_self")));
 							return true;
 						}
 						AranarthPlayer senderPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.request_sent", "player", remoteTarget.getNickname())));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.request_sent", "player", remoteTarget.getNickname())));
 						NetworkManager.getInstance().publishTpRequest(
 								player.getUniqueId(),
 								senderPlayer.getNickname().isEmpty() ? player.getName() : senderPlayer.getNickname(),
@@ -94,14 +94,14 @@ public class CommandTeleport implements CommandExecutor {
 								false);
 						AranarthUtils.playTeleportSound(player);
 					} else {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("player.offline", "name", args[0])));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.offline", "name", args[0])));
 					}
 				} else {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("player.offline", "name", args[0])));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.offline", "name", args[0])));
 				}
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 		}
 		return true;
 	}

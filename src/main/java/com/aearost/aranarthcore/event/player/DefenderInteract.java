@@ -35,7 +35,7 @@ public class DefenderInteract {
                     && dominion.getDominionPermissions().hasPermission(
                             dominion.getMemberRank(player.getUniqueId()), DominionPermission.MANAGE_DEFENDERS));
         if (!canManage) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.no_permission_defenders")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.no_permission_defenders")));
             return;
         }
 

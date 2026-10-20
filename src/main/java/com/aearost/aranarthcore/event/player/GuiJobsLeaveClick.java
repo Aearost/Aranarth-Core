@@ -85,7 +85,7 @@ public class GuiJobsLeaveClick {
         for (int i = 0; i < slots.length && i < activeJobs.size(); i++) {
             if (slots[i] == slot) {
                 if (isOnCooldown(player.getUniqueId())) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("jobs.leave_cooldown", "time", getCooldownRemaining(player.getUniqueId()))));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "jobs.leave_cooldown", "time", getCooldownRemaining(player.getUniqueId()))));
                     return;
                 }
 
@@ -101,7 +101,7 @@ public class GuiJobsLeaveClick {
                 }
                 applyCooldown(player.getUniqueId());
 
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("jobs.left", "job", job.getDisplayName())));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "jobs.left", "job", Lang.key(job.getNameKey()))));
                 int jobsVol = AranarthUtils.getPlayer(player.getUniqueId()).getJobsSoundVolume();
                 if (jobsVol > 0) {
                     player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, jobsVol / 100f, 1.0f);

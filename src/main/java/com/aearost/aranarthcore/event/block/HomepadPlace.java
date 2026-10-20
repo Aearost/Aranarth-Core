@@ -20,13 +20,13 @@ public class HomepadPlace {
 			ItemMeta meta = e.getItemInHand().getItemMeta();
 			if (meta.getPersistentDataContainer().has(HOMEPAD)) {
 				if (!AranarthCore.isSmpServer()) {
-					e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("access.no_place_smp")));
+					e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "access.no_place_smp")));
 					e.setCancelled(true);
 					return;
 				}
 				// A homepad in a creative world would let creative mounts and items reach survival
 				if (!AranarthUtils.isSurvivalWorld(e.getBlockPlaced().getWorld().getName())) {
-					e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("homepad.survival_only")));
+					e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "homepad.survival_only")));
 					e.setCancelled(true);
 					return;
 				}

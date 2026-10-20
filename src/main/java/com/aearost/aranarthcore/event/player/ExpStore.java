@@ -29,7 +29,7 @@ public class ExpStore {
                     if (player.isSneaking()) {
                         // The bottle would otherwise go to the Creative or Arena inventory, losing the player's EXP
                         if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
-                            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.must_be_gameplay_world")));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.must_be_gameplay_world")));
                             return;
                         }
                         if (player.hasPermission("aranarth.exp")) {
@@ -51,7 +51,7 @@ public class ExpStore {
                             }
                             player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
                         } else {
-                            player.sendMessage(ChatUtils.chatMessage(Lang.get("potions.no_exp_permission")));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "potions.no_exp_permission")));
                         }
                     }
                 }

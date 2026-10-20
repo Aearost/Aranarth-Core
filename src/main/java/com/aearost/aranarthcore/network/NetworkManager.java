@@ -880,13 +880,15 @@ public class NetworkManager {
      * Publishes the current sleep status action-bar message to all other servers.
      *
      * @param message  The formatted message, e.g. "Players sleeping: 1/2".
+     * @param total    Number of players sleeping across all servers.
      * @param sleeping Number of players currently sleeping.
      * @param required Number required to skip the night.
      */
-    public void publishSleepMessage(String message, int sleeping, int required) {
+    public void publishSleepMessage(String message, int total, int sleeping, int required) {
         JsonObject json = new JsonObject();
         json.addProperty("server", thisServer);
         json.addProperty("message", message);
+        json.addProperty("total", total);
         json.addProperty("sleeping", sleeping);
         json.addProperty("required", required);
         publish(CH_SLEEP, json);
@@ -939,6 +941,21 @@ public class NetworkManager {
         JsonObject json = new JsonObject();
         json.addProperty("server", thisServer);
         json.addProperty("message", rawMessage);
+        publish(CH_BROADCAST, json);
+    }
+
+    /**
+     * Relays a lang-keyed broadcast so each server renders it in its own players' locales.
+     */
+    public void publishLangBroadcast(String key, Object... args) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("key", key);
+        JsonArray argArray = new JsonArray();
+        for (Object arg : args) {
+            argArray.add(String.valueOf(arg));
+        }
+        json.add("args", argArray);
         publish(CH_BROADCAST, json);
     }
 
@@ -1523,10 +1540,10 @@ public class NetworkManager {
                     + " timed out; the player is still on this server.");
             clearPendingTeleport(uuid);
             if (isNonAuthoritative(uuid)) {
-                player.kickPlayer(ChatUtils.translateToColor(Lang.get("teleport.server_unreachable")));
+                player.kickPlayer(ChatUtils.translateToColor(Lang.getFor(player, "teleport.server_unreachable")));
             } else {
                 unlockPlayer(uuid);
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.failed")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.failed")));
             }
         }, TRANSFER_TIMEOUT_TICKS);
     }
@@ -1592,7 +1609,7 @@ public class NetworkManager {
         // The combat-log kill is skipped for transfers, so a tagged player must not be able to leave this way
         AranarthPlayer apCombat = AranarthUtils.getPlayer(uuid);
         if (apCombat != null && !apCombat.isInAdminMode() && !apCombat.getCombatLogTime().isEmpty()) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.combat_tagged")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.combat_tagged")));
             return;
         }
 
@@ -1712,7 +1729,7 @@ public class NetworkManager {
                     // The pending-TP write failed: transferring now would leave the player on the
                     // destination with no inventory state. Abort and notify the player instead.
                     unlockPlayer(uuid);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.failed")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.failed")));
                     return;
                 }
                 try {
@@ -1731,7 +1748,7 @@ public class NetworkManager {
                     transferringPlayers.remove(uuid);
                     clearPendingTeleport(uuid);
                     unlockPlayer(uuid);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.failed")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.failed")));
                 }
             });
         });
@@ -1768,11 +1785,11 @@ public class NetworkManager {
                 }
                 if (!transferAllowed) {
                     if (isNonAuthoritative(uuid)) {
-                        player.kickPlayer(ChatUtils.translateToColor(Lang.get("teleport.server_unreachable")));
+                        player.kickPlayer(ChatUtils.translateToColor(Lang.getFor(player, "teleport.server_unreachable")));
                         return;
                     }
                     unlockPlayer(uuid);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.failed")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.failed")));
                     return;
                 }
                 try {
@@ -1789,10 +1806,10 @@ public class NetworkManager {
                     transferringPlayers.remove(uuid);
                     clearPendingTeleport(uuid);
                     if (isNonAuthoritative(uuid)) {
-                        player.kickPlayer(ChatUtils.translateToColor(Lang.get("teleport.server_unreachable")));
+                        player.kickPlayer(ChatUtils.translateToColor(Lang.getFor(player, "teleport.server_unreachable")));
                     } else {
                         unlockPlayer(uuid);
-                        player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.failed")));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.failed")));
                     }
                 }
             });
@@ -1961,9 +1978,9 @@ public class NetworkManager {
             return;
         }
 
-        Bukkit.getConsoleSender().sendMessage(joinMessage);
+        Bukkit.getConsoleSender().sendMessage(ChatUtils.translateToColor(Lang.plain(joinMessage)));
         for (Player p : Bukkit.getOnlinePlayers()) {
-            p.sendMessage(joinMessage);
+            p.sendMessage(ChatUtils.translateToColor(Lang.resolve(p, joinMessage)));
         }
         boolean isNewPlayer = json.has("isNewPlayer") && json.get("isNewPlayer").getAsBoolean();
         if (isNewPlayer) {
@@ -2034,9 +2051,9 @@ public class NetworkManager {
         String quitMessage = json.has("quitMessage") ? json.get("quitMessage").getAsString() : "";
         boolean vanished = json.has("vanished") && json.get("vanished").getAsBoolean();
         if (!quitMessage.isEmpty() && !vanished) {
-            Bukkit.getConsoleSender().sendMessage(quitMessage);
+            Bukkit.getConsoleSender().sendMessage(ChatUtils.translateToColor(Lang.plain(quitMessage)));
             for (Player p : Bukkit.getOnlinePlayers()) {
-                p.sendMessage(quitMessage);
+                p.sendMessage(ChatUtils.translateToColor(Lang.resolve(p, quitMessage)));
             }
             // Play the descending note-block quit sound
             new BukkitRunnable() {
@@ -2106,11 +2123,11 @@ public class NetworkManager {
         // is populated.
 
         if (isTpHere) {
-            target.sendMessage(ChatUtils.chatMessage(Lang.get("tp.tphere_request", "player", fromNickname)));
+            target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "tp.tphere_request", "player", fromNickname)));
         } else {
-            target.sendMessage(ChatUtils.chatMessage(Lang.get("tp.request_received", "player", fromNickname)));
+            target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "tp.request_received", "player", fromNickname)));
         }
-        target.sendMessage(ChatUtils.buildTpAcceptDenyPrompt());
+        target.sendMessage(ChatUtils.buildTpAcceptDenyPrompt(target));
         AranarthUtils.playTeleportSound(target);
     }
 
@@ -2134,23 +2151,23 @@ public class NetworkManager {
                     ? AranarthUtils.getNickname(requester)
                     : accepterNick; // fallback to accepter nick if requester somehow offline
             setPendingAndPublishTransfer(accepterUuid,
-                    new PendingTeleport(requesterUuid.toString(), accepterNick, "&7You have teleported to " + requesterNick),
+                    new PendingTeleport(requesterUuid.toString(), accepterNick, Lang.getFor(accepterUuid, "teleport.teleported_to", "player", requesterNick)),
                     thisServer);
             if (requester != null) {
-                requester.sendMessage(ChatUtils.chatMessage(Lang.get("tp.accepted", "player", accepterNick)));
+                requester.sendMessage(ChatUtils.chatMessage(Lang.getFor(requester, "tp.accepted", "player", accepterNick)));
             }
         } else {
             Player requester = Bukkit.getPlayer(requesterUuid);
             if (requester != null) {
-                requester.sendMessage(ChatUtils.chatMessage(Lang.get("tp.accepted", "player", accepterNick)));
+                requester.sendMessage(ChatUtils.chatMessage(Lang.getFor(requester, "tp.accepted", "player", accepterNick)));
                 String targetServer = AranarthCore.getInstance().getConfig()
                         .getString("network.servers." + accepterServer, accepterServer);
                 PendingTeleport ptForRequester = new PendingTeleport(accepterUuid.toString(),
-                        "&e&l" + accepterServer.toUpperCase(), "&7You have teleported to " + accepterNick);
+                        "&e&l" + accepterServer.toUpperCase(), Lang.getFor(requester, "teleport.teleported_to", "player", accepterNick));
                 // Same countdown and combat check as a same-server teleport
                 AranarthPlayer requesterAp = AranarthUtils.getPlayer(requesterUuid);
                 AranarthUtils.teleportPlayer(requester, requester.getLocation(), requester.getLocation(),
-                        requesterAp.isInAdminMode(), "&e&l" + accepterServer.toUpperCase(), "&7Transferring to " + accepterNick + "&7...", success -> {
+                        requesterAp.isInAdminMode(), "&e&l" + accepterServer.toUpperCase(), Lang.getFor(requester, "teleport.transferring_named", "name", accepterNick), success -> {
                             if (success) {
                                 saveInventoryAndTransfer(requester, targetServer, ptForRequester);
                             }
@@ -2166,7 +2183,7 @@ public class NetworkManager {
 
         Player requester = Bukkit.getPlayer(requesterUuid);
         if (requester != null) {
-            requester.sendMessage(ChatUtils.chatMessage(Lang.get("tp.denied_by", "player", denierNick)));
+            requester.sendMessage(ChatUtils.chatMessage(Lang.getFor(requester, "tp.denied_by", "player", denierNick)));
         }
     }
 
@@ -2192,7 +2209,7 @@ public class NetworkManager {
         } else {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Net] Transfer of " + player.getName()
                     + " to " + toServer + " skipped: no pending teleport was found.");
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.failed")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.failed")));
         }
     }
 
@@ -2275,7 +2292,7 @@ public class NetworkManager {
                     if (ap.isWeatherMessageDisabled()) {
                         continue;
                     }
-                    p.sendMessage(ChatUtils.chatMessage(Lang.get("weather.clear")));
+                    p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, "weather.clear")));
                     if (!isNewDay) {
                         int wVol = ap.getWeatherSoundVolume();
                         if (wVol > 0) {
@@ -2301,7 +2318,7 @@ public class NetworkManager {
                 if (prevWeather == type) {
                     return;
                 }
-                String broadcastMsg = isThunder ? Lang.get("weather.thunder") : Lang.get("weather.rain");
+                String broadcastKey = isThunder ? "weather.thunder" : "weather.rain";
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     String pWorld = p.getWorld().getName();
                     if (pWorld.equals("arena") || pWorld.startsWith("creative")) {
@@ -2311,7 +2328,7 @@ public class NetworkManager {
                     if (ap.isWeatherMessageDisabled()) {
                         continue;
                     }
-                    p.sendMessage(ChatUtils.chatMessage(broadcastMsg));
+                    p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, broadcastKey)));
                     if (!isNewDay) {
                         int wVol = ap.getWeatherSoundVolume();
                         if (wVol > 0) {
@@ -2348,7 +2365,7 @@ public class NetworkManager {
                     if (ap.isWeatherMessageDisabled()) {
                         continue;
                     }
-                    p.sendMessage(ChatUtils.chatMessage(Lang.get("weather.snow")));
+                    p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, "weather.snow")));
                     if (!isNewDay) {
                         int wVol = ap.getWeatherSoundVolume();
                         if (wVol > 0) {
@@ -2378,9 +2395,9 @@ public class NetworkManager {
 
         String prefixStart = "&7⊰&r";
         String prefixEnd = "&7⊱&r";
-        Component targetPrefixComp = LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(prefixStart + "&7&l&oFrom: &r&e" + fromNickname + prefixEnd + " &7&o>> &e&o"));
+        Component targetPrefixComp = LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(prefixStart + Lang.getFor(target, "message.from") + fromNickname + prefixEnd + " &7&o>> &e&o"));
         Component targetMsgComp = targetPrefixComp.append(LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor("&e&o") + message));
-        target.sendMessage(ChatUtils.clickableCommand(targetMsgComp, ChatUtils.translateToColor("&7Reply to &e" + fromNickname), "/r ", true));
+        target.sendMessage(ChatUtils.clickableCommand(targetMsgComp, ChatUtils.translateToColor(Lang.getFor(target, "message.hover_reply", "player", fromNickname)), "/r ", true));
         AranarthUtils.playPingSound(target);
 
         // Store the sender UUID for /reply (uses last received message UUID)
@@ -2589,6 +2606,15 @@ public class NetworkManager {
         if (originServer.equals(thisServer)) {
             return;
         }
+        if (json.has("key")) {
+            JsonArray argArray = json.getAsJsonArray("args");
+            Object[] args = new Object[argArray.size()];
+            for (int i = 0; i < args.length; i++) {
+                args[i] = argArray.get(i).getAsString();
+            }
+            Lang.broadcastLocal(json.get("key").getAsString(), args);
+            return;
+        }
         String message = json.get("message").getAsString();
         boolean isServerTip = json.has("type") && json.get("type").getAsString().equals("server_tip");
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -2673,7 +2699,7 @@ public class NetworkManager {
         }
         String fromNickname = json.get("fromNickname").getAsString();
         String formattedAmount = json.get("formattedAmount").getAsString();
-        target.sendMessage(ChatUtils.chatMessage(Lang.get("economy.received_payment", "amount", formattedAmount, "player", fromNickname)));
+        target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "economy.received_payment", "amount", formattedAmount, "player", fromNickname)));
     }
 
     private void handleSleepMessage(JsonObject json) {
@@ -2689,7 +2715,10 @@ public class NetworkManager {
             if (worldName.equals("world") || AranarthUtils.isSmpWorld(worldName) || worldName.equals("resource")) {
                 long time = player.getLocation().getWorld().getTime();
                 if (time > 12500 && time <= 23980) {
-                    player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message));
+                    String text = json.has("total") && json.has("required")
+                            ? Lang.getFor(player, "sleep.players_sleeping", "sleeping", json.get("total").getAsInt(), "required", json.get("required").getAsInt())
+                            : message;
+                    player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(text));
                 }
             }
         }
@@ -2794,8 +2823,8 @@ public class NetworkManager {
                 () -> PersistenceUtils.reloadPlayerMailFromDatabase(toUuid));
 
         String fromNickname = json.get("fromNickname").getAsString();
-        target.sendMessage(ChatUtils.chatMessage(Lang.get("mail.received", "sender", fromNickname)));
-        target.sendMessage(ChatUtils.chatMessage(Lang.get("mail.received_view")));
+        target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "mail.received", "sender", fromNickname)));
+        target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "mail.received_view")));
         AranarthUtils.playPingSound(target);
     }
 
@@ -3235,14 +3264,14 @@ public class NetworkManager {
                 HashMap<Integer, ItemStack> remainder = onlinePlayer.getInventory().addItem(key);
                 if (!remainder.isEmpty()) {
                     AranarthUtils.addPendingVoteKeys(uuid, 1);
-                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("crate.inventory_full_keyclaim")));
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "crate.inventory_full_keyclaim")));
                     Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[VOTE] Remote key delivery: inventory full for " + onlinePlayer.getName() + " - stored as pending");
                 } else {
                     Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[VOTE] Remote key delivery: key given directly to " + onlinePlayer.getName() + " in " + worldName);
                 }
             } else {
                 AranarthUtils.addPendingVoteKeys(uuid, 1);
-                onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("crate.cannot_receive_here")));
+                onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "crate.cannot_receive_here")));
                 Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[VOTE] Remote key delivery: " + onlinePlayer.getName() + " is in invalid world (" + worldName + ") - stored as pending");
             }
             if (DatabaseManager.isActive()) {
@@ -3318,14 +3347,14 @@ public class NetworkManager {
                 HashMap<Integer, ItemStack> remainder = onlinePlayer.getInventory().addItem(finalKey);
                 if (!remainder.isEmpty()) {
                     AranarthUtils.addPendingKey(uuid, finalKey, quantity);
-                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("crate.inventory_full_keyclaim")));
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "crate.inventory_full_keyclaim")));
                     Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[STORE] Cross-server purchase key: inventory full for " + onlinePlayer.getName() + " - stored as pending");
                 } else {
                     Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[STORE] Cross-server purchase key: delivered " + keyType + " x" + quantity + " to " + onlinePlayer.getName());
                 }
             } else {
                 AranarthUtils.addPendingKey(uuid, finalKey, quantity);
-                onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.get("give.keyclaim_hint")));
+                onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "give.keyclaim_hint")));
                 Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[STORE] Cross-server purchase key: " + onlinePlayer.getName() + " in invalid world (" + worldName + ") - stored as pending");
             }
             if (DatabaseManager.isActive()) {
@@ -3365,7 +3394,7 @@ public class NetworkManager {
         AranarthUtils.addVote(new AranarthVote(receiverUuid, amount, timestamp));
         Player receiver = Bukkit.getPlayer(receiverUuid);
         if (receiver != null) {
-            receiver.sendMessage(ChatUtils.chatMessage(Lang.get("economy.received_vote_points", "amount", amount, "player", senderNickname)));
+            receiver.sendMessage(ChatUtils.chatMessage(Lang.getFor(receiver, "economy.received_vote_points", "amount", amount, "player", senderNickname)));
         }
     }
 
@@ -3498,7 +3527,7 @@ public class NetworkManager {
             Player viewer = Bukkit.getPlayer(viewerUuid);
             if (viewer != null) {
                 viewer.sendMessage(com.aearost.aranarthcore.utils.ChatUtils.chatMessage(
-                        Lang.get("admin.invsee_load_failed")));
+                        Lang.getFor(viewer, "admin.invsee_load_failed")));
             }
         });
     }
@@ -3614,15 +3643,15 @@ public class NetworkManager {
                 }
             }
 
-            String targetMsg = switch (type) {
-                case "ally" -> Lang.get("dominion.notify_ally_request", "dominion", requesterDominion.getName());
-                case "truce" -> Lang.get("dominion.notify_truce_request", "dominion", requesterDominion.getName());
-                default -> Lang.get("dominion.notify_neutral_request", "dominion", requesterDominion.getName());
+            String targetKey = switch (type) {
+                case "ally" -> "dominion.ally_request_received_notify";
+                case "truce" -> "dominion.truce_request_received_notify";
+                default -> "dominion.neutral_request_received_notify";
             };
-            String requesterMsg = switch (type) {
-                case "ally" -> "&7Your Dominion has requested an &5Alliance &7with &e" + targetDominion.getName();
-                case "truce" -> "&7Your Dominion has requested a &dTruce &7with &e" + targetDominion.getName();
-                default -> "&7Your Dominion has requested &fNeutrality &7with &e" + targetDominion.getName();
+            String requesterKey = switch (type) {
+                case "ally" -> "dominion.ally_request_sent_notify";
+                case "truce" -> "dominion.truce_request_sent_notify";
+                default -> "dominion.neutral_request_sent_notify";
             };
 
             for (Player p : Bukkit.getOnlinePlayers()) {
@@ -3631,12 +3660,12 @@ public class NetworkManager {
                     if (domVol > 0) {
                         p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 0.9F);
                     }
-                    p.sendMessage(ChatUtils.chatMessage(targetMsg));
+                    p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, targetKey, "name", requesterDominion.getName())));
                 } else if (requesterDominion.getMembers().contains(p.getUniqueId())) {
                     if (domVol > 0) {
                         p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 0.9F);
                     }
-                    p.sendMessage(ChatUtils.chatMessage(requesterMsg));
+                    p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, requesterKey, "name", targetDominion.getName())));
                 }
             }
         });
@@ -3721,12 +3750,12 @@ public class NetworkManager {
                         if (domVol > 0) {
                             p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 0.9F);
                         }
-                        p.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.notify_neutral", "dominion", b.getName())));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, "dominion.notify_neutral", "dominion", b.getName())));
                     } else if (b.getMembers().contains(p.getUniqueId())) {
                         if (domVol > 0) {
                             p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 0.9F);
                         }
-                        p.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.notify_neutral", "dominion", a.getName())));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, "dominion.notify_neutral", "dominion", a.getName())));
                     }
                 }
             }
@@ -3862,13 +3891,13 @@ public class NetworkManager {
                         if (domVol > 0) {
                             p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_2, 2F * (domVol / 100f), 1F);
                         }
-                        p.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.notify_conquering_own", "dominion", b.getName())));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, "dominion.notify_conquering_own", "dominion", b.getName())));
                     } else if (b.getMembers().contains(p.getUniqueId())) {
                         if (domVol > 0) {
                             p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_4, 2F * (domVol / 100f), 1F);
                         }
-                        p.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.notify_conquering", "dominion", a.getName())));
-                        p.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.conquest_auto_warning")));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, "dominion.notify_conquering", "dominion", a.getName())));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, "dominion.conquest_auto_warning")));
                     }
                 }
             }
@@ -3880,14 +3909,14 @@ public class NetworkManager {
                         if (domVol > 0) {
                             p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_1, 2F * (domVol / 100f), 1F);
                         }
-                        p.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.notify_rebellion_own", "dominion", b.getName())));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, "dominion.notify_rebellion_own", "dominion", b.getName())));
                     } else if (b.getMembers().contains(p.getUniqueId())) {
                         if (domVol > 0) {
                             p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_1, 2F * (domVol / 100f), 1F);
                         }
-                        p.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.notify_rebellion", "dominion", a.getName())));
-                        p.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.notify_retreat", "dominion", a.getName())));
-                        p.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.freed_note")));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, "dominion.notify_rebellion", "dominion", a.getName())));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, "dominion.notify_retreat", "dominion", a.getName())));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, "dominion.freed_note")));
                     }
                 }
             }

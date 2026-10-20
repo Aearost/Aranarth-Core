@@ -119,9 +119,9 @@ public class AranarthiumArmourCraft {
                             if (strippedName.startsWith("a") || strippedName.startsWith("e")
                                     || strippedName.startsWith("i") || strippedName.startsWith("o")
                                     || strippedName.startsWith("u")) {
-                                player.sendMessage(ChatUtils.chatMessage(Lang.get("aranarthium.forged", "article", "an", "item", displayName)));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "aranarthium.forged", "article", "an", "item", displayName)));
                             } else {
-                                player.sendMessage(ChatUtils.chatMessage(Lang.get("aranarthium.forged", "article", "a", "item", displayName)));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "aranarthium.forged", "article", "a", "item", displayName)));
                             }
                         }
                     }
@@ -261,7 +261,7 @@ public class AranarthiumArmourCraft {
                             if (result.getItemMeta().getPersistentDataContainer().has(ARMOR_TYPE)) {
                                 e.setCancelled(true);
                                 player.closeInventory();
-                                player.sendMessage(ChatUtils.chatMessage(Lang.get("aranarthium.cannot_trim")));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "aranarthium.cannot_trim")));
                             }
                         }
                     }

@@ -26,7 +26,7 @@ public class CommandPetTransfer implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (args.length == 0) {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "pettransfer <player>")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "pettransfer <player>")));
 			return true;
 		} else {
 			if (sender instanceof Player player) {
@@ -36,21 +36,21 @@ public class CommandPetTransfer implements CommandExecutor {
 					if (AranarthUtils.getPlayer(offlinePlayer.getUniqueId()) != null) {
 						if (offlinePlayer.getName().equalsIgnoreCase(args[0])) {
 							if (offlinePlayer.getUniqueId().equals(player.getUniqueId())) {
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.already_owner")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "pet.already_owner")));
 								return true;
 							}
 
 							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 							aranarthPlayer.setPetTransferUuid(offlinePlayer.getUniqueId());
 							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.transfer_prompt", "player", offlinePlayer.getName())));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "pet.transfer_prompt", "player", offlinePlayer.getName())));
 							isPlayerFound = true;
 							return true;
 						}
 					}
 				}
 				if (!isPlayerFound) {
-					sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[0])));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", args[0])));
 					return true;
 				}
 			}

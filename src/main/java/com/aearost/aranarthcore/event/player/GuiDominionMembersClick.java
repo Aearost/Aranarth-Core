@@ -42,7 +42,7 @@ public class GuiDominionMembersClick {
 
         // Only the leader can change ranks
         if (!dominion.getLeader().equals(player.getUniqueId())) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.leader_only_ranks")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.leader_only_ranks")));
             return;
         }
 
@@ -71,7 +71,7 @@ public class GuiDominionMembersClick {
 
         // Cannot change the leader's rank through this GUI
         if (targetUuid.equals(dominion.getLeader())) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.use_setleader")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.use_setleader")));
             return;
         }
 
@@ -88,16 +88,16 @@ public class GuiDominionMembersClick {
         DominionRank nextRank = cycleRank(currentRank);
         dominion.setMemberRank(targetUuid, nextRank);
         DominionUtils.updateDominion(dominion);
-        String rankName = DominionUtils.getFormattedRankName(nextRank);
+        String rankName = DominionUtils.getFormattedRankName(player, nextRank);
 
         String nickname = AranarthUtils.getNickname(Bukkit.getOfflinePlayer(targetUuid));
-        player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.rank_set", "player", nickname, "rank", rankName)));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.rank_set", "player", nickname, "rank", rankName)));
         player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5F, 1F);
 
         // Notify the member if they're online
         Player targetPlayer = Bukkit.getPlayer(targetUuid);
         if (targetPlayer != null && targetPlayer.isOnline()) {
-            targetPlayer.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.your_rank_changed", "name", dominion.getName(), "rank", rankName)));
+            targetPlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(targetPlayer, "dominion.your_rank_changed", "name", dominion.getName(), "rank", rankName)));
         }
 
         // Refresh the GUI

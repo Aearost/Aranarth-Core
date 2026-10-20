@@ -164,8 +164,7 @@ public class LoginStreakUtils {
             if (NetworkManager.isActive()) {
                 NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), money);
             }
-            player.sendMessage(ChatUtils.chatMessage(
-                    "&7Day &e" + day + " &7streak reward: &6$" + MONEY_FORMAT.format(money)));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "streak.reward_money", "day", day, "amount", MONEY_FORMAT.format(money))));
         }
     }
 
@@ -215,7 +214,7 @@ public class LoginStreakUtils {
                 Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
                         () -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(uuid));
             }
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("streak.reward_keyclaim",
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "streak.reward_keyclaim",
                     "day", String.valueOf(day), "item", keyColor + countStr + keyName)));
             return;
         }
@@ -225,8 +224,7 @@ public class LoginStreakUtils {
         for (ItemStack overflow : leftover.values()) {
             player.getWorld().dropItemNaturally(player.getLocation(), overflow);
         }
-        player.sendMessage(ChatUtils.chatMessage(
-                "&7Day &e" + day + " &7streak reward: " + keyColor + countStr + keyName));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "streak.reward_item", "day", day, "item", keyColor + countStr + keyName)));
     }
 
     // -------------------------------------------------------------------------

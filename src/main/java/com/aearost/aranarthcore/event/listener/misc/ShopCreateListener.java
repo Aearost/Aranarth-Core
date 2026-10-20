@@ -51,7 +51,7 @@ public class ShopCreateListener implements Listener {
 							chestShop = ShopUtils.getShopForContainer(targetLocs[1].getBlock());
 						}
 						if (chestShop != null && !chestShop.getLocation().equals(sign.getLocation())) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.chest_already_has_shop")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.chest_already_has_shop")));
 							canShopBeRemoved(e);
 							e.setLine(0, "");
 							e.setLine(1, "");
@@ -61,7 +61,7 @@ public class ShopCreateListener implements Listener {
 						}
 					}
 					if (!canCreateShop(e)) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.cannot_create_here")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.cannot_create_here")));
 						canShopBeRemoved(e);
 						e.setLine(0, "");
 						e.setLine(1, "");
@@ -81,10 +81,10 @@ public class ShopCreateListener implements Listener {
 						int maxShopNum = AranarthUtils.getMaxShopNum(player);
 						if (playerShopNum >= maxShopNum) {
 							if (maxShopNum == 0) {
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.no_shop")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.no_shop")));
 								return;
 							} else if (maxShopNum != -1) {
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.max_reached", "max", maxShopNum)));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.max_reached", "max", maxShopNum)));
 								return;
 							}
 						}
@@ -96,7 +96,7 @@ public class ShopCreateListener implements Listener {
 						// Verifies there is a sign on top, a chest underneath, and at least one item in the first slot of the chest
 						if (isValidChestFormat(player, sign)) {
 							if (getShopItem(sign, true).getType() == Material.AIR) {
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.cannot_create_here")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.cannot_create_here")));
 								return;
 							}
 
@@ -126,7 +126,7 @@ public class ShopCreateListener implements Listener {
 						}
 					}
 				} else {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.must_use_wall_sign")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.must_use_wall_sign")));
 				}
 			}
 			// If placing a Server Shop
@@ -141,7 +141,7 @@ public class ShopCreateListener implements Listener {
 
 							if (heldItem != null && heldItem.getType() != Material.AIR) {
 								if (heldItem.getType().name().contains("BUNDLE") || heldItem.getType().name().contains("SHULKER_BOX")) {
-									player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.cannot_create_here")));
+									player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.cannot_create_here")));
 									return;
 								}
 
@@ -178,7 +178,7 @@ public class ShopCreateListener implements Listener {
 								if (canShopBeRemoved(e)) {
 									displayInvalidFields(e, new int[] { 1, 0, 0, 0}, false);
 								}
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("general.not_holding_item")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.not_holding_item")));
 							}
 						} else {
 							if (canShopBeRemoved(e)) {
@@ -187,14 +187,14 @@ public class ShopCreateListener implements Listener {
 						}
 					}
 				} else {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.must_use_wall_sign")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.must_use_wall_sign")));
 				}
 			}
 			// Remove if the shop previously existed and now was changed
 			else {
 				if (ShopUtils.getShopFromLocation(e.getBlock().getLocation()) != null) {
 					if (canShopBeRemoved(e)) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.destroyed")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.destroyed")));
 					}
 				}
 			}
@@ -264,15 +264,15 @@ public class ShopCreateListener implements Listener {
 		// Quantity check
 		int shopQuantityResult = getShopQuantity(ChatUtils.stripColorFormatting(lines[1]));
 		if (shopQuantityResult == 0) {
-			player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_number")));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_number")));
 			invalidLines[1] = 1;
 		} else if (shopQuantityResult == -1) {
-			player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_format")));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_format")));
 			invalidLines[1] = 1;
 		}
 
 		String[] priceParts = ChatUtils.stripColorFormatting(lines[2]).split(" ");
-		String incorrectPrice = "&cIncorrect syntax for the price!";
+		String incorrectPrice = Lang.getFor(player, "shop.incorrect_price");
 		// Price check
 		if (priceParts[0].equalsIgnoreCase("B")) {
 			// Only buying
@@ -326,7 +326,7 @@ public class ShopCreateListener implements Listener {
 		// Username check
 		if (isPlayerShop) {
 			if (!ChatUtils.stripColorFormatting(lines[3]).equalsIgnoreCase(player.getName())) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.wrong_username")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.wrong_username")));
 				invalidLines[3] = 1;
 			}
 		}
@@ -391,12 +391,12 @@ public class ShopCreateListener implements Listener {
 	 */
 	private boolean isValidChestFormat(Player player, Block sign) {
 		if (!isBlockBelowContainer(sign)) {
-			player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.no_chest")));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.no_chest")));
 			return false;
 		}
 
 		if (getShopItem(sign, true) == null) {
-			player.sendMessage(ChatUtils.chatMessage(Lang.get("shop.first_slot_empty")));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.first_slot_empty")));
 			return false;
 		}
 

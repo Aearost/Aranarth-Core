@@ -32,7 +32,7 @@ public class TamedPetStealPreventListener implements Listener {
 				isAttemptingToLeash = true;
 				e.setCancelled(true);
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(tameable.getOwner().getUniqueId());
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.cannot_leash", "owner", aranarthPlayer.getNickname(), "pet", ChatUtils.getFormattedItemName(e.getEntity().getType().name()))));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "pet.cannot_leash", "owner", aranarthPlayer.getNickname(), "pet", ChatUtils.getFormattedItemName(e.getEntity().getType().name()))));
 			}
 		}
 	}
@@ -47,7 +47,7 @@ public class TamedPetStealPreventListener implements Listener {
 							e.setCancelled(true);
 							if (!isAttemptingToLeash) {
 								AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(tameable.getOwner().getUniqueId());
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("pet.cannot_ride", "owner", aranarthPlayer.getNickname(), "pet", ChatUtils.getFormattedItemName(mob.getType().name()))));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "pet.cannot_ride", "owner", aranarthPlayer.getNickname(), "pet", ChatUtils.getFormattedItemName(mob.getType().name()))));
 							} else {
 								isAttemptingToLeash = false;
 							}

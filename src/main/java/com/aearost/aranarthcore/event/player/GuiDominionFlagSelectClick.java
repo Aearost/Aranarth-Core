@@ -35,7 +35,7 @@ public class GuiDominionFlagSelectClick {
         }
 
         if (!dominion.getLeader().equals(player.getUniqueId())) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.leader_only_permissions")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.leader_only_permissions")));
             return;
         }
 
@@ -63,7 +63,7 @@ public class GuiDominionFlagSelectClick {
         if (slot == dominionSlot) {
             toggleDominionFlag(dominion, activeTitleKey);
             DominionUtils.updateDominion(dominion);
-            GuiDominionFlagSelect.refreshItems(e.getClickedInventory(), dominion, outposts, activeTitleKey);
+            GuiDominionFlagSelect.refreshItems(player, e.getClickedInventory(), dominion, outposts, activeTitleKey);
             player.updateInventory();
             player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 0.5F, 1.5F);
             return;
@@ -77,7 +77,7 @@ public class GuiDominionFlagSelectClick {
                 if (NetworkManager.isActive()) {
                     NetworkManager.getInstance().publishOutpostUpdate(outpost);
                 }
-                GuiDominionFlagSelect.refreshItems(e.getClickedInventory(), dominion, outposts, activeTitleKey);
+                GuiDominionFlagSelect.refreshItems(player, e.getClickedInventory(), dominion, outposts, activeTitleKey);
                 player.updateInventory();
                 player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 0.5F, 1.5F);
                 return;

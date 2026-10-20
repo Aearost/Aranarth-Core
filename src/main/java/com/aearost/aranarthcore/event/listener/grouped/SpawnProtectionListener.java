@@ -573,8 +573,8 @@ public class SpawnProtectionListener implements Listener {
             return;
         }
 
-        String adjustedName = "&eSurvival";
-        String adjustedTitle = "&e&lSurvival";
+        String adjustedName = Lang.getFor(player, "teleport.dest_survival");
+        String adjustedTitle = Lang.getFor(player, "teleport.title_survival");
         World world = Bukkit.getWorld(worldName);
         if (world != null) {
             Random random = new Random();
@@ -590,12 +590,12 @@ public class SpawnProtectionListener implements Listener {
                 } else if (worldName.equals("resource")) {
                     x = random.nextInt(5001) - 2500;
                     z = random.nextInt(5001) - 2500;
-                    adjustedName = "the &eResource &7world";
-                    adjustedTitle = "&e&lResource World";
+                    adjustedName = Lang.getFor(player, "teleport.dest_resource");
+                    adjustedTitle = Lang.getFor(player, "teleport.title_resource");
                 } else if (worldName.equals("arena")) {
                     selectedLocation = new Location(Bukkit.getWorld("arena"), 0.5, 105, 0.5, 180, 0);
-                    adjustedName = "the &eArena";
-                    adjustedTitle = "&e&lArena";
+                    adjustedName = Lang.getFor(player, "teleport.dest_arena");
+                    adjustedTitle = Lang.getFor(player, "teleport.title_arena");
                     break;
                 }
 

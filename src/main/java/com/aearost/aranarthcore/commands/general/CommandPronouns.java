@@ -27,7 +27,7 @@ public class CommandPronouns implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (args.length == 0) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "pronouns <pronouns>")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "pronouns <pronouns>")));
 				return true;
 			}
 
@@ -38,18 +38,18 @@ public class CommandPronouns implements CommandExecutor {
 				} else if (args[0].equalsIgnoreCase("FEMALE")) {
 					aranarthPlayer.setPronouns(Pronouns.FEMALE);
 				} else {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("pronouns.unsupported")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "pronouns.unsupported")));
 					return true;
 				}
 
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				NetworkManager.getInstance().publishPronounsUpdate(player.getUniqueId(), aranarthPlayer.getPronouns().name());
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("pronouns.updated")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "pronouns.updated")));
 				return true;
 			}
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
 		}
 	}

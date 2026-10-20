@@ -49,135 +49,135 @@ public class GuiJobsStatsClick {
         int level = jobData.getLevel(job);
         double currentXp = jobData.getCurrentXp(job);
         long required = JobUtils.getXpRequired(level);
-        String xpStr = level >= 10 ? "Max Level" : (int) currentXp + " / " + required;
+        String xpStr = level >= 10 ? Lang.getFor(player, "jobs.max_level") : (int) currentXp + " / " + required;
 
-        player.sendMessage(ChatUtils.chatMessage(Lang.get("jobs.stats_header", "job", job.getDisplayName(), "level", level)));
-        player.sendMessage(ChatUtils.chatMessage(Lang.get("jobs.stats_xp", "xp", xpStr)));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "jobs.stats_header", "job", Lang.key(job.getNameKey()), "level", level)));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "jobs.stats_xp", "xp", xpStr)));
         player.sendMessage(ChatUtils.chatMessage(""));
-        player.sendMessage(ChatUtils.chatMessage(Lang.get("jobs.actions_header")));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "jobs.actions_header")));
 
         double multiplier = JobUtils.getLevelMultiplier(level);
-        for (String line : getActionLines(job, multiplier)) {
+        for (String line : getActionLines(player, job, multiplier)) {
             player.sendMessage(ChatUtils.chatMessage(line));
         }
     }
 
-    private static List<String> getActionLines(JobType job, double multiplier) {
+    private static List<String> getActionLines(Player player, JobType job, double multiplier) {
         return switch (job) {
             case MINER -> List.of(
-                "&7Break:",
-                "&7  Stone / Deepslate / Cobblestone &8- &e" + fmt(0.05, multiplier),
-                "&7  Andesite / Diorite / Granite / Tuff / Calcite &8- &e" + fmt(0.07, multiplier),
-                "&7  Dripstone / Basalt / Smooth Basalt / Blackstone / End Stone &8- &e" + fmt(0.07, multiplier),
-                "&7  Sulphur / Cinnabar &8- &e" + fmt(0.07, multiplier),
-                "&7  Netherrack &8- &e" + fmt(0.03, multiplier),
-                "&7  Copper Ore &8- &e" + fmt(1.90, multiplier),
-                "&7  Coal Ore &8- &e" + fmt(1.90, multiplier),
-                "&7  Iron Ore &8- &e" + fmt(3.85, multiplier),
-                "&7  Gold Ore &8- &e" + fmt(5.75, multiplier),
-                "&7  Lapis Ore &8- &e" + fmt(2.90, multiplier),
-                "&7  Redstone Ore &8- &e" + fmt(2.40, multiplier),
-                "&7  Nether Quartz Ore &8- &e" + fmt(2.40, multiplier),
-                "&7  Emerald Ore &8- &e" + fmt(38.00, multiplier),
-                "&7  Diamond Ore &8- &e" + fmt(24.00, multiplier),
-                "&7  Ancient Debris &8- &e" + fmt(75.00, multiplier),
-                "&7  Amethyst Cluster &8- &e" + fmt(4.80, multiplier)
+                Lang.getFor(player, "jobs.act_header_break"),
+                Lang.getFor(player, "jobs.act_stone", "xp", fmt(0.05, multiplier)),
+                Lang.getFor(player, "jobs.act_stone_variants", "xp", fmt(0.07, multiplier)),
+                Lang.getFor(player, "jobs.act_dripstone", "xp", fmt(0.07, multiplier)),
+                Lang.getFor(player, "jobs.act_sulphur", "xp", fmt(0.07, multiplier)),
+                Lang.getFor(player, "jobs.act_netherrack", "xp", fmt(0.03, multiplier)),
+                Lang.getFor(player, "jobs.act_copper_ore", "xp", fmt(1.90, multiplier)),
+                Lang.getFor(player, "jobs.act_coal_ore", "xp", fmt(1.90, multiplier)),
+                Lang.getFor(player, "jobs.act_iron_ore", "xp", fmt(3.85, multiplier)),
+                Lang.getFor(player, "jobs.act_gold_ore", "xp", fmt(5.75, multiplier)),
+                Lang.getFor(player, "jobs.act_lapis_ore", "xp", fmt(2.90, multiplier)),
+                Lang.getFor(player, "jobs.act_redstone_ore", "xp", fmt(2.40, multiplier)),
+                Lang.getFor(player, "jobs.act_quartz_ore", "xp", fmt(2.40, multiplier)),
+                Lang.getFor(player, "jobs.act_emerald_ore", "xp", fmt(38.00, multiplier)),
+                Lang.getFor(player, "jobs.act_diamond_ore", "xp", fmt(24.00, multiplier)),
+                Lang.getFor(player, "jobs.act_ancient_debris", "xp", fmt(75.00, multiplier)),
+                Lang.getFor(player, "jobs.act_amethyst_cluster", "xp", fmt(4.80, multiplier))
             );
             case FARMER -> List.of(
-                "&7Harvest:",
-                "&7  Wheat / Cocoa &8- &e" + fmt(1.20, multiplier),
-                "&7  Carrots / Potatoes &8- &e" + fmt(0.60, multiplier),
-                "&7  Beetroot &8- &e" + fmt(1.45, multiplier),
-                "&7  Nether Wart &8- &e" + fmt(1.80, multiplier),
-                "&7  Melon / Pumpkin &8- &e" + fmt(2.40, multiplier),
-                "&7  Sweet Berries &8- &e" + fmt(0.95, multiplier),
-                "&7  Glow Berries &8- &e" + fmt(0.73, multiplier),
-                "&7  Sugarcane / Cactus &8- &e" + fmt(1.90, multiplier),
-                "&7  Collect Honey (bottle) &8- &e" + fmt(12.00, multiplier),
-                "&7  Collect Honeycomb (shears) &8- &e" + fmt(9.60, multiplier),
-                "&7  Milk Cow / Goat &8- &e" + fmt(4.80, multiplier),
-                "&7  Mushroom Stew (Mooshroom) &8- &e" + fmt(9.60, multiplier),
-                "&7  Shear Sheep &8- &e" + fmt(6.00, multiplier),
-                "&7  Shear Mooshroom &8- &e" + fmt(12.00, multiplier),
-                "&7  Kill Passive Mob &8- &e" + fmt(1.20, multiplier)
+                Lang.getFor(player, "jobs.act_header_harvest"),
+                Lang.getFor(player, "jobs.act_wheat", "xp", fmt(1.20, multiplier)),
+                Lang.getFor(player, "jobs.act_carrots", "xp", fmt(0.60, multiplier)),
+                Lang.getFor(player, "jobs.act_beetroot", "xp", fmt(1.45, multiplier)),
+                Lang.getFor(player, "jobs.act_nether_wart", "xp", fmt(1.80, multiplier)),
+                Lang.getFor(player, "jobs.act_melon", "xp", fmt(2.40, multiplier)),
+                Lang.getFor(player, "jobs.act_sweet_berries", "xp", fmt(0.95, multiplier)),
+                Lang.getFor(player, "jobs.act_glow_berries", "xp", fmt(0.73, multiplier)),
+                Lang.getFor(player, "jobs.act_sugarcane", "xp", fmt(1.90, multiplier)),
+                Lang.getFor(player, "jobs.act_honey", "xp", fmt(12.00, multiplier)),
+                Lang.getFor(player, "jobs.act_honeycomb", "xp", fmt(9.60, multiplier)),
+                Lang.getFor(player, "jobs.act_milk", "xp", fmt(4.80, multiplier)),
+                Lang.getFor(player, "jobs.act_mushroom_stew", "xp", fmt(9.60, multiplier)),
+                Lang.getFor(player, "jobs.act_shear_sheep", "xp", fmt(6.00, multiplier)),
+                Lang.getFor(player, "jobs.act_shear_mooshroom", "xp", fmt(12.00, multiplier)),
+                Lang.getFor(player, "jobs.act_kill_passive", "xp", fmt(1.20, multiplier))
             );
             case EXCAVATOR -> List.of(
-                "&7Dig:",
-                "&7  Dirt / Coarse Dirt / Rooted Dirt &8- &e" + fmt(0.05, multiplier),
-                "&7  Podzol / Mycelium &8- &e" + fmt(0.05, multiplier),
-                "&7  Sand / Red Sand &8- &e" + fmt(0.05, multiplier),
-                "&7  Gravel &8- &e" + fmt(0.05, multiplier),
-                "&7  Clay &8- &e" + fmt(0.10, multiplier),
-                "&7  Mud / Muddy Mangrove Roots &8- &e" + fmt(0.05, multiplier),
-                "&7  Soul Sand / Soul Soil &8- &e" + fmt(0.07, multiplier),
-                "&7  Snow Block &8- &e" + fmt(0.05, multiplier),
-                "&7  Brush Suspicious Sand &8- &e" + fmt(25.00, multiplier),
-                "&7  Brush Suspicious Gravel &8- &e" + fmt(25.00, multiplier)
+                Lang.getFor(player, "jobs.act_header_dig"),
+                Lang.getFor(player, "jobs.act_dirt", "xp", fmt(0.05, multiplier)),
+                Lang.getFor(player, "jobs.act_podzol", "xp", fmt(0.05, multiplier)),
+                Lang.getFor(player, "jobs.act_sand", "xp", fmt(0.05, multiplier)),
+                Lang.getFor(player, "jobs.act_gravel", "xp", fmt(0.05, multiplier)),
+                Lang.getFor(player, "jobs.act_clay", "xp", fmt(0.10, multiplier)),
+                Lang.getFor(player, "jobs.act_mud", "xp", fmt(0.05, multiplier)),
+                Lang.getFor(player, "jobs.act_soul_sand", "xp", fmt(0.07, multiplier)),
+                Lang.getFor(player, "jobs.act_snow_block", "xp", fmt(0.05, multiplier)),
+                Lang.getFor(player, "jobs.act_brush_sand", "xp", fmt(25.00, multiplier)),
+                Lang.getFor(player, "jobs.act_brush_gravel", "xp", fmt(25.00, multiplier))
             );
             case LUMBERJACK -> List.of(
-                "&7Chop:",
-                "&7  Log (any type) &8- &e" + fmt(2.90, multiplier),
-                "&7  Stripped Log &8- &e" + fmt(1.90, multiplier),
-                "&7  Bamboo Block &8- &e" + fmt(1.45, multiplier),
-                "&7  Mushroom Block &8- &e" + fmt(1.90, multiplier),
-                "&7  Leaves &8- &e" + fmt(0.08, multiplier),
-                "&7Craft / Saw:",
-                "&7  Planks (per plank) &8- &e" + fmt(1.20, multiplier),
-                "&7  Stairs (per stair) &8- &e" + fmt(2.40, multiplier),
-                "&7  Slabs (per slab) &8- &e" + fmt(1.20, multiplier),
-                "&7  Door &8- &e" + fmt(4.80, multiplier),
-                "&7  Trapdoor &8- &e" + fmt(3.60, multiplier),
-                "&7  Fence / Gate &8- &e" + fmt(2.90, multiplier),
-                "&7  Chiseled Bookshelf &8- &e" + fmt(6.00, multiplier)
+                Lang.getFor(player, "jobs.act_header_chop"),
+                Lang.getFor(player, "jobs.act_log", "xp", fmt(2.90, multiplier)),
+                Lang.getFor(player, "jobs.act_stripped_log", "xp", fmt(1.90, multiplier)),
+                Lang.getFor(player, "jobs.act_bamboo_block", "xp", fmt(1.45, multiplier)),
+                Lang.getFor(player, "jobs.act_mushroom_block", "xp", fmt(1.90, multiplier)),
+                Lang.getFor(player, "jobs.act_leaves", "xp", fmt(0.08, multiplier)),
+                Lang.getFor(player, "jobs.act_header_craft_saw"),
+                Lang.getFor(player, "jobs.act_planks", "xp", fmt(1.20, multiplier)),
+                Lang.getFor(player, "jobs.act_stairs", "xp", fmt(2.40, multiplier)),
+                Lang.getFor(player, "jobs.act_slabs", "xp", fmt(1.20, multiplier)),
+                Lang.getFor(player, "jobs.act_door", "xp", fmt(4.80, multiplier)),
+                Lang.getFor(player, "jobs.act_trapdoor", "xp", fmt(3.60, multiplier)),
+                Lang.getFor(player, "jobs.act_fence", "xp", fmt(2.90, multiplier)),
+                Lang.getFor(player, "jobs.act_chiseled_bookshelf", "xp", fmt(6.00, multiplier))
             );
             case BUILDER -> List.of(
-                "&7Place:",
-                "&7  Any buildable block &8- &e" + fmt(1.00, multiplier)
+                Lang.getFor(player, "jobs.act_header_place"),
+                Lang.getFor(player, "jobs.act_any_block", "xp", fmt(1.00, multiplier))
             );
             case EXPLORER -> List.of(
-                "&7Travel:",
-                "&7  Walk (per block) &8- &e" + fmt(0.25, multiplier),
-                "&7  Ride Horse (per block) &8- &e" + fmt(0.50, multiplier),
-                "&7Discover:",
-                "&7  Open Overworld Chest &8- &e" + fmt(100.00, multiplier),
-                "&7  Open Nether Chest &8- &e" + fmt(150.00, multiplier),
-                "&7  Open End Chest &8- &e" + fmt(250.00, multiplier)
+                Lang.getFor(player, "jobs.act_header_travel"),
+                Lang.getFor(player, "jobs.act_walk", "xp", fmt(0.25, multiplier)),
+                Lang.getFor(player, "jobs.act_ride_horse", "xp", fmt(0.50, multiplier)),
+                Lang.getFor(player, "jobs.act_header_discover"),
+                Lang.getFor(player, "jobs.act_chest_overworld", "xp", fmt(100.00, multiplier)),
+                Lang.getFor(player, "jobs.act_chest_nether", "xp", fmt(150.00, multiplier)),
+                Lang.getFor(player, "jobs.act_chest_end", "xp", fmt(250.00, multiplier))
             );
             case ALCHEMIST -> List.of(
-                "&7Brew:",
-                "&7  Vanilla Potion (per bottle) &8- &e" + fmt(19.20, multiplier),
-                "&7  BreweryX Alcohol (per bottle) &8- &e" + fmt(48.00, multiplier),
-                "&7Enchant:",
-                "&7  Enchanting Table &8- &e" + fmt(24.00, multiplier),
-                "&7  Apply Enchanted Book (Anvil) &8- &e" + fmt(19.20, multiplier),
-                "&7  Disenchant (Grindstone) &8- &e" + fmt(14.40, multiplier),
-                "&7  Rename (Anvil) &8- &e" + fmt(4.80, multiplier)
+                Lang.getFor(player, "jobs.act_header_brew"),
+                Lang.getFor(player, "jobs.act_vanilla_potion", "xp", fmt(19.20, multiplier)),
+                Lang.getFor(player, "jobs.act_brewery_alcohol", "xp", fmt(48.00, multiplier)),
+                Lang.getFor(player, "jobs.act_header_enchant"),
+                Lang.getFor(player, "jobs.act_enchanting_table", "xp", fmt(24.00, multiplier)),
+                Lang.getFor(player, "jobs.act_enchanted_book", "xp", fmt(19.20, multiplier)),
+                Lang.getFor(player, "jobs.act_disenchant", "xp", fmt(14.40, multiplier)),
+                Lang.getFor(player, "jobs.act_rename", "xp", fmt(4.80, multiplier))
             );
             case HUNTER -> List.of(
-                "&7Kill:",
-                "&7  Zombie / Husk / Drowned &8- &e" + fmt(4.80, multiplier),
-                "&7  Skeleton / Stray &8- &e" + fmt(6.00, multiplier),
-                "&7  Spider / Cave Spider &8- &e" + fmt(4.80, multiplier),
-                "&7  Creeper &8- &e" + fmt(8.40, multiplier),
-                "&7  Witch &8- &e" + fmt(12.00, multiplier),
-                "&7  Blaze &8- &e" + fmt(19.20, multiplier),
-                "&7  Ghast &8- &e" + fmt(24.00, multiplier),
-                "&7  Enderman &8- &e" + fmt(3.60, multiplier),
-                "&7  Piglin / Zombified Piglin &8- &e" + fmt(4.80, multiplier),
-                "&7  Wither Skeleton &8- &e" + fmt(36.00, multiplier),
-                "&7  Guardian &8- &e" + fmt(18.00, multiplier),
-                "&7  Elder Guardian &8- &e" + fmt(250.00, multiplier),
-                "&7  Shulker &8- &e" + fmt(14.40, multiplier),
-                "&7  Breeze &8- &e" + fmt(28.80, multiplier),
-                "&7  Warden &8- &e" + fmt(100.00, multiplier),
-                "&7  Passive Mob &8- &e" + fmt(2.40, multiplier),
-                "&7  Player &8- &e" + fmt(120.00, multiplier),
-                "&7  (Spawner mobs earn 1/4 pay)",
-                "&7Fish:",
-                "&7  Cod / Salmon &8- &e" + fmt(4.80, multiplier),
-                "&7  Pufferfish &8- &e" + fmt(8.40, multiplier),
-                "&7  Tropical Fish &8- &e" + fmt(6.00, multiplier),
-                "&7  Treasure Item &8- &e" + fmt(36.00, multiplier)
+                Lang.getFor(player, "jobs.act_header_kill"),
+                Lang.getFor(player, "jobs.act_zombie", "xp", fmt(4.80, multiplier)),
+                Lang.getFor(player, "jobs.act_skeleton", "xp", fmt(6.00, multiplier)),
+                Lang.getFor(player, "jobs.act_spider", "xp", fmt(4.80, multiplier)),
+                Lang.getFor(player, "jobs.act_creeper", "xp", fmt(8.40, multiplier)),
+                Lang.getFor(player, "jobs.act_witch", "xp", fmt(12.00, multiplier)),
+                Lang.getFor(player, "jobs.act_blaze", "xp", fmt(19.20, multiplier)),
+                Lang.getFor(player, "jobs.act_ghast", "xp", fmt(24.00, multiplier)),
+                Lang.getFor(player, "jobs.act_enderman", "xp", fmt(3.60, multiplier)),
+                Lang.getFor(player, "jobs.act_piglin", "xp", fmt(4.80, multiplier)),
+                Lang.getFor(player, "jobs.act_wither_skeleton", "xp", fmt(36.00, multiplier)),
+                Lang.getFor(player, "jobs.act_guardian", "xp", fmt(18.00, multiplier)),
+                Lang.getFor(player, "jobs.act_elder_guardian", "xp", fmt(250.00, multiplier)),
+                Lang.getFor(player, "jobs.act_shulker", "xp", fmt(14.40, multiplier)),
+                Lang.getFor(player, "jobs.act_breeze", "xp", fmt(28.80, multiplier)),
+                Lang.getFor(player, "jobs.act_warden", "xp", fmt(100.00, multiplier)),
+                Lang.getFor(player, "jobs.act_passive_mob", "xp", fmt(2.40, multiplier)),
+                Lang.getFor(player, "jobs.act_player", "xp", fmt(120.00, multiplier)),
+                Lang.getFor(player, "jobs.act_spawner_note"),
+                Lang.getFor(player, "jobs.act_header_fish"),
+                Lang.getFor(player, "jobs.act_cod", "xp", fmt(4.80, multiplier)),
+                Lang.getFor(player, "jobs.act_pufferfish", "xp", fmt(8.40, multiplier)),
+                Lang.getFor(player, "jobs.act_tropical_fish", "xp", fmt(6.00, multiplier)),
+                Lang.getFor(player, "jobs.act_treasure", "xp", fmt(36.00, multiplier))
             );
         };
     }

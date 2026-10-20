@@ -51,7 +51,7 @@ public class GuiDefenderManageClick {
                 && dominion.getDominionPermissions().hasPermission(
                 dominion.getMemberRank(player.getUniqueId()), DominionPermission.MANAGE_DEFENDERS));
         if (!canManage) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.no_permission_defenders")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.no_permission_defenders")));
             player.closeInventory();
             return;
         }
@@ -68,10 +68,9 @@ public class GuiDefenderManageClick {
                 UUID followId = DefenderUtils.getFollowPlayerId(defenderUUID);
                 String followerName = followId != null
                         ? (Bukkit.getOfflinePlayer(followId).getName() != null
-                        ? Bukkit.getOfflinePlayer(followId).getName() : "another player")
-                        : "another player";
-                player.sendMessage(ChatUtils.chatMessage(
-                        "&cThis defender is currently following &e" + followerName));
+                        ? Bukkit.getOfflinePlayer(followId).getName() : Lang.getFor(player, "defender.another_player"))
+                        : Lang.getFor(player, "defender.another_player");
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "defender.following", "player", followerName)));
                 return;
             }
 
@@ -96,33 +95,33 @@ public class GuiDefenderManageClick {
 
             DefenderUtils.setDefenderMode(defenderUUID, nextMode, followPlayerId, guardPosition);
 
-            String modeMsg = switch (nextMode) {
-                case PATROL -> "&7This defender will now &epatrol &7the dominion territory";
-                case FOLLOW -> "&7This defender will now &efollow &7you";
-                case IDLE -> "&7This defender is now &eidle &7and completely still";
-                case GUARD -> "&7This defender will now &eguard &7its current position";
+            String modeKey = switch (nextMode) {
+                case PATROL -> "defender.mode_patrol";
+                case FOLLOW -> "defender.mode_follow";
+                case IDLE -> "defender.mode_idle";
+                case GUARD -> "defender.mode_guard";
             };
-            player.sendMessage(ChatUtils.chatMessage(modeMsg));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, modeKey)));
             player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
             DefenderType type = DefenderUtils.getDefenderType(defenderUUID);
             boolean nowFollowLocked = DefenderUtils.isFollowLockedFor(defenderUUID, player.getUniqueId(), dominion.getLeader());
             org.bukkit.inventory.Inventory inv = player.getOpenInventory().getTopInventory();
             inv.setItem(GuiDefenderManage.SLOT_MODE, nowFollowLocked
-                    ? GuiDefenderManage.buildLockedModeButton(defenderUUID)
-                    : GuiDefenderManage.buildModeButton(nextMode, defenderUUID));
-            inv.setItem(13, GuiDefenderManage.buildInfoItem(type, defenderUUID, dominion, nextMode));
+                    ? GuiDefenderManage.buildLockedModeButton(player, defenderUUID)
+                    : GuiDefenderManage.buildModeButton(player, nextMode, defenderUUID));
+            inv.setItem(13, GuiDefenderManage.buildInfoItem(player, type, defenderUUID, dominion, nextMode));
 
         } else if (slot == GuiDefenderManage.SLOT_TELEPORT_HOME) {
             Entity defender = Bukkit.getEntity(defenderUUID);
             if (defender == null) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("defender.no_longer_available")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "defender.no_longer_available")));
                 GuiDefenderManage.clearSession(player.getUniqueId());
                 player.closeInventory();
                 return;
             }
             Location homeLocation = DefenderUtils.getDefenderHomeLocation(defenderUUID);
             if (homeLocation == null) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("defender.no_home_set")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "defender.no_home_set")));
                 return;
             }
             UUID assignedOutpostId = DefenderUtils.getAssignedOutpostId(defenderUUID);
@@ -135,8 +134,7 @@ public class GuiDefenderManageClick {
             }
             defender.teleport(homeLocation);
             DefenderUtils.setDefenderMode(defenderUUID, DefenderMode.PATROL, null, null);
-            player.sendMessage(ChatUtils.chatMessage(
-                    "&7The defender has been teleported to &e" + homeName + "&7's home"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "defender.teleported_home", "name", homeName)));
             int tpVol = AranarthUtils.getPlayer(player.getUniqueId()).getTeleportSoundVolume();
             if (tpVol > 0) {
                 player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 0.5F * (tpVol / 100f), 1F);
@@ -147,7 +145,7 @@ public class GuiDefenderManageClick {
         } else if (slot == GuiDefenderManage.SLOT_LOCATION) {
             List<Outpost> outposts = OutpostUtils.getDominionOutposts(dominionId);
             if (outposts.isEmpty()) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("defender.no_outposts")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "defender.no_outposts")));
                 return;
             }
             UUID currentOutpostId = DefenderUtils.getAssignedOutpostId(defenderUUID);
@@ -170,17 +168,16 @@ public class GuiDefenderManageClick {
             }
             DefenderUtils.setAssignedOutpost(defenderUUID, nextOutpostId);
             String assignMsg = nextOutpostId == null
-                    ? "&7This defender is now assigned to &e" + dominion.getName() + "&7's main territory"
-                    : "&7This defender is now assigned to outpost &e"
-                    + OutpostUtils.getOutpostById(nextOutpostId).getName();
+                    ? Lang.getFor(player, "defender.assigned_main", "name", dominion.getName())
+                    : Lang.getFor(player, "defender.assigned_outpost", "name", OutpostUtils.getOutpostById(nextOutpostId).getName());
             player.sendMessage(ChatUtils.chatMessage(assignMsg));
             player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
             player.getOpenInventory().getTopInventory().setItem(GuiDefenderManage.SLOT_LOCATION,
-                    GuiDefenderManage.buildLocationButton(defenderUUID, dominion));
+                    GuiDefenderManage.buildLocationButton(player, defenderUUID, dominion));
 
         } else if (slot == GuiDefenderManage.SLOT_SELL) {
             DefenderType type = DefenderUtils.getDefenderType(defenderUUID);
-            String result = DefenderUtils.sellDefender(dominion, type, defenderUUID);
+            String result = DefenderUtils.sellDefender(player, dominion, type, defenderUUID);
             player.sendMessage(ChatUtils.chatMessage(result));
             player.playSound(player, Sound.ENTITY_ITEM_PICKUP, 0.5F, 1F);
             GuiDefenderManage.clearSession(player.getUniqueId());

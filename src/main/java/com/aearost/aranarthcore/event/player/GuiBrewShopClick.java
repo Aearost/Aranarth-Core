@@ -75,7 +75,7 @@ public class GuiBrewShopClick {
 
             // Already unlocked
             if (BrewRecipeUtils.isUnlocked(player.getUniqueId(), target)) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.already_unlocked", "name", target.getDisplayName())));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "brew.already_unlocked", "name", target.getDisplayName())));
                 return;
             }
 
@@ -83,7 +83,7 @@ public class GuiBrewShopClick {
             AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
             if (ap.getBalance() < target.getPrice()) {
                 NumberFormat fmt = NumberFormat.getInstance();
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.not_enough_money", "amount", fmt.format(target.getPrice()))));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "brew.not_enough_money", "amount", fmt.format(target.getPrice()))));
                 return;
             }
 
@@ -97,8 +97,8 @@ public class GuiBrewShopClick {
             }
             BrewRecipeUtils.unlock(player.getUniqueId(), target.getId());
 
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.recipe_unlocked", "recipe", target.getDisplayName())));
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.use_brewbook")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "brew.recipe_unlocked", "recipe", target.getDisplayName())));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "brew.use_brewbook")));
 
             player.closeInventory();
         }

@@ -33,22 +33,22 @@ public class CommandSmpCreative implements CommandExecutor {
 			// Only the OG players, Council, and Architect are permitted into the SMP creative world
 			if (!AranarthUtils.isOriginalPlayer(player.getUniqueId()) && aranarthPlayer.getCouncilRank() == 0
 					&& aranarthPlayer.getArchitectRank() == 0) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("access.world_restricted")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "access.world_restricted")));
 				return false;
 			}
 
 			if (AranarthUtils.getTeleportTask(player.getUniqueId()) != null) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.already_teleporting")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.already_teleporting")));
 				return false;
 			}
 
 			// On the Survival server: the SMP creative world lives on the SMP - count down then transfer.
 			if (!AranarthCore.isSmpServer() && NetworkManager.isActive()) {
 				AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
-						aranarthPlayer.isInAdminMode(), "&e&lSMP Creative", "&7Transferring to SMP Creative...", success -> {
+						aranarthPlayer.isInAdminMode(), Lang.getFor(player, "teleport.title_smp_creative"), Lang.getFor(player, "teleport.transferring_smp_creative"), success -> {
 					if (success) {
 						PendingTeleport pt = PendingTeleport.forCommand(
-								"smpcreative", "&e&lSMP Creative", "&7You have teleported to SMP Creative");
+								"smpcreative", Lang.getFor(player, "teleport.title_smp_creative"), Lang.getFor(player, "teleport.to_smp_creative"));
 						String smpServerName = AranarthCore.getInstance().getConfig()
 								.getString("network.servers.smp", "smp");
 						NetworkManager.getInstance().saveInventoryAndTransfer(player, smpServerName, pt);
@@ -59,10 +59,10 @@ public class CommandSmpCreative implements CommandExecutor {
 
 			Location creativeSpawn = PlotUtils.getSmpCreativeSpawnLocation();
 			if (creativeSpawn.getWorld() == null) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.could_not_smp_creative")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.could_not_smp_creative")));
 				return false;
 			}
-			AranarthUtils.teleportPlayer(player, player.getLocation(), creativeSpawn, aranarthPlayer.isInAdminMode(), "&e&lSMP Creative", Lang.get("teleport.to_smp_creative"), success -> {
+			AranarthUtils.teleportPlayer(player, player.getLocation(), creativeSpawn, aranarthPlayer.isInAdminMode(), Lang.getFor(player, "teleport.title_smp_creative"), Lang.getFor(player, "teleport.to_smp_creative"), success -> {
 				if (success) {
 					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.to_smp_creative")));
 				} else {
@@ -72,7 +72,7 @@ public class CommandSmpCreative implements CommandExecutor {
 
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return false;
 		}
 	}

@@ -59,7 +59,7 @@ public class PlayerServerJoinListener implements Listener {
         if (ban == null) {
             return;
         }
-        String kickMessage = PunishmentUtils.getBanKickMessage(ban);
+        String kickMessage = PunishmentUtils.getBanKickMessage(e.getUniqueId(), ban);
         if (kickMessage == null) {
             // The ban has ended
             DatabaseManager.getInstance().deleteNetworkBan(e.getUniqueId());
@@ -90,7 +90,7 @@ public class PlayerServerJoinListener implements Listener {
         Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] Refused SMP connection for " + e.getName()
                 + ": not an original player and no transfer is pending.");
         e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST,
-                ChatUtils.translateToColor(Lang.get("access.smp_restricted")));
+                ChatUtils.translateToColor(Lang.getFor(uuid, "access.smp_restricted")));
     }
 
     /**
@@ -207,7 +207,7 @@ public class PlayerServerJoinListener implements Listener {
             player.sendMessage("  " + Lang.getFor(player, eventKey, "event", activeWorldEvent.getName(eventIntensity)));
         }
 
-        player.sendMessage("  " + Lang.getFor(player, "motd.date", "weekday", weekday, "day", DateUtils.getDayNumWithSuffix(day), "month", month, "year", String.valueOf(year)));
+        player.sendMessage("  " + Lang.getFor(player, "motd.date", "weekday", weekday, "day", DateUtils.getDayNumWithSuffix(player, day), "month", month, "year", String.valueOf(year)));
 
         int mailCount = MailUtils.getMail(player.getUniqueId()).size();
         if (mailCount > 0) {
@@ -308,7 +308,7 @@ public class PlayerServerJoinListener implements Listener {
         if (resetTime > 0 && player.getWorld().getName().startsWith("resource")
                 && player.getLastPlayed() < resetTime) {
             player.teleport(new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0));
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.resource_reset_offline")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.resource_reset_offline")));
         }
 
         boolean isNewPlayer = false;
@@ -385,7 +385,7 @@ public class PlayerServerJoinListener implements Listener {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                 aranarthPlayer.setNickname("");
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("player.nickname_cleared")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.nickname_cleared")));
             }
         }
 
@@ -426,17 +426,23 @@ public class PlayerServerJoinListener implements Listener {
 
             String joinMsgStr;
             if (dateUtils.isValentinesDay()) {
-                joinMsgStr = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.VALENTINES));
+                joinMsgStr = ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.VALENTINES);
             } else if (dateUtils.isEaster()) {
-                joinMsgStr = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.EASTER));
+                joinMsgStr = ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.EASTER);
             } else if (dateUtils.isHalloween()) {
-                joinMsgStr = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.HALLOWEEN));
+                joinMsgStr = ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.HALLOWEEN);
             } else if (dateUtils.isChristmas()) {
-                joinMsgStr = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.CHRISTMAS));
+                joinMsgStr = ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.CHRISTMAS);
             } else {
                 joinMsgStr = ChatUtils.translateToColor("&8[&a+&8] &7" + nameToDisplay);
             }
-            e.setJoinMessage(joinMsgStr);
+            if (Lang.isNested(joinMsgStr)) {
+                // Holiday messages are rendered per player, so they cannot use the shared join message
+                e.setJoinMessage(null);
+                Lang.sendToAll(joinMsgStr);
+            } else {
+                e.setJoinMessage(joinMsgStr);
+            }
 
             // Notify other servers to display the join message and play the join sound
             if (NetworkManager.isActive()) {
@@ -576,18 +582,18 @@ public class PlayerServerJoinListener implements Listener {
                                     DateUtils routedDateUtils = new DateUtils();
                                     String routedJoinMsg;
                                     if (routedDateUtils.isValentinesDay()) {
-                                        routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.VALENTINES));
+                                        routedJoinMsg = ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.VALENTINES);
                                     } else if (routedDateUtils.isEaster()) {
-                                        routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.EASTER));
+                                        routedJoinMsg = ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.EASTER);
                                     } else if (routedDateUtils.isHalloween()) {
-                                        routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.HALLOWEEN));
+                                        routedJoinMsg = ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.HALLOWEEN);
                                     } else if (routedDateUtils.isChristmas()) {
-                                        routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.CHRISTMAS));
+                                        routedJoinMsg = ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.CHRISTMAS);
                                     } else {
                                         routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + routedName);
                                     }
                                     for (Player online : Bukkit.getOnlinePlayers()) {
-                                        online.sendMessage(routedJoinMsg);
+                                        online.sendMessage(ChatUtils.translateToColor(Lang.resolve(online, routedJoinMsg)));
                                     }
                                     if (NetworkManager.isActive()) {
                                         NetworkManager.getInstance().publishJoinMsg(routedJoinMsg, false);
@@ -627,19 +633,19 @@ public class PlayerServerJoinListener implements Listener {
                                     DateUtils routedDateUtils = new DateUtils();
                                     String routedJoinMsg;
                                     if (routedDateUtils.isValentinesDay()) {
-                                        routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.VALENTINES));
+                                        routedJoinMsg = ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.VALENTINES);
                                     } else if (routedDateUtils.isEaster()) {
-                                        routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.EASTER));
+                                        routedJoinMsg = ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.EASTER);
                                     } else if (routedDateUtils.isHalloween()) {
-                                        routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.HALLOWEEN));
+                                        routedJoinMsg = ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.HALLOWEEN);
                                     } else if (routedDateUtils.isChristmas()) {
-                                        routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.CHRISTMAS));
+                                        routedJoinMsg = ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.CHRISTMAS);
                                     } else {
                                         routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + routedName);
                                     }
                                     for (Player online : Bukkit.getOnlinePlayers()) {
                                         if (!online.getUniqueId().equals(player.getUniqueId())) {
-                                            online.sendMessage(routedJoinMsg);
+                                            online.sendMessage(ChatUtils.translateToColor(Lang.resolve(online, routedJoinMsg)));
                                         }
                                     }
                                     if (NetworkManager.isActive()) {
@@ -1013,8 +1019,8 @@ public class PlayerServerJoinListener implements Listener {
                     for (Player online : Bukkit.getOnlinePlayers()) {
                         online.sendMessage("");
                         online.sendMessage(ChatUtils.translateToColor("                &6&l-------------------------"));
-                        online.sendMessage(ChatUtils.translateToColor("                     &7Welcome, &e" + player.getName() + ","));
-                        online.sendMessage(ChatUtils.translateToColor("                    &7to the &6&lRealm of Aranarth!"));
+                        online.sendMessage(ChatUtils.translateToColor(Lang.getFor(online, "join.welcome_1", "player", player.getName())));
+                        online.sendMessage(ChatUtils.translateToColor(Lang.getFor(online, "join.welcome_2")));
                         online.sendMessage(ChatUtils.translateToColor("                &6&l-------------------------"));
                         online.sendMessage("");
                     }
@@ -1028,7 +1034,7 @@ public class PlayerServerJoinListener implements Listener {
                         NetworkManager.getInstance().publishChat("", "");
                     }
 
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("join.welcome_rules")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "join.welcome_rules")));
 
                     // Give starter kit
                     PlayerInventory inv = player.getInventory();

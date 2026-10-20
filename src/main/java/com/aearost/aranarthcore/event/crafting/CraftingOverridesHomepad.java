@@ -33,13 +33,13 @@ public class CraftingOverridesHomepad {
     public void onCraft(CraftItemEvent e, ItemStack is, HumanEntity player) {
         if (!AranarthUtils.isSmpWorld(player.getLocation().getWorld().getName())) {
             e.setCancelled(true);
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.homepad_world")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "crafting.homepad_world")));
             return;
         } else {
             ItemMeta meta = is.getItemMeta();
             if (is.getType() == Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
                 if (meta.getPersistentDataContainer().has(HOMEPAD)) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.special_item_restricted", "item", "Homepad")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "crafting.special_item_restricted", "item", "Homepad")));
                     e.setCancelled(true);
                 }
             }

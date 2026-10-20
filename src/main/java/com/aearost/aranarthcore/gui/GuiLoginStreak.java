@@ -91,7 +91,7 @@ public class GuiLoginStreak {
 
         // Day items
         for (int i = 0; i < DAY_SLOTS.length; i++) {
-            inv.setItem(DAY_SLOTS[i], makeDayItem(i + 1, currentDay, canClaim, rank));
+            inv.setItem(DAY_SLOTS[i], makeDayItem(player, i + 1, currentDay, canClaim, rank));
         }
 
         // Info item
@@ -103,32 +103,32 @@ public class GuiLoginStreak {
     /**
      * Builds the item for a given streak day, reflecting its claim state.
      */
-    public static ItemStack makeDayItem(int day, int currentDay, boolean canClaim, int rank) {
+    public static ItemStack makeDayItem(Player player, int day, int currentDay, boolean canClaim, int rank) {
         Material mat;
         String statusText;
 
         if (day < currentDay) {
             mat = Material.GRAY_CONCRETE;
-            statusText = Lang.get("gui.loginstreak.claimed");
+            statusText = Lang.getFor(player, "gui.loginstreak.claimed");
         } else if (day == currentDay && canClaim) {
             mat = Material.LIME_CONCRETE;
-            statusText = Lang.get("gui.loginstreak.click_claim");
+            statusText = Lang.getFor(player, "gui.loginstreak.click_claim");
         } else if (day == currentDay) {
             mat = Material.YELLOW_CONCRETE;
-            statusText = Lang.get("gui.loginstreak.already_claimed");
+            statusText = Lang.getFor(player, "gui.loginstreak.already_claimed");
         } else {
             mat = Material.RED_CONCRETE;
-            statusText = Lang.get("gui.loginstreak.locked_day");
+            statusText = Lang.getFor(player, "gui.loginstreak.locked_day");
         }
 
         ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(Lang.get("gui.loginstreak.day_label", "n", String.valueOf(day)));
+        meta.setDisplayName(Lang.getFor(player, "gui.loginstreak.day_label", "n", String.valueOf(day)));
 
         List<String> lore = new ArrayList<>();
-        lore.add(Lang.get("gui.loginstreak.day_subtitle"));
+        lore.add(Lang.getFor(player, "gui.loginstreak.day_subtitle"));
         lore.add("");
-        lore.add(ChatUtils.translateToColor("&7Reward: " + LoginStreakUtils.getRewardDisplayName(day, rank)));
+        lore.add(Lang.getFor(player, "gui.loginstreak_reward", "reward", LoginStreakUtils.getRewardDisplayName(day, rank)));
         lore.add("");
         lore.add(statusText);
 

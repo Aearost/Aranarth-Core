@@ -24,7 +24,7 @@ public class CommandHat implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.hat")) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return true;
 			}
 
@@ -43,11 +43,11 @@ public class CommandHat implements CommandExecutor {
 					return true;
 				}
 			} else {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.not_holding_item")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.not_holding_item")));
 				return true;
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
 		}
 	}

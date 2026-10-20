@@ -30,7 +30,7 @@ public class CommandArena implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (AranarthUtils.getTeleportTask(player.getUniqueId()) != null) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.already_teleporting")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.already_teleporting")));
 				return false;
 			}
 
@@ -39,10 +39,10 @@ public class CommandArena implements CommandExecutor {
 			// On the SMP server: arena world lives on Survival - count down then transfer.
 			if (AranarthCore.isSmpServer() && NetworkManager.isActive()) {
 				AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
-						aranarthPlayer.isInAdminMode(), "&e&lArena", "&7Transferring to the Arena...", success -> {
+						aranarthPlayer.isInAdminMode(), Lang.getFor(player, "teleport.title_arena"), Lang.getFor(player, "teleport.transferring_arena"), success -> {
 					if (success) {
 						PendingTeleport pt = PendingTeleport.forCommand(
-								"arena", "&e&lArena", "&7You have teleported to the Arena");
+								"arena", Lang.getFor(player, "teleport.title_arena"), Lang.getFor(player, "teleport.to_arena"));
 						String survivalServerName = AranarthCore.getInstance().getConfig()
 								.getString("network.servers.survival", "survival");
 						NetworkManager.getInstance().saveInventoryAndTransfer(player, survivalServerName, pt);
@@ -52,16 +52,16 @@ public class CommandArena implements CommandExecutor {
 			}
 
 			Location arenaSpawn = new Location(Bukkit.getWorld("arena"), 0.5, 105, 0.5, 180, 0);
-			AranarthUtils.teleportPlayer(player, player.getLocation(), arenaSpawn, aranarthPlayer.isInAdminMode(), "&e&lArena", Lang.get("teleport.to_arena"), success -> {
+			AranarthUtils.teleportPlayer(player, player.getLocation(), arenaSpawn, aranarthPlayer.isInAdminMode(), Lang.getFor(player, "teleport.title_arena"), Lang.getFor(player, "teleport.to_arena"), success -> {
 				if (success) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.to_arena")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.to_arena")));
 				} else {
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.could_not_arena")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.could_not_arena")));
 				}
 			});
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 		}
 		return false;
 	}

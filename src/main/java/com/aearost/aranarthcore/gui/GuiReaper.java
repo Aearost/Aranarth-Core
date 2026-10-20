@@ -60,8 +60,8 @@ public class GuiReaper {
         ItemMeta purchaseMeta = purchase.getItemMeta();
         purchaseMeta.setDisplayName(Lang.getFor(player, "gui.reaper.recover"));
         purchaseMeta.setLore(Arrays.asList(
-                ChatUtils.translateToColor("&7Cost: &6$" + nf.format((long) cost)),
-                ChatUtils.translateToColor("&7Expires in: &e" + hoursLeft + " hour" + (hoursLeft == 1 ? "" : "s"))
+                Lang.getFor(player, "gui.reaper_cost", "cost", nf.format((long) cost)),
+                Lang.getFor(player, hoursLeft == 1 ? "gui.reaper_expires_one" : "gui.reaper_expires_many", "hours", hoursLeft)
         ));
         purchase.setItemMeta(purchaseMeta);
         inv.setItem(49, purchase);
@@ -75,9 +75,9 @@ public class GuiReaper {
         int dy = deathLocation.getBlockY();
         int dz = deathLocation.getBlockZ();
         dropMeta.setLore(Arrays.asList(
-                ChatUtils.translateToColor("&7Drops your items at your death location"),
-                ChatUtils.translateToColor("&7and discards this Reaper Inventory"),
-                ChatUtils.translateToColor("&7Location: &e" + worldName + " (" + dx + ", " + dy + ", " + dz + ")"),
+                Lang.getFor(player, "gui.reaper_drop_lore1"),
+                Lang.getFor(player, "gui.reaper_drop_lore2"),
+                Lang.getFor(player, "gui.reaper_location", "world", worldName, "x", dx, "y", dy, "z", dz),
                 ChatUtils.translateToColor("&0world:" + worldName + " x:" + deathLocation.getX() + " y:" + deathLocation.getY() + " z:" + deathLocation.getZ())
         ));
         dropButton.setItemMeta(dropMeta);

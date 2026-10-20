@@ -81,22 +81,22 @@ public class GuiStoreClick {
 
         // Clicking one of the ranks
         if (slot == 11) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.acolyte_monthly")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.acolyte_monthly")));
             player.closeInventory();
         } else if (slot == 13) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.disciple_monthly")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.disciple_monthly")));
             player.closeInventory();
         } else if (slot == 15) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.seraph_monthly")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.seraph_monthly")));
             player.closeInventory();
         } else if (slot == 20) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.acolyte_lifetime")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.acolyte_lifetime")));
             player.closeInventory();
         } else if (slot == 22) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.disciple_lifetime")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.disciple_lifetime")));
             player.closeInventory();
         } else if (slot == 24) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.seraph_lifetime")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.seraph_lifetime")));
             player.closeInventory();
         }
 
@@ -119,46 +119,46 @@ public class GuiStoreClick {
 
         // Clicking one of the perks
         if (slot == 12) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.blacklist")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.blacklist")));
             player.closeInventory();
         } else if (slot == 13) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.shulker_assist")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.shulker_assist")));
             player.closeInventory();
         } else if (slot == 14) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.inventory_assist")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.inventory_assist")));
             player.closeInventory();
         } else if (slot == 19) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.compressor")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.compressor")));
             player.closeInventory();
         } else if (slot == 20) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.randomizer")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.randomizer")));
             player.closeInventory();
         } else if (slot == 21) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.tables")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.tables")));
             player.closeInventory();
         } else if (slot == 22) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.colored_nickname")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.colored_nickname")));
             player.closeInventory();
         } else if (slot == 23) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.colored_chat")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.colored_chat")));
             player.closeInventory();
         } else if (slot == 24) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.item_name")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.item_name")));
             player.closeInventory();
         } else if (slot == 25) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.blue_fire")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.blue_fire")));
             player.closeInventory();
         } else if (slot == 29) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.invisible_frames")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.invisible_frames")));
             player.closeInventory();
         } else if (slot == 30) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.additional_homes")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.additional_homes")));
             player.closeInventory();
         } else if (slot == 32) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.discord_chat")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.discord_chat")));
             player.closeInventory();
         } else if (slot == 33) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.invisible_armor")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.invisible_armor")));
             player.closeInventory();
         }
 
@@ -181,16 +181,16 @@ public class GuiStoreClick {
 
         // Clicking one of the boosts
         if (slot == 10) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.boost_miner")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.boost_miner")));
             player.closeInventory();
         } else if (slot == 12) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.boost_harvest")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.boost_harvest")));
             player.closeInventory();
         } else if (slot == 14) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.boost_hunter")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.boost_hunter")));
             player.closeInventory();
         } else if (slot == 16) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.boost_chi")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.boost_chi")));
             player.closeInventory();
         }
 
@@ -213,13 +213,13 @@ public class GuiStoreClick {
 
         // Clicking one of the crate keys
         if (slot == 10) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.rare_key")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.rare_key")));
             player.closeInventory();
         } else if (slot == 13) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.epic_key")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.epic_key")));
             player.closeInventory();
         } else if (slot == 16) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("store.godly_key")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.godly_key")));
             player.closeInventory();
         }
 

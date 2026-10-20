@@ -74,8 +74,8 @@ public class GuiMcstats {
         };
     }
 
-    private static String formatRank(int rank) {
-        return rank > 0 ? "#" + rank : "Unranked";
+    private static String formatRank(Player player, int rank) {
+        return rank > 0 ? "#" + rank : Lang.getFor(player, "mcmmo.unranked");
     }
 
     private static String toDisplayName(PrimarySkillType skill) {
@@ -117,9 +117,9 @@ public class GuiMcstats {
             powerMeta.setDisplayName(Lang.getFor(viewer, "gui.mcstats.power"));
             List<String> lore = new ArrayList<>();
             lore.add(Lang.getFor(viewer, "gui.mcstats.total_power", "level", String.valueOf(targetPowerLevel)));
-            lore.add(Lang.getFor(viewer, "gui.mcstats.rank", "rank", formatRank(targetOverallRank)));
+            lore.add(Lang.getFor(viewer, "gui.mcstats.rank", "rank", formatRank(viewer, targetOverallRank)));
             if (!isSelf) {
-                lore.add(Lang.getFor(viewer, "gui.mcstats.your_rank", "rank", formatRank(viewerOverallRank)));
+                lore.add(Lang.getFor(viewer, "gui.mcstats.your_rank", "rank", formatRank(viewer, viewerOverallRank)));
             }
             powerMeta.setLore(lore);
             powerItem.setItemMeta(powerMeta);
@@ -168,10 +168,10 @@ public class GuiMcstats {
 
                 List<String> lore = new ArrayList<>();
                 lore.add(Lang.getFor(viewer, "gui.mcstats.skill_level", "level", String.valueOf(level)));
-                lore.add(Lang.getFor(viewer, "gui.mcstats.skill_rank", "rank", formatRank(targetRank)));
+                lore.add(Lang.getFor(viewer, "gui.mcstats.skill_rank", "rank", formatRank(viewer, targetRank)));
                 if (!isSelf) {
                     int viewerRank = viewerRanks.getOrDefault(skill, 0);
-                    lore.add(Lang.getFor(viewer, "gui.mcstats.skill_your_rank", "rank", formatRank(viewerRank)));
+                    lore.add(Lang.getFor(viewer, "gui.mcstats.skill_your_rank", "rank", formatRank(viewer, viewerRank)));
                 }
                 meta.setLore(lore);
                 item.setItemMeta(meta);

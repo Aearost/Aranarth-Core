@@ -36,7 +36,7 @@ public class GuiDefenderAreaSelectClick {
         }
 
         if (!dominion.getLeader().equals(player.getUniqueId())) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.leader_only_permissions")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.leader_only_permissions")));
             return;
         }
 

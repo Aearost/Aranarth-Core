@@ -35,22 +35,22 @@ public class CommandCreative implements CommandExecutor {
 			}
 
 			if (AranarthUtils.getTeleportTask(player.getUniqueId()) != null) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.already_teleporting")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.already_teleporting")));
 				return false;
 			}
 
 			// On the SMP server: the plots world lives on Survival - count down then transfer.
 			if (!PlotUtils.isPlotServer()) {
-				CommandPlot.transferToPlotServer(player, aranarthPlayer, "creative", "&e&lCreative");
+				CommandPlot.transferToPlotServer(player, aranarthPlayer, "creative", Lang.getFor(player, "teleport.title_creative"));
 				return true;
 			}
 
 			Location creativeSpawn = PlotUtils.getSpawnLocation();
 			if (creativeSpawn.getWorld() == null) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.could_not_creative")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.could_not_creative")));
 				return false;
 			}
-			AranarthUtils.teleportPlayer(player, player.getLocation(), creativeSpawn, aranarthPlayer.isInAdminMode(), "&e&lCreative", Lang.get("teleport.to_creative"), success -> {
+			AranarthUtils.teleportPlayer(player, player.getLocation(), creativeSpawn, aranarthPlayer.isInAdminMode(), Lang.getFor(player, "teleport.title_creative"), Lang.getFor(player, "teleport.to_creative"), success -> {
 				if (success) {
 					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.to_creative")));
 				} else {
@@ -60,7 +60,7 @@ public class CommandCreative implements CommandExecutor {
 
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return false;
 		}
 	}
@@ -70,11 +70,11 @@ public class CommandCreative implements CommandExecutor {
 	 */
 	private void expand(Player player, AranarthPlayer aranarthPlayer, String[] args) {
 		if (aranarthPlayer.getCouncilRank() != 3) {
-			player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 			return;
 		}
 		if (args.length != 2) {
-			player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "creative expand <rings>")));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "creative expand <rings>")));
 			return;
 		}
 		int rings;
@@ -84,14 +84,14 @@ public class CommandCreative implements CommandExecutor {
 			rings = 0;
 		}
 		if (rings < 1) {
-			player.sendMessage(ChatUtils.chatMessage(Lang.get("creative.invalid_rings")));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "creative.invalid_rings")));
 			return;
 		}
 
 		// The plots world only exists on Survival
 		if (!PlotUtils.isPlotServer()) {
 			if (!NetworkManager.isActive()) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.could_not_creative")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.could_not_creative")));
 				return;
 			}
 			NetworkManager.getInstance().publishCreativeExpand(player.getUniqueId(), rings);
@@ -99,9 +99,9 @@ public class CommandCreative implements CommandExecutor {
 		}
 		int plotsAcross = PlotUtils.expand(rings);
 		if (plotsAcross < 0) {
-			player.sendMessage(ChatUtils.chatMessage(Lang.get("teleport.could_not_creative")));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.could_not_creative")));
 			return;
 		}
-		player.sendMessage(ChatUtils.chatMessage(Lang.get("creative.expanded", "size", plotsAcross)));
+		player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "creative.expanded", "size", plotsAcross)));
 	}
 }

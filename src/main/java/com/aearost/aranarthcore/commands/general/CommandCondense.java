@@ -25,26 +25,26 @@ public class CommandCondense implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.compressor")) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return false;
 			}
 
 			if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("condense.wrong_world")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "condense.wrong_world")));
 				return false;
 			}
 
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (!aranarthPlayer.isCompressingItems()) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("compress.not_enabled")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "compress.not_enabled")));
 				return false;
 			}
 
 			AranarthUtils.compressPlayerInventory(player, aranarthPlayer, null);
-			player.sendMessage(ChatUtils.chatMessage(Lang.get("condense.success")));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "condense.success")));
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 		}
 		return false;
 	}

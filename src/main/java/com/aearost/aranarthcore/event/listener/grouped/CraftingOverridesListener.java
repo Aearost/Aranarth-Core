@@ -116,7 +116,7 @@ public class CraftingOverridesListener implements Listener {
 			if (result.isSimilar(new InvisibleItemFrame().getItem())) {
 				if (!player.hasPermission("aranarth.invisible_item_frame")) {
 					e.setCancelled(true);
-					player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.no_permission")));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "crafting.no_permission")));
 					break;
 				}
 			}

@@ -36,7 +36,7 @@ public class PetHurtPrevent {
                             AranarthPlayer aranarthAttacker = AranarthUtils.getPlayer(attacker.getUniqueId());
                             if (!aranarthAttacker.isHurtingOwnPets()) {
                                 e.setCancelled(true);
-                                attacker.sendMessage(ChatUtils.chatMessage(Lang.get("pet.cannot_hurt_own", "pet", ChatUtils.getFormattedItemName(pet.getType().name()))));
+                                attacker.sendMessage(ChatUtils.chatMessage(Lang.getFor(attacker, "pet.cannot_hurt_own", "pet", ChatUtils.getFormattedItemName(pet.getType().name()))));
                                 return;
                             }
                         }
@@ -47,7 +47,7 @@ public class PetHurtPrevent {
                                 if (pet instanceof Sittable sittable) {
                                     if (sittable.isSitting()) {
                                         e.setCancelled(true);
-                                        attacker.sendMessage(ChatUtils.chatMessage(Lang.get("pet.cannot_hurt_others", "owner", AranarthUtils.getNickname(owner), "pet", ChatUtils.getFormattedItemName(pet.getType().name()))));
+                                        attacker.sendMessage(ChatUtils.chatMessage(Lang.getFor(attacker, "pet.cannot_hurt_others", "owner", AranarthUtils.getNickname(owner), "pet", ChatUtils.getFormattedItemName(pet.getType().name()))));
                                         return;
                                     }
                                 }

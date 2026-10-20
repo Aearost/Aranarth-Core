@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.mob;
 import com.aearost.aranarthcore.objects.AranarthMount;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
@@ -57,13 +58,13 @@ public class MountStats {
 
         String ownerName = mount.getOwner() != null
                 ? AranarthUtils.getPlayer(mount.getOwner().getUniqueId()).getNickname()
-                : "None";
+                : Lang.getFor(player, "general.none");
 
-        player.sendMessage(ChatUtils.translateToColor("&8      - - - &e" + mount.getName() + "&e's Stats &8- - -"));
-        player.sendMessage(ChatUtils.translateToColor("&7Owner: &e" + ownerName));
-        player.sendMessage(ChatUtils.translateToColor("&7Health: &e" + halfHearts));
-        player.sendMessage(ChatUtils.translateToColor("&7Speed: &e" + String.format("%.2f m/s", speed)));
-        player.sendMessage(ChatUtils.translateToColor("&7Jump: &e" + String.format("%.2f blocks", jumpBlocks)));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stats_header", "name", "&e" + mount.getName(), "color", "&e")));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stat_owner", "owner", ownerName)));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stat_health", "value", halfHearts)));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stat_speed", "value", String.format("%.2f", speed))));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stat_jump", "value", String.format("%.2f", jumpBlocks))));
     }
 
     private void showCamelStats(Player player, Camel camel) {
@@ -75,13 +76,13 @@ public class MountStats {
 
         String ownerName = camel.getOwner() != null
                 ? AranarthUtils.getPlayer(camel.getOwner().getUniqueId()).getNickname()
-                : "None";
+                : Lang.getFor(player, "general.none");
 
-        player.sendMessage(ChatUtils.translateToColor("&8      - - - &e" + camel.getName() + "&e's Stats &8- - -"));
-        player.sendMessage(ChatUtils.translateToColor("&7Owner: &e" + ownerName));
-        player.sendMessage(ChatUtils.translateToColor("&7Health: &e" + halfHearts));
-        player.sendMessage(ChatUtils.translateToColor("&7Speed: &e" + String.format("%.2f m/s", speed)));
-        player.sendMessage(ChatUtils.translateToColor("&7Jump: &e" + String.format("%.2f blocks", jumpBlocks)));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stats_header", "name", "&e" + camel.getName(), "color", "&e")));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stat_owner", "owner", ownerName)));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stat_health", "value", halfHearts)));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stat_speed", "value", String.format("%.2f", speed))));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stat_jump", "value", String.format("%.2f", jumpBlocks))));
     }
 
     private void showSnifferStats(Player player, Sniffer sniffer) {
@@ -94,19 +95,19 @@ public class MountStats {
         int halfHearts = (int) Math.round(health);
         double speed = mount.getSnifferSpeedMetersPerSecond();
 
-        String ownerName = "None";
+        String ownerName = Lang.getFor(player, "general.none");
         if (mount.getOwnerUUID() != null) {
             ownerName = AranarthUtils.getPlayer(mount.getOwnerUUID()).getNickname();
         }
 
-        player.sendMessage(ChatUtils.translateToColor("&8      - - - &e" + sniffer.getName() + "&e's Stats &8- - -"));
-        player.sendMessage(ChatUtils.translateToColor("&7Owner: &e" + ownerName));
-        player.sendMessage(ChatUtils.translateToColor("&7Health: &e" + halfHearts));
-        player.sendMessage(ChatUtils.translateToColor("&7Speed: &e" + String.format("%.2f m/s", speed)));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stats_header", "name", "&e" + sniffer.getName(), "color", "&e")));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stat_owner", "owner", ownerName)));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stat_health", "value", halfHearts)));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stat_speed", "value", String.format("%.2f", speed))));
 
         if (mount.getThirdAttribute() != null) {
             double digSpeed = mount.getDigSpeedBlocksPerSecond();
-            player.sendMessage(ChatUtils.translateToColor("&7Dig Speed: &e" + String.format("%.1f ", digSpeed) + " blocks/s"));
+            player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stat_dig_speed", "value", String.format("%.1f", digSpeed))));
         }
     }
 
@@ -120,19 +121,19 @@ public class MountStats {
         int halfHearts = (int) Math.round(health);
         double speed = mount.getSnifferSpeedMetersPerSecond(); // blocks/tick * 20
 
-        String ownerName = "None";
+        String ownerName = Lang.getFor(player, "general.none");
         if (mount.getOwnerUUID() != null) {
             ownerName = AranarthUtils.getPlayer(mount.getOwnerUUID()).getNickname();
         }
 
-        player.sendMessage(ChatUtils.translateToColor("&8      - - - &e" + ravager.getName() + "&e's Stats &8- - -"));
-        player.sendMessage(ChatUtils.translateToColor("&7Owner: &e" + ownerName));
-        player.sendMessage(ChatUtils.translateToColor("&7Health: &e" + halfHearts));
-        player.sendMessage(ChatUtils.translateToColor("&7Speed: &e" + String.format("%.2f m/s", speed)));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stats_header", "name", "&e" + ravager.getName(), "color", "&e")));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stat_owner", "owner", ownerName)));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stat_health", "value", halfHearts)));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stat_speed", "value", String.format("%.2f", speed))));
 
         if (mount.getThirdAttribute() != null) {
             double maxHearts = mount.getThirdAttribute() / 2.0;
-            player.sendMessage(ChatUtils.translateToColor("&7Ram Damage: &e1 - " + String.format("%.1f", maxHearts) + " hearts"));
+            player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stat_ram_damage", "value", String.format("%.1f", maxHearts))));
         }
     }
 
@@ -146,19 +147,19 @@ public class MountStats {
         int halfHearts = (int) Math.round(health);
         double speed = mount.getSnifferSpeedMetersPerSecond(); // blocks/tick * 20
 
-        String ownerName = "None";
+        String ownerName = Lang.getFor(player, "general.none");
         if (mount.getOwnerUUID() != null) {
             ownerName = AranarthUtils.getPlayer(mount.getOwnerUUID()).getNickname();
         }
 
-        player.sendMessage(ChatUtils.translateToColor("&8      - - - &7" + ghast.getName() + "&7's Stats &8- - -"));
-        player.sendMessage(ChatUtils.translateToColor("&7Owner: &e" + ownerName));
-        player.sendMessage(ChatUtils.translateToColor("&7Health: &e" + halfHearts));
-        player.sendMessage(ChatUtils.translateToColor("&7Speed: &e" + String.format("%.2f m/s", speed)));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stats_header", "name", "&7" + ghast.getName(), "color", "&7")));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stat_owner", "owner", ownerName)));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stat_health", "value", halfHearts)));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stat_speed", "value", String.format("%.2f", speed))));
 
         if (mount.getThirdAttribute() != null) {
             double maxHearts = mount.getThirdAttribute() / 2.0;
-            player.sendMessage(ChatUtils.translateToColor("&7Bellow damage: &e1 - " + String.format("%.1f", maxHearts) + " hearts per hit"));
+            player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stat_bellow_damage", "value", String.format("%.1f", maxHearts))));
         }
     }
 
@@ -172,19 +173,19 @@ public class MountStats {
         int halfHearts = (int) Math.round(health);
         double speed = mount.getSnifferSpeedMetersPerSecond(); // blocks/tick * 20
 
-        String ownerName = "None";
+        String ownerName = Lang.getFor(player, "general.none");
         if (mount.getOwnerUUID() != null) {
             ownerName = AranarthUtils.getPlayer(mount.getOwnerUUID()).getNickname();
         }
 
-        player.sendMessage(ChatUtils.translateToColor("&8      - - - &b" + bear.getName() + "&b's Stats &8- - -"));
-        player.sendMessage(ChatUtils.translateToColor("&7Owner: &e" + ownerName));
-        player.sendMessage(ChatUtils.translateToColor("&7Health: &e" + halfHearts));
-        player.sendMessage(ChatUtils.translateToColor("&7Speed: &e" + String.format("%.2f m/s", speed)));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stats_header", "name", "&b" + bear.getName(), "color", "&b")));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stat_owner", "owner", ownerName)));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stat_health", "value", halfHearts)));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stat_speed", "value", String.format("%.2f", speed))));
 
         if (mount.getThirdAttribute() != null) {
             double maxHearts = mount.getThirdAttribute() / 2.0;
-            player.sendMessage(ChatUtils.translateToColor("&7Bite Damage: &e2.5 - " + String.format("%.1f", maxHearts) + " hearts per hit"));
+            player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.stat_bite_damage", "value", String.format("%.1f", maxHearts))));
         }
     }
 

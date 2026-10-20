@@ -61,7 +61,7 @@ public class EssencePreservationBlockBreak {
                 lore.removeIf(line -> ChatUtils.stripColorFormatting(line).equals("Preservation"));
                 meta.setLore(lore.isEmpty() ? null : lore);
             }
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("essence.preservation_expired")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.preservation_expired")));
         } else {
             meta.getPersistentDataContainer().set(PRESERVATION_USES, PersistentDataType.INTEGER, uses);
         }

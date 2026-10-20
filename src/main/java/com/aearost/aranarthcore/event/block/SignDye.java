@@ -30,7 +30,7 @@ public class SignDye {
         // Block essences from being used as dyes on any sign
         if (item.hasItemMeta() && item.getItemMeta().getPersistentDataContainer().has(CustomKeys.ESSENCE_TYPE, PersistentDataType.STRING)) {
             e.setCancelled(true);
-            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("essence.cannot_use_as_dye")));
+            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "essence.cannot_use_as_dye")));
             // Force-resend the sign's block state 1 tick later to revert any client-side color change
             BlockState snapshot = block.getState();
             AranarthCore.getInstance().getServer().getScheduler().runTaskLater(AranarthCore.getInstance(), () -> snapshot.update(true, false), 1L);
@@ -40,7 +40,7 @@ public class SignDye {
         Shop playerShop = ShopUtils.getShopFromLocation(block.getLocation());
         if (playerShop != null) {
             e.setCancelled(true);
-            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("shop.cannot_dye_sign")));
+            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "shop.cannot_dye_sign")));
             BlockState snapshot = block.getState();
             AranarthCore.getInstance().getServer().getScheduler().runTaskLater(AranarthCore.getInstance(), () -> snapshot.update(true, false), 1L);
         }

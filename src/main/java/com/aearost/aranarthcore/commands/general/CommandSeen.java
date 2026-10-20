@@ -37,13 +37,13 @@ public class CommandSeen implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.seen")) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("seen.cannot_use")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "seen.cannot_use")));
 				return true;
 			}
 		}
 
 		if (args.length == 0) {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "seen <player>")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "seen <player>")));
 			return true;
 		} else {
 			UUID uuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
@@ -75,7 +75,7 @@ public class CommandSeen implements CommandExecutor {
 
 				boolean isOnline = AranarthUtils.isVisiblyOnline(sender, uuid);
 				if (isOnline) {
-					sender.sendMessage(ChatUtils.chatMessage(Lang.get("seen.online", "prefix", rankPrefix, "player", displayName)));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "seen.online", "prefix", rankPrefix, "player", displayName)));
 					return true;
 				} else {
 					if (sender instanceof Player player) {
@@ -88,40 +88,40 @@ public class CommandSeen implements CommandExecutor {
 								zoneId,
 								sender
 							);
-							sender.sendMessage(ChatUtils.chatMessage(Lang.get("seen.last_seen", "prefix", finalRankPrefix, "player", finalDisplayName, "date", result)));
+							sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "seen.last_seen", "prefix", finalRankPrefix, "player", finalDisplayName, "date", result)));
 						});
 					} else {
 						String result = calculateDisplayDate(offlinePlayer, aranarthPlayer, ZoneId.systemDefault(), sender);
-						sender.sendMessage(ChatUtils.chatMessage(Lang.get("seen.last_seen", "prefix", rankPrefix, "player", displayName, "date", result)));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "seen.last_seen", "prefix", rankPrefix, "player", displayName, "date", result)));
 					}
 					return true;
 				}
 			} else {
-				sender.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[0])));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", args[0])));
 				return true;
 			}
 		}
 	}
 
 	/**
-	 * Provides the name of the input month.
+	 * Provides the lang key of the name of the input month.
 	 * @param month The number of the month.
-	 * @return The name of the input month.
+	 * @return The lang key of the name of the input month.
 	 */
 	private static String getMonthName(int month) {
         return switch (month) {
-            case 1 -> "January";
-            case 2 -> "February";
-            case 3 -> "March";
-            case 4 -> "April";
-            case 5 -> "May";
-            case 6 -> "June";
-            case 7 -> "July";
-            case 8 -> "August";
-            case 9 -> "September";
-            case 10 -> "October";
-            case 11 -> "November";
-            case 12 -> "December";
+            case 1 -> "date.month_january";
+            case 2 -> "date.month_february";
+            case 3 -> "date.month_march";
+            case 4 -> "date.month_april";
+            case 5 -> "date.month_may";
+            case 6 -> "date.month_june";
+            case 7 -> "date.month_july";
+            case 8 -> "date.month_august";
+            case 9 -> "date.month_september";
+            case 10 -> "date.month_october";
+            case 11 -> "date.month_november";
+            case 12 -> "date.month_december";
             default -> "NULL";
         };
     }
@@ -142,8 +142,8 @@ public class CommandSeen implements CommandExecutor {
 		}
 		localDateTime = LocalDateTime.ofInstant(lastPlayed, timezone);
 
-		String month = getMonthName(localDateTime.getMonthValue());
-		String dateWithSuffix = DateUtils.getDayNumWithSuffix(localDateTime.getDayOfMonth());
+		String month = Lang.getFor(sender, getMonthName(localDateTime.getMonthValue()));
+		String dateWithSuffix = DateUtils.getDayNumWithSuffix(sender, localDateTime.getDayOfMonth());
 		int year = localDateTime.getYear();
 
 		int hourAsInt = localDateTime.getHour();
@@ -166,7 +166,7 @@ public class CommandSeen implements CommandExecutor {
 
 		}
 		String timezoneName = timezone.getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
-		return "&e" + month + " " + dateWithSuffix + ", " + year + " &7at &e" + hour + ":" + minute + " " + timezoneName;
+		return Lang.getFor(sender, "seen.date_format", "month", month, "day", dateWithSuffix, "year", year, "time", hour + ":" + minute, "zone", timezoneName);
 	}
 
 }

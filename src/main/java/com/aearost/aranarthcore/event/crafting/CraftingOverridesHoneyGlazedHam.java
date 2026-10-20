@@ -31,14 +31,14 @@ public class CraftingOverridesHoneyGlazedHam {
             ItemMeta resultMeta = e.getRecipe().getResult().getItemMeta();
             if (is.getType() == Material.COOKED_PORKCHOP) {
                 if (meta.getPersistentDataContainer().has(HONEY_GLAZED_HAM)) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.special_item_restricted", "item", "Honey Glazed Ham")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "crafting.special_item_restricted", "item", "Honey Glazed Ham")));
                     e.setCancelled(true);
                 }
             }
         }
         // Result has no meta, therefore not requiring Honey Glazed Ham
         else {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.special_item_restricted", "item", "Honey Glazed Ham")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "crafting.special_item_restricted", "item", "Honey Glazed Ham")));
             e.setCancelled(true);
         }
     }

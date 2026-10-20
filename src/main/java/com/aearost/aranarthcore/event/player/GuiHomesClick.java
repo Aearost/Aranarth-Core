@@ -43,15 +43,15 @@ public class GuiHomesClick {
 						Material heldItem = e.getCursor().getType();
 						if (heldItem != Material.AIR) {
 							e.setCancelled(true);
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("home.bed_no_icon")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.bed_no_icon")));
 							player.closeInventory();
 							return;
 						}
 						AranarthUtils.teleportPlayer(player, player.getLocation(), bedSpawn, aranarthPlayer.isInAdminMode(), "&eBed Spawn", Lang.getFor(player, "player.tp_bed_success"), success -> {
 							if (success) {
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("player.tp_bed_success")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.tp_bed_success")));
 							} else {
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("player.tp_bed_fail")));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.tp_bed_fail")));
 							}
 						});
 						player.closeInventory();
@@ -62,7 +62,7 @@ public class GuiHomesClick {
 					Home home = aranarthPlayer.getHomes().get(homeIndex);
 
 					if (home.isSmpHome() && !AranarthUtils.isOriginalPlayer(player.getUniqueId())) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.get("player.og_only_smp_homes")));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.og_only_smp_homes")));
 						player.closeInventory();
 						return;
 					}
@@ -72,10 +72,10 @@ public class GuiHomesClick {
 					if (heldItem != Material.AIR) {
 						e.setCancelled(true);
 						if (heldItem == home.getIcon()) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("player.home_same_icon")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.home_same_icon")));
 						} else {
 							AranarthUtils.updateHome(player, home.getName(), home.getLocation(), heldItem);
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("home.icon_set", "name", home.getName(), "icon", ChatUtils.getFormattedItemName(heldItem.name()))));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.icon_set", "name", home.getName(), "icon", ChatUtils.getFormattedItemName(heldItem.name()))));
 						}
 						player.closeInventory();
 						return;
@@ -92,11 +92,11 @@ public class GuiHomesClick {
 							String smpServer = AranarthCore.getInstance().getConfig().getString("network.servers.smp", "smp");
 							player.closeInventory();
 							AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
-									aranarthPlayer.isInAdminMode(), home.getName(), "&7Transferring to your home...", success -> {
+									aranarthPlayer.isInAdminMode(), home.getName(), Lang.getFor(player, "teleport.transferring_named", "name", home.getName()), success -> {
 								if (success) {
 									NetworkManager.getInstance().saveInventoryAndTransfer(player, smpServer,
 											new PendingTeleport(smpWorldPart, hx, hy, hz, hyaw, hpitch,
-													home.getName(), "&7You have teleported to your home"));
+													home.getName(), Lang.getFor(player, "home.teleported", "name", home.getName())));
 								}
 							});
 							return;
@@ -111,11 +111,11 @@ public class GuiHomesClick {
 							String survivalServer = AranarthCore.getInstance().getConfig().getString("network.servers.survival", "survival");
 							player.closeInventory();
 							AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
-									aranarthPlayer.isInAdminMode(), home.getName(), "&7Transferring to your home...", success -> {
+									aranarthPlayer.isInAdminMode(), home.getName(), Lang.getFor(player, "teleport.transferring_named", "name", home.getName()), success -> {
 								if (success) {
 									NetworkManager.getInstance().saveInventoryAndTransfer(player, survivalServer,
 											new PendingTeleport(home.getWorldName(), hx, hy, hz, hyaw, hpitch,
-													home.getName(), "&7You have teleported to your home"));
+													home.getName(), Lang.getFor(player, "home.teleported", "name", home.getName())));
 								}
 							});
 							return;
@@ -123,9 +123,9 @@ public class GuiHomesClick {
 						// Same-server home
 						AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation(), aranarthPlayer.isInAdminMode(), home.getName(), Lang.getFor(player, "home.teleported", "name", home.getName()), success -> {
 							if (success) {
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("home.teleported", "name", home.getName())));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.teleported", "name", home.getName())));
 							} else {
-								player.sendMessage(ChatUtils.chatMessage(Lang.get("home.teleport_failed", "name", home.getName())));
+								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.teleport_failed", "name", home.getName())));
 							}
 						});
 						player.closeInventory();

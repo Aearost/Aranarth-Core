@@ -89,7 +89,7 @@ public class ContainerAutoLock {
             trusted.add(e.getPlayer().getUniqueId());
             LockedContainer lockedContainer = new LockedContainer(e.getPlayer().getUniqueId(), trusted, new Location[] { placed.getLocation(), null });
             AranarthUtils.addLockedContainer(lockedContainer);
-            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.get("lock.locked")));
+            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "lock.locked")));
         }
     }
 

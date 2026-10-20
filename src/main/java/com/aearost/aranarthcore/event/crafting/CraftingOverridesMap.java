@@ -90,7 +90,7 @@ public class CraftingOverridesMap {
             }
             if (isCopy(ingredient)) {
                 e.setCancelled(true);
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("crafting.map_no_copy")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "crafting.map_no_copy")));
                 return;
             }
         }
@@ -148,7 +148,7 @@ public class CraftingOverridesMap {
         ItemStack sourceMap = inv.getItem(0);
         if (isCopy(sourceMap)) {
             e.setCancelled(true);
-            e.getWhoClicked().sendMessage(ChatUtils.chatMessage(Lang.get("crafting.map_no_copy")));
+            e.getWhoClicked().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getWhoClicked(), "crafting.map_no_copy")));
         }
     }
 

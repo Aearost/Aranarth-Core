@@ -26,18 +26,18 @@ public class CommandEnderchest implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (!(sender instanceof Player player)) {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
 		}
 
 		if (args.length == 0) {
 			if (!player.hasPermission("aranarth.enderchest")) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return true;
 			}
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (!aranarthPlayer.getCombatLogTime().isEmpty()) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.combat_tagged")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.combat_tagged")));
 				return true;
 			}
 			if (AranarthUtils.isSurvivalWorld(player.getLocation().getWorld().getName())) {
@@ -49,13 +49,13 @@ public class CommandEnderchest implements CommandExecutor {
 		if (args.length == 1) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (!aranarthPlayer.isInAdminMode()) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("admin.must_be_admin_ender")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "admin.must_be_admin_ender")));
 				return true;
 			}
 
 			Player target = Bukkit.getPlayer(args[0]);
 			if (target == null) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("player.not_found", "name", args[0])));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.not_found", "name", args[0])));
 				return true;
 			}
 
@@ -63,7 +63,7 @@ public class CommandEnderchest implements CommandExecutor {
 			return true;
 		}
 
-		player.sendMessage(ChatUtils.chatMessage(Lang.get("general.invalid_syntax", "usage", "enderchest [username]")));
+		player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "enderchest [username]")));
 		return true;
 	}
 

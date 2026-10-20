@@ -56,7 +56,7 @@ public class GuiBlacklist {
         inv.setItem(24, buildPresetButton(5, presets, activeIndex));
 
         // Row 3 (slots 27-35): toggle at index 1 (28), select preset centered (31), clear at index 7 (34)
-        inv.setItem(28, buildToggleButton(method));
+        inv.setItem(28, buildToggleButton(player, method));
         inv.setItem(31, buildActionButton(Material.NETHER_STAR, Lang.getFor(player, "gui.blacklist.select_preset")));
         inv.setItem(34, buildActionButton(Material.TNT, Lang.getFor(player, "gui.blacklist.clear_preset")));
 
@@ -69,7 +69,7 @@ public class GuiBlacklist {
         ItemStack item = new ItemStack(isActive ? Material.MAP : Material.PAPER);
         ItemMeta meta = item.getItemMeta();
         String name = (i < presets.size() && !presets.get(i).getName().isEmpty())
-                ? presets.get(i).getName() : "Preset " + (i + 1);
+                ? presets.get(i).getName() : Lang.getFor(player, "blacklist.preset_default", "number", i + 1);
         meta.setDisplayName(ChatUtils.translateToColor("&7&l" + name));
 
         if (isActive) {
@@ -81,18 +81,18 @@ public class GuiBlacklist {
         return item;
     }
 
-    public static ItemStack buildToggleButton(int method) {
+    public static ItemStack buildToggleButton(Player player, int method) {
         Material mat;
         String name;
         if (method == 0) {
             mat = Material.HOPPER;
-            name = Lang.get("gui.blacklist.ignoring");
+            name = Lang.getFor(player, "gui.blacklist.ignoring");
         } else if (method == 1) {
             mat = Material.FIRE_CHARGE;
-            name = Lang.get("gui.blacklist.trashing");
+            name = Lang.getFor(player, "gui.blacklist.trashing");
         } else {
             mat = Material.BARRIER;
-            name = Lang.get("gui.blacklist.disabled_toggle");
+            name = Lang.getFor(player, "gui.blacklist.disabled_toggle");
         }
         ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();

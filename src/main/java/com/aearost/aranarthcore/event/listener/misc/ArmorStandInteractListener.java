@@ -122,19 +122,19 @@ public class ArmorStandInteractListener implements Listener {
         ItemStack hand = player.getInventory().getItemInMainHand();
         if (hand.getType() == Material.IRON_BLOCK) {
             if (!player.hasPermission("aranarth.armorstand.lock")) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("lock.no_permission_lock")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.no_permission_lock")));
                 e.setCancelled(true);
                 return;
             }
             Dominion dominion = DominionUtils.getDominionOfChunk(armorStand.getLocation().getChunk());
             if (dominion != null && !DominionUtils.hasPermission(player, dominion, DominionPermission.ARMOR_STAND)) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.no_permission_in", "name", dominion.getName())));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.no_permission_in", "name", dominion.getName())));
                 e.setCancelled(true);
                 return;
             }
             PersistentDataContainer pdc = armorStand.getPersistentDataContainer();
             if (pdc.has(lockedKey, PersistentDataType.BYTE)) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.get("lock.locked")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.locked")));
                 e.setCancelled(true);
                 return;
             }
@@ -147,7 +147,7 @@ public class ArmorStandInteractListener implements Listener {
             armorStand.setCanMove(false);
             armorStand.setGravity(false);
             player.playSound(armorStand.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1.0F, 1.0F);
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("lock.locked")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.locked")));
             e.setCancelled(true);
             return;
         }

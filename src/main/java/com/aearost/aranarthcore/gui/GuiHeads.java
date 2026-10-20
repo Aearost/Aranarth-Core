@@ -174,8 +174,8 @@ public class GuiHeads {
     public static void initiateSearch(Player player) {
         awaitingSearch.add(player.getUniqueId());
         player.closeInventory();
-        player.sendMessage(ChatUtils.chatMessage(Lang.get("heads.search_prompt")));
-        player.sendMessage(ChatUtils.chatMessage(Lang.get("general.type_cancel_abort")));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "heads.search_prompt")));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.type_cancel_abort")));
     }
 
     public static boolean isAwaitingSearch(UUID uuid) {
@@ -185,7 +185,7 @@ public class GuiHeads {
     public static void handleSearchInput(Player player, String query) {
         awaitingSearch.remove(player.getUniqueId());
         if (query.equalsIgnoreCase("cancel")) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("general.search_cancelled")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.search_cancelled")));
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(),
                     () -> new GuiHeads(player, 0, true).openGui());
             return;

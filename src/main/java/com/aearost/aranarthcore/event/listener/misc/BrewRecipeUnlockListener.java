@@ -59,12 +59,12 @@ public class BrewRecipeUnlockListener implements Listener {
         Player player = e.getPlayer();
         BrewRecipe recipe = BrewRecipe.fromId(recipeId);
         if (recipe == null) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.invalid_page")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "brew.invalid_page")));
             return;
         }
 
         if (BrewRecipeUtils.isUnlocked(player.getUniqueId(), recipe)) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.already_unlocked", "name", recipe.getDisplayName())));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "brew.already_unlocked", "name", recipe.getDisplayName())));
             return;
         }
 
@@ -76,7 +76,7 @@ public class BrewRecipeUnlockListener implements Listener {
         }
 
         BrewRecipeUtils.unlock(player.getUniqueId(), recipeId);
-        player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.recipe_unlocked", "recipe", recipe.getDisplayName())));
-        player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.use_brewbook")));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "brew.recipe_unlocked", "recipe", recipe.getDisplayName())));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "brew.use_brewbook")));
     }
 }

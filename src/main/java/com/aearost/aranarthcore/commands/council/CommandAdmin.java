@@ -21,21 +21,21 @@ public class CommandAdmin {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
 			if (aranarthPlayer.getCouncilRank() != 3) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return true;
 			}
 
 			if (aranarthPlayer.isInAdminMode()) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("admin.mode_exit")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "admin.mode_exit")));
 				aranarthPlayer.setInAdminMode(false);
 			} else {
-				player.sendMessage(ChatUtils.chatMessage(Lang.get("admin.mode_enter")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "admin.mode_enter")));
 				aranarthPlayer.setInAdminMode(true);
 			}
 			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.get("general.no_permission_console")));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
 		}
 	}

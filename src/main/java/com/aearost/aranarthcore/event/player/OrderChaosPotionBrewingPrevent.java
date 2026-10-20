@@ -27,7 +27,7 @@ public class OrderChaosPotionBrewingPrevent {
 							e.setCancelled(true);
 							e.getView().getTopInventory().setItem(3, null);
 							player.getInventory().setItem(e.getSlot(), copy);
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.florivor_only")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "brew.florivor_only")));
 							// Sometimes shift-clicks result in a lost eyeblossom - this refunds it
 							if (e.isShiftClick()) {
 								player.getInventory().addItem(new ItemStack(clickedItem.getType()));
@@ -44,7 +44,7 @@ public class OrderChaosPotionBrewingPrevent {
 							ItemStack copy = ingredientItem.clone();
 							e.getView().getTopInventory().setItem(3, null);
 							player.getInventory().setItem(e.getSlot(), copy);
-							player.sendMessage(ChatUtils.chatMessage(Lang.get("brew.florivor_only")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "brew.florivor_only")));
 						}
 					}
 				}
