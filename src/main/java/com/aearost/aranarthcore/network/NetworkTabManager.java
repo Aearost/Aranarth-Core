@@ -155,22 +155,25 @@ public class NetworkTabManager {
         }
     }
 
-    /** Sends an UPDATE_LATENCY-only packet for a remote player's tab entry. */
+    /**
+     * Sends an UPDATE_DISPLAY_NAME | UPDATE_LATENCY packet for a remote player's tab entry
+     * so both the [XXms] tag in their name and the signal bars reflect their latest ping.
+     */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public static void updateLatencyInTab(NetworkPlayer np) {
+    public static void updatePingInTab(NetworkPlayer np) {
         ensureInitialised();
         if (!available) return;
         try {
-            Enum updateLatencyAction;
+            EnumSet set = (EnumSet) EnumSet.class.getMethod("noneOf", Class.class).invoke(null, actionClass);
+            set.add(Enum.valueOf((Class<Enum>) actionClass, "UPDATE_DISPLAY_NAME"));
             try {
-                updateLatencyAction = Enum.valueOf((Class<Enum>) actionClass, "UPDATE_LATENCY");
+                set.add(Enum.valueOf((Class<Enum>) actionClass, "UPDATE_LATENCY"));
             } catch (IllegalArgumentException ignored) {
-                return; // Action not present in this server version - skip silently
+                // Not present in all versions
             }
             int latency = np.getPing() >= 0 ? np.getPing() : 0;
-            Object entry = createEntry(np.getUuid(), null, null, 0, latency);
-            EnumSet set = (EnumSet) EnumSet.class.getMethod("of", Enum.class)
-                    .invoke(null, updateLatencyAction);
+            Object displayName = toNmsComponent(buildDisplayName(np));
+            Object entry = createEntry(np.getUuid(), null, displayName, 0, latency);
             Object packet = updatePacketClass
                     .getDeclaredConstructor(EnumSet.class, List.class)
                     .newInstance(set, List.of(entry));
@@ -178,7 +181,7 @@ public class NetworkTabManager {
                 sendPacket(viewer, packet);
             }
         } catch (Exception ex) {
-            Bukkit.getLogger().log(Level.WARNING, "[AC] updateLatencyInTab failed for " + np.getUuid(), ex);
+            Bukkit.getLogger().log(Level.WARNING, "[AC] updatePingInTab failed for " + np.getUuid(), ex);
         }
     }
 
@@ -456,6 +459,18 @@ public class NetworkTabManager {
         display += name;
 
         if (np.isAfk()) display += " &7[AFK]";
+
+        // Ping tag - omitted until the first ping update arrives from the remote server
+        int ping = np.getPing();
+        if (ping >= 0) {
+            if (ping <= 150) {
+                display += " &8[&a" + ping + "ms&8]";
+            } else if (ping <= 250) {
+                display += " &8[&e" + ping + "ms&8]";
+            } else {
+                display += " &8[&c" + ping + "ms&8]";
+            }
+        }
 
         return ChatUtils.translateToColor(display);
     }

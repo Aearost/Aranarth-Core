@@ -84,6 +84,7 @@ Cross-server & Technical
 [~] Synced bans/mutes/warnings and dominion changes across servers, gave cross-server teleports their countdown and combat checks, and stopped transfers and demoted staff from bypassing permissions
 [~] Tightened council commands and permissions with rank checks on punishments and ranksets, admin-only destructive /ac commands, blocked vanilla messaging, WorldEdit outside creative, and cross-inventory plugin teleports
 [~] Hardened nicknames, vanish privacy, item deserialization, file saves, heads API, interactive chat, timezone lookups and the voice link, and fixed mute expiry, baltop lag and frame protection
+[~] Fixed ping tag not being shown in tab for players on the other server
 
 Miscellaneous
 [~] Fixed WorldEdit commands not appearing in tab completion or autofilling block names #456

@@ -2434,7 +2434,7 @@ public class NetworkManager {
         if (np != null) {
             np.setPing(ping);
             if (!np.isVanished()) {
-                NetworkTabManager.updateLatencyInTab(np);
+                NetworkTabManager.updatePingInTab(np);
             }
         }
     }
