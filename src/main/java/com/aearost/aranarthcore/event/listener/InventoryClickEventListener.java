@@ -33,10 +33,6 @@ public class InventoryClickEventListener implements Listener {
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
-    private static boolean isDominionFoodTitle(String title) {
-        return title.startsWith(GuiDominionFood.TITLE_PREFIX);
-    }
-
     /**
      * Prevents hopper minecarts from draining locked containers.
      */
@@ -161,15 +157,14 @@ public class InventoryClickEventListener implements Listener {
                 new GuiCrateClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.shoplocation.title"))) {
                 new GuiShopLocationClick().execute(e);
-            } else if (isDominionFoodTitle(ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
+            } else if (GuiDominionFood.isFoodTitle(player, ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
                 new GuiDominionFoodClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(Lang.getFor(player, GuiDominionResourceFilters.TITLE_SUFFIX_KEY))) {
                 new GuiDominionResourceFiltersClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(Lang.getFor(player, GuiDominionResourcesPreview.TITLE_SUFFIX_KEY))
-                    && !ChatUtils.stripColorFormatting(e.getView().getTitle()).contains("'s Resources")) {
-                new GuiDominionResourcesPreviewClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(Lang.getFor(player, GuiDominionResourcesPreview.TITLE_SUFFIX_KEY))) {
+            } else if (GuiDominionResources.isResourcesTitle(player, ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
                 new GuiDominionResourcesClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(Lang.getFor(player, GuiDominionResourcesPreview.TITLE_SUFFIX_KEY))) {
+                new GuiDominionResourcesPreviewClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiDominionFlagSelect.TITLE_MOB_SPAWNING_KEY))
                     || ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiDominionFlagSelect.TITLE_PVP_KEY))
                     || ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiDominionFlagSelect.TITLE_BENDING_KEY))
@@ -223,7 +218,7 @@ public class InventoryClickEventListener implements Listener {
                 new GuiSitColorClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.sounds.title"))) {
                 new GuiSoundsClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Top Voters")) {
+            } else if (GuiVoteTop.isVoteTopTitle(player, ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
                 new GuiVoteTopClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Top ")
                     && !ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.topkills.title"))

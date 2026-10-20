@@ -16,6 +16,7 @@ import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
@@ -33,13 +34,14 @@ public class InvseeListener implements Listener {
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
-    private boolean isInvsee(String title) {
-        return title.startsWith("Viewing ") && title.endsWith("'s Inventory");
+    // Tracked by inventory rather than title, as the title changes with the viewer's language
+    private boolean isInvsee(InventoryView view) {
+        return GuiInvsee.getOpenInvsees().containsKey(view.getTopInventory());
     }
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent e) {
-        if (!isInvsee(e.getView().getTitle())) {
+        if (!isInvsee(e.getView())) {
             return;
         }
         if (!(e.getWhoClicked() instanceof Player viewer)) {
@@ -124,14 +126,14 @@ public class InvseeListener implements Listener {
 
     @EventHandler
     public void onInventoryDrag(InventoryDragEvent e) {
-        if (isInvsee(e.getView().getTitle())) {
+        if (isInvsee(e.getView())) {
             e.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent e) {
-        if (isInvsee(e.getView().getTitle())) {
+        if (isInvsee(e.getView())) {
             Inventory inv = e.getInventory();
             if (GuiInvsee.isRemote(inv) && NetworkManager.isActive()) {
                 UUID targetUuid = GuiInvsee.getOpenInvsees().get(inv);
@@ -153,7 +155,7 @@ public class InvseeListener implements Listener {
             return;
         }
         // Skip clicks the viewer makes inside an invsee GUI - already handled above
-        if (isInvsee(e.getView().getTitle())) {
+        if (isInvsee(e.getView())) {
             return;
         }
         scheduleRefresh(player);

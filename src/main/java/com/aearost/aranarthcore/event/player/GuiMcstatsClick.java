@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.gui.GuiMcstats;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -13,16 +14,16 @@ import org.bukkit.event.inventory.InventoryType;
 public class GuiMcstatsClick {
 
     public void execute(InventoryClickEvent e) {
-        String title = ChatUtils.stripColorFormatting(e.getView().getTitle());
-        if (!title.equals(com.aearost.aranarthcore.utils.Lang.get(GuiMcstats.TITLE_SELF_KEY)) && !title.endsWith(com.aearost.aranarthcore.utils.Lang.get(GuiMcstats.TITLE_SUFFIX_KEY))) {
-            return;
-        }
-
         if (e.getClickedInventory() == null) {
             return;
         }
 
         if (e.getWhoClicked() instanceof Player player) {
+            String title = ChatUtils.stripColorFormatting(e.getView().getTitle());
+            if (!title.equals(Lang.getFor(player, GuiMcstats.TITLE_SELF_KEY)) && !title.endsWith(Lang.getFor(player, GuiMcstats.TITLE_SUFFIX_KEY))) {
+                return;
+            }
+
             if (e.getClickedInventory().getType() == InventoryType.CHEST) {
                 e.setCancelled(true);
                 if (e.getSlot() == 49) {

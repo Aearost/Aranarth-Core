@@ -28,6 +28,30 @@ public class GuiVoteTop {
 
     private static final ExecutorService SKIN_EXECUTOR = Executors.newFixedThreadPool(8);
 
+    /**
+     * The filter of the most recently opened top voters GUI per player, so clicks never need to parse the localized title.
+     */
+    public record VoteTopFilter(Integer year, Integer month, String title) {}
+    private static final Map<UUID, VoteTopFilter> openFilters = new HashMap<>();
+
+    /**
+     * Provides the filter of the top voters GUI that the player most recently opened.
+     *
+     * @param uuid The player's UUID.
+     * @return The filter, or null if the player has not opened the GUI.
+     */
+    public static VoteTopFilter getOpenFilter(UUID uuid) {
+        return openFilters.get(uuid);
+    }
+
+    /**
+     * Determines whether the color-stripped title is the top voters GUI that the player most recently opened.
+     */
+    public static boolean isVoteTopTitle(Player player, String title) {
+        VoteTopFilter filter = openFilters.get(player.getUniqueId());
+        return filter != null && filter.title().equals(title);
+    }
+
     private final Player player;
     private final Inventory initializedGui;
 
@@ -75,6 +99,7 @@ public class GuiVoteTop {
             endTime = Long.MAX_VALUE;
             title = Lang.getFor(player, "gui.votetop.title_all");
         }
+        openFilters.put(player.getUniqueId(), new VoteTopFilter(year, month, ChatUtils.stripColorFormatting(title)));
 
         Map<UUID, Integer> voteCounts = new HashMap<>();
         for (AranarthVote vote : allVotes) {

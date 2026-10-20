@@ -14,7 +14,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class GuiDominionFood {
 
 	public static final int FOOD_SLOTS_PER_PAGE = 45;
-	public static final String TITLE_PREFIX = "Power - ";
+	public static final String TITLE_KEY = "gui.dominionfood.title";
 
 	private final Player player;
 	private final Inventory initializedGui;
@@ -62,7 +62,17 @@ public class GuiDominionFood {
 		String percentageStr = percentage == Math.floor(percentage)
 				? String.valueOf((int) percentage)
 				: String.format("%.2f", percentage).replaceAll("0+$", "");
-		return Lang.getFor(player, "gui.dominionfood.title", "percent", percentageStr, "duration", duration);
+		return Lang.getFor(player, TITLE_KEY, "percent", percentageStr, "duration", duration);
+	}
+
+	/**
+	 * Determines whether the color-stripped title belongs to the food GUI, in the player's language.
+	 */
+	public static boolean isFoodTitle(Player player, String title) {
+		String template = ChatUtils.stripColorFormatting(Lang.getFor(player, TITLE_KEY));
+		int placeholderIndex = template.indexOf('{');
+		String prefix = placeholderIndex >= 0 ? template.substring(0, placeholderIndex) : template;
+		return !prefix.isEmpty() && title.startsWith(prefix);
 	}
 
 	/**

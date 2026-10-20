@@ -25,7 +25,9 @@ import static com.aearost.aranarthcore.objects.CustomKeys.ARROW;
  */
 public class GuiQuiverClick {
 	public void execute(InventoryClickEvent e) {
-		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Quiver")) {
+		Player viewer = (Player) e.getWhoClicked();
+		String title = ChatUtils.stripColorFormatting(e.getView().getTitle());
+		if (title.equals(Lang.getFor(viewer, "gui.quiver.title"))) {
 			// If the user did not click a slot
 			if (e.getClickedInventory() == null) {
 				return;
@@ -56,7 +58,7 @@ public class GuiQuiverClick {
 					}
 				}
 			}
-		} else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Arrow Selection") && e.getView().getType() == InventoryType.CHEST) {
+		} else if (title.equals(Lang.getFor(viewer, "gui.quiver.title_select")) && e.getView().getType() == InventoryType.CHEST) {
 			// If the user did not click a slot
 			if (e.getClickedInventory() == null) {
 				return;

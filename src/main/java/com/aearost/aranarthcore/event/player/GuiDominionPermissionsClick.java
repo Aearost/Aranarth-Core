@@ -49,7 +49,7 @@ public class GuiDominionPermissionsClick {
         String title = ChatUtils.stripColorFormatting(e.getView().getTitle());
 
         // Main hub screen, navigate to sections or toggle settings
-        if (title.equals(Lang.get(GuiDominionPermissions.HUB_TITLE_KEY))) {
+        if (title.equals(Lang.getFor(player, GuiDominionPermissions.HUB_TITLE_KEY))) {
             int slot = e.getSlot();
             switch (slot) {
                 case 17 -> {

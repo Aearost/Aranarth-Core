@@ -153,7 +153,7 @@ public class GuiQuiver {
 			gui.setItem(7, blank);
 			gui.setItem(8, blank);
 		} else {
-			gui = GuiHolder.create(player, 18, "Quiver");
+			gui = GuiHolder.create(player, 18, Lang.getFor(player, "gui.quiver.title"));
 			gui.setItem(0, blank);
 			gui.setItem(1, blank);
 			gui.setItem(2, blank);
@@ -185,13 +185,13 @@ public class GuiQuiver {
 	private Inventory getEsquireQuiver(int saintRank) {
 		Inventory gui  = null;
 		if (saintRank == 0) {
-			gui = GuiHolder.create(player, 9, "Quiver");
+			gui = GuiHolder.create(player, 9, Lang.getFor(player, "gui.quiver.title"));
 			gui.setItem(0, blank);
 			gui.setItem(1, blank);
 			gui.setItem(7, blank);
 			gui.setItem(8, blank);
 		} else {
-			gui = GuiHolder.create(player, 18, "Quiver");
+			gui = GuiHolder.create(player, 18, Lang.getFor(player, "gui.quiver.title"));
 			gui.setItem(0, blank);
 			gui.setItem(1, blank);
 			gui.setItem(7, blank);
@@ -221,9 +221,9 @@ public class GuiQuiver {
 	private Inventory getKnightQuiver(int saintRank) {
 		Inventory gui  = null;
 		if (saintRank == 0) {
-			gui = GuiHolder.create(player, 9, "Quiver");
+			gui = GuiHolder.create(player, 9, Lang.getFor(player, "gui.quiver.title"));
 		} else {
-			gui = GuiHolder.create(player, 18, "Quiver");
+			gui = GuiHolder.create(player, 18, Lang.getFor(player, "gui.quiver.title"));
 			if (saintRank == 1) {
 				gui.setItem(9, blank);
 				gui.setItem(10, blank);
@@ -248,7 +248,7 @@ public class GuiQuiver {
 	private Inventory getBaronQuiver(int saintRank) {
 		Inventory gui  = null;
 		if (saintRank == 0) {
-			gui = GuiHolder.create(player, 18, "Quiver");
+			gui = GuiHolder.create(player, 18, Lang.getFor(player, "gui.quiver.title"));
 			gui.setItem(0, blank);
 			gui.setItem(1, blank);
 			gui.setItem(7, blank);
@@ -256,7 +256,7 @@ public class GuiQuiver {
 			gui.setItem(9, blank);
 			gui.setItem(17, blank);
 		} else {
-			gui = GuiHolder.create(player, 27, "Quiver");
+			gui = GuiHolder.create(player, 27, Lang.getFor(player, "gui.quiver.title"));
 			gui.setItem(0, blank);
 			gui.setItem(1, blank);
 			gui.setItem(7, blank);
@@ -288,9 +288,9 @@ public class GuiQuiver {
 	private Inventory getCountQuiver(int saintRank) {
 		Inventory gui  = null;
 		if (saintRank == 0) {
-			gui = GuiHolder.create(player, 18, "Quiver");
+			gui = GuiHolder.create(player, 18, Lang.getFor(player, "gui.quiver.title"));
 		} else {
-			gui = GuiHolder.create(player, 27, "Quiver");
+			gui = GuiHolder.create(player, 27, Lang.getFor(player, "gui.quiver.title"));
 			if (saintRank == 1) {
 				gui.setItem(18, blank);
 				gui.setItem(19, blank);
@@ -315,11 +315,11 @@ public class GuiQuiver {
 	private Inventory getDukeQuiver(int saintRank) {
 		Inventory gui  = null;
 		if (saintRank == 0) {
-			gui = GuiHolder.create(player, 27, "Quiver");
+			gui = GuiHolder.create(player, 27, Lang.getFor(player, "gui.quiver.title"));
 			gui.setItem(0, blank);
 			gui.setItem(8, blank);
 		} else {
-			gui = GuiHolder.create(player, 36, "Quiver");
+			gui = GuiHolder.create(player, 36, Lang.getFor(player, "gui.quiver.title"));
 			gui.setItem(0, blank);
 			gui.setItem(8, blank);
 
@@ -347,7 +347,7 @@ public class GuiQuiver {
 	private Inventory getPrinceQuiver(int saintRank) {
 		Inventory gui  = null;
 		if (saintRank == 0) {
-			gui = GuiHolder.create(player, 36, "Quiver");
+			gui = GuiHolder.create(player, 36, Lang.getFor(player, "gui.quiver.title"));
 			gui.setItem(0, blank);
 			gui.setItem(1, blank);
 			gui.setItem(2, blank);
@@ -355,7 +355,7 @@ public class GuiQuiver {
 			gui.setItem(7, blank);
 			gui.setItem(8, blank);
 		} else {
-			gui = GuiHolder.create(player, 45, "Quiver");
+			gui = GuiHolder.create(player, 45, Lang.getFor(player, "gui.quiver.title"));
 			gui.setItem(0, blank);
 			gui.setItem(1, blank);
 			gui.setItem(2, blank);
@@ -387,9 +387,9 @@ public class GuiQuiver {
 	private Inventory getKingQuiver(int saintRank) {
 		Inventory gui  = null;
 		if (saintRank == 0) {
-			gui = GuiHolder.create(player, 36, "Quiver");
+			gui = GuiHolder.create(player, 36, Lang.getFor(player, "gui.quiver.title"));
 		} else {
-			gui = GuiHolder.create(player, 45, "Quiver");
+			gui = GuiHolder.create(player, 45, Lang.getFor(player, "gui.quiver.title"));
 			if (saintRank == 1) {
 				gui.setItem(36, blank);
 				gui.setItem(37, blank);
@@ -414,9 +414,9 @@ public class GuiQuiver {
 	private Inventory getEmperorQuiver(int saintRank) {
 		Inventory gui  = null;
 		if (saintRank == 0) {
-			gui = GuiHolder.create(player, 45, "Quiver");
+			gui = GuiHolder.create(player, 45, Lang.getFor(player, "gui.quiver.title"));
 		} else {
-			gui = GuiHolder.create(player, 54, "Quiver");
+			gui = GuiHolder.create(player, 54, Lang.getFor(player, "gui.quiver.title"));
 			if (saintRank == 1) {
 				gui.setItem(45, blank);
 				gui.setItem(46, blank);

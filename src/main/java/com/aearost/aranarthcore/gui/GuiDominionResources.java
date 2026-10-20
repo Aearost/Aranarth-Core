@@ -38,6 +38,17 @@ public class GuiDominionResources {
 		player.openInventory(initializedGui);
 	}
 
+	/**
+	 * Determines whether the color-stripped title is the main resources GUI of the player's own Dominion.
+	 */
+	public static boolean isResourcesTitle(Player player, String title) {
+		Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+		if (dominion == null) {
+			return false;
+		}
+		return title.equals(ChatUtils.stripColorFormatting(Lang.getFor(player, "gui.dominionresources.title", "dominion", dominion.getName())));
+	}
+
 	private Inventory initializeGui(Player player, int page) {
 		Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 		List<Biome> biomes = DominionUtils.getResourceClaimTypes(dominion);

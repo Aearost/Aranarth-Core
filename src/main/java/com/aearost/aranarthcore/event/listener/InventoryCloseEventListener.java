@@ -48,7 +48,7 @@ public class InventoryCloseEventListener implements Listener {
                 new GuiShulkerClose().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(Lang.getFor(player, "gui.crate.title_vote").split(" - ")[0] + " - ")) {
                 new GuiCrateClose().execute(e);
-            } else if (isDominionFoodTitle(ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
+            } else if (GuiDominionFood.isFoodTitle(player, ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
                 new GuiDominionFoodClose().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.petfood.title"))) {
                 new GuiPetFoodClose().execute(e);
@@ -68,9 +68,5 @@ public class InventoryCloseEventListener implements Listener {
                 new GuiFletchingTableClose().execute(e);
             }
         }
-    }
-
-    private static boolean isDominionFoodTitle(String title) {
-        return title.startsWith(GuiDominionFood.TITLE_PREFIX);
     }
 }

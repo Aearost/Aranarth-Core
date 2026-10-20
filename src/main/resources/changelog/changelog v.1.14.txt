@@ -51,11 +51,12 @@ Economy, Jobs & Quests
 [~] Fixed cross-server trade and Reaper Inventory duplication, invalid trade money entries, job pay loops, server shop redundancy, colored-nickaname trade invites and MySQL column migrations
 
 Chat, UI & Sounds
+[+] Added Spanish to /lang
+[~] Fixed multiple GUIs not working correctly for non-English languages
 [~] Added missing un-AFK checks and removed redundant ones
 [~] Fixed "You are no longer AFK" displaying without first going AFK, such as when being pushed by mobs right as the AFK timer ran out
 [~] Fixed switching servers resetting your streak of chat unscrambler wins
 [~] Fixed gradient chat messages containing # or & displaying in white on the other server
-[+] Added Spanish to /lang
 
 Quality of Life
 [+] Added command preview lore to /tables GUI items
