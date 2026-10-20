@@ -150,9 +150,9 @@ public class GuiDominionResourcesClick {
             if (dominion.getBiomeResourcesBeingClaimed() != null) {
                 dominion.setBiomeResourcesBeingClaimed(null);
                 DominionUtils.updateDominion(dominion);
-                Player leader = Bukkit.getPlayer(dominion.getLeader());
-                if (leader != null && leader.isOnline()) {
-                    leader.sendMessage(ChatUtils.chatMessage(Lang.get("dominion.resources_timer_expired")));
+                // Notify the member who started the claim, who is not always the leader
+                if (player.isOnline()) {
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.resources_timer_expired")));
                 }
             }
         }, 200L); // 10 seconds

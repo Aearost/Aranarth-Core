@@ -12,6 +12,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class GuiDominionResources {
 
@@ -46,7 +48,12 @@ public class GuiDominionResources {
 		if (dominion == null) {
 			return false;
 		}
-		return title.equals(ChatUtils.stripColorFormatting(Lang.getFor(player, "gui.dominionresources.title", "dominion", dominion.getName())));
+		// The claimable amount can change while the GUI is open, so any numbers are accepted in its place
+		String marker = "\u0000";
+		String expected = ChatUtils.stripColorFormatting(Lang.getFor(player, "gui.dominionresources.title",
+				"dominion", dominion.getName(), "claimable", marker, "max", marker));
+		String regex = Arrays.stream(expected.split(marker, -1)).map(Pattern::quote).collect(Collectors.joining("\\d+"));
+		return title.matches(regex);
 	}
 
 	private Inventory initializeGui(Player player, int page) {
@@ -61,7 +68,8 @@ public class GuiDominionResources {
 		int size = 45;
 
 		Inventory gui = GuiHolder.create(player, size,
-				Lang.getFor(player, "gui.dominionresources.title", "dominion", dominion.getName()));
+				Lang.getFor(player, "gui.dominionresources.title", "dominion", dominion.getName(),
+						"claimable", dominion.getClaimableResources(), "max", DominionUtils.getMaxClaimableResourcesAmount(dominion)));
 
 		ItemStack filler = makeFiller();
 		ItemStack filterPane = makeFilterPane(player);
