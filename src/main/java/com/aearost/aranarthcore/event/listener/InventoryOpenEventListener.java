@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.event.mob.VillagerDominionDiscount;
 import com.aearost.aranarthcore.event.player.AfkCancelByInteract;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
@@ -28,5 +29,6 @@ public class InventoryOpenEventListener implements Listener {
         if (e.getInventory().getHolder() instanceof BlockInventoryHolder) {
             AranarthUtils.migrateInventoryEssences(e.getInventory());
         }
+        new VillagerDominionDiscount().execute(e);
     }
 }

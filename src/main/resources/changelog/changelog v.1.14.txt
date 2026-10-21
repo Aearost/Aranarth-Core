@@ -28,6 +28,7 @@ Dominion
 [~] Fixed issue where Squaremap was not rendering unclaimed chunks as invisible when surrounded by claimed chunks
 [+] Added a customer hex option for /d mapcolor
 [+] /d resources now shows the claimable resource amount in its title
+[+] Villager cure discounts are now shared with players who have villager permissions in the Dominion  land the villager is in
 
 Aranarthium, Items & Crafting
 [+] Implemented Essence Imbuing, allowing players to create Essence items and imbue them with XP to craft the various essences
@@ -91,3 +92,4 @@ Cross-server & Technical
 
 Miscellaneous
 [~] Fixed WorldEdit commands not appearing in tab completion or autofilling block names #456
+[~] Fix the missing feedback message when you use /ac give <other username>
