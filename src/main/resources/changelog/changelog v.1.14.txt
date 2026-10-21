@@ -38,6 +38,7 @@ Aranarthium, Items & Crafting
 [~] Fixed elytras not being usable while Invisible Armor is enabled
 [-] Removed the Bone Arrow and Bone Arrowhead
 [~] Fixed the Rooting Arrow using the Bone Arrow model
+[+] Ardent Aranarthium armour now has Thorns IV by default
 [+] Soulbound Aranarthium armour now has Mending by default
 [+] Soulbound Aranarthium now pulls in XP orbs from a greater range
 [+] mcMMO Salvage can now extract essences, blank Essences and Aranarthium Ingots based on Salvage level
