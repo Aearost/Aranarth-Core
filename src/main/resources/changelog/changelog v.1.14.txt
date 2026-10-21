@@ -40,6 +40,7 @@ Aranarthium, Items & Crafting
 [~] Fixed the Rooting Arrow using the Bone Arrow model
 [+] Soulbound Aranarthium armour now has Mending by default
 [+] Soulbound Aranarthium now pulls in XP orbs from a greater range
+[+] mcMMO Salvage can now extract essences, blank Essences and Aranarthium Ingots based on Salvage level
 
 Economy, Jobs & Quests
 [~] Renamed /marketprice to /marketvalue (alias /mv)
