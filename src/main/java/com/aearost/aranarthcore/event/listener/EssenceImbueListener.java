@@ -4,12 +4,14 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.essence.EssenceBlank;
 import com.aearost.aranarthcore.recipes.RecipeEssences;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.EnchantingUtils;
 import com.aearost.aranarthcore.utils.EssenceImbueUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Keyed;
 import org.bukkit.Material;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -45,7 +47,7 @@ public class EssenceImbueListener implements Listener {
     private static final int ANVIL_RESULT_SLOT = 2;
     private static final int OFF_HAND_SLOT = 40;
 
-    private final Random random = new Random();
+    private static final Random RANDOM = new Random();
 
     public EssenceImbueListener(AranarthCore plugin) {
         Bukkit.getPluginManager().registerEvents(this, plugin);
@@ -61,41 +63,69 @@ public class EssenceImbueListener implements Listener {
         if (amount <= 0) {
             return;
         }
+        // Bottles o' Enchanting can be filled with the player's own EXP, so they never receive the Distilled Wisdom bonus
+        boolean isFromBottle = e.getSource() instanceof ExperienceOrb orb && orb.getSpawnReason() == ExperienceOrb.SpawnReason.EXP_BOTTLE;
+        e.setAmount(splitExp(e.getPlayer(), amount, !isFromBottle));
+    }
 
-        Player player = e.getPlayer();
-        if (!EssenceImbueUtils.hasRequiredRank(player)) {
-            return;
+    /**
+     * Splits the input XP between the player and the Essences in their inventory that are not fully imbued.
+     * @param player The player.
+     * @param amount The XP earned.
+     * @param applyDistilledWisdom Whether the Distilled Wisdom bonus can apply.
+     * @return The XP the player keeps.
+     */
+    public static int splitExp(Player player, int amount, boolean applyDistilledWisdom) {
+        if (amount <= 0 || !EssenceImbueUtils.hasRequiredRank(player)) {
+            return amount;
         }
-
-        int maxXp = EssenceImbueUtils.getMaxImbuedXp();
-        PlayerInventory inventory = player.getInventory();
-        if (findImbuableSlot(inventory, maxXp, -1) == -1) {
-            return;
+        if (findImbuableSlot(player.getInventory(), EssenceImbueUtils.getMaxImbuedXp(), -1) == -1) {
+            return amount;
         }
 
         int playerShare = amount - amount / 2;
         // Odd amounts give the extra point to the player, and have a 50% chance to also give it to the Essence
-        int essenceShare = amount / 2 + (amount % 2 == 1 && random.nextBoolean() ? 1 : 0);
+        int essenceShare = amount / 2 + (amount % 2 == 1 && RANDOM.nextBoolean() ? 1 : 0);
 
+        int distributed = imbue(player, essenceShare);
+        if (applyDistilledWisdom && distributed == essenceShare) {
+            double multiplier = EnchantingUtils.getDistilledWisdomEssenceMultiplier(player);
+            int bonus = EnchantingUtils.randomRound(essenceShare * (multiplier - 1));
+            if (bonus > 0) {
+                imbue(player, bonus);
+            }
+        }
+
+        // Any XP that could not be imbued because every Essence is full is returned to the player
+        return Math.min(amount, playerShare + (essenceShare - distributed));
+    }
+
+    /**
+     * Imbues the input XP into the Essences in the player's inventory that are not yet fully imbued.
+     * @param player The player.
+     * @param amount The XP to imbue.
+     * @return The XP that was imbued, which is less than the amount if every Essence became full.
+     */
+    public static int imbue(Player player, int amount) {
+        int maxXp = EssenceImbueUtils.getMaxImbuedXp();
+        PlayerInventory inventory = player.getInventory();
         int distributed = 0;
         int slot = -1;
-        while (distributed < essenceShare) {
+        while (distributed < amount) {
             slot = findImbuableSlot(inventory, maxXp, slot);
             if (slot == -1) {
                 break;
             }
             ItemStack essence = inventory.getItem(slot);
             int previousXp = EssenceImbueUtils.getImbuedXp(essence);
-            int added = Math.min(essenceShare - distributed, maxXp - previousXp);
+            int added = Math.min(amount - distributed, maxXp - previousXp);
             int newXp = previousXp + added;
             EssenceImbueUtils.setImbuedXp(essence, newXp);
             inventory.setItem(slot, essence);
             distributed += added;
             notifyThresholds(player, previousXp, newXp, maxXp);
         }
-
-        // Any XP that could not be imbued because every Essence is full is returned to the player
-        e.setAmount(Math.min(amount, playerShare + (essenceShare - distributed)));
+        return distributed;
     }
 
     /**
@@ -105,7 +135,7 @@ public class EssenceImbueListener implements Listener {
      * @param afterSlot The slot to search after, or -1 to search from the start.
      * @return The slot, or -1 if there is none.
      */
-    private int findImbuableSlot(PlayerInventory inventory, int maxXp, int afterSlot) {
+    private static int findImbuableSlot(PlayerInventory inventory, int maxXp, int afterSlot) {
         int[] slots = new int[37];
         for (int i = 0; i < 36; i++) {
             slots[i] = i;
@@ -131,7 +161,7 @@ public class EssenceImbueListener implements Listener {
     /**
      * Notifies the player when their Essence becomes imbued enough to craft a new tier of essence.
      */
-    private void notifyThresholds(Player player, int previousXp, int newXp, int maxXp) {
+    private static void notifyThresholds(Player player, int previousXp, int newXp, int maxXp) {
         if (newXp >= maxXp && previousXp < maxXp) {
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.imbue_complete")));
             return;

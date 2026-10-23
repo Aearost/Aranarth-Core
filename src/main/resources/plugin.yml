@@ -176,6 +176,9 @@ commands:
   mcstats:
     description: Opens a GUI showing your or another player's mcMMO skill levels and rankings
     aliases: [ skills ]
+  enchanting:
+    description: Displays the mcMMO Enchanting child skill and its sub-skills
+    permission: aranarth.mcmmo.enchanting
   mount:
     description: Calls or dismisses the player's current mount
     permission: aranarth.mount

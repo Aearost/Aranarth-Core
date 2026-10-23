@@ -502,6 +502,7 @@ public class PermissionUtils {
         perms.setPermission("aranarth.voteshop", true);
         perms.setPermission("aranarth.warp", true);
         perms.setPermission("aranarth.mctop", true);
+        perms.setPermission("aranarth.mcmmo.enchanting", true);
         perms.setPermission("aranarth.map", true);
         perms.setPermission("aranarth.topguesses", true);
         perms.setPermission("aranarth.brewbook", true);
@@ -512,7 +513,6 @@ public class PermissionUtils {
 
         // Disable aranarth functionality
         perms.setPermission("aranarth.ac", false);
-        perms.setPermission("aranarth.exp", false);
         perms.setPermission("aranarth.seen", false);
         perms.setPermission("aranarth.back", false);
         perms.setPermission("aranarth.tphere", false);
@@ -976,7 +976,6 @@ public class PermissionUtils {
             perms.setPermission("bending.ability.metalshots", true);          // metal
             perms.setPermission("bending.ability.metalstrips", true);         // metal
             perms.setPermission("bending.ability.metalshred", true);          // metal
-            perms.setPermission("aranarth.exp", true);
             perms.setPermission("bending.command.preset.create.10", true);
             perms.setPermission("aranarthcore.armorstand.solemn", true);
         } else {

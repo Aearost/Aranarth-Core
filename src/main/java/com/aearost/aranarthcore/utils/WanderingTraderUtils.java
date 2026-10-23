@@ -101,28 +101,33 @@ public class WanderingTraderUtils {
         Material.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE
     };
 
-    private record OverLeveledEnchant(Enchantment enchantment, int level, Material appliedMaterial) {}
+    // The level is always the over-leveled maximum provided by EnchantingUtils
+    private record OverLeveledEnchant(Enchantment enchantment, Material appliedMaterial) {
+        int level() {
+            return EnchantingUtils.getOverLeveledMax(enchantment);
+        }
+    }
 
-    // null means "choose randomly from pickaxe or chestplate" (Unbreaking IV)
+    // null means "choose randomly from pickaxe or chestplate" (Unbreaking)
+    // Must contain the same enchantments as EnchantingUtils.OVER_LEVELED_ENCHANTS
     private static final List<OverLeveledEnchant> OVER_LEVELED_ENCHANTS = List.of(
-        new OverLeveledEnchant(Enchantment.SHARPNESS, 6, Material.DIAMOND_SWORD),
-        new OverLeveledEnchant(Enchantment.EFFICIENCY, 6, Material.DIAMOND_PICKAXE),
-        new OverLeveledEnchant(Enchantment.FORTUNE, 4, Material.DIAMOND_PICKAXE),
-        new OverLeveledEnchant(Enchantment.PROTECTION, 5, Material.DIAMOND_CHESTPLATE),
-        new OverLeveledEnchant(Enchantment.FEATHER_FALLING, 5, Material.DIAMOND_BOOTS),
-        new OverLeveledEnchant(Enchantment.LOOTING, 4, Material.DIAMOND_SWORD),
-        new OverLeveledEnchant(Enchantment.FIRE_ASPECT, 3, Material.DIAMOND_SWORD),
-        new OverLeveledEnchant(Enchantment.POWER, 6, Material.BOW),
-        new OverLeveledEnchant(Enchantment.UNBREAKING, 4, null),
-        new OverLeveledEnchant(Enchantment.DEPTH_STRIDER, 4, Material.DIAMOND_BOOTS),
-        new OverLeveledEnchant(Enchantment.RESPIRATION, 4, Material.DIAMOND_HELMET),
-        new OverLeveledEnchant(Enchantment.SWIFT_SNEAK, 4, Material.DIAMOND_LEGGINGS),
-        new OverLeveledEnchant(Enchantment.SOUL_SPEED, 4, Material.DIAMOND_BOOTS),
-        new OverLeveledEnchant(Enchantment.LUCK_OF_THE_SEA, 4, Material.FISHING_ROD),
-        new OverLeveledEnchant(Enchantment.LURE, 4, Material.FISHING_ROD),
-        new OverLeveledEnchant(Enchantment.FROST_WALKER, 3, Material.DIAMOND_BOOTS),
-        new OverLeveledEnchant(Enchantment.KNOCKBACK, 3, Material.DIAMOND_SWORD),
-        new OverLeveledEnchant(Enchantment.PUNCH, 3, Material.BOW)
+        new OverLeveledEnchant(Enchantment.SHARPNESS, Material.DIAMOND_SWORD),
+        new OverLeveledEnchant(Enchantment.EFFICIENCY, Material.DIAMOND_PICKAXE),
+        new OverLeveledEnchant(Enchantment.FORTUNE, Material.DIAMOND_PICKAXE),
+        new OverLeveledEnchant(Enchantment.PROTECTION, Material.DIAMOND_CHESTPLATE),
+        new OverLeveledEnchant(Enchantment.FEATHER_FALLING, Material.DIAMOND_BOOTS),
+        new OverLeveledEnchant(Enchantment.LOOTING, Material.DIAMOND_SWORD),
+        new OverLeveledEnchant(Enchantment.FIRE_ASPECT, Material.DIAMOND_SWORD),
+        new OverLeveledEnchant(Enchantment.POWER, Material.BOW),
+        new OverLeveledEnchant(Enchantment.UNBREAKING, null),
+        new OverLeveledEnchant(Enchantment.RESPIRATION, Material.DIAMOND_HELMET),
+        new OverLeveledEnchant(Enchantment.SWIFT_SNEAK, Material.DIAMOND_LEGGINGS),
+        new OverLeveledEnchant(Enchantment.SOUL_SPEED, Material.DIAMOND_BOOTS),
+        new OverLeveledEnchant(Enchantment.LUCK_OF_THE_SEA, Material.FISHING_ROD),
+        new OverLeveledEnchant(Enchantment.LURE, Material.FISHING_ROD),
+        new OverLeveledEnchant(Enchantment.FROST_WALKER, Material.DIAMOND_BOOTS),
+        new OverLeveledEnchant(Enchantment.KNOCKBACK, Material.DIAMOND_SWORD),
+        new OverLeveledEnchant(Enchantment.PUNCH, Material.BOW)
     );
 
     private record NormalBook(Enchantment enchantment, int level, int price) {}

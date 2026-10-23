@@ -6315,6 +6315,7 @@ public class PersistenceUtils {
             obj.addProperty("chestSortSoundVolume", ap.getChestSortSoundVolume());
             obj.addProperty("jobsSoundVolume", ap.getJobsSoundVolume());
             obj.addProperty("expStoreSoundVolume", ap.getExpStoreSoundVolume());
+            obj.addProperty("infiniteLibraryCooldownEnd", ap.getInfiniteLibraryCooldownEnd());
             obj.addProperty("lowHealthSoundVolume", ap.getLowHealthSoundVolume());
             obj.addProperty("voiceChatSoundVolume", ap.getVoiceChatSoundVolume());
             obj.addProperty("interactiveChat", ap.isInteractiveChatEnabled());
@@ -8127,6 +8128,9 @@ public class PersistenceUtils {
                 if (obj.has("expStoreSoundVolume")) {
                     ap.setExpStoreSoundVolume(obj.get("expStoreSoundVolume").getAsInt());
                 }
+                if (obj.has("infiniteLibraryCooldownEnd")) {
+                    ap.setInfiniteLibraryCooldownEnd(obj.get("infiniteLibraryCooldownEnd").getAsLong());
+                }
                 if (obj.has("lowHealthSoundVolume")) {
                     ap.setLowHealthSoundVolume(obj.get("lowHealthSoundVolume").getAsInt());
                 }
@@ -8217,6 +8221,7 @@ public class PersistenceUtils {
         obj.addProperty("architectMode", ap.isInArchitectMode());
         obj.addProperty("isBarbarian", ap.isBarbarian());
         obj.addProperty("barbarianCooldownEnd", ap.getBarbarianCooldownEnd());
+        obj.addProperty("infiniteLibraryCooldownEnd", ap.getInfiniteLibraryCooldownEnd());
         obj.addProperty("reaperDisabled", ap.isReaperDisabled());
         obj.addProperty("serverTipsDisabled", ap.isServerTipsDisabled());
         obj.addProperty("sitDisabled", ap.isSitDisabled());
@@ -8371,6 +8376,9 @@ public class PersistenceUtils {
             }
             if (obj.has("barbarianCooldownEnd")) {
                 ap.setBarbarianCooldownEnd(obj.get("barbarianCooldownEnd").getAsLong());
+            }
+            if (obj.has("infiniteLibraryCooldownEnd")) {
+                ap.setInfiniteLibraryCooldownEnd(obj.get("infiniteLibraryCooldownEnd").getAsLong());
             }
             if (obj.has("reaperDisabled")) {
                 ap.setReaperDisabled(obj.get("reaperDisabled").getAsBoolean());

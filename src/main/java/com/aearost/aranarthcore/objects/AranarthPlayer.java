@@ -145,6 +145,7 @@ public class AranarthPlayer {
     private boolean jobDataLoaded = false;
     private boolean isBarbarian = false;
     private long barbarianCooldownEnd = 0;
+    private long infiniteLibraryCooldownEnd = 0;
     private String language = "en_US";
 
     public AranarthPlayer(String username) {
@@ -2083,6 +2084,14 @@ public class AranarthPlayer {
 
     public void setBarbarianCooldownEnd(long barbarianCooldownEnd) {
         this.barbarianCooldownEnd = barbarianCooldownEnd;
+    }
+
+    public long getInfiniteLibraryCooldownEnd() {
+        return infiniteLibraryCooldownEnd;
+    }
+
+    public void setInfiniteLibraryCooldownEnd(long infiniteLibraryCooldownEnd) {
+        this.infiniteLibraryCooldownEnd = infiniteLibraryCooldownEnd;
     }
 
     public boolean isReaperDisabled() {

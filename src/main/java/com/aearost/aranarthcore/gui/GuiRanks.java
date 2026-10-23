@@ -195,7 +195,6 @@ public class GuiRanks {
 		countLore.add(ChatUtils.translateToColor("&f&o- &6[&eC&6] &6&oDaggerVolley"));
 		countLore.add(Lang.getFor(player, "gui.ranks.count_bending1"));
 		countLore.add(Lang.getFor(player, "gui.ranks.perks"));
-		countLore.add(Lang.getFor(player, "gui.ranks.count_perk1"));
 		countLore.add(Lang.getFor(player, "gui.ranks.count_perk2"));
 		countLore.add(Lang.getFor(player, "gui.ranks.count_perk3"));
 		countLore.add(Lang.getFor(player, "gui.ranks.count_perk4"));

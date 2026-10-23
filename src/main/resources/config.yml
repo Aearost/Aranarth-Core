@@ -79,6 +79,53 @@ mcmmo:
     - 2500  # Rank 6
     - 5000  # Rank 7
     - 5000  # Rank 8+ (default)
+  # The Enchanting child skill (level = average of Alchemy and Repair).
+  # Every "min"/"max" pair scales linearly from the sub-skill's unlock level to level 1000.
+  enchanting:
+    bottled-knowledge:
+      unlock-level: 100
+      # Portion of the EXP spent that is stored in the bottle
+      min-ratio: 0.25
+      max-ratio: 0.75
+    arcane-recall:
+      unlock-level: 0
+      min-chance: 0.10
+      max-chance: 0.50
+      # Portion of the EXP spent on the enchantment that is refunded
+      min-refund: 0.10
+      max-refund: 0.50
+    arcane-ascension:
+      unlock-level: 250
+      min-chance: 0.025
+      max-chance: 0.25
+    purification:
+      unlock-level: 250
+      min-chance: 0.25
+      max-chance: 1.0
+      # Levels consumed per curse on the item
+      max-levels-per-curse: 10
+      min-levels-per-curse: 1
+    distilled-wisdom:
+      unlock-level: 0
+      # Multiplier applied to grindstone EXP
+      min-multiplier: 1.0
+      max-multiplier: 4.0
+      # Multiplier applied to the half of all collected EXP that is imbued into Essences, except Bottles o' Enchanting
+      min-essence-multiplier: 1.0
+      max-essence-multiplier: 2.0
+    infinite-library:
+      unlock-level: 0
+      min-duration-seconds: 2.5
+      max-duration-seconds: 10.0
+      cooldown-seconds: 240
+      lapis-per-roll: 8
+      # How long the ability stays readied before it is lowered
+      ready-seconds: 4
+    repair-xp:
+      # Repair XP per EXP level spent on an anvil (renaming alone gives none)
+      per-anvil-level: 150
+      # Repair XP per point of base grindstone EXP
+      per-grindstone-exp: 15
 
 players:
   # Number of seconds without movement before a player is marked AFK automatically.

@@ -1224,6 +1224,7 @@ public class AranarthCore extends JavaPlugin {
         new EnchanterLockoutListener(this);
         new OverLeveledAnvilListener(this);
         new EssenceImbueListener(this);
+        new EnchantingListener(this);
 
         // Multi-event listeners for single purpose
         new InvisibleItemFrameListener(this);
@@ -1520,6 +1521,8 @@ public class AranarthCore extends JavaPlugin {
         getCommand("mctop").setTabCompleter(new CommandMctopCompleter());
         getCommand("mcstats").setExecutor(new CommandMcstats());
         getCommand("mcstats").setTabCompleter(new CommandMcstatsCompleter());
+        getCommand("enchanting").setExecutor(new CommandEnchanting());
+        getCommand("enchanting").setTabCompleter(new CommandEnchantingCompleter());
         getCommand("mail").setExecutor(new CommandMail());
         getCommand("mail").setTabCompleter(new CommandMailCompleter());
         getCommand("map").setExecutor(new CommandMap());

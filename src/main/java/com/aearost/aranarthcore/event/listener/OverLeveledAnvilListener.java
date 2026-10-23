@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.EnchantingUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
@@ -18,30 +19,6 @@ import java.util.Map;
  * Corrects anvil results when over-leveled enchantments are applied.
  */
 public class OverLeveledAnvilListener implements Listener {
-
-    // Custom max levels that match WanderingTraderUtils.OVER_LEVELED_ENCHANTS
-    private static final Map<Enchantment, Integer> CUSTOM_MAX = new HashMap<>();
-
-    static {
-        CUSTOM_MAX.put(Enchantment.SHARPNESS, 6);
-        CUSTOM_MAX.put(Enchantment.EFFICIENCY, 6);
-        CUSTOM_MAX.put(Enchantment.FORTUNE, 4);
-        CUSTOM_MAX.put(Enchantment.PROTECTION, 5);
-        CUSTOM_MAX.put(Enchantment.FEATHER_FALLING, 5);
-        CUSTOM_MAX.put(Enchantment.LOOTING, 4);
-        CUSTOM_MAX.put(Enchantment.FIRE_ASPECT, 3);
-        CUSTOM_MAX.put(Enchantment.POWER, 6);
-        CUSTOM_MAX.put(Enchantment.UNBREAKING, 4);
-        CUSTOM_MAX.put(Enchantment.DEPTH_STRIDER, 4);
-        CUSTOM_MAX.put(Enchantment.RESPIRATION, 4);
-        CUSTOM_MAX.put(Enchantment.SWIFT_SNEAK, 4);
-        CUSTOM_MAX.put(Enchantment.SOUL_SPEED, 4);
-        CUSTOM_MAX.put(Enchantment.LUCK_OF_THE_SEA, 4);
-        CUSTOM_MAX.put(Enchantment.LURE, 4);
-        CUSTOM_MAX.put(Enchantment.FROST_WALKER, 3);
-        CUSTOM_MAX.put(Enchantment.KNOCKBACK, 3);
-        CUSTOM_MAX.put(Enchantment.PUNCH, 3);
-    }
 
     public OverLeveledAnvilListener(AranarthCore plugin) {
         Bukkit.getPluginManager().registerEvents(this, plugin);
@@ -70,17 +47,20 @@ public class OverLeveledAnvilListener implements Listener {
             int leftLevel = expected.getOrDefault(ench, 0);
 
             int combined;
-            if (leftLevel == rightLevel) {
+            // Equal levels only combine upwards below the vanilla max, so over-leveled enchants can only come from their source
+            if (leftLevel == rightLevel && leftLevel < ench.getMaxLevel()) {
                 combined = leftLevel + 1;
             } else {
                 combined = Math.max(leftLevel, rightLevel);
             }
-            // Cap at our custom max (or vanilla max for enchants not in our list)
-            int max = CUSTOM_MAX.getOrDefault(ench, ench.getMaxLevel());
+            // Cap at the over-leveled max, without ever lowering a level that is already on an input
+            int max = Math.max(EnchantingUtils.getOverLeveledMax(ench), Math.max(leftLevel, rightLevel));
             expected.put(ench, Math.min(combined, max));
         }
 
         // Apply corrections for any enchant whose expected level exceeds vanilla max
+        // Enchants missing from the result were rejected by vanilla, such as conflicting or unsupported enchants
+        Map<Enchantment, Integer> resultEnchants = getEnchants(result);
         ItemStack fixed = result.clone();
         ItemMeta meta = fixed.getItemMeta();
 
@@ -88,7 +68,7 @@ public class OverLeveledAnvilListener implements Listener {
         for (Map.Entry<Enchantment, Integer> entry : expected.entrySet()) {
             Enchantment ench = entry.getKey();
             int expectedLevel = entry.getValue();
-            if (expectedLevel <= ench.getMaxLevel()) continue;
+            if (expectedLevel <= ench.getMaxLevel() || !resultEnchants.containsKey(ench)) continue;
 
             if (meta instanceof EnchantmentStorageMeta bookMeta) {
                 bookMeta.addStoredEnchant(ench, expectedLevel, true);

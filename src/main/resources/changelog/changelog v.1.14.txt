@@ -9,6 +9,8 @@ World & Events
 [~] Fixed a creative crash exploit where nested containers could be created with ctrl + pick block and burned to spawn hundreds of thousands of items
 [~] Fixed light blocks not changing brightness when right-clicked by non-op players in creative
 [+] Plentiful pickaxes now break terracotta
+[~] Wandering Enchanter over-leveled enchantments are now 2 levels above the vanilla maximum
+[-] Removed Depth Strider from Wandering Enchanter
 
 Bending & Abilities
 [~] Fixed AngeredSpirits and other effect abilities respecting dominion relations in the arena
@@ -29,6 +31,7 @@ Dominion
 [+] Added a customer hex option for /d mapcolor
 [+] /d resources now shows the claimable resource amount in its title
 [+] Villager cure discounts are now shared with players who have villager permissions in the Dominion  land the villager is in
+[+] Dominion plots are now shown on the Squaremap as their own layer, displaying the plot and Dominion name when hovered
 
 Aranarthium, Items & Crafting
 [+] Implemented Essence Imbuing, allowing players to create Essence items and imbue them with XP to craft the various essences
@@ -42,6 +45,11 @@ Aranarthium, Items & Crafting
 [+] Soulbound Aranarthium armour now has Mending by default
 [+] Soulbound Aranarthium now pulls in XP orbs from a greater range
 [+] mcMMO Salvage can now extract essences, blank Essences and Aranarthium Ingots based on Salvage level
+[+] Added the mcMMO Enchanting sub-skill
+[~] Storing EXP in bottles is now unlocked at Enchanting level 100 instead of Count
+[~] EXP bottle storing effectiveness is now based on Enchanting level
+[+] Anvils and Grindstones now give mcMMO Repair XP
+[~] Fixed anvils lowering enchantments that are above the vanilla maximum
 
 Economy, Jobs & Quests
 [~] Renamed /marketprice to /marketvalue (alias /mv)
