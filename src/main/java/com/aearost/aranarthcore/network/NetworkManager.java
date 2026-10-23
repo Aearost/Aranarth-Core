@@ -112,6 +112,7 @@ public class NetworkManager {
     public static final String CH_INVSEE_UPDATE = "aranarth:invsee_update";
     public static final String CH_INVSEE_UNWATCH = "aranarth:invsee_unwatch";
     public static final String CH_RANK_UPDATE = "aranarth:rank_update";
+    public static final String CH_PERK_UPDATE = "aranarth:perk_update";
     public static final String CH_MARKET_UPDATE = "aranarth:market_update";
     public static final String CH_PERM_RELOAD = "aranarth:perm_reload";
     public static final String CH_CONFIG_RELOAD = "aranarth:config_reload";
@@ -578,6 +579,7 @@ public class NetworkManager {
             case CH_INVSEE_UPDATE -> handleInvseeUpdate(json);
             case CH_INVSEE_UNWATCH -> handleInvseeUnwatch(json);
             case CH_RANK_UPDATE -> handleRankUpdate(json);
+            case CH_PERK_UPDATE -> handlePerkUpdate(json);
             case CH_MARKET_UPDATE -> handleMarketUpdate(json);
             case CH_PERM_RELOAD -> handlePermReload(json);
             case CH_CONFIG_RELOAD -> handleConfigReload(json);
@@ -1085,6 +1087,18 @@ public class NetworkManager {
         json.addProperty("saintRank", saintRank);
         json.addProperty("architectRank", architectRank);
         publish(CH_RANK_UPDATE, json);
+    }
+
+    /**
+     * Notifies other servers that a player's perks have changed so their in-memory copy is never
+     * stale, regardless of which server the player is on or logs into next.
+     */
+    public void publishPerkUpdate(UUID uuid, String perks) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", uuid.toString());
+        json.addProperty("perks", perks);
+        publish(CH_PERK_UPDATE, json);
     }
 
     /**
@@ -2461,6 +2475,37 @@ public class NetworkManager {
         String originServer = json.get("server").getAsString();
         if (originServer.equals(thisServer)) return;
         serverLastSeen.put(originServer, System.currentTimeMillis());
+    }
+
+    private void handlePerkUpdate(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        HashMap<Perk, Integer> perks = PersistenceUtils.deserializePerks(json.get("perks").getAsString());
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+            AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+            if (ap == null) {
+                return;
+            }
+            boolean hadCompressor = ap.getPerks() != null && ap.getPerks().getOrDefault(Perk.COMPRESSOR, 0) == 1;
+            ap.setPerks(perks);
+            AranarthUtils.setPlayer(uuid, ap);
+
+            // Enables all materials to be compressed by default
+            if (!hadCompressor && perks.getOrDefault(Perk.COMPRESSOR, 0) == 1) {
+                AranarthUtils.compressAllMaterials(uuid);
+            }
+
+            // This server is authoritative for the player, so it saves their row
+            Player localPlayer = Bukkit.getPlayer(uuid);
+            if (localPlayer != null) {
+                PermissionUtils.evaluatePlayerPermissions(localPlayer);
+                PersistenceUtils.saveAranarthPlayerImmediately(uuid);
+            }
+        });
     }
 
     private void handleRankUpdate(JsonObject json) {

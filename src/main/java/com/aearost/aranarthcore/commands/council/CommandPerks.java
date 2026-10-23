@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands.council;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Perk;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -8,6 +9,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PermissionUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -79,6 +81,7 @@ public class CommandPerks {
 
                                 aranarthPlayer.setPerks(perks);
                                 AranarthUtils.setPlayer(uuid, aranarthPlayer);
+                                syncPerks(uuid, aranarthPlayer);
                                 if (Bukkit.getOfflinePlayer(uuid).isOnline()) {
                                     Player player = Bukkit.getPlayer(uuid);
                                     PermissionUtils.evaluatePlayerPermissions(player);
@@ -135,6 +138,7 @@ public class CommandPerks {
 
                             aranarthPlayer.setPerks(perks);
                             AranarthUtils.setPlayer(uuid, aranarthPlayer);
+                            syncPerks(uuid, aranarthPlayer);
 
                             // Enables all materials to be compressed by default
                             if (args[2].equalsIgnoreCase("compressor") && args[3].equals("1")) {
@@ -174,6 +178,7 @@ public class CommandPerks {
                             perks.put(Perk.HOMES, Integer.parseInt(args[3]));
                             aranarthPlayer.setPerks(perks);
                             AranarthUtils.setPlayer(uuid, aranarthPlayer);
+                            syncPerks(uuid, aranarthPlayer);
                             if (Bukkit.getOfflinePlayer(uuid).isOnline()) {
                                 Player player = Bukkit.getPlayer(uuid);
                                 PermissionUtils.evaluatePlayerPermissions(player);
@@ -197,6 +202,7 @@ public class CommandPerks {
                         perks.put(Perk.DISCORD, Integer.parseInt(args[3]));
                         aranarthPlayer.setPerks(perks);
                         AranarthUtils.setPlayer(uuid, aranarthPlayer);
+                        syncPerks(uuid, aranarthPlayer);
 
                         DiscordUtils.updateDiscordRole(Bukkit.getOfflinePlayer(uuid), aranarthPlayer);
 
@@ -225,6 +231,20 @@ public class CommandPerks {
                 return true;
             }
         }
+    }
+
+    /**
+     * Sends the player's perks to the other server and persists them, so the change is not lost
+     * when the player is online elsewhere or offline.
+     *
+     * @param uuid           The UUID of the player whose perks changed.
+     * @param aranarthPlayer The player's AranarthPlayer.
+     */
+    private static void syncPerks(UUID uuid, AranarthPlayer aranarthPlayer) {
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishPerkUpdate(uuid, PersistenceUtils.serializePerks(aranarthPlayer.getPerks()));
+        }
+        PersistenceUtils.persistPerks(uuid);
     }
 
     private static boolean isValidPerk(String perk) {

@@ -474,18 +474,7 @@ public class PersistenceUtils {
         String muteEndDate = aranarthPlayer.getMuteEndDate();
         String particles = aranarthPlayer.getParticleNum() + "";
 
-        String perks = "";
-        for (int i = 0; i < Perk.values().length; i++) {
-            Perk perk = Perk.values()[i];
-            if (aranarthPlayer.getPerks().get(perk) == null) {
-                perks += 0;
-            } else {
-                perks += aranarthPlayer.getPerks().get(perk);
-            }
-            if (i < Perk.values().length - 1) {
-                perks += "*";
-            }
-        }
+        String perks = serializePerks(aranarthPlayer.getPerks());
 
         long saintExpireDate = aranarthPlayer.getSaintExpireDate();
         String isCompressingItems = "0";
@@ -5358,6 +5347,69 @@ public class PersistenceUtils {
     }
 
     /**
+     * Serializes a player's perks into the star-delimited format stored in field 17 of their row.
+     *
+     * @param perks The player's perks.
+     * @return The serialized perks.
+     */
+    public static String serializePerks(HashMap<Perk, Integer> perks) {
+        StringBuilder serialized = new StringBuilder();
+        for (int i = 0; i < Perk.values().length; i++) {
+            Integer value = perks == null ? null : perks.get(Perk.values()[i]);
+            serialized.append(value == null ? 0 : value);
+            if (i < Perk.values().length - 1) {
+                serialized.append("*");
+            }
+        }
+        return serialized.toString();
+    }
+
+    /**
+     * Parses perks from the star-delimited format stored in field 17 of a player's row.
+     *
+     * @param serialized The serialized perks.
+     * @return The player's perks.
+     */
+    public static HashMap<Perk, Integer> deserializePerks(String serialized) {
+        HashMap<Perk, Integer> perks = new HashMap<>();
+        if (serialized == null || serialized.isEmpty()) {
+            return perks;
+        }
+        String[] perksValues = serialized.split("\\*");
+        Perk[] perkArray = Perk.values();
+        for (int i = 0; i < perkArray.length && i < perksValues.length; i++) {
+            perks.put(perkArray[i], Integer.parseInt(perksValues[i]));
+        }
+        return perks;
+    }
+
+    /**
+     * Persists a perk change.
+     *
+     * @param uuid The UUID of the player whose perks changed.
+     */
+    public static void persistPerks(UUID uuid) {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        if (Bukkit.getPlayer(uuid) != null) {
+            saveAranarthPlayerImmediately(uuid);
+            return;
+        }
+        // The other server saves it when the perk update arrives there
+        if (NetworkManager.isActive() && NetworkManager.getInstance().getRemotePlayer(uuid) != null) {
+            return;
+        }
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+        if (aranarthPlayer == null) {
+            return;
+        }
+        String perks = serializePerks(aranarthPlayer.getPerks());
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
+                DatabaseManager.getInstance().setRawPlayerField(uuid, 17, perks));
+    }
+
+    /**
      * Reloads a single player's AranarthPlayer data from MySQL, replacing the in-memory entry.
      * Blocks briefly for a single-row DB read. Call on the main thread only.
      * Used when a player arrives via cross-server transfer to pick up data saved by the source server.
@@ -7466,14 +7518,7 @@ public class PersistenceUtils {
         String muteEndDate = fields.length > 15 ? fields[15] : "none";
         int particles = fields.length > 16 ? Integer.parseInt(fields[16]) : 0;
 
-        HashMap<Perk, Integer> perks = new HashMap<>();
-        if (fields.length > 17 && !fields[17].isEmpty()) {
-            String[] perksValues = fields[17].split("\\*");
-            Perk[] perkArray = Perk.values();
-            for (int i = 0; i < perkArray.length && i < perksValues.length; i++) {
-                perks.put(perkArray[i], Integer.parseInt(perksValues[i]));
-            }
-        }
+        HashMap<Perk, Integer> perks = deserializePerks(fields.length > 17 ? fields[17] : "");
 
         long saintExpireDate = fields.length > 18 ? Long.parseLong(fields[18]) : 0L;
         boolean isCompressingItems = fields.length > 19 && fields[19].equals("1");

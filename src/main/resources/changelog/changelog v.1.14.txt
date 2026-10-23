@@ -92,6 +92,7 @@ Quality of Life
 [~] Fixed sent mail preview not being color formatted for lang files
 [~] Fixed color codes in blacklist preset names displaying as literals
 [+] Added /ac architect for Architects and Council, allowing you to bypass the build restrictions
+[~] Perk changes are now synced cross-server and persisted when the player is offline or on the other server
 
 Cross-server & Technical
 [~] The previous /creative is now available in the SMP server via /smpcreative or /smpc as an alias
