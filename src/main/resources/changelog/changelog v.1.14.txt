@@ -31,7 +31,7 @@ Dominion
 [+] Added a customer hex option for /d mapcolor
 [+] /d resources now shows the claimable resource amount in its title
 [+] Villager cure discounts are now shared with players who have villager permissions in the Dominion  land the villager is in
-[+] Dominion plots are now shown on the Squaremap as their own layer, displaying the plot and Dominion name when hovered
+[+] Dominion plots are now shown on the /map and /smpmap as their own layers
 
 Aranarthium, Items & Crafting
 [+] Implemented Essence Imbuing, allowing players to create Essence items and imbue them with XP to craft the various essences
