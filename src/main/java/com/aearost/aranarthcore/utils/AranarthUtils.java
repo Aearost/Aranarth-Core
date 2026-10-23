@@ -1545,8 +1545,16 @@ public class AranarthUtils {
      * @return The arrow if it matches.
      */
     public static ItemStack verifyIsSameArrow(ItemStack launchedArrow, ItemStack quiverArrow) {
+        // Firework rockets must match flight duration and explosion effects
+        if (launchedArrow.getType() == Material.FIREWORK_ROCKET || quiverArrow.getType() == Material.FIREWORK_ROCKET) {
+            if (launchedArrow.isSimilar(quiverArrow)) {
+                return launchedArrow;
+            } else {
+                return null;
+            }
+        }
         // Basic or special arrow
-        if (launchedArrow.getType() == Material.ARROW) {
+        else if (launchedArrow.getType() == Material.ARROW) {
             if (quiverArrow.getType() == Material.ARROW) {
                 if (launchedArrow.hasItemMeta()) {
                     if (quiverArrow.hasItemMeta()) {

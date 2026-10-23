@@ -12,6 +12,7 @@ import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -21,7 +22,7 @@ import java.util.Objects;
 import static com.aearost.aranarthcore.objects.CustomKeys.ARROW;
 
 /**
- * Prevents players from adding non-arrow items to the arrows inventory.
+ * Prevents players from adding non-arrow and non-firework items to the arrows inventory.
  */
 public class GuiQuiverClick {
 	public void execute(InventoryClickEvent e) {
@@ -73,8 +74,8 @@ public class GuiQuiverClick {
 					ItemStack[] playerInventory = player.getInventory().getContents();
 					for (int i = 0; i < playerInventory.length; i++) {
 						if (playerInventory[i] != null) {
-							// Gets the first arrow in the player's inventory
-							if (isItemArrow(playerInventory[i])) {
+							// Gets the first arrow (or firework rocket if one was selected) in the player's inventory
+							if (isSameCategory(playerInventory[i], e.getCurrentItem())) {
 								ItemStack selectedArrow = e.getCurrentItem();
 								AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 								List<ItemStack> playerArrows = aranarthPlayer.getArrows();
@@ -90,7 +91,10 @@ public class GuiQuiverClick {
 											// Updates inventory stack with what's in the quiver
 											player.getInventory().setItem(i, stackFromQuiver);
 
-											if (stackFromQuiver.hasItemMeta()) {
+											if (stackFromQuiver.getItemMeta() instanceof FireworkMeta fireworkMeta) {
+												player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arrow.now_firework", "duration", fireworkMeta.getPower())));
+												player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
+											} else if (stackFromQuiver.hasItemMeta()) {
 												// Tipped arrows
 												if (stackFromQuiver.getItemMeta() instanceof PotionMeta meta) {
 													// If mcMMO arrow
@@ -170,7 +174,10 @@ public class GuiQuiverClick {
 									playerArrows.set(j, null);
 									player.getInventory().setItem(freeSlot, stackFromQuiver);
 
-									if (stackFromQuiver.hasItemMeta()) {
+									if (stackFromQuiver.getItemMeta() instanceof FireworkMeta fireworkMeta) {
+										player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arrow.now_firework", "duration", fireworkMeta.getPower())));
+										player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
+									} else if (stackFromQuiver.hasItemMeta()) {
 										if (stackFromQuiver.getItemMeta() instanceof PotionMeta meta) {
 											if (meta.hasCustomEffects()) {
 												String arrowName = meta.getCustomEffects().getFirst().getType().getKey().getKey();
@@ -233,6 +240,23 @@ public class GuiQuiverClick {
 	private boolean isItemArrow(ItemStack item) {
 		return (item.getType() == Material.ARROW
 				|| item.getType() == Material.TIPPED_ARROW
-				|| item.getType() == Material.SPECTRAL_ARROW);
+				|| item.getType() == Material.SPECTRAL_ARROW
+				|| item.getType() == Material.FIREWORK_ROCKET);
+	}
+
+	/**
+	 * Determines whether the item is a firework rocket when a firework rocket was selected, otherwise an arrow.
+	 * @param item The item in the player's inventory.
+	 * @param selected The item selected in the GUI.
+	 * @return Whether the item is in the same category as the selected item.
+	 */
+	private boolean isSameCategory(ItemStack item, ItemStack selected) {
+		if (!isItemArrow(item)) {
+			return false;
+		}
+		if (selected == null) {
+			return true;
+		}
+		return (item.getType() == Material.FIREWORK_ROCKET) == (selected.getType() == Material.FIREWORK_ROCKET);
 	}
 }

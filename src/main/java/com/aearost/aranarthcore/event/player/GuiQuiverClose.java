@@ -11,7 +11,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.*;
 
 /**
- * Adds the input arrows to the player's quiver inventory.
+ * Adds the input arrows and firework rockets to the player's quiver inventory.
  */
 public class GuiQuiverClose {
 	public void execute(InventoryCloseEvent e) {
@@ -22,7 +22,7 @@ public class GuiQuiverClose {
 
 			List<ItemStack> inventoryArrows = new LinkedList<>(Arrays.asList(inventory.getContents()));
 
-			// Only arrows can be stored, anything else goes back to the player
+			// Only arrows and firework rockets can be stored, anything else goes back to the player
 			for (int i = 0; i < inventoryArrows.size(); i++) {
 				ItemStack item = inventoryArrows.get(i);
 				if (item == null || item.getType() == Material.BLACK_STAINED_GLASS_PANE || isArrow(item)) {
@@ -44,6 +44,7 @@ public class GuiQuiverClose {
 	private boolean isArrow(ItemStack item) {
 		return item.getType() == Material.ARROW
 				|| item.getType() == Material.TIPPED_ARROW
-				|| item.getType() == Material.SPECTRAL_ARROW;
+				|| item.getType() == Material.SPECTRAL_ARROW
+				|| item.getType() == Material.FIREWORK_ROCKET;
 	}
 }

@@ -93,6 +93,7 @@ Quality of Life
 [~] Fixed color codes in blacklist preset names displaying as literals
 [+] Added /ac architect for Architects and Council, allowing you to bypass the build restrictions
 [~] Perk changes are now synced cross-server and persisted when the player is offline or on the other server
+[+] Firework rockets can now be stored in the Quiver and are refilled when fired from a crossbow or used to boost elytra flight
 
 Cross-server & Technical
 [~] The previous /creative is now available in the SMP server via /smpcreative or /smpc as an alias

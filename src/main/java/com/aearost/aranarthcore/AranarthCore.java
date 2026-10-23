@@ -1225,6 +1225,7 @@ public class AranarthCore extends JavaPlugin {
         new EntityTargetEventListener(this);
         new EntityDeathEventListener(this);
         new EntityShootBowEventListener(this);
+        new PlayerElytraBoostEventListener(this);
         new BlockFormEventListener(this);
         new BlockPhysicsEventListener(this);
         new ProjectileHitEventListener(this);
