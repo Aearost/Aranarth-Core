@@ -81,6 +81,7 @@ Chat, UI & Sounds
 [~] Fixed "You are no longer AFK" displaying without first going AFK, such as when being pushed by mobs right as the AFK timer ran out
 [~] Fixed switching servers resetting your streak of chat unscrambler wins
 [~] Fixed gradient chat messages containing # or & displaying in white on the other server
+[+] Added the nickname and invisiblearmor perks to the tab completion of /ac perks
 
 Quality of Life
 [+] Added command preview lore to /tables GUI items
