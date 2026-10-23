@@ -647,7 +647,8 @@
       "PowerShell($utf8 = New-Object System.Text.UTF8Encoding\\($false\\); foreach \\($p in @\\(\\(Resolve-Path \"src/main/resources/lang/es_ES.properties\"\\).Path, \"C:\\\\Users\\\\liamh\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-liamh-IdeaProjects-AranarthCore\\\\9bf7cdc9-b656-49ed-a2f6-ce778b42ee57\\\\scratchpad\\\\es_07.properties\"\\)\\) { $t = [IO.File]::ReadAllText\\($p, $utf8\\); $t = $t.Replace\\('gui.votetop.title_all=Top Voters', 'gui.votetop.title_all=Top Votantes'\\).Replace\\('gui.votetop.title_year=Top Voters Year {year}', 'gui.votetop.title_year=Top Votantes Año {year}'\\).Replace\\('gui.votetop.title_month=Top Voters Month {month}-{year}', 'gui.votetop.title_month=Top Votantes Mes {month}-{year}'\\); [IO.File]::WriteAllText\\($p, $t, $utf8\\) }; Select-String -Path src/main/resources/lang/es_ES.properties -Encoding UTF8 -Pattern '^gui\\\\.votetop\\\\.title' | ForEach-Object { $_.Line })",
       "PowerShell($mvn = Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName; & $mvn -q -o compile; \"EXIT $LASTEXITCODE\")",
       "Bash(ssh -o BatchMode=yes -o ConnectTimeout=15 aranarth \"pm2 describe aranarth-bot | head -40; ls -la ~/.pm2/logs/\")",
-      "Bash(ssh *)"
+      "Bash(ssh *)",
+      "Bash(echo \"exit=$?\")"
     ]
   }
 }

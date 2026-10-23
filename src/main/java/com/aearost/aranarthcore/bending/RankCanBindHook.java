@@ -93,6 +93,10 @@ public class RankCanBindHook implements CanBindHook {
         if (player == null) {
             return Optional.of(false);
         }
+        // All rank-locked abilities are available in the arena, blood and flight are still blocked by their permissions
+        if (player.getWorld().getName().equalsIgnoreCase("arena")) {
+            return Optional.empty();
+        }
         int rank = AranarthUtils.getPlayer(player.getUniqueId()).getRank();
         return rank >= minRank ? Optional.empty() : Optional.of(false);
     }
