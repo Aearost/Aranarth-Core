@@ -133,8 +133,45 @@ public class DatabaseManager {
             throw new RuntimeException("MySQL connectivity test failed: " + e.getMessage(), e);
         }
 
+        renameLegacyTables();
         createTables();
         migrateSchema();
+    }
+
+    /**
+     * Renames tables whose feature was renamed, keeping their data.
+     */
+    private void renameLegacyTables() {
+        String[][] renames = {
+                {"server_dominion_plots", "server_dominion_regions"}
+        };
+        try (Connection conn = dataSource.getConnection(); Statement stmt = conn.createStatement()) {
+            for (String[] rename : renames) {
+                try {
+                    if (!tableExists(conn, rename[0])) {
+                        continue;
+                    }
+                    if (tableExists(conn, rename[1])) {
+                        Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Both " + rename[0] + " and " + rename[1]
+                                + " exist, so " + rename[0] + " was not renamed. Its data is not being used");
+                        continue;
+                    }
+                    stmt.execute("RENAME TABLE " + rename[0] + " TO " + rename[1]);
+                    Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[DB] Renamed table " + rename[0] + " to " + rename[1]);
+                } catch (SQLException e) {
+                    // The other server may have renamed it at the same moment
+                    Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to rename table " + rename[0] + ": " + e.getMessage());
+                }
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Table rename error: " + e.getMessage());
+        }
+    }
+
+    private boolean tableExists(Connection conn, String table) throws SQLException {
+        try (ResultSet rs = conn.getMetaData().getTables(conn.getCatalog(), null, table, new String[]{"TABLE"})) {
+            return rs.next();
+        }
     }
 
     private void doShutdown() {
@@ -338,7 +375,7 @@ public class DatabaseManager {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
                 """
-            CREATE TABLE IF NOT EXISTS server_dominion_plots (
+            CREATE TABLE IF NOT EXISTS server_dominion_regions (
                 dominion_id VARCHAR(36) PRIMARY KEY,
                 data_json MEDIUMTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -2309,29 +2346,29 @@ public class DatabaseManager {
         return result;
     }
 
-    public void deleteDominionPlots(UUID dominionId) {
-        String sql = "DELETE FROM server_dominion_plots WHERE dominion_id = ?";
+    public void deleteDominionRegions(UUID dominionId) {
+        String sql = "DELETE FROM server_dominion_regions WHERE dominion_id = ?";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, dominionId.toString());
             ps.executeUpdate();
         } catch (SQLException e) {
-            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to delete dominion plots for " + dominionId + ": " + e.getMessage());
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to delete dominion regions for " + dominionId + ": " + e.getMessage());
         }
     }
 
-    public void saveDominionPlots(UUID dominionId, String dataJson) {
-        String sql = "INSERT INTO server_dominion_plots (dominion_id, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
+    public void saveDominionRegions(UUID dominionId, String dataJson) {
+        String sql = "INSERT INTO server_dominion_regions (dominion_id, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, dominionId.toString());
             ps.setString(2, dataJson);
             ps.executeUpdate();
         } catch (SQLException e) {
-            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save dominion plots for " + dominionId + ": " + e.getMessage());
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save dominion regions for " + dominionId + ": " + e.getMessage());
         }
     }
 
-    public String loadDominionPlotsById(UUID dominionId) {
-        String sql = "SELECT data_json FROM server_dominion_plots WHERE dominion_id = ?";
+    public String loadDominionRegionsById(UUID dominionId) {
+        String sql = "SELECT data_json FROM server_dominion_regions WHERE dominion_id = ?";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, dominionId.toString());
             try (ResultSet rs = ps.executeQuery()) {
@@ -2340,13 +2377,13 @@ public class DatabaseManager {
                 }
             }
         } catch (SQLException e) {
-            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load plots for dominion " + dominionId + ": " + e.getMessage());
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load regions for dominion " + dominionId + ": " + e.getMessage());
         }
         return null;
     }
 
-    public Map<UUID, String> loadAllDominionPlots() {
-        String sql = "SELECT dominion_id, data_json FROM server_dominion_plots";
+    public Map<UUID, String> loadAllDominionRegions() {
+        String sql = "SELECT dominion_id, data_json FROM server_dominion_regions";
         Map<UUID, String> result = new HashMap<>();
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -2354,7 +2391,7 @@ public class DatabaseManager {
                 result.put(UUID.fromString(rs.getString("dominion_id")), rs.getString("data_json"));
             }
         } catch (SQLException e) {
-            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all dominion plots: " + e.getMessage());
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all dominion regions: " + e.getMessage());
         }
         return result;
     }

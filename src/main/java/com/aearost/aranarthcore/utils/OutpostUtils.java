@@ -65,6 +65,13 @@ public class OutpostUtils {
      */
     public static void disbandOutpost(Dominion dominion, Outpost outpost) {
         DefenderUtils.teleportOutpostDefendersToDominion(dominion, outpost.getId());
+        boolean releasedRegionChunk = false;
+        for (Chunk chunk : outpost.getChunks()) {
+            releasedRegionChunk |= DominionUtils.releaseRegionChunk(dominion, chunk);
+        }
+        if (releasedRegionChunk) {
+            DominionUtils.updateDominion(dominion);
+        }
         outpostById.remove(outpost.getId());
         chunkKeyToOutpost.entrySet().removeIf(e -> e.getValue().getId().equals(outpost.getId()));
         List<Outpost> list = dominionToOutposts.get(dominion.getId());
@@ -307,6 +314,7 @@ public class OutpostUtils {
         }
         outpost.getChunks().remove(chunk);
         chunkKeyToOutpost.remove(getChunkKey(chunk));
+        DominionUtils.releaseRegionChunk(dominion, chunk);
         DominionUtils.updateDominion(dominion);
         DominionUtils.refreshOutpostBiomeCache(outpost);
 
@@ -355,6 +363,9 @@ public class OutpostUtils {
             AranarthUtils.removeLocksInChunk(toRemove);
             chunks.remove(toRemove);
             chunkKeyToOutpost.remove(getChunkKey(toRemove));
+            if (DominionUtils.releaseRegionChunk(dominion, toRemove)) {
+                DominionUtils.updateDominion(dominion);
+            }
             updateOutpost(outpost);
             DominionUtils.refreshOutpostBiomeCache(outpost);
             notifyMembers(dominion, "&cA chunk has been lost from outpost &e" + outpost.getName()

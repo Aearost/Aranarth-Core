@@ -10,6 +10,7 @@ import com.aearost.aranarthcore.gui.GuiShopLocation;
 import com.aearost.aranarthcore.event.player.AfkCancelByInteract;
 import com.aearost.aranarthcore.event.player.GuiDominionResourcesClick;
 import com.aearost.aranarthcore.gui.GuiDominionPlayerPermissions;
+import com.aearost.aranarthcore.gui.GuiDominionRegions;
 import com.aearost.aranarthcore.gui.GuiTrade;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
@@ -169,6 +170,13 @@ public class PlayerChatListener implements Listener {
         if (GuiDominionPlayerPermissions.isAwaitingSearch(player.getUniqueId())) {
             e.setCancelled(true);
             GuiDominionPlayerPermissions.handleSearchInput(player, message);
+            return;
+        }
+
+        // If the player is typing a hex code for a region's map color, handle it first
+        if (GuiDominionRegions.isAwaitingHex(player.getUniqueId())) {
+            e.setCancelled(true);
+            GuiDominionRegions.handleHexInput(player, message);
             return;
         }
 

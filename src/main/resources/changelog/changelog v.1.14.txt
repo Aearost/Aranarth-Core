@@ -31,7 +31,17 @@ Dominion
 [+] Added a customer hex option for /d mapcolor
 [+] /d resources now shows the claimable resource amount in its title
 [+] Villager cure discounts are now shared with players who have villager permissions in the Dominion  land the villager is in
-[+] Dominion plots are now shown on the /map and /smpmap as their own layers
+[~] Dominion plots have been renamed to regions, and /d plot is now /d region
+[+] Dominion regions are now shown on the /map and /smpmap as their own layers
+[+] Added a Regions GUI to /d (and /d region) to view regions, manage their members and delete them
+[+] Added /d autoclaim region <name> to automatically add chunks to a region as you walk through them
+[+] Region names can now be multiple words
+[+] Added /d region public and /d region private, where public regions use the normal Dominion permissions and private regions can only be used by their members
+[~] Entering a region now only shows the region's name
+[~] Fixed region changes not syncing between servers, and deleted regions returning after a restart
+[~] Renamed dominion plots to dominion regions
+[+] Added a regions GUI to /d for managing regions
+[~] Re-arranged the /d GUI with the new additions in consideration
 
 Aranarthium, Items & Crafting
 [+] Implemented Essence Imbuing, allowing players to create Essence items and imbue them with XP to craft the various essences

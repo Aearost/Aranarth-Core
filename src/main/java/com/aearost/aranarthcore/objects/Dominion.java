@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Biome;
 import org.bukkit.inventory.ItemStack;
 
@@ -65,8 +66,11 @@ public class Dominion {
 	private int boughtOutpostChunks;
 	private int storedChunkCount = -1; // set when chunks can't be loaded (cross-server stub)
 	private Set<Biome> cachedBiomes = new HashSet<>();
-	private Map<String, String> plotChunkNames;  // chunk key → plot name
-	private Map<String, Set<UUID>> plotMembers;  // plot name → member UUIDs
+	private Map<String, String> regionChunkNames;  // chunk key → region name
+	private Map<String, Set<UUID>> regionMembers;  // region name → member UUIDs
+	private Set<String> publicRegions;             // names of regions that use the normal Dominion permissions
+	private Map<String, String> regionMapColors;   // region name → map color (&x or &#RRGGBB), absent = Dominion's color
+	private Map<String, Material> regionIcons;     // region name → GUI icon, absent = grass block
 	// A null entry for a permission means it is inherited from the player's rank or relation
 	private Map<UUID, Map<DominionPermission, Boolean>> playerPermissionOverrides;
 
@@ -95,8 +99,11 @@ public class Dominion {
 		this.members = members;
 		this.memberRanks = memberRanks != null ? memberRanks : new HashMap<>();
 		this.dominionPermissions = dominionPermissions != null ? dominionPermissions : DominionPermissions.createDefaults();
-		this.plotChunkNames = new HashMap<>();
-		this.plotMembers = new HashMap<>();
+		this.regionChunkNames = new HashMap<>();
+		this.regionMembers = new HashMap<>();
+		this.publicRegions = new HashSet<>();
+		this.regionMapColors = new HashMap<>();
+		this.regionIcons = new HashMap<>();
 		this.playerPermissionOverrides = new HashMap<>();
 		this.chunks = chunks;
 		// worldName may be stored in "smp:<name>" form to distinguish SMP worlds from Survival worlds.
@@ -286,37 +293,103 @@ public class Dominion {
 	}
 
 	/**
-	 * Provides the chunk-to-plot-name map (chunk key → plot name).
+	 * Provides the chunk-to-region-name map (chunk key → region name).
 	 */
-	public Map<String, String> getPlotChunkNames() {
-		if (plotChunkNames == null) {
-			plotChunkNames = new HashMap<>();
+	public Map<String, String> getRegionChunkNames() {
+		if (regionChunkNames == null) {
+			regionChunkNames = new HashMap<>();
 		}
-		return plotChunkNames;
+		return regionChunkNames;
 	}
 
 	/**
-	 * Replaces the chunk-to-plot-name map.
+	 * Replaces the chunk-to-region-name map.
 	 */
-	public void setPlotChunkNames(Map<String, String> plotChunkNames) {
-		this.plotChunkNames = plotChunkNames != null ? plotChunkNames : new HashMap<>();
+	public void setRegionChunkNames(Map<String, String> regionChunkNames) {
+		this.regionChunkNames = regionChunkNames != null ? regionChunkNames : new HashMap<>();
 	}
 
 	/**
-	 * Provides the plot-name-to-members map (plot name → member UUIDs).
+	 * Provides the region-name-to-members map (region name → member UUIDs).
 	 */
-	public Map<String, Set<UUID>> getPlotMembers() {
-		if (plotMembers == null) {
-			plotMembers = new HashMap<>();
+	public Map<String, Set<UUID>> getRegionMembers() {
+		if (regionMembers == null) {
+			regionMembers = new HashMap<>();
 		}
-		return plotMembers;
+		return regionMembers;
 	}
 
 	/**
-	 * Replaces the plot-name-to-members map.
+	 * Replaces the region-name-to-members map.
 	 */
-	public void setPlotMembers(Map<String, Set<UUID>> plotMembers) {
-		this.plotMembers = plotMembers != null ? plotMembers : new HashMap<>();
+	public void setRegionMembers(Map<String, Set<UUID>> regionMembers) {
+		this.regionMembers = regionMembers != null ? regionMembers : new HashMap<>();
+	}
+
+	/**
+	 * Provides the names of the regions that are public. A public region adds no restrictions, while a
+	 * private region can only be used by its members.
+	 */
+	public Set<String> getPublicRegions() {
+		if (publicRegions == null) {
+			publicRegions = new HashSet<>();
+		}
+		return publicRegions;
+	}
+
+	/**
+	 * Replaces the names of the regions that are public.
+	 */
+	public void setPublicRegions(Set<String> publicRegions) {
+		this.publicRegions = publicRegions != null ? publicRegions : new HashSet<>();
+	}
+
+	/**
+	 * Determines whether the given region is public.
+	 */
+	public boolean isRegionPublic(String regionName) {
+		return getPublicRegions().contains(regionName);
+	}
+
+	/**
+	 * Provides the map colors of the regions that have their own color.
+	 */
+	public Map<String, String> getRegionMapColors() {
+		if (regionMapColors == null) {
+			regionMapColors = new HashMap<>();
+		}
+		return regionMapColors;
+	}
+
+	/**
+	 * Replaces the map colors of the regions that have their own color.
+	 */
+	public void setRegionMapColors(Map<String, String> regionMapColors) {
+		this.regionMapColors = regionMapColors != null ? regionMapColors : new HashMap<>();
+	}
+
+	/**
+	 * Provides the GUI icons of the regions that have their own icon.
+	 */
+	public Map<String, Material> getRegionIcons() {
+		if (regionIcons == null) {
+			regionIcons = new HashMap<>();
+		}
+		return regionIcons;
+	}
+
+	/**
+	 * Replaces the GUI icons of the regions that have their own icon.
+	 */
+	public void setRegionIcons(Map<String, Material> regionIcons) {
+		this.regionIcons = regionIcons != null ? regionIcons : new HashMap<>();
+	}
+
+	/**
+	 * Provides the GUI icon of the given region.
+	 */
+	public Material getRegionIcon(String regionName) {
+		return getRegionIcons().getOrDefault(regionName, Material.GRASS_BLOCK);
 	}
 
 	/**

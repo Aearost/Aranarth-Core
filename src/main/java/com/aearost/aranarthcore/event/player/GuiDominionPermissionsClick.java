@@ -62,19 +62,19 @@ public class GuiDominionPermissionsClick {
         if (title.equals(Lang.getFor(player, GuiDominionPermissions.HUB_TITLE_KEY))) {
             int slot = e.getSlot();
             switch (slot) {
-                case 17 -> {
+                case GuiDominionPermissions.BENDING_SLOT -> {
                     GuiDominionFlagSelect.openBending(player);
                     player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
                 }
-                case 30 -> {
+                case GuiDominionPermissions.MOB_SPAWNING_SLOT -> {
                     GuiDominionFlagSelect.openMobSpawning(player);
                     player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
                 }
-                case 32 -> {
+                case GuiDominionPermissions.EXPLOSIONS_SLOT -> {
                     GuiDominionFlagSelect.openExplosions(player);
                     player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
                 }
-                case 16 -> {
+                case GuiDominionPermissions.MEMBER_PVP_SLOT -> {
                     GuiDominionFlagSelect.openMemberPvp(player);
                     player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
                 }
@@ -118,15 +118,19 @@ public class GuiDominionPermissionsClick {
                     GuiDominionPlayerPermissions.initiateSearch(player);
                     player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
                 }
-                case 34 -> {
+                case GuiDominionPermissions.GUARDIANS_SLOT -> {
                     GuiDefenderAreaSelect.open(player);
                     player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
                 }
-                case 28 -> {
+                case GuiDominionPermissions.OUTPOSTS_SLOT -> {
                     GuiOutposts.open(player);
                     player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
                 }
-                case 31 -> {
+                case GuiDominionPermissions.REGIONS_SLOT -> {
+                    GuiDominionRegions.open(player);
+                    player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
+                }
+                case GuiDominionPermissions.RESOURCES_SLOT -> {
                     String worldName = player.getWorld().getName();
                     if (!worldName.startsWith("world") && !worldName.startsWith("smp")) {
                         player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.resources_gameplay_world")));

@@ -27,7 +27,7 @@ public class CommandDominion implements CommandExecutor {
     private static final Map<UUID, Integer> pendingChunkPurchases = new HashMap<>();
     private static final Map<UUID, Map.Entry<UUID, Integer>> pendingOutpostChunkPurchases = new HashMap<>();
     private static final Map<UUID, String> pendingConfirmations = new HashMap<>();
-    private static final int[] PLOT_LIMITS_BY_LEVEL = {0, 4, 12, 25, Integer.MAX_VALUE};
+    private static final int[] REGION_LIMITS_BY_LEVEL = {0, 4, 12, 25, Integer.MAX_VALUE};
 
     /**
      * Teleports the player to their dominion's home.
@@ -541,56 +541,62 @@ public class CommandDominion implements CommandExecutor {
     }
 
     /**
-     * Dispatches /d plot sub-commands.
+     * Dispatches /d region sub-commands.
      */
-    private static void handlePlot(String[] args, Dominion dominion, Player player) {
-        if (args.length < 2) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "d plot <create|claim|rename|add|remove>")));
-            return;
-        }
-
+    private static void handleRegion(String[] args, Dominion dominion, Player player) {
         if (dominion == null) {
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.not_in_dominion")));
             return;
         }
 
-        if (!DominionUtils.hasPermission(player, dominion, DominionPermission.MANAGE_PLOTS)) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.no_permission_plots")));
+        if (!DominionUtils.hasPermission(player, dominion, DominionPermission.MANAGE_REGIONS)) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.no_permission_regions")));
+            return;
+        }
+
+        // No sub-command opens the region management GUI
+        if (args.length < 2) {
+            GuiDominionRegions.open(player);
+            player.playSound(player, Sound.BLOCK_CHEST_OPEN, 1F, 1F);
             return;
         }
 
         String sub = args[1].toLowerCase();
         switch (sub) {
-            case "create" -> plotCreate(args, dominion, player);
-            case "claim" -> plotClaim(args, dominion, player);
-            case "rename" -> plotRename(args, dominion, player);
-            case "add" -> plotAdd(args, dominion, player);
-            case "remove" -> plotRemove(args, dominion, player);
-            default -> player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "d plot <create|claim|rename|add|remove>")));
+            case "create" -> regionCreate(args, dominion, player);
+            case "claim" -> regionClaim(args, dominion, player);
+            case "unclaim" -> regionUnclaim(dominion, player);
+            case "rename" -> regionRename(args, dominion, player);
+            case "add" -> regionAdd(args, dominion, player);
+            case "remove" -> regionRemove(args, dominion, player);
+            case "public" -> regionSetPublic(dominion, player, true);
+            case "private" -> regionSetPublic(dominion, player, false);
+            case "mapcolor" -> regionSetMapColor(args, dominion, player);
+            default -> player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "d region <create|claim|unclaim|rename|add|remove|public|private|mapcolor>")));
         }
     }
 
-    private static void plotCreate(String[] args, Dominion dominion, Player player) {
+    private static void regionCreate(String[] args, Dominion dominion, Player player) {
         if (args.length < 3) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "d plot create <name>")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "d region create <name>")));
             return;
         }
 
         int level = dominion.getDominionLevel();
-        int maxPlots = PLOT_LIMITS_BY_LEVEL[level - 1];
-        if (maxPlots == 0) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.plot_level_required")));
+        int maxRegions = REGION_LIMITS_BY_LEVEL[level - 1];
+        if (maxRegions == 0) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.region_level_required")));
             return;
         }
-        int currentPlots = dominion.getPlotMembers().size();
-        if (maxPlots != Integer.MAX_VALUE && currentPlots >= maxPlots) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.plot_limit_reached", "limit", String.valueOf(maxPlots), "level", String.valueOf(level))));
+        int currentRegions = dominion.getRegionMembers().size();
+        if (maxRegions != Integer.MAX_VALUE && currentRegions >= maxRegions) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.region_limit_reached", "limit", String.valueOf(maxRegions), "level", String.valueOf(level))));
             return;
         }
 
-        String plotName = args[2];
-        if (!plotName.matches("[a-zA-Z0-9_]+")) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.plot_name_invalid")));
+        String regionName = DominionUtils.parseRegionName(args, 2);
+        if (regionName == null) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.region_name_invalid")));
             return;
         }
 
@@ -602,32 +608,33 @@ public class CommandDominion implements CommandExecutor {
         }
 
         String chunkKey = currentChunk.getWorld().getName() + ":" + currentChunk.getX() + ":" + currentChunk.getZ();
-        String existingPlot = dominion.getPlotChunkNames().get(chunkKey);
-        if (existingPlot != null) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.chunk_already_in_plot", "plot", existingPlot)));
+        String existingRegion = dominion.getRegionChunkNames().get(chunkKey);
+        if (existingRegion != null) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.chunk_already_in_region", "region", existingRegion)));
             return;
         }
 
-        if (dominion.getPlotMembers().containsKey(plotName)) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.plot_already_exists", "plot", plotName)));
+        if (DominionUtils.findRegionName(dominion, regionName) != null) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.region_already_exists", "region", regionName)));
             return;
         }
 
-        dominion.getPlotChunkNames().put(chunkKey, plotName);
-        dominion.getPlotMembers().put(plotName, new HashSet<>());
+        dominion.getRegionChunkNames().put(chunkKey, regionName);
+        dominion.getRegionMembers().put(regionName, new HashSet<>());
         DominionUtils.updateDominion(dominion);
-        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.plot_created", "plot", plotName)));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.region_created", "region", regionName)));
     }
 
-    private static void plotClaim(String[] args, Dominion dominion, Player player) {
+    private static void regionClaim(String[] args, Dominion dominion, Player player) {
         if (args.length < 3) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "d plot claim <name>")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "d region claim <name>")));
             return;
         }
 
-        String plotName = args[2];
-        if (!dominion.getPlotMembers().containsKey(plotName)) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.plot_not_found", "plot", plotName)));
+        String inputName = String.join(" ", Arrays.copyOfRange(args, 2, args.length)).trim().replaceAll("\\s+", " ");
+        String regionName = DominionUtils.findRegionName(dominion, inputName);
+        if (regionName == null) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.region_not_found", "region", inputName)));
             return;
         }
 
@@ -639,24 +646,106 @@ public class CommandDominion implements CommandExecutor {
         }
 
         String chunkKey = currentChunk.getWorld().getName() + ":" + currentChunk.getX() + ":" + currentChunk.getZ();
-        String existingPlot = dominion.getPlotChunkNames().get(chunkKey);
-        if (existingPlot != null) {
-            if (existingPlot.equals(plotName)) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.chunk_already_in_plot", "plot", plotName)));
+        String existingRegion = dominion.getRegionChunkNames().get(chunkKey);
+        if (existingRegion != null) {
+            if (existingRegion.equals(regionName)) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.chunk_already_in_region", "region", regionName)));
             } else {
-                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.chunk_already_in_plot", "plot", existingPlot)));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.chunk_already_in_region", "region", existingRegion)));
             }
             return;
         }
 
-        dominion.getPlotChunkNames().put(chunkKey, plotName);
+        dominion.getRegionChunkNames().put(chunkKey, regionName);
         DominionUtils.updateDominion(dominion);
-        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.plot_chunk_added", "plot", plotName)));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.region_chunk_added", "region", regionName)));
     }
 
-    private static void plotRename(String[] args, Dominion dominion, Player player) {
+    /**
+     * Removes the chunk the player is standing in from its region. The region is kept even when it has no
+     * chunks left, so it can be claimed into again or deleted from the GUI.
+     *
+     * @param dominion The player's dominion.
+     * @param player   The player.
+     */
+    private static void regionUnclaim(Dominion dominion, Player player) {
+        Chunk currentChunk = player.getLocation().getChunk();
+        Dominion chunkDominion = DominionUtils.getDominionOfChunk(currentChunk);
+        if (chunkDominion == null || !chunkDominion.isSameDominion(dominion)) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.must_stand_in_chunk")));
+            return;
+        }
+
+        String regionName = dominion.getRegionChunkNames().remove(DominionUtils.getChunkKey(currentChunk));
+        if (regionName == null) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.not_in_region")));
+            return;
+        }
+
+        DominionUtils.updateDominion(dominion);
+        AranarthCore.refreshSquaremap();
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.region_chunk_removed", "region", regionName)));
+    }
+
+    /**
+     * Sets the map color of a region, using the same colors as /d mapcolor. The region is the one that
+     * is named, or the one the player is standing in when no name is given. Resetting it makes the
+     * region use the Dominion's color again.
+     *
+     * @param args     The command arguments (args[2] is the color, and any arguments after it are the region name).
+     * @param dominion The player's dominion.
+     * @param player   The player.
+     */
+    private static void regionSetMapColor(String[] args, Dominion dominion, Player player) {
+        // Hex map colors are restricted to Saints with gradient access
+        boolean canUseHex = player.hasPermission("aranarth.chat.gradient");
         if (args.length < 3) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "d plot rename <new name>")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, canUseHex ? "dominion.region_mapcolor_usage" : "dominion.region_mapcolor_usage_no_hex")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.mapcolor_colors")));
+            return;
+        }
+
+        String regionName;
+        if (args.length > 3) {
+            String inputName = String.join(" ", Arrays.copyOfRange(args, 3, args.length)).trim().replaceAll("\\s+", " ");
+            regionName = DominionUtils.findRegionName(dominion, inputName);
+            if (regionName == null) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.region_not_found", "region", inputName)));
+                return;
+            }
+        } else {
+            Chunk currentChunk = player.getLocation().getChunk();
+            Dominion chunkDominion = DominionUtils.getDominionOfChunk(currentChunk);
+            if (chunkDominion == null || !chunkDominion.isSameDominion(dominion)) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.must_stand_in_chunk")));
+                return;
+            }
+
+            regionName = dominion.getRegionChunkNames().get(DominionUtils.getChunkKey(currentChunk));
+            if (regionName == null) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.not_in_region")));
+                return;
+            }
+        }
+
+        String input = args[2].toLowerCase();
+        String colorCode = parseMapColor(input);
+        if (colorCode == null) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, canUseHex ? "dominion.mapcolor_invalid" : "dominion.mapcolor_invalid_no_hex")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.mapcolor_colors")));
+            return;
+        }
+        if (colorCode.startsWith("&#") && !canUseHex) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.mapcolor_no_hex_perm")));
+            return;
+        }
+
+        DominionUtils.setRegionMapColor(player, dominion, regionName, colorCode, input);
+    }
+
+    private static void regionRename(String[] args, Dominion dominion, Player player) {
+        if (args.length < 3) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "d region rename <new name>")));
             return;
         }
 
@@ -668,32 +757,45 @@ public class CommandDominion implements CommandExecutor {
         }
 
         String chunkKey = currentChunk.getWorld().getName() + ":" + currentChunk.getX() + ":" + currentChunk.getZ();
-        String plotName = dominion.getPlotChunkNames().get(chunkKey);
-        if (plotName == null) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.not_in_plot")));
+        String regionName = dominion.getRegionChunkNames().get(chunkKey);
+        if (regionName == null) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.not_in_region")));
             return;
         }
 
-        String newName = args[2];
-        if (!newName.matches("[a-zA-Z0-9_]+")) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.plot_name_invalid")));
+        String newName = DominionUtils.parseRegionName(args, 2);
+        if (newName == null) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.region_name_invalid")));
             return;
         }
-        if (dominion.getPlotMembers().containsKey(newName)) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.plot_already_exists", "plot", newName)));
+        // Changing only the capitalization of the region's own name is allowed
+        String existingName = DominionUtils.findRegionName(dominion, newName);
+        if (existingName != null && !existingName.equals(regionName)) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.region_already_exists", "region", newName)));
             return;
         }
 
-        dominion.getPlotChunkNames().replaceAll((k, v) -> v.equals(plotName) ? newName : v);
-        Set<UUID> members = dominion.getPlotMembers().remove(plotName);
-        dominion.getPlotMembers().put(newName, members != null ? members : new HashSet<>());
+        dominion.getRegionChunkNames().replaceAll((k, v) -> v.equals(regionName) ? newName : v);
+        Set<UUID> members = dominion.getRegionMembers().remove(regionName);
+        dominion.getRegionMembers().put(newName, members != null ? members : new HashSet<>());
+        if (dominion.getPublicRegions().remove(regionName)) {
+            dominion.getPublicRegions().add(newName);
+        }
+        String mapColor = dominion.getRegionMapColors().remove(regionName);
+        if (mapColor != null) {
+            dominion.getRegionMapColors().put(newName, mapColor);
+        }
+        Material icon = dominion.getRegionIcons().remove(regionName);
+        if (icon != null) {
+            dominion.getRegionIcons().put(newName, icon);
+        }
         DominionUtils.updateDominion(dominion);
-        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.plot_renamed", "plot", plotName, "name", newName)));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.region_renamed", "region", regionName, "name", newName)));
     }
 
-    private static void plotAdd(String[] args, Dominion dominion, Player player) {
+    private static void regionAdd(String[] args, Dominion dominion, Player player) {
         if (args.length < 3) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "d plot add <player>")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "d region add <player>")));
             return;
         }
 
@@ -705,9 +807,9 @@ public class CommandDominion implements CommandExecutor {
         }
 
         String chunkKey = currentChunk.getWorld().getName() + ":" + currentChunk.getX() + ":" + currentChunk.getZ();
-        String plotName = dominion.getPlotChunkNames().get(chunkKey);
-        if (plotName == null) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.not_in_plot")));
+        String regionName = dominion.getRegionChunkNames().get(chunkKey);
+        if (regionName == null) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.not_in_region")));
             return;
         }
 
@@ -723,23 +825,23 @@ public class CommandDominion implements CommandExecutor {
             return;
         }
 
-        Set<UUID> members = dominion.getPlotMembers().computeIfAbsent(plotName, k -> new HashSet<>());
+        Set<UUID> members = dominion.getRegionMembers().computeIfAbsent(regionName, k -> new HashSet<>());
         if (members.contains(inputUuid)) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.plot_already_member", "player", targetAranarthPlayer.getNickname(), "plot", plotName)));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.region_already_member", "player", targetAranarthPlayer.getNickname(), "region", regionName)));
             return;
         }
         members.add(inputUuid);
         DominionUtils.updateDominion(dominion);
-        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.plot_member_added", "player", targetAranarthPlayer.getNickname(), "plot", plotName)));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.region_member_added", "player", targetAranarthPlayer.getNickname(), "region", regionName)));
         Player targetPlayer = Bukkit.getPlayer(inputUuid);
         if (targetPlayer != null) {
-            targetPlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(targetPlayer, "dominion.plot_you_were_added", "plot", plotName, "name", dominion.getName())));
+            targetPlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(targetPlayer, "dominion.region_you_were_added", "region", regionName, "name", dominion.getName())));
         }
     }
 
-    private static void plotRemove(String[] args, Dominion dominion, Player player) {
+    private static void regionRemove(String[] args, Dominion dominion, Player player) {
         if (args.length < 3) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "d plot remove <player>")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "d region remove <player>")));
             return;
         }
 
@@ -751,9 +853,9 @@ public class CommandDominion implements CommandExecutor {
         }
 
         String chunkKey = currentChunk.getWorld().getName() + ":" + currentChunk.getX() + ":" + currentChunk.getZ();
-        String plotName = dominion.getPlotChunkNames().get(chunkKey);
-        if (plotName == null) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.not_in_plot")));
+        String regionName = dominion.getRegionChunkNames().get(chunkKey);
+        if (regionName == null) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.not_in_region")));
             return;
         }
 
@@ -764,14 +866,46 @@ public class CommandDominion implements CommandExecutor {
         }
 
         AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(inputUuid);
-        Set<UUID> members = dominion.getPlotMembers().getOrDefault(plotName, new HashSet<>());
+        Set<UUID> members = dominion.getRegionMembers().getOrDefault(regionName, new HashSet<>());
         if (!members.contains(inputUuid)) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.plot_not_member", "player", targetAranarthPlayer.getNickname(), "plot", plotName)));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.region_not_member", "player", targetAranarthPlayer.getNickname(), "region", regionName)));
             return;
         }
         members.remove(inputUuid);
         DominionUtils.updateDominion(dominion);
-        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.plot_member_removed", "player", targetAranarthPlayer.getNickname(), "plot", plotName)));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.region_member_removed", "player", targetAranarthPlayer.getNickname(), "region", regionName)));
+    }
+
+    /**
+     * Makes the region the player is standing in public or private. A public region uses the normal
+     * Dominion permissions, while a private region can only be used by its members.
+     *
+     * @param dominion   The player's dominion.
+     * @param player     The player.
+     * @param makePublic Whether the region is being made public.
+     */
+    private static void regionSetPublic(Dominion dominion, Player player, boolean makePublic) {
+        Chunk currentChunk = player.getLocation().getChunk();
+        Dominion chunkDominion = DominionUtils.getDominionOfChunk(currentChunk);
+        if (chunkDominion == null || !chunkDominion.isSameDominion(dominion)) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.must_stand_in_chunk")));
+            return;
+        }
+
+        String regionName = dominion.getRegionChunkNames().get(DominionUtils.getChunkKey(currentChunk));
+        if (regionName == null) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.not_in_region")));
+            return;
+        }
+
+        if (dominion.isRegionPublic(regionName) == makePublic) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, makePublic ? "dominion.region_already_public" : "dominion.region_already_private", "region", regionName)));
+            return;
+        }
+
+        DominionUtils.setRegionPublic(dominion, regionName, makePublic);
+        DominionUtils.updateDominion(dominion);
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, makePublic ? "dominion.region_now_public" : "dominion.region_now_private", "region", regionName)));
     }
 
     private static void leaveDominion(Dominion dominion, Player player) {
@@ -785,7 +919,7 @@ public class CommandDominion implements CommandExecutor {
             DominionUtils.removePlayerFromDominion(player.getUniqueId());
             dominion.getMembers().remove(player.getUniqueId());
             dominion.getMemberRanks().remove(player.getUniqueId());
-            dominion.getPlotMembers().values().forEach(members -> members.remove(player.getUniqueId()));
+            dominion.getRegionMembers().values().forEach(members -> members.remove(player.getUniqueId()));
             DominionUtils.updateDominion(dominion);
             DominionLevelUtils.reevaluateDominion(dominion);
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
@@ -830,7 +964,7 @@ public class CommandDominion implements CommandExecutor {
                     DominionUtils.removePlayerFromDominion(inputUuid);
                     dominion.getMembers().remove(inputUuid);
                     dominion.getMemberRanks().remove(inputUuid);
-                    dominion.getPlotMembers().values().forEach(members -> members.remove(inputUuid));
+                    dominion.getRegionMembers().values().forEach(members -> members.remove(inputUuid));
                     DominionUtils.updateDominion(dominion);
                     DominionLevelUtils.reevaluateDominion(dominion);
                     for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
@@ -2372,7 +2506,7 @@ public class CommandDominion implements CommandExecutor {
      * @param input The color name or hex code (lowercase, no leading &).
      * @return The color code string, empty string to reset, or null if invalid.
      */
-    private static String parseMapColor(String input) {
+    public static String parseMapColor(String input) {
         return switch (input) {
             case "reset", "none", "default" -> "";
             case "white" -> "&f";
@@ -2402,12 +2536,51 @@ public class CommandDominion implements CommandExecutor {
 
     /**
      * Toggles whether the player will automatically be claiming chunks as they enter them.
+     * Usage: /d autoclaim [region &lt;name&gt;]
      *
-     * @param player The player.
+     * @param args     The command arguments.
+     * @param dominion The player's dominion.
+     * @param player   The player.
      */
-    private static void claimToggle(Player player) {
+    private static void claimToggle(String[] args, Dominion dominion, Player player) {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-        if (aranarthPlayer.isAutoClaimEnabled()) {
+
+        if (args.length >= 2) {
+            if (!args[1].equalsIgnoreCase("region") || args.length < 3) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "d autoclaim [region <name>]")));
+                return;
+            }
+            if (dominion == null) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.not_in_dominion")));
+                return;
+            }
+            if (!DominionUtils.hasPermission(player, dominion, DominionPermission.MANAGE_REGIONS)) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.no_permission_regions")));
+                return;
+            }
+            String inputName = String.join(" ", Arrays.copyOfRange(args, 2, args.length)).trim().replaceAll("\\s+", " ");
+            String regionName = DominionUtils.findRegionName(dominion, inputName);
+            if (regionName == null) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.region_not_found", "region", inputName)));
+                return;
+            }
+            // Running it again for the same region turns it off
+            if (regionName.equals(aranarthPlayer.getAutoClaimRegion())) {
+                aranarthPlayer.setAutoClaimRegion(null);
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.autoclaim_disabled")));
+            } else {
+                aranarthPlayer.setAutoClaimEnabled(false);
+                aranarthPlayer.setAutoClaimRegion(regionName);
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.autoclaim_region_enabled", "region", regionName)));
+            }
+            AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+            return;
+        }
+
+        if (aranarthPlayer.getAutoClaimRegion() != null) {
+            aranarthPlayer.setAutoClaimRegion(null);
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.autoclaim_disabled")));
+        } else if (aranarthPlayer.isAutoClaimEnabled()) {
             aranarthPlayer.setAutoClaimEnabled(false);
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.autoclaim_disabled")));
         } else {
@@ -3280,7 +3453,7 @@ public class CommandDominion implements CommandExecutor {
                 } else if (args[0].equalsIgnoreCase("mapcolor")) {
                     setMapColor(args, dominion, player);
                 } else if (args[0].equalsIgnoreCase("autoclaim")) {
-                    claimToggle(player);
+                    claimToggle(args, dominion, player);
                 } else if (args[0].equalsIgnoreCase("food")) {
                     foodStorage(player);
                 } else if (args[0].equalsIgnoreCase("resources")) {
@@ -3317,8 +3490,8 @@ public class CommandDominion implements CommandExecutor {
                     handleOutpost(args, dominion, player);
                 } else if (args[0].equalsIgnoreCase("defender")) {
                     handleDefender(dominion, player);
-                } else if (args[0].equalsIgnoreCase("plot")) {
-                    handlePlot(args, dominion, player);
+                } else if (args[0].equalsIgnoreCase("region")) {
+                    handleRegion(args, dominion, player);
                 } else if (args[0].equalsIgnoreCase("rescan")) {
                     rescanDominion(args, player);
                 } else {

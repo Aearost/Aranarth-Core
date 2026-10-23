@@ -45,9 +45,24 @@ public enum DominionPermission {
     // Defender management (buy/sell defenders)
     MANAGE_DEFENDERS,
 
-    // Plot management (assign/unassign chunks to members; also grants bypass of plot restrictions)
-    MANAGE_PLOTS,
+    // Region management (assign/unassign chunks to members; also grants bypass of region restrictions)
+    MANAGE_REGIONS,
 
     // Leader-restricted commands (enforced in commands, not configurable per rank)
-    WITHDRAW
+    WITHDRAW;
+
+    /**
+     * Provides the permission with the given stored name, including names that were since renamed.
+     *
+     * @param name The stored permission name.
+     * @return The permission.
+     * @throws IllegalArgumentException If no permission has that name.
+     */
+    public static DominionPermission fromName(String name) {
+        // Regions were previously called plots
+        if (name.equals("MANAGE_PLOTS")) {
+            return MANAGE_REGIONS;
+        }
+        return valueOf(name);
+    }
 }

@@ -79,6 +79,7 @@ public class AranarthPlayer {
     private boolean isOpeningCrateWithCyclingItem = false;
     private CrateType crateTypeBeingOpened = null;
     private boolean isAutoClaimEnabled = false;
+    private String autoClaimRegion = null;
     private boolean isTogglingMessages = false;
     private boolean isTogglingChat = false;
     private boolean isTogglingTp = false;
@@ -198,6 +199,7 @@ public class AranarthPlayer {
         this.bulkTransactionNum = 0;
         this.votePointsSpent = 0;
         this.isAutoClaimEnabled = false;
+        this.autoClaimRegion = null;
         this.isTogglingMessages = false;
         this.isTogglingChat = false;
         this.isTogglingTp = false;
@@ -277,6 +279,7 @@ public class AranarthPlayer {
         this.bulkTransactionNum = 0;
         this.votePointsSpent = votePointsSpent;
         this.isAutoClaimEnabled = false;
+        this.autoClaimRegion = null;
         this.isTogglingMessages = false;
         this.isTogglingChat = false;
         this.isTogglingTp = false;
@@ -1298,6 +1301,24 @@ public class AranarthPlayer {
      */
     public void setAutoClaimEnabled(boolean isAutoClaimEnabled) {
         this.isAutoClaimEnabled = isAutoClaimEnabled;
+    }
+
+    /**
+     * Provides the name of the region that the player is automatically adding chunks to.
+     *
+     * @return The region name, or null if the player is not auto-claiming chunks into a region.
+     */
+    public String getAutoClaimRegion() {
+        return autoClaimRegion;
+    }
+
+    /**
+     * Updates the name of the region that the player is automatically adding chunks to.
+     *
+     * @param autoClaimRegion The region name, or null to stop auto-claiming chunks into a region.
+     */
+    public void setAutoClaimRegion(String autoClaimRegion) {
+        this.autoClaimRegion = autoClaimRegion;
     }
 
     /**

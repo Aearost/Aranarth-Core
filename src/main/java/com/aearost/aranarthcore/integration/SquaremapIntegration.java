@@ -29,18 +29,18 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Integrates with the SquareMap live-map plugin to display dominion land claims, outposts and plots.
+ * Integrates with the SquareMap live-map plugin to display dominion land claims, outposts and regions.
  * The layer refreshes every 30 seconds.
  */
 public class SquaremapIntegration {
 
     private static final Key LAYER_KEY = Key.of("aranarthcore-dominions");
     private static final Key OUTPOST_LAYER_KEY = Key.of("aranarthcore-outposts");
-    private static final Key PLOT_LAYER_KEY = Key.of("aranarthcore-plots");
+    private static final Key REGION_LAYER_KEY = Key.of("aranarthcore-regions");
     // One provider per world (keyed by squaremap world identifier string)
     private final Map<String, SimpleLayerProvider> providers = new HashMap<>();
     private final Map<String, SimpleLayerProvider> outpostProviders = new HashMap<>();
-    private final Map<String, SimpleLayerProvider> plotProviders = new HashMap<>();
+    private final Map<String, SimpleLayerProvider> regionProviders = new HashMap<>();
     private BukkitTask refreshTask;
 
     /**
@@ -73,17 +73,17 @@ public class SquaremapIntegration {
             }
             outpostProviders.put(mapWorld.identifier().asString(), outpostProvider);
 
-            // Rendered above dominions and outposts so hovering a plot shows the plot's tooltip
-            SimpleLayerProvider plotProvider = SimpleLayerProvider.builder("Dominion Plots")
+            // Rendered above dominions and outposts so hovering a region shows the region's tooltip
+            SimpleLayerProvider regionProvider = SimpleLayerProvider.builder("Dominion Regions")
                     .showControls(true)
                     .defaultHidden(false)
                     .layerPriority(7)
                     .zIndex(252)
                     .build();
-            if (!mapWorld.layerRegistry().hasEntry(PLOT_LAYER_KEY)) {
-                mapWorld.layerRegistry().register(PLOT_LAYER_KEY, plotProvider);
+            if (!mapWorld.layerRegistry().hasEntry(REGION_LAYER_KEY)) {
+                mapWorld.layerRegistry().register(REGION_LAYER_KEY, regionProvider);
             }
-            plotProviders.put(mapWorld.identifier().asString(), plotProvider);
+            regionProviders.put(mapWorld.identifier().asString(), regionProvider);
         }
 
         // Refresh every 30 seconds (600 ticks) asynchronously
@@ -111,8 +111,8 @@ public class SquaremapIntegration {
                 if (mapWorld.layerRegistry().hasEntry(OUTPOST_LAYER_KEY)) {
                     mapWorld.layerRegistry().unregister(OUTPOST_LAYER_KEY);
                 }
-                if (mapWorld.layerRegistry().hasEntry(PLOT_LAYER_KEY)) {
-                    mapWorld.layerRegistry().unregister(PLOT_LAYER_KEY);
+                if (mapWorld.layerRegistry().hasEntry(REGION_LAYER_KEY)) {
+                    mapWorld.layerRegistry().unregister(REGION_LAYER_KEY);
                 }
             }
         } catch (IllegalStateException ignored) {
@@ -121,7 +121,7 @@ public class SquaremapIntegration {
 
         providers.clear();
         outpostProviders.clear();
-        plotProviders.clear();
+        regionProviders.clear();
     }
 
     /**
@@ -134,7 +134,7 @@ public class SquaremapIntegration {
         for (SimpleLayerProvider provider : outpostProviders.values()) {
             provider.clearMarkers();
         }
-        for (SimpleLayerProvider provider : plotProviders.values()) {
+        for (SimpleLayerProvider provider : regionProviders.values()) {
             provider.clearMarkers();
         }
 
@@ -226,42 +226,46 @@ public class SquaremapIntegration {
                 }
             }
 
-            // Dominion plots - grouped by plot name, then by world
+            // Dominion regions - grouped by region name, then by world
             // Chunk keys are stored as "worldName:cx:cz"
-            Map<String, Map<String, Set<String>>> plotChunksByWorld = new HashMap<>();
-            for (Map.Entry<String, String> entry : new HashMap<>(dominion.getPlotChunkNames()).entrySet()) {
+            Map<String, Map<String, Set<String>>> regionChunksByWorld = new HashMap<>();
+            for (Map.Entry<String, String> entry : new HashMap<>(dominion.getRegionChunkNames()).entrySet()) {
                 String[] parts = entry.getKey().split(":");
                 if (parts.length != 3) continue;
                 World world = Bukkit.getWorld(parts[0]);
                 if (world == null) continue;
                 String worldKey = BukkitAdapter.worldIdentifier(world).asString();
-                plotChunksByWorld
+                regionChunksByWorld
                         .computeIfAbsent(entry.getValue(), k -> new HashMap<>())
                         .computeIfAbsent(worldKey, k -> new HashSet<>())
                         .add(parts[1] + "," + parts[2]);
             }
 
-            for (Map.Entry<String, Map<String, Set<String>>> plotEntry : plotChunksByWorld.entrySet()) {
-                String plotName = plotEntry.getKey();
-                MarkerOptions plotOptions = MarkerOptions.builder()
+            for (Map.Entry<String, Map<String, Set<String>>> regionEntry : regionChunksByWorld.entrySet()) {
+                String regionName = regionEntry.getKey();
+                // Regions without their own color use a lighter shade of the Dominion's color
+                String regionMapColor = dominion.getRegionMapColors().get(regionName);
+                Color regionFillColor = regionMapColor != null ? parseColor(regionMapColor) : fillColor.brighter();
+                MarkerOptions regionOptions = MarkerOptions.builder()
                         .strokeColor(Color.WHITE)
                         .strokeWeight(1)
                         .strokeOpacity(0.9)
-                        .fillColor(fillColor.brighter())
+                        .fillColor(regionFillColor)
                         .fillOpacity(0.3)
-                        .hoverTooltip("<b>🏠 " + plotName + " 🏠</b><br><i>Plot of " + dominionName + "</i>")
+                        .hoverTooltip("<b>🏰 " + dominionName + " 🏰</b><br><i>" + regionName
+                                + (dominion.isRegionPublic(regionName) ? " (public)" : " (private)") + "</i>")
                         .build();
 
-                for (Map.Entry<String, Set<String>> entry : plotEntry.getValue().entrySet()) {
-                    SimpleLayerProvider provider = plotProviders.get(entry.getKey());
+                for (Map.Entry<String, Set<String>> entry : regionEntry.getValue().entrySet()) {
+                    SimpleLayerProvider provider = regionProviders.get(entry.getKey());
                     if (provider == null) continue;
 
                     List<Region> regions = buildRegions(entry.getValue());
                     int regionIdx = 0;
                     for (Region region : regions) {
                         Marker polygon = Marker.polygon(region.outer(), region.holes());
-                        polygon.markerOptions(plotOptions);
-                        Key markerKey = Key.of("p-" + dominion.getId() + "-" + plotName + "-" + entry.getKey().hashCode() + "-r" + regionIdx++);
+                        polygon.markerOptions(regionOptions);
+                        Key markerKey = Key.of("p-" + dominion.getId() + "-" + regionName.hashCode() + "-" + entry.getKey().hashCode() + "-r" + regionIdx++);
                         provider.addMarker(markerKey, polygon);
                     }
                 }

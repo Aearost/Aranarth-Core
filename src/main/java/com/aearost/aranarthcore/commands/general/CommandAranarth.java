@@ -44,7 +44,7 @@ public class CommandAranarth implements CommandExecutor {
     );
 
     static final List<String> DOMINION_SECTIONS = List.of(
-            "intro", "claiming", "food", "members", "flags", "plots",
+            "intro", "claiming", "food", "members", "flags", "regions",
             "resources", "outposts", "defenders", "relationships", "conquering", "levels"
     );
 
@@ -412,7 +412,7 @@ public class CommandAranarth implements CommandExecutor {
         player.sendMessage(Component.text("            ").append(buildRow(new String[][]{
                 {Lang.getFor(player, "dominions.section_members_label"), Lang.getFor(player, "guide.click_to_view"), "/aranarth dominions members"},
                 {Lang.getFor(player, "dominions.section_flags_label"), Lang.getFor(player, "guide.click_to_view"), "/aranarth dominions flags"},
-                {Lang.getFor(player, "dominions.section_plots_label"), Lang.getFor(player, "guide.click_to_view"), "/aranarth dominions plots"}
+                {Lang.getFor(player, "dominions.section_regions_label"), Lang.getFor(player, "guide.click_to_view"), "/aranarth dominions regions"}
         })));
         player.sendMessage(Component.text("    ").append(buildRow(new String[][]{
                 {Lang.getFor(player, "dominions.section_resources_label"), Lang.getFor(player, "guide.click_to_view"), "/aranarth dominions resources"},

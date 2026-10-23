@@ -78,8 +78,124 @@ public class DominionUtils {
      * @param chunk The chunk.
      * @return The lookup key string.
      */
-    private static String getChunkKey(Chunk chunk) {
+    public static String getChunkKey(Chunk chunk) {
         return chunk.getWorld().getName() + ":" + chunk.getX() + ":" + chunk.getZ();
+    }
+
+    /**
+     * Builds a region name from command arguments, allowing multiple words.
+     *
+     * @param args The command arguments.
+     * @param from The index of the first argument that is part of the name.
+     * @return The region name with single spaces between words, or null if it is not a valid region name.
+     */
+    public static String parseRegionName(String[] args, int from) {
+        if (args.length <= from) {
+            return null;
+        }
+        String name = String.join(" ", Arrays.copyOfRange(args, from, args.length)).trim().replaceAll("\\s+", " ");
+        // Letters, numbers and underscores only so the name is safe in the stored region format
+        return name.matches("[a-zA-Z0-9_]+( [a-zA-Z0-9_]+)*") ? name : null;
+    }
+
+    /**
+     * Finds the stored name of a dominion's region, ignoring case.
+     *
+     * @param dominion The dominion.
+     * @param input    The region name that was entered.
+     * @return The region name as it is stored, or null if the dominion has no such region.
+     */
+    public static String findRegionName(Dominion dominion, String input) {
+        if (input == null) {
+            return null;
+        }
+        for (String regionName : dominion.getRegionMembers().keySet()) {
+            if (regionName.equalsIgnoreCase(input)) {
+                return regionName;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Provides the number of chunks that are part of the given region.
+     *
+     * @param dominion The dominion.
+     * @param regionName The region name.
+     * @return The number of chunks in the region.
+     */
+    public static int getRegionChunkCount(Dominion dominion, String regionName) {
+        int count = 0;
+        for (String name : dominion.getRegionChunkNames().values()) {
+            if (name.equals(regionName)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Makes a region public or private.
+     *
+     * @param dominion   The dominion.
+     * @param regionName The region name.
+     * @param makePublic Whether the region is being made public.
+     */
+    public static void setRegionPublic(Dominion dominion, String regionName, boolean makePublic) {
+        if (makePublic) {
+            dominion.getPublicRegions().add(regionName);
+        } else {
+            dominion.getPublicRegions().remove(regionName);
+        }
+    }
+
+    /**
+     * Deletes a region, releasing all of its chunks and members. The caller saves the dominion.
+     *
+     * @param dominion The dominion.
+     * @param regionName The region name.
+     */
+    public static void deleteRegion(Dominion dominion, String regionName) {
+        dominion.getRegionChunkNames().values().removeIf(name -> name.equals(regionName));
+        dominion.getRegionMembers().remove(regionName);
+        dominion.getPublicRegions().remove(regionName);
+        dominion.getRegionMapColors().remove(regionName);
+        dominion.getRegionIcons().remove(regionName);
+    }
+
+    /**
+     * Sets or resets the map color of a region, saves the dominion and refreshes the map.
+     *
+     * @param player     The player changing the color, who is told the result.
+     * @param dominion   The dominion.
+     * @param regionName The region name.
+     * @param colorCode  The color code (&x or &#RRGGBB), or an empty string to use the Dominion's color.
+     * @param colorName  The name of the color as it is shown to the player.
+     */
+    public static void setRegionMapColor(Player player, Dominion dominion, String regionName, String colorCode, String colorName) {
+        if (colorCode.isEmpty()) {
+            dominion.getRegionMapColors().remove(regionName);
+        } else {
+            dominion.getRegionMapColors().put(regionName, colorCode);
+        }
+        updateDominion(dominion);
+        AranarthCore.refreshSquaremap();
+        if (colorCode.isEmpty()) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.region_mapcolor_reset", "region", regionName)));
+        } else {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.region_mapcolor_set", "region", regionName, "color", colorCode + colorName)));
+        }
+    }
+
+    /**
+     * Removes the given chunk from the dominion's region it is part of, if any. The region itself is kept.
+     *
+     * @param dominion The dominion.
+     * @param chunk    The chunk.
+     * @return True if the chunk was part of a region.
+     */
+    public static boolean releaseRegionChunk(Dominion dominion, Chunk chunk) {
+        return dominion.getRegionChunkNames().remove(getChunkKey(chunk)) != null;
     }
 
     /**
@@ -401,6 +517,11 @@ public class DominionUtils {
         live.getDisabledResourceCategories().addAll(loaded.getDisabledResourceCategories());
         live.setDominionPermissions(loaded.getDominionPermissions());
         live.setPlayerPermissionOverrides(loaded.getPlayerPermissionOverrides());
+        live.setRegionChunkNames(loaded.getRegionChunkNames());
+        live.setRegionMembers(loaded.getRegionMembers());
+        live.setPublicRegions(loaded.getPublicRegions());
+        live.setRegionMapColors(loaded.getRegionMapColors());
+        live.setRegionIcons(loaded.getRegionIcons());
 
         if (fullCopy) {
             live.setAllied(loaded.getAllied());
@@ -588,6 +709,7 @@ public class DominionUtils {
                                 }
                                 playerDominion.getChunks().remove(chunk);
                                 chunkKeyToDominion.remove(getChunkKey(chunk));
+                                releaseRegionChunk(playerDominion, chunk);
                                 resizeFoodArray(playerDominion);
                                 updateDominion(playerDominion);
                                 DominionLevelUtils.reevaluateDominion(playerDominion);
@@ -665,7 +787,7 @@ public class DominionUtils {
                 db.deleteDominion(dominionId);
                 db.deleteDominionPermissions(dominionId);
                 db.deleteDominionPlayerPerms(dominionId);
-                db.deleteDominionPlots(dominionId);
+                db.deleteDominionRegions(dominionId);
                 db.deleteDefendersForDominion(dominionId);
             });
         }
@@ -1305,6 +1427,7 @@ public class DominionUtils {
         AranarthUtils.removeLocksInChunk(chunk);
         dominion.getChunks().remove(chunk);
         chunkKeyToDominion.remove(getChunkKey(chunk));
+        releaseRegionChunk(dominion, chunk);
         resizeFoodArray(dominion);
         updateDominion(dominion);
         refreshBiomeCache(dominion);
@@ -1480,6 +1603,7 @@ public class DominionUtils {
             } else {
                 dominion.getChunks().remove(chunkToRemove);
                 chunkKeyToDominion.remove(getChunkKey(chunkToRemove));
+                releaseRegionChunk(dominion, chunkToRemove);
                 resizeFoodArray(dominion);
                 updateDominion(dominion);
                 refreshBiomeCache(dominion);

@@ -35,8 +35,14 @@ public class GuiDominionPermissions {
 
     private static final int MEMBERS_SLOT = 9;
     private static final int USER_SEARCH_SLOT = 10;
-    private static final int GUARDIANS_SLOT = 34;
-    private static final int OUTPOSTS_SLOT = 28;
+    public static final int REGIONS_SLOT = 16;
+    public static final int OUTPOSTS_SLOT = 17;
+    public static final int RESOURCES_SLOT = 28;
+    public static final int BENDING_SLOT = 29;
+    public static final int GUARDIANS_SLOT = 30;
+    public static final int MOB_SPAWNING_SLOT = 32;
+    public static final int MEMBER_PVP_SLOT = 33;
+    public static final int EXPLOSIONS_SLOT = 34;
 
     private final Player player;
     private final Inventory initializedGui;
@@ -90,7 +96,7 @@ public class GuiDominionPermissions {
         map.put(36, DominionPermission.OUTPOST_HOME);
         map.put(37, DominionPermission.MANAGE_OUTPOSTS);
         map.put(38, DominionPermission.MANAGE_DEFENDERS);
-        map.put(39, DominionPermission.MANAGE_PLOTS);
+        map.put(39, DominionPermission.MANAGE_REGIONS);
         return map;
     }
 
@@ -246,20 +252,19 @@ public class GuiDominionPermissions {
         gui.setItem(23, buildGroupItem(Material.RED_BANNER, Lang.getFor(player, "dominion.group_enemied"), groupLore));
         gui.setItem(24, buildGroupItem(Material.LIGHT_GRAY_BANNER, Lang.getFor(player, "dominion.group_wanderers"), groupLore));
 
-        // Row 1 toggles / nav
-        gui.setItem(16, buildMemberPvpNavItem(player, dominion.isMemberPvpEnabled()));
-        gui.setItem(17, buildBendingNavItem(player, dominion.isBendingEnabled()));
-
-        // Row 4 toggles / nav
-        gui.setItem(30, buildMobSpawningNavItem(player, dominion.isMobSpawningEnabled()));
-        gui.setItem(31, buildResourcesItem(player));
-        gui.setItem(32, buildExplosionNavItem(player, dominion.isExplosionEnabled()));
-
-        // Row 3: navigation and new hub sections
-        gui.setItem(GUARDIANS_SLOT, buildDefendersItem(player));
+        // Row 1: navigation
         gui.setItem(MEMBERS_SLOT, buildMembersHeadItem(player, dominion.getLeader()));
         gui.setItem(USER_SEARCH_SLOT, buildUserSearchItem(player));
+        gui.setItem(REGIONS_SLOT, buildRegionsItem(player));
         gui.setItem(OUTPOSTS_SLOT, buildOutpostsItem(player));
+
+        // Row 3: Dominion settings
+        gui.setItem(RESOURCES_SLOT, buildResourcesItem(player));
+        gui.setItem(BENDING_SLOT, buildBendingNavItem(player, dominion.isBendingEnabled()));
+        gui.setItem(GUARDIANS_SLOT, buildDefendersItem(player));
+        gui.setItem(MOB_SPAWNING_SLOT, buildMobSpawningNavItem(player, dominion.isMobSpawningEnabled()));
+        gui.setItem(MEMBER_PVP_SLOT, buildMemberPvpNavItem(player, dominion.isMemberPvpEnabled()));
+        gui.setItem(EXPLOSIONS_SLOT, buildExplosionNavItem(player, dominion.isExplosionEnabled()));
 
         return gui;
     }
@@ -381,6 +386,18 @@ public class GuiDominionPermissions {
         return item;
     }
 
+    /**
+     * Builds the Regions hub button.
+     */
+    public static ItemStack buildRegionsItem(Player player) {
+        ItemStack item = new ItemStack(Material.GRASS_BLOCK);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(Lang.getFor(player, "gui.dominionperms.regions"));
+        meta.setLore(List.of(Lang.getFor(player, "gui.dominionperms.regions_lore")));
+        item.setItemMeta(meta);
+        return item;
+    }
+
     private static ItemStack buildMembersHeadItem(Player player, UUID memberUuid) {
         ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) skull.getItemMeta();
@@ -431,7 +448,7 @@ public class GuiDominionPermissions {
             case RETREAT -> Material.FEATHER;
             case MANAGE_OUTPOSTS -> Material.OAK_LOG;
             case MANAGE_DEFENDERS -> Material.SHIELD;
-            case MANAGE_PLOTS -> Material.GRASS_BLOCK;
+            case MANAGE_REGIONS -> Material.GRASS_BLOCK;
             case WITHDRAW -> Material.GOLD_NUGGET;
         };
     }

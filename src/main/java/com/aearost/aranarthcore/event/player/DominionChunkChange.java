@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.Outpost;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -51,17 +52,39 @@ public class DominionChunkChange {
 		Dominion effectiveFrom = (dominionFrom != null) ? dominionFrom : outpostDominionFrom;
 		Dominion effectiveTo = (dominionTo != null) ? dominionTo : outpostDominionTo;
 
-		// Action bar for plot entry/exit (must run before same-dominion early returns)
+		// Action bar for region entry/exit (must run before same-dominion early returns)
 		String fromChunkKey = from.getWorld().getName() + ":" + from.getX() + ":" + from.getZ();
 		String toChunkKey = to.getWorld().getName() + ":" + to.getX() + ":" + to.getZ();
-		String fromPlotName = (dominionFrom != null) ? dominionFrom.getPlotChunkNames().get(fromChunkKey) : null;
-		String toPlotName = (dominionTo != null) ? dominionTo.getPlotChunkNames().get(toChunkKey) : null;
 
-		if (fromPlotName != null && !fromPlotName.equals(toPlotName)) {
-			player.sendActionBar(LegacyComponentSerializer.legacySection().deserialize(Lang.getFor(player, "dominion.plot_exited", "name", fromPlotName)));
+		// Region auto-claim - adds chunks of the player's own Dominion that are not yet in a region
+		String autoClaimRegion = aranarthPlayer.getAutoClaimRegion();
+		if (autoClaimRegion != null && dominionTo != null && !dominionTo.getRegionChunkNames().containsKey(toChunkKey)) {
+			Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+			if (playerDominion != null && playerDominion.isSameDominion(dominionTo)) {
+				if (!dominionTo.getRegionMembers().containsKey(autoClaimRegion)) {
+					aranarthPlayer.setAutoClaimRegion(null);
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.autoclaim_region_stopped", "region", autoClaimRegion)));
+				} else if (!DominionUtils.hasPermission(player, dominionTo, DominionPermission.MANAGE_REGIONS)) {
+					aranarthPlayer.setAutoClaimRegion(null);
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.no_permission_regions")));
+				} else {
+					dominionTo.getRegionChunkNames().put(toChunkKey, autoClaimRegion);
+					DominionUtils.updateDominion(dominionTo);
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.region_chunk_added", "region", autoClaimRegion)));
+				}
+			}
 		}
-		if (toPlotName != null && !toPlotName.equals(fromPlotName)) {
-			player.sendActionBar(LegacyComponentSerializer.legacySection().deserialize(Lang.getFor(player, "dominion.plot_entered", "name", toPlotName)));
+
+		String fromRegionName = (dominionFrom != null) ? dominionFrom.getRegionChunkNames().get(fromChunkKey) : null;
+		String toRegionName = (dominionTo != null) ? dominionTo.getRegionChunkNames().get(toChunkKey) : null;
+
+		// Entering a region shows its name, and leaving one for the rest of the same Dominion shows the Dominion's name
+		if (toRegionName != null && !toRegionName.equals(fromRegionName)) {
+			player.sendActionBar(LegacyComponentSerializer.legacySection().deserialize(Lang.getFor(player, "dominion.region_name", "name", toRegionName)));
+		} else if (fromRegionName != null && toRegionName == null && dominionTo != null && dominionTo.isSameDominion(dominionFrom)) {
+			player.sendActionBar(LegacyComponentSerializer.legacySection().deserialize(Lang.getFor(player, "dominion.region_name", "name", dominionTo.getName())));
 		}
 
 		// Determine if moving within the same territory

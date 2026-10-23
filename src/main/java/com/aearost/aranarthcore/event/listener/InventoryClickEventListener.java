@@ -175,6 +175,8 @@ public class InventoryClickEventListener implements Listener {
                 new GuiDominionPermissionsClick().execute(e);
             } else if (GuiHolder.of(e.getView().getTopInventory()).getData() instanceof GuiDominionPlayerPermissions.Screen) {
                 new GuiDominionPlayerPermissionsClick().execute(e);
+            } else if (GuiHolder.of(e.getView().getTopInventory()).getData() instanceof GuiDominionRegions.Screen) {
+                new GuiDominionRegionsClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiDefenderAreaSelect.TITLE_KEY))) {
                 new GuiDefenderAreaSelectClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.defendermanage.title"))) {

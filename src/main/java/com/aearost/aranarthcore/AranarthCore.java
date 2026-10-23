@@ -578,7 +578,7 @@ public class AranarthCore extends JavaPlugin {
                 PersistenceUtils.saveDominions();
                 PersistenceUtils.saveDominionPermissions();
                 PersistenceUtils.saveDominionPlayerPermissions();
-                PersistenceUtils.saveDominionPlots();
+                PersistenceUtils.saveDominionRegions();
                 PersistenceUtils.saveOutposts();
                 if (!isSmpServer()) {
                     DominionUtils.checkAndProcessConquestDeadlines();
@@ -869,9 +869,10 @@ public class AranarthCore extends JavaPlugin {
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                if (aranarthPlayer == null || !aranarthPlayer.isAutoClaimEnabled()) {
+                if (aranarthPlayer == null || (!aranarthPlayer.isAutoClaimEnabled() && aranarthPlayer.getAutoClaimRegion() == null)) {
                     continue;
                 }
+                String autoClaimRegion = aranarthPlayer.getAutoClaimRegion();
                 String worldName = player.getWorld().getName();
                 if (!worldName.startsWith("world") && !worldName.startsWith("smp")) {
                     continue;
@@ -887,7 +888,23 @@ public class AranarthCore extends JavaPlugin {
                         Dominion chunkDominion = DominionUtils.getDominionOfChunk(chunk);
 
                         Color particleColor;
-                        if (chunkDominion == null) {
+                        if (autoClaimRegion != null) {
+                            // Region auto-claim only works within the player's own Dominion
+                            if (chunkDominion == null || playerDominion == null || !chunkDominion.isSameDominion(playerDominion)) {
+                                continue;
+                            }
+                            String chunkRegion = chunkDominion.getRegionChunkNames().get(DominionUtils.getChunkKey(chunk));
+                            if (chunkRegion == null) {
+                                // Not in a region yet - white
+                                particleColor = Color.WHITE;
+                            } else if (chunkRegion.equals(autoClaimRegion)) {
+                                // Already in this region - lime green
+                                particleColor = Color.LIME;
+                            } else {
+                                // Part of a different region - orange
+                                particleColor = Color.ORANGE;
+                            }
+                        } else if (chunkDominion == null) {
                             // Unclaimed - white
                             particleColor = Color.WHITE;
                         } else if (playerDominion != null && chunkDominion.isSameDominion(playerDominion)) {
@@ -1021,9 +1038,9 @@ public class AranarthCore extends JavaPlugin {
             PersistenceUtils.loadDominionPlayerPermissions();
         }
         if (db) {
-            PersistenceUtils.loadDominionPlotsFromDatabase();
+            PersistenceUtils.loadDominionRegionsFromDatabase();
         } else {
-            PersistenceUtils.loadDominionPlots();
+            PersistenceUtils.loadDominionRegions();
         }
         if (db) {
             PersistenceUtils.loadOutpostsFromDatabase();
@@ -1905,7 +1922,7 @@ public class AranarthCore extends JavaPlugin {
         PersistenceUtils.saveDominions();
         PersistenceUtils.saveDominionPermissions();
         PersistenceUtils.saveDominionPlayerPermissions();
-        PersistenceUtils.saveDominionPlots();
+        PersistenceUtils.saveDominionRegions();
         PersistenceUtils.saveOutposts();
         if (!isSmpServer()) {
             PersistenceUtils.saveDefenders();

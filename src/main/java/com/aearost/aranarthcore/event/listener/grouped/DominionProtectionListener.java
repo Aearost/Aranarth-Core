@@ -818,24 +818,24 @@ public class DominionProtectionListener implements Listener {
         }
 
         if (dominion != null) {
-            // Check plot assignments
+            // Check region assignments - public regions use the normal Dominion permissions below
             Chunk targetChunk = block != null ? block.getChunk() : entity.getLocation().getChunk();
             String chunkKey = targetChunk.getWorld().getName() + ":" + targetChunk.getX() + ":" + targetChunk.getZ();
-            String plotName = dominion.getPlotChunkNames().get(chunkKey);
-            if (plotName != null) {
-                Set<UUID> plotOwners = dominion.getPlotMembers().get(plotName);
+            String regionName = dominion.getRegionChunkNames().get(chunkKey);
+            if (regionName != null && !dominion.isRegionPublic(regionName)) {
+                Set<UUID> regionOwners = dominion.getRegionMembers().get(regionName);
                 UUID playerUuid = player.getUniqueId();
                 if (playerUuid.equals(dominion.getLeader())
-                        || (plotOwners != null && plotOwners.contains(playerUuid))
-                        || DominionUtils.hasPermission(player, dominion, DominionPermission.MANAGE_PLOTS)) {
-                    return false; // Plot owner, leader, or bypass permission
+                        || (regionOwners != null && regionOwners.contains(playerUuid))
+                        || DominionUtils.hasPermission(player, dominion, DominionPermission.MANAGE_REGIONS)) {
+                    return false; // Region owner, leader, or bypass permission
                 }
                 if (dominion.getMembers().contains(playerUuid)) {
-                    // Dominion member who does not own this plot and lacks bypass, deny them
+                    // Dominion member who does not own this region and lacks bypass, deny them
                     long now = System.currentTimeMillis();
                     Long last = lastDenyMessageTime.get(playerUuid);
                     if (last == null || now - last >= DENY_MESSAGE_COOLDOWN_MS) {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.plot_not_yours")));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.region_not_yours")));
                         lastDenyMessageTime.put(playerUuid, now);
                     }
                     return true;

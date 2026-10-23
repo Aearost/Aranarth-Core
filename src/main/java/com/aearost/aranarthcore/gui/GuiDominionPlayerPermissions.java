@@ -272,7 +272,7 @@ public class GuiDominionPlayerPermissions {
             case RETREAT -> Material.FEATHER;
             case MANAGE_OUTPOSTS -> Material.BROWN_BED;
             case MANAGE_DEFENDERS -> Material.SHIELD;
-            case MANAGE_PLOTS -> Material.GRASS_BLOCK;
+            case MANAGE_REGIONS -> Material.GRASS_BLOCK;
             case WITHDRAW -> Material.GOLD_NUGGET;
         };
     }

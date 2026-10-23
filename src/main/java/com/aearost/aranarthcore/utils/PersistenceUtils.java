@@ -1909,7 +1909,7 @@ public class PersistenceUtils {
                                 if (!parts[1].isEmpty()) {
                                     for (String permName : parts[1].split(",")) {
                                         try {
-                                            perms.add(DominionPermission.valueOf(permName));
+                                            perms.add(DominionPermission.fromName(permName));
                                         } catch (IllegalArgumentException ignored) {
                                         }
                                     }
@@ -2074,7 +2074,7 @@ public class PersistenceUtils {
                                     continue;
                                 }
                                 try {
-                                    DominionPermission perm = DominionPermission.valueOf(kv[0]);
+                                    DominionPermission perm = DominionPermission.fromName(kv[0]);
                                     boolean value = Boolean.parseBoolean(kv[1]);
                                     overrides.put(perm, value);
                                 } catch (IllegalArgumentException ignored) {
@@ -2172,14 +2172,20 @@ public class PersistenceUtils {
     }
 
     /**
-     * Loads dominion plot assignments from dominions_plots.txt.
+     * Loads dominion region assignments from dominions_regions.txt.
      * Must be called after loadDominions().
      */
-    public static void loadDominionPlots() {
+    public static void loadDominionRegions() {
         String currentPath = System.getProperty("user.dir");
         String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
-                + File.separator + "dominions_plots.txt";
+                + File.separator + "dominions_regions.txt";
         File file = new File(filePath);
+
+        // Regions were previously called plots, so an old file is renamed and used
+        File legacyFile = new File(file.getParentFile(), "dominions_plots.txt");
+        if (!file.exists() && legacyFile.exists() && legacyFile.renameTo(file)) {
+            Bukkit.getLogger().info("[AC] Renamed dominions_plots.txt to dominions_regions.txt");
+        }
 
         if (!file.exists()) {
             return;
@@ -2188,7 +2194,7 @@ public class PersistenceUtils {
         Scanner reader;
         try {
             reader = new Scanner(file);
-            Bukkit.getLogger().info("[AC] Attempting to read the dominions_plots file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the dominions_regions file...");
 
             while (reader.hasNextLine()) {
                 String row = reader.nextLine();
@@ -2213,24 +2219,20 @@ public class PersistenceUtils {
                     continue;
                 }
 
-                Map<String, String> plotChunkNames = new HashMap<>();
-                Map<String, Set<UUID>> plotMembers = new HashMap<>();
-                parseDominionPlotsString(fields[1], plotChunkNames, plotMembers);
-                dominion.setPlotChunkNames(plotChunkNames);
-                dominion.setPlotMembers(plotMembers);
+                applyDominionRegionsString(fields[1], dominion);
             }
 
             reader.close();
-            Bukkit.getLogger().info("[AC] Dominion plots initialized from file");
+            Bukkit.getLogger().info("[AC] Dominion regions initialized from file");
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("[AC] dominions_plots.txt not found, skipping");
+            Bukkit.getLogger().info("[AC] dominions_regions.txt not found, skipping");
         }
     }
 
     /**
-     * Saves dominion plot assignments to dominions_plots.txt.
+     * Saves dominion region assignments to dominions_regions.txt.
      */
-    public static void saveDominionPlots() {
+    public static void saveDominionRegions() {
         List<Dominion> dominions = DominionUtils.getDominions();
         if (dominions == null || dominions.isEmpty()) {
             return;
@@ -2238,7 +2240,7 @@ public class PersistenceUtils {
 
         String currentPath = System.getProperty("user.dir");
         String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
-                + File.separator + "dominions_plots.txt";
+                + File.separator + "dominions_regions.txt";
         File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
         File file = new File(filePath);
 
@@ -2249,41 +2251,41 @@ public class PersistenceUtils {
         if (isDirectoryCreated) {
             try {
                 if (file.createNewFile()) {
-                    Bukkit.getLogger().info("[AC] A new dominions_plots.txt file has been generated");
+                    Bukkit.getLogger().info("[AC] A new dominions_regions.txt file has been generated");
                 }
             } catch (IOException e) {
-                Bukkit.getLogger().info("[AC] An error occurred creating dominions_plots.txt");
+                Bukkit.getLogger().info("[AC] An error occurred creating dominions_regions.txt");
                 return;
             }
 
             try {
                 FileWriter writer = new AtomicFileWriter(filePath);
-                writer.write("#dominionId|plots\n");
-                writer.write("#format: dominionId|plotName=uuid1,uuid2+world:chunkX:chunkZ,world:chunkX:chunkZ;plotName2=...\n");
+                writer.write("#dominionId|regions\n");
+                writer.write("#format: dominionId|regionName=uuid1,uuid2+world:chunkX:chunkZ,world:chunkX:chunkZ+public|private+mapColor+icon;regionName2=...\n");
 
                 for (Dominion dominion : dominions) {
-                    Map<String, Set<UUID>> plots = dominion.getPlotMembers();
-                    if (plots.isEmpty()) {
+                    Map<String, Set<UUID>> regions = dominion.getRegionMembers();
+                    if (regions.isEmpty()) {
                         continue;
                     }
-                    String plotStr = buildDominionPlotsString(dominion.getPlotChunkNames(), plots);
-                    writer.write(dominion.getId().toString() + "|" + plotStr + "\n");
+                    String regionStr = buildDominionRegionsString(dominion);
+                    writer.write(dominion.getId().toString() + "|" + regionStr + "\n");
                 }
                 writer.close();
             } catch (IOException e) {
-                Bukkit.getLogger().info("[AC] There was an error saving dominion plots!");
+                Bukkit.getLogger().info("[AC] There was an error saving dominion regions!");
             }
         }
         // MySQL sync
         if (DatabaseManager.isActive()) {
-            runDbSync(PersistenceUtils::syncDominionPlotsToDatabase);
+            runDbSync(PersistenceUtils::syncDominionRegionsToDatabase);
         }
     }
 
     /**
-     * Syncs dominion plot assignments to MySQL.
+     * Syncs dominion region assignments to MySQL.
      */
-    public static void syncDominionPlotsToDatabase() {
+    public static void syncDominionRegionsToDatabase() {
         if (!DatabaseManager.isActive()) {
             return;
         }
@@ -2293,30 +2295,35 @@ public class PersistenceUtils {
             return;
         }
         for (Dominion dominion : dominions) {
-            Map<String, Set<UUID>> plots = dominion.getPlotMembers();
-            if (plots.isEmpty()) {
+            // The other server's copy is a stub, and its edits are saved when they are made
+            if (!DominionUtils.isHostedHere(dominion)) {
                 continue;
             }
-            String plotStr = buildDominionPlotsString(dominion.getPlotChunkNames(), plots);
+            Map<String, Set<UUID>> regions = dominion.getRegionMembers();
             try {
-                db.saveDominionPlots(dominion.getId(), plotStr);
+                if (regions.isEmpty()) {
+                    // Clear the stored row so a deleted final region does not come back on the next load
+                    db.deleteDominionRegions(dominion.getId());
+                } else {
+                    db.saveDominionRegions(dominion.getId(), buildDominionRegionsString(dominion));
+                }
             } catch (Exception e) {
-                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync dominion plots for " + dominion.getId() + ": " + e.getMessage());
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync dominion regions for " + dominion.getId() + ": " + e.getMessage());
             }
         }
     }
 
     /**
-     * Loads dominion plot assignments from MySQL. Falls back to file if empty.
+     * Loads dominion region assignments from MySQL. Falls back to file if empty.
      */
-    public static void loadDominionPlotsFromDatabase() {
+    public static void loadDominionRegionsFromDatabase() {
         DatabaseManager db = DatabaseManager.getInstance();
-        Map<UUID, String> all = db.loadAllDominionPlots();
+        Map<UUID, String> all = db.loadAllDominionRegions();
         if (all.isEmpty()) {
-            loadDominionPlots();
+            loadDominionRegions();
             return;
         }
-        Bukkit.getLogger().info("[AC] Loading dominion plots from MySQL...");
+        Bukkit.getLogger().info("[AC] Loading dominion regions from MySQL...");
         for (Map.Entry<UUID, String> entry : all.entrySet()) {
             UUID dominionId = entry.getKey();
             Dominion dominion = DominionUtils.getDominionById(dominionId);
@@ -2324,74 +2331,100 @@ public class PersistenceUtils {
                 continue;
             }
             try {
-                Map<String, String> plotChunkNames = new HashMap<>();
-                Map<String, Set<UUID>> plotMembers = new HashMap<>();
-                parseDominionPlotsString(entry.getValue(), plotChunkNames, plotMembers);
-                dominion.setPlotChunkNames(plotChunkNames);
-                dominion.setPlotMembers(plotMembers);
+                applyDominionRegionsString(entry.getValue(), dominion);
             } catch (Exception e) {
-                Bukkit.getLogger().warning("[AC] Failed to parse dominion plots for " + dominionId + ": " + e.getMessage());
+                Bukkit.getLogger().warning("[AC] Failed to parse dominion regions for " + dominionId + ": " + e.getMessage());
             }
         }
-        Bukkit.getLogger().info("[AC] Dominion plots initialized from MySQL");
+        Bukkit.getLogger().info("[AC] Dominion regions initialized from MySQL");
     }
 
     /**
-     * Parses a dominion plots string into the two new plot maps.
-     * Format: plotName=uuid1,uuid2+world:x:z,world:x:z;plotName2=...
+     * Parses a dominion regions string and replaces the dominion's regions with it. Regions without the
+     * public flag, including those saved before regions could be public, are private. Regions without
+     * a map color use the Dominion's color.
+     * Format: regionName=uuid1,uuid2+world:x:z,world:x:z+public+&a+STONE;regionName2=...
      */
-    private static void parseDominionPlotsString(String raw, Map<String, String> plotChunkNames, Map<String, Set<UUID>> plotMembers) {
-        if (raw == null || raw.isBlank()) {
-            return;
-        }
-        for (String plotEntry : raw.split(";")) {
-            String[] nameParts = plotEntry.split("=", 2);
-            if (nameParts.length != 2) {
-                continue;
-            }
-            String plotName = nameParts[0];
-            String[] dataParts = nameParts[1].split("\\+", 2);
-            if (dataParts.length != 2) {
-                continue;
-            }
-            Set<UUID> members = new HashSet<>();
-            if (!dataParts[0].isBlank()) {
-                for (String uuidStr : dataParts[0].split(",")) {
-                    try {
-                        members.add(UUID.fromString(uuidStr.trim()));
-                    } catch (IllegalArgumentException ignored) {
+    private static void applyDominionRegionsString(String raw, Dominion dominion) {
+        Map<String, String> regionChunkNames = new HashMap<>();
+        Map<String, Set<UUID>> regionMembers = new HashMap<>();
+        Set<String> publicRegions = new HashSet<>();
+        Map<String, String> regionMapColors = new HashMap<>();
+        Map<String, Material> regionIcons = new HashMap<>();
+        if (raw != null && !raw.isBlank()) {
+            for (String regionEntry : raw.split(";")) {
+                String[] nameParts = regionEntry.split("=", 2);
+                if (nameParts.length != 2) {
+                    continue;
+                }
+                String regionName = nameParts[0];
+                String[] dataParts = nameParts[1].split("\\+", 5);
+                if (dataParts.length < 2) {
+                    continue;
+                }
+                Set<UUID> members = new HashSet<>();
+                if (!dataParts[0].isBlank()) {
+                    for (String uuidStr : dataParts[0].split(",")) {
+                        try {
+                            members.add(UUID.fromString(uuidStr.trim()));
+                        } catch (IllegalArgumentException ignored) {
+                        }
+                    }
+                }
+                regionMembers.put(regionName, members);
+                if (!dataParts[1].isBlank()) {
+                    for (String chunkKey : dataParts[1].split(",")) {
+                        regionChunkNames.put(chunkKey.trim(), regionName);
+                    }
+                }
+                if (dataParts.length >= 3 && dataParts[2].equals("public")) {
+                    publicRegions.add(regionName);
+                }
+                if (dataParts.length >= 4 && !dataParts[3].isBlank()) {
+                    regionMapColors.put(regionName, dataParts[3]);
+                }
+                if (dataParts.length == 5 && !dataParts[4].isBlank()) {
+                    Material icon = Material.matchMaterial(dataParts[4]);
+                    if (icon != null) {
+                        regionIcons.put(regionName, icon);
                     }
                 }
             }
-            plotMembers.put(plotName, members);
-            if (!dataParts[1].isBlank()) {
-                for (String chunkKey : dataParts[1].split(",")) {
-                    plotChunkNames.put(chunkKey.trim(), plotName);
-                }
-            }
         }
+        dominion.setRegionChunkNames(regionChunkNames);
+        dominion.setRegionMembers(regionMembers);
+        dominion.setPublicRegions(publicRegions);
+        dominion.setRegionMapColors(regionMapColors);
+        dominion.setRegionIcons(regionIcons);
     }
 
     /**
-     * Serializes the two plot maps into a string.
-     * Format: plotName=uuid1,uuid2+world:x:z,world:x:z;plotName2=...
+     * Serializes the dominion's regions into a string.
+     * Format: regionName=uuid1,uuid2+world:x:z,world:x:z+public+&a+STONE;regionName2=...
      */
-    private static String buildDominionPlotsString(Map<String, String> plotChunkNames, Map<String, Set<UUID>> plotMembers) {
+    private static String buildDominionRegionsString(Dominion dominion) {
+        Map<String, String> regionChunkNames = dominion.getRegionChunkNames();
         StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, Set<UUID>> entry : plotMembers.entrySet()) {
-            String plotName = entry.getKey();
+        for (Map.Entry<String, Set<UUID>> entry : dominion.getRegionMembers().entrySet()) {
+            String regionName = entry.getKey();
             Set<UUID> members = entry.getValue();
             if (!sb.isEmpty()) {
                 sb.append(";");
             }
-            sb.append(plotName).append("=");
+            sb.append(regionName).append("=");
             sb.append(members.stream().map(UUID::toString).collect(Collectors.joining(",")));
             sb.append("+");
-            String chunks = plotChunkNames.entrySet().stream()
-                    .filter(e -> e.getValue().equals(plotName))
+            String chunks = regionChunkNames.entrySet().stream()
+                    .filter(e -> e.getValue().equals(regionName))
                     .map(Map.Entry::getKey)
                     .collect(Collectors.joining(","));
             sb.append(chunks);
+            sb.append("+").append(dominion.isRegionPublic(regionName) ? "public" : "private");
+            // The map color and icon are left empty when the region has none of its own
+            String mapColor = dominion.getRegionMapColors().get(regionName);
+            sb.append("+").append(mapColor != null ? mapColor : "");
+            Material icon = dominion.getRegionIcons().get(regionName);
+            sb.append("+").append(icon != null ? icon.name() : "");
         }
         return sb.toString();
     }
@@ -6545,7 +6578,7 @@ public class PersistenceUtils {
                     if (!parts[1].isEmpty()) {
                         for (String permName : parts[1].split(",")) {
                             try {
-                                perms.add(DominionPermission.valueOf(permName));
+                                perms.add(DominionPermission.fromName(permName));
                             } catch (IllegalArgumentException ignored) {
                             }
                         }
@@ -6580,7 +6613,7 @@ public class PersistenceUtils {
                         String[] kv = permEntry.split("=", 2);
                         if (kv.length == 2) {
                             try {
-                                overrides.put(DominionPermission.valueOf(kv[0]), Boolean.parseBoolean(kv[1]));
+                                overrides.put(DominionPermission.fromName(kv[0]), Boolean.parseBoolean(kv[1]));
                             } catch (IllegalArgumentException ignored) {
                             }
                         }
@@ -6617,6 +6650,7 @@ public class PersistenceUtils {
         String row = buildDominionRow(dominion);
         String perms = dominion.getDominionPermissions() != null ? buildDominionPermissionsString(dominion) : null;
         String playerPerms = buildDominionPlayerPermsString(dominion);
+        String regions = buildDominionRegionsString(dominion);
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
             DatabaseManager db = DatabaseManager.getInstance();
             boolean saved;
@@ -6636,6 +6670,12 @@ public class PersistenceUtils {
                 db.deleteDominionPlayerPerms(id);
             } else {
                 db.saveDominionPlayerPerms(id, playerPerms);
+            }
+            // Regions can be managed through the GUI from either server, so they are always saved
+            if (regions.isEmpty()) {
+                db.deleteDominionRegions(id);
+            } else {
+                db.saveDominionRegions(id, regions);
             }
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                 if (NetworkManager.isActive()) {
@@ -6661,6 +6701,7 @@ public class PersistenceUtils {
             }
             String permsData = db.loadDominionPermissionsById(dominionId);
             String playerPermsData = db.loadDominionPlayerPermsById(dominionId);
+            String regionsData = db.loadDominionRegionsById(dominionId);
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                 Dominion live = DominionUtils.getDominionById(dominionId);
                 if (live == null) {
@@ -6673,6 +6714,7 @@ public class PersistenceUtils {
                             ? parseDominionPermissions(permsData) : live.getDominionPermissions());
                     loaded.setPlayerPermissionOverrides(playerPermsData != null && !playerPermsData.isEmpty()
                             ? parseDominionPlayerPerms(playerPermsData) : new HashMap<>());
+                    applyDominionRegionsString(regionsData, loaded);
                     DominionUtils.applySyncedDominion(live, loaded, !DominionUtils.isHostedHere(live));
                 } catch (Exception e) {
                     Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to refresh dominion " + dominionId + ": " + e.getMessage());
@@ -8987,7 +9029,7 @@ public class PersistenceUtils {
                                 if (!parts[1].isEmpty()) {
                                     for (String permName : parts[1].split(",")) {
                                         try {
-                                            perms.add(DominionPermission.valueOf(permName));
+                                            perms.add(DominionPermission.fromName(permName));
                                         } catch (IllegalArgumentException ignored) {
                                         }
                                     }
@@ -9028,7 +9070,7 @@ public class PersistenceUtils {
                                     String[] kv = permEntry.split("=", 2);
                                     if (kv.length == 2) {
                                         try {
-                                            overrides.put(DominionPermission.valueOf(kv[0]), Boolean.parseBoolean(kv[1]));
+                                            overrides.put(DominionPermission.fromName(kv[0]), Boolean.parseBoolean(kv[1]));
                                         } catch (IllegalArgumentException ignored) {
                                         }
                                     }
@@ -9043,14 +9085,10 @@ public class PersistenceUtils {
                     loaded.setPlayerPermissionOverrides(allOverrides);
                 }
 
-                // Load plot assignments
-                String plotsData = db.loadDominionPlotsById(loaded.getId());
-                if (plotsData != null && !plotsData.isEmpty()) {
-                    Map<String, String> plotChunkNames = new HashMap<>();
-                    Map<String, Set<UUID>> plotMembers = new HashMap<>();
-                    parseDominionPlotsString(plotsData, plotChunkNames, plotMembers);
-                    loaded.setPlotChunkNames(plotChunkNames);
-                    loaded.setPlotMembers(plotMembers);
+                // Load region assignments
+                String regionsData = db.loadDominionRegionsById(loaded.getId());
+                if (regionsData != null && !regionsData.isEmpty()) {
+                    applyDominionRegionsString(regionsData, loaded);
                 }
 
                 Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "Reloaded dominion '" + loaded.getName() + "' from MySQL for cross-server player " + playerUuid);
@@ -9091,7 +9129,7 @@ public class PersistenceUtils {
                                 if (!parts[1].isEmpty()) {
                                     for (String permName : parts[1].split(",")) {
                                         try {
-                                            perms.add(DominionPermission.valueOf(permName));
+                                            perms.add(DominionPermission.fromName(permName));
                                         } catch (IllegalArgumentException ignored) {
                                         }
                                     }
@@ -9160,7 +9198,7 @@ public class PersistenceUtils {
                                     continue;
                                 }
                                 try {
-                                    overrides.put(DominionPermission.valueOf(kv[0]), Boolean.parseBoolean(kv[1]));
+                                    overrides.put(DominionPermission.fromName(kv[0]), Boolean.parseBoolean(kv[1]));
                                 } catch (IllegalArgumentException ignored) {
                                 }
                             }
