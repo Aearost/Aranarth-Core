@@ -1869,7 +1869,7 @@ public class DominionUtils {
                     RESIN_CLUMP, PINK_PETALS, WILDFLOWERS,
                     RED_MUSHROOM, BROWN_MUSHROOM, RED_MUSHROOM_BLOCK, BROWN_MUSHROOM_BLOCK, MUSHROOM_STEM,
                     WEEPING_VINES, TWISTING_VINES, CRIMSON_FUNGUS, WARPED_FUNGUS,
-                    SWEET_BERRIES, SUGAR_CANE, CACTUS, CACTUS_FLOWER, MELON, PUMPKIN, COCOA_BEANS, CHORUS_FRUIT,
+                    SWEET_BERRIES, SUGAR_CANE, CACTUS, CACTUS_FLOWER, MELON, PUMPKIN, COCOA_BEANS, CHORUS_FRUIT, CHORUS_FLOWER,
                     DANDELION, SUNFLOWER, POPPY, OXEYE_DAISY, CORNFLOWER, ALLIUM, AZURE_BLUET,
                     WHITE_TULIP, PINK_TULIP, ORANGE_TULIP, RED_TULIP, LILY_OF_THE_VALLEY, LILAC, PEONY, ROSE_BUSH,
                     TUBE_CORAL_BLOCK, TUBE_CORAL, TUBE_CORAL_FAN,
@@ -1896,7 +1896,7 @@ public class DominionUtils {
                     NAUTILUS_SHELL, TURTLE_SCUTE, ARMADILLO_SCUTE,
                     BLAZE_ROD, WITHER_SKELETON_SKULL, DIAMOND,
                     NETHERITE_UPGRADE_SMITHING_TEMPLATE, ENCHANTED_BOOK,
-                    GOLD_NUGGET, ENDER_PEARL, DRIED_GHAST,
+                    GOLD_NUGGET, ENDER_PEARL, DRIED_GHAST, SHULKER_SHELL,
                     ECHO_SHARD, DISC_FRAGMENT_5, POTENT_SULFUR -> DominionResourceCategory.VALUABLES;
             default -> null;
         };
@@ -1970,6 +1970,7 @@ public class DominionUtils {
         int[] rareOdds = {20, 15, 10, 5, 2};
         int[] elytraOdds = {40, 20, 13, 10, 8};
         int[] mendingOdds = {16, 12, 8, 6, 4};
+        int[] shulkerShellOdds = {20, 6, 4, 3, 2};
         int[] godAppleOdds = {16, 12, 8, 4, 1};
 
         List<ResourceDrop> guaranteed = new ArrayList<>();
@@ -2019,6 +2020,8 @@ public class DominionUtils {
                 "Elytra (" + formatPct(elytraOdds[rank - 1]) + " if simulating End City)"));
         endCityDrops.add(new ResourceDrop(mendingBook, 0, mendingOdds[rank - 1],
                 "Mending Book (" + formatPct(mendingOdds[rank - 1]) + " if simulating End City)"));
+        endCityDrops.add(new ResourceDrop(new ItemStack(Material.SHULKER_SHELL, 1), 0, shulkerShellOdds[rank - 1],
+                "Shulker Shell (" + formatPct(shulkerShellOdds[rank - 1]) + " if simulating End City)"));
         SimulationGroup endCity = new SimulationGroup("End City", 5, endCityDrops);
 
         // Echo Shard and Swift Sneak Book are previewOnly, actual rolls done in rollAncientCityExtras
@@ -2757,7 +2760,11 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.END_STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.END_STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.OBSIDIAN, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.CHORUS_FRUIT, 16)));
+            // Chorus plants only naturally generate in the End Highlands
+            if (biome == Biome.END_HIGHLANDS) {
+                guaranteed.add(new ResourceDrop(new ItemStack(Material.CHORUS_FRUIT, 16)));
+                guaranteed.add(new ResourceDrop(new ItemStack(Material.CHORUS_FLOWER, 2)));
+            }
             simulations.add(endCity);
         }
 

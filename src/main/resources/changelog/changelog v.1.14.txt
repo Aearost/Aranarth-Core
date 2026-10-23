@@ -43,6 +43,8 @@ Dominion
 [~] Renamed dominion plots to dominion regions
 [+] Added a regions GUI to /d for managing regions
 [~] Re-arranged the /d GUI with the new additions in consideration
++] Added shulker shells to End City simulations in dominion resource claims
+[~] Chorus fruits and Chorus Flowers are provided in End Highlands claims
 
 Aranarthium, Items & Crafting
 [+] Implemented Essence Imbuing, allowing players to create Essence items and imbue them with XP to craft the various essences
