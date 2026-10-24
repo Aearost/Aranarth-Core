@@ -48,6 +48,7 @@ Dominion
 [~] Re-arranged the /d GUI with the new additions in consideration
 +] Added shulker shells to End City simulations in dominion resource claims
 [~] Chorus fruits and Chorus Flowers are provided in End Highlands claims
+[~] Cave biome resource claims now have a chance to simulate an Amethyst Geode
 
 Aranarthium, Items & Crafting
 [+] Implemented Essence Imbuing, allowing players to create Essence items and imbue them with XP to craft the various essences

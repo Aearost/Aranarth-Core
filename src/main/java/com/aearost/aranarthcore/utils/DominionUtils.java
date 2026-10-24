@@ -1880,7 +1880,7 @@ public class DominionUtils {
                     INK_SAC, SLIME_BALL, MAGMA_CREAM, BONE,
                     AZALEA_LEAVES, FLOWERING_AZALEA_LEAVES, AZALEA, FLOWERING_AZALEA,
                     BIG_DRIPLEAF, SMALL_DRIPLEAF, HANGING_ROOTS, SPORE_BLOSSOM, POINTED_DRIPSTONE,
-                    SCULK, SCULK_VEIN, SULFUR_SPIKE, NETHER_WART -> DominionResourceCategory.NATURAL_BLOCKS;
+                    SCULK, SCULK_VEIN, SULFUR_SPIKE, NETHER_WART ->DominionResourceCategory.NATURAL_BLOCKS;
             case COD, SALMON, TROPICAL_FISH, PUFFERFISH,
                     BEEF, PORKCHOP, CHICKEN, RABBIT, MUTTON,
                     APPLE, GOLDEN_CARROT, GLOW_BERRIES -> DominionResourceCategory.FOOD;
@@ -1891,13 +1891,13 @@ public class DominionUtils {
                     END_ROD, BONE_BLOCK,
                     TERRACOTTA, RED_TERRACOTTA, ORANGE_TERRACOTTA, YELLOW_TERRACOTTA,
                     BROWN_TERRACOTTA, LIGHT_GRAY_TERRACOTTA, WHITE_TERRACOTTA,
-                    SOUL_LANTERN, SCULK_SENSOR, SCULK_CATALYST -> DominionResourceCategory.MISC_BLOCKS;
+                    SOUL_LANTERN, SCULK_SENSOR, SCULK_CATALYST, AMETHYST_BLOCK -> DominionResourceCategory.MISC_BLOCKS;
             case ELYTRA, HEART_OF_THE_SEA, NETHERITE_SCRAP, GHAST_TEAR,
                     NAUTILUS_SHELL, TURTLE_SCUTE, ARMADILLO_SCUTE,
                     BLAZE_ROD, WITHER_SKELETON_SKULL, DIAMOND,
                     NETHERITE_UPGRADE_SMITHING_TEMPLATE, ENCHANTED_BOOK,
                     GOLD_NUGGET, ENDER_PEARL, DRIED_GHAST, SHULKER_SHELL,
-                    ECHO_SHARD, DISC_FRAGMENT_5, POTENT_SULFUR -> DominionResourceCategory.VALUABLES;
+                    ECHO_SHARD, DISC_FRAGMENT_5, POTENT_SULFUR ->DominionResourceCategory.VALUABLES;
             default -> null;
         };
     }
@@ -2041,6 +2041,12 @@ public class DominionUtils {
         ancientCityDrops.add(new ResourceDrop(createSwiftSneakBook(swiftSneakLevels[swiftSneakLevels.length - 1]), 0, 0,
                 "Swift Sneak " + swiftSneakLevelText + " Book (" + formatPct(SWIFT_SNEAK_BOOK_ODDS) + " if simulating Ancient City)", true));
         SimulationGroup ancientCity = new SimulationGroup("Ancient City", 5, ancientCityDrops);
+
+        List<ResourceDrop> amethystGeodeDrops = new ArrayList<>();
+        amethystGeodeDrops.add(new ResourceDrop(new ItemStack(Material.AMETHYST_BLOCK, 16)));
+        amethystGeodeDrops.add(new ResourceDrop(new ItemStack(Material.CALCITE, 32)));
+        amethystGeodeDrops.add(new ResourceDrop(new ItemStack(Material.SMOOTH_BASALT, 32)));
+        SimulationGroup amethystGeode = new SimulationGroup("Amethyst Geode", 25, amethystGeodeDrops);
 
         // Oceans, Rivers, Beaches, Islands
         if (biome == Biome.OCEAN) {
@@ -2643,6 +2649,7 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
             rares.add(new ResourceDrop(new ItemStack(Material.SPORE_BLOSSOM, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
+            simulations.add(amethystGeode);
         } else if (biome == Biome.DRIPSTONE_CAVES) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.DRIPSTONE_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
@@ -2652,6 +2659,7 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
             rares.add(new ResourceDrop(new ItemStack(Material.DIAMOND, 1), 0, rareOdds[rank - 1],
                     "Rare Drop (" + formatPct(rareOdds[rank - 1]) + " chance)"));
+            simulations.add(amethystGeode);
         } else if (biome == Biome.DEEP_DARK) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COBBLED_DEEPSLATE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COBBLED_DEEPSLATE, 64)));
@@ -2666,6 +2674,7 @@ public class DominionUtils {
             rares.add(new ResourceDrop(new ItemStack(Material.SCULK_CATALYST, 1), 0, rareOdds[rank - 1],
                     "Rare Drop (" + formatPct(rareOdds[rank - 1]) + " chance)"));
             simulations.add(ancientCity);
+            simulations.add(amethystGeode);
         } else if (biome == Biome.SULFUR_CAVES) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SULFUR, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SULFUR, 64)));
@@ -2676,6 +2685,7 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
             rares.add(new ResourceDrop(new ItemStack(Material.POTENT_SULFUR, 1), 0, rareOdds[rank - 1],
                     "Rare Drop (" + formatPct(rareOdds[rank - 1]) + " chance)"));
+            simulations.add(amethystGeode);
 
         // Nether and End
         } else if (biome == Biome.NETHER_WASTES) {
