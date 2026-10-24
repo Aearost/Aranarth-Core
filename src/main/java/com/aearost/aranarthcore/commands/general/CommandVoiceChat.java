@@ -50,7 +50,7 @@ public class CommandVoiceChat implements CommandExecutor {
             return true;
         }
 
-        if (args[0].equalsIgnoreCase("who")) {
+        if (args[0].equalsIgnoreCase("who") || args[0].equalsIgnoreCase("list")) {
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "voicechat.who_header")));
             // Matches tab list vanish visibility - only admins can see vanished players
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());

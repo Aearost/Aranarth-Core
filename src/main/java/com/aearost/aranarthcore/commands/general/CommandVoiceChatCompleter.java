@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class CommandVoiceChatCompleter implements TabCompleter {
 
-    private static final List<String> OPTIONS = List.of("global", "local", "dominion", "council", "leave", "who");
+    private static final List<String> OPTIONS = List.of("global", "local", "dominion", "council", "leave", "who", "list");
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {

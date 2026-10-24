@@ -15,6 +15,7 @@ Economy, Jobs & Quests
 Chat, UI & Sounds
 
 Quality of Life
+[+] Added /vc list as an alias for /vc who
 
 Cross-server & Technical
 
