@@ -648,7 +648,10 @@
       "PowerShell($mvn = Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName; & $mvn -q -o compile; \"EXIT $LASTEXITCODE\")",
       "Bash(ssh -o BatchMode=yes -o ConnectTimeout=15 aranarth \"pm2 describe aranarth-bot | head -40; ls -la ~/.pm2/logs/\")",
       "Bash(ssh *)",
-      "Bash(echo \"exit=$?\")"
+      "Bash(echo \"exit=$?\")",
+      "PowerShell($jar = \"$env:USERPROFILE\\\\.m2\\\\repository\\\\io\\\\papermc\\\\paper\\\\paper-api\\\\26.3.build.9-alpha\\\\paper-api-26.3.build.9-alpha.jar\"; $javap = \\(Get-Command javap -ErrorAction SilentlyContinue\\).Source; if \\(-not $javap\\) { $javap = \\(Get-ChildItem \"$env:USERPROFILE\\\\.jdks\",\"C:\\\\Program Files\\\\Java\",\"C:\\\\Program Files\\\\Eclipse Adoptium\" -Recurse -Filter javap.exe -ErrorAction SilentlyContinue | Select-Object -First 1\\).FullName }; $javap; & $javap -cp $jar 'io.papermc.paper.datacomponent.item.ResolvableProfile$Builder' 'io.papermc.paper.datacomponent.item.ResolvableProfile')",
+      "PowerShell($mvn = \\(Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1\\).FullName; & $mvn -q -o compile 2>&1 | Select-Object -Last 40)",
+      "PowerShell($mvn = \\(Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1\\).FullName; & $mvn -q -o compile 2>&1 | Where-Object { $_ -match 'ERROR' } | Select-Object -First 20)"
     ]
   }
 }

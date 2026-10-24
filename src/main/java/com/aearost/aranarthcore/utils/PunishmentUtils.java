@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Avatar;
 import com.aearost.aranarthcore.objects.Punishment;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
@@ -46,6 +47,11 @@ public class PunishmentUtils {
                     String reason = punishment.getReason();
                     Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
                             DatabaseManager.getInstance().upsertNetworkBan(uuid, reason, banExpiresAt));
+                }
+                // A banned Avatar's reign ends right away
+                Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
+                if (currentAvatar != null && currentAvatar.getUuid().equals(uuid)) {
+                    AvatarUtils.removeCurrentAvatar();
                 }
             }
             case UNBAN -> {

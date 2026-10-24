@@ -121,8 +121,9 @@ public class PlayerRespawnEventListener implements Listener {
         }
         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
+        // Dying in the arena or a creative world does not end the Avatar's reign
         Avatar avatar = AvatarUtils.getCurrentAvatar();
-        if (avatar != null) {
+        if (avatar != null && AranarthUtils.isSurvivalWorld(world)) {
             if (avatar.getUuid().equals(player.getUniqueId())) {
                 AvatarUtils.removeCurrentAvatar();
             }

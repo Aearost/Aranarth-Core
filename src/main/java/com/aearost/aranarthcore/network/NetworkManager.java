@@ -129,6 +129,7 @@ public class NetworkManager {
     public static final String CH_PING_UPDATE = "aranarth:ping_update";
     public static final String CH_HEARTBEAT = "aranarth:heartbeat";
     public static final String CH_RESOURCE_WORLD_LOCK = "aranarth:resource_world_lock";
+    public static final String CH_AVATAR_UPDATE = "aranarth:avatar_update";
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
     private static final String KEY_RETURN_LOC = "return_loc:";
@@ -596,6 +597,7 @@ public class NetworkManager {
             case CH_PING_UPDATE -> handlePingUpdate(json);
             case CH_HEARTBEAT -> handleHeartbeat(json);
             case CH_RESOURCE_WORLD_LOCK -> handleResourceWorldLock(json);
+            case CH_AVATAR_UPDATE -> handleAvatarUpdate(json);
         }
     }
 
@@ -1148,6 +1150,19 @@ public class NetworkManager {
         json.addProperty("server", thisServer);
         json.addProperty("locked", isLocked);
         publish(CH_RESOURCE_WORLD_LOCK, json);
+    }
+
+    /**
+     * Notifies all other servers that an Avatar's reign has started or ended, carrying the full
+     * avatar list so their in-memory copy (which they also save periodically) is never stale.
+     */
+    public void publishAvatarUpdate(UUID uuid, boolean isNewAvatar) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", uuid.toString());
+        json.addProperty("isNewAvatar", isNewAvatar);
+        json.add("avatars", PersistenceUtils.avatarsToJson());
+        publish(CH_AVATAR_UPDATE, json);
     }
 
     /**
@@ -2623,6 +2638,17 @@ public class NetworkManager {
         }
         boolean isLocked = json.get("locked").getAsBoolean();
         Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> ResourceWorldUtils.setRemoteResourceLocked(isLocked));
+    }
+
+    private void handleAvatarUpdate(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        boolean isNewAvatar = json.get("isNewAvatar").getAsBoolean();
+        List<Avatar> avatars = PersistenceUtils.avatarsFromJson(json.getAsJsonArray("avatars"));
+        AvatarUtils.applyRemoteUpdate(avatars, uuid, isNewAvatar);
     }
 
     private void handleMarketUpdate(JsonObject json) {

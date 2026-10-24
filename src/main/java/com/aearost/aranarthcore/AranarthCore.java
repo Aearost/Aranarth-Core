@@ -629,28 +629,6 @@ public class AranarthCore extends JavaPlugin {
                     ChatUtils.sendServerTips();
                 }
 
-                // TODO Re-enable once we do the Avatar event
-//				// Attempts to automatically assign an avatar if there currently is none
-//				if (AvatarUtils.getCurrentAvatar() == null) {
-//					boolean wasAvatarFound = AvatarUtils.selectAvatar(false);
-//					if (!wasAvatarFound) {
-//						Bukkit.getLogger().info("A new Avatar could not be selected");
-//					}
-//				} else {
-//					// Automatically removes an Avatar once they've been inactive for 7 days
-//					Avatar avatar = AvatarUtils.getCurrentAvatar();
-//					OfflinePlayer player = Bukkit.getOfflinePlayer(avatar.getUuid());
-//					if (!player.isOnline()) {
-//						Instant lastPlayed = Instant.ofEpochMilli(player.getLastPlayed());
-//						LocalDateTime playerLastPlayDate = LocalDateTime.ofInstant(lastPlayed, ZoneId.systemDefault());
-//						LocalDateTime currentDate = LocalDateTime.now();
-//						if (playerLastPlayDate.plusDays(7).isBefore(currentDate)) {
-//							Bukkit.getLogger().info("Avatar " + player.getName() + " has been inactive for 7 days");
-//							AvatarUtils.removeCurrentAvatar();
-//						}
-//					}
-//				}
-
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     PermissionUtils.reEvaluateMonthlySaints(player);
                 }
@@ -659,6 +637,13 @@ public class AranarthCore extends JavaPlugin {
                 CaveSpiderPoisonExtract.resetExtractionCounts();
             }
         }, 12000, 12000);
+
+        // Run every minute - the automatic Avatar selection and inactivity checks (Survival server only)
+        if (!isSmpServer()) {
+            Bukkit.getScheduler().scheduleSyncRepeatingTask(this, AvatarUtils::runScheduledChecks, 1200, 1200);
+            // Refreshes the mannequins in case the Avatars changed while this server was offline
+            Bukkit.getScheduler().runTaskLater(this, AvatarUtils::refreshAvatarMannequins, 200);
+        }
 
         // Check every 5 seconds to update Aranarthium effects, and to see if it is a new day
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
@@ -1407,6 +1392,7 @@ public class AranarthCore extends JavaPlugin {
         getCommand("aranarth").setTabCompleter(new CommandAranarthCompleter());
         getCommand("arena").setExecutor(new CommandArena());
         getCommand("avatar").setExecutor(new CommandAvatar());
+        getCommand("avatar").setTabCompleter(new CommandAvatarCompleter());
         getCommand("back").setExecutor(new CommandBack());
         getCommand("balance").setExecutor(new CommandBalance());
         getCommand("balance").setTabCompleter(new CommandBalanceCompleter());

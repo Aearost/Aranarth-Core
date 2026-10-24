@@ -337,7 +337,7 @@ public class PlayerServerJoinListener implements Listener {
         if (AvatarUtils.getCurrentAvatar() != null) {
             // Called to bind the Avatar's abilities to prevent loss of avatar abilities
             if (AvatarUtils.getCurrentAvatar().getUuid().equals(player.getUniqueId())) {
-                PersistenceUtils.loadAvatarBinds();
+                PersistenceUtils.applyAvatarBindsOnJoin();
 
                 // Adds a 2-second delay
                 new BukkitRunnable() {

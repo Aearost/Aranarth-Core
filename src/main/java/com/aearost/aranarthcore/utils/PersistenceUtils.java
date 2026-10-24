@@ -6871,6 +6871,42 @@ public class PersistenceUtils {
             return;
         }
         DatabaseManager db = DatabaseManager.getInstance();
+        JsonArray avatarsArr = avatarsToJson();
+        JsonArray bindsArr = new JsonArray();
+        Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
+        if (currentAvatar != null) {
+            BendingPlayer bp = BendingPlayer.getBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()));
+            if (bp != null) {
+                for (Map.Entry<Integer, String> bindEntry : bp.getAbilities().entrySet()) {
+                    JsonObject bind = new JsonObject();
+                    bind.addProperty("slot", bindEntry.getKey());
+                    bind.addProperty("ability", bindEntry.getValue());
+                    bindsArr.add(bind);
+                }
+            } else {
+                // The Avatar is not on this server, so the binds saved by the server they are on are kept
+                JsonArray storedBinds = loadStoredAvatarBinds(currentAvatar.getUuid());
+                if (storedBinds != null) {
+                    bindsArr = storedBinds;
+                }
+            }
+        }
+        JsonObject root = new JsonObject();
+        root.add("avatars", avatarsArr);
+        root.add("binds", bindsArr);
+        try {
+            db.saveAvatars(GSON.toJson(root));
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync avatars: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Converts the list of all avatars to JSON, where a null entry is a period without an Avatar.
+     *
+     * @return The list of all avatars as a JSON array.
+     */
+    public static JsonArray avatarsToJson() {
         JsonArray avatarsArr = new JsonArray();
         for (Avatar avatar : AvatarUtils.getAvatars()) {
             if (avatar == null) {
@@ -6886,27 +6922,92 @@ public class PersistenceUtils {
                 avatarsArr.add(a);
             }
         }
-        JsonArray bindsArr = new JsonArray();
-        Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
-        if (currentAvatar != null) {
-            BendingPlayer bp = BendingPlayer.getBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()));
-            if (bp != null) {
-                for (Map.Entry<Integer, String> bindEntry : bp.getAbilities().entrySet()) {
-                    JsonObject bind = new JsonObject();
-                    bind.addProperty("slot", bindEntry.getKey());
-                    bind.addProperty("ability", bindEntry.getValue());
-                    bindsArr.add(bind);
-                }
+        return avatarsArr;
+    }
+
+    /**
+     * Converts a JSON array created by avatarsToJson() back to a list of avatars.
+     *
+     * @param avatarsArr The JSON array of avatars.
+     * @return The list of avatars.
+     */
+    public static List<Avatar> avatarsFromJson(JsonArray avatarsArr) {
+        List<Avatar> avatars = new ArrayList<>();
+        for (com.google.gson.JsonElement el : avatarsArr) {
+            if (el.isJsonNull()) {
+                avatars.add(null);
+            } else {
+                JsonObject a = el.getAsJsonObject();
+                UUID uuid = UUID.fromString(a.get("uuid").getAsString());
+                String startInGame = a.get("startInGame").getAsString();
+                String endInGame = a.get("endInGame").getAsString();
+                String startInRealLife = a.get("startInRealLife").getAsString();
+                String endInRealLife = a.get("endInRealLife").getAsString();
+                char element = a.get("element").getAsString().charAt(0);
+                avatars.add(new Avatar(uuid, startInGame, endInGame, startInRealLife, endInRealLife, element));
             }
         }
-        JsonObject root = new JsonObject();
-        root.add("avatars", avatarsArr);
-        root.add("binds", bindsArr);
+        return avatars;
+    }
+
+    /**
+     * Provides the binds stored in MySQL if they belong to the input Avatar. Blocks on a DB read.
+     *
+     * @param avatarUuid The UUID of the current Avatar.
+     * @return The stored binds, or null if there are none for this Avatar.
+     */
+    private static JsonArray loadStoredAvatarBinds(UUID avatarUuid) {
         try {
-            db.saveAvatars(GSON.toJson(root));
+            String json = DatabaseManager.getInstance().loadAvatars();
+            if (json == null || json.isEmpty()) {
+                return null;
+            }
+            JsonObject root = GSON.fromJson(json, JsonObject.class);
+            if (!root.has("binds") || !root.has("avatars")) {
+                return null;
+            }
+            List<Avatar> storedAvatars = avatarsFromJson(root.getAsJsonArray("avatars"));
+            if (storedAvatars.isEmpty() || storedAvatars.getLast() == null
+                    || !storedAvatars.getLast().getUuid().equals(avatarUuid)) {
+                return null;
+            }
+            return root.getAsJsonArray("binds");
         } catch (Exception e) {
-            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync avatars: " + e.getMessage());
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to read the stored avatar binds: " + e.getMessage());
+            return null;
         }
+    }
+
+    /**
+     * Re-applies the current Avatar's binds when they join, read from MySQL so that they are the same
+     * on every server. Falls back to avatar_binds.txt when MySQL is not active.
+     */
+    public static void applyAvatarBindsOnJoin() {
+        Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
+        if (currentAvatar == null) {
+            return;
+        }
+        if (!DatabaseManager.isActive()) {
+            loadAvatarBinds();
+            return;
+        }
+        UUID uuid = currentAvatar.getUuid();
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+            JsonArray bindsArr = loadStoredAvatarBinds(uuid);
+            if (bindsArr == null) {
+                return;
+            }
+            Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+                OfflineBendingPlayer bendingPlayer = BendingPlayer.getOfflineBendingPlayer(Bukkit.getOfflinePlayer(uuid).getName());
+                if (bendingPlayer == null) {
+                    return;
+                }
+                for (com.google.gson.JsonElement bindEl : bindsArr) {
+                    JsonObject bind = bindEl.getAsJsonObject();
+                    bendingPlayer.bindAbility(bind.get("ability").getAsString(), bind.get("slot").getAsInt());
+                }
+            });
+        });
     }
 
     /**
@@ -9310,20 +9411,8 @@ public class PersistenceUtils {
         Bukkit.getLogger().info("[AC] Loading avatars from MySQL...");
         try {
             JsonObject root = GSON.fromJson(json, JsonObject.class);
-            JsonArray avatarsArr = root.getAsJsonArray("avatars");
-            for (com.google.gson.JsonElement el : avatarsArr) {
-                if (el.isJsonNull()) {
-                    AvatarUtils.addAvatar(null);
-                } else {
-                    JsonObject a = el.getAsJsonObject();
-                    UUID uuid = UUID.fromString(a.get("uuid").getAsString());
-                    String startInGame = a.get("startInGame").getAsString();
-                    String endInGame = a.get("endInGame").getAsString();
-                    String startInRealLife = a.get("startInRealLife").getAsString();
-                    String endInRealLife = a.get("endInRealLife").getAsString();
-                    char element = a.get("element").getAsString().charAt(0);
-                    AvatarUtils.addAvatar(new Avatar(uuid, startInGame, endInGame, startInRealLife, endInRealLife, element));
-                }
+            for (Avatar avatar : avatarsFromJson(root.getAsJsonArray("avatars"))) {
+                AvatarUtils.addAvatar(avatar);
             }
             // Restore binds
             Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
