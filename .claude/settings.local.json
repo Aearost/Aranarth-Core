@@ -653,7 +653,9 @@
       "PowerShell($mvn = \\(Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1\\).FullName; & $mvn -q -o compile 2>&1 | Select-Object -Last 40)",
       "PowerShell($mvn = \\(Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1\\).FullName; & $mvn -q -o compile 2>&1 | Where-Object { $_ -match 'ERROR' } | Select-Object -First 20)",
       "PowerShell($l = \\(Get-Content \"C:\\\\Users\\\\liamh\\\\Desktop\\\\Folders\\\\Minecraft\\\\Testing\\\\Survival\\\\plugins\\\\AranarthCore\\\\aranarth_players.txt\" -Encoding UTF8\\)[56]; \\($l -split '\\\\|'\\)[0..3])",
-      "PowerShell($lines = Get-Content \"C:\\\\Users\\\\liamh\\\\Desktop\\\\Folders\\\\Minecraft\\\\Testing\\\\Survival\\\\plugins\\\\AranarthCore\\\\aranarth_players.txt\" -Encoding UTF8; \\($lines[0] -split '\\\\|'\\)[0..3])"
+      "PowerShell($lines = Get-Content \"C:\\\\Users\\\\liamh\\\\Desktop\\\\Folders\\\\Minecraft\\\\Testing\\\\Survival\\\\plugins\\\\AranarthCore\\\\aranarth_players.txt\" -Encoding UTF8; \\($lines[0] -split '\\\\|'\\)[0..3])",
+      "PowerShell($mvn = Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1; & $mvn.FullName -q -o compile; \"exit $LASTEXITCODE\"; Get-ChildItem changelogs -ErrorAction SilentlyContinue | Sort-Object LastWriteTime | Select-Object -Last 1 -ExpandProperty FullName)",
+      "PowerShell(\\(Get-Item \"src\\\\main\\\\java\\\\com\\\\aearost\\\\aranarthcore\\\\event\\\\listener\\\\grouped\\\\AranarthCoreBendingListener.java\"\\).LastWriteTime; foreach \\($s in \"Survival\",\"SMP\"\\) { \"== $s\"; Select-String -Path \"C:\\\\Users\\\\liamh\\\\Desktop\\\\Folders\\\\Minecraft\\\\Testing\\\\$s\\\\logs\\\\latest.log\" -Pattern \"Exception|EnergyBurst|Could not pass event|Error\" | Select-Object -First 30 | ForEach-Object { $_.Line } })"
     ]
   }
 }

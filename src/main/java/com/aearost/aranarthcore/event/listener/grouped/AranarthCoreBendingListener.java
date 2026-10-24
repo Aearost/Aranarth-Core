@@ -1643,27 +1643,40 @@ public class AranarthCoreBendingListener implements Listener {
 
     /**
      * Triggers EnergyBurst as a fall proc when the player lands with EnergyBurst bound.
-     * Damage scales from 0.5 hearts at the vanilla fall-damage threshold to full damage at 75 blocks.
+     * Damage scales from FallBurstMinDamage at FallBurstMinDistance to full damage at FallBurstMaxDistance.
      */
-    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void onEnergyBurstFallProc(final EntityDamageEvent e) {
-        if (e.getCause() != EntityDamageEvent.DamageCause.FALL) {
-            return;
-        }
-        if (!(e.getEntity() instanceof Player player)) {
-            return;
-        }
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onEnergyBurstFallProc(final PlayerMoveEvent e) {
+        final Player player = e.getPlayer();
+        final UUID uuid = player.getUniqueId();
         final BendingPlayer bPlayer = BendingPlayer.getBendingPlayer(player);
-        if (bPlayer == null || bPlayer.isChiBlocked()) {
+        if (bPlayer == null || !bPlayer.getBoundAbilityName().equalsIgnoreCase("EnergyBurst")) {
+            EnergyBurst.clearFallTracking(uuid);
             return;
         }
-        if (!bPlayer.getBoundAbilityName().equalsIgnoreCase("EnergyBurst")) {
+        if (player.isFlying() || player.isGliding() || player.isInWater() || player.isClimbing() || player.isInsideVehicle()) {
+            EnergyBurst.clearFallTracking(uuid);
             return;
         }
-        if (bPlayer.isOnCooldown("EnergyBurst") || EnergyBurst.hasActiveInstance(player.getUniqueId())) {
+        if (!player.isOnGround()) {
+            EnergyBurst.trackFall(uuid, e.getTo(), player.getFallDistance());
             return;
         }
-        new EnergyBurst(player, player.getFallDistance());
+
+        final float trackedDistance = EnergyBurst.consumeFall(uuid, e.getFrom());
+        if (trackedDistance < 0) {
+            return;
+        }
+        // The landing move's own drop is not yet included in the tracked distance
+        final float fallDistance = Math.max(player.getFallDistance(),
+                trackedDistance + (float) Math.max(0, e.getFrom().getY() - e.getTo().getY()));
+        if (fallDistance < EnergyBurst.getFallBurstMinDistance()) {
+            return;
+        }
+        if (bPlayer.isChiBlocked() || bPlayer.isOnCooldown("EnergyBurst") || EnergyBurst.hasActiveInstance(uuid)) {
+            return;
+        }
+        new EnergyBurst(player, fallDistance);
     }
 
     /**
@@ -2029,6 +2042,7 @@ public class AranarthCoreBendingListener implements Listener {
         Jolt.clearPendingCharge(player.getUniqueId());
         ElectricStrike.clearPendingCharge(player.getUniqueId());
         DaggerVolley.resetStage(player.getUniqueId());
+        EnergyBurst.clearFallTracking(player.getUniqueId());
     }
 
     /**

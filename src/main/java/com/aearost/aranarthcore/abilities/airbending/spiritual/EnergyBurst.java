@@ -18,6 +18,7 @@ import org.bukkit.util.Vector;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 public class EnergyBurst extends SpiritualAbility implements AddonAbility {
@@ -32,6 +33,10 @@ public class EnergyBurst extends SpiritualAbility implements AddonAbility {
     private final double fallBurstMinDamage;
 
     private static final Map<UUID, EnergyBurst> activeInstances = new HashMap<>();
+
+    // Airborne fall tracking for the fall proc, keyed by player
+    private record FallTrack(Location lastLocation, float fallDistance) {}
+    private static final Map<UUID, FallTrack> fallTracks = new HashMap<>();
 
     @Attribute(Attribute.COOLDOWN)
     private long cooldown;
@@ -303,9 +308,32 @@ public class EnergyBurst extends SpiritualAbility implements AddonAbility {
         return activeInstances.get(uuid);
     }
 
-    // -------------------------------------------------------------------------
-    // ProjectKorra ability interface
-    // -------------------------------------------------------------------------
+    /**
+     * Records the player's fall distance while airborne so the landing can be detected without relying on fall damage.
+     */
+    public static void trackFall(final UUID uuid, final Location location, final float fallDistance) {
+        fallTracks.put(uuid, new FallTrack(location.clone(), fallDistance));
+    }
+
+    /**
+     * Ends fall tracking and returns the tracked fall distance.
+     */
+    public static float consumeFall(final UUID uuid, final Location from) {
+        final FallTrack track = fallTracks.remove(uuid);
+        if (track == null || !Objects.equals(track.lastLocation().getWorld(), from.getWorld())
+                || track.lastLocation().distanceSquared(from) > 1.0) {
+            return -1;
+        }
+        return track.fallDistance();
+    }
+
+    public static void clearFallTracking(final UUID uuid) {
+        fallTracks.remove(uuid);
+    }
+
+    public static double getFallBurstMinDistance() {
+        return AbilityConfig.getDouble("EnergyBurst.FallBurstMinDistance");
+    }
 
     @Override
     public boolean isSneakAbility() {

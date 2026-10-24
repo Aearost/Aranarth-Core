@@ -22,6 +22,7 @@ Bending & Abilities
 [~] Rank-locked sub-element abilities are now bindable by all ranks in the arena
 [~] Fixes to the Avatar selection functionality to be auto-selected on October 31st, 2026 at 1:00pm EST
 [~] Fixed inaccurate avatar messages
+[~] Fixed EnergyBurst not activating by a fall from a high height
 
 Dominion
 [+] Dominion resource claims now provide leaves
