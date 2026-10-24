@@ -20,8 +20,10 @@ public class MarketUtils {
 
     private static final Map<String, MarketDynamics> marketData = new HashMap<>();
 
-    // Pressure is measured in full inventories (36 slots * the item's max stack size)
+    // Pressure is measured in full inventories of 64-stack items (36 slots * 64), regardless of the item's max stack size
+    // Items that stack to 16 or 1 move the price 4x or 64x slower per inventory, since less can be carried at a time
     private static final int INVENTORY_SLOTS = 36;
+    private static final int PRESSURE_STACK_SIZE = 64;
 
     // Price floor and ceiling relative to default
     private static final double PRICE_FLOOR_MODIFIER = 0.25;
@@ -31,7 +33,7 @@ public class MarketUtils {
     private static final double DECAY_RATE = 0.95;
     private static final double SENSITIVITY = 0.000691;
     // Immediate drop from sales made since the last tick, applied as price * e^(-SALE_IMPACT * inventoriesSold)
-    // 1 inventory drops ~5%, 1 inventory of full shulker boxes (27 inventories) drops ~74%
+    // 1 inventory of a 64-stack item drops ~5%, 1 inventory of full shulker boxes (27 inventories) drops ~74%
     private static final double SALE_IMPACT = 0.05;
     // Price rises from 0.25x to 1.0x in ~3.5 days, and from 1.0x to the 2.5x ceiling in ~2.3 days
     private static final double RISE_RATE = 0.01664;
@@ -104,7 +106,7 @@ public class MarketUtils {
         if (data == null) {
             return;
         }
-        double delta = quantitySold / (double) (INVENTORY_SLOTS * shop.getItem().getMaxStackSize());
+        double delta = quantitySold / (double) (INVENTORY_SLOTS * PRESSURE_STACK_SIZE);
 
         // Lower the price right away instead of at the next tick, so a burst of sales cannot all get the high price
         Shop liveShop = ShopUtils.getShopFromLocation(shop.getLocation());

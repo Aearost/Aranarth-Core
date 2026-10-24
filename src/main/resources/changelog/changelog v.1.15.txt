@@ -10,6 +10,7 @@ Aranarthium, Items & Crafting
 
 Economy, Jobs & Quests
 [~] Fixed /vptransfer throwing an error when the receiver has never joined the current server
+[~] Market sell prices now drop at a proportional rate to the item's max stack size
 
 Chat, UI & Sounds
 
