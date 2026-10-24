@@ -651,7 +651,9 @@
       "Bash(echo \"exit=$?\")",
       "PowerShell($jar = \"$env:USERPROFILE\\\\.m2\\\\repository\\\\io\\\\papermc\\\\paper\\\\paper-api\\\\26.3.build.9-alpha\\\\paper-api-26.3.build.9-alpha.jar\"; $javap = \\(Get-Command javap -ErrorAction SilentlyContinue\\).Source; if \\(-not $javap\\) { $javap = \\(Get-ChildItem \"$env:USERPROFILE\\\\.jdks\",\"C:\\\\Program Files\\\\Java\",\"C:\\\\Program Files\\\\Eclipse Adoptium\" -Recurse -Filter javap.exe -ErrorAction SilentlyContinue | Select-Object -First 1\\).FullName }; $javap; & $javap -cp $jar 'io.papermc.paper.datacomponent.item.ResolvableProfile$Builder' 'io.papermc.paper.datacomponent.item.ResolvableProfile')",
       "PowerShell($mvn = \\(Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1\\).FullName; & $mvn -q -o compile 2>&1 | Select-Object -Last 40)",
-      "PowerShell($mvn = \\(Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1\\).FullName; & $mvn -q -o compile 2>&1 | Where-Object { $_ -match 'ERROR' } | Select-Object -First 20)"
+      "PowerShell($mvn = \\(Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1\\).FullName; & $mvn -q -o compile 2>&1 | Where-Object { $_ -match 'ERROR' } | Select-Object -First 20)",
+      "PowerShell($l = \\(Get-Content \"C:\\\\Users\\\\liamh\\\\Desktop\\\\Folders\\\\Minecraft\\\\Testing\\\\Survival\\\\plugins\\\\AranarthCore\\\\aranarth_players.txt\" -Encoding UTF8\\)[56]; \\($l -split '\\\\|'\\)[0..3])",
+      "PowerShell($lines = Get-Content \"C:\\\\Users\\\\liamh\\\\Desktop\\\\Folders\\\\Minecraft\\\\Testing\\\\Survival\\\\plugins\\\\AranarthCore\\\\aranarth_players.txt\" -Encoding UTF8; \\($lines[0] -split '\\\\|'\\)[0..3])"
     ]
   }
 }

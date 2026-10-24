@@ -170,6 +170,8 @@ public class PlayerServerJoinListener implements Listener {
         Avatar avatar = AvatarUtils.getCurrentAvatar();
         if (avatar == null) {
             player.sendMessage("  " + Lang.getFor(player, "motd.no_avatar"));
+        } else if (avatar.getUuid().equals(player.getUniqueId())) {
+            player.sendMessage("  " + Lang.getFor(player, "motd.avatar_self"));
         } else {
             String avatarNickname = AranarthUtils.getPlayer(avatar.getUuid()).getNickname();
             String element = "";
