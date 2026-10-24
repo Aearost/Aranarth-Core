@@ -1,13 +1,14 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.gui.GuiHolder;
+import com.aearost.aranarthcore.gui.GuiRankup;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.*;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
 import com.gmail.nossr50.util.EventUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -27,25 +28,39 @@ public class GuiRankupClick {
 
         e.setCancelled(true);
 
+        // Only the buttons of the GUI itself count, never the player's own inventory
+        if (e.getClickedInventory() != e.getView().getTopInventory()) {
+            return;
+        }
+        GuiHolder holder = GuiHolder.of(e.getView().getTopInventory());
+        if (holder == null || !(holder.getData() instanceof GuiRankup.RankupOffer(int fromRank, String nextRankId))) {
+            return;
+        }
+
         int slot = e.getSlot();
         // Rankup
         if (slot == 14) {
             Player player = (Player) e.getWhoClicked();
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
+            // The rank must not have changed since the GUI was opened, otherwise a stale GUI could rank up twice
+            int currentRank = aranarthPlayer.getRank();
+            List<Double> rankupCosts = AranarthCore.getInstance().getConfig().getDoubleList("economy.rankup-costs");
+            if (currentRank != fromRank || currentRank >= 8 || currentRank < 0 || currentRank >= rankupCosts.size()) {
+                player.closeInventory();
+                return;
+            }
+            // Index 0 of the config is the cost to go from rank 0 to rank 1
+            double price = rankupCosts.get(currentRank);
+            if (!Double.isFinite(price) || price < 0) {
+                player.closeInventory();
+                return;
+            }
+
             double balance = aranarthPlayer.getBalance();
-            String clickedItem = e.getClickedInventory().getItem(slot).getItemMeta().getDisplayName();
-            String[] parts = clickedItem.split(" ");
-
-            String priceWithoutDollarSign = ChatUtils.stripColorFormatting(parts[parts.length - 1]).substring(1);
-            String priceWithoutCommas = priceWithoutDollarSign.replaceAll(",", "");
-            double price = Double.parseDouble(priceWithoutCommas);
-
             if (balance >= price) {
                 if (hasMinimumMcmmoTotal(player)) {
                     if (hasMinimumMcmmoPerSkill(player)) {
-                        String rankDisplay = clickedItem.split(" ")[2];
-                        String aOrAn = "a";
 
                         NumberFormat formatter = NumberFormat.getCurrencyInstance();
                         aranarthPlayer.setBalance(balance - price);
@@ -56,14 +71,9 @@ public class GuiRankupClick {
                         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                         PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
 
-                        if (ChatUtils.stripColorFormatting(rankDisplay).equals("Esquire")
-                                || ChatUtils.stripColorFormatting(rankDisplay).equals("Emperor")
-                                || ChatUtils.stripColorFormatting(rankDisplay).equals("Empress")) {
-                            aOrAn = "an";
-                        }
                         DiscordUtils.updateRank(player, aranarthPlayer.getRank(), true);
 
-                        Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has become " + aOrAn + " " + rankDisplay + "&7!"));
+                        Lang.broadcast("rank.ranked_up", "player", aranarthPlayer.getNickname(), "article", Lang.key("rank.article_" + nextRankId), "rank", Lang.key("rank.title_" + nextRankId));
                         PermissionUtils.evaluatePlayerPermissions(player);
                         if (NetworkManager.isActive()) {
                             NetworkManager.getInstance().publishRankUpdate(player.getUniqueId(), aranarthPlayer.getRank(), aranarthPlayer.getCouncilRank(), aranarthPlayer.getSaintRank(), aranarthPlayer.getArchitectRank());
@@ -71,15 +81,15 @@ public class GuiRankupClick {
                         player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
                         player.closeInventory();
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cYou do not meet the mcMMO requirements per category!"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "rank.missing_mcmmo_category")));
                         player.closeInventory();
                     }
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou do not meet the overall mcMMO level requirements!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "rank.missing_mcmmo")));
                     player.closeInventory();
                 }
             } else {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough money to rankup!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "rank.not_enough_money")));
                 player.closeInventory();
             }
         }

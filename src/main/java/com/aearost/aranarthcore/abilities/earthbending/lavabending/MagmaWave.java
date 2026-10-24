@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.earthbending.lavabending;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.LavaAbility;
@@ -20,7 +21,6 @@ import java.util.*;
 
 public class MagmaWave extends LavaAbility implements AddonAbility {
 
-    private static final int SOURCE_SCAN_RADIUS = 3;
 
     private static final double HALF_LENGTH = 4.0;
     private static final double HALF_WIDTH = 2.5;
@@ -29,12 +29,12 @@ public class MagmaWave extends LavaAbility implements AddonAbility {
     private static final int MAX_HEIGHT_ABOVE_GROUND = 7;
     private static final int GROW_TICKS = 10;
 
-    private static final double WAVE_SPEED = 0.9;
+    private double speed;
     private static final double STEER_LERP = 0.35;
-    private static final double HIT_RADIUS = 3.5;
+    private double hitRadius;
     private static final double PULLBACK_STOP_DIST = 2.5;
-    private static final double RANGE = 28.0;
-    private static final long WAVE_DURATION = 4000L;
+    private double range;
+    private long duration;
 
     private static final Particle.DustOptions SELECT_DUST =
             new Particle.DustOptions(Color.fromRGB(220, 65, 10), 1.2f);
@@ -64,8 +64,12 @@ public class MagmaWave extends LavaAbility implements AddonAbility {
             return;
         }
 
-        cooldown = 8000;
-        damage = 14.0;
+        cooldown = AbilityConfig.getLong("MagmaWave.Cooldown");
+        damage = AbilityConfig.getDouble("MagmaWave.Damage");
+        speed = AbilityConfig.getDouble("MagmaWave.Speed");
+        hitRadius = AbilityConfig.getDouble("MagmaWave.HitRadius");
+        range = AbilityConfig.getDouble("MagmaWave.Range");
+        duration = AbilityConfig.getLong("MagmaWave.Duration");
 
         Block source = pendingSources.remove(player.getUniqueId());
         cancelPendingSourceTask(player.getUniqueId());
@@ -96,11 +100,11 @@ public class MagmaWave extends LavaAbility implements AddonAbility {
             cancelInstantly();
             return;
         }
-        if (System.currentTimeMillis() - startTime >= WAVE_DURATION) {
+        if (System.currentTimeMillis() - startTime >= duration) {
             finishAbility();
             return;
         }
-        if (waveCenter.distanceSquared(player.getLocation()) >= RANGE * RANGE) {
+        if (waveCenter.distanceSquared(player.getLocation()) >= range * range) {
             finishAbility();
             return;
         }
@@ -123,7 +127,7 @@ public class MagmaWave extends LavaAbility implements AddonAbility {
                 .normalize();
 
         // Advance the wave centre
-        waveCenter = waveCenter.clone().add(steerDir.clone().multiply(WAVE_SPEED));
+        waveCenter = waveCenter.clone().add(steerDir.clone().multiply(speed));
 
         // Applies the height limit
         int groundY = groundYBelow(waveCenter);
@@ -228,7 +232,7 @@ public class MagmaWave extends LavaAbility implements AddonAbility {
     }
 
     private void checkDamage() {
-        double radSq = HIT_RADIUS * HIT_RADIUS;
+        double radSq = hitRadius * hitRadius;
         Location center = waveCenter.clone().add(0, 1, 0);
         for (LivingEntity entity : waveCenter.getWorld().getLivingEntities()) {
             if (entity.equals(player) || hitEntities.contains(entity.getUniqueId())) {
@@ -355,9 +359,9 @@ public class MagmaWave extends LavaAbility implements AddonAbility {
         int px = loc.getBlockX(), py = loc.getBlockY(), pz = loc.getBlockZ();
         Block closest = null;
         double closestDSq = Double.MAX_VALUE;
-        for (int dx = -SOURCE_SCAN_RADIUS; dx <= SOURCE_SCAN_RADIUS; dx++) {
+        for (int dx = -AbilityConfig.getInt("MagmaWave.SourceRange"); dx <= AbilityConfig.getInt("MagmaWave.SourceRange"); dx++) {
             for (int dy = -2; dy <= 2; dy++) {
-                for (int dz = -SOURCE_SCAN_RADIUS; dz <= SOURCE_SCAN_RADIUS; dz++) {
+                for (int dz = -AbilityConfig.getInt("MagmaWave.SourceRange"); dz <= AbilityConfig.getInt("MagmaWave.SourceRange"); dz++) {
                     Block b = world.getBlockAt(px + dx, py + dy, pz + dz);
                     if (b.getType() != Material.LAVA) {
                         continue;
@@ -409,7 +413,7 @@ public class MagmaWave extends LavaAbility implements AddonAbility {
         if (waveCenter == null) {
             return false;
         }
-        double protRadSq = (HIT_RADIUS + 1.0) * (HIT_RADIUS + 1.0);
+        double protRadSq = (hitRadius + 1.0) * (hitRadius + 1.0);
         return waveCenter.distanceSquared(
                 entity.getLocation().add(0, entity.getHeight() / 2.0, 0)) <= protRadSq;
     }

@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands.general;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
@@ -25,29 +26,29 @@ public class CommandCountdown implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (!(sender instanceof Player player)) {
-			sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
 		}
 
 		if (args.length < 1) {
-			player.sendMessage(ChatUtils.chatMessage("&cUsage: /countdown <player>"));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "countdown <player>")));
 			return true;
 		}
 
 		UUID targetUuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
 		if (targetUuid == null) {
-			player.sendMessage(ChatUtils.chatMessage("&cPlayer not found!"));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.not_found", "name", args[0])));
 			return true;
 		}
 
 		Player target = Bukkit.getPlayer(targetUuid);
 		if (target == null || !target.isOnline()) {
-			player.sendMessage(ChatUtils.chatMessage("&cThat player is not online!"));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.offline", "name", args[0])));
 			return true;
 		}
 
 		if (target.equals(player)) {
-			player.sendMessage(ChatUtils.chatMessage("&cYou cannot countdown with yourself!"));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "countdown.cannot_self")));
 			return true;
 		}
 
@@ -57,17 +58,17 @@ public class CommandCountdown implements CommandExecutor {
 		// If the target already sent a request to this player, start the countdown
 		if (pendingRequests.containsKey(targetUuid) && pendingRequests.get(targetUuid).equals(player.getUniqueId())) {
 			pendingRequests.remove(targetUuid);
-			player.sendMessage(ChatUtils.chatMessage("&7Starting countdown with &e" + targetNickname + "&7!"));
-			target.sendMessage(ChatUtils.chatMessage("&e" + playerNickname + " &7accepted! Starting countdown!"));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "countdown.accepted", "player", targetNickname)));
+			target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "countdown.accepted_by", "player", playerNickname)));
 			startCountdown(player, target);
 			return true;
 		}
 
 		// Register a new request
 		pendingRequests.put(player.getUniqueId(), targetUuid);
-		player.sendMessage(ChatUtils.chatMessage("&7Countdown request sent to &e" + targetNickname + "&7!"));
-		target.sendMessage(ChatUtils.chatMessage("&e" + playerNickname + " &7wants to start a countdown with you!"));
-		target.sendMessage(ChatUtils.chatMessage("&7Use &e/countdown " + player.getName() + " &7to confirm!"));
+		player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "countdown.request_sent", "player", targetNickname)));
+		target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "countdown.request_received", "player", playerNickname)));
+		target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "countdown.confirm_hint", "player", player.getName())));
 		return true;
 	}
 
@@ -85,9 +86,8 @@ public class CommandCountdown implements CommandExecutor {
 				if (count > 0) {
 					String color = count <= 2 ? "&e&l" : "&c&l";
 					String title = ChatUtils.translateToColor(color + count);
-					String subtitle = ChatUtils.translateToColor("&7Get ready...");
-					playerA.sendTitle(title, subtitle, 3, 16, 5);
-					playerB.sendTitle(title, subtitle, 3, 16, 5);
+					playerA.sendTitle(title, ChatUtils.translateToColor(Lang.getFor(playerA, "countdown.get_ready")), 3, 16, 5);
+					playerB.sendTitle(title, ChatUtils.translateToColor(Lang.getFor(playerB, "countdown.get_ready")), 3, 16, 5);
 					// Rising major chord (root, major third, perfect fifth)
 					float root = 0.8f + (0.1f * (5 - count));
 					float third = root * 1.2599f;

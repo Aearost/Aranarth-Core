@@ -61,6 +61,16 @@ public class PermissionUtils {
         setArchitectPermissions(perms, aranarthPlayer.getArchitectRank());
         refreshPlayerPerks(perms, player);
 
+        // Operators receive all non-rank AranarthCore permissions
+        if (player.isOp()) {
+            setOperatorPermissions(perms);
+        }
+
+        // Sitting can be disabled via /toggle sit
+        if (aranarthPlayer.isSitDisabled()) {
+            perms.setPermission("aranarth.sit", false);
+        }
+
         Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
         // If the player is the avatar
         if (currentAvatar != null && currentAvatar.getUuid().equals(player.getUniqueId())) {
@@ -80,16 +90,12 @@ public class PermissionUtils {
             }
         }
 
-        // Grant creative world access and SMP map link to original players
+        // Grant the SMP map link to original players
         if (AranarthUtils.isOriginalPlayer(player.getUniqueId())) {
-            perms.setPermission("aranarth.creative", true);
             perms.setPermission("aranarth.smpmap", true);
         }
 
-        // Grant WorldEdit permissions if the player is in the creative world
-        if (player.getWorld().getName().equalsIgnoreCase("creative")) {
-            perms.setPermission("worldedit.*", true);
-        }
+        setCreativeWorldEditPermissions(player, perms, aranarthPlayer);
 
         // Must update arena permissions after base permissions apply
         toggleArenaBendingPermissions(player, player.getWorld().getName().equalsIgnoreCase("arena"));
@@ -251,6 +257,7 @@ public class PermissionUtils {
             perms.setPermission("bending.ability.SwiftStream", true);
             // Aranarth abilities now rank-gated
             perms.setPermission("bending.ability.airsnipe", true);
+            perms.setPermission("bending.ability.jetstream", true);
             perms.setPermission("bending.ability.astralprojection", true);
             perms.setPermission("bending.ability.astralshot", true);
             perms.setPermission("bending.ability.vinewhip", true);
@@ -330,6 +337,14 @@ public class PermissionUtils {
 
         perms.setPermission("bending.command.rechoose", true);
 
+        // Vanilla messaging bypasses mutes and /ac spy through namespaced commands like /minecraft:msg,
+        // and the plugin provides its own /msg
+        perms.setPermission("minecraft.command.msg", false);
+        perms.setPermission("minecraft.command.me", false);
+        perms.setPermission("minecraft.command.teammsg", false);
+        // Party teleports would move players between worlds without switching their inventory
+        perms.setPermission("mcmmo.commands.ptp", false);
+
         // Disable sub-elements
         perms.setPermission("bending.water.healing", false);
         perms.setPermission("bending.water.plantbending", false);
@@ -395,6 +410,7 @@ public class PermissionUtils {
         perms.setPermission("bending.ability.cablethrash", true);
         perms.setPermission("bending.ability.daggervolley", true);
         perms.setPermission("bending.ability.airsnipe", true);
+        perms.setPermission("bending.ability.jetstream", true);
         perms.setPermission("bending.ability.mendingwaters", true);
         perms.setPermission("bending.ability.healinghelix", true);
         perms.setPermission("bending.ability.corruptinghelix", true);
@@ -439,9 +455,10 @@ public class PermissionUtils {
         perms.setPermission("aranarth.deaths", true);
         perms.setPermission("aranarth.delhome", true);
         perms.setPermission("aranarth.dominion", true);
+        perms.setPermission("aranarth.heads", true);
         perms.setPermission("aranarth.home", true);
         perms.setPermission("aranarth.homepad", true);
-        perms.setPermission("aranarth.incantations", true);
+        perms.setPermission("aranarth.essences", true);
         perms.setPermission("aranarth.info", true);
         perms.setPermission("aranarth.keyclaim", true);
         perms.setPermission("aranarth.kills", true);
@@ -475,23 +492,27 @@ public class PermissionUtils {
         perms.setPermission("aranarth.topdeaths", true);
         perms.setPermission("aranarth.tpaccept", true);
         perms.setPermission("aranarth.tpdeny", true);
+        perms.setPermission("aranarth.trade", true);
         perms.setPermission("aranarth.trust", true);
         perms.setPermission("aranarth.unlock", true);
         perms.setPermission("aranarth.untrust", true);
+        perms.setPermission("aranarth.voicechat", true);
         perms.setPermission("aranarth.vote", true);
         perms.setPermission("aranarth.votetop", true);
         perms.setPermission("aranarth.voteshop", true);
         perms.setPermission("aranarth.warp", true);
         perms.setPermission("aranarth.mctop", true);
+        perms.setPermission("aranarth.mcmmo.enchanting", true);
         perms.setPermission("aranarth.map", true);
         perms.setPermission("aranarth.topguesses", true);
         perms.setPermission("aranarth.brewbook", true);
         perms.setPermission("aranarth.jobs", true);
+        perms.setPermission("aranarth.marketvalue", true);
+        perms.setPermission("aranarth.creative", true);
+        perms.setPermission("aranarth.plot", true);
 
         // Disable aranarth functionality
         perms.setPermission("aranarth.ac", false);
-        perms.setPermission("aranarth.creative", false);
-        perms.setPermission("aranarth.exp", false);
         perms.setPermission("aranarth.seen", false);
         perms.setPermission("aranarth.back", false);
         perms.setPermission("aranarth.tphere", false);
@@ -535,7 +556,7 @@ public class PermissionUtils {
         perms.setPermission("aranarth.vote.test", false);
         perms.setPermission("aranarth.shop.modify", false);
         perms.setPermission("aranarth.time", false);
-        perms.setPermission("aranarth.skull", false);
+        perms.setPermission("aranarth.heads.player", false);
         perms.setPermission("aranarth.resetquests", false);
         perms.setPermission("aranarth.sudo", false);
         perms.setPermission("aranarth.trash", false);
@@ -544,6 +565,8 @@ public class PermissionUtils {
         perms.setPermission("aranarth.chat.gradientbold", false);
         perms.setPermission("aranarth.gate", false);
         perms.setPermission("aranarth.mount", false);
+        perms.setPermission("aranarth.sit", false);
+        perms.setPermission("aranarth.sit.color", false);
         perms.setPermission("aranarth.whitefire", false);
         perms.setPermission("aranarth.prismaticfire", false);
 
@@ -717,6 +740,7 @@ public class PermissionUtils {
                     perms.setPermission("bending.ability.SwiftStream", true);
                     // Aranarth abilities now rank-gated
                     perms.setPermission("bending.ability.airsnipe", true);
+                    perms.setPermission("bending.ability.jetstream", true);
                     perms.setPermission("bending.ability.astralprojection", true);
                     perms.setPermission("bending.ability.astralshot", true);
                     perms.setPermission("bending.ability.vinewhip", true);
@@ -946,12 +970,12 @@ public class PermissionUtils {
         if (rank >= 4) {
             perms.setPermission("bending.ability.healinghelix", true);        // healing
             perms.setPermission("bending.ability.angeredspirits", true);      // spiritual
+            perms.setPermission("bending.ability.jetstream", true);           // air combo
             perms.setPermission("bending.ability.iceshards", true);           // ice
             perms.setPermission("bending.ability.daggervolley", true);        // chi
             perms.setPermission("bending.ability.metalshots", true);          // metal
             perms.setPermission("bending.ability.metalstrips", true);         // metal
             perms.setPermission("bending.ability.metalshred", true);          // metal
-            perms.setPermission("aranarth.exp", true);
             perms.setPermission("bending.command.preset.create.10", true);
             perms.setPermission("aranarthcore.armorstand.solemn", true);
         } else {
@@ -1047,9 +1071,9 @@ public class PermissionUtils {
             Instant now = Instant.now();
             if (now.isAfter(Instant.ofEpochMilli(aranarthPlayer.getSaintExpireDate()))) {
                 aranarthPlayer.setSaintExpireDate(0);
-                aranarthPlayer.setSaintRank(0);
+                aranarthPlayer.setSaintRank(aranarthPlayer.getPermanentSaintRank());
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                player.sendMessage(ChatUtils.chatMessage("&7Your monthly &dSaint &7rank has expired!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "rank.saint_expired")));
             }
         }
     }
@@ -1067,6 +1091,7 @@ public class PermissionUtils {
 
         if (saintRank >= 1) {
             perms.setPermission("aranarth.armorstand.lock", true);
+            perms.setPermission("aranarth.sit", true);
             perms.setPermission("aranarth.chat.color", true);
             perms.setPermission("aranarth.hat", true);
             perms.setPermission("aranarth.trash", true);
@@ -1088,6 +1113,7 @@ public class PermissionUtils {
 
         if (saintRank >= 2) {
             perms.setPermission("aranarth.enderchest", true);
+            perms.setPermission("aranarth.sit.color", true);
             perms.setPermission("aranarth.itemname", true);
             perms.setPermission("aranarth.chat.hex", true);
             perms.setPermission("aranarth.nick.hex", true);
@@ -1115,6 +1141,84 @@ public class PermissionUtils {
             perms.setPermission("aranarthcore.armorstand.engardemirrored", true);
         } else {
             return;
+        }
+    }
+
+    /**
+     * Sets the WorldEdit permissions for the player's current world.
+     *
+     * @param player         The player.
+     * @param perms          The permissions the player will have access to.
+     * @param aranarthPlayer The player's AranarthPlayer.
+     */
+    private static void setCreativeWorldEditPermissions(Player player, PermissionAttachment perms, AranarthPlayer aranarthPlayer) {
+        String worldName = player.getWorld().getName();
+        if (PlotUtils.isSmpCreativeWorld(worldName)) {
+            perms.setPermission("worldedit.*", true);
+            if (aranarthPlayer.getCouncilRank() == 0 && aranarthPlayer.getArchitectRank() == 0) {
+                // Nothing that reaches another world, the server's files, or other players' mobs
+                for (String node : List.of("worldedit.world", "worldedit.schematic.*", "worldedit.schematic.load",
+                        "worldedit.schematic.save", "worldedit.schematic.delete", "worldedit.schematic.list",
+                        "worldedit.regen", "worldedit.butcher", "worldedit.remove", "worldedit.calc",
+                        "worldedit.generation.shape", "worldedit.generation.shape.biome", "worldedit.scripting.execute",
+                        "worldedit.scripting.execute.last", "worldedit.snapshots.restore", "worldedit.snapshots.list")) {
+                    perms.setPermission(node, false);
+                }
+            }
+            return;
+        }
+        if (!PlotUtils.isPlotWorld(worldName)) {
+            return;
+        }
+
+        if (aranarthPlayer.getCouncilRank() > 0) {
+            perms.setPermission("worldedit.*", true);
+            return;
+        }
+
+        // Negate everything first so that only the permissions below are granted
+        perms.setPermission("worldedit.*", false);
+        int tier = PlotUtils.getSaintTier(aranarthPlayer);
+        if (tier == 0) {
+            return;
+        }
+
+        // Saint I - selection and basic edits
+        for (String node : List.of(
+                "worldedit.wand", "worldedit.wand.toggle", "worldedit.selection.pos", "worldedit.selection.hpos",
+                "worldedit.selection.expand", "worldedit.selection.contract", "worldedit.selection.shift",
+                "worldedit.selection.size", "worldedit.analysis.sel", "worldedit.analysis.count", "worldedit.analysis.distr",
+                "worldedit.region.set", "worldedit.region.replace", "worldedit.region.walls", "worldedit.region.faces",
+                "worldedit.history.undo", "worldedit.history.redo",
+                "worldedit.clipboard.copy", "worldedit.clipboard.cut", "worldedit.clipboard.paste",
+                "worldedit.clipboard.rotate", "worldedit.clipboard.flip", "worldedit.clipboard.clear")) {
+            perms.setPermission(node, true);
+        }
+        if (tier < 2) {
+            return;
+        }
+
+        // Saint II - shapes and region operations
+        for (String node : List.of(
+                "worldedit.region.stack", "worldedit.region.move", "worldedit.region.overlay",
+                "worldedit.region.naturalize", "worldedit.region.smooth", "worldedit.region.center",
+                "worldedit.region.line", "worldedit.region.curve", "worldedit.region.hollow",
+                "worldedit.generation.sphere", "worldedit.generation.cylinder", "worldedit.generation.pyramid")) {
+            perms.setPermission(node, true);
+        }
+        if (tier < 3) {
+            return;
+        }
+
+        // Saint III and Architect - brushes and masks
+        for (String node : List.of(
+                "worldedit.brush.sphere", "worldedit.brush.cylinder", "worldedit.brush.smooth",
+                "worldedit.brush.clipboard", "worldedit.brush.gravity",
+                "worldedit.brush.options.mask", "worldedit.brush.options.material",
+                "worldedit.brush.options.size", "worldedit.brush.options.range",
+                "worldedit.global-mask", "worldedit.replacenear",
+                "worldedit.region.forest", "worldedit.region.flora", "worldedit.generation.forest")) {
+            perms.setPermission(node, true);
         }
     }
 
@@ -1152,7 +1256,7 @@ public class PermissionUtils {
             perms.setPermission("aranarth.whereis", true);
             perms.setPermission("aranarth.broadcast", true);
             perms.setPermission("aranarth.time", true);
-            perms.setPermission("aranarth.skull", true);
+            perms.setPermission("aranarth.heads.player", true);
             perms.setPermission("aranarth.resetquests", true);
             perms.setPermission("minecraft.command.gamemode", true);
             setSaintPermissions(perms, 2);
@@ -1178,6 +1282,44 @@ public class PermissionUtils {
     }
 
     /**
+     * Sets the permissions for server operators.
+     * Grants every Saint, Council, Architect, and perk permission, but leaves in-game rank permissions untouched.
+     *
+     * @param perms The permissions the player will have access to.
+     */
+    private static void setOperatorPermissions(PermissionAttachment perms) {
+        setSaintPermissions(perms, 3);
+        setCouncilPermissions(perms, 3);
+        setArchitectPermissions(perms, 1);
+
+        // Perks
+        perms.setPermission("aranarth.compressor", true);
+        perms.setPermission("aranarth.randomizer", true);
+        perms.setPermission("aranarth.blacklist", true);
+        perms.setPermission("aranarth.tables", true);
+        perms.setPermission("aranarth.itemname", true);
+        perms.setPermission("aranarth.itemname.gradient", true);
+        perms.setPermission("aranarth.chat.color", true);
+        perms.setPermission("aranarth.chat.hex", true);
+        perms.setPermission("aranarth.shulker", true);
+        perms.setPermission("aranarth.inventory", true);
+        perms.setPermission("aranarth.invisible_item_frame", true);
+        perms.setPermission("aranarth.whitefire", true);
+        perms.setPermission("aranarth.prismaticfire", true);
+        perms.setPermission("aranarth.nick", true);
+        perms.setPermission("aranarth.nick.color", true);
+        perms.setPermission("aranarth.nick.hex", true);
+        perms.setPermission("aranarth.nick.gradient", true);
+        perms.setPermission("aranarth.invisiblearmor", true);
+
+        // Remaining staff and special permissions
+        perms.setPermission("aranarth.boost.modify", true);
+        perms.setPermission("aranarth.heads.admin", true);
+        perms.setPermission("aranarth.perk.modify", true);
+        perms.setPermission("aranarth.smpmap", true);
+    }
+
+    /**
      * Sets the permissions for the Architect staff ranks.
      *
      * @param perms         The permissions the player will have access to.
@@ -1192,7 +1334,7 @@ public class PermissionUtils {
             perms.setPermission("aranarth.ac", true);
             perms.setPermission("aranarth.creative", true);
             perms.setPermission("worldedit.*", true);
-            perms.setPermission("aranarth.skull", true);
+            perms.setPermission("aranarth.heads.player", true);
             perms.setPermission("aranarth.gate", true);
             perms.setPermission("aranarth.nick", true);
         }

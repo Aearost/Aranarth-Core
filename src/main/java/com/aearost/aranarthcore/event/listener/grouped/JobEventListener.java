@@ -9,6 +9,7 @@ import com.aearost.aranarthcore.objects.JobData;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.JobUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.dre.brewery.api.events.brew.BrewModifyEvent;
 import com.gmail.nossr50.mcMMO;
 import org.bukkit.Chunk;
@@ -117,6 +118,8 @@ public class JobEventListener implements Listener {
 
     public JobEventListener(AranarthCore plugin) {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        // Pays Builders for blocks that stayed in place, checked every 30 seconds
+        plugin.getServer().getScheduler().runTaskTimer(plugin, JobUtils::processPendingBuilderPay, 600L, 600L);
     }
 
     private boolean hasChunkPermission(Player player, Chunk chunk, DominionPermission permission) {
@@ -260,8 +263,8 @@ public class JobEventListener implements Listener {
             case BEETROOTS -> isMature(block) ? 1.45 : 0;
             case NETHER_WART -> isMature(block) ? 1.80 : 0;
             case COCOA -> isMature(block) ? 1.20 : 0;
-            case MELON -> 2.40;
-            case PUMPKIN -> 2.40;
+            // mcMMO marks player-placed blocks, so a placed pumpkin or melon pays nothing when broken
+            case MELON, PUMPKIN -> mcMMO.getChunkManager().isEligible(block) ? 2.40 : 0;
             case SWEET_BERRY_BUSH -> isMature(block) ? 0.95 : 0;
             case CAVE_VINES, CAVE_VINES_PLANT -> hasGlowBerries(block) ? 0.73 : 0;
             case SUGAR_CANE ->
@@ -329,7 +332,7 @@ public class JobEventListener implements Listener {
 
         Material mat = block.getType();
         if (isBuildableBlock(mat)) {
-            JobUtils.awardJob(player, JobType.BUILDER, 1.00);
+            JobUtils.queueBuilderPay(player, block, 1.00);
         }
     }
 
@@ -689,7 +692,7 @@ public class JobEventListener implements Listener {
         }
         // Only award for Sawmill (stonecutter placed on wood block), identified by title
         String title = ChatColor.stripColor(e.getView().getTitle());
-        if (!title.equals("Sawmill")) {
+        if (!title.equals(ChatColor.stripColor(Lang.getFor(player, "gui.recipes.station_sawmill")))) {
             return;
         }
         if (e.getRawSlot() != 1) {

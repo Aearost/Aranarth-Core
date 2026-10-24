@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.waterbending.bloodbending;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
@@ -35,14 +36,12 @@ public class BloodGrip extends BloodAbility implements AddonAbility {
 
     public enum Phase {CHARGING, CONTROLLING}
 
-    private static final long CHARGE_DURATION_MS = 1000L;
-    private static final long CONTROL_DURATION_MS = 5000L;
-    private static final double FLING_STRENGTH = 2.8;
-    private static final double MAX_FLING_H = 0.9;
-    private static final double MAX_FLING_V = 1.0;
-    private static final double FLING_ARMOR_DRAG = 0.35;
+    private double flingStrength;
+    private double maxFlingHorizontal;
+    private double maxFlingVertical;
+    private double flingArmorDrag;
     private static final double DRAG_DEAD_ZONE = 1.2;
-    private static final double TARGET_HIT_RADIUS = 0.5;
+    private double hitRadius;
 
     private static final Set<EntityType> UNDEAD_TYPES = EnumSet.of(
             EntityType.ZOMBIE,
@@ -90,10 +89,15 @@ public class BloodGrip extends BloodAbility implements AddonAbility {
             return;
         }
 
-        this.cooldown = 8000L;
-        this.range = 6.0;
-        this.chargeDuration = CHARGE_DURATION_MS;
-        this.controlDuration = CONTROL_DURATION_MS;
+        this.cooldown = AbilityConfig.getLong("BloodGrip.Cooldown");
+        this.range = AbilityConfig.getDouble("BloodGrip.Range");
+        this.flingStrength = AbilityConfig.getDouble("BloodGrip.FlingStrength");
+        this.maxFlingHorizontal = AbilityConfig.getDouble("BloodGrip.MaxFlingHorizontal");
+        this.maxFlingVertical = AbilityConfig.getDouble("BloodGrip.MaxFlingVertical");
+        this.flingArmorDrag = AbilityConfig.getDouble("BloodGrip.FlingArmorDrag");
+        this.hitRadius = AbilityConfig.getDouble("BloodGrip.HitRadius");
+        this.chargeDuration = AbilityConfig.getLong("BloodGrip.ChargeDuration");
+        this.controlDuration = AbilityConfig.getLong("BloodGrip.Duration");
 
         LivingEntity found = findTarget();
         if (found == null) {
@@ -383,7 +387,7 @@ public class BloodGrip extends BloodAbility implements AddonAbility {
                 continue;
             }
 
-            if (entity.getBoundingBox().expand(TARGET_HIT_RADIUS)
+            if (entity.getBoundingBox().expand(hitRadius)
                     .rayTrace(eye.toVector(), direction, range) == null) {
                 continue;
             }
@@ -405,13 +409,13 @@ public class BloodGrip extends BloodAbility implements AddonAbility {
         }
 
         Vector flingDir = player.getEyeLocation().getDirection().normalize();
-        Vector velocity = flingDir.multiply(FLING_STRENGTH);
+        Vector velocity = flingDir.multiply(flingStrength);
 
         // Reduce throw caps by armor weight (heavier armor = shorter throw)
         double weight = getArmorWeight(target);
-        double flingFactor = 1.0 / (1.0 + weight * FLING_ARMOR_DRAG);
-        double effectiveMaxH = MAX_FLING_H * flingFactor;
-        double effectiveMaxV = MAX_FLING_V * flingFactor;
+        double flingFactor = 1.0 / (1.0 + weight * flingArmorDrag);
+        double effectiveMaxH = maxFlingHorizontal * flingFactor;
+        double effectiveMaxV = maxFlingVertical * flingFactor;
 
         double hLen = Math.sqrt(velocity.getX() * velocity.getX() + velocity.getZ() * velocity.getZ());
         if (hLen > effectiveMaxH) {

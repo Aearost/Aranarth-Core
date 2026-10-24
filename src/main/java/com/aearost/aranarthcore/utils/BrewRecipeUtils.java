@@ -10,6 +10,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
@@ -228,23 +229,23 @@ public class BrewRecipeUtils {
         };
     }
 
-    /** Converts a wood integer ID to a human-readable barrel label. */
+    /** Converts a wood integer ID to the lang key of its barrel label. */
     private static String woodName(int wood) {
         return switch (wood) {
-            case 1  -> "Birch Barrel";
-            case 2  -> "Oak Barrel";
-            case 3  -> "Jungle Barrel";
-            case 4  -> "Spruce Barrel";
-            case 5  -> "Acacia Barrel";
-            case 6  -> "Dark Oak Barrel";
-            case 7  -> "Crimson Barrel";
-            case 8  -> "Warped Barrel";
-            case 9  -> "Mangrove Barrel";
-            case 10 -> "Cherry Barrel";
-            case 11 -> "Bamboo Barrel";
-            case 12 -> "Cut Copper Barrel";
-            case 13 -> "Pale Oak Barrel";
-            default -> "Any";
+            case 1  -> "brew.barrel_birch";
+            case 2  -> "brew.barrel_oak";
+            case 3  -> "brew.barrel_jungle";
+            case 4  -> "brew.barrel_spruce";
+            case 5  -> "brew.barrel_acacia";
+            case 6  -> "brew.barrel_dark_oak";
+            case 7  -> "brew.barrel_crimson";
+            case 8  -> "brew.barrel_warped";
+            case 9  -> "brew.barrel_mangrove";
+            case 10 -> "brew.barrel_cherry";
+            case 11 -> "brew.barrel_bamboo";
+            case 12 -> "brew.barrel_cut_copper";
+            case 13 -> "brew.barrel_pale_oak";
+            default -> "brew.barrel_any";
         };
     }
 
@@ -465,7 +466,7 @@ public class BrewRecipeUtils {
         meta.setDisplayName(ChatUtils.translateToColor("&f&l" + recipe.getDisplayName()));
 
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&8Ingredients:"));
+        lore.add(Lang.getFor(viewerUuid, "brew.lore_ingredients"));
 
         String[] ingredients = recipe.getIngredients();
         int secret = recipe.getSecretIngredientIndex();
@@ -486,19 +487,19 @@ public class BrewRecipeUtils {
 
         // Process section
         lore.add("");
-        lore.add(ChatUtils.translateToColor("&8Process:"));
+        lore.add(Lang.getFor(viewerUuid, "brew.lore_process"));
 
         int cookingTime = recipe.getCookingTime();
-        lore.add(ChatUtils.translateToColor("&7&o  Ferment: " + (cookingTime > 0 ? cookingTime + " min" : "None")));
+        lore.add(Lang.getFor(viewerUuid, "brew.lore_ferment", "value", cookingTime > 0 ? Lang.getFor(viewerUuid, "brew.minutes", "count", cookingTime) : Lang.getFor(viewerUuid, "general.none")));
 
         int distillRuns = recipe.getDistillRuns();
-        lore.add(ChatUtils.translateToColor("&7&o  Distill: " + (distillRuns > 0 ? distillRuns + " run" + (distillRuns > 1 ? "s" : "") : "None")));
+        lore.add(Lang.getFor(viewerUuid, "brew.lore_distill", "value", distillRuns > 0 ? Lang.getFor(viewerUuid, distillRuns > 1 ? "brew.run_many" : "brew.run_one", "count", distillRuns) : Lang.getFor(viewerUuid, "general.none")));
 
         int age = recipe.getAge();
-        lore.add(ChatUtils.translateToColor("&7&o  Age: " + (age > 0 ? age + " year" + (age > 1 ? "s" : "") : "None")));
+        lore.add(Lang.getFor(viewerUuid, "brew.lore_age", "value", age > 0 ? Lang.getFor(viewerUuid, age > 1 ? "brew.year_many" : "brew.year_one", "count", age) : Lang.getFor(viewerUuid, "general.none")));
 
         if (age > 0) {
-            lore.add(ChatUtils.translateToColor("&7&o  Barrel: " + woodName(recipe.getWood())));
+            lore.add(Lang.getFor(viewerUuid, "brew.lore_barrel", "value", Lang.getFor(viewerUuid, woodName(recipe.getWood()))));
         }
 
         String tierColor = switch (recipe.getTier()) {
@@ -506,13 +507,9 @@ public class BrewRecipeUtils {
             case RARE      -> "&9";
             case LEGENDARY -> "&6";
         };
-        String tierName = switch (recipe.getTier()) {
-            case COMMON    -> "Common";
-            case RARE      -> "Rare";
-            case LEGENDARY -> "Legendary";
-        };
+        String tierName = Lang.getFor(viewerUuid, "brew.tier_" + recipe.getTier().name().toLowerCase());
         lore.add("");
-        lore.add(ChatUtils.translateToColor("&8Tier: " + tierColor + tierName));
+        lore.add(Lang.getFor(viewerUuid, "brew.lore_tier", "tier", tierColor + tierName));
         meta.setLore(lore);
 
         item.setItemMeta(meta);
@@ -522,7 +519,7 @@ public class BrewRecipeUtils {
     /**
      * Creates the shop display item for a locked COMMON-tier recipe (shows purchase price).
      */
-    public static ItemStack createShopPotionDisplay(BrewRecipe recipe) {
+    public static ItemStack createShopPotionDisplay(Player player, BrewRecipe recipe) {
         ItemStack item = new ItemStack(Material.POTION);
         PotionMeta meta = (PotionMeta) item.getItemMeta();
 
@@ -534,19 +531,15 @@ public class BrewRecipeUtils {
             case RARE      -> "&9";
             case LEGENDARY -> "&6";
         };
-        String tierName = switch (recipe.getTier()) {
-            case COMMON    -> "Common";
-            case RARE      -> "Rare";
-            case LEGENDARY -> "Legendary";
-        };
+        String tierName = Lang.getFor(player, "brew.tier_" + recipe.getTier().name().toLowerCase());
 
         NumberFormat fmt = NumberFormat.getInstance();
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&8&oIngredients revealed on purchase"));
+        lore.add(Lang.getFor(player, "brew.lore_hidden"));
         lore.add("");
-        lore.add(ChatUtils.translateToColor("&8Tier: " + tierColor + tierName));
-        lore.add(ChatUtils.translateToColor("&8Price: &6$" + fmt.format(recipe.getPrice())));
-        lore.add(ChatUtils.translateToColor("&7&oClick to purchase!"));
+        lore.add(Lang.getFor(player, "brew.lore_tier", "tier", tierColor + tierName));
+        lore.add(Lang.getFor(player, "brew.lore_price", "price", fmt.format(recipe.getPrice())));
+        lore.add(Lang.getFor(player, "brew.lore_click_purchase"));
         meta.setLore(lore);
 
         item.setItemMeta(meta);
@@ -557,7 +550,7 @@ public class BrewRecipeUtils {
      * Creates a cycling recipe map display for the vote crate GUI preview.
      * Uses the Nth RARE-tier recipe (wraps around).
      */
-    public static ItemStack createCyclingRecipeMapDisplay(int index) {
+    public static ItemStack createCyclingRecipeMapDisplay(Player player, int index) {
         List<BrewRecipe> rareRecipes = new ArrayList<>();
         for (BrewRecipe r : BrewRecipe.values()) {
             if (r.getTier() == BrewRecipe.Tier.RARE) rareRecipes.add(r);
@@ -567,10 +560,10 @@ public class BrewRecipeUtils {
 
         ItemStack item = new ItemStack(Material.FILLED_MAP);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&f" + recipe.getDisplayName() + " Recipe"));
+        meta.setDisplayName(Lang.getFor(player, "brew.recipe_title", "name", recipe.getDisplayName()));
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&8Tier: &9Rare"));
-        lore.add(ChatUtils.translateToColor("&c5% Chance"));
+        lore.add(Lang.getFor(player, "brew.lore_tier", "tier", "&9" + Lang.getFor(player, "brew.tier_rare")));
+        lore.add(Lang.getFor(player, "gui.crate.chance_5"));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;

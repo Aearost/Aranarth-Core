@@ -51,8 +51,7 @@ public class MountUtils {
     public static void toggleMount(Player player) {
         String element = getElementForPlayer(player);
         if (element == null) {
-            player.sendMessage(ChatUtils.chatMessage(
-                    "&cYou must have an element in order to summon a mount!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mount.need_element")));
             return;
         }
 
@@ -69,15 +68,13 @@ public class MountUtils {
      */
     public static void summonMount(Player player, String element) {
         String worldName = player.getWorld().getName();
-        if (worldName.equals("spawn") || worldName.equals("arena") || worldName.equals("creative")) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou cannot summon a mount in this world!"));
+        if (worldName.equals("spawn") || worldName.equals("arena") || worldName.startsWith("creative")) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mount.wrong_world")));
             return;
         }
 
         if (getEntityClassForElement(element) == null) {
-            player.sendMessage(ChatUtils.chatMessage(
-                    getElementColor(element) + getMountNameForElement(element)
-                            + " &7has not been implemented yet"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mount.not_implemented", "mount", getElementColor(element) + getMountNameForElement(element))));
             return;
         }
 
@@ -85,22 +82,18 @@ public class MountUtils {
 
         if (mount.isRecharging()) {
             String displayName = getDisplayName(player.getUniqueId(), element);
-            player.sendMessage(ChatUtils.chatMessage(
-                    getElementColor(element) + displayName
-                            + " &7is still recovering! Ready in &e"
-                            + formatRechargeTime(mount.getRechargeRemainingSeconds())));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mount.still_recovering", "mount", getElementColor(element) + displayName, "time", formatRechargeTime(mount.getRechargeRemainingSeconds()))));
             return;
         }
 
         if (player.getVehicle() != null) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou must exit this vehicle before calling your mount"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mount.must_exit_vehicle")));
             return;
         }
 
         MountListener ml = MountListener.getInstance();
         if (ml == null) {
-            player.sendMessage(ChatUtils.chatMessage(
-                    "&cSomething isn't working as expected with summoning mounts..."));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mount.summon_error")));
             return;
         }
 
@@ -117,7 +110,7 @@ public class MountUtils {
         Entity entity = Bukkit.getEntity(mountId);
         if (!(entity instanceof LivingEntity mount)) {
             unregisterActive(mountId);
-            player.sendMessage(ChatUtils.chatMessage("&cYour mount could not be found"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mount.not_found")));
             return;
         }
 
@@ -136,12 +129,13 @@ public class MountUtils {
 
         mount.eject();
         mount.remove();
+        PersistenceUtils.saveMountsForPlayer(player.getUniqueId());
 
         String displayName = info != null
                 ? getDisplayName(player.getUniqueId(), info[1])
-                : "mount";
+                : Lang.getFor(player, "mount.default_name");
         String color = info != null ? getElementColor(info[1]) : "&f";
-        player.sendMessage(ChatUtils.chatMessage(color + displayName + " &7has returned"));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mount.returned", "mount", color + displayName)));
     }
 
     public static void showAllSkillBars(Player player, String element) {
@@ -190,7 +184,7 @@ public class MountUtils {
         double progress = level >= Mount.MAX_LEVEL ? 1.0
                 : (needed > 0 ? Math.min(1.0, Math.max(0.01, (double) xp / needed)) : 1.0);
 
-        bar.setTitle(buildBarTitle(barIndex, getDisplayName(playerUUID, element),
+        bar.setTitle(buildBarTitle(player, barIndex, getDisplayName(playerUUID, element),
                 getElementColor(element), element, level, xp, needed));
         bar.setProgress(progress);
 
@@ -240,19 +234,19 @@ public class MountUtils {
     /**
      * Builds the boss bar title for a skill slot.
      */
-    private static String buildBarTitle(int barIndex, String displayName, String elementColor,
+    private static String buildBarTitle(Player player, int barIndex, String displayName, String elementColor,
                                         String element, int level, long xp, long needed) {
         String skillLabel = switch (barIndex) {
-            case BAR_HEALTH -> "Health";
-            case BAR_SPEED -> "Speed";
-            default -> getThirdAttrLabel(element);
+            case BAR_HEALTH -> Lang.getFor(player, "mount.skill_health");
+            case BAR_SPEED -> Lang.getFor(player, "mount.skill_speed");
+            default -> getThirdAttrLabel(player, element);
         };
-        String nameAndSkill = elementColor + displayName + "'s " + skillLabel;
+        String mountName = elementColor + displayName;
         boolean maxed = level >= Mount.MAX_LEVEL;
 
         return ChatUtils.translateToColor(maxed
-                ? nameAndSkill + " &8» &fLvl " + level + " &a(MAX)"
-                : nameAndSkill + " &8» &fLvl " + level + " &7(&e" + xp + "&7/&e" + needed + " &eXP&7)");
+                ? Lang.getFor(player, "mount.bar_title_max", "mount", mountName, "skill", skillLabel, "level", level)
+                : Lang.getFor(player, "mount.bar_title", "mount", mountName, "skill", skillLabel, "level", level, "xp", xp, "needed", needed));
     }
 
     private static BarColor elementBarColor(String element) {
@@ -267,14 +261,14 @@ public class MountUtils {
     /**
      * Full label for the third skill attribute of each element's mount.
      */
-    public static String getThirdAttrLabel(String element) {
-        return switch (element) {
-            case "EARTH" -> "Dig Speed";
-            case "FIRE" -> "Ramming";
-            case "WATER" -> "Bite Strength";
-            case "AIR" -> "Bellow Power";
-            default -> "Special";
-        };
+    public static String getThirdAttrLabel(Player player, String element) {
+        return Lang.getFor(player, switch (element) {
+            case "EARTH" -> "mount.skill_dig_speed";
+            case "FIRE" -> "mount.skill_ramming";
+            case "WATER" -> "mount.skill_bite_strength";
+            case "AIR" -> "mount.skill_bellow_power";
+            default -> "mount.skill_special";
+        });
     }
 
     /**
@@ -453,14 +447,12 @@ public class MountUtils {
         if (owner != null) {
             refreshSkillBar(owner, info[1], BAR_SPEED);
             if (leveled) {
-                owner.sendMessage(ChatUtils.chatMessage(
-                        getElementColor(info[1]) + getDisplayName(ownerUUID, info[1])
-                                + "'s &eSpeed" + getElementColor(info[1])
-                                + " has reached level &e" + pet.getSpeedLevel()));
+                owner.sendMessage(ChatUtils.chatMessage(Lang.getFor(owner, "mount.skill_level_up", "mount", getElementColor(info[1]) + getDisplayName(ownerUUID, info[1]), "skill", Lang.getFor(owner, "mount.skill_speed"), "color", getElementColor(info[1]), "level", pet.getSpeedLevel())));
                 MountListener ml = MountListener.getInstance();
                 if (ml != null) {
                     ml.updateMountStats(mountEntityUUID);
                 }
+                PersistenceUtils.saveMountsForPlayer(ownerUUID);
             }
         }
     }
@@ -495,14 +487,12 @@ public class MountUtils {
         if (owner != null) {
             refreshSkillBar(owner, info[1], BAR_HEALTH);
             if (leveled) {
-                owner.sendMessage(ChatUtils.chatMessage(
-                        getElementColor(info[1]) + getDisplayName(ownerUUID, info[1])
-                                + "'s &eHealth" + getElementColor(info[1])
-                                + " has reached level &e" + pet.getHealthLevel()));
+                owner.sendMessage(ChatUtils.chatMessage(Lang.getFor(owner, "mount.skill_level_up", "mount", getElementColor(info[1]) + getDisplayName(ownerUUID, info[1]), "skill", Lang.getFor(owner, "mount.skill_health"), "color", getElementColor(info[1]), "level", pet.getHealthLevel())));
                 MountListener ml = MountListener.getInstance();
                 if (ml != null) {
                     ml.updateMountStats(mountEntityUUID);
                 }
+                PersistenceUtils.saveMountsForPlayer(ownerUUID);
             }
         }
     }
@@ -530,14 +520,12 @@ public class MountUtils {
         if (owner != null) {
             refreshSkillBar(owner, info[1], BAR_THIRD);
             if (leveled) {
-                owner.sendMessage(ChatUtils.chatMessage(
-                        getElementColor(info[1]) + getDisplayName(ownerUUID, info[1])
-                                + "'s &eRamming" + getElementColor(info[1])
-                                + " has reached level &e" + pet.getThirdLevel()));
+                owner.sendMessage(ChatUtils.chatMessage(Lang.getFor(owner, "mount.skill_level_up", "mount", getElementColor(info[1]) + getDisplayName(ownerUUID, info[1]), "skill", Lang.getFor(owner, "mount.skill_ramming"), "color", getElementColor(info[1]), "level", pet.getThirdLevel())));
                 MountListener ml = MountListener.getInstance();
                 if (ml != null) {
                     ml.updateMountStats(mountEntityUUID);
                 }
+                PersistenceUtils.saveMountsForPlayer(ownerUUID);
             }
         }
     }
@@ -568,14 +556,12 @@ public class MountUtils {
         if (owner != null) {
             refreshSkillBar(owner, info[1], BAR_THIRD);
             if (leveled) {
-                owner.sendMessage(ChatUtils.chatMessage(
-                        getElementColor(info[1]) + getDisplayName(ownerUUID, info[1])
-                                + "'s &eDig Speed" + getElementColor(info[1])
-                                + " has reached level &e" + pet.getThirdLevel()));
+                owner.sendMessage(ChatUtils.chatMessage(Lang.getFor(owner, "mount.skill_level_up", "mount", getElementColor(info[1]) + getDisplayName(ownerUUID, info[1]), "skill", Lang.getFor(owner, "mount.skill_dig_speed"), "color", getElementColor(info[1]), "level", pet.getThirdLevel())));
                 MountListener ml = MountListener.getInstance();
                 if (ml != null) {
                     ml.updateMountStats(mountEntityUUID);
                 }
+                PersistenceUtils.saveMountsForPlayer(ownerUUID);
             }
         }
     }
@@ -606,14 +592,12 @@ public class MountUtils {
         if (owner != null) {
             refreshSkillBar(owner, info[1], BAR_THIRD);
             if (leveled) {
-                owner.sendMessage(ChatUtils.chatMessage(
-                        getElementColor(info[1]) + getDisplayName(ownerUUID, info[1])
-                                + "'s &eBellow Power" + getElementColor(info[1])
-                                + " has reached level &e" + pet.getThirdLevel()));
+                owner.sendMessage(ChatUtils.chatMessage(Lang.getFor(owner, "mount.skill_level_up", "mount", getElementColor(info[1]) + getDisplayName(ownerUUID, info[1]), "skill", Lang.getFor(owner, "mount.skill_bellow_power"), "color", getElementColor(info[1]), "level", pet.getThirdLevel())));
                 MountListener ml = MountListener.getInstance();
                 if (ml != null) {
                     ml.updateMountStats(mountEntityUUID);
                 }
+                PersistenceUtils.saveMountsForPlayer(ownerUUID);
             }
         }
     }
@@ -644,14 +628,12 @@ public class MountUtils {
         if (owner != null) {
             refreshSkillBar(owner, info[1], BAR_THIRD);
             if (leveled) {
-                owner.sendMessage(ChatUtils.chatMessage(
-                        getElementColor(info[1]) + getDisplayName(ownerUUID, info[1])
-                                + "'s &eBite Strength" + getElementColor(info[1])
-                                + " has reached level &e" + pet.getThirdLevel()));
+                owner.sendMessage(ChatUtils.chatMessage(Lang.getFor(owner, "mount.skill_level_up", "mount", getElementColor(info[1]) + getDisplayName(ownerUUID, info[1]), "skill", Lang.getFor(owner, "mount.skill_bite_strength"), "color", getElementColor(info[1]), "level", pet.getThirdLevel())));
                 MountListener ml = MountListener.getInstance();
                 if (ml != null) {
                     ml.updateMountStats(mountEntityUUID);
                 }
+                PersistenceUtils.saveMountsForPlayer(ownerUUID);
             }
         }
     }

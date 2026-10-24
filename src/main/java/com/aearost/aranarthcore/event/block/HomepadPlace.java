@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.block;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Location;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -19,7 +20,13 @@ public class HomepadPlace {
 			ItemMeta meta = e.getItemInHand().getItemMeta();
 			if (meta.getPersistentDataContainer().has(HOMEPAD)) {
 				if (!AranarthCore.isSmpServer()) {
-					e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou can only place this in the SMP!"));
+					e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "access.no_place_smp")));
+					e.setCancelled(true);
+					return;
+				}
+				// A homepad in a creative world would let creative mounts and items reach survival
+				if (!AranarthUtils.isSurvivalWorld(e.getBlockPlaced().getWorld().getName())) {
+					e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "homepad.survival_only")));
 					e.setCancelled(true);
 					return;
 				}

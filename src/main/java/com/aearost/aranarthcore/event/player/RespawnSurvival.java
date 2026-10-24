@@ -4,10 +4,12 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.potion.PotionEffect;
@@ -26,16 +28,27 @@ public class RespawnSurvival {
         try {
             AranarthUtils.switchInventory(player, player.getLocation().getWorld().getName(), player.getLocation().getWorld().getName());
         } catch (IOException ex) {
-            player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.error_changing_world")));
             return;
         }
 
         if (!e.isBedSpawn() && !e.isAnchorSpawn()) {
             String deathWorld = e.getPlayer().getLastDeathLocation().getWorld().getName();
-            if (deathWorld.startsWith("world") || deathWorld.startsWith("resource")) {
-                e.setRespawnLocation(new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0));
-            } else if (AranarthUtils.isSmpWorld(deathWorld)) {
+            // SMP check must come first, as the SMP server's worlds are also named "world"
+            if (AranarthUtils.isSmpWorld(deathWorld)) {
                 e.setRespawnLocation(new Location(Bukkit.getWorld(AranarthCore.getSmpMainWorldName()), 0.5, 120, 3.5, 180, 0));
+            } else if (deathWorld.startsWith("world") || deathWorld.startsWith("resource")) {
+                e.setRespawnLocation(new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0));
+            }
+        }
+
+        // Never respawn in a world with another inventory (i.e a bed in a Creative plot), as the inventory would not be switched
+        World respawnWorld = e.getRespawnLocation().getWorld();
+        if (respawnWorld != null && !AranarthUtils.getInventoryGroup(respawnWorld.getName()).equals("world")) {
+            if (AranarthCore.isSmpServer()) {
+                e.setRespawnLocation(new Location(Bukkit.getWorld(AranarthCore.getSmpMainWorldName()), 0.5, 120, 3.5, 180, 0));
+            } else {
+                e.setRespawnLocation(new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0));
             }
         }
 

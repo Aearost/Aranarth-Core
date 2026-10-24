@@ -3,7 +3,6 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.gui.GuiLoginStreak;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.LoginStreakUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Sound;
@@ -29,11 +28,6 @@ public class GuiLoginStreakClick {
         if (!e.getClickedInventory().equals(e.getView().getTopInventory())) {
             return;
         }
-        if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou can only claim login streaks in survival worlds!"));
-            return;
-        }
-
         int slot = e.getRawSlot();
         UUID uuid = player.getUniqueId();
 
@@ -78,7 +72,7 @@ public class GuiLoginStreakClick {
         for (int i = 0; i < GuiLoginStreak.DAY_SLOTS.length; i++) {
             e.getInventory().setItem(
                     GuiLoginStreak.DAY_SLOTS[i],
-                    GuiLoginStreak.makeDayItem(i + 1, newDay, canClaimNow, rank)
+                    GuiLoginStreak.makeDayItem(player, i + 1, newDay, canClaimNow, rank)
             );
         }
     }

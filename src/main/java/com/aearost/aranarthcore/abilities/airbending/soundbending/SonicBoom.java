@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.airbending.soundbending;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -30,9 +31,9 @@ public class SonicBoom extends SoundAbility implements AddonAbility {
 	@Attribute(Attribute.DAMAGE)
 	private double maxDamage;
 
-	private final double minDamage = 2.0;
-	private final double hitRadius = 2.0;
-	private final double travelSpeed = 1.5; // blocks per tick
+	private final double minDamage;
+	private final double hitRadius;
+	private final double travelSpeed; // blocks per tick
 
 	private long startTime;
 	private boolean isCharged;
@@ -45,10 +46,13 @@ public class SonicBoom extends SoundAbility implements AddonAbility {
 	public SonicBoom(Player player) {
 		super(player);
 
-		this.chargeDuration = 1000;
-		this.range = 10.0;
-		this.cooldown = 8000;
-		this.maxDamage = 12.0;
+		this.chargeDuration = AbilityConfig.getLong("SonicBoom.ChargeDuration");
+		this.range = AbilityConfig.getDouble("SonicBoom.Range");
+		this.cooldown = AbilityConfig.getLong("SonicBoom.Cooldown");
+		this.maxDamage = AbilityConfig.getDouble("SonicBoom.MaxDamage");
+		this.minDamage = AbilityConfig.getDouble("SonicBoom.MinDamage");
+		this.hitRadius = AbilityConfig.getDouble("SonicBoom.HitRadius");
+		this.travelSpeed = AbilityConfig.getDouble("SonicBoom.Speed");
 
 		if (!bPlayer.canBend(this)) {
 			remove();

@@ -13,6 +13,7 @@ import com.aearost.aranarthcore.objects.Perk;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.AvatarUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
 import com.gmail.nossr50.datatypes.player.PlayerProfile;
@@ -67,6 +68,12 @@ public class GuiVoteShopPurchaseClick {
                 else if (e.getSlot() == 14) {
                     String pointsAsString = clicked.getItemMeta().getLore().get(0).split(" ")[0];
                     int requiredPoints = Integer.parseInt(ChatUtils.stripColorFormatting(pointsAsString));
+                    // The points may have been spent since the shop was opened
+                    if (requiredPoints <= 0 || AranarthUtils.getAvailableVotePoints(player.getUniqueId()) < requiredPoints) {
+                        player.closeInventory();
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.not_enough_vote_points")));
+                        return;
+                    }
                     aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() + requiredPoints);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
@@ -95,15 +102,15 @@ public class GuiVoteShopPurchaseClick {
                                 addOrDropItem(player, new KeyGodly().getItem());
                             }
                         } else {
-                            String type = ChatUtils.stripColorFormatting(clicked.getItemMeta().getDisplayName()).split(" ")[1].toLowerCase();
-                            Bukkit.getLogger().info("[AC] " + type);
-                            if (type.equals("vote")) {
+                            // Match against the localized names so this works in every language
+                            String displayName = ChatUtils.stripColorFormatting(clicked.getItemMeta().getDisplayName());
+                            if (displayName.equals(getPurchaseName(player, "gui.voteshop.vote_key"))) {
                                 addOrDropItem(player, new KeyVote().getItem());
-                            } else if (type.equals("rare")) {
+                            } else if (displayName.equals(getPurchaseName(player, "gui.voteshop.rare_key"))) {
                                 addOrDropItem(player, new KeyRare().getItem());
-                            } else if (type.equals("epic")) {
+                            } else if (displayName.equals(getPurchaseName(player, "gui.voteshop.epic_key"))) {
                                 addOrDropItem(player, new KeyEpic().getItem());
-                            } else if (type.equals("godly")) {
+                            } else if (displayName.equals(getPurchaseName(player, "gui.voteshop.godly_key"))) {
                                 addOrDropItem(player, new KeyGodly().getItem());
                             }
                         }
@@ -112,13 +119,13 @@ public class GuiVoteShopPurchaseClick {
                     else if (clicked.getType() == Material.WHITE_CONCRETE_POWDER) {
                         BendingPlayer bendingPlayer = new BendingPlayer(player);
                         if (bendingPlayer == null) {
-                            player.sendMessage(ChatUtils.chatMessage("&cYou do not have any elements!"));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.no_elements")));
                         } else {
                             if (AvatarUtils.getCurrentAvatar() != null && AvatarUtils.getCurrentAvatar().getUuid().equals(player.getUniqueId())) {
-                                player.sendMessage(ChatUtils.chatMessage("&cThe Avatar cannot use this perk!"));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.avatar_no_perk")));
                             } else {
                                 Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "b cooldown reset " + player.getName());
-                                player.sendMessage(ChatUtils.chatMessage("&7You have purchased " + itemName));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "vote_shop.purchased", "item", itemName)));
                                 return;
                             }
                         }
@@ -131,7 +138,7 @@ public class GuiVoteShopPurchaseClick {
                         if (aranarthPlayer.getPerks().getOrDefault(Perk.DISCORD, 0) == 0) {
                             Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " discord 1 silent");
                         } else {
-                            player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.already_have_perk")));
                             aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() - requiredPoints);
                             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                         }
@@ -142,7 +149,7 @@ public class GuiVoteShopPurchaseClick {
                         if (aranarthPlayer.getPerks().getOrDefault(Perk.TABLES, 0) == 0) {
                             Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " tables 1 silent");
                         } else {
-                            player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.already_have_perk")));
                             aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() - requiredPoints);
                             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                         }
@@ -153,7 +160,7 @@ public class GuiVoteShopPurchaseClick {
                         if (aranarthPlayer.getPerks().getOrDefault(Perk.ITEMFRAME, 0) == 0) {
                             Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " itemframe 1 silent");
                         } else {
-                            player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.already_have_perk")));
                             aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() - requiredPoints);
                             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                         }
@@ -164,7 +171,7 @@ public class GuiVoteShopPurchaseClick {
                         if (aranarthPlayer.getPerks().getOrDefault(Perk.CHAT, 0) == 0) {
                             Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " chat 1 silent");
                         } else {
-                            player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.already_have_perk")));
                             aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() - requiredPoints);
                             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                         }
@@ -177,7 +184,7 @@ public class GuiVoteShopPurchaseClick {
                             if (aranarthPlayer.getPerks().getOrDefault(Perk.NICKNAME, 0) == 0) {
                                 Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " nickname 1 silent");
                             } else {
-                                player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.already_have_perk")));
                                 aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() - requiredPoints);
                                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                             }
@@ -185,7 +192,7 @@ public class GuiVoteShopPurchaseClick {
                             if (aranarthPlayer.getPerks().getOrDefault(Perk.ITEMNAME, 0) == 0) {
                                 Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " itemname 1 silent");
                             } else {
-                                player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.already_have_perk")));
                                 aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() - requiredPoints);
                                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                             }
@@ -197,7 +204,7 @@ public class GuiVoteShopPurchaseClick {
                         if (aranarthPlayer.getPerks().getOrDefault(Perk.BLACKLIST, 0) == 0) {
                             Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " blacklist 1 silent");
                         } else {
-                            player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.already_have_perk")));
                             aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() - requiredPoints);
                             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                         }
@@ -208,7 +215,7 @@ public class GuiVoteShopPurchaseClick {
                         if (aranarthPlayer.getPerks().getOrDefault(Perk.HOMES, 0) <= 12) {
                             Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " homes silent");
                         } else {
-                            player.sendMessage(ChatUtils.chatMessage("&cYou already have the maximum amount of additional homes!"));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "perk.max_homes")));
                             aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() - requiredPoints);
                             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                         }
@@ -216,11 +223,11 @@ public class GuiVoteShopPurchaseClick {
                     }
                     // mcMMO Boost
                     else if (clicked.getType() == Material.PAPER) {
-                        String amount = clicked.getItemMeta().getDisplayName().split(" ")[4];
+                        String displayName = ChatUtils.stripColorFormatting(clicked.getItemMeta().getDisplayName());
                         int levelsToIncrease = 0;
-                        if (amount.equals("+10")) {
+                        if (displayName.equals(getPurchaseName(player, "gui.voteshop.mcmmo_10"))) {
                             levelsToIncrease = 10;
-                        } else if (amount.equals("+50")) {
+                        } else if (displayName.equals(getPurchaseName(player, "gui.voteshop.mcmmo_50"))) {
                             levelsToIncrease = 50;
                         }
                         McMMOPlayer mcMMOPlayer = EventUtils.getMcMMOPlayer(player);
@@ -249,51 +256,62 @@ public class GuiVoteShopPurchaseClick {
                     }
                     // Acolyte
                     else if (clicked.getType() == Material.PINK_CONCRETE_POWDER) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have purchased " + itemName));
-                        Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac rankset saintmonth " + player.getName() + " 1 silent");
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "vote_shop.purchased", "item", itemName)));
+                        Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac rankset saintmonth " + player.getUniqueId() + " 1 silent");
                         return;
                     }
                     // Disciple
                     else if (clicked.getType() == Material.MAGENTA_CONCRETE_POWDER) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have purchased " + itemName));
-                        Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac rankset saintmonth " + player.getName() + " 2 silent");
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "vote_shop.purchased", "item", itemName)));
+                        Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac rankset saintmonth " + player.getUniqueId() + " 2 silent");
                         return;
                     }
                     // Seraph
                     else if (clicked.getType() == Material.PURPLE_CONCRETE_POWDER) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have purchased " + itemName));
-                        Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac rankset saintmonth " + player.getName() + " 3 silent");
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "vote_shop.purchased", "item", itemName)));
+                        Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac rankset saintmonth " + player.getUniqueId() + " 3 silent");
                         return;
                     }
                     // Boost of the Miner
                     else if (clicked.getType() == Material.NETHERITE_PICKAXE) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have purchased " + itemName));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "vote_shop.purchased", "item", itemName)));
                         AranarthUtils.addServerBoost(Boost.MINER, null, player.getUniqueId(), true);
                         return;
                     }
                     // Boost of the Harvest
                     else if (clicked.getType() == Material.NETHERITE_HOE) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have purchased " + itemName));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "vote_shop.purchased", "item", itemName)));
                         AranarthUtils.addServerBoost(Boost.HARVEST, null, player.getUniqueId(), true);
                         return;
                     }
                     // Boost of the Hunter
                     else if (clicked.getType() == Material.CROSSBOW) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have purchased " + itemName));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "vote_shop.purchased", "item", itemName)));
                         AranarthUtils.addServerBoost(Boost.HUNTER, null, player.getUniqueId(), true);
                         return;
                     }
                     // Boost of Chi
                     else if (clicked.getType() == Material.SUGAR) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have purchased " + itemName));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "vote_shop.purchased", "item", itemName)));
                         AranarthUtils.addServerBoost(Boost.CHI, null, player.getUniqueId(), true);
                         return;
                     }
 
-                    player.sendMessage(ChatUtils.chatMessage("&7You have purchased " + itemName));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "vote_shop.purchased", "item", itemName)));
                 }
             }
         }
+    }
+
+    /**
+     * Builds the color-stripped purchase button name for a vote shop item, in the player's language.
+     *
+     * @param player  The player.
+     * @param itemKey The lang key of the vote shop item.
+     * @return The purchase button name without color formatting.
+     */
+    private String getPurchaseName(Player player, String itemKey) {
+        return ChatUtils.stripColorFormatting(Lang.getFor(player, "gui.voteshoppurchase.purchase", "item", Lang.getFor(player, itemKey)));
     }
 
     /**
@@ -307,7 +325,7 @@ public class GuiVoteShopPurchaseClick {
         // If the player's inventory was full, drop it to the ground
         if (!leftover.isEmpty()) {
             player.getLocation().getWorld().dropItemNaturally(player.getLocation(), leftover.get(0));
-            player.sendMessage(ChatUtils.chatMessage("&7The item was dropped as you don't have enough space!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "crate.item_dropped")));
         }
     }
 

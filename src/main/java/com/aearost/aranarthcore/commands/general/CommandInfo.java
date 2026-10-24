@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.FireType;
 import com.aearost.aranarthcore.network.NetworkManager;
@@ -9,6 +10,7 @@ import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.AvatarUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
@@ -46,7 +48,7 @@ public class CommandInfo implements CommandExecutor {
 			if (sender instanceof Player player) {
 				sendInfo(player.getUniqueId(), sender);
 			} else {
-				sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/info <player>"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "info <player>")));
 				return false;
 			}
 		} else {
@@ -93,7 +95,7 @@ public class CommandInfo implements CommandExecutor {
 				sendInfo(uuid, sender);
 				return true;
 			} else {
-				sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", args[0])));
 			}
 		}
 		return false;
@@ -102,11 +104,11 @@ public class CommandInfo implements CommandExecutor {
 	/**
 	 * Returns the display string for a player on a remote server (e.g. "in the &eSMP").
 	 */
-	private static String getRemoteServerDisplay(String server) {
+	private static String getRemoteServerDisplay(CommandSender sender, String server) {
 		return switch (server.toLowerCase()) {
-			case "smp" -> "in the &eSMP";
-			case "survival" -> "in &eSurvival";
-			default -> "on &e" + server;
+			case "smp" -> Lang.getFor(sender, "info.in_smp");
+			case "survival" -> Lang.getFor(sender, "info.in_survival");
+			default -> Lang.getFor(sender, "info.on_server", "server", server);
 		};
 	}
 
@@ -115,28 +117,28 @@ public class CommandInfo implements CommandExecutor {
 	 * @param name The unformatted name of the world the player is in.
 	 * @return The formatted name of the world the player is in.
 	 */
-	private static String getWorldName(String name) {
+	private static String getWorldName(CommandSender sender, String name) {
 		if (AranarthUtils.isSmpWorld(name)) {
-			return "in the &eSMP";
+			return Lang.getFor(sender, "info.in_smp");
 		}
 		switch (name) {
 			case "world", "world_nether", "world_the_end" -> {
-				return "in &eSurvival";
+				return Lang.getFor(sender, "info.in_survival");
 			}
 			case "resource", "resource_nether", "resource_the_end" -> {
-				return "in the &eResource World";
+				return Lang.getFor(sender, "info.in_resource");
 			}
 			case "arena" -> {
-				return "in the &eArena";
+				return Lang.getFor(sender, "info.in_arena");
 			}
 			case "creative" -> {
-				return "in &eCreative";
+				return Lang.getFor(sender, AranarthCore.isSmpServer() ? "info.in_smp_creative" : "info.in_creative");
 			}
 			case "shops" -> {
-				return "in the &eShops World";
+				return Lang.getFor(sender, "info.in_shops");
 			}
 			default -> {
-				return "at &eSpawn";
+				return Lang.getFor(sender, "info.at_spawn");
 			}
 		}
 	}
@@ -151,7 +153,7 @@ public class CommandInfo implements CommandExecutor {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
 
 		if (aranarthPlayer == null) {
-			sender.sendMessage(ChatUtils.chatMessage("&cPlayer data could not be loaded."));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.data_load_failed")));
 			return;
 		}
 
@@ -161,7 +163,7 @@ public class CommandInfo implements CommandExecutor {
 			offlineName = aranarthPlayer.getUsername();
 			if (offlineName == null || offlineName.isEmpty()) {
 				NetworkPlayer np = NetworkManager.isActive() ? NetworkManager.getInstance().getRemotePlayer(uuid) : null;
-				offlineName = np != null ? np.getUsername() : "Unknown";
+				offlineName = np != null ? np.getUsername() : Lang.getFor(sender, "info.unknown");
 			}
 		}
 		final String resolvedName = offlineName;
@@ -173,119 +175,120 @@ public class CommandInfo implements CommandExecutor {
 
 		String firstJoinDate = aranarthPlayer.getFirstJoinDate();
 		boolean isOG = AranarthUtils.isOriginalPlayer(uuid);
-		sender.sendMessage(ChatUtils.translateToColor("&6First Joined: &e" + (isOG || firstJoinDate.isEmpty() ? "Unknown" : firstJoinDate)));
+		sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "info.first_joined", "date", isOG || firstJoinDate.isEmpty() ? Lang.getFor(sender, "info.unknown") : firstJoinDate)));
 
 		Dominion dominion = DominionUtils.getPlayerDominion(uuid);
-		String dominionName = "None";
+		String dominionName = Lang.getFor(sender, "general.none");
 		if (dominion != null) {
 			dominionName = dominion.getName();
 		}
-		sender.sendMessage(ChatUtils.translateToColor("&6Dominion: &e" + dominionName));
+		sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "info.dominion", "name", dominionName)));
 
 		NumberFormat formatter = NumberFormat.getCurrencyInstance();
-		sender.sendMessage(ChatUtils.translateToColor("&6Balance: &e" + formatter.format(aranarthPlayer.getBalance())));
+		sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "info.balance", "balance", formatter.format(aranarthPlayer.getBalance()))));
 
 		String elementString = "";
 		if (AvatarUtils.getCurrentAvatar() != null && AvatarUtils.getCurrentAvatar().getUuid().equals(uuid)) {
-			elementString = "&c火 &7気 &b水 &a土 &5The Current Avatar &a土 &b水 &7気 &c火";
+			elementString = Lang.getFor(sender, "info.element_avatar");
 		} else {
 			OfflineBendingPlayer offlineBendingPlayer = BendingPlayer.getOfflineBendingPlayer(resolvedName);
 			if (offlineBendingPlayer == null || offlineBendingPlayer.getElements().isEmpty()) {
-				elementString = "&eNone";
+				elementString = Lang.getFor(sender, "info.element_none");
 			} else {
 				Element element = offlineBendingPlayer.getElements().getFirst();
 				if (element == Element.WATER) {
-					elementString = "&b水 Water 水";
+					elementString = Lang.getFor(sender, "info.element_water");
 				} else if (element == Element.EARTH) {
-					elementString = "&a土 Earth 土";
+					elementString = Lang.getFor(sender, "info.element_earth");
 				} else if (element == Element.FIRE) {
-					elementString = "&c火 Fire 火";
+					elementString = Lang.getFor(sender, "info.element_fire");
 				} else if (element == Element.CHI) {
-					elementString = "&6ち Chi ち";
+					elementString = Lang.getFor(sender, "info.element_chi");
 				} else {
-					elementString = "&7気 Air 気";
+					elementString = Lang.getFor(sender, "info.element_air");
 				}
 			}
 		}
-		sender.sendMessage(ChatUtils.translateToColor("&6Element: " + elementString));
+		sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "info.element", "element", elementString)));
 
 		String pronouns = aranarthPlayer.getPronouns().name();
 		pronouns = pronouns.substring(0, 1).toUpperCase() + pronouns.substring(1).toLowerCase();
-		sender.sendMessage(ChatUtils.translateToColor("&6Pronouns: &e" + pronouns));
+		sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "info.pronouns", "pronouns", pronouns)));
 
 		List<String> toggling = new ArrayList<>();
 		if (aranarthPlayer.isTogglingChat()) {
-			toggling.add("&eChat Messages");
+			toggling.add(Lang.getFor(sender, "info.toggle_chat"));
 		}
 		if (aranarthPlayer.isTogglingMessages()) {
-			toggling.add("&eDirect Messages");
+			toggling.add(Lang.getFor(sender, "info.toggle_messages"));
 		}
 		if (aranarthPlayer.isTogglingTp()) {
-			toggling.add("&eTeleport Requests");
+			toggling.add(Lang.getFor(sender, "info.toggle_tp"));
 		}
 		if (!aranarthPlayer.isUsingSpawnBoost()) {
-			toggling.add("&eSpawn Boost");
+			toggling.add(Lang.getFor(sender, "info.toggle_spawn_boost"));
 		}
 		if (aranarthPlayer.isTogglingChangeClaim()) {
-			toggling.add("&eClaim Changes");
+			toggling.add(Lang.getFor(sender, "info.toggle_claim_changes"));
 		}
 		if (aranarthPlayer.isTogglingInventoryAssist()) {
-			toggling.add("&eInventory Assist");
+			toggling.add(Lang.getFor(sender, "info.toggle_inventory_assist"));
 		}
 		if (!aranarthPlayer.isAddingToShulker()) {
-			toggling.add("&eShulker Assist");
+			toggling.add(Lang.getFor(sender, "info.toggle_shulker_assist"));
 		}
 		if (aranarthPlayer.getBlacklistingMethod() == -1) {
-			toggling.add("&eBlacklist");
+			toggling.add(Lang.getFor(sender, "info.toggle_blacklist"));
 		}
 		if (!aranarthPlayer.isCompressingItems()) {
-			toggling.add("&eCompressor");
+			toggling.add(Lang.getFor(sender, "info.toggle_compressor"));
 		}
 		if (!aranarthPlayer.isAutoLockingChests()) {
-			toggling.add("&eChest Locks");
+			toggling.add(Lang.getFor(sender, "info.toggle_chest_locks"));
 		}
 		if (aranarthPlayer.getFireType() != FireType.DEFAULT) {
-			toggling.add("&eFire Type: " + aranarthPlayer.getFireType().getDisplayName());
+			toggling.add(Lang.getFor(sender, "info.toggle_fire_type", "type", aranarthPlayer.getFireType().getDisplayName()));
 		}
 		if (aranarthPlayer.isDayMessageDisabled()) {
-			toggling.add("&eDay Message");
+			toggling.add(Lang.getFor(sender, "info.toggle_day_message"));
 		}
 		if (aranarthPlayer.isWeatherMessageDisabled()) {
-			toggling.add("&eWeather Message");
+			toggling.add(Lang.getFor(sender, "info.toggle_weather_message"));
 		}
 		if (aranarthPlayer.isBulkSellShulkerEnabled()) {
-			toggling.add("&eBulk Sell Shulker");
+			toggling.add(Lang.getFor(sender, "info.toggle_bulk_sell_shulker"));
 		}
 		String toggledFeatures = "";
 		if (toggling.isEmpty()) {
-			toggledFeatures = "&eNone";
+			toggledFeatures = Lang.getFor(sender, "info.toggle_none");
 		} else {
 			for (int i = 0; i < toggling.size(); i++) {
 				toggledFeatures += toggling.get(i);
 				if  (i < toggling.size() - 2) {
 					toggledFeatures += ", ";
 				} else if (i < toggling.size() - 1) {
-					toggledFeatures += " and ";
+					toggledFeatures += Lang.getFor(sender, "general.list_and");
 				}
 			}
 		}
-		sender.sendMessage(ChatUtils.translateToColor("&6Currently toggling: &e" + toggledFeatures));
+		sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "info.toggling", "list", toggledFeatures)));
 
 		if (sender instanceof Player player) {
 			if (player.hasPermission("aranarth.seen")) {
-				if (offlinePlayer.isOnline()) {
+				// Vanished players appear offline
+				boolean isVanished = AranarthUtils.isVanishedFrom(sender, uuid);
+				if (offlinePlayer.isOnline() && !isVanished) {
 					Player onlinePlayer = offlinePlayer.getPlayer();
-					boolean isAfk = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation() != null &&
-							AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount();
+					boolean isAfk = AranarthUtils.isAfk(AranarthUtils.getPlayer(onlinePlayer.getUniqueId()));
 					if (isAfk) {
-						sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently AFK " + getWorldName(onlinePlayer.getWorld().getName())));
+						sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "info.last_online_afk", "location", getWorldName(sender, onlinePlayer.getWorld().getName()))));
 					} else {
-						sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently online " + getWorldName(onlinePlayer.getWorld().getName())));
+						sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "info.last_online_now", "location", getWorldName(sender, onlinePlayer.getWorld().getName()))));
 					}
 				} else if (NetworkManager.isActive()) {
 					NetworkPlayer networkPlayer = NetworkManager.getInstance().getRemotePlayer(uuid);
-					if (networkPlayer != null) {
-						sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently online " + getRemoteServerDisplay(networkPlayer.getServer())));
+					if (networkPlayer != null && !isVanished) {
+						sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "info.last_online_now", "location", getRemoteServerDisplay(sender, networkPlayer.getServer()))));
 					} else {
 						AranarthUtils.getPlayerTimezone(player, zoneId -> {
 							String result = CommandSeen.calculateDisplayDate(
@@ -294,7 +297,7 @@ public class CommandInfo implements CommandExecutor {
 									zoneId,
 									sender
 							);
-							sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &e" + result));
+							sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "info.last_online", "date", result)));
 						});
 					}
 				} else {
@@ -305,31 +308,30 @@ public class CommandInfo implements CommandExecutor {
 								zoneId,
 								sender
 						);
-						sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &e" + result));
+						sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "info.last_online", "date", result)));
 					});
 				}
 			}
 		} else {
 			if (offlinePlayer.isOnline()) {
 				Player onlinePlayer = offlinePlayer.getPlayer();
-				boolean isAfk = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation() != null
-						&& AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount();
+				boolean isAfk = AranarthUtils.isAfk(AranarthUtils.getPlayer(onlinePlayer.getUniqueId()));
 				if (isAfk) {
-					sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently AFK " + getWorldName(onlinePlayer.getWorld().getName())));
+					sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "info.last_online_afk", "location", getWorldName(sender, onlinePlayer.getWorld().getName()))));
 				} else {
-					sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently online " + getWorldName(onlinePlayer.getWorld().getName())));
+					sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "info.last_online_now", "location", getWorldName(sender, onlinePlayer.getWorld().getName()))));
 				}
 			} else if (NetworkManager.isActive()) {
 				NetworkPlayer networkPlayer = NetworkManager.getInstance().getRemotePlayer(uuid);
 				if (networkPlayer != null) {
-					sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently online " + getRemoteServerDisplay(networkPlayer.getServer())));
+					sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "info.last_online_now", "location", getRemoteServerDisplay(sender, networkPlayer.getServer()))));
 				} else {
 					String result = CommandSeen.calculateDisplayDate(offlinePlayer, aranarthPlayer, ZoneId.systemDefault(), sender);
-					sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &e" + result));
+					sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "info.last_online", "date", result)));
 				}
 			} else {
 				String result = CommandSeen.calculateDisplayDate(offlinePlayer, aranarthPlayer, ZoneId.systemDefault(), sender);
-				sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &e" + result));
+				sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "info.last_online", "date", result)));
 			}
 		}
 	}

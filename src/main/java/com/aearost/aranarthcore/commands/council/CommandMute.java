@@ -4,9 +4,10 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Punishment;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.PunishmentUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -30,7 +31,7 @@ public class CommandMute {
 			if (player.hasPermission("aranarth.mute")) {
 				mutePlayer(sender, args);
 			} else {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 			}
         } else {
 			mutePlayer(sender, args);
@@ -45,7 +46,7 @@ public class CommandMute {
 	 */
 	private static void mutePlayer(CommandSender sender, String[] args) {
 		if (args.length < 4) {
-			sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac mute <player> <duration> <reason>"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac mute <player> <duration> <reason>")));
 			return;
 		}
 
@@ -62,13 +63,13 @@ public class CommandMute {
 			wasPlayerMuted = true;
 			nickname = AranarthUtils.getNickname(player);
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			if (aranarthPlayer.getCouncilRank() == 3) {
-				sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be muted"));
+			if (!PunishmentUtils.outranks(sender, uuid)) {
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "mute.cannot_mute")));
 				return;
 			}
 
 			if (!aranarthPlayer.getMuteEndDate().isEmpty()) {
-				sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &cis already muted!"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.already_muted", "name", aranarthPlayer.getNickname())));
 				return;
 			}
 
@@ -84,7 +85,12 @@ public class CommandMute {
 				try {
 					time = Integer.parseInt(timeAsString);
 				} catch (NumberFormatException e) {
-					sender.sendMessage(ChatUtils.chatMessage("&cThat is not a valid number!"));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_number")));
+					return;
+				}
+				// The end date is stored with a 2-digit year, so a mute must end before 2100
+				if (time <= 0) {
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_number")));
 					return;
 				}
 
@@ -106,10 +112,14 @@ public class CommandMute {
 				else if (last == 'w') {
 					date = date.plusWeeks(time);
 				} else {
-					sender.sendMessage(ChatUtils.chatMessage("&cThat is not a valid variable of time!"));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "mute.invalid_time_unit")));
 					return;
 				}
 
+				if (date.getYear() > 2099) {
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_number")));
+					return;
+				}
 				int year = date.getYear();
 				int month = date.getMonthValue();
 				int day = date.getDayOfMonth();
@@ -127,7 +137,7 @@ public class CommandMute {
 			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 			AranarthUtils.addMutedPlayer(player.getUniqueId());
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&e" + args[1] + " &ccould not be found"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", args[1])));
 		}
 
 		if (wasPlayerMuted) {
@@ -143,17 +153,8 @@ public class CommandMute {
 					ZoneId.systemDefault()), "MUTE", reason.toString(), senderUuid);
 			AranarthUtils.addPunishment(AranarthUtils.getUUIDFromUsername(args[1]), punishment, false);
 
-			UUID targetUuid = AranarthUtils.getUUIDFromUsername(args[1]);
-			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-				if (onlinePlayer.getUniqueId().equals(targetUuid)) {
-					onlinePlayer.sendMessage(ChatUtils.chatMessage("&cYou have been muted for &e" + args[2] + " &7because: &e" + reason));
-					onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_GHAST_HURT, 1F, 1.1F);
-				} else if (AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getCouncilRank() > 0) {
-					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + nickname + " &7has been muted for &e" + args[2] + " &7because: &e" + reason));
-				} else {
-					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + nickname + " &7has been muted"));
-				}
-			}
+			PunishmentUtils.notifyMute(punishment.getUuid(), nickname, args[2], reason.toString());
+			PunishmentUtils.issued(punishment, nickname, args[2], -1);
 		}
 	}
 

@@ -5,8 +5,12 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.JobData;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -25,6 +29,16 @@ public class JobUtils {
 
     // Builder anti-exploit: Map<playerUUID, Set<blockLocationKey>>
     private static final Map<UUID, Set<Long>> placedBlockLocations = new HashMap<>();
+    // Builder pay is only given for blocks that are still in place after this delay
+    public static final long BUILDER_PAY_DELAY_MS = 3 * 60 * 1000L;
+    private static final ArrayDeque<PendingBuild> pendingBuilds = new ArrayDeque<>();
+
+    /**
+     * A placed block whose Builder pay is held until it has stayed in place long enough.
+     */
+    private record PendingBuild(UUID playerUuid, UUID worldUuid, int x, int y, int z, Material material,
+                                double basePay, long placedAt) {
+    }
 
     public static int getMaxJobs(int rank) {
         if (rank >= 8) {
@@ -96,6 +110,10 @@ public class JobUtils {
     }
 
     public static void awardJob(Player player, JobType job, double basePay) {
+        // Jobs only pay in the survival worlds, never in the arena, creative or other worlds
+        if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
+            return;
+        }
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
         if (ap == null) {
             return;
@@ -129,18 +147,51 @@ public class JobUtils {
     }
 
     public static void handleLevelUp(Player player, AranarthPlayer ap, JobType job, int newLevel) {
-        String jobName = job.getDisplayName();
         String nickname = ap.getNickname();
 
         player.sendTitle(
-                ChatUtils.translateToColor("&6&lLevel Up!"),
-                ChatUtils.translateToColor("&e" + jobName + " &fis now &e&lLevel " + newLevel),
+                ChatUtils.translateToColor(Lang.getFor(player, "jobs.level_up_title")),
+                ChatUtils.translateToColor(Lang.getFor(player, "jobs.level_up_subtitle", "job", Lang.key(job.getNameKey()), "level", newLevel)),
                 10, 60, 20
         );
 
-        String broadcastMsg = ChatUtils.chatMessage("&7" + nickname + " &7has reached &e&lLevel " + newLevel + " &7in &e" + jobName + "&7!");
 
-        Bukkit.broadcastMessage(broadcastMsg);
+        Lang.broadcast("jobs.level_up_broadcast", "player", nickname, "level", newLevel, "job", Lang.key(job.getNameKey()));
+    }
+
+    /**
+     * Holds the Builder pay for a placed block until it has stayed in place for BUILDER_PAY_DELAY_MS.
+     */
+    public static void queueBuilderPay(Player player, Block block, double basePay) {
+        pendingBuilds.addLast(new PendingBuild(player.getUniqueId(), block.getWorld().getUID(), block.getX(), block.getY(),
+                block.getZ(), block.getType(), basePay, System.currentTimeMillis()));
+    }
+
+    /**
+     * Pays Builders for every held block that is still in place after the delay.
+     */
+    public static void processPendingBuilderPay() {
+        long now = System.currentTimeMillis();
+        Map<UUID, Double> payByPlayer = new HashMap<>();
+        while (!pendingBuilds.isEmpty() && now - pendingBuilds.peekFirst().placedAt() >= BUILDER_PAY_DELAY_MS) {
+            PendingBuild build = pendingBuilds.pollFirst();
+            World world = Bukkit.getWorld(build.worldUuid());
+            if (world == null) {
+                continue;
+            }
+            // An unloaded chunk cannot have been changed since it unloaded, so only loaded chunks are checked
+            if (world.isChunkLoaded(build.x() >> 4, build.z() >> 4)
+                    && world.getBlockAt(build.x(), build.y(), build.z()).getType() != build.material()) {
+                continue;
+            }
+            payByPlayer.merge(build.playerUuid(), build.basePay(), Double::sum);
+        }
+        for (Map.Entry<UUID, Double> entry : payByPlayer.entrySet()) {
+            Player player = Bukkit.getPlayer(entry.getKey());
+            if (player != null) {
+                awardJob(player, JobType.BUILDER, entry.getValue());
+            }
+        }
     }
 
     public static void trackPlacedBlock(UUID playerUuid, long locationKey) {
@@ -187,19 +238,6 @@ public class JobUtils {
         if (pay > 0) {
             awardJob(player, JobType.FARMER, pay);
         }
-    }
-
-    public static String getJobDescription(JobType job) {
-        return switch (job) {
-            case BUILDER -> "Place blocks to build the world around you";
-            case FARMER -> "Harvest crops, tend animals, and collect honey";
-            case MINER -> "Mine ores, stone, and precious materials underground";
-            case EXCAVATOR -> "Dig up dirt, sand, gravel, clay, and ancient artifacts";
-            case LUMBERJACK -> "Chop wood, strip logs, and craft wooden items";
-            case EXPLORER -> "Travel the world, ride horses, and open new chests";
-            case ALCHEMIST -> "Brew potions, enchant items, and visit the grindstone";
-            case HUNTER -> "Hunt mobs, catch fish, and take on powerful enemies";
-        };
     }
 
     public static String getJobColor(JobType job) {

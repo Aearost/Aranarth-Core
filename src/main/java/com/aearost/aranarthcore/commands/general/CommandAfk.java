@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.AfkLocation;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -26,8 +27,7 @@ public class CommandAfk implements CommandExecutor {
 		if (sender instanceof Player player) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			// Entering AFK
-			if (aranarthPlayer.getAfkLocation() == null
-					|| aranarthPlayer.getAfkLocation().getSeconds() < AranarthUtils.getAfkSecondsAmount()) {
+			if (!AranarthUtils.isAfk(aranarthPlayer)) {
 				// + 10 seconds to avoid double AFK messages
 				aranarthPlayer.setAfkLocation(new AfkLocation(player.getLocation(), AranarthUtils.getAfkSecondsAmount() + 10));
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
@@ -40,7 +40,7 @@ public class CommandAfk implements CommandExecutor {
 
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cThis can only be executed in-game!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return false;
 		}
 	}

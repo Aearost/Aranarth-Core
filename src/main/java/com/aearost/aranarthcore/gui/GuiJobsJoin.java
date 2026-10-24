@@ -6,7 +6,7 @@ import com.aearost.aranarthcore.objects.JobData;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.JobUtils;
-import org.bukkit.Bukkit;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -18,7 +18,7 @@ import java.util.List;
 
 public class GuiJobsJoin {
 
-    public static final String TITLE = "Join a Job";
+    public static final String TITLE_KEY = "gui.jobsjoin.title";
 
     public static final int[] JOB_SLOTS = {11, 13, 15, 20, 22, 24, 29, 31};
     public static final JobType[] JOB_ORDER = {
@@ -49,7 +49,7 @@ public class GuiJobsJoin {
     }
 
     private Inventory initializeGui() {
-        Inventory inv = Bukkit.createInventory(player, 45, ChatUtils.translateToColor("&8&lJoin a Job"));
+        Inventory inv = GuiHolder.create(player, 45, Lang.getFor(player, TITLE_KEY));
 
         ItemStack grayPane = makePane(Material.GRAY_STAINED_GLASS_PANE);
 
@@ -75,7 +75,7 @@ public class GuiJobsJoin {
         // Back button
         ItemStack back = new ItemStack(Material.BARRIER);
         ItemMeta backMeta = back.getItemMeta();
-        backMeta.setDisplayName(ChatUtils.translateToColor("&7Back"));
+        backMeta.setDisplayName(Lang.getFor(player, "gui.back"));
         back.setItemMeta(backMeta);
         inv.setItem(40, back);
 
@@ -92,20 +92,20 @@ public class GuiJobsJoin {
 
         if (alreadyJoined) {
             statusColor = "&a";
-            statusText = "Already Joined";
+            statusText = Lang.getFor(player, "gui.jobsjoin.already_joined");
         } else if (slotsFull) {
             statusColor = "&c";
-            statusText = "Job Slots Full";
+            statusText = Lang.getFor(player, "gui.jobsjoin.slots_full");
         } else {
             statusColor = "&e";
-            statusText = "Click to Join!";
+            statusText = Lang.getFor(player, "gui.jobsjoin.click_join");
         }
 
-        meta.setDisplayName(ChatUtils.translateToColor(JobUtils.getJobColor(job) + job.getDisplayName()));
+        meta.setDisplayName(ChatUtils.translateToColor(JobUtils.getJobColor(job) + Lang.getFor(player, job.getNameKey())));
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&7" + JobUtils.getJobDescription(job)));
+        lore.add(Lang.getFor(player, "jobs.desc_" + job.name().toLowerCase()));
         lore.add("");
-        lore.add(ChatUtils.translateToColor("&7Actions that earn money:"));
+        lore.add(Lang.getFor(player, "gui.jobsjoin.actions_lore"));
 
         for (String action : getJobActions(job)) {
             lore.add(ChatUtils.translateToColor("&8 - &7" + action));
@@ -117,9 +117,9 @@ public class GuiJobsJoin {
             int level = jobData.getLevel(job);
             double currentXp = jobData.getCurrentXp(job);
             long required = JobUtils.getXpRequired(level);
-            String xpStr = level >= 10 ? "Max Level" : (int) currentXp + " / " + required;
-            lore.add(ChatUtils.translateToColor("&7Level: &e" + level));
-            lore.add(ChatUtils.translateToColor("&7XP: &e" + xpStr));
+            String xpStr = level >= 10 ? Lang.getFor(player, "jobs.max_level") : (int) currentXp + " / " + required;
+            lore.add(Lang.getFor(player, "gui.jobsjoin.level", "level", String.valueOf(level)));
+            lore.add(Lang.getFor(player, "gui.jobsjoin.xp", "xp", xpStr));
             lore.add("");
         }
 
@@ -131,14 +131,14 @@ public class GuiJobsJoin {
 
     private List<String> getJobActions(JobType job) {
         return switch (job) {
-            case BUILDER -> List.of("Place buildable blocks &8($1.00)");
-            case FARMER -> List.of("Harvest crops &8($0.60-$2.40)", "Collect honey &8($9.60-$12.00)", "Kill passive mobs &8($1.20)");
-            case MINER -> List.of("Mine stone &8($0.03-$0.07)", "Mine ores &8($1.90-$75.00)", "Harvest amethyst &8($4.80)");
-            case EXCAVATOR -> List.of("Dig dirts, sands, etc &8($0.05-$0.10)", "Brush artifacts &8($25.00)");
-            case LUMBERJACK -> List.of("Chop logs &8($1.45-$2.90)", "Craft/saw wood items &8($1.20-$6.00)");
-            case EXPLORER -> List.of("Walk/ride &8($0.25-$0.50/block)", "Open natural chests &8($100-$250)");
-            case ALCHEMIST -> List.of("Brew potions &8($19.20-$48.00)", "Enchant items &8($24.00)");
-            case HUNTER -> List.of("Kill mobs &8($4.80-$250.00)", "Catch fish &8($4.80-$36.00)");
+            case BUILDER -> List.of(Lang.getFor(player, "jobs.action_builder"));
+            case FARMER -> List.of(Lang.getFor(player, "jobs.action_farmer_crops"), Lang.getFor(player, "jobs.action_farmer_honey"), Lang.getFor(player, "jobs.action_farmer_mobs"));
+            case MINER -> List.of(Lang.getFor(player, "jobs.action_miner_stone"), Lang.getFor(player, "jobs.action_miner_ores"), Lang.getFor(player, "jobs.action_miner_amethyst"));
+            case EXCAVATOR -> List.of(Lang.getFor(player, "jobs.action_excavator_dig"), Lang.getFor(player, "jobs.action_excavator_brush"));
+            case LUMBERJACK -> List.of(Lang.getFor(player, "jobs.action_lumberjack_chop"), Lang.getFor(player, "jobs.action_lumberjack_craft"));
+            case EXPLORER -> List.of(Lang.getFor(player, "jobs.action_explorer_travel"), Lang.getFor(player, "jobs.action_explorer_chests"));
+            case ALCHEMIST -> List.of(Lang.getFor(player, "jobs.action_alchemist_brew"), Lang.getFor(player, "jobs.action_alchemist_enchant"));
+            case HUNTER -> List.of(Lang.getFor(player, "jobs.action_hunter_kill"), Lang.getFor(player, "jobs.action_hunter_fish"));
         };
     }
 

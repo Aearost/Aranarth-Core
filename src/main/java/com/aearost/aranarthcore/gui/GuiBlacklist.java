@@ -4,7 +4,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.BlacklistPreset;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -15,7 +15,7 @@ import java.util.List;
 
 public class GuiBlacklist {
 
-    public static final String TITLE = "Blacklist";
+    public static final String TITLE_KEY = "gui.blacklist.title";
 
     private final Player player;
     private final Inventory gui;
@@ -31,7 +31,7 @@ public class GuiBlacklist {
     }
 
     private Inventory initializeGui() {
-        Inventory inv = Bukkit.createInventory(player, 45, TITLE);
+        Inventory inv = GuiHolder.create(player, 45, Lang.getFor(player, TITLE_KEY));
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
         List<BlacklistPreset> presets = ap.getBlacklistPresets();
         int activeIndex = ap.getActivePresetIndex();
@@ -56,9 +56,9 @@ public class GuiBlacklist {
         inv.setItem(24, buildPresetButton(5, presets, activeIndex));
 
         // Row 3 (slots 27-35): toggle at index 1 (28), select preset centered (31), clear at index 7 (34)
-        inv.setItem(28, buildToggleButton(method));
-        inv.setItem(31, buildActionButton(Material.NETHER_STAR, "&a&lSelect Preset"));
-        inv.setItem(34, buildActionButton(Material.TNT, "&c&lClear Preset"));
+        inv.setItem(28, buildToggleButton(player, method));
+        inv.setItem(31, buildActionButton(Material.NETHER_STAR, Lang.getFor(player, "gui.blacklist.select_preset")));
+        inv.setItem(34, buildActionButton(Material.TNT, Lang.getFor(player, "gui.blacklist.clear_preset")));
 
         return inv;
     }
@@ -69,11 +69,11 @@ public class GuiBlacklist {
         ItemStack item = new ItemStack(isActive ? Material.MAP : Material.PAPER);
         ItemMeta meta = item.getItemMeta();
         String name = (i < presets.size() && !presets.get(i).getName().isEmpty())
-                ? presets.get(i).getName() : "Preset " + (i + 1);
+                ? presets.get(i).getName() : Lang.getFor(player, "blacklist.preset_default", "number", i + 1);
         meta.setDisplayName(ChatUtils.translateToColor("&7&l" + name));
 
         if (isActive) {
-            meta.setLore(List.of(ChatUtils.translateToColor("&a&oCurrently active")));
+            meta.setLore(List.of(Lang.getFor(player, "gui.blacklist.active_preset")));
         } else {
             meta.setLore(null);
         }
@@ -81,22 +81,22 @@ public class GuiBlacklist {
         return item;
     }
 
-    public static ItemStack buildToggleButton(int method) {
+    public static ItemStack buildToggleButton(Player player, int method) {
         Material mat;
         String name;
         if (method == 0) {
             mat = Material.HOPPER;
-            name = "&f&lIgnoring Blacklisted Items";
+            name = Lang.getFor(player, "gui.blacklist.ignoring");
         } else if (method == 1) {
             mat = Material.FIRE_CHARGE;
-            name = "&f&lTrashing Blacklisted Items";
+            name = Lang.getFor(player, "gui.blacklist.trashing");
         } else {
             mat = Material.BARRIER;
-            name = "&f&lBlacklist Disabled";
+            name = Lang.getFor(player, "gui.blacklist.disabled_toggle");
         }
         ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor(name));
+        meta.setDisplayName(name);
         item.setItemMeta(meta);
         return item;
     }
@@ -104,7 +104,7 @@ public class GuiBlacklist {
     private ItemStack buildActionButton(Material mat, String name) {
         ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor(name));
+        meta.setDisplayName(name);
         item.setItemMeta(meta);
         return item;
     }

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.earthbending.lavabending.combo;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.GeneralMethods;
@@ -91,17 +92,17 @@ public class MoltenBlast extends LavaAbility implements AddonAbility, ComboAbili
         BALL_OFFSETS = offsets.toArray(new int[0][]);
     }
 
-    private static final long CHARGE_DURATION = 1500L;
+    private long chargeDuration;
     private static final long CONVERT_DURATION = 1000L;
-    private static final double CONVERT_RADIUS = 5.0;
+    private double convertRadius;
     private static final long LIFT_INTERVAL = 75L;
     private static final int LIFT_STEPS = 3;
-    private static final long LIFTED_DURATION = 10000L;
+    private long liftedDuration;
     private static final long MOVE_INTERVAL = 38L;
-    private static final double HIT_RADIUS = 2.0;
+    private double hitRadius;
     private static final double GRABBED_MAX_DIST = 12.0;
-    private static final int MAX_BLOCKS_THROUGH = 2;
-    private static final double SPLATTER_RADIUS = 7.0;
+    private int maxBlocksThrough;
+    private double splatterRadius;
     private static final int SPLATTER_BLOCK_COUNT = 18;
     private static final int SPLATTER_FB_COUNT = 12;
     private static final long SPLATTER_REVERT_TICKS = 100L;
@@ -160,11 +161,17 @@ public class MoltenBlast extends LavaAbility implements AddonAbility, ComboAbili
             return;
         }
 
-        this.cooldown = 9000L;
-        this.minDamage = 6.0;
-        this.maxDamage = 10.0;
-        this.selectRange = 12.0;
-        this.shootRange = 30.0;
+        this.cooldown = AbilityConfig.getLong("MoltenBlast.Cooldown");
+        this.minDamage = AbilityConfig.getDouble("MoltenBlast.MinDamage");
+        this.maxDamage = AbilityConfig.getDouble("MoltenBlast.MaxDamage");
+        this.selectRange = AbilityConfig.getDouble("MoltenBlast.SelectRange");
+        this.shootRange = AbilityConfig.getDouble("MoltenBlast.ShootRange");
+        this.chargeDuration = AbilityConfig.getLong("MoltenBlast.ChargeDuration");
+        this.convertRadius = AbilityConfig.getDouble("MoltenBlast.ConvertRadius");
+        this.liftedDuration = AbilityConfig.getLong("MoltenBlast.LiftedDuration");
+        this.hitRadius = AbilityConfig.getDouble("MoltenBlast.HitRadius");
+        this.maxBlocksThrough = AbilityConfig.getInt("MoltenBlast.MaxBlocksThrough");
+        this.splatterRadius = AbilityConfig.getDouble("MoltenBlast.SplatterRadius");
 
         this.phase = Phase.CHARGING;
         this.chargeStartTime = System.currentTimeMillis();
@@ -206,7 +213,7 @@ public class MoltenBlast extends LavaAbility implements AddonAbility, ComboAbili
         bPlayer.addCooldown("LavaFlow", 500L);
         // Only show particles once the charge is complete
         final long elapsed = System.currentTimeMillis() - chargeStartTime;
-        if (elapsed >= CHARGE_DURATION) {
+        if (elapsed >= chargeDuration) {
             spawnChargingParticles();
         }
     }
@@ -215,7 +222,7 @@ public class MoltenBlast extends LavaAbility implements AddonAbility, ComboAbili
         final long elapsed = System.currentTimeMillis() - convertStartTime;
         final double progress = Math.min(1.0, (double) elapsed / CONVERT_DURATION);
 
-        updateConvertBlocks(progress * CONVERT_RADIUS);
+        updateConvertBlocks(progress * convertRadius);
         spawnConvertParticles(progress);
 
         if (elapsed >= CONVERT_DURATION) {
@@ -248,7 +255,7 @@ public class MoltenBlast extends LavaAbility implements AddonAbility, ComboAbili
         // Keep LavaThrow suppressed so PK doesn't fire it when the player holds sneak to grab
         bPlayer.addCooldown("LavaThrow", 500L);
 
-        if (System.currentTimeMillis() - liftedStartTime > LIFTED_DURATION) {
+        if (System.currentTimeMillis() - liftedStartTime > liftedDuration) {
             endWithCooldown();
             return;
         }
@@ -310,7 +317,7 @@ public class MoltenBlast extends LavaAbility implements AddonAbility, ComboAbili
                 blockedCount++;
             }
         }
-        if (blockedCount > MAX_BLOCKS_THROUGH) {
+        if (blockedCount > maxBlocksThrough) {
             impact(ballCenter.clone());
             return;
         }
@@ -330,7 +337,7 @@ public class MoltenBlast extends LavaAbility implements AddonAbility, ComboAbili
 
     public void onSneakRelease() {
         if (phase == Phase.CHARGING) {
-            if (System.currentTimeMillis() - chargeStartTime < CHARGE_DURATION) {
+            if (System.currentTimeMillis() - chargeStartTime < chargeDuration) {
                 remove();
                 return;
             }
@@ -449,7 +456,7 @@ public class MoltenBlast extends LavaAbility implements AddonAbility, ComboAbili
     }
 
     private void collideWithEntities() {
-        for (final Entity entity : GeneralMethods.getEntitiesAroundPoint(ballCenter, HIT_RADIUS)) {
+        for (final Entity entity : GeneralMethods.getEntitiesAroundPoint(ballCenter, hitRadius)) {
             if (!(entity instanceof final LivingEntity living)) {
                 continue;
             }
@@ -548,7 +555,7 @@ public class MoltenBlast extends LavaAbility implements AddonAbility, ComboAbili
 
         for (int i = 0; i < SPLATTER_BLOCK_COUNT; i++) {
             final double angle = random.nextDouble() * Math.PI * 2;
-            final double r = 1.0 + random.nextDouble() * (SPLATTER_RADIUS - 1.0);
+            final double r = 1.0 + random.nextDouble() * (splatterRadius - 1.0);
             final Location candidate = loc.clone().add(Math.cos(angle) * r, 0, Math.sin(angle) * r);
             final Block surface = findSurface(candidate);
             if (surface == null || !isTransparent(surface)) {
@@ -589,7 +596,7 @@ public class MoltenBlast extends LavaAbility implements AddonAbility, ComboAbili
         final int count = 4 + (int) (progress * 6);
         for (int i = 0; i < count; i++) {
             final double angle = random.nextDouble() * Math.PI * 2;
-            final double r = progress * CONVERT_RADIUS;
+            final double r = progress * convertRadius;
             final Location loc = ballCenter.clone().add(Math.cos(angle) * r, 0.1, Math.sin(angle) * r);
             world.spawnParticle(Particle.LAVA, loc, 1, 0.1, 0.1, 0.1, 0);
             world.spawnParticle(Particle.FLAME, loc, 1, 0.1, 0.1, 0.1, 0.01);

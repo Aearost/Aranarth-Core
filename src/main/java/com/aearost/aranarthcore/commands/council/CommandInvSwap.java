@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.ItemUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -23,18 +24,18 @@ public class CommandInvSwap {
         if (sender instanceof Player player) {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
             if (aranarthPlayer.getCouncilRank() != 3) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
                 return true;
             }
 
             if (args.length < 2) {
-                player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac invswap <SURVIVAL|ARENA|CREATIVE> [player]"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "ac invswap <SURVIVAL|ARENA|CREATIVE> [player]")));
                 return true;
             }
 
             String typeArg = args[1].toUpperCase();
             if (!typeArg.equals("SURVIVAL") && !typeArg.equals("ARENA") && !typeArg.equals("CREATIVE")) {
-                player.sendMessage(ChatUtils.chatMessage("&cInvalid type. Valid types: &eSURVIVAL&c, &eARENA&c, or &eCREATIVE"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "invswap.invalid_type")));
                 return true;
             }
 
@@ -43,7 +44,7 @@ public class CommandInvSwap {
             if (args.length >= 3) {
                 target = Bukkit.getPlayer(args[2]);
                 if (target == null) {
-                    player.sendMessage(ChatUtils.chatMessage("&cThis player could not be found."));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.not_found", "name", args[2])));
                     return true;
                 }
                 targetAranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
@@ -59,16 +60,15 @@ public class CommandInvSwap {
                 currentType = "SURVIVAL";
             } else if (worldName.startsWith("arena")) {
                 currentType = "ARENA";
-            } else if (worldName.equals("creative")) {
+            } else if (worldName.startsWith("creative")) {
                 currentType = "CREATIVE";
             } else {
-                player.sendMessage(ChatUtils.chatMessage("&cUnable to determine the inventory type for " + (target.equals(player) ? "your" : target.getName() + "'s") + " world."));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "invswap.unknown_type")));
                 return true;
             }
 
             if (currentType.equals(typeArg)) {
-                String descriptor = target.equals(player) ? "Your" : target.getName() + "'s";
-                player.sendMessage(ChatUtils.chatMessage("&c" + descriptor + " inventory type would not change."));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "invswap.no_change")));
                 return true;
             }
 
@@ -98,18 +98,18 @@ public class CommandInvSwap {
                 AranarthUtils.setPlayer(target.getUniqueId(), targetAranarthPlayer);
 
                 if (target.equals(player)) {
-                    player.sendMessage(ChatUtils.chatMessage("&aYour inventory has been swapped to " + typeArg + "."));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "invswap.success", "player", player.getName(), "type", typeArg)));
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage("&a" + target.getName() + "'s inventory has been swapped to " + typeArg + "."));
-                    target.sendMessage(ChatUtils.chatMessage("&aYour inventory has been swapped to " + typeArg + " by a council member."));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "invswap.success", "player", target.getName(), "type", typeArg)));
+                    target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "invswap.notified", "type", typeArg)));
                 }
             } catch (IOException e) {
-                player.sendMessage(ChatUtils.chatMessage("&cAn error occurred while swapping inventories"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "invswap.error")));
             }
 
             return true;
         } else {
-            sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to execute this command!"));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
             return true;
         }
     }

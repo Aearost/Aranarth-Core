@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.ItemUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.ReaperManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -22,6 +23,11 @@ public class PlayerReaperCapture {
 
     public void execute(PlayerDeathEvent e) {
         Player player = e.getEntity();
+
+        // Only capture deaths in survival worlds - ignore arena and other non-survival worlds
+        if (player.getWorld() == null || !AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
+            return;
+        }
 
         // Soulbound armor negates all drops, so there is nothing to capture
         if (AranarthUtils.isWearingArmorType(player, "soulbound")) {
@@ -56,15 +62,17 @@ public class PlayerReaperCapture {
         double deathX = deathLocation.getX();
         double deathY = deathLocation.getY();
         double deathZ = deathLocation.getZ();
+        // Both servers have worlds with the same names, so the server is needed to know where the death was
+        String deathServer = AranarthCore.getInstance().getConfig().getString("network.this-server", "survival");
 
-        ReaperManager.put(player.getUniqueId(), dropsB64, deathTime, deathWorld, deathX, deathY, deathZ);
+        ReaperManager.put(player.getUniqueId(), dropsB64, deathTime, deathWorld, deathX, deathY, deathZ, deathServer);
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
             if (DatabaseManager.getInstance() != null) {
-                DatabaseManager.getInstance().upsertReaperInventory(player.getUniqueId(), dropsB64, deathTime, deathWorld, deathX, deathY, deathZ);
+                DatabaseManager.getInstance().upsertReaperInventory(player.getUniqueId(), dropsB64, deathTime, deathWorld, deathX, deathY, deathZ, deathServer);
             }
         });
 
         Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
-                player.sendMessage(ChatUtils.chatMessage("&7Purchase back your inventory using &e/reaper")), 1L);
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "reaper.purchase_back"))), 1L);
     }
 }

@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.airbending.soundbending;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -28,8 +29,8 @@ public class Amplification extends SoundAbility implements AddonAbility {
     @Attribute(Attribute.COOLDOWN)
     private long cooldown;
 
-    private static final double MAX_MULTIPLIER = 3.0;
-    private static final long ACTIVE_DURATION = 8000L;
+    private final double maxMultiplier;
+    private final long activeDuration;
 
     private long chargeStartTime;
     private long activeStartTime;
@@ -42,8 +43,10 @@ public class Amplification extends SoundAbility implements AddonAbility {
     public Amplification(Player player) {
         super(player);
 
-        this.chargeDuration = 5000L;
-        this.cooldown = 8000L;
+        this.chargeDuration = AbilityConfig.getLong("Amplification.ChargeDuration");
+        this.cooldown = AbilityConfig.getLong("Amplification.Cooldown");
+        this.maxMultiplier = AbilityConfig.getDouble("Amplification.MaxMultiplier");
+        this.activeDuration = AbilityConfig.getLong("Amplification.Duration");
 
         if (!bPlayer.canBend(this)) {
             remove();
@@ -54,7 +57,7 @@ public class Amplification extends SoundAbility implements AddonAbility {
         this.isCharged = false;
         this.isActive = false;
         this.consumed = false;
-        this.lockedMultiplier = MAX_MULTIPLIER;
+        this.lockedMultiplier = maxMultiplier;
 
         start();
     }
@@ -99,14 +102,14 @@ public class Amplification extends SoundAbility implements AddonAbility {
         activeAmplifications.put(player.getUniqueId(), this);
         // Cooldown covers the active window + post-window cooldown so the
         // next use is always gated 8 full seconds after the active window expires.
-        bPlayer.addCooldown(this, cooldown + ACTIVE_DURATION);
+        bPlayer.addCooldown(this, cooldown + activeDuration);
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WARDEN_SONIC_CHARGE, 0.5f, 1.25f);
     }
 
     private void progressActive() {
         long elapsed = System.currentTimeMillis() - activeStartTime;
 
-        if (elapsed >= ACTIVE_DURATION) {
+        if (elapsed >= activeDuration) {
             remove();
             return;
         }
@@ -149,9 +152,9 @@ public class Amplification extends SoundAbility implements AddonAbility {
 
     private double getCurrentMultiplier() {
         long elapsed = System.currentTimeMillis() - activeStartTime;
-        double t = Math.min((double) elapsed / ACTIVE_DURATION, 1.0);
-        // Linearly interpolate from MAX_MULTIPLIER (3x) down to 1x over 8 seconds
-        return MAX_MULTIPLIER + (1.0 - MAX_MULTIPLIER) * t;
+        double t = Math.min((double) elapsed / activeDuration, 1.0);
+        // Linearly interpolate from maxMultiplier down to 1x over the active duration
+        return maxMultiplier + (1.0 - maxMultiplier) * t;
     }
 
     private static final double HALO_HEIGHT_STAND = 2.0;

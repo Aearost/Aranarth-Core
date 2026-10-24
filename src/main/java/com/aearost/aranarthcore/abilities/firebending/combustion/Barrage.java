@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.firebending.combustion;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.CombustionAbility;
@@ -47,11 +48,11 @@ public class Barrage extends CombustionAbility implements AddonAbility {
 
     private final List<CombustionBurst> bursts = new ArrayList<>();
 
-    private static final int TOTAL_BURSTS = 3;
-    private static final long BURST_INTERVAL_MS = 500;
-    private static final double SPEED = 2.5; // blocks per tick
+    private int totalBursts;
+    private long burstInterval;
+    private double speed; // blocks per tick
     private static final double STEP = 0.4;
-    private static final double HIT_RADIUS = 0.8;
+    private double hitRadius;
 
     private static final Map<UUID, Barrage> activeInstances = new HashMap<>();
 
@@ -76,11 +77,15 @@ public class Barrage extends CombustionAbility implements AddonAbility {
             return;
         }
 
-        cooldown = 7000;
-        range = 25;
-        burstDamage = 8.0;   // 4 hearts
-        misfireDamage = 12.0; // 6 hearts
-        aoeRadius = 2.0;
+        cooldown = AbilityConfig.getLong("Barrage.Cooldown");
+        range = AbilityConfig.getDouble("Barrage.Range");
+        burstDamage = AbilityConfig.getDouble("Barrage.Damage");
+        misfireDamage = AbilityConfig.getDouble("Barrage.MisfireDamage");
+        aoeRadius = AbilityConfig.getDouble("Barrage.AoeRadius");
+        totalBursts = AbilityConfig.getInt("Barrage.Bursts");
+        burstInterval = AbilityConfig.getLong("Barrage.BurstInterval");
+        speed = AbilityConfig.getDouble("Barrage.Speed");
+        hitRadius = AbilityConfig.getDouble("Barrage.HitRadius");
 
         phase = Phase.CASTING;
         misfired = false;
@@ -113,16 +118,16 @@ public class Barrage extends CombustionAbility implements AddonAbility {
         }
 
         // Fire subsequent bursts every 0.5s intervals while still casting
-        if (phase == Phase.CASTING && burstsQueued < TOTAL_BURSTS) {
+        if (phase == Phase.CASTING && burstsQueued < totalBursts) {
             long now = System.currentTimeMillis();
-            if (now - lastBurstTime >= BURST_INTERVAL_MS) {
+            if (now - lastBurstTime >= burstInterval) {
                 fireBurst();
                 lastBurstTime = now;
             }
         }
 
         // Transition to traveling once all bursts are queued
-        if (phase == Phase.CASTING && burstsQueued >= TOTAL_BURSTS) {
+        if (phase == Phase.CASTING && burstsQueued >= totalBursts) {
             phase = Phase.TRAVELING;
         }
 
@@ -162,7 +167,7 @@ public class Barrage extends CombustionAbility implements AddonAbility {
      * Returns true when the burst should be removed.
      */
     private boolean progressBurst(CombustionBurst burst) {
-        double targetDistance = burst.distanceTraveled + SPEED;
+        double targetDistance = burst.distanceTraveled + speed;
 
         while (burst.distanceTraveled < targetDistance) {
             double step = Math.min(STEP, targetDistance - burst.distanceTraveled);
@@ -183,7 +188,7 @@ public class Barrage extends CombustionAbility implements AddonAbility {
             }
 
             // Entity hit
-            LivingEntity hit = findNearbyLivingEntity(burst.position, HIT_RADIUS);
+            LivingEntity hit = findNearbyLivingEntity(burst.position, hitRadius);
             if (hit != null) {
                 createExplosion(hit.getLocation().add(0, hit.getHeight() / 2.0, 0));
                 return true;
@@ -291,7 +296,7 @@ public class Barrage extends CombustionAbility implements AddonAbility {
     private void triggerMisfire() {
         misfired = true;
         bursts.clear();
-        burstsQueued = TOTAL_BURSTS;
+        burstsQueued = totalBursts;
 
         Location misfireCenter = player.getEyeLocation();
 

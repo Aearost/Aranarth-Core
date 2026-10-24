@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.abilities.chiblocking;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.CustomKeys;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -34,7 +35,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class DaggerVolley extends ChiAbility implements AddonAbility {
 
-    private static final double BASE_SPEED = 2.5;
     private static final double SPREAD_RADIUS = 0.24;
     private static final double NOISE = 0.03;
     private static final int[] ARROW_COUNTS = {3, 6, 9};
@@ -89,7 +89,7 @@ public class DaggerVolley extends ChiAbility implements AddonAbility {
             return false;
         }
 
-        this.cooldown = toFire * 1000L;
+        this.cooldown = toFire * AbilityConfig.getLong("DaggerVolley.CooldownPerArrow");
         STAGE_MAP.put(player.getUniqueId(), (stage + 1) % ARROW_COUNTS.length);
 
         // Snapshot per-arrow templates before consuming so counts are accurate
@@ -117,7 +117,7 @@ public class DaggerVolley extends ChiAbility implements AddonAbility {
                     .get(CustomKeys.ARROW, PersistentDataType.STRING)
                     : null;
 
-            final double arrowDamage = rng.nextBoolean() ? 2.0 : 1.0;
+            final double arrowDamage = rng.nextBoolean() ? AbilityConfig.getDouble("DaggerVolley.MaxDamage") : AbilityConfig.getDouble("DaggerVolley.MinDamage");
 
             // Random point inside a disk
             final double angle = rng.nextDouble(2.0 * Math.PI);
@@ -126,7 +126,7 @@ public class DaggerVolley extends ChiAbility implements AddonAbility {
                     .add(up.clone().multiply(Math.sin(angle)))
                     .multiply(radius);
 
-            final Vector velocity = forward.clone().multiply(BASE_SPEED)
+            final Vector velocity = forward.clone().multiply(AbilityConfig.getDouble("DaggerVolley.Speed"))
                     .add(perp)
                     .add(new Vector(
                             rng.nextDouble(-NOISE, NOISE),

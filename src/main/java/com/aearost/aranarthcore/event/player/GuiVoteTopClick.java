@@ -15,40 +15,24 @@ import org.bukkit.event.inventory.InventoryType;
 public class GuiVoteTopClick {
 
     public void execute(InventoryClickEvent e) {
-        String title = ChatUtils.stripColorFormatting(e.getView().getTitle());
-        if (!title.startsWith("Top Voters")) {
-            return;
-        }
-
         if (e.getClickedInventory() == null) {
             return;
         }
 
         if (e.getWhoClicked() instanceof Player player) {
+            String title = ChatUtils.stripColorFormatting(e.getView().getTitle());
+            if (!GuiVoteTop.isVoteTopTitle(player, title)) {
+                return;
+            }
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
             if (e.getClickedInventory().getType() == InventoryType.CHEST) {
                 e.setCancelled(true);
 
-                // Parse the filter from the GUI title
-                Integer year = null;
-                Integer month = null;
-                if (title.startsWith("Top Voters Year ")) {
-                    try {
-                        year = Integer.parseInt(title.substring("Top Voters Year ".length()).trim());
-                    } catch (NumberFormatException ignored) {
-                    }
-                } else if (title.startsWith("Top Voters Month ")) {
-                    try {
-                        String[] parts = title.substring("Top Voters Month ".length()).trim().split("-");
-                        month = Integer.parseInt(parts[0]);
-                        year = Integer.parseInt(parts[1]);
-                    } catch (Exception ignored) {
-                    }
-                }
-
-                final Integer finalYear = year;
-                final Integer finalMonth = month;
+                // The filter is stored when the GUI opens, as the title is localized
+                GuiVoteTop.VoteTopFilter filter = GuiVoteTop.getOpenFilter(player.getUniqueId());
+                final Integer finalYear = filter.year();
+                final Integer finalMonth = filter.month();
 
                 // Previous
                 if (e.getSlot() == 45) {

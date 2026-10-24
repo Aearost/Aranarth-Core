@@ -16,8 +16,9 @@ public class CustomKeys {
     public static final NamespacedKey ARROW = new NamespacedKey(AranarthCore.getInstance(), "arrow");
     public static final NamespacedKey ARROW_HEAD = new NamespacedKey(AranarthCore.getInstance(), "arrowhead");
     public static final NamespacedKey CRATE_KEY = new NamespacedKey(AranarthCore.getInstance(), "crate_key");
-    public static final NamespacedKey INCANTATION_TYPE = new NamespacedKey(AranarthCore.getInstance(), "incantation_type");
-    public static final NamespacedKey INCANTATION_LEVEL = new NamespacedKey(AranarthCore.getInstance(), "incantation_level");
+    public static final NamespacedKey ESSENCE_TYPE = new NamespacedKey(AranarthCore.getInstance(), "essence_type");
+    public static final NamespacedKey ESSENCE_LEVEL = new NamespacedKey(AranarthCore.getInstance(), "essence_level");
+    public static final NamespacedKey ESSENCE_IMBUED_XP = new NamespacedKey(AranarthCore.getInstance(), "essence_imbued_xp");
     public static final NamespacedKey MOUNT_HEALTH = new NamespacedKey(AranarthCore.getInstance(), "mount_health");
     public static final NamespacedKey MOUNT_JUMP = new NamespacedKey(AranarthCore.getInstance(), "mount_jump");
     public static final NamespacedKey MOUNT_SPEED = new NamespacedKey(AranarthCore.getInstance(), "mount_speed");
@@ -39,15 +40,20 @@ public class CustomKeys {
     public static final NamespacedKey BREWED_POTION = new NamespacedKey(AranarthCore.getInstance(), "fae_brewed_potion");
     public static final NamespacedKey BREW_RECIPE = new NamespacedKey(AranarthCore.getInstance(), "brew_recipe");
     public static final NamespacedKey BREW_BREWER = new NamespacedKey(AranarthCore.getInstance(), "brew_brewer");
+    public static final NamespacedKey BREW_ALCHEMY_XP = new NamespacedKey(AranarthCore.getInstance(), "brew_alchemy_xp");
     public static final NamespacedKey PET_FOOD_INVENTORY = new NamespacedKey(AranarthCore.getInstance(), "pet_food_inventory");
     public static final NamespacedKey NETHERITE_ITEM = new NamespacedKey(AranarthCore.getInstance(), "netherite_item");
     public static final NamespacedKey WRENCH = new NamespacedKey(AranarthCore.getInstance(), "wrench");
     public static final NamespacedKey WRENCH_LAST_BLOCK = new NamespacedKey(AranarthCore.getInstance(), "wrench_last_block");
     public static final NamespacedKey WANDERING_TRADER_TYPE = new NamespacedKey(AranarthCore.getInstance(), "wandering_trader_type");
     public static final NamespacedKey ENCHANTER_LOCKOUT = new NamespacedKey(AranarthCore.getInstance(), "enchanter_lockout");
+    public static final NamespacedKey ENCHANTER_PURCHASERS = new NamespacedKey(AranarthCore.getInstance(), "enchanter_purchasers");
     public static final NamespacedKey HEAD_TEXTURE = new NamespacedKey(AranarthCore.getInstance(), "head_texture");
     public static final NamespacedKey HEAD_REQUIRED_MATERIAL = new NamespacedKey(AranarthCore.getInstance(), "head_required_material");
     public static final NamespacedKey PRESERVATION_USES = new NamespacedKey(AranarthCore.getInstance(), "preservation_uses");
     public static final NamespacedKey WRAITH_TRIGGERED = new NamespacedKey(AranarthCore.getInstance(), "wraith_triggered");
     public static final NamespacedKey WRAITH_TYPE = new NamespacedKey(AranarthCore.getInstance(), "wraith_type");
+    public static final NamespacedKey COUPON_DISCOUNT = new NamespacedKey(AranarthCore.getInstance(), "coupon_discount");
+    public static final NamespacedKey SIT_CUSHION = new NamespacedKey(AranarthCore.getInstance(), "sit_cushion");
+    public static final NamespacedKey TABLE_ENCHANTED = new NamespacedKey(AranarthCore.getInstance(), "table_enchanted");
 }

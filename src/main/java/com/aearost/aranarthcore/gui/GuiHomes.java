@@ -3,8 +3,7 @@ package com.aearost.aranarthcore.gui;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -34,7 +33,7 @@ public class GuiHomes {
 		Location bedSpawn = player.getBedSpawnLocation();
         int guiSize = aranarthPlayer.getHomes().size() + (bedSpawn != null ? 1 : 0);
 		int maxHomes = AranarthUtils.getMaxHomeNum(player);
-		String guiName = "Your Homes (" + aranarthPlayer.getHomes().size() + "/" + maxHomes + ")";
+		String guiName = Lang.getFor(player, "gui.homes.title", "count", String.valueOf(aranarthPlayer.getHomes().size()), "max", String.valueOf(maxHomes));
 
 		// Size is based on which method is used
 		// If the amount is a multiple of 9, use a full row
@@ -42,14 +41,14 @@ public class GuiHomes {
 			guiSize = ((int) (double) (guiSize / 9) + 1) * 9;
 		}
 
-		Inventory gui = Bukkit.getServer().createInventory(player, guiSize, guiName);
+		Inventory gui = GuiHolder.create(player, guiSize, guiName);
 
 		int slot = 0;
 
 		if (bedSpawn != null) {
 			ItemStack bedItem = new ItemStack(Material.RED_BED, 1);
 			ItemMeta bedMeta = bedItem.getItemMeta();
-			bedMeta.setDisplayName(ChatUtils.translateToColor("&eBed Spawn"));
+			bedMeta.setDisplayName(Lang.getFor(player, "gui.homes.bed_spawn"));
 			bedItem.setItemMeta(bedMeta);
 			gui.setItem(slot++, bedItem);
 		}
@@ -57,7 +56,7 @@ public class GuiHomes {
 		for (Home home : aranarthPlayer.getHomes()) {
 			ItemStack homeItem = new ItemStack(home.getIcon(), 1);
 			ItemMeta homeItemMeta = homeItem.getItemMeta();
-			homeItemMeta.setDisplayName(ChatUtils.translateToColor("&e" + home.getName()));
+			homeItemMeta.setDisplayName(Lang.getFor(player, "gui.homes.home_name", "name", home.getName()));
 			homeItem.setItemMeta(homeItemMeta);
 			gui.setItem(slot++, homeItem);
 		}

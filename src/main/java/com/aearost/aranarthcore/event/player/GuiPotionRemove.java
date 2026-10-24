@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -18,7 +19,10 @@ import java.util.List;
  */
 public class GuiPotionRemove {
 	public void execute(InventoryClickEvent e) {
-		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Remove Potions")) {
+		if (!(e.getWhoClicked() instanceof Player player)) {
+			return;
+		}
+		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(Lang.getFor(player, "gui.potions.title_remove").split("\\(")[0].trim())) {
 			if (e.getView().getType() == InventoryType.CHEST) {
 				// If the user did not click a slot
 				if (e.getClickedInventory() == null) {
@@ -37,7 +41,6 @@ public class GuiPotionRemove {
 						return;
 					}
 
-					Player player = (Player) e.getWhoClicked();
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 					HashMap<ItemStack, Integer> potions = aranarthPlayer.getPotions();
 					int toBeRemoved = aranarthPlayer.getPotionQuantityToRemove();
@@ -93,7 +96,7 @@ public class GuiPotionRemove {
 					aranarthPlayer.setPotions(potions);
 					aranarthPlayer.setPotionQuantityToRemove(0);
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-					player.sendMessage(ChatUtils.chatMessage("&7You have removed &e" + amountRemoved + " &7potions"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "potions.removed", "count", amountRemoved)));
 
 					for (ItemStack potionBeingAdded : potionsToRemove) {
 						HashMap<Integer, ItemStack> nonAdded = player.getInventory().addItem(potionBeingAdded);

@@ -1,7 +1,7 @@
 package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -16,9 +16,15 @@ import java.util.*;
 
 public class GuiWrench {
 
-    public static final String TITLE = "Wrench";
+    public static final String TITLE_KEY = "gui.wrench.title";
 
     public static final Map<UUID, Block> openBlocks = new HashMap<>();
+
+    // Cardinal + vertical faces used for fence/wall connection ordering
+    public static final List<BlockFace> CARDINAL_FACES = List.of(
+            BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST,
+            BlockFace.UP, BlockFace.DOWN
+    );
 
     // The 16 valid rotation BlockFaces in order (rotation 0–15)
     public static final List<BlockFace> ROTATIONS = List.of(
@@ -37,7 +43,7 @@ public class GuiWrench {
     public GuiWrench(Player player, Block block) {
         this.player = player;
         this.block = block;
-        this.gui = Bukkit.createInventory(player, 27, ChatUtils.translateToColor("&8&lWrench"));
+        this.gui = GuiHolder.create(player, 27, Lang.getFor(player, TITLE_KEY));
         populate();
     }
 
@@ -56,7 +62,8 @@ public class GuiWrench {
         if (block == null) {
             return;
         }
-        if (!ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle()).equals(TITLE)) {
+        if (!GuiHolder.isGui(player.getOpenInventory())
+                || !ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle()).equals(Lang.getFor(player, TITLE_KEY))) {
             return;
         }
         GuiWrench rebuilt = new GuiWrench(player, block);
@@ -77,7 +84,7 @@ public class GuiWrench {
         gui.setItem(4, makeInfo());
 
         BlockData data = block.getBlockData();
-        List<ItemStack> props = buildPropertyItems(data);
+        List<ItemStack> props = buildPropertyItems(player, data);
 
         if (props.isEmpty()) {
             return;
@@ -103,218 +110,278 @@ public class GuiWrench {
         ItemMeta m = item.getItemMeta();
         m.setDisplayName(ChatUtils.translateToColor("&e" + ChatUtils.getFormattedItemName(block.getType().name())));
         m.setLore(List.of(
-                ChatUtils.translateToColor("&7Click a property to cycle its value")
+                Lang.getFor(player, "gui.wrench.click_info")
         ));
         item.setItemMeta(m);
         return item;
     }
 
-    public static List<ItemStack> buildPropertyItems(BlockData data) {
+    public static List<ItemStack> buildPropertyItems(Player player, BlockData data) {
         List<ItemStack> items = new ArrayList<>();
 
         // Facing
         if (!(data instanceof Switch) && data instanceof Directional directional) {
             boolean needsFloatCheck = data instanceof TrapDoor;
-            items.add(buildFacingItem(directional, needsFloatCheck));
+            items.add(buildFacingItem(player, directional, needsFloatCheck));
         }
 
         // Axis
         if (data instanceof Orientable orientable) {
-            items.add(buildAxisItem(orientable));
+            items.add(buildAxisItem(player, orientable));
         }
 
         // Stair shape
         if (data instanceof Stairs stairs) {
-            items.add(buildShapeItem(stairs));
+            items.add(buildShapeItem(player, stairs));
         }
 
         // Half
         if ((data instanceof Stairs || data instanceof TrapDoor) && data instanceof Bisected bisected) {
-            items.add(buildHalfItem(bisected));
+            items.add(buildHalfItem(player, bisected));
         }
 
         // Type
         if (data instanceof Slab slab) {
-            items.add(buildSlabTypeItem(slab));
+            items.add(buildSlabTypeItem(player, slab));
         }
 
         // Lever
         if (data instanceof Switch switchData) {
-            items.add(buildAttachmentItem(switchData));
-            items.add(buildWallDirectionItem(switchData));
+            items.add(buildAttachmentItem(player, switchData));
+            items.add(buildWallDirectionItem(player, switchData));
         }
 
         // Hinge
         if (data instanceof Door door) {
-            items.add(buildHingeItem(door));
+            items.add(buildHingeItem(player, door));
         }
 
         // Open
         if (data instanceof Openable openable) {
-            items.add(buildOpenItem(openable));
+            items.add(buildOpenItem(player, openable));
         }
 
         // Fence gate wall
         if (data instanceof Gate gate) {
-            items.add(buildInWallItem(gate));
+            items.add(buildInWallItem(player, gate));
         }
 
         // Rotation
         if (data instanceof Rotatable rotatable) {
-            items.add(buildRotationItem(rotatable));
+            items.add(buildRotationItem(player, rotatable));
+        }
+
+        // Wall heights and post
+        if (data instanceof Wall wall) {
+            items.add(buildWallHeightItem(player, wall, BlockFace.NORTH));
+            items.add(buildWallHeightItem(player, wall, BlockFace.EAST));
+            items.add(buildWallHeightItem(player, wall, BlockFace.SOUTH));
+            items.add(buildWallHeightItem(player, wall, BlockFace.WEST));
+            items.add(buildWallUpItem(player, wall));
+        }
+
+        // Fence connections
+        if (data instanceof MultipleFacing multiFacing) {
+            for (BlockFace face : CARDINAL_FACES) {
+                if (multiFacing.getAllowedFaces().contains(face)) {
+                    items.add(buildFaceConnectionItem(player, multiFacing, face));
+                }
+            }
         }
 
         return items;
     }
 
 
-    private static ItemStack buildFacingItem(Directional data, boolean needsFloatCheck) {
+    private static ItemStack buildFacingItem(Player player, Directional data, boolean needsFloatCheck) {
         String current = data.getFacing().name();
         List<String> available = new ArrayList<>();
         for (BlockFace f : data.getFaces()) {
             available.add(f.name());
         }
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&7Current: &a" + current));
-        lore.add(ChatUtils.translateToColor("&7Available: &f" + String.join("&7, &f", available)));
+        lore.add(Lang.getFor(player, "gui.wrench.current", "value", current));
+        lore.add(Lang.getFor(player, "gui.wrench.available", "values", String.join(", ", available)));
         lore.add("");
         if (needsFloatCheck) {
-            lore.add(ChatUtils.translateToColor("&cSome values may be blocked if the"));
-            lore.add(ChatUtils.translateToColor("&cblock would lose its support."));
+            lore.add(Lang.getFor(player, "gui.wrench.float_warn1"));
+            lore.add(Lang.getFor(player, "gui.wrench.float_warn2"));
             lore.add("");
         }
-        lore.add(ChatUtils.translateToColor("&eClick &7to cycle"));
-        return makePropertyItem(Material.COMPASS, "Facing", lore);
+        lore.add(Lang.getFor(player, "gui.wrench.cycle"));
+        return makePropertyItem(Material.COMPASS, Lang.getFor(player, "gui.wrench.prop_facing"), lore);
     }
 
-    private static ItemStack buildAxisItem(Orientable data) {
+    private static ItemStack buildAxisItem(Player player, Orientable data) {
         List<String> lore = List.of(
-                ChatUtils.translateToColor("&7Current: &a" + data.getAxis().name()),
-                ChatUtils.translateToColor("&7Available: &fX&7, &fY&7, &fZ"),
+                Lang.getFor(player, "gui.wrench.current", "value", data.getAxis().name()),
+                Lang.getFor(player, "gui.wrench.available", "values", "X, Y, Z"),
                 "",
-                ChatUtils.translateToColor("&eClick &7to cycle")
+                Lang.getFor(player, "gui.wrench.cycle")
         );
-        return makePropertyItem(Material.STICK, "Axis", lore);
+        return makePropertyItem(Material.STICK, Lang.getFor(player, "gui.wrench.prop_axis"), lore);
     }
 
-    private static ItemStack buildShapeItem(Stairs data) {
+    private static ItemStack buildShapeItem(Player player, Stairs data) {
         String current = data.getShape().name().replace('_', ' ');
         List<String> lore = List.of(
-                ChatUtils.translateToColor("&7Current: &a" + current),
-                ChatUtils.translateToColor("&7Available: &fSTRAIGHT&7, &fINNER LEFT&7, &fINNER RIGHT&7,"),
-                ChatUtils.translateToColor("            &fOUTER LEFT&7, &fOUTER RIGHT"),
+                Lang.getFor(player, "gui.wrench.current", "value", current),
+                Lang.getFor(player, "gui.wrench.available", "values", "STRAIGHT, INNER LEFT, INNER RIGHT, OUTER LEFT, OUTER RIGHT"),
                 "",
-                ChatUtils.translateToColor("&eClick &7to cycle")
+                Lang.getFor(player, "gui.wrench.cycle")
         );
-        return makePropertyItem(Material.STONE_STAIRS, "Shape", lore);
+        return makePropertyItem(Material.STONE_STAIRS, Lang.getFor(player, "gui.wrench.prop_shape"), lore);
     }
 
-    private static ItemStack buildHalfItem(Bisected data) {
+    private static ItemStack buildHalfItem(Player player, Bisected data) {
         String current = data.getHalf().name();
         List<String> lore = List.of(
-                ChatUtils.translateToColor("&7Current: &a" + current),
-                ChatUtils.translateToColor("&7Available: &fBOTTOM&7, &fTOP"),
+                Lang.getFor(player, "gui.wrench.current", "value", current),
+                Lang.getFor(player, "gui.wrench.available", "values", "BOTTOM, TOP"),
                 "",
-                ChatUtils.translateToColor("&eClick &7to cycle")
+                Lang.getFor(player, "gui.wrench.cycle")
         );
-        return makePropertyItem(Material.STONE_SLAB, "Half", lore);
+        return makePropertyItem(Material.STONE_SLAB, Lang.getFor(player, "gui.wrench.prop_half"), lore);
     }
 
-    private static ItemStack buildSlabTypeItem(Slab data) {
+    private static ItemStack buildSlabTypeItem(Player player, Slab data) {
         String current = data.getType().name();
         List<String> lore = List.of(
-                ChatUtils.translateToColor("&7Current: &a" + current),
-                ChatUtils.translateToColor("&7Available: &fBOTTOM&7, &fTOP"),
+                Lang.getFor(player, "gui.wrench.current", "value", current),
+                Lang.getFor(player, "gui.wrench.available", "values", "BOTTOM, TOP"),
                 "",
-                ChatUtils.translateToColor("&eClick &7to cycle")
+                Lang.getFor(player, "gui.wrench.cycle")
         );
-        return makePropertyItem(Material.STONE_SLAB, "Slab Type", lore);
+        return makePropertyItem(Material.STONE_SLAB, Lang.getFor(player, "gui.wrench.prop_slab"), lore);
     }
 
-    private static ItemStack buildAttachmentItem(Switch data) {
+    private static ItemStack buildAttachmentItem(Player player, Switch data) {
         String current = data.getFace().name();
         List<String> lore = List.of(
-                ChatUtils.translateToColor("&7Current: &a" + current),
-                ChatUtils.translateToColor("&7Available: &fFLOOR&7, &fWALL&7, &fCEILING"),
+                Lang.getFor(player, "gui.wrench.current", "value", current),
+                Lang.getFor(player, "gui.wrench.available", "values", "FLOOR, WALL, CEILING"),
                 "",
-                ChatUtils.translateToColor("&cBlocked if block would be unsupported."),
+                Lang.getFor(player, "gui.wrench.attach_warn"),
                 "",
-                ChatUtils.translateToColor("&eClick &7to cycle")
+                Lang.getFor(player, "gui.wrench.cycle")
         );
-        return makePropertyItem(Material.STONE_BUTTON, "Attachment", lore);
+        return makePropertyItem(Material.STONE_BUTTON, Lang.getFor(player, "gui.wrench.prop_attachment"), lore);
     }
 
-    private static ItemStack buildWallDirectionItem(Switch data) {
+    private static ItemStack buildWallDirectionItem(Player player, Switch data) {
         String current = data.getFacing().name();
         List<String> available = new ArrayList<>();
         for (BlockFace f : data.getFaces()) {
             available.add(f.name());
         }
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&7Current: &a" + current));
-        lore.add(ChatUtils.translateToColor("&7Available: &f" + String.join("&7, &f", available)));
+        lore.add(Lang.getFor(player, "gui.wrench.current", "value", current));
+        lore.add(Lang.getFor(player, "gui.wrench.available", "values", String.join(", ", available)));
         lore.add("");
-        lore.add(ChatUtils.translateToColor("&7Only applies when attachment is &fWALL&7."));
-        lore.add(ChatUtils.translateToColor("&cBlocked if no block exists on that wall."));
+        lore.add(Lang.getFor(player, "gui.wrench.wall_dir_note"));
+        lore.add(Lang.getFor(player, "gui.wrench.wall_dir_warn"));
         lore.add("");
-        lore.add(ChatUtils.translateToColor("&eClick &7to cycle"));
-        return makePropertyItem(Material.COMPASS, "Wall Direction", lore);
+        lore.add(Lang.getFor(player, "gui.wrench.cycle"));
+        return makePropertyItem(Material.COMPASS, Lang.getFor(player, "gui.wrench.prop_wall_dir"), lore);
     }
 
-    private static ItemStack buildHingeItem(Door data) {
+    private static ItemStack buildHingeItem(Player player, Door data) {
         String current = data.getHinge().name();
         List<String> lore = List.of(
-                ChatUtils.translateToColor("&7Current: &a" + current),
-                ChatUtils.translateToColor("&7Available: &fLEFT&7, &fRIGHT"),
+                Lang.getFor(player, "gui.wrench.current", "value", current),
+                Lang.getFor(player, "gui.wrench.available", "values", "LEFT, RIGHT"),
                 "",
-                ChatUtils.translateToColor("&eClick &7to cycle")
+                Lang.getFor(player, "gui.wrench.cycle")
         );
-        return makePropertyItem(Material.IRON_DOOR, "Hinge", lore);
+        return makePropertyItem(Material.IRON_DOOR, Lang.getFor(player, "gui.wrench.prop_hinge"), lore);
     }
 
-    private static ItemStack buildOpenItem(Openable data) {
+    private static ItemStack buildOpenItem(Player player, Openable data) {
         String current = data.isOpen() ? "OPEN" : "CLOSED";
         List<String> lore = List.of(
-                ChatUtils.translateToColor("&7Current: &a" + current),
-                ChatUtils.translateToColor("&7Available: &fOPEN&7, &fCLOSED"),
+                Lang.getFor(player, "gui.wrench.current", "value", current),
+                Lang.getFor(player, "gui.wrench.available", "values", "OPEN, CLOSED"),
                 "",
-                ChatUtils.translateToColor("&eClick &7to toggle")
+                Lang.getFor(player, "gui.wrench.toggle")
         );
-        return makePropertyItem(Material.OAK_TRAPDOOR, "Open", lore);
+        return makePropertyItem(Material.OAK_TRAPDOOR, Lang.getFor(player, "gui.wrench.prop_open"), lore);
     }
 
-    private static ItemStack buildInWallItem(Gate data) {
+    private static ItemStack buildInWallItem(Player player, Gate data) {
         String current = data.isInWall() ? "TRUE" : "FALSE";
         List<String> lore = List.of(
-                ChatUtils.translateToColor("&7Current: &a" + current),
-                ChatUtils.translateToColor("&7Available: &fTRUE&7, &fFALSE"),
+                Lang.getFor(player, "gui.wrench.current", "value", current),
+                Lang.getFor(player, "gui.wrench.available", "values", "TRUE, FALSE"),
                 "",
-                ChatUtils.translateToColor("&eClick &7to toggle")
+                Lang.getFor(player, "gui.wrench.toggle")
         );
-        return makePropertyItem(Material.COBBLESTONE_WALL, "In Wall", lore);
+        return makePropertyItem(Material.COBBLESTONE_WALL, Lang.getFor(player, "gui.wrench.prop_in_wall"), lore);
     }
 
-    private static ItemStack buildRotationItem(Rotatable data) {
+    private static ItemStack buildRotationItem(Player player, Rotatable data) {
         int index = ROTATIONS.indexOf(data.getRotation());
-        String current = data.getRotation().name() + " &7(" + index + "/15)";
+        String current = data.getRotation().name() + " (" + index + "/15)";
         List<String> lore = List.of(
-                ChatUtils.translateToColor("&7Current: &a" + current),
-                ChatUtils.translateToColor("&7Cycles through 16 rotation steps."),
+                Lang.getFor(player, "gui.wrench.current", "value", current),
+                Lang.getFor(player, "gui.wrench.rotation_cycles"),
                 "",
-                ChatUtils.translateToColor("&eClick &7to cycle")
+                Lang.getFor(player, "gui.wrench.cycle")
         );
-        return makePropertyItem(Material.CLOCK, "Rotation", lore);
+        return makePropertyItem(Material.CLOCK, Lang.getFor(player, "gui.wrench.prop_rotation"), lore);
+    }
+
+    private static ItemStack buildWallHeightItem(Player player, Wall data, BlockFace face) {
+        String langKey = switch (face) {
+            case SOUTH -> "gui.wrench.prop_south_height";
+            case EAST  -> "gui.wrench.prop_east_height";
+            case WEST  -> "gui.wrench.prop_west_height";
+            default    -> "gui.wrench.prop_north_height";
+        };
+        String current = data.getHeight(face).name();
+        List<String> lore = List.of(
+                Lang.getFor(player, "gui.wrench.current", "value", current),
+                Lang.getFor(player, "gui.wrench.available", "values", "NONE, LOW, TALL"),
+                "",
+                Lang.getFor(player, "gui.wrench.cycle")
+        );
+        return makePropertyItem(Material.COBBLESTONE_WALL, Lang.getFor(player, langKey), lore);
+    }
+
+    private static ItemStack buildWallUpItem(Player player, Wall data) {
+        String current = data.isUp() ? "TRUE" : "FALSE";
+        List<String> lore = List.of(
+                Lang.getFor(player, "gui.wrench.current", "value", current),
+                Lang.getFor(player, "gui.wrench.available", "values", "TRUE, FALSE"),
+                "",
+                Lang.getFor(player, "gui.wrench.toggle")
+        );
+        return makePropertyItem(Material.COBBLESTONE_WALL, Lang.getFor(player, "gui.wrench.prop_wall_up"), lore);
+    }
+
+    private static ItemStack buildFaceConnectionItem(Player player, MultipleFacing data, BlockFace face) {
+        String langKey = switch (face) {
+            case SOUTH -> "gui.wrench.prop_south_conn";
+            case EAST  -> "gui.wrench.prop_east_conn";
+            case WEST  -> "gui.wrench.prop_west_conn";
+            case UP    -> "gui.wrench.prop_up_conn";
+            case DOWN  -> "gui.wrench.prop_down_conn";
+            default    -> "gui.wrench.prop_north_conn";
+        };
+        String current = data.hasFace(face) ? "CONNECTED" : "DISCONNECTED";
+        List<String> lore = List.of(
+                Lang.getFor(player, "gui.wrench.current", "value", current),
+                Lang.getFor(player, "gui.wrench.available", "values", "CONNECTED, DISCONNECTED"),
+                "",
+                Lang.getFor(player, "gui.wrench.toggle")
+        );
+        return makePropertyItem(Material.OAK_FENCE, Lang.getFor(player, langKey), lore);
     }
 
     private static ItemStack makePropertyItem(Material material, String name, List<String> lore) {
         ItemStack item = new ItemStack(material);
         ItemMeta m = item.getItemMeta();
-        m.setDisplayName(ChatUtils.translateToColor("&e" + name));
-        List<String> colored = new ArrayList<>();
-        for (String line : lore) {
-            colored.add(line.startsWith("\u00A7") || line.isEmpty() ? line : ChatUtils.translateToColor(line));
-        }
-        m.setLore(colored);
+        m.setDisplayName(name);
+        m.setLore(lore);
         item.setItemMeta(m);
         return item;
     }

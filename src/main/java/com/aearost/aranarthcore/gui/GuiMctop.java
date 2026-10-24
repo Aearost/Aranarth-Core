@@ -3,10 +3,10 @@ package com.aearost.aranarthcore.gui;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.gmail.nossr50.datatypes.database.PlayerStat;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -14,11 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class GuiMctop {
 
@@ -38,7 +34,7 @@ public class GuiMctop {
 		}
 	}
 
-	public static void populate(Inventory gui, @org.jetbrains.annotations.Nullable PrimarySkillType skill,
+	public static void populate(Player player, Inventory gui, @org.jetbrains.annotations.Nullable PrimarySkillType skill,
 								List<PlayerStat> leaderboard, Map<String, PlayerProfile> profiles) {
 		ItemStack blank = new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE);
 		ItemMeta blankMeta = blank.getItemMeta();
@@ -66,12 +62,12 @@ public class GuiMctop {
 			AranarthPlayer aranarthPlayer = uuid != null ? AranarthUtils.getPlayer(uuid) : null;
 			String displayName = aranarthPlayer != null ? aranarthPlayer.getNickname() : stat.playerName();
 			if (displayName == null) {
-				displayName = stat.playerName() != null ? stat.playerName() : "Unknown";
+				displayName = stat.playerName() != null ? stat.playerName() : Lang.getFor(player, "info.unknown");
 			}
 			skullMeta.setDisplayName(ChatUtils.translateToColor(displayName));
 
 			List<String> lore = new ArrayList<>();
-			lore.add(ChatUtils.translateToColor("&7Level " + stat.value()));
+			lore.add(Lang.getFor(player, "gui.mctop.skull_lore", "value", String.valueOf(stat.value())));
 			skullMeta.setLore(lore);
 			head.setItemMeta(skullMeta);
 			gui.setItem(i, head);
@@ -80,8 +76,8 @@ public class GuiMctop {
 
 	private Inventory initializeGui(Player player, @org.jetbrains.annotations.Nullable PrimarySkillType skill,
 									List<PlayerStat> leaderboard, Map<String, PlayerProfile> profiles) {
-		String skillDisplayName = skill == null ? "Overall" : skill.name().charAt(0) + skill.name().substring(1).toLowerCase();
-		Inventory gui = Bukkit.getServer().createInventory(player, 54, "Top " + skillDisplayName);
+		String skillDisplayName = skill == null ? Lang.getFor(player, "mcmmo.overall") : skill.name().charAt(0) + skill.name().substring(1).toLowerCase();
+		Inventory gui = GuiHolder.create(player, 54, Lang.getFor(player, "gui.mctop.title", "skill", skillDisplayName));
 
 		ItemStack previous = new ItemStack(Material.RED_WOOL);
 		ItemStack barrier = new ItemStack(Material.BARRIER);
@@ -90,19 +86,19 @@ public class GuiMctop {
 
 		ItemMeta previousMeta = previous.getItemMeta();
 		if (Objects.nonNull(previousMeta)) {
-			previousMeta.setDisplayName(ChatUtils.translateToColor("&c&lPrevious"));
+			previousMeta.setDisplayName(Lang.getFor(player, "gui.page_prev"));
 			previous.setItemMeta(previousMeta);
 		}
 
 		ItemMeta barrierMeta = barrier.getItemMeta();
 		if (Objects.nonNull(barrierMeta)) {
-			barrierMeta.setDisplayName(ChatUtils.translateToColor("&4&lExit"));
+			barrierMeta.setDisplayName(Lang.getFor(player, "gui.exit"));
 			barrier.setItemMeta(barrierMeta);
 		}
 
 		ItemMeta nextMeta = next.getItemMeta();
 		if (Objects.nonNull(nextMeta)) {
-			nextMeta.setDisplayName(ChatUtils.translateToColor("&a&lNext"));
+			nextMeta.setDisplayName(Lang.getFor(player, "gui.page_next"));
 			next.setItemMeta(nextMeta);
 		}
 
@@ -142,12 +138,12 @@ public class GuiMctop {
 			AranarthPlayer aranarthPlayer = uuid != null ? AranarthUtils.getPlayer(uuid) : null;
 			String displayName = aranarthPlayer != null ? aranarthPlayer.getNickname() : stat.playerName();
 			if (displayName == null) {
-				displayName = stat.playerName() != null ? stat.playerName() : "Unknown";
+				displayName = stat.playerName() != null ? stat.playerName() : Lang.getFor(player, "info.unknown");
 			}
 			skullMeta.setDisplayName(ChatUtils.translateToColor(displayName));
 
 			List<String> lore = new ArrayList<>();
-			lore.add(ChatUtils.translateToColor("&7Level " + stat.value()));
+			lore.add(Lang.getFor(player, "gui.mctop.skull_lore", "value", String.valueOf(stat.value())));
 			skullMeta.setLore(lore);
 			head.setItemMeta(skullMeta);
 			gui.setItem(i, head);

@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.network.PendingTeleport;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -27,17 +28,17 @@ public class CommandBack implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (!player.hasPermission("aranarth.back")) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return true;
 			}
 
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (aranarthPlayer.getLastKnownTeleportLocation() != null) {
-				AranarthUtils.teleportPlayer(player, player.getLocation(), aranarthPlayer.getLastKnownTeleportLocation(), aranarthPlayer.isInAdminMode(), "&e&lPrevious Location", "&7You have returned to your previous location", success -> {
+				AranarthUtils.teleportPlayer(player, player.getLocation(), aranarthPlayer.getLastKnownTeleportLocation(), aranarthPlayer.isInAdminMode(), Lang.getFor(player, "teleport.title_previous"), Lang.getFor(player, "teleport.returned"), success -> {
 					if (success) {
-						player.sendMessage(ChatUtils.chatMessage("&7You have returned to your previous location"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.returned")));
 					} else {
-						player.sendMessage(ChatUtils.chatMessage("&cYou could not return to your previous location"));
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.could_not_return")));
 					}
 				});
 				return true;
@@ -58,24 +59,24 @@ public class CommandBack implements CommandExecutor {
 						String targetServer = AranarthCore.getInstance().getConfig()
 								.getString("network.servers." + serverKey, serverKey);
 						AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
-								aranarthPlayer.isInAdminMode(), "&e&lPrevious Location", "&7Transferring to your previous location...", success -> {
+								aranarthPlayer.isInAdminMode(), Lang.getFor(player, "teleport.title_previous"), Lang.getFor(player, "teleport.transferring_previous"), success -> {
 							if (success) {
 								NetworkManager.getInstance().saveInventoryAndTransfer(player, targetServer,
 										new PendingTeleport(world, bx, by, bz, byaw, bpitch,
-												"&e&lPrevious Location", "&7You have returned to your previous location"));
+												Lang.getFor(player, "teleport.title_previous"), Lang.getFor(player, "teleport.returned")));
 							}
 						});
 						return true;
 					}
 				}
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have a previous location to teleport to!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.no_previous")));
 				return true;
 			} else {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have a previous location to teleport to!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.no_previous")));
 				return true;
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
 		}
 	}

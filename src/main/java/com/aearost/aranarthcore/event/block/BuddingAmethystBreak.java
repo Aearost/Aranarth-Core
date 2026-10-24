@@ -1,6 +1,8 @@
 package com.aearost.aranarthcore.event.block;
 
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -12,12 +14,12 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.List;
 
-import static com.aearost.aranarthcore.objects.CustomKeys.INCANTATION_LEVEL;
-import static com.aearost.aranarthcore.objects.CustomKeys.INCANTATION_TYPE;
+import static com.aearost.aranarthcore.objects.CustomKeys.ESSENCE_LEVEL;
+import static com.aearost.aranarthcore.objects.CustomKeys.ESSENCE_TYPE;
 import static com.aearost.aranarthcore.objects.CustomKeys.PRESERVATION_USES;
 
 /**
- * If harvested with a pickaxe bearing the Incantation of Preservation, the Budding Amethyst block will drop.
+ * If harvested with a pickaxe bearing the Essence of Preservation, the Budding Amethyst block will drop.
  */
 public class BuddingAmethystBreak {
 	public void execute(BlockBreakEvent e) {
@@ -27,7 +29,7 @@ public class BuddingAmethystBreak {
 			e.setDropItems(false);
 			location.getWorld().dropItemNaturally(location, new ItemStack(Material.BUDDING_AMETHYST, 1));
 
-			// Decrement uses and strip the incantation when exhausted
+			// Decrement uses and strip the essence when exhausted
 			Player player = e.getPlayer();
 			ItemMeta meta = heldItem.getItemMeta();
 			if (meta == null || !meta.getPersistentDataContainer().has(PRESERVATION_USES)) return;
@@ -36,8 +38,8 @@ public class BuddingAmethystBreak {
 			uses--;
 
 			if (uses <= 0) {
-				meta.getPersistentDataContainer().remove(INCANTATION_TYPE);
-				meta.getPersistentDataContainer().remove(INCANTATION_LEVEL);
+				meta.getPersistentDataContainer().remove(ESSENCE_TYPE);
+				meta.getPersistentDataContainer().remove(ESSENCE_LEVEL);
 				meta.getPersistentDataContainer().remove(PRESERVATION_USES);
 				meta.removeEnchant(Enchantment.SILK_TOUCH);
 				List<String> lore = meta.getLore();
@@ -45,7 +47,7 @@ public class BuddingAmethystBreak {
 					lore.removeIf(line -> ChatUtils.stripColorFormatting(line).equals("Preservation"));
 					meta.setLore(lore.isEmpty() ? null : lore);
 				}
-				player.sendMessage(ChatUtils.chatMessage("&5Your Incantation of Preservation has expired."));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.preservation_expired")));
 			} else {
 				meta.getPersistentDataContainer().set(PRESERVATION_USES, PersistentDataType.INTEGER, uses);
 			}
@@ -55,10 +57,7 @@ public class BuddingAmethystBreak {
 	}
 
 	private boolean hasPreservation(ItemStack item) {
-		if (!item.hasItemMeta()) return false;
-		var pdc = item.getItemMeta().getPersistentDataContainer();
-		return pdc.has(INCANTATION_TYPE) &&
-				"incantation_preservation".equals(pdc.get(INCANTATION_TYPE, PersistentDataType.STRING));
+		return "essence_preservation".equals(AranarthUtils.getEssenceType(item));
 	}
 
 	private boolean isHoldingPickaxe(ItemStack heldItem) {

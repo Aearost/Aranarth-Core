@@ -7,12 +7,12 @@ import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 
@@ -74,19 +74,19 @@ public class ContainerInteract {
         LockedContainer container = AranarthUtils.getLockedContainerAtBlock(block);
 
         if (container == null) {
-            player.sendMessage(ChatUtils.chatMessage("&cThis is not a locked container!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.not_locked")));
         } else {
             // Only the owner can add players
             if (container.getOwner().equals(uuid)) {
                 if (uuid.equals(aranarthPlayer.getTrustedPlayerUUID())) {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou already own this container!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.already_own")));
                 } else {
                     AranarthUtils.addPlayerToContainer(aranarthPlayer.getTrustedPlayerUUID(), block.getLocation());
                     String username = Bukkit.getOfflinePlayer(aranarthPlayer.getTrustedPlayerUUID()).getName();
-                    player.sendMessage(ChatUtils.chatMessage("&7You have trusted &e" + username + " &7to this container"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "trust.added", "player", username)));
                 }
             } else {
-                player.sendMessage(ChatUtils.chatMessage("&cYou are not the owner of this container!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.not_owner")));
             }
         }
         AranarthUtils.setPlayer(uuid, aranarthPlayer);
@@ -107,24 +107,24 @@ public class ContainerInteract {
         LockedContainer container = AranarthUtils.getLockedContainerAtBlock(block);
 
         if (container == null) {
-            player.sendMessage(ChatUtils.chatMessage("&cThis is not a locked container!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.not_locked")));
         } else {
             // Only the owner can remove players
             if (container.getOwner().equals(uuid)) {
                 if (uuid.equals(aranarthPlayer.getUntrustedPlayerUUID())) {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou must unlock this container instead!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.unlock_instead")));
                 } else {
                     boolean wasRemoved = AranarthUtils.removePlayerFromContainer(aranarthPlayer.getUntrustedPlayerUUID(), block.getLocation());
                     String username = Bukkit.getOfflinePlayer(aranarthPlayer.getUntrustedPlayerUUID()).getName();
                     if (wasRemoved) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have untrusted &e" + username + " &7from this container"));
-                        player.sendMessage(ChatUtils.chatMessage("&7To exit untrust mode, type &e/untrust &7again"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "trust.removed", "player", username)));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "trust.untrust_exit_mode")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&e" + username + " &ccould not be removed from this container!"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "trust.remove_failed", "player", username)));
                     }
                 }
             } else {
-                player.sendMessage(ChatUtils.chatMessage("&cYou are not the owner of this container!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.not_owner")));
             }
         }
         AranarthUtils.setPlayer(uuid, aranarthPlayer);
@@ -146,18 +146,18 @@ public class ContainerInteract {
 
         Dominion chunkDominion = DominionUtils.getDominionOfChunk(block.getChunk());
         if (!AranarthUtils.isSurvivalWorld(block.getWorld().getName()) || AranarthUtils.isSpawnLocation(block.getLocation())) {
-            player.sendMessage(ChatUtils.chatMessage("&cContainers cannot be locked here!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.cannot_here")));
         } else if (chunkDominion != null && !DominionUtils.hasPermission(player, chunkDominion, DominionPermission.LOCK_CONTAINER)) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to lock containers in this dominion!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.no_permission_lock_dominion")));
         } else if (container != null) {
-            player.sendMessage(ChatUtils.chatMessage("&cThis container is already locked!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.locked")));
         } else {
             List<UUID> trusted = new ArrayList<>();
             trusted.add(player.getUniqueId());
             Location[] locations = AranarthUtils.getLocationsOfContainer(block);
             LockedContainer lockedContainer = new LockedContainer(player.getUniqueId(), trusted, locations);
             AranarthUtils.addLockedContainer(lockedContainer);
-            player.sendMessage(ChatUtils.chatMessage("&7This container has been locked!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.locked")));
         }
         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
         e.setCancelled(true);
@@ -177,18 +177,18 @@ public class ContainerInteract {
         LockedContainer container = AranarthUtils.getLockedContainerAtBlock(block);
 
         if (container == null) {
-            player.sendMessage(ChatUtils.chatMessage("&cThis is not a locked container!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.not_locked")));
         } else {
             // Owner or admin can remove a lock
             if (container.getOwner().equals(uuid) || aranarthPlayer.isInAdminMode()) {
                 int breakResult = AranarthUtils.removeLockedContainer(container.getLocations());
                 if (breakResult == 0) {
-                    player.sendMessage(ChatUtils.chatMessage("&7The lock was successfully removed from this container!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.unlocked")));
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage("&cThe lock could not be removed from this container!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.no_permission_lock")));
                 }
             } else {
-                player.sendMessage(ChatUtils.chatMessage("&cYou are not the owner of this container!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.not_owner")));
             }
         }
         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
@@ -205,7 +205,7 @@ public class ContainerInteract {
         Dominion chunkDominion = DominionUtils.getDominionOfChunk(block.getChunk());
 
         // Message is sent in ShopInteract already
-        if (ShopUtils.getShopFromLocation(block.getRelative(BlockFace.UP).getLocation()) != null) {
+        if (ShopUtils.getShopForContainer(block) != null) {
             return;
         }
 
@@ -221,7 +221,7 @@ public class ContainerInteract {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
             if (!aranarthPlayer.isInAdminMode()) {
                 e.setCancelled(true);
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to open this container!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.no_permission_open")));
             }
         } else if (chunkDominion != null) {
             // No lock - apply normal dominion permission check instead

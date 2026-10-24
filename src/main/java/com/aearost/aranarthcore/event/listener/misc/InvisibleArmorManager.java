@@ -8,6 +8,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -99,6 +100,20 @@ public class InvisibleArmorManager implements Listener {
         }, 1L);
     }
 
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onItemDamage(PlayerItemDamageEvent e) {
+        Player player = e.getPlayer();
+        if (!player.isGliding()) return;
+        if (!hiddenPlayers.contains(player.getUniqueId())) return;
+        // Elytra durability loss while gliding makes the server re-broadcast the real chest item,
+        // so re-send 2 ticks later to keep the wings hidden for the whole flight
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            if (player.isOnline()) {
+                sendFakeEquipmentToAll(player);
+            }
+        }, 2L);
+    }
+
     private static void sendFakeEquipmentToAll(Player target) {
         for (Player viewer : Bukkit.getOnlinePlayers()) {
             sendFakeEquipmentToViewer(viewer, target);
@@ -107,9 +122,19 @@ public class InvisibleArmorManager implements Listener {
 
     private static void sendFakeEquipmentToViewer(Player viewer, Player target) {
         viewer.sendEquipmentChange(target, EquipmentSlot.HEAD, AIR);
-        viewer.sendEquipmentChange(target, EquipmentSlot.CHEST, AIR);
+        // The client only lets a player glide if it sees a glider in their own chest slot,
+        // so never hide it from the wearer themselves
+        if (!viewer.equals(target) || !isGlider(target.getInventory().getChestplate())) {
+            viewer.sendEquipmentChange(target, EquipmentSlot.CHEST, AIR);
+        }
         viewer.sendEquipmentChange(target, EquipmentSlot.LEGS, AIR);
         viewer.sendEquipmentChange(target, EquipmentSlot.FEET, AIR);
+    }
+
+    private static boolean isGlider(ItemStack item) {
+        if (item == null || item.getType() == Material.AIR) return false;
+        if (item.getType() == Material.ELYTRA) return true;
+        return item.hasItemMeta() && item.getItemMeta().isGlider();
     }
 
     private static void sendRealEquipmentToAll(Player target) {

@@ -18,6 +18,7 @@ import org.bukkit.block.data.Levelled;
 import org.bukkit.block.data.type.Slab;
 import org.bukkit.block.data.type.Snow;
 import org.bukkit.block.data.type.Stairs;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.*;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -41,6 +42,10 @@ public class DateUtils {
     private static int baseMonsterLimit = 0;
     private static long baseAnimalTicks = 0;
     private static long baseMonsterTicks = 0;
+    private static final Map<UUID, Long> outdoorExposureStart = new HashMap<>();
+
+    private static final long FROSTBITE_DAYTIME_THRESHOLD_MS = 15 * 60 * 1000L;
+    private static final long FROSTBITE_NIGHTTIME_THRESHOLD_MS = 5 * 60 * 1000L;
 
     static {
         INVALID_SURFACE_BLOCKS = EnumSet.of(
@@ -172,16 +177,17 @@ public class DateUtils {
     /**
      * Displays the server date on new days.
      *
+     * @param recipient   The player or console the date is shown to.
      * @param dayNum      The current server day.
      * @param weekdayName The current server weekday name.
      * @param monthName   The current server month name.
      * @param yearNum     The current server year.
      */
-    public static String[] determineServerDate(int dayNum, String weekdayName, String monthName, int yearNum) {
-        String dayNumAsString = getDayNumWithSuffix(dayNum);
+    public static String[] determineServerDate(CommandSender recipient, int dayNum, String weekdayName, String monthName, int yearNum) {
+        String dayNumAsString = getDayNumWithSuffix(recipient, dayNum);
         String[] messages = new String[3];
         messages[0] = ChatUtils.translateToColor("&6&l---------------------------------");
-        messages[1] = ChatUtils.translateToColor("&e&l" + weekdayName + " &f&lthe " + dayNumAsString + " of " + monthName + ", &e&l" + yearNum + "  ");
+        messages[1] = ChatUtils.translateToColor(Lang.getFor(recipient, "motd.date", "weekday", weekdayName, "day", dayNumAsString, "month", monthName, "year", yearNum) + "  ");
         messages[2] = ChatUtils.translateToColor("&6&l---------------------------------");
         return messages;
     }
@@ -248,43 +254,27 @@ public class DateUtils {
     }
 
     /**
-     * Provides the day number with the suffix.
+     * Provides the day number with the ordinal suffix in the recipient's language.
      *
-     * @param day The day.
+     * @param recipient The player or console the date is shown to.
+     * @param day       The day.
      * @return The day with the suffix.
      */
-    public static String getDayNumWithSuffix(int day) {
-        String dayNumAsString = day + "";
-        if (dayNumAsString.length() > 1) {
-            if (dayNumAsString.endsWith("11")) {
-                dayNumAsString += "th";
-            } else if (dayNumAsString.endsWith("12")) {
-                dayNumAsString += "th";
-            } else if (dayNumAsString.endsWith("13")) {
-                dayNumAsString += "th";
-            } else {
-                if (dayNumAsString.endsWith("1")) {
-                    dayNumAsString += "st";
-                } else if (dayNumAsString.endsWith("2")) {
-                    dayNumAsString += "nd";
-                } else if (dayNumAsString.endsWith("3")) {
-                    dayNumAsString += "rd";
-                } else {
-                    dayNumAsString += "th";
-                }
-            }
+    public static String getDayNumWithSuffix(CommandSender recipient, int day) {
+        String key;
+        if (day == 1) {
+            key = "date.ordinal_first";
+        } else if (day % 100 >= 11 && day % 100 <= 13) {
+            key = "date.ordinal_th";
         } else {
-            if (dayNumAsString.endsWith("1")) {
-                dayNumAsString += "st";
-            } else if (dayNumAsString.endsWith("2")) {
-                dayNumAsString += "nd";
-            } else if (dayNumAsString.endsWith("3")) {
-                dayNumAsString += "rd";
-            } else {
-                dayNumAsString += "th";
-            }
+            key = switch (day % 10) {
+                case 1 -> "date.ordinal_st";
+                case 2 -> "date.ordinal_nd";
+                case 3 -> "date.ordinal_rd";
+                default -> "date.ordinal_th";
+            };
         }
-        return dayNumAsString;
+        return day + Lang.getFor(recipient, key);
     }
 
     /**
@@ -347,7 +337,7 @@ public class DateUtils {
      * @return The Description of the month.
      */
     public static String getArdorvorDescription() {
-        return "The month of Ardorvór is the month of flames. All sources of fire deal more damage, and random bursts of weakness and mining fatigue are felt.";
+        return "The month of Ardorvór is the month of flames. All sources of fire deal more damage, and random bursts of weakness and mining fatigue are felt under the blistering sun.";
     }
 
     /**
@@ -401,7 +391,7 @@ public class DateUtils {
      * @return The Description of the month.
      */
     public static String getGlacivorDescription() {
-        return "The month of Glacivór sends shivers down your spine. You will be slowed down in your tracks, and water begins to freeze in rivers and the sea.";
+        return "The month of Glacivór sends shivers down your spine. You will be slowed down in your tracks, and water begins to freeze in rivers and the sea. Lingering outdoors will lead to frostbite.";
     }
 
     /**
@@ -410,7 +400,7 @@ public class DateUtils {
      * @return The Description of the month.
      */
     public static String getFrigorvorDescription() {
-        return "The month of Frigorvór brings the heaviest snowfalls. Your movements will be slowed even further, as will your crop growth rates.";
+        return "The month of Frigorvór brings the heaviest snowfalls. Your movements will be slowed even further, as will your crop growth rates. Frostbite strikes faster when night falls.";
     }
 
     /**
@@ -419,7 +409,7 @@ public class DateUtils {
      * @return The Description of the month.
      */
     public static String getObscurvorDescription() {
-        return "The month of Obscurvór is the month of rest. The slowness of Winter lingers, with more aggression from phantoms, and an increased amount of sleeping players to skip the night.";
+        return "The month of Obscurvór is the month of rest. The slowness of Winter lingers, with more aggression from phantoms, and an increased amount of sleeping players to skip the night. The cold still bites those who stay outside too long.";
     }
 
     /**
@@ -694,19 +684,18 @@ public class DateUtils {
             return;
         }
 
-        String[] messages = determineServerDate(dayNum, weekdayName, monthName, yearNum);
+        String[] messages = determineServerDate(Bukkit.getConsoleSender(), dayNum, weekdayName, monthName, yearNum);
 
-        String dayNumAsString = getDayNumWithSuffix(dayNum);
         for (Player player : Bukkit.getOnlinePlayers()) {
             String worldName = player.getWorld().getName();
-            boolean skipDayMessage = worldName.equals("arena") || worldName.equals("creative");
+            boolean skipDayMessage = worldName.equals("arena") || worldName.startsWith("creative");
             if (!skipDayMessage) {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                 skipDayMessage = aranarthPlayer.isDayMessageDisabled();
             }
             if (!skipDayMessage) {
                 String mainTitle = ChatUtils.translateToColor("&e&l" + weekdayName);
-                String subTitle = ChatUtils.translateToColor("&f&lThe " + dayNumAsString + " of " + monthName + ", &e&l" + yearNum);
+                String subTitle = ChatUtils.translateToColor(Lang.getFor(player, "date.title_subtitle", "day", getDayNumWithSuffix(player, dayNum), "month", monthName, "year", yearNum));
                 player.sendTitle(mainTitle, subTitle);
             }
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
@@ -744,7 +733,7 @@ public class DateUtils {
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             String worldName = player.getWorld().getName();
-            if (worldName.equals("arena") || worldName.equals("creative")) {
+            if (worldName.equals("arena") || worldName.startsWith("creative")) {
                 continue;
             }
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
@@ -789,8 +778,11 @@ public class DateUtils {
             AranarthCore.launchMonthFireworks(month);
             if (month == Month.IGNIVOR) {
                 AranarthCore.resetResourceWorlds();
-                for (Boost boost : Boost.values()) {
-                    AranarthUtils.addServerBoost(boost, null, null, false);
+                // Survival applies the boosts and syncs them to SMP, so SMP must not forward a second add
+                if (!AranarthCore.isSmpServer()) {
+                    for (Boost boost : Boost.values()) {
+                        AranarthUtils.addServerBoost(boost, null, null, false);
+                    }
                 }
             }
         }
@@ -817,37 +809,63 @@ public class DateUtils {
      */
     private boolean checkIfExceedsMonth(int day, Month month) {
         if (month == Month.IGNIVOR) {
-            return day > 147;
+            return day > 127;
         } else if (month == Month.AQUINVOR) {
-            return day > 147;
+            return day > 140;
         } else if (month == Month.VENTIVOR) {
-            return day > 146;
+            return day > 153;
         } else if (month == Month.FLORIVOR) {
-            return day > 145;
+            return day > 165;
         } else if (month == Month.AESTIVOR) {
-            return day > 146;
+            return day > 172;
         } else if (month == Month.CALORVOR) {
-            return day > 145;
+            return day > 177;
         } else if (month == Month.ARDORVOR) {
-            return day > 146;
+            return day > 178;
         } else if (month == Month.SOLARVOR) {
-            return day > 146;
+            return day > 177;
         } else if (month == Month.FOLLIVOR) {
-            return day > 146;
+            return day > 170;
         } else if (month == Month.STRIGAVOR) {
-            return day > 146;
+            return day > 157;
         } else if (month == Month.FAUNIVOR) {
-            return day > 146;
+            return day > 142;
         } else if (month == Month.UMBRAVOR) {
-            return day > 146;
+            return day > 123;
         } else if (month == Month.GLACIVOR) {
-            return day > 146;
+            return day > 108;
         } else if (month == Month.FRIGORVOR) {
-            return day > 147;
+            return day > 102;
         } else if (month == Month.OBSCURVOR) {
-            return day > 147;
+            return day > 101;
         }
         return false;
+    }
+
+    /**
+     * Returns the number of days in the given month.
+     *
+     * @param month The month to check.
+     * @return The number of days in that month.
+     */
+    public static int getDaysInMonth(Month month) {
+        return switch (month) {
+            case IGNIVOR -> 127;
+            case AQUINVOR -> 140;
+            case VENTIVOR -> 153;
+            case FLORIVOR -> 165;
+            case AESTIVOR -> 172;
+            case CALORVOR -> 177;
+            case ARDORVOR -> 178;
+            case SOLARVOR -> 177;
+            case FOLLIVOR -> 170;
+            case STRIGAVOR -> 157;
+            case FAUNIVOR -> 142;
+            case UMBRAVOR -> 123;
+            case GLACIVOR -> 108;
+            case FRIGORVOR -> 102;
+            case OBSCURVOR -> 101;
+        };
     }
 
     /**
@@ -1062,7 +1080,15 @@ public class DateUtils {
         meltSnow(5);
         applyRain();
 
-        if (new Random().nextInt(15) == 0) {
+        World mainWorld = Bukkit.getWorld("world");
+        if (mainWorld == null) {
+            return;
+        }
+        // Heat effects only apply during the daytime
+        long time = mainWorld.getTime();
+        boolean isDaytime = time >= 0 && time < 12000;
+
+        if (isDaytime && new Random().nextInt(15) == 0) {
             List<PotionEffect> effects = new ArrayList<>();
             effects.add(new PotionEffect(PotionEffectType.MINING_FATIGUE, 100, 0));
             effects.add(new PotionEffect(PotionEffectType.WEAKNESS, 320, 0));
@@ -1132,6 +1158,7 @@ public class DateUtils {
             effects.add(new PotionEffect(PotionEffectType.SLOWNESS, 320, 0));
         }
         applyWeatherEffectsToAllPlayers(effects);
+        applyFrostbiteTracking(0);
 
         // Applies delay to first snow storm
         if (!AranarthUtils.getHasStormedInMonth()) {
@@ -1151,6 +1178,7 @@ public class DateUtils {
             effects.add(new PotionEffect(PotionEffectType.SLOWNESS, 320, 1));
         }
         applyWeatherEffectsToAllPlayers(effects);
+        applyFrostbiteTracking(1);
 
         // Applies delay to first snow storm
         if (!AranarthUtils.getHasStormedInMonth()) {
@@ -1170,6 +1198,7 @@ public class DateUtils {
             effects.add(new PotionEffect(PotionEffectType.SLOWNESS, 320, 0));
         }
         applyWeatherEffectsToAllPlayers(effects);
+        applyFrostbiteTracking(0);
 
         // Applies delay to first snow storm
         if (!AranarthUtils.getHasStormedInMonth()) {
@@ -1179,6 +1208,53 @@ public class DateUtils {
         }
         applySnow(35, 700);
         attemptSpawnExtraPhantoms();
+    }
+
+    /**
+     * Tracks outdoor exposure time in winter months and applies a frostbite burst.
+     * @param baseSloAmp The base Slowness amplifier the month normally applies (0 = Slowness I, 1 = Slowness II, etc.)
+     */
+    private void applyFrostbiteTracking(int baseSloAmp) {
+        long now = System.currentTimeMillis();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            String worldName = player.getWorld().getName();
+            if (!worldName.startsWith("world") && !AranarthUtils.isSmpWorld(worldName)
+                    && !worldName.startsWith("resource")) {
+                outdoorExposureStart.remove(player.getUniqueId());
+                continue;
+            }
+
+            Location loc = player.getLocation();
+            Block highestBlock = loc.getWorld().getHighestBlockAt(loc.getBlockX(), loc.getBlockZ());
+            boolean isOutdoors = loc.getBlockY() + 2 >= highestBlock.getLocation().getBlockY();
+
+            if (!isOutdoors) {
+                outdoorExposureStart.remove(player.getUniqueId());
+                continue;
+            }
+
+            outdoorExposureStart.putIfAbsent(player.getUniqueId(), now);
+            long exposedMs = now - outdoorExposureStart.get(player.getUniqueId());
+
+            long time = player.getWorld().getTime();
+            boolean isNight = time >= 12300;
+            long threshold = isNight ? FROSTBITE_NIGHTTIME_THRESHOLD_MS : FROSTBITE_DAYTIME_THRESHOLD_MS;
+
+            if (exposedMs >= threshold) {
+                player.setFreezeTicks(player.getMaxFreezeTicks());
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 320, baseSloAmp + 1), true);
+                // Reset so they must remain outside for another full threshold before the next burst
+                outdoorExposureStart.put(player.getUniqueId(), now);
+            }
+        }
+    }
+
+    /**
+     * Removes a player's outdoor exposure tracking entry.
+     * @param uuid The player's UUID.
+     */
+    public static void clearOutdoorExposure(UUID uuid) {
+        outdoorExposureStart.remove(uuid);
     }
 
     /**
@@ -1492,6 +1568,7 @@ public class DateUtils {
 
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
             List<Block> toSnow = new ArrayList<>();
+            List<Block> tallGrassToSnow = new ArrayList<>();
             int snowAmountToCreate = bigFlakeDensity * 2;
             ThreadLocalRandom tlr = ThreadLocalRandom.current();
 
@@ -1551,6 +1628,14 @@ public class DateUtils {
                     }
                 }
 
+                // Tall grass and large fern upper halves need special handling
+                if ((surfaceBlock.getType() == Material.TALL_GRASS || surfaceBlock.getType() == Material.LARGE_FERN)
+                        && surfaceBlock.getBlockData() instanceof Bisected bisected
+                        && bisected.getHalf() == Bisected.Half.TOP) {
+                    tallGrassToSnow.add(surfaceBlock.getRelative(BlockFace.DOWN));
+                    continue;
+                }
+
                 // If the surface block is invalid, skip this column
                 if (INVALID_SURFACE_BLOCKS.contains(surfaceBlock.getType())) {
                     continue;
@@ -1568,10 +1653,15 @@ public class DateUtils {
                 }
 
                 Block above = surfaceBlock.getRelative(BlockFace.UP);
-                if (above.getType() != Material.AIR && above.getType() != Material.SNOW && above.getType() != Material.SHORT_GRASS && above.getType() != Material.FERN) {
+                if (above.getType() != Material.AIR && above.getType() != Material.SNOW && above.getType() != Material.SHORT_GRASS && above.getType() != Material.FERN
+                        && above.getType() != Material.TALL_GRASS && above.getType() != Material.LARGE_FERN) {
                     continue;
                 }
-                toSnow.add(above);
+                if (above.getType() == Material.TALL_GRASS || above.getType() == Material.LARGE_FERN) {
+                    tallGrassToSnow.add(above);
+                } else {
+                    toSnow.add(above);
+                }
             }
 
             // --- SWITCH BACK TO SYNC ---
@@ -1648,6 +1738,12 @@ public class DateUtils {
                             }
                         }
                     }
+                }
+
+                // Remove both halves of tall grass/large fern and place snow at the lower half position
+                for (Block lowerHalf : tallGrassToSnow) {
+                    lowerHalf.getRelative(BlockFace.UP).setType(Material.AIR);
+                    lowerHalf.setType(Material.SNOW);
                 }
             });
         });
@@ -2059,25 +2155,52 @@ public class DateUtils {
                                                     continue;
                                                 }
 
-                                                // Adds short grass depending on biome
+                                                // Adds short grass or tall grass depending on biome
                                                 switch (biome) {
                                                     case "MEADOW":
                                                         if (grassReplaceRate > 55) {
                                                             break;
                                                         }
-                                                        above.setType(Material.SHORT_GRASS);
+                                                        if (grassReplaceRate <= 5 && above.getRelative(BlockFace.UP).getType() == Material.AIR) {
+                                                            Bisected meadowLower = (Bisected) Material.TALL_GRASS.createBlockData();
+                                                            meadowLower.setHalf(Bisected.Half.BOTTOM);
+                                                            above.setBlockData(meadowLower);
+                                                            Bisected meadowUpper = (Bisected) Material.TALL_GRASS.createBlockData();
+                                                            meadowUpper.setHalf(Bisected.Half.TOP);
+                                                            above.getRelative(BlockFace.UP).setBlockData(meadowUpper);
+                                                        } else {
+                                                            above.setType(Material.SHORT_GRASS);
+                                                        }
                                                         break;
                                                     case "PLAINS":
                                                         if (grassReplaceRate > 35) {
                                                             break;
                                                         }
-                                                        above.setType(Material.SHORT_GRASS);
+                                                        if (grassReplaceRate <= 2 && above.getRelative(BlockFace.UP).getType() == Material.AIR) {
+                                                            Bisected plainsLower = (Bisected) Material.TALL_GRASS.createBlockData();
+                                                            plainsLower.setHalf(Bisected.Half.BOTTOM);
+                                                            above.setBlockData(plainsLower);
+                                                            Bisected plainsUpper = (Bisected) Material.TALL_GRASS.createBlockData();
+                                                            plainsUpper.setHalf(Bisected.Half.TOP);
+                                                            above.getRelative(BlockFace.UP).setBlockData(plainsUpper);
+                                                        } else {
+                                                            above.setType(Material.SHORT_GRASS);
+                                                        }
                                                         break;
                                                     case "SUNFLOWER_PLAINS":
                                                         if (grassReplaceRate > 45) {
                                                             break;
                                                         }
-                                                        above.setType(Material.SHORT_GRASS);
+                                                        if (grassReplaceRate <= 4 && above.getRelative(BlockFace.UP).getType() == Material.AIR) {
+                                                            Bisected sfplainsLower = (Bisected) Material.TALL_GRASS.createBlockData();
+                                                            sfplainsLower.setHalf(Bisected.Half.BOTTOM);
+                                                            above.setBlockData(sfplainsLower);
+                                                            Bisected sfplainsUpper = (Bisected) Material.TALL_GRASS.createBlockData();
+                                                            sfplainsUpper.setHalf(Bisected.Half.TOP);
+                                                            above.getRelative(BlockFace.UP).setBlockData(sfplainsUpper);
+                                                        } else {
+                                                            above.setType(Material.SHORT_GRASS);
+                                                        }
                                                         break;
                                                     case "TAIGA", "OLD_GROWTH_PINE_TAIGA",
                                                          "OLD_GROWTH_SPRUCE_TAIGA":
@@ -2085,8 +2208,15 @@ public class DateUtils {
                                                             break;
                                                         } else if (grassReplaceRate > 5) {
                                                             above.setType(Material.FERN);
-                                                        } else {
+                                                        } else if (grassReplaceRate > 1 || above.getRelative(BlockFace.UP).getType() != Material.AIR) {
                                                             above.setType(Material.SHORT_GRASS);
+                                                        } else {
+                                                            Bisected taigaLower = (Bisected) Material.LARGE_FERN.createBlockData();
+                                                            taigaLower.setHalf(Bisected.Half.BOTTOM);
+                                                            above.setBlockData(taigaLower);
+                                                            Bisected taigaUpper = (Bisected) Material.LARGE_FERN.createBlockData();
+                                                            taigaUpper.setHalf(Bisected.Half.TOP);
+                                                            above.getRelative(BlockFace.UP).setBlockData(taigaUpper);
                                                         }
                                                         break;
                                                     case "WINDSWEPT_HILLS":
@@ -2283,7 +2413,7 @@ public class DateUtils {
      * @param duration The amount of ticks the storm will last.
      */
     private void updateStorm(Weather type, int duration) {
-        String message = null;
+        String messageKey = null;
         World mainWorld = Bukkit.getWorld("world");
         if (mainWorld == null) {
             return; // survival main world must always exist
@@ -2307,7 +2437,7 @@ public class DateUtils {
                 if (!isNewDay) {
                     for (Player player : Bukkit.getOnlinePlayers()) {
                         String playerWorld = player.getWorld().getName();
-                        if (playerWorld.equals("arena") || playerWorld.equals("creative")) {
+                        if (playerWorld.equals("arena") || playerWorld.startsWith("creative")) {
                             continue;
                         }
                         int vol = AranarthUtils.getPlayer(player.getUniqueId()).getWeatherSoundVolume();
@@ -2316,7 +2446,7 @@ public class DateUtils {
                         }
                     }
                 }
-                message = ChatUtils.chatMessage("&7&oIt has started to rain...");
+                messageKey = "weather.started_rain";
             } else if (type == Weather.THUNDER) {
                 for (World w : weatherWorlds) {
                     w.setClearWeatherDuration(0);
@@ -2328,7 +2458,7 @@ public class DateUtils {
                 if (!isNewDay) {
                     for (Player player : Bukkit.getOnlinePlayers()) {
                         String playerWorld = player.getWorld().getName();
-                        if (playerWorld.equals("arena") || playerWorld.equals("creative")) {
+                        if (playerWorld.equals("arena") || playerWorld.startsWith("creative")) {
                             continue;
                         }
                         int vol = AranarthUtils.getPlayer(player.getUniqueId()).getWeatherSoundVolume();
@@ -2337,7 +2467,7 @@ public class DateUtils {
                         }
                     }
                 }
-                message = ChatUtils.chatMessage("&7&oA thunderstorm has started...");
+                messageKey = "weather.started_thunderstorm";
             } else if (type == Weather.SNOW) {
                 for (World w : weatherWorlds) {
                     w.setThunderDuration(0);
@@ -2349,7 +2479,7 @@ public class DateUtils {
                 if (!isNewDay) {
                     for (Player player : Bukkit.getOnlinePlayers()) {
                         String playerWorld = player.getWorld().getName();
-                        if (playerWorld.equals("arena") || playerWorld.equals("creative")) {
+                        if (playerWorld.equals("arena") || playerWorld.startsWith("creative")) {
                             continue;
                         }
                         int vol = AranarthUtils.getPlayer(player.getUniqueId()).getWeatherSoundVolume();
@@ -2358,7 +2488,7 @@ public class DateUtils {
                         }
                     }
                 }
-                message = ChatUtils.chatMessage("&7&oIt has started to snow...");
+                messageKey = "weather.started_snow";
             } else {
                 Bukkit.getLogger().info("[AC] Something went wrong with starting the storm...");
                 AranarthUtils.setWeather(Weather.CLEAR);
@@ -2376,7 +2506,7 @@ public class DateUtils {
             if (!isNewDay) {
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     String playerWorld = player.getWorld().getName();
-                    if (playerWorld.equals("arena") || playerWorld.equals("creative")) {
+                    if (playerWorld.equals("arena") || playerWorld.startsWith("creative")) {
                         continue;
                     }
                     int vol = AranarthUtils.getPlayer(player.getUniqueId()).getWeatherSoundVolume();
@@ -2385,17 +2515,17 @@ public class DateUtils {
                     }
                 }
             }
-            message = ChatUtils.chatMessage("&7&oThe storm has subsided...");
+            messageKey = "weather.storm_subsided";
         }
         for (Player player : Bukkit.getOnlinePlayers()) {
             String playerWorld = player.getWorld().getName();
-            if (playerWorld.equals("arena") || playerWorld.equals("creative")) {
+            if (playerWorld.equals("arena") || playerWorld.startsWith("creative")) {
                 continue;
             }
             if (AranarthUtils.getPlayer(player.getUniqueId()).isWeatherMessageDisabled()) {
                 continue;
             }
-            player.sendMessage(message);
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, messageKey)));
         }
     }
 

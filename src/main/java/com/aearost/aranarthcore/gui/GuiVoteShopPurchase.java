@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.items.key.KeyVote;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -41,8 +42,8 @@ public class GuiVoteShopPurchase {
 			int[] randomKeyIndex = {1};
 			int[] taskId = {-1};
 			taskId[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(AranarthCore.getInstance(), () -> {
-				if (player.getOpenInventory() != null
-						&& ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle()).equals("Vote Shop Purchase")) {
+				if (player.getOpenInventory() != null && GuiHolder.isGui(player.getOpenInventory())
+						&& ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle()).equals(Lang.getFor(player, "gui.voteshoppurchase.title"))) {
 					updateRandomKeyItem(randomKeyIndex[0]);
 					randomKeyIndex[0] = (randomKeyIndex[0] + 1) % 4;
 				} else {
@@ -62,13 +63,13 @@ public class GuiVoteShopPurchase {
 			default -> randomKey = new KeyVote().getItem();
 		}
 		ItemMeta meta = randomKey.getItemMeta();
-		meta.setDisplayName(ChatUtils.translateToColor("&a&lPurchase &4&lRandom Crate Key"));
+		meta.setDisplayName(Lang.getFor(player, "gui.voteshoppurchase.purchase", "item", "&4&lRandom Crate Key"));
 		List<String> lore = new ArrayList<>();
-		lore.add(ChatUtils.translateToColor("&e10 vote points"));
-		lore.add(ChatUtils.translateToColor("&a&oVote &7&o- 65%"));
-		lore.add(ChatUtils.translateToColor("&6&oRare &7&o- 25%"));
-		lore.add(ChatUtils.translateToColor("&3&oEpic &7&o- 7%"));
-		lore.add(ChatUtils.translateToColor("&5&oGodly &7&o- 3%"));
+		lore.add(Lang.getFor(player, "gui.voteshop.random_key_points"));
+		lore.add(ChatUtils.translateToColor("&a&o" + Lang.getFor(player, "crate.tier_vote") + " &7&o- 65%"));
+		lore.add(ChatUtils.translateToColor("&6&o" + Lang.getFor(player, "crate.tier_rare") + " &7&o- 25%"));
+		lore.add(ChatUtils.translateToColor("&3&o" + Lang.getFor(player, "crate.tier_epic") + " &7&o- 7%"));
+		lore.add(ChatUtils.translateToColor("&5&o" + Lang.getFor(player, "crate.tier_godly") + " &7&o- 3%"));
 		meta.getPersistentDataContainer().set(randomKeyNSKey, PersistentDataType.STRING, "true");
 		meta.setLore(lore);
 		randomKey.setItemMeta(meta);
@@ -76,7 +77,7 @@ public class GuiVoteShopPurchase {
 	}
 	
 	private Inventory initializeGui(Player player) {
-		Inventory gui = Bukkit.getServer().createInventory(player, 27, ChatUtils.translateToColor("&a&lVote Shop Purchase"));
+		Inventory gui = GuiHolder.create(player, 27, Lang.getFor(player, "gui.voteshoppurchase.title"));
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
 		// Initialize Items
@@ -93,10 +94,10 @@ public class GuiVoteShopPurchase {
 		blackPane.setItemMeta(blackPaneMeta);
 
 		ItemMeta backMeta = back.getItemMeta();
-		backMeta.setDisplayName(ChatUtils.translateToColor("&c&lBack"));
+		backMeta.setDisplayName(Lang.getFor(player, "gui.voteshoppurchase.back"));
 		back.setItemMeta(backMeta);
 		ItemMeta itemMeta = item.getItemMeta();
-		itemMeta.setDisplayName(ChatUtils.translateToColor("&a&lPurchase " + item.getItemMeta().getDisplayName()));
+		itemMeta.setDisplayName(Lang.getFor(player, "gui.voteshoppurchase.purchase", "item", item.getItemMeta().getDisplayName()));
 		item.setItemMeta(itemMeta);
 
 		// Initialize GUI

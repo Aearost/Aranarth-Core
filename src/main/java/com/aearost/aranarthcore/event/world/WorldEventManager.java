@@ -2,11 +2,7 @@ package com.aearost.aranarthcore.event.world;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.WorldEvent;
-import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
-import com.aearost.aranarthcore.utils.DiscordUtils;
-import com.aearost.aranarthcore.utils.PermissionUtils;
-import com.aearost.aranarthcore.utils.PersistenceUtils;
+import com.aearost.aranarthcore.utils.*;
 import com.projectkorra.projectkorra.BendingPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -49,7 +45,6 @@ public class WorldEventManager implements Listener {
         if (!AranarthCore.isSmpServer()) {
             String title = ChatUtils.translateToColor(event.getTitleText(intensity));
             String subtitle = ChatUtils.translateToColor(event.getSubtitleText(intensity));
-            String chatMsg = ChatUtils.chatMessage(event.getColor() + event.getName(intensity) + " &7has begun!");
             String descMsg = ChatUtils.chatMessage(event.getSubtitleText(intensity));
             for (Player player : Bukkit.getOnlinePlayers()) {
                 String worldName = player.getWorld().getName();
@@ -57,7 +52,7 @@ public class WorldEventManager implements Listener {
                     continue;
                 }
                 player.sendTitle(title, subtitle, 20, 120, 20);
-                player.sendMessage(chatMsg);
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "world_event.begun", "event", event.getColor() + event.getName(intensity))));
                 player.sendMessage(descMsg);
             }
 
@@ -90,13 +85,12 @@ public class WorldEventManager implements Listener {
         AranarthUtils.setActiveWorldEventIntensity(1);
 
         if (!AranarthCore.isSmpServer()) {
-            String chatMsg = ChatUtils.chatMessage("&7The " + event.getColor() + event.getName(intensity) + " &7has ended");
             for (Player player : Bukkit.getOnlinePlayers()) {
                 String worldName = player.getWorld().getName();
                 if (!AranarthUtils.isSurvivalWorld(worldName) || worldName.equals("spawn") || worldName.equals("shops")) {
                     continue;
                 }
-                player.sendMessage(chatMsg);
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "world_event.ended", "color", event.getColor(), "name", event.getName(intensity))));
             }
 
             if (AranarthCore.isPublicServer()) {
@@ -270,6 +264,6 @@ public class WorldEventManager implements Listener {
         int intensity = AranarthUtils.getActiveWorldEventIntensity();
         String eventName = active.getName(intensity);
         e.setUseBed(PlayerBedEnterEvent.Result.DENY);
-        e.getPlayer().sendMessage(ChatUtils.chatMessage(active.getColor() + eventName + " &7- this night cannot be shortened."));
+        e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "world_event.night_cannot_skip", "event", active.getColor() + eventName)));
     }
 }

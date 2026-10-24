@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.gui.GuiPotions;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryAction;
@@ -17,6 +18,13 @@ import org.bukkit.potion.PotionType;
  * Dynamically updates the number of potions that will be in the player's pouch as they add potions.
  */
 public class GuiPotionAdd {
+
+	/**
+	 * Builds the add-potions title in the player's language with the given stats suffix.
+	 */
+	private static String getAddTitle(Player player, String potionStats) {
+		return Lang.getFor(player, "gui.potions.title_add").split("\\(")[0].trim() + " " + potionStats;
+	}
 	public void execute(InventoryClickEvent e) {
 		if (e.getClickedInventory() == null) {
 			return;
@@ -46,7 +54,7 @@ public class GuiPotionAdd {
 					ItemStack cursorCopy = e.getCursor().clone();
 					player.setItemOnCursor(null);
 					addPotion(player, top, cursorCopy, e.getSlot(), true);
-					e.getView().setTitle("Add Potions " + potionStats);
+					e.getView().setTitle(getAddTitle(player, potionStats));
 				}
 			}
 			// Removing potion(s) by shift-clicking from potion inventory into player inventory
@@ -71,7 +79,7 @@ public class GuiPotionAdd {
 						}
 
 						removePotion(player, top, e.getCurrentItem(), e.getSlot(), false);
-						e.getView().setTitle("Add Potions " + potionStats);
+						e.getView().setTitle(getAddTitle(player, potionStats));
 					} else {
 						e.setCancelled(true);
 					}
@@ -124,7 +132,7 @@ public class GuiPotionAdd {
 						aranarthPlayer.setAddingPotions(false);
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
-						e.getView().setTitle("Add Potions " + potionStats);
+						e.getView().setTitle(getAddTitle(player, potionStats));
 					}
 				}
 			}
@@ -146,7 +154,7 @@ public class GuiPotionAdd {
 						boolean wasAdded = addPotion(player, top, item, potionGuiSlot, true);
 						if (wasAdded) {
 							e.getView().getBottomInventory().setItem(hotbarSlot, null);
-							e.getView().setTitle("Add Potions " + potionStats);
+							e.getView().setTitle(getAddTitle(player, potionStats));
 						} else {
 							e.setCancelled(true);
 						}
@@ -165,7 +173,7 @@ public class GuiPotionAdd {
 					top.setItem(e.getSlot(), null);
 					player.setItemOnCursor(null); // To negate it being populated in removePotion()
 					player.getInventory().setItem(e.getHotbarButton(), item);
-					e.getView().setTitle("Add Potions " + potionStats);
+					e.getView().setTitle(getAddTitle(player, potionStats));
 				}
 			}
 			// Removing potions by taking from potions inventory
@@ -177,7 +185,7 @@ public class GuiPotionAdd {
 				}
 
 				removePotion(player, top, e.getCurrentItem(), e.getSlot(), true);
-				e.getView().setTitle("Add Potions " + potionStats);
+				e.getView().setTitle(getAddTitle(player, potionStats));
 			}
 		} else {
 			// Adding potion(s) by shift-clicking into the potion inventory
@@ -193,7 +201,7 @@ public class GuiPotionAdd {
 
 						boolean wasAdded = addPotion(player, top, e.getCurrentItem(), e.getSlot(), false);
 						if (wasAdded) {
-							e.getView().setTitle("Add Potions " + potionStats);
+							e.getView().setTitle(getAddTitle(player, potionStats));
 						} else {
 							e.setCancelled(true);
 						}
@@ -253,7 +261,7 @@ public class GuiPotionAdd {
 							aranarthPlayer.setAddingPotions(false);
 							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
-							e.getView().setTitle("Add Potions " + potionStats);
+							e.getView().setTitle(getAddTitle(player, potionStats));
 						}
 					}
 				}
@@ -350,9 +358,9 @@ public class GuiPotionAdd {
 				|| item.getType() == Material.SPLASH_POTION
 				|| item.getType() == Material.LINGERING_POTION) {
 			PotionMeta meta = (PotionMeta) item.getItemMeta();
-			// Prevent potions without effects from being added
+			// Prevent potions without effects from being added (water bottles are allowed as a waterbending source)
 			if (meta.getBasePotionType() == PotionType.AWKWARD || meta.getBasePotionType() == PotionType.MUNDANE
-					|| meta.getBasePotionType() == PotionType.THICK || meta.getBasePotionType() == PotionType.WATER) {
+					|| meta.getBasePotionType() == PotionType.THICK) {
 				// Allows mcMMO potions
 				if (!meta.getCustomEffects().isEmpty()) {
 					return true;

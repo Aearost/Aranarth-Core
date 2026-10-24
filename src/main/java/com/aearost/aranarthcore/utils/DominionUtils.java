@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.*;
 import org.bukkit.*;
 import org.bukkit.block.Biome;
+import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -38,14 +39,9 @@ public class DominionUtils {
      */
     private static String lastFoodEvalDate = null;
     /**
-     * Dominion IDs that lost a chunk to auto-unclaim during yesterday's food evaluation cycle.
-     * Used to detect recovery (no chunk lost today after losing one yesterday).
+     * Remaining chunk counts at which a crumbling Dominion re-notifies Discord, after the initial crumble message.
      */
-    private static Set<UUID> yesterdayCrumblingDominionIds = new HashSet<>();
-    /**
-     * Dominion IDs that lost a chunk to auto-unclaim during today's food evaluation cycle.
-     */
-    private static final Set<UUID> todayCrumblingDominionIds = new HashSet<>();
+    private static final int[] CRUMBLE_NOTIFY_THRESHOLDS = {250, 100, 25, 5};
 
     /**
      * Provides the list of Dominions.
@@ -82,8 +78,124 @@ public class DominionUtils {
      * @param chunk The chunk.
      * @return The lookup key string.
      */
-    private static String getChunkKey(Chunk chunk) {
+    public static String getChunkKey(Chunk chunk) {
         return chunk.getWorld().getName() + ":" + chunk.getX() + ":" + chunk.getZ();
+    }
+
+    /**
+     * Builds a region name from command arguments, allowing multiple words.
+     *
+     * @param args The command arguments.
+     * @param from The index of the first argument that is part of the name.
+     * @return The region name with single spaces between words, or null if it is not a valid region name.
+     */
+    public static String parseRegionName(String[] args, int from) {
+        if (args.length <= from) {
+            return null;
+        }
+        String name = String.join(" ", Arrays.copyOfRange(args, from, args.length)).trim().replaceAll("\\s+", " ");
+        // Letters, numbers and underscores only so the name is safe in the stored region format
+        return name.matches("[a-zA-Z0-9_]+( [a-zA-Z0-9_]+)*") ? name : null;
+    }
+
+    /**
+     * Finds the stored name of a dominion's region, ignoring case.
+     *
+     * @param dominion The dominion.
+     * @param input    The region name that was entered.
+     * @return The region name as it is stored, or null if the dominion has no such region.
+     */
+    public static String findRegionName(Dominion dominion, String input) {
+        if (input == null) {
+            return null;
+        }
+        for (String regionName : dominion.getRegionMembers().keySet()) {
+            if (regionName.equalsIgnoreCase(input)) {
+                return regionName;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Provides the number of chunks that are part of the given region.
+     *
+     * @param dominion The dominion.
+     * @param regionName The region name.
+     * @return The number of chunks in the region.
+     */
+    public static int getRegionChunkCount(Dominion dominion, String regionName) {
+        int count = 0;
+        for (String name : dominion.getRegionChunkNames().values()) {
+            if (name.equals(regionName)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Makes a region public or private.
+     *
+     * @param dominion   The dominion.
+     * @param regionName The region name.
+     * @param makePublic Whether the region is being made public.
+     */
+    public static void setRegionPublic(Dominion dominion, String regionName, boolean makePublic) {
+        if (makePublic) {
+            dominion.getPublicRegions().add(regionName);
+        } else {
+            dominion.getPublicRegions().remove(regionName);
+        }
+    }
+
+    /**
+     * Deletes a region, releasing all of its chunks and members. The caller saves the dominion.
+     *
+     * @param dominion The dominion.
+     * @param regionName The region name.
+     */
+    public static void deleteRegion(Dominion dominion, String regionName) {
+        dominion.getRegionChunkNames().values().removeIf(name -> name.equals(regionName));
+        dominion.getRegionMembers().remove(regionName);
+        dominion.getPublicRegions().remove(regionName);
+        dominion.getRegionMapColors().remove(regionName);
+        dominion.getRegionIcons().remove(regionName);
+    }
+
+    /**
+     * Sets or resets the map color of a region, saves the dominion and refreshes the map.
+     *
+     * @param player     The player changing the color, who is told the result.
+     * @param dominion   The dominion.
+     * @param regionName The region name.
+     * @param colorCode  The color code (&x or &#RRGGBB), or an empty string to use the Dominion's color.
+     * @param colorName  The name of the color as it is shown to the player.
+     */
+    public static void setRegionMapColor(Player player, Dominion dominion, String regionName, String colorCode, String colorName) {
+        if (colorCode.isEmpty()) {
+            dominion.getRegionMapColors().remove(regionName);
+        } else {
+            dominion.getRegionMapColors().put(regionName, colorCode);
+        }
+        updateDominion(dominion);
+        AranarthCore.refreshSquaremap();
+        if (colorCode.isEmpty()) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.region_mapcolor_reset", "region", regionName)));
+        } else {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.region_mapcolor_set", "region", regionName, "color", colorCode + colorName)));
+        }
+    }
+
+    /**
+     * Removes the given chunk from the dominion's region it is part of, if any. The region itself is kept.
+     *
+     * @param dominion The dominion.
+     * @param chunk    The chunk.
+     * @return True if the chunk was part of a region.
+     */
+    public static boolean releaseRegionChunk(Dominion dominion, Chunk chunk) {
+        return dominion.getRegionChunkNames().remove(getChunkKey(chunk)) != null;
     }
 
     /**
@@ -124,59 +236,114 @@ public class DominionUtils {
     }
 
     /**
-     * Returns true if the attacker is permitted to apply harmful PvP effects to the target
-     * under the current dominion relation rules. Mirrors the logic in DominionProtectionListener
-     * so that abilities bypassing EntityDamageEvent (potion effects, stuns, etc.) are still gated.
+     * Returns true if the attacker is permitted to apply harmful PvP effects to the target. Uses the
+     * same rules as normal PvP damage, so abilities that bypass EntityDamageEvent (potion effects,
+     * stuns, direct health changes, etc.) cannot harm anyone a regular attack could not. Players at
+     * spawn can never be harmed this way.
      *
      * @param attacker The player using the ability.
      * @param target   The player being targeted.
      * @return Whether the attacker may harm the target.
      */
     public static boolean canAttackPlayer(Player attacker, Player target) {
+        if (AranarthUtils.isSpawnLocation(target.getLocation()) || AranarthUtils.isSpawnLocation(attacker.getLocation())) {
+            return false;
+        }
+        return getPvpDenyMessage(attacker, target) == null;
+    }
+
+    /**
+     * Applies the dominion PvP rules between two players.
+     *
+     * @param attacker The attacking player.
+     * @param target   The player being attacked.
+     * @return The message explaining why the attack is blocked, or null if it is allowed.
+     */
+    public static String getPvpDenyMessage(Player attacker, Player target) {
+        // Dominion relations only apply in the worlds DominionProtectionListener protects (not the arena, etc.)
+        String worldName = target.getWorld().getName();
+        if (!worldName.startsWith("world") && !AranarthUtils.isSmpWorld(worldName) && !worldName.startsWith("resource")) {
+            return null;
+        }
+        // Spawn has its own protection
+        if (AranarthUtils.isSpawnLocation(target.getLocation())) {
+            return null;
+        }
+
         Dominion attackerDominion = getPlayerDominion(attacker.getUniqueId());
         Dominion targetDominion = getPlayerDominion(target.getUniqueId());
+        AranarthPlayer aranarthAttacker = AranarthUtils.getPlayer(attacker.getUniqueId());
+        AranarthPlayer aranarthTarget = AranarthUtils.getPlayer(target.getUniqueId());
 
-        // Same dominion - respect the member PvP flag
+        // Same dominion - check per-area PvP flag (outpost overrides dominion flag)
         if (attackerDominion != null && targetDominion != null
                 && attackerDominion.isSameDominion(targetDominion)) {
-            return attackerDominion.isMemberPvpEnabled();
+            Outpost fightOutpost = OutpostUtils.getOutpostOfChunk(attacker.getLocation().getChunk());
+            boolean pvpEnabled = (fightOutpost != null && fightOutpost.getDominionId().equals(attackerDominion.getId()))
+                    ? fightOutpost.isMemberPvpEnabled()
+                    : attackerDominion.isMemberPvpEnabled();
+            if (!pvpEnabled) {
+                return Lang.getFor(attacker, "dominion.cannot_harm_pvp_disabled", "target", aranarthTarget.getNickname(), "name", attackerDominion.getName());
+            }
+            return null;
         }
 
         // Both players belong to different dominions
         if (attackerDominion != null && targetDominion != null) {
             DominionRank relation = getRelationKey(attackerDominion, targetDominion);
-            Dominion chunkDominion = getDominionOfChunk(target.getLocation().getChunk());
 
             if (relation == DominionRank.ALLIED || relation == DominionRank.TRUCED) {
                 // Per-player overrides take precedence; either side allowing PvP permits the attack
                 boolean attackerPvp = hasPermission(target, attackerDominion, DominionPermission.PVP);
                 boolean targetPvp = hasPermission(attacker, targetDominion, DominionPermission.PVP);
-                return attackerPvp || targetPvp;
+                if (!attackerPvp && !targetPvp) {
+                    return Lang.getFor(attacker, "dominion.cannot_harm_player_relation", "target", aranarthTarget.getNickname(), "relation", getFormattedRankName(attacker, relation));
+                }
+                return null;
             }
 
             if (relation == DominionRank.NEUTRAL) {
-                // Blocked only when the target is in their own dominion's land
-                return chunkDominion == null || !chunkDominion.isSameDominion(targetDominion);
+                // Blocked only when the target is in their own dominion's land (including its outposts)
+                Dominion chunkDominion = getDominionOfChunkAnywhere(target.getLocation().getChunk());
+                if (chunkDominion != null && chunkDominion.isSameDominion(targetDominion)) {
+                    return Lang.getFor(attacker, "dominion.cannot_harm_player_neutral", "target", aranarthTarget.getNickname(), "relation", getFormattedRankName(attacker, DominionRank.NEUTRAL));
+                }
+                return null;
             }
 
             // ENEMIED - always allowed
-            return true;
+            return null;
         }
 
-        // Attacker has a dominion, target is a wanderer - always allowed
+        // Attacker has a dominion, target is a wanderer - blocked if target is not a barbarian
         if (attackerDominion != null) {
-            return true;
-        }
-
-        // Attacker is a wanderer, target has a dominion - blocked in target's own land
-        if (targetDominion != null) {
-            Dominion chunkDominion = getDominionOfChunk(target.getLocation().getChunk());
-            if (chunkDominion != null && chunkDominion.isSameDominion(targetDominion)) {
-                return false;
+            if (!aranarthTarget.isBarbarian()) {
+                return Lang.getFor(attacker, "dominion.cannot_harm_wanderer", "target", aranarthTarget.getNickname());
             }
+            return null;
         }
 
-        return true;
+        // Attacker is a wanderer, target has a dominion
+        if (targetDominion != null) {
+            if (!aranarthAttacker.isBarbarian()) {
+                return Lang.getFor(attacker, "pvp.wanderer_cannot_damage");
+            }
+            Dominion chunkDominion = getDominionOfChunkAnywhere(target.getLocation().getChunk());
+            if (chunkDominion != null && chunkDominion.isSameDominion(targetDominion)) {
+                return Lang.getFor(attacker, "dominion.cannot_harm_in_lands", "target", aranarthTarget.getNickname());
+            }
+            return null;
+        }
+
+        // Both are wanderers (neither has a dominion)
+        if (!aranarthAttacker.isBarbarian()) {
+            return Lang.getFor(attacker, "pvp.wanderer_cannot_damage");
+        }
+        if (!aranarthTarget.isBarbarian()) {
+            return Lang.getFor(attacker, "dominion.cannot_harm_wanderer", "target", aranarthTarget.getNickname());
+        }
+        // Both are barbarians - allowed
+        return null;
     }
 
     /**
@@ -303,11 +470,96 @@ public class DominionUtils {
             chunkKeyToDominion.put(getChunkKey(chunk), dominion);
         }
 
-        // Hot-save to MySQL immediately so changes are not lost between 30-minute periodic saves.
-        // Skip during shutdown - saveAll()/saveDominions() handles that path synchronously.
-        if (!dominion.getChunks().isEmpty()
-                && AranarthCore.getInstance() != null && AranarthCore.getInstance().isEnabled()) {
-            PersistenceUtils.saveSingleDominionToDatabase(dominion);
+        // Hot-save to MySQL immediately so changes are not lost between 30-minute periodic saves, and
+        // refresh the other server's copy. Skip during shutdown - saveAll()/saveDominions() handles that
+        // path synchronously.
+        if (AranarthCore.getInstance() != null && AranarthCore.getInstance().isEnabled()) {
+            PersistenceUtils.saveDominionAndPublish(dominion);
+        }
+    }
+
+    /**
+     * Whether this server hosts the dominion's land.
+     */
+    public static boolean isHostedHere(Dominion dominion) {
+        return !dominion.getChunks().isEmpty();
+    }
+
+    /**
+     * The name of the server hosting the dominion, for messages.
+     */
+    public static String getHostingServerDisplayName(Dominion dominion) {
+        String worldName = dominion.getDominionHomeWorldName();
+        return worldName != null && worldName.startsWith("smp") ? "SMP" : "Survival";
+    }
+
+    /**
+     * Copies a dominion freshly loaded from MySQL into the copy held in memory, keeping the same object
+     * so open GUIs and pending tasks keep working.
+     *
+     * @param fullCopy True on the server that does not host the dominion, which takes everything except
+     *                 the land. False on the hosting server, which only takes the settings the other
+     *                 server may change.
+     */
+    public static void applySyncedDominion(Dominion live, Dominion loaded, boolean fullCopy) {
+        List<UUID> oldMembers = new ArrayList<>(live.getMembers());
+
+        live.setName(loaded.getName());
+        live.setLeader(loaded.getLeader());
+        live.setMembers(loaded.getMembers());
+        live.setMemberRanks(loaded.getMemberRanks());
+        live.setMemberPvpEnabled(loaded.isMemberPvpEnabled());
+        live.setMobSpawningEnabled(loaded.isMobSpawningEnabled());
+        live.setBendingEnabled(loaded.isBendingEnabled());
+        live.setExplosionEnabled(loaded.isExplosionEnabled());
+        live.setMapColor(loaded.getMapColor());
+        live.getDisabledResourceCategories().clear();
+        live.getDisabledResourceCategories().addAll(loaded.getDisabledResourceCategories());
+        live.setDominionPermissions(loaded.getDominionPermissions());
+        live.setPlayerPermissionOverrides(loaded.getPlayerPermissionOverrides());
+        live.setRegionChunkNames(loaded.getRegionChunkNames());
+        live.setRegionMembers(loaded.getRegionMembers());
+        live.setPublicRegions(loaded.getPublicRegions());
+        live.setRegionMapColors(loaded.getRegionMapColors());
+        live.setRegionIcons(loaded.getRegionIcons());
+
+        if (fullCopy) {
+            live.setAllied(loaded.getAllied());
+            live.setTruced(loaded.getTruced());
+            live.setEnemied(loaded.getEnemied());
+            live.setFood(loaded.getFood());
+            live.setClaimableResources(loaded.getClaimableResources());
+            live.getClaimFoodYields().clear();
+            live.getClaimFoodYields().addAll(loaded.getClaimFoodYields());
+            live.setConquered(loaded.getConquered());
+            live.setConqueredRequest(loaded.getConqueredRequest());
+            live.setConqueredRequestTimestamp(loaded.getConqueredRequestTimestamp());
+            live.setConqueredRequestDefenderLastSeen(loaded.getConqueredRequestDefenderLastSeen());
+            live.setRebelRequest(loaded.getRebelRequest());
+            live.setRebelRequestTimestamp(loaded.getRebelRequestTimestamp());
+            live.setRebelRequestConquerorLastSeen(loaded.getRebelRequestConquerorLastSeen());
+            live.setLastConquerAttemptTimestamp(loaded.getLastConquerAttemptTimestamp());
+            live.setLastRebelAttemptTimestamp(loaded.getLastRebelAttemptTimestamp());
+            live.setConqueredTimestamp(loaded.getConqueredTimestamp());
+            live.setBalance(loaded.getBalance());
+            live.setBoughtChunks(loaded.getBoughtChunks());
+            live.setStoredChunkCount(loaded.getChunkCount());
+            live.setDominionLevel(loaded.getDominionLevel());
+            live.setCachedFarmlandCount(loaded.getCachedFarmlandCount());
+            live.setCachedLivestockCount(loaded.getCachedLivestockCount());
+            live.setFoundedTimestamp(loaded.getFoundedTimestamp());
+            live.setLevelDropTimestamp(loaded.getLevelDropTimestamp());
+            live.setCrumbleNotifiedChunks(loaded.getCrumbleNotifiedChunks());
+        }
+
+        // Keep the member lookup in sync, including members who were removed
+        for (UUID oldMember : oldMembers) {
+            if (!live.getMembers().contains(oldMember) && playerToDominion.get(oldMember) == live) {
+                playerToDominion.remove(oldMember);
+            }
+        }
+        for (UUID member : live.getMembers()) {
+            playerToDominion.put(member, live);
         }
     }
 
@@ -324,29 +576,29 @@ public class DominionUtils {
         if (dominionOfChunk != null) {
             Dominion playerDominion = getPlayerDominion(player.getUniqueId());
             if (playerDominion != null && playerDominion.isSameDominion(dominionOfChunk)) {
-                return "&cThis chunk is already claimed by your dominion";
+                return Lang.getFor(player, "dominion.claim_already_yours");
             }
-            return "&cThis chunk is already claimed by &e" + dominionOfChunk.getName();
+            return Lang.getFor(player, "dominion.claim_already_other", "name", dominionOfChunk.getName());
         }
         Outpost outpostOfChunk = OutpostUtils.getOutpostOfChunk(chunkToClaim);
         if (outpostOfChunk != null) {
             Dominion playerDominion = getPlayerDominion(player.getUniqueId());
             if (playerDominion != null && outpostOfChunk.getDominionId().equals(playerDominion.getId())) {
-                return "&cThis chunk is already claimed by your outpost &e" + outpostOfChunk.getName();
+                return Lang.getFor(player, "dominion.claim_already_your_outpost", "name", outpostOfChunk.getName());
             }
-            return "&cThis chunk is already claimed by another dominion's outpost";
+            return Lang.getFor(player, "dominion.claim_already_other_outpost");
         }
 
         Dominion playerDominion = getPlayerDominion(player.getUniqueId());
         if (playerDominion == null) {
-            return "&cYou are not part of a dominion!";
+            return Lang.getFor(player, "dominion.not_part_of");
         }
         if (!playerDominion.getLeader().equals(player.getUniqueId())
                 && playerDominion.getMemberRank(player.getUniqueId()) != DominionRank.LIEUTENANT) {
-            return "&cOnly the Leader or Lieutenant can claim land!";
+            return Lang.getFor(player, "dominion.claim_rank_required");
         }
         if (playerDominion.getConqueredRequest() != null) {
-            return "&cYou cannot claim chunks while your Dominion is under active conquest!";
+            return Lang.getFor(player, "dominion.claim_conquest");
         }
 
         int claimPrice = 250;
@@ -354,10 +606,10 @@ public class DominionUtils {
         // Adjacent to main dominion
         if (isConnectedToClaims(playerDominion.getChunks(), chunkToClaim)) {
             if (playerDominion.getBalance() < claimPrice) {
-                return "&cYour dominion cannot afford this!";
+                return Lang.getFor(player, "dominion.cannot_afford");
             }
             if (playerDominion.getChunks().size() >= playerDominion.getMaxChunks()) {
-                return "&cYou cannot claim more than &e" + playerDominion.getMaxChunks() + " chunks!";
+                return Lang.getFor(player, "dominion.claim_limit", "max", playerDominion.getMaxChunks());
             }
             playerDominion.setBalance(playerDominion.getBalance() - claimPrice);
             PersistenceUtils.saveSingleDominionToDatabase(playerDominion);
@@ -370,8 +622,8 @@ public class DominionUtils {
             updateDominion(playerDominion);
             DominionLevelUtils.reevaluateDominion(playerDominion);
             refreshBiomeCache(playerDominion);
-            return "&e" + playerDominion.getName() + " &7has claimed &e"
-                    + playerDominion.getChunks().size() + "/" + playerDominion.getMaxChunks() + " chunks";
+            return Lang.getFor(player, "dominion.claimed_chunks", "name", playerDominion.getName(),
+                    "count", playerDominion.getChunks().size(), "max", playerDominion.getMaxChunks());
         }
 
         // Adjacent to an outpost (lowest index first)
@@ -382,7 +634,7 @@ public class DominionUtils {
             }
         }
 
-        return "&cThis chunk is not connected to your Dominion or an outpost";
+        return Lang.getFor(player, "dominion.claim_not_connected");
     }
 
     /**
@@ -425,10 +677,10 @@ public class DominionUtils {
         if (outpostOfChunk != null) {
             Dominion playerDominion = getPlayerDominion(player.getUniqueId());
             if (playerDominion == null) {
-                return "&cYou are not part of a Dominion";
+                return Lang.getFor(player, "dominion.not_part_of");
             }
             if (!outpostOfChunk.getDominionId().equals(playerDominion.getId())) {
-                return "&cThis chunk is claimed by another dominion's outpost!";
+                return Lang.getFor(player, "dominion.unclaim_other_outpost");
             }
             return OutpostUtils.unclaimOutpostChunk(player, outpostOfChunk, playerDominion, chunk);
         }
@@ -441,11 +693,11 @@ public class DominionUtils {
                 if (playerDominion.isSameDominion(dominionOfChunk)) {
                     if (playerDominion.getLeader().equals(player.getUniqueId()) || playerDominion.getMemberRank(player.getUniqueId()) == DominionRank.LIEUTENANT) {
                         if (playerDominion.getConqueredRequest() != null) {
-                            return "&cYou cannot unclaim chunks while your Dominion is under active conquest!";
+                            return Lang.getFor(player, "dominion.unclaim_conquest");
                         }
                         Chunk homeChunk = playerDominion.getDominionHome().getChunk();
                         if (chunk.getX() == homeChunk.getX() && chunk.getZ() == homeChunk.getZ()) {
-                            return "&cYou cannot unclaim the chunk that the home is in!";
+                            return Lang.getFor(player, "dominion.unclaim_home");
                         } else {
                             if (isAllClaimsConnectedAfterUnclaiming(dominionOfChunk, chunk)) {
                                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
@@ -457,26 +709,27 @@ public class DominionUtils {
                                 }
                                 playerDominion.getChunks().remove(chunk);
                                 chunkKeyToDominion.remove(getChunkKey(chunk));
+                                releaseRegionChunk(playerDominion, chunk);
                                 resizeFoodArray(playerDominion);
                                 updateDominion(playerDominion);
                                 DominionLevelUtils.reevaluateDominion(playerDominion);
                                 refreshBiomeCache(playerDominion);
-                                return "&7This chunk has been unclaimed successfully";
+                                return Lang.getFor(player, "dominion.unclaimed");
                             } else {
-                                return "&cYou cannot unclaim this chunk as they all must remain connected!";
+                                return Lang.getFor(player, "dominion.unclaim_disconnect");
                             }
                         }
                     } else {
-                        return "&cOnly the Leader or Lieutenant can unclaim land!";
+                        return Lang.getFor(player, "dominion.unclaim_rank_required");
                     }
                 } else {
-                    return "&cThis chunk not claimed by " + dominionOfChunk.getName() + "!";
+                    return Lang.getFor(player, "dominion.unclaim_not_yours", "name", dominionOfChunk.getName());
                 }
             } else {
-                return "&cYou are not part of a Dominion";
+                return Lang.getFor(player, "dominion.not_part_of");
             }
         } else {
-            return "&cThis chunk is not claimed!";
+            return Lang.getFor(player, "dominion.unclaim_not_claimed");
         }
     }
 
@@ -486,8 +739,8 @@ public class DominionUtils {
      * @param dominion The Dominion to be disbanded.
      */
     public static void disbandDominion(Dominion dominion) {
-        Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The Dominion of &e" + dominion.getName() + " &7has been disbanded"));
-        DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " &7has been disbanded", Color.RED);
+        Lang.broadcast("dominion.disbanded_broadcast", "name", dominion.getName());
+        DiscordUtils.dominionMessage(dominion, dominion.getName() + " &7has been disbanded", Color.RED);
         DefenderUtils.sellAllDominionDefenders(dominion);
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(dominion.getLeader());
         aranarthPlayer.setBalance(aranarthPlayer.getBalance() + dominion.getBalance());
@@ -497,7 +750,7 @@ public class DominionUtils {
         }
         if (Bukkit.getOfflinePlayer(dominion.getLeader()).isOnline()) {
             Player leader = Bukkit.getPlayer(dominion.getLeader());
-            leader.sendMessage(ChatUtils.chatMessage("&7Your Dominion's balance has been added to your own"));
+            leader.sendMessage(ChatUtils.chatMessage(Lang.getFor(leader, "dominion.balance_returned")));
             ItemStack[] foodReserves = dominion.getFood();
             if (foodReserves != null) {
                 for (ItemStack item : foodReserves) {
@@ -534,7 +787,7 @@ public class DominionUtils {
                 db.deleteDominion(dominionId);
                 db.deleteDominionPermissions(dominionId);
                 db.deleteDominionPlayerPerms(dominionId);
-                db.deleteDominionPlots(dominionId);
+                db.deleteDominionRegions(dominionId);
                 db.deleteDefendersForDominion(dominionId);
             });
         }
@@ -793,10 +1046,6 @@ public class DominionUtils {
         }
         lastFoodEvalDate = today;
 
-        // Rotate crumbling sets
-        yesterdayCrumblingDominionIds = new HashSet<>(todayCrumblingDominionIds);
-        todayCrumblingDominionIds.clear();
-
         // Close all inventories before evaluating
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             String foodTitle = ChatUtils.stripColorFormatting(onlinePlayer.getOpenInventory().getTitle());
@@ -834,15 +1083,12 @@ public class DominionUtils {
                 }
                 if (chunkToRemove != null) {
                     removePenaltyChunk(dominion, chunkToRemove);
-                    if (!todayCrumblingDominionIds.contains(dominion.getId())) {
-                        todayCrumblingDominionIds.add(dominion.getId());
-                        DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " is starting to crumble", new Color(180, 70, 0));
-                    }
+                    notifyCrumble(dominion);
                     for (UUID memberUuid : dominion.getMembers()) {
                         if (Bukkit.getOfflinePlayer(memberUuid).isOnline()) {
                             Player member = Bukkit.getPlayer(memberUuid);
-                            member.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &7has more chunks claimed than its membership allows"));
-                            member.sendMessage(ChatUtils.chatMessage("&7A chunk has been automatically unclaimed to bring the total within the limit"));
+                            member.sendMessage(ChatUtils.chatMessage(Lang.getFor(member, "dominion.chunk_over_limit", "name", dominion.getName())));
+                            member.sendMessage(ChatUtils.chatMessage(Lang.getFor(member, "dominion.chunk_auto_unclaimed")));
                         }
                     }
                 }
@@ -855,47 +1101,89 @@ public class DominionUtils {
 
             if (totalFoodPower >= powerBeingConsumed) {
                 consumeFood(dominion, powerBeingConsumed);
+                notifyCrumbleRecovery(dominion);
                 PersistenceUtils.saveSingleDominionToDatabase(dominion);
                 if (Bukkit.getOfflinePlayer(dominion.getLeader()).isOnline()) {
                     Player onlineLeader = Bukkit.getPlayer(dominion.getLeader());
-                    onlineLeader.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + "'s &7daily food rations have been consumed"));
-                }
-                // No chunk lost today but lost one yesterday
-                if (yesterdayCrumblingDominionIds.contains(dominion.getId())) {
-                    DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " has recovered and prevented their demise", new Color(50, 180, 50));
+                    onlineLeader.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlineLeader, "dominion.food_consumed", "name", dominion.getName())));
                 }
             } else {
                 double dailyCost = DominionLevelUtils.getDailyBalanceCost(dominion.getDominionLevel());
                 int result = consumeMoneyOrLand(dominion, dailyCost);
                 if (result == -1) {
+                    DiscordUtils.dominionMessage(dominion, dominion.getName() + " has crumbled", new Color(120, 40, 0), true);
                     updateDominionLeader(dominion, null, true);
                 } else {
-                    // Land was consumed - mark as crumbling
-                    if (result == 0 && !todayCrumblingDominionIds.contains(dominion.getId())) {
-                        todayCrumblingDominionIds.add(dominion.getId());
-                        DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " is starting to crumble", new Color(180, 70, 0));
+                    // Land was consumed
+                    if (result == 0) {
+                        notifyCrumble(dominion);
                     }
-                    // Money was consumed - check recovery
-                    if (result == 1 && yesterdayCrumblingDominionIds.contains(dominion.getId())) {
-                        DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " has recovered and prevented their demise", new Color(50, 180, 50));
+                    // Money was consumed
+                    else {
+                        notifyCrumbleRecovery(dominion);
                     }
                     for (UUID memberUuid : dominion.getMembers()) {
                         if (Bukkit.getOfflinePlayer(memberUuid).isOnline()) {
                             Player member = Bukkit.getPlayer(memberUuid);
-                            member.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &7did not have enough food in its reserves"));
+                            member.sendMessage(ChatUtils.chatMessage(Lang.getFor(member, "dominion.food_not_enough", "name", dominion.getName())));
                             // Money was consumed
                             if (result == 1) {
-                                member.sendMessage(ChatUtils.chatMessage("&7Instead, &6$" + (int) dailyCost + " &7was consumed to pay for the tax"));
+                                member.sendMessage(ChatUtils.chatMessage(Lang.getFor(member, "dominion.tax_paid_money", "amount", (int) dailyCost)));
                             }
                             // Land was consumed
                             else {
-                                member.sendMessage(ChatUtils.chatMessage("&7Instead, a chunk was sold to pay for the tax"));
+                                member.sendMessage(ChatUtils.chatMessage(Lang.getFor(member, "dominion.tax_paid_chunk")));
                             }
                         }
                     }
                 }
             }
         }
+    }
+
+    /**
+     * Notifies Discord that a Dominion has lost a chunk to auto-unclaim.
+     *
+     * @param dominion The Dominion that lost a chunk.
+     */
+    private static void notifyCrumble(Dominion dominion) {
+        int remainingChunks = dominion.getChunks().size();
+        int lastNotifiedChunks = dominion.getCrumbleNotifiedChunks();
+
+        if (lastNotifiedChunks == 0) {
+            dominion.setCrumbleNotifiedChunks(remainingChunks);
+            PersistenceUtils.saveSingleDominionToDatabase(dominion);
+            DiscordUtils.dominionMessage(dominion, dominion.getName() + " is starting to crumble", new Color(180, 70, 0), true);
+            return;
+        }
+
+        // Only notify for the lowest threshold crossed since the last notification
+        int crossedThreshold = -1;
+        for (int threshold : CRUMBLE_NOTIFY_THRESHOLDS) {
+            if (remainingChunks <= threshold && lastNotifiedChunks > threshold) {
+                crossedThreshold = threshold;
+            }
+        }
+        if (crossedThreshold != -1) {
+            dominion.setCrumbleNotifiedChunks(remainingChunks);
+            PersistenceUtils.saveSingleDominionToDatabase(dominion);
+            String chunkWord = remainingChunks == 1 ? " chunk" : " chunks";
+            DiscordUtils.dominionMessage(dominion, dominion.getName() + " is crumbling and has " + remainingChunks + chunkWord + " remaining", new Color(180, 70, 0), true);
+        }
+    }
+
+    /**
+     * Notifies Discord that a crumbling Dominion has paid its daily tax and is no longer crumbling.
+     *
+     * @param dominion The Dominion that paid its daily tax.
+     */
+    private static void notifyCrumbleRecovery(Dominion dominion) {
+        if (dominion.getCrumbleNotifiedChunks() == 0) {
+            return;
+        }
+        dominion.setCrumbleNotifiedChunks(0);
+        PersistenceUtils.saveSingleDominionToDatabase(dominion);
+        DiscordUtils.dominionMessage(dominion, dominion.getName() + " has recovered and prevented their demise", new Color(50, 180, 50));
     }
 
     /**
@@ -1139,6 +1427,7 @@ public class DominionUtils {
         AranarthUtils.removeLocksInChunk(chunk);
         dominion.getChunks().remove(chunk);
         chunkKeyToDominion.remove(getChunkKey(chunk));
+        releaseRegionChunk(dominion, chunk);
         resizeFoodArray(dominion);
         updateDominion(dominion);
         refreshBiomeCache(dominion);
@@ -1179,6 +1468,13 @@ public class DominionUtils {
     public static boolean isFoodInventoryLockedByOther(UUID dominionId, UUID playerUUID) {
         UUID holder = foodInventoryLocks.get(dominionId);
         return holder != null && !holder.equals(playerUUID);
+    }
+
+    /**
+     * Returns true if the food inventory is locked by the given player.
+     */
+    public static boolean isFoodInventoryLockedBy(UUID dominionId, UUID playerUUID) {
+        return playerUUID.equals(foodInventoryLocks.get(dominionId));
     }
 
     /**
@@ -1307,6 +1603,7 @@ public class DominionUtils {
             } else {
                 dominion.getChunks().remove(chunkToRemove);
                 chunkKeyToDominion.remove(getChunkKey(chunkToRemove));
+                releaseRegionChunk(dominion, chunkToRemove);
                 resizeFoodArray(dominion);
                 updateDominion(dominion);
                 refreshBiomeCache(dominion);
@@ -1354,7 +1651,8 @@ public class DominionUtils {
      * for example, an outpost in the nether should never pick up overworld biomes at the same chunk
      * coordinates, even if a different world happens to have claims there.
      * Overworld chunks are sampled at the surface height of each column so that underground biome
-     * zones (e.g. Cherry Grove extending below a mountain at Y=63) are not included. Non-overworld
+     * zones (e.g. Cherry Grove extending below a mountain at Y=63) are not included. Cave biomes are
+     * then picked up separately by scanning beneath the surface of each overworld chunk. Non-overworld
      * chunks are sampled every 16 blocks across the world's full height range to account for 3D
      * biome placement.
      *
@@ -1375,6 +1673,7 @@ public class DominionUtils {
             Chunk live = world.getChunkAt(chunk.getX(), chunk.getZ());
             if (world.getEnvironment() == World.Environment.NORMAL) {
                 sampleBiomesAtSurface(live, biomes);
+                sampleCaveBiomes(live, biomes);
             } else {
                 for (int y = world.getMinHeight(); y < world.getMaxHeight(); y += 16) {
                     sampleBiomesAtY(live, y, biomes);
@@ -1388,8 +1687,7 @@ public class DominionUtils {
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
                 Biome biome = chunk.getBlock(x, y, z).getBiome();
-                if (biome != Biome.LUSH_CAVES && biome != Biome.DRIPSTONE_CAVES
-                        && biome != Biome.DEEP_DARK) {
+                if (!isCaveBiome(biome)) {
                     biomes.add(biome);
                 }
             }
@@ -1409,12 +1707,44 @@ public class DominionUtils {
             for (int z = 0; z < 16; z++) {
                 int surfaceY = world.getHighestBlockYAt(baseX + x, baseZ + z);
                 Biome biome = chunk.getBlock(x, surfaceY, z).getBiome();
-                if (biome != Biome.LUSH_CAVES && biome != Biome.DRIPSTONE_CAVES
-                        && biome != Biome.DEEP_DARK) {
+                if (!isCaveBiome(biome)) {
                     biomes.add(biome);
                 }
             }
         }
+    }
+
+    /**
+     * Samples cave biomes from an overworld chunk by scanning beneath the surface of each column.
+     * Biomes are stored in 4x4x4 cells, so only one block per cell is checked rather than every block.
+     * Only cave biomes are added, so that regular biomes extending underground are still ignored.
+     */
+    private static void sampleCaveBiomes(Chunk chunk, Set<Biome> biomes) {
+        World world = chunk.getWorld();
+        int baseX = chunk.getX() << 4;
+        int baseZ = chunk.getZ() << 4;
+        for (int x = 0; x < 16; x += 4) {
+            for (int z = 0; z < 16; z += 4) {
+                int surfaceY = world.getHighestBlockYAt(baseX + x, baseZ + z);
+                for (int y = world.getMinHeight(); y < surfaceY; y += 4) {
+                    Biome biome = chunk.getBlock(x, y, z).getBiome();
+                    if (isCaveBiome(biome)) {
+                        biomes.add(biome);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Determines if the biome is an underground cave biome.
+     *
+     * @param biome The biome.
+     * @return Whether the biome is a cave biome.
+     */
+    private static boolean isCaveBiome(Biome biome) {
+        return biome == Biome.LUSH_CAVES || biome == Biome.DRIPSTONE_CAVES
+                || biome == Biome.DEEP_DARK || biome == Biome.SULFUR_CAVES;
     }
 
     /**
@@ -1509,6 +1839,121 @@ public class DominionUtils {
         return formatted + "%";
     }
 
+    /**
+     * Maps a Material to its DominionResourceCategory for drop filtering.
+     */
+    public static DominionResourceCategory getCategoryForMaterial(Material material) {
+        return switch (material) {
+            case STONE, COBBLESTONE, BLACKSTONE, NETHERRACK, END_STONE, BASALT,
+                    SMOOTH_BASALT, CALCITE, GRANITE, DIORITE, ANDESITE,
+                    COBBLED_DEEPSLATE, DRIPSTONE_BLOCK, SULFUR, CINNABAR -> DominionResourceCategory.STONES;
+            case COAL_ORE, IRON_ORE, COPPER_ORE, GOLD_ORE, EMERALD_ORE, LAPIS_ORE,
+                    NETHER_QUARTZ_ORE, NETHER_GOLD_ORE, DEEPSLATE_IRON_ORE, DEEPSLATE_GOLD_ORE,
+                    DEEPSLATE_REDSTONE_ORE, DEEPSLATE_LAPIS_ORE -> DominionResourceCategory.ORES;
+            case DIRT, COARSE_DIRT, GRASS_BLOCK, PODZOL, MYCELIUM, MUD,
+                    SAND, RED_SAND, GRAVEL, CLAY, SNOW, SNOW_BLOCK,
+                    ICE, PACKED_ICE, BLUE_ICE, SOUL_SAND, SOUL_SOIL,
+                    SANDSTONE, RED_SANDSTONE, MOSSY_COBBLESTONE,
+                    CRIMSON_NYLIUM, WARPED_NYLIUM, ROOTED_DIRT, MOSS_BLOCK -> DominionResourceCategory.DIRTS;
+            case OAK_LOG, SPRUCE_LOG, BIRCH_LOG, JUNGLE_LOG, ACACIA_LOG, DARK_OAK_LOG,
+                    MANGROVE_LOG, CHERRY_LOG, PALE_OAK_LOG, POPLAR_LOG, BAMBOO,
+                    CRIMSON_STEM, WARPED_STEM -> DominionResourceCategory.WOODS;
+            case MAGMA_BLOCK, OBSIDIAN, SEA_LANTERN,
+                    PRISMARINE, DARK_PRISMARINE,
+                    SHROOMLIGHT, VINE, KELP, SEAGRASS, SEA_PICKLE, LILY_PAD, FIREFLY_BUSH,
+                    MANGROVE_ROOTS, MUDDY_MANGROVE_ROOTS,
+                    OAK_LEAVES, SPRUCE_LEAVES, BIRCH_LEAVES, JUNGLE_LEAVES, ACACIA_LEAVES, DARK_OAK_LEAVES,
+                    MANGROVE_LEAVES, CHERRY_LEAVES, PALE_OAK_LEAVES, NETHER_WART_BLOCK, WARPED_WART_BLOCK,
+                    RED_POPLAR_LEAVES, ORANGE_POPLAR_LEAVES, YELLOW_POPLAR_LEAVES, RED_SHRUB,
+                    MOSS_CARPET, PALE_MOSS_BLOCK, PALE_HANGING_MOSS, LEAF_LITTER,
+                    RESIN_CLUMP, PINK_PETALS, WILDFLOWERS,
+                    RED_MUSHROOM, BROWN_MUSHROOM, RED_MUSHROOM_BLOCK, BROWN_MUSHROOM_BLOCK, MUSHROOM_STEM,
+                    WEEPING_VINES, TWISTING_VINES, CRIMSON_FUNGUS, WARPED_FUNGUS,
+                    SWEET_BERRIES, SUGAR_CANE, CACTUS, CACTUS_FLOWER, MELON, PUMPKIN, COCOA_BEANS, CHORUS_FRUIT, CHORUS_FLOWER,
+                    DANDELION, SUNFLOWER, POPPY, OXEYE_DAISY, CORNFLOWER, ALLIUM, AZURE_BLUET,
+                    WHITE_TULIP, PINK_TULIP, ORANGE_TULIP, RED_TULIP, LILY_OF_THE_VALLEY, LILAC, PEONY, ROSE_BUSH,
+                    TUBE_CORAL_BLOCK, TUBE_CORAL, TUBE_CORAL_FAN,
+                    BRAIN_CORAL_BLOCK, BRAIN_CORAL, BRAIN_CORAL_FAN,
+                    BUBBLE_CORAL_BLOCK, BUBBLE_CORAL, BUBBLE_CORAL_FAN,
+                    FIRE_CORAL_BLOCK, FIRE_CORAL, FIRE_CORAL_FAN,
+                    HORN_CORAL_BLOCK, HORN_CORAL, HORN_CORAL_FAN,
+                    INK_SAC, SLIME_BALL, MAGMA_CREAM, BONE,
+                    AZALEA_LEAVES, FLOWERING_AZALEA_LEAVES, AZALEA, FLOWERING_AZALEA,
+                    BIG_DRIPLEAF, SMALL_DRIPLEAF, HANGING_ROOTS, SPORE_BLOSSOM, POINTED_DRIPSTONE,
+                    SCULK, SCULK_VEIN, SULFUR_SPIKE, NETHER_WART ->DominionResourceCategory.NATURAL_BLOCKS;
+            case COD, SALMON, TROPICAL_FISH, PUFFERFISH,
+                    BEEF, PORKCHOP, CHICKEN, RABBIT, MUTTON,
+                    APPLE, GOLDEN_CARROT, GLOW_BERRIES -> DominionResourceCategory.FOOD;
+            case STONE_BRICKS, END_STONE_BRICKS, PURPUR_BLOCK, PURPUR_PILLAR,
+                    DEEPSLATE_BRICKS, DEEPSLATE_TILES, NETHER_BRICKS, POLISHED_BLACKSTONE_BRICKS,
+                    PRISMARINE_BRICKS -> DominionResourceCategory.BRICKS;
+            case GILDED_BLACKSTONE,
+                    END_ROD, BONE_BLOCK,
+                    TERRACOTTA, RED_TERRACOTTA, ORANGE_TERRACOTTA, YELLOW_TERRACOTTA,
+                    BROWN_TERRACOTTA, LIGHT_GRAY_TERRACOTTA, WHITE_TERRACOTTA,
+                    SOUL_LANTERN, SCULK_SENSOR, SCULK_CATALYST, AMETHYST_BLOCK -> DominionResourceCategory.MISC_BLOCKS;
+            case ELYTRA, HEART_OF_THE_SEA, NETHERITE_SCRAP, GHAST_TEAR,
+                    NAUTILUS_SHELL, TURTLE_SCUTE, ARMADILLO_SCUTE,
+                    BLAZE_ROD, WITHER_SKELETON_SKULL, DIAMOND,
+                    NETHERITE_UPGRADE_SMITHING_TEMPLATE, ENCHANTED_BOOK,
+                    GOLD_NUGGET, ENDER_PEARL, DRIED_GHAST, SHULKER_SHELL,
+                    ECHO_SHARD, DISC_FRAGMENT_5, POTENT_SULFUR ->DominionResourceCategory.VALUABLES;
+            default -> null;
+        };
+    }
+
+    // 1 in X odds of a Swift Sneak Book when simulating an Ancient City
+    private static final int SWIFT_SNEAK_BOOK_ODDS = 10;
+
+    /**
+     * Rolls the Ancient City drops that cannot be expressed as 1 in X odds.
+     * Echo Shard has a 10% chance per Dominion rank, and the Swift Sneak Book has a 10% chance
+     * with its level chosen from the levels available at the Dominion's rank.
+     *
+     * @param items  The items being claimed.
+     * @param rank   The Dominion's rank.
+     * @param random The random instance.
+     */
+    private static void rollAncientCityExtras(List<ItemStack> items, int rank, Random random) {
+        if (random.nextInt(10) < rank) {
+            items.add(new ItemStack(Material.ECHO_SHARD, 1));
+        }
+        if (random.nextInt(SWIFT_SNEAK_BOOK_ODDS) == 0) {
+            int[] levels = getSwiftSneakLevels(rank);
+            items.add(createSwiftSneakBook(levels[random.nextInt(levels.length)]));
+        }
+    }
+
+    /**
+     * Provides the Swift Sneak levels obtainable at the Dominion rank, each being equally likely.
+     *
+     * @param rank The Dominion's rank.
+     * @return The Swift Sneak levels obtainable.
+     */
+    private static int[] getSwiftSneakLevels(int rank) {
+        return switch (rank) {
+            case 1 -> new int[] { 1 };
+            case 2 -> new int[] { 1, 2 };
+            case 3 -> new int[] { 2 };
+            case 4 -> new int[] { 2, 3 };
+            default -> new int[] { 3 };
+        };
+    }
+
+    /**
+     * Creates an enchanted book with Swift Sneak at the input level.
+     *
+     * @param level The level of Swift Sneak.
+     * @return The enchanted book.
+     */
+    private static ItemStack createSwiftSneakBook(int level) {
+        ItemStack book = new ItemStack(Material.ENCHANTED_BOOK, 1);
+        EnchantmentStorageMeta meta = (EnchantmentStorageMeta) book.getItemMeta();
+        meta.addStoredEnchant(Enchantment.SWIFT_SNEAK, level, true);
+        book.setItemMeta(meta);
+        return book;
+    }
+
     private static ItemStack resolveAmount(ResourceDrop drop, Random random) {
         int amount = drop.maxAmount > 0
                 ? random.nextInt(drop.maxAmount - drop.item.getAmount() + 1) + drop.item.getAmount()
@@ -1523,8 +1968,9 @@ public class DominionUtils {
 
         int[] commonOdds = {10, 8, 5, 3, 1};
         int[] rareOdds = {20, 15, 10, 5, 2};
-        int[] elytraOdds = {200, 100, 65, 50, 40};
+        int[] elytraOdds = {40, 20, 13, 10, 8};
         int[] mendingOdds = {16, 12, 8, 6, 4};
+        int[] shulkerShellOdds = {20, 6, 4, 3, 2};
         int[] godAppleOdds = {16, 12, 8, 4, 1};
 
         List<ResourceDrop> guaranteed = new ArrayList<>();
@@ -1574,7 +2020,33 @@ public class DominionUtils {
                 "Elytra (" + formatPct(elytraOdds[rank - 1]) + " if simulating End City)"));
         endCityDrops.add(new ResourceDrop(mendingBook, 0, mendingOdds[rank - 1],
                 "Mending Book (" + formatPct(mendingOdds[rank - 1]) + " if simulating End City)"));
+        endCityDrops.add(new ResourceDrop(new ItemStack(Material.SHULKER_SHELL, 1), 0, shulkerShellOdds[rank - 1],
+                "Shulker Shell (" + formatPct(shulkerShellOdds[rank - 1]) + " if simulating End City)"));
         SimulationGroup endCity = new SimulationGroup("End City", 5, endCityDrops);
+
+        // Echo Shard and Swift Sneak Book are previewOnly, actual rolls done in rollAncientCityExtras
+        int[] swiftSneakLevels = getSwiftSneakLevels(rank);
+        String swiftSneakLevelText = AranarthUtils.getEssenceLevelInNumerals(swiftSneakLevels[0]);
+        if (swiftSneakLevels.length > 1) {
+            swiftSneakLevelText += " or " + AranarthUtils.getEssenceLevelInNumerals(swiftSneakLevels[1]);
+        }
+        List<ResourceDrop> ancientCityDrops = new ArrayList<>();
+        ancientCityDrops.add(new ResourceDrop(new ItemStack(Material.DEEPSLATE_BRICKS, 64)));
+        ancientCityDrops.add(new ResourceDrop(new ItemStack(Material.DEEPSLATE_TILES, 64)));
+        ancientCityDrops.add(new ResourceDrop(new ItemStack(Material.SOUL_LANTERN, 8)));
+        ancientCityDrops.add(new ResourceDrop(new ItemStack(Material.ECHO_SHARD, 1), 0, 0,
+                "Echo Shard (" + (rank * 10) + "% if simulating Ancient City)", true));
+        ancientCityDrops.add(new ResourceDrop(new ItemStack(Material.DISC_FRAGMENT_5, 1), 0, 4,
+                "Disc Fragment (" + formatPct(4) + " if simulating Ancient City)"));
+        ancientCityDrops.add(new ResourceDrop(createSwiftSneakBook(swiftSneakLevels[swiftSneakLevels.length - 1]), 0, 0,
+                "Swift Sneak " + swiftSneakLevelText + " Book (" + formatPct(SWIFT_SNEAK_BOOK_ODDS) + " if simulating Ancient City)", true));
+        SimulationGroup ancientCity = new SimulationGroup("Ancient City", 5, ancientCityDrops);
+
+        List<ResourceDrop> amethystGeodeDrops = new ArrayList<>();
+        amethystGeodeDrops.add(new ResourceDrop(new ItemStack(Material.AMETHYST_BLOCK, 16)));
+        amethystGeodeDrops.add(new ResourceDrop(new ItemStack(Material.CALCITE, 32)));
+        amethystGeodeDrops.add(new ResourceDrop(new ItemStack(Material.SMOOTH_BASALT, 32)));
+        SimulationGroup amethystGeode = new SimulationGroup("Amethyst Geode", 25, amethystGeodeDrops);
 
         // Oceans, Rivers, Beaches, Islands
         if (biome == Biome.OCEAN) {
@@ -1582,24 +2054,24 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.KELP, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 8)));
             rares.add(new ResourceDrop(new ItemStack(Material.NAUTILUS_SHELL, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
         } else if (biome == Biome.RIVER) {
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRAVEL, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.CLAY, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SUGAR_CANE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.SALMON, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SALMON, 8)));
         } else if (biome == Biome.FROZEN_OCEAN) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRAVEL, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 32)));
@@ -1608,10 +2080,10 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.ICE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.PACKED_ICE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BLUE_ICE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SALMON, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 2)));
             rares.add(new ResourceDrop(new ItemStack(Material.NAUTILUS_SHELL, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
         } else if (biome == Biome.FROZEN_RIVER) {
@@ -1619,18 +2091,18 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.DIRT, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.CLAY, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.ICE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SUGAR_CANE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.SALMON, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SALMON, 8)));
         } else if (biome == Biome.BEACH) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SUGAR_CANE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 8)));
             rares.add(new ResourceDrop(new ItemStack(Material.TURTLE_SCUTE, 1), 0, rareOdds[rank - 1],
                     "Rare Drop (" + formatPct(rareOdds[rank - 1]) + " chance)"));
             rares.add(new ResourceDrop(new ItemStack(Material.HEART_OF_THE_SEA, 1), 0, 25,
@@ -1641,37 +2113,37 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.KELP, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 8)));
             rares.add(new ResourceDrop(new ItemStack(Material.NAUTILUS_SHELL, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
             simulations.add(seaTemple);
         } else if (biome == Biome.STONY_SHORE) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRAVEL, 64)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 8)));
         } else if (biome == Biome.SNOWY_BEACH) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SNOW, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SALMON, 8)));
         } else if (biome == Biome.WARM_OCEAN) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SEA_PICKLE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.TROPICAL_FISH, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.TROPICAL_FISH, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.PUFFERFISH, 2)));
             // Coral - previewOnly variety items, actual selection done in getResourcesByDominionAndBiome
-            String coralNote = "1 of 5 coral types per claim";
+            String coralNote = Lang.key("dominion.resource_note_coral");
             guaranteed.add(new ResourceDrop(new ItemStack(Material.TUBE_CORAL_BLOCK, 8), 0, 0, coralNote, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.TUBE_CORAL, 4), 0, 0, coralNote, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.TUBE_CORAL_FAN, 4), 0, 0, coralNote, true));
@@ -1693,9 +2165,9 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.KELP, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 4)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.TROPICAL_FISH, 4)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.PUFFERFISH, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 8)));
@@ -1705,21 +2177,21 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRAVEL, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.KELP, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SALMON, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 4)));
             rares.add(new ResourceDrop(new ItemStack(Material.NAUTILUS_SHELL, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
         } else if (biome == Biome.DEEP_LUKEWARM_OCEAN) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.KELP, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 4)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.TROPICAL_FISH, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.TROPICAL_FISH, 8)));
             rares.add(new ResourceDrop(new ItemStack(Material.NAUTILUS_SHELL, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
             simulations.add(seaTemple);
@@ -1728,10 +2200,10 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SAND, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.KELP, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COD, 8)));
             rares.add(new ResourceDrop(new ItemStack(Material.NAUTILUS_SHELL, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
             simulations.add(seaTemple);
@@ -1739,10 +2211,10 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRAVEL, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.KELP, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.SALMON, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LAPIS_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.INK_SAC, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SALMON, 8)));
             rares.add(new ResourceDrop(new ItemStack(Material.NAUTILUS_SHELL, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
             simulations.add(seaTemple);
@@ -1752,7 +2224,7 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.RED_MUSHROOM_BLOCK, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BROWN_MUSHROOM_BLOCK, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.MUSHROOM_STEM, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
             rares.add(new ResourceDrop(new ItemStack(Material.DIAMOND, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
@@ -1762,11 +2234,11 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.DANDELION, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.BEEF, 16)));
-            String flowerNote3 = "1 of 3 possible per claim";
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BEEF, 8)));
+            String flowerNote3 = Lang.key("dominion.resource_note_3");
             guaranteed.add(new ResourceDrop(new ItemStack(Material.POPPY, 8), 0, 0, flowerNote3, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.OXEYE_DAISY, 8), 0, 0, flowerNote3, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.CORNFLOWER, 8), 0, 0, flowerNote3, true));
@@ -1774,12 +2246,12 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.DANDELION, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SUNFLOWER, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.BEEF, 16)));
-            String flowerNote3s = "1 of 3 possible per claim";
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BEEF, 8)));
+            String flowerNote3s = Lang.key("dominion.resource_note_3");
             guaranteed.add(new ResourceDrop(new ItemStack(Material.POPPY, 8), 0, 0, flowerNote3s, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.OXEYE_DAISY, 8), 0, 0, flowerNote3s, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.CORNFLOWER, 8), 0, 0, flowerNote3s, true));
@@ -1792,26 +2264,25 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.MELON, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.PUMPKIN, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COCOA_BEANS, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.CHICKEN, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CHICKEN, 8)));
         } else if (biome == Biome.SNOWY_PLAINS) {
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SNOW, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SPRUCE_LOG, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 4)));
         } else if (biome == Biome.ICE_SPIKES) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SNOW_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.PACKED_ICE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.ICE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 4)));
 
         // Forests
         } else if (biome == Biome.FOREST) {
@@ -1820,10 +2291,10 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BIRCH_LOG, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.LEAF_LITTER, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.APPLE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 4)));
             int godOddsF = godAppleOdds[rank - 1];
             if (AranarthUtils.getMonth() == Month.SOLARVOR) {
                 godOddsF = Math.max(1, godOddsF / 4);
@@ -1835,19 +2306,19 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SPRUCE_LOG, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SWEET_BERRIES, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 4)));
         } else if (biome == Biome.SWAMP) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.CLAY, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.FIREFLY_BUSH, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BROWN_MUSHROOM, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.RED_MUSHROOM, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.LILY_PAD, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SLIME_BALL, 2)));
         } else if (biome == Biome.MANGROVE_SWAMP) {
@@ -1860,7 +2331,7 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.MUDDY_MANGROVE_ROOTS, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.MOSS_CARPET, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.LILY_PAD, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
         } else if (biome == Biome.JUNGLE) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
@@ -1871,9 +2342,9 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.VINE, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.MELON, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COCOA_BEANS, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.CHICKEN, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CHICKEN, 8)));
         } else if (biome == Biome.BAMBOO_JUNGLE) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.PODZOL, 64)));
@@ -1882,17 +2353,17 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BAMBOO, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.MELON, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.CHICKEN, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CHICKEN, 8)));
         } else if (biome == Biome.BIRCH_FOREST || biome == Biome.OLD_GROWTH_BIRCH_FOREST) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BIRCH_LOG, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.WILDFLOWERS, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 4)));
         } else if (biome == Biome.DARK_FOREST) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
@@ -1902,8 +2373,7 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.RED_MUSHROOM_BLOCK, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.MUSHROOM_STEM, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.LEAF_LITTER, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.APPLE, 4)));
             int godOddsD = godAppleOdds[rank - 1];
@@ -1918,7 +2388,7 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.PALE_OAK_LOG, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.PALE_MOSS_BLOCK, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.PALE_HANGING_MOSS, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.RESIN_CLUMP, 8)));
         } else if (biome == Biome.SNOWY_TAIGA) {
@@ -1926,9 +2396,9 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SPRUCE_LOG, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SNOW, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 4)));
         } else if (biome == Biome.OLD_GROWTH_PINE_TAIGA || biome == Biome.OLD_GROWTH_SPRUCE_TAIGA) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.PODZOL, 32)));
@@ -1936,10 +2406,10 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.MOSSY_COBBLESTONE, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SPRUCE_LOG, 64)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BROWN_MUSHROOM, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 4)));
         } else if (biome == Biome.FLOWER_FOREST) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
@@ -1947,10 +2417,10 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BIRCH_LOG, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.LEAF_LITTER, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.APPLE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
-            String flowerNote14 = "1 of 14 possible per claim";
+            String flowerNote14 = Lang.key("dominion.resource_note_14");
             guaranteed.add(new ResourceDrop(new ItemStack(Material.DANDELION, 8), 0, 0, flowerNote14, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.POPPY, 8), 0, 0, flowerNote14, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.WHITE_TULIP, 8), 0, 0, flowerNote14, true));
@@ -1971,6 +2441,17 @@ public class DominionUtils {
             }
             rares.add(new ResourceDrop(new GodAppleFragment().getItem(), 0, godOddsFF,
                     "Rare Drop (" + formatPct(godOddsFF) + " chance)"));
+        } else if (biome == Biome.DAPPLED_FOREST) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COARSE_DIRT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.POPLAR_LOG, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.LEAF_LITTER, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RED_SHRUB, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SHELF_MUSHROOM, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 8)));
 
         // Mountains and Large Hills
         } else if (biome == Biome.WINDSWEPT_HILLS) {
@@ -1982,12 +2463,12 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.ANDESITE, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SPRUCE_LOG, 4)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
+            rares.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 1), 0, 2, "Emerald Ore (" + formatPct(2) + " chance)"));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 8)));
         } else if (biome == Biome.WINDSWEPT_FOREST) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
@@ -1997,100 +2478,100 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.ANDESITE, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SPRUCE_LOG, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
+            rares.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 1), 0, 2, "Emerald Ore (" + formatPct(2) + " chance)"));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 8)));
         } else if (biome == Biome.WINDSWEPT_GRAVELLY_HILLS) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRAVEL, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SPRUCE_LOG, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
+            rares.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 1), 0, 2, "Emerald Ore (" + formatPct(2) + " chance)"));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 8)));
         } else if (biome == Biome.WINDSWEPT_SAVANNA) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COARSE_DIRT, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.ACACIA_LOG, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.BEEF, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
+            rares.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 1), 0, 2, "Emerald Ore (" + formatPct(2) + " chance)"));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BEEF, 8)));
         } else if (biome == Biome.GROVE) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SNOW_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SPRUCE_LOG, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
+            rares.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 1), 0, 2, "Emerald Ore (" + formatPct(2) + " chance)"));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 4)));
         } else if (biome == Biome.FROZEN_PEAKS) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SNOW_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.PACKED_ICE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
+            rares.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 1), 0, 2, "Emerald Ore (" + formatPct(2) + " chance)"));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 8)));
         } else if (biome == Biome.MEADOW) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.DANDELION, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.CORNFLOWER, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.WILDFLOWERS, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
+            rares.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 1), 0, 2, "Emerald Ore (" + formatPct(2) + " chance)"));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 8)));
         } else if (biome == Biome.JAGGED_PEAKS || biome == Biome.SNOWY_SLOPES) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SNOW_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
+            rares.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 1), 0, 2, "Emerald Ore (" + formatPct(2) + " chance)"));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 8)));
         } else if (biome == Biome.STONY_PEAKS) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.CALCITE, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
+            rares.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 1), 0, 2, "Emerald Ore (" + formatPct(2) + " chance)"));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MUTTON, 8)));
         } else if (biome == Biome.CHERRY_GROVE) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.CHERRY_LOG, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.PINK_PETALS, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
+            rares.add(new ResourceDrop(new ItemStack(Material.EMERALD_ORE, 1), 0, 2, "Emerald Ore (" + formatPct(2) + " chance)"));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 4)));
 
         // Dry and Desert Biomes
         } else if (biome == Biome.DESERT) {
@@ -2100,18 +2581,18 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.CACTUS, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.CACTUS_FLOWER, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.RABBIT, 4)));
             rares.add(new ResourceDrop(new ItemStack(Material.BONE_BLOCK, 32), 0, rareOdds[rank - 1],
                     "Rare Drop (" + formatPct(rareOdds[rank - 1]) + " chance)"));
         } else if (biome == Biome.SAVANNA || biome == Biome.SAVANNA_PLATEAU) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GRASS_BLOCK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.ACACIA_LOG, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.BEEF, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BEEF, 8)));
             rares.add(new ResourceDrop(new ItemStack(Material.ARMADILLO_SCUTE, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
         } else if (biome == Biome.BADLANDS || biome == Biome.ERODED_BADLANDS) {
@@ -2119,9 +2600,9 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.RED_SANDSTONE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.TERRACOTTA, 64)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
-            String terracottaNote = "1 of 6 possible per claim";
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
+            String terracottaNote = Lang.key("dominion.resource_note_6");
             guaranteed.add(new ResourceDrop(new ItemStack(Material.RED_TERRACOTTA, 16), 0, 0, terracottaNote, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.ORANGE_TERRACOTTA, 16), 0, 0, terracottaNote, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.YELLOW_TERRACOTTA, 16), 0, 0, terracottaNote, true));
@@ -2137,9 +2618,9 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.TERRACOTTA, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.OAK_LOG, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.LEAF_LITTER, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 4)));
-            String terracottaNoteW = "1 of 6 possible per claim";
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
+            String terracottaNoteW = Lang.key("dominion.resource_note_6");
             guaranteed.add(new ResourceDrop(new ItemStack(Material.RED_TERRACOTTA, 8), 0, 0, terracottaNoteW, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.ORANGE_TERRACOTTA, 8), 0, 0, terracottaNoteW, true));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.YELLOW_TERRACOTTA, 8), 0, 0, terracottaNoteW, true));
@@ -2149,14 +2630,71 @@ public class DominionUtils {
             rares.add(new ResourceDrop(new ItemStack(Material.ARMADILLO_SCUTE, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
 
+        // Cave Biomes
+        } else if (biome == Biome.LUSH_CAVES) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.MOSS_BLOCK, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CLAY, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.ROOTED_DIRT, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.AZALEA_LEAVES, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.FLOWERING_AZALEA_LEAVES, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.AZALEA, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.FLOWERING_AZALEA, 1)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.BIG_DRIPLEAF, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SMALL_DRIPLEAF, 1)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.HANGING_ROOTS, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GLOW_BERRIES, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
+            rares.add(new ResourceDrop(new ItemStack(Material.SPORE_BLOSSOM, 1), 0, commonOdds[rank - 1],
+                    "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
+            simulations.add(amethystGeode);
+        } else if (biome == Biome.DRIPSTONE_CAVES) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.DRIPSTONE_BLOCK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.POINTED_DRIPSTONE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COPPER_ORE, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.IRON_ORE, 4)));
+            rares.add(new ResourceDrop(new ItemStack(Material.DIAMOND, 1), 0, rareOdds[rank - 1],
+                    "Rare Drop (" + formatPct(rareOdds[rank - 1]) + " chance)"));
+            simulations.add(amethystGeode);
+        } else if (biome == Biome.DEEP_DARK) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COBBLED_DEEPSLATE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COBBLED_DEEPSLATE, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SCULK, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SCULK_VEIN, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.DEEPSLATE_IRON_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.DEEPSLATE_GOLD_ORE, 2)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.DEEPSLATE_REDSTONE_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.DEEPSLATE_LAPIS_ORE, 2)));
+            rares.add(new ResourceDrop(new ItemStack(Material.SCULK_SENSOR, 1), 0, commonOdds[rank - 1],
+                    "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
+            rares.add(new ResourceDrop(new ItemStack(Material.SCULK_CATALYST, 1), 0, rareOdds[rank - 1],
+                    "Rare Drop (" + formatPct(rareOdds[rank - 1]) + " chance)"));
+            simulations.add(ancientCity);
+            simulations.add(amethystGeode);
+        } else if (biome == Biome.SULFUR_CAVES) {
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SULFUR, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SULFUR, 64)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.CINNABAR, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.STONE, 32)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SULFUR_SPIKE, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.COAL_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.GOLD_ORE, 2)));
+            rares.add(new ResourceDrop(new ItemStack(Material.POTENT_SULFUR, 1), 0, rareOdds[rank - 1],
+                    "Rare Drop (" + formatPct(rareOdds[rank - 1]) + " chance)"));
+            simulations.add(amethystGeode);
+
         // Nether and End
         } else if (biome == Biome.NETHER_WASTES) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHERRACK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHERRACK, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BLACKSTONE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.MAGMA_BLOCK, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_QUARTZ_ORE, 32)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_GOLD_ORE, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_QUARTZ_ORE, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_GOLD_ORE, 8)));
             rares.add(new ResourceDrop(new ItemStack(Material.GHAST_TEAR, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
             rares.add(new ResourceDrop(new ItemStack(Material.NETHERITE_SCRAP, 2), 0, commonOdds[rank - 1],
@@ -2171,8 +2709,8 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BASALT, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BLACKSTONE, 32)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BONE_BLOCK, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_QUARTZ_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_QUARTZ_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_GOLD_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BONE, 4)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.GHAST_TEAR, rank)));
             rares.add(new ResourceDrop(new ItemStack(Material.NETHERITE_SCRAP, 1), 0, commonOdds[rank - 1],
@@ -2189,9 +2727,9 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SHROOMLIGHT, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.WEEPING_VINES, 16)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.CRIMSON_FUNGUS, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_QUARTZ_ORE, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_GOLD_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.PORKCHOP, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_QUARTZ_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.PORKCHOP, 8)));
             rares.add(new ResourceDrop(new ItemStack(Material.NETHERITE_SCRAP, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
             simulations.add(netherFortress);
@@ -2204,8 +2742,8 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.SHROOMLIGHT, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.TWISTING_VINES, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.WARPED_FUNGUS, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_QUARTZ_ORE, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_GOLD_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_QUARTZ_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_GOLD_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.ENDER_PEARL, rank)));
             rares.add(new ResourceDrop(new ItemStack(Material.NETHERITE_SCRAP, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
@@ -2218,8 +2756,8 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BLACKSTONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.BLACKSTONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.MAGMA_BLOCK, 8)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_QUARTZ_ORE, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_GOLD_ORE, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_QUARTZ_ORE, 8)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.NETHER_GOLD_ORE, 8)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.MAGMA_CREAM, 4)));
             rares.add(new ResourceDrop(new ItemStack(Material.NETHERITE_SCRAP, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
@@ -2232,12 +2770,92 @@ public class DominionUtils {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.END_STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.END_STONE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.OBSIDIAN, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.CHORUS_FRUIT, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.PURPUR_BLOCK, 4)));
+            // Chorus plants only naturally generate in the End Highlands
+            if (biome == Biome.END_HIGHLANDS) {
+                guaranteed.add(new ResourceDrop(new ItemStack(Material.CHORUS_FRUIT, 16)));
+                guaranteed.add(new ResourceDrop(new ItemStack(Material.CHORUS_FLOWER, 2)));
+            }
             simulations.add(endCity);
         }
 
+        addLeavesForLogs(guaranteed);
+
         return new BiomeTable(guaranteed, simulations, rares, varieties);
+    }
+
+    /**
+     * Adds the associated leaves (or wart blocks for stems) directly after every log drop, at double the log amount.
+     * Logs with multiple leaf types split the amount between them by weight, and amounts above 64 are split into
+     * multiple full stacks.
+     *
+     * @param drops The drops to add the leaves to.
+     */
+    private static void addLeavesForLogs(List<ResourceDrop> drops) {
+        for (int i = 0; i < drops.size(); i++) {
+            ResourceDrop drop = drops.get(i);
+            Material[] leaves = getLeavesForLog(drop.item.getType());
+            if (leaves.length == 0) {
+                continue;
+            }
+
+            int total = drop.item.getAmount() * 2;
+            int totalWeight = 0;
+            for (Material leaf : leaves) {
+                totalWeight += getLeafWeight(leaf);
+            }
+
+            int distributed = 0;
+            for (int j = 0; j < leaves.length; j++) {
+                int remaining = total * getLeafWeight(leaves[j]) / totalWeight;
+                // Any remainder from an uneven split goes to the last leaf type
+                if (j == leaves.length - 1) {
+                    remaining = total - distributed;
+                }
+                distributed += remaining;
+                while (remaining > 0) {
+                    int amount = Math.min(remaining, 64);
+                    drops.add(++i, new ResourceDrop(new ItemStack(leaves[j], amount), 0, 0, drop.lore, drop.previewOnly));
+                    remaining -= amount;
+                }
+            }
+        }
+    }
+
+    /**
+     * Provides the leaves (or wart block for stems) associated to the log.
+     *
+     * @param log The log.
+     * @return The leaves, or an empty array if the material has no associated leaves.
+     */
+    private static Material[] getLeavesForLog(Material log) {
+        return switch (log) {
+            case OAK_LOG -> new Material[] { Material.OAK_LEAVES };
+            case SPRUCE_LOG -> new Material[] { Material.SPRUCE_LEAVES };
+            case BIRCH_LOG -> new Material[] { Material.BIRCH_LEAVES };
+            case JUNGLE_LOG -> new Material[] { Material.JUNGLE_LEAVES };
+            case ACACIA_LOG -> new Material[] { Material.ACACIA_LEAVES };
+            case DARK_OAK_LOG -> new Material[] { Material.DARK_OAK_LEAVES };
+            case MANGROVE_LOG -> new Material[] { Material.MANGROVE_LEAVES };
+            case CHERRY_LOG -> new Material[] { Material.CHERRY_LEAVES };
+            case PALE_OAK_LOG -> new Material[] { Material.PALE_OAK_LEAVES };
+            case POPLAR_LOG -> new Material[] { Material.ORANGE_POPLAR_LEAVES, Material.RED_POPLAR_LEAVES, Material.YELLOW_POPLAR_LEAVES };
+            case CRIMSON_STEM -> new Material[] { Material.NETHER_WART_BLOCK };
+            case WARPED_STEM -> new Material[] { Material.WARPED_WART_BLOCK };
+            default -> new Material[0];
+        };
+    }
+
+    /**
+     * Provides the share of a log's leaves that the leaf type receives, relative to the log's other leaf types.
+     *
+     * @param leaves The leaves.
+     * @return The weight of the leaves.
+     */
+    private static int getLeafWeight(Material leaves) {
+        return switch (leaves) {
+            case ORANGE_POPLAR_LEAVES -> 2;
+            default -> 1;
+        };
     }
 
     /**
@@ -2265,6 +2883,9 @@ public class DominionUtils {
                     if (drop.previewOnly) continue;
                     if (drop.subChanceOdds > 0 && random.nextInt(drop.subChanceOdds) != 0) continue;
                     items.add(resolveAmount(drop, random));
+                }
+                if (sim.name.equals("Ancient City")) {
+                    rollAncientCityExtras(items, rank, random);
                 }
             }
         }
@@ -2351,6 +2972,15 @@ public class DominionUtils {
             }
         }
 
+        // Filter out items belonging to disabled resource categories
+        Set<DominionResourceCategory> disabledCategories = dominion.getDisabledResourceCategories();
+        if (!disabledCategories.isEmpty()) {
+            items.removeIf(item -> {
+                DominionResourceCategory cat = getCategoryForMaterial(item.getType());
+                return cat != null && disabledCategories.contains(cat);
+            });
+        }
+
         // Apply food yield multiplier to item quantities before rank duplication
         if (yieldMultiplier < 1.0) {
             List<ItemStack> yieldScaled = new ArrayList<>();
@@ -2391,6 +3021,10 @@ public class DominionUtils {
      */
     public static void provideDominionRewards() {
         for (Dominion dominion : getDominions()) {
+            // The hosting server gives the rewards and the other server receives them through the sync
+            if (!isHostedHere(dominion)) {
+                continue;
+            }
             int claimableAmount = dominion.getClaimableResources();
             OfflinePlayer player = Bukkit.getOfflinePlayer(dominion.getLeader());
 
@@ -2443,9 +3077,8 @@ public class DominionUtils {
                     resizeFoodArray(dominion);
                     refreshBiomeCache(dominion);
                     if (player.isOnline()) {
-                        player.getPlayer().sendMessage(ChatUtils.chatMessage(
-                                "&cYour Dominion is over its chunk limit and has lost a chunk! "
-                                        + "&7(" + dominion.getChunks().size() + "/" + maxChunks + " chunks)"));
+                        player.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(player.getPlayer(), "dominion.over_chunk_limit",
+                                "count", dominion.getChunks().size(), "max", maxChunks)));
                     }
                 }
             }
@@ -2456,13 +3089,13 @@ public class DominionUtils {
                 if (isAmountIncreasing) {
                     int foodPct = (int) Math.round(getBaseFoodPercentage(dominion) * 100);
                     int yieldPct = (int) Math.round(foodPercentageToYield(foodPct / 100.0) * 100);
-                    player.getPlayer().sendMessage(ChatUtils.chatMessage("&7It is a new week - Dominion resources may be claimed"));
-                    player.getPlayer().sendMessage(ChatUtils.chatMessage("&7Food reserves: &e" + foodPct + "% &7- Claim yield this week: &e" + yieldPct + "%"));
+                    player.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(player.getPlayer(), "dominion.new_week_resources")));
+                    player.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(player.getPlayer(), "dominion.new_week_yield", "food", foodPct, "yield", yieldPct)));
                 } else {
                     if (isClaimPrevented) {
-                        player.getPlayer().sendMessage(ChatUtils.chatMessage("&7Your Dominion was unable to claim resources this week"));
+                        player.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(player.getPlayer(), "dominion.claim_failed")));
                     } else {
-                        player.getPlayer().sendMessage(ChatUtils.chatMessage("&7You must claim the available resources from your Dominion"));
+                        player.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(player.getPlayer(), "dominion.claim_available")));
                     }
                 }
 
@@ -2552,6 +3185,17 @@ public class DominionUtils {
     }
 
     /**
+     * Provides the colored name of the rank in the recipient's language.
+     *
+     * @param recipient The player or console the rank is shown to.
+     * @param rank      The rank.
+     * @return The colored, translated rank name.
+     */
+    public static String getFormattedRankName(CommandSender recipient, DominionRank rank) {
+        return getRankColor(rank) + Lang.getFor(recipient, "dominion.rank_" + rank.name().toLowerCase());
+    }
+
+    /**
      * Verifies active conquest/rebellion requests and resolves any that have reached a deadline or activity threshold.
      */
     public static void checkAndProcessConquestDeadlines() {
@@ -2613,17 +3257,16 @@ public class DominionUtils {
             defender.setConqueredTimestamp(now);
             updateDominion(defender);
             updateDominion(conqueror);
-            String conquestAutoMsg = ChatUtils.chatMessage(defender.getName() + " &4has been conquered by &e" + conqueror.getName());
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 int domVol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getDominionSoundVolume();
                 if (domVol > 0) {
                     onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_7, domVol / 100f, 1F);
                 }
-                onlinePlayer.sendMessage(conquestAutoMsg);
+                onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "dominion.conquered_broadcast", "name", defender.getName(), "conqueror", conqueror.getName())));
             }
             DiscordUtils.dominionMessage(defender, defender.getName() + " has been conquered by " + conqueror.getName(), new Color(101, 0, 0));
             if (nm != null) {
-                nm.publishBroadcast(conquestAutoMsg);
+                nm.publishLangBroadcast("dominion.conquered_broadcast", "name", defender.getName(), "conqueror", conqueror.getName());
                 // a=defender, b=conqueror
                 nm.publishDominionConquestUpdate("conquest_auto", defender, conqueror);
             }
@@ -2644,17 +3287,16 @@ public class DominionUtils {
             conqueror.setLastConquerAttemptTimestamp(now);
             updateDominion(defender);
             updateDominion(conqueror);
-            String conquestExpiredMsg = ChatUtils.chatMessage("&e" + conqueror.getName() + " &7's conquest of &e" + defender.getName() + " &7has failed");
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 int domVol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getDominionSoundVolume();
                 if (domVol > 0) {
                     onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 1F);
                 }
-                onlinePlayer.sendMessage(conquestExpiredMsg);
+                onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "dominion.conquest_failed_broadcast", "conqueror", conqueror.getName(), "defender", defender.getName())));
             }
             DiscordUtils.dominionMessage(defender, conqueror.getName() + "'s conquest of " + defender.getName() + " has failed", new Color(135, 245, 220));
             if (nm != null) {
-                nm.publishBroadcast(conquestExpiredMsg);
+                nm.publishLangBroadcast("dominion.conquest_failed_broadcast", "conqueror", conqueror.getName(), "defender", defender.getName());
                 // a=defender, b=conqueror
                 nm.publishDominionConquestUpdate("conquest_expired", defender, conqueror);
             }
@@ -2678,17 +3320,16 @@ public class DominionUtils {
             rebel.setLastRebelAttemptTimestamp(now);
             updateDominion(conqueror);
             updateDominion(rebel);
-            String rebelAutoMsg = ChatUtils.chatMessage(rebel.getName() + " &dhas successfully rebelled against &e" + conqueror.getName());
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 int domVol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getDominionSoundVolume();
                 if (domVol > 0) {
                     onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 1F);
                 }
-                onlinePlayer.sendMessage(rebelAutoMsg);
+                onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "dominion.rebelled_broadcast", "name", rebel.getName(), "conqueror", conqueror.getName())));
             }
             DiscordUtils.dominionMessage(conqueror, rebel.getName() + " has successfully rebelled against " + conqueror.getName(), new Color(135, 245, 220));
             if (nm != null) {
-                nm.publishBroadcast(rebelAutoMsg);
+                nm.publishLangBroadcast("dominion.rebelled_broadcast", "name", rebel.getName(), "conqueror", conqueror.getName());
                 // a=rebel, b=conqueror
                 nm.publishDominionConquestUpdate("rebel_auto", rebel, conqueror);
             }
@@ -2708,17 +3349,16 @@ public class DominionUtils {
             updateDominion(conqueror);
 
             if (rebel != null) {
-                String rebelExpiredMsg = ChatUtils.chatMessage("&e" + rebel.getName() + "&7's rebellion against &e" + conqueror.getName() + " &7has failed");
                 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                     int domVol = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getDominionSoundVolume();
                     if (domVol > 0) {
                         onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_4, domVol / 100f, 1F);
                     }
-                    onlinePlayer.sendMessage(rebelExpiredMsg);
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "dominion.rebellion_failed_broadcast", "rebel", rebel.getName(), "conqueror", conqueror.getName())));
                 }
                 DiscordUtils.dominionMessage(conqueror, rebel.getName() + "'s rebellion against " + conqueror.getName() + " has failed", new Color(101, 0, 0));
                 if (nm != null) {
-                    nm.publishBroadcast(rebelExpiredMsg);
+                    nm.publishLangBroadcast("dominion.rebellion_failed_broadcast", "rebel", rebel.getName(), "conqueror", conqueror.getName());
                     // a=rebel, b=conqueror
                     nm.publishDominionConquestUpdate("rebel_expired", rebel, conqueror);
                 }

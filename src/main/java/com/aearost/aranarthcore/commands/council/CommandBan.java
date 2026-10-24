@@ -6,6 +6,8 @@ import com.aearost.aranarthcore.objects.Punishment;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionLevelUtils;
+import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.PunishmentUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -33,7 +35,7 @@ public class CommandBan {
 			if (player.hasPermission("aranarth.ban")) {
 				banPlayer(sender, args);
 			} else {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 			}
         } else {
 			banPlayer(sender, args);
@@ -48,7 +50,7 @@ public class CommandBan {
 	 */
 	private static void banPlayer(CommandSender sender, String[] args) {
 		if (args.length < 4) {
-			sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac mute <player> <duration> <reason>"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac ban <player> <duration> <reason>")));
 			return;
 		}
 
@@ -75,8 +77,8 @@ public class CommandBan {
 			wasPlayerBanned = true;
 			nickname = AranarthUtils.getNickname(player);
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			if (aranarthPlayer.getCouncilRank() == 3) {
-				sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be banned"));
+			if (!PunishmentUtils.outranks(sender, uuid)) {
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ban.cannot_ban")));
 				return;
 			}
 
@@ -96,6 +98,7 @@ public class CommandBan {
 			player.ban(reason, unbanDate, null);
 			Punishment punishment = new Punishment(player.getUniqueId(), currentTime, "BAN", reason, senderUuid);
 			AranarthUtils.addPunishment(player.getUniqueId(), punishment, false);
+			PunishmentUtils.issued(punishment, nickname, args[2], unbanDate == null ? -1 : unbanDate.getTime());
 
 			// Permanent bans (unbanDate == null) remove the player from their dominion.
 			// If they are the leader, the dominion and all its outposts are disbanded.
@@ -114,17 +117,10 @@ public class CommandBan {
 				}
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&e" + args[1] + " &ccould not be found"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", args[1])));
 			return;
 		}
-
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-			if (AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getCouncilRank() > 0) {
-				onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + nickname + " &7has been banned for &e" + args[2] + " &7because: &e" + reason));
-			} else {
-				onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + nickname + " &7has been banned"));
-			}
-		}
+		PunishmentUtils.notifyBan(nickname, args[2], reason, args[2].equals("-1"));
 	}
 
 	/**
@@ -140,7 +136,11 @@ public class CommandBan {
 		try {
 			time = Integer.parseInt(timeAsString);
 		} catch (NumberFormatException e) {
-			sender.sendMessage(ChatUtils.chatMessage("&cThat is not a valid number!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_number")));
+			return null;
+		}
+		if (time <= 0) {
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_number")));
 			return null;
 		}
 
@@ -161,7 +161,7 @@ public class CommandBan {
 		else if (last == 'w') {
 			date = date.plusWeeks(time);
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cThat is not a valid variable of time!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ban.invalid_time_unit")));
 			return null;
 		}
 

@@ -1,6 +1,8 @@
 package com.aearost.aranarthcore.abilities.earthbending.metalbending;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AbilityConfig;
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.MetalAbility;
@@ -8,6 +10,7 @@ import com.projectkorra.projectkorra.attribute.Attribute;
 import com.projectkorra.projectkorra.util.DamageHandler;
 import org.bukkit.*;
 import org.bukkit.entity.*;
+import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -20,12 +23,9 @@ import java.util.Set;
 
 public class MetalStrips extends MetalAbility implements AddonAbility {
 
-    private static final double SPEED = 3.0;
+    private double speed;
     private static final double STEP = 0.3;
-    private static final double HIT_RADIUS = 0.6;
-    private static final double RECALL_RANGE = 32.0;
-    private static final double RECALL_SPEED = 1.2;
-    private static final double PICKUP_RADIUS = 1.5;
+    private double hitRadius;
 
     // Base damage = 2.0 (iron)
     private static final Map<Material, Double> METAL_DAMAGE = Map.of(
@@ -57,9 +57,6 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
             Material.QUARTZ
     );
 
-    private static final int MAX_BURST_SHOTS = 8;
-    private static final long BURST_WINDOW_TICKS = 50L; // 2.5 seconds
-    private static final long COOLDOWN_MS = 5000L;
 
     private static final Set<UUID> pendingLeftClicks = new HashSet<>();
 
@@ -116,7 +113,7 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
         }
         BurstData burst = activeBursts.get(uuid);
 
-        if (burst != null && burst.shotsFired >= MAX_BURST_SHOTS) {
+        if (burst != null && burst.shotsFired >= AbilityConfig.getInt("MetalStrips.BurstShots")) {
             return;
         }
 
@@ -142,21 +139,23 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
                 public void run() {
                     endBurst(player, uuid);
                 }
-            }.runTaskLater(AranarthCore.getInstance(), BURST_WINDOW_TICKS);
+            }.runTaskLater(AranarthCore.getInstance(), AbilityConfig.getLong("MetalStrips.BurstWindowTicks"));
         }
 
         burst.shotsFired++;
         burst.lastInstance = this;
 
-        this.cooldown = COOLDOWN_MS;
+        this.cooldown = AbilityConfig.getLong("MetalStrips.Cooldown");
         this.damage = METAL_DAMAGE.getOrDefault(found, 2.0);
-        this.range = 20.0;
+        this.range = AbilityConfig.getDouble("MetalStrips.Range");
+        this.speed = AbilityConfig.getDouble("MetalStrips.Speed");
+        this.hitRadius = AbilityConfig.getDouble("MetalStrips.HitRadius");
 
         fireShot();
         this.start();
 
         // If all shots used, end burst immediately instead of waiting for the timer
-        if (burst.shotsFired >= MAX_BURST_SHOTS) {
+        if (burst.shotsFired >= AbilityConfig.getInt("MetalStrips.BurstShots")) {
             burst.endTask.cancel();
             endBurst(player, uuid);
         }
@@ -193,7 +192,7 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
         this.firedItem.setCanMobPickup(false);
         this.firedItem.setCanPlayerPickup(false); // Only the owner can pick it up via recall
         this.firedItem.setGravity(false);
-        this.firedItem.setVelocity(this.direction.clone().multiply(SPEED));
+        this.firedItem.setVelocity(this.direction.clone().multiply(speed));
 
         // Tag the item so the recall system can verify it belongs to this player
         this.firedItem.getPersistentDataContainer().set(
@@ -233,7 +232,7 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
         }
 
         // Advance along the exact ray in sub-steps for precise collision detection
-        double remaining = SPEED;
+        double remaining = speed;
         while (remaining > 0) {
             final double step = Math.min(STEP, remaining);
             this.distanceTraveled += step;
@@ -258,7 +257,7 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
             }
 
             // Living entity in the path - continue forward slightly and arc down after impact
-            for (final Entity entity : checkPos.getWorld().getNearbyEntities(checkPos, HIT_RADIUS, HIT_RADIUS, HIT_RADIUS)) {
+            for (final Entity entity : checkPos.getWorld().getNearbyEntities(checkPos, hitRadius, hitRadius, hitRadius)) {
                 if (!(entity instanceof LivingEntity)) {
                     continue;
                 }
@@ -329,6 +328,10 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
             return;
         }
 
+        final double recallRange = AbilityConfig.getDouble("MetalStrips.RecallRange");
+        final double recallSpeed = AbilityConfig.getDouble("MetalStrips.RecallSpeed");
+        final double pickupRadius = AbilityConfig.getDouble("MetalStrips.PickupRadius");
+
         final BukkitTask task = new BukkitRunnable() {
             @Override
             public void run() {
@@ -353,12 +356,12 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
 
                         final double distSq = item.getLocation().distanceSquared(playerAnchor);
 
-                        if (distSq > RECALL_RANGE * RECALL_RANGE) {
+                        if (distSq > recallRange * recallRange) {
                             continue;
                         }
 
                         // Within pickup radius, return the correct material
-                        if (distSq <= PICKUP_RADIUS * PICKUP_RADIUS) {
+                        if (distSq <= pickupRadius * pickupRadius) {
                             final Material returnMaterial = getStoredMaterial(item);
                             final HashMap<Integer, ItemStack> overflow =
                                     player.getInventory().addItem(new ItemStack(returnMaterial, 1));
@@ -375,7 +378,7 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
                         final Vector toPlayer = playerAnchor.toVector()
                                 .subtract(item.getLocation().toVector())
                                 .normalize()
-                                .multiply(RECALL_SPEED);
+                                .multiply(recallSpeed);
                         item.setGravity(false);
                         item.setVelocity(toPlayer);
                         item.getWorld().spawnParticle(
@@ -385,7 +388,7 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
 
                 // Pull nearby ambient metal items
                 for (final Entity entity : player.getWorld().getNearbyEntities(
-                        playerAnchor, RECALL_RANGE, RECALL_RANGE, RECALL_RANGE)) {
+                        playerAnchor, recallRange, recallRange, recallRange)) {
                     if (!(entity instanceof Item item)) {
                         continue;
                     }
@@ -397,14 +400,26 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
                             getStripOwnerKey(), PersistentDataType.STRING)) {
                         continue;
                     }
+                    // Only pull items the player could pick up by hand, so ability projectiles (such as
+                    // MetalShots) never become real items and protected land cannot be drained
+                    if (!canRecallAmbientItem(player, item)) {
+                        continue;
+                    }
 
                     final double distSq = item.getLocation().distanceSquared(playerAnchor);
-                    if (distSq > RECALL_RANGE * RECALL_RANGE) {
+                    if (distSq > recallRange * recallRange) {
                         continue;
                     }
 
                     // Within pickup radius, add the item's actual stack to inventory
-                    if (distSq <= PICKUP_RADIUS * PICKUP_RADIUS) {
+                    if (distSq <= pickupRadius * pickupRadius) {
+                        // Let other plugins and protections refuse the pickup like a normal one
+                        final PlayerAttemptPickupItemEvent attemptEvent =
+                                new PlayerAttemptPickupItemEvent(player, item, 0);
+                        Bukkit.getPluginManager().callEvent(attemptEvent);
+                        if (attemptEvent.isCancelled()) {
+                            continue;
+                        }
                         final ItemStack stack = item.getItemStack().clone();
                         final HashMap<Integer, ItemStack> overflow =
                                 player.getInventory().addItem(stack);
@@ -417,7 +432,7 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
                     final Vector toPlayer = playerAnchor.toVector()
                             .subtract(item.getLocation().toVector())
                             .normalize()
-                            .multiply(RECALL_SPEED);
+                            .multiply(recallSpeed);
                     item.setVelocity(toPlayer);
                     item.getWorld().spawnParticle(
                             Particle.DUST, item.getLocation(), 1, 0.05, 0.05, 0.05, 0,
@@ -491,6 +506,19 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
     private static Particle.DustOptions getParticleForItem(final Item item) {
         final Material mat = getStoredMaterial(item);
         return METAL_PARTICLES.getOrDefault(mat, METAL_PARTICLES.get(Material.IRON_INGOT));
+    }
+
+    /**
+     * Returns true if a dropped metal item may be recalled by the player.
+     */
+    private static boolean canRecallAmbientItem(Player player, Item item) {
+        if (!item.canPlayerPickup() || item.getPickupDelay() == Integer.MAX_VALUE) {
+            return false;
+        }
+        if (item.getOwner() != null && !item.getOwner().equals(player.getUniqueId())) {
+            return false;
+        }
+        return AranarthBendingUtils.canBendBlock(player, item.getLocation().getBlock());
     }
 
     public static NamespacedKey getStripOwnerKey() {

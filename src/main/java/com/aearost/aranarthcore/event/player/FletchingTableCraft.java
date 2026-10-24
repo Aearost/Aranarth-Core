@@ -338,11 +338,6 @@ public class FletchingTableCraft {
 			if (type == Material.DIAMOND) {
 				return new ArrowheadDiamond().getItem();
 			}
-			if (type == Material.BONE) {
-				ItemStack is = new ArrowheadBone().getItem();
-				is.setAmount(2);
-				return is;
-			}
 		} else {
 			ItemStack[] ingredients = new ItemStack[] { a, b, c };
 

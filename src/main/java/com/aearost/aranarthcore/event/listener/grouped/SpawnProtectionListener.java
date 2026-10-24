@@ -4,7 +4,10 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.PlotUtils;
+import com.aearost.aranarthcore.utils.ResourceWorldUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import io.papermc.paper.event.player.PlayerOpenSignEvent;
 import org.bukkit.*;
@@ -38,13 +41,23 @@ public class SpawnProtectionListener implements Listener {
     }
 
     /**
+     * Provides whether the player bypasses the spawn protections at the location.
+     * Players in architect mode can build in the spawn world and in the Creative spawn plots.
+     */
+    private boolean canModify(Player player, Location loc) {
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        return aranarthPlayer.isInAdminMode()
+                || (aranarthPlayer.isInArchitectMode()
+                && (loc.getWorld().getName().equals("spawn") || PlotUtils.isSpawnPlotLocation(loc)));
+    }
+
+    /**
      * Prevents players from placing blocks at spawn.
      */
     @EventHandler
     public void onPlace(BlockPlaceEvent e) {
         if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-            if (!aranarthPlayer.isInAdminMode()) {
+            if (!canModify(e.getPlayer(), e.getBlock().getLocation())) {
                 e.setCancelled(true);
             }
         }
@@ -56,8 +69,7 @@ public class SpawnProtectionListener implements Listener {
     @EventHandler
     public void onBucketEmpty(PlayerBucketEmptyEvent e) {
         if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-            if (!aranarthPlayer.isInAdminMode()) {
+            if (!canModify(e.getPlayer(), e.getBlock().getLocation())) {
                 e.setCancelled(true);
             }
         }
@@ -73,8 +85,7 @@ public class SpawnProtectionListener implements Listener {
             return;
         }
         if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-            if (!aranarthPlayer.isInAdminMode()) {
+            if (!canModify(e.getPlayer(), e.getBlock().getLocation())) {
                 e.setCancelled(true);
             }
         }
@@ -86,8 +97,7 @@ public class SpawnProtectionListener implements Listener {
     @EventHandler
     public void onBreak(BlockBreakEvent e) {
         if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-            if (!aranarthPlayer.isInAdminMode()) {
+            if (!canModify(e.getPlayer(), e.getBlock().getLocation())) {
                 e.setCancelled(true);
             }
         }
@@ -100,8 +110,7 @@ public class SpawnProtectionListener implements Listener {
     public void onInteractEntity(PlayerInteractEntityEvent e) {
         if (e.getRightClicked() != null) {
             if (AranarthUtils.isSpawnLocation(e.getRightClicked().getLocation())) {
-                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-                if (!aranarthPlayer.isInAdminMode()) {
+                if (!canModify(e.getPlayer(), e.getRightClicked().getLocation())) {
                     e.setCancelled(true);
                 }
             }
@@ -114,8 +123,7 @@ public class SpawnProtectionListener implements Listener {
     @EventHandler
     public void onArmorStandManipulate(PlayerArmorStandManipulateEvent e) {
         if (AranarthUtils.isSpawnLocation(e.getRightClicked().getLocation())) {
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-            if (!aranarthPlayer.isInAdminMode()) {
+            if (!canModify(e.getPlayer(), e.getRightClicked().getLocation())) {
                 e.setCancelled(true);
             }
         }
@@ -128,8 +136,7 @@ public class SpawnProtectionListener implements Listener {
     public void onPlaceEntity(EntityPlaceEvent e) {
         if (e.getEntity() != null) {
             if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
-                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-                if (!aranarthPlayer.isInAdminMode()) {
+                if (e.getPlayer() != null && !canModify(e.getPlayer(), e.getEntity().getLocation())) {
                     e.setCancelled(true);
                 }
             }
@@ -144,8 +151,7 @@ public class SpawnProtectionListener implements Listener {
         if (e.getEntity() != null) {
             if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
                 if (e.getDamageSource().getCausingEntity() instanceof Player player) {
-                    AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                    if (!aranarthPlayer.isInAdminMode()) {
+                    if (!canModify(player, e.getEntity().getLocation())) {
                         e.setCancelled(true);
                     }
                 }
@@ -160,8 +166,7 @@ public class SpawnProtectionListener implements Listener {
     public void onHangingBreak(HangingBreakByEntityEvent e) {
         if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
             if (e.getRemover() instanceof Player player) {
-                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                if (!aranarthPlayer.isInAdminMode()) {
+                if (!canModify(player, e.getEntity().getLocation())) {
                     e.setCancelled(true);
                 }
             }
@@ -174,8 +179,7 @@ public class SpawnProtectionListener implements Listener {
     @EventHandler
     public void onEntityPlace(HangingPlaceEvent e) {
         if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-            if (!aranarthPlayer.isInAdminMode()) {
+            if (e.getPlayer() != null && !canModify(e.getPlayer(), e.getEntity().getLocation())) {
                 e.setCancelled(true);
             }
         }
@@ -187,8 +191,7 @@ public class SpawnProtectionListener implements Listener {
     @EventHandler
     public void onSignOpen(PlayerOpenSignEvent e) {
         if (AranarthUtils.isSpawnLocation(e.getSign().getLocation())) {
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-            if (!aranarthPlayer.isInAdminMode()) {
+            if (!canModify(e.getPlayer(), e.getSign().getLocation())) {
                 e.setCancelled(true);
             }
         }
@@ -249,8 +252,7 @@ public class SpawnProtectionListener implements Listener {
                         || block.getType() == Material.CRAFTER || block.getType() == Material.HOPPER || block.getType().name().endsWith("_SHELF")
                         || block.getType() == Material.DECORATED_POT || block.getType() == Material.FLOWER_POT || block.getType() == Material.CHISELED_BOOKSHELF
                         || block.getType() == Material.SWEET_BERRY_BUSH || block.getType() == Material.CAVE_VINES || block.getType() == Material.CAVE_VINES_PLANT) {
-                    AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-                    if (!aranarthPlayer.isInAdminMode()) {
+                    if (!canModify(e.getPlayer(), block.getLocation())) {
                         // Allow server shops to be used at spawn
                         if (block.getType().name().endsWith("_SIGN") && ShopUtils.getShopFromLocation(block.getLocation()) != null) {
                             return;
@@ -269,8 +271,7 @@ public class SpawnProtectionListener implements Listener {
     @EventHandler
     public void onTakeLecternBook(PlayerTakeLecternBookEvent e) {
         if (AranarthUtils.isSpawnLocation(e.getLectern().getLocation())) {
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-            if (!aranarthPlayer.isInAdminMode()) {
+            if (!canModify(e.getPlayer(), e.getLectern().getLocation())) {
                 e.setCancelled(true);
             }
         }
@@ -281,7 +282,7 @@ public class SpawnProtectionListener implements Listener {
      */
     @EventHandler
     private void onEnderPearlThrow(ProjectileLaunchEvent e) {
-        if (e.getLocation().getWorld().getName().equals("spawn")) {
+        if (AranarthUtils.isSpawnLocation(e.getLocation())) {
             if (e.getEntityType() == EntityType.ENDER_PEARL || e.getEntityType() == EntityType.ARROW
                     || e.getEntityType() == EntityType.SPECTRAL_ARROW || e.getEntityType() == EntityType.TRIDENT
                     || e.getEntityType() == EntityType.FIREBALL || e.getEntityType() == EntityType.SMALL_FIREBALL
@@ -291,7 +292,7 @@ public class SpawnProtectionListener implements Listener {
 
                 if (e.getEntity().getShooter() != null && e.getEntity().getShooter() instanceof Player player) {
                     e.setCancelled(true);
-                    player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this item at spawn!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "spawn.no_item_use")));
                 }
             }
         }
@@ -303,10 +304,10 @@ public class SpawnProtectionListener implements Listener {
      */
     @EventHandler
     private void onChorusFruitEat(PlayerItemConsumeEvent e) {
-        if (e.getPlayer().getLocation().getWorld().getName().equals("spawn")) {
+        if (AranarthUtils.isSpawnLocation(e.getPlayer().getLocation())) {
             if (e.getItem().getType() == Material.CHORUS_FRUIT) {
                 e.setCancelled(true);
-                e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot use this item at spawn!"));
+                e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "spawn.no_item_use")));
             }
         }
     }
@@ -319,7 +320,7 @@ public class SpawnProtectionListener implements Listener {
         if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
             if (e.getEntity() instanceof Player target) {
                 if (e.getDamageSource().getCausingEntity() instanceof Player attacker) {
-                    attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm players at Spawn!"));
+                    attacker.sendMessage(ChatUtils.chatMessage(Lang.getFor(attacker, "spawn.no_harm_players")));
                 }
                 // Additionally prevents the target from being damaged, regardless of the source of damage
                 e.setCancelled(true);
@@ -359,7 +360,7 @@ public class SpawnProtectionListener implements Listener {
 
             // Tutorial exit portals
             boolean isExitingBendingPortal = (x >= 2999 && x <= 3001) && (y >= 100 && y <= 102) && z == 65;
-            boolean isExitingAranarthiumPortal = (x >= 3999 && x <= 4001) && (y >= 100 && y <= 102) && z == 83;
+            boolean isExitingAranarthiumPortal = (x >= 3999 && x <= 4001) && (y >= 100 && y <= 102) && z == 89;
             boolean isExitingRecipesPortal = (x >= 8999 && x <= 9001) && (y >= 100 && y <= 102) && z == 143;
             boolean isExitingCalendarPortal = (x >= 4999 && x <= 5001) && (y >= 100 && y <= 102) && z == 107;
             boolean isExitingShopsPortal = (x >= 5999 && x <= 6001) && (y >= 100 && y <= 102) && z == 89;
@@ -380,71 +381,71 @@ public class SpawnProtectionListener implements Listener {
             // Tutorial entry portals
             else if (isEnteringBendingPortal) {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 3000.5, 100, 0.5, 0, 0);
-                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&5Bending Tutorial", "&7You have teleported to the &5Bending Tutorial", success -> {
+                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&5Bending Tutorial", Lang.getFor(player, "tutorial.bending_enter"), success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &5Bending Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "tutorial.bending_enter")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cThis tutorial is currently disabled"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "tutorial.disabled")));
                     }
                 });
                 return;
             } else if (isEnteringAranarthiumPortal) {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 4000.5, 100, 0.5, 0, 0);
-                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&bAranarthium Tutorial", "&7You have teleported to the &bAranarthium Tutorial", success -> {
+                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&bAranarthium Tutorial", Lang.getFor(player, "tutorial.aranarthium_enter"), success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &bAranarthium Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "tutorial.aranarthium_enter")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cThis tutorial is currently disabled"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "tutorial.disabled")));
                     }
                 });
                 return;
             } else if (isEnteringRecipePortal) {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 9000.5, 100, 0.5, 0, 0);
-                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&fRecipe Tutorial", "&7You have teleported to the &fRecipe Tutorial", success -> {
+                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&fRecipe Tutorial", Lang.getFor(player, "tutorial.recipe_enter"), success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &fRecipe Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "tutorial.recipe_enter")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cThis tutorial is currently disabled"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "tutorial.disabled")));
                     }
                 });
                 return;
             } else if (isEnteringCalendarPortal) {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 5000.5, 100, 0.5, 0, 0);
-                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&eCalendar Tutorial", "&7You have teleported to the &eCalendar Tutorial", success -> {
+                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&eCalendar Tutorial", Lang.getFor(player, "tutorial.calendar_enter"), success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &eCalendar Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "tutorial.calendar_enter")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cThis tutorial is currently disabled"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "tutorial.disabled")));
                     }
                 });
                 return;
             } else if (isEnteringShopsPortal) {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 6000.5, 100, 0.5, 0, 0);
-                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&aShops Tutorial", "&7You have teleported to the &aShops Tutorial", success -> {
+                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&aShops Tutorial", Lang.getFor(player, "tutorial.shops_enter"), success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &aShops Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "tutorial.shops_enter")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cThis tutorial is currently disabled"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "tutorial.disabled")));
                     }
                 });
                 return;
             } else if (isEnteringRanksPortal) {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 7000.5, 100, 0.5, 0, 0);
-                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&4Ranks Tutorial", "&7You have teleported to the &4Ranks Tutorial", success -> {
+                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&4Ranks Tutorial", Lang.getFor(player, "tutorial.ranks_enter"), success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &4Ranks Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "tutorial.ranks_enter")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cThis tutorial is currently disabled"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "tutorial.disabled")));
                     }
                 });
                 return;
             } else if (isEnteringDominionsPortal) {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 8000.5, 100, 0.5, 0, 0);
-                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&6Dominions Tutorial", "&7You have teleported to the &6Dominions Tutorial", success -> {
+                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&6Dominions Tutorial", Lang.getFor(player, "tutorial.dominion_enter"), success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &6Dominions Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "tutorial.dominion_enter")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cThis tutorial is currently disabled"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "tutorial.disabled")));
                     }
                 });
                 return;
@@ -452,71 +453,71 @@ public class SpawnProtectionListener implements Listener {
             // Tutorial exit portals
             else if (isExitingBendingPortal) {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 51.5, 103, -56.5, 0, 0);
-                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&5Bending Tutorial", "&7You have exited the &5Bending Tutorial", success -> {
+                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&5Bending Tutorial", Lang.getFor(player, "tutorial.bending_exit"), success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have exited the &5Bending Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "tutorial.bending_exit")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong. Please use &e/spawn"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.error_use_spawn")));
                     }
                 });
                 return;
             } else if (isExitingAranarthiumPortal) {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 56.5, 104, -51.5, 180, 0);
-                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&bAranarthium Tutorial", "&7You have exited the &bAranarthium Tutorial", success -> {
+                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&bAranarthium Tutorial", Lang.getFor(player, "tutorial.aranarthium_exit"), success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have exited the &bAranarthium Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "tutorial.aranarthium_exit")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong. Please use &e/spawn"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.error_use_spawn")));
                     }
                 });
                 return;
             } else if (isExitingRecipesPortal) {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 62.5, 106, -57.5, 90, 0);
-                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&fRecipe Tutorial", "&7You have exited the &fRecipe Tutorial", success -> {
+                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&fRecipe Tutorial", Lang.getFor(player, "tutorial.recipe_exit"), success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have exited the &fRecipe Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "tutorial.recipe_exit")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong. Please use &e/spawn"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.error_use_spawn")));
                     }
                 });
                 return;
             } else if (isExitingCalendarPortal) {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 63.5, 109, -67.5, 90, 0);
-                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&eCalendar Tutorial", "&7You have exited the &eCalendar Tutorial", success -> {
+                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&eCalendar Tutorial", Lang.getFor(player, "tutorial.calendar_exit"), success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have exited the &eCalendar Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "tutorial.calendar_exit")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong. Please use &e/spawn"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.error_use_spawn")));
                     }
                 });
                 return;
             } else if (isExitingShopsPortal) {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 50.5, 110, -66.5, -90, 0);
-                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&aShops Tutorial", "&7You have exited the &aShops Tutorial", success -> {
+                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&aShops Tutorial", Lang.getFor(player, "tutorial.shops_exit"), success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have exited the &aShops Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "tutorial.shops_exit")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong. Please use &e/spawn"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.error_use_spawn")));
                     }
                 });
                 return;
             } else if (isExitingRanksPortal) {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 55, 110, -74.5, -45, 0);
-                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&4Ranks Tutorial", "&7You have exited the &4Ranks Tutorial", success -> {
+                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&4Ranks Tutorial", Lang.getFor(player, "tutorial.ranks_exit"), success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have exited the &4Ranks Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "tutorial.ranks_exit")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong. Please use &e/spawn"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.error_use_spawn")));
                     }
                 });
                 return;
             } else if (isExitingDominionsPortal) {
                 Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 57.5, 111, -74.5, 0, 0);
-                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&6Dominions Tutorial", "&7You have exited the &6Dominions Tutorial", success -> {
+                AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, "&6Dominions Tutorial", Lang.getFor(player, "tutorial.dominion_exit"), success -> {
                     if (success) {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have exited the &6Dominions Tutorial"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "tutorial.dominion_exit")));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong. Please use &e/spawn"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.error_use_spawn")));
                     }
                 });
                 return;
@@ -553,7 +554,7 @@ public class SpawnProtectionListener implements Listener {
      */
     private void teleportPlayerToWorld(Player player, String worldName) {
         if (AranarthUtils.getTeleportTask(player.getUniqueId()) != null) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou are already teleporting somewhere!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.already_teleporting")));
             return;
         }
 
@@ -561,13 +562,19 @@ public class SpawnProtectionListener implements Listener {
         if (System.currentTimeMillis() < aranarthPlayer.getLastWorldCommandUse() + 60000) {
             if (!aranarthPlayer.isInAdminMode()) {
                 int wait = (int) ((aranarthPlayer.getLastWorldCommandUse() + 60000) - System.currentTimeMillis()) / 1000;
-                player.sendMessage(ChatUtils.chatMessage("&cYou must wait another &e" + wait + " seconds &cto teleport again!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "spawn.wait", "seconds", wait)));
                 return;
             }
         }
 
-        String adjustedName = "&eSurvival";
-        String adjustedTitle = "&e&lSurvival";
+        // The resource world is still being reset and pre-generated
+        if (ResourceWorldUtils.isLockedFor(player, worldName)) {
+            ResourceWorldUtils.sendLockedMessage(player);
+            return;
+        }
+
+        String adjustedName = Lang.getFor(player, "teleport.dest_survival");
+        String adjustedTitle = Lang.getFor(player, "teleport.title_survival");
         World world = Bukkit.getWorld(worldName);
         if (world != null) {
             Random random = new Random();
@@ -583,12 +590,12 @@ public class SpawnProtectionListener implements Listener {
                 } else if (worldName.equals("resource")) {
                     x = random.nextInt(5001) - 2500;
                     z = random.nextInt(5001) - 2500;
-                    adjustedName = "the &eResource &7world";
-                    adjustedTitle = "&e&lResource World";
+                    adjustedName = Lang.getFor(player, "teleport.dest_resource");
+                    adjustedTitle = Lang.getFor(player, "teleport.title_resource");
                 } else if (worldName.equals("arena")) {
                     selectedLocation = new Location(Bukkit.getWorld("arena"), 0.5, 105, 0.5, 180, 0);
-                    adjustedName = "the &eArena";
-                    adjustedTitle = "&e&lArena";
+                    adjustedName = Lang.getFor(player, "teleport.dest_arena");
+                    adjustedTitle = Lang.getFor(player, "teleport.title_arena");
                     break;
                 }
 
@@ -603,13 +610,13 @@ public class SpawnProtectionListener implements Listener {
 
             String finalAdjustedName = adjustedName;
             String finalAdjustedTitle = adjustedTitle;
-            AranarthUtils.teleportPlayer(player, player.getLocation(), selectedLocation, true, finalAdjustedTitle, "&7You have teleported to " + finalAdjustedName, success -> {
+            AranarthUtils.teleportPlayer(player, player.getLocation(), selectedLocation, true, finalAdjustedTitle, Lang.getFor(player, "spawn.teleported", "name", finalAdjustedName), success -> {
                 if (success) {
                     aranarthPlayer.setLastWorldCommandUse(System.currentTimeMillis());
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                    player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to " + finalAdjustedName));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "spawn.teleported", "name", finalAdjustedName)));
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to " + finalAdjustedName));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "spawn.could_not", "name", finalAdjustedName)));
                 }
             });
         }

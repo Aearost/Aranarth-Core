@@ -6,7 +6,9 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PermissionUtils;
+import com.aearost.aranarthcore.utils.PunishmentUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -14,6 +16,7 @@ import org.bukkit.entity.Player;
 
 import java.awt.*;
 import java.time.Instant;
+import java.util.UUID;
 
 /**
  * Allows for the manual assignment of a player's rank.
@@ -29,7 +32,7 @@ public class CommandRankSet {
     public static boolean onCommand(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
             if (!player.hasPermission("aranarth.rankset")) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
                 return true;
             }
         }
@@ -42,10 +45,22 @@ public class CommandRankSet {
                 OfflinePlayer player = null;
 
                 // Does the player exist
-                for (OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
-                    if (offlinePlayer.getName().equals(args[2])) {
-                        player = offlinePlayer;
-                    }
+                UUID targetUuid;
+                try {
+                    targetUuid = UUID.fromString(args[2]);
+                } catch (IllegalArgumentException e) {
+                    targetUuid = AranarthUtils.getUUIDFromUsername(args[2]);
+                }
+                if (targetUuid != null && AranarthUtils.getPlayer(targetUuid) != null) {
+                    player = Bukkit.getOfflinePlayer(targetUuid);
+                }
+
+                // Staff can only change the ranks of players below them, or their own
+                if (player != null && sender instanceof Player senderPlayer
+                        && !senderPlayer.getUniqueId().equals(player.getUniqueId())
+                        && !PunishmentUtils.outranks(sender, player.getUniqueId())) {
+                    sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "rankset.cannot_modify")));
+                    return true;
                 }
 
                 if (player != null) {
@@ -53,12 +68,12 @@ public class CommandRankSet {
                     try {
                         rank = Integer.parseInt(args[3]);
                     } catch (NumberFormatException e) {
-                        sender.sendMessage(ChatUtils.chatMessage("&cThat is not a valid number!"));
+                        sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_number")));
                         return true;
                     }
 
                     if (rank < 0) {
-                        sender.sendMessage(ChatUtils.chatMessage("&cYou must enter a positive number!"));
+                        sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.amount_positive")));
                         return true;
                     }
 
@@ -73,8 +88,11 @@ public class CommandRankSet {
                     if (!aranarthPlayer.getNickname().isEmpty()) {
                         name = aranarthPlayer.getNickname();
                     } else {
-                        name = player.getName();
+                        name = aranarthPlayer.getUsername();
                     }
+
+                    // Store purchases are run from console on both servers, so only Survival posts the Discord notifications
+                    boolean canNotifyDiscord = sender instanceof Player || !AranarthCore.isSmpServer();
 
                     boolean isSuccessful = false;
                     // Limited from 0 to 8
@@ -84,7 +102,7 @@ public class CommandRankSet {
                             DiscordUtils.updateRank(player, rank, true);
                             isSuccessful = true;
                         } else {
-                            sender.sendMessage(ChatUtils.chatMessage("&cThere is no rank with this value!"));
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "rank.not_found")));
                         }
                     }
                     // Limited from 0 to 3
@@ -95,11 +113,22 @@ public class CommandRankSet {
                                 AranarthUtils.compressAllMaterials(player.getUniqueId());
                             }
 
-                            aranarthPlayer.setSaintRank(rank);
-                            DiscordUtils.updateSaint(player, rank, true);
+                            aranarthPlayer.setPermanentSaintRank(rank);
+                            // Keep a monthly rank if still active and higher, otherwise apply permanent now
+                            long now = Instant.now().toEpochMilli();
+                            boolean monthlyActive = aranarthPlayer.getSaintExpireDate() != 0
+                                    && aranarthPlayer.getSaintExpireDate() > now;
+                            if (monthlyActive && aranarthPlayer.getSaintRank() > rank) {
+                                // Monthly is higher - keep active rank as-is
+                            } else {
+                                // Clear monthly and apply permanent
+                                aranarthPlayer.setSaintExpireDate(0);
+                                aranarthPlayer.setSaintRank(rank);
+                            }
+                            DiscordUtils.updateSaint(player, rank, canNotifyDiscord);
                             isSuccessful = true;
                         } else {
-                            sender.sendMessage(ChatUtils.chatMessage("&cThere is no rank with this value!"));
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "rank.not_found")));
                         }
                     }
                     // Limited from 0 to 3
@@ -114,7 +143,7 @@ public class CommandRankSet {
                             DiscordUtils.updateCouncil(player, rank, true);
                             isSuccessful = true;
                         } else {
-                            sender.sendMessage(ChatUtils.chatMessage("&cThere is no rank with this value!"));
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "rank.not_found")));
                         }
                     }
                     // Limited from 0 to 1
@@ -124,32 +153,35 @@ public class CommandRankSet {
                             DiscordUtils.updateArchitect(player, rank, true);
                             isSuccessful = true;
                         } else {
-                            sender.sendMessage(ChatUtils.chatMessage("&cThere is no rank with this value!"));
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "rank.not_found")));
                         }
                     }
                     // Limited from 0 to 3
                     else if (args[1].equals("saintmonth")) {
                         if (rank <= 3) {
-                            aranarthPlayer.setSaintRank(rank);
                             if (rank == 0) {
                                 aranarthPlayer.setSaintExpireDate(0);
+                                // Fall back to permanent rank when monthly is removed
+                                aranarthPlayer.setSaintRank(aranarthPlayer.getPermanentSaintRank());
                             } else {
                                 if (rank == 3) {
                                     AranarthUtils.compressAllMaterials(player.getUniqueId());
                                 }
                                 Instant end = Instant.now().plusSeconds(2592000);
                                 aranarthPlayer.setSaintExpireDate(end.toEpochMilli());
+                                // Active rank is the higher of the monthly or permanent rank
+                                aranarthPlayer.setSaintRank(Math.max(rank, aranarthPlayer.getPermanentSaintRank()));
                                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                             }
-                            DiscordUtils.updateSaint(player, rank, !silent);
+                            DiscordUtils.updateSaint(player, rank, !silent && canNotifyDiscord);
                             if (silent && rank > 0 && (sender instanceof Player || !AranarthCore.isSmpServer())) {
                                 String[] saintRankNames = {"", "&5&lAcolyte", "&5&lDisciple", "&5&lSeraph"};
-                                Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + name + " &7used vote points to purchase " + saintRankNames[rank]));
+                                Lang.broadcast("rankset.voteshop_broadcast", "player", name, "rank", saintRankNames[rank]);
                                 DiscordUtils.voteShopNotification(name + " used vote points to purchase " + saintRankNames[rank], player.getUniqueId(), Color.MAGENTA);
                             }
                             isSuccessful = true;
                         } else {
-                            sender.sendMessage(ChatUtils.chatMessage("&cThere is no rank with this value!"));
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "rank.not_found")));
                         }
                     }
 
@@ -165,6 +197,7 @@ public class CommandRankSet {
 
                     if (isSuccessful) {
                         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                        sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "rankset.success", "player", name, "type", args[1], "level", args[3])));
                         if (NetworkManager.isActive()) {
                             NetworkManager.getInstance().publishRankUpdate(player.getUniqueId(), aranarthPlayer.getRank(), aranarthPlayer.getCouncilRank(), aranarthPlayer.getSaintRank(), aranarthPlayer.getArchitectRank());
                         }
@@ -176,28 +209,28 @@ public class CommandRankSet {
                         if (sender instanceof Player || !AranarthCore.isSmpServer()) {
                             if (args[1].equals("saint") && rank > 0) {
                                 String[] saintRankNames = {"", "an &d&lAcolyte", "a &d&lDisciple", "a &d&lSeraph"};
-                                Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has donated and become " + saintRankNames[rank] + "&7!"));
+                                Lang.broadcast("rankset.saint_broadcast", "player", player.getName(), "rank", saintRankNames[rank]);
                             } else if (args[1].equals("council")) {
                                 if (args[3].equals("1")) {
-                                    Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become a &3&lHelper &7of &e&lThe Council!"));
+                                    Lang.broadcast("rankset.council_helper_broadcast", "player", player.getName());
                                 } else if (args[3].equals("2")) {
-                                    Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become a &6&lModerator &7of &e&lThe Council!"));
+                                    Lang.broadcast("rankset.council_mod_broadcast", "player", player.getName());
                                 } else if (args[3].equals("3")) {
-                                    Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become an &4&lAdmin &7of &e&lThe Council!"));
+                                    Lang.broadcast("rankset.council_admin_broadcast", "player", player.getName());
                                 }
                             } else if (args[1].equals("architect")) {
-                                Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become an &a&lArchitect &7of &6&lAranarth!"));
+                                Lang.broadcast("rankset.architect_broadcast", "player", player.getName());
                             }
                         }
                     }
                 } else {
-                    sender.sendMessage(ChatUtils.chatMessage("&cThat player was not found!"));
+                    sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", args[2])));
                 }
             } else {
-                sender.sendMessage(ChatUtils.chatMessage("&cThat is an invalid rank type!"));
+                sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "rankset.invalid_type")));
             }
         } else {
-            sender.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax! /ac rankset <rank type> <player name> <level>"));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac rankset <rank type> <player name> <level>")));
         }
         return true;
     }

@@ -1,19 +1,16 @@
 package com.aearost.aranarthcore;
 
-import com.aearost.aranarthcore.bending.RankCanBindHook;
 import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralProjection;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.PastLives;
-import com.aearost.aranarthcore.commands.council.CommandAC;
-import com.aearost.aranarthcore.commands.council.CommandACCompleter;
-import com.aearost.aranarthcore.commands.council.CommandEnchant;
-import com.aearost.aranarthcore.commands.council.CommandEnchantCompleter;
-import com.aearost.aranarthcore.commands.council.CommandTrash;
+import com.aearost.aranarthcore.abilities.earthbending.Tremorsense;
+import com.aearost.aranarthcore.bending.RankCanBindHook;
+import com.aearost.aranarthcore.commands.council.*;
 import com.aearost.aranarthcore.commands.general.*;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Weather;
-import com.aearost.aranarthcore.event.block.IncantationMagnetismBlockBreak;
+import com.aearost.aranarthcore.event.block.EssenceMagnetismBlockBreak;
 import com.aearost.aranarthcore.event.listener.*;
 import com.aearost.aranarthcore.event.listener.grouped.*;
 import com.aearost.aranarthcore.event.listener.misc.*;
@@ -21,14 +18,18 @@ import com.aearost.aranarthcore.event.mob.CaveSpiderPoisonExtract;
 import com.aearost.aranarthcore.event.mob.MountListener;
 import com.aearost.aranarthcore.event.world.WorldEventManager;
 import com.aearost.aranarthcore.integration.SquaremapIntegration;
+import com.aearost.aranarthcore.integration.WorldEditPlotIntegration;
+import com.aearost.aranarthcore.integration.WorldEditWorldGuard;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.PlotChunkGenerator;
 import com.aearost.aranarthcore.objects.VoidChunkGenerator;
 import com.aearost.aranarthcore.recipes.*;
 import com.aearost.aranarthcore.recipes.aranarthium.*;
 import com.aearost.aranarthcore.utils.*;
+import com.aearost.aranarthcore.voice.VoiceChatManager;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
@@ -39,8 +40,11 @@ import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.SimpleCommandMap;
+import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.FireworkMeta;
@@ -50,12 +54,9 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 public class AranarthCore extends JavaPlugin {
 
@@ -66,6 +67,7 @@ public class AranarthCore extends JavaPlugin {
     private RoleReactionListener roleReactionListener;
     private FireParticleListener fireParticleListener;
     private volatile boolean savedOnDisable = false;
+    private boolean configLoadFailed = false;
     private static volatile boolean shutdownHookMode = false;
 
     public static boolean isShutdownHookMode() {
@@ -133,74 +135,21 @@ public class AranarthCore extends JavaPlugin {
     /**
      * Resets the resource world automatically.
      * Called automatically on the 1st of Ignivór (new year).
+     * The resource worlds are only used on Survival, so the SMP server only launches the fireworks.
      */
     public static void resetResourceWorlds() {
-        String[] worldNames = {"resource", "resource_nether", "resource_the_end"};
-        World.Environment[] environments = {
-                World.Environment.NORMAL,
-                World.Environment.NETHER,
-                World.Environment.THE_END
-        };
+        if (!isSmpServer()) {
+            // Relayed to the SMP server by the broadcast relay
+            Lang.broadcast("resource.reset_broadcast");
 
-        Location spawnLocation = new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0);
+            // Record the reset time so offline players can be detected on next login
+            AranarthUtils.setLastResourceWorldResetTime(System.currentTimeMillis());
+            PersistenceUtils.saveServerDate();
 
-        Bukkit.broadcastMessage(ChatUtils.chatMessage(
-                "&5A new year has dawned! The resource world is being reset..."));
-
-        // Record the reset time so offline players can be detected on next login
-        AranarthUtils.setLastResourceWorldResetTime(System.currentTimeMillis());
-        PersistenceUtils.saveServerDate();
-
-        // Teleport any players in a resource world to Spawn immediately
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            String worldName = player.getWorld().getName();
-            for (String rWorld : worldNames) {
-                if (worldName.equals(rWorld)) {
-                    player.teleport(spawnLocation);
-                    player.sendMessage(ChatUtils.chatMessage(
-                            "&7You have been teleported to &eSpawn &7due to the resource world reset!"));
-                    break;
-                }
-            }
+            ResourceWorldUtils.startReset();
+        } else {
+            Bukkit.getLogger().info(LOG_PREFIX + "[ResourceReset] Skipping the resource world reset on the SMP server");
         }
-
-        // Unload, delete, and recreate each resource world
-        for (int i = 0; i < worldNames.length; i++) {
-            String worldName = worldNames[i];
-            World world = Bukkit.getWorld(worldName);
-
-            File worldFolder = null;
-            if (world != null) {
-                worldFolder = world.getWorldFolder();
-                Bukkit.unloadWorld(world, false);
-            } else {
-                worldFolder = new File(Bukkit.getWorldContainer(), worldName);
-            }
-
-            if (worldFolder.exists()) {
-                deleteDirectory(worldFolder);
-            }
-
-            WorldCreator wc = new WorldCreator(worldName);
-            wc.environment(environments[i]);
-            wc.type(WorldType.NORMAL);
-            World newWorld = wc.createWorld();
-
-            if (newWorld != null) {
-                newWorld.setGameRule(GameRules.SHOW_ADVANCEMENT_MESSAGES, false);
-                newWorld.setGameRule(GameRules.LOCATOR_BAR, false);
-                newWorld.getWorldBorder().setCenter(0, 0);
-                newWorld.getWorldBorder().setSize(5000);
-                ConsoleCommandSender console = Bukkit.getConsoleSender();
-                Bukkit.dispatchCommand(console, "chunky world " + worldName);
-                Bukkit.dispatchCommand(console, "chunky center 0 0");
-                Bukkit.dispatchCommand(console, "chunky radius 2500");
-                Bukkit.dispatchCommand(console, "chunky start");
-                Bukkit.getLogger().info(LOG_PREFIX + "Chunky pre-generation started for world: " + worldName);
-            }
-        }
-
-        Bukkit.broadcastMessage(ChatUtils.chatMessage("&5The resource world has been reset - &dHappy New Year!"));
         launchNewYearFireworks();
     }
 
@@ -225,7 +174,7 @@ public class AranarthCore extends JavaPlugin {
                 }
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     String worldName = player.getWorld().getName();
-                    if (worldName.equals("arena") || worldName.equals("creative")) {
+                    if (worldName.equals("arena") || worldName.startsWith("creative")) {
                         continue;
                     }
                     double offsetX = (random.nextDouble() - 0.5) * 5;
@@ -351,20 +300,6 @@ public class AranarthCore extends JavaPlugin {
         }.runTaskTimer(plugin, 0L, 10L);
     }
 
-    private static void deleteDirectory(File directory) {
-        File[] files = directory.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    deleteDirectory(file);
-                } else {
-                    boolean isFileDeleted = file.delete();
-                }
-            }
-        }
-        boolean isDirectoryDeleted = directory.delete();
-    }
-
     private static Material getFaeTrailFlower(Biome biome) {
         Random rng = new Random();
         if (biome == Biome.FLOWER_FOREST) {
@@ -401,6 +336,53 @@ public class AranarthCore extends JavaPlugin {
     }
 
     /**
+     * Reloads config.yml, adding any values from the bundled copy that are missing from the server's copy
+     * so newly added settings appear in the file with their defaults. Existing values are left untouched.
+     * If the server's copy cannot be parsed, saving is blocked until it is fixed so it is never overwritten with defaults.
+     */
+    @Override
+    public void reloadConfig() {
+        super.reloadConfig();
+        File configFile = new File(getDataFolder(), "config.yml");
+        configLoadFailed = false;
+        if (configFile.exists()) {
+            try {
+                new YamlConfiguration().load(configFile);
+            } catch (IOException | InvalidConfigurationException e) {
+                configLoadFailed = true;
+                getLogger().severe("config.yml could not be parsed - it will NOT be saved until fixed, to avoid overwriting it with defaults: " + e.getMessage());
+                return;
+            }
+        }
+
+        FileConfiguration config = getConfig();
+        Configuration defaults = config.getDefaults();
+        if (defaults == null) {
+            return;
+        }
+
+        for (String key : defaults.getKeys(true)) {
+            if (!defaults.isConfigurationSection(key) && !config.isSet(key)) {
+                config.options().copyDefaults(true);
+                saveConfig();
+                return;
+            }
+        }
+    }
+
+    /**
+     * Saves config.yml, unless the server's copy failed to parse on the last load.
+     */
+    @Override
+    public void saveConfig() {
+        if (configLoadFailed) {
+            getLogger().severe("Skipped saving config.yml because it failed to parse on load - fix the file and restart");
+            return;
+        }
+        super.saveConfig();
+    }
+
+    /**
      * Called when the plugin is first enabled on server startup.
      * Responsible for initializing all functionality of AranarthCore.
      */
@@ -408,6 +390,7 @@ public class AranarthCore extends JavaPlugin {
     public void onEnable() {
         plugin = this;
         saveDefaultConfig();
+        AbilityConfig.load(this);
 
         PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
         PacketEvents.getAPI().getSettings().reEncodeByDefault(false).checkForUpdates(false);
@@ -431,6 +414,7 @@ public class AranarthCore extends JavaPlugin {
             DatabaseManager.initialize(host, port, database, username, password);
         }
 
+        LangManager.getInstance().load();
         initializeUtils();
         initializeEvents();
         initializeRecipes();
@@ -447,6 +431,9 @@ public class AranarthCore extends JavaPlugin {
             commandMap.getKnownCommands().put("aranarthcore:mcstats", getCommand("mcstats"));
             commandMap.getKnownCommands().put("enchant", getCommand("enchant"));
             commandMap.getKnownCommands().put("aranarthcore:enchant", getCommand("enchant"));
+            // Simple Voice Chat registers its own /voicechat, so it must be overridden
+            commandMap.getKnownCommands().put("voicechat", getCommand("voicechat"));
+            commandMap.getKnownCommands().put("vc", getCommand("voicechat"));
         });
 
         // Purge expired reaper inventories once on startup, then every hour
@@ -486,6 +473,15 @@ public class AranarthCore extends JavaPlugin {
             squaremapIntegration.enable();
         }
 
+        // Restrict WorldEdit to the player's own plots in the Creative plots world (soft-depend)
+        if (!isSmpServer() && Bukkit.getPluginManager().isPluginEnabled("WorldEdit")) {
+            WorldEditPlotIntegration.enable();
+        }
+        // Players only get WorldEdit in the creative worlds, so it can never change a survival world
+        if (Bukkit.getPluginManager().isPluginEnabled("WorldEdit")) {
+            WorldEditWorldGuard.enable();
+        }
+
         // Start cross-server networking (NetworkManager) now that the DB is already connected.
         // Only on the public server.
         if (isPublicServer() && DatabaseManager.isActive()) {
@@ -499,6 +495,9 @@ public class AranarthCore extends JavaPlugin {
                 Bukkit.getLogger().info(LOG_PREFIX + "Cross-server networking enabled via MySQL");
             }
         }
+
+        // /vc channels (soft-depend - only if Simple Voice Chat is loaded)
+        VoiceChatManager.initialize(this);
 
         // Fallback shutdown hook for restarters (i.e UltimateAutoRestart) that may
         // terminate the JVM via System.exit() without triggering onDisable()
@@ -524,6 +523,10 @@ public class AranarthCore extends JavaPlugin {
                 // has a recent copy - limits inventory loss to at most 30 minutes on ungraceful shutdown.
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     try {
+                        // Their inventory and location here are not theirs until they are routed
+                        if (NetworkManager.isActive() && NetworkManager.getInstance().isNonAuthoritative(p.getUniqueId())) {
+                            continue;
+                        }
                         if (AranarthUtils.isSurvivalWorld(p.getWorld().getName())) {
                             AranarthPlayer ap = AranarthUtils.getPlayer(p.getUniqueId());
                             if (ap != null) {
@@ -575,7 +578,7 @@ public class AranarthCore extends JavaPlugin {
                 PersistenceUtils.saveDominions();
                 PersistenceUtils.saveDominionPermissions();
                 PersistenceUtils.saveDominionPlayerPermissions();
-                PersistenceUtils.saveDominionPlots();
+                PersistenceUtils.saveDominionRegions();
                 PersistenceUtils.saveOutposts();
                 if (!isSmpServer()) {
                     DominionUtils.checkAndProcessConquestDeadlines();
@@ -626,28 +629,6 @@ public class AranarthCore extends JavaPlugin {
                     ChatUtils.sendServerTips();
                 }
 
-                // TODO Re-enable once we do the Avatar event
-//				// Attempts to automatically assign an avatar if there currently is none
-//				if (AvatarUtils.getCurrentAvatar() == null) {
-//					boolean wasAvatarFound = AvatarUtils.selectAvatar(false);
-//					if (!wasAvatarFound) {
-//						Bukkit.getLogger().info("A new Avatar could not be selected");
-//					}
-//				} else {
-//					// Automatically removes an Avatar once they've been inactive for 7 days
-//					Avatar avatar = AvatarUtils.getCurrentAvatar();
-//					OfflinePlayer player = Bukkit.getOfflinePlayer(avatar.getUuid());
-//					if (!player.isOnline()) {
-//						Instant lastPlayed = Instant.ofEpochMilli(player.getLastPlayed());
-//						LocalDateTime playerLastPlayDate = LocalDateTime.ofInstant(lastPlayed, ZoneId.systemDefault());
-//						LocalDateTime currentDate = LocalDateTime.now();
-//						if (playerLastPlayDate.plusDays(7).isBefore(currentDate)) {
-//							Bukkit.getLogger().info("Avatar " + player.getName() + " has been inactive for 7 days");
-//							AvatarUtils.removeCurrentAvatar();
-//						}
-//					}
-//				}
-
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     PermissionUtils.reEvaluateMonthlySaints(player);
                 }
@@ -656,6 +637,13 @@ public class AranarthCore extends JavaPlugin {
                 CaveSpiderPoisonExtract.resetExtractionCounts();
             }
         }, 12000, 12000);
+
+        // Run every minute - the automatic Avatar selection and inactivity checks (Survival server only)
+        if (!isSmpServer()) {
+            Bukkit.getScheduler().scheduleSyncRepeatingTask(this, AvatarUtils::runScheduledChecks, 1200, 1200);
+            // Refreshes the mannequins in case the Avatars changed while this server was offline
+            Bukkit.getScheduler().runTaskLater(this, AvatarUtils::refreshAvatarMannequins, 200);
+        }
 
         // Check every 5 seconds to update Aranarthium effects, and to see if it is a new day
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
@@ -670,6 +658,9 @@ public class AranarthCore extends JavaPlugin {
                 AranarthUtils.updateAfkLocations();
                 AranarthUtils.updateTab();
                 QuestUtils.checkAndPerformResets();
+                if (NetworkManager.isActive()) {
+                    NetworkManager.getInstance().publishPingUpdates();
+                }
                 if (roleReactionListener != null) {
                     roleReactionListener.pollReactions();
                 }
@@ -813,6 +804,9 @@ public class AranarthCore extends JavaPlugin {
             }
         }, 0, 3);
 
+        // Increased XP orb pickup range for Soulbound Aranarthium
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, AranarthUtils::applySoulboundXpMagnet, 0, 2);
+
         // Flower trail for Fae Aranarthium in Fae biomes - random 1-10 tick interval, only when moving
         scheduleFaeFlowerTrail();
 
@@ -838,7 +832,7 @@ public class AranarthCore extends JavaPlugin {
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                     if (aranarthPlayer.isTogglingChat()) {
-                        player.sendMessage(ChatUtils.chatMessage("&7Your chat is currently &cdisabled&7. Use &e/toggle chat &7to re-enable it."));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.chat_muted_toggle")));
                     }
                 }
             }
@@ -852,7 +846,7 @@ public class AranarthCore extends JavaPlugin {
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             @Override
             public void run() {
-                IncantationMagnetismBlockBreak.tickMagnetismPull();
+                EssenceMagnetismBlockBreak.tickMagnetismPull();
             }
         }, 2L, 2L);
 
@@ -860,9 +854,10 @@ public class AranarthCore extends JavaPlugin {
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                if (aranarthPlayer == null || !aranarthPlayer.isAutoClaimEnabled()) {
+                if (aranarthPlayer == null || (!aranarthPlayer.isAutoClaimEnabled() && aranarthPlayer.getAutoClaimRegion() == null)) {
                     continue;
                 }
+                String autoClaimRegion = aranarthPlayer.getAutoClaimRegion();
                 String worldName = player.getWorld().getName();
                 if (!worldName.startsWith("world") && !worldName.startsWith("smp")) {
                     continue;
@@ -878,7 +873,23 @@ public class AranarthCore extends JavaPlugin {
                         Dominion chunkDominion = DominionUtils.getDominionOfChunk(chunk);
 
                         Color particleColor;
-                        if (chunkDominion == null) {
+                        if (autoClaimRegion != null) {
+                            // Region auto-claim only works within the player's own Dominion
+                            if (chunkDominion == null || playerDominion == null || !chunkDominion.isSameDominion(playerDominion)) {
+                                continue;
+                            }
+                            String chunkRegion = chunkDominion.getRegionChunkNames().get(DominionUtils.getChunkKey(chunk));
+                            if (chunkRegion == null) {
+                                // Not in a region yet - white
+                                particleColor = Color.WHITE;
+                            } else if (chunkRegion.equals(autoClaimRegion)) {
+                                // Already in this region - lime green
+                                particleColor = Color.LIME;
+                            } else {
+                                // Part of a different region - orange
+                                particleColor = Color.ORANGE;
+                            }
+                        } else if (chunkDominion == null) {
                             // Unclaimed - white
                             particleColor = Color.WHITE;
                         } else if (playerDominion != null && chunkDominion.isSameDominion(playerDominion)) {
@@ -952,6 +963,9 @@ public class AranarthCore extends JavaPlugin {
                 }
             }
         }, 1L, 1L);
+
+        // Manage Tremorsense passive glow block (runs every 4 ticks)
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> Tremorsense.managePassiveGlow(Bukkit.getServer()), 0L, 4L);
     }
 
     /**
@@ -984,6 +998,7 @@ public class AranarthCore extends JavaPlugin {
         }
         if (db) {
             PersistenceUtils.loadMarketDynamicsFromDatabase();
+            PersistenceUtils.loadTradeMarketDataFromDatabase();
         }
         ShopUtils.initializeAllHolograms();
         if (db) {
@@ -1008,9 +1023,9 @@ public class AranarthCore extends JavaPlugin {
             PersistenceUtils.loadDominionPlayerPermissions();
         }
         if (db) {
-            PersistenceUtils.loadDominionPlotsFromDatabase();
+            PersistenceUtils.loadDominionRegionsFromDatabase();
         } else {
-            PersistenceUtils.loadDominionPlots();
+            PersistenceUtils.loadDominionRegions();
         }
         if (db) {
             PersistenceUtils.loadOutpostsFromDatabase();
@@ -1063,6 +1078,12 @@ public class AranarthCore extends JavaPlugin {
                 PersistenceUtils.loadShopCollaborators();
             }
         }
+        // Creative plots are loaded on both servers so /plot list and /plot home work from the SMP
+        if (db) {
+            PersistenceUtils.loadCreativePlotsFromDatabase();
+        } else {
+            PersistenceUtils.loadCreativePlots();
+        }
         // Sentinels and toggles must load after aranarth players
         if (db) {
             PersistenceUtils.loadSentinelsFromDatabase();
@@ -1102,6 +1123,7 @@ public class AranarthCore extends JavaPlugin {
         BrewRecipeUtils.initialize(this);
         MobHeadUtils.initialize(this);
         HeadsDatabaseManager.initialize(this);
+        CouponUtils.initialize(getDataFolder());
         // Load shared quest reset timestamps from DB so both servers stay synchronized
         if (db) {
             try {
@@ -1175,6 +1197,7 @@ public class AranarthCore extends JavaPlugin {
         new PlayerInteractEntityEventListener(this);
         new PlayerShearEntityEventListener(this);
         new PlayerMoveEventListener(this);
+        new ElvenDoubleJumpListener(this);
         new EntityChangeBlockEventListener(this);
         new EntityPickupItemEventListener(this);
         new CreatureSpawnEventListener(this);
@@ -1187,6 +1210,7 @@ public class AranarthCore extends JavaPlugin {
         new EntityTargetEventListener(this);
         new EntityDeathEventListener(this);
         new EntityShootBowEventListener(this);
+        new PlayerElytraBoostEventListener(this);
         new BlockFormEventListener(this);
         new BlockPhysicsEventListener(this);
         new ProjectileHitEventListener(this);
@@ -1201,6 +1225,9 @@ public class AranarthCore extends JavaPlugin {
         new LootGenerateEventListener(this);
         new WrenchEnchantListener(this);
         new EnchanterLockoutListener(this);
+        new OverLeveledAnvilListener(this);
+        new EssenceImbueListener(this);
+        new EnchantingListener(this);
 
         // Multi-event listeners for single purpose
         new InvisibleItemFrameListener(this);
@@ -1208,19 +1235,25 @@ public class AranarthCore extends JavaPlugin {
         new SoilTrampleListener(this);
         new CraftingOverridesListener(this);
         new PotionConsumeListener(this);
+        new WaterbendingBottleRefillListener(this);
         new PlayerRespawnEventListener(this);
+        new PlayerGameModeChangeEventListener(this);
         new DominionProtectionListener(this);
         new SpawnProtectionListener(this);
         new ShopProtectionListener(this);
+        new PlotProtectionListener(this);
+        new CreativeItemListener(this);
         new PortalEventListener(this);
         new ArenaProtection(this);
         new FireProtectionListener(this);
         new SleepSkipListener(this);
+        new AfkActivityListener(this);
         new BoostEffectsListener(this);
         new McMMOListener(this);
         new LeafDropsListener(this);
         new AranarthCoreBendingListener(this);
         new MountStatsListener(this);
+        new SitListener(this);
         new MountListener(this);
         new PotionAlchemyExpListener(this);
         new TamedPetStealPreventListener(this);
@@ -1230,6 +1263,7 @@ public class AranarthCore extends JavaPlugin {
         new PlayerCommandSendEventListener(this);
         new PlayerServerJoinListener(this);
         new PlayerServerQuitListener(this);
+        new TransferLockListener(this);
         new ChatGameListener(this);
         new PlayerChatListener(this);
         new BroadcastRelayListener(this);
@@ -1245,6 +1279,7 @@ public class AranarthCore extends JavaPlugin {
         new BrewingListener(this);
         new BrewRecipeUnlockListener(this);
         new BrewRecipeAutoUnlockListener(this);
+        new BrewAlchemyXpListener(this);
         new ShopCreateListener(this);
         new ShopHologramChunkListener(this);
         new WeatherChangeListener(this);
@@ -1325,6 +1360,7 @@ public class AranarthCore extends JavaPlugin {
         new RecipePaleMossBlock(this);
         new RecipePaleMossCarpet(this);
         new RecipeHoneycombBlockUncraft(this);
+        new RecipeHoneyBlockSugar(this);
         new RecipeBeeNest(this);
         new RecipeCopperExposed(this);
         new RecipeCopperWeathered(this);
@@ -1336,6 +1372,7 @@ public class AranarthCore extends JavaPlugin {
         new RecipeScorchedAranarthium(this);
         new RecipeArdentAranarthium(this);
         new RecipeSoulboundAranarthium(this);
+        new RecipeEssences(this);
         new com.aearost.aranarthcore.recipes.aranarthium.RecipeFaeAranarthium(this);
         new RecipeGodApple(this);
         new RecipeGreenDye(this);
@@ -1351,9 +1388,11 @@ public class AranarthCore extends JavaPlugin {
         getCommand("ac").setTabCompleter(new CommandACCompleter());
         getCommand("afk").setExecutor(new CommandAfk());
         getCommand("anvil").setExecutor(new CommandAnvil());
-        getCommand("aranarthium").setExecutor(new CommandAranarthium());
+        getCommand("aranarth").setExecutor(new CommandAranarth());
+        getCommand("aranarth").setTabCompleter(new CommandAranarthCompleter());
         getCommand("arena").setExecutor(new CommandArena());
         getCommand("avatar").setExecutor(new CommandAvatar());
+        getCommand("avatar").setTabCompleter(new CommandAvatarCompleter());
         getCommand("back").setExecutor(new CommandBack());
         getCommand("balance").setExecutor(new CommandBalance());
         getCommand("balance").setTabCompleter(new CommandBalanceCompleter());
@@ -1362,7 +1401,6 @@ public class AranarthCore extends JavaPlugin {
         getCommand("blacklist").setTabCompleter(new CommandBlacklistCompleter());
         getCommand("boosts").setExecutor(new CommandBoosts());
         getCommand("boosts").setTabCompleter(new CommandBoostsCompleter());
-        getCommand("calendar").setExecutor(new CommandCalendar());
         getCommand("cartography").setExecutor(new CommandCartography());
         getCommand("compressor").setExecutor(new CommandCompressor());
         getCommand("condense").setExecutor(new CommandCondense());
@@ -1370,6 +1408,7 @@ public class AranarthCore extends JavaPlugin {
         getCommand("countdown").setExecutor(new CommandCountdown());
         getCommand("countdown").setTabCompleter(new CommandCountdownCompleter());
         getCommand("creative").setExecutor(new CommandCreative());
+        getCommand("creative").setTabCompleter(new CommandCreativeCompleter());
         getCommand("date").setExecutor(new CommandDate());
         getCommand("deaths").setExecutor(new CommandDeaths());
         getCommand("deaths").setTabCompleter(new CommandDeathsCompleter());
@@ -1384,11 +1423,11 @@ public class AranarthCore extends JavaPlugin {
         getCommand("grindstone").setExecutor(new CommandGrindstone());
         getCommand("hat").setExecutor(new CommandHat());
         getCommand("heads").setExecutor(new CommandHeads());
+        getCommand("heads").setTabCompleter(new CommandHeadsCompleter());
         getCommand("home").setExecutor(new CommandHome());
         getCommand("home").setTabCompleter(new CommandHomeCompleter());
         getCommand("homepad").setExecutor(new CommandHomePad());
         getCommand("homepad").setTabCompleter(new CommandHomePadCompleter());
-        getCommand("incantations").setExecutor(new CommandIncantations());
         getCommand("info").setExecutor(new CommandInfo());
         getCommand("info").setTabCompleter(new CommandInfoCompleter());
         getCommand("itemname").setExecutor(new CommandItemName());
@@ -1396,6 +1435,8 @@ public class AranarthCore extends JavaPlugin {
         getCommand("keyclaim").setExecutor(new CommandKeyClaim());
         getCommand("kills").setExecutor(new CommandKills());
         getCommand("kills").setTabCompleter(new CommandKillsCompleter());
+        getCommand("language").setExecutor(new CommandLanguage());
+        getCommand("language").setTabCompleter(new CommandLanguageCompleter());
         getCommand("lock").setExecutor(new CommandLock());
         getCommand("loom").setExecutor(new CommandLoom());
         getCommand("message").setExecutor(new CommandMessage());
@@ -1409,6 +1450,8 @@ public class AranarthCore extends JavaPlugin {
         getCommand("pay").setTabCompleter(new CommandPayCompleter());
         getCommand("pettransfer").setExecutor(new CommandPetTransfer());
         getCommand("pettransfer").setTabCompleter(new CommandPetTransferCompleter());
+        getCommand("plot").setExecutor(new CommandPlot());
+        getCommand("plot").setTabCompleter(new CommandPlotCompleter());
         getCommand("ping").setExecutor(new CommandPing());
         getCommand("ping").setTabCompleter(new CommandPingCompleter());
         getCommand("potions").setExecutor(new CommandPotions());
@@ -1432,6 +1475,7 @@ public class AranarthCore extends JavaPlugin {
         getCommand("shop").setTabCompleter(new CommandShopCompleter());
         getCommand("smithing").setExecutor(new CommandSmithing());
         getCommand("smp").setExecutor(new CommandSMP());
+        getCommand("smpcreative").setExecutor(new CommandSmpCreative());
         getCommand("sounds").setExecutor(new CommandSounds());
         getCommand("spawn").setExecutor(new CommandSpawn());
         getCommand("stonecutter").setExecutor(new CommandStonecutter());
@@ -1450,6 +1494,10 @@ public class AranarthCore extends JavaPlugin {
         getCommand("tpaccept").setExecutor(new CommandTpAccept());
         getCommand("tpdeny").setExecutor(new CommandTpDeny());
         getCommand("tphere").setExecutor(new CommandTpHere());
+        getCommand("trade").setExecutor(new CommandTrade());
+        getCommand("trade").setTabCompleter(new CommandTradeCompleter());
+        getCommand("marketvalue").setExecutor(new CommandMarketValue());
+        getCommand("marketvalue").setTabCompleter(new CommandMarketValueCompleter());
         getCommand("trash").setExecutor(new CommandTrash());
         getCommand("trust").setExecutor(new CommandTrust());
         getCommand("trust").setTabCompleter(new CommandTrustCompleter());
@@ -1462,6 +1510,8 @@ public class AranarthCore extends JavaPlugin {
         getCommand("voteshop").setExecutor(new CommandVoteShop());
         getCommand("vptransfer").setExecutor(new CommandVpTransfer());
         getCommand("vptransfer").setTabCompleter(new CommandVpTransferCompleter());
+        getCommand("voicechat").setExecutor(new CommandVoiceChat());
+        getCommand("voicechat").setTabCompleter(new CommandVoiceChatCompleter());
         getCommand("warp").setExecutor(new CommandWarp());
         getCommand("warp").setTabCompleter(new CommandWarpCompleter());
         getCommand("quests").setExecutor(new CommandQuests());
@@ -1469,16 +1519,87 @@ public class AranarthCore extends JavaPlugin {
         getCommand("streak").setExecutor(new CommandStreak());
         getCommand("mount").setExecutor(new CommandMount());
         getCommand("mount").setTabCompleter(new CommandMountCompleter());
+        getCommand("sit").setExecutor(new CommandSit());
+        getCommand("sit").setTabCompleter(new CommandSitCompleter());
         getCommand("mctop").setExecutor(new CommandMctop());
         getCommand("mctop").setTabCompleter(new CommandMctopCompleter());
         getCommand("mcstats").setExecutor(new CommandMcstats());
         getCommand("mcstats").setTabCompleter(new CommandMcstatsCompleter());
+        getCommand("enchanting").setExecutor(new CommandEnchanting());
+        getCommand("enchanting").setTabCompleter(new CommandEnchantingCompleter());
         getCommand("mail").setExecutor(new CommandMail());
         getCommand("mail").setTabCompleter(new CommandMailCompleter());
         getCommand("map").setExecutor(new CommandMap());
         getCommand("smpmap").setExecutor(new CommandSmpMap());
         getCommand("brewbook").setExecutor(new CommandBrewBook());
         getCommand("brewbook").setTabCompleter(new CommandBrewBookCompleter());
+    }
+
+    /**
+     * Loads or creates the Creative plots world.
+     */
+    private void loadCreativePlotsWorld() {
+        PlotUtils.loadPattern();
+        if (Bukkit.getWorld(PlotUtils.WORLD_NAME) != null) {
+            return;
+        }
+        File worldFolder = PlotUtils.getWorldFolder(PlotUtils.WORLD_NAME);
+        boolean isNewWorld = worldFolder == null;
+        if (!isNewWorld && !new File(worldFolder, PlotUtils.MARKER_FILE).exists()) {
+            Bukkit.getLogger().severe(LOG_PREFIX + "[Plots] The \"" + PlotUtils.WORLD_NAME + "\" folder is the SMP creative world."
+                    + " It was NOT loaded to protect it. Move it to the SMP server and restart to generate the plots world");
+            return;
+        }
+
+        WorldCreator wc = new WorldCreator(PlotUtils.WORLD_NAME);
+        wc.environment(World.Environment.NORMAL);
+        wc.generator(new PlotChunkGenerator());
+        World world = wc.createWorld();
+        if (world == null) {
+            return;
+        }
+        world.setGameRule(GameRules.SPAWN_MOBS, false);
+        world.setGameRule(GameRules.ADVANCE_WEATHER, false);
+        world.setGameRule(GameRules.ADVANCE_TIME, false);
+        world.setGameRule(GameRules.SHOW_ADVANCEMENT_MESSAGES, false);
+        world.setGameRule(GameRules.LOCATOR_BAR, false);
+        world.setSpawnLocation(PlotUtils.getSpawnLocation(world));
+
+        if (isNewWorld) {
+            try {
+                File marker = new File(PlotUtils.getWorldFolder(PlotUtils.WORLD_NAME), PlotUtils.MARKER_FILE);
+                if (!marker.createNewFile()) {
+                    Bukkit.getLogger().warning(LOG_PREFIX + "[Plots] Could not create the plots world marker file");
+                }
+            } catch (Exception e) {
+                Bukkit.getLogger().warning(LOG_PREFIX + "[Plots] Could not create the plots world marker file: " + e.getMessage());
+            }
+            // The border is fitted to whole rings of plots, as close to the configured size as possible
+            int borderSize = getConfig().getInt("creative-plots.border-size", 2500); // Expandable via /creative expand <amount>
+            PlotUtils.setRings(world, PlotUtils.getRingsForBorderSize(borderSize));
+        }
+    }
+
+    /**
+     * Loads the SMP creative world.
+     */
+    private void loadCreativeSmpWorld() {
+        if (Bukkit.getWorld(PlotUtils.WORLD_NAME) != null) {
+            return;
+        }
+        File worldFolder = PlotUtils.getWorldFolder(PlotUtils.WORLD_NAME);
+        if (worldFolder == null || !new File(worldFolder, "region").isDirectory()) {
+            Bukkit.getLogger().info(LOG_PREFIX + "[Plots] No \"" + PlotUtils.WORLD_NAME + "\" world folder found - skipping");
+            return;
+        }
+        WorldCreator wc = new WorldCreator(PlotUtils.WORLD_NAME);
+        wc.environment(World.Environment.NORMAL);
+        wc.type(WorldType.FLAT);
+        World world = wc.createWorld();
+        if (world != null) {
+            world.setGameRule(GameRules.SHOW_ADVANCEMENT_MESSAGES, false);
+            world.setGameRule(GameRules.LOCATOR_BAR, false);
+        }
     }
 
     /**
@@ -1506,6 +1627,9 @@ public class AranarthCore extends JavaPlugin {
                 wc.type(WorldType.NORMAL);
                 wc.createWorld();
             }
+
+            // The creative world, transferred from the Survival server
+            loadCreativeSmpWorld();
 
             // Disable advancement announcements and locator bar in SMP worlds
             for (World w : Bukkit.getWorlds()) {
@@ -1587,12 +1711,7 @@ public class AranarthCore extends JavaPlugin {
             wc.type(WorldType.FLAT);
             wc.createWorld();
         }
-        if (Bukkit.getWorld("creative") == null) {
-            WorldCreator wc = new WorldCreator("creative");
-            wc.environment(World.Environment.NORMAL);
-            wc.type(WorldType.FLAT);
-            wc.createWorld();
-        }
+        loadCreativePlotsWorld();
 
         // Spawn (void world)
         if (Bukkit.getWorld("spawn") == null) {
@@ -1664,12 +1783,14 @@ public class AranarthCore extends JavaPlugin {
     @Override
     public void onDisable() {
         savedOnDisable = true;
+        SitUtils.standUpAll();
         saveAll();
 
         if (squaremapIntegration != null) {
             squaremapIntegration.disable();
         }
 
+        VoiceChatManager.shutdown();
         NetworkManager.shutdown();
         DatabaseManager.shutdown();
 
@@ -1699,6 +1820,17 @@ public class AranarthCore extends JavaPlugin {
         Bukkit.getLogger().info(LOG_PREFIX + "[Shutdown] saveAll() called - " + onlinePlayers.size() + " player(s) still online.");
         for (Player p : onlinePlayers) {
             try {
+                // Both servers auto-restart around the same time, so SMP players can get bounced here
+                // seconds before this server also shuts down. SMP already saved their data and location,
+                // so writing ours would send them to Survival on next login and could overwrite SMP's data.
+                // The same applies to anyone still waiting to be routed to the server that holds their inventory
+                if (NetworkManager.isActive() && (NetworkManager.getInstance().isRecentFallbackLanding(p.getUniqueId())
+                        || NetworkManager.getInstance().isNonAuthoritative(p.getUniqueId()))) {
+                    Bukkit.getLogger().info(LOG_PREFIX + "[Shutdown] Skipping player row and last location for "
+                            + p.getName() + " - landed here as a fallback less than a minute ago");
+                    p.saveData();
+                    continue;
+                }
                 if (AranarthUtils.isSurvivalWorld(p.getWorld().getName())) {
                     AranarthPlayer ap = AranarthUtils.getPlayer(p.getUniqueId());
                     if (ap != null) {
@@ -1742,6 +1874,16 @@ public class AranarthCore extends JavaPlugin {
             }
         }
 
+        // On SMP shutdown: write a fallback inventory snapshot for each online player so
+        // Survival can restore it if Velocity routes them there during the restart window.
+        // The periodic task (every 30s) is the primary mechanism; this is a belt-and-suspenders
+        // write for the final seconds before the server stops accepting connections.
+        if (isSmpServer() && NetworkManager.isActive()) {
+            for (Player p : onlinePlayers) {
+                NetworkManager.getInstance().writeSmpFallbackSnapshot(p);
+            }
+        }
+
         // End all active AstralProjections/cancel the abilities
         AstralProjection.endAllProjections();
         PastLives.endAllInstances();
@@ -1767,7 +1909,7 @@ public class AranarthCore extends JavaPlugin {
         PersistenceUtils.saveDominions();
         PersistenceUtils.saveDominionPermissions();
         PersistenceUtils.saveDominionPlayerPermissions();
-        PersistenceUtils.saveDominionPlots();
+        PersistenceUtils.saveDominionRegions();
         PersistenceUtils.saveOutposts();
         if (!isSmpServer()) {
             PersistenceUtils.saveDefenders();

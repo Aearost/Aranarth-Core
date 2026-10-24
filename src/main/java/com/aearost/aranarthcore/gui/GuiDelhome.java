@@ -3,8 +3,7 @@ package com.aearost.aranarthcore.gui;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -30,18 +29,18 @@ public class GuiDelhome {
 	private Inventory initializeGui(Player player) {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		int guiSize = aranarthPlayer.getHomes().size();
-		String guiName = "Delete Home";
+		String guiName = Lang.getFor(player, "gui.delhome.title");
 
 		if (guiSize % 9 != 0) {
 			guiSize = ((int) (double) (guiSize / 9) + 1) * 9;
 		}
 
-		Inventory gui = Bukkit.getServer().createInventory(player, guiSize, guiName);
+		Inventory gui = GuiHolder.create(player, guiSize, guiName);
 
 		for (Home home : aranarthPlayer.getHomes()) {
 			ItemStack homeItem = new ItemStack(home.getIcon(), 1);
 			ItemMeta homeItemMeta = homeItem.getItemMeta();
-			homeItemMeta.setDisplayName(ChatUtils.translateToColor("&c" + home.getName()));
+			homeItemMeta.setDisplayName(Lang.getFor(player, "gui.delhome.home_name", "name", home.getName()));
 			homeItem.setItemMeta(homeItemMeta);
 			gui.addItem(homeItem);
 		}

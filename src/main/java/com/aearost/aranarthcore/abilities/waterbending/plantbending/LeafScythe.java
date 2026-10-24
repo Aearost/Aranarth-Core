@@ -2,9 +2,10 @@ package com.aearost.aranarthcore.abilities.waterbending.plantbending;
 
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.QuestTaskType;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.utils.AbilityConfig;
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.CropUtils;
@@ -64,13 +65,14 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
 
     private static final Particle.DustOptions SCYTHE_DUST =
             new Particle.DustOptions(Color.fromRGB(0, 90, 10), 0.6f);
-    private static final long SOURCED_TIMEOUT_MS = 5000;
+    private long sourcedTimeout;
     private static final int SLASH_TICKS = 20;
     private static final int RENDER_SUB_STEPS = 8;
     private static final int HIT_SUB_STEPS = 6;
     private static final double YAW_THRESHOLD = 0.01;
     private static final int NO_MOVEMENT_TICKS = 3;
-    private static final double HIT_RADIUS = 1.5;
+    private double hitRadius;
+    private double bladeDamageMultiplier;
     private static final double PARTICLE_SPACING = 0.4;
 
     /**
@@ -99,9 +101,12 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
             return;
         }
 
-        cooldown = 6000;
-        selectRange = 8;
-        damage = 4.0; // 2 hearts (blade hits deal 1.5× - 3 hearts)
+        cooldown = AbilityConfig.getLong("LeafScythe.Cooldown");
+        selectRange = AbilityConfig.getInt("LeafScythe.SelectRange");
+        damage = AbilityConfig.getDouble("LeafScythe.Damage");
+        sourcedTimeout = AbilityConfig.getLong("LeafScythe.SourcedTimeout");
+        hitRadius = AbilityConfig.getDouble("LeafScythe.HitRadius");
+        bladeDamageMultiplier = AbilityConfig.getDouble("LeafScythe.BladeDamageMultiplier");
 
         Block found = BlockSource.getWaterSourceBlock(player, selectRange, ClickType.LEFT_CLICK, false, false, bPlayer.canPlantbend());
         if (found == null || !isValidPlantSource(found)) {
@@ -134,7 +139,7 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
     }
 
     private void progressSourced() {
-        if (System.currentTimeMillis() - sourcedStartTime > SOURCED_TIMEOUT_MS) {
+        if (System.currentTimeMillis() - sourcedStartTime > sourcedTimeout) {
             cancelInstantly();
             return;
         }
@@ -256,12 +261,12 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
                     .add(bladeDir.clone().multiply(offset[1]));
             Location center = pos.toLocation(world);
             boolean isBlade = offset[1] > 0;
-            for (Entity entity : world.getNearbyEntities(center, HIT_RADIUS, HIT_RADIUS, HIT_RADIUS)) {
+            for (Entity entity : world.getNearbyEntities(center, hitRadius, hitRadius, hitRadius)) {
                 if (!(entity instanceof LivingEntity living) || living.equals(player)) {
                     continue;
                 }
                 if (hitEntities.add(living.getUniqueId())) {
-                    living.damage(isBlade ? damage * 1.5 : damage, player);
+                    living.damage(isBlade ? damage * bladeDamageMultiplier : damage, player);
                     hitLivingEntity = true;
                 }
             }
@@ -296,24 +301,23 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
             return;
         }
 
-        // Dominion protection check
+        // Same protection as harvesting by hand, where enemies may also harvest crops (including in outposts)
         if (AranarthUtils.isSpawnLocation(block.getLocation())) {
             return;
         }
-        Dominion blockDominion = DominionUtils.getDominionOfChunk(block.getChunk());
-        if (blockDominion != null) {
-            Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
-            if (playerDominion == null || !playerDominion.isSameDominion(blockDominion)) {
-                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                boolean isEnemied = playerDominion != null && playerDominion.isEnemied(blockDominion);
-                if (!aranarthPlayer.isInAdminMode() && !isEnemied) {
-                    return;
-                }
-            }
+        Dominion blockDominion = DominionUtils.getDominionOfChunkAnywhere(block.getChunk());
+        Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+        boolean isEnemyCrop = blockDominion != null && playerDominion != null && playerDominion.isEnemied(blockDominion);
+        if (!isEnemyCrop && !AranarthBendingUtils.canBendBlock(player, block)) {
+            return;
         }
 
-        JobUtils.awardFarmerCropHarvest(player, block.getType());
-        QuestUtils.updateProgress(player, QuestTaskType.HARVEST_CROPS, 1);
+        // Rewards are only given in the survival worlds, like harvesting by hand
+        boolean isRewarded = AranarthUtils.isSurvivalWorld(block.getWorld().getName());
+        if (isRewarded) {
+            JobUtils.awardFarmerCropHarvest(player, block.getType());
+            QuestUtils.updateProgress(player, QuestTaskType.HARVEST_CROPS, 1);
+        }
 
         // Get vanilla fortune-based drops, then scale by seasonal yield multiplier
         ArrayList<ItemStack> drops = new ArrayList<>(block.getDrops(player.getInventory().getItemInMainHand()));
@@ -366,7 +370,7 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
         block.setBlockData(crop);
 
         McMMOPlayer mcmmoPlayer = EventUtils.getMcMMOPlayer(player);
-        if (mcmmoPlayer != null) {
+        if (isRewarded && mcmmoPlayer != null) {
             HerbalismManager herbalismManager = new HerbalismManager(mcmmoPlayer);
             HashSet<Block> brokenBlocks = new HashSet<>();
             brokenBlocks.add(block);
@@ -400,7 +404,7 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
 
     private void finishAbility() {
         if (!harvestedCrops.isEmpty() && !hitLivingEntity) {
-            cooldown = 500;
+            cooldown = AbilityConfig.getLong("LeafScythe.HarvestCooldown");
         }
         bPlayer.addCooldown(this);
         remove();

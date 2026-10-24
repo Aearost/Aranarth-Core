@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.earthbending.metalbending;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -26,8 +27,8 @@ import java.util.UUID;
  */
 public class CableThrash extends MetalAbility implements AddonAbility {
 
-    private static final long CAST_DURATION_MS = 1500L;
-    private static final long DAMAGE_INTERVAL_MS = 500L;
+    private long duration;
+    private long damageInterval;
     private static final long SOUND_INTERVAL_MS = 450L;
     private static final int CABLE_SEGMENTS = 26;
 
@@ -64,9 +65,11 @@ public class CableThrash extends MetalAbility implements AddonAbility {
             return;
         }
 
-        this.cooldown = 7000L;
-        this.damage = 2.0;
-        this.radius = 4.0;
+        this.cooldown = AbilityConfig.getLong("CableThrash.Cooldown");
+        this.damage = AbilityConfig.getDouble("CableThrash.Damage");
+        this.radius = AbilityConfig.getDouble("CableThrash.Radius");
+        this.duration = AbilityConfig.getLong("CableThrash.Duration");
+        this.damageInterval = AbilityConfig.getLong("CableThrash.DamageInterval");
         this.castStartTime = System.currentTimeMillis();
         this.lastDamageTime = System.currentTimeMillis();
         this.lastSoundTime = System.currentTimeMillis();
@@ -93,7 +96,7 @@ public class CableThrash extends MetalAbility implements AddonAbility {
 
         final long now = System.currentTimeMillis();
 
-        if (now - castStartTime >= CAST_DURATION_MS) {
+        if (now - castStartTime >= duration) {
             endWithCooldown();
             return;
         }
@@ -103,7 +106,7 @@ public class CableThrash extends MetalAbility implements AddonAbility {
         spawnCableParticles();
         refreshEntityTracking();
 
-        if (now - lastDamageTime >= DAMAGE_INTERVAL_MS) {
+        if (now - lastDamageTime >= damageInterval) {
             damageEntities();
             lastDamageTime = now;
         }

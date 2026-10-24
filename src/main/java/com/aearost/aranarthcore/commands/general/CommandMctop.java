@@ -1,10 +1,12 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.gui.GuiHolder;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiMctop;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.gmail.nossr50.api.exceptions.InvalidSkillException;
 import com.gmail.nossr50.datatypes.database.PlayerStat;
@@ -21,6 +23,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
@@ -28,10 +33,12 @@ import java.util.stream.Collectors;
  */
 public class CommandMctop implements CommandExecutor {
 
+    private static final ExecutorService SKIN_EXECUTOR = Executors.newFixedThreadPool(8);
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
             return true;
         }
 
@@ -40,12 +47,12 @@ public class CommandMctop implements CommandExecutor {
             try {
                 skill = PrimarySkillType.valueOf(args[0].toUpperCase());
             } catch (IllegalArgumentException e) {
-                player.sendMessage(ChatUtils.chatMessage("&cUnknown skill &e" + args[0]));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mctop.unknown_skill", "skill", args[0])));
                 return true;
             }
 
             if (SkillTools.isChildSkill(skill)) {
-                player.sendMessage(ChatUtils.chatMessage("&c" + args[0] + " &cis a child skill and does not have a leaderboard"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mctop.child_skill", "skill", args[0])));
                 return true;
             }
         }
@@ -82,29 +89,36 @@ public class CommandMctop implements CommandExecutor {
                 return;
             }
 
-            // Complete each player's profile
-            Map<String, PlayerProfile> profiles = new LinkedHashMap<>();
-            for (PlayerStat stat : leaderboard) {
-                PlayerProfile profile = Bukkit.createProfile(null, stat.playerName());
-                profile.complete(true);
-                profiles.put(stat.playerName(), profile);
+            // Complete each player's profile in parallel
+            final List<PlayerStat> finalLeaderboard = leaderboard;
+            List<CompletableFuture<Map.Entry<String, PlayerProfile>>> futures = new ArrayList<>();
+            for (PlayerStat stat : finalLeaderboard) {
+                futures.add(CompletableFuture.supplyAsync(() -> {
+                    PlayerProfile profile = Bukkit.createProfile(null, stat.playerName());
+                    profile.complete(true);
+                    return Map.entry(stat.playerName(), profile);
+                }, SKIN_EXECUTOR));
             }
 
-            final List<PlayerStat> finalLeaderboard = leaderboard;
-            final Map<String, PlayerProfile> finalProfiles = profiles;
-
-            Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
-                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                aranarthPlayer.setCurrentGuiPageNum(pageNum);
-                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                String skillDisplay = skill == null ? "Overall" : skill.name().charAt(0) + skill.name().substring(1).toLowerCase();
-                String expectedTitle = "Top " + skillDisplay;
-                String openTitle = ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
-                if (player.isOnline() && openTitle.equals(expectedTitle)) {
-                    GuiMctop.populate(player.getOpenInventory().getTopInventory(), skill, finalLeaderboard, finalProfiles);
-                } else {
-                    new GuiMctop(player, skill, pageNum, finalLeaderboard, finalProfiles).openGui();
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).thenRun(() -> {
+                Map<String, PlayerProfile> profiles = new LinkedHashMap<>();
+                for (CompletableFuture<Map.Entry<String, PlayerProfile>> f : futures) {
+                    Map.Entry<String, PlayerProfile> entry = f.join();
+                    profiles.put(entry.getKey(), entry.getValue());
                 }
+                Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+                    AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+                    aranarthPlayer.setCurrentGuiPageNum(pageNum);
+                    AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    String skillDisplay = skill == null ? Lang.getFor(player, "mcmmo.overall") : skill.name().charAt(0) + skill.name().substring(1).toLowerCase();
+                    String expectedTitle = ChatUtils.stripColorFormatting(Lang.getFor(player, "gui.mctop.title", "skill", skillDisplay));
+                    String openTitle = ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
+                    if (player.isOnline() && GuiHolder.isGui(player.getOpenInventory()) && openTitle.equals(expectedTitle)) {
+                        GuiMctop.populate(player, player.getOpenInventory().getTopInventory(), skill, finalLeaderboard, profiles);
+                    } else {
+                        new GuiMctop(player, skill, pageNum, finalLeaderboard, profiles).openGui();
+                    }
+                });
             });
         });
     }

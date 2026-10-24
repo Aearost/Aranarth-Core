@@ -3,8 +3,8 @@ package com.aearost.aranarthcore.gui;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.LoginStreakUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -46,7 +46,7 @@ public class GuiLoginStreak {
     }
 
     private Inventory initializeGui() {
-        Inventory inv = Bukkit.createInventory(player, 54, ChatUtils.translateToColor("&6&lLogin Streak"));
+        Inventory inv = GuiHolder.create(player, 54, Lang.getFor(player, "gui.loginstreak.title"));
 
         UUID uuid = player.getUniqueId();
 
@@ -91,7 +91,7 @@ public class GuiLoginStreak {
 
         // Day items
         for (int i = 0; i < DAY_SLOTS.length; i++) {
-            inv.setItem(DAY_SLOTS[i], makeDayItem(i + 1, currentDay, canClaim, rank));
+            inv.setItem(DAY_SLOTS[i], makeDayItem(player, i + 1, currentDay, canClaim, rank));
         }
 
         // Info item
@@ -103,39 +103,34 @@ public class GuiLoginStreak {
     /**
      * Builds the item for a given streak day, reflecting its claim state.
      */
-    public static ItemStack makeDayItem(int day, int currentDay, boolean canClaim, int rank) {
+    public static ItemStack makeDayItem(Player player, int day, int currentDay, boolean canClaim, int rank) {
         Material mat;
-        String statusColor;
         String statusText;
 
         if (day < currentDay) {
             mat = Material.GRAY_CONCRETE;
-            statusColor = "&7";
-            statusText = "Claimed";
+            statusText = Lang.getFor(player, "gui.loginstreak.claimed");
         } else if (day == currentDay && canClaim) {
             mat = Material.LIME_CONCRETE;
-            statusColor = "&a";
-            statusText = "Click to Claim!";
+            statusText = Lang.getFor(player, "gui.loginstreak.click_claim");
         } else if (day == currentDay) {
             mat = Material.YELLOW_CONCRETE;
-            statusColor = "&e";
-            statusText = "Already Claimed Today";
+            statusText = Lang.getFor(player, "gui.loginstreak.already_claimed");
         } else {
             mat = Material.RED_CONCRETE;
-            statusColor = "&c";
-            statusText = "Locked";
+            statusText = Lang.getFor(player, "gui.loginstreak.locked_day");
         }
 
         ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&f&lDay " + day));
+        meta.setDisplayName(Lang.getFor(player, "gui.loginstreak.day_label", "n", String.valueOf(day)));
 
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&8Login Streak Reward"));
+        lore.add(Lang.getFor(player, "gui.loginstreak.day_subtitle"));
         lore.add("");
-        lore.add(ChatUtils.translateToColor("&7Reward: " + LoginStreakUtils.getRewardDisplayName(day, rank)));
+        lore.add(Lang.getFor(player, "gui.loginstreak_reward", "reward", LoginStreakUtils.getRewardDisplayName(day, rank)));
         lore.add("");
-        lore.add(ChatUtils.translateToColor(statusColor + statusText));
+        lore.add(statusText);
 
         meta.setLore(lore);
         item.setItemMeta(meta);
@@ -145,21 +140,21 @@ public class GuiLoginStreak {
     private ItemStack makeInfoItem(int currentDay, boolean canClaim) {
         ItemStack item = new ItemStack(Material.BOOK);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&e&lStreak Info"));
+        meta.setDisplayName(Lang.getFor(player, "gui.loginstreak.info"));
 
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&7Current Streak Day: &f" + currentDay + "&7/&f28"));
+        lore.add(Lang.getFor(player, "gui.loginstreak.current_day", "day", String.valueOf(currentDay)));
         lore.add("");
         if (canClaim) {
-            lore.add(ChatUtils.translateToColor("&aYou can claim today's reward!"));
-            lore.add(ChatUtils.translateToColor("&7Click &aDay " + currentDay + " &7to claim."));
+            lore.add(Lang.getFor(player, "gui.loginstreak.can_claim"));
+            lore.add(Lang.getFor(player, "gui.loginstreak.click_day", "n", String.valueOf(currentDay)));
         } else {
-            lore.add(ChatUtils.translateToColor("&7You have already claimed today."));
-            lore.add(ChatUtils.translateToColor("&7Come back tomorrow!"));
+            lore.add(Lang.getFor(player, "gui.loginstreak.done_today"));
+            lore.add(Lang.getFor(player, "gui.loginstreak.come_back"));
         }
         lore.add("");
-        lore.add(ChatUtils.translateToColor("&7Rewards available at &f12:00 AM EST &7daily."));
-        lore.add(ChatUtils.translateToColor("&cMissing a day resets your streak!"));
+        lore.add(Lang.getFor(player, "gui.loginstreak.reset_time"));
+        lore.add(Lang.getFor(player, "gui.loginstreak.miss_reset"));
 
         meta.setLore(lore);
         item.setItemMeta(meta);

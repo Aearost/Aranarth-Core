@@ -3,7 +3,9 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.gui.GuiEnhancedAranarthium;
 import com.aearost.aranarthcore.items.aranarthium.armour.*;
 import com.aearost.aranarthcore.items.netherite.NetheriteElytra;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
@@ -17,11 +19,13 @@ import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.aearost.aranarthcore.objects.CustomKeys.ARANARTHIUM_INGOT;
 import static com.aearost.aranarthcore.objects.CustomKeys.ARMOR_TYPE;
+import static com.aearost.aranarthcore.objects.CustomKeys.ESSENCE_LEVEL;
+import static com.aearost.aranarthcore.objects.CustomKeys.ESSENCE_TYPE;
 import static com.aearost.aranarthcore.objects.CustomKeys.NETHERITE_ITEM;
 
 /**
@@ -92,11 +96,15 @@ public class AranarthiumArmourCraft {
                         boolean netheriteElytraArmorFirst = hasPlainElytra(inventory.getItem(0)) && hasNetheriteIngot(inventory.getItem(1)) && inventory.getItem(2) != null;
                         boolean netheriteElytraIngotFirst = hasNetheriteIngot(inventory.getItem(0)) && hasPlainElytra(inventory.getItem(1)) && inventory.getItem(2) != null;
                         if (armorInFirst || ingotInFirst || netheriteElytraArmorFirst || netheriteElytraIngotFirst) {
+                            ItemStack result = inventory.getItem(2).clone();
                             if (e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
-                                HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(inventory.getItem(2));
-                                if (!remainder.isEmpty()) {
+                                // The result is handed out here, so the vanilla shift-click must not also move it
+                                e.setCancelled(true);
+                                if (player.getInventory().firstEmpty() == -1) {
                                     return;
                                 }
+                                inventory.setItem(2, null);
+                                player.getInventory().addItem(result);
                             }
 
 
@@ -104,16 +112,16 @@ public class AranarthiumArmourCraft {
                             inventory.getItem(1).setAmount(inventory.getItem(1).getAmount() - 1);
 
 
-                            ItemMeta meta = inventory.getItem(2).getItemMeta();
+                            ItemMeta meta = result.getItemMeta();
                             player.playSound(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.5F, 1.5F);
                             String displayName = meta.getDisplayName();
                             String strippedName = ChatUtils.stripColorFormatting(displayName).toLowerCase();
                             if (strippedName.startsWith("a") || strippedName.startsWith("e")
                                     || strippedName.startsWith("i") || strippedName.startsWith("o")
                                     || strippedName.startsWith("u")) {
-                                player.sendMessage(ChatUtils.chatMessage("&7You have forged an " + displayName));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "aranarthium.forged", "article", "an", "item", displayName)));
                             } else {
-                                player.sendMessage(ChatUtils.chatMessage("&7You have forged a " + displayName));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "aranarthium.forged", "article", "a", "item", displayName)));
                             }
                         }
                     }
@@ -253,7 +261,7 @@ public class AranarthiumArmourCraft {
                             if (result.getItemMeta().getPersistentDataContainer().has(ARMOR_TYPE)) {
                                 e.setCancelled(true);
                                 player.closeInventory();
-                                player.sendMessage(ChatUtils.chatMessage("&cYou cannot apply armor trims to Aranarthium armor!"));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "aranarthium.cannot_trim")));
                             }
                         }
                     }
@@ -279,12 +287,13 @@ public class AranarthiumArmourCraft {
                 }
                 return true;
             }
-            // Any elytra without an ARMOR_TYPE tag (plain or Netherite Elytra) is valid input
+            // Only a Netherite Elytra (has NETHERITE_ITEM tag, no ARMOR_TYPE tag) is valid input
             if (type == Material.ELYTRA) {
-				if (!item.hasItemMeta()) {
-					return true;
-				}
-                return !item.getItemMeta().getPersistentDataContainer().has(ARMOR_TYPE);
+                if (!item.hasItemMeta()) {
+                    return false;
+                }
+                var pdc = item.getItemMeta().getPersistentDataContainer();
+                return pdc.has(NETHERITE_ITEM) && !pdc.has(ARMOR_TYPE);
             }
         }
         return false;
@@ -309,6 +318,34 @@ public class AranarthiumArmourCraft {
      */
     private boolean hasNetheriteIngot(ItemStack item) {
         return item != null && item.getType() == Material.NETHERITE_INGOT;
+    }
+
+    /**
+     * Copies essence PDC entries and lore from the source item to the result item.
+     */
+    private void transferEssence(ItemStack source, ItemStack result) {
+        if (!source.hasItemMeta() || !result.hasItemMeta()) return;
+        String essenceType = AranarthUtils.getEssenceType(source);
+        if (essenceType == null) return;
+
+        ItemMeta resultMeta = result.getItemMeta();
+        int essenceLevel = AranarthUtils.getEssenceLevel(source);
+        resultMeta.getPersistentDataContainer().set(ESSENCE_TYPE, PersistentDataType.STRING, essenceType);
+        resultMeta.getPersistentDataContainer().set(ESSENCE_LEVEL, PersistentDataType.INTEGER, essenceLevel);
+
+        // Copy essence lore lines - any line in source that isn't already in result
+        List<String> sourceLore = source.getItemMeta().getLore();
+        List<String> resultLore = resultMeta.getLore();
+        if (sourceLore != null && resultLore != null) {
+            for (String loreLine : sourceLore) {
+                if (!resultLore.contains(loreLine)) {
+                    resultLore.add(loreLine);
+                }
+            }
+            resultMeta.setLore(resultLore);
+        }
+
+        result.setItemMeta(resultMeta);
     }
 
     /**
@@ -353,6 +390,7 @@ public class AranarthiumArmourCraft {
                 }
                 netheriteElytra.setItemMeta(resultMeta);
             }
+            transferEssence(armor, netheriteElytra);
             return netheriteElytra;
         }
         String ingotName = ingot.getItemMeta().getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING);
@@ -476,6 +514,7 @@ public class AranarthiumArmourCraft {
             }
             enhancedAranarthiumArmor.setItemMeta(resultMeta);
         }
+        transferEssence(armor, enhancedAranarthiumArmor);
 
         return enhancedAranarthiumArmor;
     }

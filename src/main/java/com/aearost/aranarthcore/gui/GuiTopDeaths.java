@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -15,8 +16,15 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class GuiTopDeaths {
+
+    public static final String TITLE_KEY = "gui.topdeaths.title";
+
+    private static final ExecutorService SKIN_EXECUTOR = Executors.newFixedThreadPool(8);
 
     private final Player player;
     private final Inventory initializedGui;
@@ -44,21 +52,28 @@ public class GuiTopDeaths {
             pageUuids.add(uuidList.get(i));
         }
 
-        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
-            Map<UUID, PlayerProfile> profiles = new LinkedHashMap<>();
-            for (UUID uuid : pageUuids) {
+        List<CompletableFuture<Map.Entry<UUID, PlayerProfile>>> futures = new ArrayList<>();
+        for (UUID uuid : pageUuids) {
+            futures.add(CompletableFuture.supplyAsync(() -> {
                 OfflinePlayer op = Bukkit.getOfflinePlayer(uuid);
                 PlayerProfile profile = Bukkit.createProfile(uuid, op.getName());
                 profile.complete(true);
-                profiles.put(uuid, profile);
-            }
+                return Map.entry(uuid, profile);
+            }, SKIN_EXECUTOR));
+        }
 
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).thenRun(() -> {
+            Map<UUID, PlayerProfile> profiles = new LinkedHashMap<>();
+            for (CompletableFuture<Map.Entry<UUID, PlayerProfile>> f : futures) {
+                Map.Entry<UUID, PlayerProfile> entry = f.join();
+                profiles.put(entry.getKey(), entry.getValue());
+            }
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                 aranarthPlayer.setCurrentGuiPageNum(pageNum);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 String openTitle = com.aearost.aranarthcore.utils.ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
-                if (player.isOnline() && openTitle.equals("Top Deaths")) {
+                if (player.isOnline() && GuiHolder.isGui(player.getOpenInventory()) && openTitle.equals(ChatUtils.stripColorFormatting(Lang.getFor(player, TITLE_KEY)))) {
                     populate(player.getOpenInventory().getTopInventory(), player, pageNum, profiles);
                 } else {
                     new GuiTopDeaths(player, pageNum, profiles).openGui();
@@ -97,7 +112,7 @@ public class GuiTopDeaths {
             skullMeta.setDisplayName(ChatUtils.translateToColor("&e" + aranarthPlayer.getNickname()));
             List<String> lore = new ArrayList<>();
             int deathCount = AranarthUtils.getKillsOrDeathsInWorld(uuid, player.getWorld(), false);
-            lore.add(ChatUtils.translateToColor("&e" + deathCount + " deaths"));
+            lore.add(Lang.getFor(player, "gui.topdeaths.skull_lore", "count", String.valueOf(deathCount)));
             skullMeta.setLore(lore);
             head.setItemMeta(skullMeta);
             gui.setItem(i, head);
@@ -107,7 +122,7 @@ public class GuiTopDeaths {
     private Inventory initializeGui(Player player, int pageNum, Map<UUID, PlayerProfile> profiles) {
         List<UUID> uuidList = AranarthUtils.getTopDeaths(player.getWorld());
         int startIndex = pageNum * 45;
-        Inventory gui = Bukkit.getServer().createInventory(player, 54, "Top Deaths");
+        Inventory gui = GuiHolder.create(player, 54, Lang.getFor(player, TITLE_KEY));
 
         ItemStack previous = new ItemStack(Material.RED_WOOL);
         ItemStack barrier = new ItemStack(Material.BARRIER);
@@ -116,19 +131,19 @@ public class GuiTopDeaths {
 
         ItemMeta previousMeta = previous.getItemMeta();
         if (Objects.nonNull(previousMeta)) {
-            previousMeta.setDisplayName(ChatUtils.translateToColor("&c&lPrevious"));
+            previousMeta.setDisplayName(Lang.getFor(player, "gui.page_prev"));
             previous.setItemMeta(previousMeta);
         }
 
         ItemMeta barrierMeta = barrier.getItemMeta();
         if (Objects.nonNull(barrierMeta)) {
-            barrierMeta.setDisplayName(ChatUtils.translateToColor("&4&lExit"));
+            barrierMeta.setDisplayName(Lang.getFor(player, "gui.exit"));
             barrier.setItemMeta(barrierMeta);
         }
 
         ItemMeta nextMeta = next.getItemMeta();
         if (Objects.nonNull(nextMeta)) {
-            nextMeta.setDisplayName(ChatUtils.translateToColor("&a&lNext"));
+            nextMeta.setDisplayName(Lang.getFor(player, "gui.page_next"));
             next.setItemMeta(nextMeta);
         }
 
@@ -167,7 +182,7 @@ public class GuiTopDeaths {
             skullMeta.setDisplayName(ChatUtils.translateToColor("&e" + aranarthPlayer.getNickname()));
             List<String> lore = new ArrayList<>();
             int deathCount = AranarthUtils.getKillsOrDeathsInWorld(uuid, player.getWorld(), false);
-            lore.add(ChatUtils.translateToColor("&e" + deathCount + " deaths"));
+            lore.add(Lang.getFor(player, "gui.topdeaths.skull_lore", "count", String.valueOf(deathCount)));
             skullMeta.setLore(lore);
             head.setItemMeta(skullMeta);
             gui.setItem(i, head);

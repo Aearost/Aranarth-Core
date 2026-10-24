@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.airbending.spiritual;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
@@ -41,12 +42,12 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
             new ShotType(AranarthBendingUtils.SPIRIT_COLORS[3], AranarthBendingUtils.SPIRIT_EFFECT_TYPES[3], AranarthBendingUtils.SPIRIT_EFFECT_AMPLIFIER),
     };
 
-    private static final double HIT_RADIUS = 1.5;
+    private final double hitRadius;
     private static final double STEP_SIZE = 0.1;
-    private static final long FIRE_WINDOW = 2500L;
+    private final long fireWindow;
     private static final int MAX_SHOTS = 4;
-    private static final double MIN_RANGE = 16.0;
-    private static final double MAX_RANGE = 24.0;
+    private final double minRange;
+    private final double maxRange;
 
     // {rightComponent, yComponent, forwardComponent} - indices 0-1 are left shoulder, 2-3 are right shoulder
     private static final double[][] SHOULDER_OFFSETS = {
@@ -83,10 +84,14 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
         super(player);
 
         this.activeProjectiles = new ArrayList<>();
-        this.cooldown = 6000L;
-        this.chargeDuration = 1000L;
-        this.damage = 2.0;
-        this.speed = 2.0;
+        this.cooldown = AbilityConfig.getLong("AngeredSpirits.Cooldown");
+        this.chargeDuration = AbilityConfig.getLong("AngeredSpirits.ChargeDuration");
+        this.damage = AbilityConfig.getDouble("AngeredSpirits.Damage");
+        this.speed = AbilityConfig.getDouble("AngeredSpirits.Speed");
+        this.hitRadius = AbilityConfig.getDouble("AngeredSpirits.HitRadius");
+        this.fireWindow = AbilityConfig.getLong("AngeredSpirits.FireWindow");
+        this.minRange = AbilityConfig.getDouble("AngeredSpirits.MinRange");
+        this.maxRange = AbilityConfig.getDouble("AngeredSpirits.MaxRange");
 
         this.state = State.CHARGING;
         this.nextShotIndex = 0;
@@ -196,7 +201,7 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
             return;
         }
 
-        if (System.currentTimeMillis() - fireWindowStart >= FIRE_WINDOW) {
+        if (System.currentTimeMillis() - fireWindowStart >= fireWindow) {
             bPlayer.addCooldown(this);
             remove();
             return;
@@ -222,7 +227,7 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
         final ShotType shotType = SHOT_TYPES[shotOrder[nextShotIndex]];
         nextShotIndex++;
 
-        final double range = MIN_RANGE + Math.random() * (MAX_RANGE - MIN_RANGE);
+        final double range = minRange + Math.random() * (maxRange - minRange);
         final Location eyeLoc = player.getEyeLocation();
         final Vector direction = eyeLoc.getDirection().normalize();
 
@@ -522,7 +527,7 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
                 }
 
                 final Location entityCenter = entity.getLocation().add(0, entity.getHeight() / 2.0, 0);
-                if (entityCenter.distance(location) <= HIT_RADIUS) {
+                if (entityCenter.distance(location) <= hitRadius) {
                     hitEntities.add(entity.getUniqueId());
                     applyHitEffects(entity);
                 }

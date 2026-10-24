@@ -1,20 +1,33 @@
 package com.aearost.aranarthcore.commands.council;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.AranarthItem;
-import com.aearost.aranarthcore.items.incantation.Incantation;
+import com.aearost.aranarthcore.items.essence.Essence;
+import com.aearost.aranarthcore.items.essence.EssenceBlank;
 import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.NetworkPlayer;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
+import com.aearost.aranarthcore.utils.EssenceImbueUtils;
+import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.UUID;
+
+import static com.aearost.aranarthcore.objects.CustomKeys.COUPON_DISCOUNT;
 
 /**
  * Provides a specified player an AranarthCore item.
@@ -29,15 +42,23 @@ public class CommandGive {
     public static void onCommand(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
             if (!player.hasPermission("aranarth.give")) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
                 return;
             }
         }
 
         if (args.length < 3) {
-            sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac give <player> <item> <quantity>"));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac give <player> <item> <quantity>")));
             return;
         } else {
+            // Store purchases must only be processed on the Survival server, which forwards
+            // the key to the SMP server if the player is there
+            boolean isStoreKeyPurchase = args[2].startsWith("Key") && !args[2].equals("KeyVote")
+                    && args.length >= 5 && args[4].equalsIgnoreCase("broadcast");
+            if (isStoreKeyPurchase && AranarthCore.isSmpServer()) {
+                return;
+            }
+
             Player player = null;
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (onlinePlayer.getName().equals(args[1])) {
@@ -47,6 +68,37 @@ public class CommandGive {
             }
 
             if (player != null) {
+                // Inline handling for store coupons
+                if (args[2].equals("Coupon10") || args[2].equals("Coupon30")) {
+                    if (sender instanceof Player senderPlayer) {
+                        AranarthPlayer senderAranarthPlayer = AranarthUtils.getPlayer(senderPlayer.getUniqueId());
+                        if (senderAranarthPlayer == null || senderAranarthPlayer.getCouncilRank() < 2) {
+                            senderPlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(senderPlayer, "general.no_permission")));
+                            return;
+                        }
+                    }
+                    int discountPercentage = args[2].equals("Coupon10") ? 10 : 30;
+                    ItemStack coupon = new ItemStack(Material.PAPER, 1);
+                    ItemMeta couponMeta = coupon.getItemMeta();
+                    couponMeta.setMaxStackSize(1);
+                    couponMeta.setDisplayName(ChatUtils.translateToColor("&6&l" + discountPercentage + "% Store Coupon"));
+                    couponMeta.setLore(Collections.singletonList(ChatUtils.translateToColor("&7&oSneak and Right-Click to Redeem")));
+                    couponMeta.getPersistentDataContainer().set(COUPON_DISCOUNT, PersistentDataType.INTEGER, discountPercentage);
+                    coupon.setItemMeta(couponMeta);
+                    HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(coupon);
+                    if (!remainder.isEmpty()) {
+                        for (ItemStack value : remainder.values()) {
+                            player.getWorld().dropItemNaturally(player.getLocation(), value);
+                        }
+                    }
+                    String itemName = couponMeta.getDisplayName();
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "give.received", "item", itemName + " x1")));
+                    if (sender instanceof Player senderPlayer && !senderPlayer.getUniqueId().equals(player.getUniqueId())) {
+                        sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "give.success", "player", player.getName(), "amount", "1", "item", itemName)));
+                    }
+                    return;
+                }
+
                 boolean isKey = false;
                 String fullPathName = "";
                 if (args[2].startsWith("Aranarthium")) {
@@ -68,8 +120,8 @@ public class CommandGive {
                 } else if (args[2].startsWith("Key")) {
                     isKey = true;
                     fullPathName = "com.aearost.aranarthcore.items.key." + args[2];
-                } else if (args[2].startsWith("Incantation")) {
-                    fullPathName = "com.aearost.aranarthcore.items.incantation." + args[2];
+                } else if (args[2].startsWith("Essence")) {
+                    fullPathName = "com.aearost.aranarthcore.items.essence." + args[2];
                 } else {
                     fullPathName = "com.aearost.aranarthcore.items." + args[2];
                 }
@@ -80,14 +132,28 @@ public class CommandGive {
                     instance = unknownClass.getDeclaredConstructor().newInstance();
                 } catch (ClassNotFoundException | InvocationTargetException | InstantiationException
                          | IllegalAccessException | NoSuchMethodException e) {
-                    sender.sendMessage(ChatUtils.chatMessage("&cThere is no item by that name!"));
+                    sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "give.no_such_item")));
                     return;
                 }
 
                 if (instance instanceof AranarthItem aranarthItem) {
                     ItemStack item = aranarthItem.getItem();
                     int quantity = 1;
-                    if (args.length >= 4) {
+                    // The blank Essence takes an optional imbued percentage instead of a quantity
+                    if (aranarthItem instanceof EssenceBlank) {
+                        if (args.length >= 4) {
+                            try {
+                                double percent = Double.parseDouble(args[3]);
+                                if (percent < 0 || percent > 100) {
+                                    throw new NumberFormatException();
+                                }
+                                EssenceImbueUtils.setImbuedXp(item, (int) Math.round(EssenceImbueUtils.getMaxImbuedXp() * percent / 100));
+                            } catch (NumberFormatException e) {
+                                sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "particles.invalid_range")));
+                                return;
+                            }
+                        }
+                    } else if (args.length >= 4) {
                         try {
                             quantity = Integer.parseInt(args[3]);
                             if (quantity <= 0 || quantity > item.getMaxStackSize()) {
@@ -95,7 +161,7 @@ public class CommandGive {
                             }
                             item.setAmount(quantity);
                         } catch (Exception e) {
-                            player.sendMessage(ChatUtils.chatMessage("&cThe entered Quantity is invalid!"));
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "give.invalid_quantity")));
                             return;
                         }
                     }
@@ -112,21 +178,27 @@ public class CommandGive {
                     // For crate keys in non-survival worlds, store as pending instead of giving directly
                     if (isKey) {
                         if (isBroadcast) {
-                            String broadcastMessage = ChatUtils.chatMessage("&e" + player.getName() + " &7has purchased " + itemName + " x" + quantity);
                             DiscordUtils.donationNotification(player.getName() + " has purchased " + itemName + " x" + quantity, player.getUniqueId(), Color.CYAN);
                             for (Player online : Bukkit.getOnlinePlayers()) {
-                                online.sendMessage(broadcastMessage);
+                                online.sendMessage(ChatUtils.chatMessage(Lang.getFor(online, "give.purchased_broadcast", "player", player.getName(), "item", itemName, "amount", String.valueOf(quantity))));
                             }
-                            Bukkit.getConsoleSender().sendMessage(broadcastMessage);
                             if (NetworkManager.isActive()) {
-                                NetworkManager.getInstance().publishBroadcast(broadcastMessage);
+                                NetworkManager.getInstance().publishLangBroadcast("give.purchased_broadcast", "player", player.getName(), "item", itemName, "amount", String.valueOf(quantity));
                             }
                         }
 
                         String worldName = player.getWorld().getName();
                         if (!AranarthUtils.isSurvivalWorld(worldName)) {
                             AranarthUtils.addPendingKey(player.getUniqueId(), item, quantity);
-                            player.sendMessage(ChatUtils.chatMessage("&7Use &e/keyclaim &7in a Survival world to obtain your keys!"));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "give.keyclaim_hint")));
+                            if (!isBroadcast && sender instanceof Player senderPlayer && !senderPlayer.getUniqueId().equals(player.getUniqueId())) {
+                                sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "give.success", "player", player.getName(), "amount", String.valueOf(quantity), "item", itemName)));
+                            }
+                            // Persist immediately so /keyclaim can see the keys even if the player
+                            // switches servers before the next periodic save.
+                            final UUID pendingUuid = player.getUniqueId();
+                            Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                                    () -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(pendingUuid));
                             return;
                         }
                     }
@@ -142,16 +214,16 @@ public class CommandGive {
 
                     if (!isKey || !isBroadcast) {
                         if (isInventoryFull) {
-                            player.sendMessage(ChatUtils.chatMessage("&e" + itemName + " &7has been dropped to the floor"));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "give.dropped", "item", itemName)));
                         } else {
-                            player.sendMessage(ChatUtils.chatMessage("&7You have been given " + itemName + " x" + quantity));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "give.received", "item", itemName + " x" + quantity)));
                         }
-                        if (isKey && sender instanceof Player senderPlayer && !senderPlayer.getUniqueId().equals(player.getUniqueId())) {
-                            sender.sendMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has been given " + itemName + " x" + quantity));
+                        if (sender instanceof Player senderPlayer && !senderPlayer.getUniqueId().equals(player.getUniqueId())) {
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "give.success", "player", player.getName(), "amount", String.valueOf(quantity), "item", itemName)));
                         }
                     }
-                } else if (instance instanceof Incantation incantation) {
-                    ItemStack item = incantation.getItem();
+                } else if (instance instanceof Essence essence) {
+                    ItemStack item = essence.getItem();
                     int quantity = 1;
                     if (args.length >= 4) {
                         try {
@@ -161,7 +233,7 @@ public class CommandGive {
                             }
                             item.setAmount(quantity);
                         } catch (Exception e) {
-                            player.sendMessage(ChatUtils.chatMessage("&cThe entered Quantity is invalid!"));
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "give.invalid_quantity")));
                             return;
                         }
                     }
@@ -176,17 +248,75 @@ public class CommandGive {
                         }
                     }
 
-                    player.sendMessage(ChatUtils.chatMessage("&7You have been given " + itemName + " x" + quantity));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "give.received", "item", itemName + " x" + quantity)));
                     if (sender instanceof Player playerSender) {
                         if (!playerSender.getUniqueId().equals(player.getUniqueId())) {
-                            sender.sendMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has been given " + itemName + " x" + quantity));
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "give.success", "player", player.getName(), "amount", String.valueOf(quantity), "item", itemName)));
                         }
                     }
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage("&cThere is no item by that name!"));
+                    sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "give.no_such_item")));
                 }
             } else {
-                sender.sendMessage(ChatUtils.chatMessage("&cThat player was not found!"));
+                // Player not on this server - check if this is a store key purchase and
+                // the player is on the remote server, so we can deliver cross-server.
+                if (isStoreKeyPurchase && NetworkManager.isActive()) {
+                    UUID remoteUuid = null;
+                    String remoteName = null;
+                    for (NetworkPlayer np : NetworkManager.getInstance().getRemoteRoster().values()) {
+                        if (np.getUsername().equalsIgnoreCase(args[1])) {
+                            remoteUuid = np.getUuid();
+                            remoteName = np.getUsername();
+                            break;
+                        }
+                    }
+                    if (remoteUuid != null) {
+                        int quantity = 1;
+                        if (args.length >= 4) {
+                            try {
+                                quantity = Math.max(1, Integer.parseInt(args[3]));
+                            } catch (NumberFormatException ignored) {
+                            }
+                        }
+                        // Map class name to key type string
+                        String keyType = switch (args[2]) {
+                            case "KeyRare" -> "key_rare";
+                            case "KeyEpic" -> "key_epic";
+                            case "KeyGodly" -> "key_godly";
+                            default -> null;
+                        };
+                        if (keyType != null) {
+                            // Derive item display name for the broadcast
+                            String itemName;
+                            try {
+                                Class<?> cls = Class.forName("com.aearost.aranarthcore.items.key." + args[2]);
+                                Object inst = cls.getDeclaredConstructor().newInstance();
+                                if (inst instanceof AranarthItem ai) {
+                                    ItemStack tmp = ai.getItem();
+                                    ItemMeta tmpMeta = tmp.getItemMeta();
+                                    itemName = (tmpMeta != null && tmpMeta.hasDisplayName())
+                                            ? tmpMeta.getDisplayName()
+                                            : ChatUtils.getFormattedItemName(tmp.getType().name());
+                                } else {
+                                    itemName = args[2];
+                                }
+                            } catch (Exception ignored) {
+                                itemName = args[2];
+                            }
+                            DiscordUtils.donationNotification(remoteName + " has purchased " + itemName + " x" + quantity, remoteUuid, Color.CYAN);
+                            for (Player online : Bukkit.getOnlinePlayers()) {
+                                online.sendMessage(ChatUtils.chatMessage(Lang.getFor(online, "give.purchased_broadcast", "player", remoteName, "item", itemName, "amount", String.valueOf(quantity))));
+                            }
+                            NetworkManager.getInstance().publishLangBroadcast("give.purchased_broadcast", "player", remoteName, "item", itemName, "amount", String.valueOf(quantity));
+                            NetworkManager.getInstance().publishPurchaseKey(remoteUuid, keyType, quantity);
+                            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[STORE] Player " + remoteName + " is on remote server - forwarding " + keyType + " x" + quantity + " cross-server");
+                        }
+                    } else {
+                        sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", args[1])));
+                    }
+                } else {
+                    sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", args[1])));
+                }
             }
         }
     }

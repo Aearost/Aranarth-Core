@@ -20,10 +20,12 @@ public class NetworkPlayer {
     private final String textureSignature;
     private boolean afk;
     private long afkStartTime = 0;
+    private String pronouns;
+    private int ping = -1;
 
     public NetworkPlayer(UUID uuid, String username, String nickname, String server,
                          int rank, int councilRank, int saintRank, int architectRank, boolean vanished,
-                         String textureValue, String textureSignature) {
+                         String textureValue, String textureSignature, String pronouns) {
         this.uuid = uuid;
         this.username = username != null ? username : "";
         this.nickname = nickname;
@@ -35,6 +37,7 @@ public class NetworkPlayer {
         this.vanished = vanished;
         this.textureValue = textureValue != null ? textureValue : "";
         this.textureSignature = textureSignature != null ? textureSignature : "";
+        this.pronouns = pronouns != null ? pronouns : "MALE";
     }
 
     public UUID getUuid() {
@@ -115,5 +118,21 @@ public class NetworkPlayer {
 
     public void setAfkStartTime(long afkStartTime) {
         this.afkStartTime = afkStartTime;
+    }
+
+    public String getPronouns() {
+        return pronouns;
+    }
+
+    public void setPronouns(String pronouns) {
+        this.pronouns = pronouns != null ? pronouns : "MALE";
+    }
+
+    public int getPing() {
+        return ping;
+    }
+
+    public void setPing(int ping) {
+        this.ping = ping;
     }
 }

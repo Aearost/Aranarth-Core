@@ -2,7 +2,9 @@ package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.objects.Mount;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.MountUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -21,7 +23,7 @@ public class CommandMount implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to use this command!"));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
             return true;
         }
 
@@ -38,8 +40,7 @@ public class CommandMount implements CommandExecutor {
             case "info" -> sendInfo(player);
             case "nickname" -> {
                 if (args.length < 2) {
-                    player.sendMessage(ChatUtils.chatMessage(
-                            "&7Usage: &f/mount nickname <name|remove>"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "mount nickname <name|remove>")));
                     return true;
                 }
                 if (args[1].equalsIgnoreCase("remove")) {
@@ -49,8 +50,7 @@ public class CommandMount implements CommandExecutor {
                     setNickname(player, name);
                 }
             }
-            default -> player.sendMessage(ChatUtils.chatMessage(
-                    "&cInvalid syntax: &e/mount [info|skills|nickname]"));
+            default -> player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "mount [info|skills|nickname]")));
         }
         return true;
     }
@@ -58,35 +58,35 @@ public class CommandMount implements CommandExecutor {
     private void sendInfo(Player player) {
         String element = MountUtils.getElementForPlayer(player);
         if (element == null) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou must have an element to use this!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.need_element_use")));
             return;
         }
 
         Mount mount = MountUtils.getOrCreate(player.getUniqueId(), element);
         String color = MountUtils.getElementColor(element);
         String displayName = MountUtils.getDisplayName(player.getUniqueId(), element);
-        String thirdLabel = MountUtils.getThirdAttrLabel(element);
+        String thirdLabel = MountUtils.getThirdAttrLabel(player, element);
 
-        String healthFoodHint = switch (element) {
-            case "AIR" -> " (carrots, potatoes, beetroot)";
-            case "FIRE" -> " (raw meats)";
-            case "WATER" -> " (cod, salmon)";
-            default -> " (mushrooms, melon, pumpkin)";
-        };
-        String thirdHowTo = switch (element) {
-            case "EARTH" -> "Use the Tunnel ability (spacebar)";
-            case "FIRE" -> "Use the Ram ability (run into mobs)";
-            case "WATER" -> "Use the Bite ability (spacebar)";
-            case "AIR" -> "Use the Bellow ability (spacebar)";
-            default -> "Not yet implemented";
-        };
+        String healthFoodHint = Lang.getFor(player, switch (element) {
+            case "AIR" -> "mount.food_air";
+            case "FIRE" -> "mount.food_fire";
+            case "WATER" -> "mount.food_water";
+            default -> "mount.food_earth";
+        });
+        String thirdHowTo = Lang.getFor(player, switch (element) {
+            case "EARTH" -> "mount.howto_earth";
+            case "FIRE" -> "mount.howto_fire";
+            case "WATER" -> "mount.howto_water";
+            case "AIR" -> "mount.howto_air";
+            default -> "mount.howto_none";
+        });
 
-        player.sendMessage(ChatUtils.translateToColor("&8&l- - - &6&l" + displayName + "&6&l's Information &8&l- - -"));
-        player.sendMessage(ChatUtils.translateToColor("&6Health &8\u00bb &fLvl " + skillProgress(mount.getHealthLevel(), mount.getHealthXp(), mount.xpNeededForNextHealthLevel())));
-        player.sendMessage(ChatUtils.translateToColor("  &7&oTake damage or heal your mount" + healthFoodHint));
-        player.sendMessage(ChatUtils.translateToColor("&6Speed &8\u00bb &fLvl " + skillProgress(mount.getSpeedLevel(), mount.getSpeedXp(), mount.xpNeededForNextSpeedLevel())));
-        player.sendMessage(ChatUtils.translateToColor("  &7&oRide your mount"));
-        player.sendMessage(ChatUtils.translateToColor("&6" + thirdLabel + " &8\u00bb &fLvl " + skillProgress(mount.getThirdLevel(), mount.getThirdXp(), mount.xpNeededForNextThirdLevel())));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.info_header", "mount", displayName)));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.info_skill", "skill", Lang.getFor(player, "mount.skill_health"), "progress", skillProgress(mount.getHealthLevel(), mount.getHealthXp(), mount.xpNeededForNextHealthLevel()))));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.info_health_hint", "food", healthFoodHint)));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.info_skill", "skill", Lang.getFor(player, "mount.skill_speed"), "progress", skillProgress(mount.getSpeedLevel(), mount.getSpeedXp(), mount.xpNeededForNextSpeedLevel()))));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.info_speed_hint")));
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "mount.info_skill", "skill", thirdLabel, "progress", skillProgress(mount.getThirdLevel(), mount.getThirdXp(), mount.xpNeededForNextThirdLevel()))));
         player.sendMessage(ChatUtils.translateToColor("  &7&o" + thirdHowTo));
     }
 
@@ -102,14 +102,13 @@ public class CommandMount implements CommandExecutor {
             element = requestedElement;
             if (!element.equals("AIR") && !element.equals("WATER")
                     && !element.equals("EARTH") && !element.equals("FIRE")) {
-                player.sendMessage(ChatUtils.chatMessage(
-                        "&6Chiblockers currently do not have a mount"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mount.no_chi_mount")));
                 return;
             }
         } else {
             element = MountUtils.getElementForPlayer(player);
             if (element == null) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou must have an element in order to use this!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.need_element")));
                 return;
             }
         }
@@ -118,37 +117,39 @@ public class CommandMount implements CommandExecutor {
     }
 
     private void setNickname(Player player, String name) {
+        if (!ChatUtils.isSafeStoredText(name)) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "nickname.invalid_characters")));
+            return;
+        }
         if (ChatUtils.stripColorFormatting(name).length() > 32) {
-            player.sendMessage(ChatUtils.chatMessage("&cNicknames cannot exceed 32 characters"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mount.nickname_too_long")));
             return;
         }
         String element = MountUtils.getElementForPlayer(player);
         if (element == null) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou must have an element in order to do this!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.need_element")));
             return;
         }
         Mount mount = MountUtils.getOrCreate(player.getUniqueId(), element);
         mount.setNickname(name);
+        PersistenceUtils.saveMountsForPlayer(player.getUniqueId());
         updateMountNametag(player.getUniqueId(), name);
 
-        player.sendMessage(ChatUtils.chatMessage(
-                MountUtils.getElementColor(element)
-                        + MountUtils.getMountNameForElement(element)
-                        + " &7has been nicknamed &e" + name));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mount.nicknamed", "mount", MountUtils.getElementColor(element) + MountUtils.getMountNameForElement(element), "name", name)));
     }
 
     private void removeNickname(Player player) {
         String element = MountUtils.getElementForPlayer(player);
         if (element == null) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou must have an element in order to do this!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.need_element")));
             return;
         }
         Mount mount = MountUtils.getOrCreate(player.getUniqueId(), element);
         mount.setNickname(null);
+        PersistenceUtils.saveMountsForPlayer(player.getUniqueId());
         updateMountNametag(player.getUniqueId(), MountUtils.getMountNameForElement(element));
 
-        player.sendMessage(ChatUtils.chatMessage(MountUtils.getElementColor(element)
-                + "Your " + MountUtils.getMountNameForElement(element) + "'s nickname has been removed"));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mount.nickname_removed", "mount", MountUtils.getElementColor(element) + MountUtils.getMountNameForElement(element))));
     }
 
     private void updateMountNametag(UUID playerUUID, String name) {

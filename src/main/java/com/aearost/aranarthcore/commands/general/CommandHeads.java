@@ -1,9 +1,11 @@
 package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.gui.GuiHeadExchange;
+import com.aearost.aranarthcore.gui.GuiHeads;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.HeadsDatabaseManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -22,19 +24,37 @@ public class CommandHeads implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(ChatUtils.chatMessage("&cThis command can only be executed in-game"));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
+            return true;
+        }
+
+        // Using /heads adminbuy
+        if (args.length >= 1 && args[0].equalsIgnoreCase("adminbuy")) {
+            if (!player.hasPermission("aranarth.heads.admin")) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
+                return true;
+            }
+            if (!HeadsDatabaseManager.isLoaded()) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "heads.loading")));
+                return true;
+            }
+            if (HeadsDatabaseManager.getExchangeableHeads().isEmpty()) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "heads.unavailable")));
+                return true;
+            }
+            new GuiHeads(player, 0, true).openGui();
             return true;
         }
 
         // Using /heads <username>
         if (args.length >= 1) {
-            if (!player.hasPermission("aranarth.skull")) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command"));
+            if (!player.hasPermission("aranarth.heads.player")) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
                 return true;
             }
             UUID skullUuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
             if (skullUuid == null) {
-                player.sendMessage(ChatUtils.chatMessage("&e" + args[0] + " &ccould not be found"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.not_found", "name", args[0])));
                 return true;
             }
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(skullUuid);
@@ -45,30 +65,19 @@ public class CommandHeads implements CommandExecutor {
             String displayName = aranarthPlayer != null ? aranarthPlayer.getNickname() : skullPlayer.getName();
             meta.setDisplayName(ChatUtils.translateToColor("&e" + displayName + "&e's Skull"));
             skull.setItemMeta(meta);
-            player.sendMessage(ChatUtils.chatMessage("&7You have given yourself &e" + skullPlayer.getName() + "'s &7skull"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "heads.skull_given", "player", skullPlayer.getName())));
             player.getInventory().addItem(skull);
             return true;
         }
 
         // Using /heads
-        if (!player.hasPermission("aranarth.customheads")) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
-            return true;
-        }
-
-        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-        if (aranarthPlayer.getSaintRank() < 1 && aranarthPlayer.getCouncilRank() < 1) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
-            return true;
-        }
-
         if (!HeadsDatabaseManager.isLoaded()) {
-            player.sendMessage(ChatUtils.chatMessage("&eHead database is still loading, please try again in a moment"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "heads.loading")));
             return true;
         }
 
         if (HeadsDatabaseManager.getExchangeableHeads().isEmpty()) {
-            player.sendMessage(ChatUtils.chatMessage("&cNo heads are available - check that the API categories are configured and the server has internet access"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "heads.unavailable")));
             return true;
         }
 

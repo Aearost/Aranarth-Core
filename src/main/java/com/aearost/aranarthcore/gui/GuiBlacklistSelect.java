@@ -4,7 +4,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.BlacklistPreset;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -15,8 +15,8 @@ import java.util.List;
 
 public class GuiBlacklistSelect {
 
-    public static final String TITLE_CLEAR = "Blacklist - Clear Preset";
-    public static final String TITLE_USE = "Blacklist - Select Preset";
+    public static final String TITLE_CLEAR_KEY = "gui.blacklistselect.title_clear";
+    public static final String TITLE_USE_KEY = "gui.blacklistselect.title_select";
 
     private final Player player;
     private final Inventory gui;
@@ -32,7 +32,7 @@ public class GuiBlacklistSelect {
     }
 
     private Inventory initializeGui(boolean isClear) {
-        Inventory inv = Bukkit.createInventory(player, 36, isClear ? TITLE_CLEAR : TITLE_USE);
+        Inventory inv = GuiHolder.create(player, 36, isClear ? Lang.getFor(player, TITLE_CLEAR_KEY) : Lang.getFor(player, TITLE_USE_KEY));
 
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
         List<BlacklistPreset> presets = ap.getBlacklistPresets();
@@ -55,7 +55,7 @@ public class GuiBlacklistSelect {
         // Back arrow
         ItemStack back = new ItemStack(Material.ARROW);
         ItemMeta backMeta = back.getItemMeta();
-        backMeta.setDisplayName(ChatUtils.translateToColor("&7Back to Blacklist"));
+        backMeta.setDisplayName(Lang.getFor(player, "gui.blacklisteditor.back"));
         back.setItemMeta(backMeta);
         inv.setItem(31, back);
 
@@ -77,11 +77,11 @@ public class GuiBlacklistSelect {
 
         ItemStack item = new ItemStack(isActive ? Material.MAP : Material.PAPER);
         ItemMeta meta = item.getItemMeta();
-        String presetName = (i < presets.size() && !presets.get(i).getName().isEmpty()) ? presets.get(i).getName() : "Preset " + (i + 1);
+        String presetName = (i < presets.size() && !presets.get(i).getName().isEmpty()) ? presets.get(i).getName() : Lang.getFor(player, "blacklist.preset_default", "number", i + 1);
         meta.setDisplayName(ChatUtils.translateToColor("&7&l" + presetName));
 
         if (isActive) {
-            meta.setLore(List.of(ChatUtils.translateToColor("&a&oCurrently active")));
+            meta.setLore(List.of(Lang.getFor(player, "gui.blacklist.active_preset")));
         } else {
             meta.setLore(null);
         }

@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.abilities.waterbending.healing;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -10,6 +11,7 @@ import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.HealingAbility;
 import com.projectkorra.projectkorra.attribute.Attribute;
+import com.projectkorra.projectkorra.waterbending.util.WaterReturn;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -33,13 +35,12 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
 
     public enum Phase {CHARGING, READY}
 
-    private static final long CHARGE_DURATION_MS = 500L;
-    private static final long SHOT_COOLDOWN_MS = 200L;
-    private static final double SOURCE_RANGE = 5.0;
-    private static final double PROJECTILE_SPEED = 1.5;
+    private long chargeDuration;
+    private long shotCooldown;
+    private double speed;
     private static final double STEP = 0.25;
-    private static final double HIT_RADIUS = 0.8;
-    private static final double BASE_HEAL = 2.0; // 1 heart = 2 HP
+    private double hitRadius;
+    private double baseHeal; // 1 heart = 2 HP
 
     private static final double[] RANK_MULTIPLIERS = {
             1.0, 1.05, 1.15, 1.3, 1.5, 1.75, 2.0, 2.25, 2.5
@@ -61,6 +62,7 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
     );
 
     private static final Map<UUID, MendingWaters> ACTIVE_INSTANCES = new HashMap<>();
+    // Without a selected block source, the user's water bottle is used as the source instead
     private static final Map<UUID, Block> PENDING_SOURCES = new HashMap<>();
     private static final Map<UUID, BukkitRunnable> PENDING_SOURCE_TASKS = new HashMap<>();
 
@@ -76,6 +78,7 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
     private int shotsRemaining;
     private long lastShotTime;
     private double healAmount;
+    private boolean usesBottle;
     private final List<WaterShot> shots = new ArrayList<>();
 
     /**
@@ -98,19 +101,30 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
             return;
         }
 
-        if (!PENDING_SOURCES.containsKey(player.getUniqueId())) {
+        final boolean bottleSource = !PENDING_SOURCES.containsKey(player.getUniqueId());
+        if (bottleSource && !WaterReturn.hasWaterBottle(player)) {
             return;
         }
         clearPendingSource(player.getUniqueId());
 
-        this.cooldown = 8000L;
-        this.range = 20.0;
-        this.maxShots = 5;
+        this.cooldown = AbilityConfig.getLong("MendingWaters.Cooldown");
+        this.range = AbilityConfig.getDouble("MendingWaters.Range");
+        this.maxShots = AbilityConfig.getInt("MendingWaters.Shots");
+        this.chargeDuration = AbilityConfig.getLong("MendingWaters.ChargeDuration");
+        this.shotCooldown = AbilityConfig.getLong("MendingWaters.ShotCooldown");
+        this.speed = AbilityConfig.getDouble("MendingWaters.Speed");
+        this.hitRadius = AbilityConfig.getDouble("MendingWaters.HitRadius");
+        this.baseHeal = AbilityConfig.getDouble("MendingWaters.BaseHeal");
         this.phase = Phase.CHARGING;
         this.chargeStart = System.currentTimeMillis();
         this.shotsRemaining = this.maxShots;
         this.lastShotTime = 0L;
         this.healAmount = computeHealAmount();
+
+        if (bottleSource) {
+            WaterReturn.emptyWaterBottle(player);
+            this.usesBottle = true;
+        }
 
         ACTIVE_INSTANCES.put(player.getUniqueId(), this);
         start();
@@ -122,7 +136,7 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
     private double computeHealAmount() {
         final AranarthPlayer ap = AranarthUtils.getAranarthPlayers().get(player.getUniqueId());
         final int rank = (ap != null) ? ap.getRank() : 0;
-        return BASE_HEAL * RANK_MULTIPLIERS[Math.min(rank, RANK_MULTIPLIERS.length - 1)];
+        return baseHeal * RANK_MULTIPLIERS[Math.min(rank, RANK_MULTIPLIERS.length - 1)];
     }
 
     @Override
@@ -159,7 +173,7 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
 
         spawnHandParticles(false);
 
-        if (System.currentTimeMillis() - chargeStart >= CHARGE_DURATION_MS) {
+        if (System.currentTimeMillis() - chargeStart >= chargeDuration) {
             phase = Phase.READY;
             player.getWorld().playSound(player.getLocation(), Sound.BLOCK_WATER_AMBIENT, 0.6f, 1.3f);
         }
@@ -180,7 +194,7 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
             LivingEntity hitEntity = null;
             Location hitPos = null;
 
-            double remaining = PROJECTILE_SPEED;
+            double remaining = speed;
             while (remaining > 0 && !remove) {
                 final double step = Math.min(STEP, remaining);
                 shot.location.add(lookDir.clone().multiply(step));
@@ -203,7 +217,7 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
                 }
 
                 for (final Entity entity : shot.location.getWorld().getNearbyEntities(
-                        shot.location, HIT_RADIUS, HIT_RADIUS, HIT_RADIUS)) {
+                        shot.location, hitRadius, hitRadius, hitRadius)) {
                     if (!(entity instanceof LivingEntity living)) {
                         continue;
                     }
@@ -298,7 +312,7 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
         }
 
         final long now = System.currentTimeMillis();
-        if (now - lastShotTime < SHOT_COOLDOWN_MS) {
+        if (now - lastShotTime < shotCooldown) {
             return;
         }
         lastShotTime = now;
@@ -335,7 +349,7 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
         if (!block.getWorld().equals(player.getWorld())) {
             return;
         }
-        if (block.getLocation().distance(player.getLocation()) > SOURCE_RANGE) {
+        if (block.getLocation().distance(player.getLocation()) > AbilityConfig.getDouble("MendingWaters.SourceRange")) {
             return;
         }
 
@@ -375,6 +389,11 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
 
     @Override
     public void remove() {
+        // Return the water to the bottle, matching ProjectKorra's HealingWaters
+        if (usesBottle) {
+            usesBottle = false;
+            AranarthBendingUtils.fillWaterBottle(player);
+        }
         shots.clear();
         ACTIVE_INSTANCES.remove(player.getUniqueId());
         super.remove();
@@ -438,6 +457,6 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
     public String getDescription() {
         return "Channel your healing abilities to launchable streams of water, allowing you to heal your allies " +
                 "from a distance. You also benefit from half of the heal!\n" +
-                ChatUtils.translateToColor("&fUsage: Left-click (water source) > Hold Sneak (charge) > Left-click (up to 5x)");
+                ChatUtils.translateToColor("&fUsage: Left-click (water source, or skip with a water bottle) > Hold Sneak (charge) > Left-click (up to 5x)");
     }
 }

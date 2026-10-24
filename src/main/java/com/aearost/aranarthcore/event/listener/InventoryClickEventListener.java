@@ -6,12 +6,18 @@ import com.aearost.aranarthcore.event.mob.GuiVillagerClick;
 import com.aearost.aranarthcore.event.player.*;
 import com.aearost.aranarthcore.gui.*;
 import com.aearost.aranarthcore.objects.CustomKeys;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.TradeManager;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.minecart.HopperMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.BrewerInventory;
@@ -27,8 +33,18 @@ public class InventoryClickEventListener implements Listener {
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
-    private static boolean isDominionFoodTitle(String title) {
-        return title.startsWith(GuiDominionFood.TITLE_PREFIX);
+    /**
+     * Prevents hopper minecarts from draining locked containers.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onHopperMinecartPull(InventoryMoveItemEvent e) {
+        if (!(e.getDestination().getHolder() instanceof HopperMinecart)) {
+            return;
+        }
+        Location sourceLocation = e.getSource().getLocation();
+        if (sourceLocation != null && AranarthUtils.getLockedContainerAtBlock(sourceLocation.getBlock()) != null) {
+            e.setCancelled(true);
+        }
     }
 
     /**
@@ -53,130 +69,180 @@ public class InventoryClickEventListener implements Listener {
         }
     }
 
+    /**
+     * Drags skip every click handler, so they could place items into slots that the GUI would never
+     * accept from a click.
+     */
     @EventHandler
-    public void onInventoryClick(InventoryClickEvent e) {
-        // Chat snapshot GUIs are purely view-only
-        if (GuiChatSnapshot.isSnapshotGui(ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
-            e.setCancelled(true);
+    public void onInventoryDrag(InventoryDragEvent e) {
+        GuiHolder holder = GuiHolder.of(e.getView().getTopInventory());
+        if (holder == null || holder.isDragAllowed()) {
             return;
         }
-        if (e.getView().getType() == InventoryType.CHEST) {
-            if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiWrench.TITLE)) {
+        int topSize = e.getView().getTopInventory().getSize();
+        for (int rawSlot : e.getRawSlots()) {
+            if (rawSlot < topSize) {
+                e.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent e) {
+        // Only inventories created by AranarthCore are GUIs, so a chest renamed in an anvil can never reach a handler
+        boolean isGui = GuiHolder.isGui(e.getView());
+        // Chat snapshot GUIs are purely view-only
+        if (isGui && GuiChatSnapshot.isSnapshotGui(e.getView().getTopInventory())) {
+            e.setCancelled(true);
+            if (e.getWhoClicked() instanceof Player snapshotViewer) {
+                new AfkCancelByInteract().execute(snapshotViewer);
+            }
+            return;
+        }
+        if (!(e.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+        if (isGui && e.getView().getType() == InventoryType.CHEST) {
+            if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.wrench.title"))) {
                 new GuiWrenchClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Teleport")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.teleport.title"))) {
                 new GuiHomepadClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiBlacklistSelect.TITLE_CLEAR)
-                    || ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiBlacklistSelect.TITLE_USE)) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.blacklistselect.title_clear"))
+                    || ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.blacklistselect.title_select"))) {
                 new GuiBlacklistSelectClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(GuiBlacklistEditor.TITLE_PREFIX)
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(Lang.getFor(player, "gui.blacklisteditor.title_prefix"))
                     && e.getView().getTopInventory().getSize() == 54) {
                 new GuiBlacklistEditorClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Blacklist")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.blacklist.title"))) {
                 new GuiBlacklistClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Villager")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.villager.title"))) {
                 new GuiVillagerClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Quiver")
-                    || ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Arrow Selection")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.quiver.title"))
+                    || ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.quiver.title_select"))) {
                 new GuiQuiverClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Your Potions")
-                    || ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Remove Potions")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(Lang.getFor(player, "gui.potions.title_view").split("\\(")[0].trim())
+                    || ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(Lang.getFor(player, "gui.potions.title_remove").split("\\(")[0].trim())) {
                 new GuiPotionRemove().execute(e);
                 new GuiPotionListPreventRemoval().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Add Potions")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(Lang.getFor(player, "gui.potions.title_add").split("\\(")[0].trim())) {
                 new GuiPotionPreventNonPotionAdd().execute(e);
                 new GuiPotionAdd().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Held Shulker")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.shulker.title"))) {
                 new GuiShulkerPreventDrop().execute(e);
                 new ShulkerPreventSlotSwitch().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarth Ranks")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiAranarth.TITLE_KEY))) {
+                new GuiAranarthClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiRecipes.TITLE_KEY))) {
+                new GuiRecipesClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiRecipeView.TITLE_KEY))) {
+                new GuiRecipeViewClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.ranks.title"))) {
                 new GuiRanksClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Rankup Confirm")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.rankup.title"))) {
                 new GuiRankupClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Your Homes")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(Lang.getFor(player, "gui.homes.title").split("\\(")[0].trim())) {
                 new GuiHomesClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Delete Home")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.delhome.title"))) {
                 new GuiDelhomeClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Warps")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.warps.title"))) {
                 new GuiWarpClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Tables")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.tables.title"))) {
                 new GuiTablesClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Aranarth Store - ")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(Lang.getFor(player, "gui.store.title_main").split(" - ")[0] + " - ")) {
                 new GuiStoreClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Compressible Items")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(Lang.getFor(player, "gui.compressor.title"))) {
                 new GuiCompressorClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Crate - ")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(Lang.getFor(player, "gui.crate.title_vote").split(" - ")[0] + " - ")) {
                 new GuiCrateClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Player Shops")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.shoplocation.title"))) {
                 new GuiShopLocationClick().execute(e);
-            } else if (isDominionFoodTitle(ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
+            } else if (GuiDominionFood.isFoodTitle(player, ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
                 new GuiDominionFoodClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(GuiDominionResourcesPreview.TITLE_SUFFIX)
-                    && !ChatUtils.stripColorFormatting(e.getView().getTitle()).contains("'s Resources")) {
-                new GuiDominionResourcesPreviewClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(" Resources")) {
+            } else if (GuiHolder.of(e.getView().getTopInventory()).getData() instanceof GuiDominionResourceFilters.Screen) {
+                new GuiDominionResourceFiltersClick().execute(e);
+            } else if (GuiDominionResources.isResourcesTitle(player, ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
                 new GuiDominionResourcesClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiDominionPermissions.HUB_TITLE)
-                    || (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(" Permissions")
-                    && !ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith("'s Permissions"))) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(Lang.getFor(player, GuiDominionResourcesPreview.TITLE_SUFFIX_KEY))) {
+                new GuiDominionResourcesPreviewClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiDominionFlagSelect.TITLE_MOB_SPAWNING_KEY))
+                    || ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiDominionFlagSelect.TITLE_PVP_KEY))
+                    || ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiDominionFlagSelect.TITLE_BENDING_KEY))
+                    || ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiDominionFlagSelect.TITLE_EXPLOSIONS_KEY))) {
+                new GuiDominionFlagSelectClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiDominionPermissions.HUB_TITLE_KEY))
+                    || GuiHolder.of(e.getView().getTopInventory()).getData() instanceof GuiDominionPermissions.RankScreen) {
                 new GuiDominionPermissionsClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith("'s Permissions")) {
+            } else if (GuiHolder.of(e.getView().getTopInventory()).getData() instanceof GuiDominionPlayerPermissions.Screen) {
                 new GuiDominionPlayerPermissionsClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiDefenderManage.TITLE)) {
+            } else if (GuiHolder.of(e.getView().getTopInventory()).getData() instanceof GuiDominionRegions.Screen) {
+                new GuiDominionRegionsClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiDefenderAreaSelect.TITLE_KEY))) {
+                new GuiDefenderAreaSelectClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.defendermanage.title"))) {
                 new GuiDefenderManageClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(GuiDefenders.TITLE_PREFIX)) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(Lang.getFor(player, "gui.defenders.title").split("\\(")[0].trim() + " (")) {
                 new GuiDefendersClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiOutposts.TITLE)) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.outposts.title"))) {
                 new GuiOutpostsClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Dominion Members")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.dominionmembers.title"))) {
                 new GuiDominionMembersClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiBrewBook.TITLE)) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.brewbook.title"))) {
                 new GuiBrewBookClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiBrewShop.TITLE)) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.brewshop.title"))) {
                 new GuiBrewShopClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarth Vote Shop")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.voteshop.title"))) {
                 new GuiVoteShopClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Vote Shop Purchase")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.voteshoppurchase.title"))) {
                 new GuiVoteShopPurchaseClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Deaths")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.topdeaths.title"))) {
                 new GuiTopDeathsClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Kills")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.topkills.title"))) {
                 new GuiTopKillsClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Guesses")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.topguesses.title"))) {
                 new GuiTopGuessesClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Your Quests")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.quests.title"))) {
                 new GuiQuestsClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiJobs.TITLE)) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.jobs.title"))) {
                 new GuiJobsClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiJobsJoin.TITLE)) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.jobsjoin.title"))) {
                 new GuiJobsJoinClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiJobsStats.TITLE)) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.jobsstats.title"))) {
                 new GuiJobsStatsClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiJobsLeave.TITLE)) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.jobsleave.title"))) {
                 new GuiJobsLeaveClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Login Streak")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(ChatUtils.stripColorFormatting(Lang.getFor(player, "gui.loginstreak.title")))) {
                 new GuiLoginStreakClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Player Toggles")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.toggle.title"))) {
                 new GuiToggleClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiSounds.TITLE)) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.sitcolor.title"))) {
+                new GuiSitColorClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.sounds.title"))) {
                 new GuiSoundsClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Top Voters")) {
+            } else if (GuiVoteTop.isVoteTopTitle(player, ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
                 new GuiVoteTopClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Top ")
-                    && !ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Kills")
-                    && !ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Deaths")
-                    && !ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Guesses")) {
+                    && !ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.topkills.title"))
+                    && !ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.topdeaths.title"))
+                    && !ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.topguesses.title"))) {
                 new GuiMctopClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiPetFood.TITLE)) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.petfood.title"))) {
                 new GuiPetFoodClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiHeadExchange.TITLE)) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiHeadExchange.TITLE_KEY))) {
                 new GuiHeadExchangeClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiMcstats.TITLE_SELF)
-                    || ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(GuiMcstats.TITLE_SUFFIX)) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiHeads.ADMIN_TITLE_KEY))) {
+                new GuiHeadsAdminClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiMarketValue.TITLE_KEY))) {
+                new GuiMarketValueClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiMcstats.TITLE_SELF_KEY))
+                    || ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(Lang.getFor(player, GuiMcstats.TITLE_SUFFIX_KEY))) {
                 new GuiMcstatsClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiReaper.TITLE)) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.reaper.title"))) {
                 new GuiReaperClick().execute(e);
+            } else if (TradeManager.isTradeGuiOpen(player)) {
+                new GuiTradeClick().execute(e);
             }
-        } else {
+        } else if (e.getView().getType() != InventoryType.CHEST) {
             if (e.getClickedInventory() != null) {
                 if (e.getView().getType() == InventoryType.ANVIL || e.getView().getType() == InventoryType.SMITHING) {
                     new AranarthiumArmourCraft().execute(e);
@@ -192,9 +258,7 @@ public class InventoryClickEventListener implements Listener {
         }
 
         // Execute regardless of inventory type
-        if (e.getWhoClicked() instanceof Player player) {
-            new AfkCancelByInteract().execute(player);
-        }
+        new AfkCancelByInteract().execute(player);
 //        new QuiverSwitchSlots().execute(e);
     }
 }

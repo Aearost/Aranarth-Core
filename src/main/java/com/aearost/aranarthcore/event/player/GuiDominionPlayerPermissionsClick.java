@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.DominionRank;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -38,7 +39,7 @@ public class GuiDominionPlayerPermissionsClick {
 
         // Only the leader may use this GUI
         if (!dominion.getLeader().equals(player.getUniqueId())) {
-            player.sendMessage(ChatUtils.chatMessage("&cOnly the leader can manage permissions!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.leader_only_permissions")));
             return;
         }
 
@@ -89,7 +90,7 @@ public class GuiDominionPlayerPermissionsClick {
                 }
                 boolean eff = inheritedPermsForRestore.contains(entry.getValue());
                 e.getClickedInventory().setItem(entry.getKey(),
-                        GuiDominionPlayerPermissions.buildPlayerPermissionItem(entry.getValue(), eff, false));
+                        GuiDominionPlayerPermissions.buildPlayerPermissionItem(player, entry.getValue(), eff, false));
             }
             player.updateInventory();
             player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5F, 1F);
@@ -143,7 +144,7 @@ public class GuiDominionPlayerPermissionsClick {
         boolean effective = overrides.containsKey(perm) ? overrides.get(perm) : inheritedValue;
         boolean isOverridden = overrides.containsKey(perm);
         e.getClickedInventory().setItem(e.getSlot(),
-                GuiDominionPlayerPermissions.buildPlayerPermissionItem(perm, effective, isOverridden));
+                GuiDominionPlayerPermissions.buildPlayerPermissionItem(player, perm, effective, isOverridden));
         player.updateInventory();
         player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 0.5F, 1.5F);
     }

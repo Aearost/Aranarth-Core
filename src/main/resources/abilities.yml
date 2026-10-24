@@ -1,0 +1,728 @@
+# AranarthCore ability values
+# All durations and cooldowns are in milliseconds unless the key ends in Ticks (20 ticks = 1 second)
+# All distances are in blocks, and 2 damage = 1 heart
+# Run /ac reload to apply changes - abilities that are already active keep the values they were started with
+# This file is separate on each server, so keep it identical on Survival and SMP
+
+# ==================== Fire - Lightning ====================
+
+Jolt:
+  Damage: 3.0
+  Cooldown: 4000
+  Range: 45.0
+  StunChance: 0.5
+  StunDuration: 1500
+  ChargeDuration: 500
+  Speed: 4.0
+  HitRadius: 0.8
+
+Discharge:
+  Damage: 4.0
+  Cooldown: 5000
+  AvatarCooldown: 500
+  Duration: 1000
+  EntityCollisionRadius: 1.0
+  StunChance: 0.25
+  StunDuration: 1000
+  Knockback: 0.8
+
+LightningBurst:
+  Damage: 8.0
+  Cooldown: 12000
+  ChargeDuration: 1750
+  AvatarCooldown: 1000
+  AvatarChargeDuration: 750
+  Radius: 12.0
+  StunChance: 0.25
+  StunDuration: 1000
+
+Static:
+  Damage: 2.0
+  # Damage against non-player entities is multiplied by this value
+  NonPlayerDamageMultiplier: 3.0
+  Cooldown: 7000
+  Range: 7.0
+  Speed: 1.5
+  HitRadius: 0.8
+  BounceRadius: 5.0
+  MaxBounces: 6
+  BounceDelayTicks: 5
+  StunChance: 0.1
+  StunDuration: 500
+
+ElectricStrike:
+  Damage: 12.0
+  Cooldown: 7000
+  Range: 50.0
+  ChargeDuration: 1000
+  Speed: 5.0
+  HitRadius: 0.5
+  AoeRadius: 3.5
+  # Entities caught in the impact area (other than the one directly hit) take this fraction of the damage
+  AoeDamageMultiplier: 0.5
+
+Lightning:
+  Damage: 10.0
+  Cooldown: 10000
+  Range: 20.0
+  ChargeDuration: 3000
+  StunChance: 0.3
+  StunDuration: 30
+  MaxArcAngle: 2.5
+  SubArcChance: 0.00125
+  ChainRange: 6.0
+  ChainArcChance: 0.5
+  MaxChainArcs: 2
+  WaterArcs: 4
+  WaterArcRange: 20.0
+  ConductivityRange: 5.0
+  MaxCopperArcs: 8
+  SelfHitWater: true
+  SelfHitClose: true
+  ArcOnIce: true
+  ArcOnCopper: true
+  AllowOnFireJet: true
+  ChainLightningRods: true
+
+JetBolt:
+  Damage: 1.0
+  Cooldown: 12000
+  Range: 10.0
+  Duration: 4000
+  StrikeInterval: 500
+  MaxStrikesPerTarget: 3
+  StunChance: 0.75
+  StunDuration: 2000
+  FlightSpeed: 2.5
+  # Cooldown applied to FireJet once the flight ends
+  FireJetCooldown: 7000
+
+# ==================== Fire - Combustion ====================
+
+Barrage:
+  # 8 damage = 4 hearts
+  Damage: 8.0
+  MisfireDamage: 12.0
+  Cooldown: 7000
+  Range: 25.0
+  AoeRadius: 2.0
+  Bursts: 3
+  BurstInterval: 500
+  # Blocks travelled per tick
+  Speed: 2.5
+  HitRadius: 0.8
+
+CombustionStrike:
+  # 20 damage = 10 hearts
+  Damage: 20.0
+  MisfireDamage: 8.0
+  Cooldown: 14000
+  Range: 100.0
+  ChargeDuration: 5000
+  # Radius of blocks destroyed by the explosion
+  ExplosionRadius: 3.5
+  # Radius of entities damaged by the explosion
+  DamageRadius: 3.0
+  # Blocks travelled per tick
+  Speed: 2.5
+  HitRadius: 0.8
+
+NoxiousFumes:
+  Cooldown: 12000
+  Range: 10.0
+  SmokeSpeed: 12.0
+  ChargeDuration: 1500
+  MaxChannelingDuration: 4000
+  PuffLifespan: 7000
+  PuffRadius: 3.0
+  SourceCheckRadius: 6.0
+  # Max number of fire/lava sources pulled from during the day and night
+  MaxSourcesDay: 5
+  MaxSourcesNight: 1
+  # How often entities in the fumes receive stronger effects
+  EffectInterval: 500
+  BaseEffectDurationTicks: 60
+
+# ==================== Fire - Combos ====================
+
+JetFumes:
+  Cooldown: 12000
+  Duration: 4000
+  FlightSpeed: 1.6
+  PuffRadius: 3.0
+  PuffLifespan: 5500
+  # Radius in which a fire or lava source must be to launch
+  SourceRadius: 6.0
+  # How often entities in the fumes receive stronger effects
+  EffectInterval: 500
+  BaseEffectDurationTicks: 20
+  # Cooldown applied to FireJet once the flight ends
+  FireJetCooldown: 5000
+
+# ==================== Air - AirBlast ====================
+
+# Arrow launched by AirBlast while holding arrows with level 100+ Archery
+AirBlastArrow:
+  # Blocks travelled per tick at launch (a fully drawn bow is 3.0), arrow damage scales with this
+  Speed: 3.0
+
+# ==================== Air - Sound ====================
+
+# Debuff applied by most Sound abilities on hit (20 ticks = 1 second)
+SoundDebuff:
+  SlownessDurationTicks: 60
+  DarknessDurationTicks: 40
+
+SonicBoom:
+  # Damage scales from MaxDamage at point-blank down to MinDamage at max range
+  MaxDamage: 12.0
+  MinDamage: 2.0
+  Cooldown: 8000
+  ChargeDuration: 1000
+  Range: 10.0
+  HitRadius: 2.0
+  # Blocks travelled per tick
+  Speed: 1.5
+
+DeafeningScream:
+  # 14 damage = 7 hearts
+  Damage: 14.0
+  # Fraction of damage lost at the edge of the radius
+  MaxFalloff: 0.5
+  Cooldown: 15000
+  ChargeDuration: 2000
+  Radius: 7.0
+  SlownessDurationTicks: 150
+  DarknessDurationTicks: 100
+
+SonicClap:
+  # Damage against players, multiplied by MobDamageMultiplier against mobs
+  Damage: 3.0
+  MobDamageMultiplier: 1.5
+  Cooldown: 2250
+  Range: 12.0
+  # Blocks travelled per tick
+  Speed: 1.5
+  HitRadiusHorizontal: 1.2
+  HitRadiusVertical: 1.55
+
+Amplification:
+  Cooldown: 8000
+  ChargeDuration: 5000
+  # How long the amplification lasts - the multiplier decreases to 1x over this time
+  Duration: 8000
+  MaxMultiplier: 3.0
+
+SonicPulse:
+  Cooldown: 6000
+  Range: 10.0
+  Pulses: 4
+  # Time over which all pulses are emitted
+  Duration: 2500
+  # Damage against players scales from MaxDamage on the first pulse to MinDamage on the last
+  MaxDamage: 6.0
+  MinDamage: 2.0
+  MobDamageMultiplier: 1.5
+  MinKnockback: 0.5
+  MaxKnockback: 2.8
+  KnockbackVertical: 0.4
+  HitThickness: 0.6
+  # Blocks travelled per tick
+  Speed: 1.6
+  # The caster recoils when a pulse hits a solid block within this distance
+  MaxRecoilDistance: 4.0
+  RecoilHorizontal: 1.5
+  RecoilVertical: 0.6
+
+# ==================== Air - Spiritual ====================
+
+AngeredSpirits:
+  Damage: 2.0
+  Cooldown: 6000
+  ChargeDuration: 1000
+  # Blocks travelled per tick
+  Speed: 2.0
+  HitRadius: 1.5
+  # Time the player has to fire all spirits once charged
+  FireWindow: 2500
+  # Each spirit travels a random distance between MinRange and MaxRange
+  MinRange: 16.0
+  MaxRange: 24.0
+
+AstralShot:
+  Damage: 2.0
+  Cooldown: 8000
+  Range: 24.0
+  # Blocks travelled per tick
+  Speed: 2.0
+  HitRadius: 1.5
+  EffectDurationTicks: 60
+
+EnergyBurst:
+  # 10 damage = 5 hearts
+  Damage: 10.0
+  Cooldown: 12000
+  ChargeDuration: 1500
+  Radius: 8.0
+  BurstDuration: 1500
+  # When triggered by falling, damage scales from FallBurstMinDamage at FallBurstMinDistance to full damage at FallBurstMaxDistance
+  FallBurstMinDistance: 3.0
+  FallBurstMaxDistance: 75.0
+  FallBurstMinDamage: 1.0
+
+LightOfRaava:
+  Cooldown: 20000
+  ChargeDuration: 1000
+  Range: 7.0
+  # Range used while in the Avatar State
+  AvatarRange: 13.0
+  BurstDuration: 750
+  WitherDurationTicks: 200
+  RegenerationDurationTicks: 100
+
+AstralProjection:
+  Cooldown: 60000
+  Range: 30.0
+  Duration: 30000
+  ChargeDuration: 4000
+  # Number of sub-abilities that can be used per projection
+  MaxUses: 5
+  AuraCooldown: 8000
+  ScreamCooldown: 3000
+  PossessCooldown: 12000
+
+PastLives:
+  # 5 minutes
+  Cooldown: 300000
+  # 30 minutes
+  Duration: 1800000
+  # Roku - Fang flight speed in blocks per tick (1.0 = 20 m/s), ramps from min to max over 10 seconds
+  RokuMinSpeed: 1.0
+  RokuMaxSpeed: 3.75
+  # Roku - cooldown applied if Fang is killed (15 minutes)
+  RokuDeathCooldown: 900000
+  # Kuruk - hit streak resets after this long without a hit
+  KurukStreakTimeout: 5000
+  # Kuruk - fraction of max health below which the low-health effects apply
+  KurukLowHpFraction: 0.5
+  # Aang - cooldown applied when the form ends
+  AangEndCooldown: 10000
+
+# ==================== Air - Combos ====================
+
+AirSnipe:
+  Damage: 8.0
+  Cooldown: 9000
+  Range: 40.0
+  Speed: 20.0
+  HitRadius: 0.4
+
+JetStream:
+  Cooldown: 8000
+  Duration: 2500
+  # Blocks per tick (3.0 = 60 blocks/s, 150 blocks over the full duration)
+  Speed: 3.0
+  # Radius of the stream (1.0 = 2 block diameter)
+  Radius: 1.0
+  # Max radians per tick the stream can turn toward where the caster is looking
+  TurnRate: 0.03
+  # How strongly carried entities are pulled toward the stream each tick
+  PullStrength: 0.4
+  # Carried entities (including the caster) further than this from the stream (e.g. stuck behind a wall) are freed from it
+  CarryRange: 3.0
+  # How long the caster and carried entities stay protected from fall damage after release
+  FallProtection: 5000
+  # Max time between two sneak presses for a double-tap to end the stream early
+  DoubleTapWindow: 400
+
+# ==================== Water - Plant ====================
+
+LeafScythe:
+  # 4 damage = 2 hearts
+  Damage: 4.0
+  # Hits from the blade end deal this multiple of the damage
+  BladeDamageMultiplier: 1.5
+  Cooldown: 6000
+  # Cooldown used when only crops were harvested
+  HarvestCooldown: 500
+  SelectRange: 8
+  HitRadius: 1.5
+  # How long a selected source stays valid
+  SourcedTimeout: 5000
+
+RazorLeaves:
+  Damage: 2.0
+  Cooldown: 8000
+  SelectRange: 6
+  Range: 20
+  SourceLeashRange: 10.0
+  Leaves: 5
+  # Blocks travelled per tick
+  Speed: 2.5
+  HitRadius: 0.8
+
+Regrowth:
+  Cooldown: 10000
+  SourceRange: 6.0
+  GrowingRadius: 5.0
+  StreamSpeed: 0.4
+  WaveRadius: 4.0
+
+RootSnare:
+  Damage: 2.0
+  Cooldown: 8000
+  Range: 12.0
+  SnareDuration: 2000
+  SpreadDuration: 750
+  ChargeDuration: 1000
+  # How long the charge is held before it is lost
+  ChargedTimeout: 5000
+  # Number of nearby log pillars needed to count as a forest
+  MinWoodPillars: 2
+  MaxTargets: 5
+
+ToxicSpores:
+  Cooldown: 12000
+  Range: 10.0
+  SporeSpeed: 35.0
+  ChargeDuration: 500
+  MaxChannelingDuration: 2000
+  PuffLifespan: 7000
+  PuffRadius: 1.5
+  SourceCheckRadius: 6.0
+  # How often entities in the spores receive effects
+  EffectInterval: 500
+  EffectDurationTicks: 80
+  # 4 = Poison V
+  PoisonAmplifier: 4
+
+VineWhip:
+  Damage: 5.0
+  Cooldown: 4000
+  SelectRange: 6
+  Range: 25
+  FullExtendDuration: 750
+  HoldDuration: 500
+
+# ==================== Water - Healing ====================
+
+MendingWaters:
+  # Heal per shot in HP (2 = 1 heart), multiplied based on the caster's rank
+  BaseHeal: 2.0
+  Cooldown: 8000
+  Range: 20.0
+  SourceRange: 5.0
+  Shots: 5
+  ShotCooldown: 200
+  ChargeDuration: 500
+  # Blocks travelled per tick
+  Speed: 1.5
+  HitRadius: 0.8
+
+HealingHelix:
+  # HP healed every HealInterval
+  Heal: 1.0
+  HealInterval: 500
+  # Max absorption HP granted once the target is at full health
+  MaxAbsorption: 8.0
+  AbsorptionExpiryTicks: 240
+  Cooldown: 15000
+  Range: 15.0
+  SourceRange: 5.0
+  HitRadius: 0.6
+  WaterDuration: 4000
+  GoldenDuration: 4000
+
+CorruptingHelix:
+  # HP drained every DamageInterval
+  Damage: 1.0
+  DamageInterval: 500
+  # Slowness increases by one level every SlownessInterval up to MaxSlowness
+  SlownessInterval: 1000
+  MaxSlowness: 4
+  Cooldown: 15000
+  Range: 15.0
+  SourceRange: 5.0
+  HitRadius: 0.6
+  WaterDuration: 4000
+  CorruptedDuration: 4000
+
+# ==================== Water - Blood ====================
+
+BloodFreeze:
+  # HP drained every DamageInterval
+  Damage: 1.0
+  DamageInterval: 250
+  Cooldown: 10000
+  Range: 6.0
+  HitRadius: 0.5
+  ChargeDuration: 1000
+  Duration: 3000
+  MaxSlowness: 5
+
+BloodGrip:
+  Cooldown: 8000
+  Range: 6.0
+  HitRadius: 0.5
+  ChargeDuration: 1000
+  # How long the target is controlled
+  Duration: 5000
+  FlingStrength: 2.8
+  MaxFlingHorizontal: 0.9
+  MaxFlingVertical: 1.0
+  # Reduces fling strength based on the target's armor weight
+  FlingArmorDrag: 0.35
+
+Disalignment:
+  Cooldown: 15000
+  Range: 6.0
+  HitRadius: 0.5
+  ChargeDuration: 5000
+  # How long the target stays disaligned
+  Duration: 10000
+
+LifeRip:
+  Cooldown: 30000
+  Range: 7.0
+  HitRadius: 0.5
+  Duration: 6000
+  # HP drained from the target each drain
+  DrainDamage: 2.0
+  # Max health removed from the target
+  TargetMaxHealthLoss: 2.0
+  # Max health gained by the caster per drain, up to CasterMaxGainCap in total
+  CasterMaxHealthGain: 1.0
+  CasterMaxGainCap: 20.0
+
+# ==================== Water - Combos ====================
+
+IceDiscs:
+  Damage: 2.0
+  Cooldown: 12000
+  Range: 20.0
+  # Time to build the full ice pillar
+  ChargeDuration: 2000
+  # Delay between each disc fired
+  DiscCooldown: 100
+  Speed: 3.0
+  HitRadius: 0.7
+
+IceShards:
+  Damage: 12.0
+  Cooldown: 14000
+  DomeRadius: 10
+  ChargeDuration: 3000
+  # How long the charge is held before it is lost
+  ChargeHoldGrace: 5000
+  # Blocks travelled per tick
+  Speed: 2.5
+  ProjectileMaxLifetime: 5000
+
+# ==================== Earth ====================
+
+Tremorsense:
+  Cooldown: 10000
+  # Entity glow radius, reached gradually over ExpandDuration
+  Radius: 50
+  ExpandDuration: 5000
+  Duration: 15000
+
+# ==================== Earth - Metal ====================
+
+CableThrash:
+  # Damage dealt every DamageInterval
+  Damage: 2.0
+  DamageInterval: 500
+  Cooldown: 7000
+  Radius: 4.0
+  Duration: 1500
+
+CableWhip:
+  Damage: 3.0
+  Cooldown: 6000
+  Range: 6.0
+  ChargeDuration: 500
+  # How long the player has to whip once charged
+  ReadyDuration: 3000
+  Whips: 3
+  HitRadius: 0.8
+
+MetalBlade:
+  Damage: 5.0
+  Cooldown: 8000
+  ChargeDuration: 750
+  Duration: 6000
+  MaxHits: 3
+
+MetalShots:
+  Damage: 2.0
+  Cooldown: 10000
+  Range: 24.0
+  MaxSources: 3
+  ShotsPerSource: 8
+  SourceRange: 6.0
+  Speed: 3.0
+  HitRadius: 0.6
+  ShotCooldown: 200
+  Duration: 30000
+
+MetalShred:
+  Damage: 6.0
+  Cooldown: 9000
+  Range: 1.0
+  MaxBlocks: 50
+  # How long the shred stays extended
+  Duration: 5000
+  DamageRadius: 2.0
+
+MetalStrips:
+  Cooldown: 5000
+  Range: 20.0
+  Speed: 3.0
+  HitRadius: 0.6
+  # Shots that can be fired in one burst, within BurstWindowTicks (20 ticks = 1 second)
+  BurstShots: 8
+  BurstWindowTicks: 50
+  RecallRange: 32.0
+  RecallSpeed: 1.2
+  PickupRadius: 1.5
+
+# ==================== Earth - Lava ====================
+
+Eruption:
+  Damage: 6.0
+  Cooldown: 12000
+  Range: 12.0
+  SourceRange: 15
+  Geysers: 3
+  # Time after the first click in which more geysers can be added
+  ClickWindow: 1000
+  # Knock-up scales from BaseKnockup to MaxKnockup based on the geyser's height
+  BaseKnockup: 1.2
+  MaxKnockup: 2.0
+
+MagmaGlaives:
+  Damage: 6.0
+  Cooldown: 9000
+  Range: 16.0
+  Knockback: 1.2
+  SourceRange: 5
+  ChargeDuration: 1500
+  # How long the glaives can be held once charged
+  ReadyDuration: 8000
+  # Blocks travelled per tick
+  Speed: 1.2
+  HitRadius: 1.8
+
+MagmaWave:
+  Damage: 14.0
+  Cooldown: 8000
+  Range: 28.0
+  Duration: 4000
+  # Blocks travelled per tick
+  Speed: 0.9
+  HitRadius: 3.5
+  # Radius searched around the player for a lava source
+  SourceRange: 3
+
+# ==================== Earth - Sand ====================
+
+Burial:
+  # Damage dealt every DamageInterval while buried
+  Damage: 1.0
+  DamageInterval: 500
+  Cooldown: 12000
+  Range: 24.0
+  Duration: 3000
+  # Blocks travelled per second
+  Speed: 16.0
+
+SandWave:
+  Damage: 4.0
+  Cooldown: 12000
+  Range: 16.0
+  Width: 5.0
+  Knockback: 1.5
+  # Time for the wave to travel its full range
+  Duration: 1500
+
+Sandstorm:
+  # Damage starts at BaseDamage and increases by DamageIncrement each DamageInterval, up to MaxDamagePerInterval
+  BaseDamage: 1.0
+  DamageIncrement: 1.0
+  MaxDamagePerInterval: 3.0
+  DamageInterval: 500
+  Cooldown: 12000
+  MaxRadius: 10.0
+  ExpansionInterval: 500
+  MaxCastingDuration: 10000
+  SelectSourceRange: 5.0
+  SlownessUpgradeInterval: 1500
+
+# ==================== Earth - Combos ====================
+
+CableSlash:
+  Damage: 5.0
+  Cooldown: 8000
+  Range: 10.0
+  Knockback: 0.3
+  HitRadius: 1.5
+
+EarthRush:
+  Damage: 5.0
+  Cooldown: 8000
+  Range: 20.0
+  # Boulders that can be fired within the combo window
+  Shots: 3
+  SourceRange: 6
+  # How long a formed boulder waits to be fired
+  LoadedTimeout: 8000
+  HitRadius: 1.5
+
+MoltenBlast:
+  # Damage scales from MinDamage to MaxDamage
+  MinDamage: 6.0
+  MaxDamage: 10.0
+  Cooldown: 9000
+  SelectRange: 12.0
+  ShootRange: 30.0
+  ChargeDuration: 1500
+  ConvertRadius: 5.0
+  # How long the lifted lava ball stays before it drops
+  LiftedDuration: 10000
+  HitRadius: 2.0
+  # Solid blocks the ball can pass through before stopping
+  MaxBlocksThrough: 2
+  SplatterRadius: 7.0
+
+# ==================== Chi ====================
+
+HighJump:
+  Cooldown: 5000
+  JumpCooldown: 1500
+  DoubleJumpCooldown: 4000
+  EvadeCooldown: 4000
+  EvadeDistance: 2.0
+  LungeCooldown: 5000
+  LungeDistance: 2.0
+  # Vertical velocity - 0.6 is about 2 blocks, 0.81 about 4 blocks, 1.0 about 5 blocks
+  JumpHeight: 0.81
+  DoubleJumpHeight: 1.0
+  EvadeHeight: 0.81
+  LungeHeight: 0.6
+
+DaggerThrow:
+  Damage: 1.0
+  Cooldown: 3000
+  # Daggers that can be thrown within ShotWindow
+  Shots: 5
+  ShotWindow: 500
+  ShotCooldown: 100
+
+DaggerVolley:
+  # Each arrow randomly deals either MinDamage or MaxDamage
+  MinDamage: 1.0
+  MaxDamage: 2.0
+  # Cooldown applied per arrow fired
+  CooldownPerArrow: 1000
+  Speed: 2.5

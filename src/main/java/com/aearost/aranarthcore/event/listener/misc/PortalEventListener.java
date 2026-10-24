@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.ResourceWorldUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -34,7 +35,20 @@ public class PortalEventListener implements Listener {
 			return;
 		}
 		Location destination = determinePortalDestinationLocation(e.getFrom(), e.getPlayer(), e.getCause(), e);
+		// The target resource world has not been re-created yet, so vanilla would send the player to the main worlds
+		if (destination == null && fromWorld != null && fromWorld.getName().startsWith("resource")
+				&& ResourceWorldUtils.isResetting()) {
+			e.setCancelled(true);
+			ResourceWorldUtils.sendLockedMessage(e.getPlayer());
+			return;
+		}
 		if (destination != null) {
+			// The resource world is still being reset and pre-generated
+			if (ResourceWorldUtils.isLockedFor(e.getPlayer(), destination.getWorld().getName())) {
+				e.setCancelled(true);
+				ResourceWorldUtils.sendLockedMessage(e.getPlayer());
+				return;
+			}
 			e.setTo(destination);
 		}
 	}

@@ -2,18 +2,8 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.network.NetworkManager;
-import com.aearost.aranarthcore.objects.CustomKeys;
-import com.aearost.aranarthcore.objects.DefenderMode;
-import com.aearost.aranarthcore.objects.DefenderType;
-import com.aearost.aranarthcore.objects.Dominion;
-import com.aearost.aranarthcore.objects.DominionPermission;
-import com.aearost.aranarthcore.objects.DominionRank;
-import com.aearost.aranarthcore.objects.Outpost;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.Material;
-import org.bukkit.Location;
-import org.bukkit.World;
+import com.aearost.aranarthcore.objects.*;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
@@ -23,15 +13,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Manages all Defender data, spawning, entity tracking, and behaviour modes for Dominions.
@@ -311,6 +293,10 @@ public class DefenderUtils {
         if (spawnLoc == null || spawnLoc.getWorld() == null) {
             return;
         }
+        // Force-load the chunk so the entity can be placed even if the player is elsewhere
+        if (!spawnLoc.getChunk().isLoaded()) {
+            spawnLoc.getChunk().load(true);
+        }
         Entity entity = spawnLoc.getWorld().spawnEntity(spawnLoc, type.getEntityType());
         applyDefenderStats(entity, dominion.getId(), type);
         // New purchases default to patrol
@@ -374,25 +360,26 @@ public class DefenderUtils {
     /**
      * Attempts to purchase one defender of the given type for the dominion.
      *
+     * @param player   The player the result message is shown to.
      * @param dominion The owning dominion.
      * @param type     The defender type to purchase.
      * @param outpost  The outpost to assign the defender to, or {@code null} for the main dominion.
      */
-    public static String purchaseDefender(Dominion dominion, DefenderType type, Outpost outpost) {
+    public static String purchaseDefender(Player player, Dominion dominion, DefenderType type, Outpost outpost) {
         int limit = getDefenderLimit(dominion.getDominionLevel());
         int current = getTotalDefenderCount(dominion.getId());
         if (current >= limit) {
-            return "&cYour dominion cannot purchase any more defenders";
+            return Lang.getFor(player, "defender.limit_reached");
         }
         if (type.getPerRankLimit() > 0) {
             int typeMax = type.getPerRankLimit() * dominion.getDominionLevel();
             if (getDefenderCount(dominion.getId(), type) >= typeMax) {
-                return "&cYour dominion cannot purchase any more Elder Guardian defenders at this dominion rank";
+                return Lang.getFor(player, "defender.elder_limit_reached");
             }
         }
         double price = type.getPurchasePrice();
         if (dominion.getBalance() < price) {
-            return "&cYour dominion cannot afford this";
+            return Lang.getFor(player, "defender.cannot_afford");
         }
         dominion.setBalance(dominion.getBalance() - price);
         PersistenceUtils.saveSingleDominionToDatabase(dominion);
@@ -403,22 +390,22 @@ public class DefenderUtils {
                 .merge(type, 1, Integer::sum);
         spawnEntity(dominion, type, outpost);
         DominionUtils.updateDominion(dominion);
-        return "&7A &e" + type.getDisplayName()
-                + " defender &7has been purchased for &6$" + NumberFormat.getInstance().format((long) price);
+        return Lang.getFor(player, "defender.purchased", "type", Lang.key(type.getNameKey()), "price", NumberFormat.getInstance().format((long) price));
     }
 
     /**
      * Sells a defender and refunds the dominion.
      *
+     * @param player     The player the result message is shown to.
      * @param dominion   The owning dominion.
      * @param type       The defender type to sell.
      * @param entityUUID The specific entity to sell, or {@code null} to pick an arbitrary one of {@code type}.
      */
-    public static String sellDefender(Dominion dominion, DefenderType type, UUID entityUUID) {
+    public static String sellDefender(Player player, Dominion dominion, DefenderType type, UUID entityUUID) {
         if (entityUUID == null) {
             // Selling any tracked entity of this type
             if (getDefenderCount(dominion.getId(), type) <= 0) {
-                return "&cYou do not have any &e" + type.getDisplayName() + " &cdefenders &7to sell";
+                return Lang.getFor(player, "defender.none_to_sell", "type", Lang.key(type.getNameKey()));
             }
             List<UUID> entities = dominionToEntities.get(dominion.getId());
             if (entities != null) {
@@ -429,10 +416,14 @@ public class DefenderUtils {
                     }
                 }
             }
+            // Only refund a defender that is actually tracked here
+            if (entityUUID == null) {
+                return Lang.getFor(player, "defender.not_found");
+            }
         } else {
             // Selling a specific defender via the manage defender GUI
             if (!entityToType.containsKey(entityUUID)) {
-                return "&cThis defender could not be found";
+                return Lang.getFor(player, "defender.not_found");
             }
         }
 
@@ -453,8 +444,7 @@ public class DefenderUtils {
             NetworkManager.getInstance().publishDominionBalanceAdjust(dominion.getId(), refund);
         }
         DominionUtils.updateDominion(dominion);
-        return "&7A &e" + type.getDisplayName()
-                + " defender &7has been sold for &6$" + NumberFormat.getInstance().format((long) refund);
+        return Lang.getFor(player, "defender.sold", "type", Lang.key(type.getNameKey()), "price", NumberFormat.getInstance().format((long) refund));
     }
 
     /**

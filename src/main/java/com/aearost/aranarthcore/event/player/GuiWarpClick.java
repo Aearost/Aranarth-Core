@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -16,21 +17,22 @@ import java.util.List;
  */
 public class GuiWarpClick {
 	public void execute(InventoryClickEvent e) {
-		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Warps")) {
-			// If the user did not click a slot
-			if (e.getClickedInventory() == null) {
-				return;
-			}
+		// If the user did not click a slot
+		if (e.getClickedInventory() == null) {
+			return;
+		}
 
-			List<Home> warps = AranarthUtils.getWarps();
+		List<Home> warps = AranarthUtils.getWarps();
 
-			if (e.getWhoClicked() instanceof Player player) {
+		if (e.getWhoClicked() instanceof Player player) {
 				// Ensures the player is actually clicking a warp
 				if (e.getSlot() >= warps.size()) {
 					return;
 				}
 
 				if (e.getClickedInventory().getType() == InventoryType.CHEST) {
+					// The icon must never be picked up, even if the teleport is cancelled
+					e.setCancelled(true);
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 					for (int i = 0; i < warps.size(); i++) {
 						if (e.getSlot() == i) {
@@ -43,21 +45,21 @@ public class GuiWarpClick {
 								if (heldItem != Material.AIR) {
 									e.setCancelled(true);
 									if (heldItem == warp.getIcon()) {
-										player.sendMessage(ChatUtils.chatMessage("&cThis warp already uses that icon!"));
+										player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "warp.icon_same")));
 									} else {
 										AranarthUtils.updateWarp(warp.getName(), warp.getLocation(), heldItem);
-										player.sendMessage(ChatUtils.chatMessage("&e" + warp.getName() + "&7's icon is now &e" + ChatUtils.getFormattedItemName(heldItem.name())));
+										player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "warp.icon_set", "name", warp.getName(), "icon", ChatUtils.getFormattedItemName(heldItem.name()))));
 									}
 									player.closeInventory();
 									return;
 								}
 							}
 
-							AranarthUtils.teleportPlayer(player, player.getLocation(), warp.getLocation(), aranarthPlayer.isInAdminMode(), warp.getName(), "&7You have teleported to " + warp.getName(), success -> {
+							AranarthUtils.teleportPlayer(player, player.getLocation(), warp.getLocation(), aranarthPlayer.isInAdminMode(), warp.getName(), Lang.getFor(player, "warp.teleported", "name", warp.getName()), success -> {
 								if (success) {
-									player.sendMessage(ChatUtils.chatMessage("&7You have warped to &e" + warp.getName()));
+									player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "warp.teleported", "name", warp.getName())));
 								} else {
-									player.sendMessage(ChatUtils.chatMessage("&cYou could not warp to &e" + warp.getName()));
+									player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "warp.teleport_failed", "name", warp.getName())));
 								}
 							});
 
@@ -66,9 +68,8 @@ public class GuiWarpClick {
 						}
 					}
 					player.closeInventory();
-					player.sendMessage(ChatUtils.chatMessage("&cSomething with wrong with teleporting to that warp..."));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.error")));
 				}
-			}
 		}
 	}
 

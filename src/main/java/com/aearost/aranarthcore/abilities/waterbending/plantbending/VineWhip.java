@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.waterbending.plantbending;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.PlantAbility;
@@ -69,12 +70,12 @@ public class VineWhip extends PlantAbility implements AddonAbility {
             return;
         }
 
-        cooldown = 4000;
-        selectRange = 6;
-        range = 25;
-        damage = 5.0;
-        fullExtendDuration = 750;
-        holdDuration = 500;
+        cooldown = AbilityConfig.getLong("VineWhip.Cooldown");
+        selectRange = AbilityConfig.getInt("VineWhip.SelectRange");
+        range = AbilityConfig.getInt("VineWhip.Range");
+        damage = AbilityConfig.getDouble("VineWhip.Damage");
+        fullExtendDuration = AbilityConfig.getLong("VineWhip.FullExtendDuration");
+        holdDuration = AbilityConfig.getLong("VineWhip.HoldDuration");
 
         phase = Phase.SELECTING;
         activeInstances.put(player.getUniqueId(), this);

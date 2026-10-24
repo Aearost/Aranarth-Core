@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.enums.SpecialDay;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.*;
+import com.aearost.aranarthcore.voice.VoiceChatManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -48,16 +49,28 @@ public class PlayerServerQuitListener implements Listener {
     public void onPlayerQuit(final PlayerQuitEvent e) {
         Player player = e.getPlayer();
         AranarthCore.getInstance().getFireParticleListener().clearPlayer(player.getUniqueId());
+        DateUtils.clearOutdoorExposure(player.getUniqueId());
+
+        // Cancel any active trade when a player disconnects
+        TradeManager.handleQuit(player);
+
+        // Must run before consumeTransferring() so transferring players keep their voice channel on the other server
+        VoiceChatManager.onPlayerQuit(player, NetworkManager.isActive()
+                && NetworkManager.getInstance().isTransferring(player.getUniqueId()));
 
         boolean isCrossServerTransfer = NetworkManager.isActive()
                 && NetworkManager.getInstance().consumeTransferring(player.getUniqueId());
+        // The player landed on the wrong server and left before being routed: this server's copy of
+        // their inventory and location is not theirs, so nothing about it may be saved
+        boolean isNonAuthoritative = NetworkManager.isActive()
+                && NetworkManager.getInstance().isNonAuthoritative(player.getUniqueId());
 
         // Persist the player's logout location so they are returned here on next login.
         // Skipped for cross-server transfers; the receiving server will track their location.
         // Saved synchronously (not async) to prevent a race with DatabaseManager.shutdown():
         // an async task queued here may never run if the connection pool closes first, leaving
         // a stale location in MySQL that causes the player to spawn at the wrong position.
-        if (!isCrossServerTransfer && DatabaseManager.isActive()) {
+        if (!isCrossServerTransfer && !isNonAuthoritative && DatabaseManager.isActive()) {
             final String server = NetworkManager.isActive() ? NetworkManager.getInstance().getThisServer() : "survival";
             final Location loc = player.getLocation();
             final String world = loc.getWorld().getName();
@@ -76,17 +89,17 @@ public class PlayerServerQuitListener implements Listener {
             AranarthPlayer apForQuit = AranarthUtils.getPlayer(player.getUniqueId());
             boolean isVanished = apForQuit != null && apForQuit.isVanished();
             String crossServerQuitMsg = null;
-            if (!isCrossServerTransfer && !isVanished) {
+            if (!isCrossServerTransfer && !isNonAuthoritative && !isVanished) {
                 DateUtils dateUtils = new DateUtils();
                 String nameToDisplay = "&7" + AranarthUtils.getNickname(player);
                 if (dateUtils.isValentinesDay()) {
-                    crossServerQuitMsg = ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.VALENTINES));
+                    crossServerQuitMsg = ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.VALENTINES);
                 } else if (dateUtils.isEaster()) {
-                    crossServerQuitMsg = ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.EASTER));
+                    crossServerQuitMsg = ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.EASTER);
                 } else if (dateUtils.isHalloween()) {
-                    crossServerQuitMsg = ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.HALLOWEEN));
+                    crossServerQuitMsg = ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.HALLOWEEN);
                 } else if (dateUtils.isChristmas()) {
-                    crossServerQuitMsg = ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.CHRISTMAS));
+                    crossServerQuitMsg = ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.CHRISTMAS);
                 } else {
                     crossServerQuitMsg = ChatUtils.translateToColor("&8[&c-&8] &7" + nameToDisplay);
                 }
@@ -120,7 +133,9 @@ public class PlayerServerQuitListener implements Listener {
         PermissionUtils.clearPlayerAttachments(player.getUniqueId());
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
         aranarthPlayer.setAfkLocation(null);
-        if (!aranarthPlayer.getCombatLogTime().isEmpty()) {
+        aranarthPlayer.setAfkStartTime(0);
+        // The inventory was already handed to the other server, so dying here would drop a second copy of it
+        if (!isCrossServerTransfer && !isNonAuthoritative && !aranarthPlayer.getCombatLogTime().isEmpty()) {
             player.setHealth(0);
         }
 
@@ -128,7 +143,7 @@ public class PlayerServerQuitListener implements Listener {
         // Snapshot survival inventory so MySQL is current at logout time.
         // The same-server login path uses this as a fallback if player.dat is stale
         // (e.g. the server crashed on the previous session without saving player.dat).
-        if (!isCrossServerTransfer) {
+        if (!isCrossServerTransfer && !isNonAuthoritative) {
             String quitWorld = player.getWorld() != null ? player.getWorld().getName() : "";
             if (AranarthUtils.isSurvivalWorld(quitWorld)) {
                 try {
@@ -162,7 +177,7 @@ public class PlayerServerQuitListener implements Listener {
         // Saved synchronously (matching saveJobDataSync above) to prevent the same shutdown race:
         // if this were async, the connection pool could close before the task executes, leaving
         // a stale inventory snapshot that causes inventory rollbacks on next login.
-        if (!isCrossServerTransfer && DatabaseManager.isActive()) {
+        if (!isCrossServerTransfer && !isNonAuthoritative && DatabaseManager.isActive()) {
             final String rawRow = PersistenceUtils.buildPlayerRowForTransfer(player.getUniqueId());
             if (rawRow != null) {
                 DatabaseManager.getInstance().saveAranarthPlayerRaw(player.getUniqueId(), player.getName(), rawRow);
@@ -170,6 +185,16 @@ public class PlayerServerQuitListener implements Listener {
                         + " - player row (inventory/stats) flushed to MySQL (raw_data length=" + rawRow.length() + ").");
             } else {
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Quit] " + player.getName() + " - WARNING: rawRow was null, player row NOT flushed to MySQL.");
+            }
+        }
+        // The SMP fallback snapshot is only meant for players pushed off SMP by a restart or crash.
+        // On a normal logout or server switch, remove it so their next login is routed back to SMP
+        // instead of keeping them on Survival. A restart kicks players, so keep it fresh in that case.
+        if (AranarthCore.isSmpServer() && NetworkManager.isActive()) {
+            if (e.getReason() == PlayerQuitEvent.QuitReason.DISCONNECTED) {
+                DatabaseManager.getInstance().deleteTempData(NetworkManager.KEY_SMP_RESTART_INV + player.getUniqueId());
+            } else {
+                NetworkManager.getInstance().writeSmpFallbackSnapshot(player);
             }
         }
 
@@ -180,7 +205,8 @@ public class PlayerServerQuitListener implements Listener {
             }
         }
 
-        if (isCrossServerTransfer) {
+        // A wrong-server landing never announced a join, so its quit is not announced either
+        if (isCrossServerTransfer || isNonAuthoritative) {
             e.setQuitMessage(null);
             // Suppress DiscordSRV leave announcement for server-switch departures
             if (NetworkManager.isActive()) {
@@ -192,18 +218,26 @@ public class PlayerServerQuitListener implements Listener {
             nameToDisplay = "&7" + AranarthUtils.getNickname(player);
 
             if (dateUtils.isValentinesDay()) {
-                e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.VALENTINES)));
+                e.setQuitMessage(null);
+                Lang.sendToAll(ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.VALENTINES));
             } else if (dateUtils.isEaster()) {
-                e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.EASTER)));
+                e.setQuitMessage(null);
+                Lang.sendToAll(ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.EASTER));
             } else if (dateUtils.isHalloween()) {
-                e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.HALLOWEEN)));
+                e.setQuitMessage(null);
+                Lang.sendToAll(ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.HALLOWEEN));
             } else if (dateUtils.isChristmas()) {
-                e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.CHRISTMAS)));
+                e.setQuitMessage(null);
+                Lang.sendToAll(ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.CHRISTMAS));
             } else {
                 e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + nameToDisplay));
             }
 
             playQuitSound();
+        }
+
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().clearTransferState(player.getUniqueId());
         }
 
         AranarthUtils.updateTab();

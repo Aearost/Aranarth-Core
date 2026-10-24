@@ -12,6 +12,7 @@ import java.util.UUID;
  * @param remoteServer The server name the remote player is on.
  * @param isTpHere If true the remote player used /tphere (local player should travel to them).
  *                 If false the remote player used /tp (they should come here to local player).
+ * @param createdAt When the request was received, so old requests expire.
  */
 public record CrossServerTpContext(UUID remotePlayerUuid, String remotePlayerNickname,
-                                   String remoteServer, boolean isTpHere) {}
+                                   String remoteServer, boolean isTpHere, long createdAt) {}

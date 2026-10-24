@@ -32,9 +32,9 @@ import java.util.stream.Collectors;
 public class CommandACCompleter implements TabCompleter {
 
     private static final List<String> COUNCIL_OPTIONS = List.of(
-            "admin", "ban", "broadcast", "clearchat", "dateset", "discordreload", "give",
+            "admin", "architect", "ban", "broadcast", "clearchat", "dateset", "discordreload", "give",
             "home", "invsee", "invswap", "msg", "mute", "og", "perks", "punishments", "questnpc", "rankset",
-            "reloadperms", "reloadshops", "resetquest", "speed", "spy", "sudo", "time", "tp", "tpf", "tpw", "unban", "unmute",
+            "reload", "resetquest", "speed", "spy", "sudo", "time", "tp", "tpf", "tpw", "unban", "unmute",
             "unscramble", "vanish", "vpedit", "warn", "weather", "whereis", "worldevent"
     );
 
@@ -69,8 +69,8 @@ public class CommandACCompleter implements TabCompleter {
 
     private static final List<String> PERK_OPTIONS = List.of(
             "blacklist", "bluefire", "chat", "compressor", "discord",
-            "homes", "inventory", "itemframe", "itemname",
-            "prismaticfire", "randomizer", "shulker", "tables", "whitefire"
+            "homes", "inventory", "invisiblearmor", "itemframe", "itemname",
+            "nickname", "prismaticfire", "randomizer", "shulker", "tables", "whitefire"
     );
 
     /**
@@ -97,7 +97,7 @@ public class CommandACCompleter implements TabCompleter {
             return List.of();
         }
         if (args.length == 1) {
-            return filter(isArchitectOnly ? List.of("msg") : COUNCIL_OPTIONS, args[0]);
+            return filter(isArchitectOnly ? List.of("architect", "msg") : COUNCIL_OPTIONS, args[0]);
         }
         return councilArgs(sender, args);
     }
@@ -120,14 +120,30 @@ public class CommandACCompleter implements TabCompleter {
                 }
                 yield List.of();
             }
-            case "reloadperms" -> args.length == 2 ? filterPlayers(args[1]) : List.of();
             case "whereis", "give", "mute", "unmute", "ban", "unban", "invsee", "warn", "punishments", "perks",
                  "sudo" -> {
                 if (args.length == 2) {
                     yield filterPlayers(args[1]);
                 }
                 yield switch (args[0].toLowerCase()) {
-                    case "give" -> args.length == 3 ? filter(ITEM_NAMES, args[2]) : List.of();
+                    case "give" -> {
+                        if (args.length == 4 && args[2].equals("EssenceBlank")) {
+                            yield filter(List.of("0", "10", "30", "100"), args[3]);
+                        }
+                        if (args.length != 3) {
+                            yield List.of();
+                        }
+                        List<String> giveItems = new ArrayList<>(ITEM_NAMES);
+                        if (sender instanceof Player givePlayer) {
+                            AranarthPlayer giveAranarthPlayer = AranarthUtils.getPlayer(givePlayer.getUniqueId());
+                            if (giveAranarthPlayer != null && giveAranarthPlayer.getCouncilRank() >= 2) {
+                                giveItems.add("Coupon10");
+                                giveItems.add("Coupon30");
+                                Collections.sort(giveItems);
+                            }
+                        }
+                        yield filter(giveItems, args[2]);
+                    }
                     case "mute", "ban" -> {
                         if (args.length == 3) {
                             yield args[2].isEmpty() ? List.of("1m", "1h", "1d", "1w", "-1") : List.of();

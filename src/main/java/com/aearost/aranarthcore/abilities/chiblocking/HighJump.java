@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.chiblocking;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.ChiAbility;
@@ -18,12 +19,6 @@ public class HighJump extends ChiAbility implements AddonAbility {
 
     public enum JumpType { JUMP, DOUBLEJUMP, EVADE, LUNGE }
 
-    // 0.6 ~ 2 blocks, 0.81 ~ 4 blocks, 1.0 ~5 blocks
-    private static final double JUMP_HEIGHT        = 0.81;
-    private static final double DOUBLE_JUMP_HEIGHT = 1.0;
-    private static final double EVADE_HEIGHT       = 0.81;
-    private static final double LUNGE_HEIGHT       = 0.6;
-
     private static final Map<UUID, HighJump> ACTIVE_INSTANCES = new HashMap<>();
 
     @Attribute(Attribute.COOLDOWN)
@@ -41,6 +36,12 @@ public class HighJump extends ChiAbility implements AddonAbility {
     @Attribute("LungeDistance")
     private double lungeDistance;
 
+    // 0.6 ~ 2 blocks, 0.81 ~ 4 blocks, 1.0 ~5 blocks
+    private double jumpHeight;
+    private double doubleJumpHeight;
+    private double evadeHeight;
+    private double lungeHeight;
+
     private JumpType jumpType;
 
     public HighJump(final Player player, final JumpType jumpType) {
@@ -51,13 +52,17 @@ public class HighJump extends ChiAbility implements AddonAbility {
         }
 
         this.jumpType           = jumpType;
-        this.cooldown           = 5000L;
-        this.jumpCooldown       = 1500L;
-        this.doubleJumpCooldown = 4000L;
-        this.evadeCooldown      = 4000L;
-        this.evadeDistance      = 2.0;
-        this.lungeCooldown      = 5000L;
-        this.lungeDistance      = 2.0;
+        this.cooldown           = AbilityConfig.getLong("HighJump.Cooldown");
+        this.jumpCooldown       = AbilityConfig.getLong("HighJump.JumpCooldown");
+        this.doubleJumpCooldown = AbilityConfig.getLong("HighJump.DoubleJumpCooldown");
+        this.evadeCooldown      = AbilityConfig.getLong("HighJump.EvadeCooldown");
+        this.evadeDistance      = AbilityConfig.getDouble("HighJump.EvadeDistance");
+        this.lungeCooldown      = AbilityConfig.getLong("HighJump.LungeCooldown");
+        this.lungeDistance      = AbilityConfig.getDouble("HighJump.LungeDistance");
+        this.jumpHeight         = AbilityConfig.getDouble("HighJump.JumpHeight");
+        this.doubleJumpHeight   = AbilityConfig.getDouble("HighJump.DoubleJumpHeight");
+        this.evadeHeight        = AbilityConfig.getDouble("HighJump.EvadeHeight");
+        this.lungeHeight        = AbilityConfig.getDouble("HighJump.LungeHeight");
 
         // Register before start() so same-tick duplicate events are blocked immediately.
         ACTIVE_INSTANCES.put(player.getUniqueId(), this);
@@ -81,7 +86,7 @@ public class HighJump extends ChiAbility implements AddonAbility {
 
     private void performJump() {
         Vector velocity = player.getVelocity();
-        velocity.setY(JUMP_HEIGHT);
+        velocity.setY(jumpHeight);
         player.setVelocity(velocity);
         poof();
         bPlayer.addCooldown(this, jumpCooldown);
@@ -90,7 +95,7 @@ public class HighJump extends ChiAbility implements AddonAbility {
 
     private void performDoubleJump() {
         Vector velocity = player.getVelocity();
-        velocity.setY(DOUBLE_JUMP_HEIGHT);
+        velocity.setY(doubleJumpHeight);
         player.setVelocity(velocity);
         poof();
         bPlayer.addCooldown(this, doubleJumpCooldown);
@@ -99,7 +104,7 @@ public class HighJump extends ChiAbility implements AddonAbility {
 
     private void performEvade() {
         Vector velocity = player.getLocation().getDirection().normalize().multiply(-evadeDistance);
-        velocity.setY(EVADE_HEIGHT);
+        velocity.setY(evadeHeight);
         player.setVelocity(velocity);
         poof();
         bPlayer.addCooldown(this, evadeCooldown);
@@ -108,7 +113,7 @@ public class HighJump extends ChiAbility implements AddonAbility {
 
     private void performLunge() {
         Vector velocity = player.getLocation().getDirection().normalize().multiply(lungeDistance);
-        velocity.setY(LUNGE_HEIGHT);
+        velocity.setY(lungeHeight);
         player.setVelocity(velocity);
         poof();
         bPlayer.addCooldown(this, lungeCooldown);

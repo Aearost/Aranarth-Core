@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.firebending.lightningbending;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
@@ -31,11 +32,7 @@ import java.util.UUID;
 
 public class JetBolt extends LightningAbility implements AddonAbility, ComboAbility {
 
-    private static final long COOLDOWN_MS = 12000L;
-    private static final long STRIKE_INTERVAL_MS = 500L;
-    private static final long ELECTROCUTION_DURATION_MS = 2000L;
     private static final long SOUND_INTERVAL_MS = 50L;
-    private static final double FLIGHT_SPEED = 2.5;
     private static final int BOLTS_PER_TICK = 15;
     private static final long TRAIL_NODE_INTERVAL_MS = 100L;
     private static final long TRAIL_NODE_LIFESPAN_MS = 1200L;
@@ -48,6 +45,12 @@ public class JetBolt extends LightningAbility implements AddonAbility, ComboAbil
     private double range;
     @Attribute(Attribute.DURATION)
     private long duration;
+    private long strikeInterval;
+    private int maxStrikesPerTarget;
+    private double stunChance;
+    private long stunDuration;
+    private double flightSpeed;
+    private long fireJetCooldown;
 
     private long flightStartTime;
     private long lastSoundTime;
@@ -55,8 +58,6 @@ public class JetBolt extends LightningAbility implements AddonAbility, ComboAbil
     private long flightEndTime;
     private boolean started;
     private boolean flightEnded;
-
-    private static final int MAX_STRIKES_PER_TARGET = 3;
 
     private final Map<UUID, Long> entityLastStrikeTime = new HashMap<>();
     private final Map<UUID, Integer> entityStrikeCount = new HashMap<>();
@@ -87,10 +88,16 @@ public class JetBolt extends LightningAbility implements AddonAbility, ComboAbil
             return;
         }
 
-        damage = 1.0;
-        cooldown = COOLDOWN_MS;
-        range = 10.0;
-        duration = 4000L;
+        damage = AbilityConfig.getDouble("JetBolt.Damage");
+        cooldown = AbilityConfig.getLong("JetBolt.Cooldown");
+        range = AbilityConfig.getDouble("JetBolt.Range");
+        duration = AbilityConfig.getLong("JetBolt.Duration");
+        strikeInterval = AbilityConfig.getLong("JetBolt.StrikeInterval");
+        maxStrikesPerTarget = AbilityConfig.getInt("JetBolt.MaxStrikesPerTarget");
+        stunChance = AbilityConfig.getDouble("JetBolt.StunChance");
+        stunDuration = AbilityConfig.getLong("JetBolt.StunDuration");
+        flightSpeed = AbilityConfig.getDouble("JetBolt.FlightSpeed");
+        fireJetCooldown = AbilityConfig.getLong("JetBolt.FireJetCooldown");
 
         flightStartTime = System.currentTimeMillis();
         lastSoundTime = 0L;
@@ -158,12 +165,12 @@ public class JetBolt extends LightningAbility implements AddonAbility, ComboAbil
     private void endFlight() {
         flightEnded = true;
         flightEndTime = System.currentTimeMillis();
-        bPlayer.addCooldown("FireJet", 7000L);
-        bPlayer.addCooldown("JetBolt", COOLDOWN_MS);
+        bPlayer.addCooldown("FireJet", fireJetCooldown);
+        bPlayer.addCooldown("JetBolt", cooldown);
     }
 
     private void tickFlight() {
-        Vector velocity = player.getEyeLocation().getDirection().normalize().multiply(FLIGHT_SPEED);
+        Vector velocity = player.getEyeLocation().getDirection().normalize().multiply(flightSpeed);
         player.setVelocity(velocity);
         player.setFallDistance(0f);
         player.setFireTicks(0);
@@ -334,12 +341,12 @@ public class JetBolt extends LightningAbility implements AddonAbility, ComboAbil
             }
 
             UUID id = entity.getUniqueId();
-            if (entityStrikeCount.getOrDefault(id, 0) >= MAX_STRIKES_PER_TARGET) {
+            if (entityStrikeCount.getOrDefault(id, 0) >= maxStrikesPerTarget) {
                 continue;
             }
 
             Long lastStrike = entityLastStrikeTime.get(id);
-            if (lastStrike != null && now - lastStrike < STRIKE_INTERVAL_MS) {
+            if (lastStrike != null && now - lastStrike < strikeInterval) {
                 continue;
             }
 
@@ -349,7 +356,7 @@ public class JetBolt extends LightningAbility implements AddonAbility, ComboAbil
             }
             entityStrikeCount.merge(id, 1, Integer::sum);
             DamageHandler.damageEntity(living, damage, this);
-            AranarthBendingUtils.applyElectrocution(living, ELECTROCUTION_DURATION_MS, 0.75);
+            AranarthBendingUtils.applyElectrocution(living, stunDuration, stunChance);
 
             for (int k = 0; k < 8; k++) {
                 Particle.DustOptions dust = switch (k % 3) {
@@ -394,12 +401,12 @@ public class JetBolt extends LightningAbility implements AddonAbility, ComboAbil
         if (started) {
             if (flightEndTime == 0) {
                 // endFlight() was never called (i.e player died or disconnected mid-flight)
-                bPlayer.addCooldown("FireJet", 7000L);
-                bPlayer.addCooldown("JetBolt", COOLDOWN_MS);
+                bPlayer.addCooldown("FireJet", fireJetCooldown);
+                bPlayer.addCooldown("JetBolt", cooldown);
             } else {
                 // endFlight() already started both cooldowns, but super.remove() just reset
                 long now = System.currentTimeMillis();
-                long jbRemaining = COOLDOWN_MS - (now - flightEndTime);
+                long jbRemaining = cooldown - (now - flightEndTime);
                 if (jbRemaining > 0) {
                     bPlayer.addCooldown("JetBolt", jbRemaining);
                 } else {

@@ -1,6 +1,5 @@
 package com.aearost.aranarthcore.gui;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
@@ -21,7 +20,12 @@ public class GuiEnhancedAranarthium {
 	}
 	
 	private Inventory initializeGui(Player player, ItemStack armor, ItemStack ingot, ItemStack result, boolean isArmorFirst) {
-		Inventory gui = Bukkit.getServer().createInventory(player, InventoryType.ANVIL, "Aranarthium Anvil");
+		Inventory gui = GuiHolder.create(player, InventoryType.ANVIL, "Aranarthium Anvil");
+		// Behaves like the vanilla block, so items can be dragged across its slots
+		GuiHolder holder = GuiHolder.of(gui);
+		if (holder != null) {
+			holder.allowDrag();
+		}
 		gui.clear();
 		if (isArmorFirst) {
 			gui.setItem(0, armor);

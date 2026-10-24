@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.NetworkPlayer;
 import net.kyori.adventure.text.Component;
@@ -33,7 +34,16 @@ public class CommandBalanceTop implements CommandExecutor {
 	 */
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
-		List<String> lines = baltopSetup();
+		// Read off the main thread and reused for a minute, as this reads every player's balance
+		DatabaseManager.getInstance().getCachedPlayerBalances(balances -> showPage(sender, args, balances));
+		return true;
+	}
+
+	/**
+	 * Sends the requested page of balances.
+	 */
+	private static void showPage(CommandSender sender, String[] args, Map<UUID, DatabaseManager.BalanceEntry> balances) {
+		List<String> lines = baltopSetup(balances);
 
 		double generalPageAmount = lines.size() / 10.0;
 		int totalPageNumber = (int) generalPageAmount;
@@ -54,8 +64,8 @@ public class CommandBalanceTop implements CommandExecutor {
 					throw new NumberFormatException();
 				}
 			} catch (NumberFormatException e) {
-				sender.sendMessage(ChatUtils.translateToColor("&cPlease enter a valid page number!"));
-				return false;
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "baltop.invalid_page")));
+				return;
 			}
 
 			if (page > totalPageNumber) {
@@ -67,7 +77,7 @@ public class CommandBalanceTop implements CommandExecutor {
 		Component prevButton;
 		if (page > 1) {
 			Component prevDisplay = LegacyComponentSerializer.legacyAmpersand().deserialize("&8[&6&l<<&8]");
-			prevButton = ChatUtils.clickableCommand(prevDisplay, ChatUtils.translateToColor("&7Go to page &6" + (page - 1)), "/baltop " + (page - 1), false);
+			prevButton = ChatUtils.clickableCommand(prevDisplay, ChatUtils.translateToColor(Lang.getFor(sender, "general.go_to_page", "page", page - 1)), "/baltop " + (page - 1), false);
 		} else {
 			prevButton = LegacyComponentSerializer.legacyAmpersand().deserialize("&8[&7<<&8]");
 		}
@@ -75,15 +85,15 @@ public class CommandBalanceTop implements CommandExecutor {
 		Component nextButton;
 		if (page < totalPageNumber) {
 			Component nextDisplay = LegacyComponentSerializer.legacyAmpersand().deserialize("&8[&6&l>>&8]");
-			nextButton = ChatUtils.clickableCommand(nextDisplay, ChatUtils.translateToColor("&7Go to page &6" + (page + 1)), "/baltop " + (page + 1), false);
+			nextButton = ChatUtils.clickableCommand(nextDisplay, ChatUtils.translateToColor(Lang.getFor(sender, "general.go_to_page", "page", page + 1)), "/baltop " + (page + 1), false);
 		} else {
 			nextButton = LegacyComponentSerializer.legacyAmpersand().deserialize("&8[&7>>&8]");
 		}
 
-		Component titleMiddle = LegacyComponentSerializer.legacyAmpersand().deserialize("&8 - - - &6&lAranarth Balances &8- - - ");
+		Component titleMiddle = LegacyComponentSerializer.legacyAmpersand().deserialize(Lang.getFor(sender, "baltop.header"));
 		sender.sendMessage(prevButton.append(titleMiddle).append(nextButton));
 
-		sender.sendMessage(ChatUtils.translateToColor("&7Showing page &6" + page + " &7of &6" + totalPageNumber));
+		sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "general.showing_page", "page", page, "total", totalPageNumber)));
 
 		int line = (page * 10) - 10;
 		page++;
@@ -96,7 +106,6 @@ public class CommandBalanceTop implements CommandExecutor {
 			}
 		}
 
-		return true;
 	}
 
 	/**
@@ -104,8 +113,7 @@ public class CommandBalanceTop implements CommandExecutor {
 	 * so that balances from other servers are included.
 	 * @return The full list of all player's balances.
 	 */
-	private static List<String> baltopSetup() {
-		Map<UUID, DatabaseManager.BalanceEntry> balances = DatabaseManager.getInstance().loadAllPlayerBalances();
+	private static List<String> baltopSetup(Map<UUID, DatabaseManager.BalanceEntry> balances) {
 		List<Map.Entry<UUID, DatabaseManager.BalanceEntry>> sorted = new ArrayList<>(balances.entrySet());
 		sorted.sort(Comparator.<Map.Entry<UUID, DatabaseManager.BalanceEntry>>comparingDouble(e -> e.getValue().balance()).reversed());
 

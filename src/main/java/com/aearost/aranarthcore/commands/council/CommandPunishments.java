@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.Punishment;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -28,7 +29,7 @@ public class CommandPunishments {
 		if (sender instanceof Player player) {
 			if (player.hasPermission("aranarth.punishments")) {
 				if (args.length == 1) {
-					sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac punishments <player> [<remove> <number>]"));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac punishments <player> [<remove> <number>]")));
 					return true;
 				}
 				// List the punishments
@@ -38,7 +39,7 @@ public class CommandPunishments {
 					removePunishment(sender, args);
 				}
 			} else {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 			}
         } else {
 			listPunishments(sender, args);
@@ -57,22 +58,22 @@ public class CommandPunishments {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				List<Punishment> punishments = AranarthUtils.getPunishments(player.getUniqueId());
 				if (punishments == null || punishments.isEmpty()) {
-					sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has no logged punishments"));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "punishment.none", "player", aranarthPlayer.getNickname())));
 					return;
 				} else {
-					sender.sendMessage(ChatUtils.translateToColor("&8      - - - &6" + aranarthPlayer.getNickname() + "'s &6Punishments &8- - -"));
+					sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "punishment.list_header", "player", aranarthPlayer.getNickname())));
 					for (int i = 0; i < punishments.size(); i++) {
 						Punishment punishment = punishments.get(i);
-						String type = switch (punishment.getType()) {
-							case "WARN" -> "Warned";
-							case "MUTE" -> "Muted";
-							case "BAN" -> "Banned";
-							case "UNMUTE" -> "Unmuted";
-							case "UNBAN" -> "Unbanned";
-							default -> "Punished";
-						};
+						String type = Lang.getFor(sender, switch (punishment.getType()) {
+							case "WARN" -> "punishment.type_warn";
+							case "MUTE" -> "punishment.type_mute";
+							case "BAN" -> "punishment.type_ban";
+							case "UNMUTE" -> "punishment.type_unmute";
+							case "UNBAN" -> "punishment.type_unban";
+							default -> "punishment.type_other";
+						});
 
-						String appliedBy = "Console";
+						String appliedBy = Lang.getFor(sender, "punishment.console");
 						if (punishment.getAppliedBy() != null) {
 							appliedBy = AranarthUtils.getNickname(Bukkit.getOfflinePlayer(punishment.getAppliedBy()));
 						}
@@ -96,11 +97,8 @@ public class CommandPunishments {
 						String dayOfYear = month + "/" + day + "/" + year;
 						String time = hour + ":" + minute;
 
-						sender.sendMessage(ChatUtils.translateToColor(
-								"&8&l[&6&l" + (i + 1) + "&8&l] &e" // Prefix and number of warnings
-										+ type + " &7by &e" + appliedBy // Type of punishment and who applied it
-										+ " &7| &e" + dayOfYear + " " + time // The date and time of the punishment
-										+ " &7| &e" + punishment.getReason())); // The reason for the punishment
+						sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "punishment.list_entry", "number", i + 1,
+								"type", type, "by", appliedBy, "date", dayOfYear, "time", time, "reason", punishment.getReason())));
 					}
 					return;
 				}
@@ -119,16 +117,16 @@ public class CommandPunishments {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				List<Punishment> punishments = AranarthUtils.getPunishments(player.getUniqueId());
 				if (punishments == null || punishments.isEmpty()) {
-					sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has no logged punishments"));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "punishment.none", "player", aranarthPlayer.getNickname())));
 					return;
 				} else {
 					if (args.length < 4) {
-						sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac punishments <player> [<remove> <number>]"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac punishments <player> [<remove> <number>]")));
 						return;
 					}
 
 					if (!args[2].equals("remove")) {
-						sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac punishments <player> [<remove> <number>]"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac punishments <player> [<remove> <number>]")));
 						return;
 					}
 
@@ -148,7 +146,7 @@ public class CommandPunishments {
 										player.getUniqueId(), LocalDateTime.now(), "REMOVE_" + type, punishmentBeingRemoved.getReason(), senderUuid);
 								DiscordUtils.addPunishmentToDiscord(punishment);
 								AranarthUtils.removePunishment(player.getUniqueId(), punishmentBeingRemoved);
-								sender.sendMessage(ChatUtils.chatMessage("&7You have removed &e" + aranarthPlayer.getNickname() + "&e's &7punishment successfully"));
+								sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "punishment.removed", "number", String.valueOf(slotToRemove), "player", aranarthPlayer.getNickname())));
 							} else {
 								throw new NumberFormatException();
 							}
@@ -156,7 +154,7 @@ public class CommandPunishments {
 							throw new NumberFormatException();
 						}
 					} catch (NumberFormatException e) {
-						sender.sendMessage(ChatUtils.chatMessage("&cThat punishment number is invalid"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "punishment.invalid_number")));
 						return;
 					}
 				}

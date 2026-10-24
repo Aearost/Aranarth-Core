@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.waterbending.plantbending;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
@@ -21,9 +22,6 @@ import java.util.*;
 public class Regrowth extends PlantAbility implements AddonAbility {
 
     public enum Phase { GROWING, STREAMING, PULSING }
-
-    // ---- Shared constants ----
-    private static final double SOURCE_RANGE = 6.0;
 
     // ---- Growing phase constants ----
     @Attribute(Attribute.RANGE)
@@ -47,9 +45,9 @@ public class Regrowth extends PlantAbility implements AddonAbility {
     );
 
     // ---- Water wave constants ----
-    private static final double STREAM_SPEED = 0.4;
+    private double streamSpeed;
     private static final double WAVE_RING_RATE = 0.12; // blocks/tick - sweeps 4 blocks in ~33 ticks
-    private static final double WAVE_RADIUS = 4.0;
+    private double waveRadius;
 
     private static final Set<Material> CROPS = Set.of(
             Material.WHEAT,
@@ -89,8 +87,10 @@ public class Regrowth extends PlantAbility implements AddonAbility {
             return;
         }
 
-        cooldown = 10_000L;
-        growingRadius = 5.0;
+        cooldown = AbilityConfig.getLong("Regrowth.Cooldown");
+        growingRadius = AbilityConfig.getDouble("Regrowth.GrowingRadius");
+        streamSpeed = AbilityConfig.getDouble("Regrowth.StreamSpeed");
+        waveRadius = AbilityConfig.getDouble("Regrowth.WaveRadius");
 
         if (pendingSources.containsKey(player.getUniqueId())) {
             // Water wave path
@@ -192,12 +192,12 @@ public class Regrowth extends PlantAbility implements AddonAbility {
         Vector dir = target.toVector().subtract(streamHead.toVector());
         double dist = dir.length();
 
-        if (dist <= STREAM_SPEED + 0.2) {
+        if (dist <= streamSpeed + 0.2) {
             transitionToPulsing();
             return;
         }
 
-        streamHead.add(dir.normalize().multiply(STREAM_SPEED));
+        streamHead.add(dir.normalize().multiply(streamSpeed));
         spawnStreamParticles(streamHead);
     }
 
@@ -219,7 +219,7 @@ public class Regrowth extends PlantAbility implements AddonAbility {
             player.getWorld().playSound(player.getLocation(), Sound.BLOCK_WATER_AMBIENT, 0.25f, 1.1f);
         }
 
-        if (waveRingRadius >= WAVE_RADIUS) {
+        if (waveRingRadius >= waveRadius) {
             bPlayer.addCooldown(this);
             remove();
         }
@@ -310,7 +310,7 @@ public class Regrowth extends PlantAbility implements AddonAbility {
         if (!block.getWorld().equals(player.getWorld())) {
             return;
         }
-        if (block.getLocation().distance(player.getLocation()) > SOURCE_RANGE) {
+        if (block.getLocation().distance(player.getLocation()) > AbilityConfig.getDouble("Regrowth.SourceRange")) {
             return;
         }
 

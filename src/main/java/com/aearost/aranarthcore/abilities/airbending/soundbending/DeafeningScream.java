@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.airbending.soundbending;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
@@ -41,10 +42,10 @@ public class DeafeningScream extends SoundAbility implements AddonAbility {
     public DeafeningScream(Player player) {
         super(player);
 
-        this.chargeDuration = 2000L;
-        this.cooldown = 15000L;
-        this.radius = 7.0;
-        this.damage = 14.0; // 7 hearts
+        this.chargeDuration = AbilityConfig.getLong("DeafeningScream.ChargeDuration");
+        this.cooldown = AbilityConfig.getLong("DeafeningScream.Cooldown");
+        this.radius = AbilityConfig.getDouble("DeafeningScream.Radius");
+        this.damage = AbilityConfig.getDouble("DeafeningScream.Damage");
 
         if (!bPlayer.canBend(this)) {
             remove();
@@ -102,12 +103,12 @@ public class DeafeningScream extends SoundAbility implements AddonAbility {
             if (entity instanceof Player targetPlayer && !DominionUtils.canAttackPlayer(player, targetPlayer)) continue;
             double dist = entity.getLocation().distance(origin);
             if (dist <= radius) {
-                // Scale from full damage at point-blank to 50% at max radius
-                double falloff = 1.0 - (0.5 * (dist / radius));
+                // Scale from full damage at point-blank to the max falloff at max radius
+                double falloff = 1.0 - (AbilityConfig.getDouble("DeafeningScream.MaxFalloff") * (dist / radius));
                 DamageHandler.damageEntity(entity, damage * falloff, this);
-                // 2.5x the base sound debuff durations: Slowness I for 7.5s, Darkness for 5s
-                entity.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 150, 0, false, true));
-                entity.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 100, 0, false, true));
+                // Longer than the base sound debuff durations
+                entity.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, AbilityConfig.getInt("DeafeningScream.SlownessDurationTicks"), 0, false, true));
+                entity.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, AbilityConfig.getInt("DeafeningScream.DarknessDurationTicks"), 0, false, true));
             }
         }
 

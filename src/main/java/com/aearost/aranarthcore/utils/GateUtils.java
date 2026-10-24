@@ -240,7 +240,7 @@ public class GateUtils {
                 gates.add(gate);
                 blockToGateId.put(key(loc), gate.getId());
                 exitGatePlacementMode(playerId);
-                player.sendMessage(ChatUtils.chatMessage("&7A new gate has been created"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "gate.created")));
             }
         }
 
@@ -293,12 +293,12 @@ public class GateUtils {
     public static String toggleGate(Gate gate) {
         Gate.Axis axis = gate.getAxis();
         if (axis == null) {
-            return "You must add blocks along an X or Z axis first";
+            return Lang.key("gate.error_axis_first");
         }
         int minVal = getMinAxisVal(gate);
         int maxVal = getMaxAxisVal(gate);
         if (maxVal - minVal < 2) {
-            return "This gate needs to be at least 3 blocks wide to open";
+            return Lang.key("gate.error_too_narrow");
         }
         if (gate.isOpen()) {
             closeGate(gate);
@@ -618,7 +618,7 @@ public class GateUtils {
             }
 
             if (!allSameX && !allSameZ) {
-                return "Gates must be connected along the same X or Z axis!";
+                return Lang.key("gate.error_same_axis");
             }
             return null;
         }
@@ -627,11 +627,11 @@ public class GateUtils {
         Location any = adjacentGate.getBlocks().iterator().next();
         if (axis == Gate.Axis.X) {
             if (loc.getBlockZ() != any.getBlockZ()) {
-                return "Connected gate blocks must share the same Z coordinate!";
+                return Lang.key("gate.error_same_z");
             }
         } else {
             if (loc.getBlockX() != any.getBlockX()) {
-                return "Connected gate blocks must share the same X coordinate!";
+                return Lang.key("gate.error_same_x");
             }
         }
         return null;
@@ -670,7 +670,7 @@ public class GateUtils {
 
         if (!modifyingGateSet.contains(id)) {
             modifyingGateSet.add(id);
-            player.sendMessage(ChatUtils.chatMessage("&7You are now modifying a gate"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "gate.modifying")));
         }
 
         Integer existing = modifyTimeoutTaskIds.remove(id);
@@ -685,7 +685,7 @@ public class GateUtils {
                     modifyTimeoutTaskIds.remove(id);
                     Player online = Bukkit.getPlayer(id);
                     if (online != null) {
-                        online.sendMessage(ChatUtils.chatMessage("&7The gate modification has ended"));
+                        online.sendMessage(ChatUtils.chatMessage(Lang.getFor(online, "gate.modification_ended")));
                     }
                 },
                 60L

@@ -1,7 +1,9 @@
 package com.aearost.aranarthcore.abilities.airbending.spiritual;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.MultiAbility;
@@ -31,10 +33,10 @@ import java.util.UUID;
 
 public class AstralProjection extends SpiritualAbility implements AddonAbility, MultiAbility {
 
-    public static final int MAX_USES = 5;
-    public static final long AURA_COOLDOWN_MS = 8000;
-    public static final long SCREAM_COOLDOWN_MS = 3000;
-    public static final long POSSESS_COOLDOWN_MS = 12000;
+    private int maxUses;
+    private long auraCooldown;
+    private long screamCooldown;
+    private long possessCooldown;
 
     // PDC keys for crash-safe armor persistence (index matches getArmorContents: 0=boots,1=legs,2=chest,3=helmet)
     private static final String PDC_ARMOR_PREFIX = "astral_armor_";
@@ -75,11 +77,15 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
             return;
         }
 
-        cooldown = 60000;
-        range = 30;
-        duration = 30000;
-        chargeDuration = 4000;
-        usesRemaining = MAX_USES;
+        cooldown = AbilityConfig.getLong("AstralProjection.Cooldown");
+        range = AbilityConfig.getInt("AstralProjection.Range");
+        duration = AbilityConfig.getInt("AstralProjection.Duration");
+        chargeDuration = AbilityConfig.getInt("AstralProjection.ChargeDuration");
+        maxUses = AbilityConfig.getInt("AstralProjection.MaxUses");
+        auraCooldown = AbilityConfig.getLong("AstralProjection.AuraCooldown");
+        screamCooldown = AbilityConfig.getLong("AstralProjection.ScreamCooldown");
+        possessCooldown = AbilityConfig.getLong("AstralProjection.PossessCooldown");
+        usesRemaining = maxUses;
 
         start();
     }
@@ -136,6 +142,8 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
         Mannequin m = (Mannequin) player.getWorld().spawnEntity(player.getLocation(), EntityType.MANNEQUIN);
         m.setProfile(ResolvableProfile.resolvableProfile(player.getPlayerProfile()));
         m.setPose(Pose.SNEAKING);
+        // Never saved with the chunk, so a crash cannot leave a mannequin wearing the armor behind
+        m.setPersistent(false);
         this.mannequin = m;
         abilityStart = System.currentTimeMillis();
 
@@ -215,7 +223,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
         if (!player.isDead()) {
             player.teleport(bodyLocation);
             player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 1.3F);
-            player.sendMessage(ChatUtils.chatMessage("&cYour body was struck while projecting!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.astral_body_struck")));
         }
         bPlayer.addCooldown(this);
         remove();
@@ -336,7 +344,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
         }
         if (found) {
             player.getInventory().setArmorContents(armor);
-            player.sendMessage(ChatUtils.chatMessage("&7Your armor has been restored from your last Astral Projection."));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.astral_armor_restored")));
         }
     }
 
@@ -348,7 +356,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
     public void activateAura() {
         if (!isAuraReady()) {
             int cooldown = (int) (bPlayer.getCooldown("Aura") - System.currentTimeMillis()) / 1000 + 1;
-            player.sendMessage(ChatUtils.chatMessage("&7Aura is on cooldown for another " + cooldown + " seconds"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.astral_cooldown", "ability", "Aura", "seconds", cooldown)));
             return;
         }
         if (!consumeUse()) return;
@@ -372,14 +380,14 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
             }
         }
 
-        bPlayer.addCooldown("Aura", AURA_COOLDOWN_MS);
+        bPlayer.addCooldown("Aura", auraCooldown);
     }
 
     /** Slot 1: Release a ghastly scream that erupts soul particles and damages nearby entities. */
     public void activateScream() {
         if (!isScreamReady()) {
             int cooldown = (int) (bPlayer.getCooldown("Scream") - System.currentTimeMillis()) / 1000 + 1;
-            player.sendMessage(ChatUtils.chatMessage("&7Scream is on cooldown for another " + cooldown + " seconds"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.astral_cooldown", "ability", "Scream", "seconds", cooldown)));
             return;
         }
         if (!consumeUse()) return;
@@ -409,14 +417,14 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
         }
         subAbilityDamaging.remove(player.getUniqueId());
 
-        bPlayer.addCooldown("Scream", SCREAM_COOLDOWN_MS);
+        bPlayer.addCooldown("Scream", screamCooldown);
     }
 
     /** Slot 2: Possess a player in line of sight within 8 blocks, scrambling their movement. */
     public void activatePossess() {
         if (!isPossessReady()) {
             int cooldown = (int) (bPlayer.getCooldown("Possess") - System.currentTimeMillis()) / 1000 + 1;
-            player.sendMessage(ChatUtils.chatMessage("&7Possess is on cooldown for another " + cooldown + " seconds"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.astral_cooldown", "ability", "Possess", "seconds", cooldown)));
             return;
         }
 
@@ -428,7 +436,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
         if (!consumeUse()) return;
 
         victim.addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, 80, 1, false, true, true));
-        victim.sendMessage(ChatUtils.chatMessage("&5An unseen force seizes your body!"));
+        victim.sendMessage(ChatUtils.chatMessage(Lang.getFor(victim, "bending.astral_force_seizes")));
 
         new BukkitRunnable() {
             private int ticks = 0;
@@ -437,7 +445,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
             @Override
             public void run() {
                 if (ticks >= 60 || !victim.isOnline() || victim.isDead()) {
-                    victim.sendMessage(ChatUtils.chatMessage("&7You regain control of your body"));
+                    victim.sendMessage(ChatUtils.chatMessage(Lang.getFor(victim, "bending.astral_regain_control")));
                     cancel();
                     return;
                 }
@@ -450,7 +458,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
             }
         }.runTaskTimer(AranarthCore.getInstance(), 0L, 1L);
 
-        bPlayer.addCooldown("Possess", POSSESS_COOLDOWN_MS);
+        bPlayer.addCooldown("Possess", possessCooldown);
     }
 
     /**
@@ -479,11 +487,11 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
 
     private boolean consumeUse() {
         if (usesRemaining <= 0) {
-            player.sendMessage(ChatUtils.chatMessage("&cNo astral uses remaining!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.astral_no_uses")));
             return false;
         }
         usesRemaining--;
-        player.sendMessage(ChatUtils.chatMessage("&7Astral uses remaining: &f" + usesRemaining + "/" + MAX_USES));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "bending.astral_uses_remaining", "current", usesRemaining, "max", maxUses)));
         return true;
     }
 
@@ -618,7 +626,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
     @Override
     public String getDescription() {
         return "This Spiritual ability allows the bender to leave their body, and project themselves as a flying, invisible, and invulnerable form. " +
-                "While projecting, up to " + MAX_USES + " sub-abilities can be used: " +
+                "While projecting, up to " + AbilityConfig.getInt("AstralProjection.MaxUses") + " sub-abilities can be used: " +
                 "Aura (Slowness + Nausea in radius), Scream (soul burst + damage), and Possess (disorient a nearby player's movement). " +
                 "Enemies who strike your body will snap you back and deal that damage to you. " +
                 "Travel too far away from your body, or double-tap sneak to return early.\n" +

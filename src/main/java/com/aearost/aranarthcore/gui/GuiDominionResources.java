@@ -3,7 +3,7 @@ package com.aearost.aranarthcore.gui;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
-import org.bukkit.Bukkit;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.Player;
@@ -11,15 +11,13 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class GuiDominionResources {
 
-	public static final int CONTENT_PER_PAGE = 36; // max 4 content rows per page
+	public static final int CONTENT_PER_PAGE = 27; // 3 content rows in the fixed 45-slot GUI
 	public static final Map<UUID, Integer> playerPage = new HashMap<>();
 
 	private final Player player;
@@ -42,6 +40,22 @@ public class GuiDominionResources {
 		player.openInventory(initializedGui);
 	}
 
+	/**
+	 * Determines whether the color-stripped title is the main resources GUI of the player's own Dominion.
+	 */
+	public static boolean isResourcesTitle(Player player, String title) {
+		Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+		if (dominion == null) {
+			return false;
+		}
+		// The claimable amount can change while the GUI is open, so any numbers are accepted in its place
+		String marker = "\u0000";
+		String expected = ChatUtils.stripColorFormatting(Lang.getFor(player, "gui.dominionresources.title",
+				"dominion", dominion.getName(), "claimable", marker, "max", marker));
+		String regex = Arrays.stream(expected.split(marker, -1)).map(Pattern::quote).collect(Collectors.joining("\\d+"));
+		return title.matches(regex);
+	}
+
 	private Inventory initializeGui(Player player, int page) {
 		Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 		List<Biome> biomes = DominionUtils.getResourceClaimTypes(dominion);
@@ -50,56 +64,60 @@ public class GuiDominionResources {
 		int totalPages = Math.max(1, (int) Math.ceil((double) totalBiomes / CONTENT_PER_PAGE));
 		int safePage = Math.min(page, totalPages - 1);
 
-		// Determine content rows and total size
-		int contentRows;
-		if (totalPages > 1) {
-			// Paginated - always use 4 content rows (54 total)
-			contentRows = 4;
-		} else {
-			contentRows = Math.max(1, (int) Math.ceil((double) totalBiomes / 9.0));
-		}
-		int size = contentRows * 9 + 18;
+		// Always 45 slots
+		int size = 45;
 
-		Inventory gui = Bukkit.getServer().createInventory(player, size,
-				ChatUtils.translateToColor("&e" + dominion.getName() + "'s &rResources"));
+		Inventory gui = GuiHolder.create(player, size,
+				Lang.getFor(player, "gui.dominionresources.title", "dominion", dominion.getName(),
+						"claimable", dominion.getClaimableResources(), "max", DominionUtils.getMaxClaimableResourcesAmount(dominion)));
 
 		ItemStack filler = makeFiller();
+		ItemStack filterPane = makeFilterPane(player);
 
-		// Top filler row
+		// Top row - all filter panes
 		for (int i = 0; i < 9; i++) {
+			gui.setItem(i, i == 4 ? filterPane : filler);
+		}
+		// Bottom row - filler with back button at center
+		for (int i = 36; i < 45; i++) {
 			gui.setItem(i, filler);
 		}
-		// Bottom filler row
-		for (int i = size - 9; i < size; i++) {
-			gui.setItem(i, filler);
-		}
+		ItemStack back = new ItemStack(Material.BARRIER);
+		ItemMeta backMeta = back.getItemMeta();
+		backMeta.setDisplayName(Lang.getFor(player, "gui.back"));
+		back.setItemMeta(backMeta);
+		gui.setItem(40, back);
 
 		// Biome items in content area
 		int start = safePage * CONTENT_PER_PAGE;
 		int end = Math.min(start + CONTENT_PER_PAGE, totalBiomes);
 		int slot = 9;
+		// The click handler reads the biome from here, never from the item name
+		Map<Integer, Biome> biomeBySlot = new HashMap<>();
+		GuiHolder.of(gui).setData(biomeBySlot);
 		for (int i = start; i < end; i++) {
 			Biome biome = biomes.get(i);
+			biomeBySlot.put(slot, biome);
 			ItemStack item = new ItemStack(getIconByBiome(biome));
 			ItemMeta itemMeta = item.getItemMeta();
 			itemMeta.setDisplayName(ChatUtils.translateToColor("&l" + DominionUtils.getBiomeName(biome)));
 			itemMeta.setLore(Arrays.asList(
-					ChatUtils.translateToColor("&7Right-click to &epreview &7resources"),
-					ChatUtils.translateToColor("&7Left-click to &eclaim &7resources")
+					Lang.getFor(player, "gui.dominionresources.right_click"),
+					Lang.getFor(player, "gui.dominionresources.left_click")
 			));
 			item.setItemMeta(itemMeta);
 			gui.setItem(slot++, item);
 		}
 
-		// Pagination buttons in bottom row
+		// Pagination buttons in bottom row (slots 36 = prev, 44 = next)
 		if (totalPages > 1) {
 			if (safePage > 0) {
-				gui.setItem(size - 9, makeNavButton(Material.ARROW, "&aPrevious Page",
-						"&7Page " + safePage + " / " + totalPages));
+				gui.setItem(36, makeNavButton(Material.ARROW, Lang.getFor(player, "gui.dominionresources.prev"),
+						Lang.getFor(player, "gui.dominionresources.page", "n", String.valueOf(safePage), "total", String.valueOf(totalPages))));
 			}
 			if (safePage < totalPages - 1) {
-				gui.setItem(size - 1, makeNavButton(Material.ARROW, "&aNext Page",
-						"&7Page " + (safePage + 2) + " / " + totalPages));
+				gui.setItem(44, makeNavButton(Material.ARROW, Lang.getFor(player, "gui.dominionresources.next"),
+						Lang.getFor(player, "gui.dominionresources.page", "n", String.valueOf(safePage + 2), "total", String.valueOf(totalPages))));
 			}
 		}
 
@@ -110,6 +128,15 @@ public class GuiDominionResources {
 		ItemStack pane = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
 		ItemMeta meta = pane.getItemMeta();
 		meta.setDisplayName(" ");
+		pane.setItemMeta(meta);
+		return pane;
+	}
+
+	private ItemStack makeFilterPane(Player player) {
+		ItemStack pane = new ItemStack(Material.HOPPER);
+		ItemMeta meta = pane.getItemMeta();
+		meta.setDisplayName(ChatUtils.translateToColor(Lang.getFor(player, "gui.dominionresources.filter_button")));
+		meta.setLore(List.of(ChatUtils.translateToColor(Lang.getFor(player, "gui.dominionresources.filter_lore"))));
 		pane.setItemMeta(meta);
 		return pane;
 	}
@@ -251,6 +278,16 @@ public class GuiDominionResources {
 			return Material.STONE;
 		} else if (biome == Biome.CHERRY_GROVE) {
 			return Material.CHERRY_LEAVES;
+		} else if (biome == Biome.DAPPLED_FOREST) {
+			return Material.ORANGE_POPLAR_LEAVES;
+		} else if (biome == Biome.LUSH_CAVES) {
+			return Material.MOSS_BLOCK;
+		} else if (biome == Biome.DRIPSTONE_CAVES) {
+			return Material.POINTED_DRIPSTONE;
+		} else if (biome == Biome.DEEP_DARK) {
+			return Material.SCULK;
+		} else if (biome == Biome.SULFUR_CAVES) {
+			return Material.SULFUR;
 		}
 		// Assume the void or new biomes
 		else {

@@ -28,7 +28,7 @@ public class CommandDominionCompleter implements TabCompleter {
 	private static final List<String> DOMINION_OPTIONS = List.of(
 		"accept", "ally", "autoclaim", "balance", "buychunks", "claim", "conquer", "create",
 		"defender", "deposit", "disband", "enemy", "food", "guide", "home", "info", "invite",
-		"leave", "list", "map", "mapcolor", "msg", "neutral", "outpost", "plot", "rank", "setrank",
+		"leave", "list", "map", "mapcolor", "msg", "neutral", "outpost", "rank", "region", "setrank",
 		"rebel", "remove", "rename", "resources", "retreat", "sethome", "setleader",
 		"surrender", "truce", "unclaim", "who", "withdraw"
 	);
@@ -138,21 +138,43 @@ public class CommandDominionCompleter implements TabCompleter {
 				}
 				yield List.of();
 			}
-			case "plot" -> {
+			case "autoclaim" -> {
 				if (args.length == 2) {
-					yield filter(List.of("add", "claim", "create", "remove", "rename"), args[1]);
+					yield filter(List.of("region"), args[1]);
+				}
+				if (args[1].equalsIgnoreCase("region")) {
+					yield filterRegionNames(sender, args, 2);
+				}
+				yield List.of();
+			}
+			case "region" -> {
+				if (args.length == 2) {
+					yield filter(List.of("add", "claim", "create", "mapcolor", "private", "public", "remove", "rename", "unclaim"), args[1]);
+				}
+				if (args.length == 3 && args[1].equalsIgnoreCase("mapcolor")) {
+					List<String> opts = new ArrayList<>(MAP_COLOR_OPTIONS);
+					if (sender.hasPermission("aranarth.chat.gradient")) opts.add("#RRGGBB");
+					yield filter(opts, args[2]);
+				}
+				// The region name after the color is optional
+				if (args.length > 3 && args[1].equalsIgnoreCase("mapcolor")) {
+					yield filterRegionNames(sender, args, 3);
+				}
+				// Region names can be multiple words
+				if (args.length > 3 && args[1].equalsIgnoreCase("claim")) {
+					yield filterRegionNames(sender, args, 2);
 				}
 				if (args.length == 3) {
-					String plotSub = args[1].toLowerCase();
+					String regionSub = args[1].toLowerCase();
 					if (sender instanceof Player player) {
 						Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 						if (dominion != null) {
-							yield switch (plotSub) {
+							yield switch (regionSub) {
 								case "add", "remove" -> dominion.getMembers().stream()
 										.map(uuid -> Bukkit.getOfflinePlayer(uuid).getName())
 										.filter(name -> name != null && (args[2].isEmpty() || name.toLowerCase().startsWith(args[2].toLowerCase())))
 										.collect(Collectors.toList());
-								case "claim", "rename" -> dominion.getPlotMembers().keySet().stream()
+								case "claim", "rename" -> dominion.getRegionMembers().keySet().stream()
 										.filter(name -> args[2].isEmpty() || name.toLowerCase().startsWith(args[2].toLowerCase()))
 										.collect(Collectors.toList());
 								case "create" -> args[2].isEmpty() ? List.of("name") : List.of();
@@ -212,8 +234,38 @@ public class CommandDominionCompleter implements TabCompleter {
 					.collect(Collectors.toList());
 			}
 			case "buychunks" -> args[1].isEmpty() ? List.of("amount") : List.of();
-			case "create" -> args[1].isEmpty() ? List.of("name") : List.of();
-			case "mapcolor" -> filter(MAP_COLOR_OPTIONS, args[1]);
+			case "create" -> {
+				if (args.length == 2) {
+					List<String> opts = new ArrayList<>(List.of("name"));
+					if (sender.hasPermission("aranarth.chat.gradient")) opts.add("gradient");
+					if (sender.hasPermission("aranarth.chat.gradientbold")) opts.add("gradientbold");
+					yield filter(opts, args[1]);
+				}
+				if (args.length >= 3 && (args[1].equalsIgnoreCase("gradient") || args[1].equalsIgnoreCase("gradientbold"))) {
+					yield args[2].isEmpty() ? List.of("name") : List.of();
+				}
+				yield List.of();
+			}
+			case "rename" -> {
+				if (args.length == 2) {
+					List<String> opts = new ArrayList<>(List.of("name"));
+					if (sender.hasPermission("aranarth.chat.gradient")) opts.add("gradient");
+					if (sender.hasPermission("aranarth.chat.gradientbold")) opts.add("gradientbold");
+					yield filter(opts, args[1]);
+				}
+				if (args.length >= 3 && (args[1].equalsIgnoreCase("gradient") || args[1].equalsIgnoreCase("gradientbold"))) {
+					yield args[2].isEmpty() ? List.of("name") : List.of();
+				}
+				yield List.of();
+			}
+			case "mapcolor" -> {
+				if (args.length == 2) {
+					List<String> opts = new ArrayList<>(MAP_COLOR_OPTIONS);
+					if (sender.hasPermission("aranarth.chat.gradient")) opts.add("#RRGGBB");
+					yield filter(opts, args[1]);
+				}
+				yield List.of();
+			}
 			case "outpost" -> {
 				if (args.length == 2) {
 					yield filter(OUTPOST_OPTIONS, args[1]);
@@ -251,6 +303,24 @@ public class CommandDominionCompleter implements TabCompleter {
 		}
 		return options.stream()
 			.filter(s -> s.toLowerCase().startsWith(input.toLowerCase()))
+			.collect(Collectors.toList());
+	}
+
+	/**
+	 * Suggests the player's Dominion region names, matching every argument from the given index onward as one name.
+	 */
+	private static List<String> filterRegionNames(CommandSender sender, String[] args, int from) {
+		if (!(sender instanceof Player player)) {
+			return List.of();
+		}
+		Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+		if (dominion == null) {
+			return List.of();
+		}
+		String query = String.join(" ", Arrays.copyOfRange(args, from, args.length)).toLowerCase();
+		return dominion.getRegionMembers().keySet().stream()
+			.filter(name -> name.toLowerCase().startsWith(query))
+			.sorted(String.CASE_INSENSITIVE_ORDER)
 			.collect(Collectors.toList());
 	}
 

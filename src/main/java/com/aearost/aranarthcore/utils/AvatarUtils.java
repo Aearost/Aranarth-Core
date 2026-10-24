@@ -1,7 +1,9 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Avatar;
 import com.destroystokyo.paper.profile.PlayerProfile;
@@ -13,10 +15,13 @@ import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.time.Duration;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 
 /**
@@ -24,7 +29,39 @@ import java.util.UUID;
  */
 public class AvatarUtils {
 
+    /**
+     * The result of an attempt to select a new Avatar.
+     */
+    public enum SelectionResult {
+        SELECTED, ALREADY_REIGNING, NOT_ELIGIBLE, NONE_FOUND, BUSY
+    }
+
+    // The one-time automatic selection of the first Avatar (Survival only)
+    private static final ZonedDateTime AUTO_SELECT_TIME = ZonedDateTime.of(2026, 10, 31, 13, 0, 0, 0, ZoneId.of("America/New_York"));
+    // Stops the automatic selection from ever re-running later if the avatar list somehow failed to load
+    private static final Duration AUTO_SELECT_WINDOW = Duration.ofDays(7);
+    private static final Duration INACTIVITY_LIMIT = Duration.ofDays(7);
+    private static final String KEY_AVATAR_LAST_SEEN = "avatar_last_seen:";
+    private static final String MANNEQUIN_TAG = "aranarth_avatar_mannequin";
+    // x, y, z, yaw of each mannequin, the first being the current Avatar's spot
+    private static final double[][] MANNEQUIN_SPOTS = {
+            {16.5, 102, 13.5, 45}, {18.5, 103, 15.5, 90}, {18.5, 103, 18.5, 90}, {18.5, 103, 21.5, 120},
+            {16.5, 103, 24.5, 135}, {13.5, 104, 25.5, 180}, {10.5, 104, 24.5, 180}, {7.5, 104, 23.5, 180},
+            {4.5, 105, 25.5, 180}, {1.5, 105, 24.5, 180}, {-1.5, 105, 23.5, -135}, {-2.5, 105, 20.5, -90},
+            {-0.5, 106, 17.5, -90}, {1.5, 106, 14.5, -25}, {4.5, 106, 13.5, 0}, {7.5, 107, 12.5, 0},
+            {10.5, 107, 12.5, 0}, {13.5, 107, 12.5, 0}, {16.5, 108, 12.5, 0}, {19.5, 108, 14.5, 45},
+            {21.5, 108, 17.5, 90}, {21.5, 109, 20.5, 90}, {20.5, 109, 23.5, 150}, {18.5, 109, 26.5, 135},
+            {15.5, 110, 27.5, 180}, {12.5, 110, 27.5, 180}, {9.5, 110, 26.5, 180}, {6.5, 110, 25.5, 180},
+            {3.5, 111, 25.5, 180}, {0.5, 111, 24.5, 180}, {-2.5, 111, 23.5, -135}, {-3.5, 111, 20.5, -90},
+            {-3.5, 112, 17.5, -90}, {-1.5, 112, 14.5, -45}, {1.5, 112, 12.5, 0}, {4.5, 113, 10.5, 0},
+            {7.5, 113, 9.5, 0}, {10.5, 114, 10.5, 0}, {13.5, 114, 11.5, 0}, {16.5, 114, 12.5, 90}
+    };
+
     private static List<Avatar> avatars = new ArrayList<>();
+    private static boolean isSelecting = false;
+    private static long lastSeenSavedAt = 0;
+    // Incremented on every refresh so that mannequins from an older refresh are never spawned
+    private static int mannequinGeneration = 0;
 
     /**
      * Provides the list of all avatars.
@@ -66,120 +103,224 @@ public class AvatarUtils {
     }
 
     /**
-     * Selects a new Avatar from the list of online players.
+     * Provides the most recent Avatar whose reign has ended.
      *
-     * @param isManual Whether this call was triggered manually via /avatar set.
-     *                 If false and no avatar has ever existed, selection is skipped.
-     * @return Confirmation if a new Avatar was selected.
+     * @return The most recent Avatar whose reign has ended, or null if there is none.
      */
-    public static boolean selectAvatar(boolean isManual) {
-        // Nobody online to select as a new avatar
-        if (Bukkit.getOnlinePlayers().isEmpty() && getCurrentAvatar() == null) {
-            return false;
-        }
-
-        // The first-ever avatar must be set manually via /avatar set, not auto-selected
-        if (avatars.isEmpty() && !isManual) {
-            return false;
-        }
-
-        Random random = new Random();
-        int index = 0;
-        Avatar avatar = null;
-
-        if (Bukkit.getOnlinePlayers().size() > 1) {
-            index = random.nextInt(Bukkit.getOnlinePlayers().size());
-        }
-
-        int attempts = 0;
-        // First avatar should be fully random
-        if (avatars.isEmpty()) {
-            while (true) {
-                // Try again upon next execution
-                if (attempts == 500) {
-                    return false;
-                }
-
-                Player player = (Player) Bukkit.getOnlinePlayers().toArray()[index];
-                BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
-                if (bendingPlayer == null) {
-                    attempts++;
-                    continue;
-                }
-
-                if (bendingPlayer.getElements().contains(Element.CHI)) {
-                    attempts++;
-                    continue;
-                }
-                // An avatar was selected
-                else {
-                    if (bendingPlayer.getElements().isEmpty()) {
-                        attempts++;
-                        continue;
-                    }
-                    char element = bendingPlayer.getElements().get(0).getName().charAt(0);
-                    avatar = new Avatar(player.getUniqueId(), DateUtils.getRawInGameDate(), "",
-                            DateUtils.getRawInRealLifeDate(), "", element);
-
-                    setNewAvatar(avatar);
-                    DiscordUtils.addAvatarMessageToDiscord(avatar, true);
-                    return true;
-                }
+    private static Avatar getPreviousAvatar() {
+        for (int i = avatars.size() - 1; i >= 0; i--) {
+            Avatar avatar = avatars.get(i);
+            if (avatar != null && avatar != getCurrentAvatar()) {
+                return avatar;
             }
         }
+        return null;
+    }
 
-        Avatar previousAvatar = avatars.get(avatars.size() - 1);
+    /**
+     * Runs the scheduled Avatar logic. Must only be called on the Survival server.
+     * Selects the first-ever Avatar once the automatic selection time has passed, and ends the reign
+     * of an Avatar that has been inactive on every server for too long.
+     */
+    public static void runScheduledChecks() {
+        ZonedDateTime now = ZonedDateTime.now(AUTO_SELECT_TIME.getZone());
 
-        // If there is currently a reigning avatar
-        if (previousAvatar != null) {
-            removeCurrentAvatar();
+        // The first-ever Avatar is selected automatically, retrying each check until someone eligible is online
+        if (avatars.isEmpty()) {
+            if (!now.isBefore(AUTO_SELECT_TIME) && now.isBefore(AUTO_SELECT_TIME.plus(AUTO_SELECT_WINDOW))) {
+                selectAvatar(null, result -> {
+                    if (result == SelectionResult.NONE_FOUND) {
+                        Bukkit.getLogger().info("[AC] A new Avatar could not be selected, will try again next check");
+                    }
+                });
+            }
+            return;
+        }
+
+        Avatar avatar = getCurrentAvatar();
+        if (avatar == null) {
+            return;
+        }
+
+        UUID uuid = avatar.getUuid();
+        if (isOnlineAnywhere(uuid)) {
+            // Tracks when the Avatar was last seen on any server, as getLastPlayed() only covers this server
+            if (DatabaseManager.isActive() && System.currentTimeMillis() - lastSeenSavedAt >= 600_000) {
+                lastSeenSavedAt = System.currentTimeMillis();
+                String value = String.valueOf(lastSeenSavedAt);
+                Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
+                        DatabaseManager.getInstance().saveTempData(KEY_AVATAR_LAST_SEEN + uuid, value, 30 * 24 * 60 * 60));
+            }
+            return;
+        }
+
+        long lastPlayedHere = Bukkit.getOfflinePlayer(uuid).getLastPlayed();
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+            long lastSeen = lastPlayedHere;
+            if (DatabaseManager.isActive()) {
+                String stored = DatabaseManager.getInstance().loadTempData(KEY_AVATAR_LAST_SEEN + uuid);
+                if (stored != null) {
+                    try {
+                        lastSeen = Math.max(lastSeen, Long.parseLong(stored));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+            }
+            if (lastSeen <= 0 || System.currentTimeMillis() - lastSeen < INACTIVITY_LIMIT.toMillis()) {
+                return;
+            }
+            Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+                // The reign may have changed while the last seen time was being read
+                Avatar current = getCurrentAvatar();
+                if (current != null && current.getUuid().equals(uuid) && !isOnlineAnywhere(uuid)) {
+                    Bukkit.getLogger().info("[AC] Avatar " + Bukkit.getOfflinePlayer(uuid).getName() + " has been inactive for 7 days");
+                    removeCurrentAvatar();
+                }
+            });
+        });
+    }
+
+    /**
+     * Determines if the player is online on this server or on another server in the network.
+     *
+     * @param uuid The player's UUID.
+     * @return Confirmation if the player is online anywhere.
+     */
+    private static boolean isOnlineAnywhere(UUID uuid) {
+        if (Bukkit.getPlayer(uuid) != null) {
             return true;
         }
-        // If there is not currently a reigning avatar but one has previously existed
-        else {
-            char previousAvatarElement = avatars.get(avatars.size() - 2).getElement();
-            char newAvatarElement = switch (previousAvatarElement) {
-                case 'A' -> 'W';
-                case 'W' -> 'E';
-                case 'E' -> 'F';
-                default -> 'A';
-            };
+        return NetworkManager.isActive() && NetworkManager.getInstance().getRemotePlayer(uuid) != null;
+    }
 
-            UUID recentAvatar = null;
-            while (true) {
-                Player player = (Player) Bukkit.getOnlinePlayers().toArray()[index];
-                BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+    /**
+     * Determines if the player is online on another server in the network but not this one.
+     *
+     * @param uuid The player's UUID.
+     * @return Confirmation if the player is online on another server.
+     */
+    private static boolean isOnlineRemotely(UUID uuid) {
+        return Bukkit.getPlayer(uuid) == null && NetworkManager.isActive()
+                && NetworkManager.getInstance().getRemotePlayer(uuid) != null;
+    }
 
-                // Try again upon next execution
-                if (attempts == 1000) {
-                    return false;
+    /**
+     * Selects a new Avatar from the players online across the network.
+     *
+     * @param target   The player to make the Avatar, or null to select one at random.
+     * @param callback Called on the main thread with the result of the selection.
+     */
+    public static void selectAvatar(UUID target, Consumer<SelectionResult> callback) {
+        if (getCurrentAvatar() != null) {
+            callback.accept(SelectionResult.ALREADY_REIGNING);
+            return;
+        }
+        if (isSelecting) {
+            callback.accept(SelectionResult.BUSY);
+            return;
+        }
+
+        List<UUID> candidates = new ArrayList<>();
+        if (target != null) {
+            if (!isOnlineAnywhere(target)) {
+                callback.accept(SelectionResult.NOT_ELIGIBLE);
+                return;
+            }
+            candidates.add(target);
+        } else {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+                if (aranarthPlayer == null || !aranarthPlayer.isVanished()) {
+                    candidates.add(player.getUniqueId());
                 }
-
-                if (bendingPlayer == null || bendingPlayer.getElements().isEmpty()) {
-                    attempts++;
-                    continue;
-                }
-
-                if (bendingPlayer.getElements().contains(Element.CHI)) {
-                    attempts++;
-                    continue;
-                } else {
-                    char playerElement = bendingPlayer.getElements().get(0).getName().charAt(0);
-                    if (playerElement == newAvatarElement) {
-                        // An avatar was selected
-                        if (!isOneOfLastFiveAvatars(player.getUniqueId())) {
-                            avatar = new Avatar(player.getUniqueId(), DateUtils.getRawInGameDate(), "",
-                                    DateUtils.getRawInRealLifeDate(), "", playerElement);
-                            avatars.remove(avatars.size() - 1); // Removing the null placeholder
-                            setNewAvatar(avatar);
-                            DiscordUtils.addAvatarMessageToDiscord(avatar, true);
-                            return true;
-                        }
+            }
+            if (NetworkManager.isActive()) {
+                for (NetworkPlayer networkPlayer : NetworkManager.getInstance().getRemoteRoster().values()) {
+                    if (!networkPlayer.isVanished() && !candidates.contains(networkPlayer.getUuid())) {
+                        candidates.add(networkPlayer.getUuid());
                     }
-                    attempts++;
                 }
             }
         }
+
+        if (candidates.isEmpty()) {
+            callback.accept(SelectionResult.NONE_FOUND);
+            return;
+        }
+
+        // Players on the other server are not loaded here, so their bending data is read from the shared database
+        isSelecting = true;
+        Map<UUID, CompletableFuture<OfflineBendingPlayer>> futures = new LinkedHashMap<>();
+        for (UUID uuid : candidates) {
+            futures.put(uuid, BendingPlayer.getOrLoadOfflineAsync(Bukkit.getOfflinePlayer(uuid))
+                    .orTimeout(10, TimeUnit.SECONDS)
+                    .exceptionally(ex -> null));
+        }
+
+        CompletableFuture.allOf(futures.values().toArray(new CompletableFuture[0])).whenComplete((ignored, ex) ->
+                Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+                    isSelecting = false;
+                    // Another selection may have completed in the meantime
+                    if (getCurrentAvatar() != null) {
+                        callback.accept(SelectionResult.ALREADY_REIGNING);
+                        return;
+                    }
+
+                    // The element cycles Air -> Water -> Earth -> Fire, with the first Avatar being fully random
+                    Avatar previousAvatar = getPreviousAvatar();
+                    Character requiredElement = null;
+                    if (previousAvatar != null) {
+                        requiredElement = switch (previousAvatar.getElement()) {
+                            case 'A' -> 'W';
+                            case 'W' -> 'E';
+                            case 'E' -> 'F';
+                            default -> 'A';
+                        };
+                    }
+
+                    List<UUID> shuffled = new ArrayList<>(futures.keySet());
+                    Collections.shuffle(shuffled);
+                    for (UUID uuid : shuffled) {
+                        Character element = getEligibleElement(futures.get(uuid).getNow(null));
+                        if (element == null || !isOnlineAnywhere(uuid)) {
+                            continue;
+                        }
+                        // The element cycle is always respected
+                        if (requiredElement != null && element != requiredElement) {
+                            continue;
+                        }
+                        // A manually chosen player skips the last five rule
+                        if (target == null && isOneOfLastFiveAvatars(uuid)) {
+                            continue;
+                        }
+
+                        Avatar avatar = new Avatar(uuid, DateUtils.getRawInGameDate(), "",
+                                DateUtils.getRawInRealLifeDate(), "", element);
+                        // Removing the null placeholder of the previous reign
+                        if (!avatars.isEmpty() && avatars.get(avatars.size() - 1) == null) {
+                            avatars.remove(avatars.size() - 1);
+                        }
+                        setNewAvatar(avatar);
+                        DiscordUtils.addAvatarMessageToDiscord(avatar, true);
+                        callback.accept(SelectionResult.SELECTED);
+                        return;
+                    }
+                    callback.accept(target != null ? SelectionResult.NOT_ELIGIBLE : SelectionResult.NONE_FOUND);
+                }));
+    }
+
+    /**
+     * Provides the element the player would become the Avatar with.
+     *
+     * @param bendingPlayer The player's bending data.
+     * @return The first character of the player's element, or null if they cannot become the Avatar.
+     */
+    private static Character getEligibleElement(OfflineBendingPlayer bendingPlayer) {
+        if (bendingPlayer == null || bendingPlayer.getElements().isEmpty()
+                || bendingPlayer.getElements().contains(Element.CHI)) {
+            return null;
+        }
+        return bendingPlayer.getElements().getFirst().getName().charAt(0);
     }
 
     /**
@@ -191,7 +332,7 @@ public class AvatarUtils {
     private static boolean isOneOfLastFiveAvatars(UUID uuid) {
         List<UUID> lastFive = new ArrayList<>();
         // Cycle from last to first
-        for (int i = avatars.size() - 1; i > 0; i--) {
+        for (int i = avatars.size() - 1; i >= 0; i--) {
             if (avatars.get(i) == null) {
                 continue;
             }
@@ -213,13 +354,18 @@ public class AvatarUtils {
     public static void setNewAvatar(Avatar avatar) {
         avatars.add(avatar);
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(avatar.getUuid());
-        if (Bukkit.getOfflinePlayer(avatar.getUuid()).isOnline()) {
-            PermissionUtils.evaluatePlayerPermissions(Bukkit.getPlayer(avatar.getUuid()));
+        // An Avatar on the other server is handled by that server once it receives the update
+        Player onlineAvatar = Bukkit.getPlayer(avatar.getUuid());
+        if (onlineAvatar != null) {
+            PermissionUtils.evaluatePlayerPermissions(onlineAvatar);
+        }
+        PersistenceUtils.saveAvatars();
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishAvatarUpdate(avatar.getUuid(), true);
         }
 
         // Despawns the mannequins and then respawns them with the updated values
-        despawnAvatarMannequins();
-        respawnAvatarMannequins();
+        refreshAvatarMannequins();
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             int avVol = AranarthUtils.getPlayer(player.getUniqueId()).getAvatarSoundVolume();
@@ -235,7 +381,7 @@ public class AvatarUtils {
         new BukkitRunnable() {
             @Override
             public void run() {
-                Bukkit.broadcastMessage(ChatUtils.chatMessage("&5&l&oThe new Avatar &d" + aranarthPlayer.getNickname() + " &5&l&ohas risen!"));
+                Lang.broadcast("avatar.new_risen", "player", aranarthPlayer.getNickname());
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     int avVol = AranarthUtils.getPlayer(player.getUniqueId()).getAvatarSoundVolume();
 					if (avVol > 0) {
@@ -254,7 +400,7 @@ public class AvatarUtils {
      * Removes the current Avatar.
      */
     public static void removeCurrentAvatar() {
-        Avatar oldAvatar = avatars.get(avatars.size() - 1);
+        Avatar oldAvatar = getCurrentAvatar();
         if (oldAvatar == null) {
             return;
         }
@@ -263,15 +409,22 @@ public class AvatarUtils {
         oldAvatar.setEndInRealLife(DateUtils.getRawInRealLifeDate());
         avatars.set(avatars.size() - 1, oldAvatar);
         avatars.add(null);
-        PermissionUtils.updateAvatarPermissions(oldAvatar.getUuid(), true);
+        // An Avatar on the other server is handled by that server once it receives the update
+        if (!isOnlineRemotely(oldAvatar.getUuid())) {
+            PermissionUtils.updateAvatarPermissions(oldAvatar.getUuid(), true);
+        }
+        PersistenceUtils.saveAvatars();
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishAvatarUpdate(oldAvatar.getUuid(), false);
+        }
+
         // Despawns the mannequins and then respawns them with the updated values
-        despawnAvatarMannequins();
-        respawnAvatarMannequins();
+        refreshAvatarMannequins();
 
         DiscordUtils.addAvatarMessageToDiscord(oldAvatar, false);
 
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(oldAvatar.getUuid());
-        Bukkit.broadcastMessage(ChatUtils.chatMessage("&5&l&oThe Avatar &d" + aranarthPlayer.getNickname() + " &5&l&ohas deceased..."));
+        Lang.broadcast("avatar.deceased", "player", aranarthPlayer.getNickname());
         for (Player player : Bukkit.getOnlinePlayers()) {
             int avVol = AranarthUtils.getPlayer(player.getUniqueId()).getAvatarSoundVolume();
 			if (avVol > 0) {
@@ -286,7 +439,7 @@ public class AvatarUtils {
         new BukkitRunnable() {
             @Override
             public void run() {
-                Bukkit.broadcastMessage(ChatUtils.chatMessage("&5&l&oA new Avatar must be found..."));
+                Lang.broadcast("avatar.must_be_found");
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     int avVol = AranarthUtils.getPlayer(player.getUniqueId()).getAvatarSoundVolume();
 					if (avVol > 0) {
@@ -301,96 +454,100 @@ public class AvatarUtils {
     }
 
     /**
-     * Despawns all the Avatar mannequins.
+     * Applies an Avatar change that was made on another server in the network.
+     *
+     * @param newAvatars  The updated list of all avatars.
+     * @param uuid        The UUID of the player whose reign started or ended.
+     * @param isNewAvatar Whether the player became the Avatar, or their reign ended.
      */
-    private static void despawnAvatarMannequins() {
-        Location center = new Location(Bukkit.getWorld("spawn"), 8, 107, 19);
-        for (Entity entity : center.getNearbyEntities(30, 30, 30)) {
-            if (entity instanceof Mannequin mannequin) {
-                for (Entity nearby : mannequin.getLocation().getNearbyEntities(2.5, 2.5, 2.5)) {
-                    // Removes the nametag first
-                    if (nearby instanceof TextDisplay display) {
+    public static void applyRemoteUpdate(List<Avatar> newAvatars, UUID uuid, boolean isNewAvatar) {
+        avatars = newAvatars;
+        Player player = Bukkit.getPlayer(uuid);
+        if (player != null) {
+            if (isNewAvatar) {
+                PermissionUtils.evaluatePlayerPermissions(player);
+            } else {
+                PermissionUtils.updateAvatarPermissions(uuid, true);
+            }
+        }
+        refreshAvatarMannequins();
+    }
+
+    /**
+     * Despawns the Avatar mannequins and then respawns them with the current values.
+     */
+    public static void refreshAvatarMannequins() {
+        World spawn = Bukkit.getWorld("spawn");
+        if (spawn == null) {
+            return;
+        }
+        int generation = ++mannequinGeneration;
+        despawnAvatarMannequins(spawn);
+        respawnAvatarMannequins(spawn, generation);
+    }
+
+    /**
+     * Despawns all the Avatar mannequins.
+     *
+     * @param spawn The spawn world.
+     */
+    private static void despawnAvatarMannequins(World spawn) {
+        // Loads the chunks so that mannequins in unloaded chunks are not left behind as duplicates
+        for (int chunkX = -2; chunkX <= 2; chunkX++) {
+            for (int chunkZ = -1; chunkZ <= 3; chunkZ++) {
+                for (Entity entity : spawn.getChunkAt(chunkX, chunkZ).getEntities()) {
+                    if (entity instanceof Mannequin mannequin) {
+                        for (Entity nearby : mannequin.getLocation().getNearbyEntities(2.5, 2.5, 2.5)) {
+                            // Removes the nametag first
+                            if (nearby instanceof TextDisplay display) {
+                                display.remove();
+                            }
+                        }
+                        mannequin.remove();
+                    } else if (entity instanceof TextDisplay display && display.getScoreboardTags().contains(MANNEQUIN_TAG)) {
                         display.remove();
                     }
                 }
-                mannequin.remove();
             }
         }
     }
 
     /**
-     * Despawns all the Avatar mannequins.
+     * Respawns all the Avatar mannequins, the first spot being reserved for the current Avatar.
+     *
+     * @param spawn      The spawn world.
+     * @param generation The refresh that these mannequins belong to.
      */
-    private static void respawnAvatarMannequins() {
+    private static void respawnAvatarMannequins(World spawn, int generation) {
         if (avatars.isEmpty()) {
             Bukkit.getLogger().info("[AC] There are no avatars");
             return;
         }
 
-        World spawn = Bukkit.getWorld("spawn");
-        int mannequinIndex = spawnAvatar(new Location(spawn, 16.5, 102, 13.5, 45, 0), (avatars.size() - 1));
-        mannequinIndex = spawnAvatar(new Location(spawn, 18.5, 103, 15.5, 90, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 18.5, 103, 18.5, 90, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 18.5, 103, 21.5, 120, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 16.5, 103, 24.5, 135, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 13.5, 104, 25.5, 180, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 10.5, 104, 24.5, 180, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 7.5, 104, 23.5, 180, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 4.5, 105, 25.5, 180, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 1.5, 105, 24.5, 180, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, -1.5, 105, 23.5, -135, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, -2.5, 105, 20.5, -90, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, -0.5, 106, 17.5, -90, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 1.5, 106, 14.5, -25, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 4.5, 106, 13.5, 0, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 7.5, 107, 12.5, 0, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 10.5, 107, 12.5, 0, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 13.5, 107, 12.5, 0, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 16.5, 108, 12.5, 0, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 19.5, 108, 14.5, 45, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 21.5, 108, 17.5, 90, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 21.5, 109, 20.5, 90, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 20.5, 109, 23.5, 150, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 18.5, 109, 26.5, 135, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 15.5, 110, 27.5, 180, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 12.5, 110, 27.5, 180, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 9.5, 110, 26.5, 180, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 6.5, 110, 25.5, 180, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 3.5, 111, 25.5, 180, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 0.5, 111, 24.5, 180, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, -2.5, 111, 23.5, -135, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, -3.5, 111, 20.5, -90, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, -3.5, 112, 17.5, -90, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, -1.5, 112, 14.5, -45, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 1.5, 112, 12.5, 0, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 4.5, 113, 10.5, 0, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 7.5, 113, 9.5, 0, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 10.5, 114, 10.5, 0, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 13.5, 114, 11.5, 0, 0), mannequinIndex);
-        mannequinIndex = spawnAvatar(new Location(spawn, 16.5, 114, 12.5, 90, 0), mannequinIndex);
+        for (int i = 0; i < MANNEQUIN_SPOTS.length; i++) {
+            int avatarIndex = avatars.size() - 1 - i;
+            if (avatarIndex < 0) {
+                break;
+            }
+            // If there is currently no avatar, its spot is left empty
+            Avatar avatar = avatars.get(avatarIndex);
+            if (avatar == null) {
+                continue;
+            }
+            double[] spot = MANNEQUIN_SPOTS[i];
+            spawnAvatar(new Location(spawn, spot[0], spot[1], spot[2], (float) spot[3], 0), avatar, generation);
+        }
     }
 
     /**
      * Spawns an individual avatar.
      *
-     * @param loc            The Location of the mannequin.
-     * @param mannequinIndex The index of the mannequin being iterated.
-     * @return The next mannequin index to be used.
+     * @param loc        The Location of the mannequin.
+     * @param avatar     The avatar being spawned.
+     * @param generation The refresh that this mannequin belongs to.
      */
-    private static int spawnAvatar(Location loc, int mannequinIndex) {
-        // Catches and prevents further spawning if there are not enough avatars
-        if (mannequinIndex == -1) {
-            return -1;
-        }
-
-        // If there is currently no avatar, skip to the next mannequin
-        if (avatars.get(mannequinIndex) == null) {
-            return mannequinIndex - 1;
-        }
-
-
-        UUID uuid = avatars.get(mannequinIndex).getUuid();
-        OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
+    private static void spawnAvatar(Location loc, Avatar avatar, int generation) {
+        UUID uuid = avatar.getUuid();
         AranarthCore plugin = AranarthCore.getInstance();
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
@@ -398,38 +555,37 @@ public class AvatarUtils {
             PlayerProfile profile = plugin.getServer().createProfile(uuid);
             boolean completed = profile.complete(true); // Fetches the skin from Mojang
 
-            if (!completed) {
-                // Mojang servers unreachable or UUID is somehow incorrect
-                return;
-            }
-
             // Jump back to main thread to spawn the mannequin
             Bukkit.getScheduler().runTask(plugin, () -> {
-                World world = Bukkit.getWorld("spawn");
+                // A newer refresh has already despawned and respawned the mannequins
+                if (generation != mannequinGeneration || loc.getWorld() == null) {
+                    return;
+                }
 
-                Mannequin mannequin = (Mannequin) world.spawnEntity(loc, EntityType.MANNEQUIN);
-                mannequin.setProfile(ResolvableProfile.resolvableProfile(profile));
+                Mannequin mannequin = (Mannequin) loc.getWorld().spawnEntity(loc, EntityType.MANNEQUIN);
+                // Mojang servers unreachable, so the skin is resolved from the UUID later instead
+                mannequin.setProfile(completed ? ResolvableProfile.resolvableProfile(profile)
+                        : ResolvableProfile.resolvableProfile().uuid(uuid).build());
                 mannequin.setInvulnerable(true);
                 mannequin.setGravity(false);
                 mannequin.setPersistent(true);
                 mannequin.setNoPhysics(false);
                 mannequin.setImmovable(true);
+                mannequin.addScoreboardTag(MANNEQUIN_TAG);
 
-                if (mannequin != null) {
-                    Location above = mannequin.getLocation().clone().add(0, 2, 0);
-                    String elementSymbol = getElementSymbol(uuid, avatars.get(mannequinIndex));
-                    String name = ChatUtils.translateToColor(elementSymbol + " &r"
-                            + AranarthUtils.getPlayer(uuid).getNickname() + " " + elementSymbol);
+                Location above = mannequin.getLocation().clone().add(0, 2, 0);
+                String elementSymbol = getElementSymbol(uuid, avatar);
+                String name = ChatUtils.translateToColor(elementSymbol + " &r"
+                        + AranarthUtils.getPlayer(uuid).getNickname() + " " + elementSymbol);
 
-                    // Always will create a new text display
-                    mannequin.getWorld().spawn(above, TextDisplay.class, displayEntity -> {
-                        displayEntity.setText(name);
-                        displayEntity.setBillboard(Display.Billboard.VERTICAL); // Pivots only around the vertical axis
-                    });
-                }
+                // Always will create a new text display
+                mannequin.getWorld().spawn(above, TextDisplay.class, displayEntity -> {
+                    displayEntity.setText(name);
+                    displayEntity.setBillboard(Display.Billboard.VERTICAL); // Pivots only around the vertical axis
+                    displayEntity.addScoreboardTag(MANNEQUIN_TAG);
+                });
             });
         });
-        return mannequinIndex - 1;
     }
 
     /**

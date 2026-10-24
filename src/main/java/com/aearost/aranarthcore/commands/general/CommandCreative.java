@@ -1,12 +1,11 @@
 package com.aearost.aranarthcore.commands.general;
 
-import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.network.NetworkManager;
-import com.aearost.aranarthcore.network.PendingTeleport;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
+import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.PlotUtils;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -14,7 +13,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 /**
- * Teleports the player to the creative world, using the creative inventory.
+ * Teleports the player to the spawn of the Creative plots world, using the creative inventory.
  */
 public class CommandCreative implements CommandExecutor {
 
@@ -29,46 +28,80 @@ public class CommandCreative implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			// Only the OG players, Council, and Architect are permitted into the Creative world
-			if (!AranarthUtils.isOriginalPlayer(player.getUniqueId()) && aranarthPlayer.getCouncilRank() == 0
-					&& aranarthPlayer.getArchitectRank() == 0) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have access to this world!"));
-				return false;
-			}
 
-			if (AranarthUtils.getTeleportTask(player.getUniqueId()) != null) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou are already teleporting somewhere!"));
-				return false;
-			}
-
-			// On the SMP server: creative world lives on Survival - count down then transfer.
-			if (AranarthCore.isSmpServer() && NetworkManager.isActive()) {
-				AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
-						aranarthPlayer.isInAdminMode(), "&e&lCreative", "&7Transferring to Creative...", success -> {
-					if (success) {
-						PendingTeleport pt = PendingTeleport.forCommand(
-								"creative", "&e&lCreative", "&7You have teleported to Creative");
-						String survivalServerName = AranarthCore.getInstance().getConfig()
-								.getString("network.servers.survival", "survival");
-						NetworkManager.getInstance().saveInventoryAndTransfer(player, survivalServerName, pt);
-					}
-				});
+			if (args.length > 0 && args[0].equalsIgnoreCase("expand")) {
+				expand(player, aranarthPlayer, args);
 				return true;
 			}
 
-			Location creativeSpawn = new Location(Bukkit.getWorld("creative"), 0, -60, 0, 0, 2);
-			AranarthUtils.teleportPlayer(player, player.getLocation(), creativeSpawn, aranarthPlayer.isInAdminMode(), "&e&lCreative", "&7You have teleported to Creative", success -> {
+			if (AranarthUtils.getTeleportTask(player.getUniqueId()) != null) {
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.already_teleporting")));
+				return false;
+			}
+
+			// On the SMP server: the plots world lives on Survival - count down then transfer.
+			if (!PlotUtils.isPlotServer()) {
+				CommandPlot.transferToPlotServer(player, aranarthPlayer, "creative", Lang.getFor(player, "teleport.title_creative"));
+				return true;
+			}
+
+			Location creativeSpawn = PlotUtils.getSpawnLocation();
+			if (creativeSpawn.getWorld() == null) {
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.could_not_creative")));
+				return false;
+			}
+			AranarthUtils.teleportPlayer(player, player.getLocation(), creativeSpawn, aranarthPlayer.isInAdminMode(), Lang.getFor(player, "teleport.title_creative"), Lang.getFor(player, "teleport.to_creative"), success -> {
 				if (success) {
-					player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eCreative"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.to_creative")));
 				} else {
-					player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to &eCreative"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.could_not_creative")));
 				}
 			});
 
 			return true;
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to use this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return false;
 		}
+	}
+
+	/**
+	 * Adds rings of plots around the Creative plots world, pre-generating the new area.
+	 */
+	private void expand(Player player, AranarthPlayer aranarthPlayer, String[] args) {
+		if (aranarthPlayer.getCouncilRank() != 3) {
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
+			return;
+		}
+		if (args.length != 2) {
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "creative expand <rings>")));
+			return;
+		}
+		int rings;
+		try {
+			rings = Integer.parseInt(args[1]);
+		} catch (NumberFormatException e) {
+			rings = 0;
+		}
+		if (rings < 1) {
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "creative.invalid_rings")));
+			return;
+		}
+
+		// The plots world only exists on Survival
+		if (!PlotUtils.isPlotServer()) {
+			if (!NetworkManager.isActive()) {
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.could_not_creative")));
+				return;
+			}
+			NetworkManager.getInstance().publishCreativeExpand(player.getUniqueId(), rings);
+			return;
+		}
+		int plotsAcross = PlotUtils.expand(rings);
+		if (plotsAcross < 0) {
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.could_not_creative")));
+			return;
+		}
+		player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "creative.expanded", "size", plotsAcross)));
 	}
 }

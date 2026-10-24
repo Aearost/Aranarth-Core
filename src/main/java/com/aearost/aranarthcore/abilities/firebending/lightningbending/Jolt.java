@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.firebending.lightningbending;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.GeneralMethods;
@@ -25,10 +26,7 @@ public class Jolt extends LightningAbility implements AddonAbility {
 
     public enum Phase { CHARGING, READY, TRAVELING }
 
-    private static final long CHARGE_DURATION_MS = 500L;
-    private static final double PROJECTILE_SPEED = 4.0;
     private static final double STEP = 0.2;
-    private static final double HIT_RADIUS = 0.8;
 
     private static final Map<UUID, Jolt> ACTIVE_INSTANCES = new HashMap<>();
     private static final Set<UUID> PENDING_CHARGES = new HashSet<>();
@@ -43,6 +41,9 @@ public class Jolt extends LightningAbility implements AddonAbility {
     private double stunChance;
     @Attribute("StunDuration")
     private long stunDuration;
+    private long chargeDuration;
+    private double speed;
+    private double hitRadius;
 
     private Phase phase;
     private long chargeStart;
@@ -55,11 +56,14 @@ public class Jolt extends LightningAbility implements AddonAbility {
         if (!bPlayer.canBend(this)) return;
         if (!PENDING_CHARGES.remove(player.getUniqueId())) return;
 
-        damage = 3.0;
-        cooldown = 4000L;
-        range = 45.0;
-        stunChance = 0.5;
-        stunDuration = 1500L;
+        damage = AbilityConfig.getDouble("Jolt.Damage");
+        cooldown = AbilityConfig.getLong("Jolt.Cooldown");
+        range = AbilityConfig.getDouble("Jolt.Range");
+        stunChance = AbilityConfig.getDouble("Jolt.StunChance");
+        stunDuration = AbilityConfig.getLong("Jolt.StunDuration");
+        chargeDuration = AbilityConfig.getLong("Jolt.ChargeDuration");
+        speed = AbilityConfig.getDouble("Jolt.Speed");
+        hitRadius = AbilityConfig.getDouble("Jolt.HitRadius");
 
         phase = Phase.CHARGING;
         chargeStart = System.currentTimeMillis();
@@ -95,7 +99,7 @@ public class Jolt extends LightningAbility implements AddonAbility {
 
         spawnHandParticles(false);
 
-        if (System.currentTimeMillis() - chargeStart >= CHARGE_DURATION_MS) {
+        if (System.currentTimeMillis() - chargeStart >= chargeDuration) {
             phase = Phase.READY;
             player.getWorld().playSound(player.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 0.4f, 2.0f);
         }
@@ -107,7 +111,7 @@ public class Jolt extends LightningAbility implements AddonAbility {
 
     private void progressTraveling() {
         final Vector lookDir = player.getEyeLocation().getDirection().normalize();
-        double remaining = PROJECTILE_SPEED;
+        double remaining = speed;
 
         while (remaining > 0) {
             double step = Math.min(STEP, remaining);
@@ -140,7 +144,7 @@ public class Jolt extends LightningAbility implements AddonAbility {
      * Returns true if an entity was hit.
      */
     private boolean checkEntityHit(Location loc) {
-        for (Entity entity : loc.getWorld().getNearbyEntities(loc, HIT_RADIUS, HIT_RADIUS, HIT_RADIUS)) {
+        for (Entity entity : loc.getWorld().getNearbyEntities(loc, hitRadius, hitRadius, hitRadius)) {
             if (!(entity instanceof LivingEntity living) || entity.equals(player)) continue;
 
             DamageHandler.damageEntity(living, damage, this);

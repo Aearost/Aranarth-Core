@@ -15,7 +15,7 @@ import java.util.Objects;
 import static com.aearost.aranarthcore.objects.CustomKeys.QUIVER;
 
 /**
- * When a player picks up arrows and has a quiver, prioritizes filling non-full
+ * When a player picks up arrows or firework rockets and has a quiver, prioritizes filling non-full
  * matching stacks in the quiver before letting vanilla handle the pickup.
  */
 public class QuiverArrowPickup {
@@ -108,6 +108,7 @@ public class QuiverArrowPickup {
     private boolean isArrow(ItemStack item) {
         return item.getType() == Material.ARROW
                 || item.getType() == Material.SPECTRAL_ARROW
-                || item.getType() == Material.TIPPED_ARROW;
+                || item.getType() == Material.TIPPED_ARROW
+                || item.getType() == Material.FIREWORK_ROCKET;
     }
 }

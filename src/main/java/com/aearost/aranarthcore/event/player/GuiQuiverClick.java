@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -11,6 +12,7 @@ import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -20,11 +22,13 @@ import java.util.Objects;
 import static com.aearost.aranarthcore.objects.CustomKeys.ARROW;
 
 /**
- * Prevents players from adding non-arrow items to the arrows inventory.
+ * Prevents players from adding non-arrow and non-firework items to the arrows inventory.
  */
 public class GuiQuiverClick {
 	public void execute(InventoryClickEvent e) {
-		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Quiver")) {
+		Player viewer = (Player) e.getWhoClicked();
+		String title = ChatUtils.stripColorFormatting(e.getView().getTitle());
+		if (title.equals(Lang.getFor(viewer, "gui.quiver.title"))) {
 			// If the user did not click a slot
 			if (e.getClickedInventory() == null) {
 				return;
@@ -55,7 +59,7 @@ public class GuiQuiverClick {
 					}
 				}
 			}
-		} else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Arrow Selection") && e.getView().getType() == InventoryType.CHEST) {
+		} else if (title.equals(Lang.getFor(viewer, "gui.quiver.title_select")) && e.getView().getType() == InventoryType.CHEST) {
 			// If the user did not click a slot
 			if (e.getClickedInventory() == null) {
 				return;
@@ -70,8 +74,8 @@ public class GuiQuiverClick {
 					ItemStack[] playerInventory = player.getInventory().getContents();
 					for (int i = 0; i < playerInventory.length; i++) {
 						if (playerInventory[i] != null) {
-							// Gets the first arrow in the player's inventory
-							if (isItemArrow(playerInventory[i])) {
+							// Gets the first arrow (or firework rocket if one was selected) in the player's inventory
+							if (isSameCategory(playerInventory[i], e.getCurrentItem())) {
 								ItemStack selectedArrow = e.getCurrentItem();
 								AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 								List<ItemStack> playerArrows = aranarthPlayer.getArrows();
@@ -87,7 +91,10 @@ public class GuiQuiverClick {
 											// Updates inventory stack with what's in the quiver
 											player.getInventory().setItem(i, stackFromQuiver);
 
-											if (stackFromQuiver.hasItemMeta()) {
+											if (stackFromQuiver.getItemMeta() instanceof FireworkMeta fireworkMeta) {
+												player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arrow.now_firework", "duration", fireworkMeta.getPower())));
+												player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
+											} else if (stackFromQuiver.hasItemMeta()) {
 												// Tipped arrows
 												if (stackFromQuiver.getItemMeta() instanceof PotionMeta meta) {
 													// If mcMMO arrow
@@ -98,7 +105,7 @@ public class GuiQuiverClick {
 
 														Color color = meta.getCustomEffects().getFirst().getType().getColor();
 														String rgbAsHex = String.format("#%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue());
-														player.sendMessage(ChatUtils.chatMessage("&7You will now use " + rgbAsHex + newName + " &7Arrows"));
+														player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arrow.now_custom", "color", rgbAsHex, "name", newName)));
 														player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 													} else {
 														StringBuilder newNameSB = new StringBuilder();
@@ -117,7 +124,7 @@ public class GuiQuiverClick {
 														// Puts the text in the color of the potion
 														Color color = meta.getBasePotionType().getPotionEffects().getFirst().getType().getColor();
 														String rgbAsHex = String.format("#%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue());
-														player.sendMessage(ChatUtils.chatMessage("&7You will now use " + rgbAsHex + newNameSB + " &7Arrows"));
+														player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arrow.now_custom", "color", rgbAsHex, "name", newNameSB)));
 														player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 													}
 												}
@@ -127,7 +134,7 @@ public class GuiQuiverClick {
 														String type = stackFromQuiver.getItemMeta().getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
 														ItemStack arrowItem = AranarthUtils.getArrowFromType(type);
 														String arrowName = arrowItem.getItemMeta().getDisplayName() + "s";
-														player.sendMessage(ChatUtils.chatMessage("&7You will now use " + arrowName));
+														player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arrow.now_named", "name", arrowName)));
 														player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 													}
 												}
@@ -135,10 +142,10 @@ public class GuiQuiverClick {
 											// Regular or Spectral Arrows
 											else {
 												if (selectedArrow.getType() == Material.ARROW) {
-													player.sendMessage(ChatUtils.chatMessage("&7You will now use regular &eArrows"));
+													player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arrow.now_regular")));
 													player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 												} else if (selectedArrow.getType() == Material.SPECTRAL_ARROW) {
-													player.sendMessage(ChatUtils.chatMessage("&7You will now use &eSpectral Arrows"));
+													player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arrow.now_spectral")));
 													player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 												}
 											}
@@ -161,13 +168,16 @@ public class GuiQuiverClick {
 							if (playerArrows.get(j) != null && AranarthUtils.verifyIsSameArrow(playerArrows.get(j), selectedArrow) != null) {
 								int freeSlot = player.getInventory().firstEmpty();
 								if (freeSlot == -1) {
-									player.sendMessage(ChatUtils.chatMessage("&cThere are no free slots for any arrows"));
+									player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "quiver.no_free_slots")));
 								} else {
 									ItemStack stackFromQuiver = playerArrows.get(j).clone();
 									playerArrows.set(j, null);
 									player.getInventory().setItem(freeSlot, stackFromQuiver);
 
-									if (stackFromQuiver.hasItemMeta()) {
+									if (stackFromQuiver.getItemMeta() instanceof FireworkMeta fireworkMeta) {
+										player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arrow.now_firework", "duration", fireworkMeta.getPower())));
+										player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
+									} else if (stackFromQuiver.hasItemMeta()) {
 										if (stackFromQuiver.getItemMeta() instanceof PotionMeta meta) {
 											if (meta.hasCustomEffects()) {
 												String arrowName = meta.getCustomEffects().getFirst().getType().getKey().getKey();
@@ -175,7 +185,7 @@ public class GuiQuiverClick {
 												newName = newName + arrowName.substring(1);
 												Color color = meta.getCustomEffects().getFirst().getType().getColor();
 												String rgbAsHex = String.format("#%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue());
-												player.sendMessage(ChatUtils.chatMessage("&7You will now use " + rgbAsHex + newName + " &7Arrows"));
+												player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arrow.now_custom", "color", rgbAsHex, "name", newName)));
 												player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 											} else {
 												StringBuilder newNameSB = new StringBuilder();
@@ -193,7 +203,7 @@ public class GuiQuiverClick {
 												}
 												Color color = meta.getBasePotionType().getPotionEffects().getFirst().getType().getColor();
 												String rgbAsHex = String.format("#%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue());
-												player.sendMessage(ChatUtils.chatMessage("&7You will now use " + rgbAsHex + newNameSB + " &7Arrows"));
+												player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arrow.now_custom", "color", rgbAsHex, "name", newNameSB)));
 												player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 											}
 										} else {
@@ -201,16 +211,16 @@ public class GuiQuiverClick {
 												String type = stackFromQuiver.getItemMeta().getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
 												ItemStack arrowItem = AranarthUtils.getArrowFromType(type);
 												String arrowName = arrowItem.getItemMeta().getDisplayName() + "s";
-												player.sendMessage(ChatUtils.chatMessage("&7You will now use " + arrowName));
+												player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arrow.now_named", "name", arrowName)));
 												player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 											}
 										}
 									} else {
 										if (selectedArrow.getType() == Material.ARROW) {
-											player.sendMessage(ChatUtils.chatMessage("&7You will now use regular &eArrows"));
+											player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arrow.now_regular")));
 											player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 										} else if (selectedArrow.getType() == Material.SPECTRAL_ARROW) {
-											player.sendMessage(ChatUtils.chatMessage("&7You will now use &eSpectral Arrows"));
+											player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arrow.now_spectral")));
 											player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 										}
 									}
@@ -220,7 +230,7 @@ public class GuiQuiverClick {
 							}
 						}
 					}
-					player.sendMessage(ChatUtils.chatMessage("&cYou must have an arrow in your inventory to do this!"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "quiver.must_have_arrow")));
 					player.closeInventory();
 				}
 			}
@@ -230,6 +240,23 @@ public class GuiQuiverClick {
 	private boolean isItemArrow(ItemStack item) {
 		return (item.getType() == Material.ARROW
 				|| item.getType() == Material.TIPPED_ARROW
-				|| item.getType() == Material.SPECTRAL_ARROW);
+				|| item.getType() == Material.SPECTRAL_ARROW
+				|| item.getType() == Material.FIREWORK_ROCKET);
+	}
+
+	/**
+	 * Determines whether the item is a firework rocket when a firework rocket was selected, otherwise an arrow.
+	 * @param item The item in the player's inventory.
+	 * @param selected The item selected in the GUI.
+	 * @return Whether the item is in the same category as the selected item.
+	 */
+	private boolean isSameCategory(ItemStack item, ItemStack selected) {
+		if (!isItemArrow(item)) {
+			return false;
+		}
+		if (selected == null) {
+			return true;
+		}
+		return (item.getType() == Material.FIREWORK_ROCKET) == (selected.getType() == Material.FIREWORK_ROCKET);
 	}
 }

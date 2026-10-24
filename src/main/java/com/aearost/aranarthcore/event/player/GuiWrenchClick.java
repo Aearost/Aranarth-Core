@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.gui.GuiWrench;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Axis;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -20,8 +21,19 @@ import java.util.List;
  */
 public class GuiWrenchClick {
 
+    /** Lang key suffixes (gui.wrench.prop_*) of every property button. */
+    private static final String[] PROPERTY_KEYS = {
+            "facing", "axis", "shape", "half", "slab", "attachment", "wall_dir", "hinge", "open", "in_wall", "rotation",
+            "north_conn", "south_conn", "east_conn", "west_conn", "up_conn", "down_conn",
+            "north_height", "south_height", "east_height", "west_height", "wall_up"
+    };
+
     public void execute(InventoryClickEvent e) {
         e.setCancelled(true);
+        // Only the GUI's own buttons count, never the player's inventory
+        if (e.getClickedInventory() != e.getView().getTopInventory()) {
+            return;
+        }
 
         if (!(e.getWhoClicked() instanceof Player player)) {
             return;
@@ -45,18 +57,41 @@ public class GuiWrenchClick {
         String propertyName = ChatUtils.stripColorFormatting(
                 e.getCurrentItem().getItemMeta().getDisplayName());
 
-        switch (propertyName) {
-            case "Facing" -> cycleFacing(player, block, data);
-            case "Axis" -> cycleAxis(player, block, data);
-            case "Shape" -> cycleShape(player, block, data);
-            case "Half" -> cycleHalf(player, block, data);
-            case "Slab Type" -> cycleSlabType(player, block, data);
-            case "Attachment" -> cycleAttachment(player, block, data);
-            case "Wall Direction" -> cycleWallDirection(player, block, data);
-            case "Hinge" -> cycleHinge(player, block, data);
-            case "Open" -> cycleOpen(player, block, data);
-            case "In Wall" -> cycleInWall(player, block, data);
-            case "Rotation" -> cycleRotation(player, block, data);
+        // Buttons are named in the player's language, so match the name back to its lang key
+        String propertyKey = null;
+        for (String key : PROPERTY_KEYS) {
+            if (propertyName.equals(ChatUtils.stripColorFormatting(Lang.getFor(player, "gui.wrench.prop_" + key)))) {
+                propertyKey = key;
+                break;
+            }
+        }
+        if (propertyKey == null) {
+            return;
+        }
+
+        switch (propertyKey) {
+            case "facing" -> cycleFacing(player, block, data);
+            case "axis" -> cycleAxis(player, block, data);
+            case "shape" -> cycleShape(player, block, data);
+            case "half" -> cycleHalf(player, block, data);
+            case "slab" -> cycleSlabType(player, block, data);
+            case "attachment" -> cycleAttachment(player, block, data);
+            case "wall_dir" -> cycleWallDirection(player, block, data);
+            case "hinge" -> cycleHinge(player, block, data);
+            case "open" -> cycleOpen(player, block, data);
+            case "in_wall" -> cycleInWall(player, block, data);
+            case "rotation" -> cycleRotation(player, block, data);
+            case "north_conn" -> toggleFaceConnection(block, data, BlockFace.NORTH);
+            case "south_conn" -> toggleFaceConnection(block, data, BlockFace.SOUTH);
+            case "east_conn"  -> toggleFaceConnection(block, data, BlockFace.EAST);
+            case "west_conn"  -> toggleFaceConnection(block, data, BlockFace.WEST);
+            case "up_conn"    -> toggleFaceConnection(block, data, BlockFace.UP);
+            case "down_conn"  -> toggleFaceConnection(block, data, BlockFace.DOWN);
+            case "north_height" -> cycleWallHeight(block, data, BlockFace.NORTH);
+            case "south_height" -> cycleWallHeight(block, data, BlockFace.SOUTH);
+            case "east_height"  -> cycleWallHeight(block, data, BlockFace.EAST);
+            case "west_height"  -> cycleWallHeight(block, data, BlockFace.WEST);
+            case "wall_up"    -> toggleWallUp(block, data);
         }
 
         GuiWrench.refresh(player);
@@ -75,8 +110,7 @@ public class GuiWrenchClick {
         // New facing must have a supporting block
         if (data instanceof TrapDoor) {
             if (!block.getRelative(next).getType().isSolid()) {
-                player.sendMessage(ChatUtils.chatMessage(
-                        "&cCannot face &e" + next.name() + "&c - no block to attach to there"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "wrench.cannot_face", "direction", Lang.key("general.direction_" + next.name().toLowerCase()))));
                 return;
             }
         }
@@ -142,8 +176,7 @@ public class GuiWrenchClick {
 
         // Verify the target surface exists
         if (!attachmentSupported(block, switchData, next)) {
-            player.sendMessage(ChatUtils.chatMessage(
-                    "&cCannot attach to &e" + next.name() + "&c - no block to attach to there"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "wrench.cannot_attach", "direction", Lang.key("general.direction_" + next.name().toLowerCase()))));
             return;
         }
 
@@ -164,8 +197,7 @@ public class GuiWrenchClick {
         if (switchData.getFace() == Switch.Face.WALL) {
             // When face is WALL, the support is on the opposite side of the facing direction
             if (!block.getRelative(next.getOppositeFace()).getType().isSolid()) {
-                player.sendMessage(ChatUtils.chatMessage(
-                        "&cCannot face &e" + next.name() + "&c - no block to attach to on that wall"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "wrench.cannot_face_wall", "direction", Lang.key("general.direction_" + next.name().toLowerCase()))));
                 return;
             }
         }
@@ -214,6 +246,32 @@ public class GuiWrenchClick {
         block.setBlockData(rotatable, false);
     }
 
+
+    private void cycleWallHeight(Block block, BlockData data, BlockFace face) {
+        if (!(data instanceof Wall wall)) {
+            return;
+        }
+        Wall.Height[] heights = Wall.Height.values(); // NONE, LOW, TALL
+        int idx = wall.getHeight(face).ordinal();
+        wall.setHeight(face, heights[(idx + 1) % heights.length]);
+        block.setBlockData(wall, false);
+    }
+
+    private void toggleWallUp(Block block, BlockData data) {
+        if (!(data instanceof Wall wall)) {
+            return;
+        }
+        wall.setUp(!wall.isUp());
+        block.setBlockData(wall, false);
+    }
+
+    private void toggleFaceConnection(Block block, BlockData data, BlockFace face) {
+        if (!(data instanceof MultipleFacing multiFacing)) {
+            return;
+        }
+        multiFacing.setFace(face, !multiFacing.hasFace(face));
+        block.setBlockData(multiFacing, false);
+    }
 
     /**
      * Returns whether the proposed attachment face has a supporting block.

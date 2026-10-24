@@ -18,7 +18,7 @@ public class ExpGainPreventListener implements Listener {
 	 */
 	@EventHandler
 	public void onExpDrop(PlayerExpChangeEvent e) {
-		if (e.getPlayer().getLocation().getWorld().getName().equalsIgnoreCase("creative")
+		if (e.getPlayer().getLocation().getWorld().getName().startsWith("creative")
 		|| e.getPlayer().getLocation().getWorld().getName().equalsIgnoreCase("arena")) {
 			e.setAmount(0);
 		}

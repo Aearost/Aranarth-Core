@@ -19,9 +19,18 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionType;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 
 public class PotionConsumeListener implements Listener {
+
+	private static final Set<UUID> pendingWaterBottleDrinks = new HashSet<>();
+
+	static boolean consumeWaterBottleDrinkFlag(UUID uuid) {
+		return pendingWaterBottleDrinks.remove(uuid);
+	}
 
 	public PotionConsumeListener(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
@@ -34,6 +43,13 @@ public class PotionConsumeListener implements Listener {
 	@EventHandler
 	public void onPotionUse(final PlayerItemConsumeEvent e) {
 		if (AranarthUtils.isSurvivalWorld(e.getPlayer().getWorld().getName())) {
+			// Flag plain water-bottle drinks to skip the resulting slot-change event
+			if (e.getItem().getType() == Material.POTION && e.getItem().hasItemMeta()) {
+				PotionMeta drinkMeta = (PotionMeta) e.getItem().getItemMeta();
+				if (drinkMeta.getBasePotionType() == PotionType.WATER && drinkMeta.getCustomEffects().isEmpty()) {
+					pendingWaterBottleDrinks.add(e.getPlayer().getUniqueId());
+				}
+			}
             replacePotion(e.getPlayer(), e.getItem(), e.getHand() == EquipmentSlot.HAND);
 		}
 	}

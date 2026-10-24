@@ -7,9 +7,12 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Mount;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import com.aearost.aranarthcore.utils.PermissionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.MountUtils;
+import com.aearost.aranarthcore.utils.PermissionUtils;
+import com.projectkorra.projectkorra.BendingPlayer;
 import org.bukkit.Bukkit;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -30,7 +33,7 @@ public class CommandOverrides {
 
         if (!parts[0].equals("/afk")) {
             if (aranarthPlayer.getAfkLocation() != null) {
-                if (aranarthPlayer.getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount()) {
+                if (AranarthUtils.isAfk(aranarthPlayer)) {
                     Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
                         @Override
                         public void run() {
@@ -54,14 +57,14 @@ public class CommandOverrides {
                 sb.append(plugins[i].isEnabled() ? "&7" : "&c");
                 sb.append(plugins[i].getName());
             }
-            player.sendMessage(ChatUtils.chatMessage("&e&lPlugins (" + plugins.length + ") &7&l- " + sb));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "plugins.list", "count", plugins.length, "list", sb)));
             e.setCancelled(true);
             return;
         }
 
         if (aranarthPlayer.getCouncilRank() != 3) {
             if (parts[0].equals("/w")) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
                 e.setCancelled(true);
                 return;
             }
@@ -70,9 +73,9 @@ public class CommandOverrides {
         // Prevent the command entirely
         if (parts[0].equals("/time") && AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
             if (aranarthPlayer.getCouncilRank() < 2) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
             } else {
-                player.sendMessage(ChatUtils.chatMessage("&cUse &e/ac time <time> &cinstead!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "commands.use_ac_time")));
             }
             e.setCancelled(true);
             return;
@@ -80,9 +83,19 @@ public class CommandOverrides {
 
         // Prevent the command entirely
         if (parts[0].equals("/me")) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
             e.setCancelled(true);
             return;
+        }
+
+        // Prevent table commands (and their aliases) in the arena world unless in admin mode
+        if (player.getWorld().getName().equalsIgnoreCase("arena") && !aranarthPlayer.isInAdminMode()) {
+            PluginCommand pluginCommand = Bukkit.getPluginCommand(parts[0].substring(1).toLowerCase());
+            if (pluginCommand != null && "aranarth.tables".equals(pluginCommand.getPermission())) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arena.no_tables")));
+                e.setCancelled(true);
+                return;
+            }
         }
 
         // Adding and removing the sub-elements upon changing element without relogging
@@ -96,7 +109,10 @@ public class CommandOverrides {
                         }
                         // Saints always get their element change cooldown reset
                         if (aranarthPlayer.getSaintRank() >= 1) {
-                            Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "b cooldown reset " + player.getName());
+                            BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+                            if (bendingPlayer != null) {
+                                bendingPlayer.removeCooldown("ChooseElement");
+                            }
                         }
                         // Dismiss any active mount as the new element may have a different mount
                         dismissActiveMountIfPresent(player);
@@ -136,8 +152,7 @@ public class CommandOverrides {
 
         if (info != null) {
             String displayName = MountUtils.getDisplayName(player.getUniqueId(), info[1]);
-            player.sendMessage(ChatUtils.chatMessage(
-                    MountUtils.getElementColor(info[1]) + displayName + " &7has returned."));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mount.returned", "mount", MountUtils.getElementColor(info[1]) + displayName)));
         }
     }
 

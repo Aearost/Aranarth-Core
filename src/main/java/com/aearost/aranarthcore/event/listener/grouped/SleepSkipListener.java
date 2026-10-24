@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DefenderUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
@@ -146,7 +147,7 @@ public class SleepSkipListener implements Listener {
 				if (worldName.equals("world") || AranarthUtils.isSmpWorld(worldName) || worldName.equals("resource")) {
 					long time = player.getLocation().getWorld().getTime();
 					if (time > 12500 && time <= 23980) {
-						player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message));
+						player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(Lang.getFor(player, "sleep.players_sleeping", "sleeping", totalSleepingPlayerNum, "required", amountRequiredToSkip)));
 					}
 				}
 			}
@@ -154,7 +155,7 @@ public class SleepSkipListener implements Listener {
 			// update was itself triggered by a remote message - that would echo the count back
 			// and cause the remote server to double-count it.
 			if (!isRemoteUpdate && NetworkManager.isActive()) {
-				NetworkManager.getInstance().publishSleepMessage(message, localSleepingCount, amountRequiredToSkip);
+				NetworkManager.getInstance().publishSleepMessage(message, totalSleepingPlayerNum, localSleepingCount, amountRequiredToSkip);
 			}
 		}, 1L);
 

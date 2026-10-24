@@ -3,29 +3,25 @@ package com.aearost.aranarthcore.utils;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
+import com.aearost.aranarthcore.objects.Outpost;
 import com.projectkorra.projectkorra.BendingPlayer;
+import com.projectkorra.projectkorra.ability.Ability;
 import com.projectkorra.projectkorra.ability.CoreAbility;
+import com.projectkorra.projectkorra.util.DamageHandler;
+import com.projectkorra.projectkorra.waterbending.util.WaterReturn;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Particle;
+import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class AranarthBendingUtils {
 
@@ -217,7 +213,7 @@ public class AranarthBendingUtils {
         int stunTicks = (int) (durationMs / 50L);
 
         if (target instanceof Player p) {
-            p.sendActionBar(Component.text("* ELECTROCUTED *").color(ELECTROCUTION_COLOR));
+            p.sendActionBar(Component.text(Lang.getFor(p, "bending.electrocuted")).color(ELECTROCUTION_COLOR));
         }
 
         new BukkitRunnable() {
@@ -282,11 +278,62 @@ public class AranarthBendingUtils {
      * @return Whether bending should be blocked at that location.
      */
     public static boolean isBendingBlockedAtLocation(Player player, Location location) {
-        Dominion dominion = DominionUtils.getDominionOfChunk(location.getChunk());
+        Chunk chunk = location.getChunk();
+        Outpost outpost = OutpostUtils.getOutpostOfChunk(chunk);
+        if (outpost != null) {
+            return !outpost.isBendingEnabled();
+        }
+        Dominion dominion = DominionUtils.getDominionOfChunk(chunk);
         if (dominion == null) {
             return false;
         }
         return !dominion.isBendingEnabled();
+    }
+
+    /**
+     * Returns true if the player may permanently change the block with an ability.
+     *
+     * @param player The player using the ability.
+     * @param block  The block being changed.
+     * @return Whether the block may be changed.
+     */
+    public static boolean canBendBlock(Player player, Block block) {
+        if (AranarthUtils.getPlayer(player.getUniqueId()).isInAdminMode()) {
+            return true;
+        }
+        Location location = block.getLocation();
+        if (AranarthUtils.isSpawnLocation(location)) {
+            return false;
+        }
+        if (block.getWorld().getName().equals(ShopIslandUtils.SHOPS_WORLD)) {
+            UUID owner = ShopIslandUtils.getIslandOwnerAtLocation(location);
+            return owner != null && (owner.equals(player.getUniqueId())
+                    || AranarthUtils.isShopCollaborator(owner, player.getUniqueId()));
+        }
+        if (PlotUtils.isPlotWorld(block.getWorld())) {
+            return PlotUtils.canBuild(player, location);
+        }
+        Dominion dominion = DominionUtils.getDominionOfChunkAnywhere(block.getChunk());
+        return dominion == null || DominionUtils.hasPermission(player, dominion, DominionPermission.BUILD);
+    }
+
+    /**
+     * Deals ability damage that ignores armor and invulnerability frames without knocking the target
+     * back. Unlike setting health directly, this fires the damage events, so protection, combat tagging
+     * and kill attribution all apply.
+     *
+     * @param target  The entity being damaged.
+     * @param damage  The amount of damage.
+     * @param ability The ability dealing the damage.
+     * @return Whether the damage landed, which is false when a protection listener cancelled it.
+     */
+    public static boolean damageIgnoringArmor(LivingEntity target, double damage, Ability ability) {
+        double healthBefore = target.getHealth() + target.getAbsorptionAmount();
+        Vector velocity = target.getVelocity();
+        target.setNoDamageTicks(0);
+        DamageHandler.damageEntity(target, damage, ability, true);
+        target.setVelocity(velocity);
+        return target.isDead() || target.getHealth() + target.getAbsorptionAmount() < healthBefore;
     }
 
     /**
@@ -302,7 +349,7 @@ public class AranarthBendingUtils {
         for (int x = chunkX - 1; x <= chunkX + 1; x++) {
             for (int z = chunkZ - 1; z <= chunkZ + 1; z++) {
                 Chunk chunk = player.getWorld().getChunkAt(x, z);
-                Dominion dominion = DominionUtils.getDominionOfChunk(chunk);
+                Dominion dominion = DominionUtils.getDominionOfChunkAnywhere(chunk);
                 if (dominion == null) {
                     continue;
                 }
@@ -379,6 +426,28 @@ public class AranarthBendingUtils {
     }
 
     /**
+     * Refills one empty glass bottle in the player's inventory with water.
+     */
+    public static void fillWaterBottle(Player player) {
+        PlayerInventory inventory = player.getInventory();
+        int index = inventory.first(Material.GLASS_BOTTLE);
+        if (index < 0) {
+            return;
+        }
+
+        ItemStack item = inventory.getItem(index);
+        ItemStack water = WaterReturn.waterBottleItem();
+        if (item.getAmount() == 1) {
+            inventory.setItem(index, water);
+        } else {
+            item.setAmount(item.getAmount() - 1);
+            inventory.setItem(index, item);
+            Map<Integer, ItemStack> leftover = inventory.addItem(water);
+            leftover.values().forEach(left -> player.getWorld().dropItemNaturally(player.getLocation(), left));
+        }
+    }
+
+    /**
      * Returns true if the material is a valid plant-bending source block.
      * Mirrors the categories that ProjectKorra considers plant-bendable.
      */
@@ -389,8 +458,7 @@ public class AranarthBendingUtils {
         return switch (mat) {
             case GRASS_BLOCK, SHORT_GRASS, TALL_GRASS, FERN, LARGE_FERN,
                  VINE, GLOW_LICHEN, LILY_PAD, SEAGRASS, TALL_SEAGRASS,
-                 HANGING_ROOTS, BIG_DRIPLEAF, SMALL_DRIPLEAF ->
-                    true;
+                 HANGING_ROOTS, BIG_DRIPLEAF, SMALL_DRIPLEAF -> true;
             default -> AranarthUtils.isFlower(mat);
         };
     }

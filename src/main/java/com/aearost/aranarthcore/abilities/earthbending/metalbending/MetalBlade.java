@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.earthbending.metalbending;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -23,9 +24,9 @@ public class MetalBlade extends MetalAbility implements AddonAbility {
 
     public enum Phase {CHARGING, READY}
 
-    private static final long CHARGE_DURATION_MS = 750L;
-    private static final long MAX_DURATION_MS = 6000L;
-    private static final int MAX_HITS = 3;
+    private long chargeDuration;
+    private long duration;
+    private int maxHits;
     private static final double BLADE_HALF_WIDTH = 0.09;
     private static final int BLADE_STEPS = 6;
 
@@ -59,8 +60,11 @@ public class MetalBlade extends MetalAbility implements AddonAbility {
             return;
         }
 
-        this.cooldown = 8000L;
-        this.damage = 5.0;
+        this.cooldown = AbilityConfig.getLong("MetalBlade.Cooldown");
+        this.damage = AbilityConfig.getDouble("MetalBlade.Damage");
+        this.chargeDuration = AbilityConfig.getLong("MetalBlade.ChargeDuration");
+        this.duration = AbilityConfig.getLong("MetalBlade.Duration");
+        this.maxHits = AbilityConfig.getInt("MetalBlade.MaxHits");
         this.phase = Phase.CHARGING;
         this.chargeStartTime = System.currentTimeMillis();
         this.hitsLanded = 0;
@@ -89,7 +93,7 @@ public class MetalBlade extends MetalAbility implements AddonAbility {
         }
 
         final double chargeProgress = Math.min(1.0,
-                (double) (System.currentTimeMillis() - chargeStartTime) / CHARGE_DURATION_MS);
+                (double) (System.currentTimeMillis() - chargeStartTime) / chargeDuration);
         spawnBladeParticles(chargeProgress, CHARGE_DUST);
 
         if (chargeProgress >= 1.0) {
@@ -102,7 +106,7 @@ public class MetalBlade extends MetalAbility implements AddonAbility {
     }
 
     private void progressReady() {
-        if (System.currentTimeMillis() - readyStartTime >= MAX_DURATION_MS) {
+        if (System.currentTimeMillis() - readyStartTime >= duration) {
             endWithCooldown();
             return;
         }
@@ -170,7 +174,7 @@ public class MetalBlade extends MetalAbility implements AddonAbility {
         impactLoc.getWorld().playSound(impactLoc, Sound.BLOCK_METAL_HIT, 0.8f, 2.0f);
 
         hitsLanded++;
-        if (hitsLanded >= MAX_HITS) {
+        if (hitsLanded >= maxHits) {
             endWithCooldown();
         }
     }

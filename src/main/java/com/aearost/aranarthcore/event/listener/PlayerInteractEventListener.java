@@ -42,6 +42,8 @@ public class PlayerInteractEventListener implements Listener {
                 new QuiverClick().execute(e);
             } else if (e.getItem().getType().name().contains("SHULKER_BOX")) {
                 new ShulkerClick().execute(e);
+            } else if (e.getItem().getType().name().equals("PAPER")) {
+                new CouponRedeem().execute(e);
             } else if (e.getItem().hasItemMeta()) {
                 if (e.getItem().getItemMeta() instanceof MusicInstrumentMeta) {
                     new GoatHornUse().execute(e);
@@ -104,9 +106,11 @@ public class PlayerInteractEventListener implements Listener {
             new EnderChestOpenPrevent().execute(e);
             new FletchingTableClick().execute(e);
             new StructureWraith().execute(e);
+            new ShulkerBoxDye().execute(e);
             new ContainerInteract().execute(e);
             new ExpStore().execute(e);
             new CrateOpen().execute(e);
+            new LightLevelCycle().execute(e);
         } else if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
             new ShulkerDump().execute(e);
             new ChestSort().execute(e);

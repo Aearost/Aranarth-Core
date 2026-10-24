@@ -42,7 +42,7 @@ public class GuiDominionFoodClick {
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					GuiDominionFood.populatePage(e.getClickedInventory(), dominion, newPage);
 					int totalPowerPrev = DominionUtils.getTotalFoodPower(dominion);
-					e.getView().setTitle(GuiDominionFood.buildFoodTitle(dominion, totalPowerPrev));
+					e.getView().setTitle(GuiDominionFood.buildFoodTitle(player, dominion, totalPowerPrev));
 					player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
 				} else if (slot == 49) { // Exit
 					player.closeInventory();
@@ -54,7 +54,7 @@ public class GuiDominionFoodClick {
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					GuiDominionFood.populatePage(e.getClickedInventory(), dominion, newPage);
 					int totalPowerNext = DominionUtils.getTotalFoodPower(dominion);
-					e.getView().setTitle(GuiDominionFood.buildFoodTitle(dominion, totalPowerNext));
+					e.getView().setTitle(GuiDominionFood.buildFoodTitle(player, dominion, totalPowerNext));
 					player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
 				}
 				return;
@@ -83,7 +83,7 @@ public class GuiDominionFoodClick {
 			Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
 				if (player.getOpenInventory().getTopInventory().equals(top)) {
 					int totalPower = GuiDominionFood.calculatePowerFromOpenGui(dominion, top, currentPage);
-					e.getView().setTitle(GuiDominionFood.buildFoodTitle(dominion, totalPower));
+					e.getView().setTitle(GuiDominionFood.buildFoodTitle(player, dominion, totalPower));
 				}
 			});
 		}

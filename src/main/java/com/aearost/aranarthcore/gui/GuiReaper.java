@@ -1,7 +1,7 @@
 package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -17,16 +17,24 @@ import java.util.Arrays;
  */
 public class GuiReaper {
 
-    public static final String TITLE = "Reaper Inventory";
+    public static final String TITLE_KEY = "gui.reaper.title";
 
     private final Inventory inventory;
 
-    public GuiReaper(Player player, ItemStack[] drops, double cost, long deathTime, Location deathLocation) {
-        this.inventory = initializeGui(player, drops, cost, deathTime, deathLocation);
+    public GuiReaper(Player player, ItemStack[] drops, double cost, long deathTime, Location deathLocation, boolean deathLocationKnown,
+                     String[] record) {
+        this.inventory = initializeGui(player, drops, cost, deathTime, deathLocation, deathLocationKnown, record);
     }
 
-    private Inventory initializeGui(Player player, ItemStack[] drops, double cost, long deathTime, Location deathLocation) {
-        Inventory inv = Bukkit.createInventory(null, 54, ChatUtils.translateToColor("&4" + TITLE));
+    private Inventory initializeGui(Player player, ItemStack[] drops, double cost, long deathTime, Location deathLocation, boolean deathLocationKnown,
+                                    String[] record) {
+        Inventory inv = GuiHolder.create(player, 54, Lang.getFor(player, TITLE_KEY));
+        // The click handler only ever uses this server-side copy, never what the GUI displays
+        ItemStack[] dropsCopy = new ItemStack[drops.length];
+        for (int i = 0; i < drops.length; i++) {
+            dropsCopy[i] = drops[i] == null ? null : drops[i].clone();
+        }
+        GuiHolder.of(inv).setData(new ReaperState(dropsCopy, cost, deathLocation.clone(), deathLocationKnown, deathTime, record.clone()));
 
         // Display the drop items
         int displaySlots = Math.min(drops.length, 45);
@@ -50,10 +58,10 @@ public class GuiReaper {
         long hoursLeft = getHoursRemaining(deathTime);
         ItemStack purchase = new ItemStack(Material.LIME_CONCRETE);
         ItemMeta purchaseMeta = purchase.getItemMeta();
-        purchaseMeta.setDisplayName(ChatUtils.translateToColor("&a&lRecover Inventory"));
+        purchaseMeta.setDisplayName(Lang.getFor(player, "gui.reaper.recover"));
         purchaseMeta.setLore(Arrays.asList(
-                ChatUtils.translateToColor("&7Cost: &6$" + nf.format((long) cost)),
-                ChatUtils.translateToColor("&7Expires in: &e" + hoursLeft + " hour" + (hoursLeft == 1 ? "" : "s"))
+                Lang.getFor(player, "gui.reaper_cost", "cost", nf.format((long) cost)),
+                Lang.getFor(player, hoursLeft == 1 ? "gui.reaper_expires_one" : "gui.reaper_expires_many", "hours", hoursLeft)
         ));
         purchase.setItemMeta(purchaseMeta);
         inv.setItem(49, purchase);
@@ -61,11 +69,16 @@ public class GuiReaper {
         // Drop to death location button (slot 47)
         ItemStack dropButton = new ItemStack(Material.RED_CONCRETE);
         ItemMeta dropMeta = dropButton.getItemMeta();
-        dropMeta.setDisplayName(ChatUtils.translateToColor("&c&lDrop to Death Location"));
+        dropMeta.setDisplayName(Lang.getFor(player, "gui.reaper.drop"));
         String worldName = deathLocation.getWorld() != null ? deathLocation.getWorld().getName() : "world";
+        int dx = deathLocation.getBlockX();
+        int dy = deathLocation.getBlockY();
+        int dz = deathLocation.getBlockZ();
         dropMeta.setLore(Arrays.asList(
-                ChatUtils.translateToColor("&7Drops your items at your death location"),
-                ChatUtils.translateToColor("&7and discards this Reaper Inventory")
+                Lang.getFor(player, "gui.reaper_drop_lore1"),
+                Lang.getFor(player, "gui.reaper_drop_lore2"),
+                Lang.getFor(player, "gui.reaper_location", "world", worldName, "x", dx, "y", dy, "z", dz),
+                ChatUtils.translateToColor("&0world:" + worldName + " x:" + deathLocation.getX() + " y:" + deathLocation.getY() + " z:" + deathLocation.getZ())
         ));
         dropButton.setItemMeta(dropMeta);
         inv.setItem(47, dropButton);
@@ -73,7 +86,7 @@ public class GuiReaper {
         // Close button (slot 45)
         ItemStack close = new ItemStack(Material.BARRIER);
         ItemMeta closeMeta = close.getItemMeta();
-        closeMeta.setDisplayName(ChatUtils.translateToColor("&c&lExit"));
+        closeMeta.setDisplayName(Lang.getFor(player, "gui.reaper.exit"));
         close.setItemMeta(closeMeta);
         inv.setItem(45, close);
 
@@ -88,5 +101,12 @@ public class GuiReaper {
 
     public void openGui(Player player) {
         player.openInventory(inventory);
+    }
+
+    /**
+     * The Reaper Inventory as it was loaded when the GUI was opened.
+     */
+    public record ReaperState(ItemStack[] drops, double cost, Location deathLocation, boolean deathLocationKnown, long deathTime,
+                              String[] record) {
     }
 }

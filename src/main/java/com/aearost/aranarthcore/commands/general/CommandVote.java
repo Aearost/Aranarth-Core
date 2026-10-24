@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.command.Command;
@@ -25,7 +26,7 @@ public class CommandVote implements CommandExecutor {
 		if (sender instanceof Player player) {
 			displayVoteLinks(player);
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 		}
 		return true;
 	}
@@ -35,7 +36,7 @@ public class CommandVote implements CommandExecutor {
 	 * @param player The player who ran the command.
 	 */
 	private void displayVoteLinks(Player player) {
-		player.sendMessage(ChatUtils.translateToColor("&8      - - - &6&lVote Links &8- - -"));
+		player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "vote.links_header")));
 		player.sendMessage(buildVoteLink(" &8&l[&6&l1&8&l] &e&l&oPlanet Minecraft", "https://www.planetminecraft.com/server/aranarth-6795356/vote/"));
 		player.sendMessage(buildVoteLink(" &8&l[&6&l2&8&l] &7&l&oMC Server List", "https://minecraft-server-list.com/server/519140/vote/"));
 		player.sendMessage(buildVoteLink(" &8&l[&6&l3&8&l] &e&l&oMinecraft MP", "https://minecraft-mp.com/server/356466/vote/"));

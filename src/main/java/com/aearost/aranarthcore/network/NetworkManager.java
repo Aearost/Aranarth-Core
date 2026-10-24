@@ -1,18 +1,21 @@
 package com.aearost.aranarthcore.network;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralProjection;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.Month;
+import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.enums.Weather;
+import com.aearost.aranarthcore.items.key.KeyEpic;
+import com.aearost.aranarthcore.items.key.KeyGodly;
+import com.aearost.aranarthcore.items.key.KeyRare;
 import com.aearost.aranarthcore.items.key.KeyVote;
 import com.aearost.aranarthcore.objects.*;
 import com.aearost.aranarthcore.utils.*;
-import org.bukkit.inventory.ItemStack;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.aearost.aranarthcore.utils.InteractiveChatManager;
-import com.google.gson.JsonArray;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -23,12 +26,15 @@ import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -77,6 +83,7 @@ public class NetworkManager {
     public static final String CH_DOMINION_RELATION_UPDATE = "aranarth:dominion_relation_update";
     public static final String CH_DOMINION_CONQUEST_UPDATE = "aranarth:dominion_conquest_update";
     public static final String CH_DOMINION_BALANCE_ADJUST = "aranarth:dominion_balance_adjust";
+    public static final String CH_DOMINION_UPDATE = "aranarth:dominion_update";
     public static final String CH_CHAT_GAME_START = "aranarth:chat_game_start";
     public static final String CH_CHAT_GAME_WIN = "aranarth:chat_game_win";
     public static final String CH_CHAT_GAME_EXPIRE = "aranarth:chat_game_expire";
@@ -91,21 +98,46 @@ public class NetworkManager {
     public static final String CH_OUTPOST_DISBAND = "aranarth:outpost_disband";
     public static final String CH_OUTPOST_CREATE = "aranarth:outpost_create";
     public static final String CH_OUTPOST_UPDATE = "aranarth:outpost_update";
+    public static final String CH_CREATIVE_PLOT_UPDATE = "aranarth:creative_plot_update";
+    public static final String CH_CREATIVE_PLOT_DELETE = "aranarth:creative_plot_delete";
+    public static final String CH_CREATIVE_EXPAND = "aranarth:creative_expand";
     public static final String CH_JOB_UPDATE = "aranarth:job_update";
+    public static final String CH_MOUNT_UPDATE = "aranarth:mount_update";
     public static final String CH_VOTE_AWARD = "aranarth:vote_award";
     public static final String CH_VOTE_KEY = "aranarth:vote_key";
+    public static final String CH_PURCHASE_KEY = "aranarth:purchase_key";
     public static final String CH_VP_TRANSFER = "aranarth:vp_transfer";
     public static final String CH_INVSEE_REQUEST = "aranarth:invsee_request";
     public static final String CH_INVSEE_RESPONSE = "aranarth:invsee_response";
     public static final String CH_INVSEE_UPDATE = "aranarth:invsee_update";
     public static final String CH_INVSEE_UNWATCH = "aranarth:invsee_unwatch";
     public static final String CH_RANK_UPDATE = "aranarth:rank_update";
+    public static final String CH_PERK_UPDATE = "aranarth:perk_update";
     public static final String CH_MARKET_UPDATE = "aranarth:market_update";
     public static final String CH_PERM_RELOAD = "aranarth:perm_reload";
+    public static final String CH_CONFIG_RELOAD = "aranarth:config_reload";
+    public static final String CH_TRADE_INVITE = "aranarth:trade_invite";
+    public static final String CH_TRADE_ACCEPT = "aranarth:trade_accept";
+    public static final String CH_TRADE_CANCEL = "aranarth:trade_cancel";
+    public static final String CH_TRADE_ITEMS = "aranarth:trade_items";
+    public static final String CH_TRADE_MONEY = "aranarth:trade_money";
+    public static final String CH_TRADE_CONFIRM = "aranarth:trade_confirm";
+    public static final String CH_TRADE_EXECUTE = "aranarth:trade_execute";
+    public static final String CH_TRADE_RESULT = "aranarth:trade_result";
+    public static final String CH_PUNISHMENT = "aranarth:punishment";
+    public static final String CH_PRONOUNS_UPDATE = "aranarth:pronouns_update";
+    public static final String CH_PING_UPDATE = "aranarth:ping_update";
+    public static final String CH_HEARTBEAT = "aranarth:heartbeat";
+    public static final String CH_RESOURCE_WORLD_LOCK = "aranarth:resource_world_lock";
+    public static final String CH_AVATAR_UPDATE = "aranarth:avatar_update";
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
     private static final String KEY_RETURN_LOC = "return_loc:";
     private static final String KEY_LAST_MSG = "last_msg:";
+    public static final String KEY_SMP_RESTART_INV = "smp_restart_inv:";
+    public static final String KEY_SERVER_STARTED = "server_started:";
+    public static final String KEY_HEARTBEAT = "heartbeat:";
+    private static final int HEARTBEAT_TTL_SECONDS = 90;
     private static NetworkManager instance;
     private final String thisServer;
     private final DatabaseManager db;
@@ -114,6 +146,10 @@ public class NetworkManager {
      * Players currently online on OTHER servers.
      */
     private final Map<UUID, NetworkPlayer> remoteRoster = new ConcurrentHashMap<>();
+    /**
+     * Players that landed on this server as a fallback (other server restarting) mapped to when it happened.
+     */
+    private final Map<UUID, Long> fallbackLandings = new ConcurrentHashMap<>();
 
     // -------------------------------------------------------------------------
     // State
@@ -128,11 +164,19 @@ public class NetworkManager {
      * Populated in PlayerServerQuitListener, consumed in DiscordChatListener.
      */
     private final Set<UUID> crossServerQuitPlayers = ConcurrentHashMap.newKeySet();
+    private final Set<UUID> lockedPlayers = ConcurrentHashMap.newKeySet();
+    private final Set<UUID> nonAuthoritativePlayers = ConcurrentHashMap.newKeySet();
+    private static final long TRANSFER_TIMEOUT_TICKS = 400L;
     /**
      * Players whose cross-server join should suppress DiscordSRV's join announcement.
      * Populated in PlayerServerJoinListener, consumed in DiscordChatListener.
      */
     private final Set<UUID> crossServerJoinPlayers = ConcurrentHashMap.newKeySet();
+    /**
+     * Last time (epoch ms) a heartbeat was received from each remote server name.
+     * Used to determine whether a peer server is currently online.
+     */
+    private final Map<String, Long> serverLastSeen = new ConcurrentHashMap<>();
     /**
      * Pending cross-server TP requests received from another server.
      */
@@ -152,6 +196,8 @@ public class NetworkManager {
     private long lastProcessedMessageId;
     private BukkitTask pollingTask;
     private BukkitTask cleanupTask;
+    private BukkitTask smpSnapshotTask;
+    private BukkitTask heartbeatTask;
     private final ExecutorService publishExecutor = Executors.newSingleThreadExecutor();
     /**
      * Number of players currently sleeping on other servers. Updated by handleSleepMessage.
@@ -171,6 +217,13 @@ public class NetworkManager {
 
         startPolling();
         startCleanup();
+        if (AranarthCore.isSmpServer()) {
+            // Lets Survival tell a fallback snapshot from SMP's previous run apart from one written
+            // while SMP is down, so players are only kept on Survival while SMP is unavailable
+            db.saveTempData(KEY_SERVER_STARTED + thisServer, String.valueOf(System.currentTimeMillis()), 30 * 24 * 60 * 60);
+            startSmpFallbackSnapshots();
+        }
+        startHeartbeat();
     }
 
     public static NetworkManager getInstance() {
@@ -231,6 +284,151 @@ public class NetworkManager {
                 6000L,
                 6000L
         );
+    }
+
+    /**
+     * Periodically snapshots every online SMP player's inventory + stats to MySQL so
+     * that Survival can restore them if Velocity routes a player there as a fallback
+     * during an SMP restart or crash. TTL is 10 minutes; refreshed every 30 seconds.
+     */
+    private void startSmpFallbackSnapshots() {
+        // Collect inventory data synchronously on the main thread, then write async.
+        smpSnapshotTask = Bukkit.getScheduler().runTaskTimer(
+                AranarthCore.getInstance(),
+                () -> {
+                    if (!DatabaseManager.isActive()) {
+                        return;
+                    }
+                    for (Player p : Bukkit.getOnlinePlayers()) {
+                        try {
+                            String key = KEY_SMP_RESTART_INV + p.getUniqueId();
+                            String json = buildFallbackSnapshot(p);
+                            if (json == null) {
+                                continue;
+                            }
+                            Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                                    () -> db.saveTempData(key, json, 600)); // 10-min TTL
+                        } catch (Exception e) {
+                            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+                                    + "[SmpSnapshot] Failed to snapshot " + p.getName() + ": " + e.getMessage());
+                        }
+                    }
+                },
+                600L,  // 30s initial delay
+                600L   // every 30s
+        );
+    }
+
+    /**
+     * Sends a lightweight heartbeat to all other servers every 2 minutes so they can
+     * determine whether this server is currently online via {@link #isServerOnline(String)}.
+     */
+    private void startHeartbeat() {
+        heartbeatTask = Bukkit.getScheduler().runTaskTimerAsynchronously(
+                AranarthCore.getInstance(),
+                this::publishHeartbeat,
+                0L,    // fire immediately so peer servers see us as online within one polling cycle
+                600L   // every 30 seconds
+        );
+    }
+
+    /**
+     * Publishes a heartbeat message so other servers know this server is online.
+     */
+    public void publishHeartbeat() {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        publish(CH_HEARTBEAT, json);
+        // Also keep a heartbeat row in MySQL, since a server that has just started misses heartbeat
+        // messages sent before its own NetworkManager came up
+        db.saveTempData(KEY_HEARTBEAT + thisServer, String.valueOf(System.currentTimeMillis()), HEARTBEAT_TTL_SECONDS);
+    }
+
+    /**
+     * Returns true if the given server is online according to its heartbeat row in MySQL. The row is
+     * refreshed every 30 seconds, expires shortly after a crash and is deleted on shutdown, so a
+     * restarting server is reported as offline right away. Blocks on a DB read, call off the main thread.
+     */
+    public boolean isServerOnlineInDatabase(String serverName) {
+        return db.loadTempData(KEY_HEARTBEAT + serverName) != null;
+    }
+
+    /**
+     * Returns true if the given server name has sent a heartbeat within the last 5 minutes.
+     * Uses a 5-minute window against a 2-minute heartbeat interval, giving 2.5 cycles of
+     * safety margin. Returns false if no heartbeat has ever been received (e.g. right after
+     * Survival restarts while SMP is already running - the first heartbeat arrives within 2 min).
+     */
+    public boolean isServerOnline(String serverName) {
+        Long lastSeen = serverLastSeen.get(serverName);
+        return lastSeen != null && System.currentTimeMillis() - lastSeen < 5 * 60 * 1000L;
+    }
+
+    /**
+     * Serializes the player's current inventory + stats into a JSON string suitable for
+     * storing as an SMP fallback snapshot. Must be called from the main thread.
+     *
+     * @return The snapshot, or null if the player has no survival inventory to snapshot.
+     */
+    private String buildFallbackSnapshot(Player p) {
+        // The inventory on this server is not the player's while they wait to be routed elsewhere
+        if (isNonAuthoritative(p.getUniqueId())) {
+            return null;
+        }
+        JsonObject snap = new JsonObject();
+        snap.addProperty("ts", System.currentTimeMillis());
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(p.getUniqueId());
+        if (AranarthUtils.isSurvivalWorld(p.getWorld().getName()) || aranarthPlayer == null) {
+            snap.addProperty("inventory", ItemUtils.itemStackArrayToBase64(p.getInventory().getContents()));
+            snap.addProperty("health", p.getHealth());
+            snap.addProperty("food", p.getFoodLevel());
+            snap.addProperty("saturation", p.getSaturation());
+            snap.addProperty("expLevel", p.getLevel());
+            snap.addProperty("expProgress", p.getExp());
+        } else {
+            // In a world with another inventory (i.e SMP Creative), so the survival inventory saved when they left is used
+            if (aranarthPlayer.getSurvivalInventory().isEmpty()) {
+                return null;
+            }
+            snap.addProperty("inventory", aranarthPlayer.getSurvivalInventory());
+            snap.addProperty("health", aranarthPlayer.getSurvivalHealth());
+            snap.addProperty("food", aranarthPlayer.getSurvivalFoodLevel());
+            snap.addProperty("saturation", aranarthPlayer.getSurvivalSaturation());
+            snap.addProperty("expLevel", aranarthPlayer.getSurvivalExpLevel());
+            snap.addProperty("expProgress", aranarthPlayer.getSurvivalExpProgress());
+        }
+        // The ender chest is shared by every world
+        snap.addProperty("enderChest", ItemUtils.itemStackArrayToBase64(p.getEnderChest().getContents()));
+        // Carry the full player row (homes, balance, etc.) so Survival does not keep using its
+        // stale copy - and later write it back to MySQL - when the player lands there as a fallback
+        String rawRow = PersistenceUtils.buildPlayerRowForTransfer(p.getUniqueId());
+        if (rawRow != null) {
+            snap.addProperty("raw", rawRow);
+        }
+        return snap.toString();
+    }
+
+    /**
+     * Writes a one-off SMP fallback snapshot for this player synchronously (no async
+     * dispatch). Used during shutdown where async tasks may not complete, and on quit.
+     * Safe to call from any thread.
+     */
+    public void writeSmpFallbackSnapshot(Player player) {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        try {
+            String json = buildFallbackSnapshot(player);
+            if (json == null) {
+                return;
+            }
+            db.saveTempData(KEY_SMP_RESTART_INV + player.getUniqueId(), json, 600);
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX
+                    + "[SmpSnapshot] Snapshot written for " + player.getName());
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+                    + "[SmpSnapshot] Failed to write shutdown snapshot for " + player.getName() + ": " + e.getMessage());
+        }
     }
 
     /**
@@ -305,6 +503,14 @@ public class NetworkManager {
             cleanupTask.cancel();
             cleanupTask = null;
         }
+        if (smpSnapshotTask != null) {
+            smpSnapshotTask.cancel();
+            smpSnapshotTask = null;
+        }
+        if (heartbeatTask != null) {
+            heartbeatTask.cancel();
+            heartbeatTask = null;
+        }
         publishExecutor.shutdown();
         // Clear this server's roster entries from the DB so stale entries don't appear on other servers
         try {
@@ -312,6 +518,8 @@ public class NetworkManager {
         } catch (Exception e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Failed to clear roster on shutdown: " + e.getMessage());
         }
+        // Remove the heartbeat row so other servers see this one as offline immediately
+        db.deleteTempData(KEY_HEARTBEAT + thisServer);
         Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "NetworkManager shut down");
     }
 
@@ -343,6 +551,7 @@ public class NetworkManager {
             case CH_DOMINION_RELATION_UPDATE -> handleDominionRelationUpdate(json);
             case CH_DOMINION_CONQUEST_UPDATE -> handleDominionConquestUpdate(json);
             case CH_DOMINION_BALANCE_ADJUST -> handleDominionBalanceAdjust(json);
+            case CH_DOMINION_UPDATE -> handleDominionUpdate(json);
             case CH_CHAT_GAME_START -> handleChatGameStart(json);
             case CH_CHAT_GAME_WIN -> handleChatGameWin(json);
             case CH_CHAT_GAME_EXPIRE -> handleChatGameExpire(json);
@@ -357,17 +566,38 @@ public class NetworkManager {
             case CH_OUTPOST_DISBAND -> handleOutpostDisband(json);
             case CH_OUTPOST_CREATE -> handleOutpostCreate(json);
             case CH_OUTPOST_UPDATE -> handleOutpostUpdate(json);
+            case CH_CREATIVE_PLOT_UPDATE -> handleCreativePlotUpdate(json);
+            case CH_CREATIVE_PLOT_DELETE -> handleCreativePlotDelete(json);
+            case CH_CREATIVE_EXPAND -> handleCreativeExpand(json);
             case CH_JOB_UPDATE -> handleJobUpdate(json);
+            case CH_MOUNT_UPDATE -> handleMountUpdate(json);
             case CH_VOTE_AWARD -> handleVoteAward(json);
             case CH_VOTE_KEY -> handleVoteKey(json);
+            case CH_PURCHASE_KEY -> handlePurchaseKey(json);
             case CH_VP_TRANSFER -> handleVpTransfer(json);
             case CH_INVSEE_REQUEST -> handleInvseeRequest(json);
             case CH_INVSEE_RESPONSE -> handleInvseeResponse(json);
             case CH_INVSEE_UPDATE -> handleInvseeUpdate(json);
             case CH_INVSEE_UNWATCH -> handleInvseeUnwatch(json);
             case CH_RANK_UPDATE -> handleRankUpdate(json);
+            case CH_PERK_UPDATE -> handlePerkUpdate(json);
             case CH_MARKET_UPDATE -> handleMarketUpdate(json);
             case CH_PERM_RELOAD -> handlePermReload(json);
+            case CH_CONFIG_RELOAD -> handleConfigReload(json);
+            case CH_TRADE_INVITE -> handleTradeInvite(json);
+            case CH_TRADE_ACCEPT -> handleTradeAccept(json);
+            case CH_TRADE_CANCEL -> handleTradeCancel(json);
+            case CH_TRADE_ITEMS -> handleTradeItems(json);
+            case CH_TRADE_MONEY -> handleTradeMoney(json);
+            case CH_TRADE_CONFIRM -> handleTradeConfirm(json);
+            case CH_TRADE_EXECUTE -> handleTradeExecute(json);
+            case CH_TRADE_RESULT -> handleTradeResult(json);
+            case CH_PUNISHMENT -> handlePunishment(json);
+            case CH_PRONOUNS_UPDATE -> handlePronounsUpdate(json);
+            case CH_PING_UPDATE -> handlePingUpdate(json);
+            case CH_HEARTBEAT -> handleHeartbeat(json);
+            case CH_RESOURCE_WORLD_LOCK -> handleResourceWorldLock(json);
+            case CH_AVATAR_UPDATE -> handleAvatarUpdate(json);
         }
     }
 
@@ -375,10 +605,26 @@ public class NetworkManager {
      * Publishes a public chat message so the other server can relay it to its players.
      */
     public void publishChat(String prefix, String chatMessage) {
+        publishChat(prefix, chatMessage, null);
+    }
+
+    /**
+     * Publishes a public chat message along with the exact Component shown on this server, so the
+     * other server renders it identically (gradients, clickable URLs, clickable prefix) instead of
+     * re-parsing the legacy string.
+     *
+     * @param prefix      the formatted prefix string (legacy colour codes already applied)
+     * @param chatMessage the legacy version of the message (for console fallback)
+     * @param fullMessage the fully assembled Component including prefix, or null to send legacy only
+     */
+    public void publishChat(String prefix, String chatMessage, Component fullMessage) {
         JsonObject json = new JsonObject();
         json.addProperty("server", thisServer);
         json.addProperty("prefix", prefix);
         json.addProperty("message", chatMessage);
+        if (fullMessage != null) {
+            json.addProperty("componentJson", GsonComponentSerializer.gson().serialize(fullMessage));
+        }
         publish(CH_CHAT, json);
     }
 
@@ -386,10 +632,10 @@ public class NetworkManager {
      * Publishes an interactive chat message (one containing [item]/[inv]/[ec]/[coords]) so the
      * other server can display the same clickable component and serve /ichat view clicks locally.
      *
-     * @param prefix       the formatted prefix string (legacy colour codes already applied)
-     * @param chatMessage  the plain-text version of the message (for console/discord fallback)
-     * @param fullMessage  the fully assembled Adventure Component including prefix and interactive parts
-     * @param snapshots    every snapshot that was created while building the message
+     * @param prefix      the formatted prefix string (legacy colour codes already applied)
+     * @param chatMessage the plain-text version of the message (for console/discord fallback)
+     * @param fullMessage the fully assembled Adventure Component including prefix and interactive parts
+     * @param snapshots   every snapshot that was created while building the message
      */
     public void publishInteractiveChat(String prefix, String chatMessage, Component fullMessage,
                                        List<InteractiveChatManager.Snapshot> snapshots) {
@@ -482,9 +728,11 @@ public class NetworkManager {
         String nickname = ap.getNickname().isEmpty() ? ap.getUsername() : ap.getNickname();
 
         // Update roster in DB
+        String pronounsName = ap.getPronouns() != null ? ap.getPronouns().name() : "MALE";
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
                 db.upsertRosterEntry(uuid, ap.getUsername(), nickname, thisServer,
-                        ap.getRank(), ap.getCouncilRank(), ap.getSaintRank(), ap.getArchitectRank(), ap.isVanished())
+                        ap.getRank(), ap.getCouncilRank(), ap.getSaintRank(), ap.getArchitectRank(), ap.isVanished(),
+                        pronounsName)
         );
 
         // Extract skin texture so other servers can render this player's head in the tab list
@@ -512,6 +760,7 @@ public class NetworkManager {
         json.addProperty("vanished", ap.isVanished());
         json.addProperty("textureValue", textureValue);
         json.addProperty("textureSignature", textureSignature);
+        json.addProperty("pronouns", ap.getPronouns() != null ? ap.getPronouns().name() : "MALE");
         publish(CH_JOIN, json);
     }
 
@@ -635,13 +884,15 @@ public class NetworkManager {
      * Publishes the current sleep status action-bar message to all other servers.
      *
      * @param message  The formatted message, e.g. "Players sleeping: 1/2".
+     * @param total    Number of players sleeping across all servers.
      * @param sleeping Number of players currently sleeping.
      * @param required Number required to skip the night.
      */
-    public void publishSleepMessage(String message, int sleeping, int required) {
+    public void publishSleepMessage(String message, int total, int sleeping, int required) {
         JsonObject json = new JsonObject();
         json.addProperty("server", thisServer);
         json.addProperty("message", message);
+        json.addProperty("total", total);
         json.addProperty("sleeping", sleeping);
         json.addProperty("required", required);
         publish(CH_SLEEP, json);
@@ -694,6 +945,21 @@ public class NetworkManager {
         JsonObject json = new JsonObject();
         json.addProperty("server", thisServer);
         json.addProperty("message", rawMessage);
+        publish(CH_BROADCAST, json);
+    }
+
+    /**
+     * Relays a lang-keyed broadcast so each server renders it in its own players' locales.
+     */
+    public void publishLangBroadcast(String key, Object... args) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("key", key);
+        JsonArray argArray = new JsonArray();
+        for (Object arg : args) {
+            argArray.add(String.valueOf(arg));
+        }
+        json.add("args", argArray);
         publish(CH_BROADCAST, json);
     }
 
@@ -826,6 +1092,34 @@ public class NetworkManager {
     }
 
     /**
+     * Notifies other servers that a player's perks have changed so their in-memory copy is never
+     * stale, regardless of which server the player is on or logs into next.
+     */
+    public void publishPerkUpdate(UUID uuid, String perks) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", uuid.toString());
+        json.addProperty("perks", perks);
+        publish(CH_PERK_UPDATE, json);
+    }
+
+    /**
+     * Notifies other servers that a player's pronouns have changed so they can update the
+     * remote roster and refresh the TAB list immediately.
+     */
+    public void publishPronounsUpdate(UUID uuid, String pronouns) {
+        // Update DB so the roster survives server restarts
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
+                db.updateRosterPronouns(uuid, pronouns)
+        );
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", uuid.toString());
+        json.addProperty("pronouns", pronouns);
+        publish(CH_PRONOUNS_UPDATE, json);
+    }
+
+    /**
      * Tells the other server to re-evaluate permissions for all its online players,
      * or for a specific player if uuid is non-null.
      */
@@ -836,6 +1130,39 @@ public class NetworkManager {
             json.addProperty("uuid", uuid.toString());
         }
         publish(CH_PERM_RELOAD, json);
+    }
+
+    /**
+     * Tells the other server to reload its config.yml and abilities.yml, and import its own coupons.txt.
+     */
+    public void publishConfigReload() {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        publish(CH_CONFIG_RELOAD, json);
+    }
+
+    /**
+     * Notifies all other servers whether Survival's resource world is locked while it is being reset,
+     * so that /resource is refused on the SMP server instead of transferring the player.
+     */
+    public void publishResourceWorldLock(boolean isLocked) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("locked", isLocked);
+        publish(CH_RESOURCE_WORLD_LOCK, json);
+    }
+
+    /**
+     * Notifies all other servers that an Avatar's reign has started or ended, carrying the full
+     * avatar list so their in-memory copy (which they also save periodically) is never stale.
+     */
+    public void publishAvatarUpdate(UUID uuid, boolean isNewAvatar) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", uuid.toString());
+        json.addProperty("isNewAvatar", isNewAvatar);
+        json.add("avatars", PersistenceUtils.avatarsToJson());
+        publish(CH_AVATAR_UPDATE, json);
     }
 
     /**
@@ -856,6 +1183,20 @@ public class NetworkManager {
         json.addProperty("afk", isAfk);
         json.addProperty("afkStartTime", isAfk ? System.currentTimeMillis() : 0L);
         publish(CH_AFK, json);
+    }
+
+    /**
+     * Publishes the current ping of every locally online player so other servers
+     * can display accurate pings via /ping.
+     */
+    public void publishPingUpdates() {
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            JsonObject json = new JsonObject();
+            json.addProperty("server", thisServer);
+            json.addProperty("uuid", p.getUniqueId().toString());
+            json.addProperty("ping", p.getPing());
+            publish(CH_PING_UPDATE, json);
+        }
     }
 
     /**
@@ -884,6 +1225,24 @@ public class NetworkManager {
         json.addProperty("boost", boostName);
         json.addProperty("endTime", endTimeStr);
         json.addProperty("removing", removing);
+        publish(CH_BOOST_SYNC, json);
+    }
+
+    /**
+     * Forwards a boost add from SMP to Survival so Survival applies it as the source of truth.
+     *
+     * @param boostName    Boost enum name (e.g. "MINER").
+     * @param uuid         The UUID of the player applying the boost, or null if none.
+     * @param fromVoteShop Whether the boost was purchased from the vote shop.
+     */
+    public void publishBoostAddRequest(String boostName, UUID uuid, boolean fromVoteShop) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("boost", boostName);
+        json.addProperty("request", true);
+        json.addProperty("uuid", uuid == null ? "" : uuid.toString());
+        json.addProperty("fromVoteShop", fromVoteShop);
+        json.addProperty("removing", false);
         publish(CH_BOOST_SYNC, json);
     }
 
@@ -1155,6 +1514,87 @@ public class NetworkManager {
     }
 
     /**
+     * Freezes the player's inventory and interactions while a transfer or arrival is in progress,
+     * so nothing can change between the inventory being serialized and the player leaving.
+     */
+    public void lockPlayer(UUID uuid) {
+        lockedPlayers.add(uuid);
+    }
+
+    public void unlockPlayer(UUID uuid) {
+        lockedPlayers.remove(uuid);
+    }
+
+    public boolean isLocked(UUID uuid) {
+        return lockedPlayers.contains(uuid);
+    }
+
+    /**
+     * Marks that this server's copy of the player's inventory is not theirs (they landed on the
+     * wrong server and are waiting to be routed), so a quit here must not save it.
+     */
+    public void markNonAuthoritative(UUID uuid) {
+        nonAuthoritativePlayers.add(uuid);
+    }
+
+    public void clearNonAuthoritative(UUID uuid) {
+        nonAuthoritativePlayers.remove(uuid);
+    }
+
+    public boolean isNonAuthoritative(UUID uuid) {
+        return nonAuthoritativePlayers.contains(uuid);
+    }
+
+    /**
+     * Clears every transfer-related flag for the player. Called once their quit has been handled.
+     */
+    public void clearTransferState(UUID uuid) {
+        lockedPlayers.remove(uuid);
+        nonAuthoritativePlayers.remove(uuid);
+    }
+
+    /**
+     * Velocity does not tell the backend when a Connect fails, so the player would otherwise stay
+     * here flagged as transferring forever. Once the timeout passes with the player still online,
+     * the transfer is treated as failed: the pending teleport is removed and the player is either
+     * unlocked or, if this server's inventory is not theirs, kicked so they can reconnect.
+     */
+    private void scheduleTransferTimeout(Player player) {
+        final UUID uuid = player.getUniqueId();
+        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
+            if (!player.isOnline() || !transferringPlayers.remove(uuid)) {
+                return;
+            }
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Net] Transfer of " + player.getName()
+                    + " timed out; the player is still on this server.");
+            clearPendingTeleport(uuid);
+            if (isNonAuthoritative(uuid)) {
+                player.kickPlayer(ChatUtils.translateToColor(Lang.getFor(player, "teleport.server_unreachable")));
+            } else {
+                unlockPlayer(uuid);
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.failed")));
+            }
+        }, TRANSFER_TIMEOUT_TICKS);
+    }
+
+    /**
+     * Writes the pending teleport and only then tells the other server to send the player, so the
+     * other server can never read the transfer before the pending teleport exists.
+     */
+    public void setPendingAndPublishTransfer(UUID uuid, PendingTeleport pending, String targetServer) {
+        final String pendingJson = gson.toJson(pending);
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+            try {
+                db.saveTempData(KEY_PENDING_TP + uuid, pendingJson, 300);
+            } catch (Exception e) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "DB: failed to set pending TP for " + uuid);
+                return;
+            }
+            publishTransfer(uuid, targetServer);
+        });
+    }
+
+    /**
      * Marks this player's quit as a cross-server transfer for DiscordSRV suppression.
      */
     public void markCrossServerQuit(UUID uuid) {
@@ -1194,6 +1634,25 @@ public class NetworkManager {
      */
     public void saveInventoryAndTransfer(Player player, String targetServer, PendingTeleport pending) {
         UUID uuid = player.getUniqueId();
+
+        // The combat-log kill is skipped for transfers, so a tagged player must not be able to leave this way
+        AranarthPlayer apCombat = AranarthUtils.getPlayer(uuid);
+        if (apCombat != null && !apCombat.isInAdminMode() && !apCombat.getCombatLogTime().isEmpty()) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.combat_tagged")));
+            return;
+        }
+
+        // An open trade is cancelled first so the offered items are back in the inventory
+        TradeManager.handleQuit(player);
+        // An astral projection keeps the armor on its mannequin, so end it to put the armor back on first
+        if (AstralProjection.isProjecting(uuid)) {
+            AstralProjection.getActiveProjection(uuid).endAbility();
+        }
+        // Closing first runs every GUI close handler (held shulker, quiver, potions, dominion food)
+        // and returns the crafting grid and cursor, so the serialized inventory is the final one
+        player.closeInventory();
+        // Nothing may change between serialization and the player leaving this server
+        lockPlayer(uuid);
 
         // Serialize inventory and ender chest into AranarthPlayer. handleTeleportLogic() already
         // does this for teleports that go through the normal countdown, but callers like
@@ -1290,14 +1749,16 @@ public class NetworkManager {
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                 if (!player.isOnline()) {
                     // Player disconnected during the async write - quit message was not suppressed
-                    // (flag was never set), so no cleanup needed here.
+                    // (flag was never set). Remove the pending teleport so their next login is not
+                    // treated as an arrival from this transfer.
+                    clearPendingTeleport(uuid);
                     return;
                 }
                 if (!transferAllowed) {
                     // The pending-TP write failed: transferring now would leave the player on the
                     // destination with no inventory state. Abort and notify the player instead.
-                    player.sendMessage(ChatUtils.chatMessage(
-                            "&cTransfer failed due to a database error. Please try again."));
+                    unlockPlayer(uuid);
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.failed")));
                     return;
                 }
                 try {
@@ -1309,10 +1770,14 @@ public class NetworkManager {
                     // Velocity-triggered quit is treated as a server switch, not a real disconnect.
                     transferringPlayers.add(uuid);
                     player.sendPluginMessage(AranarthCore.getInstance(), "BungeeCord", bos.toByteArray());
+                    scheduleTransferTimeout(player);
                 } catch (Exception e) {
                     Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
                             + "Failed to transfer " + player.getName() + " to " + targetServer + ": " + e.getMessage());
                     transferringPlayers.remove(uuid);
+                    clearPendingTeleport(uuid);
+                    unlockPlayer(uuid);
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.failed")));
                 }
             });
         });
@@ -1327,6 +1792,9 @@ public class NetworkManager {
         UUID uuid = player.getUniqueId();
         final String pendingJson = gson.toJson(pending);
         // NOTE: transferringPlayers is NOT set here - see saveInventoryAndTransfer for rationale.
+        TradeManager.handleQuit(player);
+        player.closeInventory();
+        lockPlayer(uuid);
 
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
             boolean dbWriteSucceeded = true;
@@ -1340,11 +1808,17 @@ public class NetworkManager {
             final boolean transferAllowed = dbWriteSucceeded;
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                 if (!player.isOnline()) {
+                    // Otherwise their next login would be treated as an arrival from this transfer
+                    clearPendingTeleport(uuid);
                     return;
                 }
                 if (!transferAllowed) {
-                    player.sendMessage(ChatUtils.chatMessage(
-                            "&cTransfer failed due to a database error. Please try again."));
+                    if (isNonAuthoritative(uuid)) {
+                        player.kickPlayer(ChatUtils.translateToColor(Lang.getFor(player, "teleport.server_unreachable")));
+                        return;
+                    }
+                    unlockPlayer(uuid);
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.failed")));
                     return;
                 }
                 try {
@@ -1354,30 +1828,21 @@ public class NetworkManager {
                     dos.writeUTF(targetServer);
                     transferringPlayers.add(uuid);
                     player.sendPluginMessage(AranarthCore.getInstance(), "BungeeCord", bos.toByteArray());
+                    scheduleTransferTimeout(player);
                 } catch (Exception e) {
                     Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
                             + "Failed to transfer " + player.getName() + " to " + targetServer + ": " + e.getMessage());
                     transferringPlayers.remove(uuid);
+                    clearPendingTeleport(uuid);
+                    if (isNonAuthoritative(uuid)) {
+                        player.kickPlayer(ChatUtils.translateToColor(Lang.getFor(player, "teleport.server_unreachable")));
+                    } else {
+                        unlockPlayer(uuid);
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.failed")));
+                    }
                 }
             });
         });
-    }
-
-    /**
-     * Instructs the proxy to move {@code player} to {@code targetServer}.
-     */
-    public void transferPlayer(Player player, String targetServer) {
-        transferringPlayers.add(player.getUniqueId());
-        try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            DataOutputStream dos = new DataOutputStream(bos);
-            dos.writeUTF("Connect");
-            dos.writeUTF(targetServer);
-            player.sendPluginMessage(AranarthCore.getInstance(), "BungeeCord", bos.toByteArray());
-        } catch (Exception e) {
-            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
-                    + "Failed to transfer " + player.getName() + " to " + targetServer + ": " + e.getMessage());
-        }
     }
 
     // -------------------------------------------------------------------------
@@ -1385,11 +1850,21 @@ public class NetworkManager {
     // -------------------------------------------------------------------------
 
     public void storeCrossServerTpContext(UUID localPlayerUuid, CrossServerTpContext ctx) {
+        long now = System.currentTimeMillis();
+        pendingCrossServerRequests.values().removeIf(c -> now - c.createdAt() > AranarthPlayer.TELEPORT_REQUEST_TTL_MS);
         pendingCrossServerRequests.put(localPlayerUuid, ctx);
     }
 
+    /**
+     * Provides the cross-server request the local player received, or null if there is none or it expired.
+     */
     public CrossServerTpContext getCrossServerTpContext(UUID localPlayerUuid) {
-        return pendingCrossServerRequests.get(localPlayerUuid);
+        CrossServerTpContext ctx = pendingCrossServerRequests.get(localPlayerUuid);
+        if (ctx != null && System.currentTimeMillis() - ctx.createdAt() > AranarthPlayer.TELEPORT_REQUEST_TTL_MS) {
+            pendingCrossServerRequests.remove(localPlayerUuid);
+            return null;
+        }
+        return ctx;
     }
 
     public void clearCrossServerTpContext(UUID localPlayerUuid) {
@@ -1411,6 +1886,23 @@ public class NetworkManager {
         return remoteRoster.get(uuid);
     }
 
+    /**
+     * Records that the player just landed on this server as a fallback because their server went down.
+     */
+    public void markFallbackLanding(UUID uuid) {
+        fallbackLandings.put(uuid, System.currentTimeMillis());
+    }
+
+    /**
+     * Returns true if the player landed on this server as a fallback within the last minute.
+     * When both servers auto-restart together, SMP players get bounced here seconds before this
+     * server also shuts down, and their last location should keep pointing at SMP.
+     */
+    public boolean isRecentFallbackLanding(UUID uuid) {
+        Long landedAt = fallbackLandings.get(uuid);
+        return landedAt != null && System.currentTimeMillis() - landedAt < 60 * 1000L;
+    }
+
     public String getThisServer() {
         return thisServer;
     }
@@ -1427,6 +1919,12 @@ public class NetworkManager {
             if (!remoteRoster.isEmpty()) {
                 Bukkit.getLogger().info(AranarthCore.LOG_PREFIX
                         + "Synced " + remoteRoster.size() + " remote player(s) from MySQL");
+                // Seed serverLastSeen so isServerOnline() works immediately at startup
+                // when a peer server is already running and has players in the roster.
+                long now = System.currentTimeMillis();
+                for (NetworkPlayer np : loaded.values()) {
+                    serverLastSeen.put(np.getServer(), now);
+                }
             }
         } catch (Exception e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Failed to sync roster from MySQL: " + e.getMessage());
@@ -1446,8 +1944,18 @@ public class NetworkManager {
         String prefix = json.get("prefix").getAsString();
         String message = json.get("message").getAsString();
 
-        String formatted = ChatUtils.translateToColor(prefix + message);
-        Component component = LegacyComponentSerializer.legacySection().deserialize(formatted);
+        Component component = null;
+        if (json.has("componentJson")) {
+            try {
+                component = GsonComponentSerializer.gson().deserialize(json.get("componentJson").getAsString());
+            } catch (Exception ignored) {
+                // Falls back to the legacy string below
+            }
+        }
+        if (component == null) {
+            String formatted = ChatUtils.translateToColor(prefix + message);
+            component = LegacyComponentSerializer.legacySection().deserialize(formatted);
+        }
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.sendMessage(component);
         }
@@ -1466,6 +1974,7 @@ public class NetworkManager {
         String username = json.has("username") ? json.get("username").getAsString() : "";
         String textureValue = json.has("textureValue") ? json.get("textureValue").getAsString() : "";
         String textureSignature = json.has("textureSignature") ? json.get("textureSignature").getAsString() : "";
+        String pronouns = json.has("pronouns") ? json.get("pronouns").getAsString() : "MALE";
         NetworkPlayer np = new NetworkPlayer(
                 uuid,
                 username,
@@ -1477,7 +1986,8 @@ public class NetworkManager {
                 json.get("architectRank").getAsInt(),
                 vanished,
                 textureValue,
-                textureSignature
+                textureSignature,
+                pronouns
         );
         remoteRoster.put(uuid, np);
         if (!vanished) {
@@ -1497,9 +2007,9 @@ public class NetworkManager {
             return;
         }
 
-        Bukkit.getConsoleSender().sendMessage(joinMessage);
+        Bukkit.getConsoleSender().sendMessage(ChatUtils.translateToColor(Lang.plain(joinMessage)));
         for (Player p : Bukkit.getOnlinePlayers()) {
-            p.sendMessage(joinMessage);
+            p.sendMessage(ChatUtils.translateToColor(Lang.resolve(p, joinMessage)));
         }
         boolean isNewPlayer = json.has("isNewPlayer") && json.get("isNewPlayer").getAsBoolean();
         if (isNewPlayer) {
@@ -1555,6 +2065,7 @@ public class NetworkManager {
 
         UUID uuid = UUID.fromString(json.get("uuid").getAsString());
         remoteRoster.remove(uuid);
+        pendingCrossServerRequests.values().removeIf(c -> c.remotePlayerUuid().equals(uuid));
 
         // Close any remote invsee GUIs local players have open for this player
         com.aearost.aranarthcore.gui.GuiInvsee.closeAllRemoteFor(uuid);
@@ -1569,9 +2080,9 @@ public class NetworkManager {
         String quitMessage = json.has("quitMessage") ? json.get("quitMessage").getAsString() : "";
         boolean vanished = json.has("vanished") && json.get("vanished").getAsBoolean();
         if (!quitMessage.isEmpty() && !vanished) {
-            Bukkit.getConsoleSender().sendMessage(quitMessage);
+            Bukkit.getConsoleSender().sendMessage(ChatUtils.translateToColor(Lang.plain(quitMessage)));
             for (Player p : Bukkit.getOnlinePlayers()) {
-                p.sendMessage(quitMessage);
+                p.sendMessage(ChatUtils.translateToColor(Lang.resolve(p, quitMessage)));
             }
             // Play the descending note-block quit sound
             new BukkitRunnable() {
@@ -1631,7 +2142,7 @@ public class NetworkManager {
             return;
         }
 
-        storeCrossServerTpContext(toUuid, new CrossServerTpContext(fromUuid, fromNickname, fromServer, isTpHere));
+        storeCrossServerTpContext(toUuid, new CrossServerTpContext(fromUuid, fromNickname, fromServer, isTpHere, System.currentTimeMillis()));
 
         // Do NOT set teleportToUuid/teleportFromUuid here - those fields resolve the UUID via
         // Bukkit.getPlayer(), which only works for locally-online players. The remote requester is
@@ -1641,11 +2152,11 @@ public class NetworkManager {
         // is populated.
 
         if (isTpHere) {
-            target.sendMessage(ChatUtils.chatMessage("&e" + fromNickname + " &7has requested you teleport to them"));
+            target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "tp.tphere_request", "player", fromNickname)));
         } else {
-            target.sendMessage(ChatUtils.chatMessage("&e" + fromNickname + " &7has requested to teleport to you"));
+            target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "tp.request_received", "player", fromNickname)));
         }
-        target.sendMessage(ChatUtils.buildTpAcceptDenyPrompt());
+        target.sendMessage(ChatUtils.buildTpAcceptDenyPrompt(target));
         AranarthUtils.playTeleportSound(target);
     }
 
@@ -1668,24 +2179,28 @@ public class NetworkManager {
             String requesterNick = requester != null
                     ? AranarthUtils.getNickname(requester)
                     : accepterNick; // fallback to accepter nick if requester somehow offline
-            setPendingTeleport(accepterUuid,
-                    new PendingTeleport(requesterUuid.toString(), accepterNick, "&7You have teleported to " + requesterNick));
-            JsonObject transfer = new JsonObject();
-            transfer.addProperty("uuid", accepterUuid.toString());
-            transfer.addProperty("targetServer", thisServer);
-            publish(CH_TRANSFER, transfer);
+            setPendingAndPublishTransfer(accepterUuid,
+                    new PendingTeleport(requesterUuid.toString(), accepterNick, Lang.getFor(accepterUuid, "teleport.teleported_to", "player", requesterNick)),
+                    thisServer);
             if (requester != null) {
-                requester.sendMessage(ChatUtils.chatMessage("&e" + accepterNick + " &7has accepted your teleport request"));
+                requester.sendMessage(ChatUtils.chatMessage(Lang.getFor(requester, "tp.accepted", "player", accepterNick)));
             }
         } else {
             Player requester = Bukkit.getPlayer(requesterUuid);
             if (requester != null) {
-                requester.sendMessage(ChatUtils.chatMessage("&e" + accepterNick + " &7has accepted your teleport request"));
+                requester.sendMessage(ChatUtils.chatMessage(Lang.getFor(requester, "tp.accepted", "player", accepterNick)));
                 String targetServer = AranarthCore.getInstance().getConfig()
                         .getString("network.servers." + accepterServer, accepterServer);
                 PendingTeleport ptForRequester = new PendingTeleport(accepterUuid.toString(),
-                        "&e&l" + accepterServer.toUpperCase(), "&7You have teleported to " + accepterNick);
-                saveInventoryAndTransfer(requester, targetServer, ptForRequester);
+                        "&e&l" + accepterServer.toUpperCase(), Lang.getFor(requester, "teleport.teleported_to", "player", accepterNick));
+                // Same countdown and combat check as a same-server teleport
+                AranarthPlayer requesterAp = AranarthUtils.getPlayer(requesterUuid);
+                AranarthUtils.teleportPlayer(requester, requester.getLocation(), requester.getLocation(),
+                        requesterAp.isInAdminMode(), "&e&l" + accepterServer.toUpperCase(), Lang.getFor(requester, "teleport.transferring_named", "name", accepterNick), success -> {
+                            if (success) {
+                                saveInventoryAndTransfer(requester, targetServer, ptForRequester);
+                            }
+                        });
             }
         }
     }
@@ -1697,9 +2212,8 @@ public class NetworkManager {
 
         Player requester = Bukkit.getPlayer(requesterUuid);
         if (requester != null) {
-            requester.sendMessage(ChatUtils.chatMessage("&e" + denierNick + " &7has denied your teleport request"));
+            requester.sendMessage(ChatUtils.chatMessage(Lang.getFor(requester, "tp.denied_by", "player", denierNick)));
         }
-        clearCrossServerTpContext(requesterUuid);
     }
 
     private void handleTransfer(JsonObject json) {
@@ -1716,11 +2230,15 @@ public class NetworkManager {
 
         // Read the pending TP that was set on the requester's server so we can embed this
         // player's inventory into it before the DB write + transfer sequence fires.
+        // The pending teleport is always written before the transfer is published. Without it the
+        // destination would keep its own stale copy of the inventory, so never transfer bare.
         PendingTeleport existing = getPendingTeleport(uuid);
         if (existing != null) {
             saveInventoryAndTransfer(player, velocityName, existing);
         } else {
-            transferPlayer(player, velocityName);
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Net] Transfer of " + player.getName()
+                    + " to " + toServer + " skipped: no pending teleport was found.");
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.failed")));
         }
     }
 
@@ -1796,14 +2314,14 @@ public class NetworkManager {
                 }
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     String pWorld = p.getWorld().getName();
-                    if (pWorld.equals("arena") || pWorld.equals("creative")) {
+                    if (pWorld.equals("arena") || pWorld.startsWith("creative")) {
                         continue;
                     }
                     AranarthPlayer ap = AranarthUtils.getPlayer(p.getUniqueId());
                     if (ap.isWeatherMessageDisabled()) {
                         continue;
                     }
-                    p.sendMessage(ChatUtils.chatMessage("&7&oThe storm has subsided..."));
+                    p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, "weather.clear")));
                     if (!isNewDay) {
                         int wVol = ap.getWeatherSoundVolume();
                         if (wVol > 0) {
@@ -1829,17 +2347,17 @@ public class NetworkManager {
                 if (prevWeather == type) {
                     return;
                 }
-                String broadcastMsg = isThunder ? "&7&oA thunderstorm has started..." : "&7&oIt has started to rain...";
+                String broadcastKey = isThunder ? "weather.thunder" : "weather.rain";
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     String pWorld = p.getWorld().getName();
-                    if (pWorld.equals("arena") || pWorld.equals("creative")) {
+                    if (pWorld.equals("arena") || pWorld.startsWith("creative")) {
                         continue;
                     }
                     AranarthPlayer ap = AranarthUtils.getPlayer(p.getUniqueId());
                     if (ap.isWeatherMessageDisabled()) {
                         continue;
                     }
-                    p.sendMessage(ChatUtils.chatMessage(broadcastMsg));
+                    p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, broadcastKey)));
                     if (!isNewDay) {
                         int wVol = ap.getWeatherSoundVolume();
                         if (wVol > 0) {
@@ -1869,14 +2387,14 @@ public class NetworkManager {
                 }
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     String pWorld = p.getWorld().getName();
-                    if (pWorld.equals("arena") || pWorld.equals("creative")) {
+                    if (pWorld.equals("arena") || pWorld.startsWith("creative")) {
                         continue;
                     }
                     AranarthPlayer ap = AranarthUtils.getPlayer(p.getUniqueId());
                     if (ap.isWeatherMessageDisabled()) {
                         continue;
                     }
-                    p.sendMessage(ChatUtils.chatMessage("&7&oIt has started to snow..."));
+                    p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, "weather.snow")));
                     if (!isNewDay) {
                         int wVol = ap.getWeatherSoundVolume();
                         if (wVol > 0) {
@@ -1906,10 +2424,10 @@ public class NetworkManager {
 
         String prefixStart = "&7⊰&r";
         String prefixEnd = "&7⊱&r";
-        Component targetPrefixComp = LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(prefixStart + "&7&l&oFrom: &r&e" + fromNickname + prefixEnd + " &7&o>> &e&o"));
+        Component targetPrefixComp = LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(prefixStart + Lang.getFor(target, "message.from") + fromNickname + prefixEnd + " &7&o>> &e&o"));
         Component targetMsgComp = targetPrefixComp.append(LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor("&e&o") + message));
-        target.sendMessage(ChatUtils.clickableCommand(targetMsgComp, ChatUtils.translateToColor("&7Reply to &e" + fromNickname), "/r ", true));
-        target.playSound(target, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.4f, 1f);
+        target.sendMessage(ChatUtils.clickableCommand(targetMsgComp, ChatUtils.translateToColor(Lang.getFor(target, "message.hover_reply", "player", fromNickname)), "/r ", true));
+        AranarthUtils.playPingSound(target);
 
         // Store the sender UUID for /reply (uses last received message UUID)
         AranarthPlayer targetAp = AranarthUtils.getPlayer(toUuid);
@@ -1939,13 +2457,70 @@ public class NetworkManager {
             NetworkTabManager.addToTab(np);
         }
 
-        // Broadcast the AFK message to locally online players
-        String message = isAfk
-                ? "&e" + nickname + " &7is now AFK"
-                : "&e" + nickname + " &7is no longer AFK";
+        // Broadcast the AFK message to locally online players who can see the player
+        String langKey = isAfk ? "afk.player_now_afk" : "afk.player_no_longer_afk";
         for (Player p : Bukkit.getOnlinePlayers()) {
-            p.sendMessage(ChatUtils.chatMessage(message));
+            if (AranarthUtils.isVanishedFrom(p, uuid)) {
+                continue;
+            }
+            p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, langKey, "name", nickname)));
         }
+    }
+
+    private void handlePingUpdate(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        int ping = json.get("ping").getAsInt();
+
+        NetworkPlayer np = remoteRoster.get(uuid);
+        if (np != null) {
+            np.setPing(ping);
+            if (!np.isVanished()) {
+                NetworkTabManager.updatePingInTab(np);
+            }
+        }
+    }
+
+    private void handleHeartbeat(JsonObject json) {
+        if (!json.has("server")) return;
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) return;
+        serverLastSeen.put(originServer, System.currentTimeMillis());
+    }
+
+    private void handlePerkUpdate(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        HashMap<Perk, Integer> perks = PersistenceUtils.deserializePerks(json.get("perks").getAsString());
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+            AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+            if (ap == null) {
+                return;
+            }
+            boolean hadCompressor = ap.getPerks() != null && ap.getPerks().getOrDefault(Perk.COMPRESSOR, 0) == 1;
+            ap.setPerks(perks);
+            AranarthUtils.setPlayer(uuid, ap);
+
+            // Enables all materials to be compressed by default
+            if (!hadCompressor && perks.getOrDefault(Perk.COMPRESSOR, 0) == 1) {
+                AranarthUtils.compressAllMaterials(uuid);
+            }
+
+            // This server is authoritative for the player, so it saves their row
+            Player localPlayer = Bukkit.getPlayer(uuid);
+            if (localPlayer != null) {
+                PermissionUtils.evaluatePlayerPermissions(localPlayer);
+                PersistenceUtils.saveAranarthPlayerImmediately(uuid);
+            }
+        });
     }
 
     private void handleRankUpdate(JsonObject json) {
@@ -1989,6 +2564,38 @@ public class NetworkManager {
         }
     }
 
+    private void handlePronounsUpdate(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        String pronounsStr = json.get("pronouns").getAsString();
+
+        NetworkPlayer np = remoteRoster.get(uuid);
+        if (np != null) {
+            np.setPronouns(pronounsStr);
+            if (!np.isVanished()) {
+                NetworkTabManager.addToTab(np);
+            }
+            AranarthUtils.updateTab();
+        } else {
+            Player localPlayer = Bukkit.getPlayer(uuid);
+            if (localPlayer != null) {
+                AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+                if (ap != null) {
+                    try {
+                        ap.setPronouns(Pronouns.valueOf(pronounsStr));
+                    } catch (IllegalArgumentException ignored) {
+                        ap.setPronouns(Pronouns.MALE);
+                    }
+                    AranarthUtils.setPlayer(uuid, ap);
+                }
+            }
+        }
+    }
+
     private void handlePermReload(JsonObject json) {
         String originServer = json.get("server").getAsString();
         if (originServer.equals(thisServer)) {
@@ -2012,18 +2619,54 @@ public class NetworkManager {
         });
     }
 
+    private void handleConfigReload(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+            AranarthCore.getInstance().reloadConfig();
+            AbilityConfig.load(AranarthCore.getInstance());
+            Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), CouponUtils::importCoupons);
+        });
+    }
+
+    private void handleResourceWorldLock(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        boolean isLocked = json.get("locked").getAsBoolean();
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> ResourceWorldUtils.setRemoteResourceLocked(isLocked));
+    }
+
+    private void handleAvatarUpdate(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        boolean isNewAvatar = json.get("isNewAvatar").getAsBoolean();
+        List<Avatar> avatars = PersistenceUtils.avatarsFromJson(json.getAsJsonArray("avatars"));
+        AvatarUtils.applyRemoteUpdate(avatars, uuid, isNewAvatar);
+    }
+
     private void handleMarketUpdate(JsonObject json) {
         String originServer = json.get("server").getAsString();
         if (originServer.equals(thisServer)) {
             return;
         }
-        // Reload market dynamics from DB and refresh signs on main thread
+        // Reload market dynamics and trade market data from DB on main thread;
+        // only refresh signs on Survival (shops world does not exist on SMP)
         Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
             PersistenceUtils.loadMarketDynamicsFromDatabase();
-            List<Shop> serverShops = ShopUtils.getShops().get(null);
-            if (serverShops != null) {
-                for (Shop shop : serverShops) {
-                    MarketUtils.refreshServerShopSign(shop);
+            PersistenceUtils.loadTradeMarketDataFromDatabase();
+            if (!AranarthCore.isSmpServer()) {
+                List<Shop> serverShops = ShopUtils.getShops().get(null);
+                if (serverShops != null) {
+                    for (Shop shop : serverShops) {
+                        MarketUtils.refreshServerShopSign(shop);
+                    }
                 }
             }
         });
@@ -2032,6 +2675,15 @@ public class NetworkManager {
     private void handleBroadcast(JsonObject json) {
         String originServer = json.get("server").getAsString();
         if (originServer.equals(thisServer)) {
+            return;
+        }
+        if (json.has("key")) {
+            JsonArray argArray = json.getAsJsonArray("args");
+            Object[] args = new Object[argArray.size()];
+            for (int i = 0; i < args.length; i++) {
+                args[i] = argArray.get(i).getAsString();
+            }
+            Lang.broadcastLocal(json.get("key").getAsString(), args);
             return;
         }
         String message = json.get("message").getAsString();
@@ -2080,9 +2732,15 @@ public class NetworkManager {
         AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
         if (ap != null) {
             ap.setBalance(ap.getBalance() + delta);
-            // Immediately persist so the next periodic save cannot overwrite
-            // the updated balance with a stale value.
-            PersistenceUtils.saveAranarthPlayerImmediately(uuid);
+            if (Bukkit.getPlayer(uuid) != null) {
+                // This server is authoritative for the player, persist so the next periodic
+                // save cannot overwrite the updated balance with a stale value
+                PersistenceUtils.saveAranarthPlayerImmediately(uuid);
+            } else if (ap.getBalanceSnapshot() >= 0.0) {
+                // The origin server persists the delta for players not online here, so shift the
+                // snapshot too, otherwise this delta would be re-applied as a local change later
+                ap.setBalanceSnapshot(ap.getBalanceSnapshot() + delta);
+            }
         }
     }
 
@@ -2112,7 +2770,7 @@ public class NetworkManager {
         }
         String fromNickname = json.get("fromNickname").getAsString();
         String formattedAmount = json.get("formattedAmount").getAsString();
-        target.sendMessage(ChatUtils.chatMessage("&7You have received &6" + formattedAmount + " &7from &e" + fromNickname));
+        target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "economy.received_payment", "amount", formattedAmount, "player", fromNickname)));
     }
 
     private void handleSleepMessage(JsonObject json) {
@@ -2128,7 +2786,10 @@ public class NetworkManager {
             if (worldName.equals("world") || AranarthUtils.isSmpWorld(worldName) || worldName.equals("resource")) {
                 long time = player.getLocation().getWorld().getTime();
                 if (time > 12500 && time <= 23980) {
-                    player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message));
+                    String text = json.has("total") && json.has("required")
+                            ? Lang.getFor(player, "sleep.players_sleeping", "sleeping", json.get("total").getAsInt(), "required", json.get("required").getAsInt())
+                            : message;
+                    player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(text));
                 }
             }
         }
@@ -2194,6 +2855,15 @@ public class NetworkManager {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "handleBoostSync: unknown boost: " + boostName);
             return;
         }
+        // SMP forwarded a boost add - only Survival applies it, then syncs the end time back
+        if (json.has("request") && json.get("request").getAsBoolean()) {
+            if (!AranarthCore.isSmpServer()) {
+                String uuidStr = json.get("uuid").getAsString();
+                UUID uuid = uuidStr.isEmpty() ? null : UUID.fromString(uuidStr);
+                AranarthUtils.addServerBoost(boost, null, uuid, json.get("fromVoteShop").getAsBoolean());
+            }
+            return;
+        }
         if (removing) {
             AranarthUtils.removeServerBoost(boost, true);
         } else {
@@ -2224,9 +2894,9 @@ public class NetworkManager {
                 () -> PersistenceUtils.reloadPlayerMailFromDatabase(toUuid));
 
         String fromNickname = json.get("fromNickname").getAsString();
-        target.sendMessage(ChatUtils.chatMessage("&7You have received mail from &e" + fromNickname));
-        target.sendMessage(ChatUtils.chatMessage("&7View it with &e/mail read"));
-        target.playSound(target, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.4f, 1f);
+        target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "mail.received", "sender", fromNickname)));
+        target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "mail.received_view")));
+        AranarthUtils.playPingSound(target);
     }
 
     private void handleCouncilMessage(JsonObject json) {
@@ -2260,7 +2930,7 @@ public class NetworkManager {
      */
     public void publishChatGameWin(String winnerNickname, String answer, java.util.UUID winnerUUID,
                                    double elapsedSeconds, boolean newGlobalRecord, String newHolderNickname,
-                                   java.util.UUID newHolderUUID, double newGlobalBestTime) {
+                                   java.util.UUID newHolderUUID, double newGlobalBestTime, int streakCount) {
         JsonObject json = new JsonObject();
         json.addProperty("server", thisServer);
         json.addProperty("winner", winnerNickname);
@@ -2268,6 +2938,7 @@ public class NetworkManager {
         json.addProperty("winnerUUID", winnerUUID.toString());
         json.addProperty("elapsedSeconds", elapsedSeconds);
         json.addProperty("newGlobalRecord", newGlobalRecord);
+        json.addProperty("streakCount", streakCount);
         if (newGlobalRecord && newHolderUUID != null) {
             json.addProperty("newHolderNickname", newHolderNickname);
             json.addProperty("newHolderUUID", newHolderUUID.toString());
@@ -2325,6 +2996,24 @@ public class NetworkManager {
     }
 
     /**
+     * Publishes that a dominion was saved, so the other server refreshes its copy from MySQL.
+     */
+    public void publishDominionUpdate(UUID dominionId) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("dominionId", dominionId.toString());
+        publish(CH_DOMINION_UPDATE, json);
+    }
+
+    private void handleDominionUpdate(JsonObject json) {
+        if (json.get("server").getAsString().equals(thisServer)) {
+            return;
+        }
+        UUID dominionId = UUID.fromString(json.get("dominionId").getAsString());
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> PersistenceUtils.reloadSyncedDominion(dominionId));
+    }
+
+    /**
      * Publishes a dominion creation event so other servers load it into memory.
      */
     public void publishDominionCreate(UUID dominionId) {
@@ -2343,6 +3032,97 @@ public class NetworkManager {
         UUID dominionId = UUID.fromString(json.get("dominionId").getAsString());
         Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () ->
                 PersistenceUtils.loadSingleDominionFromDatabase(dominionId));
+    }
+
+    /**
+     * Publishes a claimed or changed Creative plot so the other server's copy stays current.
+     */
+    public void publishCreativePlotUpdate(CreativePlot plot) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.add("data", PlotUtils.toJson(plot));
+        publish(CH_CREATIVE_PLOT_UPDATE, json);
+    }
+
+    private void handleCreativePlotUpdate(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        JsonObject data = json.getAsJsonObject("data");
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () ->
+                PlotUtils.loadPlot(PlotUtils.fromJson(data)));
+    }
+
+    /**
+     * Publishes an unclaimed Creative plot so the other server removes it from memory.
+     */
+    public void publishCreativePlotDelete(String plotKey) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("plotKey", plotKey);
+        publish(CH_CREATIVE_PLOT_DELETE, json);
+    }
+
+    /**
+     * Asks the Survival server to expand the Creative plots world, as the world only exists there.
+     */
+    public void publishCreativeExpand(UUID requester, int rings) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("requester", requester.toString());
+        json.addProperty("rings", rings);
+        publish(CH_CREATIVE_EXPAND, json);
+    }
+
+    /**
+     * Tells the requester's server how large the Creative plots world now is.
+     */
+    private void publishCreativeExpanded(UUID requester, int plotsAcross) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("requester", requester.toString());
+        json.addProperty("plotsAcross", plotsAcross);
+        publish(CH_CREATIVE_EXPAND, json);
+    }
+
+    private void handleCreativeExpand(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        UUID requester = UUID.fromString(json.get("requester").getAsString());
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+            if (json.has("rings")) {
+                // The request - only the server with the plots world expands it
+                if (!PlotUtils.isPlotServer()) {
+                    return;
+                }
+                int plotsAcross = PlotUtils.expand(json.get("rings").getAsInt());
+                publishCreativeExpanded(requester, plotsAcross);
+            } else {
+                // The result - tell the requester if they are on this server
+                Player player = Bukkit.getPlayer(requester);
+                if (player == null) {
+                    return;
+                }
+                int plotsAcross = json.get("plotsAcross").getAsInt();
+                if (plotsAcross < 0) {
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.could_not_creative")));
+                } else {
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "creative.expanded", "size", plotsAcross)));
+                }
+            }
+        });
+    }
+
+    private void handleCreativePlotDelete(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        String plotKey = json.get("plotKey").getAsString();
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> PlotUtils.unloadPlot(plotKey));
     }
 
     /**
@@ -2421,6 +3201,18 @@ public class NetworkManager {
                 int newCount = data.getAsJsonArray("chunks").size();
                 existing.setStoredChunkCount(newCount);
             }
+            if (data.has("mobSpawningEnabled")) {
+                existing.setMobSpawningEnabled(data.get("mobSpawningEnabled").getAsBoolean());
+            }
+            if (data.has("memberPvpEnabled")) {
+                existing.setMemberPvpEnabled(data.get("memberPvpEnabled").getAsBoolean());
+            }
+            if (data.has("bendingEnabled")) {
+                existing.setBendingEnabled(data.get("bendingEnabled").getAsBoolean());
+            }
+            if (data.has("explosionEnabled")) {
+                existing.setExplosionEnabled(data.get("explosionEnabled").getAsBoolean());
+            }
         });
     }
 
@@ -2450,6 +3242,29 @@ public class NetworkManager {
         if (Bukkit.getPlayer(uuid) != null) {
             Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
                     () -> PersistenceUtils.loadJobDataForPlayer(uuid));
+        }
+    }
+
+    /**
+     * Notifies other servers that a player's mount progress was saved to the database.
+     *
+     * @param uuid The UUID of the player whose mounts were saved.
+     */
+    public void publishMountUpdate(UUID uuid) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", uuid.toString());
+        publish(CH_MOUNT_UPDATE, json);
+    }
+
+    private void handleMountUpdate(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        if (Bukkit.getPlayer(uuid) != null) {
+            PersistenceUtils.loadMountsForPlayer(uuid);
         }
     }
 
@@ -2520,15 +3335,98 @@ public class NetworkManager {
                 HashMap<Integer, ItemStack> remainder = onlinePlayer.getInventory().addItem(key);
                 if (!remainder.isEmpty()) {
                     AranarthUtils.addPendingVoteKeys(uuid, 1);
-                    onlinePlayer.sendMessage(ChatUtils.chatMessage("&7Your inventory was full! &7Use &e/keyclaim &7to obtain your vote key!"));
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "crate.inventory_full_keyclaim")));
                     Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[VOTE] Remote key delivery: inventory full for " + onlinePlayer.getName() + " - stored as pending");
                 } else {
                     Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[VOTE] Remote key delivery: key given directly to " + onlinePlayer.getName() + " in " + worldName);
                 }
             } else {
                 AranarthUtils.addPendingVoteKeys(uuid, 1);
-                onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You cannot receive crate keys here! &7Use &e/keyclaim &7to obtain your vote key!"));
+                onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "crate.cannot_receive_here")));
                 Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[VOTE] Remote key delivery: " + onlinePlayer.getName() + " is in invalid world (" + worldName + ") - stored as pending");
+            }
+            if (DatabaseManager.isActive()) {
+                Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                        () -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(uuid));
+            }
+        });
+    }
+
+    /**
+     * Tells the remote server to deliver purchased crate keys to the player.
+     * Used when Survival processes a store command but the player is currently on SMP.
+     *
+     * @param uuid     The UUID of the player to receive keys.
+     * @param keyType  The key type string ("key_rare", "key_epic", "key_godly").
+     * @param quantity The number of keys to deliver.
+     */
+    public void publishPurchaseKey(UUID uuid, String keyType, int quantity) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", uuid.toString());
+        json.addProperty("keyType", keyType);
+        json.addProperty("quantity", quantity);
+        publish(CH_PURCHASE_KEY, json);
+    }
+
+    private void handlePurchaseKey(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        String keyType = json.get("keyType").getAsString();
+        int quantity = json.get("quantity").getAsInt();
+
+        ItemStack key = switch (keyType) {
+            case "key_rare" -> new KeyRare().getItem();
+            case "key_epic" -> new KeyEpic().getItem();
+            case "key_godly" -> new KeyGodly().getItem();
+            default -> null;
+        };
+        if (key == null) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[STORE] Unknown purchase key type: " + keyType);
+            return;
+        }
+        final ItemStack finalKey = key;
+
+        Player player = Bukkit.getPlayer(uuid);
+        if (player == null || !player.isOnline()) {
+            AranarthUtils.addPendingKey(uuid, finalKey, quantity);
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[STORE] Cross-server purchase key for " + uuid + " but player is not online - stored as pending");
+            if (DatabaseManager.isActive()) {
+                Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                        () -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(uuid));
+            }
+            return;
+        }
+
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+            Player onlinePlayer = Bukkit.getPlayer(uuid);
+            if (onlinePlayer == null || !onlinePlayer.isOnline()) {
+                AranarthUtils.addPendingKey(uuid, finalKey, quantity);
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[STORE] Cross-server purchase key: " + uuid + " logged off before delivery - stored as pending");
+                if (DatabaseManager.isActive()) {
+                    Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                            () -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(uuid));
+                }
+                return;
+            }
+            finalKey.setAmount(quantity);
+            String worldName = onlinePlayer.getWorld().getName();
+            if (AranarthUtils.isSurvivalWorld(worldName)) {
+                HashMap<Integer, ItemStack> remainder = onlinePlayer.getInventory().addItem(finalKey);
+                if (!remainder.isEmpty()) {
+                    AranarthUtils.addPendingKey(uuid, finalKey, quantity);
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "crate.inventory_full_keyclaim")));
+                    Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[STORE] Cross-server purchase key: inventory full for " + onlinePlayer.getName() + " - stored as pending");
+                } else {
+                    Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[STORE] Cross-server purchase key: delivered " + keyType + " x" + quantity + " to " + onlinePlayer.getName());
+                }
+            } else {
+                AranarthUtils.addPendingKey(uuid, finalKey, quantity);
+                onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "give.keyclaim_hint")));
+                Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[STORE] Cross-server purchase key: " + onlinePlayer.getName() + " in invalid world (" + worldName + ") - stored as pending");
             }
             if (DatabaseManager.isActive()) {
                 Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
@@ -2567,7 +3465,7 @@ public class NetworkManager {
         AranarthUtils.addVote(new AranarthVote(receiverUuid, amount, timestamp));
         Player receiver = Bukkit.getPlayer(receiverUuid);
         if (receiver != null) {
-            receiver.sendMessage(ChatUtils.chatMessage("&7You have received &e" + amount + " &7vote points from &e" + senderNickname + "&7."));
+            receiver.sendMessage(ChatUtils.chatMessage(Lang.getFor(receiver, "economy.received_vote_points", "amount", amount, "player", senderNickname)));
         }
     }
 
@@ -2700,7 +3598,7 @@ public class NetworkManager {
             Player viewer = Bukkit.getPlayer(viewerUuid);
             if (viewer != null) {
                 viewer.sendMessage(com.aearost.aranarthcore.utils.ChatUtils.chatMessage(
-                        "&cFailed to load that player's inventory"));
+                        Lang.getFor(viewer, "admin.invsee_load_failed")));
             }
         });
     }
@@ -2816,16 +3714,15 @@ public class NetworkManager {
                 }
             }
 
-            String targetMsg = switch (type) {
-                case "ally" ->
-                        "&e" + requesterDominion.getName() + " &7has requested an &5Alliance &7with your Dominion";
-                case "truce" -> "&e" + requesterDominion.getName() + " &7has requested a &dTruce &7with your Dominion";
-                default -> "&e" + requesterDominion.getName() + " &7has requested &fNeutrality &7with your Dominion";
+            String targetKey = switch (type) {
+                case "ally" -> "dominion.ally_request_received_notify";
+                case "truce" -> "dominion.truce_request_received_notify";
+                default -> "dominion.neutral_request_received_notify";
             };
-            String requesterMsg = switch (type) {
-                case "ally" -> "&7Your Dominion has requested an &5Alliance &7with &e" + targetDominion.getName();
-                case "truce" -> "&7Your Dominion has requested a &dTruce &7with &e" + targetDominion.getName();
-                default -> "&7Your Dominion has requested &fNeutrality &7with &e" + targetDominion.getName();
+            String requesterKey = switch (type) {
+                case "ally" -> "dominion.ally_request_sent_notify";
+                case "truce" -> "dominion.truce_request_sent_notify";
+                default -> "dominion.neutral_request_sent_notify";
             };
 
             for (Player p : Bukkit.getOnlinePlayers()) {
@@ -2834,12 +3731,12 @@ public class NetworkManager {
                     if (domVol > 0) {
                         p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 0.9F);
                     }
-                    p.sendMessage(ChatUtils.chatMessage(targetMsg));
+                    p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, targetKey, "name", requesterDominion.getName())));
                 } else if (requesterDominion.getMembers().contains(p.getUniqueId())) {
                     if (domVol > 0) {
                         p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 0.9F);
                     }
-                    p.sendMessage(ChatUtils.chatMessage(requesterMsg));
+                    p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, requesterKey, "name", targetDominion.getName())));
                 }
             }
         });
@@ -2924,12 +3821,12 @@ public class NetworkManager {
                         if (domVol > 0) {
                             p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 0.9F);
                         }
-                        p.sendMessage(ChatUtils.chatMessage("&7Your Dominion has become &fNeutral &7with &e" + b.getName()));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, "dominion.notify_neutral", "dominion", b.getName())));
                     } else if (b.getMembers().contains(p.getUniqueId())) {
                         if (domVol > 0) {
                             p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_0, domVol / 100f, 0.9F);
                         }
-                        p.sendMessage(ChatUtils.chatMessage("&7Your Dominion has become &fNeutral &7with &e" + a.getName()));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, "dominion.notify_neutral", "dominion", a.getName())));
                     }
                 }
             }
@@ -3065,13 +3962,13 @@ public class NetworkManager {
                         if (domVol > 0) {
                             p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_2, 2F * (domVol / 100f), 1F);
                         }
-                        p.sendMessage(ChatUtils.chatMessage("&4Your Dominion is attempting to conquer &e" + b.getName()));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, "dominion.notify_conquering_own", "dominion", b.getName())));
                     } else if (b.getMembers().contains(p.getUniqueId())) {
                         if (domVol > 0) {
                             p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_4, 2F * (domVol / 100f), 1F);
                         }
-                        p.sendMessage(ChatUtils.chatMessage("&e" + a.getName() + " &4is attempting to conquer your Dominion"));
-                        p.sendMessage(ChatUtils.chatMessage("&4Your Dominion will automatically be conquered if nobody logs on for 3 days during the conquest!"));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, "dominion.notify_conquering", "dominion", a.getName())));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, "dominion.conquest_auto_warning")));
                     }
                 }
             }
@@ -3083,14 +3980,14 @@ public class NetworkManager {
                         if (domVol > 0) {
                             p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_1, 2F * (domVol / 100f), 1F);
                         }
-                        p.sendMessage(ChatUtils.chatMessage("&5Your Dominion has started a rebellion against &e" + b.getName()));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, "dominion.notify_rebellion_own", "dominion", b.getName())));
                     } else if (b.getMembers().contains(p.getUniqueId())) {
                         if (domVol > 0) {
                             p.playSound(p, Sound.ITEM_GOAT_HORN_SOUND_1, 2F * (domVol / 100f), 1F);
                         }
-                        p.sendMessage(ChatUtils.chatMessage("&e" + a.getName() + " &5has started a rebellion against your Dominion!"));
-                        p.sendMessage(ChatUtils.chatMessage("&5Use &e/dominion retreat " + ChatUtils.stripColorFormatting(a.getName()) + " &5to release them of your conquest"));
-                        p.sendMessage(ChatUtils.chatMessage("They will be freed if your Dominion goes 3 days without logging on"));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, "dominion.notify_rebellion", "dominion", a.getName())));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, "dominion.notify_retreat", "dominion", a.getName())));
+                        p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, "dominion.freed_note")));
                     }
                 }
             }
@@ -3123,8 +4020,9 @@ public class NetworkManager {
         java.util.UUID newHolderUUID = newGlobalRecord && json.has("newHolderUUID")
                 ? java.util.UUID.fromString(json.get("newHolderUUID").getAsString()) : null;
         double newGlobalBestTime = newGlobalRecord && json.has("newGlobalBestTime") ? json.get("newGlobalBestTime").getAsDouble() : 0;
+        int streakCount = json.has("streakCount") ? json.get("streakCount").getAsInt() : 0;
         ChatGameUtils.applyNetworkGameWin(AranarthCore.getInstance(), winner, answer, winnerUUID,
-                elapsedSeconds, newGlobalRecord, newHolderNickname, newHolderUUID, newGlobalBestTime);
+                elapsedSeconds, newGlobalRecord, newHolderNickname, newHolderUUID, newGlobalBestTime, streakCount);
     }
 
     private void handleChatGameExpire(JsonObject json) {
@@ -3336,24 +4234,40 @@ public class NetworkManager {
      */
     private void handleSentinelDeath(JsonObject json) {
         UUID sentinelUuid = UUID.fromString(json.get("sentinelUuid").getAsString());
-        org.bukkit.entity.EntityType type = org.bukkit.entity.EntityType.valueOf(json.get("sentinelType").getAsString());
+        // Search all tracked sentinel types by UUID
+        org.bukkit.entity.EntityType[] trackedTypes = {
+                org.bukkit.entity.EntityType.HORSE,
+                org.bukkit.entity.EntityType.IRON_GOLEM,
+                org.bukkit.entity.EntityType.WOLF
+        };
 
         for (Map.Entry<UUID, AranarthPlayer> entry : AranarthUtils.getAranarthPlayers().entrySet()) {
             AranarthPlayer ap = entry.getValue();
-            if (ap.getSentinels() == null || ap.getSentinels().get(type) == null) {
+            if (ap.getSentinels() == null) {
                 continue;
             }
-            java.util.List<com.aearost.aranarthcore.objects.Sentinel> list = ap.getSentinels().get(type);
-            com.aearost.aranarthcore.objects.Sentinel toRemove = null;
-            for (com.aearost.aranarthcore.objects.Sentinel s : list) {
-                if (s.getUuid().equals(sentinelUuid)) {
-                    toRemove = s;
+            boolean removed = false;
+            for (org.bukkit.entity.EntityType trackedType : trackedTypes) {
+                java.util.List<com.aearost.aranarthcore.objects.Sentinel> list = ap.getSentinels().get(trackedType);
+                if (list == null) {
+                    continue;
+                }
+                com.aearost.aranarthcore.objects.Sentinel toRemove = null;
+                for (com.aearost.aranarthcore.objects.Sentinel s : list) {
+                    if (s.getUuid().equals(sentinelUuid)) {
+                        toRemove = s;
+                        break;
+                    }
+                }
+                if (toRemove != null) {
+                    list.remove(toRemove);
+                    AranarthUtils.setPlayer(entry.getKey(), ap);
+                    PersistenceUtils.syncPlayerSentinelsToDatabase(entry.getKey());
+                    removed = true;
                     break;
                 }
             }
-            if (toRemove != null) {
-                list.remove(toRemove);
-                AranarthUtils.setPlayer(entry.getKey(), ap);
+            if (removed) {
                 break;
             }
         }
@@ -3369,5 +4283,289 @@ public class NetworkManager {
                         + "DB publish failed on " + channel + ": " + e.getMessage());
             }
         });
+    }
+
+    // -------------------------------------------------------------------------
+    // Trade - publishers
+    // -------------------------------------------------------------------------
+
+    /**
+     * Sent by A's server when A invites B who is on another server.
+     */
+    public void publishTradeInvite(UUID inviterUuid, String inviterName, String inviterUsername, UUID inviteeUuid) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("inviterUuid", inviterUuid.toString());
+        json.addProperty("inviterName", inviterName);
+        json.addProperty("inviterUsername", inviterUsername);
+        json.addProperty("inviteeUuid", inviteeUuid.toString());
+        publish(CH_TRADE_INVITE, json);
+    }
+
+    /**
+     * Sent by B's server when B accepts a cross-server invite from A.
+     */
+    public void publishTradeAccept(UUID initiatorUuid, UUID targetUuid) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("initiatorUuid", initiatorUuid.toString());
+        json.addProperty("targetUuid", targetUuid.toString());
+        publish(CH_TRADE_ACCEPT, json);
+    }
+
+    /**
+     * Sent by either server when a player cancels the trade.
+     */
+    public void publishTradeCancel(UUID initiatorUuid, UUID cancellerUuid, String cancellerNick) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("initiatorUuid", initiatorUuid.toString());
+        json.addProperty("cancellerUuid", cancellerUuid.toString());
+        json.addProperty("cancellerNick", cancellerNick);
+        publish(CH_TRADE_CANCEL, json);
+    }
+
+    /**
+     * Sent after a player's offered items change.
+     */
+    public void publishTradeItems(UUID changerUuid, UUID initiatorUuid, ItemStack[] items) {
+        try {
+            String base64 = com.aearost.aranarthcore.utils.ItemUtils.itemStackArrayToBase64(items);
+            JsonObject json = new JsonObject();
+            json.addProperty("server", thisServer);
+            json.addProperty("changerUuid", changerUuid.toString());
+            json.addProperty("initiatorUuid", initiatorUuid.toString());
+            json.addProperty("items", base64);
+            publish(CH_TRADE_ITEMS, json);
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+                    + "Failed to serialize trade items for " + changerUuid + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Sent after a player's money offer changes.
+     */
+    public void publishTradeMoney(UUID changerUuid, UUID initiatorUuid, double amount) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("changerUuid", changerUuid.toString());
+        json.addProperty("initiatorUuid", initiatorUuid.toString());
+        json.addProperty("amount", amount);
+        publish(CH_TRADE_MONEY, json);
+    }
+
+    /**
+     * Sent when a player toggles their confirm state.
+     */
+    public void publishTradeConfirm(UUID confirmerUuid, UUID initiatorUuid, boolean confirmed) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("confirmerUuid", confirmerUuid.toString());
+        json.addProperty("initiatorUuid", initiatorUuid.toString());
+        json.addProperty("confirmed", confirmed);
+        publish(CH_TRADE_CONFIRM, json);
+    }
+
+    /**
+     * Sent by the initiator's server once the initiator's side is in escrow. Carries both offers as
+     * the initiator saw them, so the target's server can refuse the trade if anything changed.
+     */
+    public void publishTradeExecute(UUID commitId, UUID initiatorUuid, ItemStack[] itemsForTarget, double initiatorMoney,
+                                    ItemStack[] expectedTargetItems, double targetMoney) {
+        try {
+            JsonObject json = new JsonObject();
+            json.addProperty("server", thisServer);
+            json.addProperty("commitId", commitId.toString());
+            json.addProperty("initiatorUuid", initiatorUuid.toString());
+            json.addProperty("itemsForTarget", com.aearost.aranarthcore.utils.ItemUtils.itemStackArrayToBase64(itemsForTarget));
+            json.addProperty("initiatorMoney", initiatorMoney);
+            json.addProperty("expectedTargetItems", com.aearost.aranarthcore.utils.ItemUtils.itemStackArrayToBase64(expectedTargetItems));
+            json.addProperty("targetMoney", targetMoney);
+            publish(CH_TRADE_EXECUTE, json);
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+                    + "Failed to serialize trade execute for " + initiatorUuid + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Sent by the target's server after it committed or refused a cross-server trade.
+     */
+    public void publishTradeResult(UUID commitId, UUID initiatorUuid, boolean success, ItemStack[] itemsForInitiator,
+                                   double targetMoney, String targetNick) {
+        try {
+            JsonObject json = new JsonObject();
+            json.addProperty("server", thisServer);
+            json.addProperty("commitId", commitId.toString());
+            json.addProperty("initiatorUuid", initiatorUuid.toString());
+            json.addProperty("success", success);
+            json.addProperty("itemsForInitiator", com.aearost.aranarthcore.utils.ItemUtils.itemStackArrayToBase64(itemsForInitiator));
+            json.addProperty("targetMoney", targetMoney);
+            json.addProperty("targetNick", targetNick);
+            publish(CH_TRADE_RESULT, json);
+        } catch (Exception e) {
+            Bukkit.getLogger().severe(AranarthCore.LOG_PREFIX
+                    + "Failed to serialize trade result " + commitId + " for " + initiatorUuid + ": " + e.getMessage());
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Trade - handlers
+    // -------------------------------------------------------------------------
+
+    private void handleTradeInvite(JsonObject json) {
+        if (json.get("server").getAsString().equals(thisServer)) {
+            return;
+        }
+        UUID inviterUuid = UUID.fromString(json.get("inviterUuid").getAsString());
+        String inviterName = json.get("inviterName").getAsString();
+        String inviterUsername = json.has("inviterUsername") ? json.get("inviterUsername").getAsString()
+                : com.aearost.aranarthcore.utils.ChatUtils.stripColorFormatting(inviterName);
+        UUID inviteeUuid = UUID.fromString(json.get("inviteeUuid").getAsString());
+        com.aearost.aranarthcore.utils.TradeManager.onCrossServerInvite(inviterUuid, inviterName, inviterUsername, inviteeUuid);
+    }
+
+    private void handleTradeAccept(JsonObject json) {
+        if (json.get("server").getAsString().equals(thisServer)) {
+            return;
+        }
+        UUID initiatorUuid = UUID.fromString(json.get("initiatorUuid").getAsString());
+        UUID targetUuid = UUID.fromString(json.get("targetUuid").getAsString());
+        com.aearost.aranarthcore.utils.TradeManager.onCrossServerAccept(initiatorUuid, targetUuid);
+    }
+
+    private void handleTradeCancel(JsonObject json) {
+        if (json.get("server").getAsString().equals(thisServer)) {
+            return;
+        }
+        UUID initiatorUuid = UUID.fromString(json.get("initiatorUuid").getAsString());
+        UUID cancellerUuid = UUID.fromString(json.get("cancellerUuid").getAsString());
+        String cancellerNick = json.get("cancellerNick").getAsString();
+        com.aearost.aranarthcore.utils.TradeManager.onRemoteCancel(initiatorUuid, cancellerUuid, cancellerNick);
+    }
+
+    private void handleTradeItems(JsonObject json) {
+        if (json.get("server").getAsString().equals(thisServer)) {
+            return;
+        }
+        UUID changerUuid = UUID.fromString(json.get("changerUuid").getAsString());
+        UUID initiatorUuid = UUID.fromString(json.get("initiatorUuid").getAsString());
+        String base64 = json.get("items").getAsString();
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+            try {
+                ItemStack[] items = com.aearost.aranarthcore.utils.ItemUtils.itemStackArrayFromBase64(base64);
+                Bukkit.getScheduler().runTask(AranarthCore.getInstance(),
+                        () -> com.aearost.aranarthcore.utils.TradeManager.onRemoteItemUpdate(
+                                changerUuid, initiatorUuid, items));
+            } catch (Exception e) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+                        + "Failed to deserialize trade items from " + changerUuid + ": " + e.getMessage());
+            }
+        });
+    }
+
+    private void handleTradeMoney(JsonObject json) {
+        if (json.get("server").getAsString().equals(thisServer)) {
+            return;
+        }
+        UUID changerUuid = UUID.fromString(json.get("changerUuid").getAsString());
+        UUID initiatorUuid = UUID.fromString(json.get("initiatorUuid").getAsString());
+        double amount = json.get("amount").getAsDouble();
+        com.aearost.aranarthcore.utils.TradeManager.onRemoteMoneyUpdate(changerUuid, initiatorUuid, amount);
+    }
+
+    private void handleTradeConfirm(JsonObject json) {
+        if (json.get("server").getAsString().equals(thisServer)) {
+            return;
+        }
+        UUID confirmerUuid = UUID.fromString(json.get("confirmerUuid").getAsString());
+        UUID initiatorUuid = UUID.fromString(json.get("initiatorUuid").getAsString());
+        boolean confirmed = json.get("confirmed").getAsBoolean();
+        com.aearost.aranarthcore.utils.TradeManager.onRemoteConfirm(confirmerUuid, initiatorUuid, confirmed);
+    }
+
+    private void handleTradeExecute(JsonObject json) {
+        if (json.get("server").getAsString().equals(thisServer)) {
+            return;
+        }
+        UUID commitId = UUID.fromString(json.get("commitId").getAsString());
+        UUID initiatorUuid = UUID.fromString(json.get("initiatorUuid").getAsString());
+        String itemsBase64 = json.get("itemsForTarget").getAsString();
+        String expectedBase64 = json.get("expectedTargetItems").getAsString();
+        double initiatorMoney = json.get("initiatorMoney").getAsDouble();
+        double targetMoney = json.get("targetMoney").getAsDouble();
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+            try {
+                ItemStack[] items = com.aearost.aranarthcore.utils.ItemUtils.itemStackArrayFromBase64(itemsBase64);
+                ItemStack[] expected = com.aearost.aranarthcore.utils.ItemUtils.itemStackArrayFromBase64(expectedBase64);
+                Bukkit.getScheduler().runTask(AranarthCore.getInstance(),
+                        () -> com.aearost.aranarthcore.utils.TradeManager.onRemoteExecute(
+                                commitId, initiatorUuid, items, initiatorMoney, expected, targetMoney));
+            } catch (Exception e) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+                        + "Failed to deserialize trade execute items for " + initiatorUuid + ": " + e.getMessage());
+                // Refuse the trade so the initiator is refunded instead of waiting for the timeout
+                Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () ->
+                        publishTradeResult(commitId, initiatorUuid, false, new ItemStack[12], 0, "?"));
+            }
+        });
+    }
+
+    private void handleTradeResult(JsonObject json) {
+        if (json.get("server").getAsString().equals(thisServer)) {
+            return;
+        }
+        UUID commitId = UUID.fromString(json.get("commitId").getAsString());
+        boolean success = json.get("success").getAsBoolean();
+        String itemsBase64 = json.get("itemsForInitiator").getAsString();
+        double targetMoney = json.get("targetMoney").getAsDouble();
+        String targetNick = json.get("targetNick").getAsString();
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+            try {
+                ItemStack[] items = com.aearost.aranarthcore.utils.ItemUtils.itemStackArrayFromBase64(itemsBase64);
+                Bukkit.getScheduler().runTask(AranarthCore.getInstance(),
+                        () -> com.aearost.aranarthcore.utils.TradeManager.onRemoteTradeResult(
+                                commitId, success, items, targetMoney, targetNick));
+            } catch (Exception e) {
+                Bukkit.getLogger().severe(AranarthCore.LOG_PREFIX
+                        + "Failed to deserialize trade result " + commitId + ": " + e.getMessage());
+            }
+        });
+    }
+
+    // -------------------------------------------------------------------------
+    // Punishments
+    // -------------------------------------------------------------------------
+
+    /**
+     * Sends a ban, unban, mute, unmute or warning to the other server so it applies it immediately.
+     */
+    public void publishPunishment(Punishment punishment, String nickname, String duration, long banExpiresAt, String muteEndDate) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", punishment.getUuid().toString());
+        json.addProperty("type", punishment.getType());
+        json.addProperty("reason", punishment.getReason());
+        json.addProperty("date", punishment.getDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+        json.addProperty("appliedBy", punishment.getAppliedBy() != null ? punishment.getAppliedBy().toString() : "");
+        json.addProperty("nickname", nickname);
+        json.addProperty("duration", duration);
+        json.addProperty("banExpiresAt", banExpiresAt);
+        json.addProperty("muteEndDate", muteEndDate != null ? muteEndDate : "");
+        publish(CH_PUNISHMENT, json);
+    }
+
+    private void handlePunishment(JsonObject json) {
+        if (json.get("server").getAsString().equals(thisServer)) {
+            return;
+        }
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        String appliedBy = json.get("appliedBy").getAsString();
+        LocalDateTime date = LocalDateTime.ofInstant(Instant.ofEpochMilli(json.get("date").getAsLong()), ZoneId.systemDefault());
+        Punishment punishment = new Punishment(uuid, date, json.get("type").getAsString(), json.get("reason").getAsString(),
+                appliedBy.isEmpty() ? null : UUID.fromString(appliedBy));
+        PunishmentUtils.onRemotePunishment(punishment, json.get("nickname").getAsString(), json.get("duration").getAsString(),
+                json.get("banExpiresAt").getAsLong(), json.get("muteEndDate").getAsString());
     }
 }

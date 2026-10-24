@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.objects;
 
 import com.aearost.aranarthcore.enums.FireType;
 import com.aearost.aranarthcore.enums.Pronouns;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.MusicInstrument;
 import org.bukkit.entity.EntityType;
@@ -61,12 +62,16 @@ public class AranarthPlayer {
     private String muteEndDate;
     private UUID teleportToUuid;
     private UUID teleportFromUuid;
+    private long teleportRequestTime;
+    public static final long TELEPORT_REQUEST_TTL_MS = 2 * 60 * 1000L;
     private Location lastKnownTeleportLocation;
     private int particleNum = 100;
     private boolean isAddingPotions = false;
     private HashMap<Perk, Integer> perks = new HashMap<>();
     private boolean isInAdminMode = false;
+    private boolean isInArchitectMode = false;
     private long saintExpireDate;
+    private int permanentSaintRank;
     private long conquestDisbandCooldownEnd = 0;
     private boolean isCompressingItems = true;
     private int bulkTransactionNum = 0;
@@ -74,6 +79,7 @@ public class AranarthPlayer {
     private boolean isOpeningCrateWithCyclingItem = false;
     private CrateType crateTypeBeingOpened = null;
     private boolean isAutoClaimEnabled = false;
+    private String autoClaimRegion = null;
     private boolean isTogglingMessages = false;
     private boolean isTogglingChat = false;
     private boolean isTogglingTp = false;
@@ -112,6 +118,8 @@ public class AranarthPlayer {
     private boolean isSizeScaleEnabled = true;
     private boolean isReaperDisabled = false;
     private boolean isServerTipsDisabled = false;
+    private boolean isSitDisabled = false;
+    private String sitCushionColor = "WHITE";
     private int joinSoundVolume = 100;
     private int leaveSoundVolume = 100;
     private int voteSoundVolume = 100;
@@ -129,6 +137,7 @@ public class AranarthPlayer {
     private int jobsSoundVolume = 100;
     private int expStoreSoundVolume = 100;
     private int lowHealthSoundVolume = 100;
+    private int voiceChatSoundVolume = 100;
     private long containerToggleExpiry = 0;
     private long bulkTransactionExpiry = 0;
     private int bulkTransactionQuantity = 0;
@@ -137,6 +146,8 @@ public class AranarthPlayer {
     private boolean jobDataLoaded = false;
     private boolean isBarbarian = false;
     private long barbarianCooldownEnd = 0;
+    private long infiniteLibraryCooldownEnd = 0;
+    private String language = "en_US";
 
     public AranarthPlayer(String username) {
         this.username = username;
@@ -183,10 +194,12 @@ public class AranarthPlayer {
         this.perks = new HashMap<>();
         this.isInAdminMode = false;
         this.saintExpireDate = 0;
+        this.permanentSaintRank = 0;
         this.isCompressingItems = true;
         this.bulkTransactionNum = 0;
         this.votePointsSpent = 0;
         this.isAutoClaimEnabled = false;
+        this.autoClaimRegion = null;
         this.isTogglingMessages = false;
         this.isTogglingChat = false;
         this.isTogglingTp = false;
@@ -266,6 +279,7 @@ public class AranarthPlayer {
         this.bulkTransactionNum = 0;
         this.votePointsSpent = votePointsSpent;
         this.isAutoClaimEnabled = false;
+        this.autoClaimRegion = null;
         this.isTogglingMessages = false;
         this.isTogglingChat = false;
         this.isTogglingTp = false;
@@ -725,6 +739,11 @@ public class AranarthPlayer {
      * @param balance The new value for the player's balance.
      */
     public void setBalance(double balance) {
+        // A NaN or infinite balance would pass every "balance < price" check, so it is never stored
+        if (!Double.isFinite(balance)) {
+            Bukkit.getLogger().warning("[AC] Refused to set a non-finite balance for " + username);
+            return;
+        }
         this.balance = balance;
     }
 
@@ -902,6 +921,9 @@ public class AranarthPlayer {
      */
     public void setCouncilRank(int councilRank) {
         this.councilRank = councilRank;
+        if (councilRank != 3) {
+            this.isInAdminMode = false;
+        }
     }
 
     /**
@@ -986,6 +1008,9 @@ public class AranarthPlayer {
      * @return The UUID of the player that sent the request to teleport to them.
      */
     public UUID getTeleportToUuid() {
+        if (teleportToUuid != null && System.currentTimeMillis() - teleportRequestTime > TELEPORT_REQUEST_TTL_MS) {
+            teleportToUuid = null;
+        }
         return teleportToUuid;
     }
 
@@ -996,6 +1021,9 @@ public class AranarthPlayer {
      */
     public void setTeleportToUuid(UUID teleportToUuid) {
         this.teleportToUuid = teleportToUuid;
+        if (teleportToUuid != null) {
+            teleportRequestTime = System.currentTimeMillis();
+        }
     }
 
     /**
@@ -1004,6 +1032,9 @@ public class AranarthPlayer {
      * @return The UUID of the player that sent the request to teleport to this player.
      */
     public UUID getTeleportFromUuid() {
+        if (teleportFromUuid != null && System.currentTimeMillis() - teleportRequestTime > TELEPORT_REQUEST_TTL_MS) {
+            teleportFromUuid = null;
+        }
         return teleportFromUuid;
     }
 
@@ -1014,6 +1045,9 @@ public class AranarthPlayer {
      */
     public void setTeleportFromUuid(UUID teleportFromUuid) {
         this.teleportFromUuid = teleportFromUuid;
+        if (teleportFromUuid != null) {
+            teleportRequestTime = System.currentTimeMillis();
+        }
     }
 
     /**
@@ -1094,7 +1128,8 @@ public class AranarthPlayer {
      * @return Whether the player is in admin mode.
      */
     public boolean isInAdminMode() {
-        return isInAdminMode;
+        // Only Council rank 3 can use admin mode, so a demoted player loses it immediately
+        return isInAdminMode && councilRank == 3;
     }
 
     /**
@@ -1104,6 +1139,25 @@ public class AranarthPlayer {
      */
     public void setInAdminMode(boolean isInAdminMode) {
         this.isInAdminMode = isInAdminMode;
+    }
+
+    /**
+     * Provides whether the player is in architect mode.
+     *
+     * @return Whether the player is in architect mode.
+     */
+    public boolean isInArchitectMode() {
+        // Only Architects and Council can use architect mode, so a demoted player loses it immediately
+        return isInArchitectMode && (councilRank > 0 || architectRank >= 1);
+    }
+
+    /**
+     * Updates the variable tracking whether the player is in architect mode.
+     *
+     * @param isInArchitectMode Whether the player is in architect mode.
+     */
+    public void setInArchitectMode(boolean isInArchitectMode) {
+        this.isInArchitectMode = isInArchitectMode;
     }
 
     /**
@@ -1122,6 +1176,23 @@ public class AranarthPlayer {
      */
     public void setSaintExpireDate(long saintExpireDate) {
         this.saintExpireDate = saintExpireDate;
+    }
+
+    /**
+     * Provides the player's permanent saint rank which is the fallback when a monthly saint rank expires.
+     * @return The permanent saint rank.
+     */
+    public int getPermanentSaintRank() {
+        return permanentSaintRank;
+    }
+
+    /**
+     * Updates the player's permanent saint rank.
+     *
+     * @param permanentSaintRank The permanent saint rank (0-3).
+     */
+    public void setPermanentSaintRank(int permanentSaintRank) {
+        this.permanentSaintRank = permanentSaintRank;
     }
 
     /**
@@ -1230,6 +1301,24 @@ public class AranarthPlayer {
      */
     public void setAutoClaimEnabled(boolean isAutoClaimEnabled) {
         this.isAutoClaimEnabled = isAutoClaimEnabled;
+    }
+
+    /**
+     * Provides the name of the region that the player is automatically adding chunks to.
+     *
+     * @return The region name, or null if the player is not auto-claiming chunks into a region.
+     */
+    public String getAutoClaimRegion() {
+        return autoClaimRegion;
+    }
+
+    /**
+     * Updates the name of the region that the player is automatically adding chunks to.
+     *
+     * @param autoClaimRegion The region name, or null to stop auto-claiming chunks into a region.
+     */
+    public void setAutoClaimRegion(String autoClaimRegion) {
+        this.autoClaimRegion = autoClaimRegion;
     }
 
     /**
@@ -1395,18 +1484,18 @@ public class AranarthPlayer {
     }
 
     /**
-     * Provides the temporary variable tracking the number of blocks to destroy from the Incantation of Plentiful.
+     * Provides the temporary variable tracking the number of blocks to destroy from the Essence of Plentiful.
      *
-     * @return The temporary variable tracking the number of blocks to destroy from the Incantation of Plentiful.
+     * @return The temporary variable tracking the number of blocks to destroy from the Essence of Plentiful.
      */
     public int getPlentifulBlocksToDestroy() {
         return plentifulBlocksToDestroy;
     }
 
     /**
-     * Updates the temporary variable tracking the number of blocks to destroy from the Incantation of Plentiful.
+     * Updates the temporary variable tracking the number of blocks to destroy from the Essence of Plentiful.
      *
-     * @param plentifulBlocksToDestroy The temporary variable tracking the number of blocks to destroy from the Incantation of Plentiful.
+     * @param plentifulBlocksToDestroy The temporary variable tracking the number of blocks to destroy from the Essence of Plentiful.
      */
     public void setPlentifulBlocksToDestroy(int plentifulBlocksToDestroy) {
         this.plentifulBlocksToDestroy = plentifulBlocksToDestroy;
@@ -1970,6 +2059,14 @@ public class AranarthPlayer {
         this.lowHealthSoundVolume = lowHealthSoundVolume;
     }
 
+    public int getVoiceChatSoundVolume() {
+        return voiceChatSoundVolume;
+    }
+
+    public void setVoiceChatSoundVolume(int voiceChatSoundVolume) {
+        this.voiceChatSoundVolume = voiceChatSoundVolume;
+    }
+
     public boolean isInteractiveChatEnabled() {
         return isInteractiveChatEnabled;
     }
@@ -2010,6 +2107,14 @@ public class AranarthPlayer {
         this.barbarianCooldownEnd = barbarianCooldownEnd;
     }
 
+    public long getInfiniteLibraryCooldownEnd() {
+        return infiniteLibraryCooldownEnd;
+    }
+
+    public void setInfiniteLibraryCooldownEnd(long infiniteLibraryCooldownEnd) {
+        this.infiniteLibraryCooldownEnd = infiniteLibraryCooldownEnd;
+    }
+
     public boolean isReaperDisabled() {
         return isReaperDisabled;
     }
@@ -2024,5 +2129,29 @@ public class AranarthPlayer {
 
     public void setServerTipsDisabled(boolean serverTipsDisabled) {
         this.isServerTipsDisabled = serverTipsDisabled;
+    }
+
+    public boolean isSitDisabled() {
+        return isSitDisabled;
+    }
+
+    public void setSitDisabled(boolean sitDisabled) {
+        this.isSitDisabled = sitDisabled;
+    }
+
+    public String getSitCushionColor() {
+        return sitCushionColor;
+    }
+
+    public void setSitCushionColor(String sitCushionColor) {
+        this.sitCushionColor = sitCushionColor;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
     }
 }

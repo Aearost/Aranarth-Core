@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.projectkorra.projectkorra.event.AbilityDamageEntityEvent;
 import io.papermc.paper.event.player.PlayerOpenSignEvent;
 import org.bukkit.Bukkit;
@@ -17,7 +18,6 @@ import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
@@ -27,6 +27,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionType;
 
 import java.util.Random;
+import java.util.UUID;
 
 /**
  * Handles preventing behaviour in the arena world.
@@ -51,29 +52,35 @@ public class ArenaProtection implements Listener {
 	}
 
 	/**
+	 * Provides whether the player bypasses the building protections in the arena world.
+	 */
+	private boolean canModify(Player player) {
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		return aranarthPlayer.isInAdminMode() || aranarthPlayer.isInArchitectMode();
+	}
+
+	/**
 	 * Prevents blocks from being destroyed in the arena world spawn.
 	 */
 	@EventHandler
 	public void onBlockBreak(final BlockBreakEvent e) {
 		if (isArenaSpawn(e.getBlock().getLocation())) {
-			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-			if (!aranarthPlayer.isInAdminMode()) {
+			if (!canModify(e.getPlayer())) {
 				e.setCancelled(true);
-				e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot break this!"));
+				e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "access.no_break")));
 			}
 		}
 	}
 
 	/**
-	 * Prevents blocks from being placed in the arena world spawn if somehow obtained.
+	 * Prevents blocks from being placed anywhere in the arena world unless in admin or architect mode.
 	 */
 	@EventHandler
 	public void onBlockPlace(final BlockPlaceEvent e) {
-		if (isArenaSpawn(e.getBlock().getLocation())) {
-			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-			if (!aranarthPlayer.isInAdminMode()) {
+		if (e.getBlock().getWorld().getName().equalsIgnoreCase("arena")) {
+			if (!canModify(e.getPlayer())) {
 				e.setCancelled(true);
-				e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot place this here!"));
+				e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "arena.cannot_place")));
 			}
 		}
 	}
@@ -144,12 +151,8 @@ public class ArenaProtection implements Listener {
 		return (x >= -10 && x <= 10) && (y >= 100 && y <= 111) && (z >= -10 && z <= 10);
 	}
 
-	/**
-	 * Tracks the arena-capped damage value from AbilityDamageEntityEvent so it can be enforced
-	 * in EntityDamageByEntityEvent at HIGHEST priority (after any other plugins inflate the value).
-	 * Set to null when not in an ability damage pipeline.
-	 */
 	private Double pendingArenaCap = null;
+	private UUID pendingArenaCapTarget = null;
 
 	/**
 	 * Reduces bending ability damage in the arena world using a tiered scale.
@@ -180,23 +183,41 @@ public class ArenaProtection implements Listener {
 		}
 
 		// Store the intended cap - enforced at HIGHEST in onBendingEntityDamageInArena
-		// since another plugin inflates the EntityDamageByEntityEvent after LOWEST
+		// since another plugin inflates the damage event after LOWEST
 		pendingArenaCap = reducedHp;
+		pendingArenaCapTarget = e.getEntity().getUniqueId();
 		e.setDamage(reducedHp);
 	}
 
 	/**
-	 * Enforces the arena damage cap at HIGHEST priority on the EntityDamageByEntityEvent
-	 * that ProjectKorra fires internally after AbilityDamageEntityEvent. This counteracts
-	 * any other plugin that inflates bending damage between LOWEST and HIGHEST.
+	 * Clears the pending arena cap if the ability damage was cancelled after it was stored,
+	 * since no damage event will follow to consume it.
+	 */
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void onBendingDamageInArenaCancelled(AbilityDamageEntityEvent e) {
+		if (e.isCancelled() && e.getEntity().getUniqueId().equals(pendingArenaCapTarget)) {
+			pendingArenaCap = null;
+			pendingArenaCapTarget = null;
+		}
+	}
+
+	/**
+	 * Enforces the arena damage cap at HIGHEST priority on the damage event that ProjectKorra
+	 * fires internally after AbilityDamageEntityEvent. This counteracts any other plugin that
+	 * inflates bending damage between LOWEST and HIGHEST. Listens to EntityDamageEvent so that
+	 * sourceless bending damage (such as bending fire tick) is also consumed and capped.
 	 */
 	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onBendingEntityDamageInArena(EntityDamageByEntityEvent e) {
+	public void onBendingEntityDamageInArena(EntityDamageEvent e) {
 		if (pendingArenaCap == null) {
+			return;
+		}
+		if (!e.getEntity().getUniqueId().equals(pendingArenaCapTarget)) {
 			return;
 		}
 		double cap = pendingArenaCap;
 		pendingArenaCap = null;
+		pendingArenaCapTarget = null;
 
 		if (!e.getEntity().getWorld().getName().equalsIgnoreCase("arena")) {
 			return;
@@ -211,7 +232,7 @@ public class ArenaProtection implements Listener {
 	private void onDamage(EntityDamageEvent e) {
 		if (isArenaSpawn(e.getEntity().getLocation())) {
 			if (e.getDamageSource().getCausingEntity() instanceof Player attacker) {
-				attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm players here!"));
+				attacker.sendMessage(ChatUtils.chatMessage(Lang.getFor(attacker, "spawn.no_harm_players")));
 			}
 			// Additionally prevents the target from being damaged, regardless of the source of damage
 			e.setCancelled(true);
@@ -231,11 +252,11 @@ public class ArenaProtection implements Listener {
 				if (loc.getBlockX() == -1 && loc.getBlockY() == 106 && loc.getBlockZ() == -3) {
 					e.setCancelled(true);
 					Location arenaLoc = new Location(Bukkit.getWorld("arena"), 1000, 101, 1000);
-					AranarthUtils.teleportPlayer(player, player.getLocation(), arenaLoc, true, "&e&lSmall Arena", "&7You have teleported to the Small Arena", success -> {
+					AranarthUtils.teleportPlayer(player, player.getLocation(), arenaLoc, true, Lang.getFor(player, "teleport.title_small_arena"), Lang.getFor(player, "arena.tp_small_success"), success -> {
 						if (success) {
-							player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &eSmall Arena"));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arena.tp_small_success")));
 						} else {
-							player.sendMessage(ChatUtils.chatMessage("&cYou could not be teleported to the &eSmall Arena"));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arena.tp_small_fail")));
 						}
 					});
 				}
@@ -255,11 +276,11 @@ public class ArenaProtection implements Listener {
 					} else if (locationNum == 4) {
 						arenaLoc = new Location(Bukkit.getWorld("arena"), -940, 104, -947, 135, 0);
 					}
-					AranarthUtils.teleportPlayer(player, player.getLocation(), arenaLoc, true, "&e&lLarge Arena", "&7You have teleported to the Large Arena", success -> {
+					AranarthUtils.teleportPlayer(player, player.getLocation(), arenaLoc, true, Lang.getFor(player, "teleport.title_large_arena"), Lang.getFor(player, "arena.tp_large_success"), success -> {
 						if (success) {
-							player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &eLarge Arena"));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arena.tp_large_success")));
 						} else {
-							player.sendMessage(ChatUtils.chatMessage("&cYou could not be teleported to the &eLarge Arena"));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arena.tp_large_fail")));
 						}
 					});
 				}
@@ -298,8 +319,7 @@ public class ArenaProtection implements Listener {
 	@EventHandler
 	public void onSignOpen(PlayerOpenSignEvent e) {
 		if (e.getSign().getLocation().getWorld().getName().equalsIgnoreCase("arena")) {
-			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-			if (!aranarthPlayer.isInAdminMode()) {
+			if (!canModify(e.getPlayer())) {
 				e.setCancelled(true);
 			}
 		}

@@ -25,7 +25,7 @@ public class CommandDate implements CommandExecutor {
 		String month = DateUtils.provideMonthName(AranarthUtils.getMonth());
 		int year = AranarthUtils.getYear();
 
-		String[] messages = DateUtils.determineServerDate(day, weekday, month, year);
+		String[] messages = DateUtils.determineServerDate(sender, day, weekday, month, year);
 		sender.sendMessage(messages[0]);
 		sender.sendMessage("  " + messages[1]);
 		sender.sendMessage(messages[2]);

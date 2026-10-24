@@ -1,8 +1,10 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -40,7 +42,7 @@ public class CommandBoosts implements CommandExecutor {
 			}
 
 			if (args.length <= 1) {
-				sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/boosts <add/remove> <type> [user]"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "boosts <add/remove> <type> [user]")));
 				return true;
 			} else {
 				if (args[0].equals("add") || args[0].equals("remove")) {
@@ -54,6 +56,11 @@ public class CommandBoosts implements CommandExecutor {
 					if (applied != null) {
 						// Adding a boost
 						if (args[0].equals("add")) {
+							// Store purchases are run from console on both servers and must only be processed on the Survival server
+							if (!(sender instanceof Player) && AranarthCore.isSmpServer()) {
+								return true;
+							}
+
 							// If a user was entered, attempt to resolve their UUID
 							UUID uuid = null;
 							if (args.length >= 3) {
@@ -68,11 +75,11 @@ public class CommandBoosts implements CommandExecutor {
 							return true;
 						}
 					} else {
-						sender.sendMessage(ChatUtils.chatMessage("&cThe entered boost does not exist!"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "boost.not_found")));
 						return true;
 					}
 				} else {
-					sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/boosts <add/remove> <type> <user>"));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "boosts <add/remove> <type> <user>")));
 					return true;
 				}
 			}
@@ -83,12 +90,12 @@ public class CommandBoosts implements CommandExecutor {
 	private void displayBoosts(CommandSender sender) {
 		HashMap<Boost, LocalDateTime> boosts = AranarthUtils.getServerBoosts();
 		if (boosts.isEmpty()) {
-			sender.sendMessage(ChatUtils.chatMessage("&7There are currently no active server boosts"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "boost.no_active")));
 		} else {
-			sender.sendMessage(ChatUtils.translateToColor("&8      - - - &6&lActive Server Boosts &8- - -"));
+			sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "boost.list_header")));
 			HashMap<String, String> activeBoosts = AranarthUtils.getActiveServerBoostsMessages();
 			for (String boost : activeBoosts.keySet()) {
-				sender.sendMessage(ChatUtils.translateToColor(boost + " &7| " + activeBoosts.get(boost)));
+				sender.sendMessage(ChatUtils.translateToColor(Lang.resolve(sender, boost) + " &7| " + activeBoosts.get(boost)));
 			}
 		}
 	}

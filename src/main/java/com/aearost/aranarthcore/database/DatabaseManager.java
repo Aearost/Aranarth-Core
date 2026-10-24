@@ -2,13 +2,18 @@ package com.aearost.aranarthcore.database;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.network.NetworkPlayer;
+import com.aearost.aranarthcore.objects.Coupon;
+import com.aearost.aranarthcore.objects.TradeMarketData;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.Bukkit;
 
 import java.sql.*;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Central MySQL persistence layer for AranarthCore.
@@ -128,8 +133,45 @@ public class DatabaseManager {
             throw new RuntimeException("MySQL connectivity test failed: " + e.getMessage(), e);
         }
 
+        renameLegacyTables();
         createTables();
         migrateSchema();
+    }
+
+    /**
+     * Renames tables whose feature was renamed, keeping their data.
+     */
+    private void renameLegacyTables() {
+        String[][] renames = {
+                {"server_dominion_plots", "server_dominion_regions"}
+        };
+        try (Connection conn = dataSource.getConnection(); Statement stmt = conn.createStatement()) {
+            for (String[] rename : renames) {
+                try {
+                    if (!tableExists(conn, rename[0])) {
+                        continue;
+                    }
+                    if (tableExists(conn, rename[1])) {
+                        Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Both " + rename[0] + " and " + rename[1]
+                                + " exist, so " + rename[0] + " was not renamed. Its data is not being used");
+                        continue;
+                    }
+                    stmt.execute("RENAME TABLE " + rename[0] + " TO " + rename[1]);
+                    Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[DB] Renamed table " + rename[0] + " to " + rename[1]);
+                } catch (SQLException e) {
+                    // The other server may have renamed it at the same moment
+                    Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to rename table " + rename[0] + ": " + e.getMessage());
+                }
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Table rename error: " + e.getMessage());
+        }
+    }
+
+    private boolean tableExists(Connection conn, String table) throws SQLException {
+        try (ResultSet rs = conn.getMetaData().getTables(conn.getCatalog(), null, table, new String[]{"TABLE"})) {
+            return rs.next();
+        }
     }
 
     private void doShutdown() {
@@ -163,13 +205,14 @@ public class DatabaseManager {
             CREATE TABLE IF NOT EXISTS network_roster (
                 uuid VARCHAR(36) PRIMARY KEY,
                 username VARCHAR(64) NOT NULL,
-                nickname TEXT DEFAULT '',
+                nickname VARCHAR(1000) DEFAULT '',
                 server VARCHAR(64) NOT NULL,
-                rank INT DEFAULT 0,
+                `rank` INT DEFAULT 0,
                 council_rank INT DEFAULT 0,
                 saint_rank INT DEFAULT 0,
                 architect_rank INT DEFAULT 0,
                 vanished TINYINT(1) DEFAULT 0,
+                pronouns VARCHAR(64) DEFAULT '',
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
@@ -178,6 +221,7 @@ public class DatabaseManager {
                 uuid VARCHAR(36) PRIMARY KEY,
                 username VARCHAR(64) NOT NULL,
                 data_json MEDIUMTEXT NOT NULL,
+                raw_data MEDIUMTEXT DEFAULT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
@@ -245,6 +289,14 @@ public class DatabaseManager {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
                 """
+            CREATE TABLE IF NOT EXISTS network_bans (
+                uuid VARCHAR(36) PRIMARY KEY,
+                reason TEXT NOT NULL,
+                expires_at BIGINT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+                """
             CREATE TABLE IF NOT EXISTS server_boosts (
                 data_json MEDIUMTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -254,7 +306,7 @@ public class DatabaseManager {
                 """
             CREATE TABLE IF NOT EXISTS network_temp_data (
                 key_name VARCHAR(128) PRIMARY KEY,
-                value_json TEXT NOT NULL,
+                value_json MEDIUMTEXT NOT NULL,
                 expires_at TIMESTAMP NOT NULL,
                 INDEX idx_expires (expires_at)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
@@ -323,7 +375,7 @@ public class DatabaseManager {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
                 """
-            CREATE TABLE IF NOT EXISTS server_dominion_plots (
+            CREATE TABLE IF NOT EXISTS server_dominion_regions (
                 dominion_id VARCHAR(36) PRIMARY KEY,
                 data_json MEDIUMTEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -428,7 +480,7 @@ public class DatabaseManager {
             CREATE TABLE IF NOT EXISTS player_blacklist_presets (
                 uuid VARCHAR(36) PRIMARY KEY,
                 active_preset_index INT NOT NULL DEFAULT -1,
-                preset_data_json MEDIUMTEXT NOT NULL DEFAULT '{}'
+                preset_data_json MEDIUMTEXT NOT NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
                 """
@@ -439,7 +491,8 @@ public class DatabaseManager {
                 death_world VARCHAR(64) NOT NULL DEFAULT 'world',
                 death_x DOUBLE NOT NULL DEFAULT 0,
                 death_y DOUBLE NOT NULL DEFAULT 64,
-                death_z DOUBLE NOT NULL DEFAULT 0
+                death_z DOUBLE NOT NULL DEFAULT 0,
+                death_server VARCHAR(32) NULL DEFAULT NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
                 """
@@ -450,17 +503,47 @@ public class DatabaseManager {
                 sell_pressure DOUBLE NOT NULL DEFAULT 0.0,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+                """
+            CREATE TABLE IF NOT EXISTS trade_market_prices (
+                market_key VARCHAR(256) PRIMARY KEY,
+                display_name VARCHAR(256) NOT NULL,
+                material VARCHAR(64) NOT NULL,
+                item_model_key VARCHAR(256),
+                total_value DOUBLE NOT NULL DEFAULT 0,
+                total_units BIGINT NOT NULL DEFAULT 0,
+                first_price DOUBLE NOT NULL DEFAULT 0,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+                """
+            CREATE TABLE IF NOT EXISTS server_creative_plots (
+                plot_key VARCHAR(32) PRIMARY KEY,
+                data_json MEDIUMTEXT NOT NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+                """
+            CREATE TABLE IF NOT EXISTS server_coupons (
+                id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                discount INT NOT NULL,
+                code VARCHAR(64) NOT NULL UNIQUE,
+                INDEX idx_discount (discount, id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """
         };
 
         try (Connection conn = dataSource.getConnection();
              Statement stmt = conn.createStatement()) {
             for (String sql : ddl) {
-                stmt.execute(sql.trim());
+                try {
+                    stmt.execute(sql.trim());
+                } catch (SQLException e) {
+                    Bukkit.getLogger().log(Level.SEVERE, AranarthCore.LOG_PREFIX + "Failed to create MySQL schema: " + e.getMessage(), e);
+                }
             }
             Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "MySQL schema verified/created");
         } catch (SQLException e) {
-            Bukkit.getLogger().log(Level.SEVERE, AranarthCore.LOG_PREFIX + "Failed to create MySQL schema: " + e.getMessage(), e);
+            Bukkit.getLogger().log(Level.SEVERE, AranarthCore.LOG_PREFIX + "Failed to connect for schema creation: " + e.getMessage(), e);
         }
     }
 
@@ -472,24 +555,49 @@ public class DatabaseManager {
         String[] migrations = {
                 "ALTER TABLE aranarth_players ADD COLUMN IF NOT EXISTS raw_data LONGTEXT",
                 "ALTER TABLE player_votes ADD COLUMN IF NOT EXISTS history_json MEDIUMTEXT",
-                "ALTER TABLE network_roster MODIFY COLUMN nickname TEXT DEFAULT ''",
+                "ALTER TABLE network_roster MODIFY COLUMN nickname VARCHAR(1000) DEFAULT ''",
                 "ALTER TABLE player_chat_game_guesses ADD COLUMN IF NOT EXISTS total_earnings DOUBLE NOT NULL DEFAULT 0",
                 "ALTER TABLE player_chat_game_guesses ADD COLUMN IF NOT EXISTS best_time DOUBLE NOT NULL DEFAULT 0",
                 "ALTER TABLE player_chat_game_guesses ADD COLUMN IF NOT EXISTS highest_streak INT NOT NULL DEFAULT 0",
                 "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_world VARCHAR(64) NOT NULL DEFAULT 'world'",
                 "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_x DOUBLE NOT NULL DEFAULT 0",
                 "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_y DOUBLE NOT NULL DEFAULT 64",
-                "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_z DOUBLE NOT NULL DEFAULT 0"
+                "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_z DOUBLE NOT NULL DEFAULT 0",
+                "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_server VARCHAR(32) NULL DEFAULT NULL",
+                "ALTER TABLE network_temp_data MODIFY COLUMN value_json MEDIUMTEXT NOT NULL",
+                "ALTER TABLE network_roster ADD COLUMN IF NOT EXISTS pronouns VARCHAR(10) NOT NULL DEFAULT 'MALE'"
         };
         try (Connection conn = dataSource.getConnection(); Statement stmt = conn.createStatement()) {
             for (String sql : migrations) {
                 try {
-                    stmt.execute(sql);
-                } catch (SQLException ignored) {
+                    // MySQL does not support ADD COLUMN IF NOT EXISTS (only MariaDB does), so the column is
+                    // checked first and added with a plain ADD COLUMN when it is missing
+                    Matcher addColumn = ADD_COLUMN_IF_NOT_EXISTS.matcher(sql);
+                    if (addColumn.matches()) {
+                        String table = addColumn.group(1);
+                        String column = addColumn.group(2);
+                        if (!columnExists(conn, table, column)) {
+                            stmt.execute("ALTER TABLE " + table + " ADD COLUMN " + column + " " + addColumn.group(3));
+                            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[DB] Added column " + table + "." + column);
+                        }
+                    } else {
+                        stmt.execute(sql);
+                    }
+                } catch (SQLException e) {
+                    Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Schema migration failed (" + sql + "): " + e.getMessage());
                 }
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Schema migration error: " + e.getMessage());
+        }
+    }
+
+    private static final Pattern ADD_COLUMN_IF_NOT_EXISTS = Pattern.compile(
+            "ALTER TABLE (\\w+) ADD COLUMN IF NOT EXISTS (\\w+) (.+)", Pattern.CASE_INSENSITIVE);
+
+    private boolean columnExists(Connection conn, String table, String column) throws SQLException {
+        try (ResultSet rs = conn.getMetaData().getColumns(conn.getCatalog(), null, table, column)) {
+            return rs.next();
         }
     }
 
@@ -516,6 +624,30 @@ public class DatabaseManager {
     }
 
     /**
+     * Every player's balance, loaded asynchronously and reused for a minute.
+     */
+    private final CachedQuery<Map<UUID, BalanceEntry>> cachedBalances = new CachedQuery<>(this::loadAllPlayerBalances, 60_000L);
+
+    /**
+     * Every player's job data, loaded asynchronously and reused for a minute.
+     */
+    private final CachedQuery<List<JobTopEntry>> cachedJobEntries = new CachedQuery<>(this::loadAllJobEntries, 60_000L);
+
+    /**
+     * Provides every player's balance on the main thread, reusing a result up to a minute old.
+     */
+    public void getCachedPlayerBalances(Consumer<Map<UUID, BalanceEntry>> callback) {
+        cachedBalances.get(callback);
+    }
+
+    /**
+     * Provides every player's job data on the main thread, reusing a result up to a minute old.
+     */
+    public void getCachedJobEntries(Consumer<List<JobTopEntry>> callback) {
+        cachedJobEntries.get(callback);
+    }
+
+    /**
      * Row returned by {@link #loadAllPlayerBalances()}.
      */
     public record BalanceEntry(double balance, String username, String nickname) {
@@ -526,7 +658,8 @@ public class DatabaseManager {
      * Includes username and nickname so /baltop can display players not loaded on this server.
      */
     public Map<UUID, BalanceEntry> loadAllPlayerBalances() {
-        String sql = "SELECT uuid, username, raw_data FROM aranarth_players WHERE raw_data IS NOT NULL AND raw_data != ''";
+        // Only the first 10 fields (up to the balance) are read, never the serialized inventories
+        String sql = "SELECT uuid, username, SUBSTRING_INDEX(raw_data, '|', 10) AS raw_data FROM aranarth_players WHERE raw_data IS NOT NULL AND raw_data != ''";
         Map<UUID, BalanceEntry> result = new HashMap<>();
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -583,6 +716,99 @@ public class DatabaseManager {
             ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save raw player data for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Atomically adds a delta to the balance field of the player's stored raw row, leaving every
+     * other field untouched. Used by a server that is NOT authoritative for the player (they are
+     * not online on it), so it never overwrites homes, inventory, etc. with its stale in-memory copy.
+     *
+     * @return true if the row existed and was updated.
+     */
+    public boolean adjustRawBalance(UUID uuid, double delta) {
+        String select = "SELECT raw_data FROM aranarth_players WHERE uuid = ? AND raw_data IS NOT NULL AND raw_data != '' FOR UPDATE";
+        String update = "UPDATE aranarth_players SET raw_data = ? WHERE uuid = ?";
+        try (Connection conn = dataSource.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                String raw;
+                try (PreparedStatement ps = conn.prepareStatement(select)) {
+                    ps.setString(1, uuid.toString());
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (!rs.next()) {
+                            conn.commit();
+                            return false;
+                        }
+                        raw = rs.getString("raw_data");
+                    }
+                }
+                // Field 9 is the balance (see PersistenceUtils.buildAranarthPlayerRow)
+                String[] fields = raw.split("\\|", -1);
+                if (fields.length < 10) {
+                    conn.commit();
+                    return false;
+                }
+                fields[9] = String.valueOf(Double.parseDouble(fields[9]) + delta);
+                try (PreparedStatement ps = conn.prepareStatement(update)) {
+                    ps.setString(1, String.join("|", fields));
+                    ps.setString(2, uuid.toString());
+                    ps.executeUpdate();
+                }
+                conn.commit();
+                return true;
+            } catch (SQLException | NumberFormatException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        } catch (SQLException | NumberFormatException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to adjust raw balance for " + uuid + ": " + e.getMessage());
+        }
+        return false;
+    }
+
+    /**
+     * Replaces a single field of a stored player row, for players who are not online on any server.
+     */
+    public void setRawPlayerField(UUID uuid, int index, String value) {
+        String select = "SELECT raw_data FROM aranarth_players WHERE uuid = ? AND raw_data IS NOT NULL AND raw_data != '' FOR UPDATE";
+        String update = "UPDATE aranarth_players SET raw_data = ? WHERE uuid = ?";
+        try (Connection conn = dataSource.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                String raw;
+                try (PreparedStatement ps = conn.prepareStatement(select)) {
+                    ps.setString(1, uuid.toString());
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (!rs.next()) {
+                            conn.commit();
+                            return;
+                        }
+                        raw = rs.getString("raw_data");
+                    }
+                }
+                String[] fields = raw.split("\\|", -1);
+                if (fields.length <= index) {
+                    conn.commit();
+                    return;
+                }
+                fields[index] = value;
+                try (PreparedStatement ps = conn.prepareStatement(update)) {
+                    ps.setString(1, String.join("|", fields));
+                    ps.setString(2, uuid.toString());
+                    ps.executeUpdate();
+                }
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to set field " + index + " for " + uuid + ": " + e.getMessage());
         }
     }
 
@@ -1050,13 +1276,14 @@ public class DatabaseManager {
     // -------------------------------------------------------------------------
 
     public void upsertRosterEntry(UUID uuid, String username, String nickname, String server,
-                                  int rank, int councilRank, int saintRank, int architectRank, boolean vanished) {
+                                  int rank, int councilRank, int saintRank, int architectRank, boolean vanished,
+                                  String pronouns) {
         String sql = """
-                INSERT INTO network_roster (uuid, username, nickname, server, rank, council_rank, saint_rank, architect_rank, vanished)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO network_roster (uuid, username, nickname, server, `rank`, council_rank, saint_rank, architect_rank, vanished, pronouns)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE username=VALUES(username), nickname=VALUES(nickname), server=VALUES(server),
-                rank=VALUES(rank), council_rank=VALUES(council_rank), saint_rank=VALUES(saint_rank),
-                architect_rank=VALUES(architect_rank), vanished=VALUES(vanished)
+                `rank`=VALUES(`rank`), council_rank=VALUES(council_rank), saint_rank=VALUES(saint_rank),
+                architect_rank=VALUES(architect_rank), vanished=VALUES(vanished), pronouns=VALUES(pronouns)
                 """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -1073,9 +1300,22 @@ public class DatabaseManager {
             ps.setInt(7, saintRank);
             ps.setInt(8, architectRank);
             ps.setBoolean(9, vanished);
+            ps.setString(10, pronouns != null ? pronouns : "MALE");
             ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to upsert roster entry for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    public void updateRosterPronouns(UUID uuid, String pronouns) {
+        String sql = "UPDATE network_roster SET pronouns = ? WHERE uuid = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, pronouns != null ? pronouns : "MALE");
+            ps.setString(2, uuid.toString());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to update roster pronouns for " + uuid + ": " + e.getMessage());
         }
     }
 
@@ -1108,7 +1348,7 @@ public class DatabaseManager {
      * Loads all roster entries NOT from thisServer.
      */
     public Map<UUID, NetworkPlayer> loadRemoteRoster(String thisServer) {
-        String sql = "SELECT uuid, username, nickname, server, rank, council_rank, saint_rank, architect_rank, vanished FROM network_roster WHERE server != ?";
+        String sql = "SELECT uuid, username, nickname, server, `rank`, council_rank, saint_rank, architect_rank, vanished, pronouns FROM network_roster WHERE server != ?";
         Map<UUID, NetworkPlayer> roster = new HashMap<>();
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -1116,6 +1356,7 @@ public class DatabaseManager {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     UUID uuid = UUID.fromString(rs.getString("uuid"));
+                    String pronouns = rs.getString("pronouns");
                     roster.put(uuid, new NetworkPlayer(
                             uuid,
                             rs.getString("username"),
@@ -1126,7 +1367,8 @@ public class DatabaseManager {
                             rs.getInt("saint_rank"),
                             rs.getInt("architect_rank"),
                             rs.getBoolean("vanished"),
-                            "", "" // textures not stored in DB roster; populated via CH_JOIN
+                            "", "", // textures not stored in DB roster; populated via CH_JOIN
+                            pronouns
                     ));
                 }
             }
@@ -1476,6 +1718,54 @@ public class DatabaseManager {
         }
     }
 
+    /**
+     * @param expiresAt When the ban ends in epoch milliseconds, or -1 for a permanent ban.
+     */
+    public void upsertNetworkBan(UUID uuid, String reason, long expiresAt) {
+        String sql = """
+                INSERT INTO network_bans (uuid, reason, expires_at)
+                VALUES (?, ?, ?)
+                ON DUPLICATE KEY UPDATE reason=VALUES(reason), expires_at=VALUES(expires_at)
+                """;
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            ps.setString(2, reason);
+            ps.setLong(3, expiresAt);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save network ban for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    public void deleteNetworkBan(UUID uuid) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement("DELETE FROM network_bans WHERE uuid = ?")) {
+            ps.setString(1, uuid.toString());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to delete network ban for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Returns {reason, expiresAtString} or null if the player is not banned.
+     */
+    public String[] loadNetworkBan(UUID uuid) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement("SELECT reason, expires_at FROM network_bans WHERE uuid = ?")) {
+            ps.setString(1, uuid.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new String[]{rs.getString("reason"), String.valueOf(rs.getLong("expires_at"))};
+                }
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load network ban for " + uuid + ": " + e.getMessage());
+        }
+        return null;
+    }
+
     public String loadPunishments(UUID uuid) {
         String sql = "SELECT data_json FROM server_punishments WHERE uuid = ?";
         try (Connection conn = dataSource.getConnection();
@@ -1523,6 +1813,100 @@ public class DatabaseManager {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load boosts: " + e.getMessage());
         }
         return null;
+    }
+
+    public record ClaimedCoupon(String code, int remaining) {
+    }
+
+    /**
+     * Inserts the given coupons into the shared pool, skipping codes that are already stored.
+     *
+     * @param coupons The coupons to insert.
+     * @return {added, skipped}, or null if the import failed and nothing was committed.
+     */
+    public int[] importCoupons(List<Coupon> coupons) {
+        String sql = "INSERT IGNORE INTO server_coupons (discount, code) VALUES (?, ?)";
+        try (Connection conn = dataSource.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                int added = 0;
+                for (Coupon coupon : coupons) {
+                    ps.setInt(1, coupon.getDiscountPercentage());
+                    ps.setString(2, coupon.getCode());
+                    added += ps.executeUpdate();
+                }
+                conn.commit();
+                return new int[]{added, coupons.size() - added};
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to import coupons: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Removes and returns the oldest coupon of the given discount tier.
+     *
+     * @param discount The discount tier (e.g. 10 or 30).
+     * @return The claimed code and how many of that tier remain, or null if none are available.
+     */
+    public ClaimedCoupon claimCoupon(int discount) {
+        String select = "SELECT id, code FROM server_coupons WHERE discount = ? ORDER BY id LIMIT 1 FOR UPDATE";
+        String delete = "DELETE FROM server_coupons WHERE id = ?";
+        String count = "SELECT COUNT(*) FROM server_coupons WHERE discount = ?";
+        try (Connection conn = dataSource.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                // Retry in case the other server deleted the selected row first
+                for (int attempt = 0; attempt < 3; attempt++) {
+                    long id;
+                    String code;
+                    try (PreparedStatement ps = conn.prepareStatement(select)) {
+                        ps.setInt(1, discount);
+                        try (ResultSet rs = ps.executeQuery()) {
+                            if (!rs.next()) {
+                                conn.commit();
+                                return null;
+                            }
+                            id = rs.getLong("id");
+                            code = rs.getString("code");
+                        }
+                    }
+                    try (PreparedStatement ps = conn.prepareStatement(delete)) {
+                        ps.setLong(1, id);
+                        if (ps.executeUpdate() == 0) {
+                            continue;
+                        }
+                    }
+                    int remaining = 0;
+                    try (PreparedStatement ps = conn.prepareStatement(count)) {
+                        ps.setInt(1, discount);
+                        try (ResultSet rs = ps.executeQuery()) {
+                            if (rs.next()) {
+                                remaining = rs.getInt(1);
+                            }
+                        }
+                    }
+                    conn.commit();
+                    return new ClaimedCoupon(code, remaining);
+                }
+                conn.commit();
+                return null;
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to claim a " + discount + "% coupon: " + e.getMessage());
+            return null;
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -1766,6 +2150,53 @@ public class DatabaseManager {
         }
     }
 
+    /**
+     * Copies the given fields of sourceRow into the stored row of the dominion, leaving every other
+     * field as stored.
+     */
+    public boolean mergeDominionFields(UUID id, String sourceRow, int[] fieldIndexes) {
+        String select = "SELECT raw_data FROM server_dominions WHERE id = ? FOR UPDATE";
+        String update = "UPDATE server_dominions SET raw_data = ? WHERE id = ?";
+        try (Connection conn = dataSource.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                String stored;
+                try (PreparedStatement ps = conn.prepareStatement(select)) {
+                    ps.setString(1, id.toString());
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (!rs.next()) {
+                            conn.commit();
+                            return false;
+                        }
+                        stored = rs.getString("raw_data");
+                    }
+                }
+                String[] storedFields = stored.split("\\|", -1);
+                String[] sourceFields = sourceRow.split("\\|", -1);
+                for (int index : fieldIndexes) {
+                    if (index < storedFields.length && index < sourceFields.length) {
+                        storedFields[index] = sourceFields[index];
+                    }
+                }
+                try (PreparedStatement ps = conn.prepareStatement(update)) {
+                    ps.setString(1, String.join("|", storedFields));
+                    ps.setString(2, id.toString());
+                    ps.executeUpdate();
+                }
+                conn.commit();
+                return true;
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to merge dominion " + id + ": " + e.getMessage());
+        }
+        return false;
+    }
+
     public String loadDominion(UUID id) {
         String sql = "SELECT raw_data FROM server_dominions WHERE id = ?";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -1915,29 +2346,29 @@ public class DatabaseManager {
         return result;
     }
 
-    public void deleteDominionPlots(UUID dominionId) {
-        String sql = "DELETE FROM server_dominion_plots WHERE dominion_id = ?";
+    public void deleteDominionRegions(UUID dominionId) {
+        String sql = "DELETE FROM server_dominion_regions WHERE dominion_id = ?";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, dominionId.toString());
             ps.executeUpdate();
         } catch (SQLException e) {
-            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to delete dominion plots for " + dominionId + ": " + e.getMessage());
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to delete dominion regions for " + dominionId + ": " + e.getMessage());
         }
     }
 
-    public void saveDominionPlots(UUID dominionId, String dataJson) {
-        String sql = "INSERT INTO server_dominion_plots (dominion_id, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
+    public void saveDominionRegions(UUID dominionId, String dataJson) {
+        String sql = "INSERT INTO server_dominion_regions (dominion_id, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, dominionId.toString());
             ps.setString(2, dataJson);
             ps.executeUpdate();
         } catch (SQLException e) {
-            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save dominion plots for " + dominionId + ": " + e.getMessage());
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save dominion regions for " + dominionId + ": " + e.getMessage());
         }
     }
 
-    public String loadDominionPlotsById(UUID dominionId) {
-        String sql = "SELECT data_json FROM server_dominion_plots WHERE dominion_id = ?";
+    public String loadDominionRegionsById(UUID dominionId) {
+        String sql = "SELECT data_json FROM server_dominion_regions WHERE dominion_id = ?";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, dominionId.toString());
             try (ResultSet rs = ps.executeQuery()) {
@@ -1946,13 +2377,13 @@ public class DatabaseManager {
                 }
             }
         } catch (SQLException e) {
-            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load plots for dominion " + dominionId + ": " + e.getMessage());
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load regions for dominion " + dominionId + ": " + e.getMessage());
         }
         return null;
     }
 
-    public Map<UUID, String> loadAllDominionPlots() {
-        String sql = "SELECT dominion_id, data_json FROM server_dominion_plots";
+    public Map<UUID, String> loadAllDominionRegions() {
+        String sql = "SELECT dominion_id, data_json FROM server_dominion_regions";
         Map<UUID, String> result = new HashMap<>();
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -1960,7 +2391,7 @@ public class DatabaseManager {
                 result.put(UUID.fromString(rs.getString("dominion_id")), rs.getString("data_json"));
             }
         } catch (SQLException e) {
-            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all dominion plots: " + e.getMessage());
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all dominion regions: " + e.getMessage());
         }
         return result;
     }
@@ -1988,6 +2419,41 @@ public class DatabaseManager {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all outposts: " + e.getMessage());
         }
         return result;
+    }
+
+    public void saveCreativePlot(String plotKey, String dataJson) {
+        String sql = "INSERT INTO server_creative_plots (plot_key, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, plotKey);
+            ps.setString(2, dataJson);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save creative plot " + plotKey + ": " + e.getMessage());
+        }
+    }
+
+    public Map<String, String> loadAllCreativePlots() {
+        String sql = "SELECT plot_key, data_json FROM server_creative_plots";
+        Map<String, String> result = new HashMap<>();
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                result.put(rs.getString("plot_key"), rs.getString("data_json"));
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load creative plots: " + e.getMessage());
+        }
+        return result;
+    }
+
+    public void deleteCreativePlot(String plotKey) {
+        String sql = "DELETE FROM server_creative_plots WHERE plot_key = ?";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, plotKey);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to delete creative plot " + plotKey + ": " + e.getMessage());
+        }
     }
 
     public void deleteOutpost(UUID id) {
@@ -2195,6 +2661,47 @@ public class DatabaseManager {
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load market dynamics: " + e.getMessage());
+        }
+        return result;
+    }
+
+    public void upsertTradeMarketData(TradeMarketData data) {
+        String sql = "INSERT INTO trade_market_prices (market_key, display_name, material, item_model_key, total_value, total_units, first_price) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE " +
+                "display_name=VALUES(display_name), total_value=VALUES(total_value), " +
+                "total_units=VALUES(total_units), first_price=VALUES(first_price)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, data.getMarketKey());
+            ps.setString(2, data.getDisplayName());
+            ps.setString(3, data.getMaterial());
+            ps.setString(4, data.getItemModelKey());
+            ps.setDouble(5, data.getTotalValue());
+            ps.setLong(6, data.getTotalUnits());
+            ps.setDouble(7, data.getFirstPrice());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to upsert trade market data for " + data.getMarketKey() + ": " + e.getMessage());
+        }
+    }
+
+    public List<TradeMarketData> loadAllTradeMarketData() {
+        String sql = "SELECT market_key, display_name, material, item_model_key, total_value, total_units, first_price FROM trade_market_prices";
+        List<TradeMarketData> result = new ArrayList<>();
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                result.add(new TradeMarketData(
+                        rs.getString("market_key"),
+                        rs.getString("display_name"),
+                        rs.getString("material"),
+                        rs.getString("item_model_key"),
+                        rs.getDouble("total_value"),
+                        rs.getLong("total_units"),
+                        rs.getDouble("first_price")
+                ));
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load trade market data: " + e.getMessage());
         }
         return result;
     }
@@ -2597,12 +3104,14 @@ public class DatabaseManager {
     // player_reaper
     // -------------------------------------------------------------------------
 
-    public void upsertReaperInventory(UUID uuid, String dropsB64, long deathTime, String deathWorld, double deathX, double deathY, double deathZ) {
+    public void upsertReaperInventory(UUID uuid, String dropsB64, long deathTime, String deathWorld, double deathX, double deathY, double deathZ,
+                                      String deathServer) {
         String sql = """
-                INSERT INTO player_reaper (uuid, drops_b64, death_time, death_world, death_x, death_y, death_z)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO player_reaper (uuid, drops_b64, death_time, death_world, death_x, death_y, death_z, death_server)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE drops_b64=VALUES(drops_b64), death_time=VALUES(death_time),
-                death_world=VALUES(death_world), death_x=VALUES(death_x), death_y=VALUES(death_y), death_z=VALUES(death_z)
+                death_world=VALUES(death_world), death_x=VALUES(death_x), death_y=VALUES(death_y), death_z=VALUES(death_z),
+                death_server=VALUES(death_server)
                 """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -2613,6 +3122,7 @@ public class DatabaseManager {
             ps.setDouble(5, deathX);
             ps.setDouble(6, deathY);
             ps.setDouble(7, deathZ);
+            ps.setString(8, deathServer);
             ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to upsert reaper inventory for " + uuid + ": " + e.getMessage());
@@ -2620,10 +3130,11 @@ public class DatabaseManager {
     }
 
     /**
-     * Returns {dropsB64, deathTimeString, deathWorld, deathXStr, deathYStr, deathZStr} or null if not found.
+     * Returns {dropsB64, deathTimeString, deathWorld, deathXStr, deathYStr, deathZStr, deathServer} or null if not found.
+     * deathServer is null for entries saved before it was recorded.
      */
     public String[] loadReaperInventory(UUID uuid) {
-        String sql = "SELECT drops_b64, death_time, death_world, death_x, death_y, death_z FROM player_reaper WHERE uuid = ?";
+        String sql = "SELECT drops_b64, death_time, death_world, death_x, death_y, death_z, death_server FROM player_reaper WHERE uuid = ?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
@@ -2635,7 +3146,8 @@ public class DatabaseManager {
                             rs.getString("death_world"),
                             String.valueOf(rs.getDouble("death_x")),
                             String.valueOf(rs.getDouble("death_y")),
-                            String.valueOf(rs.getDouble("death_z"))
+                            String.valueOf(rs.getDouble("death_z")),
+                            rs.getString("death_server")
                     };
                 }
             }
@@ -2643,6 +3155,23 @@ public class DatabaseManager {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load reaper inventory for " + uuid + ": " + e.getMessage());
         }
         return null;
+    }
+
+    /**
+     * Deletes the Reaper Inventory only if it is still the one from the given death. Returns true if
+     * this call removed it, so a death can only ever be claimed once across both servers.
+     */
+    public boolean claimReaperInventory(UUID uuid, long deathTime) {
+        String sql = "DELETE FROM player_reaper WHERE uuid = ? AND death_time = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            ps.setLong(2, deathTime);
+            return ps.executeUpdate() == 1;
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to claim reaper inventory for " + uuid + ": " + e.getMessage());
+            return false;
+        }
     }
 
     public void deleteReaperInventory(UUID uuid) {

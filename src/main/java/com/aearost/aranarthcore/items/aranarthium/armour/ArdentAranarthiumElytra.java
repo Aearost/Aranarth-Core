@@ -7,6 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
@@ -26,6 +27,7 @@ public class ArdentAranarthiumElytra implements AranarthItem {
         if (Objects.nonNull(meta)) {
             NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "aranarthium_ardent_elytra");
             meta.setItemModel(key);
+            meta.addEnchant(Enchantment.THORNS, 4, true);
             meta.setDisplayName(ChatUtils.translateToColor(getName()));
             ArrayList<String> lore = new ArrayList<>();
             lore.add(ChatUtils.translateToColor(getLore()));

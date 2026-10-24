@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.earthbending.lavabending;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -19,20 +20,20 @@ public class MagmaGlaives extends LavaAbility implements AddonAbility {
 
     public enum Phase {CHARGING, READY, FLYING}
 
-    private static final int SOURCE_RANGE = 5;
+    private int sourceRange;
     private static final long STAGE_1_MS = 500L;
     private static final long STAGE_2_MS = 1000L;
-    private static final long CHARGE_DURATION = 1500L;
-    private static final long READY_DURATION = 8000L;
+    private long chargeDuration;
+    private long readyDuration;
     private static final double GLAIVE_RADIUS = 0.60;
     private static final int GLAIVE_ARMS = 3;
     private static final double CURVE_FACTOR = 1.05;
     private static final int POINTS_PER_ARM = 8;
     private static final double IDLE_ROTATION_SPEED = Math.toRadians(8);
     private static final double FLIGHT_ROTATION_SPEED = Math.toRadians(16);
-    private static final double GLAIVE_SPEED = 1.2;
+    private double speed;
     private static final double STEER_FACTOR = 0.40;
-    private static final double HIT_RADIUS = 1.8;
+    private double hitRadius;
     private static final double SIDE_OFFSET = 0.85;
     private static final double HEIGHT_OFFSET = 0.50;
     private static final int PASSIVE_SOUND_INTERVAL = 16;
@@ -109,13 +110,18 @@ public class MagmaGlaives extends LavaAbility implements AddonAbility {
             return;
         }
 
-        cooldown = 9000;
-        range = 16.0;
-        damage = 6.0;
-        knockback = 1.2;
+        cooldown = AbilityConfig.getLong("MagmaGlaives.Cooldown");
+        range = AbilityConfig.getDouble("MagmaGlaives.Range");
+        damage = AbilityConfig.getDouble("MagmaGlaives.Damage");
+        knockback = AbilityConfig.getDouble("MagmaGlaives.Knockback");
+        sourceRange = AbilityConfig.getInt("MagmaGlaives.SourceRange");
+        chargeDuration = AbilityConfig.getLong("MagmaGlaives.ChargeDuration");
+        readyDuration = AbilityConfig.getLong("MagmaGlaives.ReadyDuration");
+        speed = AbilityConfig.getDouble("MagmaGlaives.Speed");
+        hitRadius = AbilityConfig.getDouble("MagmaGlaives.HitRadius");
 
         // Require an earthbendable block in the player's line of sight
-        Block target = player.getTargetBlock(null, SOURCE_RANGE);
+        Block target = player.getTargetBlock(null, sourceRange);
         if (!isEarthbendable(player, target)) {
             return;
         }
@@ -177,7 +183,7 @@ public class MagmaGlaives extends LavaAbility implements AddonAbility {
             netherrackApplied = true;
             playTransitionSound(0.95f);
         }
-        if (!fullyCharged && elapsed >= CHARGE_DURATION) {
+        if (!fullyCharged && elapsed >= chargeDuration) {
             sourceBlock.setType(AranarthBendingUtils.LAVA_WARMUP_SEQUENCE[3]);
             fullyCharged = true;
             playChargeCompleteSound();
@@ -241,7 +247,7 @@ public class MagmaGlaives extends LavaAbility implements AddonAbility {
     }
 
     private void progressReady() {
-        if (System.currentTimeMillis() - readyStartTime >= READY_DURATION) {
+        if (System.currentTimeMillis() - readyStartTime >= readyDuration) {
             // 8-second window expired without both glaives being fired
             finishAbility();
             return;
@@ -323,8 +329,8 @@ public class MagmaGlaives extends LavaAbility implements AddonAbility {
         g.direction = g.direction.clone().add(lookDir.multiply(STEER_FACTOR)).normalize();
 
         g.prevPosition = g.position.clone();
-        g.position.add(g.direction.clone().multiply(GLAIVE_SPEED));
-        g.distanceTraveled += GLAIVE_SPEED;
+        g.position.add(g.direction.clone().multiply(speed));
+        g.distanceTraveled += speed;
         g.rotationAngle += FLIGHT_ROTATION_SPEED;
 
         if (g.position.getBlock().getType().isSolid()) {
@@ -365,7 +371,7 @@ public class MagmaGlaives extends LavaAbility implements AddonAbility {
             double t = (sweepLenSq > 0) ? center.clone().subtract(p1).dot(sweep) / sweepLenSq : 0;
             t = Math.max(0, Math.min(1, t));
             Vector closest = p1.clone().add(sweep.clone().multiply(t));
-            if (center.distanceSquared(closest) > HIT_RADIUS * HIT_RADIUS) {
+            if (center.distanceSquared(closest) > hitRadius * hitRadius) {
                 continue;
             }
 

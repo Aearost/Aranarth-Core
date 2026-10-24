@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.gui.GuiDominionResources;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -30,8 +31,8 @@ public class GuiDominionResourcesPreviewClick {
 		}
 
 		String displayName = ChatUtils.stripColorFormatting(clickedItem.getItemMeta().getDisplayName());
-		if (displayName.equals("Back")) {
-			Player player = (Player) e.getWhoClicked();
+		Player player = (Player) e.getWhoClicked();
+		if (displayName.equals(ChatUtils.stripColorFormatting(Lang.getFor(player, "gui.back")))) {
 			int page = GuiDominionResources.playerPage.getOrDefault(player.getUniqueId(), 0);
 			new GuiDominionResources(player, page).openGui();
 		}

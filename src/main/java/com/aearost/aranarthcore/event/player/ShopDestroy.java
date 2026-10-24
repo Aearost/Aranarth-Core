@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -38,27 +39,31 @@ public class ShopDestroy {
 				return;
 			}
 		} else if (AranarthUtils.isContainerBlock(e.getBlock())) {
-			Location signLocation = e.getBlock().getRelative(BlockFace.UP).getLocation();
-			Shop playerShop = ShopUtils.getShopFromLocation(signLocation);
+			Shop playerShop = ShopUtils.getShopForContainer(e.getBlock());
 			if (playerShop != null) {
+				Location signLocation = playerShop.getLocation();
 				deletionResult = deleteShopIfPossible(player, signLocation);
 
-				Sign sign = (Sign) signLocation.getBlock().getState();
-				SignSide back = sign.getSide(Side.BACK);
-				back.setLine(0, ChatUtils.stripColorFormatting(back.getLine(0)));
-				back.setLine(1, ChatUtils.stripColorFormatting(back.getLine(1)));
-				back.setLine(2, ChatUtils.stripColorFormatting(back.getLine(2)));
-				back.setLine(3, ChatUtils.stripColorFormatting(back.getLine(3)));
+				// Only clear sign text for signs above the chest - front-facing wall signs
+				// drop naturally when their attachment block is broken
+				Block signBlock = signLocation.getBlock();
+				if (signBlock.getRelative(BlockFace.DOWN).equals(e.getBlock()) && signBlock.getState() instanceof Sign sign) {
+					SignSide back = sign.getSide(Side.BACK);
+					back.setLine(0, ChatUtils.stripColorFormatting(back.getLine(0)));
+					back.setLine(1, ChatUtils.stripColorFormatting(back.getLine(1)));
+					back.setLine(2, ChatUtils.stripColorFormatting(back.getLine(2)));
+					back.setLine(3, ChatUtils.stripColorFormatting(back.getLine(3)));
 
-				SignSide front = sign.getSide(Side.FRONT);
-				front.setLine(0, ChatUtils.stripColorFormatting(front.getLine(0)));
-				front.setLine(1, ChatUtils.stripColorFormatting(front.getLine(1)));
-				front.setLine(2, ChatUtils.stripColorFormatting(front.getLine(2)));
-				front.setLine(3, ChatUtils.stripColorFormatting(front.getLine(3)));
+					SignSide front = sign.getSide(Side.FRONT);
+					front.setLine(0, ChatUtils.stripColorFormatting(front.getLine(0)));
+					front.setLine(1, ChatUtils.stripColorFormatting(front.getLine(1)));
+					front.setLine(2, ChatUtils.stripColorFormatting(front.getLine(2)));
+					front.setLine(3, ChatUtils.stripColorFormatting(front.getLine(3)));
 
-				sign.update(true, false);
+					sign.update(true, false);
+				}
 			}
-			// If the sign is not a shop
+			// If the chest is not a shop
 			else {
 				return;
 			}
@@ -69,7 +74,7 @@ public class ShopDestroy {
 				Shop shop = ShopUtils.getShopFromLocation(signBlock.getLocation());
 
 				if (shop.getUuid() == null || shop.getUuid().equals(player.getUniqueId())) {
-					player.sendMessage(ChatUtils.chatMessage("&cYou must destroy the shop first!"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.must_destroy_first")));
 					e.setCancelled(true);
 					return;
 				} else {
@@ -81,13 +86,13 @@ public class ShopDestroy {
 		}
 
 		if (deletionResult == 1) {
-			player.sendMessage(ChatUtils.chatMessage("&7You have destroyed this shop"));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.destroyed")));
 			player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 0.1F);
 		} else if (deletionResult == 0) {
-			player.sendMessage(ChatUtils.chatMessage("&cYou cannot destroy someone else's shop!"));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.cannot_destroy_others")));
 			e.setCancelled(true);
 		} else {
-			player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with deleting this shop..."));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.delete_error")));
 			e.setCancelled(true);
 		}
 	}

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.earthbending.metalbending;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -30,16 +31,15 @@ import java.util.*;
 
 public class MetalShots extends MetalAbility implements AddonAbility {
 
-    private static final int MAX_SOURCES = 3;
-    private static final int SHOTS_PER_SOURCE = 8;
-    private static final double SOURCE_RANGE = 6.0;
+    private int maxSources;
+    private double sourceRange;
     private static final double ORBIT_RADIUS = 1.8;
     private static final double ORBIT_HEIGHT = 0.75;
-    private static final double PROJECTILE_SPEED = 3.0;
+    private double speed;
     private static final double STEP = 0.3;
-    private static final double HIT_RADIUS = 0.6;
-    private static final long SHOT_COOLDOWN_MS = 200L;
-    private static final long MAX_DURATION_MS = 30_000L;
+    private double hitRadius;
+    private long shotCooldown;
+    private long duration;
 
     private static final Particle.DustOptions SOURCE_DUST =
             new Particle.DustOptions(Color.fromRGB(120, 120, 130), 0.6f);
@@ -81,7 +81,7 @@ public class MetalShots extends MetalAbility implements AddonAbility {
             this.originalLocation = originalLocation.clone();
             this.projectileMaterial = projectileMaterial;
             this.orbitAngle = orbitAngle;
-            this.shotsRemaining = SHOTS_PER_SOURCE;
+            this.shotsRemaining = AbilityConfig.getInt("MetalShots.ShotsPerSource");
         }
     }
 
@@ -109,9 +109,15 @@ public class MetalShots extends MetalAbility implements AddonAbility {
             return;
         }
 
-        this.cooldown = 10_000L;
-        this.damage = 2.0;
-        this.range = 24.0;
+        this.cooldown = AbilityConfig.getLong("MetalShots.Cooldown");
+        this.damage = AbilityConfig.getDouble("MetalShots.Damage");
+        this.range = AbilityConfig.getDouble("MetalShots.Range");
+        this.maxSources = AbilityConfig.getInt("MetalShots.MaxSources");
+        this.sourceRange = AbilityConfig.getDouble("MetalShots.SourceRange");
+        this.speed = AbilityConfig.getDouble("MetalShots.Speed");
+        this.hitRadius = AbilityConfig.getDouble("MetalShots.HitRadius");
+        this.shotCooldown = AbilityConfig.getLong("MetalShots.ShotCooldown");
+        this.duration = AbilityConfig.getLong("MetalShots.Duration");
         this.startTime = System.currentTimeMillis();
         this.lastShotTime = 0L;
 
@@ -129,11 +135,11 @@ public class MetalShots extends MetalAbility implements AddonAbility {
      * @return true if a block was successfully sourced, false otherwise.
      */
     private boolean trySourceBlock() {
-        if (sources.size() >= MAX_SOURCES) {
+        if (sources.size() >= maxSources) {
             return false;
         }
 
-        final Block targetBlock = player.getTargetBlock(null, (int) SOURCE_RANGE);
+        final Block targetBlock = player.getTargetBlock(null, (int) sourceRange);
         if (targetBlock == null || targetBlock.getType() == Material.AIR) {
             return false;
         }
@@ -153,7 +159,7 @@ public class MetalShots extends MetalAbility implements AddonAbility {
         }
 
         // Assign a fixed orbit angle so the position persists even when other sources are removed
-        final double orbitAngle = Math.toRadians(sources.size() * (360.0 / MAX_SOURCES));
+        final double orbitAngle = Math.toRadians(sources.size() * (360.0 / maxSources));
 
         // Block data must be captured before TempBlock replaces the block with AIR
         final BlockData originalBlockData = targetBlock.getBlockData();
@@ -192,7 +198,7 @@ public class MetalShots extends MetalAbility implements AddonAbility {
         }
 
         final long now = System.currentTimeMillis();
-        if (now - lastShotTime < SHOT_COOLDOWN_MS) {
+        if (now - lastShotTime < shotCooldown) {
             return;
         }
 
@@ -248,7 +254,7 @@ public class MetalShots extends MetalAbility implements AddonAbility {
         shotItem.setCanMobPickup(false);
         shotItem.setCanPlayerPickup(false);
         shotItem.setGravity(false);
-        shotItem.setVelocity(direction.clone().multiply(PROJECTILE_SPEED));
+        shotItem.setVelocity(direction.clone().multiply(speed));
 
         shots.add(new FlyingShot(shotItem, fireFrom, direction));
 
@@ -270,7 +276,7 @@ public class MetalShots extends MetalAbility implements AddonAbility {
             return;
         }
 
-        if (System.currentTimeMillis() - startTime >= MAX_DURATION_MS) {
+        if (System.currentTimeMillis() - startTime >= duration) {
             endWithCooldown();
             return;
         }
@@ -321,7 +327,7 @@ public class MetalShots extends MetalAbility implements AddonAbility {
                 continue;
             }
 
-            double remaining = PROJECTILE_SPEED;
+            double remaining = speed;
             boolean shouldRemove = false;
             boolean entityHit = false;
             Location hitLocation = null;
@@ -352,7 +358,7 @@ public class MetalShots extends MetalAbility implements AddonAbility {
                 }
 
                 for (final Entity entity : checkPos.getWorld().getNearbyEntities(
-                        checkPos, HIT_RADIUS, HIT_RADIUS, HIT_RADIUS)) {
+                        checkPos, hitRadius, hitRadius, hitRadius)) {
                     if (!(entity instanceof LivingEntity)) {
                         continue;
                     }
@@ -381,7 +387,7 @@ public class MetalShots extends MetalAbility implements AddonAbility {
             } else {
                 // Constant velocity every tick: overrides drag and keeps movement smooth.
                 // distanceTraveled is used solely for the range check and collision ray.
-                shot.entity.setVelocity(shot.direction.clone().multiply(PROJECTILE_SPEED));
+                shot.entity.setVelocity(shot.direction.clone().multiply(speed));
             }
         }
     }

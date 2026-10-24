@@ -1,17 +1,12 @@
 package com.aearost.aranarthcore.event.player;
 
-import com.aearost.aranarthcore.gui.GuiDefenders;
-import com.aearost.aranarthcore.gui.GuiDominionMembers;
-import com.aearost.aranarthcore.gui.GuiDominionPermissions;
-import com.aearost.aranarthcore.gui.GuiDominionPlayerPermissions;
-import com.aearost.aranarthcore.gui.GuiOutposts;
+import com.aearost.aranarthcore.gui.*;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.DominionRank;
-import com.aearost.aranarthcore.objects.Outpost;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
-import com.aearost.aranarthcore.utils.OutpostUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -26,6 +21,16 @@ import java.util.Map;
  */
 public class GuiDominionPermissionsClick {
 
+
+    /**
+     * The rank edited by the open permission screen, or null if it is not a rank screen.
+     */
+    private static DominionRank getScreenRank(InventoryClickEvent e) {
+        GuiHolder holder = GuiHolder.of(e.getView().getTopInventory());
+        return holder != null && holder.getData() instanceof GuiDominionPermissions.RankScreen(
+                DominionRank rank
+        ) ? rank : null;
+    }
 
     public void execute(InventoryClickEvent e) {
         e.setCancelled(true);
@@ -42,7 +47,7 @@ public class GuiDominionPermissionsClick {
 
         // Only the leader can use this GUI
         if (!dominion.getLeader().equals(player.getUniqueId())) {
-            player.sendMessage(ChatUtils.chatMessage("&cOnly the leader can manage permissions!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.leader_only_permissions")));
             return;
         }
 
@@ -54,72 +59,100 @@ public class GuiDominionPermissionsClick {
         String title = ChatUtils.stripColorFormatting(e.getView().getTitle());
 
         // Main hub screen, navigate to sections or toggle settings
-        if (title.equals(GuiDominionPermissions.HUB_TITLE)) {
-            String itemName = ChatUtils.stripColorFormatting(clicked.getItemMeta().getDisplayName());
-            if (itemName.startsWith("Bending")) {
-                boolean newState = !dominion.isBendingEnabled();
-                dominion.setBendingEnabled(newState);
-                DominionUtils.updateDominion(dominion);
-                e.getClickedInventory().setItem(e.getSlot(), GuiDominionPermissions.buildBendingToggleItem(newState));
-                player.updateInventory();
-                player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 0.5F, 1.5F);
-                return;
-            }
-            if (itemName.startsWith("Mob Spawning")) {
-                boolean newState = !dominion.isMobSpawningEnabled();
-                dominion.setMobSpawningEnabled(newState);
-                DominionUtils.updateDominion(dominion);
-                e.getClickedInventory().setItem(e.getSlot(), GuiDominionPermissions.buildMobSpawningToggleItem(newState));
-                player.updateInventory();
-                player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 0.5F, 1.5F);
-                return;
-            }
-            if (itemName.startsWith("Explosions")) {
-                boolean newState = !dominion.isExplosionEnabled();
-                dominion.setExplosionEnabled(newState);
-                DominionUtils.updateDominion(dominion);
-                e.getClickedInventory().setItem(e.getSlot(), GuiDominionPermissions.buildExplosionToggleItem(newState));
-                player.updateInventory();
-                player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 0.5F, 1.5F);
-                return;
-            }
-            if (itemName.startsWith("Member PvP")) {
-                boolean newState = !dominion.isMemberPvpEnabled();
-                dominion.setMemberPvpEnabled(newState);
-                DominionUtils.updateDominion(dominion);
-                e.getClickedInventory().setItem(e.getSlot(), GuiDominionPermissions.buildMemberPvpToggleItem(newState));
-                player.updateInventory();
-                player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 0.5F, 1.5F);
-                return;
-            }
-            switch (itemName) {
-                case "Newcomer" -> GuiDominionPermissions.openRankGui(player, DominionRank.NEWCOMER);
-                case "Citizen" -> GuiDominionPermissions.openRankGui(player, DominionRank.CITIZEN);
-                case "Lieutenant" -> GuiDominionPermissions.openRankGui(player, DominionRank.LIEUTENANT);
-                case "Allied Dominions" -> GuiDominionPermissions.openRelationGui(player, DominionRank.ALLIED);
-                case "Truced Dominions" -> GuiDominionPermissions.openRelationGui(player, DominionRank.TRUCED);
-                case "Neutral Dominions" -> GuiDominionPermissions.openRelationGui(player, DominionRank.NEUTRAL);
-                case "Enemied Dominions" -> GuiDominionPermissions.openRelationGui(player, DominionRank.ENEMIED);
-                case "Wanderers" -> GuiDominionPermissions.openRelationGui(player, DominionRank.WANDERER);
-                case "Members"     -> GuiDominionMembers.open(player);
-                case "User Search" -> GuiDominionPlayerPermissions.initiateSearch(player);
-                case "Defenders" -> {
-                    Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
-                    if (playerDominion != null) {
-                        Dominion chunkDominion = DominionUtils.getDominionOfChunk(player.getLocation().getChunk());
-                        Outpost chunkOutpost = OutpostUtils.getOutpostPlayerIsIn(player);
-                        boolean inMain = chunkDominion != null && chunkDominion.getId().equals(playerDominion.getId());
-                        boolean inOutpost = chunkOutpost != null && chunkOutpost.getDominionId().equals(playerDominion.getId());
-                        if (!inMain && !inOutpost) {
-                            player.sendMessage(ChatUtils.chatMessage("&cYou can only manage defenders while in your Dominion or one of its outposts"));
-                            break;
-                        }
-                    }
-                    GuiDefenders.open(player);
+        if (title.equals(Lang.getFor(player, GuiDominionPermissions.HUB_TITLE_KEY))) {
+            int slot = e.getSlot();
+            switch (slot) {
+                case GuiDominionPermissions.BENDING_SLOT -> {
+                    GuiDominionFlagSelect.openBending(player);
+                    player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
                 }
-                case "Outposts"    -> GuiOutposts.open(player);
+                case GuiDominionPermissions.MOB_SPAWNING_SLOT -> {
+                    GuiDominionFlagSelect.openMobSpawning(player);
+                    player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
+                }
+                case GuiDominionPermissions.EXPLOSIONS_SLOT -> {
+                    GuiDominionFlagSelect.openExplosions(player);
+                    player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
+                }
+                case GuiDominionPermissions.MEMBER_PVP_SLOT -> {
+                    GuiDominionFlagSelect.openMemberPvp(player);
+                    player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
+                }
+                case 12 -> {
+                    GuiDominionPermissions.openRankGui(player, DominionRank.NEWCOMER);
+                    player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
+                }
+                case 13 -> {
+                    GuiDominionPermissions.openRankGui(player, DominionRank.CITIZEN);
+                    player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
+                }
+                case 14 -> {
+                    GuiDominionPermissions.openRankGui(player, DominionRank.LIEUTENANT);
+                    player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
+                }
+                case 20 -> {
+                    GuiDominionPermissions.openRelationGui(player, DominionRank.ALLIED);
+                    player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
+                }
+                case 21 -> {
+                    GuiDominionPermissions.openRelationGui(player, DominionRank.TRUCED);
+                    player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
+                }
+                case 22 -> {
+                    GuiDominionPermissions.openRelationGui(player, DominionRank.NEUTRAL);
+                    player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
+                }
+                case 23 -> {
+                    GuiDominionPermissions.openRelationGui(player, DominionRank.ENEMIED);
+                    player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
+                }
+                case 24 -> {
+                    GuiDominionPermissions.openRelationGui(player, DominionRank.WANDERER);
+                    player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
+                }
+                case 9 -> {
+                    GuiDominionMembers.open(player);
+                    player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
+                }
+                case 10 -> {
+                    GuiDominionPlayerPermissions.initiateSearch(player);
+                    player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
+                }
+                case GuiDominionPermissions.GUARDIANS_SLOT -> {
+                    GuiDefenderAreaSelect.open(player);
+                    player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
+                }
+                case GuiDominionPermissions.OUTPOSTS_SLOT -> {
+                    GuiOutposts.open(player);
+                    player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
+                }
+                case GuiDominionPermissions.REGIONS_SLOT -> {
+                    GuiDominionRegions.open(player);
+                    player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
+                }
+                case GuiDominionPermissions.RESOURCES_SLOT -> {
+                    String worldName = player.getWorld().getName();
+                    if (!worldName.startsWith("world") && !worldName.startsWith("smp")) {
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.resources_gameplay_world")));
+                        return;
+                    }
+                    // Resources are claimed only on the server hosting the dominion's land
+                    if (!DominionUtils.isHostedHere(dominion)) {
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.home_server_only", "server", DominionUtils.getHostingServerDisplayName(dominion))));
+                        return;
+                    }
+                    if (DominionUtils.hasPermission(player, dominion, DominionPermission.RESOURCES)) {
+                        if (dominion.getClaimableResources() > 0) {
+                            new GuiDominionResources(player).openGui();
+                            player.playSound(player, Sound.BLOCK_CHEST_OPEN, 1F, 1F);
+                        } else {
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.resources_none")));
+                        }
+                    } else {
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.resources_no_permission")));
+                    }
+                }
             }
-            player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
             return;
         }
         // Rank/relation permissions sub-screen (any title that isn't the main screen)
@@ -133,7 +166,7 @@ public class GuiDominionPermissionsClick {
 
             // Restore Defaults button (slot 4)
             if (e.getSlot() == 4 && clicked.getType() == Material.ENDER_PEARL) {
-                DominionRank rank = GuiDominionPermissions.getRankFromTitle(title);
+                DominionRank rank = getScreenRank(e);
                 if (rank != null && rank != DominionRank.LEADER) {
                     dominion.getDominionPermissions().restoreDefaults(rank);
                     DominionUtils.updateDominion(dominion);
@@ -147,13 +180,13 @@ public class GuiDominionPermissionsClick {
                 return;
             }
 
-            DominionRank rank = GuiDominionPermissions.getRankFromTitle(title);
+            DominionRank rank = getScreenRank(e);
             if (rank == null) {
                 return;
             }
 
             if (rank == DominionRank.LEADER) {
-                player.sendMessage(ChatUtils.chatMessage("&cThe Leader rank always has full permissions!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.leader_full_permissions")));
                 return;
             }
 
@@ -173,7 +206,7 @@ public class GuiDominionPermissionsClick {
             DominionUtils.updateDominion(dominion);
 
             boolean newState = dominion.getDominionPermissions().getPermissions(rank).contains(perm);
-            e.getClickedInventory().setItem(e.getSlot(), GuiDominionPermissions.buildPermissionItem(perm, newState));
+            e.getClickedInventory().setItem(e.getSlot(), GuiDominionPermissions.buildPermissionItem(player, perm, newState));
             player.updateInventory();
             player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 0.5F, 1.5F);
         }
@@ -203,10 +236,12 @@ public class GuiDominionPermissionsClick {
      */
     private void repopulateRank(org.bukkit.inventory.Inventory inv, Player player, DominionRank rank) {
         Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
-        if (dominion == null) return;
+        if (dominion == null) {
+            return;
+        }
         java.util.Set<DominionPermission> enabled = dominion.getDominionPermissions().getPermissions(rank);
         for (Map.Entry<Integer, DominionPermission> entry : GuiDominionPermissions.getRankSlotPermissions().entrySet()) {
-            inv.setItem(entry.getKey(), GuiDominionPermissions.buildPermissionItem(entry.getValue(), enabled.contains(entry.getValue())));
+            inv.setItem(entry.getKey(), GuiDominionPermissions.buildPermissionItem(player, entry.getValue(), enabled.contains(entry.getValue())));
         }
         player.updateInventory();
     }
@@ -216,12 +251,16 @@ public class GuiDominionPermissionsClick {
      */
     private void repopulateRelation(org.bukkit.inventory.Inventory inv, Player player, DominionRank rank) {
         Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
-        if (dominion == null) return;
+        if (dominion == null) {
+            return;
+        }
         java.util.Set<DominionPermission> enabled = dominion.getDominionPermissions().getPermissions(rank);
         boolean omitPvp = rank == DominionRank.NEUTRAL || rank == DominionRank.ENEMIED || rank == DominionRank.WANDERER;
         for (Map.Entry<Integer, DominionPermission> entry : GuiDominionPermissions.getRelationSlotPermissions().entrySet()) {
-            if (omitPvp && entry.getValue() == DominionPermission.PVP) continue;
-            inv.setItem(entry.getKey(), GuiDominionPermissions.buildPermissionItem(entry.getValue(), enabled.contains(entry.getValue())));
+            if (omitPvp && entry.getValue() == DominionPermission.PVP) {
+                continue;
+            }
+            inv.setItem(entry.getKey(), GuiDominionPermissions.buildPermissionItem(player, entry.getValue(), enabled.contains(entry.getValue())));
         }
         player.updateInventory();
     }

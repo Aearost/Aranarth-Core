@@ -4,9 +4,10 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Punishment;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.PunishmentUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -30,7 +31,7 @@ public class CommandWarn {
 			if (player.hasPermission("aranarth.warn")) {
 				warnPlayer(sender, args);
 			} else {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 			}
         } else {
 			warnPlayer(sender, args);
@@ -45,7 +46,7 @@ public class CommandWarn {
 	 */
 	private static void warnPlayer(CommandSender sender, String[] args) {
 		if (args.length == 1) {
-			sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac warn <player> <reason>"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac warn <player> <reason>")));
 			return;
 		}
 
@@ -57,46 +58,41 @@ public class CommandWarn {
 		boolean wasPlayerWarned = false;
 		String playerName = args[1];
 		String nickname = "";
-		for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
-			if (player.getName().equalsIgnoreCase(args[1])) {
-				wasPlayerWarned = true;
-				playerName = player.getName();
-				nickname = AranarthUtils.getNickname(player);
-				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		UUID targetUuid = AranarthUtils.getUUIDFromUsername(args[1]);
+		if (targetUuid != null) {
+			wasPlayerWarned = true;
+			OfflinePlayer player = Bukkit.getOfflinePlayer(targetUuid);
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(targetUuid);
+			playerName = aranarthPlayer.getUsername();
+			nickname = AranarthUtils.getNickname(player);
+			if (!PunishmentUtils.outranks(sender, targetUuid)) {
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "warn.cannot_warn")));
+				return;
+			}
 
-				if (args.length >= 3) {
-					StringBuilder reason = new StringBuilder();
-					for (int i = 2; i < args.length; i++) {
-						reason.append(args[i]);
-						if (i < args.length - 1) {
-							reason.append(" ");
-						}
+			if (args.length >= 3) {
+				StringBuilder reason = new StringBuilder();
+				for (int i = 2; i < args.length; i++) {
+					reason.append(args[i]);
+					if (i < args.length - 1) {
+						reason.append(" ");
 					}
-
-					Punishment punishment = new Punishment(AranarthUtils.getUUIDFromUsername(args[1]), LocalDateTime.ofInstant(Instant.now(),
-							ZoneId.systemDefault()), "WARN", reason.toString(), senderUuid);
-					AranarthUtils.addPunishment(AranarthUtils.getUUIDFromUsername(args[1]), punishment, false);
-
-					UUID targetUuid = Bukkit.getOfflinePlayer(playerName).getUniqueId();
-					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-						if (onlinePlayer.getUniqueId().equals(targetUuid)) {
-							onlinePlayer.sendMessage(ChatUtils.chatMessage("&cYou have been warned for: &e" + reason));
-							onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_GHAST_HURT, 1F, 1.1F);
-						} else if (AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getCouncilRank() > 0) {
-							onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + nickname + " &7has been warned for: &e" + reason));
-						} else {
-							onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + nickname + " &7has been warned"));
-						}
-					}
-				} else {
-					sender.sendMessage(ChatUtils.chatMessage("&cYou must specify a player and a reason for the warn!"));
-					return;
 				}
+
+				Punishment punishment = new Punishment(targetUuid, LocalDateTime.ofInstant(Instant.now(),
+						ZoneId.systemDefault()), "WARN", reason.toString(), senderUuid);
+				AranarthUtils.addPunishment(targetUuid, punishment, false);
+
+				PunishmentUtils.notifyWarn(targetUuid, nickname, reason.toString());
+				PunishmentUtils.issued(punishment, nickname, "", -1);
+			} else {
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "warn.must_specify_reason")));
+				return;
 			}
 		}
 
 		if (!wasPlayerWarned) {
-			sender.sendMessage(ChatUtils.chatMessage("&e" + args[1]) + " &ccould not be found");
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", args[1])));
 		}
 	}
 

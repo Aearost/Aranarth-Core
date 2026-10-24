@@ -1,7 +1,7 @@
 package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.event.player.IncantationApply;
+import com.aearost.aranarthcore.event.player.EssenceApply;
 import com.aearost.aranarthcore.event.player.PlayerAutoReplenishSlot;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -19,7 +19,7 @@ public class PlayerDropItemEventListener implements Listener {
      */
     @EventHandler
     public void onItemDrop(PlayerDropItemEvent e) {
-        new IncantationApply().execute(e);
+        new EssenceApply().execute(e);
         new PlayerAutoReplenishSlot().execute(e);
     }
 }

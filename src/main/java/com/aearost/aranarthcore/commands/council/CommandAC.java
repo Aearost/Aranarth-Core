@@ -1,20 +1,31 @@
 package com.aearost.aranarthcore.commands.council;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.LangManager;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import java.util.Set;
 
 /**
  * This is the master command for all commands related to AranarthCore.
  * All sub-commands have their own classes that are called from here.
  */
 public class CommandAC implements CommandExecutor {
+
+	/**
+	 * Sub-commands that are destructive or affect the whole server, limited to Council rank 3 and the console.
+	 */
+	private static final Set<String> OWNER_SUBCOMMANDS = Set.of("disband", "reload", "reloadlang", "dateset", "discordreload");
 
 	/**
 	 * @param sender The user that entered the command.
@@ -30,26 +41,27 @@ public class CommandAC implements CommandExecutor {
 			boolean isCouncil = aranarthPlayer.getCouncilRank() > 0;
 			boolean isArchitect = aranarthPlayer.getArchitectRank() >= 1;
 			if (!isCouncil && !isArchitect) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return false;
 			}
 			if (!isCouncil && isArchitect) {
-				if (args.length == 0 || !args[0].equalsIgnoreCase("msg")) {
-					player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+				if (args.length == 0 || (!args[0].equalsIgnoreCase("msg") && !args[0].equalsIgnoreCase("speed")
+						&& !args[0].equalsIgnoreCase("architect"))) {
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 					return false;
 				}
 			}
 		}
 
 		if (args.length == 0) {
-			sender.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: &e/ac <sub-command>"));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac <sub-command>")));
 			return false;
 		} else {
 			boolean commandResult = false;
 			commandResult = isCouncil(sender, args);
 
 			if (!commandResult) {
-				sender.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid sub-command!"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ac.invalid_subcommand")));
 			}
 			return commandResult;
 		}
@@ -57,6 +69,22 @@ public class CommandAC implements CommandExecutor {
 
 	private boolean isCouncil(CommandSender sender, String[] args) {
 		boolean commandResult = false;
+		String subCommand = args[0].toLowerCase();
+		if (sender instanceof Player player) {
+			// Pushing this server's player rows to the database can roll back the whole network
+			if (subCommand.equals("migrate")) {
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
+				return true;
+			}
+			// Destructive and server-wide sub-commands are limited to the highest Council rank
+			if (OWNER_SUBCOMMANDS.contains(subCommand) && AranarthUtils.getPlayer(player.getUniqueId()).getCouncilRank() < 3) {
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
+				return true;
+			}
+		}
+		if (OWNER_SUBCOMMANDS.contains(subCommand) || subCommand.equals("migrate")) {
+			Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + sender.getName() + " used /ac " + String.join(" ", args));
+		}
 		if (args[0].equalsIgnoreCase("whereis")) {
 			CommandWhereIs.onCommand(sender, args);
 			commandResult = true;
@@ -83,6 +111,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandPerks.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("admin")) {
 			commandResult = CommandAdmin.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("architect")) {
+			commandResult = CommandArchitect.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("spy")) {
 			commandResult = CommandSpy.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("speed")) {
@@ -117,21 +147,23 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandInvSwap.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("discordreload")) {
 			commandResult = CommandDiscordReload.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("reloadperms")) {
-			commandResult = CommandReloadPerms.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("reload")) {
+			commandResult = CommandReload.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("reloadlang")) {
+			LangManager.getInstance().load();
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ac.lang_reloaded")));
+			commandResult = true;
 		} else if (args[0].equalsIgnoreCase("migrate")) {
 			commandResult = CommandMigrate.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("unscramble")) {
 			commandResult = CommandUnscramble.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("og")) {
 			commandResult = CommandOG.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("reloadshops")) {
-			commandResult = CommandReloadShops.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("worldevent")) {
 			commandResult = CommandWorldEvent.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("disband")) {
 			if (args.length < 2) {
-				sender.sendMessage(ChatUtils.chatMessage("&cUsage: &e/ac disband <dominion name>"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac disband <dominion name>")));
 			} else {
 				StringBuilder nameBuilder = new StringBuilder();
 				for (int i = 1; i < args.length; i++) {
@@ -143,7 +175,7 @@ public class CommandAC implements CommandExecutor {
 						.filter(d -> ChatUtils.stripColorFormatting(d.getName()).equalsIgnoreCase(targetName))
 						.findFirst().orElse(null);
 				if (target == null) {
-					sender.sendMessage(ChatUtils.chatMessage("&cDominion &e" + targetName + " &ccould not be found!"));
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "dominion.not_found", "name", targetName)));
 				} else {
 					DominionUtils.disbandDominion(target);
 					commandResult = true;

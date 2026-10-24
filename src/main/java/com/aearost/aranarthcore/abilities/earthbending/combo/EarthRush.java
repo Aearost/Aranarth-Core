@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.earthbending.combo;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.GeneralMethods;
@@ -49,15 +50,14 @@ public class EarthRush extends EarthAbility implements AddonAbility, ComboAbilit
     private static final Set<UUID> LISTENER_TRIGGERED = new HashSet<>();
 
     private static final long SNEAK_WINDOW_MS = 5000L;
-    private static final long LOADED_TIMEOUT_MS = 8000L;
+    private long loadedTimeout;
     private static final long MOVE_INTERVAL_MS = 17L;
-    private static final int SOURCE_SEARCH_RANGE = 6;
-    private static final double HIT_RADIUS = 1.5;
+    private int sourceRange;
+    private double hitRadius;
     private static final long HOLE_LINGER_TICKS = 200L;
     private static final long HOLE_REVERT_PERIOD_TICKS = 2L;
     private static final long WINDOW_DURATION_MS = 5000L;
     private static final long WINDOW_DURATION_TICKS = 100L;
-    private static final int MAX_SHOTS = 3;
     private static final int RISING_TICKS_PER_STEP = 2;
 
     public enum Phase { RISING, LOADED, FLYING }
@@ -108,9 +108,12 @@ public class EarthRush extends EarthAbility implements AddonAbility, ComboAbilit
             return;
         }
 
-        this.cooldown = 8000L;
-        this.damage = 5.0;
-        this.range = 20.0;
+        this.cooldown = AbilityConfig.getLong("EarthRush.Cooldown");
+        this.damage = AbilityConfig.getDouble("EarthRush.Damage");
+        this.range = AbilityConfig.getDouble("EarthRush.Range");
+        this.loadedTimeout = AbilityConfig.getLong("EarthRush.LoadedTimeout");
+        this.sourceRange = AbilityConfig.getInt("EarthRush.SourceRange");
+        this.hitRadius = AbilityConfig.getDouble("EarthRush.HitRadius");
 
         AranarthBendingUtils.suppressComboTrigger(this.bPlayer, player, "RaiseEarth");
 
@@ -153,7 +156,7 @@ public class EarthRush extends EarthAbility implements AddonAbility, ComboAbilit
         final Vector horiz = player.getEyeLocation().getDirection().clone().setY(0).normalize();
 
         // Start at dist of 3 so the boulder forms a comfortable distance ahead of the player
-        for (int dist = 3; dist <= SOURCE_SEARCH_RANGE + 2; dist++) {
+        for (int dist = 3; dist <= sourceRange + 2; dist++) {
             final int bx = (int) Math.floor(feet.getX() + horiz.getX() * dist) - 1;
             final int bz = (int) Math.floor(feet.getZ() + horiz.getZ() * dist) - 1;
             final Integer by = findGroundY(world, bx, bz, feet.getBlockY() + 3);
@@ -254,7 +257,7 @@ public class EarthRush extends EarthAbility implements AddonAbility, ComboAbilit
     }
 
     private void progressLoaded() {
-        if (System.currentTimeMillis() - loadedStartTime > LOADED_TIMEOUT_MS) {
+        if (System.currentTimeMillis() - loadedStartTime > loadedTimeout) {
             cancelInstantly();
         }
     }
@@ -301,7 +304,7 @@ public class EarthRush extends EarthAbility implements AddonAbility, ComboAbilit
         }
 
         // Entity collision - damage each entity once, push continuously while in range
-        for (final Entity entity : GeneralMethods.getEntitiesAroundPoint(boulderCenter, HIT_RADIUS)) {
+        for (final Entity entity : GeneralMethods.getEntitiesAroundPoint(boulderCenter, hitRadius)) {
             if (!(entity instanceof LivingEntity)) {
                 continue;
             }
@@ -345,7 +348,7 @@ public class EarthRush extends EarthAbility implements AddonAbility, ComboAbilit
      * Fires the loaded boulder in the player's current horizontal look direction.
      * Called by the bending listener when the player left-clicks with RaiseEarth bound.
      *
-     * <p>Up to {@value #MAX_SHOTS} boulders can be fired within the 5-second window that
+     * <p>Up to the configured number of boulders can be fired within the 5-second window that
      * begins when the combo sequence completes. The cooldown is applied after the final
      * shot or when the window expires, whichever comes first.</p>
      */
@@ -368,7 +371,7 @@ public class EarthRush extends EarthAbility implements AddonAbility, ComboAbilit
         final Long windowEnd = WINDOW_END_TIME.get(player.getUniqueId());
         final boolean windowExpired = windowEnd == null || System.currentTimeMillis() >= windowEnd;
 
-        if (shots >= MAX_SHOTS || windowExpired) {
+        if (shots >= AbilityConfig.getInt("EarthRush.Shots") || windowExpired) {
             // Final shot or window expired - apply cooldown immediately
             final BukkitRunnable pending = PENDING_COOLDOWN_TASKS.remove(player.getUniqueId());
             if (pending != null) {
@@ -560,7 +563,7 @@ public class EarthRush extends EarthAbility implements AddonAbility, ComboAbilit
     /**
      * Returns true if the player can create a new EarthRush shot. This is true for
      * the first shot (combo transition just performed) or for subsequent shots while
-     * the 5-second window is active and fewer than {@value #MAX_SHOTS} shots have fired.
+     * the 5-second window is active and fewer than the configured number of shots have fired.
      */
     public static boolean canCreateShot(final UUID uuid) {
         if (hasRecentRaiseEarthTransition(uuid)) {
@@ -570,7 +573,7 @@ public class EarthRush extends EarthAbility implements AddonAbility, ComboAbilit
         if (end == null || System.currentTimeMillis() >= end) {
             return false;
         }
-        return SHOT_COUNT.getOrDefault(uuid, 0) < MAX_SHOTS;
+        return SHOT_COUNT.getOrDefault(uuid, 0) < AbilityConfig.getInt("EarthRush.Shots");
     }
 
     public static boolean hasActiveInstance(final UUID uuid) {

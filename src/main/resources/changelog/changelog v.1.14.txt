@@ -1,0 +1,125 @@
+AranarthCore v. 1.14
+
+World & Events
+[+] Added in creative plots functionality, accessible by /creative
+[+] Added custom toggleable /sit functionality
+[~] Wandering Enchanter over-leveled lockout is now per-player
+[~] Fixed AFK messages not displaying nicknames in color correctly
+[~] Prevented block placing and table commands in the arena world outside of admin mode
+[~] Fixed a creative crash exploit where nested containers could be created with ctrl + pick block and burned to spawn hundreds of thousands of items
+[~] Fixed light blocks not changing brightness when right-clicked by non-op players in creative
+[+] Plentiful pickaxes now break terracotta
+[~] Wandering Enchanter over-leveled enchantments are now 2 levels above the vanilla maximum
+[-] Removed Depth Strider from Wandering Enchanter
+
+Bending & Abilities
+[~] Fixed AngeredSpirits and other effect abilities respecting dominion relations in the arena
+[+] Airbenders with level 100 Archery now launch the arrow they are holding when using AirBlast while sneaking
+[~] Stopped bloodbending and sound abilities bypassing PvP and build protection
+[~] Fixed Saint cooldown resets, MetalShots and MetalStrips ingot exploits, Aranarthium Anvil and pet food duplication, homepad combat escapes and creative mounts, and AstralProjection armor loss
+[+] HealingHelix, CorruptingHelix, and MendingWaters can now be sourced from a water bottle
+[~] Fixed AstralProjection flight being revoked by the Survival orphaned-flight check
+[~] Rank-locked sub-element abilities are now bindable by all ranks in the arena
+[~] Fixes to the Avatar selection functionality to be auto-selected on October 31st, 2026 at 1:00pm EST
+[~] Fixed inaccurate avatar messages
+[~] Fixed EnergyBurst not activating by a fall from a high height
+
+Dominion
+[+] Dominion resource claims now provide leaves
+[+] Added Dappled Forests to be claimable in /d resources
+[+] Added Lush Caves, Dripstone Caves, Deep Dark and Sulfur Caves to be claimable in /d resources
+[+] Added Poplar wood to the Sawmill
+[~] Fixed dominion crumble message being sent to Discord every day
+[~] Protected outposts and Dominion borders from explosions, pistons, liquids, dispensers and hopper minecarts, protected animals and beds
+[~] Fixed issue where Squaremap was not rendering unclaimed chunks as invisible when surrounded by claimed chunks
+[+] Added a customer hex option for /d mapcolor
+[+] /d resources now shows the claimable resource amount in its title
+[+] Villager cure discounts are now shared with players who have villager permissions in the Dominion  land the villager is in
+[~] Dominion plots have been renamed to regions, and /d plot is now /d region
+[+] Dominion regions are now shown on the /map and /smpmap as their own layers
+[+] Added a Regions GUI to /d (and /d region) to view regions, manage their members and delete them
+[+] Added /d autoclaim region <name> to automatically add chunks to a region as you walk through them
+[+] Region names can now be multiple words
+[+] Added /d region public and /d region private, where public regions use the normal Dominion permissions and private regions can only be used by their members
+[~] Entering a region now only shows the region's name
+[~] Fixed region changes not syncing between servers, and deleted regions returning after a restart
+[~] Renamed dominion plots to dominion regions
+[+] Added a regions GUI to /d for managing regions
+[~] Re-arranged the /d GUI with the new additions in consideration
++] Added shulker shells to End City simulations in dominion resource claims
+[~] Chorus fruits and Chorus Flowers are provided in End Highlands claims
+[~] Cave biome resource claims now have a chance to simulate an Amethyst Geode
+
+Aranarthium, Items & Crafting
+[+] Implemented Essence Imbuing, allowing players to create Essence items and imbue them with XP to craft the various essences
+[+] Implemented the JetStream combo for airbenders
+[~] Changed double jump trigger with Elven Aranarthium to be tapping sneak while mid-air
+[-] Removed the double jump cooldown of Elven Aranarthium
+[~] Fixed elytras not being usable while Invisible Armor is enabled
+[-] Removed the Bone Arrow and Bone Arrowhead
+[~] Fixed the Rooting Arrow using the Bone Arrow model
+[+] Ardent Aranarthium armour now has Thorns IV by default
+[+] Soulbound Aranarthium armour now has Mending by default
+[+] Soulbound Aranarthium now pulls in XP orbs from a greater range
+[+] mcMMO Salvage can now extract essences, blank Essences and Aranarthium Ingots based on Salvage level
+[+] Added the mcMMO Enchanting sub-skill
+[~] Storing EXP in bottles is now unlocked at Enchanting level 100 instead of Count
+[~] EXP bottle storing effectiveness is now based on Enchanting level
+[+] Anvils and Grindstones now give mcMMO Repair XP
+[~] Fixed anvils lowering enchantments that are above the vanilla maximum
+
+Economy, Jobs & Quests
+[~] Renamed /marketprice to /marketvalue (alias /mv)
+[~] Made items in /mp all be single-stacks
+[+] Added a max/min indicator to server shop prices in /marketprice
+[+] Colored the sell price on server shop signs when at its limit
+[~] Fixed perk purchase messages not displaying when bought from the vote shop on SMP
+[+] Added /q alias for quests
+[~] Market prices now drop sharply on mass sales, scaled by item stack size
+[~] Login streak rewards can now be claimed in creative, with crate keys sent to /keyclaim
+[~] Fixed cross-server trade and Reaper Inventory duplication, invalid trade money entries, job pay loops, server shop redundancy, colored-nickaname trade invites and MySQL column migrations
+
+Chat, UI & Sounds
+[+] Added Spanish to /lang
+[+] Enabled Portuguese in /lang (was implemented but never enabled unintentionally)
+[~] Fixed issues where different languages were causing issues for non-GUI functionality
+[~] Fixed multiple GUIs not working correctly for non-English languages
+[~] Added missing un-AFK checks and removed redundant ones
+[~] Fixed "You are no longer AFK" displaying without first going AFK, such as when being pushed by mobs right as the AFK timer ran out
+[~] Fixed switching servers resetting your streak of chat unscrambler wins
+[~] Fixed gradient chat messages containing # or & displaying in white on the other server
+[+] Added the nickname and invisiblearmor perks to the tab completion of /ac perks
+
+Quality of Life
+[+] Added command preview lore to /tables GUI items
+[+] Added the filling of empty held shulker boxes from a container via Shulker Assist
+[~] Fixed sent mail preview not being color formatted for lang files
+[~] Fixed color codes in blacklist preset names displaying as literals
+[+] Added /ac architect for Architects and Council, allowing you to bypass the build restrictions
+[~] Perk changes are now synced cross-server and persisted when the player is offline or on the other server
+[+] Firework rockets can now be stored in the Quiver and are refilled when fired from a crossbow or used to boost elytra flight
+
+Cross-server & Technical
+[~] The previous /creative is now available in the SMP server via /smpcreative or /smpc as an alias
+[~] Fixed players sometimes missing flight when entering the Creative world
+[~] Fixed cross-server join error for players new to a server, and SMP deaths respawning into a null world
+[~] Opped players now receive all Saint, Council, Architect and perk permissions
+[+] Added /voicechat command with global, local, and dominion channels
+[~] Fixed store-purchased boosts and crate keys being applied twice, and saint rank Discord notifications being posted twice
+[~] Fixed performance issues at new year by resetting and pre-generating the resource worlds one at a time, and adding detailed reset logging
+[~] Centralized all AC ability variables into a new abilities.yml that is reloaded on both servers via /ac reload
+[+] Added missing config.yml settings being filled in with their defaults on startup and reload
+[~] Fixed SMP overwriting Survival mount progress with stale data, and increased mount progress saving frequency
+[~] Fixed voice link scheduling tasks while the plugin is disabling, causing an error on shutdown
+[~] Fixed /tphere not tab completing or finding players on another server
+[~] Fixed ender pearls landing after a world change teleporting players between Survival and Creative without swapping their inventory or game mode, and fixed failed teleports still swapping the player's inventory
+[~] Fixed several cross-server item duplication exploits by freezing players during server transfers and other individual fixes
+[~] Fixed GUI exploits by identifying plugin GUIs with an internal tag instead of their title, and hardened GUIs against forged items and drags
+[~] Synced bans/mutes/warnings and dominion changes across servers, gave cross-server teleports their countdown and combat checks, and stopped transfers and demoted staff from bypassing permissions
+[~] Tightened council commands and permissions with rank checks on punishments and ranksets, admin-only destructive /ac commands, blocked vanilla messaging, WorldEdit outside creative, and cross-inventory plugin teleports
+[~] Hardened nicknames, vanish privacy, item deserialization, file saves, heads API, interactive chat, timezone lookups and the voice link, and fixed mute expiry, baltop lag and frame protection
+[~] Fixed ping tag not being shown in tab for players on the other server
+
+Miscellaneous
+[~] Fixed WorldEdit commands not appearing in tab completion or autofilling block names #456
+[~] Fix the missing feedback message when you use /ac give <other username>

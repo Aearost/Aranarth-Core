@@ -1,9 +1,12 @@
 package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.objects.*;
+import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.DominionPermission;
+import com.aearost.aranarthcore.objects.DominionRank;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -23,17 +26,23 @@ import java.util.*;
  * and navigation buttons for Members, User Search, Guardians, and Outposts.
  * Clicking a rank or relation group opens a 45-slot permissions sub-screen.
  *
- * <p>Title of the hub screen: {@link #HUB_TITLE} ("Dominion Hub")
+ * <p>Title of the hub screen: {@link #HUB_TITLE_KEY} ("Dominion Hub")
  * Title of rank/relation sub-screens: "[Group] Permissions"
  */
 public class GuiDominionPermissions {
 
-    public static final String HUB_TITLE = "Dominion Hub";
+    public static final String HUB_TITLE_KEY = "gui.dominionperms.title_hub";
 
     private static final int MEMBERS_SLOT = 9;
     private static final int USER_SEARCH_SLOT = 10;
-    private static final int GUARDIANS_SLOT = 34;
-    private static final int OUTPOSTS_SLOT = 28;
+    public static final int REGIONS_SLOT = 16;
+    public static final int OUTPOSTS_SLOT = 17;
+    public static final int RESOURCES_SLOT = 28;
+    public static final int BENDING_SLOT = 29;
+    public static final int GUARDIANS_SLOT = 30;
+    public static final int MOB_SPAWNING_SLOT = 32;
+    public static final int MEMBER_PVP_SLOT = 33;
+    public static final int EXPLOSIONS_SLOT = 34;
 
     private final Player player;
     private final Inventory initializedGui;
@@ -87,7 +96,7 @@ public class GuiDominionPermissions {
         map.put(36, DominionPermission.OUTPOST_HOME);
         map.put(37, DominionPermission.MANAGE_OUTPOSTS);
         map.put(38, DominionPermission.MANAGE_DEFENDERS);
-        map.put(39, DominionPermission.MANAGE_PLOTS);
+        map.put(39, DominionPermission.MANAGE_REGIONS);
         return map;
     }
 
@@ -125,31 +134,25 @@ public class GuiDominionPermissions {
     /**
      * Returns the natural-language title for a permission sub-screen.
      */
-    public static String getPermissionsTitle(DominionRank rank) {
-        return switch (rank) {
-            case NEWCOMER -> "Newcomer Permissions";
-            case CITIZEN -> "Citizen Permissions";
-            case LIEUTENANT -> "Lieutenant Permissions";
-            case LEADER -> "Leader Permissions";
-            case ALLIED -> "Allied Dominion Permissions";
-            case TRUCED -> "Truced Dominion Permissions";
-            case NEUTRAL -> "Neutral Dominion Permissions";
-            case ENEMIED -> "Enemied Dominion Permissions";
-            case WANDERER -> "Wanderer Permissions";
-        };
+    public static String getPermissionsTitle(Player player, DominionRank rank) {
+        return Lang.getFor(player, switch (rank) {
+            case NEWCOMER -> "gui.dominionperms.title_newcomer";
+            case CITIZEN -> "gui.dominionperms.title_citizen";
+            case LIEUTENANT -> "gui.dominionperms.title_lieutenant";
+            case LEADER -> "gui.dominionperms.title_leader";
+            case ALLIED -> "gui.dominionperms.title_allied";
+            case TRUCED -> "gui.dominionperms.title_truced";
+            case NEUTRAL -> "gui.dominionperms.title_neutral";
+            case ENEMIED -> "gui.dominionperms.title_enemied";
+            case WANDERER -> "gui.dominionperms.title_wanderer";
+        });
     }
 
     /**
-     * Parses the DominionRank from a permission sub-screen title.
-     * @return The matching rank, or null if unrecognised.
+     * Marks a rank or relation permission screen and the rank it edits. Click handling identifies the screen by
+     * this rather than by its title, as titles are worded differently in each language.
      */
-    public static DominionRank getRankFromTitle(String strippedTitle) {
-        for (DominionRank rank : DominionRank.values()) {
-            if (strippedTitle.equals(getPermissionsTitle(rank))) {
-                return rank;
-            }
-        }
-        return null;
+    public record RankScreen(DominionRank rank) {
     }
 
     /**
@@ -162,12 +165,12 @@ public class GuiDominionPermissions {
         }
 
         Set<DominionPermission> enabled = dominion.getDominionPermissions().getPermissions(rank);
-        String title = ChatUtils.translateToColor(getPermissionsTitle(rank));
-        Inventory gui = Bukkit.createInventory(player, 54, title);
+        Inventory gui = GuiHolder.create(player, 54, getPermissionsTitle(player, rank));
+        GuiHolder.of(gui).setData(new RankScreen(rank));
 
-        gui.setItem(9,  buildSectionHeader(Material.LIGHT_BLUE_STAINED_GLASS_PANE,   "&b&lInteractions"));
-        gui.setItem(18, buildSectionHeader(Material.YELLOW_STAINED_GLASS_PANE, "&e&lBlock Interactions"));
-        gui.setItem(27, buildSectionHeader(Material.RED_STAINED_GLASS_PANE,  "&c&lCommands"));
+        gui.setItem(9, buildSectionHeader(Material.LIGHT_BLUE_STAINED_GLASS_PANE, Lang.getFor(player, "gui.dominionperms.section_interactions")));
+        gui.setItem(18, buildSectionHeader(Material.YELLOW_STAINED_GLASS_PANE, Lang.getFor(player, "gui.dominionperms.section_blocks")));
+        gui.setItem(27, buildSectionHeader(Material.RED_STAINED_GLASS_PANE, Lang.getFor(player, "gui.dominionperms.section_commands")));
 
         ItemStack filler = buildFiller();
         for (int i = 0; i < 9; i++) {
@@ -176,10 +179,10 @@ public class GuiDominionPermissions {
         }
 
         for (Map.Entry<Integer, DominionPermission> entry : getRankSlotPermissions().entrySet()) {
-            gui.setItem(entry.getKey(), buildPermissionItem(entry.getValue(), enabled.contains(entry.getValue())));
+            gui.setItem(entry.getKey(), buildPermissionItem(player, entry.getValue(), enabled.contains(entry.getValue())));
         }
-        gui.setItem(4, buildRestoreDefaultsButton("&7Resets this rank's permissions to server defaults"));
-        gui.setItem(49, buildBackButton());
+        gui.setItem(4, buildRestoreDefaultsButton(player, Lang.getFor(player, "gui.dominionperms.restore_rank_lore")));
+        gui.setItem(49, buildBackButton(player));
 
         player.closeInventory();
         player.openInventory(gui);
@@ -195,12 +198,12 @@ public class GuiDominionPermissions {
         }
 
         Set<DominionPermission> enabled = dominion.getDominionPermissions().getPermissions(rank);
-        String title = ChatUtils.translateToColor(getPermissionsTitle(rank));
-        Inventory gui = Bukkit.createInventory(player, 45, title);
+        Inventory gui = GuiHolder.create(player, 45, getPermissionsTitle(player, rank));
+        GuiHolder.of(gui).setData(new RankScreen(rank));
 
-        gui.setItem(9,  buildSectionHeader(Material.LIGHT_BLUE_STAINED_GLASS_PANE,   "&b&lInteractions"));
-        gui.setItem(18, buildSectionHeader(Material.YELLOW_STAINED_GLASS_PANE, "&e&lBlock Interactions"));
-        gui.setItem(27, buildSectionHeader(Material.RED_STAINED_GLASS_PANE,  "&c&lCommands"));
+        gui.setItem(9, buildSectionHeader(Material.LIGHT_BLUE_STAINED_GLASS_PANE, Lang.getFor(player, "gui.dominionperms.section_interactions")));
+        gui.setItem(18, buildSectionHeader(Material.YELLOW_STAINED_GLASS_PANE, Lang.getFor(player, "gui.dominionperms.section_blocks")));
+        gui.setItem(27, buildSectionHeader(Material.RED_STAINED_GLASS_PANE, Lang.getFor(player, "gui.dominionperms.section_commands")));
 
         ItemStack filler = buildFiller();
         for (int i = 0; i < 9; i++) {
@@ -213,10 +216,10 @@ public class GuiDominionPermissions {
             if (omitPvp && entry.getValue() == DominionPermission.PVP) {
                 continue;
             }
-            gui.setItem(entry.getKey(), buildPermissionItem(entry.getValue(), enabled.contains(entry.getValue())));
+            gui.setItem(entry.getKey(), buildPermissionItem(player, entry.getValue(), enabled.contains(entry.getValue())));
         }
-        gui.setItem(4, buildRestoreDefaultsButton("&7Resets this relation's permissions to server defaults"));
-        gui.setItem(40, buildBackButton());
+        gui.setItem(4, buildRestoreDefaultsButton(player, Lang.getFor(player, "gui.dominionperms.restore_relation_lore")));
+        gui.setItem(40, buildBackButton(player));
 
         player.closeInventory();
         player.openInventory(gui);
@@ -225,11 +228,10 @@ public class GuiDominionPermissions {
     private Inventory initializeMainGui(Player player) {
         Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
         if (dominion == null) {
-            return Bukkit.createInventory(player, 9, ChatUtils.translateToColor("Dominion Hub"));
+            return GuiHolder.create(player, 9, Lang.getFor(player, HUB_TITLE_KEY));
         }
 
-        String title = ChatUtils.translateToColor(HUB_TITLE);
-        Inventory gui = Bukkit.createInventory(player, 45, title);
+        Inventory gui = GuiHolder.create(player, 45, Lang.getFor(player, HUB_TITLE_KEY));
 
         ItemStack filler = buildFiller();
         for (int i = 0; i < 9; i++) {
@@ -237,31 +239,32 @@ public class GuiDominionPermissions {
             gui.setItem(36 + i, filler);
         }
 
+        String groupLore = Lang.getFor(player, "gui.dominionperms.group_lore");
         // Row 1: Rank groups
-        gui.setItem(12, buildGroupItem(Material.IRON_BLOCK, DominionUtils.getFormattedRankName(DominionRank.NEWCOMER), "&7Click to manage permissions"));
-        gui.setItem(13, buildGroupItem(Material.GOLD_BLOCK, DominionUtils.getFormattedRankName(DominionRank.CITIZEN), "&7Click to manage permissions"));
-        gui.setItem(14, buildGroupItem(Material.DIAMOND_BLOCK, DominionUtils.getFormattedRankName(DominionRank.LIEUTENANT), "&7Click to manage permissions"));
+        gui.setItem(12, buildGroupItem(Material.IRON_BLOCK, DominionUtils.getFormattedRankName(player, DominionRank.NEWCOMER), groupLore));
+        gui.setItem(13, buildGroupItem(Material.GOLD_BLOCK, DominionUtils.getFormattedRankName(player, DominionRank.CITIZEN), groupLore));
+        gui.setItem(14, buildGroupItem(Material.DIAMOND_BLOCK, DominionUtils.getFormattedRankName(player, DominionRank.LIEUTENANT), groupLore));
 
         // Row 2: Relation groups
-        gui.setItem(20, buildGroupItem(Material.PURPLE_BANNER, DominionUtils.getFormattedRankName(DominionRank.ALLIED) + " &rDominions", "&7Click to manage permissions"));
-        gui.setItem(21, buildGroupItem(Material.PINK_BANNER, DominionUtils.getFormattedRankName(DominionRank.TRUCED) + " &rDominions", "&7Click to manage permissions"));
-        gui.setItem(22, buildGroupItem(Material.WHITE_BANNER, DominionUtils.getFormattedRankName(DominionRank.NEUTRAL) + " &rDominions", "&7Click to manage permissions"));
-        gui.setItem(23, buildGroupItem(Material.RED_BANNER, DominionUtils.getFormattedRankName(DominionRank.ENEMIED) + " &rDominions", "&7Click to manage permissions"));
-        gui.setItem(24, buildGroupItem(Material.LIGHT_GRAY_BANNER, DominionUtils.getFormattedRankName(DominionRank.WANDERER) + "s", "&7Click to manage permissions"));
+        gui.setItem(20, buildGroupItem(Material.PURPLE_BANNER, Lang.getFor(player, "dominion.group_allied"), groupLore));
+        gui.setItem(21, buildGroupItem(Material.PINK_BANNER, Lang.getFor(player, "dominion.group_truced"), groupLore));
+        gui.setItem(22, buildGroupItem(Material.WHITE_BANNER, Lang.getFor(player, "dominion.group_neutral"), groupLore));
+        gui.setItem(23, buildGroupItem(Material.RED_BANNER, Lang.getFor(player, "dominion.group_enemied"), groupLore));
+        gui.setItem(24, buildGroupItem(Material.LIGHT_GRAY_BANNER, Lang.getFor(player, "dominion.group_wanderers"), groupLore));
 
-        // Row 1 toggles
-        gui.setItem(16, buildMemberPvpToggleItem(dominion.isMemberPvpEnabled()));
-        gui.setItem(17, buildBendingToggleItem(dominion.isBendingEnabled()));
+        // Row 1: navigation
+        gui.setItem(MEMBERS_SLOT, buildMembersHeadItem(player, dominion.getLeader()));
+        gui.setItem(USER_SEARCH_SLOT, buildUserSearchItem(player));
+        gui.setItem(REGIONS_SLOT, buildRegionsItem(player));
+        gui.setItem(OUTPOSTS_SLOT, buildOutpostsItem(player));
 
-        // Row 4 toggles
-        gui.setItem(30, buildMobSpawningToggleItem(dominion.isMobSpawningEnabled()));
-        gui.setItem(32, buildExplosionToggleItem(dominion.isExplosionEnabled()));
-
-        // Row 3: navigation and new hub sections
-        gui.setItem(GUARDIANS_SLOT, buildDefendersItem());
-        gui.setItem(MEMBERS_SLOT, buildMembersHeadItem(dominion.getLeader()));
-        gui.setItem(USER_SEARCH_SLOT, buildUserSearchItem());
-        gui.setItem(OUTPOSTS_SLOT, buildOutpostsItem());
+        // Row 3: Dominion settings
+        gui.setItem(RESOURCES_SLOT, buildResourcesItem(player));
+        gui.setItem(BENDING_SLOT, buildBendingNavItem(player, dominion.isBendingEnabled()));
+        gui.setItem(GUARDIANS_SLOT, buildDefendersItem(player));
+        gui.setItem(MOB_SPAWNING_SLOT, buildMobSpawningNavItem(player, dominion.isMobSpawningEnabled()));
+        gui.setItem(MEMBER_PVP_SLOT, buildMemberPvpNavItem(player, dominion.isMemberPvpEnabled()));
+        gui.setItem(EXPLOSIONS_SLOT, buildExplosionNavItem(player, dominion.isExplosionEnabled()));
 
         return gui;
     }
@@ -288,7 +291,7 @@ public class GuiDominionPermissions {
                     return;
                 }
                 UUID memberUuid = members.get(index[0] % members.size());
-                initializedGui.setItem(MEMBERS_SLOT, buildMembersHeadItem(memberUuid));
+                initializedGui.setItem(MEMBERS_SLOT, buildMembersHeadItem(player, memberUuid));
                 player.updateInventory();
                 index[0]++;
             }
@@ -296,56 +299,53 @@ public class GuiDominionPermissions {
     }
 
     /**
-     * Builds the Explosion toggle item for the main screen.
+     * Builds the Explosions nav item for the main screen (opens per-area config).
      */
-    public static ItemStack buildExplosionToggleItem(boolean enabled) {
+    public static ItemStack buildExplosionNavItem(Player player, boolean enabled) {
         ItemStack item = new ItemStack(Material.TNT);
         ItemMeta meta = item.getItemMeta();
-        String statusColor = enabled ? "&a" : "&c";
-        String statusText = enabled ? "Enabled" : "Disabled";
-        meta.setDisplayName(ChatUtils.translateToColor("&6&lExplosions &7&l- " + statusColor + "&l" + statusText));
-        meta.setLore(List.of(ChatUtils.translateToColor("&7Allows explosions to damage blocks in dominion chunks")));
+        String status = Lang.getFor(player, enabled ? "gui.dominionperms.enabled" : "gui.dominionperms.disabled");
+        meta.setDisplayName(Lang.getFor(player, "gui.dominionperms.toggle_explosions_name", "status", status));
+        meta.setLore(List.of(Lang.getFor(player, "gui.dominionperms.toggle_explosions")));
         item.setItemMeta(meta);
         return item;
     }
 
     /**
-     * Builds the Mob Spawning toggle item for the main screen.
+     * Builds the Mob Spawning nav item for the main screen (opens per-area config).
      */
-    public static ItemStack buildMobSpawningToggleItem(boolean enabled) {
+    public static ItemStack buildMobSpawningNavItem(Player player, boolean enabled) {
         ItemStack item = new ItemStack(Material.ZOMBIE_SPAWN_EGG);
         ItemMeta meta = item.getItemMeta();
-        String statusColor = enabled ? "&a" : "&c";
-        String statusText = enabled ? "Enabled" : "Disabled";
-        meta.setDisplayName(ChatUtils.translateToColor("&6&lMob Spawning &7&l- " + statusColor + "&l" + statusText));
-        meta.setLore(List.of(ChatUtils.translateToColor("&7Allows monsters to spawn in dominion chunks")));
+        String status = Lang.getFor(player, enabled ? "gui.dominionperms.enabled" : "gui.dominionperms.disabled");
+        meta.setDisplayName(Lang.getFor(player, "gui.dominionperms.toggle_monsters_name", "status", status));
+        meta.setLore(List.of(Lang.getFor(player, "gui.dominionperms.toggle_monsters")));
         item.setItemMeta(meta);
         return item;
     }
 
     /**
-     * Builds the Bending toggle item for the main screen.
+     * Builds the Bending nav item for the main screen (opens per-area config).
      */
-    public static ItemStack buildBendingToggleItem(boolean enabled) {
+    public static ItemStack buildBendingNavItem(Player player, boolean enabled) {
         ItemStack item = new ItemStack(Material.BLAZE_POWDER);
         ItemMeta meta = item.getItemMeta();
-        String statusColor = enabled ? "&a" : "&c";
-        String statusText = enabled ? "Enabled" : "Disabled";
-        meta.setDisplayName(ChatUtils.translateToColor("&6&lBending &7&l- " + statusColor + "&l" + statusText));
+        String status = Lang.getFor(player, enabled ? "gui.dominionperms.enabled" : "gui.dominionperms.disabled");
+        meta.setDisplayName(Lang.getFor(player, "gui.dominionperms.toggle_bending_name", "status", status));
+        meta.setLore(List.of(Lang.getFor(player, "gui.dominionperms.toggle_bending")));
         item.setItemMeta(meta);
         return item;
     }
 
     /**
-     * Builds the Member PvP toggle item for the main screen.
+     * Builds the Member PvP nav item for the main screen (opens per-area config).
      */
-    public static ItemStack buildMemberPvpToggleItem(boolean enabled) {
+    public static ItemStack buildMemberPvpNavItem(Player player, boolean enabled) {
         ItemStack item = new ItemStack(Material.IRON_SWORD);
         ItemMeta meta = item.getItemMeta();
-        String statusColor = enabled ? "&a" : "&c";
-        String statusText = enabled ? "Enabled" : "Disabled";
-        meta.setDisplayName(ChatUtils.translateToColor("&6&lMember PvP &7&l- " + statusColor + "&l" + statusText));
-        meta.setLore(List.of(ChatUtils.translateToColor("&7Allows dominion members to harm each other")));
+        String status = Lang.getFor(player, enabled ? "gui.dominionperms.enabled" : "gui.dominionperms.disabled");
+        meta.setDisplayName(Lang.getFor(player, "gui.dominionperms.toggle_pvp_name", "status", status));
+        meta.setLore(List.of(Lang.getFor(player, "gui.dominionperms.toggle_pvp")));
         item.setItemMeta(meta);
         return item;
     }
@@ -353,11 +353,23 @@ public class GuiDominionPermissions {
     /**
      * Builds the Defenders hub button.
      */
-    public static ItemStack buildDefendersItem() {
+    public static ItemStack buildDefendersItem(Player player) {
         ItemStack item = new ItemStack(Material.SHIELD);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&c&lDefenders"));
-        meta.setLore(List.of(ChatUtils.translateToColor("&7Manage your dominion's defenders")));
+        meta.setDisplayName(Lang.getFor(player, "gui.dominionperms.defenders"));
+        meta.setLore(List.of(Lang.getFor(player, "gui.dominionperms.defenders_lore")));
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    /**
+     * Builds the Resources hub button.
+     */
+    public static ItemStack buildResourcesItem(Player player) {
+        ItemStack item = new ItemStack(Material.DIAMOND_PICKAXE);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(Lang.getFor(player, "gui.dominionperms.resources_nav"));
+        meta.setLore(List.of(Lang.getFor(player, "gui.dominionperms.resources_nav_lore")));
         item.setItemMeta(meta);
         return item;
     }
@@ -365,22 +377,34 @@ public class GuiDominionPermissions {
     /**
      * Builds the Outposts hub button.
      */
-    public static ItemStack buildOutpostsItem() {
+    public static ItemStack buildOutpostsItem(Player player) {
         ItemStack item = new ItemStack(Material.OAK_LOG);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&6&lOutposts"));
-        meta.setLore(List.of(ChatUtils.translateToColor("&7Manage your dominion's outposts")));
+        meta.setDisplayName(Lang.getFor(player, "gui.dominionperms.outposts"));
+        meta.setLore(List.of(Lang.getFor(player, "gui.dominionperms.outposts_lore")));
         item.setItemMeta(meta);
         return item;
     }
 
-    private static ItemStack buildMembersHeadItem(UUID memberUuid) {
+    /**
+     * Builds the Regions hub button.
+     */
+    public static ItemStack buildRegionsItem(Player player) {
+        ItemStack item = new ItemStack(Material.GRASS_BLOCK);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(Lang.getFor(player, "gui.dominionperms.regions"));
+        meta.setLore(List.of(Lang.getFor(player, "gui.dominionperms.regions_lore")));
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    private static ItemStack buildMembersHeadItem(Player player, UUID memberUuid) {
         ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) skull.getItemMeta();
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(memberUuid);
         meta.setOwningPlayer(offlinePlayer);
-        meta.setDisplayName(ChatUtils.translateToColor("&eMembers"));
-        meta.setLore(List.of(ChatUtils.translateToColor("&7Click to manage member ranks")));
+        meta.setDisplayName(Lang.getFor(player, "gui.dominionperms.members"));
+        meta.setLore(List.of(Lang.getFor(player, "gui.dominionperms.members_lore")));
         skull.setItemMeta(meta);
         return skull;
     }
@@ -389,7 +413,7 @@ public class GuiDominionPermissions {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(ChatUtils.translateToColor(name));
-        meta.setLore(Collections.singletonList(ChatUtils.translateToColor(lore)));
+        meta.setLore(Collections.singletonList(lore));
         item.setItemMeta(meta);
         return item;
     }
@@ -424,17 +448,20 @@ public class GuiDominionPermissions {
             case RETREAT -> Material.FEATHER;
             case MANAGE_OUTPOSTS -> Material.OAK_LOG;
             case MANAGE_DEFENDERS -> Material.SHIELD;
-            case MANAGE_PLOTS -> Material.GRASS_BLOCK;
+            case MANAGE_REGIONS -> Material.GRASS_BLOCK;
             case WITHDRAW -> Material.GOLD_NUGGET;
         };
     }
 
-    public static ItemStack buildPermissionItem(DominionPermission permission, boolean enabled) {
+    public static String getPermissionName(Player player, DominionPermission permission) {
+        return Lang.getFor(player, "gui.dominionperms.perm_" + permission.name().toLowerCase());
+    }
+
+    public static ItemStack buildPermissionItem(Player player, DominionPermission permission, boolean enabled) {
         ItemStack item = new ItemStack(getPermissionMaterial(permission));
         ItemMeta meta = item.getItemMeta();
-        String statusColor = enabled ? "&a" : "&c";
-        String statusText = enabled ? "Yes" : "No";
-        meta.setDisplayName(ChatUtils.translateToColor("&6&l" + formatPermissionName(permission) + " &7&l- " + statusColor + "&l" + statusText));
+        String status = Lang.getFor(player, enabled ? "gui.dominionperms.enabled" : "gui.dominionperms.disabled");
+        meta.setDisplayName(Lang.getFor(player, "gui.dominionperms.perm_name", "name", getPermissionName(player, permission), "status", status));
         item.setItemMeta(meta);
         return item;
     }
@@ -442,7 +469,7 @@ public class GuiDominionPermissions {
     private static ItemStack buildSectionHeader(Material material, String name) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor(name));
+        meta.setDisplayName(name);
         meta.setLore(Collections.emptyList());
         item.setItemMeta(meta);
         return item;
@@ -459,24 +486,25 @@ public class GuiDominionPermissions {
     /**
      * Builds the User Search button for the main permissions screen.
      */
-    public static ItemStack buildUserSearchItem() {
+    public static ItemStack buildUserSearchItem(Player player) {
         ItemStack item = new ItemStack(Material.COMPASS);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&bUser Search"));
-        meta.setLore(List.of(ChatUtils.translateToColor("&7Modify a specific player's permissions")));
+        meta.setDisplayName(Lang.getFor(player, "gui.dominionperms.user_search"));
+        meta.setLore(List.of(Lang.getFor(player, "gui.dominionperms.user_search_lore")));
         item.setItemMeta(meta);
         return item;
     }
 
     /**
      * Builds the Restore Defaults button used in permission sub-screens.
+     *
      * @param loreLine Descriptive lore explaining what will be restored.
      */
-    public static ItemStack buildRestoreDefaultsButton(String loreLine) {
+    public static ItemStack buildRestoreDefaultsButton(Player player, String loreLine) {
         ItemStack item = new ItemStack(Material.ENDER_PEARL);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&6&lRestore Defaults"));
-        meta.setLore(List.of(ChatUtils.translateToColor(loreLine)));
+        meta.setDisplayName(Lang.getFor(player, "gui.dominionperms.restore_defaults"));
+        meta.setLore(List.of(loreLine));
         item.setItemMeta(meta);
         return item;
     }
@@ -484,35 +512,13 @@ public class GuiDominionPermissions {
     /**
      * Builds the back button item used in sub-screens.
      */
-    public static ItemStack buildBackButton() {
+    public static ItemStack buildBackButton(Player player) {
         ItemStack item = new ItemStack(Material.BARRIER);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&c&lBack"));
+        meta.setDisplayName(Lang.getFor(player, "gui.dominionperms.back"));
         item.setItemMeta(meta);
         return item;
     }
 
-    /**
-     * Formats a DominionPermission enum name into a human-readable string.
-     */
-    public static String formatPermissionName(DominionPermission permission) {
-        if (permission == DominionPermission.FENCE_GATE) return "Gates";
-        if (permission == DominionPermission.LOCK_CONTAINER) return "Lock Containers";
-        String raw = permission.name().replace("_", " ");
-        StringBuilder formatted = new StringBuilder();
-        for (String word : raw.split(" ")) {
-            if (!word.isEmpty()) {
-                if (word.equalsIgnoreCase("pvp")) {
-                    formatted.append("PvP")
-                            .append(" ");
-                } else {
-                    formatted.append(Character.toUpperCase(word.charAt(0)))
-                            .append(word.substring(1).toLowerCase())
-                            .append(" ");
-                }
-            }
-        }
-        return formatted.toString().trim();
-    }
 
 }

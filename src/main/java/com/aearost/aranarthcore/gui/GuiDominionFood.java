@@ -4,7 +4,7 @@ import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionLevelUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
-import org.bukkit.Bukkit;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -14,7 +14,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class GuiDominionFood {
 
 	public static final int FOOD_SLOTS_PER_PAGE = 45;
-	public static final String TITLE_PREFIX = "Power - ";
+	public static final String TITLE_KEY = "gui.dominionfood.title";
 
 	private final Player player;
 	private final Inventory initializedGui;
@@ -50,7 +50,7 @@ public class GuiDominionFood {
 	/**
 	 * Builds the inventory title string including the current food power, max capacity, and estimated duration.
 	 */
-	public static String buildFoodTitle(Dominion dominion, int totalPower) {
+	public static String buildFoodTitle(Player player, Dominion dominion, int totalPower) {
 		int amplifier = dominion.getConquered().size();
 		if (amplifier == 0 && DominionUtils.getConquerorOfDominion(dominion) != null) {
 			amplifier = -1;
@@ -62,7 +62,17 @@ public class GuiDominionFood {
 		String percentageStr = percentage == Math.floor(percentage)
 				? String.valueOf((int) percentage)
 				: String.format("%.2f", percentage).replaceAll("0+$", "");
-		return "Power - " + percentageStr + "% (" + duration + ")";
+		return Lang.getFor(player, TITLE_KEY, "percent", percentageStr, "duration", duration);
+	}
+
+	/**
+	 * Determines whether the color-stripped title belongs to the food GUI, in the player's language.
+	 */
+	public static boolean isFoodTitle(Player player, String title) {
+		String template = ChatUtils.stripColorFormatting(Lang.getFor(player, TITLE_KEY));
+		int placeholderIndex = template.indexOf('{');
+		String prefix = placeholderIndex >= 0 ? template.substring(0, placeholderIndex) : template;
+		return !prefix.isEmpty() && title.startsWith(prefix);
 	}
 
 	/**
@@ -131,7 +141,9 @@ public class GuiDominionFood {
 
 		int inventorySize = multiPage ? 54 : DominionUtils.getFoodArraySize(dominion);
 		int totalPower = DominionUtils.getTotalFoodPower(dominion);
-		Inventory gui = Bukkit.getServer().createInventory(player, inventorySize, buildFoodTitle(dominion, totalPower));
+		Inventory gui = GuiHolder.create(player, inventorySize, buildFoodTitle(player, dominion, totalPower));
+		// The contents are only ever written back to the Dominion that was opened
+		GuiHolder.of(gui).setData(dominion.getId());
 
 		ItemStack[] food = dominion.getFood();
 		int foodOffset = pageNum * FOOD_SLOTS_PER_PAGE;
@@ -149,17 +161,17 @@ public class GuiDominionFood {
 
 			ItemMeta prevMeta = previous.getItemMeta();
 			if (prevMeta != null) {
-				prevMeta.setDisplayName(ChatUtils.translateToColor("&c&lPrevious"));
+				prevMeta.setDisplayName(Lang.getFor(player, "gui.page_prev"));
 				previous.setItemMeta(prevMeta);
 			}
 			ItemMeta barrierMeta = barrier.getItemMeta();
 			if (barrierMeta != null) {
-				barrierMeta.setDisplayName(ChatUtils.translateToColor("&4&lExit"));
+				barrierMeta.setDisplayName(Lang.getFor(player, "gui.exit"));
 				barrier.setItemMeta(barrierMeta);
 			}
 			ItemMeta nextMeta = next.getItemMeta();
 			if (nextMeta != null) {
-				nextMeta.setDisplayName(ChatUtils.translateToColor("&a&lNext"));
+				nextMeta.setDisplayName(Lang.getFor(player, "gui.page_next"));
 				next.setItemMeta(nextMeta);
 			}
 			ItemMeta blankMeta = blank.getItemMeta();

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.waterbending.bloodbending;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
@@ -32,12 +33,10 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
 
     public enum Phase {CHARGING, CASTING}
 
-    private static final long CHARGE_DURATION_MS = 1000L;
-    private static final long CAST_DURATION_MS = 3000L;
-    private static final long DAMAGE_INTERVAL_MS = 250L;
-    private static final double DAMAGE_PER_TICK = 1.0;
-    private static final int MAX_SLOWNESS_LEVEL = 5;
-    private static final double TARGET_HIT_RADIUS = 0.5;
+    private long damageInterval;
+    private double damage;
+    private int maxSlowness;
+    private double hitRadius;
 
     private static final Set<EntityType> UNDEAD_TYPES = EnumSet.of(
             EntityType.ZOMBIE,
@@ -83,10 +82,14 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
             return;
         }
 
-        this.cooldown = 10000L;
-        this.range = 6.0;
-        this.chargeDuration = CHARGE_DURATION_MS;
-        this.castDuration = CAST_DURATION_MS;
+        this.cooldown = AbilityConfig.getLong("BloodFreeze.Cooldown");
+        this.range = AbilityConfig.getDouble("BloodFreeze.Range");
+        this.damageInterval = AbilityConfig.getLong("BloodFreeze.DamageInterval");
+        this.damage = AbilityConfig.getDouble("BloodFreeze.Damage");
+        this.maxSlowness = AbilityConfig.getInt("BloodFreeze.MaxSlowness");
+        this.hitRadius = AbilityConfig.getDouble("BloodFreeze.HitRadius");
+        this.chargeDuration = AbilityConfig.getLong("BloodFreeze.ChargeDuration");
+        this.castDuration = AbilityConfig.getLong("BloodFreeze.Duration");
 
         LivingEntity found = findTarget();
         if (found == null) {
@@ -184,15 +187,15 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
         target.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 40, 1, false, true, true), true);
         spawnCastingParticles();
 
-        if (System.currentTimeMillis() - lastDamageTime >= DAMAGE_INTERVAL_MS) {
+        if (System.currentTimeMillis() - lastDamageTime >= damageInterval) {
             applyDamageTick();
             lastDamageTime = System.currentTimeMillis();
         }
     }
 
     /**
-     * Deals one damage tick directly to the target's health, bypassing armor and rank multipliers,
-     * then applies or escalates the Slowness effect up to the maximum level.
+     * Deals one damage tick to the target, bypassing armor, then applies or escalates the Slowness
+     * effect up to the maximum level.
      */
     private void applyDamageTick() {
         if (!target.isValid()) {
@@ -200,9 +203,13 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
             return;
         }
 
-        target.setHealth(Math.max(0.0, target.getHealth() - DAMAGE_PER_TICK));
+        // Real damage so protection, combat tagging and kill attribution all apply
+        if (!AranarthBendingUtils.damageIgnoringArmor(target, damage, this)) {
+            finishWithCooldown();
+            return;
+        }
 
-        slownessLevel = Math.min(slownessLevel + 1, MAX_SLOWNESS_LEVEL);
+        slownessLevel = Math.min(slownessLevel + 1, maxSlowness);
         target.addPotionEffect(new PotionEffect(
                 PotionEffectType.SLOWNESS,
                 slownessLevel * 20,
@@ -327,7 +334,7 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
                 continue;
             }
 
-            if (entity.getBoundingBox().expand(TARGET_HIT_RADIUS)
+            if (entity.getBoundingBox().expand(hitRadius)
                     .rayTrace(eye.toVector(), direction, range) == null) {
                 continue;
             }

@@ -1,10 +1,10 @@
 name: AranarthCore
-version: 1.11
+version: 1.14
 authors: [ Aearost ]
 main: com.aearost.aranarthcore.AranarthCore
-api-version: 26.2
+api-version: 26.3
 depend: [ mcMMO, ProjectKorra, DiscordSRV ]
-softdepend: [ VotifierPlus, BreweryX, squaremap ]
+softdepend: [ VotifierPlus, BreweryX, squaremap, voicechat, WorldEdit, Chunky ]
 description: A core plugin to incorporate any features we desire into our Minecraft world
 loadbefore: [ mcMMO ]
 # BungeeCord plugin messaging channel used to transfer players between servers via Velocity.
@@ -22,9 +22,8 @@ commands:
   anvil:
     description: Opens an anvil GUI
     permission: aranarth.tables
-  aranarthium:
-    description: Provides a written book containing information about Aranarthium
-    permission: aranarth.aranarthium
+  aranarth:
+    description: Centralised guide for Aranarth topics
   arena:
     description: Teleports the player to the arena world
     permission: aranarth.arena
@@ -52,10 +51,6 @@ commands:
   boosts:
     description: Lists the active boosts on the server
     permission: aranarth.boosts
-  calendar:
-    description: Provides a written book containing information about the calendar system
-    aliases: [ cal ]
-    permission: aranarth.calendar
   cartography:
     description: Opens a cartography table GUI
     permission: aranarth.tables
@@ -74,7 +69,7 @@ commands:
     aliases: [ workbench, wb, ct ]
     permission: aranarth.tables
   creative:
-    description: Teleports the player to the Creative world
+    description: Teleports the player to the Creative plots world
     permission: aranarth.creative
   date:
     description: Lists the current Aranarth calendar date
@@ -107,17 +102,14 @@ commands:
     permission: aranarth.hat
   heads:
     description: Opens the custom heads exchange shop, or /heads <username> to get a player skull
-    permission: aranarth.customheads
-    usage: /heads [username]
+    permission: aranarth.heads
+    usage: /heads [username|adminbuy]
   home:
     description: Opens the GUI or teleports the player to their specified home
     permission: aranarth.home
   homepad:
     description: Defines a homepad
     permission: aranarth.homepad
-  incantations:
-    description: Provides a written book containing information about the incantations system
-    permission: aranarth.incantations
   jobs:
     description: Manage your jobs
     usage: /jobs [join|quit|stats] [name]
@@ -134,6 +126,9 @@ commands:
   kills:
     description: Shows the number of kills the input player has
     permission: aranarth.kills
+  language:
+    description: View or change the language messages are displayed in
+    aliases: [ lang ]
   lock:
     description: Locks the next-clicked chest block
     permission: aranarth.lock
@@ -146,6 +141,14 @@ commands:
   map:
     description: Sends the player a clickable link to the Aranarth live map
     permission: aranarth.map
+  marketvalue:
+    description: Opens the Market Value GUI showing current item prices and market values
+    aliases: [ mv ]
+    permission: aranarth.marketvalue
+  smpcreative:
+    description: Teleports original players to the SMP Creative world
+    aliases: [ smpc ]
+    permission: aranarth.creative
   smpmap:
     description: Sends OG players a clickable link to the Aranarth SMP live map
     permission: aranarth.smpmap
@@ -173,12 +176,18 @@ commands:
   mcstats:
     description: Opens a GUI showing your or another player's mcMMO skill levels and rankings
     aliases: [ skills ]
+  enchanting:
+    description: Displays the mcMMO Enchanting child skill and its sub-skills
+    permission: aranarth.mcmmo.enchanting
   mount:
     description: Calls or dismisses the player's current mount
     permission: aranarth.mount
   pettransfer:
     description: Allows the player to specify a player to transfer their pet's ownership to
     permission: aranarth.pettransfer
+  plot:
+    description: Claims and manages plots in the Creative world
+    permission: aranarth.plot
   ping:
     description: Shows the input player's ping
     permission: aranarth.ping
@@ -190,6 +199,7 @@ commands:
     permission: aranarth.pronouns
   quests:
     description: Opens the Aranarth Quests GUI
+    aliases: [ q ]
     permission: aranarth.quests
   reaper:
     description: Opens the Reaper Inventory GUI to purchase back items lost on death
@@ -222,6 +232,9 @@ commands:
   shop:
     description: Opens the GUI to players' shops
     permission: aranarth.shop
+  sit:
+    description: Sits the player on a cushion, or opens the cushion color GUI
+    permission: aranarth.sit
   smithing:
     description: Opens a smithing table GUI
     permission: aranarth.tables
@@ -288,6 +301,9 @@ commands:
     description: Allows the player to request another player teleports to them
     aliases: [ tph ]
     permission: aranarth.tphere
+  trade:
+    description: Initiates or accepts a trade with another player
+    permission: aranarth.trade
   trash:
     description: Allows players to dispense of items
     permission: aranarth.trash
@@ -300,6 +316,10 @@ commands:
   untrust:
     description: Removes the input player from the next clicked chest's protection
     permission: aranarth.untrust
+  voicechat:
+    description: Joins or leaves a voice chat channel (global, local, or dominion)
+    aliases: [ vc ]
+    permission: aranarth.voicechat
   vote:
     description: Provides the player with a list of vote links
     aliases: [ v ]

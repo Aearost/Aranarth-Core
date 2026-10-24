@@ -2,11 +2,13 @@ package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.abilities.airbending.combo.AirSnipe;
+import com.aearost.aranarthcore.abilities.airbending.combo.JetStream;
 import com.aearost.aranarthcore.abilities.airbending.soundbending.*;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.*;
 import com.aearost.aranarthcore.abilities.chiblocking.DaggerThrow;
 import com.aearost.aranarthcore.abilities.chiblocking.DaggerVolley;
 import com.aearost.aranarthcore.abilities.chiblocking.HighJump;
+import com.aearost.aranarthcore.abilities.earthbending.Tremorsense;
 import com.aearost.aranarthcore.abilities.earthbending.combo.CableSlash;
 import com.aearost.aranarthcore.abilities.earthbending.combo.EarthRush;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.Eruption;
@@ -35,14 +37,23 @@ import com.aearost.aranarthcore.abilities.waterbending.plantbending.*;
 import com.aearost.aranarthcore.enums.FireType;
 import com.aearost.aranarthcore.event.listener.misc.FireParticleListener;
 import com.aearost.aranarthcore.event.mob.MountListener;
+import com.aearost.aranarthcore.event.player.ArrowConsume;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.CustomKeys;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.ShopIslandUtils;
+import com.gmail.nossr50.api.ExperienceAPI;
+import com.gmail.nossr50.api.exceptions.McMMOPlayerNotFoundException;
+import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
+import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.*;
+import com.projectkorra.projectkorra.ability.util.ComboManager;
 import com.projectkorra.projectkorra.airbending.AirBlast;
 import com.projectkorra.projectkorra.event.*;
 import com.projectkorra.projectkorra.util.TempBlock;
@@ -62,8 +73,12 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -76,6 +91,7 @@ import java.util.UUID;
 public class AranarthCoreBendingListener implements Listener {
 
     private static Field airBlastOriginsField;
+    private static final String AIR_BLAST_ARROW = "airblastarrow";
 
     static {
         try {
@@ -126,6 +142,7 @@ public class AranarthCoreBendingListener implements Listener {
         AstralProjection.endAllProjections();
         PastLives.endAllInstances();
         new ArrayList<>(CoreAbility.getAbilities(AirSnipe.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(JetStream.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(AstralShot.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(CableSlash.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(EarthRush.class)).forEach(CoreAbility::remove);
@@ -260,6 +277,152 @@ public class AranarthCoreBendingListener implements Listener {
     }
 
     /**
+     * Prevents the AirBlast from the final left-click of the JetStream combo from firing at all.
+     * PK only starts the combo a tick after the click, so the AirBlast would otherwise get to travel briefly.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onJetStreamAirBlastStart(final AbilityStartEvent e) {
+        if (!(e.getAbility() instanceof AirBlast airBlast)) {
+            return;
+        }
+        Player player = airBlast.getPlayer();
+        ComboManager.ComboAbilityInfo combo = ComboManager.checkForValidCombo(player);
+        if (combo == null || !combo.getName().equals("JetStream")) {
+            return;
+        }
+        // Only suppress the AirBlast if JetStream will actually start
+        BendingPlayer bendingPlayer = airBlast.getBendingPlayer();
+        CoreAbility jetStream = CoreAbility.getAbility(JetStream.class);
+        if (jetStream == null || bendingPlayer.isOnCooldown(jetStream)
+                || !bendingPlayer.canBendIgnoreBindsCooldowns(jetStream)
+                || CoreAbility.hasAbility(player, JetStream.class)) {
+            return;
+        }
+        e.setCancelled(true);
+        // AirBlast applies its cooldown before starting
+        bendingPlayer.removeCooldown("AirBlast");
+    }
+
+    /**
+     * Launches the held arrow into the AirBlast when an airbender with 100+ Archery fires it while sneaking and holding arrows.
+     */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onAirBlastArrowLaunch(final AbilityStartEvent e) {
+        if (!(e.getAbility() instanceof AirBlast airBlast) || airBlast.getSource() != null) {
+            return;
+        }
+        Player player = airBlast.getPlayer();
+        if (!player.isSneaking()) {
+            return;
+        }
+        ItemStack held = player.getInventory().getItemInMainHand();
+        Material type = held.getType();
+        if (type != Material.ARROW && type != Material.TIPPED_ARROW && type != Material.SPECTRAL_ARROW) {
+            return;
+        }
+        try {
+            if (ExperienceAPI.getLevel(player, PrimarySkillType.ARCHERY) < 100) {
+                return;
+            }
+        } catch (McMMOPlayerNotFoundException ex) {
+            return;
+        }
+
+        // AstralShot removes this AirBlast on the next tick, so the arrow would have nothing to carry it
+        ComboManager.ComboAbilityInfo combo = ComboManager.checkForValidCombo(player);
+        if (combo != null && combo.getName().equals("AstralShot")) {
+            CoreAbility astralShot = CoreAbility.getAbility(AstralShot.class);
+            BendingPlayer bendingPlayer = airBlast.getBendingPlayer();
+            if (astralShot != null && !bendingPlayer.isOnCooldown(astralShot)
+                    && bendingPlayer.canBendIgnoreBindsCooldowns(astralShot)) {
+                return;
+            }
+        }
+
+        Vector direction = airBlast.getDirection().clone().normalize();
+        Location spawnLocation = airBlast.getOrigin().clone().add(direction.clone().multiply(0.5));
+        // Arrows use a different rotation convention than players, matching it prevents the arrow from visibly spinning into place
+        spawnLocation.setYaw((float) Math.toDegrees(Math.atan2(direction.getX(), direction.getZ())));
+        spawnLocation.setPitch((float) Math.toDegrees(Math.atan2(direction.getY(),
+                Math.sqrt(direction.getX() * direction.getX() + direction.getZ() * direction.getZ()))));
+        Vector velocity = direction.clone().multiply(AbilityConfig.getDouble("AirBlastArrow.Speed"));
+        if (!spawnLocation.getBlock().isPassable() || spawnLocation.getBlock().isLiquid()
+                || GeneralMethods.isRegionProtectedFromBuild(airBlast, spawnLocation)) {
+            return;
+        }
+
+        ItemStack template = held.clone();
+        template.setAmount(1);
+
+        // The shooter and velocity are set before the arrow is added to the world so the launch event treats it like a bow shot,
+        // letting mcMMO track it for Archery XP and letting launch protections cancel it
+        AbstractArrow arrow;
+        if (type == Material.SPECTRAL_ARROW) {
+            arrow = player.getWorld().spawn(spawnLocation, SpectralArrow.class, spectralArrow -> {
+                spectralArrow.setShooter(player);
+                spectralArrow.setVelocity(velocity);
+                spectralArrow.setMetadata(AIR_BLAST_ARROW, new FixedMetadataValue(AranarthCore.getInstance(), true));
+                spectralArrow.setItemStack(template.clone());
+            });
+        } else {
+            arrow = player.getWorld().spawn(spawnLocation, Arrow.class, normalArrow -> {
+                normalArrow.setShooter(player);
+                normalArrow.setVelocity(velocity);
+                normalArrow.setMetadata(AIR_BLAST_ARROW, new FixedMetadataValue(AranarthCore.getInstance(), true));
+                normalArrow.setItemStack(template.clone());
+                if (type == Material.TIPPED_ARROW && template.getItemMeta() instanceof PotionMeta meta) {
+                    if (meta.getBasePotionType() != null) {
+                        normalArrow.setBasePotionType(meta.getBasePotionType());
+                    }
+                    for (PotionEffect effect : meta.getCustomEffects()) {
+                        normalArrow.addCustomEffect(effect, true);
+                    }
+                }
+            });
+        }
+        if (!arrow.isValid()) {
+            return;
+        }
+
+        String arrowType = template.getItemMeta() != null
+                ? template.getItemMeta().getPersistentDataContainer().get(CustomKeys.ARROW, PersistentDataType.STRING)
+                : null;
+        if (arrowType != null) {
+            arrow.getPersistentDataContainer().set(CustomKeys.ARROW, PersistentDataType.STRING, arrowType);
+        }
+
+        if (player.getGameMode() == GameMode.CREATIVE) {
+            arrow.setPickupStatus(AbstractArrow.PickupStatus.CREATIVE_ONLY);
+            return;
+        }
+        arrow.setPickupStatus(AbstractArrow.PickupStatus.ALLOWED);
+        // Quiver refill runs before the arrow is removed, the same as when shooting a bow
+        int heldSlot = player.getInventory().getHeldItemSlot();
+        new ArrowConsume().replaceArrow(player, template.clone());
+        // Re-read the slot as the refill replaces the held stack, so the earlier reference would no longer be in the inventory
+        ItemStack heldAfterRefill = player.getInventory().getItem(heldSlot);
+        if (heldAfterRefill != null && heldAfterRefill.isSimilar(template)) {
+            heldAfterRefill.setAmount(heldAfterRefill.getAmount() - 1);
+            player.getInventory().setItem(heldSlot, heldAfterRefill.getAmount() > 0 ? heldAfterRefill : null);
+        } else {
+            player.getInventory().removeItem(template.clone());
+        }
+    }
+
+    /**
+     * Prevents the player's own AirBlast from overriding the launch velocity of the arrow it fired.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onAirBlastArrowPush(final AbilityVelocityAffectEntityEvent e) {
+        if (!(e.getAbility() instanceof AirBlast airBlast) || !(e.getAffected() instanceof AbstractArrow arrow)) {
+            return;
+        }
+        if (arrow.hasMetadata(AIR_BLAST_ARROW) && airBlast.getPlayer().equals(arrow.getShooter())) {
+            e.setCancelled(true);
+        }
+    }
+
+    /**
      * Registers the initial position of a fire ability as a fire source immediately on start,
      * before the per-tick scheduler can pick it up. This eliminates the 1-tick gap on the
      * first frame of a new ability.
@@ -350,6 +513,16 @@ public class AranarthCoreBendingListener implements Listener {
 
         CoreAbility ability = bendingPlayer.getBoundAbility();
         String abilityName = bendingPlayer.getBoundAbilityName();
+
+        // Sneaking while riding a JetStream - cancel so PK cannot activate the bound ability, and double-tapping ends the stream
+        JetStream jetStream = CoreAbility.getAbility(player, JetStream.class);
+        if (jetStream != null && jetStream.isCasterRiding()) {
+            e.setCancelled(true);
+            if (e.isSneaking()) {
+                jetStream.onSneakPress();
+            }
+            return;
+        }
 
         // Sneak press during FIRING - cancel so PK cannot activate IceSpike via SHIFT_DOWN
         if (e.isSneaking()) {
@@ -641,6 +814,10 @@ public class AranarthCoreBendingListener implements Listener {
                     EarthRush.markListenerTriggered(player.getUniqueId());
                     new EarthRush(player);
                     return;
+                } else if (abilityName.equalsIgnoreCase("tremorsense")) {
+                    if (!Tremorsense.hasActiveInstance(player.getUniqueId())) {
+                        new Tremorsense(player);
+                    }
                 } else if (abilityName.equalsIgnoreCase("earthtunnel") || abilityName.equalsIgnoreCase("collapse")) {
                     e.setCancelled(AranarthBendingUtils.preventAbilityNearDominion(player));
                 }
@@ -921,6 +1098,14 @@ public class AranarthCoreBendingListener implements Listener {
         if (bpClap != null && bpClap.getBoundAbilityName().equalsIgnoreCase("sonicclap")
                 && bpClap.isElementToggled(Element.AIR)) {
             new SonicClap(player);
+            return;
+        }
+
+        // Tremorsense: left-click triggers the underground smoke reveal
+        BendingPlayer bpTremorsense = BendingPlayer.getBendingPlayer(player);
+        if (bpTremorsense != null && bpTremorsense.getBoundAbilityName().equalsIgnoreCase("tremorsense")
+                && bpTremorsense.isElementToggled(Element.EARTH)) {
+            Tremorsense.activateSmokeReveal(player);
             return;
         }
 
@@ -1433,6 +1618,16 @@ public class AranarthCoreBendingListener implements Listener {
     }
 
     /**
+     * Keeps players caught in a JetStream gliding, even without an elytra equipped.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onJetStreamGlideToggle(final EntityToggleGlideEvent e) {
+        if (!e.isGliding() && JetStream.isGliding(e.getEntity().getUniqueId())) {
+            e.setCancelled(true);
+        }
+    }
+
+    /**
      * Suppresses vanilla suffocation damage for entities currently buried by Burial.
      * Manual ticking damage is applied by the ability itself instead.
      */
@@ -1448,27 +1643,40 @@ public class AranarthCoreBendingListener implements Listener {
 
     /**
      * Triggers EnergyBurst as a fall proc when the player lands with EnergyBurst bound.
-     * Damage scales from 0.5 hearts at the vanilla fall-damage threshold to full damage at 75 blocks.
+     * Damage scales from FallBurstMinDamage at FallBurstMinDistance to full damage at FallBurstMaxDistance.
      */
-    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void onEnergyBurstFallProc(final EntityDamageEvent e) {
-        if (e.getCause() != EntityDamageEvent.DamageCause.FALL) {
-            return;
-        }
-        if (!(e.getEntity() instanceof Player player)) {
-            return;
-        }
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onEnergyBurstFallProc(final PlayerMoveEvent e) {
+        final Player player = e.getPlayer();
+        final UUID uuid = player.getUniqueId();
         final BendingPlayer bPlayer = BendingPlayer.getBendingPlayer(player);
-        if (bPlayer == null || bPlayer.isChiBlocked()) {
+        if (bPlayer == null || !bPlayer.getBoundAbilityName().equalsIgnoreCase("EnergyBurst")) {
+            EnergyBurst.clearFallTracking(uuid);
             return;
         }
-        if (!bPlayer.getBoundAbilityName().equalsIgnoreCase("EnergyBurst")) {
+        if (player.isFlying() || player.isGliding() || player.isInWater() || player.isClimbing() || player.isInsideVehicle()) {
+            EnergyBurst.clearFallTracking(uuid);
             return;
         }
-        if (bPlayer.isOnCooldown("EnergyBurst") || EnergyBurst.hasActiveInstance(player.getUniqueId())) {
+        if (!player.isOnGround()) {
+            EnergyBurst.trackFall(uuid, e.getTo(), player.getFallDistance());
             return;
         }
-        new EnergyBurst(player, player.getFallDistance());
+
+        final float trackedDistance = EnergyBurst.consumeFall(uuid, e.getFrom());
+        if (trackedDistance < 0) {
+            return;
+        }
+        // The landing move's own drop is not yet included in the tracked distance
+        final float fallDistance = Math.max(player.getFallDistance(),
+                trackedDistance + (float) Math.max(0, e.getFrom().getY() - e.getTo().getY()));
+        if (fallDistance < EnergyBurst.getFallBurstMinDistance()) {
+            return;
+        }
+        if (bPlayer.isChiBlocked() || bPlayer.isOnCooldown("EnergyBurst") || EnergyBurst.hasActiveInstance(uuid)) {
+            return;
+        }
+        new EnergyBurst(player, fallDistance);
     }
 
     /**
@@ -1628,7 +1836,7 @@ public class AranarthCoreBendingListener implements Listener {
     public void onCommand(PlayerCommandPreprocessEvent e) {
         if (AstralProjection.isProjecting(e.getPlayer().getUniqueId())) {
             e.setCancelled(true);
-            e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot run commands while Astral Projecting!"));
+            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "bending.no_commands_astral")));
         }
     }
 
@@ -1817,7 +2025,7 @@ public class AranarthCoreBendingListener implements Listener {
     /**
      * Ends the projection when the player disconnects.
      */
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onDisconnect(PlayerQuitEvent e) {
         Player player = e.getPlayer();
         if (AstralProjection.isProjecting(player.getUniqueId())) {
@@ -1834,6 +2042,7 @@ public class AranarthCoreBendingListener implements Listener {
         Jolt.clearPendingCharge(player.getUniqueId());
         ElectricStrike.clearPendingCharge(player.getUniqueId());
         DaggerVolley.resetStage(player.getUniqueId());
+        EnergyBurst.clearFallTracking(player.getUniqueId());
     }
 
     /**
@@ -2134,7 +2343,7 @@ public class AranarthCoreBendingListener implements Listener {
         Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
             if (!dragon.isDead() && !dragon.getPassengers().contains(player)) {
                 dragon.addPassenger(player);
-                MountListener.getInstance().registerFang(dragon, player, PastLives.ROKU_MIN_SPEED);
+                MountListener.getInstance().registerFang(dragon, player, AbilityConfig.getDouble("PastLives.RokuMinSpeed"));
             }
         }, 2L);
     }

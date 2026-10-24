@@ -1,6 +1,10 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.NetworkPlayer;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -25,16 +29,16 @@ public class CommandPing implements CommandExecutor {
 			if (sender instanceof Player player) {
 				int ping = player.getPing();
 				if (ping <= 150) {
-					player.sendMessage(ChatUtils.chatMessage("&7Your ping is &a" + ping + "ms"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "ping.self_good", "ping", String.valueOf(ping))));
 				} else if (ping <= 250) {
-					player.sendMessage(ChatUtils.chatMessage("&7Your ping is &e" + ping + "ms"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "ping.self_ok", "ping", String.valueOf(ping))));
 				} else {
-					player.sendMessage(ChatUtils.chatMessage("&7Your ping is &c" + ping + "ms"));
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "ping.self_bad", "ping", String.valueOf(ping))));
 				}
 
 				return true;
 			} else {
-				sender.sendMessage(ChatUtils.chatMessage("&cYou must specify a player's ping! /ping <player>"));
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ping <player>")));
 				return true;
 			}
 		} else {
@@ -43,28 +47,52 @@ public class CommandPing implements CommandExecutor {
 				if (sender.getName().equalsIgnoreCase(args[0])) {
 					int ping = onlinePlayer.getPing();
 					if (ping <= 150) {
-						sender.sendMessage(ChatUtils.chatMessage("&7Your ping is &a" + ping + "ms"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ping.self_good", "ping", String.valueOf(ping))));
 					} else if (ping <= 250) {
-						sender.sendMessage(ChatUtils.chatMessage("&7Your ping is &e" + ping + "ms"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ping.self_ok", "ping", String.valueOf(ping))));
 					} else {
-						sender.sendMessage(ChatUtils.chatMessage("&7Your ping is &c" + ping + "ms"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ping.self_bad", "ping", String.valueOf(ping))));
 					}
                     return true;
 				}
 				// If the user is running the command on another player
-				else if (onlinePlayer.getName().equalsIgnoreCase(args[0])) {
+				else if (onlinePlayer.getName().equalsIgnoreCase(args[0])
+						&& !AranarthUtils.isVanishedFrom(sender, onlinePlayer.getUniqueId())) {
 					int ping = onlinePlayer.getPing();
 					if (ping <= 150) {
-						sender.sendMessage(ChatUtils.chatMessage("&e" + onlinePlayer.getName() +"'s &7ping is &a" + ping + "ms"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ping.other_good", "player", onlinePlayer.getName(), "ping", String.valueOf(ping))));
 					} else if (ping <= 250) {
-						sender.sendMessage(ChatUtils.chatMessage("&e" + onlinePlayer.getName() +"'s &7ping is &e" + ping + "ms"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ping.other_ok", "player", onlinePlayer.getName(), "ping", String.valueOf(ping))));
 					} else {
-						sender.sendMessage(ChatUtils.chatMessage("&e" + onlinePlayer.getName() +"'s &7ping is &c" + ping + "ms"));
+						sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ping.other_bad", "player", onlinePlayer.getName(), "ping", String.valueOf(ping))));
 					}
 					return true;
 				}
 			}
-            sender.sendMessage(ChatUtils.chatMessage("&cThat player is not online!"));
+            // Check the remote roster for cross-server players
+            if (NetworkManager.isActive()) {
+                for (NetworkPlayer np : NetworkManager.getInstance().getRemoteRoster().values()) {
+                    if (np.getUsername().equalsIgnoreCase(args[0])
+                            && !AranarthUtils.isVanishedFrom(sender, np.getUuid())) {
+                        int ping = np.getPing();
+                        if (ping < 0) {
+                            // Ping not yet received from remote server
+                            sender.sendMessage(ChatUtils.chatMessage(
+                                    Lang.getFor(sender, "ping.other_good", "player", np.getUsername(), "ping", "?")));
+                            return true;
+                        }
+                        if (ping <= 150) {
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ping.other_good", "player", np.getUsername(), "ping", String.valueOf(ping))));
+                        } else if (ping <= 250) {
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ping.other_ok", "player", np.getUsername(), "ping", String.valueOf(ping))));
+                        } else {
+                            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ping.other_bad", "player", np.getUsername(), "ping", String.valueOf(ping))));
+                        }
+                        return true;
+                    }
+                }
+            }
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.offline", "name", args[0])));
 			return true;
         }
 	}

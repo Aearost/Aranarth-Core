@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.gui.GuiStore;
 import com.aearost.aranarthcore.objects.StorePage;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -13,13 +14,21 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 public class GuiStoreClick {
     public void execute(InventoryClickEvent e) {
         e.setCancelled(true);
-        if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarth Store - Saint Ranks")) {
+        // Only the GUI's own buttons count, never the player's inventory
+        if (e.getClickedInventory() != e.getView().getTopInventory()) {
+            return;
+        }
+        if (!(e.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+        String title = ChatUtils.stripColorFormatting(e.getView().getTitle());
+        if (title.equals(Lang.getFor(player, "gui.store.title_saint"))) {
             saintPageLogic(e);
-        } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarth Store - Perks")) {
+        } else if (title.equals(Lang.getFor(player, "gui.store.title_perks"))) {
             perksPageLogic(e);
-        } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarth Store - Boosts")) {
+        } else if (title.equals(Lang.getFor(player, "gui.store.title_boosts"))) {
             boostsPageLogic(e);
-        } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarth Store - Crate Keys")) {
+        } else if (title.equals(Lang.getFor(player, "gui.store.title_crates"))) {
             cratesPageLogic(e);
         } else {
             mainPageLogic(e);
@@ -72,22 +81,22 @@ public class GuiStoreClick {
 
         // Clicking one of the ranks
         if (slot == 11) {
-            player.sendMessage(ChatUtils.chatMessage("&3&lAcolyte (1 Month): &bhttps://aranarth.craftingstore.net/package/1474413"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.acolyte_monthly")));
             player.closeInventory();
         } else if (slot == 13) {
-            player.sendMessage(ChatUtils.chatMessage("&6&lDisciple (1 Month): &ehttps://aranarth.craftingstore.net/package/1474415"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.disciple_monthly")));
             player.closeInventory();
         } else if (slot == 15) {
-            player.sendMessage(ChatUtils.chatMessage("&4&lSeraph (1 Month): &chttps://aranarth.craftingstore.net/package/1474421"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.seraph_monthly")));
             player.closeInventory();
         } else if (slot == 20) {
-            player.sendMessage(ChatUtils.chatMessage("&3&lAcolyte (Lifetime): &bhttps://aranarth.craftingstore.net/package/493265"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.acolyte_lifetime")));
             player.closeInventory();
         } else if (slot == 22) {
-            player.sendMessage(ChatUtils.chatMessage("&6&lDisciple (Lifetime): &ehttps://aranarth.craftingstore.net/package/1474409"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.disciple_lifetime")));
             player.closeInventory();
         } else if (slot == 24) {
-            player.sendMessage(ChatUtils.chatMessage("&4&lSeraph (Lifetime): &chttps://aranarth.craftingstore.net/package/1474412"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.seraph_lifetime")));
             player.closeInventory();
         }
 
@@ -110,46 +119,46 @@ public class GuiStoreClick {
 
         // Clicking one of the perks
         if (slot == 12) {
-            player.sendMessage(ChatUtils.chatMessage("&8&lBlacklist: &7https://aranarth.craftingstore.net/package/1474962"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.blacklist")));
             player.closeInventory();
         } else if (slot == 13) {
-            player.sendMessage(ChatUtils.chatMessage("&5&lShulker Assist: &dhttps://aranarth.craftingstore.net/package/1474988"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.shulker_assist")));
             player.closeInventory();
         } else if (slot == 14) {
-            player.sendMessage(ChatUtils.chatMessage("&3&lInventory Assist: &bhttps://aranarth.craftingstore.net/package/1474994"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.inventory_assist")));
             player.closeInventory();
         } else if (slot == 19) {
-            player.sendMessage(ChatUtils.chatMessage("&6&lCompressor: &ehttps://aranarth.craftingstore.net/package/1474604"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.compressor")));
             player.closeInventory();
         } else if (slot == 20) {
-            player.sendMessage(ChatUtils.chatMessage("&2&lRandomizer: &ahttps://aranarth.craftingstore.net/package/1474958"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.randomizer")));
             player.closeInventory();
         } else if (slot == 21) {
-            player.sendMessage(ChatUtils.chatMessage("&6&lTables: &ehttps://aranarth.craftingstore.net/package/1474970"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.tables")));
             player.closeInventory();
         } else if (slot == 22) {
-            player.sendMessage(ChatUtils.chatMessage("&6&lColored Nickname: &ehttps://aranarth.craftingstore.net/package/1584687"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.colored_nickname")));
             player.closeInventory();
         } else if (slot == 23) {
-            player.sendMessage(ChatUtils.chatMessage("&6&lColored Chat: &ehttps://aranarth.craftingstore.net/package/1474977"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.colored_chat")));
             player.closeInventory();
         } else if (slot == 24) {
-            player.sendMessage(ChatUtils.chatMessage("&4&lItem Name: &chttps://aranarth.craftingstore.net/package/1474973"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.item_name")));
             player.closeInventory();
         } else if (slot == 25) {
-            player.sendMessage(ChatUtils.chatMessage("&3&lBlue Fire: &bhttps://aranarth.craftingstore.net/package/1475696"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.blue_fire")));
             player.closeInventory();
         } else if (slot == 29) {
-            player.sendMessage(ChatUtils.chatMessage("&7&lInvisible Item Frames: &fhttps://aranarth.craftingstore.net/package/1475081"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.invisible_frames")));
             player.closeInventory();
         } else if (slot == 30) {
-            player.sendMessage(ChatUtils.chatMessage("&4&lAdditional 3 Homes: &chttps://aranarth.craftingstore.net/package/1475006"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.additional_homes")));
             player.closeInventory();
         } else if (slot == 32) {
-            player.sendMessage(ChatUtils.chatMessage("&5&lDiscord Chat: &dhttps://aranarth.craftingstore.net/package/1477059"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.discord_chat")));
             player.closeInventory();
         } else if (slot == 33) {
-            player.sendMessage(ChatUtils.chatMessage("&7&lInvisible Armor: &fhttps://aranarth.craftingstore.net/package/TODO"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.invisible_armor")));
             player.closeInventory();
         }
 
@@ -172,16 +181,16 @@ public class GuiStoreClick {
 
         // Clicking one of the boosts
         if (slot == 10) {
-            player.sendMessage(ChatUtils.chatMessage("&8&lBoost of the Miner: &7https://aranarth.craftingstore.net/package/1474946"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.boost_miner")));
             player.closeInventory();
         } else if (slot == 12) {
-            player.sendMessage(ChatUtils.chatMessage("&6&lBoost of the Harvest: &ehttps://aranarth.craftingstore.net/package/1474947"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.boost_harvest")));
             player.closeInventory();
         } else if (slot == 14) {
-            player.sendMessage(ChatUtils.chatMessage("&4&lBoost of the Hunter: &chttps://aranarth.craftingstore.net/package/1474950"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.boost_hunter")));
             player.closeInventory();
         } else if (slot == 16) {
-            player.sendMessage(ChatUtils.chatMessage("&7&lBoost of Chi: &fhttps://aranarth.craftingstore.net/package/1474953"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.boost_chi")));
             player.closeInventory();
         }
 
@@ -204,13 +213,13 @@ public class GuiStoreClick {
 
         // Clicking one of the crate keys
         if (slot == 10) {
-            player.sendMessage(ChatUtils.chatMessage("&6&lRare Crate Key (x3): &ehttps://aranarth.craftingstore.net/package/492746"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.rare_key")));
             player.closeInventory();
         } else if (slot == 13) {
-            player.sendMessage(ChatUtils.chatMessage("&3&lEpic Crate Key (x3): &bhttps://aranarth.craftingstore.net/package/1475091"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.epic_key")));
             player.closeInventory();
         } else if (slot == 16) {
-            player.sendMessage(ChatUtils.chatMessage("&5&lGodly Crate Key (x3): &dhttps://aranarth.craftingstore.net/package/1475090"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "store.godly_key")));
             player.closeInventory();
         }
 

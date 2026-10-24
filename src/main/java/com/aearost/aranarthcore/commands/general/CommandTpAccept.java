@@ -1,10 +1,13 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.network.CrossServerTpContext;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.PlotUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
@@ -53,32 +56,32 @@ public class CommandTpAccept implements CommandExecutor {
                 // If both players are still online
                 if (target != null) {
                     String destinationWorld = target.getLocation().getWorld().getName();
-                    if (AranarthUtils.isSmpWorld(destinationWorld) || destinationWorld.equals("creative")) {
+                    if (AranarthUtils.isSmpWorld(destinationWorld) || PlotUtils.isSmpCreativeWorld(destinationWorld)) {
                         if (!AranarthUtils.isOriginalPlayer(player.getUniqueId())) {
-                            player.sendMessage(ChatUtils.chatMessage("&cYou are not permitted to enter the SMP!"));
-                            target.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &cis not permitted to enter the SMP!"));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "access.smp_restricted")));
+                            target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "teleport.target_smp_restricted", "player", aranarthPlayer.getNickname())));
                             clearTeleportRequests(player, target);
                             return true;
                         }
                     }
 
-                    target.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has accepted your teleport request"));
-                    AranarthUtils.teleportPlayer(player, player.getLocation(), target.getLocation(), aranarthPlayer.isInAdminMode(), targetNickname, "&7You have teleported to " + targetNickname, success -> {
+                    target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "teleport.request_accepted_notify", "player", aranarthPlayer.getNickname())));
+                    AranarthUtils.teleportPlayer(player, player.getLocation(), target.getLocation(), aranarthPlayer.isInAdminMode(), targetNickname, Lang.getFor(player, "teleport.teleported_to", "player", targetNickname), success -> {
                         if (success) {
-                            player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + targetNickname));
-                            target.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has teleported to you"));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.teleported_to", "player", targetNickname)));
+                            target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "teleport.teleported_to_you", "player", aranarthPlayer.getNickname())));
                             int tpVol = AranarthUtils.getPlayer(target.getUniqueId()).getTeleportSoundVolume();
 							if (tpVol > 0) {
 								target.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, tpVol / 100f, 0.9F);
 							}
                         } else {
-                            player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to &e" + targetNickname));
-                            target.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &ccould not teleport to you"));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.could_not_player", "player", targetNickname)));
+                            target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "teleport.could_not_tp_to_you", "player", aranarthPlayer.getNickname())));
                         }
                         clearTeleportRequests(player, target);
                     });
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage("&e" + targetNickname + " &cis no longer online"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.no_longer_online", "player", targetNickname)));
                     clearTeleportRequests(player, target);
                 }
                 return true;
@@ -91,17 +94,17 @@ public class CommandTpAccept implements CommandExecutor {
                 if (target != null) {
                     AranarthPlayer targetPlayer = AranarthUtils.getPlayer(target.getUniqueId());
                     String destinationWorld = player.getLocation().getWorld().getName();
-                    if (AranarthUtils.isSmpWorld(destinationWorld) || destinationWorld.equals("creative")) {
+                    if (AranarthUtils.isSmpWorld(destinationWorld) || PlotUtils.isSmpCreativeWorld(destinationWorld)) {
                         if (!AranarthUtils.isOriginalPlayer(target.getUniqueId())) {
-                            target.sendMessage(ChatUtils.chatMessage("&cYou are not permitted to enter the SMP!"));
-                            player.sendMessage(ChatUtils.chatMessage("&e" + targetPlayer.getNickname() + " &cis not permitted to enter the SMP!"));
+                            target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "access.smp_restricted")));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.target_smp_restricted", "player", targetPlayer.getNickname())));
                             clearTeleportRequests(player, target);
                             return true;
                         }
                     }
 
-                    player.sendMessage(ChatUtils.chatMessage("&7You have accepted &e" + targetPlayer.getNickname() + "&7's teleport request"));
-                    target.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has accepted your teleport request"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.accepted_request", "player", targetPlayer.getNickname())));
+                    target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "teleport.request_accepted_notify", "player", aranarthPlayer.getNickname())));
                     // Cancel any stale teleport task the acceptor (Player B) might have so that
                     // their movement does not falsely trigger a "cannot move" cancel on the
                     // requester's (Player A's) countdown that is about to start.
@@ -110,22 +113,22 @@ public class CommandTpAccept implements CommandExecutor {
                         staleTask.cancel();
                         AranarthUtils.removeTeleportTask(player.getUniqueId());
                     }
-                    AranarthUtils.teleportPlayer(target, target.getLocation(), player.getLocation(), targetPlayer.isInAdminMode(), aranarthPlayer.getNickname(), "&7You have teleported to " + aranarthPlayer.getNickname(), success -> {
+                    AranarthUtils.teleportPlayer(target, target.getLocation(), player.getLocation(), targetPlayer.isInAdminMode(), aranarthPlayer.getNickname(), Lang.getFor(target, "teleport.teleported_to", "player", aranarthPlayer.getNickname()), success -> {
                         if (success) {
-                            target.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + aranarthPlayer.getNickname()));
-                            player.sendMessage(ChatUtils.chatMessage("&e" + targetPlayer.getNickname() + " &7has teleported to you"));
+                            target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "teleport.teleported_to", "player", aranarthPlayer.getNickname())));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.teleported_to_you", "player", targetPlayer.getNickname())));
                             int tpVol = AranarthUtils.getPlayer(player.getUniqueId()).getTeleportSoundVolume();
 							if (tpVol > 0) {
 								player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, tpVol / 100f, 0.9F);
 							}
                         } else {
-                            target.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to &e" + aranarthPlayer.getNickname()));
-                            player.sendMessage(ChatUtils.chatMessage("&e" + targetPlayer.getNickname() + " &ccould not teleport to you"));
+                            target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "teleport.could_not_player", "player", aranarthPlayer.getNickname())));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.could_not_tp_to_you", "player", targetPlayer.getNickname())));
                         }
                         clearTeleportRequests(player, target);
                     });
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage("&e" + targetNickname + " &cis no longer online"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.no_longer_online", "player", targetNickname)));
                     aranarthPlayer.setTeleportFromUuid(null);
                 }
                 return true;
@@ -133,27 +136,60 @@ public class CommandTpAccept implements CommandExecutor {
                 // Check for a cross-server request received from another server
                 CrossServerTpContext ctx = NetworkManager.getInstance().getCrossServerTpContext(player.getUniqueId());
                 if (ctx != null) {
-                    NetworkManager.getInstance().clearCrossServerTpContext(player.getUniqueId());
                     String localNickname = aranarthPlayer.getNickname().isEmpty() ? player.getName() : aranarthPlayer.getNickname();
+
+                    // Block if the accepter would be sent to the SMP server but lacks access (/tphere case)
+                    if (ctx.isTpHere()) {
+                        String smpServerName = AranarthCore.getInstance().getConfig().getString("network.servers.smp", "smp");
+                        if (ctx.remoteServer().equals(smpServerName) && !AranarthUtils.isOriginalPlayer(player.getUniqueId())) {
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "access.smp_restricted")));
+                            NetworkManager.getInstance().clearCrossServerTpContext(player.getUniqueId());
+                            NetworkManager.getInstance().publishTpDenied(player.getUniqueId(), localNickname, ctx.remotePlayerUuid());
+                            return true;
+                        }
+                    }
+                    // Block if the requester would be sent to this SMP server but lacks access (/tp case)
+                    if (!ctx.isTpHere() && AranarthCore.isSmpServer() && !AranarthUtils.isOriginalPlayer(ctx.remotePlayerUuid())) {
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.target_smp_restricted", "player", ctx.remotePlayerNickname())));
+                        NetworkManager.getInstance().clearCrossServerTpContext(player.getUniqueId());
+                        NetworkManager.getInstance().publishTpDenied(player.getUniqueId(), localNickname, ctx.remotePlayerUuid());
+                        return true;
+                    }
+
+                    NetworkManager.getInstance().clearCrossServerTpContext(player.getUniqueId());
                     // Clear the mirrored UUID so /tpaccept can't double-fire
                     aranarthPlayer.setTeleportFromUuid(null);
                     aranarthPlayer.setTeleportToUuid(null);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
-                    player.sendMessage(ChatUtils.chatMessage("&7You have accepted &e" + ctx.remotePlayerNickname() + "&7's teleport request"));
-                    NetworkManager.getInstance().publishTpAccepted(
-                            player.getUniqueId(), localNickname,
-                            ctx.remotePlayerUuid(), ctx.isTpHere());
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.accepted_request", "player", ctx.remotePlayerNickname())));
+                    if (ctx.isTpHere()) {
+                        // This player is the one leaving, so they get the same countdown and combat
+                        // check as a same-server teleport before the other server transfers them
+                        AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
+                                aranarthPlayer.isInAdminMode(), "&e&l" + ctx.remoteServer().toUpperCase(),
+                                Lang.getFor(player, "teleport.transferring_named", "name", ctx.remotePlayerNickname()), success -> {
+                                    if (success) {
+                                        NetworkManager.getInstance().publishTpAccepted(
+                                                player.getUniqueId(), localNickname,
+                                                ctx.remotePlayerUuid(), true);
+                                    }
+                                });
+                    } else {
+                        NetworkManager.getInstance().publishTpAccepted(
+                                player.getUniqueId(), localNickname,
+                                ctx.remotePlayerUuid(), false);
+                    }
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou do not have any pending teleport requests!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.no_pending_request")));
                 }
                 return true;
             } else {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have any pending teleport requests!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.no_pending_request")));
                 return true;
             }
         } else {
-            sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
+            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
             return true;
         }
     }

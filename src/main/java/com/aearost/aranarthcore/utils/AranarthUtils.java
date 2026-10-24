@@ -13,6 +13,9 @@ import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.network.NetworkTabManager;
 import com.aearost.aranarthcore.objects.*;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.projectkorra.projectkorra.BendingPlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.*;
@@ -20,20 +23,21 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.ban.ProfileBanList;
 import org.bukkit.block.*;
 import org.bukkit.block.data.Levelled;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import com.projectkorra.projectkorra.BendingPlayer;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -41,15 +45,16 @@ import org.bukkit.profile.PlayerProfile;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 import static com.aearost.aranarthcore.objects.CustomKeys.*;
@@ -64,6 +69,7 @@ public class AranarthUtils {
     public static final Map<UUID, Boolean> playerUnderground = new HashMap<>();
     public static final Map<UUID, Boolean> playerWasOnGround = new HashMap<>();
     public static final Map<UUID, Location> playerLastFlowerLocation = new HashMap<>();
+    public static final Set<UUID> elvenCanDoubleJump = new HashSet<>();
     private static final HashMap<UUID, AranarthPlayer> players = new HashMap<>();
     private static final HashMap<Location, Integer> dragonHeads = new HashMap<>();
     private static final HashMap<UUID, BannerMeta> playerBanners = new HashMap<>();
@@ -87,6 +93,7 @@ public class AranarthUtils {
     private static final HashMap<UUID, UUID> pendingShopInvites = new HashMap<>(); // invitee UUID → owner UUID
     private static final HashMap<UUID, String> shopNames = new HashMap<>();
     private static final HashMap<UUID, BukkitTask> teleportingPlayers = new HashMap<>();
+    private static final Set<UUID> skipCountdown = new HashSet<>();
     private static final List<AranarthVote> votes = new ArrayList<>();
     private static final HashMap<UUID, List<PlayerKillDeathScore>> killDeathScores = new HashMap<>();
     private static final HashMap<UUID, Integer> chatGameGuesses = new HashMap<>();
@@ -398,6 +405,21 @@ public class AranarthUtils {
         return count;
     }
 
+    /**
+     * Provides the inventory that is used in the input world.
+     *
+     * @param worldName The name of the world.
+     * @return "arena" or "creative" for those worlds, otherwise "world" as all other worlds share the Survival inventory.
+     */
+    public static String getInventoryGroup(String worldName) {
+        if (worldName.startsWith("arena")) {
+            return "arena";
+        } else if (worldName.startsWith("creative")) {
+            return "creative";
+        }
+        return "world";
+    }
+
     public static void switchInventory(Player player, String currentWorld, String destinationWorld) throws IOException {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
@@ -417,7 +439,7 @@ public class AranarthUtils {
 
         // No need to change inventory
         if (isSurvivalToSurvival || isSameWorld) {
-            if (!destinationWorld.equals("creative")) {
+            if (!destinationWorld.startsWith("creative")) {
                 if (aranarthPlayer.getCouncilRank() != 3) {
                     player.setGameMode(GameMode.SURVIVAL);
                 }
@@ -430,14 +452,8 @@ public class AranarthUtils {
             }
         }
 
-        // World edit permissions
-        PermissionAttachment perms = PermissionUtils.addTrackedAttachment(player);
-        if (destinationWorld.equals("creative")) {
-            perms.setPermission("worldedit.*", true);
-        } else {
-            perms.setPermission("worldedit.*", false);
-        }
-        player.updateCommands();
+        // The 2x2 crafting grid and the cursor are not part of the inventory contents
+        player.closeInventory();
 
         if (currentWorld.startsWith("world")) {
             aranarthPlayer.setSurvivalInventory(ItemUtils.toBase64(player.getInventory()));
@@ -477,6 +493,7 @@ public class AranarthUtils {
                     player.getInventory().clear();
                 }
                 player.setGameMode(GameMode.CREATIVE);
+                player.setAllowFlight(true);
                 return;
             }
             player.getInventory().clear();
@@ -508,6 +525,7 @@ public class AranarthUtils {
                     player.getInventory().clear();
                 }
                 player.setGameMode(GameMode.CREATIVE);
+                player.setAllowFlight(true);
                 PermissionUtils.evaluatePlayerPermissions(player);
                 return;
             }
@@ -552,7 +570,8 @@ public class AranarthUtils {
                 PermissionUtils.updateSubElements(player);
                 player.updateCommands();
                 return;
-            } else if (destinationWorld.equals("creative")) {
+            } else if (destinationWorld.startsWith("creative")) {
+                // Both creative worlds share the same creative inventory
                 return;
             }
             player.getInventory().clear();
@@ -598,7 +617,8 @@ public class AranarthUtils {
             player.addPotionEffect(new PotionEffect(PotionEffectType.CONDUIT_POWER, 320, 0));
             player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
             boolean isRaining = AranarthUtils.getWeather() == Weather.RAIN || AranarthUtils.getWeather() == Weather.THUNDER;
-            if (isRaining || player.isInWater()) {
+            boolean isInOceanBiome = isAquaticBiome(player.getLocation().getBlock().getBiome());
+            if (isRaining || player.isInWater() || isInOceanBiome) {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
                 player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 1));
             }
@@ -649,6 +669,50 @@ public class AranarthUtils {
                 }
             }
         }
+    }
+
+    /**
+     * Pulls nearby XP orbs towards players wearing a full set of Soulbound Aranarthium armour.
+     */
+    public static void applySoulboundXpMagnet() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.isDead() || player.getGameMode() == GameMode.SPECTATOR) {
+                continue;
+            }
+            if (!isWearingArmorType(player, "soulbound")) {
+                continue;
+            }
+
+            Location target = player.getLocation().add(0, 0.5, 0);
+            for (Entity entity : player.getNearbyEntities(5, 5, 5)) {
+                if (!(entity instanceof ExperienceOrb orb) || !orb.isValid()) {
+                    continue;
+                }
+                double distance = orb.getLocation().distance(target);
+                if (distance > 6 || distance < 1) {
+                    continue;
+                }
+                // Prevents pulling orbs through walls
+                if (!player.hasLineOfSight(orb)) {
+                    continue;
+                }
+                orb.setVelocity(target.toVector().subtract(orb.getLocation().toVector()).normalize().multiply(0.8));
+            }
+        }
+    }
+
+    /**
+     * Returns true if the given biome is any ocean or river biome.
+     * @param biome The biome to check.
+     * @return Whether the biome is an ocean biome.
+     */
+    private static boolean isAquaticBiome(Biome biome) {
+        return biome == Biome.OCEAN || biome == Biome.DEEP_OCEAN
+                || biome == Biome.COLD_OCEAN || biome == Biome.DEEP_COLD_OCEAN
+                || biome == Biome.FROZEN_OCEAN || biome == Biome.DEEP_FROZEN_OCEAN
+                || biome == Biome.LUKEWARM_OCEAN || biome == Biome.DEEP_LUKEWARM_OCEAN
+                || biome == Biome.WARM_OCEAN
+                || biome == Biome.RIVER || biome == Biome.FROZEN_RIVER;
     }
 
     /**
@@ -1037,6 +1101,8 @@ public class AranarthUtils {
                 || type == Material.CRYING_OBSIDIAN || type == Material.WARPED_NYLIUM
                 || type == Material.BLACKSTONE || type == Material.GLOWSTONE
                 || type == Material.SULFUR || type == Material.CINNABAR
+                || type == Material.TERRACOTTA
+                || (type.name().endsWith("_TERRACOTTA"))
                 || type.name().endsWith("_ORE") || type.name().endsWith("_CORAL_BLOCK");
     }
 
@@ -1283,10 +1349,8 @@ public class AranarthUtils {
                 continue;
             }
             // Skip chest shops
-            boolean isShop = (loc1 != null && loc1.getWorld() != null && ShopUtils.getShopFromLocation(
-                    loc1.getBlock().getRelative(BlockFace.UP).getLocation()) != null)
-                    || (loc2 != null && loc2.getWorld() != null && ShopUtils.getShopFromLocation(
-                    loc2.getBlock().getRelative(BlockFace.UP).getLocation()) != null);
+            boolean isShop = (loc1 != null && loc1.getWorld() != null && ShopUtils.getShopForContainer(loc1.getBlock()) != null)
+                    || (loc2 != null && loc2.getWorld() != null && ShopUtils.getShopForContainer(loc2.getBlock()) != null);
             if (!isShop) {
                 iterator.remove();
             }
@@ -1481,8 +1545,16 @@ public class AranarthUtils {
      * @return The arrow if it matches.
      */
     public static ItemStack verifyIsSameArrow(ItemStack launchedArrow, ItemStack quiverArrow) {
+        // Firework rockets must match flight duration and explosion effects
+        if (launchedArrow.getType() == Material.FIREWORK_ROCKET || quiverArrow.getType() == Material.FIREWORK_ROCKET) {
+            if (launchedArrow.isSimilar(quiverArrow)) {
+                return launchedArrow;
+            } else {
+                return null;
+            }
+        }
         // Basic or special arrow
-        if (launchedArrow.getType() == Material.ARROW) {
+        else if (launchedArrow.getType() == Material.ARROW) {
             if (quiverArrow.getType() == Material.ARROW) {
                 if (launchedArrow.hasItemMeta()) {
                     if (quiverArrow.hasItemMeta()) {
@@ -1563,7 +1635,6 @@ public class AranarthUtils {
             case "rooting" -> new ArrowRooting().getItem();
             case "gust" -> new ArrowGust().getItem();
             case "dragon" -> new ArrowDragon().getItem();
-            case "bone" -> new ArrowBone().getItem();
             default -> null;
         };
     }
@@ -1585,6 +1656,73 @@ public class AranarthUtils {
             }
         }
         return null;
+    }
+
+    /**
+     * Provides whether the player is vanished from the viewer.
+     *
+     * @param viewer The sender looking up the player.
+     * @param uuid   The player being looked up.
+     * @return Whether the player must be treated as offline for the viewer.
+     */
+    public static boolean isVanishedFrom(CommandSender viewer, UUID uuid) {
+        if (!(viewer instanceof Player viewerPlayer) || viewerPlayer.getUniqueId().equals(uuid)) {
+            return false;
+        }
+        AranarthPlayer viewerAranarthPlayer = getPlayer(viewerPlayer.getUniqueId());
+        if (viewerAranarthPlayer != null && viewerAranarthPlayer.getCouncilRank() == 3) {
+            return false;
+        }
+        if (Bukkit.getPlayer(uuid) != null) {
+            AranarthPlayer aranarthPlayer = getPlayer(uuid);
+            return aranarthPlayer != null && aranarthPlayer.isVanished();
+        }
+        if (NetworkManager.isActive()) {
+            NetworkPlayer remotePlayer = NetworkManager.getInstance().getRemotePlayer(uuid);
+            return remotePlayer != null && remotePlayer.isVanished();
+        }
+        return false;
+    }
+
+    /**
+     * Provides whether the player is online anywhere on the network and not vanished from the viewer.
+     *
+     * @param viewer The sender looking up the player.
+     * @param uuid   The player being looked up.
+     * @return Whether the player should be shown as online.
+     */
+    public static boolean isVisiblyOnline(CommandSender viewer, UUID uuid) {
+        boolean isOnline = Bukkit.getPlayer(uuid) != null
+                || (NetworkManager.isActive() && NetworkManager.getInstance().getRemotePlayer(uuid) != null);
+        return isOnline && !isVanishedFrom(viewer, uuid);
+    }
+
+    /**
+     * Provides whether the name matches another player's username or nickname, ignoring colors and case.
+     *
+     * @param strippedName The name without color codes.
+     * @param ownUuid      The player choosing the name, whose own names are allowed.
+     * @return Whether another player already uses the name.
+     */
+    public static boolean isNameTakenByOther(String strippedName, UUID ownUuid) {
+        if (strippedName == null || strippedName.isEmpty()) {
+            return false;
+        }
+        for (Map.Entry<UUID, AranarthPlayer> entry : players.entrySet()) {
+            if (entry.getKey().equals(ownUuid)) {
+                continue;
+            }
+            AranarthPlayer other = entry.getValue();
+            if (strippedName.equalsIgnoreCase(other.getUsername())) {
+                return true;
+            }
+            String otherNickname = other.getNickname();
+            if (otherNickname != null && !otherNickname.isEmpty()
+                    && strippedName.equalsIgnoreCase(ChatUtils.stripColorFormatting(otherNickname))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -1817,7 +1955,7 @@ public class AranarthUtils {
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
                 if (offlinePlayer.isOnline()) {
                     Player player = Bukkit.getPlayer(uuid);
-                    player.sendMessage(ChatUtils.chatMessage("&7You are no longer muted"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mute.no_longer_muted")));
                 }
             }
         }
@@ -2001,7 +2139,7 @@ public class AranarthUtils {
      * @return Confirmation if the input coordinate is within the server Spawn world.
      */
     public static boolean isSpawnLocation(Location loc) {
-        return loc.getWorld().getName().equals("spawn");
+        return loc.getWorld().getName().equals("spawn") || PlotUtils.isSpawnPlotLocation(loc);
     }
 
     /**
@@ -2016,7 +2154,7 @@ public class AranarthUtils {
      * @param resultCallback      Confirmation whether the teleportation was successful or not.
      */
     public static void teleportPlayer(Player player, Location from, Location to, boolean isImmediateTeleport, String teleportTitle, String teleportSubtitle, Consumer<Boolean> resultCallback) {
-        if (isImmediateTeleport) {
+        if (isImmediateTeleport || skipCountdown.contains(player.getUniqueId())) {
             boolean result = handleTeleportLogic(player, from, to);
             if (result) {
                 sendTeleportTitle(player, teleportTitle, teleportSubtitle);
@@ -2025,11 +2163,11 @@ public class AranarthUtils {
         } else {
             AranarthPlayer aranarthPlayerCheck = getPlayer(player.getUniqueId());
             if (aranarthPlayerCheck != null && !aranarthPlayerCheck.getCombatLogTime().isEmpty()) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou cannot teleport while in combat!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.combat_tagged")));
                 resultCallback.accept(false);
                 return;
             }
-            player.sendMessage(ChatUtils.chatMessage("&7You will be teleported in &e3 seconds!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.countdown")));
             initiateTeleport(player, () -> {
                 boolean result = handleTeleportLogic(player, from, to);
                 if (result) {
@@ -2037,6 +2175,18 @@ public class AranarthUtils {
                 }
                 resultCallback.accept(result);
             });
+        }
+    }
+
+    /**
+     * Runs the action with any teleport it starts skipping the countdown and combat check.
+     */
+    public static void runWithoutCountdown(Player player, Runnable action) {
+        skipCountdown.add(player.getUniqueId());
+        try {
+            action.run();
+        } finally {
+            skipCountdown.remove(player.getUniqueId());
         }
     }
 
@@ -2075,10 +2225,15 @@ public class AranarthUtils {
      * @return Confirmation if the teleportation was successful.
      */
     private static boolean handleTeleportLogic(Player player, Location from, Location to) {
+        // The resource world is still being reset and pre-generated
+        if (to.getWorld() != null && ResourceWorldUtils.isLockedFor(player, to.getWorld().getName())) {
+            ResourceWorldUtils.sendLockedMessage(player);
+            return false;
+        }
         Location locToTeleportTo = getSafeTeleportLocation(to);
         // If i.e over the void
         if (locToTeleportTo == null) {
-            player.sendMessage(ChatUtils.chatMessage("&cThis teleport location is unsafe!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.failed")));
             return false;
         }
 
@@ -2111,7 +2266,11 @@ public class AranarthUtils {
                 ? player.getLocation().getWorld().getName()
                 : from.getWorld().getName();
 
-        player.teleport(locToTeleportTo);
+        // The inventory must not be switched if the player never left (i.e the teleport was cancelled)
+        if (!player.teleport(locToTeleportTo)) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.failed")));
+            return false;
+        }
         for (Entity leashed : leashedEntities) {
             leashed.teleport(locToTeleportTo);
         }
@@ -2157,7 +2316,7 @@ public class AranarthUtils {
 
             return true;
         } catch (IOException e) {
-            player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.error_changing_world")));
             return false;
         }
     }
@@ -2213,20 +2372,38 @@ public class AranarthUtils {
     }
 
     /**
+     * Each player's timezone, looked up once from their IP address.
+     */
+    private static final Map<UUID, ZoneId> playerTimezones = new ConcurrentHashMap<>();
+
+    /**
      * Provides the player's timezone.
      *
      * @param player   The player.
      * @param callback The player's timezone.
      */
     public static void getPlayerTimezone(Player player, Consumer<ZoneId> callback) {
+        // Looked up once per player per server start, so the lookup service is never spammed
+        UUID uuid = player.getUniqueId();
+        ZoneId cachedZone = playerTimezones.get(uuid);
+        if (cachedZone != null) {
+            callback.accept(cachedZone);
+            return;
+        }
         String ip = player.getAddress().getAddress().getHostAddress();
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
             try {
-                URL url = new URL("http://ip-api.com/json/" + ip + "?fields=timezone");
-                BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
-                String[] lineSplit = reader.readLine().split("\"");
-                ZoneId zoneId = ZoneId.of(lineSplit[3]);
-                reader.close();
+                HttpURLConnection connection = (HttpURLConnection) new URL("http://ip-api.com/json/" + ip + "?fields=timezone").openConnection();
+                connection.setConnectTimeout(3000);
+                connection.setReadTimeout(3000);
+                ZoneId zoneId;
+                try (InputStreamReader reader = new InputStreamReader(connection.getInputStream())) {
+                    JsonObject response = JsonParser.parseReader(reader).getAsJsonObject();
+                    zoneId = ZoneId.of(response.get("timezone").getAsString());
+                } finally {
+                    connection.disconnect();
+                }
+                playerTimezones.put(uuid, zoneId);
 
                 // Switch back to main thread for player messaging
                 Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> callback.accept(zoneId));
@@ -2648,19 +2825,25 @@ public class AranarthUtils {
     public static void addServerBoost(Boost boost, LocalDateTime duration, UUID uuid, boolean fromVoteShop) {
         String name = "";
         if (boost == Boost.MINER) {
-            name = "&8&lBoost of the Miner";
+            name = Lang.key("boost.name_miner");
         } else if (boost == Boost.HARVEST) {
-            name = "&6&lBoost of the Harvest";
+            name = Lang.key("boost.name_harvest");
         } else if (boost == Boost.HUNTER) {
-            name = "&c&lBoost of the Hunter";
+            name = Lang.key("boost.name_hunter");
         } else if (boost == Boost.CHI) {
-            name = "&f&lBoost of Chi";
+            name = Lang.key("boost.name_chi");
         } else {
-            name = "&7&lUnspecified Boost";
+            name = Lang.key("boost.name_unspecified");
         }
 
         // A new boost will automatically apply for 24 hours
         if (duration == null) {
+            // SMP forwards the add to Survival, which applies it and syncs the end time back
+            if (AranarthCore.isSmpServer() && NetworkManager.isActive()) {
+                NetworkManager.getInstance().publishBoostAddRequest(boost.name(), uuid, fromVoteShop);
+                return;
+            }
+
             // Increase by 24 hours if it already exists i.e the same boost was purchased twice
             if (serverBoosts.get(boost) != null) {
                 LocalDateTime currentBoostEnd = serverBoosts.get(boost);
@@ -2683,24 +2866,31 @@ public class AranarthUtils {
             // Handles messages - only broadcast and notify Discord on the primary (Survival) server
             // to avoid duplicate messages when both servers independently receive a boost event.
             if (!AranarthCore.isSmpServer()) {
+                String appliedKey;
+                Object[] appliedArgs;
                 if (uuid == null) {
-                    Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied"));
+                    appliedKey = "boost.applied";
+                    appliedArgs = new Object[] { "boost", name };
                     if (AranarthCore.isPublicServer()) {
                         DiscordUtils.updateBoostInDiscord(null, boost, true, fromVoteShop);
                     }
                 } else {
                     AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
                     if (fromVoteShop) {
-                        Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " &7used vote points to purchase the " + name));
+                        appliedKey = "boost.player_purchased";
+                        appliedArgs = new Object[] { "player", aranarthPlayer.getNickname(), "boost", name };
                     } else {
-                        Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied by &e" + aranarthPlayer.getNickname()));
+                        appliedKey = "boost.player_applied";
+                        appliedArgs = new Object[] { "player", aranarthPlayer.getNickname(), "boost", name };
                     }
                     if (AranarthCore.isPublicServer()) {
                         DiscordUtils.updateBoostInDiscord(uuid, boost, true, fromVoteShop);
                     }
                 }
+                Lang.broadcastLocal(appliedKey, appliedArgs);
                 // Sync boost end-time to other servers so they apply effects without re-broadcasting
                 if (NetworkManager.isActive()) {
+                    NetworkManager.getInstance().publishLangBroadcast(appliedKey, appliedArgs);
                     LocalDateTime endTime = serverBoosts.get(boost);
                     if (endTime != null) {
                         NetworkManager.getInstance().publishBoostSync(boost.name(), endTime.toString(), false);
@@ -2736,18 +2926,18 @@ public class AranarthUtils {
         if (AranarthUtils.getServerBoosts().containsKey(boost)) {
             String name = "";
             if (boost == Boost.MINER) {
-                name = "&8&lBoost of the Miner";
+                name = Lang.key("boost.name_miner");
             } else if (boost == Boost.HARVEST) {
-                name = "&6&lBoost of the Harvest";
+                name = Lang.key("boost.name_harvest");
             } else if (boost == Boost.HUNTER) {
-                name = "&c&lBoost of the Hunter";
+                name = Lang.key("boost.name_hunter");
             } else if (boost == Boost.CHI) {
-                name = "&f&lBoost of Chi";
+                name = Lang.key("boost.name_chi");
             } else {
-                name = "&7&lUnspecified Boost";
+                name = Lang.key("boost.name_unspecified");
             }
             if (!AranarthCore.isSmpServer()) {
-                Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
+                Lang.broadcast("boost.expired", "boost", name);
                 if (AranarthCore.isPublicServer()) {
                     DiscordUtils.updateBoostInDiscord(null, boost, false, false);
                     DiscordUtils.sendBoostExpiredToDiscord(boost);
@@ -2780,19 +2970,48 @@ public class AranarthUtils {
             LocalDateTime ldt = serverBoosts.get(boost);
             String name = "";
             if (boost == Boost.MINER) {
-                name = "&8&lBoost of the Miner";
+                name = Lang.key("boost.name_miner");
             } else if (boost == Boost.HARVEST) {
-                name = "&6&lBoost of the Harvest";
+                name = Lang.key("boost.name_harvest");
             } else if (boost == Boost.HUNTER) {
-                name = "&c&lBoost of the Hunter";
+                name = Lang.key("boost.name_hunter");
             } else if (boost == Boost.CHI) {
-                name = "&f&lBoost of Chi";
+                name = Lang.key("boost.name_chi");
             } else {
-                name = "&7&lUnspecified Boost";
+                name = Lang.key("boost.name_unspecified");
             }
             boostMessages.put(ChatUtils.translateToColor(name), getRemainingBoostDuration(boost));
         }
         return boostMessages;
+    }
+
+    /**
+     * Builds the tab list footer listing the active server boosts in the player's language.
+     *
+     * @param player The player viewing the tab list.
+     * @return The footer text.
+     */
+    private static String buildBoostFooter(Player player) {
+        StringBuilder boostFooter = new StringBuilder();
+        for (Boost boost : serverBoosts.keySet()) {
+            String color = switch (boost) {
+                case MINER -> "&8";
+                case HARVEST -> "&6";
+                case HUNTER -> "&c";
+                case CHI -> "&f";
+            };
+            String name = Lang.getFor(player, "boost.short_" + switch (boost) {
+                case MINER -> "miner";
+                case HARVEST -> "harvest";
+                case HUNTER -> "hunter";
+                case CHI -> "chi";
+            });
+            String duration = getRemainingBoostDuration(boost).replace("&e", "&e&o");
+            boostFooter.append(color).append("&o").append(name)
+                    .append(" ").append(color).append("&o(").append(duration).append(color).append("&o)\n");
+        }
+        boostFooter.append("&8&l---------------------");
+        return boostFooter.toString();
     }
 
     /**
@@ -2834,15 +3053,15 @@ public class AranarthUtils {
         for (Boost boost : toRemove) {
             String name = "";
             if (boost == Boost.MINER) {
-                name = "&8&lBoost of the Miner";
+                name = Lang.key("boost.name_miner");
             } else if (boost == Boost.HARVEST) {
-                name = "&6&lBoost of the Harvest";
+                name = Lang.key("boost.name_harvest");
             } else if (boost == Boost.HUNTER) {
-                name = "&c&lBoost of the Hunter";
+                name = Lang.key("boost.name_hunter");
             } else if (boost == Boost.CHI) {
-                name = "&f&lBoost of Chi";
+                name = Lang.key("boost.name_chi");
             } else {
-                name = "&7&lUnspecified Boost";
+                name = Lang.key("boost.name_unspecified");
             }
             // Always clean up memory on every server
             serverBoosts.remove(boost);
@@ -2852,7 +3071,7 @@ public class AranarthUtils {
             sentBoostReminders.remove(boost.name() + "_1");
             // Only Survival broadcasts and notifies Discord/network
             if (!AranarthCore.isSmpServer()) {
-                Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
+                Lang.broadcast("boost.expired", "boost", name);
                 if (AranarthCore.isPublicServer()) {
                     DiscordUtils.updateBoostInDiscord(null, boost, false, false);
                     DiscordUtils.sendBoostExpiredToDiscord(boost);
@@ -2867,29 +3086,29 @@ public class AranarthUtils {
         for (Boost boost : serverBoosts.keySet()) {
             String name = "";
             if (boost == Boost.MINER) {
-                name = "&8&lBoost of the Miner";
+                name = Lang.key("boost.name_miner");
             } else if (boost == Boost.HARVEST) {
-                name = "&6&lBoost of the Harvest";
+                name = Lang.key("boost.name_harvest");
             } else if (boost == Boost.HUNTER) {
-                name = "&c&lBoost of the Hunter";
+                name = Lang.key("boost.name_hunter");
             } else if (boost == Boost.CHI) {
-                name = "&f&lBoost of Chi";
+                name = Lang.key("boost.name_chi");
             } else {
-                name = "&7&lUnspecified Boost";
+                name = Lang.key("boost.name_unspecified");
             }
 
             Duration remaining = Duration.between(LocalDateTime.now(), serverBoosts.get(boost));
             long minutesLeft = remaining.toMinutes();
 
             int[] thresholds = {60, 30, 10, 1};
-            String[] labels = {"&e1 hour", "&e30 minutes", "&e10 minutes", "&e1 minute"};
+            String[] labels = {Lang.key("boost.time_hour"), Lang.key("boost.time_30_minutes"), Lang.key("boost.time_10_minutes"), Lang.key("boost.time_minute")};
             String[] discordLabels = {"1 hour", "30 minutes", "10 minutes", null};
             for (int i = 0; i < thresholds.length; i++) {
                 String key = boost.name() + "_" + thresholds[i];
                 if (minutesLeft == thresholds[i] && !sentBoostReminders.contains(key)) {
                     sentBoostReminders.add(key);
                     if (!AranarthCore.isSmpServer()) {
-                        Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7expires in " + labels[i] + "&7!"));
+                        Lang.broadcast("boost.expires_in", "boost", name, "time", labels[i]);
                         if (discordLabels[i] != null && AranarthCore.isPublicServer()) {
                             DiscordUtils.sendBoostReminderToDiscord(boost, discordLabels[i]);
                         }
@@ -3390,6 +3609,15 @@ public class AranarthUtils {
     }
 
     /**
+     * Plays the standard notification ping sound for a player.
+     *
+     * @param player The player to play the sound for.
+     */
+    public static void playPingSound(Player player) {
+        player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1F, 1F);
+    }
+
+    /**
      * Plays the jingle when a player sends or receives a teleport request.
      *
      * @param player The player that sent or received the request.
@@ -3450,49 +3678,14 @@ public class AranarthUtils {
         String weekday = DateUtils.provideWeekdayName(AranarthUtils.getWeekday());
         String month = DateUtils.provideMonthName(AranarthUtils.getMonth());
         int year = AranarthUtils.getYear();
-        String dateLine = DateUtils.determineServerDate(day, weekday, month, year)[1];
-        String[] parts = ChatUtils.stripColorFormatting(dateLine).split(" ");
-        dateLine = "&e" + parts[0] + " &f" + parts[1] + " " + parts[2] + " " + parts[3] + " " + parts[4] + " &e" + parts[5];
-
-        String playerOrPlayers = onlineNum == 1 ? "player" : "players";
         String tps = String.format("%.1f", Bukkit.getServer().getTPS()[0]);
-        String infoLine = "&e" + onlineNum + " " + playerOrPlayers + " online &7&l| &eTPS " + tps;
-
-        // Build boost footer section
-        StringBuilder boostFooter = new StringBuilder();
-        if (!serverBoosts.isEmpty()) {
-            for (Boost boost : serverBoosts.keySet()) {
-                String color;
-                String name;
-                if (boost == Boost.MINER) {
-                    color = "&8";
-                    name = "Boost of the Miner";
-                } else if (boost == Boost.HARVEST) {
-                    color = "&6";
-                    name = "Boost of the Harvest";
-                } else if (boost == Boost.HUNTER) {
-                    color = "&c";
-                    name = "Boost of the Hunter";
-                } else if (boost == Boost.CHI) {
-                    color = "&f";
-                    name = "Boost of Chi";
-                } else {
-                    color = "&7";
-                    name = "Unspecified Boost";
-                }
-                String duration = getRemainingBoostDuration(boost).replace("&e", "&e&o");
-                boostFooter.append(color).append("&o").append(name)
-                        .append(" ").append(color).append("&o(").append(duration).append(color).append("&o)\n");
-            }
-        }
-        boostFooter.append("&8&l---------------------");
 
         // Header / Footer
-        String footer = boostFooter.toString();
         for (Player player : onlinePlayers) {
-            player.setPlayerListHeader(ChatUtils.translateToColor(
-                    "&8&l---------------------\n&6&lThe Realm of Aranarth\n" + dateLine + "\n" + infoLine));
-            player.setPlayerListFooter(ChatUtils.translateToColor(footer));
+            String dateLine = Lang.getFor(player, "tab.date", "weekday", weekday, "day", DateUtils.getDayNumWithSuffix(player, day), "month", month, "year", year);
+            String infoLine = Lang.getFor(player, onlineNum == 1 ? "tab.info_one" : "tab.info_many", "count", onlineNum, "tps", tps);
+            player.setPlayerListHeader(ChatUtils.translateToColor(Lang.getFor(player, "tab.header", "date", dateLine, "info", infoLine)));
+            player.setPlayerListFooter(ChatUtils.translateToColor(buildBoostFooter(player)));
         }
 
         // Handle vanish visibility
@@ -3574,8 +3767,7 @@ public class AranarthUtils {
                 UUID uuid = player.getUniqueId();
                 String display = ChatUtils.providePrefixAndName(uuid);
                 AranarthPlayer aranarthPlayer = getPlayer(uuid);
-                if (aranarthPlayer.getAfkLocation() != null
-                        && aranarthPlayer.getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount()) {
+                if (isAfk(aranarthPlayer)) {
                     display += " &7[AFK]";
                 }
                 int ping = player.getPing();
@@ -3624,10 +3816,10 @@ public class AranarthUtils {
     /**
      * Provides the roman numeral equivalent of the input level.
      *
-     * @param level The level of the incantation.
+     * @param level The level of the essence.
      * @return The roman numeral equivalent of the input level.
      */
-    public static String getIncantationLevelInNumerals(int level) {
+    public static String getEssenceLevelInNumerals(int level) {
         String levelLetter = "I";
         if (level == 2) {
             return "II";
@@ -3642,36 +3834,93 @@ public class AranarthUtils {
     }
 
     /**
-     * Determines whether the input item contains an Aranarth incantation.
+     * Returns the essence type string on an item.
      *
-     * @param item        The item.
-     * @param incantation The incantation name.
-     * @return Whether the input item contains an Aranarth incantation.
+     * @param item The item to inspect.
+     * @return The essence type (e.g. "essence_beheading"), or null if the item has no essence.
      */
-    public static boolean hasIncantation(ItemStack item, String incantation) {
-        if (item.hasItemMeta()) {
-            if (item.getItemMeta().getPersistentDataContainer().has(INCANTATION_TYPE, PersistentDataType.STRING)) {
-                if (item.getItemMeta().getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING).equals(incantation)) {
-                    return true;
-                }
-            }
+    public static String getEssenceType(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) return null;
+        if (item.getItemMeta().getPersistentDataContainer().has(LEGACY_INCANTATION_TYPE, PersistentDataType.STRING)) {
+            migrateEssenceItem(item);
         }
-        return false;
+        return item.getItemMeta().getPersistentDataContainer().get(ESSENCE_TYPE, PersistentDataType.STRING);
+    }
+
+    public static boolean hasEssence(ItemStack item, String essence) {
+        return essence.equals(getEssenceType(item));
     }
 
     /**
      * Provides
      *
      * @param item The item.
-     * @return The level of the applied incantation. -1 if the level is not determined.
+     * @return The level of the applied essence. -1 if the level is not determined.
      */
-    public static int getIncantationLevel(ItemStack item) {
-        if (item.hasItemMeta()) {
-            if (item.getItemMeta().getPersistentDataContainer().has(INCANTATION_LEVEL, PersistentDataType.INTEGER)) {
-                return item.getItemMeta().getPersistentDataContainer().get(INCANTATION_LEVEL, PersistentDataType.INTEGER);
-            }
+    public static int getEssenceLevel(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) return -1;
+        if (item.getItemMeta().getPersistentDataContainer().has(LEGACY_INCANTATION_TYPE, PersistentDataType.STRING)) {
+            migrateEssenceItem(item);
+        }
+        if (item.getItemMeta().getPersistentDataContainer().has(ESSENCE_LEVEL, PersistentDataType.INTEGER)) {
+            return item.getItemMeta().getPersistentDataContainer().get(ESSENCE_LEVEL, PersistentDataType.INTEGER);
         }
         return -1;
+    }
+
+    // Legacy PDC keys from before the Incantation -> Essence rename
+    private static final NamespacedKey LEGACY_INCANTATION_TYPE = new NamespacedKey(AranarthCore.getInstance(), "incantation_type");
+    private static final NamespacedKey LEGACY_INCANTATION_LEVEL = new NamespacedKey(AranarthCore.getInstance(), "incantation_level");
+
+    /**
+     * Migrates a single item from the old Incantation PDC keys/values to the new Essence ones.
+     * @param item The item to migrate.
+     * @return Whether the item was migrated.
+     */
+    public static boolean migrateEssenceItem(ItemStack item) {
+        if (item == null || item.getType() == Material.AIR || !item.hasItemMeta()) return false;
+
+        NamespacedKey oldTypeKey = LEGACY_INCANTATION_TYPE;
+        NamespacedKey oldLevelKey = LEGACY_INCANTATION_LEVEL;
+
+        ItemMeta meta = item.getItemMeta();
+        if (!meta.getPersistentDataContainer().has(oldTypeKey, PersistentDataType.STRING)) return false;
+
+        String oldTypeValue = meta.getPersistentDataContainer().get(oldTypeKey, PersistentDataType.STRING);
+        int level = meta.getPersistentDataContainer().getOrDefault(oldLevelKey, PersistentDataType.INTEGER, 1);
+
+        // Migrate PDC keys and values
+        String newTypeValue = oldTypeValue.replace("incantation_", "essence_");
+        meta.getPersistentDataContainer().set(ESSENCE_TYPE, PersistentDataType.STRING, newTypeValue);
+        meta.getPersistentDataContainer().set(ESSENCE_LEVEL, PersistentDataType.INTEGER, level);
+        meta.getPersistentDataContainer().remove(oldTypeKey);
+        meta.getPersistentDataContainer().remove(oldLevelKey);
+
+        // Unapplied essence items also need their item model and display name updated
+        NamespacedKey model = meta.getItemModel();
+        if (model != null && model.getNamespace().equals("aranarthcore") && model.getKey().startsWith("incantation_")) {
+            meta.setItemModel(new NamespacedKey("aranarthcore", model.getKey().replace("incantation_", "essence_")));
+            if (meta.hasDisplayName()) {
+                meta.setDisplayName(meta.getDisplayName().replace("Incantation of", "Essence of"));
+            }
+        }
+
+        item.setItemMeta(meta);
+        return true;
+    }
+
+    /**
+     * Scans every slot of the given inventory and migrates any old Incantation items to Essences.
+     *
+     * @param inventory The inventory to scan.
+     */
+    public static void migrateInventoryEssences(Inventory inventory) {
+        for (int i = 0; i < inventory.getSize(); i++) {
+            ItemStack item = inventory.getItem(i);
+            if (migrateEssenceItem(item)) {
+                inventory.setItem(i, item);
+            }
+        }
     }
 
     /**
@@ -3732,13 +3981,13 @@ public class AranarthUtils {
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (player.getWorld().getName().equals(onlinePlayer.getWorld().getName())) {
                     if (onlinePlayer.getName().equals(player.getName())) {
-                        onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You have used the &eHorn of " + hornName));
+                        onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "horn.used", "horn", hornName)));
                         continue;
                     }
 
                     if (player.getWorld().equals(onlinePlayer.getWorld())) {
                         if (player.getLocation().distance(onlinePlayer.getLocation()) <= 256) {
-                            onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has used the &eHorn of " + hornName));
+                            onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "horn.player_used", "player", aranarthPlayer.getNickname(), "horn", hornName)));
                         }
                     }
                 }
@@ -3759,7 +4008,7 @@ public class AranarthUtils {
             long remainder = (horns.get(hornWithLongestCooldown) + getHornCooldown(hornWithLongestCooldown)) - System.currentTimeMillis();
             remainder = remainder / 1000;
             int seconds = (int) remainder;
-            player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a horn again for another &e" + seconds + " &cseconds!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "horn.cooldown", "seconds", seconds)));
             return false;
         }
     }
@@ -3799,25 +4048,26 @@ public class AranarthUtils {
      * @return The name of the horn.
      */
     private static String getHornName(MusicInstrument horn) {
-        String name = "Horns";
+        // Returned as a nested key so each recipient sees the name in their own language
+        String name = "horn.name_default";
         if (horn.equals(MusicInstrument.PONDER_GOAT_HORN)) {
-            name = "the Traveller";
+            name = "horn.name_traveller";
         } else if (horn.equals(MusicInstrument.SING_GOAT_HORN)) {
-            name = "the Target";
+            name = "horn.name_target";
         } else if (horn.equals(MusicInstrument.SEEK_GOAT_HORN)) {
-            name = "the Brute";
+            name = "horn.name_brute";
         } else if (horn.equals(MusicInstrument.FEEL_GOAT_HORN)) {
-            name = "the Resilient";
+            name = "horn.name_resilient";
         } else if (horn.equals(MusicInstrument.ADMIRE_GOAT_HORN)) {
-            name = "the Armored";
+            name = "horn.name_armored";
         } else if (horn.equals(MusicInstrument.CALL_GOAT_HORN)) {
-            name = "the Beasts";
+            name = "horn.name_beasts";
         } else if (horn.equals(MusicInstrument.YEARN_GOAT_HORN)) {
-            name = "the Stallion";
+            name = "horn.name_stallion";
         } else if (horn.equals(MusicInstrument.DREAM_GOAT_HORN)) {
-            name = "the Pure";
+            name = "horn.name_pure";
         }
-        return name;
+        return Lang.key(name);
     }
 
     /**
@@ -3902,11 +4152,12 @@ public class AranarthUtils {
             }
             aranarthPlayer.setAfkStartTime(System.currentTimeMillis());
 
+            String nickname = aranarthPlayer.getNickname();
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
-                    onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You are now AFK"));
-                } else {
-                    onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is now AFK"));
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "afk.now_afk")));
+                } else if (!isVanishedFrom(onlinePlayer, uuid)) {
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "afk.player_now_afk", "name", nickname)));
                 }
             }
             Bukkit.getLogger().info("[AC] " + ChatUtils.translateToColor(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " is now AFK"));
@@ -3917,13 +4168,20 @@ public class AranarthUtils {
             if (aranarthPlayer.getAfkLocation() == null) {
                 return;
             }
+            // They reached the timeout but were never announced as AFK, so only reset their timer
+            if (!isAfk(aranarthPlayer)) {
+                aranarthPlayer.setAfkLocation(null);
+                setPlayer(uuid, aranarthPlayer);
+                return;
+            }
             aranarthPlayer.setAfkLocation(null);
             aranarthPlayer.setAfkStartTime(0);
+            String nickname = aranarthPlayer.getNickname();
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
-                    onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You are no longer AFK"));
-                } else {
-                    onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is no longer AFK"));
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "afk.no_longer_afk")));
+                } else if (!isVanishedFrom(onlinePlayer, uuid)) {
+                    onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "afk.player_no_longer_afk", "name", nickname)));
                 }
             }
             Bukkit.getLogger().info("[AC] " + ChatUtils.translateToColor(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " is no longer AFK"));
@@ -3953,8 +4211,8 @@ public class AranarthUtils {
                         aranarthPlayer.setAfkLocation(afkLocation);
                         setPlayer(player.getUniqueId(), aranarthPlayer);
                     }
-                    // Auto-afk after 5 minutes
-                    else if (afkLocation.getSeconds() == getAfkSecondsAmount()) {
+                    // Auto-afk after the timeout, even if the timeout is not a multiple of 5
+                    else if (aranarthPlayer.getAfkStartTime() == 0) {
                         toggleAfkStatus(player.getUniqueId(), true);
                         // Prevents further calls
                         afkLocation.setSeconds(AranarthUtils.getAfkSecondsAmount() + 5);
@@ -3964,7 +4222,7 @@ public class AranarthUtils {
                 }
                 // The player has moved
                 else {
-                    if (afkLocation.getSeconds() >= getAfkSecondsAmount()) {
+                    if (isAfk(aranarthPlayer)) {
                         toggleAfkStatus(player.getUniqueId(), false);
                     } else {
                         aranarthPlayer.setAfkLocation(null);
@@ -4081,6 +4339,16 @@ public class AranarthUtils {
     }
 
     /**
+     * Determines whether the player has actually been placed in the AFK status, rather than just reaching the timeout.
+     *
+     * @param aranarthPlayer The player.
+     * @return Whether the player is currently AFK.
+     */
+    public static boolean isAfk(AranarthPlayer aranarthPlayer) {
+        return aranarthPlayer != null && aranarthPlayer.getAfkStartTime() != 0;
+    }
+
+    /**
      * Provides the HashMap of the kills and deaths of all players across all worlds.
      *
      * @return The HashMap of the kills and deaths of all players across all worlds.
@@ -4126,7 +4394,6 @@ public class AranarthUtils {
 
     /**
      * Provides the number of kills/deaths the player has in the input world.
-     *
      * @param uuid           The UUID of the player.
      * @param world          The world to verify the number of kills/deaths in.
      * @param isGettingKills Whether the method is getting the player's kills/deaths. False if getting deaths.
@@ -4157,6 +4424,47 @@ public class AranarthUtils {
             }
         }
         return 0;
+    }
+
+    /**
+     * Determines the player responsible for a death.
+     * If the final damage had no source (such as fire tick, fall damage or the void),
+     * the death is credited to the last player who hit them, then the player they are combat tagged by.
+     *
+     * @param e The death event.
+     * @return The player responsible for the death, or null if it was not caused by a player.
+     */
+    public static Player getKillingPlayer(EntityDeathEvent e) {
+        Entity causingEntity = e.getDamageSource().getCausingEntity();
+        if (causingEntity instanceof Player killer) {
+            return killer;
+        }
+        if (causingEntity != null) {
+            return null;
+        }
+
+        // Covers projectiles, which do not combat tag
+        Player lastHitBy = e.getEntity().getKiller();
+        if (lastHitBy != null && !lastHitBy.equals(e.getEntity())) {
+            return lastHitBy;
+        }
+
+        if (!(e.getEntity() instanceof Player victim)) {
+            return null;
+        }
+        AranarthPlayer aranarthPlayer = getPlayer(victim.getUniqueId());
+        if (aranarthPlayer == null) {
+            return null;
+        }
+        UUID taggedBy = null;
+        long latestTime = 0;
+        for (Map.Entry<UUID, Long> entry : aranarthPlayer.getCombatLogTime().entrySet()) {
+            if (entry.getValue() > latestTime) {
+                latestTime = entry.getValue();
+                taggedBy = entry.getKey();
+            }
+        }
+        return taggedBy != null ? Bukkit.getPlayer(taggedBy) : null;
     }
 
     /**

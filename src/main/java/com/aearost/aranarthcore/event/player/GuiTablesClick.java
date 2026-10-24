@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.gui.GuiFletchingTable;
+import com.aearost.aranarthcore.utils.Lang;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -95,7 +96,7 @@ public class GuiTablesClick {
 					e.setCancelled(true);
 					player.closeInventory();
 					MenuType.STONECUTTER.builder()
-							.title(Component.text("Sawmill"))
+							.title(Component.text(Lang.getFor(player, "gui.recipes.station_sawmill")))
 							.checkReachable(false)
 							.build(player)
 							.open();

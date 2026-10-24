@@ -4,7 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.WanderingTraderType;
 import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.WanderingTraderUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -34,9 +34,7 @@ public class WanderingTraderSpawn {
                         || worldName.equalsIgnoreCase("resource")) {
                     if (player.getWorld().getName().equals(wanderingTrader.getLocation().getWorld().getName())) {
                         if (player.getLocation().distance(wanderingTrader.getLocation()) <= 100) {
-                            Bukkit.broadcastMessage(ChatUtils.chatMessage(
-                                "&7A " + typeName + " has spawned nearby &e" + AranarthUtils.getNickname(player)
-                            ));
+                            Lang.broadcast("trader.spawned_nearby", "type", typeName, "player", AranarthUtils.getNickname(player));
                             return;
                         }
                     }

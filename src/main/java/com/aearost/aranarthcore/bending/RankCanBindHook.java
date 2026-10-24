@@ -38,6 +38,7 @@ public class RankCanBindHook implements CanBindHook {
         ABILITY_MIN_RANKS.put("metalfragments", 3);
 
         // Count
+        ABILITY_MIN_RANKS.put("jetstream", 4);
         ABILITY_MIN_RANKS.put("iceshards", 4);
         ABILITY_MIN_RANKS.put("angeredspirits", 4);
         ABILITY_MIN_RANKS.put("daggervolley", 4);
@@ -91,6 +92,10 @@ public class RankCanBindHook implements CanBindHook {
         Player player = bPlayer.getPlayer();
         if (player == null) {
             return Optional.of(false);
+        }
+        // All rank-locked abilities are available in the arena, blood and flight are still blocked by their permissions
+        if (player.getWorld().getName().equalsIgnoreCase("arena")) {
+            return Optional.empty();
         }
         int rank = AranarthUtils.getPlayer(player.getUniqueId()).getRank();
         return rank >= minRank ? Optional.empty() : Optional.of(false);

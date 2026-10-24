@@ -169,7 +169,7 @@ bundle
 pumpkin
 melon
 
-# Incantations
+# Essences
 plentiful
 lifesteal
 magnetism

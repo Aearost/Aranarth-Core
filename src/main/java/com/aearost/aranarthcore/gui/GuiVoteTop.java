@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.AranarthVote;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -19,8 +20,37 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class GuiVoteTop {
+
+    private static final ExecutorService SKIN_EXECUTOR = Executors.newFixedThreadPool(8);
+
+    /**
+     * The filter of the most recently opened top voters GUI per player, so clicks never need to parse the localized title.
+     */
+    public record VoteTopFilter(Integer year, Integer month, String title) {}
+    private static final Map<UUID, VoteTopFilter> openFilters = new HashMap<>();
+
+    /**
+     * Provides the filter of the top voters GUI that the player most recently opened.
+     *
+     * @param uuid The player's UUID.
+     * @return The filter, or null if the player has not opened the GUI.
+     */
+    public static VoteTopFilter getOpenFilter(UUID uuid) {
+        return openFilters.get(uuid);
+    }
+
+    /**
+     * Determines whether the color-stripped title is the top voters GUI that the player most recently opened.
+     */
+    public static boolean isVoteTopTitle(Player player, String title) {
+        VoteTopFilter filter = openFilters.get(player.getUniqueId());
+        return filter != null && filter.title().equals(title);
+    }
 
     private final Player player;
     private final Inventory initializedGui;
@@ -58,17 +88,18 @@ public class GuiVoteTop {
             startTime = yearMonth.atDay(1).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
             endTime = yearMonth.atEndOfMonth().atTime(23, 59, 59, 999_000_000)
                     .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-            title = String.format("Top Voters Month %02d-%d", month, year);
+            title = Lang.getFor(player, "gui.votetop.title_month", "month", String.format("%02d", month), "year", String.valueOf(year));
         } else if (year != null) {
             startTime = LocalDate.of(year, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
             endTime = LocalDate.of(year, 12, 31).atTime(23, 59, 59, 999_000_000)
                     .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-            title = "Top Voters Year " + year;
+            title = Lang.getFor(player, "gui.votetop.title_year", "year", String.valueOf(year));
         } else {
             startTime = Long.MIN_VALUE;
             endTime = Long.MAX_VALUE;
-            title = "Top Voters";
+            title = Lang.getFor(player, "gui.votetop.title_all");
         }
+        openFilters.put(player.getUniqueId(), new VoteTopFilter(year, month, ChatUtils.stripColorFormatting(title)));
 
         Map<UUID, Integer> voteCounts = new HashMap<>();
         for (AranarthVote vote : allVotes) {
@@ -82,7 +113,7 @@ public class GuiVoteTop {
                 .toList();
 
         if (sorted.isEmpty()) {
-            player.sendMessage(ChatUtils.chatMessage("&7There are no votes in this period"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "votetop.no_votes")));
             return;
         }
 
@@ -101,32 +132,38 @@ public class GuiVoteTop {
         final String finalTitle = title;
         final List<Map.Entry<UUID, Integer>> finalPageEntries = pageEntries;
 
-        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
-            Map<UUID, PlayerProfile> profiles = new LinkedHashMap<>();
-            for (Map.Entry<UUID, Integer> entry : finalPageEntries) {
-                UUID uuid = entry.getKey();
+        List<CompletableFuture<Map.Entry<UUID, PlayerProfile>>> futures = new ArrayList<>();
+        for (Map.Entry<UUID, Integer> entry : finalPageEntries) {
+            UUID uuid = entry.getKey();
+            futures.add(CompletableFuture.supplyAsync(() -> {
                 OfflinePlayer op = Bukkit.getOfflinePlayer(uuid);
                 PlayerProfile profile = Bukkit.createProfile(uuid, op.getName());
                 profile.complete(true);
-                profiles.put(uuid, profile);
-            }
+                return Map.entry(uuid, profile);
+            }, SKIN_EXECUTOR));
+        }
 
-            final Map<UUID, PlayerProfile> finalProfiles = profiles;
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).thenRun(() -> {
+            Map<UUID, PlayerProfile> profiles = new LinkedHashMap<>();
+            for (CompletableFuture<Map.Entry<UUID, PlayerProfile>> f : futures) {
+                Map.Entry<UUID, PlayerProfile> entry = f.join();
+                profiles.put(entry.getKey(), entry.getValue());
+            }
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                 aranarthPlayer.setCurrentGuiPageNum(pageNum);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 String openTitle = com.aearost.aranarthcore.utils.ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle());
-                if (player.isOnline() && openTitle.equals(com.aearost.aranarthcore.utils.ChatUtils.stripColorFormatting(finalTitle))) {
-                    populate(player.getOpenInventory().getTopInventory(), finalPageEntries, finalProfiles);
+                if (player.isOnline() && GuiHolder.isGui(player.getOpenInventory()) && openTitle.equals(com.aearost.aranarthcore.utils.ChatUtils.stripColorFormatting(finalTitle))) {
+                    populate(player, player.getOpenInventory().getTopInventory(), finalPageEntries, profiles);
                 } else {
-                    new GuiVoteTop(player, finalTitle, finalPageEntries, finalProfiles).openGui();
+                    new GuiVoteTop(player, finalTitle, finalPageEntries, profiles).openGui();
                 }
             });
         });
     }
 
-    private static void populate(Inventory gui, List<Map.Entry<UUID, Integer>> pageEntries,
+    private static void populate(Player player, Inventory gui, List<Map.Entry<UUID, Integer>> pageEntries,
                                  Map<UUID, PlayerProfile> profiles) {
         ItemStack blank = new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE);
         ItemMeta blankMeta = blank.getItemMeta();
@@ -160,8 +197,8 @@ public class GuiVoteTop {
             skullMeta.setDisplayName(ChatUtils.translateToColor("&e" + displayName));
 
             List<String> lore = new ArrayList<>();
-            String voteWord = voteCount == 1 ? "vote" : "votes";
-            lore.add(ChatUtils.translateToColor("&6" + voteCount + " &e" + voteWord));
+            String voteKey = voteCount == 1 ? "gui.votetop.vote_singular" : "gui.votetop.vote_plural";
+            lore.add(Lang.getFor(player, voteKey, "count", String.valueOf(voteCount)));
             skullMeta.setLore(lore);
             head.setItemMeta(skullMeta);
             gui.setItem(i, head);
@@ -170,7 +207,7 @@ public class GuiVoteTop {
 
     private Inventory initializeGui(String title, List<Map.Entry<UUID, Integer>> pageEntries,
                                     Map<UUID, PlayerProfile> profiles) {
-        Inventory gui = Bukkit.getServer().createInventory(player, 54, title);
+        Inventory gui = GuiHolder.create(player, 54, title);
 
         ItemStack previous = new ItemStack(Material.RED_WOOL);
         ItemStack barrier = new ItemStack(Material.BARRIER);
@@ -179,19 +216,19 @@ public class GuiVoteTop {
 
         ItemMeta previousMeta = previous.getItemMeta();
         if (Objects.nonNull(previousMeta)) {
-            previousMeta.setDisplayName(ChatUtils.translateToColor("&c&lPrevious"));
+            previousMeta.setDisplayName(Lang.getFor(player, "gui.page_prev"));
             previous.setItemMeta(previousMeta);
         }
 
         ItemMeta barrierMeta = barrier.getItemMeta();
         if (Objects.nonNull(barrierMeta)) {
-            barrierMeta.setDisplayName(ChatUtils.translateToColor("&4&lExit"));
+            barrierMeta.setDisplayName(Lang.getFor(player, "gui.exit"));
             barrier.setItemMeta(barrierMeta);
         }
 
         ItemMeta nextMeta = next.getItemMeta();
         if (Objects.nonNull(nextMeta)) {
-            nextMeta.setDisplayName(ChatUtils.translateToColor("&a&lNext"));
+            nextMeta.setDisplayName(Lang.getFor(player, "gui.page_next"));
             next.setItemMeta(nextMeta);
         }
 
@@ -236,8 +273,8 @@ public class GuiVoteTop {
             skullMeta.setDisplayName(ChatUtils.translateToColor("&e" + displayName));
 
             List<String> lore = new ArrayList<>();
-            String voteWord = voteCount == 1 ? "vote" : "votes";
-            lore.add(ChatUtils.translateToColor("&6" + voteCount + " &e" + voteWord));
+            String voteKey = voteCount == 1 ? "gui.votetop.vote_singular" : "gui.votetop.vote_plural";
+            lore.add(Lang.getFor(player, voteKey, "count", String.valueOf(voteCount)));
             skullMeta.setLore(lore);
             head.setItemMeta(skullMeta);
             gui.setItem(i, head);

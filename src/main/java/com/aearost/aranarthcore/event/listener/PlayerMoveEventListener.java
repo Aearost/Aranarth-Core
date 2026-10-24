@@ -45,6 +45,11 @@ public class PlayerMoveEventListener implements Listener {
                 }
             }
             AranarthUtils.playerWasOnGround.put(player.getUniqueId(), onGround);
+
+            // When an elven player lands, clear any unused double-jump eligibility
+            if (onGround) {
+                AranarthUtils.elvenCanDoubleJump.remove(player.getUniqueId());
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.earthbending.lavabending;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -20,19 +21,19 @@ public class Eruption extends LavaAbility implements AddonAbility {
 
     public enum Phase {SOURCING, ERUPTING, DESCENDING}
 
-    private static final int SOURCE_LOOK_RANGE = 15;
+    private int sourceRange;
     private static final double LAVA_RADIUS = 2.0;
     private static final double ANIM_RADIUS = 4.0;
-    private static final int MAX_GEYSERS = 3;
-    private static final long CLICK_WINDOW = 1000L;
+    private int maxGeysers;
+    private long clickWindow;
     private static final long WARMUP_DURATION = 1500L;
     private static final long PEAK_HOLD_DURATION = 1000L;
     private static final int MIN_GEYSER_HEIGHT = 8;
     private static final int MAX_GEYSER_HEIGHT = 15;
     private static final long RISE_TICKS_PER_BLOCK = 1L;
     private static final int DESCEND_LAYERS_PER_TICK = 1;
-    private static final double BASE_KNOCKUP = 1.2;
-    private static final double MAX_KNOCKUP = 2.0;
+    private double baseKnockup;
+    private double maxKnockup;
 
     private static final Particle.DustOptions SOURCE_OUTLINE_DUST = new Particle.DustOptions(Color.fromRGB(255, 90, 10), 1.0f);
     private static final Particle.DustOptions SOURCE_FILL_DUST = new Particle.DustOptions(Color.fromRGB(200, 40, 0), 0.9f);
@@ -106,9 +107,14 @@ public class Eruption extends LavaAbility implements AddonAbility {
             return;
         }
 
-        cooldown = 12000;
-        range = 12.0;
-        damage = 6.0;
+        cooldown = AbilityConfig.getLong("Eruption.Cooldown");
+        range = AbilityConfig.getDouble("Eruption.Range");
+        damage = AbilityConfig.getDouble("Eruption.Damage");
+        sourceRange = AbilityConfig.getInt("Eruption.SourceRange");
+        maxGeysers = AbilityConfig.getInt("Eruption.Geysers");
+        clickWindow = AbilityConfig.getLong("Eruption.ClickWindow");
+        baseKnockup = AbilityConfig.getDouble("Eruption.BaseKnockup");
+        maxKnockup = AbilityConfig.getDouble("Eruption.MaxKnockup");
 
         targetLocation = findTargetLocation();
         firstClickTime = 0;
@@ -151,12 +157,12 @@ public class Eruption extends LavaAbility implements AddonAbility {
         }
 
         // Show preview for where the next geyser would land
-        if (now - firstClickTime < CLICK_WINDOW) {
+        if (now - firstClickTime < clickWindow) {
             Location updated = findTargetLocation();
             if (updated != null) {
                 targetLocation = updated;
             }
-            if (geysers.size() < MAX_GEYSERS) {
+            if (geysers.size() < maxGeysers) {
                 spawnSourcingParticles();
             }
         }
@@ -295,7 +301,7 @@ public class Eruption extends LavaAbility implements AddonAbility {
         World world = geyser.base.getWorld();
 
         double t = (geyser.maxHeight - MIN_GEYSER_HEIGHT) / (double) (MAX_GEYSER_HEIGHT - MIN_GEYSER_HEIGHT);
-        double knockup = BASE_KNOCKUP + t * (MAX_KNOCKUP - BASE_KNOCKUP);
+        double knockup = baseKnockup + t * (maxKnockup - baseKnockup);
 
         for (LivingEntity entity : world.getLivingEntities()) {
             Location eLoc = entity.getLocation();
@@ -363,7 +369,7 @@ public class Eruption extends LavaAbility implements AddonAbility {
      * Traces the player's line of sight to find a valid surface target within range.
      */
     private Location findTargetLocation() {
-        Block target = player.getTargetBlock(null, SOURCE_LOOK_RANGE);
+        Block target = player.getTargetBlock(null, sourceRange);
         if (target == null || target.getType().isAir()) {
             return null;
         }
@@ -507,10 +513,10 @@ public class Eruption extends LavaAbility implements AddonAbility {
             return;
         }
         long now = System.currentTimeMillis();
-        if (firstClickTime > 0 && now - firstClickTime >= CLICK_WINDOW) {
+        if (firstClickTime > 0 && now - firstClickTime >= clickWindow) {
             return;
         }
-        if (geysers.size() >= MAX_GEYSERS) {
+        if (geysers.size() >= maxGeysers) {
             return;
         }
 

@@ -1,13 +1,17 @@
 package com.aearost.aranarthcore.event.mob;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.database.DatabaseManager;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthMount;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.objects.Mount;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.MountUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
@@ -21,6 +25,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityDismountEvent;
 import org.bukkit.event.player.PlayerInputEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -170,7 +175,7 @@ public class MountListener implements Listener {
                 // Still on cooldown - give the player a quiet hint via action bar
                 long remaining = (end - now + 999) / 1000;
                 rider.sendActionBar(LegacyComponentSerializer.legacySection().deserialize(
-                        ChatUtils.translateToColor("&7Bellow is ready in &e" + remaining + "s")));
+                        ChatUtils.translateToColor(Lang.getFor(rider, "mount.bellow_ready_in", "seconds", remaining))));
                 return;
             }
             double maxDamage = mountData.getThirdAttribute() != null
@@ -204,7 +209,7 @@ public class MountListener implements Listener {
             if (now < end) {
                 long remaining = (end - now + 999) / 1000;
                 rider.sendActionBar(LegacyComponentSerializer.legacySection().deserialize(
-                        ChatUtils.translateToColor("&7Bite is ready in &e" + remaining + "s")));
+                        ChatUtils.translateToColor(Lang.getFor(rider, "mount.bite_ready_in", "seconds", remaining))));
                 return;
             }
             if (activeLunges.containsKey(id)) {
@@ -440,7 +445,7 @@ public class MountListener implements Listener {
                     && clickedEntity.getPersistentDataContainer()
                             .has(CustomKeys.MOUNT_ELEMENT, PersistentDataType.STRING)) {
                 event.setCancelled(true);
-                player.sendMessage(ChatUtils.chatMessage("&cYou cannot put a lead on a Flying Bison!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "pet.cannot_lead_bison")));
                 return;
             }
             return;
@@ -466,7 +471,7 @@ public class MountListener implements Listener {
 
         if (!isOwner) {
             if (!"AIR".equals(mountElement)) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou cannot ride someone else's mount!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "pet.cannot_ride_bison_no_owner")));
                 return;
             }
             // Flying Bison: non-owners may join when the owner is already riding
@@ -475,7 +480,7 @@ public class MountListener implements Listener {
                     && passengers.get(0) instanceof Player firstRider
                     && firstRider.getUniqueId().equals(ownerUUID);
             if (!ownerIsRiding) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou can only ride the Flying Bison when the owner is already riding it!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "pet.cannot_ride_bison_not_riding")));
                 return;
             }
             if (!passengers.contains(player)) {
@@ -506,9 +511,10 @@ public class MountListener implements Listener {
                     Mount mountData = MountUtils.get(ownerUUID, "AIR");
                     if (mountData != null) {
                         mountData.setHarnessColor(colorName);
+                        PersistenceUtils.saveMountsForPlayer(ownerUUID);
                     }
                     mainHand.setAmount(mainHand.getAmount() - 1);
-                    player.sendMessage(ChatUtils.chatMessage("&7Your Flying Bison's harness color has been updated!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "pet.harness_updated")));
                 }
                 return;
             }
@@ -647,13 +653,11 @@ public class MountListener implements Listener {
                     UUID ownerUUID = UUID.fromString(ownerStr);
                     Mount mountData = MountUtils.getOrCreate(ownerUUID, mountElement);
                     mountData.startRecharge();
+                    PersistenceUtils.saveMountsForPlayer(ownerUUID);
                     Player owner = Bukkit.getPlayer(ownerUUID);
                     if (owner != null) {
                         String mountDisplayName = MountUtils.getDisplayName(ownerUUID, mountElement);
-                        owner.sendMessage(ChatUtils.chatMessage(
-                                MountUtils.getElementColor(mountElement) + mountDisplayName
-                                        + " &7needs some time to recover! "
-                                        + "Use &e/mount info &7to check their status"));
+                        owner.sendMessage(ChatUtils.chatMessage(Lang.getFor(owner, "mount.needs_recovery", "mount", MountUtils.getElementColor(mountElement) + mountDisplayName)));
                     }
                 } catch (IllegalArgumentException ignored) {
                 }
@@ -670,8 +674,31 @@ public class MountListener implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         MountUtils.cleanupPlayerBars(player.getUniqueId());
+        despawnMountOnQuit(player);
 
+        // Persist this player's mounts now and tell the other server to reload them
+        if (DatabaseManager.isActive()) {
+            PersistenceUtils.saveMountsForPlayerSync(player.getUniqueId());
+            NetworkManager nm = NetworkManager.getInstance();
+            if (nm != null) {
+                nm.publishMountUpdate(player.getUniqueId());
+            }
+        }
+    }
 
+    /**
+     * Refreshes the player's mount progress from MySQL on join, picking up any progress
+     * made on the other server since this server last loaded it.
+     */
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        PersistenceUtils.loadMountsForPlayer(event.getPlayer().getUniqueId());
+    }
+
+    /**
+     * Saves the HP of the quitting player's mount and removes the entity.
+     */
+    private void despawnMountOnQuit(Player player) {
         // If the mount is dismounted but alive in the world, save its HP and remove it
         UUID wanderingId = MountUtils.getActiveMountEntityUUID(player.getUniqueId());
         if (wanderingId != null) {
@@ -1042,7 +1069,7 @@ public class MountListener implements Listener {
         double actualHeal = Math.min(baseHeal, maxHp - currentHp);
 
         if (actualHeal <= 0) {
-            player.sendMessage(ChatUtils.chatMessage("&7Your mount is already at full health!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mount.already_full_health")));
             return;
         }
         mount.setHealth(currentHp + actualHeal);
@@ -1127,8 +1154,7 @@ public class MountListener implements Listener {
         mount.setCustomName(displayName);
         mount.setCustomNameVisible(true);
 
-        player.sendMessage(ChatUtils.chatMessage(
-                MountUtils.getElementColor(element) + displayName + " &7has been summoned!"));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "mount.summoned", "mount", MountUtils.getElementColor(element) + displayName)));
     }
 
     /**

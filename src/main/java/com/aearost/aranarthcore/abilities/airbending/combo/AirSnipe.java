@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.airbending.combo;
 
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.GeneralMethods;
@@ -30,7 +31,7 @@ public class AirSnipe extends AirAbility implements AddonAbility, ComboAbility {
 
     public enum Phase { CHARGING, READY, FIRING }
 
-    private static final double HIT_RADIUS = 0.4;
+    private double hitRadius;
     private static final double STEP_SIZE = 0.25;
     private static final Map<UUID, AirSnipe> ACTIVE = new HashMap<>();
 
@@ -73,10 +74,11 @@ public class AirSnipe extends AirAbility implements AddonAbility, ComboAbility {
         // Suppress the AirSwipe that just started on this same SHIFT_DOWN so it doesn't also run
         AranarthBendingUtils.suppressComboTrigger(this.bPlayer, player, "AirSwipe");
 
-        this.cooldown = 9000L;
-        this.damage = 8.0;
-        this.range = 40.0;
-        this.speed = 20.0;
+        this.cooldown = AbilityConfig.getLong("AirSnipe.Cooldown");
+        this.damage = AbilityConfig.getDouble("AirSnipe.Damage");
+        this.range = AbilityConfig.getDouble("AirSnipe.Range");
+        this.speed = AbilityConfig.getDouble("AirSnipe.Speed");
+        this.hitRadius = AbilityConfig.getDouble("AirSnipe.HitRadius");
 
         this.phase = Phase.CHARGING;
         this.chargeStartTime = System.currentTimeMillis();
@@ -265,7 +267,7 @@ public class AirSnipe extends AirAbility implements AddonAbility, ComboAbility {
     }
 
     private boolean checkCollision() {
-        for (final LivingEntity entity : this.shotLocation.getNearbyLivingEntities(HIT_RADIUS)) {
+        for (final LivingEntity entity : this.shotLocation.getNearbyLivingEntities(hitRadius)) {
             if (entity.equals(player)) continue;
             if (this.hitEntities.contains(entity)) continue;
             if (GeneralMethods.isRegionProtectedFromBuild(this, entity.getLocation())) continue;

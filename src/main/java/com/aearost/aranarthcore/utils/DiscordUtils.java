@@ -10,6 +10,7 @@ import github.scarsz.discordsrv.dependencies.jda.api.JDA;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.Guild;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.Member;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.Role;
+import github.scarsz.discordsrv.dependencies.jda.api.entities.Emote;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
@@ -127,7 +128,43 @@ public class DiscordUtils {
 		finalMessage = finalMessage.replace("\uD83D\uDD28", "\uD83D\uDD28\uFE0E");
 		// Saint symbol - force text presentation
 		finalMessage = finalMessage.replace("\u269C", "\u269C\uFE0E");
+		finalMessage = resolveCustomEmojis(finalMessage);
 		serverChatChannel.sendMessage(finalMessage).queue();
+	}
+
+	/**
+	 * Resolves :shortcode: patterns in a message to Discord custom emoji mentions (<:name:id>).
+	 */
+	private static String resolveCustomEmojis(String message) {
+		Guild guild = getGuild();
+		if (guild == null) {
+			return message;
+		}
+		StringBuilder result = new StringBuilder();
+		int i = 0;
+		while (i < message.length()) {
+			if (message.charAt(i) == ':') {
+				int end = message.indexOf(':', i + 1);
+				if (end > i + 1) {
+					String name = message.substring(i + 1, end);
+					// Only treat as a shortcode if the name contains only word chars and underscores
+					if (name.matches("[\\w]+")) {
+						List<Emote> emotes = guild.getEmotesByName(name, true);
+						if (!emotes.isEmpty()) {
+							Emote emote = emotes.get(0);
+							result.append(emote.isAnimated()
+									? "<a:" + emote.getName() + ":" + emote.getId() + ">"
+									: "<:" + emote.getName() + ":" + emote.getId() + ">");
+							i = end + 1;
+							continue;
+						}
+					}
+				}
+			}
+			result.append(message.charAt(i));
+			i++;
+		}
+		return result.toString();
 	}
 
 	/**
@@ -277,7 +314,7 @@ public class DiscordUtils {
 				String uuidNoDashes = player.getUniqueId().toString().replaceAll("-", "");
 				String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
 				EmbedBuilder embed = new EmbedBuilder()
-						.setAuthor(player.getName() + " has donated and become " + saintRankName + "!", null, url)
+						.setAuthor(player.getName() + " has become " + saintRankName + "!", null, url)
 						.setColor(Color.MAGENTA);
 				roleChangesChannel.sendMessageEmbeds(embed.build()).queue(message -> {
 					message.addReaction("⚜").queue();
@@ -514,8 +551,8 @@ public class DiscordUtils {
 				embed.setColor(new Color(255, 255, 0));
 
 				String formattedEndDate = "None";
-				if (!aranarthPlayer.getMuteEndDate().equals("none")) {
-					LocalDateTime endDate = ChatUtils.getMuteEndAsLocalDateTime(aranarthPlayer);
+				LocalDateTime endDate = ChatUtils.getMuteEndAsLocalDateTime(aranarthPlayer);
+				if (!aranarthPlayer.getMuteEndDate().equals("none") && endDate != null) {
 					String year = endDate.getYear() + "";
 					String month = endDate.getMonthValue() < 10 ? "0" + endDate.getMonthValue() : endDate.getMonthValue() + "";
 					String day = endDate.getDayOfMonth() < 10 ? "0" + endDate.getDayOfMonth() : endDate.getDayOfMonth() + "";
@@ -952,6 +989,17 @@ public class DiscordUtils {
 	 * @param color The color of the Discord message.
 	 */
 	public static void dominionMessage(Dominion dominion, String message, Color color) {
+		dominionMessage(dominion, message, color, false);
+	}
+
+	/**
+	 * Handles sending messages to the dominions relations channel.
+	 * @param dominion The Dominion involved with the message that will show its leader's head in the message.
+	 * @param message The message to be sent.
+	 * @param color The color of the Discord message.
+	 * @param isPingingLeadership Whether the Dominion's Leader and Lieutenants with linked Discord accounts are pinged.
+	 */
+	public static void dominionMessage(Dominion dominion, String message, Color color, boolean isPingingLeadership) {
 		Guild guild = getGuild();
 		EmbedBuilder embed = new EmbedBuilder();
 		message = ChatUtils.stripColorFormatting(message);
@@ -959,7 +1007,27 @@ public class DiscordUtils {
 		String uuidNoDashes = dominion.getLeader().toString().replaceAll("-", "");
 		String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
 		embed.setAuthor(message, null, url).setColor(color);
-		dominions.sendMessageEmbeds(embed.build()).queue();
+
+		StringBuilder mentions = new StringBuilder();
+		if (isPingingLeadership) {
+			for (UUID memberUuid : dominion.getMembers()) {
+				DominionRank rank = dominion.getMemberRank(memberUuid);
+				if (rank != DominionRank.LEADER && rank != DominionRank.LIEUTENANT) {
+					continue;
+				}
+				String discordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(memberUuid);
+				if (discordId != null) {
+					mentions.append("<@").append(discordId).append("> ");
+				}
+			}
+		}
+
+		if (mentions.isEmpty()) {
+			dominions.sendMessageEmbeds(embed.build()).queue();
+		} else {
+			dominions.sendMessage(mentions.toString().trim()).setEmbeds(embed.build())
+					.allowedMentions(EnumSet.of(Message.MentionType.USER)).queue();
+		}
 	}
 
 }

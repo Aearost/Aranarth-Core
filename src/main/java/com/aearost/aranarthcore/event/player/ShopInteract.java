@@ -7,9 +7,11 @@ import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.CropUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.MarketUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
+import com.aearost.aranarthcore.utils.TradeMarketUtils;
 import org.bukkit.*;
 import org.bukkit.block.*;
 import org.bukkit.entity.Player;
@@ -35,12 +37,12 @@ public class ShopInteract {
             Player player = e.getPlayer();
             AranarthPlayer clickUser = AranarthUtils.getPlayer(player.getUniqueId());
             Location signLocation = e.getClickedBlock().getLocation();
-            Location locationBelow = new Location(signLocation.getWorld(),
-                    signLocation.getBlockX(), signLocation.getBlockY() - 1, signLocation.getBlockZ());
+            Block chestBlock = ShopUtils.getChestBlockForSign(e.getClickedBlock());
+            Location locationBelow = chestBlock != null ? chestBlock.getLocation() : null;
             Shop shop = ShopUtils.getShopFromLocation(signLocation);
 
             // Player shop
-            if (isContainer(locationBelow.getBlock()) && shop != null && AranarthUtils.getPlayer(shop.getUuid()) != null) {
+            if (locationBelow != null && shop != null && shop.getUuid() != null && AranarthUtils.getPlayer(shop.getUuid()) != null) {
                 if (shop != null) {
                     e.setCancelled(true);
 
@@ -172,7 +174,7 @@ public class ShopInteract {
                             } else {
                                 e.setCancelled(false);
                                 ShopUtils.removeShop(shop);
-                                player.sendMessage(ChatUtils.chatMessage("&7You have destroyed this shop"));
+                                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.destroyed")));
                                 player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 0.1F);
                             }
                         }
@@ -201,10 +203,10 @@ public class ShopInteract {
                 locations[0] = e.getClickedBlock().getLocation();
             }
 
-            Shop location1Shop = ShopUtils.getShopFromLocation(locations[0].getBlock().getRelative(BlockFace.UP).getLocation());
+            Shop location1Shop = ShopUtils.getShopForContainer(locations[0].getBlock());
             Shop location2Shop = null;
-            if (ShopUtils.getShopFromLocation(locations[1]) != null) {
-                location2Shop = ShopUtils.getShopFromLocation(locations[1].getBlock().getRelative(BlockFace.UP).getLocation());
+            if (locations[1] != null) {
+                location2Shop = ShopUtils.getShopForContainer(locations[1].getBlock());
             }
 
             if (location1Shop != null || (locations[1] != null && location2Shop != null)) {
@@ -215,9 +217,9 @@ public class ShopInteract {
                         // Prevents other players from destroying or opening the chest
                         e.setCancelled(true);
                         if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
-                            e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot destroy someone else's shop!"));
+                            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "shop.cannot_destroy_others")));
                         } else if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-                            e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot open someone else's player shop chest!"));
+                            e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "shop.cannot_open_chest")));
                         }
                     }
                 }
@@ -257,7 +259,7 @@ public class ShopInteract {
                         chestInventory.clear();
                         chestInventory.setContents(result.get(true));
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cThere is not enough inventory in this shop!"));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.not_enough_inventory")));
                         return;
                     }
                 }
@@ -296,7 +298,7 @@ public class ShopInteract {
                     }
                 }
                 if (spaceForShopItemInPlayerInventory < shop.getQuantity()) {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough space for this!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.not_enough_space")));
                     clickUser.setBulkTransactionNum(-1);
                     AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
                     return;
@@ -378,15 +380,15 @@ public class ShopInteract {
                     }
                 }
 
-                player.sendMessage(ChatUtils.chatMessage(
-                        "&7You have purchased &e" + shop.getQuantity() + " " + itemname
-                                + ChatUtils.translateToColor(" &7for &6" + formatter.format(shop.getBuyPrice()))));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.purchased", "amount", shop.getQuantity(), "item", itemname, "price", formatter.format(shop.getBuyPrice()))));
+                ItemStack marketBuyItem = shop.getItem().clone();
+                marketBuyItem.setAmount(shop.getQuantity());
+                TradeMarketUtils.recordTradeTransaction(new ItemStack[]{marketBuyItem}, shop.getBuyPrice());
                 clickUser.setBulkTransactionNum(-1);
                 AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
 
                 if (!remainder.isEmpty()) {
-                    player.sendMessage(ChatUtils.chatMessage("&e" + remainder.size() + " " + itemname
-                            + ChatUtils.translateToColor(" &7was dropped on the ground!")));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.partial_items_dropped", "count", remainder.size(), "item", itemname)));
                 }
 
                 // If the shop owner is online
@@ -394,15 +396,14 @@ public class ShopInteract {
                     if (Bukkit.getPlayer(shop.getUuid()) != null) {
                         Player shopPlayer = Bukkit.getPlayer(shop.getUuid());
                         shopPlayer.sendMessage(
-                                ChatUtils.chatMessage("&e" + player.getName() + " &7has purchased &e" + shop.getQuantity() + " "
-                                        + itemname + ChatUtils.translateToColor(" &7for &6" + formatter.format(shop.getBuyPrice()))));
+                                ChatUtils.chatMessage(Lang.getFor(shopPlayer, "shop.owner_purchase_notify", "player", player.getName(), "quantity", shop.getQuantity(), "item", itemname, "price", formatter.format(shop.getBuyPrice()))));
                     }
                 }
             } else {
                 if (clickUser.getBulkTransactionNum() <= 0 && AranarthUtils.isPhysicallySneaking(player.getUniqueId())) {
                     return;
                 }
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough money to buy this!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.not_enough_money")));
             }
         }
     }
@@ -456,7 +457,7 @@ public class ShopInteract {
 
             if (isPlayerShop) {
                 if (shopUser.getBalance() < shop.getSellPrice()) {
-                    player.sendMessage(ChatUtils.chatMessage("&cThis player does not have enough money to sell this!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.owner_not_enough_money")));
                     return;
                 }
             }
@@ -488,7 +489,7 @@ public class ShopInteract {
                     }
                 }
                 if (spaceForShopItemInChestInventory < shop.getQuantity()) {
-                    player.sendMessage(ChatUtils.chatMessage("&cThere is no space remaining in the chest!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.no_chest_space")));
                     clickUser.setBulkTransactionNum(-1);
                     AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
                     return;
@@ -504,7 +505,7 @@ public class ShopInteract {
             } else if (useLeaveOneLogic) {
                 // Leave-one logic was active but nothing could be sold (only 1 item per shulker slot).
                 // Do NOT fall back to checkIfContentsHasShopItems - that would consume the kept items.
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough of this item!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "inventory.not_enough")));
                 clickUser.setBulkTransactionNum(-1);
                 AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
                 return;
@@ -554,9 +555,10 @@ public class ShopInteract {
                     }
                 }
 
-                player.sendMessage(ChatUtils.chatMessage(
-                        "&7You have sold &e" + shop.getQuantity() + " " + itemname
-                                + ChatUtils.translateToColor(" &7for &6" + formatter.format(shop.getSellPrice()))));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.sold", "amount", shop.getQuantity(), "item", itemname, "price", formatter.format(shop.getSellPrice()))));
+                ItemStack marketSellItem = shop.getItem().clone();
+                marketSellItem.setAmount(shop.getQuantity());
+                TradeMarketUtils.recordTradeTransaction(new ItemStack[]{marketSellItem}, shop.getSellPrice());
                 clickUser.setBulkTransactionNum(-1);
                 AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
 
@@ -565,22 +567,21 @@ public class ShopInteract {
                     if (Bukkit.getPlayer(shop.getUuid()) != null) {
                         Player shopPlayer = Bukkit.getPlayer(shop.getUuid());
                         shopPlayer.sendMessage(
-                                ChatUtils.chatMessage("&e" + player.getName() + " &7has sold you &e" + shop.getQuantity() + " "
-                                        + itemname + ChatUtils.translateToColor(" &7for &6" + formatter.format(shop.getSellPrice()))));
+                                ChatUtils.chatMessage(Lang.getFor(shopPlayer, "shop.owner_sold_notify", "player", player.getName(), "quantity", shop.getQuantity(), "item", itemname, "price", formatter.format(shop.getSellPrice()))));
                     }
                 }
             } else {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough of this item!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "inventory.not_enough")));
             }
         } else {
             if (clickUser.getBulkTransactionNum() == 1 && AranarthUtils.isPhysicallySneaking(player.getUniqueId())) {
                 return;
             }
             if (shop.getUuid() != null) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou cannot destroy someone else's shop!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.cannot_destroy_others")));
             } else {
                 if (AranarthUtils.getPlayer(player.getUniqueId()).getCouncilRank() < 3) {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou cannot destroy a server shop!"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.cannot_destroy_server")));
                 }
             }
         }

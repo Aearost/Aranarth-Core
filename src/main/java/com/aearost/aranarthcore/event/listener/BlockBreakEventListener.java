@@ -21,11 +21,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
-
 import java.util.UUID;
-
-import static com.aearost.aranarthcore.objects.CustomKeys.INCANTATION_TYPE;
 
 /**
  * Centralizes all logic to be called by blocks being broken.
@@ -104,7 +100,7 @@ public class BlockBreakEventListener implements Listener {
     }
 
     /**
-     * Handles the logic for an Incantation of Plentiful block break.
+     * Handles the logic for an Essence of Plentiful block break.
      * @param e The event.
      */
     private void handlePlentifulBreak(BlockBreakEvent e) {
@@ -118,23 +114,21 @@ public class BlockBreakEventListener implements Listener {
                 aranarthPlayer.setPlentifulBlocksToDestroy(aranarthPlayer.getPlentifulBlocksToDestroy() - 1);
             } else {
                 ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
-                if (heldItem.hasItemMeta() && heldItem.getItemMeta().getPersistentDataContainer().has(INCANTATION_TYPE)) {
-                    String type = heldItem.getItemMeta().getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
-                    if (type.equals("incantation_plentiful")) {
-                        // Only activate plentiful for fully matured crops to avoid durability draining
-                        if (heldItem.getType().name().endsWith("_HOE")) {
-                            Block block = e.getBlock();
-                            if (block.getBlockData() instanceof Ageable ageable) {
-                                if (ageable.getAge() < ageable.getMaximumAge()) {
-                                    e.setCancelled(true);
-                                    AranarthUtils.setPlayer(uuid, aranarthPlayer);
-                                    return;
-                                }
+                String type = AranarthUtils.getEssenceType(heldItem);
+                if ("essence_plentiful".equals(type)) {
+                    // Only activate plentiful for fully matured crops to avoid durability draining
+                    if (heldItem.getType().name().endsWith("_HOE")) {
+                        Block block = e.getBlock();
+                        if (block.getBlockData() instanceof Ageable ageable) {
+                            if (ageable.getAge() < ageable.getMaximumAge()) {
+                                e.setCancelled(true);
+                                AranarthUtils.setPlayer(uuid, aranarthPlayer);
+                                return;
                             }
                         }
-                        aranarthPlayer.setPlentifulBlocksToDestroy(9);
-                        new IncantationPlentifulBlockBreak().execute(e);
                     }
+                    aranarthPlayer.setPlentifulBlocksToDestroy(9);
+                    new EssencePlentifulBlockBreak().execute(e);
                 }
             }
             AranarthUtils.setPlayer(uuid, aranarthPlayer);
@@ -142,35 +136,29 @@ public class BlockBreakEventListener implements Listener {
     }
 
     /**
-     * Handles the logic for an Incantation of Preservation block break.
+     * Handles the logic for an Essence of Preservation block break.
      * @param e The event.
      */
     private void handlePreservationBreak(BlockBreakEvent e) {
         String worldName = e.getBlock().getWorld().getName();
         if (worldName.startsWith("world") || AranarthUtils.isSmpWorld(worldName) || worldName.startsWith("resource")) {
             ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
-            if (heldItem.hasItemMeta() && heldItem.getItemMeta().getPersistentDataContainer().has(INCANTATION_TYPE)) {
-                String type = heldItem.getItemMeta().getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
-                if (type.equals("incantation_preservation")) {
-                    new IncantationPreservationBlockBreak().execute(e);
-                }
+            if ("essence_preservation".equals(AranarthUtils.getEssenceType(heldItem))) {
+                new EssencePreservationBlockBreak().execute(e);
             }
         }
     }
 
     /**
-     * Handles the logic for an Incantation of Magnetism block break.
+     * Handles the logic for an Essence of Magnetism block break.
      * @param e The event.
      */
     private void handleMagnetismBreak(BlockBreakEvent e) {
         String worldName = e.getBlock().getWorld().getName();
         if (worldName.startsWith("world") || AranarthUtils.isSmpWorld(worldName) || worldName.startsWith("resource")) {
             ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
-            if (heldItem.hasItemMeta() && heldItem.getItemMeta().getPersistentDataContainer().has(INCANTATION_TYPE)) {
-                String type = heldItem.getItemMeta().getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
-                if (type.equals("incantation_magnetism")) {
-                    new IncantationMagnetismBlockBreak().execute(e);
-                }
+            if ("essence_magnetism".equals(AranarthUtils.getEssenceType(heldItem))) {
+                new EssenceMagnetismBlockBreak().execute(e);
             }
         }
     }

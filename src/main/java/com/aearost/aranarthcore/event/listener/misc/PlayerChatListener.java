@@ -3,23 +3,26 @@ package com.aearost.aranarthcore.event.listener.misc;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiBlacklistEditor;
 import com.aearost.aranarthcore.gui.GuiBrewBook;
+import com.aearost.aranarthcore.gui.GuiHeads;
+import com.aearost.aranarthcore.gui.GuiMarketValue;
+import com.aearost.aranarthcore.gui.GuiRecipes;
+import com.aearost.aranarthcore.gui.GuiShopLocation;
+import com.aearost.aranarthcore.event.player.AfkCancelByInteract;
+import com.aearost.aranarthcore.event.player.GuiDominionResourcesClick;
 import com.aearost.aranarthcore.gui.GuiDominionPlayerPermissions;
+import com.aearost.aranarthcore.gui.GuiDominionRegions;
+import com.aearost.aranarthcore.gui.GuiTrade;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.BlacklistPreset;
 import com.aearost.aranarthcore.objects.Dominion;
-import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
-import com.aearost.aranarthcore.utils.DiscordUtils;
-import com.aearost.aranarthcore.utils.DominionUtils;
-import com.aearost.aranarthcore.utils.EmojiUtils;
-import com.aearost.aranarthcore.utils.InteractiveChatManager;
-import com.aearost.aranarthcore.utils.PersistenceUtils;
+import com.aearost.aranarthcore.objects.DominionPermission;
+import com.aearost.aranarthcore.objects.Trade;
+import com.aearost.aranarthcore.utils.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import java.util.Objects;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -30,11 +33,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,7 +45,14 @@ public class PlayerChatListener implements Listener {
 
     private final AranarthCore plugin;
 
-    /** Matches [item], [inv], [ec], [coords], [pos] case-insensitively. */
+    /**
+     * The most interactive keywords turned into components in a single message.
+     */
+    private static final int MAX_INTERACTIVE_KEYWORDS = 3;
+
+    /**
+     * Matches [item], [inv], [ec], [coords], [pos] case-insensitively.
+     */
     private static final Pattern INTERACTIVE_PATTERN =
             Pattern.compile("\\[item]|\\[inv]|\\[ec]|\\[coords?]|\\[pos]", Pattern.CASE_INSENSITIVE);
 
@@ -65,6 +71,66 @@ public class PlayerChatListener implements Listener {
             message = message.substring(1);
         }
 
+        // If the player is awaiting a trade money amount, handle it first
+        if (TradeManager.isAwaitingPayInput(player.getUniqueId())) {
+            e.setCancelled(true);
+            TradeManager.clearAwaitingPayInput(player.getUniqueId());
+            Trade trade = TradeManager.getTrade(player.getUniqueId());
+            if (trade == null) {
+                return;
+            }
+
+            if (message.equalsIgnoreCase("cancel")) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.cancelled")));
+                // Reopen the GUI
+                Bukkit.getScheduler().runTask(plugin, () -> new GuiTrade(player, trade).openGui());
+                return;
+            }
+
+            double amount;
+            try {
+                amount = Double.parseDouble(message);
+            } catch (NumberFormatException ex) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_number")));
+                Bukkit.getScheduler().runTask(plugin, () -> new GuiTrade(player, trade).openGui());
+                return;
+            }
+
+            // NaN and Infinity parse fine but would corrupt both balances
+            if (!Double.isFinite(amount)) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_number")));
+                Bukkit.getScheduler().runTask(plugin, () -> new GuiTrade(player, trade).openGui());
+                return;
+            }
+            amount = Math.round(amount * 100) / 100.0;
+
+            if (amount < 0) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "economy.pay_negative")));
+                Bukkit.getScheduler().runTask(plugin, () -> new GuiTrade(player, trade).openGui());
+                return;
+            }
+
+            final double finalAmount = amount;
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                UUID playerUuid = player.getUniqueId();
+                trade.setMyMoney(playerUuid, finalAmount);
+                trade.resetConfirmations();
+                trade.setCompleting(false);
+                TradeManager.cancelCompletion(trade);
+                if (finalAmount > 0) {
+                    TradeManager.startAnimation(trade); // no-op if already running
+                } else {
+                    TradeManager.stopAnimation(trade);
+                }
+                TradeManager.updateConfirmButtons(trade);
+                new GuiTrade(player, trade).openGui();
+                if (TradeManager.isCrossServer(trade) && NetworkManager.isActive()) {
+                    NetworkManager.getInstance().publishTradeMoney(playerUuid, trade.getInitiatorUuid(), finalAmount);
+                }
+            });
+            return;
+        }
+
         // If the player is awaiting a brew book search input, handle it first
         if (GuiBrewBook.isAwaitingSearch(player.getUniqueId())) {
             e.setCancelled(true);
@@ -72,10 +138,45 @@ public class PlayerChatListener implements Listener {
             return;
         }
 
+        // If the player is awaiting a recipes guide search input, handle it first
+        if (GuiRecipes.isAwaitingSearch(player.getUniqueId())) {
+            e.setCancelled(true);
+            GuiRecipes.handleSearchInput(player, message);
+            return;
+        }
+
+        // If the player is awaiting an admin heads search input, handle it first
+        if (GuiHeads.isAwaitingSearch(player.getUniqueId())) {
+            e.setCancelled(true);
+            GuiHeads.handleSearchInput(player, message);
+            return;
+        }
+
+        // If the player is awaiting a market value search input, handle it first
+        if (GuiMarketValue.isAwaitingSearch(player.getUniqueId())) {
+            e.setCancelled(true);
+            GuiMarketValue.handleSearchInput(player, message);
+            return;
+        }
+
+        // If the player is awaiting a shop item search input, handle it first
+        if (GuiShopLocation.isAwaitingSearch(player.getUniqueId())) {
+            e.setCancelled(true);
+            GuiShopLocation.handleSearchInput(player, message);
+            return;
+        }
+
         // If the player is awaiting a user-search input for the player permission GUI, handle it first
         if (GuiDominionPlayerPermissions.isAwaitingSearch(player.getUniqueId())) {
             e.setCancelled(true);
             GuiDominionPlayerPermissions.handleSearchInput(player, message);
+            return;
+        }
+
+        // If the player is typing a hex code for a region's map color, handle it first
+        if (GuiDominionRegions.isAwaitingHex(player.getUniqueId())) {
+            e.setCancelled(true);
+            GuiDominionRegions.handleHexInput(player, message);
             return;
         }
 
@@ -87,27 +188,27 @@ public class PlayerChatListener implements Listener {
             GuiBlacklistEditor.clearAwaitingRename(uuid);
 
             if (message.equalsIgnoreCase("cancel")) {
-                player.sendMessage(ChatUtils.chatMessage("&7Preset rename cancelled."));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.cancelled")));
                 return;
             }
 
             if (message.contains("&") && !player.hasPermission("aranarth.nick.color")) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use color codes!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission_color")));
                 GuiBlacklistEditor.setAwaitingRename(uuid, renameIndex);
                 return;
             }
             if (message.contains("#") && !player.hasPermission("aranarth.nick.hex")) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use hex color codes!"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission_hex")));
                 GuiBlacklistEditor.setAwaitingRename(uuid, renameIndex);
                 return;
             }
             if (ChatUtils.stripColorFormatting(message).length() > 30) {
-                player.sendMessage(ChatUtils.chatMessage("&cPreset name cannot exceed 30 characters! Please try again."));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "gradient.name_too_long")));
                 GuiBlacklistEditor.setAwaitingRename(uuid, renameIndex);
                 return;
             }
             if (ChatUtils.stripColorFormatting(message).isEmpty()) {
-                player.sendMessage(ChatUtils.chatMessage("&cPreset name cannot be empty! Please try again."));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "gradient.name_empty")));
                 GuiBlacklistEditor.setAwaitingRename(uuid, renameIndex);
                 return;
             }
@@ -121,7 +222,7 @@ public class PlayerChatListener implements Listener {
                 }
                 ap.getBlacklistPresets().get(finalIndex).setName(presetName);
                 PersistenceUtils.saveBlacklistPresetsAsync(uuid);
-                player.sendMessage(ChatUtils.chatMessage("&7Preset renamed to &r" + ChatUtils.translateToColor(presetName)));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "gradient.preset_renamed", "name", ChatUtils.translateToColor(presetName))));
                 new GuiBlacklistEditor(player, finalIndex).openGui();
             });
             return;
@@ -131,7 +232,7 @@ public class PlayerChatListener implements Listener {
         // If resources are actively being claimed by the Dominion, prioritize this above all other chat functionality
         if (dominion != null) {
             if (dominion.getBiomeResourcesBeingClaimed() != null) {
-                if (player.getUniqueId().equals(dominion.getLeader())) {
+                if (DominionUtils.hasPermission(player, dominion, DominionPermission.RESOURCES)) {
                     e.setCancelled(true);
                     try {
                         int enteredNumber = Integer.parseInt(message);
@@ -145,6 +246,11 @@ public class PlayerChatListener implements Listener {
 
                         final int count = enteredNumber;
                         final Biome capturedBiome = dominion.getBiomeResourcesBeingClaimed();
+                        // Fallback in case the chunk is unclaimed, or the claim was started on the server
+                        // that does not host the dominion
+                        if (!DominionUtils.isHostedHere(dominion) || !DominionUtils.getResourceClaimTypes(dominion).contains(capturedBiome)) {
+                            throw new NumberFormatException();
+                        }
 
                         // Compute the average yield
                         List<Double> yields = dominion.getClaimFoodYields();
@@ -164,6 +270,9 @@ public class PlayerChatListener implements Listener {
                         dominion.setClaimableResources(dominion.getClaimableResources() - count);
                         dominion.setBiomeResourcesBeingClaimed(null);
                         DominionUtils.updateDominion(dominion);
+                        // Cancel the 10-second auto-cancel timer now that a valid response was received
+                        org.bukkit.scheduler.BukkitTask timer = GuiDominionResourcesClick.claimTimerTasks.remove(dominion.getId());
+                        if (timer != null) timer.cancel();
                         Bukkit.getScheduler().runTask(plugin, () -> {
                             for (int i = 0; i < count; i++) {
                                 claimDominionResources(dominion, player, capturedBiome, avgYield);
@@ -171,8 +280,10 @@ public class PlayerChatListener implements Listener {
                             player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 0.5F, 1F);
                         });
                     } catch (NumberFormatException ex) {
-                        player.sendMessage(ChatUtils.chatMessage("&cThat number is invalid! Please re-enter /dominion resources to try again."));
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.resources_invalid_number")));
                         dominion.setBiomeResourcesBeingClaimed(null);
+                        org.bukkit.scheduler.BukkitTask timer = GuiDominionResourcesClick.claimTimerTasks.remove(dominion.getId());
+                        if (timer != null) timer.cancel();
                     }
                     return;
                 }
@@ -204,28 +315,17 @@ public class PlayerChatListener implements Listener {
             String strippedNickname = ChatUtils.stripColorFormatting(recipientAranarthPlayer.getNickname());
             if (!isSenderTheRecipient && (message.toLowerCase().contains(recipient.getDisplayName().toLowerCase())
                     || message.toLowerCase().contains(strippedNickname.toLowerCase()))) {
-                int pmVol = AranarthUtils.getPlayer(recipient.getUniqueId()).getPrivateMsgSoundVolume();
-                if (pmVol > 0) {
-                    recipient.playSound(recipient, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 5f * (pmVol / 100f), 1f);
-                }
+                AranarthUtils.playPingSound(recipient);
             }
         }
         e.getRecipients().removeAll(toRemove);
 
-        if (aranarthPlayer.getAfkLocation() != null) {
-            // Automatically un-afk the player if they type a message
-            if (aranarthPlayer.getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount()) {
-                AranarthUtils.toggleAfkStatus(player.getUniqueId(), false);
-            }
-            // Reset their AFK timer
-            else {
-                aranarthPlayer.setAfkLocation(null);
-                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-            }
-        }
+        // Automatically un-afk the player or reset their AFK timer if they type a message
+        // Done on the main thread as chat is async and the AFK sampler runs sync
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> new AfkCancelByInteract().execute(player));
 
         if (ChatUtils.isPlayerMuted(player)) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou cannot send any messages as you are muted!"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.muted")));
             e.setCancelled(true);
             return;
         }
@@ -300,7 +400,7 @@ public class PlayerChatListener implements Listener {
                             .collect(java.util.stream.Collectors.toList());
                     NetworkManager.getInstance().publishInteractiveChat(prefix, chatMessage, fullMessage, snapshots);
                 } else {
-                    NetworkManager.getInstance().publishChat(prefix, chatMessage);
+                    NetworkManager.getInstance().publishChat(prefix, chatMessage, fullMessage);
                 }
             }
         }
@@ -318,8 +418,11 @@ public class PlayerChatListener implements Listener {
 
         Matcher matcher = INTERACTIVE_PATTERN.matcher(rawMessage);
         int lastEnd = 0;
+        int keywordCount = 0;
 
-        while (matcher.find()) {
+        // Only the first few keywords become interactive, so one message cannot store dozens of snapshots
+        while (keywordCount < MAX_INTERACTIVE_KEYWORDS && matcher.find()) {
+            keywordCount++;
             // Append the text segment before this keyword
             if (matcher.start() > lastEnd) {
                 String rawSegment = rawMessage.substring(lastEnd, matcher.start());
@@ -345,13 +448,17 @@ public class PlayerChatListener implements Listener {
      * Formats a plain text segment using the player's chat permissions (gradient or color).
      */
     private Component buildSegment(Player player, AranarthPlayer ap, String rawSegment, String chatMessage, int rawOffset) {
-        if (rawSegment.isEmpty()) return Component.empty();
+        if (rawSegment.isEmpty()) {
+            return Component.empty();
+        }
 
         if (ap.isGradientChatEnabled() && !ap.getGradientChatColors().isEmpty()) {
             String stripped = ChatUtils.stripColorFormatting(rawSegment);
             Component gradComp = ChatUtils.buildGradientMessageWithUrls(
                     ap.getGradientChatColors(), stripped, ap.isGradientChatBold());
-            if (gradComp != null) return gradComp;
+            if (gradComp != null) {
+                return gradComp;
+            }
         }
 
         // Non-gradient
@@ -377,9 +484,9 @@ public class PlayerChatListener implements Listener {
                                             String keyword, List<UUID> createdSnapshotIds) {
         return switch (keyword) {
             case "[item]" -> buildItemComponent(player, nickname, createdSnapshotIds);
-            case "[inv]"  -> buildInvComponent(player, nickname, createdSnapshotIds);
-            case "[ec]"   -> buildEcComponent(player, nickname, createdSnapshotIds);
-            default       -> buildCoordsComponent(nickname, loc); // [coords], [coord], [pos]
+            case "[inv]" -> buildInvComponent(player, nickname, createdSnapshotIds);
+            case "[ec]" -> buildEcComponent(player, nickname, createdSnapshotIds);
+            default -> buildCoordsComponent(nickname, loc); // [coords], [coord], [pos]
         };
     }
 
@@ -474,6 +581,6 @@ public class PlayerChatListener implements Listener {
         }
         int yieldPct = (int) Math.round(yieldMultiplier * 100);
         String yieldColor = yieldPct >= 80 ? "&a" : yieldPct >= 50 ? "&e" : "&c";
-        player.sendMessage(ChatUtils.chatMessage("&7The resources have been added to your inventory " + yieldColor + "(" + yieldPct + "% yield)"));
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.resources_added", "color", yieldColor, "yield", yieldPct)));
     }
 }

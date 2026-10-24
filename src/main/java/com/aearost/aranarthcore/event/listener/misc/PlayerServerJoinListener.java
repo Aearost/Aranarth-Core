@@ -16,6 +16,8 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Avatar;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.*;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.event.BendingPlayerLoadEvent;
 import org.bukkit.*;
@@ -24,6 +26,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -45,6 +48,52 @@ public class PlayerServerJoinListener implements Listener {
     }
 
     /**
+     * Bans are shared by both servers, so a player banned on one server cannot join the other.
+     */
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPreLoginBanCheck(final AsyncPlayerPreLoginEvent e) {
+        if (e.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED || !DatabaseManager.isActive()) {
+            return;
+        }
+        String[] ban = DatabaseManager.getInstance().loadNetworkBan(e.getUniqueId());
+        if (ban == null) {
+            return;
+        }
+        String kickMessage = PunishmentUtils.getBanKickMessage(e.getUniqueId(), ban);
+        if (kickMessage == null) {
+            // The ban has ended
+            DatabaseManager.getInstance().deleteNetworkBan(e.getUniqueId());
+            return;
+        }
+        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] Refused connection for " + e.getName() + ": banned");
+        e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, kickMessage);
+    }
+
+    /**
+     * Only original players may be on the SMP.
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPreLogin(final AsyncPlayerPreLoginEvent e) {
+        if (e.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
+            return;
+        }
+        if (!AranarthCore.isSmpServer() || !NetworkManager.isActive()) {
+            return;
+        }
+        UUID uuid = e.getUniqueId();
+        if (AranarthUtils.isOriginalPlayer(uuid)) {
+            return;
+        }
+        if (NetworkManager.getInstance().getPendingTeleport(uuid) != null) {
+            return;
+        }
+        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] Refused SMP connection for " + e.getName()
+                + ": not an original player and no transfer is pending.");
+        e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST,
+                ChatUtils.translateToColor(Lang.getFor(uuid, "access.smp_restricted")));
+    }
+
+    /**
      * Displays the MOTD to the player when they join.
      *
      * @param player The player.
@@ -56,71 +105,73 @@ public class PlayerServerJoinListener implements Listener {
         String month = DateUtils.provideMonthName(AranarthUtils.getMonth());
         int year = AranarthUtils.getYear();
 
-        String[] messages = DateUtils.determineServerDate(day, weekday, month, year);
-        player.sendMessage(ChatUtils.translateToColor("&6&l-------------------------------------"));
+        player.sendMessage(Lang.getFor(player, "motd.divider"));
 
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
         List<String> toggling = new ArrayList<>();
         if (aranarthPlayer.isTogglingChat()) {
-            toggling.add("&e&oChat Messages");
+            toggling.add(Lang.getFor(player, "motd.toggle_chat"));
         }
         if (aranarthPlayer.isTogglingMessages()) {
-            toggling.add("&e&oDirect Messages");
+            toggling.add(Lang.getFor(player, "motd.toggle_messages"));
         }
         if (aranarthPlayer.isTogglingTp()) {
-            toggling.add("&e&oTeleport Requests");
+            toggling.add(Lang.getFor(player, "motd.toggle_tp"));
         }
         if (!aranarthPlayer.isUsingSpawnBoost()) {
-            toggling.add("&e&oSpawn Boost");
+            toggling.add(Lang.getFor(player, "motd.toggle_spawn_boost"));
         }
         if (aranarthPlayer.isTogglingChangeClaim()) {
-            toggling.add("&e&oClaim Changes");
+            toggling.add(Lang.getFor(player, "motd.toggle_claim_changes"));
         }
         if (aranarthPlayer.isTogglingInventoryAssist()) {
-            toggling.add("&e&oInventory Assist");
+            toggling.add(Lang.getFor(player, "motd.toggle_inventory_assist"));
         }
         if (!aranarthPlayer.isAddingToShulker()) {
-            toggling.add("&e&oShulker Assist");
+            toggling.add(Lang.getFor(player, "motd.toggle_shulker_assist"));
         }
         if (aranarthPlayer.getBlacklistingMethod() == -1) {
-            toggling.add("&e&oBlacklist");
+            toggling.add(Lang.getFor(player, "motd.toggle_blacklist"));
         }
         if (!aranarthPlayer.isCompressingItems()) {
-            toggling.add("&e&oCompressor");
+            toggling.add(Lang.getFor(player, "motd.toggle_compressor"));
         }
         if (!aranarthPlayer.isAutoLockingChests()) {
-            toggling.add("&e&oChest Locks");
+            toggling.add(Lang.getFor(player, "motd.toggle_chest_locks"));
         }
         if (aranarthPlayer.getFireType() != FireType.DEFAULT) {
-            toggling.add("&e&oFire Type: " + aranarthPlayer.getFireType().getDisplayName());
+            toggling.add(Lang.getFor(player, "motd.toggle_fire_type", "type", aranarthPlayer.getFireType().getDisplayName()));
         }
         if (aranarthPlayer.isDayMessageDisabled()) {
-            toggling.add("&e&oDay Message");
+            toggling.add(Lang.getFor(player, "motd.toggle_day_message"));
         }
         if (aranarthPlayer.isWeatherMessageDisabled()) {
-            toggling.add("&e&oWeather Message");
+            toggling.add(Lang.getFor(player, "motd.toggle_weather_message"));
         }
         if (aranarthPlayer.isBulkSellShulkerEnabled()) {
-            toggling.add("&e&oBulk Sell Shulker");
+            toggling.add(Lang.getFor(player, "motd.toggle_bulk_sell"));
         }
 
         if (!toggling.isEmpty()) {
-            String toggledFeatures = "  &7&oYou currently have ";
+            String and = Lang.getFor(player, "motd.toggled_and");
+            String toggledFeatures = "  " + Lang.getFor(player, "motd.toggled_prefix") + " ";
             for (int i = 0; i < toggling.size(); i++) {
                 toggledFeatures += toggling.get(i);
                 if (i < toggling.size() - 2) {
                     toggledFeatures += "&7&o, ";
                 } else if (i < toggling.size() - 1) {
-                    toggledFeatures += " &7&oand ";
+                    toggledFeatures += " " + and + " ";
                 }
             }
-            toggledFeatures += " &7&otoggled";
+            toggledFeatures += " " + Lang.getFor(player, "motd.toggled_suffix");
             player.sendMessage(ChatUtils.translateToColor(toggledFeatures));
         }
 
         Avatar avatar = AvatarUtils.getCurrentAvatar();
         if (avatar == null) {
-            player.sendMessage(ChatUtils.translateToColor("  &7&oAranarth is currently without an Avatar..."));
+            player.sendMessage("  " + Lang.getFor(player, "motd.no_avatar"));
+        } else if (avatar.getUuid().equals(player.getUniqueId())) {
+            player.sendMessage("  " + Lang.getFor(player, "motd.avatar_self"));
         } else {
             String avatarNickname = AranarthUtils.getPlayer(avatar.getUuid()).getNickname();
             String element = "";
@@ -133,19 +184,18 @@ public class PlayerServerJoinListener implements Listener {
             } else {
                 element = "&7気";
             }
-            player.sendMessage(ChatUtils.translateToColor(
-                    "  &5&lThe current Avatar is " + element + " &d" + avatarNickname + " " + element));
+            player.sendMessage("  " + Lang.getFor(player, "motd.avatar", "element", element, "name", avatarNickname));
         }
 
         NumberFormat formatter = NumberFormat.getCurrencyInstance();
 
-        player.sendMessage(ChatUtils.translateToColor("  &7&oYour balance is currently &6" + formatter.format(aranarthPlayer.getBalance())));
+        player.sendMessage("  " + Lang.getFor(player, "motd.balance", "balance", formatter.format(aranarthPlayer.getBalance())));
         HashMap<String, String> activeBoosts = AranarthUtils.getActiveServerBoostsMessages();
         if (activeBoosts.isEmpty()) {
-            player.sendMessage(ChatUtils.translateToColor("  &7There are currently no active server boosts"));
+            player.sendMessage("  " + Lang.getFor(player, "motd.no_boosts"));
         } else {
-            for (String boost : activeBoosts.keySet()) {
-                player.sendMessage(ChatUtils.translateToColor("  " + boost + " &7is active for &e" + activeBoosts.get(boost)));
+            for (Map.Entry<String, String> boost : activeBoosts.entrySet()) {
+                player.sendMessage("  " + Lang.getFor(player, "motd.boost_active", "name", boost.getKey(), "duration", boost.getValue()));
             }
         }
 
@@ -155,23 +205,24 @@ public class PlayerServerJoinListener implements Listener {
             boolean useThe = activeWorldEvent != WorldEvent.SEIKOS_COMET
                     && activeWorldEvent != WorldEvent.HARMONIC_CONVERGENCE_OF_SACHSI
                     && activeWorldEvent != WorldEvent.AEAROSTS_METEORITE;
-            String eventPrefix = useThe ? "  &7The &6" : "  &6";
-            player.sendMessage(ChatUtils.translateToColor(eventPrefix + activeWorldEvent.getName(eventIntensity) + " &7is currently active"));
+            String eventKey = useThe ? "motd.world_event" : "motd.world_event_no_the";
+            player.sendMessage("  " + Lang.getFor(player, eventKey, "event", activeWorldEvent.getName(eventIntensity)));
         }
 
-        player.sendMessage("  " + messages[1]); // Date message
+        player.sendMessage("  " + Lang.getFor(player, "motd.date", "weekday", weekday, "day", DateUtils.getDayNumWithSuffix(player, day), "month", month, "year", String.valueOf(year)));
 
         int mailCount = MailUtils.getMail(player.getUniqueId()).size();
         if (mailCount > 0) {
-            player.sendMessage(ChatUtils.translateToColor("  &7You have &e" + mailCount + " &7mail message" + (mailCount == 1 ? "" : "s")));
+            String mailKey = mailCount == 1 ? "motd.mail" : "motd.mail_plural";
+            player.sendMessage("  " + Lang.getFor(player, mailKey, "count", String.valueOf(mailCount)));
         }
 
         // Login streak notification
         boolean streakReset = LoginStreakUtils.ensureStreakValid(player.getUniqueId());
         if (streakReset) {
-            player.sendMessage(ChatUtils.translateToColor("  &7Your login streak has been reset to Day 1"));
+            player.sendMessage("  " + Lang.getFor(player, "motd.streak_reset"));
         } else if (LoginStreakUtils.canClaim(player.getUniqueId())) {
-            player.sendMessage(ChatUtils.translateToColor("  &7Don't forget to claim your daily login reward with &e/streak"));
+            player.sendMessage("  " + Lang.getFor(player, "motd.streak_claim"));
         }
 
         // Pending crate key notification - reload from MySQL first so we display the
@@ -197,11 +248,11 @@ public class PlayerServerJoinListener implements Listener {
 			pendingKeys += pg;
 		}
         if (pendingKeys > 0) {
-            String keyWord = pendingKeys == 1 ? "key" : "keys";
-            player.sendMessage(ChatUtils.translateToColor("  &7You have &e" + pendingKeys + " pending crate " + keyWord + " &7- use &e/keyclaim &7to collect!"));
+            String keyWord = pendingKeys == 1 ? Lang.getFor(player, "motd.pending_key") : Lang.getFor(player, "motd.pending_keys_plural");
+            player.sendMessage("  " + Lang.getFor(player, "motd.pending_keys", "count", String.valueOf(pendingKeys), "keys", keyWord));
         }
 
-        player.sendMessage(ChatUtils.translateToColor("&6&l-------------------------------------"));
+        player.sendMessage(Lang.getFor(player, "motd.divider"));
         player.sendMessage("");
 
         // Adds all aranarth recipes
@@ -220,6 +271,9 @@ public class PlayerServerJoinListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerJoin(final PlayerJoinEvent e) {
         Player player = e.getPlayer();
+
+        // Migrate any pre-#420 Incantation items in the player's inventory to Essences.
+        AranarthUtils.migrateInventoryEssences(player.getInventory());
 
         // Clear any stale BendingPlayer data PK may have cached from a previous session on
         // this server. Without this, players who switch to SMP, change element, then return
@@ -242,6 +296,9 @@ public class PlayerServerJoinListener implements Listener {
         boolean needsServerRouting = lastLoc != null && thisServerName != null && !lastLoc.server.equals(thisServerName);
         boolean hasPendingTp = NetworkManager.isActive() && NetworkManager.getInstance().getPendingTeleport(player.getUniqueId()) != null;
         boolean isCrossServerTransfer = needsServerRouting || hasPendingTp;
+        // True when the player's lastLoc points to SMP but no pending TP exists - this means SMP
+        // crashed/restarted and Velocity routed them here directly. Treat as a real join arrival.
+        boolean isSurvivalFallbackLanding = needsServerRouting && !hasPendingTp && !AranarthCore.isSmpServer();
         Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
                 + " - lastLoc=" + (lastLoc == null ? "null" : lastLoc.server + "/" + lastLoc.world
                 + " @ (" + String.format("%.1f", lastLoc.x) + "," + String.format("%.1f", lastLoc.y) + "," + String.format("%.1f", lastLoc.z) + ")")
@@ -253,7 +310,7 @@ public class PlayerServerJoinListener implements Listener {
         if (resetTime > 0 && player.getWorld().getName().startsWith("resource")
                 && player.getLastPlayed() < resetTime) {
             player.teleport(new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0));
-            player.sendMessage(ChatUtils.chatMessage("&7You were in the resource world when it was reset, so you have been sent to &eSpawn&7."));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.resource_reset_offline")));
         }
 
         boolean isNewPlayer = false;
@@ -274,15 +331,15 @@ public class PlayerServerJoinListener implements Listener {
                 isNewPlayer = true;
             }
         }
-        // If the player changed their username
-        else if (AranarthUtils.getUsername(player) != null && !AranarthUtils.getUsername(player).equals(player.getName())) {
+        // If the player changed their username/it was never resolved
+        else if (!player.getName().equals(AranarthUtils.getUsername(player))) {
             AranarthUtils.setUsername(player);
         }
 
         if (AvatarUtils.getCurrentAvatar() != null) {
             // Called to bind the Avatar's abilities to prevent loss of avatar abilities
             if (AvatarUtils.getCurrentAvatar().getUuid().equals(player.getUniqueId())) {
-                PersistenceUtils.loadAvatarBinds();
+                PersistenceUtils.applyAvatarBindsOnJoin();
 
                 // Adds a 2-second delay
                 new BukkitRunnable() {
@@ -330,7 +387,7 @@ public class PlayerServerJoinListener implements Listener {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                 aranarthPlayer.setNickname("");
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                player.sendMessage(ChatUtils.chatMessage("&7Your nickname has been cleared"));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.nickname_cleared")));
             }
         }
 
@@ -340,7 +397,7 @@ public class PlayerServerJoinListener implements Listener {
             NetworkManager.getInstance().publishPlayerJoin(player.getUniqueId(), apForNetwork);
         }
 
-        if (isCrossServerTransfer) {
+        if (isCrossServerTransfer && !isSurvivalFallbackLanding) {
             e.setJoinMessage(null);
             PendingTeleport pendingForDiscord = NetworkManager.isActive()
                     ? NetworkManager.getInstance().getPendingTeleport(player.getUniqueId()) : null;
@@ -351,6 +408,10 @@ public class PlayerServerJoinListener implements Listener {
                 if (NetworkManager.isActive()) {
                     NetworkManager.getInstance().markCrossServerJoin(player.getUniqueId());
                 }
+            } else if (pendingForDiscord != null && pendingForDiscord.isJoinAlreadyAnnounced()) {
+                // Join was already announced on Survival before routing here; suppress Discord
+                // to prevent a duplicate announcement in the chat channel.
+                player.addAttachment(AranarthCore.getInstance(), "discordsrv.silentjoin", true);
             }
         } else {
             if (!isNewPlayer) {
@@ -367,17 +428,23 @@ public class PlayerServerJoinListener implements Listener {
 
             String joinMsgStr;
             if (dateUtils.isValentinesDay()) {
-                joinMsgStr = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.VALENTINES));
+                joinMsgStr = ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.VALENTINES);
             } else if (dateUtils.isEaster()) {
-                joinMsgStr = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.EASTER));
+                joinMsgStr = ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.EASTER);
             } else if (dateUtils.isHalloween()) {
-                joinMsgStr = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.HALLOWEEN));
+                joinMsgStr = ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.HALLOWEEN);
             } else if (dateUtils.isChristmas()) {
-                joinMsgStr = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.CHRISTMAS));
+                joinMsgStr = ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.CHRISTMAS);
             } else {
                 joinMsgStr = ChatUtils.translateToColor("&8[&a+&8] &7" + nameToDisplay);
             }
-            e.setJoinMessage(joinMsgStr);
+            if (Lang.isNested(joinMsgStr)) {
+                // Holiday messages are rendered per player, so they cannot use the shared join message
+                e.setJoinMessage(null);
+                Lang.sendToAll(joinMsgStr);
+            } else {
+                e.setJoinMessage(joinMsgStr);
+            }
 
             // Notify other servers to display the join message and play the join sound
             if (NetworkManager.isActive()) {
@@ -386,6 +453,11 @@ public class PlayerServerJoinListener implements Listener {
                     NetworkManager.getInstance().publishJoinMsg(joinMsgStr, isNewPlayer);
                 }
             }
+        }
+
+        // Paper has already loaded this server's copy of the inventory, which may not be the player's
+        if (NetworkManager.isActive() && isCrossServerTransfer) {
+            NetworkManager.getInstance().lockPlayer(player.getUniqueId());
         }
 
         boolean finalIsNewPlayer = isNewPlayer;
@@ -403,6 +475,8 @@ public class PlayerServerJoinListener implements Listener {
                     PendingTeleport pending = NetworkManager.getInstance().getPendingTeleport(player.getUniqueId());
                     if (pending != null) {
                         hadPendingTp = true;
+                        // The arrival is planned, so the inventory applied below is theirs
+                        NetworkManager.getInstance().unlockPlayer(player.getUniqueId());
                         isLoginRouting = pending.isLoginRouting();
                         NetworkManager.getInstance().clearPendingTeleport(player.getUniqueId());
 
@@ -510,18 +584,18 @@ public class PlayerServerJoinListener implements Listener {
                                     DateUtils routedDateUtils = new DateUtils();
                                     String routedJoinMsg;
                                     if (routedDateUtils.isValentinesDay()) {
-                                        routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.VALENTINES));
+                                        routedJoinMsg = ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.VALENTINES);
                                     } else if (routedDateUtils.isEaster()) {
-                                        routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.EASTER));
+                                        routedJoinMsg = ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.EASTER);
                                     } else if (routedDateUtils.isHalloween()) {
-                                        routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.HALLOWEEN));
+                                        routedJoinMsg = ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.HALLOWEEN);
                                     } else if (routedDateUtils.isChristmas()) {
-                                        routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.CHRISTMAS));
+                                        routedJoinMsg = ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.CHRISTMAS);
                                     } else {
                                         routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + routedName);
                                     }
                                     for (Player online : Bukkit.getOnlinePlayers()) {
-                                        online.sendMessage(routedJoinMsg);
+                                        online.sendMessage(ChatUtils.translateToColor(Lang.resolve(online, routedJoinMsg)));
                                     }
                                     if (NetworkManager.isActive()) {
                                         NetworkManager.getInstance().publishJoinMsg(routedJoinMsg, false);
@@ -534,7 +608,9 @@ public class PlayerServerJoinListener implements Listener {
                             // routing on login (e.g. last logged off on SMP, routed here from Survival).
                             // No inventory apply needed (Minecraft restores state from player data), but
                             // we DO need to publish a join announcement since the routing server suppressed it.
-                            if (isLoginRouting) {
+                            // Skip if joinAlreadyAnnounced: the intermediate server (Survival fallback
+                            // landing) already broadcast the join to avoid a duplicate announcement here.
+                            if (isLoginRouting && !pending.isJoinAlreadyAnnounced()) {
                                 int nonNull = 0;
                                 for (org.bukkit.inventory.ItemStack is : player.getInventory().getContents()) {
 									if (is != null) {
@@ -552,31 +628,33 @@ public class PlayerServerJoinListener implements Listener {
                                         + " non-null main slot(s), " + armorNonNull + " armor piece(s)."
                                         + (nonNull == 0 ? " WARNING: main inventory is empty - player.dat may be stale." : ""));
                             }
-                            AranarthPlayer apJoin = AranarthUtils.getPlayer(player.getUniqueId());
-                            if (apJoin != null && !apJoin.isVanished()) {
-                                String routedName = "&7" + AranarthUtils.getNickname(player);
-                                DateUtils routedDateUtils = new DateUtils();
-                                String routedJoinMsg;
-                                if (routedDateUtils.isValentinesDay()) {
-                                    routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.VALENTINES));
-                                } else if (routedDateUtils.isEaster()) {
-                                    routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.EASTER));
-                                } else if (routedDateUtils.isHalloween()) {
-                                    routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.HALLOWEEN));
-                                } else if (routedDateUtils.isChristmas()) {
-                                    routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.CHRISTMAS));
-                                } else {
-                                    routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + routedName);
-                                }
-                                for (Player online : Bukkit.getOnlinePlayers()) {
-                                    if (!online.getUniqueId().equals(player.getUniqueId())) {
-                                        online.sendMessage(routedJoinMsg);
+                            if (!pending.isJoinAlreadyAnnounced()) {
+                                AranarthPlayer apJoin = AranarthUtils.getPlayer(player.getUniqueId());
+                                if (apJoin != null && !apJoin.isVanished()) {
+                                    String routedName = "&7" + AranarthUtils.getNickname(player);
+                                    DateUtils routedDateUtils = new DateUtils();
+                                    String routedJoinMsg;
+                                    if (routedDateUtils.isValentinesDay()) {
+                                        routedJoinMsg = ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.VALENTINES);
+                                    } else if (routedDateUtils.isEaster()) {
+                                        routedJoinMsg = ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.EASTER);
+                                    } else if (routedDateUtils.isHalloween()) {
+                                        routedJoinMsg = ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.HALLOWEEN);
+                                    } else if (routedDateUtils.isChristmas()) {
+                                        routedJoinMsg = ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.CHRISTMAS);
+                                    } else {
+                                        routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + routedName);
                                     }
+                                    for (Player online : Bukkit.getOnlinePlayers()) {
+                                        if (!online.getUniqueId().equals(player.getUniqueId())) {
+                                            online.sendMessage(ChatUtils.translateToColor(Lang.resolve(online, routedJoinMsg)));
+                                        }
+                                    }
+                                    if (NetworkManager.isActive()) {
+                                        NetworkManager.getInstance().publishJoinMsg(routedJoinMsg, false);
+                                    }
+                                    PlayerServerJoinListener.this.playJoinSound();
                                 }
-                                if (NetworkManager.isActive()) {
-                                    NetworkManager.getInstance().publishJoinMsg(routedJoinMsg, false);
-                                }
-                                PlayerServerJoinListener.this.playJoinSound();
                             }
                         }
 
@@ -589,17 +667,10 @@ public class PlayerServerJoinListener implements Listener {
                                         });
                             }
                         } else if ("command".equals(pending.getType())) {
-                            // Dispatch a command as if the player ran it on this server.
-                            // Force admin mode so the command skips its own countdown
-                            // (the countdown already happened on the source server).
-                            AranarthPlayer apCmd = AranarthUtils.getPlayer(player.getUniqueId());
-                            boolean wasAdmin = apCmd.isInAdminMode();
-                            apCmd.setInAdminMode(true);
-                            AranarthUtils.setPlayer(player.getUniqueId(), apCmd);
-                            Bukkit.dispatchCommand(player, pending.getCommand());
-                            AranarthPlayer apCmdAfter = AranarthUtils.getPlayer(player.getUniqueId());
-                            apCmdAfter.setInAdminMode(wasAdmin);
-                            AranarthUtils.setPlayer(player.getUniqueId(), apCmdAfter);
+                            // Dispatch a command as if the player ran it on this server. The countdown
+                            // already happened on the source server so it is skipped, but every permission
+                            // check of the command still applies.
+                            AranarthUtils.runWithoutCountdown(player, () -> Bukkit.dispatchCommand(player, pending.getCommand()));
                         } else {
                             // TP to the stored coordinates
                             World w = Bukkit.getWorld(pending.getWorld());
@@ -689,50 +760,194 @@ public class PlayerServerJoinListener implements Listener {
                         }
                     } else {
                         // Unplanned cross-server landing: the player's last known location is on
-                        // another server (e.g. that server shut down and Velocity routed them here
-                        // as a fallback). Route the player back without applying the MySQL inventory
-                        // snapshot.
+                        // another server and they arrived here without a pending teleport
+                        // (e.g. the source server restarted and Velocity routed them here as a
+                        // fallback). Paper loads this server's player.dat before any plugin code
+                        // runs, so the player currently holds the wrong inventory.
                         //
-                        // We do NOT apply the MySQL survivalInventory snapshot here, and we do NOT
-                        // set applyInventory on the pending teleport. This lets the source server
-                        // load the player's inventory from its own player.dat, which is more
-                        // reliable than MySQL after a crash: MySQL is only updated when
-                        // onPlayerQuit fires, which crashes can skip entirely, leaving a snapshot
-                        // from a previous Survival session. Paper autosaves player.dat on a
-                        // regular cycle regardless of how the server stops, so player.dat on the
-                        // source server is always at least as fresh as MySQL and usually more so.
+                        // The strategy differs by which server we are on:
                         //
-                        // The onPlayerQuit here is treated as a transfer (isCrossServerTransfer=true)
-                        // because setPendingAndTransfer adds the player to transferringPlayers, so
-                        // this server will NOT write a new inventory snapshot or last_loc to MySQL -
-                        // MySQL retains whatever the source server last wrote.
-                        final String velocityTarget = AranarthCore.getInstance().getConfig()
-                                .getString("network.servers." + lastLoc.server, lastLoc.server);
-                        final String locWorld = lastLoc.world;
-                        final double locX = lastLoc.x, locY = lastLoc.y, locZ = lastLoc.z;
-                        final float locYaw = lastLoc.yaw, locPitch = lastLoc.pitch;
-                        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
-                                + " - unplanned landing from " + lastLoc.server
-                                + ", routing to: " + velocityTarget + " without applying MySQL inventory (player.dat on source server is authoritative).");
-                        new BukkitRunnable() {
-                            @Override
-                            public void run() {
-                                if (!player.isOnline()) {
-                                    return;
+                        // On Survival (non-SMP): check MySQL for a fallback snapshot that SMP
+                        // writes every 30s. If found, apply it and let the player stay with their
+                        // correct SMP items. If not found (crash with no recent write), kick so
+                        // no stale state is written to MySQL.
+                        //
+                        // On SMP: the player was last on Survival and Velocity sent them here
+                        // instead. Route them back to Survival the same way the original code
+                        // did - their last_loc.server = "survival" is authoritative, and
+                        // Survival's player.dat holds the correct inventory for that server.
+                        // Kicking is NOT safe here: it would leave last_loc.server = "survival"
+                        // unchanged, so every reconnect would hit SMP first and loop forever.
+                        final String sourceServer = lastLoc.server;
+                        final UUID uuidForAsync = player.getUniqueId();
+                        // Until this is resolved the inventory here is not theirs: keep them frozen
+                        // and make sure a quit, restart or periodic save never writes it back
+                        NetworkManager.getInstance().lockPlayer(uuidForAsync);
+                        NetworkManager.getInstance().markNonAuthoritative(uuidForAsync);
+                        if (!AranarthCore.isSmpServer()) {
+                            // --- Survival side: snapshot check ---
+                            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
+                                    + " - unplanned landing from " + sourceServer
+                                    + "; checking for fallback snapshot in MySQL.");
+                            NetworkManager.getInstance().markFallbackLanding(uuidForAsync);
+                            Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+                                String loadedSnapJson = DatabaseManager.isActive()
+                                        ? DatabaseManager.getInstance().loadTempData(
+                                                NetworkManager.KEY_SMP_RESTART_INV + uuidForAsync)
+                                        : null;
+                                // A snapshot written before SMP's latest startup means SMP has already
+                                // come back up since, so route the player there instead of keeping them here
+                                if (loadedSnapJson != null && isSnapshotFromPreviousRun(loadedSnapJson, sourceServer)) {
+                                    DatabaseManager.getInstance().deleteTempData(NetworkManager.KEY_SMP_RESTART_INV + uuidForAsync);
+                                    Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
+                                            + " - fallback snapshot predates " + sourceServer + "'s latest startup; discarded.");
+                                    loadedSnapJson = null;
                                 }
-                                if (DatabaseManager.isActive()) {
-                                    PersistenceUtils.reloadPlayerFromDatabase(player.getUniqueId());
-                                    PersistenceUtils.loadPlayerTogglesFromDatabase(player.getUniqueId());
-                                    PersistenceUtils.loadJobDataForPlayer(player.getUniqueId());
+                                final String snapJson = loadedSnapJson;
+                                // Read from MySQL rather than relying only on heartbeat messages, which this
+                                // server misses if it started up after the source server's last heartbeat
+                                final boolean sourceOnline = NetworkManager.isActive()
+                                        && (DatabaseManager.isActive()
+                                                ? NetworkManager.getInstance().isServerOnlineInDatabase(sourceServer)
+                                                : NetworkManager.getInstance().isServerOnline(sourceServer));
+                                Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+                                    if (!player.isOnline()) return;
+                                    if (snapJson != null) {
+                                        // The player stays here, so this server now holds their inventory
+                                        // (the snapshot below, or the existing one if applying it fails)
+                                        NetworkManager.getInstance().clearNonAuthoritative(uuidForAsync);
+                                        NetworkManager.getInstance().unlockPlayer(uuidForAsync);
+                                        // Apply the SMP snapshot so the player has their correct items
+                                        try {
+                                            JsonObject snap = JsonParser.parseString(snapJson).getAsJsonObject();
+                                            // This server's copy of the player is from its own startup load,
+                                            // so it is missing anything done on SMP since (homes, balance, etc.).
+                                            // Without this, quitting or a restart here writes that stale copy
+                                            // back to MySQL and wipes the SMP changes.
+                                            boolean rowApplied = snap.has("raw")
+                                                    && PersistenceUtils.reloadPlayerFromRow(uuidForAsync, snap.get("raw").getAsString());
+                                            reloadFallbackLandingData(uuidForAsync, !rowApplied);
+                                            player.getInventory().setContents(
+                                                    ItemUtils.itemStackArrayFromBase64(snap.get("inventory").getAsString()));
+                                            player.getEnderChest().setContents(
+                                                    ItemUtils.itemStackArrayFromBase64(snap.get("enderChest").getAsString()));
+                                            if (snap.has("health")) {
+                                                double maxHp = player.getAttribute(Attribute.MAX_HEALTH).getValue();
+                                                player.setHealth(Math.min(snap.get("health").getAsDouble(), maxHp));
+                                            }
+                                            if (snap.has("food")) player.setFoodLevel(snap.get("food").getAsInt());
+                                            if (snap.has("saturation")) player.setSaturation(snap.get("saturation").getAsFloat());
+                                            if (snap.has("expLevel")) player.setLevel(snap.get("expLevel").getAsInt());
+                                            if (snap.has("expProgress")) player.setExp(snap.get("expProgress").getAsFloat());
+                                            // Update in-memory AranarthPlayer so the quit listener saves
+                                            // the SMP inventory (not the old Survival snapshot) to MySQL.
+                                            AranarthPlayer ap = AranarthUtils.getPlayer(uuidForAsync);
+                                            if (ap != null) {
+                                                ap.setSurvivalInventory(snap.get("inventory").getAsString());
+                                                ap.setSurvivalEnderChest(snap.get("enderChest").getAsString());
+                                                if (snap.has("health")) ap.setSurvivalHealth(player.getHealth());
+                                                if (snap.has("food")) ap.setSurvivalFoodLevel(player.getFoodLevel());
+                                                if (snap.has("saturation")) ap.setSurvivalSaturation(player.getSaturation());
+                                                if (snap.has("expLevel")) ap.setSurvivalExpLevel(player.getLevel());
+                                                if (snap.has("expProgress")) ap.setSurvivalExpProgress(player.getExp());
+                                                AranarthUtils.setPlayer(uuidForAsync, ap);
+                                            }
+                                            // Paper restored their last position on this server, which may be in a world with another inventory
+                                            if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
+                                                World fallbackWorld = Bukkit.getWorld("spawn");
+                                                if (fallbackWorld == null) {
+                                                    fallbackWorld = Bukkit.getWorld("world");
+                                                }
+                                                if (fallbackWorld != null) {
+                                                    player.teleport(new Location(fallbackWorld, 0.5, 101, 0.5, 180, 0));
+                                                }
+                                            }
+                                            player.setGameMode(GameMode.SURVIVAL);
+                                            // Consume the snapshot (one-use) so it cannot be applied again.
+                                            Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                                                    () -> DatabaseManager.getInstance().deleteTempData(
+                                                            NetworkManager.KEY_SMP_RESTART_INV + uuidForAsync));
+                                            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
+                                                    + " - SMP fallback snapshot applied; player landed on "
+                                                    + NetworkManager.getInstance().getThisServer()
+                                                    + " with SMP inventory.");
+                                        } catch (Exception ex) {
+                                            // If snapshot application fails, leave the player on Survival
+                                            // with the inventory Paper loaded (Survival player.dat). Their
+                                            // SMP items remain safe in SMP's player.dat.
+                                            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
+                                                    + " - failed to apply SMP fallback snapshot: " + ex.getMessage()
+                                                    + "; player stays on Survival with existing Survival inventory.");
+                                        }
+                                    } else {
+                                        // No snapshot in MySQL. Two possible causes:
+                                        //  a) SMP is healthy - player logged off normally (no shutdown wrote
+                                        //     a snapshot). Route them to SMP the same way the original login-
+                                        //     routing path did before the snapshot feature was added.
+                                        //  b) SMP crashed without writing a snapshot (ungraceful). Routing
+                                        //     would fail. Keep the player on Survival.
+                                        // Distinguish the two cases using the source server's heartbeat.
+                                        if (sourceOnline) {
+                                            // SMP is online - route the player there (old behavior).
+                                            // Mark joinAlreadyAnnounced so the SMP arrival handler doesn't
+                                            // broadcast a second join message.
+                                            final String velocityTarget = AranarthCore.getInstance().getConfig()
+                                                    .getString("network.servers." + sourceServer, sourceServer);
+                                            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
+                                                    + " - no snapshot but " + sourceServer + " is online; routing to "
+                                                    + velocityTarget + ".");
+                                            PendingTeleport pt = new PendingTeleport(
+                                                    lastLoc.world, lastLoc.x, lastLoc.y, lastLoc.z,
+                                                    lastLoc.yaw, lastLoc.pitch, "", "");
+                                            pt.setLoginRouting(true);
+                                            pt.setJoinAlreadyAnnounced(true);
+                                            NetworkManager.getInstance().setPendingAndTransfer(player, velocityTarget, pt);
+                                        } else {
+                                            // SMP is offline (crashed or not yet reachable). Keep the player
+                                            // on Survival - their SMP items are safe in SMP's player.dat and
+                                            // will be there when SMP comes back up.
+                                            NetworkManager.getInstance().clearNonAuthoritative(uuidForAsync);
+                                            NetworkManager.getInstance().unlockPlayer(uuidForAsync);
+                                            reloadFallbackLandingData(uuidForAsync, true);
+                                            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
+                                                    + " - no SMP fallback snapshot found and " + sourceServer
+                                                    + " is offline; player stays on Survival with existing Survival inventory.");
+                                        }
+                                    }
+                                });
+                            });
+                        } else {
+                            // --- SMP side: route back to source server ---
+                            // Kicking here would be an infinite loop: last_loc.server = "survival"
+                            // means Velocity always tries SMP first, so the player can never land
+                            // anywhere else. Route them to their last server instead; from there
+                            // they can /smp back once SMP is ready.
+                            final String velocityTarget = AranarthCore.getInstance().getConfig()
+                                    .getString("network.servers." + sourceServer, sourceServer);
+                            final String locWorld = lastLoc.world;
+                            final double locX = lastLoc.x, locY = lastLoc.y, locZ = lastLoc.z;
+                            final float locYaw = lastLoc.yaw, locPitch = lastLoc.pitch;
+                            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
+                                    + " - unplanned landing on SMP from " + sourceServer
+                                    + "; routing back to " + velocityTarget + " (player.dat on source server is authoritative).");
+                            new BukkitRunnable() {
+                                @Override
+                                public void run() {
+                                    if (!player.isOnline()) return;
+                                    if (DatabaseManager.isActive()) {
+                                        PersistenceUtils.reloadPlayerFromDatabase(uuidForAsync);
+                                        PersistenceUtils.loadPlayerTogglesFromDatabase(uuidForAsync);
+                                        PersistenceUtils.loadJobDataForPlayer(uuidForAsync);
+                                    }
+                                    Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
+                                            + " - routing to " + velocityTarget + " after unplanned SMP landing.");
+                                    PendingTeleport pt = new PendingTeleport(
+                                            locWorld, locX, locY, locZ, locYaw, locPitch, "", "");
+                                    pt.setLoginRouting(true);
+                                    NetworkManager.getInstance().setPendingAndTransfer(player, velocityTarget, pt);
                                 }
-                                Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
-                                        + " - routing to " + velocityTarget + " after unplanned landing.");
-                                PendingTeleport pt = new PendingTeleport(
-                                        locWorld, locX, locY, locZ, locYaw, locPitch, "", "");
-                                pt.setLoginRouting(true);
-                                NetworkManager.getInstance().setPendingAndTransfer(player, velocityTarget, pt);
-                            }
-                        }.runTaskLater(AranarthCore.getInstance(), 40L); // 2s - brief delay before routing
+                            }.runTaskLater(AranarthCore.getInstance(), 40L);
+                        }
                     }
                 }
 
@@ -796,13 +1011,18 @@ public class PlayerServerJoinListener implements Listener {
                     }
                 }
 
+                // Anyone not waiting to be routed elsewhere now holds their own inventory
+                if (NetworkManager.isActive() && !NetworkManager.getInstance().isNonAuthoritative(player.getUniqueId())) {
+                    NetworkManager.getInstance().unlockPlayer(player.getUniqueId());
+                }
+
                 // Displays a welcome message after the join message
                 if (finalIsNewPlayer) {
                     for (Player online : Bukkit.getOnlinePlayers()) {
                         online.sendMessage("");
                         online.sendMessage(ChatUtils.translateToColor("                &6&l-------------------------"));
-                        online.sendMessage(ChatUtils.translateToColor("                     &7Welcome, &e" + player.getName() + ","));
-                        online.sendMessage(ChatUtils.translateToColor("                    &7to the &6&lRealm of Aranarth!"));
+                        online.sendMessage(ChatUtils.translateToColor(Lang.getFor(online, "join.welcome_1", "player", player.getName())));
+                        online.sendMessage(ChatUtils.translateToColor(Lang.getFor(online, "join.welcome_2")));
                         online.sendMessage(ChatUtils.translateToColor("                &6&l-------------------------"));
                         online.sendMessage("");
                     }
@@ -816,7 +1036,7 @@ public class PlayerServerJoinListener implements Listener {
                         NetworkManager.getInstance().publishChat("", "");
                     }
 
-                    player.sendMessage(ChatUtils.chatMessage("&7Be sure to read the &e/rules &7and check out &e/warp Tutorial"));
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "join.welcome_rules")));
 
                     // Give starter kit
                     PlayerInventory inv = player.getInventory();
@@ -851,7 +1071,7 @@ public class PlayerServerJoinListener implements Listener {
                     online.playSound(online, Sound.UI_TOAST_CHALLENGE_COMPLETE, vol / 100f, 0.8F);
                 }
             }
-        } else if (!isCrossServerTransfer) {
+        } else if (!isCrossServerTransfer || isSurvivalFallbackLanding) {
             playJoinSound();
         }
         AranarthUtils.updateTab();
@@ -922,5 +1142,50 @@ public class PlayerServerJoinListener implements Listener {
         }.runTaskTimer(AranarthCore.getInstance(), 0, 5); // Runs every 5 ticks
     }
 
+    /**
+     * Determines whether the SMP fallback snapshot was written before the source server's most
+     * recent startup.
+     *
+     * @param snapJson     The fallback snapshot JSON.
+     * @param sourceServer The server the snapshot came from.
+     * @return Whether the source server has restarted since the snapshot was written.
+     */
+    private boolean isSnapshotFromPreviousRun(String snapJson, String sourceServer) {
+        try {
+            JsonObject snap = JsonParser.parseString(snapJson).getAsJsonObject();
+            if (!snap.has("ts")) {
+                return false;
+            }
+            String startedAt = DatabaseManager.getInstance().loadTempData(NetworkManager.KEY_SERVER_STARTED + sourceServer);
+            return startedAt != null && snap.get("ts").getAsLong() < Long.parseLong(startedAt);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Reloads the player's per-player data from MySQL after an unplanned landing on Survival
+     * (SMP restarted or crashed), matching what a normal cross-server arrival reloads.
+     *
+     * @param uuid             The UUID of the player.
+     * @param reloadPlayerData Whether the AranarthPlayer row itself should also be reloaded from MySQL.
+     */
+    private void reloadFallbackLandingData(UUID uuid, boolean reloadPlayerData) {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        if (reloadPlayerData) {
+            PersistenceUtils.reloadPlayerFromDatabase(uuid);
+        }
+        PersistenceUtils.reloadPlayerSentinelsFromDatabase(uuid);
+        PersistenceUtils.loadPlayerTogglesFromDatabase(uuid);
+        PersistenceUtils.reloadQuestProgressForPlayer(uuid);
+        PersistenceUtils.loadJobDataForPlayer(uuid);
+        PersistenceUtils.reloadDominionForPlayer(uuid);
+        PersistenceUtils.reloadPlayerLoginStreakFromDatabase(uuid);
+        PersistenceUtils.reloadPlayerMailFromDatabase(uuid);
+        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] " + uuid
+                + " - reloaded player data after unplanned landing (playerRow=" + (reloadPlayerData ? "MySQL" : "snapshot") + ")");
+    }
 
 }

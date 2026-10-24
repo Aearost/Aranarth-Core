@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.BlacklistPreset;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -22,7 +23,7 @@ public class GuiBlacklistSelectClick {
         e.setCancelled(true);
         Player player = (Player) e.getWhoClicked();
         String title = ChatUtils.stripColorFormatting(e.getView().getTitle());
-        boolean isClear = title.equals(GuiBlacklistSelect.TITLE_CLEAR);
+        boolean isClear = title.equals(ChatUtils.stripColorFormatting(Lang.getFor(player, GuiBlacklistSelect.TITLE_CLEAR_KEY)));
 
         if (e.getClickedInventory() == null) {
             return;
@@ -71,12 +72,12 @@ public class GuiBlacklistSelectClick {
                 ap.setActivePresetIndex(-1);
             }
             PersistenceUtils.saveBlacklistPresetsAsync(player.getUniqueId());
-            player.sendMessage(ChatUtils.chatMessage("&7Preset &e" + (presetIndex + 1) + " &7has been cleared"));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "blacklist.preset_cleared", "number", (presetIndex + 1))));
             player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 0.5F, 0.8F);
         } else {
             ap.setActivePresetIndex(presetIndex);
             PersistenceUtils.saveBlacklistPresetsAsync(player.getUniqueId());
-            player.sendMessage(ChatUtils.chatMessage("&7Now using preset &e" + (presetIndex + 1)));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "blacklist.preset_selected", "number", (presetIndex + 1))));
             player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 0.5F, 1.75F);
         }
 

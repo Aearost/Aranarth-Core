@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.abilities.airbending.spiritual;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.DominionRank;
+import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DefenderUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
@@ -40,8 +41,10 @@ public class LightOfRaava extends AvatarAbility implements AddonAbility {
     private static final Particle.DustOptions BURST_WHITE_DUST = new Particle.DustOptions(Color.WHITE, 1.2f);
     private static final Particle.DustOptions BURST_BLUE_DUST = new Particle.DustOptions(Color.fromRGB(85, 255, 255), 1.1f);
 
-    private static final double AVATAR_STATE_RANGE = 13.0;
-    private static final long BURST_DURATION = 750L;
+    private final double avatarRange;
+    private final long burstDuration;
+    private final int witherDurationTicks;
+    private final int regenerationDurationTicks;
 
     @Attribute(Attribute.CHARGE_DURATION)
     private long chargeDuration;
@@ -62,9 +65,13 @@ public class LightOfRaava extends AvatarAbility implements AddonAbility {
     public LightOfRaava(final Player player) {
         super(player);
 
-        this.chargeDuration = 1000L;
-        this.range = 7.0;
-        this.cooldown = 20000L;
+        this.chargeDuration = AbilityConfig.getLong("LightOfRaava.ChargeDuration");
+        this.range = AbilityConfig.getDouble("LightOfRaava.Range");
+        this.cooldown = AbilityConfig.getLong("LightOfRaava.Cooldown");
+        this.avatarRange = AbilityConfig.getDouble("LightOfRaava.AvatarRange");
+        this.burstDuration = AbilityConfig.getLong("LightOfRaava.BurstDuration");
+        this.witherDurationTicks = AbilityConfig.getInt("LightOfRaava.WitherDurationTicks");
+        this.regenerationDurationTicks = AbilityConfig.getInt("LightOfRaava.RegenerationDurationTicks");
         this.state = State.CHARGING;
         this.heldSlot = player.getInventory().getHeldItemSlot();
 
@@ -127,7 +134,7 @@ public class LightOfRaava extends AvatarAbility implements AddonAbility {
     }
 
     private void activate() {
-        burstRange = bPlayer.isAvatarState() ? AVATAR_STATE_RANGE : range;
+        burstRange = bPlayer.isAvatarState() ? avatarRange : range;
         burstCenter = player.getLocation().add(0, 1, 0);
         burstStart = System.currentTimeMillis();
         state = State.BURSTING;
@@ -136,19 +143,19 @@ public class LightOfRaava extends AvatarAbility implements AddonAbility {
         player.getWorld().playSound(burstCenter, Sound.BLOCK_AMETHYST_CLUSTER_BREAK, 0.7f, 2.0f);
 
         player.addPotionEffect(new PotionEffect(PotionEffectType.INSTANT_HEALTH, 1, 2));
-        player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 100, 4));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, regenerationDurationTicks, 4));
 
         bPlayer.addCooldown(this);
     }
 
     private void handleBursting() {
         final long elapsed = System.currentTimeMillis() - burstStart;
-        if (elapsed >= BURST_DURATION) {
+        if (elapsed >= burstDuration) {
             remove();
             return;
         }
 
-        final double progress = (double) elapsed / BURST_DURATION;
+        final double progress = (double) elapsed / burstDuration;
         final double currentRadius = burstRange * progress;
 
         spawnBurstShell(burstCenter, currentRadius);
@@ -163,7 +170,7 @@ public class LightOfRaava extends AvatarAbility implements AddonAbility {
 
             hitEntities.add(entity.getUniqueId());
             if (isHostileTarget(entity)) {
-                entity.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 200, 1));
+                entity.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, witherDurationTicks, 1));
                 entity.addPotionEffect(new PotionEffect(PotionEffectType.INSTANT_DAMAGE, 1, 1));
             } else {
                 // Undead mobs (zombies, skeletons, etc.) are harmed by instant health - use instant damage instead
@@ -172,7 +179,7 @@ public class LightOfRaava extends AvatarAbility implements AddonAbility {
                 } else {
                     entity.addPotionEffect(new PotionEffect(PotionEffectType.INSTANT_HEALTH, 1, 2));
                 }
-                entity.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 100, 4));
+                entity.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, regenerationDurationTicks, 4));
             }
         }
     }
@@ -188,8 +195,7 @@ public class LightOfRaava extends AvatarAbility implements AddonAbility {
     }
 
     private boolean canDamagePlayer(final Player target) {
-        final Dominion targetDominion = DominionUtils.getPlayerDominion(target.getUniqueId());
-        return canDamageByDominion(targetDominion, target.getLocation());
+        return DominionUtils.canAttackPlayer(player, target);
     }
 
     private boolean canDamageDefender(final UUID defenderEntityId) {

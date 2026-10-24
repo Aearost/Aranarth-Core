@@ -1,7 +1,7 @@
 package com.aearost.aranarthcore.gui;
 
-import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
+import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -21,18 +21,20 @@ public class GuiRankup {
 	private final Player player;
 	private final Inventory initializedGui;
 
-	public GuiRankup(Player player, String nextRankInfo, String rankupCost) {
+	public GuiRankup(Player player, String nextRankId, String rankupCost) {
 		this.player = player;
-		this.initializedGui = initializeGui(player, nextRankInfo, rankupCost);
+		this.initializedGui = initializeGui(player, nextRankId, rankupCost);
 	}
 
 	public void openGui() {
 		player.openInventory(initializedGui);
 	}
 
-	private Inventory initializeGui(Player player, String rankName, String rankupCost) {
-		Inventory gui = Bukkit.getServer().createInventory(player, 27,
-				ChatUtils.translateToColor("&8&lRankup Confirm"));
+	private Inventory initializeGui(Player player, String rankId, String rankupCost) {
+		Inventory gui = GuiHolder.create(player, 27,
+				Lang.getFor(player, "gui.rankup.title"));
+		// The click handler prices the rankup from the config, the button name is only for display
+		GuiHolder.of(gui).setData(new RankupOffer(AranarthUtils.getPlayer(player.getUniqueId()).getRank(), rankId));
 
 		// Initialize Items
 		ItemStack yellowPane = new ItemStack(Material.YELLOW_STAINED_GLASS_PANE);
@@ -49,11 +51,10 @@ public class GuiRankup {
 		blackPane.setItemMeta(blackPaneMeta);
 
 		ItemMeta cancelMeta = cancel.getItemMeta();
-		cancelMeta.setDisplayName(ChatUtils.translateToColor("&c&lCancel Rankup"));
+		cancelMeta.setDisplayName(Lang.getFor(player, "gui.rankup.cancel"));
 		cancel.setItemMeta(cancelMeta);
 		ItemMeta rankupMeta = rankup.getItemMeta();
-		rankupMeta
-				.setDisplayName(ChatUtils.translateToColor("&a&lRankup to " + rankName + " &a&lfor &6&l" + rankupCost));
+		rankupMeta.setDisplayName(Lang.getFor(player, "gui.rankup.confirm", "rank", Lang.key("rank.title_" + rankId), "cost", rankupCost));
 		rankup.setItemMeta(rankupMeta);
 
 		// Initialize GUI
@@ -75,6 +76,12 @@ public class GuiRankup {
 		gui.setItem(17, blackPane);
 
 		return gui;
+	}
+
+	/**
+	 * The rank the player had when the GUI was opened and the display name of the next rank.
+	 */
+	public record RankupOffer(int fromRank, String nextRankId) {
 	}
 
 }
