@@ -280,11 +280,29 @@ public class EnchantingListener implements Listener {
                 return;
             }
             newRoll.state = RollState.PAID;
+            startInfiniteLibraryCountdown(player);
             Location above = tableLocation.clone().add(0.5, 1.1, 0.5);
             tableLocation.getWorld().spawnParticle(Particle.ENCHANT, above, 60, 0.4, 0.5, 0.4, 1);
             tableLocation.getWorld().spawnParticle(Particle.DUST, above, 15, 0.3, 0.2, 0.3, LAPIS_DUST);
             player.playSound(tableLocation, Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1F, 1.4F);
         });
+    }
+
+    /**
+     * Starts the Infinite Library duration on the first paid roll, so the time spent placing the item is not lost.
+     */
+    private void startInfiniteLibraryCountdown(Player player) {
+        UUID uuid = player.getUniqueId();
+        long end = EnchantingUtils.startInfiniteLibraryCountdown(uuid);
+        if (end == 0) {
+            return;
+        }
+        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
+            // Skipped if the ability was ended or re-activated in the meantime
+            if (EnchantingUtils.endInfiniteLibrary(uuid, end) && player.isOnline()) {
+                sendActionBar(player, Lang.getFor(player, "enchanting.library_off"));
+            }
+        }, Math.max(1, (end - System.currentTimeMillis()) / 50));
     }
 
     /**
@@ -362,7 +380,13 @@ public class EnchantingListener implements Listener {
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent e) {
         if (e.getView().getType() == InventoryType.ENCHANTING) {
-            libraryRolls.remove(e.getPlayer().getUniqueId());
+            UUID uuid = e.getPlayer().getUniqueId();
+            libraryRolls.remove(uuid);
+            // Closing the table before rolling anything ends Infinite Library, as its duration never started
+            if (EnchantingUtils.isInfiniteLibraryAwaitingRoll(uuid) && e.getPlayer() instanceof Player player) {
+                EnchantingUtils.endInfiniteLibrary(uuid);
+                sendActionBar(player, Lang.getFor(player, "enchanting.library_off"));
+            }
         }
     }
 
@@ -457,13 +481,6 @@ public class EnchantingListener implements Listener {
         player.openEnchanting(table.getLocation(), false);
         player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "enchanting.library_reroll_hint",
                 "amount", EnchantingUtils.getInt("infinite-library.lapis-per-roll"))));
-
-        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
-            EnchantingUtils.endInfiniteLibrary(uuid);
-            if (player.isOnline()) {
-                sendActionBar(player, Lang.getFor(player, "enchanting.library_off"));
-            }
-        }, Math.max(1, durationMillis / 50));
 
         Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
             AranarthPlayer current = AranarthUtils.getPlayer(uuid);
