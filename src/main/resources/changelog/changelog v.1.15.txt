@@ -16,6 +16,7 @@ Economy, Jobs & Quests
 
 Chat, UI & Sounds
 [+] /mcstats now also shows the levels of the 3 sub-skills
+[+] /mcstats now shows the Gathering, Combat and Misc level totals, along with the highest rank each total qualifies for
 
 Quality of Life
 [+] Added /vc list as an alias for /vc who

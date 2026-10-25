@@ -3414,6 +3414,17 @@ public class CommandDominion implements CommandExecutor {
                         }
 
                         if (!wasDominionFound) {
+                            // Fall back to a player search so /d info <player> shows that player's Dominion
+                            UUID searchedUuid = args.length == 2 ? AranarthUtils.getUUIDFromUsernameOrNickname(args[1]) : null;
+                            if (searchedUuid != null) {
+                                Dominion searchedPlayerDominion = DominionUtils.getPlayerDominion(searchedUuid);
+                                if (searchedPlayerDominion != null) {
+                                    displayInfoForDominion(player, searchedPlayerDominion);
+                                } else {
+                                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.player_not_in", "player", AranarthUtils.getPlayer(searchedUuid).getNickname())));
+                                }
+                                return true;
+                            }
                             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.not_found", "name", dominionNameBuilder.toString())));
                         }
                     }

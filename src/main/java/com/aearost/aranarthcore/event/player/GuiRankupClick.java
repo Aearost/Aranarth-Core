@@ -7,7 +7,6 @@ import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.*;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
-import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
 import com.gmail.nossr50.util.EventUtils;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -137,28 +136,11 @@ public class GuiRankupClick {
             return true;
         }
 
-        int gatheringSkillsLevelTotal = mcMMOPlayer.getSkillLevel(PrimarySkillType.EXCAVATION)
-                + mcMMOPlayer.getSkillLevel(PrimarySkillType.FISHING)
-                + mcMMOPlayer.getSkillLevel(PrimarySkillType.HERBALISM)
-                + mcMMOPlayer.getSkillLevel(PrimarySkillType.MINING)
-                + mcMMOPlayer.getSkillLevel(PrimarySkillType.WOODCUTTING);
-
-        int combatSkillsLevelTotal = mcMMOPlayer.getSkillLevel(PrimarySkillType.ARCHERY)
-                + mcMMOPlayer.getSkillLevel(PrimarySkillType.AXES)
-                + mcMMOPlayer.getSkillLevel(PrimarySkillType.CROSSBOWS)
-                + mcMMOPlayer.getSkillLevel(PrimarySkillType.MACES)
-                + mcMMOPlayer.getSkillLevel(PrimarySkillType.SWORDS)
-                + mcMMOPlayer.getSkillLevel(PrimarySkillType.SPEARS)
-                + mcMMOPlayer.getSkillLevel(PrimarySkillType.TAMING)
-                + mcMMOPlayer.getSkillLevel(PrimarySkillType.TRIDENTS)
-                + mcMMOPlayer.getSkillLevel(PrimarySkillType.UNARMED);
-
-        int miscSkillsLevelTotal = mcMMOPlayer.getSkillLevel(PrimarySkillType.ACROBATICS)
-                + mcMMOPlayer.getSkillLevel(PrimarySkillType.ALCHEMY)
-                + mcMMOPlayer.getSkillLevel(PrimarySkillType.REPAIR)
-                + mcMMOPlayer.getSkillLevel(PrimarySkillType.SALVAGE)
-                + mcMMOPlayer.getSkillLevel(PrimarySkillType.SMELTING);
-
-        return gatheringSkillsLevelTotal >= minimum && combatSkillsLevelTotal >= minimum && miscSkillsLevelTotal >= minimum;
+        for (int categoryTotal : AranarthUtils.getMcmmoCategoryTotals(mcMMOPlayer::getSkillLevel)) {
+            if (categoryTotal < minimum) {
+                return false;
+            }
+        }
+        return true;
     }
 }

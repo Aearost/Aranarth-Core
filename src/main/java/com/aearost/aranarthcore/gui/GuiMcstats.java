@@ -38,18 +38,19 @@ public class GuiMcstats {
     private static final Material[] SUB_SKILL_MATERIALS = {Material.GOLD_BLOCK, Material.FURNACE, Material.ENCHANTING_TABLE};
     private static final String[][] SUB_SKILL_PARENTS   = {{"FISHING", "REPAIR"}, {"MINING", "REPAIR"}, {"ALCHEMY", "REPAIR"}};
     private static final int[]      SUB_SKILL_SLOTS     = {41, 42, 43};
+    private static final String[] CATEGORY_KEYS = {"gui.mcstats.category_gathering", "gui.mcstats.category_combat", "gui.mcstats.category_misc"};
 
     private final Player viewer;
     private final Inventory gui;
 
     public GuiMcstats(Player viewer, String targetName, boolean isSelf,
-                      Map<PrimarySkillType, Integer> targetLevels, int targetPowerLevel,
-                      Map<PrimarySkillType, Integer> targetRanks, int targetOverallRank,
-                      Map<PrimarySkillType, Integer> viewerRanks, int viewerOverallRank) {
+                      Map<PrimarySkillType, Integer> targetLevels, int targetPowerLevel, int targetOverallRank,
+                      int[] categoryTotals, int[] categoryRanks,
+                      Map<PrimarySkillType, Integer> targetRanks, Map<PrimarySkillType, Integer> viewerRanks) {
         this.viewer = viewer;
         String title = isSelf ? Lang.getFor(viewer, TITLE_SELF_KEY) : (targetName + Lang.getFor(viewer, TITLE_SUFFIX_KEY));
-        this.gui = initializeGui(title, isSelf, targetLevels, targetPowerLevel,
-                targetRanks, targetOverallRank, viewerRanks, viewerOverallRank);
+        this.gui = initializeGui(title, isSelf, targetLevels, targetPowerLevel, targetOverallRank,
+                categoryTotals, categoryRanks, targetRanks, viewerRanks);
     }
 
     public void openGui() {
@@ -96,10 +97,25 @@ public class GuiMcstats {
                 .orElse(null);
     }
 
+    /**
+     * Provides the level of the given skill, deriving child skill levels from the average of their two parents.
+     */
+    public static int getLevel(PrimarySkillType skill, Map<PrimarySkillType, Integer> targetLevels) {
+        for (int i = 0; i < SUB_SKILL_NAMES.length; i++) {
+            if (SUB_SKILL_NAMES[i].equalsIgnoreCase(skill.name())) {
+                PrimarySkillType parentOne = findSkill(SUB_SKILL_PARENTS[i][0]);
+                PrimarySkillType parentTwo = findSkill(SUB_SKILL_PARENTS[i][1]);
+                return (targetLevels.getOrDefault(parentOne, 0) + targetLevels.getOrDefault(parentTwo, 0)) / 2;
+            }
+        }
+        return targetLevels.getOrDefault(skill, 0);
+    }
+
     private Inventory initializeGui(String title, boolean isSelf,
                                     Map<PrimarySkillType, Integer> targetLevels, int targetPowerLevel,
-                                    Map<PrimarySkillType, Integer> targetRanks, int targetOverallRank,
-                                    Map<PrimarySkillType, Integer> viewerRanks, int viewerOverallRank) {
+                                    int targetOverallRank, int[] categoryTotals, int[] categoryRanks,
+                                    Map<PrimarySkillType, Integer> targetRanks,
+                                    Map<PrimarySkillType, Integer> viewerRanks) {
         Inventory inv = GuiHolder.create(viewer, 54, title);
 
         // Top and bottom border rows only
@@ -122,10 +138,13 @@ public class GuiMcstats {
         if (Objects.nonNull(powerMeta)) {
             powerMeta.setDisplayName(Lang.getFor(viewer, "gui.mcstats.power"));
             List<String> lore = new ArrayList<>();
-            lore.add(Lang.getFor(viewer, "gui.mcstats.total_power", "level", String.valueOf(targetPowerLevel)));
-            lore.add(Lang.getFor(viewer, "gui.mcstats.rank", "rank", formatRank(viewer, targetOverallRank)));
-            if (!isSelf) {
-                lore.add(Lang.getFor(viewer, "gui.mcstats.your_rank", "rank", formatRank(viewer, viewerOverallRank)));
+            lore.add(Lang.getFor(viewer, "gui.mcstats.total_power",
+                    "level", String.valueOf(targetPowerLevel), "rank", formatRank(viewer, targetOverallRank)));
+            for (int i = 0; i < categoryTotals.length && i < CATEGORY_KEYS.length; i++) {
+                lore.add(Lang.getFor(viewer, "gui.mcstats.category_total",
+                        "category", Lang.getFor(viewer, CATEGORY_KEYS[i]),
+                        "total", String.valueOf(categoryTotals[i]),
+                        "rank", formatRank(viewer, categoryRanks[i])));
             }
             powerMeta.setLore(lore);
             powerItem.setItemMeta(powerMeta);

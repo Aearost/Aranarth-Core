@@ -13,6 +13,8 @@ import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.network.NetworkTabManager;
 import com.aearost.aranarthcore.objects.*;
+import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
+import com.gmail.nossr50.util.skills.SkillTools;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.projectkorra.projectkorra.BendingPlayer;
@@ -56,6 +58,7 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.ToIntFunction;
 
 import static com.aearost.aranarthcore.objects.CustomKeys.*;
 
@@ -88,6 +91,16 @@ public class AranarthUtils {
             Material.MUDDY_MANGROVE_ROOTS, Material.MYCELIUM
     );
     private static final HashMap<UUID, int[]> shopIslandCenters = new HashMap<>();
+    // The skills of each mcMMO rank-up category, in the order Gathering, Combat, Miscellaneous
+    private static final PrimarySkillType[][] MCMMO_CATEGORIES = {
+            {PrimarySkillType.EXCAVATION, PrimarySkillType.FISHING, PrimarySkillType.HERBALISM,
+                    PrimarySkillType.MINING, PrimarySkillType.WOODCUTTING},
+            {PrimarySkillType.ARCHERY, PrimarySkillType.AXES, PrimarySkillType.CROSSBOWS, PrimarySkillType.MACES,
+                    PrimarySkillType.SWORDS, PrimarySkillType.SPEARS, PrimarySkillType.TAMING,
+                    PrimarySkillType.TRIDENTS, PrimarySkillType.UNARMED},
+            {PrimarySkillType.ACROBATICS, PrimarySkillType.ALCHEMY, PrimarySkillType.REPAIR,
+                    PrimarySkillType.SALVAGE, PrimarySkillType.SMELTING}
+    };
     private static final HashMap<UUID, Set<UUID>> shopCollaborators = new HashMap<>();
     private static final HashMap<UUID, UUID> collaboratorShop = new HashMap<>(); // collaborator UUID → owner UUID
     private static final HashMap<UUID, UUID> pendingShopInvites = new HashMap<>(); // invitee UUID → owner UUID
@@ -2067,6 +2080,39 @@ public class AranarthUtils {
             }
         }
         return "&8&l[&a&lPeasant&8&l] &r";
+    }
+
+    /**
+     * Provides the sum of mcMMO levels in each of the three rank-up categories (Gathering, Combat, Miscellaneous).
+     *
+     * @param levelOf Provides the level of the given skill, including child skills.
+     * @return The totals in the order Gathering, Combat, Miscellaneous.
+     */
+    public static int[] getMcmmoCategoryTotals(ToIntFunction<PrimarySkillType> levelOf) {
+        int[] totals = new int[MCMMO_CATEGORIES.length];
+        for (int i = 0; i < MCMMO_CATEGORIES.length; i++) {
+            for (PrimarySkillType skill : MCMMO_CATEGORIES[i]) {
+                totals[i] += levelOf.applyAsInt(skill);
+            }
+        }
+        return totals;
+    }
+
+    /**
+     * Provides every non-child skill that counts towards one of the mcMMO rank-up categories.
+     *
+     * @return The non-child skills of all three categories, without duplicates.
+     */
+    public static Set<PrimarySkillType> getMcmmoCategoryParentSkills() {
+        Set<PrimarySkillType> skills = new LinkedHashSet<>();
+        for (PrimarySkillType[] category : MCMMO_CATEGORIES) {
+            for (PrimarySkillType skill : category) {
+                if (!SkillTools.isChildSkill(skill)) {
+                    skills.add(skill);
+                }
+            }
+        }
+        return skills;
     }
 
     /**
