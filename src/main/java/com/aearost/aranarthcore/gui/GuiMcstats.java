@@ -31,7 +31,13 @@ public class GuiMcstats {
     private static final int[]    COMBAT_ROW2_SLOTS   = {29, 30, 31, 32, 33};
 
     private static final String[] MISC_ORDER         = {"ALCHEMY", "ACROBATICS", "REPAIR"};
-    private static final int[]    MISC_SLOTS          = {39, 40, 41};
+    private static final int[]    MISC_SLOTS          = {37, 38, 39};
+
+    // Child skills are not ranked by mcMMO, so their level is derived from the average of their two parents
+    private static final String[]   SUB_SKILL_NAMES     = {"Salvage", "Smelting", "Enchanting"};
+    private static final Material[] SUB_SKILL_MATERIALS = {Material.GOLD_BLOCK, Material.FURNACE, Material.ENCHANTING_TABLE};
+    private static final String[][] SUB_SKILL_PARENTS   = {{"FISHING", "REPAIR"}, {"MINING", "REPAIR"}, {"ALCHEMY", "REPAIR"}};
+    private static final int[]      SUB_SKILL_SLOTS     = {41, 42, 43};
 
     private final Player viewer;
     private final Inventory gui;
@@ -140,8 +146,36 @@ public class GuiMcstats {
         placeSection(inv, COMBAT_ROW1_ORDER, COMBAT_ROW1_SLOTS, "gui.mcstats.category_combat",    isSelf, targetLevels, targetRanks, viewerRanks);
         placeSection(inv, COMBAT_ROW2_ORDER, COMBAT_ROW2_SLOTS, "gui.mcstats.category_combat",    isSelf, targetLevels, targetRanks, viewerRanks);
         placeSection(inv, MISC_ORDER,        MISC_SLOTS,        "gui.mcstats.category_misc",       isSelf, targetLevels, targetRanks, viewerRanks);
+        placeSubSkills(inv, targetLevels);
 
         return inv;
+    }
+
+    private void placeSubSkills(Inventory inv, Map<PrimarySkillType, Integer> targetLevels) {
+        String category = Lang.getFor(viewer, "gui.mcstats.category_subskill");
+        for (int i = 0; i < SUB_SKILL_NAMES.length; i++) {
+            PrimarySkillType parentOne = findSkill(SUB_SKILL_PARENTS[i][0]);
+            PrimarySkillType parentTwo = findSkill(SUB_SKILL_PARENTS[i][1]);
+            if (parentOne == null || parentTwo == null) {
+                continue;
+            }
+
+            int level = (targetLevels.getOrDefault(parentOne, 0) + targetLevels.getOrDefault(parentTwo, 0)) / 2;
+
+            ItemStack item = new ItemStack(SUB_SKILL_MATERIALS[i]);
+            ItemMeta meta = item.getItemMeta();
+            if (Objects.nonNull(meta)) {
+                meta.setDisplayName(ChatUtils.translateToColor("&e&l" + SUB_SKILL_NAMES[i] + " &7(" + category + ")"));
+
+                List<String> lore = new ArrayList<>();
+                lore.add(Lang.getFor(viewer, "gui.mcstats.skill_level", "level", String.valueOf(level)));
+                lore.add(Lang.getFor(viewer, "gui.mcstats.skill_parents",
+                        "first", toDisplayName(parentOne), "second", toDisplayName(parentTwo)));
+                meta.setLore(lore);
+                item.setItemMeta(meta);
+            }
+            inv.setItem(SUB_SKILL_SLOTS[i], item);
+        }
     }
 
     private void placeSection(Inventory inv, String[] skillNames, int[] slots, String categoryKey, boolean isSelf,

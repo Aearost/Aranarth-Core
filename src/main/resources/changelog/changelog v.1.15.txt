@@ -14,6 +14,7 @@ Economy, Jobs & Quests
 [~] Market sell prices now drop at a proportional rate to the item's max stack size
 
 Chat, UI & Sounds
+[+] /mcstats now also shows the levels of the 3 sub-skills
 
 Quality of Life
 [+] Added /vc list as an alias for /vc who
