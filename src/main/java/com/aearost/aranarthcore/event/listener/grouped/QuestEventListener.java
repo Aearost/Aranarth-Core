@@ -48,7 +48,11 @@ public class QuestEventListener implements Listener {
             Material.STRIPPED_OAK_WOOD, Material.STRIPPED_SPRUCE_WOOD,
             Material.STRIPPED_BIRCH_WOOD, Material.STRIPPED_JUNGLE_WOOD,
             Material.STRIPPED_ACACIA_WOOD, Material.STRIPPED_DARK_OAK_WOOD,
-            Material.STRIPPED_MANGROVE_WOOD, Material.STRIPPED_CHERRY_WOOD
+            Material.STRIPPED_MANGROVE_WOOD, Material.STRIPPED_CHERRY_WOOD,
+            Material.PALE_OAK_LOG, Material.STRIPPED_PALE_OAK_LOG,
+            Material.PALE_OAK_WOOD, Material.STRIPPED_PALE_OAK_WOOD,
+            Material.POPLAR_LOG, Material.STRIPPED_POPLAR_LOG,
+            Material.POPLAR_WOOD, Material.STRIPPED_POPLAR_WOOD
     );
 
     // Materials that count as stone for "mine stone" tasks

@@ -60,6 +60,8 @@ public class JobEventListener implements Listener {
             Material.OAK_WOOD, Material.SPRUCE_WOOD, Material.BIRCH_WOOD,
             Material.JUNGLE_WOOD, Material.ACACIA_WOOD, Material.DARK_OAK_WOOD,
             Material.MANGROVE_WOOD, Material.CHERRY_WOOD,
+            Material.PALE_OAK_LOG, Material.PALE_OAK_WOOD,
+            Material.POPLAR_LOG, Material.POPLAR_WOOD,
             Material.CRIMSON_STEM, Material.WARPED_STEM
     );
 
@@ -70,6 +72,8 @@ public class JobEventListener implements Listener {
             Material.STRIPPED_OAK_WOOD, Material.STRIPPED_SPRUCE_WOOD, Material.STRIPPED_BIRCH_WOOD,
             Material.STRIPPED_JUNGLE_WOOD, Material.STRIPPED_ACACIA_WOOD, Material.STRIPPED_DARK_OAK_WOOD,
             Material.STRIPPED_MANGROVE_WOOD, Material.STRIPPED_CHERRY_WOOD,
+            Material.STRIPPED_PALE_OAK_LOG, Material.STRIPPED_PALE_OAK_WOOD,
+            Material.STRIPPED_POPLAR_LOG, Material.STRIPPED_POPLAR_WOOD,
             Material.STRIPPED_CRIMSON_STEM, Material.STRIPPED_WARPED_STEM,
             Material.STRIPPED_BAMBOO_BLOCK
     );
@@ -78,7 +82,8 @@ public class JobEventListener implements Listener {
             Material.OAK_LEAVES, Material.SPRUCE_LEAVES, Material.BIRCH_LEAVES,
             Material.JUNGLE_LEAVES, Material.ACACIA_LEAVES, Material.DARK_OAK_LEAVES,
             Material.MANGROVE_LEAVES, Material.CHERRY_LEAVES, Material.AZALEA_LEAVES,
-            Material.FLOWERING_AZALEA_LEAVES
+            Material.FLOWERING_AZALEA_LEAVES, Material.PALE_OAK_LEAVES,
+            Material.RED_POPLAR_LEAVES, Material.ORANGE_POPLAR_LEAVES, Material.YELLOW_POPLAR_LEAVES
     );
 
     private static final Set<Material> MUSHROOM_BLOCK_MATERIALS = Set.of(
