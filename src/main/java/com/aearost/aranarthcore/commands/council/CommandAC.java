@@ -25,7 +25,7 @@ public class CommandAC implements CommandExecutor {
 	/**
 	 * Sub-commands that are destructive or affect the whole server, limited to Council rank 3 and the console.
 	 */
-	private static final Set<String> OWNER_SUBCOMMANDS = Set.of("disband", "reload", "reloadlang", "dateset", "discordreload");
+	private static final Set<String> OWNER_SUBCOMMANDS = Set.of("disband", "reload", "reloadlang", "dateset", "discordreload", "dominionrank");
 
 	/**
 	 * @param sender The user that entered the command.
@@ -161,6 +161,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandOG.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("worldevent")) {
 			commandResult = CommandWorldEvent.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("dominionrank")) {
+			commandResult = CommandDominionRank.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("disband")) {
 			if (args.length < 2) {
 				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac disband <dominion name>")));

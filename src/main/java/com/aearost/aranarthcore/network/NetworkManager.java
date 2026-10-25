@@ -84,6 +84,7 @@ public class NetworkManager {
     public static final String CH_DOMINION_CONQUEST_UPDATE = "aranarth:dominion_conquest_update";
     public static final String CH_DOMINION_BALANCE_ADJUST = "aranarth:dominion_balance_adjust";
     public static final String CH_DOMINION_UPDATE = "aranarth:dominion_update";
+    public static final String CH_DOMINION_LEVEL_OVERRIDE = "aranarth:dominion_level_override";
     public static final String CH_CHAT_GAME_START = "aranarth:chat_game_start";
     public static final String CH_CHAT_GAME_WIN = "aranarth:chat_game_win";
     public static final String CH_CHAT_GAME_EXPIRE = "aranarth:chat_game_expire";
@@ -552,6 +553,7 @@ public class NetworkManager {
             case CH_DOMINION_CONQUEST_UPDATE -> handleDominionConquestUpdate(json);
             case CH_DOMINION_BALANCE_ADJUST -> handleDominionBalanceAdjust(json);
             case CH_DOMINION_UPDATE -> handleDominionUpdate(json);
+            case CH_DOMINION_LEVEL_OVERRIDE -> handleDominionLevelOverride(json);
             case CH_CHAT_GAME_START -> handleChatGameStart(json);
             case CH_CHAT_GAME_WIN -> handleChatGameWin(json);
             case CH_CHAT_GAME_EXPIRE -> handleChatGameExpire(json);
@@ -3011,6 +3013,32 @@ public class NetworkManager {
         }
         UUID dominionId = UUID.fromString(json.get("dominionId").getAsString());
         Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> PersistenceUtils.reloadSyncedDominion(dominionId));
+    }
+
+    /**
+     * Asks the server hosting a dominion to temporarily set its level until its next re-evaluation.
+     *
+     * @param dominionId The UUID of the dominion.
+     * @param level      The temporary level.
+     */
+    public void publishDominionLevelOverride(UUID dominionId, int level) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("dominionId", dominionId.toString());
+        json.addProperty("level", level);
+        publish(CH_DOMINION_LEVEL_OVERRIDE, json);
+    }
+
+    private void handleDominionLevelOverride(JsonObject json) {
+        if (json.get("server").getAsString().equals(thisServer)) {
+            return;
+        }
+        UUID dominionId = UUID.fromString(json.get("dominionId").getAsString());
+        Dominion dominion = DominionUtils.getDominionById(dominionId);
+        // Only the hosting server re-evaluates levels, so it is the one that holds the override
+        if (dominion != null && DominionUtils.isHostedHere(dominion)) {
+            DominionLevelUtils.overrideLevel(dominion, json.get("level").getAsInt());
+        }
     }
 
     /**

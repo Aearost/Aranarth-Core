@@ -5,6 +5,7 @@ World & Events
 Bending & Abilities
 
 Dominion
+[+] Added the council command /ac dominionrank to temporarily update a dominion's level
 
 Aranarthium, Items & Crafting
 
