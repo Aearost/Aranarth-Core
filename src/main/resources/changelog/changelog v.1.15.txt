@@ -18,6 +18,7 @@ Chat, UI & Sounds
 
 Quality of Life
 [+] Added /vc list as an alias for /vc who
+[-] Made the Aranarth Support bot handle the preview of online players in Discord, rather than using AranarthCore for this
 
 Cross-server & Technical
 
