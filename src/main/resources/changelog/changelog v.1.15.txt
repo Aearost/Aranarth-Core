@@ -9,6 +9,7 @@ Bending & Abilities
 
 Dominion
 [+] Added the council command /ac dominionrank to temporarily update a dominion's level
+[~] Fixed inaccurate leader-only error when using /d resources despite having permission
 
 Aranarthium, Items & Crafting
 
