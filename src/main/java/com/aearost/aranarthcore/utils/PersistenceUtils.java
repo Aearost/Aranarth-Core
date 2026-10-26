@@ -42,6 +42,8 @@ public class PersistenceUtils {
     // Latest unsaved mount snapshot per player; only the newest is ever written
     private static final Map<UUID, String> pendingMountWrites = new ConcurrentHashMap<>();
     private static final Object MOUNT_WRITE_LOCK = new Object();
+    // Shops saved before shops recorded their server, which this server found the sign for and saves as its own
+    private static final Set<String> claimedLegacyShops = ConcurrentHashMap.newKeySet();
     // Used for one-time migration.
     private static final long[] OLD_CUMULATIVE_XP = {0, 500, 2500, 8500, 23500, 63500, 153500, 328500, 628500, 1128500};
 
@@ -1140,10 +1142,12 @@ public class PersistenceUtils {
                 }
             }
         }
-        // MySQL sync
+        // MySQL sync - each server only saves its own shops, since the other server's are not up to date here
         if (DatabaseManager.isActive()) {
-            runDbSync(PersistenceUtils::syncShopsToDatabase);
-            runDbSync(PersistenceUtils::syncServerShopsToDatabase);
+            Map<UUID, JsonArray> ownShops = getOwnShopsJson();
+            JsonArray ownServerShops = ownShops.remove(null);
+            runDbSync(() -> syncShopsToDatabase(ownShops));
+            runDbSync(() -> syncServerShopsToDatabase(ownServerShops != null ? ownServerShops : new JsonArray()));
         }
     }
 
@@ -6420,67 +6424,198 @@ public class PersistenceUtils {
     }
 
     /**
-     * Syncs per-player shop data to MySQL.
+     * Syncs this server's player shops to MySQL, keeping the other server's shops that are already saved.
+     *
+     * @param ownShops This server's shops by owner, from getOwnShopsJson().
      */
-    public static void syncShopsToDatabase() {
+    private static void syncShopsToDatabase(Map<UUID, JsonArray> ownShops) {
         if (!DatabaseManager.isActive()) {
             return;
         }
-        DatabaseManager db = DatabaseManager.getInstance();
-        for (Map.Entry<UUID, List<Shop>> entry : ShopUtils.getShops().entrySet()) {
-            UUID uuid = entry.getKey();
-            if (uuid == null) {
-                continue; // server shops are handled by syncServerShopsToDatabase
+        Map<UUID, String> merged = DatabaseManager.getInstance().mergePlayerShops(stored -> {
+            Set<UUID> uuids = new HashSet<>(stored.keySet());
+            for (UUID uuid : ownShops.keySet()) {
+                if (uuid != null) {
+                    uuids.add(uuid);
+                }
             }
-            JsonArray arr = new JsonArray();
-            for (Shop shop : entry.getValue()) {
-                JsonObject s = new JsonObject();
-                s.addProperty("worldName", shop.getWorldName());
-                s.addProperty("x", shop.getLocation().getBlockX());
-                s.addProperty("y", shop.getLocation().getBlockY());
-                s.addProperty("z", shop.getLocation().getBlockZ());
-                s.addProperty("item", ItemUtils.itemStackArrayToBase64(new ItemStack[]{shop.getItem()}));
-                s.addProperty("quantity", shop.getQuantity());
-                s.addProperty("buyPrice", shop.getBuyPrice());
-                s.addProperty("sellPrice", shop.getSellPrice());
-                arr.add(s);
+            Map<UUID, String> result = new HashMap<>();
+            for (UUID uuid : uuids) {
+                result.put(uuid, GSON.toJson(mergeShopsJson(stored.get(uuid), ownShops.get(uuid))));
             }
-            try {
-                db.savePlayerShops(uuid, GSON.toJson(arr));
-            } catch (Exception e) {
-                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync shops for " + uuid + ": " + e.getMessage());
-            }
+            return result;
+        });
+        if (merged != null) {
+            runOnMainThread(() -> merged.forEach(PersistenceUtils::refreshOtherServerShops));
         }
     }
 
     /**
-     * Syncs server shop data (null-UUID shops) to MySQL as a singleton blob.
+     * Syncs this server's server shops to MySQL, keeping the other server's server shops that are already saved.
+     *
+     * @param ownShops This server's server shops, from getOwnShopsJson().
      */
-    public static void syncServerShopsToDatabase() {
+    private static void syncServerShopsToDatabase(JsonArray ownShops) {
         if (!DatabaseManager.isActive()) {
             return;
         }
-        DatabaseManager db = DatabaseManager.getInstance();
-        List<Shop> serverShops = ShopUtils.getShops().get(null);
-        JsonArray arr = new JsonArray();
-        if (serverShops != null) {
-            for (Shop shop : serverShops) {
-                JsonObject s = new JsonObject();
-                s.addProperty("worldName", shop.getWorldName());
-                s.addProperty("x", shop.getLocation().getBlockX());
-                s.addProperty("y", shop.getLocation().getBlockY());
-                s.addProperty("z", shop.getLocation().getBlockZ());
-                s.addProperty("item", ItemUtils.itemStackArrayToBase64(new ItemStack[]{shop.getItem()}));
-                s.addProperty("quantity", shop.getQuantity());
-                s.addProperty("buyPrice", shop.getBuyPrice());
-                s.addProperty("sellPrice", shop.getSellPrice());
-                arr.add(s);
+        String merged = DatabaseManager.getInstance().mergeServerShops(stored -> GSON.toJson(mergeShopsJson(stored, ownShops)));
+        if (merged != null) {
+            runOnMainThread(() -> refreshOtherServerShops(null, merged));
+        }
+    }
+
+    /**
+     * Runs the task on the main thread, unless the plugin is shutting down.
+     */
+    private static void runOnMainThread(Runnable task) {
+        if (AranarthCore.getInstance().isEnabled() && !AranarthCore.isShutdownHookMode()) {
+            Bukkit.getScheduler().runTask(AranarthCore.getInstance(), task);
+        }
+    }
+
+    private static String getThisServerName() {
+        return AranarthCore.getInstance().getConfig().getString("network.this-server", "survival");
+    }
+
+    private static String getShopLocationKey(JsonObject s) {
+        return s.get("worldName").getAsString() + "," + s.get("x").getAsInt() + "," + s.get("y").getAsInt() + "," + s.get("z").getAsInt();
+    }
+
+    private static JsonObject shopToJson(Shop shop) {
+        JsonObject s = new JsonObject();
+        s.addProperty("worldName", shop.getWorldName());
+        s.addProperty("serverName", shop.getServerName());
+        s.addProperty("x", shop.getLocation().getBlockX());
+        s.addProperty("y", shop.getLocation().getBlockY());
+        s.addProperty("z", shop.getLocation().getBlockZ());
+        s.addProperty("item", ItemUtils.itemStackArrayToBase64(new ItemStack[]{shop.getItem()}));
+        s.addProperty("quantity", shop.getQuantity());
+        s.addProperty("buyPrice", shop.getBuyPrice());
+        s.addProperty("sellPrice", shop.getSellPrice());
+        return s;
+    }
+
+    /**
+     * Returns the shops on this server as JSON by owner, with server shops under the null key.
+     * Built on the main thread so the async save does not read the shops while they change.
+     */
+    private static Map<UUID, JsonArray> getOwnShopsJson() {
+        String thisServer = getThisServerName();
+        Map<UUID, JsonArray> ownShops = new HashMap<>();
+        for (Map.Entry<UUID, List<Shop>> entry : ShopUtils.getShops().entrySet()) {
+            JsonArray arr = new JsonArray();
+            for (Shop shop : entry.getValue()) {
+                if (thisServer.equals(shop.getServerName())) {
+                    arr.add(shopToJson(shop));
+                }
+            }
+            ownShops.put(entry.getKey(), arr);
+        }
+        return ownShops;
+    }
+
+    /**
+     * Keeps the other server's shops from the saved JSON and replaces this server's shops with the given ones.
+     */
+    private static JsonArray mergeShopsJson(String storedJson, JsonArray ownShops) {
+        String thisServer = getThisServerName();
+        JsonArray merged = new JsonArray();
+        if (storedJson != null && !storedJson.isBlank()) {
+            for (com.google.gson.JsonElement el : GSON.fromJson(storedJson, JsonArray.class)) {
+                JsonObject s = el.getAsJsonObject();
+                boolean isOwnShop = s.has("serverName")
+                        ? thisServer.equals(s.get("serverName").getAsString())
+                        : claimedLegacyShops.contains(getShopLocationKey(s));
+                if (!isOwnShop) {
+                    merged.add(s);
+                }
+            }
+        }
+        if (ownShops != null) {
+            merged.addAll(ownShops);
+        }
+        return merged;
+    }
+
+    /**
+     * Builds a shop from its saved JSON.
+     * Shops on the other server have no world, so they are not treated as a shop at the same spot on this server.
+     *
+     * @param uuid          The owner, or null for a server shop.
+     * @param s             The saved shop.
+     * @param resolveLegacy Whether a shop saved before shops recorded their server is checked for its sign on this server.
+     */
+    private static Shop shopFromJson(UUID uuid, JsonObject s, boolean resolveLegacy) {
+        String thisServer = getThisServerName();
+        String worldName = s.get("worldName").getAsString();
+        int x = s.get("x").getAsInt();
+        int y = s.get("y").getAsInt();
+        int z = s.get("z").getAsInt();
+        ItemStack item;
+        try {
+            item = ItemUtils.itemStackArrayFromBase64(s.get("item").getAsString())[0];
+        } catch (Exception ex) {
+            item = new ItemStack(Material.AIR, 1);
+        }
+        int quantity = s.get("quantity").getAsInt();
+        double buyPrice = s.get("buyPrice").getAsDouble();
+        double sellPrice = s.get("sellPrice").getAsDouble();
+
+        String serverName = "";
+        String locationKey = getShopLocationKey(s);
+        if (s.has("serverName")) {
+            serverName = s.get("serverName").getAsString();
+        } else if (claimedLegacyShops.contains(locationKey)) {
+            serverName = thisServer;
+        } else if (resolveLegacy) {
+            // Both servers have worlds with the same names, so the shop belongs to whichever server has its sign
+            World world = Bukkit.getWorld(worldName);
+            if (world != null && Tag.ALL_SIGNS.isTagged(world.getBlockAt(x, y, z).getType())) {
+                serverName = thisServer;
+                claimedLegacyShops.add(locationKey);
+            }
+        }
+
+        World world = thisServer.equals(serverName) ? Bukkit.getWorld(worldName) : null;
+        Shop shop = new Shop(uuid, new Location(world, x, y, z), item, quantity, buyPrice, sellPrice);
+        shop.setWorldName(worldName);
+        shop.setServerName(serverName);
+        return shop;
+    }
+
+    /**
+     * Replaces the other server's shops in memory with the latest saved ones, so shop limits and market values stay current.
+     *
+     * @param uuid The owner, or null for server shops.
+     * @param json The saved shops of the owner.
+     */
+    private static void refreshOtherServerShops(UUID uuid, String json) {
+        String thisServer = getThisServerName();
+        List<Shop> shops = new ArrayList<>();
+        List<Shop> current = ShopUtils.getShops().get(uuid);
+        if (current != null) {
+            for (Shop shop : current) {
+                if (thisServer.equals(shop.getServerName())) {
+                    shops.add(shop);
+                }
             }
         }
         try {
-            db.saveServerShops(GSON.toJson(arr));
+            for (com.google.gson.JsonElement el : GSON.fromJson(json, JsonArray.class)) {
+                Shop shop = shopFromJson(uuid, el.getAsJsonObject(), false);
+                if (!thisServer.equals(shop.getServerName())) {
+                    shops.add(shop);
+                }
+            }
         } catch (Exception e) {
-            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync server shops: " + e.getMessage());
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to refresh shops for " + uuid + ": " + e.getMessage());
+            return;
+        }
+        if (shops.isEmpty()) {
+            ShopUtils.getShops().remove(uuid);
+        } else {
+            ShopUtils.getShops().put(uuid, shops);
         }
     }
 
@@ -8605,24 +8740,7 @@ public class PersistenceUtils {
             try {
                 JsonArray arr = GSON.fromJson(entry.getValue(), JsonArray.class);
                 for (com.google.gson.JsonElement el : arr) {
-                    JsonObject s = el.getAsJsonObject();
-                    String worldName = s.get("worldName").getAsString();
-                    int x = s.get("x").getAsInt();
-                    int y = s.get("y").getAsInt();
-                    int z = s.get("z").getAsInt();
-                    ItemStack item;
-                    try {
-                        item = ItemUtils.itemStackArrayFromBase64(s.get("item").getAsString())[0];
-                    } catch (Exception ex) {
-                        item = new ItemStack(Material.AIR, 1);
-                    }
-                    int quantity = s.get("quantity").getAsInt();
-                    double buyPrice = s.get("buyPrice").getAsDouble();
-                    double sellPrice = s.get("sellPrice").getAsDouble();
-                    Location location = new Location(Bukkit.getWorld(worldName), x, y, z);
-                    Shop shop = new Shop(uuid, location, item, quantity, buyPrice, sellPrice);
-                    shop.setWorldName(worldName);
-                    ShopUtils.addShop(uuid, shop);
+                    ShopUtils.addShop(uuid, shopFromJson(uuid, el.getAsJsonObject(), true));
                 }
             } catch (Exception e) {
                 Bukkit.getLogger().warning("[AC] Failed to parse shops for " + uuid + ": " + e.getMessage());
@@ -8644,24 +8762,7 @@ public class PersistenceUtils {
         try {
             JsonArray arr = GSON.fromJson(json, JsonArray.class);
             for (com.google.gson.JsonElement el : arr) {
-                JsonObject s = el.getAsJsonObject();
-                String worldName = s.get("worldName").getAsString();
-                int x = s.get("x").getAsInt();
-                int y = s.get("y").getAsInt();
-                int z = s.get("z").getAsInt();
-                ItemStack item;
-                try {
-                    item = ItemUtils.itemStackArrayFromBase64(s.get("item").getAsString())[0];
-                } catch (Exception ex) {
-                    item = new ItemStack(Material.AIR, 1);
-                }
-                int quantity = s.get("quantity").getAsInt();
-                double buyPrice = s.get("buyPrice").getAsDouble();
-                double sellPrice = s.get("sellPrice").getAsDouble();
-                Location location = new Location(Bukkit.getWorld(worldName), x, y, z);
-                Shop shop = new Shop(null, location, item, quantity, buyPrice, sellPrice);
-                shop.setWorldName(worldName);
-                ShopUtils.addShop(null, shop);
+                ShopUtils.addShop(null, shopFromJson(null, el.getAsJsonObject(), true));
             }
             Bukkit.getLogger().info("[AC] Server shops initialized from MySQL");
         } catch (Exception e) {

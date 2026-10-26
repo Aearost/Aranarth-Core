@@ -11,6 +11,8 @@ import org.bukkit.Bukkit;
 import java.sql.*;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -2610,13 +2612,42 @@ public class DatabaseManager {
         return null;
     }
 
-    public void saveServerShops(String dataJson) {
-        String sql = "INSERT INTO server_shops (id, data_json) VALUES (1, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
-        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, dataJson);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save server shops: " + e.getMessage());
+    /**
+     * Rewrites the server shops while they are locked, so both servers saving at once cannot overwrite each other.
+     *
+     * @param merger Given the stored server shops JSON (or null), returns the JSON to store.
+     * @return The JSON that was stored, or null if it failed.
+     */
+    public String mergeServerShops(UnaryOperator<String> merger) {
+        String select = "SELECT data_json FROM server_shops WHERE id = 1 FOR UPDATE";
+        String upsert = "INSERT INTO server_shops (id, data_json) VALUES (1, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
+        try (Connection conn = dataSource.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                String stored = null;
+                try (PreparedStatement ps = conn.prepareStatement(select); ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        stored = rs.getString("data_json");
+                    }
+                }
+                String merged = merger.apply(stored);
+                if (!merged.equals(stored)) {
+                    try (PreparedStatement ps = conn.prepareStatement(upsert)) {
+                        ps.setString(1, merged);
+                        ps.executeUpdate();
+                    }
+                }
+                conn.commit();
+                return merged;
+            } catch (SQLException | RuntimeException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        } catch (SQLException | RuntimeException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to merge server shops: " + e.getMessage());
+            return null;
         }
     }
 
@@ -2720,14 +2751,47 @@ public class DatabaseManager {
         return result;
     }
 
-    public void savePlayerShops(UUID uuid, String dataJson) {
-        String sql = "INSERT INTO player_shops (uuid, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
-        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, uuid.toString());
-            ps.setString(2, dataJson);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save player shops for " + uuid + ": " + e.getMessage());
+    /**
+     * Rewrites every player's shops while they are locked, so both servers saving at once cannot overwrite each other.
+     *
+     * @param merger Given each player's stored shops JSON, returns the JSON to store for each player.
+     * @return The JSON that was stored for each player, or null if it failed.
+     */
+    public Map<UUID, String> mergePlayerShops(Function<Map<UUID, String>, Map<UUID, String>> merger) {
+        String select = "SELECT uuid, data_json FROM player_shops FOR UPDATE";
+        String upsert = "INSERT INTO player_shops (uuid, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
+        try (Connection conn = dataSource.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                Map<UUID, String> stored = new HashMap<>();
+                try (PreparedStatement ps = conn.prepareStatement(select); ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        stored.put(UUID.fromString(rs.getString("uuid")), rs.getString("data_json"));
+                    }
+                }
+                Map<UUID, String> merged = merger.apply(stored);
+                try (PreparedStatement ps = conn.prepareStatement(upsert)) {
+                    for (Map.Entry<UUID, String> entry : merged.entrySet()) {
+                        if (entry.getValue().equals(stored.get(entry.getKey()))) {
+                            continue;
+                        }
+                        ps.setString(1, entry.getKey().toString());
+                        ps.setString(2, entry.getValue());
+                        ps.addBatch();
+                    }
+                    ps.executeBatch();
+                }
+                conn.commit();
+                return merged;
+            } catch (SQLException | RuntimeException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        } catch (SQLException | RuntimeException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to merge player shops: " + e.getMessage());
+            return null;
         }
     }
 

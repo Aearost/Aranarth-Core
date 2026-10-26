@@ -9,11 +9,13 @@ import com.aearost.aranarthcore.objects.TradeMarketData;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 
 import java.util.*;
@@ -34,6 +36,15 @@ public class TradeMarketUtils {
     }
 
     public static void addTradeMarketData(TradeMarketData data) {
+        // Vanilla potions always use their generated name, since older entries were stored as just the material name
+        String potionName = getPotionDisplayName(data.getMarketKey());
+        if (potionName != null && getCustomEffectsFromKey(data.getMarketKey()).isEmpty()
+                && !potionName.equals(data.getDisplayName())) {
+            TradeMarketData renamed = new TradeMarketData(data.getMarketKey(), potionName, data.getMaterial(),
+                    data.getItemModelKey(), data.getTotalValue(), data.getTotalUnits(), data.getFirstPrice());
+            tradeMarketData.put(data.getMarketKey(), renamed);
+            return;
+        }
         tradeMarketData.put(data.getMarketKey(), data);
     }
 
@@ -88,6 +99,9 @@ public class TradeMarketUtils {
         if (meta != null && meta.hasDisplayName()) {
             return meta.getDisplayName(); // Already color-coded, colors intact
         }
+        if (meta instanceof PotionMeta pm && pm.getBasePotionType() != null) {
+            return getPotionDisplayName(item.getType(), pm.getBasePotionType());
+        }
         String[] words = item.getType().name().toLowerCase().split("_");
         StringBuilder sb = new StringBuilder();
         for (String word : words) {
@@ -96,6 +110,61 @@ public class TradeMarketUtils {
             }
         }
         return sb.toString().trim();
+    }
+
+    /**
+     * Returns the potion type stored in a potion market key, or null if the key is not for a potion.
+     */
+    private static PotionType getPotionTypeFromKey(String marketKey) {
+        String[] parts = marketKey.split(":");
+        if (parts.length < 2 || !isPotionMaterial(Material.matchMaterial(parts[0]))) {
+            return null;
+        }
+        try {
+            return PotionType.valueOf(parts[1]);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns the unique potion name for a potion market key, or null if the key is not for a potion.
+     */
+    private static String getPotionDisplayName(String marketKey) {
+        PotionType type = getPotionTypeFromKey(marketKey);
+        if (type == null) {
+            return null;
+        }
+        return getPotionDisplayName(Material.matchMaterial(marketKey.split(":")[0]), type);
+    }
+
+    private static boolean isPotionMaterial(Material mat) {
+        return mat == Material.POTION || mat == Material.SPLASH_POTION
+                || mat == Material.LINGERING_POTION || mat == Material.TIPPED_ARROW;
+    }
+
+    /**
+     * Builds the vanilla name for a potion such as "Splash Potion of Swiftness".
+     */
+    private static String getPotionDisplayName(Material mat, PotionType type) {
+        String typeName = type.name();
+        if (typeName.startsWith("LONG_") || typeName.startsWith("STRONG_")) {
+            typeName = typeName.substring(typeName.indexOf('_') + 1);
+        }
+        String effectName = typeName.equals("TURTLE_MASTER") ? "the Turtle Master" : ChatUtils.getFormattedItemName(typeName);
+
+        if (mat == Material.TIPPED_ARROW) {
+            return type == PotionType.WATER ? "Arrow of Splashing" : "Arrow of " + effectName;
+        }
+
+        String prefix = mat == Material.SPLASH_POTION ? "Splash " : mat == Material.LINGERING_POTION ? "Lingering " : "";
+        if (type == PotionType.WATER) {
+            return prefix + "Water Bottle";
+        }
+        if (type == PotionType.AWKWARD || type == PotionType.MUNDANE || type == PotionType.THICK) {
+            return prefix + effectName + " Potion";
+        }
+        return prefix + "Potion of " + effectName;
     }
 
     /**
@@ -268,18 +337,55 @@ public class TradeMarketUtils {
             mat = Material.PAPER;
         }
         ItemStack item = new ItemStack(mat);
-        if (data.getItemModelKey() != null || !data.getDisplayName().isEmpty()) {
-            ItemMeta meta = item.getItemMeta();
-            if (meta != null) {
-                if (data.getItemModelKey() != null) {
-                    NamespacedKey nk = NamespacedKey.fromString(data.getItemModelKey());
-                    if (nk != null) meta.setItemModel(nk);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            // Restores the potion type and effects so each potion shows its own color and effects
+            if (meta instanceof PotionMeta pm && isPotionMaterial(mat)) {
+                PotionType potionType = getPotionTypeFromKey(data.getMarketKey());
+                if (potionType != null) {
+                    pm.setBasePotionType(potionType);
                 }
-                meta.setDisplayName(data.getDisplayName()); // §-coded, colors already applied
-                item.setItemMeta(meta);
+                for (PotionEffect effect : getCustomEffectsFromKey(data.getMarketKey())) {
+                    pm.addCustomEffect(effect, true);
+                }
             }
+            if (data.getItemModelKey() != null) {
+                NamespacedKey nk = NamespacedKey.fromString(data.getItemModelKey());
+                if (nk != null) meta.setItemModel(nk);
+            }
+            // The display name is applied by the GUI so that it is not italicized
+            item.setItemMeta(meta);
         }
         return item;
+    }
+
+    /**
+     * Returns the custom potion effects stored in a potion market key.
+     */
+    private static List<PotionEffect> getCustomEffectsFromKey(String marketKey) {
+        List<PotionEffect> effects = new ArrayList<>();
+        // Skips the material, then the base potion type if there is one
+        String rest = marketKey.substring(marketKey.indexOf(':') + 1);
+        int baseEnd = rest.indexOf(':');
+        if (baseEnd > 0 && getPotionTypeFromKey(marketKey) != null) {
+            rest = rest.substring(baseEnd + 1);
+        }
+        for (String part : rest.split(";")) {
+            String[] fields = part.split(",");
+            if (fields.length != 3) {
+                continue;
+            }
+            NamespacedKey effectKey = NamespacedKey.fromString(fields[0]);
+            PotionEffectType type = effectKey == null ? null : Registry.EFFECT.get(effectKey);
+            if (type == null) {
+                continue;
+            }
+            try {
+                effects.add(new PotionEffect(type, Integer.parseInt(fields[2]), Integer.parseInt(fields[1])));
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        return effects;
     }
 
     /**

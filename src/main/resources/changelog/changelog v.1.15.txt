@@ -17,6 +17,7 @@ Economy, Jobs & Quests
 [~] Market sell prices now drop at a proportional rate to the item's max stack size
 [+] Poplar and Pale Oak logs now count towards quests and Lumberjack job XP
 [~] Every 10 seconds, players now see in their action bar how much money their jobs earned them in that time
+[~] Potions in /mv are now grouped by effect, amplifier, and duration, instead of all showing as "Potion"
 
 Chat, UI & Sounds
 [+] /mcstats now also shows the levels of the 3 sub-skills

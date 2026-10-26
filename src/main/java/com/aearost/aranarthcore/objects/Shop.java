@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.objects;
 
+import com.aearost.aranarthcore.AranarthCore;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
@@ -17,6 +18,8 @@ public class Shop {
     private int quantity;
     private double buyPrice;
     private double sellPrice;
+    // The server the shop is on, since both servers have worlds with the same names
+    private String serverName;
 
     public Shop(UUID uuid, Location location, ItemStack item, int quantity, double buyPrice, double sellPrice) {
         this.uuid = uuid;
@@ -26,6 +29,7 @@ public class Shop {
         this.quantity = quantity;
         this.buyPrice = buyPrice;
         this.sellPrice = sellPrice;
+        this.serverName = AranarthCore.getInstance().getConfig().getString("network.this-server", "survival");
     }
 
     /**
@@ -65,6 +69,9 @@ public class Shop {
 
     public String getWorldName() { return worldName; }
     public void setWorldName(String worldName) { this.worldName = worldName; }
+
+    public String getServerName() { return serverName; }
+    public void setServerName(String serverName) { this.serverName = serverName; }
 
     /**
      * Provides the shop's item.
