@@ -21,6 +21,10 @@ Economy, Jobs & Quests
 Chat, UI & Sounds
 [+] /mcstats now also shows the levels of the 3 sub-skills
 [+] /mcstats now shows the Gathering, Combat and Misc level totals, along with the highest rank each total qualifies for
+[~] Overhauled the /aranarth guide text content for every topic
+[+] Added new topics for Creative, new Fire Types, Dominion Commands and 9 Mechanics pages
+[~] Corrected outdated pages across every topic
+[~] Made every topic menu be centered automatically
 
 Quality of Life
 [+] Added /vc list as an alias for /vc who

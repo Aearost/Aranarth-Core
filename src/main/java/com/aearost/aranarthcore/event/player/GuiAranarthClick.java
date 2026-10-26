@@ -63,6 +63,10 @@ public class GuiAranarthClick {
                 player.closeInventory();
                 player.performCommand("aranarth mechanics");
             }
+            case GuiAranarth.SLOT_CREATIVE -> {
+                player.closeInventory();
+                player.performCommand("aranarth creative");
+            }
             case GuiAranarth.SLOT_RECIPES -> {
                 player.closeInventory();
                 player.performCommand("aranarth recipes");

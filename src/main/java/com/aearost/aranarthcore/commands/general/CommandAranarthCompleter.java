@@ -13,7 +13,7 @@ public class CommandAranarthCompleter implements TabCompleter {
 
     private static final List<String> TOPICS = List.of(
             "calendar", "aranarthium", "essences", "rules",
-            "dominions", "bending", "ranks", "economy", "perks", "mechanics", "recipes"
+            "dominions", "bending", "ranks", "economy", "perks", "mechanics", "creative", "recipes"
     );
 
     @Override
@@ -25,18 +25,9 @@ public class CommandAranarthCompleter implements TabCompleter {
         }
 
         if (args.length == 2) {
-            List<String> chapters = switch (args[0].toLowerCase()) {
-                case "calendar" -> CommandAranarth.CALENDAR_MONTHS;
-                case "aranarthium" -> CommandAranarth.ARANARTHIUM_SECTIONS;
-                case "essences" -> CommandAranarth.ESSENCE_SECTIONS;
-                case "dominions" -> CommandAranarth.DOMINION_SECTIONS;
-                case "bending" -> CommandAranarth.BENDING_SECTIONS;
-                case "ranks" -> CommandAranarth.RANKS_SECTIONS;
-                case "economy" -> CommandAranarth.ECONOMY_SECTIONS;
-                case "perks" -> CommandAranarth.PERKS_SECTIONS;
-                case "mechanics" -> CommandAranarth.MECHANICS_SECTIONS;
-                default -> List.of();
-            };
+            List<String> chapters = args[0].equalsIgnoreCase("calendar")
+                    ? CommandAranarth.CALENDAR_MONTHS
+                    : CommandAranarth.getSections(args[0].toLowerCase());
             return chapters.stream()
                     .filter(c -> c.startsWith(args[1].toLowerCase()))
                     .toList();

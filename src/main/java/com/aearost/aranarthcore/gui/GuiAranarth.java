@@ -27,9 +27,10 @@ public class GuiAranarth {
     public static final int SLOT_CALENDAR = 21;
     public static final int SLOT_ARANARTHIUM = 23;
     public static final int SLOT_ESSENCES = 25;
-    public static final int SLOT_PERKS = 29;
-    public static final int SLOT_MECHANICS = 31;
-    public static final int SLOT_RECIPES = 33;
+    public static final int SLOT_PERKS = 28;
+    public static final int SLOT_MECHANICS = 30;
+    public static final int SLOT_CREATIVE = 32;
+    public static final int SLOT_RECIPES = 34;
 
     private final Player player;
     private final Inventory gui;
@@ -139,6 +140,14 @@ public class GuiAranarth {
                 List.of(
                         Lang.getFor(player, "gui.aranarth.mechanics_lore1"),
                         Lang.getFor(player, "gui.aranarth.mechanics_lore2")
+                )
+        ));
+        inv.setItem(SLOT_CREATIVE, buildItem(
+                Material.BRICKS,
+                Lang.getFor(player, "gui.aranarth.creative_name"),
+                List.of(
+                        Lang.getFor(player, "gui.aranarth.creative_lore1"),
+                        Lang.getFor(player, "gui.aranarth.creative_lore2")
                 )
         ));
         inv.setItem(SLOT_RECIPES, buildItem(
