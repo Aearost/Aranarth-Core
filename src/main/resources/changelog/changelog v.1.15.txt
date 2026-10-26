@@ -28,5 +28,6 @@ Quality of Life
 [~] Clarified the Arcane Ascension description
 
 Cross-server & Technical
+[~] AFK players are now marked with [AFK] in the Discord online player list
 
 Miscellaneous

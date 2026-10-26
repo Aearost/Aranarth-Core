@@ -213,6 +213,7 @@ public class DatabaseManager {
                 architect_rank INT DEFAULT 0,
                 vanished TINYINT(1) DEFAULT 0,
                 pronouns VARCHAR(64) DEFAULT '',
+                afk TINYINT(1) NOT NULL DEFAULT 0,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
@@ -565,7 +566,8 @@ public class DatabaseManager {
                 "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_z DOUBLE NOT NULL DEFAULT 0",
                 "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_server VARCHAR(32) NULL DEFAULT NULL",
                 "ALTER TABLE network_temp_data MODIFY COLUMN value_json MEDIUMTEXT NOT NULL",
-                "ALTER TABLE network_roster ADD COLUMN IF NOT EXISTS pronouns VARCHAR(10) NOT NULL DEFAULT 'MALE'"
+                "ALTER TABLE network_roster ADD COLUMN IF NOT EXISTS pronouns VARCHAR(10) NOT NULL DEFAULT 'MALE'",
+                "ALTER TABLE network_roster ADD COLUMN IF NOT EXISTS afk TINYINT(1) NOT NULL DEFAULT 0"
         };
         try (Connection conn = dataSource.getConnection(); Statement stmt = conn.createStatement()) {
             for (String sql : migrations) {
@@ -1283,7 +1285,7 @@ public class DatabaseManager {
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE username=VALUES(username), nickname=VALUES(nickname), server=VALUES(server),
                 `rank`=VALUES(`rank`), council_rank=VALUES(council_rank), saint_rank=VALUES(saint_rank),
-                architect_rank=VALUES(architect_rank), vanished=VALUES(vanished), pronouns=VALUES(pronouns)
+                architect_rank=VALUES(architect_rank), vanished=VALUES(vanished), pronouns=VALUES(pronouns), afk=0
                 """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -1316,6 +1318,18 @@ public class DatabaseManager {
             ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to update roster pronouns for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    public void updateRosterAfk(UUID uuid, boolean afk) {
+        String sql = "UPDATE network_roster SET afk = ? WHERE uuid = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBoolean(1, afk);
+            ps.setString(2, uuid.toString());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to update roster AFK status for " + uuid + ": " + e.getMessage());
         }
     }
 

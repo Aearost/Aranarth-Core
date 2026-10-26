@@ -1178,6 +1178,10 @@ public class NetworkManager {
     }
 
     public void publishAfkStatus(UUID uuid, String nickname, boolean isAfk) {
+        // Update DB so the Discord bot's !online list can show who is AFK
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
+                db.updateRosterAfk(uuid, isAfk)
+        );
         JsonObject json = new JsonObject();
         json.addProperty("server", thisServer);
         json.addProperty("uuid", uuid.toString());
