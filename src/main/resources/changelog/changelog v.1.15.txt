@@ -3,6 +3,7 @@ AranarthCore v. 1.15
 World & Events
 
 Bending & Abilities
+[~] EnergyBurst's fall auto-proc now only triggers after falling at least 10 blocks
 
 Dominion
 [+] Added the council command /ac dominionrank to temporarily update a dominion's level

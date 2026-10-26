@@ -1643,7 +1643,6 @@ public class AranarthCoreBendingListener implements Listener {
 
     /**
      * Triggers EnergyBurst as a fall proc when the player lands with EnergyBurst bound.
-     * Damage scales from FallBurstMinDamage at FallBurstMinDistance to full damage at FallBurstMaxDistance.
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEnergyBurstFallProc(final PlayerMoveEvent e) {
@@ -1670,7 +1669,7 @@ public class AranarthCoreBendingListener implements Listener {
         // The landing move's own drop is not yet included in the tracked distance
         final float fallDistance = Math.max(player.getFallDistance(),
                 trackedDistance + (float) Math.max(0, e.getFrom().getY() - e.getTo().getY()));
-        if (fallDistance < EnergyBurst.getFallBurstMinDistance()) {
+        if (fallDistance < EnergyBurst.getFallBurstTriggerDistance()) {
             return;
         }
         if (bPlayer.isChiBlocked() || bPlayer.isOnCooldown("EnergyBurst") || EnergyBurst.hasActiveInstance(uuid)) {

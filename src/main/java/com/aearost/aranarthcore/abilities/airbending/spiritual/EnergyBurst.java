@@ -27,8 +27,8 @@ public class EnergyBurst extends SpiritualAbility implements AddonAbility {
     private final long burstDuration;
     private static final int BOLTS_PER_TICK = 7;
 
-    // Fall burst scaling: 0.5 hearts (1.0 HP) at the vanilla fall-damage threshold, full damage at 75 blocks
-    private final double fallBurstMinDistance;
+    // Fall burst scaling: FallBurstMinDamage at the trigger distance, full damage at FallBurstMaxDistance
+    private final double fallBurstTriggerDistance;
     private final double fallBurstMaxDistance;
     private final double fallBurstMinDamage;
 
@@ -59,7 +59,7 @@ public class EnergyBurst extends SpiritualAbility implements AddonAbility {
         this.damage = AbilityConfig.getDouble("EnergyBurst.Damage");
         this.burstRadius = AbilityConfig.getDouble("EnergyBurst.Radius");
         this.burstDuration = AbilityConfig.getLong("EnergyBurst.BurstDuration");
-        this.fallBurstMinDistance = AbilityConfig.getDouble("EnergyBurst.FallBurstMinDistance");
+        this.fallBurstTriggerDistance = AbilityConfig.getDouble("EnergyBurst.FallBurstTriggerDistance");
         this.fallBurstMaxDistance = AbilityConfig.getDouble("EnergyBurst.FallBurstMaxDistance");
         this.fallBurstMinDamage = AbilityConfig.getDouble("EnergyBurst.FallBurstMinDamage");
         this.state = State.CHARGING;
@@ -75,7 +75,7 @@ public class EnergyBurst extends SpiritualAbility implements AddonAbility {
 
     /**
      * Fall-proc constructor. Immediately fires the burst with damage scaled by fall distance:
-     * 0.5 hearts at the vanilla fall threshold, full damage at fallBurstMaxDistance blocks.
+     * fallBurstMinDamage at fallBurstTriggerDistance blocks, full damage at fallBurstMaxDistance blocks.
      */
     public EnergyBurst(final Player player, final float fallDistance) {
         super(player);
@@ -85,7 +85,7 @@ public class EnergyBurst extends SpiritualAbility implements AddonAbility {
         this.damage = AbilityConfig.getDouble("EnergyBurst.Damage");
         this.burstRadius = AbilityConfig.getDouble("EnergyBurst.Radius");
         this.burstDuration = AbilityConfig.getLong("EnergyBurst.BurstDuration");
-        this.fallBurstMinDistance = AbilityConfig.getDouble("EnergyBurst.FallBurstMinDistance");
+        this.fallBurstTriggerDistance = AbilityConfig.getDouble("EnergyBurst.FallBurstTriggerDistance");
         this.fallBurstMaxDistance = AbilityConfig.getDouble("EnergyBurst.FallBurstMaxDistance");
         this.fallBurstMinDamage = AbilityConfig.getDouble("EnergyBurst.FallBurstMinDamage");
         this.heldSlot = player.getInventory().getHeldItemSlot();
@@ -95,7 +95,7 @@ public class EnergyBurst extends SpiritualAbility implements AddonAbility {
         }
 
         final double t = Math.min(1.0, Math.max(0.0,
-                (fallDistance - fallBurstMinDistance) / (fallBurstMaxDistance - fallBurstMinDistance)));
+                (fallDistance - fallBurstTriggerDistance) / (fallBurstMaxDistance - fallBurstTriggerDistance)));
         final double scaledDamage = fallBurstMinDamage + t * (this.damage - fallBurstMinDamage);
 
         applyBurstEffects(scaledDamage);
@@ -331,8 +331,8 @@ public class EnergyBurst extends SpiritualAbility implements AddonAbility {
         fallTracks.remove(uuid);
     }
 
-    public static double getFallBurstMinDistance() {
-        return AbilityConfig.getDouble("EnergyBurst.FallBurstMinDistance");
+    public static double getFallBurstTriggerDistance() {
+        return AbilityConfig.getDouble("EnergyBurst.FallBurstTriggerDistance");
     }
 
     @Override

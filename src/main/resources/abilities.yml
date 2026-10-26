@@ -265,8 +265,9 @@ EnergyBurst:
   ChargeDuration: 1500
   Radius: 8.0
   BurstDuration: 1500
-  # When triggered by falling, damage scales from FallBurstMinDamage at FallBurstMinDistance to full damage at FallBurstMaxDistance
-  FallBurstMinDistance: 3.0
+  # Falling at least FallBurstTriggerDistance blocks auto-triggers the burst on landing
+  # Damage scales from FallBurstMinDamage at FallBurstTriggerDistance to full damage at FallBurstMaxDistance
+  FallBurstTriggerDistance: 10.0
   FallBurstMaxDistance: 75.0
   FallBurstMinDamage: 1.0
 
