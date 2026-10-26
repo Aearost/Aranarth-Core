@@ -1784,6 +1784,7 @@ public class AranarthCore extends JavaPlugin {
     public void onDisable() {
         savedOnDisable = true;
         SitUtils.standUpAll();
+        PetRallyUtils.endAllRallies();
         saveAll();
 
         if (squaremapIntegration != null) {
