@@ -3,9 +3,19 @@ package com.aearost.aranarthcore.utils;
 import com.aearost.aranarthcore.enums.WanderingTraderType;
 import com.aearost.aranarthcore.items.ChorusDiamond;
 import com.aearost.aranarthcore.items.GodAppleFragment;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.CustomKeys;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.HeightMap;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.TraderLlama;
 import org.bukkit.entity.WanderingTrader;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantRecipe;
@@ -169,6 +179,142 @@ public class WanderingTraderUtils {
         new PotionOption(PotionType.WATER,           PotionEffectType.WITHER,          1800,  440, 2, true),
         new PotionOption(PotionType.WATER,           PotionEffectType.ABSORPTION,      2100,  900, 2, true)
     );
+
+    private static final int TRADER_DESPAWN_DELAY = 48000;
+    private static final int MIN_SPAWN_RADIUS = 16;
+    private static final int MAX_SPAWN_RADIUS = 48;
+    private static final int SPAWN_ATTEMPTS = 10;
+
+    /**
+     * Determines if a naturally spawning Wandering Trader should be moved to another player.
+     * @param location The location the Wandering Trader is spawning at.
+     * @return true if the Wandering Trader should be relocated
+     */
+    public static boolean shouldRelocateTrader(Location location) {
+        if (!isTraderWorld(location.getWorld())) {
+            return false;
+        }
+        boolean isNearAfkPlayer = false;
+        for (Player player : location.getWorld().getPlayers()) {
+            if (player.getLocation().distance(location) > MAX_SPAWN_RADIUS + 16) {
+                continue;
+            }
+            if (!AranarthUtils.isAfk(AranarthUtils.getPlayer(player.getUniqueId()))) {
+                return false;
+            }
+            isNearAfkPlayer = true;
+        }
+        return isNearAfkPlayer;
+    }
+
+    /**
+     * Spawns a Wandering Trader and its two Trader Llamas nearby a random online player that is not AFK.
+     * @return true if a Wandering Trader was spawned
+     */
+    public static boolean spawnTraderNearRandomPlayer() {
+        List<Player> eligiblePlayers = new ArrayList<>();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (isEligibleForTrader(player)) {
+                eligiblePlayers.add(player);
+            }
+        }
+        Collections.shuffle(eligiblePlayers);
+
+        for (Player player : eligiblePlayers) {
+            Location spawnLocation = findSpawnLocation(player.getLocation(), MIN_SPAWN_RADIUS, MAX_SPAWN_RADIUS);
+            if (spawnLocation == null) {
+                continue;
+            }
+
+            Location playerLocation = player.getLocation();
+            WanderingTrader trader = spawnLocation.getWorld().spawn(spawnLocation, WanderingTrader.class, wt -> {
+                wt.setDespawnDelay(TRADER_DESPAWN_DELAY);
+                wt.setWanderingTowards(playerLocation);
+            });
+            if (!trader.isValid()) {
+                continue;
+            }
+
+            for (int i = 0; i < 2; i++) {
+                Location llamaLocation = findSpawnLocation(spawnLocation, 1, 4);
+                if (llamaLocation == null) {
+                    llamaLocation = spawnLocation;
+                }
+                TraderLlama llama = llamaLocation.getWorld().spawn(llamaLocation, TraderLlama.class);
+                if (llama.isValid()) {
+                    llama.setLeashHolder(trader);
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Determines if a Wandering Trader can be spawned nearby the player.
+     * @param player The player.
+     * @return true if the player is eligible
+     */
+    private static boolean isEligibleForTrader(Player player) {
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        if (aranarthPlayer == null || AranarthUtils.isAfk(aranarthPlayer) || aranarthPlayer.isVanished()) {
+            return false;
+        }
+        if (player.isDead() || player.getGameMode() == GameMode.SPECTATOR) {
+            return false;
+        }
+        return isTraderWorld(player.getWorld()) && !AranarthUtils.isSpawnLocation(player.getLocation());
+    }
+
+    /**
+     * Determines if Wandering Traders can spawn in the world.
+     * @param world The world.
+     * @return true if it is an overworld that Wandering Traders spawn in
+     */
+    private static boolean isTraderWorld(World world) {
+        if (world.getEnvironment() != World.Environment.NORMAL) {
+            return false;
+        }
+        String worldName = world.getName();
+        return worldName.equals("world") || worldName.equals("resource") || AranarthUtils.isSmpWorld(worldName);
+    }
+
+    /**
+     * Finds a safe surface location within the given radius of the center, only within already loaded chunks.
+     * @param center The center location.
+     * @param minRadius The minimum horizontal distance from the center.
+     * @param maxRadius The maximum horizontal distance from the center.
+     * @return the location, or null if none could be found
+     */
+    private static Location findSpawnLocation(Location center, int minRadius, int maxRadius) {
+        World world = center.getWorld();
+        for (int attempt = 0; attempt < SPAWN_ATTEMPTS; attempt++) {
+            double angle = RANDOM.nextDouble() * Math.PI * 2;
+            double distance = minRadius + RANDOM.nextDouble() * (maxRadius - minRadius);
+            int x = center.getBlockX() + (int) Math.round(Math.cos(angle) * distance);
+            int z = center.getBlockZ() + (int) Math.round(Math.sin(angle) * distance);
+            if (!world.isChunkLoaded(x >> 4, z >> 4)) {
+                continue;
+            }
+
+            Block ground = world.getHighestBlockAt(x, z, HeightMap.MOTION_BLOCKING_NO_LEAVES);
+            Block feet = ground.getRelative(BlockFace.UP);
+            Block head = feet.getRelative(BlockFace.UP);
+            if (!ground.getType().isSolid() || ground.isLiquid()) {
+                continue;
+            }
+            if (!feet.isPassable() || feet.isLiquid() || !head.isPassable() || head.isLiquid()) {
+                continue;
+            }
+
+            Location location = feet.getLocation().add(0.5, 0, 0.5);
+            if (!world.getWorldBorder().isInside(location) || AranarthUtils.isSpawnLocation(location)) {
+                continue;
+            }
+            return location;
+        }
+        return null;
+    }
 
     /**
      * Selects a trader type.

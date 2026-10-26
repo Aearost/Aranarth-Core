@@ -2,6 +2,7 @@ AranarthCore v. 1.15
 
 World & Events
 [+] The Horn of the Target now also sends nearby pet wolves and cats after the targeted area
+[~] Wandering Traders that spawn nearby AFK players now spawn nearby another online player that is not AFK instead
 
 Bending & Abilities
 [~] EnergyBurst's fall auto-proc now only triggers after falling at least 10 blocks
