@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.enums.JobType;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.JobData;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -12,6 +13,8 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -32,6 +35,9 @@ public class JobUtils {
     // Builder pay is only given for blocks that are still in place after this delay
     public static final long BUILDER_PAY_DELAY_MS = 3 * 60 * 1000L;
     private static final ArrayDeque<PendingBuild> pendingBuilds = new ArrayDeque<>();
+    public static final long EARNINGS_SUMMARY_INTERVAL_MS = 10 * 1000L;
+    private static final Map<UUID, Double> recentEarnings = new HashMap<>();
+    private static final Map<UUID, Long> earningsWindowStart = new HashMap<>();
 
     /**
      * A placed block whose Builder pay is held until it has stayed in place long enough.
@@ -133,6 +139,7 @@ public class JobUtils {
         if (NetworkManager.isActive()) {
             NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), actualPay);
         }
+        trackEarnings(player.getUniqueId(), actualPay);
 
         if (level < 10) {
             double xpGain = basePay * 100;
@@ -191,6 +198,48 @@ public class JobUtils {
             if (player != null) {
                 awardJob(player, JobType.BUILDER, entry.getValue());
             }
+        }
+    }
+
+    /**
+     * Adds job pay to the player's running total, starting a new summary window if one is not already running.
+     */
+    private static void trackEarnings(UUID playerUuid, double amount) {
+        if (amount <= 0) {
+            return;
+        }
+        recentEarnings.merge(playerUuid, amount, Double::sum);
+        earningsWindowStart.putIfAbsent(playerUuid, System.currentTimeMillis());
+    }
+
+    /**
+     * Shows each player how much they earned from jobs once their summary window has elapsed.
+     */
+    public static void processEarningsSummaries() {
+        long now = System.currentTimeMillis();
+        Iterator<Map.Entry<UUID, Long>> iterator = earningsWindowStart.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<UUID, Long> entry = iterator.next();
+            UUID uuid = entry.getKey();
+            Player player = Bukkit.getPlayer(uuid);
+            if (player == null) {
+                iterator.remove();
+                recentEarnings.remove(uuid);
+                continue;
+            }
+            if (now - entry.getValue() < EARNINGS_SUMMARY_INTERVAL_MS) {
+                continue;
+            }
+            double earned = recentEarnings.getOrDefault(uuid, 0.0);
+            if (earned < 0.005) {
+                iterator.remove();
+                recentEarnings.remove(uuid);
+                continue;
+            }
+            player.sendActionBar(LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(
+                    Lang.getFor(player, "jobs.earned_recently", "amount", String.format(Locale.US, "%,.2f", earned)))));
+            recentEarnings.put(uuid, 0.0);
+            entry.setValue(now);
         }
     }
 

@@ -125,6 +125,8 @@ public class JobEventListener implements Listener {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
         // Pays Builders for blocks that stayed in place, checked every 30 seconds
         plugin.getServer().getScheduler().runTaskTimer(plugin, JobUtils::processPendingBuilderPay, 600L, 600L);
+        // Shows each player their recent job earnings, checked every second
+        plugin.getServer().getScheduler().runTaskTimer(plugin, JobUtils::processEarningsSummaries, 20L, 20L);
     }
 
     private boolean hasChunkPermission(Player player, Chunk chunk, DominionPermission permission) {
