@@ -132,6 +132,7 @@ public class NetworkManager {
     public static final String CH_HEARTBEAT = "aranarth:heartbeat";
     public static final String CH_RESOURCE_WORLD_LOCK = "aranarth:resource_world_lock";
     public static final String CH_AVATAR_UPDATE = "aranarth:avatar_update";
+    public static final String CH_ORIGINAL_PLAYER_UPDATE = "aranarth:original_player_update";
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
     private static final String KEY_RETURN_LOC = "return_loc:";
@@ -602,6 +603,7 @@ public class NetworkManager {
             case CH_HEARTBEAT -> handleHeartbeat(json);
             case CH_RESOURCE_WORLD_LOCK -> handleResourceWorldLock(json);
             case CH_AVATAR_UPDATE -> handleAvatarUpdate(json);
+            case CH_ORIGINAL_PLAYER_UPDATE -> handleOriginalPlayerUpdate(json);
         }
     }
 
@@ -1183,6 +1185,17 @@ public class NetworkManager {
         json.addProperty("isNewAvatar", isNewAvatar);
         json.add("avatars", PersistenceUtils.avatarsToJson());
         publish(CH_AVATAR_UPDATE, json);
+    }
+
+    /**
+     * Notifies all other servers that a player was added to or removed from the OG list.
+     */
+    public void publishOriginalPlayerUpdate(UUID uuid, boolean isOriginal) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", uuid.toString());
+        json.addProperty("isOriginal", isOriginal);
+        publish(CH_ORIGINAL_PLAYER_UPDATE, json);
     }
 
     /**
@@ -2701,6 +2714,22 @@ public class NetworkManager {
         boolean isNewAvatar = json.get("isNewAvatar").getAsBoolean();
         List<Avatar> avatars = PersistenceUtils.avatarsFromJson(json.getAsJsonArray("avatars"));
         AvatarUtils.applyRemoteUpdate(avatars, uuid, isNewAvatar);
+    }
+
+    private void handleOriginalPlayerUpdate(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        boolean isOriginal = json.get("isOriginal").getAsBoolean();
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+            if (isOriginal) {
+                AranarthUtils.addOriginalPlayer(uuid);
+            } else {
+                AranarthUtils.removeOriginalPlayer(uuid);
+            }
+        });
     }
 
     private void handleMarketUpdate(JsonObject json) {

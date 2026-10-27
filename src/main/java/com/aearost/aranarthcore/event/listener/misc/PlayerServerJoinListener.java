@@ -77,14 +77,15 @@ public class PlayerServerJoinListener implements Listener {
         if (e.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
             return;
         }
-        if (!AranarthCore.isSmpServer() || !NetworkManager.isActive()) {
+        if (!AranarthCore.isSmpServer()) {
             return;
         }
         UUID uuid = e.getUniqueId();
         if (AranarthUtils.isOriginalPlayer(uuid)) {
             return;
         }
-        if (NetworkManager.getInstance().getPendingTeleport(uuid) != null) {
+        // Fails closed when the network is down, as this is the SMP's only whitelist
+        if (NetworkManager.isActive() && NetworkManager.getInstance().getPendingTeleport(uuid) != null) {
             return;
         }
         Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] Refused SMP connection for " + e.getName()

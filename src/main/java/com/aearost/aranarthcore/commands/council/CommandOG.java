@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.council;
 
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -42,7 +43,10 @@ public class CommandOG {
                     sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "og.already_og", "name", targetName)));
                 } else {
                     AranarthUtils.addOriginalPlayer(targetUuid);
-                    PersistenceUtils.saveOriginalPlayers();
+                    PersistenceUtils.saveOriginalPlayer(targetUuid, true);
+                    if (NetworkManager.isActive()) {
+                        NetworkManager.getInstance().publishOriginalPlayerUpdate(targetUuid, true);
+                    }
                     sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "og.added", "player", targetName)));
                 }
             }
@@ -51,7 +55,10 @@ public class CommandOG {
                     sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "og.not_og", "name", targetName)));
                 } else {
                     AranarthUtils.removeOriginalPlayer(targetUuid);
-                    PersistenceUtils.saveOriginalPlayers();
+                    PersistenceUtils.saveOriginalPlayer(targetUuid, false);
+                    if (NetworkManager.isActive()) {
+                        NetworkManager.getInstance().publishOriginalPlayerUpdate(targetUuid, false);
+                    }
                     sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "og.removed", "player", targetName)));
                 }
             }

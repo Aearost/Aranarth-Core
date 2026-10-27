@@ -2459,6 +2459,11 @@ public class PersistenceUtils {
                     DatabaseManager.getInstance().mergeOriginalPlayers(fileUuids);
                     Bukkit.getLogger().info("[AC] Merged " + fileUuids.size() + " original players from file into database");
                 }
+                // Retire the file so a later /ac og remove is not undone by re-merging it on the next startup
+                File migratedFile = new File(filePath + ".migrated");
+                if (!file.renameTo(migratedFile)) {
+                    Bukkit.getLogger().warning("[AC] Could not rename original_players.txt after migrating it to the database");
+                }
             }
 
             List<UUID> uuids = DatabaseManager.getInstance().loadAllOriginalPlayers();
@@ -2468,11 +2473,12 @@ public class PersistenceUtils {
     }
 
     /**
-     * Saves the original players list to the database.
+     * Saves a single original player addition or removal to the database.
      */
-    public static void saveOriginalPlayers() {
+    public static void saveOriginalPlayer(UUID uuid, boolean isOriginal) {
         if (DatabaseManager.isActive()) {
-            DatabaseManager.getInstance().saveAllOriginalPlayers(AranarthUtils.getOriginalPlayers());
+            Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                    () -> DatabaseManager.getInstance().setOriginalPlayer(uuid, isOriginal));
         } else {
             Bukkit.getLogger().warning("[AC] Database is not active, original players could not be saved!");
         }

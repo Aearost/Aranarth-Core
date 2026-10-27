@@ -2933,27 +2933,19 @@ public class DatabaseManager {
     }
 
     /**
-     * Replaces all rows in server_original_players with the given list.
+     * Adds or removes a single row in server_original_players. Writes per row rather than replacing the
+     * whole table so a stale in-memory list on one server can never wipe a change made on the other.
      */
-    public void saveAllOriginalPlayers(List<UUID> uuids) {
-        try (Connection conn = dataSource.getConnection()) {
-            conn.setAutoCommit(false);
-            try (PreparedStatement del = conn.prepareStatement("DELETE FROM server_original_players")) {
-                del.executeUpdate();
-            }
-            if (!uuids.isEmpty()) {
-                try (PreparedStatement ins = conn.prepareStatement(
-                        "INSERT IGNORE INTO server_original_players (uuid) VALUES (?)")) {
-                    for (UUID uuid : uuids) {
-                        ins.setString(1, uuid.toString());
-                        ins.addBatch();
-                    }
-                    ins.executeBatch();
-                }
-            }
-            conn.commit();
+    public void setOriginalPlayer(UUID uuid, boolean isOriginal) {
+        String sql = isOriginal
+                ? "INSERT IGNORE INTO server_original_players (uuid) VALUES (?)"
+                : "DELETE FROM server_original_players WHERE uuid = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            ps.executeUpdate();
         } catch (SQLException e) {
-            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save original players: " + e.getMessage());
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save original player " + uuid + ": " + e.getMessage());
         }
     }
 
