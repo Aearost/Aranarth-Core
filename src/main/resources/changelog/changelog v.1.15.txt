@@ -26,6 +26,7 @@ Economy, Jobs & Quests
 [~] Fixed the Explorer job not rewarding XP while riding a horse
 [~] Fixed /jobs top showing outdated or missing XP for players on the other server
 [~] Max level players now show their total XP instead of "Max Level"
+[~] Shops in the shop menu are now sorted by most profit, with shop earnings tracked across both servers
 
 Chat, UI & Sounds
 [+] Added fully customizable prefixes in chat, allowing full, shortened, or symbols for the rank, council, and saint ranks

@@ -7239,6 +7239,29 @@ public class PersistenceUtils {
     }
 
     /**
+     * Adds the amount to the shop owner's net shop earnings in MySQL.
+     * @param uuid The shop owner's UUID.
+     * @param amount The amount earned (positive) or paid out (negative).
+     */
+    public static void addShopEarningsToDatabase(UUID uuid, double amount) {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        runDbSync(() -> DatabaseManager.getInstance().addPlayerShopEarnings(uuid, amount));
+    }
+
+    /**
+     * Loads every shop owner's net shop earnings from MySQL. Must not be called on the main thread.
+     * @return The earnings of each shop owner, or an empty map if the database is unavailable.
+     */
+    public static Map<UUID, Double> loadShopEarningsFromDatabase() {
+        if (!DatabaseManager.isActive()) {
+            return new HashMap<>();
+        }
+        return DatabaseManager.getInstance().loadAllPlayerShopEarnings();
+    }
+
+    /**
      * Syncs per-player shop collaborators to MySQL.
      */
     public static void syncShopCollaboratorsToDatabase() {

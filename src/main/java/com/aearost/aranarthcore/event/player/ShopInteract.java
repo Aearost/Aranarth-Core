@@ -10,6 +10,7 @@ import com.aearost.aranarthcore.utils.CropUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.MarketUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
+import com.aearost.aranarthcore.utils.ShopIslandUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import com.aearost.aranarthcore.utils.TradeMarketUtils;
 import org.bukkit.*;
@@ -321,6 +322,10 @@ public class ShopInteract {
                     if (Bukkit.getPlayer(shop.getUuid()) == null && NetworkManager.isActive()) {
                         NetworkManager.getInstance().publishBalanceAdjust(shop.getUuid(), shop.getBuyPrice());
                     }
+                    // Ranks the owner's shop island in the shop location GUI
+                    if (ShopIslandUtils.SHOPS_WORLD.equals(shop.getWorldName())) {
+                        PersistenceUtils.addShopEarningsToDatabase(shop.getUuid(), shop.getBuyPrice());
+                    }
                 }
 
                 // Logic to add items to player's inventory
@@ -538,6 +543,10 @@ public class ShopInteract {
                     PersistenceUtils.saveAranarthPlayerImmediately(shop.getUuid());
                     if (Bukkit.getPlayer(shop.getUuid()) == null && NetworkManager.isActive()) {
                         NetworkManager.getInstance().publishBalanceAdjust(shop.getUuid(), -shop.getSellPrice());
+                    }
+                    // Payouts count against earnings so buy/sell-back loops cannot inflate the ranking
+                    if (ShopIslandUtils.SHOPS_WORLD.equals(shop.getWorldName())) {
+                        PersistenceUtils.addShopEarningsToDatabase(shop.getUuid(), -shop.getSellPrice());
                     }
                     ItemStack shopItem = shop.getItem().clone();
                     shopItem.setAmount(shop.getQuantity());

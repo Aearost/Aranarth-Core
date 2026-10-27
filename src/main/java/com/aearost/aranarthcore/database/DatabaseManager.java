@@ -448,6 +448,13 @@ public class DatabaseManager {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
                 """
+            CREATE TABLE IF NOT EXISTS player_shop_earnings (
+                uuid VARCHAR(36) PRIMARY KEY,
+                earnings DOUBLE NOT NULL DEFAULT 0,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+                """
             CREATE TABLE IF NOT EXISTS player_last_location (
                 uuid      VARCHAR(36) PRIMARY KEY,
                 server    VARCHAR(64) NOT NULL,
@@ -2840,6 +2847,34 @@ public class DatabaseManager {
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all player shop locations: " + e.getMessage());
+        }
+        return result;
+    }
+
+    /**
+     * Atomically adds the amount to the owner's net shop earnings, so both servers can write concurrently.
+     */
+    public void addPlayerShopEarnings(UUID uuid, double amount) {
+        String sql = "INSERT INTO player_shop_earnings (uuid, earnings) VALUES (?, ?) ON DUPLICATE KEY UPDATE earnings = earnings + VALUES(earnings)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            ps.setDouble(2, amount);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to add player shop earnings for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    public Map<UUID, Double> loadAllPlayerShopEarnings() {
+        String sql = "SELECT uuid, earnings FROM player_shop_earnings";
+        Map<UUID, Double> result = new HashMap<>();
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                result.put(UUID.fromString(rs.getString("uuid")), rs.getDouble("earnings"));
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all player shop earnings: " + e.getMessage());
         }
         return result;
     }
