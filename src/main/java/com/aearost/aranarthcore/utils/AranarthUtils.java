@@ -16,10 +16,12 @@ import com.aearost.aranarthcore.network.NetworkTabManager;
 import com.aearost.aranarthcore.objects.*;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
 import com.gmail.nossr50.util.skills.SkillTools;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.projectkorra.projectkorra.BendingPlayer;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
@@ -123,6 +125,10 @@ public class AranarthUtils {
     private static final HashMap<UUID, String> shopNames = new HashMap<>();
     private static final HashMap<UUID, BukkitTask> teleportingPlayers = new HashMap<>();
     private static final Set<UUID> skipCountdown = new HashSet<>();
+    // Worlds disabled via /ac disable - world names are not unique across the network, so each server tracks its own
+    private static final Set<String> disabledWorlds = ConcurrentHashMap.newKeySet();
+    private static final Map<UUID, Long> lastDisabledWorldMessage = new HashMap<>();
+    private static final String KEY_DISABLED_WORLDS = "disabled_worlds:";
     private static final List<AranarthVote> votes = new ArrayList<>();
     private static final HashMap<UUID, List<PlayerKillDeathScore>> killDeathScores = new HashMap<>();
     private static final HashMap<UUID, Integer> chatGameGuesses = new HashMap<>();
@@ -2267,6 +2273,145 @@ public class AranarthUtils {
     }
 
     /**
+     * Confirms if the input world has been disabled on this server via /ac disable.
+     *
+     * @param worldName The name of the world.
+     * @return Confirmation if the world is disabled.
+     */
+    public static boolean isWorldDisabled(String worldName) {
+        return disabledWorlds.contains(worldName);
+    }
+
+    /**
+     * Confirms if the input world cannot be entered by the player, as they are not in admin or architect mode.
+     *
+     * @param player    The player.
+     * @param worldName The name of the world.
+     * @return Confirmation if the world is disabled for the player.
+     */
+    public static boolean isWorldDisabledFor(Player player, String worldName) {
+        if (!isWorldDisabled(worldName)) {
+            return false;
+        }
+        AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+        return aranarthPlayer == null || (!aranarthPlayer.isInAdminMode() && !aranarthPlayer.isInArchitectMode());
+    }
+
+    /**
+     * Provides the names of all disabled worlds on this server.
+     *
+     * @return The sorted names of the disabled worlds.
+     */
+    public static List<String> getDisabledWorlds() {
+        List<String> names = new ArrayList<>(disabledWorlds);
+        Collections.sort(names);
+        return names;
+    }
+
+    /**
+     * Disables or re-enables the world, moving every player in it that cannot bypass it when disabling.
+     *
+     * @param worldName  The name of the world.
+     * @param isDisabled Whether the world is being disabled.
+     * @return Confirmation if the world's state was changed.
+     */
+    public static boolean setWorldDisabled(String worldName, boolean isDisabled) {
+        boolean isChanged = isDisabled ? disabledWorlds.add(worldName) : disabledWorlds.remove(worldName);
+        if (!isChanged) {
+            return false;
+        }
+        // Saved so the world stays disabled across restarts
+        if (NetworkManager.isActive()) {
+            String key = KEY_DISABLED_WORLDS + NetworkManager.getInstance().getThisServer();
+            JsonArray json = new JsonArray();
+            getDisabledWorlds().forEach(json::add);
+            Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                    () -> DatabaseManager.getInstance().saveTempData(key, json.toString(), 365 * 24 * 60 * 60));
+        }
+        World world = Bukkit.getWorld(worldName);
+        if (isDisabled && world != null) {
+            for (Player player : world.getPlayers()) {
+                if (isWorldDisabledFor(player, worldName)) {
+                    evacuateDisabledWorld(player);
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Loads this server's disabled worlds from the database.
+     */
+    public static void loadDisabledWorlds() {
+        if (!NetworkManager.isActive()) {
+            return;
+        }
+        String json = DatabaseManager.getInstance().loadTempData(KEY_DISABLED_WORLDS + NetworkManager.getInstance().getThisServer());
+        if (json == null) {
+            return;
+        }
+        JsonParser.parseString(json).getAsJsonArray().forEach(name -> disabledWorlds.add(name.getAsString()));
+        if (!disabledWorlds.isEmpty()) {
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "Loaded disabled worlds: " + disabledWorlds);
+        }
+    }
+
+    /**
+     * Informs the player that the world is currently disabled.
+     *
+     * @param player The player.
+     */
+    public static void sendWorldDisabledMessage(Player player) {
+        long now = System.currentTimeMillis();
+        Long last = lastDisabledWorldMessage.get(player.getUniqueId());
+        // Prevents spam while standing in a portal
+        if (last != null && now - last < 3000) {
+            return;
+        }
+        lastDisabledWorldMessage.put(player.getUniqueId(), now);
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.world_disabled")));
+    }
+
+    /**
+     * Moves the player to Spawn, or this server's main world if Spawn is unavailable, out of a disabled world.
+     *
+     * @param player The player.
+     */
+    public static void evacuateDisabledWorld(Player player) {
+        World spawn = Bukkit.getWorld("spawn");
+        World main = Bukkit.getWorlds().get(0);
+        Location destination = null;
+        if (spawn != null && !isWorldDisabled(spawn.getName())) {
+            destination = new Location(spawn, 0.5, 101, 0.5, 180, 0);
+        } else if (!isWorldDisabled(main.getName())) {
+            destination = main.getSpawnLocation();
+        }
+
+        Runnable kick = () -> {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Could not move " + player.getName() + " out of the disabled world "
+                    + player.getWorld().getName() + " - kicked them instead");
+            player.kick(LegacyComponentSerializer.legacySection().deserialize(
+                    ChatUtils.translateToColor(Lang.getFor(player, "teleport.world_disabled_kick"))));
+        };
+        if (destination == null || player.isDead()) {
+            kick.run();
+            return;
+        }
+
+        player.leaveVehicle();
+        String title = destination.getWorld() == spawn ? "&e&lSpawn" : Lang.getFor(player, "teleport.title_survival");
+        // Switches the inventory when leaving i.e the creative or arena world
+        teleportPlayer(player, player.getLocation(), destination, true, title,
+                Lang.getFor(player, "teleport.world_disabled_moved"), success -> {
+                    if (success) {
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.world_disabled_moved")));
+                    } else {
+                        kick.run();
+                    }
+                });
+    }
+
+    /**
      * Handles creating the teleport task timer and initializing the callback method.
      *
      * @param player              The player that is being teleported.
@@ -2349,6 +2494,12 @@ public class AranarthUtils {
      * @return Confirmation if the teleportation was successful.
      */
     private static boolean handleTeleportLogic(Player player, Location from, Location to) {
+        // The world was disabled via /ac disable
+        if (to.getWorld() != null && to.getWorld() != player.getWorld()
+                && isWorldDisabledFor(player, to.getWorld().getName())) {
+            sendWorldDisabledMessage(player);
+            return false;
+        }
         // The resource world is still being reset and pre-generated
         if (to.getWorld() != null && ResourceWorldUtils.isLockedFor(player, to.getWorld().getName())) {
             ResourceWorldUtils.sendLockedMessage(player);

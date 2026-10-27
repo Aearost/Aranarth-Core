@@ -490,6 +490,8 @@ public class AranarthCore extends JavaPlugin {
             if (NetworkManager.isActive()) {
                 // Re-populate remote roster in case the other server was already running
                 NetworkManager.getInstance().syncRosterFromDatabase();
+                // Keeps worlds disabled via /ac disable disabled across restarts
+                AranarthUtils.loadDisabledWorlds();
                 // Register BungeeCord plugin messaging channel for player transfers
                 getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
                 Bukkit.getLogger().info(LOG_PREFIX + "Cross-server networking enabled via MySQL");

@@ -9,6 +9,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -33,8 +34,8 @@ import java.util.stream.Collectors;
 public class CommandACCompleter implements TabCompleter {
 
     private static final List<String> COUNCIL_OPTIONS = List.of(
-            "admin", "architect", "ban", "broadcast", "clearchat", "dateset", "discordreload", "dominionrank", "give",
-            "home", "invsee", "invswap", "msg", "mute", "og", "perks", "punishments", "questnpc", "rankset",
+            "admin", "architect", "ban", "broadcast", "clearchat", "dateset", "disable", "discordreload", "dominionrank",
+            "enable", "give", "home", "invsee", "invswap", "msg", "mute", "og", "perks", "punishments", "questnpc", "rankset",
             "reload", "resetquest", "speed", "spy", "sudo", "time", "tp", "tpf", "tpw", "unban", "unmute",
             "unscramble", "vanish", "vpedit", "warn", "weather", "whereis", "worldevent"
     );
@@ -284,6 +285,16 @@ public class CommandACCompleter implements TabCompleter {
                 }
                 yield List.of();
             }
+            case "disable" -> {
+                if (args.length == 2) {
+                    yield filter(Bukkit.getWorlds().stream()
+                            .map(World::getName)
+                            .filter(name -> !AranarthUtils.isWorldDisabled(name))
+                            .collect(Collectors.toList()), args[1]);
+                }
+                yield List.of();
+            }
+            case "enable" -> args.length == 2 ? filter(AranarthUtils.getDisabledWorlds(), args[1]) : List.of();
             case "tp", "tpf" -> {
                 if (args.length == 2) {
                     yield List.of("username", "x");

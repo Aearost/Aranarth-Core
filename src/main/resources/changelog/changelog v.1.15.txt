@@ -39,5 +39,6 @@ Quality of Life
 Cross-server & Technical
 [~] AFK players are now marked with [AFK] in the Discord online player list
 [~] Fixed duplicate Discord messages when a player's mute or temporary ban automatically ends
+[+] Added /ac disable and /ac enable to temporarily block access to specific worlds for players not in admin or architect mode
 
 Miscellaneous

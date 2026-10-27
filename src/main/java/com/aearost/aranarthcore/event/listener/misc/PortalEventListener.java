@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ResourceWorldUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -47,6 +48,12 @@ public class PortalEventListener implements Listener {
 			if (ResourceWorldUtils.isLockedFor(e.getPlayer(), destination.getWorld().getName())) {
 				e.setCancelled(true);
 				ResourceWorldUtils.sendLockedMessage(e.getPlayer());
+				return;
+			}
+			// The world was disabled via /ac disable
+			if (AranarthUtils.isWorldDisabledFor(e.getPlayer(), destination.getWorld().getName())) {
+				e.setCancelled(true);
+				AranarthUtils.sendWorldDisabledMessage(e.getPlayer());
 				return;
 			}
 			e.setTo(destination);

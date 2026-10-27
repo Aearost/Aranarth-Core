@@ -686,6 +686,11 @@ public class PlayerServerJoinListener implements Listener {
                     }
                 }
 
+                // The player logged in to a world that was disabled via /ac disable, or a pending teleport into one was refused
+                if (AranarthUtils.isWorldDisabledFor(player, player.getWorld().getName())) {
+                    AranarthUtils.evacuateDisabledWorld(player);
+                }
+
                 // Reload quest progress from DB so assignments and progress match the source server.
                 // Skip when this is a login-routing transfer (player being routed back to the server
                 // they last logged off on) - the in-memory data here is already authoritative and

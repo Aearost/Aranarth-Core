@@ -149,6 +149,14 @@ public class PlayerRespawnEventListener implements Listener {
         } else {
             new RespawnSurvival().execute(e);
         }
+
+        // The player respawned in a world that was disabled via /ac disable, i.e at their bed
+        Player player = e.getPlayer();
+        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
+            if (player.isOnline() && AranarthUtils.isWorldDisabledFor(player, player.getWorld().getName())) {
+                AranarthUtils.evacuateDisabledWorld(player);
+            }
+        }, 1L);
     }
 
     /**

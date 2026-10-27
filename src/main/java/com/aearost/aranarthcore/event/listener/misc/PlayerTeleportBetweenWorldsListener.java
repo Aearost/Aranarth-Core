@@ -32,7 +32,7 @@ public class PlayerTeleportBetweenWorldsListener implements Listener {
      *
      * @param e The event.
      */
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onTeleport(PlayerTeleportEvent e) {
         if (e.getCause() == TeleportCause.COMMAND) {
             Player player = e.getPlayer();
