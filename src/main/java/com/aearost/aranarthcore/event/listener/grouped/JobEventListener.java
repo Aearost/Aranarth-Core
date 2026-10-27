@@ -1000,17 +1000,19 @@ public class JobEventListener implements Listener {
         }
 
         // Must be on ground, not in water, not flying
-        if (!player.isOnGround()) {
+        // A rider's own ground state is never updated while mounted, so the mount's is used instead
+        Entity vehicle = player.getVehicle();
+        Entity grounded = vehicle != null ? vehicle : player;
+        if (!grounded.isOnGround()) {
             return;
         }
-        if (player.isInWater()) {
+        if (grounded.isInWater()) {
             return;
         }
         if (player.isFlying() || player.isGliding()) {
             return;
         }
 
-        Entity vehicle = player.getVehicle();
         if (vehicle instanceof AbstractHorse) {
             JobUtils.awardJob(player, JobType.EXPLORER, 0.50);
         } else if (vehicle == null) {

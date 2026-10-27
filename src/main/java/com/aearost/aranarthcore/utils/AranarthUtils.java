@@ -127,7 +127,7 @@ public class AranarthUtils {
     private static final Set<UUID> skipCountdown = new HashSet<>();
     // Travel rewards: moves larger than this (in blocks) or shortly after a teleport are not active travel
     private static final Map<UUID, Long> recentTeleports = new HashMap<>();
-    private static final double MAX_TRAVEL_DISTANCE_PER_MOVE = 5.0;
+    private static final double MAX_TRAVEL_DISTANCE_PER_MOVE = 32.0;
     private static final long TELEPORT_TRAVEL_GRACE_MS = 1000L;
     // Worlds disabled via /ac disable - world names are not unique across the network, so each server tracks its own
     private static final Set<String> disabledWorlds = ConcurrentHashMap.newKeySet();

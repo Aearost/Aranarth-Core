@@ -21,6 +21,7 @@ Economy, Jobs & Quests
 [~] Every 10 seconds, players now see in their action bar how much money their jobs earned them in that time
 [~] Potions in /mv are now grouped by effect, amplifier, and duration, instead of all showing as "Potion"
 [~] Fixed the Explorer job and travel quests counting teleports and portal trips as travelled distance
+[~] Fixed the Explorer job not rewarding XP while riding a horse
 
 Chat, UI & Sounds
 [+] Added fully customizable prefixes in chat, allowing full, shortened, or symbols for the rank, council, and saint ranks
