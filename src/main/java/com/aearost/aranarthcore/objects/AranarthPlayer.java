@@ -2176,6 +2176,15 @@ public class AranarthPlayer {
     }
 
     /**
+     * Provides the styles this player sees everyone's council, saint, and rank prefixes in.
+     *
+     * @return The council, saint, and rank prefix styles.
+     */
+    public PrefixStyle[] getPrefixStyles() {
+        return new PrefixStyle[]{councilPrefixStyle, saintPrefixStyle, rankPrefixStyle};
+    }
+
+    /**
      * Provides the player's council, saint, and rank prefix styles encoded into a single String.
      *
      * @return The encoded prefix styles.

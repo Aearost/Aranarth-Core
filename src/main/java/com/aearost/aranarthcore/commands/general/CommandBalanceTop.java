@@ -43,7 +43,7 @@ public class CommandBalanceTop implements CommandExecutor {
 	 * Sends the requested page of balances.
 	 */
 	private static void showPage(CommandSender sender, String[] args, Map<UUID, DatabaseManager.BalanceEntry> balances) {
-		List<String> lines = baltopSetup(balances);
+		List<String> lines = baltopSetup(sender, balances);
 
 		double generalPageAmount = lines.size() / 10.0;
 		int totalPageNumber = (int) generalPageAmount;
@@ -111,9 +111,10 @@ public class CommandBalanceTop implements CommandExecutor {
 	/**
 	 * Provides the full list of all players' balances, queried fresh from the database
 	 * so that balances from other servers are included.
+	 * @param sender The user viewing the balances, whose prefix styles are used.
 	 * @return The full list of all player's balances.
 	 */
-	private static List<String> baltopSetup(Map<UUID, DatabaseManager.BalanceEntry> balances) {
+	private static List<String> baltopSetup(CommandSender sender, Map<UUID, DatabaseManager.BalanceEntry> balances) {
 		List<Map.Entry<UUID, DatabaseManager.BalanceEntry>> sorted = new ArrayList<>(balances.entrySet());
 		sorted.sort(Comparator.<Map.Entry<UUID, DatabaseManager.BalanceEntry>>comparingDouble(e -> e.getValue().balance()).reversed());
 
@@ -128,7 +129,7 @@ public class CommandBalanceTop implements CommandExecutor {
 
 			String displayedName;
 			if (aranarthPlayer != null) {
-				displayedName = ChatUtils.providePrefixAndName(uuid);
+				displayedName = ChatUtils.providePrefixAndName(uuid, sender);
 			} else {
 				// Player is not loaded on this server - use DB nickname/username for display.
 				// If they are currently online on another server, prefer the remote roster entry.

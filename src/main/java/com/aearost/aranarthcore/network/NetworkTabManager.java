@@ -84,16 +84,20 @@ public class NetworkTabManager {
             String profileName  = !np.getUsername().isEmpty() ? np.getUsername() : "Unknown";
             Object gameProfile  = createGameProfile(np.getUuid(), profileName,
                     np.getTextureValue(), np.getTextureSignature());
-            Object displayName  = toNmsComponent(buildDisplayName(np)); // null on failure → falls back to profile name
             int latency = np.getPing() >= 0 ? np.getPing() : 0;
-            Object entry        = createEntry(np.getUuid(), gameProfile, displayName, 0, latency);
             EnumSet<?> actionsSet = createActionEnumSet();
-            Object packet       = updatePacketClass
-                    .getDeclaredConstructor(EnumSet.class, List.class)
-                    .newInstance(actionsSet, List.of(entry));
 
-            for (Player viewer : viewers) {
-                sendPacket(viewer, packet);
+            // One packet per set of prefix styles, as each viewer sees the prefix in their own styles
+            for (Map.Entry<String, List<Player>> group : groupByPrefixStyles(viewers).entrySet()) {
+                PrefixStyle[] styles = PrefixStyle.decode(group.getKey());
+                Object displayName  = toNmsComponent(buildDisplayName(np, styles)); // null on failure → falls back to profile name
+                Object entry        = createEntry(np.getUuid(), gameProfile, displayName, 0, latency);
+                Object packet       = updatePacketClass
+                        .getDeclaredConstructor(EnumSet.class, List.class)
+                        .newInstance(actionsSet, List.of(entry));
+                for (Player viewer : group.getValue()) {
+                    sendPacket(viewer, packet);
+                }
             }
         } catch (Exception ex) {
             Bukkit.getLogger().log(Level.WARNING, "[AC] addToTab failed", ex);
@@ -174,17 +178,59 @@ public class NetworkTabManager {
                 // Not present in all versions
             }
             int latency = np.getPing() >= 0 ? np.getPing() : 0;
-            Object displayName = toNmsComponent(buildDisplayName(np));
-            Object entry = createEntry(np.getUuid(), null, displayName, 0, latency);
-            Object packet = updatePacketClass
-                    .getDeclaredConstructor(EnumSet.class, List.class)
-                    .newInstance(set, List.of(entry));
-            for (Player viewer : Bukkit.getOnlinePlayers()) {
-                sendPacket(viewer, packet);
+            for (Map.Entry<String, List<Player>> group : groupByPrefixStyles(Bukkit.getOnlinePlayers()).entrySet()) {
+                Object displayName = toNmsComponent(buildDisplayName(np, PrefixStyle.decode(group.getKey())));
+                Object entry = createEntry(np.getUuid(), null, displayName, 0, latency);
+                Object packet = updatePacketClass
+                        .getDeclaredConstructor(EnumSet.class, List.class)
+                        .newInstance(set, List.of(entry));
+                for (Player viewer : group.getValue()) {
+                    sendPacket(viewer, packet);
+                }
             }
         } catch (Exception ex) {
             Bukkit.getLogger().log(Level.WARNING, "[AC] updatePingInTab failed for " + np.getUuid(), ex);
         }
+    }
+
+    /**
+     * Sends a single UPDATE_DISPLAY_NAME packet to one viewer, overriding the tab names of the given
+     * players for that viewer only. Used so each viewer sees everyone's prefixes in their own styles.
+     *
+     * @param viewer       The player whose tab list is being updated.
+     * @param displayNames The §-formatted display name of each player, keyed by their UUID.
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static void sendDisplayNames(Player viewer, Map<UUID, String> displayNames) {
+        ensureInitialised();
+        if (!available || displayNames.isEmpty()) return;
+        try {
+            EnumSet set = (EnumSet) EnumSet.class.getMethod("of", Enum.class)
+                    .invoke(null, Enum.valueOf((Class<Enum>) actionClass, "UPDATE_DISPLAY_NAME"));
+            List<Object> entries = new ArrayList<>();
+            for (Map.Entry<UUID, String> displayName : displayNames.entrySet()) {
+                // For UPDATE_DISPLAY_NAME only the UUID and display name fields are read by the codec
+                entries.add(createEntry(displayName.getKey(), null, toNmsComponent(displayName.getValue()), 0, 0));
+            }
+            Object packet = updatePacketClass
+                    .getDeclaredConstructor(EnumSet.class, List.class)
+                    .newInstance(set, entries);
+            sendPacket(viewer, packet);
+        } catch (Exception ex) {
+            Bukkit.getLogger().log(Level.WARNING, "[AC] sendDisplayNames failed for " + viewer.getName(), ex);
+        }
+    }
+
+    /**
+     * Groups the viewers by their encoded prefix styles, so a packet only needs to be built once per set of styles.
+     */
+    private static Map<String, List<Player>> groupByPrefixStyles(Collection<? extends Player> viewers) {
+        Map<String, List<Player>> groups = new HashMap<>();
+        for (Player viewer : viewers) {
+            PrefixStyle[] styles = AranarthUtils.getPrefixStyles(viewer);
+            groups.computeIfAbsent(PrefixStyle.encode(styles[0], styles[1], styles[2]), k -> new ArrayList<>()).add(viewer);
+        }
+        return groups;
     }
 
     /**
@@ -418,11 +464,11 @@ public class NetworkTabManager {
     /**
      * Builds a §-formatted display name for a remote player, mirroring the local tab format:
      * rank badges + rank title + nickname + [SMP] tag (without the ⊰⊱ outer brackets).
+     *
+     * @param np     The remote player.
+     * @param styles The council, saint, and rank styles chosen by the viewer via /prefix.
      */
-    private static String buildDisplayName(NetworkPlayer np) {
-        // Council, saint, and rank styles as chosen by the player via /prefix
-        PrefixStyle[] styles = PrefixStyle.decode(np.getPrefixStyles());
-
+    public static String buildDisplayName(NetworkPlayer np, PrefixStyle[] styles) {
         // Rank title - use female variants when applicable
         boolean isFemale = "FEMALE".equals(np.getPronouns());
         String display = AranarthUtils.buildPrefixElements(

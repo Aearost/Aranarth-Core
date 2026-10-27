@@ -195,7 +195,7 @@ commands:
     description: Opens the GUI of the player's potions
     permission: aranarth.potions
   prefix:
-    description: Changes whether the player's council, saint, and rank prefixes are shown in full, shortened, or as a symbol
+    description: Changes whether everyone's council, saint, and rank prefixes are shown to the player in full, shortened, or as a symbol
     permission: aranarth.prefix
   pronouns:
     description: Allows the player to update their pronouns

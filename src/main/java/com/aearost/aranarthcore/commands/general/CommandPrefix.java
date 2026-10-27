@@ -17,8 +17,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 /**
- * Allows players to choose whether their council, saint, and rank prefixes are displayed
- * as full text, a single letter, or a symbol.
+ * Allows players to choose whether everyone's council, saint, and rank prefixes are displayed
+ * to them as full text, a single letter, or a symbol. This only changes what the player sees.
  */
 public class CommandPrefix implements CommandExecutor {
 
@@ -54,7 +54,7 @@ public class CommandPrefix implements CommandExecutor {
 		player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "prefix.updated",
 				"type", type, "style", style.name().toLowerCase())));
 		player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "prefix.preview",
-				"preview", ChatUtils.formatChatPrefix(player))));
+				"preview", ChatUtils.formatChatPrefix(player, player))));
 		return true;
 	}
 
@@ -73,6 +73,7 @@ public class CommandPrefix implements CommandExecutor {
 			default -> aranarthPlayer.setRankPrefixStyle(style);
 		}
 		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+		// Immediately re-sends every tab name to this player in their new styles
 		AranarthUtils.updateTab();
 		// Immediately persist to MySQL so the styles are not reverted on the next join or server transfer
 		if (DatabaseManager.isActive()) {
@@ -82,7 +83,7 @@ public class CommandPrefix implements CommandExecutor {
 						DatabaseManager.getInstance().savePlayerToggles(player.getUniqueId(), toggleJson));
 			}
 		}
-		// Refreshes this player's prefix in the other server's TAB list immediately
+		// Keeps the other server's copy of the player in sync so the styles carry over on a server transfer
 		if (NetworkManager.isActive()) {
 			NetworkManager.getInstance().publishPrefixUpdate(player.getUniqueId(), aranarthPlayer.getEncodedPrefixStyles());
 		}

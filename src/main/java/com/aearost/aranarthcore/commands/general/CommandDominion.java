@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.enums.PrefixStyle;
 import com.aearost.aranarthcore.gui.*;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.PendingTeleport;
@@ -1954,12 +1955,14 @@ public class CommandDominion implements CommandExecutor {
      * Provides the player's nickname preceded by their Saint, Architect, and Council badges.
      *
      * @param aranarthPlayer The AranarthPlayer whose name is being formatted.
+     * @param viewer         The player viewing the name, whose prefix styles are used.
      * @return The player's nickname with their badges.
      */
-    private static String formatBadgedName(AranarthPlayer aranarthPlayer) {
-        return AranarthUtils.getSaintRank(aranarthPlayer)
+    private static String formatBadgedName(AranarthPlayer aranarthPlayer, Player viewer) {
+        PrefixStyle[] styles = AranarthUtils.getPrefixStyles(viewer);
+        return AranarthUtils.getSaintPrefix(aranarthPlayer.getSaintRank(), styles[1])
                 + AranarthUtils.getArchitectRank(aranarthPlayer)
-                + AranarthUtils.getCouncilRank(aranarthPlayer)
+                + AranarthUtils.getCouncilPrefix(aranarthPlayer.getCouncilRank(), styles[0])
                 + aranarthPlayer.getNickname();
     }
 
@@ -1974,7 +1977,7 @@ public class CommandDominion implements CommandExecutor {
         String dominionName = "&e" + dominion.getName();
 
         AranarthPlayer leader = AranarthUtils.getPlayer(dominion.getLeader());
-        String leaderDisplayedName = formatBadgedName(leader);
+        String leaderDisplayedName = formatBadgedName(leader, player);
 
         dominionName = Lang.getFor(player, "dominion.info_header", "name", dominion.getName(), "leader", leaderDisplayedName);
         player.sendMessage(ChatUtils.translateToColor(dominionName));
@@ -2034,7 +2037,7 @@ public class CommandDominion implements CommandExecutor {
                 if (aranarthPlayer == null) {
                     continue;
                 }
-                membersBuilder.append(formatBadgedName(aranarthPlayer));
+                membersBuilder.append(formatBadgedName(aranarthPlayer, player));
                 if (i < dominion.getMembers().size() - 1) {
                     membersBuilder.append("&e, ");
                 }

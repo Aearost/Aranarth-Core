@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralProjection;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.Month;
+import com.aearost.aranarthcore.enums.PrefixStyle;
 import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.items.key.KeyEpic;
@@ -611,26 +612,29 @@ public class NetworkManager {
      * Publishes a public chat message so the other server can relay it to its players.
      */
     public void publishChat(String prefix, String chatMessage) {
-        publishChat(prefix, chatMessage, null);
-    }
-
-    /**
-     * Publishes a public chat message along with the exact Component shown on this server, so the
-     * other server renders it identically (gradients, clickable URLs, clickable prefix) instead of
-     * re-parsing the legacy string.
-     *
-     * @param prefix      the formatted prefix string (legacy colour codes already applied)
-     * @param chatMessage the legacy version of the message (for console fallback)
-     * @param fullMessage the fully assembled Component including prefix, or null to send legacy only
-     */
-    public void publishChat(String prefix, String chatMessage, Component fullMessage) {
         JsonObject json = new JsonObject();
         json.addProperty("server", thisServer);
         json.addProperty("prefix", prefix);
         json.addProperty("message", chatMessage);
-        if (fullMessage != null) {
-            json.addProperty("componentJson", GsonComponentSerializer.gson().serialize(fullMessage));
-        }
+        publish(CH_CHAT, json);
+    }
+
+    /**
+     * Publishes a public chat message along with the exact message Component shown on this server, so the
+     * other server renders it identically (gradients, clickable URLs) instead of re-parsing the legacy string.
+     * The prefix is sent as data so the other server can show it to each player in their own prefix styles.
+     *
+     * @param chatPrefix       the prefix of the sender
+     * @param chatMessage      the legacy version of the message (for console fallback)
+     * @param messageComponent the message Component, without the prefix
+     */
+    public void publishChat(ChatPrefix chatPrefix, String chatMessage, Component messageComponent) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("prefix", chatPrefix.format(PrefixStyle.defaults()));
+        json.addProperty("message", chatMessage);
+        json.add("prefixData", chatPrefix.toJson());
+        json.addProperty("messageJson", GsonComponentSerializer.gson().serialize(messageComponent));
         publish(CH_CHAT, json);
     }
 
@@ -638,18 +642,19 @@ public class NetworkManager {
      * Publishes an interactive chat message (one containing [item]/[inv]/[ec]/[coords]) so the
      * other server can display the same clickable component and serve /ichat view clicks locally.
      *
-     * @param prefix      the formatted prefix string (legacy colour codes already applied)
-     * @param chatMessage the plain-text version of the message (for console/discord fallback)
-     * @param fullMessage the fully assembled Adventure Component including prefix and interactive parts
-     * @param snapshots   every snapshot that was created while building the message
+     * @param chatPrefix       the prefix of the sender
+     * @param chatMessage      the plain-text version of the message (for console/discord fallback)
+     * @param messageComponent the Adventure Component of the message including interactive parts, without the prefix
+     * @param snapshots        every snapshot that was created while building the message
      */
-    public void publishInteractiveChat(String prefix, String chatMessage, Component fullMessage,
+    public void publishInteractiveChat(ChatPrefix chatPrefix, String chatMessage, Component messageComponent,
                                        List<InteractiveChatManager.Snapshot> snapshots) {
         JsonObject json = new JsonObject();
         json.addProperty("server", thisServer);
-        json.addProperty("prefix", prefix);
+        json.addProperty("prefix", chatPrefix.format(PrefixStyle.defaults()));
         json.addProperty("message", chatMessage);
-        json.addProperty("componentJson", GsonComponentSerializer.gson().serialize(fullMessage));
+        json.add("prefixData", chatPrefix.toJson());
+        json.addProperty("messageJson", GsonComponentSerializer.gson().serialize(messageComponent));
 
         JsonArray snapshotArray = new JsonArray();
         for (InteractiveChatManager.Snapshot snap : snapshots) {
@@ -710,19 +715,8 @@ public class NetworkManager {
             InteractiveChatManager.storeSnapshotWithId(snapId, ownerId, ownerDisplay, type, items);
         }
 
-        // Deserialize the full Component (prefix + interactive message) and send it
-        Component component;
-        try {
-            component = GsonComponentSerializer.gson().deserialize(json.get("componentJson").getAsString());
-        } catch (Exception ex) {
-            // Fallback to plain text if component JSON is malformed
-            component = LegacyComponentSerializer.legacySection().deserialize(
-                    ChatUtils.translateToColor(prefix + message));
-        }
-        final Component finalComponent = component;
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            player.sendMessage(finalComponent);
-        }
+        // Rebuild the prefix for each player in their own prefix styles, followed by the interactive message
+        relayChat(json, prefix, message);
         Bukkit.getConsoleSender().sendMessage(ChatUtils.translateToColor(
                 "&8[" + originServer.toUpperCase() + "] " + prefix + message));
     }
@@ -738,7 +732,7 @@ public class NetworkManager {
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
                 db.upsertRosterEntry(uuid, ap.getUsername(), nickname, thisServer,
                         ap.getRank(), ap.getCouncilRank(), ap.getSaintRank(), ap.getArchitectRank(), ap.isVanished(),
-                        pronounsName, ap.getEncodedPrefixStyles())
+                        pronounsName)
         );
 
         // Extract skin texture so other servers can render this player's head in the tab list
@@ -767,7 +761,6 @@ public class NetworkManager {
         json.addProperty("textureValue", textureValue);
         json.addProperty("textureSignature", textureSignature);
         json.addProperty("pronouns", ap.getPronouns() != null ? ap.getPronouns().name() : "MALE");
-        json.addProperty("prefixStyles", ap.getEncodedPrefixStyles());
         publish(CH_JOIN, json);
     }
 
@@ -1127,13 +1120,9 @@ public class NetworkManager {
     }
 
     /**
-     * Notifies other servers that a player's prefix styles have changed.
+     * Notifies other servers that a player's prefix styles have changed, so their copy of the player stays in sync.
      */
     public void publishPrefixUpdate(UUID uuid, String prefixStyles) {
-        // Update DB so the roster survives server restarts
-        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
-                db.updateRosterPrefixStyles(uuid, prefixStyles)
-        );
         JsonObject json = new JsonObject();
         json.addProperty("server", thisServer);
         json.addProperty("uuid", uuid.toString());
@@ -1981,23 +1970,30 @@ public class NetworkManager {
         String prefix = json.get("prefix").getAsString();
         String message = json.get("message").getAsString();
 
-        Component component = null;
-        if (json.has("componentJson")) {
+        relayChat(json, prefix, message);
+        Bukkit.getConsoleSender().sendMessage(ChatUtils.translateToColor(
+                "&8[" + originServer.toUpperCase() + "] " + prefix + message));
+    }
+
+    /**
+     * Sends a relayed chat message to every player on this server. When the sender's prefix data is included,
+     * each player sees the prefix in their own prefix styles, otherwise the legacy prefix and message are used.
+     */
+    private void relayChat(JsonObject json, String prefix, String message) {
+        if (json.has("prefixData") && json.has("messageJson")) {
             try {
-                component = GsonComponentSerializer.gson().deserialize(json.get("componentJson").getAsString());
+                ChatPrefix chatPrefix = ChatPrefix.fromJson(json.getAsJsonObject("prefixData"));
+                Component messageComponent = GsonComponentSerializer.gson().deserialize(json.get("messageJson").getAsString());
+                ChatUtils.sendChatToViewers(Bukkit.getOnlinePlayers(), chatPrefix, messageComponent);
+                return;
             } catch (Exception ignored) {
                 // Falls back to the legacy string below
             }
         }
-        if (component == null) {
-            String formatted = ChatUtils.translateToColor(prefix + message);
-            component = LegacyComponentSerializer.legacySection().deserialize(formatted);
-        }
+        Component component = LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(prefix + message));
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.sendMessage(component);
         }
-        Bukkit.getConsoleSender().sendMessage(ChatUtils.translateToColor(
-                "&8[" + originServer.toUpperCase() + "] " + prefix + message));
     }
 
     private void handleJoin(JsonObject json) {
@@ -2026,9 +2022,6 @@ public class NetworkManager {
                 textureSignature,
                 pronouns
         );
-        if (json.has("prefixStyles")) {
-            np.setPrefixStyles(json.get("prefixStyles").getAsString());
-        }
         remoteRoster.put(uuid, np);
         if (!vanished) {
             NetworkTabManager.addToTab(np);
@@ -2645,15 +2638,8 @@ public class NetworkManager {
         UUID uuid = UUID.fromString(json.get("uuid").getAsString());
         String prefixStyles = json.get("prefixStyles").getAsString();
 
-        NetworkPlayer np = remoteRoster.get(uuid);
-        if (np != null) {
-            np.setPrefixStyles(prefixStyles);
-            if (!np.isVanished()) {
-                NetworkTabManager.addToTab(np);
-            }
-            AranarthUtils.updateTab();
-        }
-        // Keeps the in-memory copy accurate so displays built on this server (baltop, info, dominion lists) match
+        // Prefix styles only change how the player sees others, so no other player's display needs to be refreshed.
+        // Keeps the in-memory copy accurate so the player keeps their styles when transferring to this server
         AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
         if (ap != null) {
             ap.setEncodedPrefixStyles(prefixStyles);

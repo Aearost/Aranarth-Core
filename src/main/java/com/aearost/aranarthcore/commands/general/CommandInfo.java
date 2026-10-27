@@ -171,7 +171,7 @@ public class CommandInfo implements CommandExecutor {
 		boolean isNicknameSameAsUsername = ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()).equalsIgnoreCase(resolvedName);
 		String username = !isNicknameSameAsUsername ? " &e(" + resolvedName + "&e)" : "";
 		sender.sendMessage(ChatUtils.translateToColor("&8      - - - &e"
-				+ ChatUtils.providePrefixAndName(uuid) + username + " &8- - -"));
+				+ ChatUtils.providePrefixAndName(uuid, sender) + username + " &8- - -"));
 
 		String firstJoinDate = aranarthPlayer.getFirstJoinDate();
 		boolean isOG = AranarthUtils.isOriginalPlayer(uuid);

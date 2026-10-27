@@ -94,7 +94,7 @@ public class AranarthUtils {
             Material.MUDDY_MANGROVE_ROOTS, Material.MYCELIUM
     );
     private static final HashMap<UUID, int[]> shopIslandCenters = new HashMap<>();
-    // The skills of each mcMMO rank-up category, in the order Gathering, Combat, Miscellaneous
+    private static final Set<UUID> customTabViewers = new HashSet<>();
     private static final PrimarySkillType[][] MCMMO_CATEGORIES = {
             {PrimarySkillType.EXCAVATION, PrimarySkillType.FISHING, PrimarySkillType.HERBALISM,
                     PrimarySkillType.MINING, PrimarySkillType.WOODCUTTING},
@@ -2104,18 +2104,20 @@ public class AranarthUtils {
     }
 
     /**
-     * Provides all of the player's prefix elements in their chosen styles.
+     * Provides the styles the viewer sees everyone's prefixes in.
+     * The console and any other non-player viewer always uses the default styles.
      *
-     * @param aranarthPlayer The AranarthPlayer that is being analyzed.
-     * @return The player's prefix elements, without any trailing space.
+     * @param viewer The user who will see the prefixes.
+     * @return The council, saint, and rank prefix styles.
      */
-    public static String getPrefixElements(AranarthPlayer aranarthPlayer) {
-        return buildPrefixElements(
-                aranarthPlayer.getCouncilRank(), aranarthPlayer.getCouncilPrefixStyle(),
-                !getArchitectRank(aranarthPlayer).isEmpty(),
-                aranarthPlayer.getSaintRank(), aranarthPlayer.getSaintPrefixStyle(),
-                !getAvatarRank(aranarthPlayer).isEmpty(),
-                aranarthPlayer.getRank(), aranarthPlayer.getPronouns() != Pronouns.MALE, aranarthPlayer.getRankPrefixStyle());
+    public static PrefixStyle[] getPrefixStyles(CommandSender viewer) {
+        if (viewer instanceof Player player) {
+            AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+            if (aranarthPlayer != null) {
+                return aranarthPlayer.getPrefixStyles();
+            }
+        }
+        return PrefixStyle.defaults();
     }
 
     /**
@@ -2177,16 +2179,6 @@ public class AranarthUtils {
     }
 
     /**
-     * Provides the String portion of the player's Saint rank.
-     *
-     * @param aranarthPlayer The AranarthPlayer that is being analyzed.
-     * @return The String portion of the player's Saint rank.
-     */
-    public static String getSaintRank(AranarthPlayer aranarthPlayer) {
-        return getSaintPrefix(aranarthPlayer.getSaintRank(), aranarthPlayer.getSaintPrefixStyle());
-    }
-
-    /**
      * Provides the String portion of a Saint rank in the given prefix style.
      *
      * @param saintRank The Saint rank, where 0 is no Saint rank.
@@ -2203,16 +2195,6 @@ public class AranarthUtils {
             case SHORT -> ROLE_BRACKET_COLOR + "&l[" + color + "&lS" + ROLE_BRACKET_COLOR + "&l]&r";
             case FULL -> ROLE_BRACKET_COLOR + "&l[" + color + "&l" + SAINT_NAMES[saintRank - 1] + ROLE_BRACKET_COLOR + "&l]&r";
         };
-    }
-
-    /**
-     * Provides the String portion of the player's Council rank.
-     *
-     * @param aranarthPlayer The AranarthPlayer that is being analyzed.
-     * @return The String portion of the player's Council rank.
-     */
-    public static String getCouncilRank(AranarthPlayer aranarthPlayer) {
-        return getCouncilPrefix(aranarthPlayer.getCouncilRank(), aranarthPlayer.getCouncilPrefixStyle());
     }
 
     /**
@@ -4037,6 +4019,10 @@ public class AranarthUtils {
 
         // Apply display names and list order.  Local players can be ordered directly;
         // remote players get an NMS list-order packet via NetworkTabManager.
+        // The list name set here uses the default prefix styles, and is overridden below for
+        // any viewer who has chosen their own prefix styles.
+        Map<UUID, ChatPrefix> localPrefixes = new LinkedHashMap<>();
+        Map<UUID, String> localSuffixes = new HashMap<>();
         int total = combined.size();
         for (int i = 0; i < total; i++) {
             SortEntry entry = combined.get(i);
@@ -4044,20 +4030,23 @@ public class AranarthUtils {
             if (entry.localPlayer() != null) {
                 Player player = entry.localPlayer();
                 UUID uuid = player.getUniqueId();
-                String display = ChatUtils.providePrefixAndName(uuid);
+                ChatPrefix prefix = ChatPrefix.of(player);
+                String suffix = "";
                 AranarthPlayer aranarthPlayer = getPlayer(uuid);
                 if (isAfk(aranarthPlayer)) {
-                    display += " &7[AFK]";
+                    suffix += " &7[AFK]";
                 }
                 int ping = player.getPing();
                 if (ping <= 150) {
-                    display += " &8[&a" + ping + "ms&8]";
+                    suffix += " &8[&a" + ping + "ms&8]";
                 } else if (ping <= 250) {
-                    display += " &8[&e" + ping + "ms&8]";
+                    suffix += " &8[&e" + ping + "ms&8]";
                 } else {
-                    display += " &8[&c" + ping + "ms&8]";
+                    suffix += " &8[&c" + ping + "ms&8]";
                 }
-                player.setPlayerListName(ChatUtils.translateToColor(display));
+                localPrefixes.put(uuid, prefix);
+                localSuffixes.put(uuid, suffix);
+                player.setPlayerListName(ChatUtils.translateToColor(prefix.formatName(PrefixStyle.defaults()) + suffix));
                 player.setPlayerListOrder(order);
             } else {
                 // Send a list-order packet for the remote fake entry so it slots in at
@@ -4067,6 +4056,32 @@ public class AranarthUtils {
             }
         }
 
+        // Sends each viewer with custom prefix styles their own version of every tab name. Viewers who just
+        // went back to the default styles are sent the default names once, replacing their old overrides.
+        Map<String, Map<UUID, String>> displayNamesByStyles = new HashMap<>();
+        for (Player viewer : Bukkit.getOnlinePlayers()) {
+            PrefixStyle[] styles = getPrefixStyles(viewer);
+            if (Arrays.equals(styles, PrefixStyle.defaults())) {
+                if (!customTabViewers.remove(viewer.getUniqueId())) {
+                    continue;
+                }
+            } else {
+                customTabViewers.add(viewer.getUniqueId());
+            }
+            Map<UUID, String> displayNames = displayNamesByStyles.computeIfAbsent(
+                    PrefixStyle.encode(styles[0], styles[1], styles[2]), k -> {
+                        Map<UUID, String> names = new HashMap<>();
+                        for (Map.Entry<UUID, ChatPrefix> local : localPrefixes.entrySet()) {
+                            names.put(local.getKey(), ChatUtils.translateToColor(
+                                    local.getValue().formatName(styles) + localSuffixes.get(local.getKey())));
+                        }
+                        for (NetworkPlayer np : remotePlayers) {
+                            names.put(np.getUuid(), NetworkTabManager.buildDisplayName(np, styles));
+                        }
+                        return names;
+                    });
+            NetworkTabManager.sendDisplayNames(viewer, displayNames);
+        }
     }
 
     /**

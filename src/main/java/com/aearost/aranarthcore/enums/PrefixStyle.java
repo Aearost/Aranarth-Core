@@ -1,12 +1,22 @@
 package com.aearost.aranarthcore.enums;
 
 /**
- * The ways in which a player's council, saint, and rank prefixes can be displayed.
+ * The ways in which council, saint, and rank prefixes can be displayed.
+ * Each player chooses how they see everyone's prefixes, while the console, logs, and Discord use the defaults.
  */
 public enum PrefixStyle {
 	FULL,
 	SHORT,
 	SYMBOL;
+
+	/**
+	 * Provides the default styles, used for the console, logs, Discord, and players who never changed them.
+	 *
+	 * @return The default council, saint, and rank prefix styles.
+	 */
+	public static PrefixStyle[] defaults() {
+		return new PrefixStyle[]{SYMBOL, SYMBOL, FULL};
+	}
 
 	/**
 	 * Provides the PrefixStyle matching the input, or the fallback if it does not match any style.
@@ -27,7 +37,7 @@ public enum PrefixStyle {
 	}
 
 	/**
-	 * Encodes the three prefix styles into a single String, used for network and roster syncing.
+	 * Encodes the three prefix styles into a single String, used for persistence and network syncing.
 	 *
 	 * @param council The council prefix style.
 	 * @param saint   The saint prefix style.
@@ -46,10 +56,10 @@ public enum PrefixStyle {
 	 */
 	public static PrefixStyle[] decode(String encoded) {
 		String[] parts = encoded != null ? encoded.split(",") : new String[0];
-		return new PrefixStyle[]{
-				fromString(parts.length > 0 ? parts[0] : null, SYMBOL),
-				fromString(parts.length > 1 ? parts[1] : null, SYMBOL),
-				fromString(parts.length > 2 ? parts[2] : null, FULL)
-		};
+		PrefixStyle[] styles = defaults();
+		for (int i = 0; i < styles.length && i < parts.length; i++) {
+			styles[i] = fromString(parts[i], styles[i]);
+		}
+		return styles;
 	}
 }

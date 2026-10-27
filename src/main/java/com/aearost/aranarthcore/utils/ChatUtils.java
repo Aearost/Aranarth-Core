@@ -1,8 +1,10 @@
 package com.aearost.aranarthcore.utils;
 
+import com.aearost.aranarthcore.enums.PrefixStyle;
 import com.aearost.aranarthcore.enums.SpecialDay;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.ChatPrefix;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionRank;
 import net.kyori.adventure.text.Component;
@@ -374,41 +376,55 @@ public class ChatUtils {
     }
 
     /**
-     * Formats the player's prefix based on their current ranks.
+     * Formats the player's prefix based on their current ranks, in the default prefix styles.
+     * Used for the console, logs, and Discord.
      *
      * @param player The player sending the message.
      * @return The formatted prefix.
      */
     public static String formatChatPrefix(OfflinePlayer player) {
-        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-        String nickname = aranarthPlayer.getNickname();
-        String prefix = "&l⊰&r";
-
-        prefix += AranarthUtils.getPrefixElements(aranarthPlayer) + " ";
-
-        if (nickname != null && !nickname.isEmpty()) {
-            prefix += nickname + "&r";
-        } else {
-            String name = player.getName();
-            prefix += (name != null) ? name : aranarthPlayer.getUsername();
-        }
-
-        prefix += "&l⊱ &r";
-        prefix = ChatUtils.translateToColor(prefix);
-        return prefix;
+        return ChatPrefix.of(player).format(PrefixStyle.defaults());
     }
 
     /**
-     * Provides the formatted prefix and the name of the player.
+     * Formats the player's prefix based on their current ranks, in the prefix styles chosen by the viewer.
      *
-     * @param uuid The UUID of the player.
+     * @param player The player sending the message.
+     * @param viewer The user who will see the prefix.
+     * @return The formatted prefix.
+     */
+    public static String formatChatPrefix(OfflinePlayer player, CommandSender viewer) {
+        return ChatPrefix.of(player).format(AranarthUtils.getPrefixStyles(viewer));
+    }
+
+    /**
+     * Sends a public chat message, with each viewer seeing the sender's prefix in their own prefix styles.
+     *
+     * @param viewers The players receiving the message.
+     * @param prefix  The prefix of the sender.
+     * @param message The message, without the prefix.
+     */
+    public static void sendChatToViewers(Collection<? extends Player> viewers, ChatPrefix prefix, Component message) {
+        Map<String, Component> messagesByStyles = new HashMap<>();
+        for (Player viewer : viewers) {
+            PrefixStyle[] styles = AranarthUtils.getPrefixStyles(viewer);
+            // Use Component.empty() as root so the message is a sibling of the prefix, not a child.
+            // Children inherit hover/click from their parent, siblings do not.
+            Component fullMessage = messagesByStyles.computeIfAbsent(PrefixStyle.encode(styles[0], styles[1], styles[2]),
+                    k -> Component.empty().append(prefix.toComponent(styles)).append(message));
+            viewer.sendMessage(fullMessage);
+        }
+    }
+
+    /**
+     * Provides the formatted prefix and the name of the player, in the prefix styles chosen by the viewer.
+     *
+     * @param uuid   The UUID of the player.
+     * @param viewer The user who will see the prefix.
      * @return The formatted prefix and the name of the player.
      */
-    public static String providePrefixAndName(UUID uuid) {
-        String prefixAndName = ChatUtils.formatChatPrefix(Bukkit.getOfflinePlayer(uuid));
-        prefixAndName = prefixAndName.substring(5, prefixAndName.length() - 1);
-        prefixAndName = prefixAndName.substring(0, prefixAndName.length() - 7);
-        return prefixAndName;
+    public static String providePrefixAndName(UUID uuid, CommandSender viewer) {
+        return ChatPrefix.of(Bukkit.getOfflinePlayer(uuid)).formatName(AranarthUtils.getPrefixStyles(viewer));
     }
 
     /**

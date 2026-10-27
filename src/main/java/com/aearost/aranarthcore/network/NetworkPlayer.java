@@ -21,7 +21,6 @@ public class NetworkPlayer {
     private boolean afk;
     private long afkStartTime = 0;
     private String pronouns;
-    private String prefixStyles = "";
     private int ping = -1;
 
     public NetworkPlayer(UUID uuid, String username, String nickname, String server,
@@ -127,14 +126,6 @@ public class NetworkPlayer {
 
     public void setPronouns(String pronouns) {
         this.pronouns = pronouns != null ? pronouns : "MALE";
-    }
-
-    public String getPrefixStyles() {
-        return prefixStyles;
-    }
-
-    public void setPrefixStyles(String prefixStyles) {
-        this.prefixStyles = prefixStyles != null ? prefixStyles : "";
     }
 
     public int getPing() {
