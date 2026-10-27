@@ -143,7 +143,7 @@ public class WorldEventManager implements Listener {
         perms.setPermission("bending.fire.combustionbending", true);
         perms.setPermission("bending.fire.lightningbending", true);
         perms.setPermission("bending.ability.barrage", true);
-        perms.setPermission("bending.ability.combustionstrike", true);
+        perms.setPermission("bending.ability.combustivestrike", true);
         perms.setPermission("bending.ability.Combustion", true);
         perms.setPermission("bending.ability.Discharge", true);
         perms.setPermission("bending.ability.Lightning", true);

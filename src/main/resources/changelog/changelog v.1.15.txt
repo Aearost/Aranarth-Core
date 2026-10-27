@@ -6,6 +6,7 @@ World & Events
 
 Bending & Abilities
 [~] EnergyBurst's fall auto-proc now only triggers after falling at least 10 blocks
+[~] Renamed CombustionStrike to CombustiveStrike
 
 Dominion
 [+] Added the council command /ac dominionrank to temporarily update a dominion's level

@@ -112,7 +112,7 @@ Barrage:
   Speed: 2.5
   HitRadius: 0.8
 
-CombustionStrike:
+CombustiveStrike:
   # 20 damage = 10 hearts
   Damage: 20.0
   MisfireDamage: 8.0

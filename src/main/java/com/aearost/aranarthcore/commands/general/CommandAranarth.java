@@ -343,8 +343,8 @@ public class CommandAranarth implements CommandExecutor {
             sendMultilineIndented(player, Lang.getFor(player, "essences.section_" + section + "_content1"));
             player.sendMessage(Component.empty());
             sendMultilineIndented(player, Lang.getFor(player, "essences.section_" + section + "_content2"));
-        } else if (topic.equals("bending")) {
-            sendMultilineIndented(player, Lang.getFor(player, "bending.section_" + section + "_content", getElementColors()));
+        } else if (topic.equals("bending") || topic.equals("ranks")) {
+            sendMultilineIndented(player, Lang.getFor(player, topic + ".section_" + section + "_content", getElementColors()));
         } else {
             sendMultilineIndented(player, Lang.getFor(player, topic + ".section_" + section + "_content"));
         }
@@ -366,7 +366,7 @@ public class CommandAranarth implements CommandExecutor {
     }
 
     /**
-     * Provides the placeholders that colour element and sub-element names in the Bending guide,
+     * Provides the placeholders that colour element and sub-element names in the Bending and Ranks guides,
      * so they always match the colours that ProjectKorra uses.
      */
     private static Object[] getElementColors() {

@@ -23,7 +23,7 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class CombustionStrike extends CombustionAbility implements AddonAbility {
+public class CombustiveStrike extends CombustionAbility implements AddonAbility {
 
     public enum Phase {CHARGING, CHARGED, TRAVELING}
 
@@ -60,24 +60,24 @@ public class CombustionStrike extends CombustionAbility implements AddonAbility 
     // Radius within which nearby entities take damage from the impact explosion
     private double damageRadius;
 
-    private static final Map<UUID, CombustionStrike> activeInstances = new HashMap<>();
+    private static final Map<UUID, CombustiveStrike> activeInstances = new HashMap<>();
 
-    public CombustionStrike(Player player) {
+    public CombustiveStrike(Player player) {
         super(player);
 
         if (!bPlayer.canBend(this)) {
             return;
         }
 
-        cooldown = AbilityConfig.getLong("CombustionStrike.Cooldown");
-        range = AbilityConfig.getDouble("CombustionStrike.Range");
-        damage = AbilityConfig.getDouble("CombustionStrike.Damage");
-        chargeDuration = AbilityConfig.getLong("CombustionStrike.ChargeDuration");
-        misfireDamage = AbilityConfig.getDouble("CombustionStrike.MisfireDamage");
-        explosionRadius = AbilityConfig.getDouble("CombustionStrike.ExplosionRadius");
-        speed = AbilityConfig.getDouble("CombustionStrike.Speed");
-        hitRadius = AbilityConfig.getDouble("CombustionStrike.HitRadius");
-        damageRadius = AbilityConfig.getDouble("CombustionStrike.DamageRadius");
+        cooldown = AbilityConfig.getLong("CombustiveStrike.Cooldown");
+        range = AbilityConfig.getDouble("CombustiveStrike.Range");
+        damage = AbilityConfig.getDouble("CombustiveStrike.Damage");
+        chargeDuration = AbilityConfig.getLong("CombustiveStrike.ChargeDuration");
+        misfireDamage = AbilityConfig.getDouble("CombustiveStrike.MisfireDamage");
+        explosionRadius = AbilityConfig.getDouble("CombustiveStrike.ExplosionRadius");
+        speed = AbilityConfig.getDouble("CombustiveStrike.Speed");
+        hitRadius = AbilityConfig.getDouble("CombustiveStrike.HitRadius");
+        damageRadius = AbilityConfig.getDouble("CombustiveStrike.DamageRadius");
 
         phase = Phase.CHARGING;
         chargeStartTime = System.currentTimeMillis();
@@ -342,7 +342,7 @@ public class CombustionStrike extends CombustionAbility implements AddonAbility 
         return activeInstances.containsKey(uuid);
     }
 
-    public static CombustionStrike getActiveInstance(UUID uuid) {
+    public static CombustiveStrike getActiveInstance(UUID uuid) {
         return activeInstances.get(uuid);
     }
 
@@ -367,7 +367,7 @@ public class CombustionStrike extends CombustionAbility implements AddonAbility 
 
     @Override
     public String getName() {
-        return "CombustionStrike";
+        return "CombustiveStrike";
     }
 
     @Override

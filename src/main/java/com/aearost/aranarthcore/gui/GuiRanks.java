@@ -335,7 +335,7 @@ public class GuiRanks {
 		}
 
 		emperorLore.add(Lang.getFor(player, "gui.ranks.bending"));
-		emperorLore.add(ChatUtils.translateToColor("&f&o- &4[&cF&4] " + Element.COMBUSTION.getColor() + "&oCombustion, CombustionStrike, Barrage"));
+		emperorLore.add(ChatUtils.translateToColor("&f&o- &4[&cF&4] " + Element.COMBUSTION.getColor() + "&oCombustion, CombustiveStrike, Barrage"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] " + Element.FLIGHT.getColor() + "&o" + Lang.getFor(player, "gui.ranks_basic_flight")));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] " + Element.BLOOD.getColor() + "&oLifeRip, Disalignment"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.LAVA.getColor() + "&oEruption, Fissure"));

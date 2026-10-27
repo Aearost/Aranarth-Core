@@ -75,7 +75,7 @@ public class RankCanBindHook implements CanBindHook {
 
         // Emperor
         ABILITY_MIN_RANKS.put("barrage", 8);
-        ABILITY_MIN_RANKS.put("combustionstrike", 8);
+        ABILITY_MIN_RANKS.put("combustivestrike", 8);
         ABILITY_MIN_RANKS.put("eruption", 8);
         ABILITY_MIN_RANKS.put("disalignment", 8);
         ABILITY_MIN_RANKS.put("liferip", 8);

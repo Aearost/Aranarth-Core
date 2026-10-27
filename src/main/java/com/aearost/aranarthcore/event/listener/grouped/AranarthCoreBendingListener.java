@@ -20,7 +20,7 @@ import com.aearost.aranarthcore.abilities.earthbending.sandbending.Burial;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.SandWave;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.Sandstorm;
 import com.aearost.aranarthcore.abilities.firebending.combustion.Barrage;
-import com.aearost.aranarthcore.abilities.firebending.combustion.CombustionStrike;
+import com.aearost.aranarthcore.abilities.firebending.combustion.CombustiveStrike;
 import com.aearost.aranarthcore.abilities.firebending.combustion.JetFumes;
 import com.aearost.aranarthcore.abilities.firebending.combustion.NoxiousFumes;
 import com.aearost.aranarthcore.abilities.firebending.lightningbending.*;
@@ -706,9 +706,9 @@ public class AranarthCoreBendingListener implements Listener {
                     if (!Barrage.hasActiveInstance(player.getUniqueId())) {
                         new Barrage(player);
                     }
-                } else if (abilityName.equalsIgnoreCase("combustionstrike")) {
-                    if (!CombustionStrike.hasActiveInstance(player.getUniqueId())) {
-                        new CombustionStrike(player);
+                } else if (abilityName.equalsIgnoreCase("combustivestrike")) {
+                    if (!CombustiveStrike.hasActiveInstance(player.getUniqueId())) {
+                        new CombustiveStrike(player);
                     }
                 } else if (abilityName.equalsIgnoreCase("noxiousfumes")) {
                     if (!NoxiousFumes.hasActiveInstance(player.getUniqueId())) {
@@ -1212,7 +1212,7 @@ public class AranarthCoreBendingListener implements Listener {
             e.setCancelled(true);
             return;
         }
-        if (CombustionStrike.hasActiveInstance(player.getUniqueId())) {
+        if (CombustiveStrike.hasActiveInstance(player.getUniqueId())) {
             e.setCancelled(true);
             return;
         }
@@ -1402,9 +1402,9 @@ public class AranarthCoreBendingListener implements Listener {
         if (energyBurst != null) {
             energyBurst.onSlotChange();
         }
-        CombustionStrike combustionStrike = CombustionStrike.getActiveInstance(e.getPlayer().getUniqueId());
-        if (combustionStrike != null && combustionStrike.getPhase() != CombustionStrike.Phase.TRAVELING) {
-            combustionStrike.cancelInstantly();
+        CombustiveStrike combustiveStrike = CombustiveStrike.getActiveInstance(e.getPlayer().getUniqueId());
+        if (combustiveStrike != null && combustiveStrike.getPhase() != CombustiveStrike.Phase.TRAVELING) {
+            combustiveStrike.cancelInstantly();
         }
         MagmaGlaives magmaGlaives = MagmaGlaives.getActiveInstance(e.getPlayer().getUniqueId());
         if (magmaGlaives != null) {
