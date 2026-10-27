@@ -40,6 +40,7 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
@@ -988,6 +989,10 @@ public class JobEventListener implements Listener {
         if (!AranarthUtils.isSurvivalWorld(worldName)) {
             return;
         }
+        // Teleports only pay for actively moving, never for the distance jumped
+        if (!AranarthUtils.isActiveTravel(player, e.getFrom(), e.getTo())) {
+            return;
+        }
 
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
         if (ap == null || !ap.getJobData().hasJob(JobType.EXPLORER)) {
@@ -1011,6 +1016,11 @@ public class JobEventListener implements Listener {
         } else if (vehicle == null) {
             JobUtils.awardJob(player, JobType.EXPLORER, 0.25);
         }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerTeleport(PlayerTeleportEvent e) {
+        AranarthUtils.markTeleported(e.getPlayer().getUniqueId());
     }
 
     // -------------------------------------------------------------------------

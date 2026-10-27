@@ -125,6 +125,10 @@ public class AranarthUtils {
     private static final HashMap<UUID, String> shopNames = new HashMap<>();
     private static final HashMap<UUID, BukkitTask> teleportingPlayers = new HashMap<>();
     private static final Set<UUID> skipCountdown = new HashSet<>();
+    // Travel rewards: moves larger than this (in blocks) or shortly after a teleport are not active travel
+    private static final Map<UUID, Long> recentTeleports = new HashMap<>();
+    private static final double MAX_TRAVEL_DISTANCE_PER_MOVE = 5.0;
+    private static final long TELEPORT_TRAVEL_GRACE_MS = 1000L;
     // Worlds disabled via /ac disable - world names are not unique across the network, so each server tracks its own
     private static final Set<String> disabledWorlds = ConcurrentHashMap.newKeySet();
     private static final Map<UUID, Long> lastDisabledWorldMessage = new HashMap<>();
@@ -5125,6 +5129,35 @@ public class AranarthUtils {
                 || isSmpWorld(worldName)
                 || worldName.equals("resource") || worldName.equals("resource_nether") || worldName.equals("resource_the_end")
                 || worldName.equals("spawn") || worldName.equals("shops");
+    }
+
+    /**
+     * Marks the player as having just teleported, so their next few moves do not count as travel.
+     */
+    public static void markTeleported(UUID uuid) {
+        recentTeleports.put(uuid, System.currentTimeMillis());
+    }
+
+    /**
+     * Returns true if the move is the player actively travelling, rather than a teleport.
+     */
+    public static boolean isActiveTravel(Player player, Location from, Location to) {
+        if (to == null || from.getWorld() != to.getWorld()) {
+            return false;
+        }
+        double dx = to.getX() - from.getX();
+        double dz = to.getZ() - from.getZ();
+        if (dx * dx + dz * dz > MAX_TRAVEL_DISTANCE_PER_MOVE * MAX_TRAVEL_DISTANCE_PER_MOVE) {
+            return false;
+        }
+        Long teleportedAt = recentTeleports.get(player.getUniqueId());
+        if (teleportedAt != null) {
+            if (System.currentTimeMillis() - teleportedAt < TELEPORT_TRAVEL_GRACE_MS) {
+                return false;
+            }
+            recentTeleports.remove(player.getUniqueId());
+        }
+        return true;
     }
 
     /**

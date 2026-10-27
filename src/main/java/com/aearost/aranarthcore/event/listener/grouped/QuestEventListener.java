@@ -340,6 +340,10 @@ public class QuestEventListener implements Listener {
         if (!AranarthUtils.isSurvivalWorld(worldName)) {
             return;
         }
+        // Teleports do not count towards travel
+        if (!AranarthUtils.isActiveTravel(player, e.getFrom(), e.getTo())) {
+            return;
+        }
 
         QuestUtils.updateProgress(player, QuestTaskType.TRAVEL_BLOCKS, 1);
     }
