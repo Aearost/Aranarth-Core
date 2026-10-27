@@ -127,6 +127,7 @@ public class NetworkManager {
     public static final String CH_TRADE_RESULT = "aranarth:trade_result";
     public static final String CH_PUNISHMENT = "aranarth:punishment";
     public static final String CH_PRONOUNS_UPDATE = "aranarth:pronouns_update";
+    public static final String CH_PREFIX_UPDATE = "aranarth:prefix_update";
     public static final String CH_PING_UPDATE = "aranarth:ping_update";
     public static final String CH_HEARTBEAT = "aranarth:heartbeat";
     public static final String CH_RESOURCE_WORLD_LOCK = "aranarth:resource_world_lock";
@@ -596,6 +597,7 @@ public class NetworkManager {
             case CH_TRADE_RESULT -> handleTradeResult(json);
             case CH_PUNISHMENT -> handlePunishment(json);
             case CH_PRONOUNS_UPDATE -> handlePronounsUpdate(json);
+            case CH_PREFIX_UPDATE -> handlePrefixUpdate(json);
             case CH_PING_UPDATE -> handlePingUpdate(json);
             case CH_HEARTBEAT -> handleHeartbeat(json);
             case CH_RESOURCE_WORLD_LOCK -> handleResourceWorldLock(json);
@@ -734,7 +736,7 @@ public class NetworkManager {
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
                 db.upsertRosterEntry(uuid, ap.getUsername(), nickname, thisServer,
                         ap.getRank(), ap.getCouncilRank(), ap.getSaintRank(), ap.getArchitectRank(), ap.isVanished(),
-                        pronounsName)
+                        pronounsName, ap.getEncodedPrefixStyles())
         );
 
         // Extract skin texture so other servers can render this player's head in the tab list
@@ -763,6 +765,7 @@ public class NetworkManager {
         json.addProperty("textureValue", textureValue);
         json.addProperty("textureSignature", textureSignature);
         json.addProperty("pronouns", ap.getPronouns() != null ? ap.getPronouns().name() : "MALE");
+        json.addProperty("prefixStyles", ap.getEncodedPrefixStyles());
         publish(CH_JOIN, json);
     }
 
@@ -1119,6 +1122,21 @@ public class NetworkManager {
         json.addProperty("uuid", uuid.toString());
         json.addProperty("pronouns", pronouns);
         publish(CH_PRONOUNS_UPDATE, json);
+    }
+
+    /**
+     * Notifies other servers that a player's prefix styles have changed.
+     */
+    public void publishPrefixUpdate(UUID uuid, String prefixStyles) {
+        // Update DB so the roster survives server restarts
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
+                db.updateRosterPrefixStyles(uuid, prefixStyles)
+        );
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", uuid.toString());
+        json.addProperty("prefixStyles", prefixStyles);
+        publish(CH_PREFIX_UPDATE, json);
     }
 
     /**
@@ -1995,6 +2013,9 @@ public class NetworkManager {
                 textureSignature,
                 pronouns
         );
+        if (json.has("prefixStyles")) {
+            np.setPrefixStyles(json.get("prefixStyles").getAsString());
+        }
         remoteRoster.put(uuid, np);
         if (!vanished) {
             NetworkTabManager.addToTab(np);
@@ -2599,6 +2620,31 @@ public class NetworkManager {
                     AranarthUtils.setPlayer(uuid, ap);
                 }
             }
+        }
+    }
+
+    private void handlePrefixUpdate(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        String prefixStyles = json.get("prefixStyles").getAsString();
+
+        NetworkPlayer np = remoteRoster.get(uuid);
+        if (np != null) {
+            np.setPrefixStyles(prefixStyles);
+            if (!np.isVanished()) {
+                NetworkTabManager.addToTab(np);
+            }
+            AranarthUtils.updateTab();
+        }
+        // Keeps the in-memory copy accurate so displays built on this server (baltop, info, dominion lists) match
+        AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+        if (ap != null) {
+            ap.setEncodedPrefixStyles(prefixStyles);
+            AranarthUtils.setPlayer(uuid, ap);
         }
     }
 

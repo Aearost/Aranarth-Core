@@ -1456,6 +1456,8 @@ public class AranarthCore extends JavaPlugin {
         getCommand("ping").setTabCompleter(new CommandPingCompleter());
         getCommand("potions").setExecutor(new CommandPotions());
         getCommand("potions").setTabCompleter(new CommandPotionsCompleter());
+        getCommand("prefix").setExecutor(new CommandPrefix());
+        getCommand("prefix").setTabCompleter(new CommandPrefixCompleter());
         getCommand("pronouns").setExecutor(new CommandPronouns());
         getCommand("pronouns").setTabCompleter(new CommandPronounsCompleter());
         getCommand("randomizer").setExecutor(new CommandRandomizer());

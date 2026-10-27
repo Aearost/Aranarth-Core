@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.utils;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.Month;
+import com.aearost.aranarthcore.enums.PrefixStyle;
 import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.enums.WorldEvent;
@@ -101,6 +102,21 @@ public class AranarthUtils {
             {PrimarySkillType.ACROBATICS, PrimarySkillType.ALCHEMY, PrimarySkillType.REPAIR,
                     PrimarySkillType.SALVAGE, PrimarySkillType.SMELTING}
     };
+    // Prefix display data for each rank, indexed from Peasant (0) to Emperor (8)
+    private static final String[] RANK_NAMES_MALE = {"Peasant", "Esquire", "Knight", "Baron", "Count", "Duke", "Prince", "King", "Emperor"};
+    private static final String[] RANK_NAMES_FEMALE = {"Peasant", "Esquire", "Knight", "Baroness", "Countess", "Duchess", "Princess", "Queen", "Empress"};
+    private static final String[] RANK_BRACKET_COLORS = {"&8", "&d", "&7", "&5", "&8", "&6", "&6", "&6", "&6"};
+    private static final String[] RANK_TEXT_COLORS = {"&a", "&a", "&f", "&d", "&7", "&e", "&b", "&9", "&4"};
+    private static final String[] RANK_SYMBOL_COLORS = {"&#6FCF4F", "&#FF9EC7", "&#F0F0F0", "&#B05CE6", "&#8A8A8A", "&#FFE14D", "&#4DE0FF", "&#4D6BFF", "&#D11A1A"};
+    private static final String RANK_SYMBOL = "❖";
+    private static final String ARCHITECT_SYMBOL = "&#4CA64C&l\uD83D\uDD28&r"; // Hammer emoji
+    private static final String AVATAR_SYMBOL = "&5❋&r";
+    // Prefix display data for Council (Helper, Moderator, Admin) and Saint (Acolyte, Disciple, Seraph) ranks
+    private static final String[] COUNCIL_NAMES = {"Helper", "Moderator", "Admin"};
+    private static final String[] COUNCIL_COLORS = {"&6", "&3", "&4"};
+    private static final String[] SAINT_NAMES = {"Acolyte", "Disciple", "Seraph"};
+    private static final String[] SAINT_COLORS = {"&#FFE58A", "&#8AB8FF", "&#FF8A8A"};
+    private static final String ROLE_BRACKET_COLOR = "&8";
     private static final HashMap<UUID, Set<UUID>> shopCollaborators = new HashMap<>();
     private static final HashMap<UUID, UUID> collaboratorShop = new HashMap<>(); // collaborator UUID → owner UUID
     private static final HashMap<UUID, UUID> pendingShopInvites = new HashMap<>(); // invitee UUID → owner UUID
@@ -1961,9 +1977,12 @@ public class AranarthUtils {
                 aranarthPlayer.setMuteEndDate("");
                 AranarthUtils.setPlayer(uuid, aranarthPlayer);
 
-                Punishment punishment = new Punishment(
-                        uuid, LocalDateTime.now(), "UNMUTE", "The player's mute has automatically ended", null);
-                DiscordUtils.addPunishmentToDiscord(punishment);
+                // Both servers expire the mute, so only Survival posts it to Discord
+                if (!AranarthCore.isSmpServer()) {
+                    Punishment punishment = new Punishment(
+                            uuid, LocalDateTime.now(), "UNMUTE", "The player's mute has automatically ended", null);
+                    DiscordUtils.addPunishmentToDiscord(punishment);
+                }
 
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
                 if (offlinePlayer.isOnline()) {
@@ -1987,9 +2006,12 @@ public class AranarthUtils {
             if (entry.getExpiration() != null) {
                 // If they are no longer banned
                 if (entry.getExpiration().before(new Date())) {
-                    Punishment punishment = new Punishment(
-                            uuid, LocalDateTime.now(), "UNBAN", "The player's ban has automatically ended", null);
-                    DiscordUtils.addPunishmentToDiscord(punishment);
+                    // Both servers expire the ban, so only Survival posts it to Discord
+                    if (!AranarthCore.isSmpServer()) {
+                        Punishment punishment = new Punishment(
+                                uuid, LocalDateTime.now(), "UNBAN", "The player's ban has automatically ended", null);
+                        DiscordUtils.addPunishmentToDiscord(punishment);
+                    }
                     entry.remove();
                 }
             }
@@ -2039,47 +2061,76 @@ public class AranarthUtils {
      * @return The String portion of the player's rank.
      */
     public static String getRank(AranarthPlayer aranarthPlayer) {
-        int rank = aranarthPlayer.getRank();
-        if (aranarthPlayer.getPronouns() == Pronouns.MALE) {
-            switch (rank) {
-                case 1:
-                    return "&d&l[&a&lEsquire&d&l] &r";
-                case 2:
-                    return "&7&l[&f&lKnight&7&l] &r";
-                case 3:
-                    return "&5&l[&d&lBaron&5&l] &r";
-                case 4:
-                    return "&8&l[&7&lCount&8&l] &r";
-                case 5:
-                    return "&6&l[&e&lDuke&6&l] &r";
-                case 6:
-                    return "&6&l[&b&lPrince&6&l] &r";
-                case 7:
-                    return "&6&l[&9&lKing&6&l] &r";
-                case 8:
-                    return "&6&l[&4&lEmperor&6&l] &r";
-            }
-        } else {
-            switch (rank) {
-                case 1:
-                    return "&d&l[&a&lEsquire&d&l] &r";
-                case 2:
-                    return "&7&l[&f&lKnight&7&l] &r";
-                case 3:
-                    return "&5&l[&d&lBaroness&5&l] &r";
-                case 4:
-                    return "&8&l[&7&lCountess&8&l] &r";
-                case 5:
-                    return "&6&l[&e&lDuchess&6&l] &r";
-                case 6:
-                    return "&6&l[&b&lPrincess&6&l] &r";
-                case 7:
-                    return "&6&l[&9&lQueen&6&l] &r";
-                case 8:
-                    return "&6&l[&4&lEmpress&6&l] &r";
-            }
+        return formatRank(aranarthPlayer.getRank(), aranarthPlayer.getPronouns() != Pronouns.MALE, PrefixStyle.FULL) + " &r";
+    }
+
+    /**
+     * Provides the String portion of a rank in the given prefix style.
+     *
+     * @param rank     The rank, where 0 is Peasant and 8 is Emperor.
+     * @param isFemale Whether the female variant of the rank name should be used.
+     * @param style    The prefix style to display the rank in.
+     * @return The String portion of the rank.
+     */
+    public static String getRankPrefix(int rank, boolean isFemale, PrefixStyle style) {
+        return formatRank(rank, isFemale, style) + "&r";
+    }
+
+    /**
+     * Formats a rank in the given prefix style, without any trailing reset or spacing.
+     */
+    private static String formatRank(int rank, boolean isFemale, PrefixStyle style) {
+        if (rank < 0 || rank >= RANK_SYMBOL_COLORS.length) {
+            rank = 0;
         }
-        return "&8&l[&a&lPeasant&8&l] &r";
+        if (style == PrefixStyle.SYMBOL) {
+            return RANK_SYMBOL_COLORS[rank] + RANK_SYMBOL;
+        }
+        String name = isFemale ? RANK_NAMES_FEMALE[rank] : RANK_NAMES_MALE[rank];
+        if (style == PrefixStyle.SHORT) {
+            name = name.substring(0, 1);
+        }
+        return RANK_BRACKET_COLORS[rank] + "&l[" + RANK_TEXT_COLORS[rank] + "&l" + name + RANK_BRACKET_COLORS[rank] + "&l]";
+    }
+
+    /**
+     * Provides all of the player's prefix elements in their chosen styles.
+     *
+     * @param aranarthPlayer The AranarthPlayer that is being analyzed.
+     * @return The player's prefix elements, without any trailing space.
+     */
+    public static String getPrefixElements(AranarthPlayer aranarthPlayer) {
+        return buildPrefixElements(
+                aranarthPlayer.getCouncilRank(), aranarthPlayer.getCouncilPrefixStyle(),
+                !getArchitectRank(aranarthPlayer).isEmpty(),
+                aranarthPlayer.getSaintRank(), aranarthPlayer.getSaintPrefixStyle(),
+                !getAvatarRank(aranarthPlayer).isEmpty(),
+                aranarthPlayer.getRank(), aranarthPlayer.getPronouns() != Pronouns.MALE, aranarthPlayer.getRankPrefixStyle());
+    }
+
+    /**
+     * Builds the prefix elements, grouped as symbols on the left, short values in the middle, and full values
+     * on the right. Within each group, the Council, Architect, Saint, Avatar, and rank priority is kept.
+     *
+     * @return The prefix elements, without any trailing space.
+     */
+    public static String buildPrefixElements(int councilRank, PrefixStyle councilStyle, boolean isArchitect,
+                                             int saintRank, PrefixStyle saintStyle, boolean isAvatar,
+                                             int rank, boolean isFemale, PrefixStyle rankStyle) {
+        // Indexed by PrefixStyle ordinal: FULL, SHORT, SYMBOL
+        StringBuilder[] groups = {new StringBuilder(), new StringBuilder(), new StringBuilder()};
+        groups[councilStyle.ordinal()].append(getCouncilPrefix(councilRank, councilStyle));
+        if (isArchitect) {
+            groups[PrefixStyle.SYMBOL.ordinal()].append(ARCHITECT_SYMBOL);
+        }
+        groups[saintStyle.ordinal()].append(getSaintPrefix(saintRank, saintStyle));
+        if (isAvatar) {
+            groups[PrefixStyle.SYMBOL.ordinal()].append(AVATAR_SYMBOL);
+        }
+        groups[rankStyle.ordinal()].append(getRankPrefix(rank, isFemale, rankStyle));
+        return groups[PrefixStyle.SYMBOL.ordinal()].toString()
+                + groups[PrefixStyle.SHORT.ordinal()]
+                + groups[PrefixStyle.FULL.ordinal()];
     }
 
     /**
@@ -2122,12 +2173,25 @@ public class AranarthUtils {
      * @return The String portion of the player's Saint rank.
      */
     public static String getSaintRank(AranarthPlayer aranarthPlayer) {
-        int saintRank = aranarthPlayer.getSaintRank();
-        return switch (saintRank) {
-            case 1 -> "&b⚜&r";
-            case 2 -> "&e⚜&r";
-            case 3 -> "&c⚜&r";
-            default -> "";
+        return getSaintPrefix(aranarthPlayer.getSaintRank(), aranarthPlayer.getSaintPrefixStyle());
+    }
+
+    /**
+     * Provides the String portion of a Saint rank in the given prefix style.
+     *
+     * @param saintRank The Saint rank, where 0 is no Saint rank.
+     * @param style     The prefix style to display the Saint rank in.
+     * @return The String portion of the Saint rank.
+     */
+    public static String getSaintPrefix(int saintRank, PrefixStyle style) {
+        if (saintRank < 1 || saintRank > SAINT_NAMES.length) {
+            return "";
+        }
+        String color = SAINT_COLORS[saintRank - 1];
+        return switch (style) {
+            case SYMBOL -> color + "⚜&r";
+            case SHORT -> ROLE_BRACKET_COLOR + "&l[" + color + "&lS" + ROLE_BRACKET_COLOR + "&l]&r";
+            case FULL -> ROLE_BRACKET_COLOR + "&l[" + color + "&l" + SAINT_NAMES[saintRank - 1] + ROLE_BRACKET_COLOR + "&l]&r";
         };
     }
 
@@ -2138,12 +2202,26 @@ public class AranarthUtils {
      * @return The String portion of the player's Council rank.
      */
     public static String getCouncilRank(AranarthPlayer aranarthPlayer) {
-        int councilRank = aranarthPlayer.getCouncilRank();
-        return switch (councilRank) {
-            case 1 -> "&3۞&r";
-            case 2 -> "&6۞&r";
-            case 3 -> "&4۞&r";
-            default -> "";
+        return getCouncilPrefix(aranarthPlayer.getCouncilRank(), aranarthPlayer.getCouncilPrefixStyle());
+    }
+
+    /**
+     * Provides the String portion of a Council rank in the given prefix style.
+     *
+     * @param councilRank The Council rank, where 0 is no Council rank.
+     * @param style       The prefix style to display the Council rank in.
+     * @return The String portion of the Council rank.
+     */
+    public static String getCouncilPrefix(int councilRank, PrefixStyle style) {
+        if (councilRank < 1 || councilRank > COUNCIL_NAMES.length) {
+            return "";
+        }
+        String color = COUNCIL_COLORS[councilRank - 1];
+        String name = COUNCIL_NAMES[councilRank - 1];
+        return switch (style) {
+            case SYMBOL -> color + "۞&r";
+            case SHORT -> ROLE_BRACKET_COLOR + "&l[" + color + "&l" + name.charAt(0) + ROLE_BRACKET_COLOR + "&l]&r";
+            case FULL -> ROLE_BRACKET_COLOR + "&l[" + color + "&l" + name + ROLE_BRACKET_COLOR + "&l]&r";
         };
     }
 
@@ -2156,7 +2234,7 @@ public class AranarthUtils {
     public static String getArchitectRank(AranarthPlayer aranarthPlayer) {
         int architectRank = aranarthPlayer.getArchitectRank();
         return switch (architectRank) {
-            case 1 -> "&a&l\uD83D\uDD28&r"; // Hammer emoji
+            case 1 -> ARCHITECT_SYMBOL;
             default -> "";
         };
     }
@@ -2171,7 +2249,7 @@ public class AranarthUtils {
         if (AvatarUtils.getCurrentAvatar() != null) {
             UUID uuid = AvatarUtils.getCurrentAvatar().getUuid();
             if (uuid != null && getUUIDFromUsername(aranarthPlayer.getUsername()) != null && uuid.equals(getUUIDFromUsername(aranarthPlayer.getUsername()))) {
-                return "&5✵";
+                return AVATAR_SYMBOL;
             }
         }
 

@@ -22,6 +22,7 @@ Economy, Jobs & Quests
 [~] Potions in /mv are now grouped by effect, amplifier, and duration, instead of all showing as "Potion"
 
 Chat, UI & Sounds
+[+] Added fully customizable prefixes in chat, allowing full, shortened, or symbols for the rank, council, and saint ranks
 [+] /mcstats now also shows the levels of the 3 sub-skills
 [+] /mcstats now shows the Gathering, Combat and Misc level totals, along with the highest rank each total qualifies for
 [~] Overhauled the /aranarth guide text content for every topic

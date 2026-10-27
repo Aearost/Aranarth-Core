@@ -278,7 +278,7 @@ public class PermissionUtils {
             perms.setPermission("bending.ability.moltenblast", true);
             perms.setPermission("bending.ability.eruption", true);
             perms.setPermission("bending.ability.magmawave", true);
-            perms.setPermission("bending.ability.combustionstrike", true);
+            perms.setPermission("bending.ability.combustivestrike", true);
             perms.setPermission("bending.ability.metalshots", true);
             perms.setPermission("bending.ability.metalstrips", true);
             perms.setPermission("bending.ability.metalshred", true);
@@ -403,7 +403,7 @@ public class PermissionUtils {
         perms.setPermission("bending.ability.moltenblast", true);
         perms.setPermission("bending.ability.eruption", true);
         perms.setPermission("bending.ability.magmawave", true);
-        perms.setPermission("bending.ability.combustionstrike", true);
+        perms.setPermission("bending.ability.combustivestrike", true);
         perms.setPermission("bending.ability.metalshots", true);
         perms.setPermission("bending.ability.metalstrips", true);
         perms.setPermission("bending.ability.metalblade", true);
@@ -471,6 +471,7 @@ public class PermissionUtils {
         perms.setPermission("aranarth.pettransfer", true);
         perms.setPermission("aranarth.ping", true);
         perms.setPermission("aranarth.potions", true);
+        perms.setPermission("aranarth.prefix", true);
         perms.setPermission("aranarth.pronouns", true);
         perms.setPermission("aranarth.quests", true);
         perms.setPermission("aranarth.ranks", true);
@@ -762,7 +763,7 @@ public class PermissionUtils {
                     perms.setPermission("bending.ability.moltenblast", true);
                     perms.setPermission("bending.ability.eruption", true);
                     perms.setPermission("bending.ability.magmawave", true);
-                    perms.setPermission("bending.ability.combustionstrike", true);
+                    perms.setPermission("bending.ability.combustivestrike", true);
                     perms.setPermission("bending.ability.metalshots", true);
                     perms.setPermission("bending.ability.metalstrips", true);
                     perms.setPermission("bending.ability.metalshred", true);
@@ -1051,7 +1052,7 @@ public class PermissionUtils {
             perms.setPermission("bending.ability.eruption", true);            // lava
             perms.setPermission("bending.ability.Fissure", true);             // JedCore lava
             perms.setPermission("bending.ability.Combustion", true);          // JedCore combustion
-            perms.setPermission("bending.ability.combustionstrike", true);    // combustion
+            perms.setPermission("bending.ability.combustivestrike", true);    // combustion
             perms.setPermission("bending.ability.barrage", true);             // combustion
             perms.setPermission("bending.ability.SwiftStream", true);         // JedCore flight combo
             perms.setPermission("bending.command.preset.create.25", true);

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.objects;
 
 import com.aearost.aranarthcore.enums.FireType;
+import com.aearost.aranarthcore.enums.PrefixStyle;
 import com.aearost.aranarthcore.enums.Pronouns;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -120,6 +121,9 @@ public class AranarthPlayer {
     private boolean isServerTipsDisabled = false;
     private boolean isSitDisabled = false;
     private String sitCushionColor = "WHITE";
+    private PrefixStyle councilPrefixStyle = PrefixStyle.SYMBOL;
+    private PrefixStyle saintPrefixStyle = PrefixStyle.SYMBOL;
+    private PrefixStyle rankPrefixStyle = PrefixStyle.FULL;
     private int joinSoundVolume = 100;
     private int leaveSoundVolume = 100;
     private int voteSoundVolume = 100;
@@ -2145,6 +2149,51 @@ public class AranarthPlayer {
 
     public void setSitCushionColor(String sitCushionColor) {
         this.sitCushionColor = sitCushionColor;
+    }
+
+    public PrefixStyle getCouncilPrefixStyle() {
+        return councilPrefixStyle;
+    }
+
+    public void setCouncilPrefixStyle(PrefixStyle councilPrefixStyle) {
+        this.councilPrefixStyle = councilPrefixStyle;
+    }
+
+    public PrefixStyle getSaintPrefixStyle() {
+        return saintPrefixStyle;
+    }
+
+    public void setSaintPrefixStyle(PrefixStyle saintPrefixStyle) {
+        this.saintPrefixStyle = saintPrefixStyle;
+    }
+
+    public PrefixStyle getRankPrefixStyle() {
+        return rankPrefixStyle;
+    }
+
+    public void setRankPrefixStyle(PrefixStyle rankPrefixStyle) {
+        this.rankPrefixStyle = rankPrefixStyle;
+    }
+
+    /**
+     * Provides the player's council, saint, and rank prefix styles encoded into a single String.
+     *
+     * @return The encoded prefix styles.
+     */
+    public String getEncodedPrefixStyles() {
+        return PrefixStyle.encode(councilPrefixStyle, saintPrefixStyle, rankPrefixStyle);
+    }
+
+    /**
+     * Applies the prefix styles from a String created by getEncodedPrefixStyles().
+     *
+     * @param encoded The encoded prefix styles.
+     */
+    public void setEncodedPrefixStyles(String encoded) {
+        PrefixStyle[] styles = PrefixStyle.decode(encoded);
+        this.councilPrefixStyle = styles[0];
+        this.saintPrefixStyle = styles[1];
+        this.rankPrefixStyle = styles[2];
     }
 
     public String getLanguage() {

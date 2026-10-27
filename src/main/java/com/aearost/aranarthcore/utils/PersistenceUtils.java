@@ -915,6 +915,11 @@ public class PersistenceUtils {
                     aranarthPlayer.setSitCushionColor(fields[38]);
                 }
 
+                // Prefix Styles (index 39)
+                if (fields.length > 39) {
+                    aranarthPlayer.setEncodedPrefixStyles(fields[39]);
+                }
+
                 AranarthUtils.setPlayer(uuid, aranarthPlayer);
             }
             Bukkit.getLogger().info("[AC] All toggled features have been initialized");
@@ -954,7 +959,7 @@ public class PersistenceUtils {
                 try {
                     FileWriter writer = new AtomicFileWriter(filePath);
                     // Template line
-                    writer.write("#uuid|chat|messages|teleport|spawnboost|changeclaim|inventory|shulker|blacklist|compressing|chestlock|firetype|gradientchatenabled|gradientchatcolors|daymessage|weathermessage|dominionmsgcompact|joinsound|leavesound|votesound|cratesound|weathersound|newdaysound|newmonthsound|privatemsgsound|teleportsound|avatarsound|dominionSound|aranarthiumsound|chatgamesound|chestsortsound|jobssound|expstoresponud|interactivechat|emojienabled|sizescaleenabled|servertipsdisabled|sitdisabled|sitcushioncolor\n");
+                    writer.write("#uuid|chat|messages|teleport|spawnboost|changeclaim|inventory|shulker|blacklist|compressing|chestlock|firetype|gradientchatenabled|gradientchatcolors|daymessage|weathermessage|dominionmsgcompact|joinsound|leavesound|votesound|cratesound|weathersound|newdaysound|newmonthsound|privatemsgsound|teleportsound|avatarsound|dominionSound|aranarthiumsound|chatgamesound|chestsortsound|jobssound|expstoresponud|interactivechat|emojienabled|sizescaleenabled|servertipsdisabled|sitdisabled|sitcushioncolor|prefixstyles\n");
 
                     for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
                         AranarthPlayer aranarthPlayer = entry.getValue();
@@ -1007,7 +1012,8 @@ public class PersistenceUtils {
                                 + "|" + teleportSound + "|" + avatarSound + "|" + dominionSound + "|" + aranarthiumSound
                                 + "|" + chatGameSound + "|" + chestSortSound + "|" + jobsSound + "|" + expStoreSound
                                 + "|" + interactiveChat + "|" + emojiEnabled + "|" + sizeScaleEnabled + "|" + serverTipsDisabled
-                                + "|" + sitDisabled + "|" + aranarthPlayer.getSitCushionColor() + "\n";
+                                + "|" + sitDisabled + "|" + aranarthPlayer.getSitCushionColor()
+                                + "|" + aranarthPlayer.getEncodedPrefixStyles() + "\n";
                         writer.write(row);
                     }
                     writer.close();
@@ -6414,6 +6420,7 @@ public class PersistenceUtils {
             obj.addProperty("serverTipsDisabled", ap.isServerTipsDisabled());
             obj.addProperty("sitDisabled", ap.isSitDisabled());
             obj.addProperty("sitCushionColor", ap.getSitCushionColor());
+            obj.addProperty("prefixStyles", ap.getEncodedPrefixStyles());
             obj.addProperty("language", ap.getLanguage());
             try {
                 db.savePlayerToggles(uuid, GSON.toJson(obj));
@@ -8481,6 +8488,9 @@ public class PersistenceUtils {
                 if (obj.has("sitCushionColor")) {
                     ap.setSitCushionColor(obj.get("sitCushionColor").getAsString());
                 }
+                if (obj.has("prefixStyles")) {
+                    ap.setEncodedPrefixStyles(obj.get("prefixStyles").getAsString());
+                }
                 if (obj.has("language")) {
                     ap.setLanguage(obj.get("language").getAsString());
                 }
@@ -8549,6 +8559,7 @@ public class PersistenceUtils {
         obj.addProperty("serverTipsDisabled", ap.isServerTipsDisabled());
         obj.addProperty("sitDisabled", ap.isSitDisabled());
         obj.addProperty("sitCushionColor", ap.getSitCushionColor());
+        obj.addProperty("prefixStyles", ap.getEncodedPrefixStyles());
         obj.addProperty("language", ap.getLanguage());
         return GSON.toJson(obj);
     }
@@ -8714,6 +8725,9 @@ public class PersistenceUtils {
             }
             if (obj.has("sitCushionColor")) {
                 ap.setSitCushionColor(obj.get("sitCushionColor").getAsString());
+            }
+            if (obj.has("prefixStyles")) {
+                ap.setEncodedPrefixStyles(obj.get("prefixStyles").getAsString());
             }
             if (obj.has("language")) {
                 ap.setLanguage(obj.get("language").getAsString());

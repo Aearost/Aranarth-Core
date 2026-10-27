@@ -569,7 +569,8 @@ public class DatabaseManager {
                 "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_server VARCHAR(32) NULL DEFAULT NULL",
                 "ALTER TABLE network_temp_data MODIFY COLUMN value_json MEDIUMTEXT NOT NULL",
                 "ALTER TABLE network_roster ADD COLUMN IF NOT EXISTS pronouns VARCHAR(10) NOT NULL DEFAULT 'MALE'",
-                "ALTER TABLE network_roster ADD COLUMN IF NOT EXISTS afk TINYINT(1) NOT NULL DEFAULT 0"
+                "ALTER TABLE network_roster ADD COLUMN IF NOT EXISTS afk TINYINT(1) NOT NULL DEFAULT 0",
+                "ALTER TABLE network_roster ADD COLUMN IF NOT EXISTS prefix_styles VARCHAR(32) NOT NULL DEFAULT ''"
         };
         try (Connection conn = dataSource.getConnection(); Statement stmt = conn.createStatement()) {
             for (String sql : migrations) {
@@ -1281,13 +1282,14 @@ public class DatabaseManager {
 
     public void upsertRosterEntry(UUID uuid, String username, String nickname, String server,
                                   int rank, int councilRank, int saintRank, int architectRank, boolean vanished,
-                                  String pronouns) {
+                                  String pronouns, String prefixStyles) {
         String sql = """
-                INSERT INTO network_roster (uuid, username, nickname, server, `rank`, council_rank, saint_rank, architect_rank, vanished, pronouns)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO network_roster (uuid, username, nickname, server, `rank`, council_rank, saint_rank, architect_rank, vanished, pronouns, prefix_styles)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE username=VALUES(username), nickname=VALUES(nickname), server=VALUES(server),
                 `rank`=VALUES(`rank`), council_rank=VALUES(council_rank), saint_rank=VALUES(saint_rank),
-                architect_rank=VALUES(architect_rank), vanished=VALUES(vanished), pronouns=VALUES(pronouns), afk=0
+                architect_rank=VALUES(architect_rank), vanished=VALUES(vanished), pronouns=VALUES(pronouns),
+                prefix_styles=VALUES(prefix_styles), afk=0
                 """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -1305,6 +1307,7 @@ public class DatabaseManager {
             ps.setInt(8, architectRank);
             ps.setBoolean(9, vanished);
             ps.setString(10, pronouns != null ? pronouns : "MALE");
+            ps.setString(11, prefixStyles != null ? prefixStyles : "");
             ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to upsert roster entry for " + uuid + ": " + e.getMessage());
@@ -1320,6 +1323,18 @@ public class DatabaseManager {
             ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to update roster pronouns for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    public void updateRosterPrefixStyles(UUID uuid, String prefixStyles) {
+        String sql = "UPDATE network_roster SET prefix_styles = ? WHERE uuid = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, prefixStyles != null ? prefixStyles : "");
+            ps.setString(2, uuid.toString());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to update roster prefix styles for " + uuid + ": " + e.getMessage());
         }
     }
 
@@ -1364,7 +1379,7 @@ public class DatabaseManager {
      * Loads all roster entries NOT from thisServer.
      */
     public Map<UUID, NetworkPlayer> loadRemoteRoster(String thisServer) {
-        String sql = "SELECT uuid, username, nickname, server, `rank`, council_rank, saint_rank, architect_rank, vanished, pronouns FROM network_roster WHERE server != ?";
+        String sql = "SELECT uuid, username, nickname, server, `rank`, council_rank, saint_rank, architect_rank, vanished, pronouns, prefix_styles FROM network_roster WHERE server != ?";
         Map<UUID, NetworkPlayer> roster = new HashMap<>();
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -1373,7 +1388,7 @@ public class DatabaseManager {
                 while (rs.next()) {
                     UUID uuid = UUID.fromString(rs.getString("uuid"));
                     String pronouns = rs.getString("pronouns");
-                    roster.put(uuid, new NetworkPlayer(
+                    NetworkPlayer np = new NetworkPlayer(
                             uuid,
                             rs.getString("username"),
                             rs.getString("nickname"),
@@ -1385,7 +1400,9 @@ public class DatabaseManager {
                             rs.getBoolean("vanished"),
                             "", "", // textures not stored in DB roster; populated via CH_JOIN
                             pronouns
-                    ));
+                    );
+                    np.setPrefixStyles(rs.getString("prefix_styles"));
+                    roster.put(uuid, np);
                 }
             }
         } catch (SQLException e) {

@@ -384,15 +384,7 @@ public class ChatUtils {
         String nickname = aranarthPlayer.getNickname();
         String prefix = "&l⊰&r";
 
-        prefix += AranarthUtils.getCouncilRank(aranarthPlayer);
-        prefix += AranarthUtils.getArchitectRank(aranarthPlayer);
-        prefix += AranarthUtils.getSaintRank(aranarthPlayer);
-        prefix += AranarthUtils.getAvatarRank(aranarthPlayer);
-
-        if (!prefix.equals("&l⊰&r")) {
-            prefix += " ";
-        }
-        prefix += AranarthUtils.getRank(aranarthPlayer);
+        prefix += AranarthUtils.getPrefixElements(aranarthPlayer) + " ";
 
         if (nickname != null && !nickname.isEmpty()) {
             prefix += nickname + "&r";
