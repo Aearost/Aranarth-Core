@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.enums.JobType;
 import com.aearost.aranarthcore.event.player.GuiJobsLeaveClick;
 import com.aearost.aranarthcore.event.player.GuiJobsStatsClick;
 import com.aearost.aranarthcore.gui.GuiJobs;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.JobData;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -20,8 +21,12 @@ import org.bukkit.entity.Player;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class CommandJobs implements CommandExecutor {
 
@@ -154,36 +159,54 @@ public class CommandJobs implements CommandExecutor {
     }
 
     private void handleTop(Player player, JobType job) {
-        // Read off the main thread and reused for a minute, as this reads every player's job data
-        DatabaseManager.getInstance().getCachedJobEntries(entries -> showTop(player, job, entries));
+        // Job XP is only saved periodically, so players on the other server are fetched live from it
+        Consumer<Map<UUID, String>> withRemoteData = remoteJobData ->
+                // Read off the main thread and reused for a minute, as this reads every player's job data
+                DatabaseManager.getInstance().getCachedJobEntries(entries -> showTop(player, job, entries, remoteJobData));
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().requestRemoteJobData(withRemoteData);
+        } else {
+            withRemoteData.accept(Collections.emptyMap());
+        }
     }
 
-    private void showTop(Player player, JobType job, List<DatabaseManager.JobTopEntry> entries) {
+    private void showTop(Player player, JobType job, List<DatabaseManager.JobTopEntry> entries, Map<UUID, String> remoteJobData) {
         if (!player.isOnline()) {
             return;
+        }
+
+        // Most current source wins: online here, then online on the other server, then the database
+        Map<UUID, JobData> jobDataByUuid = new HashMap<>();
+        Map<UUID, String> usernames = new HashMap<>();
+        for (DatabaseManager.JobTopEntry entry : entries) {
+            jobDataByUuid.put(entry.uuid(), PersistenceUtils.deserializeJobData(entry.jobDataJson()));
+            usernames.put(entry.uuid(), entry.username());
+        }
+        for (Map.Entry<UUID, String> remote : remoteJobData.entrySet()) {
+            jobDataByUuid.put(remote.getKey(), PersistenceUtils.deserializeJobData(remote.getValue()));
+        }
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            AranarthPlayer onlineAp = AranarthUtils.getPlayer(online.getUniqueId());
+            if (onlineAp != null && onlineAp.isJobDataLoaded()) {
+                jobDataByUuid.put(online.getUniqueId(), onlineAp.getJobData());
+            }
         }
 
         record RankedEntry(String name, double totalXp) {
         }
         List<RankedEntry> ranked = new ArrayList<>();
 
-        for (DatabaseManager.JobTopEntry entry : entries) {
-            UUID uuid = entry.uuid();
-            JobData jd;
-            AranarthPlayer onlineAp = AranarthUtils.getAranarthPlayers().get(uuid);
-            if (onlineAp != null) {
-                jd = onlineAp.getJobData();
-            } else {
-                jd = PersistenceUtils.deserializeJobData(entry.jobDataJson());
-            }
-            double xp = jd.getTotalXp(job);
+        for (Map.Entry<UUID, JobData> entry : jobDataByUuid.entrySet()) {
+            double xp = entry.getValue().getTotalXp(job);
             if (xp <= 0) {
                 continue;
             }
 
-            String displayName = onlineAp != null
-                    ? onlineAp.getUsername()
-                    : (entry.username().isEmpty() ? Lang.getFor(player, "info.unknown") : entry.username());
+            AranarthPlayer knownAp = AranarthUtils.getAranarthPlayers().get(entry.getKey());
+            String displayName = knownAp != null ? knownAp.getUsername() : usernames.getOrDefault(entry.getKey(), "");
+            if (displayName == null || displayName.isEmpty()) {
+                displayName = Lang.getFor(player, "info.unknown");
+            }
             ranked.add(new RankedEntry(displayName, xp));
         }
 
@@ -203,7 +226,8 @@ public class CommandJobs implements CommandExecutor {
             int level = temp.getLevel(job);
             double currentXp = temp.getCurrentXp(job);
             long required = JobUtils.getXpRequired(level);
-            String xpStr = level >= 10 ? Lang.getFor(player, "jobs.max_level")
+            // Max level players are ranked by total XP, so it is shown instead of "Max Level"
+            String xpStr = level >= 10 ? nf.format((long) e.totalXp()) + " XP"
                     : nf.format((long) currentXp) + " / " + nf.format(required) + " XP";
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "jobs.list_entry", "number", (i + 1), "job", e.name())
                     + Lang.getFor(player, "jobs.level_suffix", "level", level, "xp", xpStr)));

@@ -10095,7 +10095,7 @@ public class PersistenceUtils {
         return uuid.toString();
     }
 
-    private static String serializeJobData(JobData jobData) {
+    public static String serializeJobData(JobData jobData) {
         JsonObject obj = new JsonObject();
         com.google.gson.JsonArray activeJobs = new com.google.gson.JsonArray();
         for (JobType job : jobData.getActiveJobs()) {

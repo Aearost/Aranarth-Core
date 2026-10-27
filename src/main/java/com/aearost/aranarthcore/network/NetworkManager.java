@@ -40,6 +40,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
 /**
@@ -104,6 +105,8 @@ public class NetworkManager {
     public static final String CH_CREATIVE_PLOT_DELETE = "aranarth:creative_plot_delete";
     public static final String CH_CREATIVE_EXPAND = "aranarth:creative_expand";
     public static final String CH_JOB_UPDATE = "aranarth:job_update";
+    public static final String CH_JOB_TOP_REQUEST = "aranarth:job_top_request";
+    public static final String CH_JOB_TOP_RESPONSE = "aranarth:job_top_response";
     public static final String CH_MOUNT_UPDATE = "aranarth:mount_update";
     public static final String CH_VOTE_AWARD = "aranarth:vote_award";
     public static final String CH_VOTE_KEY = "aranarth:vote_key";
@@ -197,6 +200,15 @@ public class NetworkManager {
      * Populated by loadAndApplyCrossServerBack(); consumed by CommandBack.
      */
     private final Map<UUID, String> crossServerBackLocations = new ConcurrentHashMap<>();
+
+    /**
+     * Callbacks waiting on the in-flight /jobs top request for the other server's live job data.
+     * Only touched on the main thread.
+     */
+    private final List<Consumer<Map<UUID, String>>> pendingJobTopCallbacks = new ArrayList<>();
+    private String pendingJobTopRequestId = null;
+    private Map<UUID, String> cachedRemoteJobData = null;
+    private long cachedRemoteJobDataAt = 0L;
     private long lastProcessedMessageId;
     private BukkitTask pollingTask;
     private BukkitTask cleanupTask;
@@ -575,6 +587,8 @@ public class NetworkManager {
             case CH_CREATIVE_PLOT_DELETE -> handleCreativePlotDelete(json);
             case CH_CREATIVE_EXPAND -> handleCreativeExpand(json);
             case CH_JOB_UPDATE -> handleJobUpdate(json);
+            case CH_JOB_TOP_REQUEST -> handleJobTopRequest(json);
+            case CH_JOB_TOP_RESPONSE -> handleJobTopResponse(json);
             case CH_MOUNT_UPDATE -> handleMountUpdate(json);
             case CH_VOTE_AWARD -> handleVoteAward(json);
             case CH_VOTE_KEY -> handleVoteKey(json);
@@ -3336,6 +3350,105 @@ public class NetworkManager {
             Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
                     () -> PersistenceUtils.loadJobDataForPlayer(uuid));
         }
+    }
+
+    /**
+     * Provides the live job data of every player online on the other server, as their XP is only
+     * written to MySQL periodically. Responds with an empty map if the other server is empty or
+     * does not answer in time. Results are reused for a few seconds so /jobs top cannot be spammed
+     * to flood the network. Must be called from the main thread.
+     *
+     * @param callback Receives the job data JSON keyed by UUID, on the main thread.
+     */
+    public void requestRemoteJobData(Consumer<Map<UUID, String>> callback) {
+        if (remoteRoster.isEmpty()) {
+            callback.accept(Collections.emptyMap());
+            return;
+        }
+        if (cachedRemoteJobData != null && System.currentTimeMillis() - cachedRemoteJobDataAt < 5000L) {
+            callback.accept(cachedRemoteJobData);
+            return;
+        }
+        pendingJobTopCallbacks.add(callback);
+        if (pendingJobTopRequestId != null) {
+            return;
+        }
+
+        String requestId = UUID.randomUUID().toString();
+        pendingJobTopRequestId = requestId;
+        JsonObject json = new JsonObject();
+        json.addProperty("fromServer", thisServer);
+        json.addProperty("requestId", requestId);
+        publish(CH_JOB_TOP_REQUEST, json);
+
+        // Falls back to the database values if the other server does not respond
+        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
+            if (requestId.equals(pendingJobTopRequestId)) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Jobs] No /jobs top response from the other server - using database values");
+                completeJobTopRequest(Collections.emptyMap(), false);
+            }
+        }, 60L);
+    }
+
+    private void completeJobTopRequest(Map<UUID, String> jobData, boolean cache) {
+        pendingJobTopRequestId = null;
+        if (cache) {
+            cachedRemoteJobData = jobData;
+            cachedRemoteJobDataAt = System.currentTimeMillis();
+        }
+        List<Consumer<Map<UUID, String>>> callbacks = new ArrayList<>(pendingJobTopCallbacks);
+        pendingJobTopCallbacks.clear();
+        for (Consumer<Map<UUID, String>> callback : callbacks) {
+            callback.accept(jobData);
+        }
+    }
+
+    /**
+     * Received on the other server. Replies with the live job data of every player online here.
+     */
+    private void handleJobTopRequest(JsonObject json) {
+        String fromServer = json.get("fromServer").getAsString();
+        if (fromServer.equals(thisServer)) {
+            return;
+        }
+
+        JsonObject players = new JsonObject();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
+            if (ap == null || !ap.isJobDataLoaded()) {
+                continue;
+            }
+            players.addProperty(player.getUniqueId().toString(), PersistenceUtils.serializeJobData(ap.getJobData()));
+        }
+
+        JsonObject response = new JsonObject();
+        response.addProperty("targetServer", fromServer);
+        response.addProperty("requestId", json.get("requestId").getAsString());
+        response.add("players", players);
+        publish(CH_JOB_TOP_RESPONSE, response);
+    }
+
+    /**
+     * Received on the server that ran /jobs top.
+     */
+    private void handleJobTopResponse(JsonObject json) {
+        String targetServer = json.get("targetServer").getAsString();
+        if (!targetServer.equals(thisServer)) {
+            return;
+        }
+        if (!json.get("requestId").getAsString().equals(pendingJobTopRequestId)) {
+            return;
+        }
+
+        Map<UUID, String> jobData = new HashMap<>();
+        JsonObject players = json.getAsJsonObject("players");
+        for (String key : players.keySet()) {
+            try {
+                jobData.put(UUID.fromString(key), players.get(key).getAsString());
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+        completeJobTopRequest(jobData, true);
     }
 
     /**
