@@ -31,6 +31,7 @@ Chat, UI & Sounds
 [+] Added new topics for Creative, new Fire Types, Dominion Commands and 9 Mechanics pages
 [~] Corrected outdated pages across every topic
 [~] Made every topic menu be centered automatically
+[~] Fixed the Avatar symbol not appearing in tab for players on the other server
 
 Quality of Life
 [+] Added /vc list as an alias for /vc who
