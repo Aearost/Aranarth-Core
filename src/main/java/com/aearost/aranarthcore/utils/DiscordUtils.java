@@ -3,6 +3,8 @@ package com.aearost.aranarthcore.utils;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.WorldEvent;
+import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.objects.*;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.EmbedBuilder;
@@ -538,16 +540,28 @@ public class DiscordUtils {
 			appliedBy = Bukkit.getOfflinePlayer(punishment.getAppliedBy()).getName();
 		}
 
+		// The username is null on a server the player has never joined
+		String username = aranarthPlayer.getUsername();
+		if (username == null && NetworkManager.isActive()) {
+			NetworkPlayer remote = NetworkManager.getInstance().getRemotePlayer(punishment.getUuid());
+			if (remote != null) {
+				username = remote.getUsername();
+			}
+		}
+		if (username == null) {
+			username = ChatUtils.stripColorFormatting(aranarthPlayer.getNickname());
+		}
+
         switch (punishment.getType()) {
             case "WARN" -> {
-                embed.setAuthor(aranarthPlayer.getUsername() + " has been warned", null, url);
+                embed.setAuthor(username + " has been warned", null, url);
                 embed.setColor(new Color(253, 233, 146));
                 embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
 						"**Warned by:** " + appliedBy + "\n" +
                         "**Reason:** " + punishment.getReason());
             }
 			case "MUTE" -> {
-				embed.setAuthor(aranarthPlayer.getUsername() + " has been muted", null, url);
+				embed.setAuthor(username + " has been muted", null, url);
 				embed.setColor(new Color(255, 255, 0));
 
 				String formattedEndDate = "None";
@@ -582,7 +596,7 @@ public class DiscordUtils {
 					String minute = endDate.getMinute() < 10 ? "0" + endDate.getMinute() : endDate.getMinute() + "";
 					formattedEndDate = month + "/" + day + "/" + year + " at " + hour + ":" + minute + " EST";
 				}
-				embed.setAuthor(aranarthPlayer.getUsername() + " has been banned", null, url);
+				embed.setAuthor(username + " has been banned", null, url);
 				embed.setColor(new Color(70, 0, 0));
 				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
 						"**Banned by:** " + appliedBy + "\n" +
@@ -590,49 +604,49 @@ public class DiscordUtils {
 						"**Reason:** " + punishment.getReason());
 			}
 			case "UNMUTE" -> {
-				embed.setAuthor(aranarthPlayer.getUsername() + " has been unmuted", null, url);
+				embed.setAuthor(username + " has been unmuted", null, url);
 				embed.setColor(Color.GREEN);
 				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
 						"**Unmuted by:** " + appliedBy + "\n" +
 						"**Reason:** " + punishment.getReason());
 			}
 			case "UNBAN" -> {
-				embed.setAuthor(aranarthPlayer.getUsername() + " has been unbanned", null, url);
+				embed.setAuthor(username + " has been unbanned", null, url);
 				embed.setColor(Color.GREEN);
 				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
 						"**Unbanned by:** " + appliedBy + "\n" +
 						"**Reason:** " + punishment.getReason());
 			}
 			case "REMOVE_WARN" -> {
-				embed.setAuthor("A warning has been removed from " + aranarthPlayer.getUsername(), null, url);
+				embed.setAuthor("A warning has been removed from " + username, null, url);
 				embed.setColor(Color.CYAN);
 				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
 						"**Warning removed by:** " + appliedBy + "\n" +
 						"**Original Warn Reason:** " + punishment.getReason());
 			}
 			case "REMOVE_MUTE" -> {
-				embed.setAuthor("A mute has been removed from " + aranarthPlayer.getUsername(), null, url);
+				embed.setAuthor("A mute has been removed from " + username, null, url);
 				embed.setColor(Color.CYAN);
 				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
 						"**Mute removed by:** " + appliedBy + "\n" +
 						"**Original Mute Reason:** " + punishment.getReason());
 			}
 			case "REMOVE_BAN" -> {
-				embed.setAuthor("A ban has been removed from " + aranarthPlayer.getUsername(), null, url);
+				embed.setAuthor("A ban has been removed from " + username, null, url);
 				embed.setColor(Color.CYAN);
 				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
 						"**Ban removed by:** " + appliedBy + "\n" +
 						"**Original Ban Reason:** " + punishment.getReason());
 			}
 			case "REMOVE_UNMUTE" -> {
-				embed.setAuthor("An unmute has been removed from " + aranarthPlayer.getUsername(), null, url);
+				embed.setAuthor("An unmute has been removed from " + username, null, url);
 				embed.setColor(Color.CYAN);
 				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
 						"**Unmute removed by:** " + appliedBy + "\n" +
 						"**Original Unmute Reason:** " + punishment.getReason());
 			}
 			case "REMOVE_UNBAN" -> {
-				embed.setAuthor("An unban has been removed from " + aranarthPlayer.getUsername(), null, url);
+				embed.setAuthor("An unban has been removed from " + username, null, url);
 				embed.setColor(Color.CYAN);
 				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
 						"**Unban removed by:** " + appliedBy + "\n" +
