@@ -46,6 +46,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.ShopIslandUtils;
+import com.aearost.aranarthcore.utils.SitUtils;
 import com.gmail.nossr50.api.ExperienceAPI;
 import com.gmail.nossr50.api.exceptions.McMMOPlayerNotFoundException;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
@@ -578,6 +579,10 @@ public class AranarthCoreBendingListener implements Listener {
                 return;
             }
             if (isBendingRestricted(player, player.getLocation())) {
+                // Cancelling the sneak also blocks the vanilla dismount, so stand sitting players up manually
+                if (SitUtils.isSitting(player)) {
+                    SitUtils.standUp(player);
+                }
                 // Cancel the sneak-press event to prevent PK from sourcing abilities.
                 // Physical sneak state is tracked separately (onPlayerSneakTrack at LOWEST
                 // priority) so shop and shulker handlers can still detect the key-press.
