@@ -61,7 +61,7 @@ public class CommandAranarth implements CommandExecutor {
 
     static final List<String> ECONOMY_SECTIONS = List.of(
             "intro", "jobs", "shopoverview", "shopcreation", "shopusage", "quests", "shopcommands",
-            "trading", "marketvalue"
+            "trading"
     );
 
     static final List<String> PERKS_SECTIONS = List.of(
@@ -292,7 +292,7 @@ public class CommandAranarth implements CommandExecutor {
             case "dominions" -> new int[]{3, 3, 3, 2, 2};
             case "bending" -> new int[]{3, 3, 1};
             case "ranks", "creative" -> new int[]{3, 3};
-            case "economy" -> new int[]{2, 2, 2, 2, 1};
+            case "economy" -> new int[]{2, 2, 2, 2};
             case "mechanics" -> new int[]{3, 3, 3, 3, 3, 3, 1};
             default -> new int[]{3, 3, 3};
         };
@@ -347,14 +347,6 @@ public class CommandAranarth implements CommandExecutor {
             sendMultilineIndented(player, Lang.getFor(player, topic + ".section_" + section + "_content", getElementColors()));
         } else {
             sendMultilineIndented(player, Lang.getFor(player, topic + ".section_" + section + "_content"));
-        }
-        if (topic.equals("ranks") && section.equals("unlocks")) {
-            player.sendMessage(Component.empty());
-            player.sendMessage(Component.text("  ").append(buildBtn(
-                    Lang.getFor(player, "perks.guide_title_short"),
-                    Lang.getFor(player, "guide.view_perks"),
-                    "/aranarth perks"
-            )));
         }
         player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "guide.divider")));
         player.sendMessage(Component.text("  ")
