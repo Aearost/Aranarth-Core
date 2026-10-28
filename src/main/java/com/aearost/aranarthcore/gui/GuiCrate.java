@@ -33,8 +33,8 @@ public class GuiCrate {
 
 		if (type == CrateType.RARE) {
 			this.initializedGui = initializeRareCrate(player);
-			// Updating the armor trims and cluster item here to allow for dynamic updates
-			updateRareCrateItems(indexes.get(0), indexes.get(1));
+			// Updating the armor trims, cluster, and essence items here to allow for dynamic updates
+			updateRareCrateItems(indexes.get(0), indexes.get(1), indexes.get(2));
 		} else if (type == CrateType.EPIC) {
 			this.initializedGui = initializeEpicCrate(player);
 			// Updating the weapons, spawn eggs, clusters, essence, and ham/sniffer/shulker here to allow for dynamic updates
@@ -256,14 +256,6 @@ public class GuiCrate {
 		totemMeta.setLore(totemLore);
 		totem.setItemMeta(totemMeta);
 		gui.setItem(16, totem);
-
-		ItemStack beheading = new EssenceBeheading().getItem();
-		ItemMeta beheadingMeta = beheading.getItemMeta();
-		List<String> beheadingLore = new ArrayList<>();
-		beheadingLore.add(Lang.getFor(player, "gui.crate.chance_5"));
-		beheadingMeta.setLore(beheadingLore);
-		beheading.setItemMeta(beheadingMeta);
-		gui.setItem(20, beheading);
 
 		ItemStack netherite2 = new ItemStack(Material.NETHERITE_INGOT, 2);
 		ItemMeta netherite2Meta = netherite2.getItemMeta();
@@ -529,11 +521,12 @@ public class GuiCrate {
 	}
 
 	/**
-	 * Provides the Cluster that is associated to the input index for a Rare Crate.
+	 * Provides the armor trim, cluster, and essence that are associated to the input indexes for a Rare Crate.
 	 * @param armorTrimIndex The index of the armor trim.
 	 * @param clusterIndex The index of the cluster.
+	 * @param essenceIndex The index of the essence.
 	 */
-	public void updateRareCrateItems(int armorTrimIndex, int clusterIndex) {
+	public void updateRareCrateItems(int armorTrimIndex, int clusterIndex, int essenceIndex) {
 		// Cycle through the Armor Trims
 		ItemStack trim = null;
 		switch (armorTrimIndex) {
@@ -590,6 +583,15 @@ public class GuiCrate {
 		cycledClusterMeta.setLore(cycledClusterLore);
 		cluster.setItemMeta(cycledClusterMeta);
 		initializedGui.setItem(23, cluster);
+
+		// Cycle through the essences (Beheading, Blank)
+		ItemStack essence = essenceIndex == 1 ? new EssenceBlank().getItem() : new EssenceBeheading().getItem();
+		ItemMeta cycledEssenceMeta = essence.getItemMeta();
+		List<String> cycledEssenceLore = new ArrayList<>();
+		cycledEssenceLore.add(Lang.getFor(player, "gui.crate.chance_5"));
+		cycledEssenceMeta.setLore(cycledEssenceLore);
+		essence.setItemMeta(cycledEssenceMeta);
+		initializedGui.setItem(20, essence);
 	}
 
 	/**

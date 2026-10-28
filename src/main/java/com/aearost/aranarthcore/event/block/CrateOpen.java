@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.items.aranarthium.clusters.*;
 import com.aearost.aranarthcore.items.aranarthium.ingots.*;
 import com.aearost.aranarthcore.items.brew.BrewRecipe;
 import com.aearost.aranarthcore.items.essence.EssenceBeheading;
+import com.aearost.aranarthcore.items.essence.EssenceBlank;
 import com.aearost.aranarthcore.items.essence.EssenceLifesteal;
 import com.aearost.aranarthcore.items.essence.EssenceMagnetism;
 import com.aearost.aranarthcore.items.essence.EssencePlentiful;
@@ -146,17 +147,19 @@ public class CrateOpen {
                                 // Sets default value to display at first
                                 indexes.add(0);
                                 indexes.add(0);
+                                indexes.add(0); // essence index (Beheading, Blank)
                                 GuiCrate gui = new GuiCrate(player, CrateType.RARE, indexes);
                                 gui.openGui();
                                 // Updates to next slot so task can update it accordingly
                                 indexes.set(0, 1);
                                 indexes.set(1, 1);
+                                indexes.set(2, 1);
 
                                 scheduledSkipTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(AranarthCore.getInstance(), new Runnable() {
                                     @Override
                                     public void run() {
                                         if (aranarthPlayer.isOpeningCrateWithCyclingItem()) {
-                                            gui.updateRareCrateItems(indexes.get(0), indexes.get(1));
+                                            gui.updateRareCrateItems(indexes.get(0), indexes.get(1), indexes.get(2));
 
                                             // Cycle through the next trim iteration
                                             if (indexes.get(0) < 17) {
@@ -170,6 +173,13 @@ public class CrateOpen {
                                                 indexes.set(1, indexes.get(1) + 1);
                                             } else {
                                                 indexes.set(1, 0);
+                                            }
+
+                                            // Cycle through the next essence iteration
+                                            if (indexes.get(2) < 1) {
+                                                indexes.set(2, indexes.get(2) + 1);
+                                            } else {
+                                                indexes.set(2, 0);
                                             }
                                         } else {
                                             Bukkit.getScheduler().cancelTask(scheduledSkipTask);
@@ -630,6 +640,7 @@ public class CrateOpen {
             final int chance = new Random().nextInt(100) + 1;
             final int trimRoll = new Random().nextInt(18);
             final int clusterRoll = new Random().nextInt(8);
+            final boolean isBeheading = new Random().nextInt(2) == 0;
 
             // Determine the display item shown in the animation as the winner
             final ItemStack displayItem;
@@ -654,7 +665,7 @@ public class CrateOpen {
             } else if (chance <= 80) {
                 displayItem = new ItemStack(Material.TOTEM_OF_UNDYING);
             } else if (chance <= 85) {
-                displayItem = new EssenceBeheading().getItem();
+                displayItem = isBeheading ? new EssenceBeheading().getItem() : new EssenceBlank().getItem();
             } else if (chance <= 90) {
                 displayItem = new ItemStack(Material.NETHERITE_INGOT, 2);
             } else if (chance <= 95) {
@@ -726,7 +737,12 @@ public class CrateOpen {
                     reward = new ItemStack(Material.TOTEM_OF_UNDYING, 1);
                     name = Lang.key("crate.reward_amount", "name", Lang.key("gui.crate.totem"), "amount", 1);
                 } else if (chance <= 85) {
-                    reward = new EssenceBeheading().getItem();
+                    // Use pre-rolled isBeheading
+                    if (isBeheading) {
+                        reward = new EssenceBeheading().getItem();
+                    } else {
+                        reward = new EssenceBlank().getItem();
+                    }
                     name = reward.getItemMeta().getDisplayName() + " x1";
                 } else if (chance <= 90) {
                     reward = new ItemStack(Material.NETHERITE_INGOT, 2);
@@ -1606,6 +1622,7 @@ public class CrateOpen {
                 pool.add(new ItemStack(Material.TOTEM_OF_UNDYING));
                 pool.add(new ItemStack(Material.NETHERITE_INGOT));
                 pool.add(new EssenceBeheading().getItem());
+                pool.add(new EssenceBlank().getItem());
                 pool.add(new CopperCluster().getItem());
                 pool.add(new ItemStack(Material.OMINOUS_TRIAL_KEY));
                 pool.add(new KeyEpic().getItem());

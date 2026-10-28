@@ -16,8 +16,10 @@ Dominion
 
 Aranarthium, Items & Crafting
 [~] Fixed applying Essences consuming 2 Aranarthium at a time if thrown at once
-[~] The Essence of Resilience is now found in the Epic Crate, and the Essence of Lifesteal in the Godly Crate
-[~] Aranarthium size changes are now reset to normal while combat tagged, and return automatically once the combat tag ends
+[~] The Essence of Resilience is now found in the Epic Crate
+[~] The Essence of Lifesteal in the Godly Crate
+[~] The Rare Crate now has a 50% chance of rewarding an Essence of Beheading or an unimbued Essence
+[~] Aranarthium size changes are now reset to normal while combat tagge`d, and return automatically once the combat tag ends
 [~] Lifesteal no longer heals from damage dealt to undead mobs
 
 Economy, Jobs & Quests
