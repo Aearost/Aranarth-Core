@@ -208,6 +208,10 @@ public class JobUtils {
         if (amount <= 0) {
             return;
         }
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(playerUuid);
+        if (aranarthPlayer != null && aranarthPlayer.isJobsMessageDisabled()) {
+            return;
+        }
         recentEarnings.merge(playerUuid, amount, Double::sum);
         earningsWindowStart.putIfAbsent(playerUuid, System.currentTimeMillis());
     }
@@ -231,7 +235,9 @@ public class JobUtils {
                 continue;
             }
             double earned = recentEarnings.getOrDefault(uuid, 0.0);
-            if (earned < 0.005) {
+            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+            boolean isMessageDisabled = aranarthPlayer != null && aranarthPlayer.isJobsMessageDisabled();
+            if (earned < 0.005 || isMessageDisabled) {
                 iterator.remove();
                 recentEarnings.remove(uuid);
                 continue;

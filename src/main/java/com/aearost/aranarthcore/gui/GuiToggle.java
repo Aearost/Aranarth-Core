@@ -201,6 +201,9 @@ public class GuiToggle {
             gui.setItem(39, buildLockedItem(player, Material.WHITE_CUSHION, Lang.getFor(player, "gui.toggle.sit")));
         }
 
+        // Jobs Earnings Message
+        gui.setItem(40, buildToggleItem(player, Material.GOLD_INGOT, Lang.getFor(player, "gui.toggle.jobs_message"), !aranarthPlayer.isJobsMessageDisabled()));
+
         return gui;
     }
 

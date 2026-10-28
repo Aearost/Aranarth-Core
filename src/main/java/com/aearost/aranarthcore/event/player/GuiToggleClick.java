@@ -383,6 +383,18 @@ public class GuiToggleClick {
                 PermissionUtils.evaluatePlayerPermissions(player);
                 refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.WHITE_CUSHION, "&f&lSit", !aranarthPlayer.isSitDisabled()));
             }
+            // Jobs Earnings Message
+            case 40 -> {
+                if (aranarthPlayer.isJobsMessageDisabled()) {
+                    aranarthPlayer.setJobsMessageDisabled(false);
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.jobsmsg_enabled")));
+                } else {
+                    aranarthPlayer.setJobsMessageDisabled(true);
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.jobsmsg_disabled")));
+                }
+                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.GOLD_INGOT, Lang.getFor(player, "gui.toggle.jobs_message"), !aranarthPlayer.isJobsMessageDisabled()));
+            }
         }
     }
 

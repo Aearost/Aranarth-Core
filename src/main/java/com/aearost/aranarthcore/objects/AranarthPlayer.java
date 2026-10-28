@@ -120,6 +120,7 @@ public class AranarthPlayer {
     private boolean isReaperDisabled = false;
     private boolean isServerTipsDisabled = false;
     private boolean isSitDisabled = false;
+    private boolean isJobsMessageDisabled = false;
     private String sitCushionColor = "WHITE";
     private PrefixStyle councilPrefixStyle = PrefixStyle.SYMBOL;
     private PrefixStyle saintPrefixStyle = PrefixStyle.SYMBOL;
@@ -2141,6 +2142,14 @@ public class AranarthPlayer {
 
     public void setSitDisabled(boolean sitDisabled) {
         this.isSitDisabled = sitDisabled;
+    }
+
+    public boolean isJobsMessageDisabled() {
+        return isJobsMessageDisabled;
+    }
+
+    public void setJobsMessageDisabled(boolean jobsMessageDisabled) {
+        this.isJobsMessageDisabled = jobsMessageDisabled;
     }
 
     public String getSitCushionColor() {

@@ -920,6 +920,11 @@ public class PersistenceUtils {
                     aranarthPlayer.setEncodedPrefixStyles(fields[39]);
                 }
 
+                // Jobs Message Disabled (index 40)
+                if (fields.length > 40) {
+                    aranarthPlayer.setJobsMessageDisabled(!fields[40].equals("0"));
+                }
+
                 AranarthUtils.setPlayer(uuid, aranarthPlayer);
             }
             Bukkit.getLogger().info("[AC] All toggled features have been initialized");
@@ -1004,6 +1009,7 @@ public class PersistenceUtils {
                         String sizeScaleEnabled = aranarthPlayer.isSizeScaleEnabled() ? "1" : "0";
                         String serverTipsDisabled = aranarthPlayer.isServerTipsDisabled() ? "1" : "0";
                         String sitDisabled = aranarthPlayer.isSitDisabled() ? "1" : "0";
+                        String jobsMessageDisabled = aranarthPlayer.isJobsMessageDisabled() ? "1" : "0";
                         String row = uuid + "|" + chat + "|" + messages + "|" + teleport + "|" + spawnboost + "|" + changeClaim
                                 + "|" + inventory + "|" + shulker + "|" + blacklist + "|" + compressing + "|" + chestLock + "|"
                                 + bluefire + "|" + gradientEnabled + "|" + gradientColors + "|" + dayMessage + "|" + weatherMessage
@@ -1013,7 +1019,7 @@ public class PersistenceUtils {
                                 + "|" + chatGameSound + "|" + chestSortSound + "|" + jobsSound + "|" + expStoreSound
                                 + "|" + interactiveChat + "|" + emojiEnabled + "|" + sizeScaleEnabled + "|" + serverTipsDisabled
                                 + "|" + sitDisabled + "|" + aranarthPlayer.getSitCushionColor()
-                                + "|" + aranarthPlayer.getEncodedPrefixStyles() + "\n";
+                                + "|" + aranarthPlayer.getEncodedPrefixStyles() + "|" + jobsMessageDisabled + "\n";
                         writer.write(row);
                     }
                     writer.close();
@@ -6425,6 +6431,7 @@ public class PersistenceUtils {
             obj.addProperty("reaperDisabled", ap.isReaperDisabled());
             obj.addProperty("serverTipsDisabled", ap.isServerTipsDisabled());
             obj.addProperty("sitDisabled", ap.isSitDisabled());
+            obj.addProperty("jobsMessageDisabled", ap.isJobsMessageDisabled());
             obj.addProperty("sitCushionColor", ap.getSitCushionColor());
             obj.addProperty("prefixStyles", ap.getEncodedPrefixStyles());
             obj.addProperty("language", ap.getLanguage());
@@ -8514,6 +8521,9 @@ public class PersistenceUtils {
                 if (obj.has("sitDisabled")) {
                     ap.setSitDisabled(obj.get("sitDisabled").getAsBoolean());
                 }
+                if (obj.has("jobsMessageDisabled")) {
+                    ap.setJobsMessageDisabled(obj.get("jobsMessageDisabled").getAsBoolean());
+                }
                 if (obj.has("sitCushionColor")) {
                     ap.setSitCushionColor(obj.get("sitCushionColor").getAsString());
                 }
@@ -8587,6 +8597,7 @@ public class PersistenceUtils {
         obj.addProperty("reaperDisabled", ap.isReaperDisabled());
         obj.addProperty("serverTipsDisabled", ap.isServerTipsDisabled());
         obj.addProperty("sitDisabled", ap.isSitDisabled());
+        obj.addProperty("jobsMessageDisabled", ap.isJobsMessageDisabled());
         obj.addProperty("sitCushionColor", ap.getSitCushionColor());
         obj.addProperty("prefixStyles", ap.getEncodedPrefixStyles());
         obj.addProperty("language", ap.getLanguage());
@@ -8751,6 +8762,9 @@ public class PersistenceUtils {
             }
             if (obj.has("sitDisabled")) {
                 ap.setSitDisabled(obj.get("sitDisabled").getAsBoolean());
+            }
+            if (obj.has("jobsMessageDisabled")) {
+                ap.setJobsMessageDisabled(obj.get("jobsMessageDisabled").getAsBoolean());
             }
             if (obj.has("sitCushionColor")) {
                 ap.setSitCushionColor(obj.get("sitCushionColor").getAsString());

@@ -411,6 +411,15 @@ public class CommandToggle implements CommandExecutor {
 						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.servertips_disabled")));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				} else if (args[0].equalsIgnoreCase("jobsmsg")) {
+					if (aranarthPlayer.isJobsMessageDisabled()) {
+						aranarthPlayer.setJobsMessageDisabled(false);
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.jobsmsg_enabled")));
+					} else {
+						aranarthPlayer.setJobsMessageDisabled(true);
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.jobsmsg_disabled")));
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("sit")) {
 					if (aranarthPlayer.getSaintRank() < 1 && aranarthPlayer.getCouncilRank() < 1) {
 						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));

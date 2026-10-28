@@ -28,7 +28,8 @@ Economy, Jobs & Quests
 [~] Fixed the Explorer job and travel quests counting teleports and portal trips as travelled distance
 [~] Fixed the Explorer job not rewarding XP while riding a horse
 [~] Fixed /jobs top showing outdated or missing XP for players on the other server
-[~] Max level players now show their total XP instead of "Max Level"
+[+] Added /t jobsmsg to toggle the jobs earnings message
+[~] Changed wording of jobs earnings message[~] Max level players now show their total XP instead of "Max Level"
 [~] Shops in the shop menu are now sorted by most profit, with shop earnings tracked across both servers
 
 Chat, UI & Sounds
