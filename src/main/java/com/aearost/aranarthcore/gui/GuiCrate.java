@@ -435,13 +435,13 @@ public class GuiCrate {
 		netherStar.setItemMeta(netherStarMeta);
 		gui.setItem(6, netherStar);
 
-		ItemStack resilienceDefault = new EssenceResilience().getItem();
-		ItemMeta resilienceDefaultMeta = resilienceDefault.getItemMeta();
-		List<String> resilienceDefaultLore = new ArrayList<>();
-		resilienceDefaultLore.add(Lang.getFor(player, "gui.crate.chance_8"));
-		resilienceDefaultMeta.setLore(resilienceDefaultLore);
-		resilienceDefault.setItemMeta(resilienceDefaultMeta);
-		gui.setItem(15, resilienceDefault);
+		ItemStack lifestealDefault = new EssenceLifesteal().getItem();
+		ItemMeta lifestealDefaultMeta = lifestealDefault.getItemMeta();
+		List<String> lifestealDefaultLore = new ArrayList<>();
+		lifestealDefaultLore.add(Lang.getFor(player, "gui.crate.chance_8"));
+		lifestealDefaultMeta.setLore(lifestealDefaultLore);
+		lifestealDefault.setItemMeta(lifestealDefaultMeta);
+		gui.setItem(15, lifestealDefault);
 
 		ItemStack aranarthium = new AranarthiumIngot().getItem();
 		ItemMeta aranarthiumMeta = aranarthium.getItemMeta();
@@ -664,8 +664,8 @@ public class GuiCrate {
 		cluster.setItemMeta(cycledClusterMeta);
 		initializedGui.setItem(15, cluster);
 
-		// Cycle through the essences (Magnetism, Lifesteal)
-		ItemStack essence = essenceIndex == 1 ? new EssenceLifesteal().getItem() : new EssenceMagnetism().getItem();
+		// Cycle through the essences (Magnetism, Resilience)
+		ItemStack essence = essenceIndex == 1 ? new EssenceResilience().getItem() : new EssenceMagnetism().getItem();
 		ItemMeta cycledEssenceMeta = essence.getItemMeta();
 		List<String> cycledEssenceLore = new ArrayList<>();
 		cycledEssenceLore.add(Lang.getFor(player, "gui.crate.chance_5"));
@@ -701,7 +701,7 @@ public class GuiCrate {
 	 * @param ingotIndex The index of the cluster.
 	 * @param eggIndex The index of the spawn egg.
 	 * @param diamondShulkerIndex The index of the diamond blocks/shulker shells.
-	 * @param essenceIndex The index of the essence rotation (0=Resilience, 1=Preservation, 2=Plentiful).
+	 * @param essenceIndex The index of the essence rotation (0=Lifesteal, 1=Preservation, 2=Plentiful).
 	 */
 	public void updateGodlyCrateItems(int ingotIndex, int eggIndex, int diamondShulkerIndex, int essenceIndex) {
 		ItemStack ingot = null;
@@ -762,14 +762,14 @@ public class GuiCrate {
 		}
 		initializedGui.setItem(3, diamondShulker);
 
-		// Cycle through essences (Resilience, Preservation, Plentiful)
+		// Cycle through essences (Lifesteal, Preservation, Plentiful)
 		ItemStack essenceItem;
 		if (essenceIndex == 1) {
 			essenceItem = new EssencePreservation().getItem();
 		} else if (essenceIndex == 2) {
 			essenceItem = new EssencePlentiful().getItem();
 		} else {
-			essenceItem = new EssenceResilience().getItem();
+			essenceItem = new EssenceLifesteal().getItem();
 		}
 		ItemMeta cycledEssenceMeta = essenceItem.getItemMeta();
 		List<String> cycledEssenceLore = new ArrayList<>();

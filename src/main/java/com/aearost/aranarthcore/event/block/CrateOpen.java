@@ -304,7 +304,7 @@ public class CrateOpen {
                                 indexes.add(0);
                                 indexes.add(0);
                                 indexes.add(0);
-                                indexes.add(0); // essence index (Resilience, Preservation, Plentiful)
+                                indexes.add(0); // essence index (Lifesteal, Preservation, Plentiful)
                                 GuiCrate gui = new GuiCrate(player, CrateType.GODLY, indexes);
                                 gui.openGui();
                                 // Updates to next slot so task can update it accordingly
@@ -340,7 +340,7 @@ public class CrateOpen {
                                                 indexes.set(2, 0);
                                             }
 
-                                            // Cycle through essences (Resilience, Preservation, Plentiful)
+                                            // Cycle through essences (Lifesteal, Preservation, Plentiful)
                                             if (indexes.get(3) < 2) {
                                                 indexes.set(3, indexes.get(3) + 1);
                                             } else {
@@ -829,7 +829,7 @@ public class CrateOpen {
                 key.setAmount(2);
                 displayItem = key;
             } else if (chance <= 95) {
-                displayItem = isMagnetism ? new EssenceMagnetism().getItem() : new EssenceLifesteal().getItem();
+                displayItem = isMagnetism ? new EssenceMagnetism().getItem() : new EssenceResilience().getItem();
             } else {
                 displayItem = new KeyGodly().getItem();
             }
@@ -990,7 +990,7 @@ public class CrateOpen {
                     if (isMagnetism) {
                         reward = new EssenceMagnetism().getItem();
                     } else {
-                        reward = new EssenceLifesteal().getItem();
+                        reward = new EssenceResilience().getItem();
                     }
                     name = reward.getItemMeta().getDisplayName();
                 } else {
@@ -1061,7 +1061,7 @@ public class CrateOpen {
                 displayItem = new ItemStack(Material.NETHER_STAR);
             } else if (chance <= 80) {
                 if (incantRoll == 0) {
-                    displayItem = new EssenceResilience().getItem();
+                    displayItem = new EssenceLifesteal().getItem();
                 } else if (incantRoll == 1) {
                     displayItem = new EssencePreservation().getItem();
                 } else {
@@ -1164,7 +1164,7 @@ public class CrateOpen {
                 } else if (chance <= 80) {
                     // Use pre-rolled incantRoll
                     if (incantRoll == 0) {
-                        reward = new EssenceResilience().getItem();
+                        reward = new EssenceLifesteal().getItem();
                         name = reward.getItemMeta().getDisplayName() + " x1";
                     } else if (incantRoll == 1) {
                         reward = new EssencePreservation().getItem();
@@ -1631,7 +1631,7 @@ public class CrateOpen {
                 pool.add(new ItemStack(Material.NETHERITE_BLOCK));
                 pool.add(new ItemStack(Material.NETHER_STAR));
                 pool.add(new AranarthiumArdent().getItem());
-                pool.add(new EssenceResilience().getItem());
+                pool.add(new EssenceLifesteal().getItem());
                 pool.add(new ItemStack(Material.MAGMA_CUBE_SPAWN_EGG));
                 pool.add(new ItemStack(Material.SHULKER_SHELL));
                 pool.add(new ItemStack(Material.ENCHANTED_BOOK));
