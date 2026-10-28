@@ -660,7 +660,8 @@
       "PowerShell(Select-String -Path src/main/resources/lang/en_US.properties -Pattern \"\\(?i\\)horn of the target|Sing Goat\" | ForEach-Object { \"$\\($_.LineNumber\\): $\\($_.Line.Substring\\(0, [Math]::Min\\(1500, $_.Line.Length\\)\\)\\)\" })",
       "PowerShell($mvn = Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1; & $mvn.FullName -q -o compile 2>&1 | Select-Object -Last 40)",
       "PowerShell($mvn = Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1; & $mvn.FullName -q -o compile 2>&1 | Where-Object { $_ -notmatch \"WARNING\" } | Select-Object -Last 30)",
-      "PowerShell($mvn = Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1; & $mvn.FullName -q -o compile; \"exit $LASTEXITCODE\")"
+      "PowerShell($mvn = Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1; & $mvn.FullName -q -o compile; \"exit $LASTEXITCODE\")",
+      "PowerShell($mvn = Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1; & $mvn.FullName -q -o compile; \"exit: $LASTEXITCODE\")"
     ]
   }
 }
