@@ -31,6 +31,10 @@ public class AranarthPlayer {
     private float survivalSaturation;
     private int survivalExpLevel;
     private float survivalExpProgress;
+    private String survivalEffects = "";
+    // -1 means the value was never saved, so the server's own player data is used
+    private double lifeRipDrain = -1;
+    private double lifeRipGain = -1;
     private String arenaInventory;
     private String creativeInventory;
     private int blacklistingMethod;
@@ -428,6 +432,39 @@ public class AranarthPlayer {
 
     public void setSurvivalHealth(double survivalHealth) {
         this.survivalHealth = survivalHealth;
+    }
+
+    /**
+     * Provides the potion effects the player had in Survival, serialized by AranarthUtils.serializePotionEffects().
+     */
+    public String getSurvivalEffects() {
+        return survivalEffects;
+    }
+
+    public void setSurvivalEffects(String survivalEffects) {
+        this.survivalEffects = survivalEffects;
+    }
+
+    /**
+     * Provides the maximum health taken from the player by LifeRip, or -1 if it was never saved.
+     */
+    public double getLifeRipDrain() {
+        return lifeRipDrain;
+    }
+
+    public void setLifeRipDrain(double lifeRipDrain) {
+        this.lifeRipDrain = lifeRipDrain;
+    }
+
+    /**
+     * Provides the maximum health gained by the player from LifeRip, or -1 if it was never saved.
+     */
+    public double getLifeRipGain() {
+        return lifeRipGain;
+    }
+
+    public void setLifeRipGain(double lifeRipGain) {
+        this.lifeRipGain = lifeRipGain;
     }
 
     public int getSurvivalFoodLevel() {

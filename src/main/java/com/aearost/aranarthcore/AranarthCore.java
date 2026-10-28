@@ -539,6 +539,7 @@ public class AranarthCore extends JavaPlugin {
                                 ap.setSurvivalSaturation(p.getSaturation());
                                 ap.setSurvivalExpLevel(p.getLevel());
                                 ap.setSurvivalExpProgress(p.getExp());
+                                ap.setSurvivalEffects(AranarthUtils.serializePotionEffects(p));
                                 AranarthUtils.setPlayer(p.getUniqueId(), ap);
                             }
                         }
@@ -1846,6 +1847,7 @@ public class AranarthCore extends JavaPlugin {
                         ap.setSurvivalSaturation(p.getSaturation());
                         ap.setSurvivalExpLevel(p.getLevel());
                         ap.setSurvivalExpProgress(p.getExp());
+                        ap.setSurvivalEffects(AranarthUtils.serializePotionEffects(p));
                         AranarthUtils.setPlayer(p.getUniqueId(), ap);
                         // Write raw_data synchronously during shutdown so MySQL is current even if
                         // syncAranarthPlayersToDatabase's async path never fires (plugin disabled).

@@ -459,6 +459,55 @@ public class AranarthUtils {
         return "world";
     }
 
+    /**
+     * Serializes the player's potion effects so they can be restored once they are back in Survival.
+     *
+     * @param player The player.
+     * @return The serialized effects, or an empty string if there are none.
+     */
+    public static String serializePotionEffects(Player player) {
+        List<String> parts = new ArrayList<>();
+        for (PotionEffect effect : player.getActivePotionEffects()) {
+            if (effect.isInfinite()) {
+                continue;
+            }
+            parts.add(effect.getType().getKey() + "," + effect.getDuration() + "," + effect.getAmplifier() + ","
+                    + (effect.isAmbient() ? 1 : 0) + "," + (effect.hasParticles() ? 1 : 0) + "," + (effect.hasIcon() ? 1 : 0));
+        }
+        return String.join(";", parts);
+    }
+
+    /**
+     * Replaces the player's potion effects with the serialized effects.
+     *
+     * @param player  The player.
+     * @param effects The effects serialized by serializePotionEffects().
+     */
+    public static void applyPotionEffects(Player player, String effects) {
+        for (PotionEffect effect : player.getActivePotionEffects()) {
+            player.removePotionEffect(effect.getType());
+        }
+        if (effects == null || effects.isEmpty()) {
+            return;
+        }
+        for (String part : effects.split(";")) {
+            String[] fields = part.split(",");
+            if (fields.length < 6) {
+                continue;
+            }
+            NamespacedKey key = NamespacedKey.fromString(fields[0]);
+            PotionEffectType type = key == null ? null : Registry.EFFECT.get(key);
+            if (type == null) {
+                continue;
+            }
+            try {
+                player.addPotionEffect(new PotionEffect(type, Integer.parseInt(fields[1]), Integer.parseInt(fields[2]),
+                        fields[3].equals("1"), fields[4].equals("1"), fields[5].equals("1")));
+            } catch (NumberFormatException ignored) {
+            }
+        }
+    }
+
     public static void switchInventory(Player player, String currentWorld, String destinationWorld) throws IOException {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
@@ -485,6 +534,10 @@ public class AranarthUtils {
                 return;
             }
         } else {
+            // Survival effects are kept so they can be given back when the player returns
+            if (currentWorld.startsWith("world")) {
+                aranarthPlayer.setSurvivalEffects(serializePotionEffects(player));
+            }
             // Remove potion effects when changing the world
             for (PotionEffect effect : player.getActivePotionEffects()) {
                 player.removePotionEffect(effect.getType());
@@ -552,6 +605,7 @@ public class AranarthUtils {
                 }
                 player.setFoodLevel(aranarthPlayer.getSurvivalFoodLevel());
                 player.setSaturation(aranarthPlayer.getSurvivalSaturation());
+                applyPotionEffects(player, aranarthPlayer.getSurvivalEffects());
                 player.setGameMode(GameMode.SURVIVAL);
                 PermissionUtils.evaluatePlayerPermissions(player);
                 return;
@@ -586,6 +640,7 @@ public class AranarthUtils {
                     Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] survivalInventory empty for "
                             + player.getName() + " during creative→world switch - skipping clear to protect items");
                 }
+                applyPotionEffects(player, aranarthPlayer.getSurvivalEffects());
                 player.setGameMode(GameMode.SURVIVAL);
                 return;
             } else if (destinationWorld.startsWith("arena")) {
@@ -2564,6 +2619,7 @@ public class AranarthUtils {
             aranarthPlayer.setSurvivalSaturation(player.getSaturation());
             aranarthPlayer.setSurvivalExpLevel(player.getLevel());
             aranarthPlayer.setSurvivalExpProgress(player.getExp());
+            aranarthPlayer.setSurvivalEffects(serializePotionEffects(player));
         }
 
         setPlayer(player.getUniqueId(), aranarthPlayer);

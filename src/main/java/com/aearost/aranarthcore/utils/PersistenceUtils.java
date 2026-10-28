@@ -384,6 +384,9 @@ public class PersistenceUtils {
                     boolean isBarbarian = fields.length > 31 && fields[30].equals("1");
                     long barbarianCooldownEnd = fields.length > 32 ? Long.parseLong(fields[31]) : 0L;
                     int permanentSaintRank = fields.length > 33 ? Integer.parseInt(fields[32]) : 0;
+                    String survivalEffects = fields.length > 34 ? fields[33] : "";
+                    double lifeRipDrain = fields.length > 35 ? Double.parseDouble(fields[34]) : -1;
+                    double lifeRipGain = fields.length > 36 ? Double.parseDouble(fields[35]) : -1;
                     AranarthUtils.getPlayer(uuid).setConquestDisbandCooldownEnd(conquestDisbandCooldownEnd);
                     AranarthUtils.getPlayer(uuid).setSurvivalEnderChest(survivalEnderChest);
                     AranarthUtils.getPlayer(uuid).setSurvivalHealth(survivalHealth);
@@ -394,6 +397,9 @@ public class PersistenceUtils {
                     AranarthUtils.getPlayer(uuid).setBarbarian(isBarbarian);
                     AranarthUtils.getPlayer(uuid).setBarbarianCooldownEnd(barbarianCooldownEnd);
                     AranarthUtils.getPlayer(uuid).setPermanentSaintRank(permanentSaintRank);
+                    AranarthUtils.getPlayer(uuid).setSurvivalEffects(survivalEffects);
+                    AranarthUtils.getPlayer(uuid).setLifeRipDrain(lifeRipDrain);
+                    AranarthUtils.getPlayer(uuid).setLifeRipGain(lifeRipGain);
                 } catch (Exception e) {
                     // Skip malformed rows without aborting the rest of the load
                     Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Load] Skipping malformed player row (first 40 chars: "
@@ -507,6 +513,9 @@ public class PersistenceUtils {
         int barbarianValue = aranarthPlayer.isBarbarian() ? 1 : 0;
         long barbarianCooldownEnd = aranarthPlayer.getBarbarianCooldownEnd();
         int permanentSaintRank = aranarthPlayer.getPermanentSaintRank();
+        String survivalEffects = aranarthPlayer.getSurvivalEffects();
+        double lifeRipDrain = aranarthPlayer.getLifeRipDrain();
+        double lifeRipGain = aranarthPlayer.getLifeRipGain();
         return uuidStr + "|" + nickname + "|" + survivalInventory + "|" + arenaInventory + "|"
                 + creativeInventory + "|" + potions + "|" + arrows + "|" + blacklist + "|" + blacklistingMethod
                 + "|" + balance + "|" + rank + "|" + saint + "|" + council + "|" + architect + "|"
@@ -516,6 +525,7 @@ public class PersistenceUtils {
                 + survivalHealth + "|" + survivalFoodLevel + "|" + survivalSaturation + "|"
                 + survivalExpLevel + "|" + survivalExpProgress + "|"
                 + barbarianValue + "|" + barbarianCooldownEnd + "|" + permanentSaintRank + "|"
+                + survivalEffects + "|" + lifeRipDrain + "|" + lifeRipGain + "|"
                 // Keep pronouns at the end and add before this
                 + pronouns;
     }
@@ -571,7 +581,7 @@ public class PersistenceUtils {
                 boolean writeSucceeded = false;
                 try (FileWriter writer = new FileWriter(tempFile)) {
                     // Template line
-                    writer.write("#uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|perks|saintExpirationDate|isCompressingItems|votePointsSpent|spawnBoostValue|firstJoinDate|conquestDisbandCooldownEnd|survivalEnderChest|survivalHealth|survivalFoodLevel|survivalSaturation|survivalExpLevel|survivalExpProgress|barbarianValue|barbarianCooldownEnd|permanentSaintRank|pronouns\n");
+                    writer.write("#uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|perks|saintExpirationDate|isCompressingItems|votePointsSpent|spawnBoostValue|firstJoinDate|conquestDisbandCooldownEnd|survivalEnderChest|survivalHealth|survivalFoodLevel|survivalSaturation|survivalExpLevel|survivalExpProgress|barbarianValue|barbarianCooldownEnd|permanentSaintRank|survivalEffects|lifeRipDrain|lifeRipGain|pronouns\n");
 
                     for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
                         String row = buildAranarthPlayerRow(entry.getKey(), entry.getValue()) + "\n";
@@ -7839,6 +7849,9 @@ public class PersistenceUtils {
         boolean isBarbarian = fields.length > 31 && fields[30].equals("1");
         long barbarianCooldownEnd = fields.length > 32 ? Long.parseLong(fields[31]) : 0L;
         int permanentSaintRank = fields.length > 33 ? Integer.parseInt(fields[32]) : 0;
+        String survivalEffects = fields.length > 34 ? fields[33] : "";
+        double lifeRipDrain = fields.length > 35 ? Double.parseDouble(fields[34]) : -1;
+        double lifeRipGain = fields.length > 36 ? Double.parseDouble(fields[35]) : -1;
         AranarthUtils.getPlayer(uuid).setConquestDisbandCooldownEnd(conquestDisbandCooldownEnd);
         AranarthUtils.getPlayer(uuid).setSurvivalEnderChest(survivalEnderChest);
         AranarthUtils.getPlayer(uuid).setSurvivalHealth(survivalHealth);
@@ -7849,6 +7862,9 @@ public class PersistenceUtils {
         AranarthUtils.getPlayer(uuid).setBarbarian(isBarbarian);
         AranarthUtils.getPlayer(uuid).setBarbarianCooldownEnd(barbarianCooldownEnd);
         AranarthUtils.getPlayer(uuid).setPermanentSaintRank(permanentSaintRank);
+        AranarthUtils.getPlayer(uuid).setSurvivalEffects(survivalEffects);
+        AranarthUtils.getPlayer(uuid).setLifeRipDrain(lifeRipDrain);
+        AranarthUtils.getPlayer(uuid).setLifeRipGain(lifeRipGain);
     }
 
     /**

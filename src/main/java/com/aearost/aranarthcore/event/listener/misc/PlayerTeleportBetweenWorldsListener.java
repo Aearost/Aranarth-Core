@@ -16,7 +16,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.IOException;
@@ -49,11 +48,9 @@ public class PlayerTeleportBetweenWorldsListener implements Listener {
                 }
 
                 try {
+                    // Also clears the potion effects, and gives back the saved ones when returning to Survival
                     AranarthUtils.switchInventory(player, currentWorld, destinationWorld);
                     player.setGameMode(newMode);
-                    for (PotionEffect effect : player.getActivePotionEffects()) {
-                        player.removePotionEffect(effect.getType());
-                    }
                 } catch (IOException exception) {
                     player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.error")));
                     e.setCancelled(true);

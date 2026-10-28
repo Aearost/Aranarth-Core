@@ -401,6 +401,7 @@ public class NetworkManager {
             snap.addProperty("saturation", p.getSaturation());
             snap.addProperty("expLevel", p.getLevel());
             snap.addProperty("expProgress", p.getExp());
+            snap.addProperty("effects", AranarthUtils.serializePotionEffects(p));
         } else {
             // In a world with another inventory (i.e SMP Creative), so the survival inventory saved when they left is used
             if (aranarthPlayer.getSurvivalInventory().isEmpty()) {
@@ -412,6 +413,7 @@ public class NetworkManager {
             snap.addProperty("saturation", aranarthPlayer.getSurvivalSaturation());
             snap.addProperty("expLevel", aranarthPlayer.getSurvivalExpLevel());
             snap.addProperty("expProgress", aranarthPlayer.getSurvivalExpProgress());
+            snap.addProperty("effects", aranarthPlayer.getSurvivalEffects());
         }
         // The ender chest is shared by every world
         snap.addProperty("enderChest", ItemUtils.itemStackArrayToBase64(p.getEnderChest().getContents()));
@@ -1716,6 +1718,7 @@ public class NetworkManager {
                 ap.setSurvivalSaturation(player.getSaturation());
                 ap.setSurvivalExpLevel(player.getLevel());
                 ap.setSurvivalExpProgress(player.getExp());
+                ap.setSurvivalEffects(AranarthUtils.serializePotionEffects(player));
             } else if (transferFromWorld.startsWith("creative")) {
                 // Save creative inventory so it persists across servers
                 try {

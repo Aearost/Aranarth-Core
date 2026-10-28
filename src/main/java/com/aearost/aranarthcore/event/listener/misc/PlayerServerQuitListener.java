@@ -159,6 +159,7 @@ public class PlayerServerQuitListener implements Listener {
                 aranarthPlayer.setSurvivalSaturation(player.getSaturation());
                 aranarthPlayer.setSurvivalExpLevel(player.getLevel());
                 aranarthPlayer.setSurvivalExpProgress(player.getExp());
+                aranarthPlayer.setSurvivalEffects(AranarthUtils.serializePotionEffects(player));
                 int nonNullItems = 0;
                 for (org.bukkit.inventory.ItemStack is : player.getInventory().getContents()) {
                     if (is != null) {

@@ -3,11 +3,13 @@ AranarthCore v. 1.15
 World & Events
 [+] The Horn of the Target now also sends nearby pet wolves and cats after the targeted area
 [~] Wandering Traders that spawn nearby AFK players now spawn nearby another online player that is not AFK instead
+[~] Potion effects from survival are now saved when going to the arena or creative and given back when returning
 
 Bending & Abilities
 [~] EnergyBurst's fall auto-proc now only triggers after falling at least 10 blocks
 [~] Renamed CombustionStrike to CombustiveStrike
 [~] Fixed sneaking not standing players up from stairs and slabs at the arena spawn and other no-bending zones
+[~] LifeRip hearts now stay the same across Survival and SMP and after restarts
 
 Dominion
 [+] Added the council command /ac dominionrank to temporarily update a dominion's level

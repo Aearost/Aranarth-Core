@@ -1,9 +1,11 @@
 package com.aearost.aranarthcore.abilities.waterbending.bloodbending;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionRank;
 import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.Lang;
@@ -165,8 +167,7 @@ public class LifeRip extends BloodAbility implements AddonAbility {
             targetAttr.setBaseValue(newBaseValue);
             double existingDrain = target.getPersistentDataContainer()
                     .getOrDefault(TARGET_DRAIN_KEY, PersistentDataType.DOUBLE, 0.0);
-            target.getPersistentDataContainer()
-                    .set(TARGET_DRAIN_KEY, PersistentDataType.DOUBLE, existingDrain + actualReduction);
+            recordAmount(target, TARGET_DRAIN_KEY, existingDrain + actualReduction);
             // Clamp current health to the new computed maximum
             if (target.getHealth() > targetAttr.getValue()) {
                 target.setHealth(targetAttr.getValue());
@@ -178,8 +179,7 @@ public class LifeRip extends BloodAbility implements AddonAbility {
             casterAttr.setBaseValue(casterAttr.getBaseValue() + AbilityConfig.getDouble("LifeRip.CasterMaxHealthGain"));
             double existingGain = player.getPersistentDataContainer()
                     .getOrDefault(CASTER_GAIN_KEY, PersistentDataType.DOUBLE, 0.0);
-            player.getPersistentDataContainer()
-                    .set(CASTER_GAIN_KEY, PersistentDataType.DOUBLE, existingGain + AbilityConfig.getDouble("LifeRip.CasterMaxHealthGain"));
+            recordAmount(player, CASTER_GAIN_KEY, existingGain + AbilityConfig.getDouble("LifeRip.CasterMaxHealthGain"));
             // Restore half of whatever health the target was missing as current health to the caster
             if (missingHP > 0.0) {
                 player.setHealth(Math.min(player.getHealth() + missingHP / 2.0, casterAttr.getValue()));
@@ -193,10 +193,10 @@ public class LifeRip extends BloodAbility implements AddonAbility {
 
     public static void resetTargetDrain(final Player target) {
         Double drain = target.getPersistentDataContainer().get(TARGET_DRAIN_KEY, PersistentDataType.DOUBLE);
+        recordAmount(target, TARGET_DRAIN_KEY, 0.0);
         if (drain == null) {
             return;
         }
-        target.getPersistentDataContainer().remove(TARGET_DRAIN_KEY);
         AttributeInstance attr = target.getAttribute(MAX_HEALTH);
         if (attr != null) {
             attr.setBaseValue(attr.getBaseValue() + drain);
@@ -205,14 +205,70 @@ public class LifeRip extends BloodAbility implements AddonAbility {
 
     public static void resetCasterGain(final Player caster) {
         Double gain = caster.getPersistentDataContainer().get(CASTER_GAIN_KEY, PersistentDataType.DOUBLE);
+        recordAmount(caster, CASTER_GAIN_KEY, 0.0);
         if (gain == null) {
             return;
         }
-        caster.getPersistentDataContainer().remove(CASTER_GAIN_KEY);
         AttributeInstance attr = caster.getAttribute(MAX_HEALTH);
         if (attr != null) {
             // Ensure base health never drops below 1 heart from floating-point imprecision
             attr.setBaseValue(Math.max(2.0, attr.getBaseValue() - gain));
+        }
+    }
+
+    /**
+     * Saves a LifeRip amount both on this server's player data, which tracks what is applied to the
+     * player's maximum health here, and on the AranarthPlayer, which is shared by every server.
+     */
+    private static void recordAmount(final Player player, final NamespacedKey key, final double amount) {
+        if (amount > 0) {
+            player.getPersistentDataContainer().set(key, PersistentDataType.DOUBLE, amount);
+        } else {
+            player.getPersistentDataContainer().remove(key);
+        }
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        if (aranarthPlayer != null) {
+            if (key.equals(TARGET_DRAIN_KEY)) {
+                aranarthPlayer.setLifeRipDrain(amount);
+            } else {
+                aranarthPlayer.setLifeRipGain(amount);
+            }
+        }
+    }
+
+    /**
+     * Updates the player's maximum health on this server to match the LifeRip amounts saved on their
+     * AranarthPlayer, as each server has its own player data and the player may have gained or lost
+     * health from LifeRip on the other server since they were last here.
+     *
+     * @param player The player.
+     */
+    public static void syncMaxHealth(final Player player) {
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        AttributeInstance attr = player.getAttribute(MAX_HEALTH);
+        if (aranarthPlayer == null || attr == null) {
+            return;
+        }
+        double appliedDrain = player.getPersistentDataContainer().getOrDefault(TARGET_DRAIN_KEY, PersistentDataType.DOUBLE, 0.0);
+        double appliedGain = player.getPersistentDataContainer().getOrDefault(CASTER_GAIN_KEY, PersistentDataType.DOUBLE, 0.0);
+        // Saved before the amounts were shared between servers, so this server's amounts are used
+        if (aranarthPlayer.getLifeRipDrain() < 0 || aranarthPlayer.getLifeRipGain() < 0) {
+            aranarthPlayer.setLifeRipDrain(appliedDrain);
+            aranarthPlayer.setLifeRipGain(appliedGain);
+            return;
+        }
+
+        double drain = aranarthPlayer.getLifeRipDrain();
+        double gain = aranarthPlayer.getLifeRipGain();
+        double adjustment = (appliedDrain - drain) + (gain - appliedGain);
+        if (Math.abs(adjustment) < 0.0001) {
+            return;
+        }
+        attr.setBaseValue(Math.max(2.0, attr.getBaseValue() + adjustment));
+        recordAmount(player, TARGET_DRAIN_KEY, drain);
+        recordAmount(player, CASTER_GAIN_KEY, gain);
+        if (player.getHealth() > attr.getValue()) {
+            player.setHealth(attr.getValue());
         }
     }
 
