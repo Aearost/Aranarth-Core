@@ -16,6 +16,7 @@ Dominion
 Aranarthium, Items & Crafting
 [~] Fixed applying Essences consuming 2 Aranarthium at a time if thrown at once
 [~] The Essence of Resilience is now found in the Epic Crate, and the Essence of Lifesteal in the Godly Crate
+[~] Aranarthium size changes are now reset to normal while combat tagged, and return automatically once the combat tag ends
 
 Economy, Jobs & Quests
 [~] Fixed /vptransfer throwing an error when the receiver has never joined the current server

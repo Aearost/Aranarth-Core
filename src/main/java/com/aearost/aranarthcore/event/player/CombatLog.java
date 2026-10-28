@@ -93,6 +93,10 @@ public class CombatLog {
 								}
 								AranarthUtils.setPlayer(attacker.getUniqueId(), attackerAranarthPlayer);
 
+								// Combat tagged players are reset to the normal size
+								AranarthUtils.applyAranarthiumScale(player);
+								AranarthUtils.applyAranarthiumScale(attacker);
+
 								new BukkitRunnable() {
 									@Override
 									public void run() {
@@ -106,6 +110,10 @@ public class CombatLog {
 												updatedCombatLog.remove(attacker.getUniqueId());
 												updatedAranarthPlayer.setCombatLogTime(updatedCombatLog);
 												AranarthUtils.setPlayer(player.getUniqueId(), updatedAranarthPlayer);
+												// Restores the Aranarthium size once the combat tag ends
+												if (player.isOnline()) {
+													AranarthUtils.applyAranarthiumScale(player);
+												}
 											}
 										}
 
@@ -119,6 +127,9 @@ public class CombatLog {
 												updatedAttackerCombatLog.remove(player.getUniqueId());
 												updatedAttackerAranarthPlayer.setCombatLogTime(updatedAttackerCombatLog);
 												AranarthUtils.setPlayer(attacker.getUniqueId(), updatedAttackerAranarthPlayer);
+												if (attacker.isOnline()) {
+													AranarthUtils.applyAranarthiumScale(attacker);
+												}
 											}
 										}
 									}

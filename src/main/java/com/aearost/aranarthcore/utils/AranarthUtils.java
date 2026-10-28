@@ -786,7 +786,7 @@ public class AranarthUtils {
      */
     public static void applyAranarthiumScale(Player player) {
         AranarthPlayer ap = getPlayer(player.getUniqueId());
-        if (ap != null && ap.isSizeScaleEnabled()) {
+        if (ap != null && ap.isSizeScaleEnabled() && ap.getCombatLogTime().isEmpty()) {
             if (isWearingArmorType(player, "dwarven")) {
                 setPlayerScale(player, 0.75, 0.6);
                 return;
