@@ -3090,46 +3090,47 @@ public class CommandDominion implements CommandExecutor {
         player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_header", "name", dominion.getName(), "level", currentLevel)));
 
         // --- Level progress section ---
-        if (currentLevel < DominionLevelUtils.MAX_LEVEL) {
-            int nextLevel = currentLevel + 1;
-            boolean[] criteria = DominionLevelUtils.getCriteriaStatus(dominion, nextLevel);
+        // At max level, the criteria are still shown against the max level thresholds
+        int nextLevel = Math.min(currentLevel + 1, DominionLevelUtils.MAX_LEVEL);
+        boolean[] criteria = DominionLevelUtils.getCriteriaStatus(dominion, nextLevel);
 
+        if (currentLevel < DominionLevelUtils.MAX_LEVEL) {
             player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_criteria", "name", dominion.getName(),
                     "required", DominionLevelUtils.CRITERIA_REQUIRED, "count", DominionLevelUtils.CRITERIA_COUNT)));
-
-            // Members
-            int membThresh = DominionLevelUtils.getMembersThreshold(nextLevel);
-            player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_members", "mark", criteria[0] ? "&a✔" : "&cX",
-                    "current", dominion.getMembers().size(), "target", membThresh)));
-
-            // Balance
-            double balThresh = DominionLevelUtils.getBalanceThreshold(nextLevel);
-            player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_balance", "mark", criteria[1] ? "&a✔" : "&cX",
-                    "current", formatter.format(dominion.getBalance()), "target", formatter.format(balThresh))));
-
-            // Farmland
-            int farmThresh = DominionLevelUtils.getFarmlandThreshold(nextLevel);
-            player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_farmland", "mark", criteria[2] ? "&a✔" : "&cX",
-                    "current", dominion.getCachedFarmlandCount(), "target", farmThresh)));
-
-            // Livestock
-            int liveThresh = DominionLevelUtils.getLivestockThreshold(nextLevel);
-            player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_livestock", "mark", criteria[3] ? "&a✔" : "&cX",
-                    "current", dominion.getCachedLivestockCount(), "target", liveThresh)));
-
-            // Chunks
-            int chunkThresh = DominionLevelUtils.getChunksThreshold(nextLevel);
-            int totalChunks = dominion.getChunks().size() + OutpostUtils.getTotalOutpostChunkCount(dominion.getId());
-            player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_chunks", "mark", criteria[4] ? "&a✔" : "&cX",
-                    "current", totalChunks, "target", chunkThresh)));
-
-            // Age
-            int ageThresh = DominionLevelUtils.getAgeThreshold(nextLevel);
-            player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_age", "mark", criteria[5] ? "&a✔" : "&cX",
-                    "current", DominionLevelUtils.getFormattedAge(dominion), "target", ageThresh)));
         } else {
             player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_max")));
         }
+
+        // Members
+        int membThresh = DominionLevelUtils.getMembersThreshold(nextLevel);
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_members", "mark", criteria[0] ? "&a✔" : "&cX",
+                "current", dominion.getMembers().size(), "target", membThresh)));
+
+        // Balance
+        double balThresh = DominionLevelUtils.getBalanceThreshold(nextLevel);
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_balance", "mark", criteria[1] ? "&a✔" : "&cX",
+                "current", formatter.format(dominion.getBalance()), "target", formatter.format(balThresh))));
+
+        // Farmland
+        int farmThresh = DominionLevelUtils.getFarmlandThreshold(nextLevel);
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_farmland", "mark", criteria[2] ? "&a✔" : "&cX",
+                "current", dominion.getCachedFarmlandCount(), "target", farmThresh)));
+
+        // Livestock
+        int liveThresh = DominionLevelUtils.getLivestockThreshold(nextLevel);
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_livestock", "mark", criteria[3] ? "&a✔" : "&cX",
+                "current", dominion.getCachedLivestockCount(), "target", liveThresh)));
+
+        // Chunks
+        int chunkThresh = DominionLevelUtils.getChunksThreshold(nextLevel);
+        int totalChunks = dominion.getChunks().size() + OutpostUtils.getTotalOutpostChunkCount(dominion.getId());
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_chunks", "mark", criteria[4] ? "&a✔" : "&cX",
+                "current", totalChunks, "target", chunkThresh)));
+
+        // Age
+        int ageThresh = DominionLevelUtils.getAgeThreshold(nextLevel);
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_age", "mark", criteria[5] ? "&a✔" : "&cX",
+                "current", DominionLevelUtils.getFormattedAge(dominion), "target", ageThresh)));
     }
 
     /**
