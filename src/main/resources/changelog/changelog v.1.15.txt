@@ -6,6 +6,7 @@ World & Events
 [~] Potion effects from survival are now saved when going to the arena or creative and given back when returning
 [~] Boost messages in Discord are now only sent when a boost is activated, when 1 hour is left, and when it expires
 [~] Storms now only end early when players sleep through the night
+[~] Fixed snow not melting under trees when the snow on top of the leaves was removed
 
 Bending & Abilities
 [~] EnergyBurst's fall auto-proc now only triggers after falling at least 10 blocks

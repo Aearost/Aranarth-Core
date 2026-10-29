@@ -2016,8 +2016,12 @@ public class DateUtils {
 
                                         Block surfaceBlock = world.getHighestBlockAt(x, z);
                                         Block above = surfaceBlock.getRelative(BlockFace.UP);
+                                        boolean isUnderTree = surfaceBlock.getType().name().endsWith("LEAVES");
                                         if (above.getType() != Material.SNOW && surfaceBlock.getType() != Material.ICE) {
-                                            continue;
+                                            // Still melt the snow under the leaves if the snow on top of them was removed
+                                            if (!isUnderTree || !hasSnowUnderLeaves(surfaceBlock)) {
+                                                continue;
+                                            }
                                         }
 
                                         double temperature = surfaceBlock.getWorld().getTemperature(surfaceBlock.getX(), surfaceBlock.getY(), surfaceBlock.getZ());
@@ -2041,18 +2045,20 @@ public class DateUtils {
                                             continue;
                                         }
 
-                                        if (above.getBlockData() instanceof Snow snow) {
-                                            int snowLayers = snow.getLayers();
-                                            if (snowLayers > 1) {
-                                                snow.setLayers(snowLayers - 1);
-                                                above.setBlockData(snow);
-                                            }
-                                            // Removes snow when there is only 1 layer left
-                                            else {
-                                                above.setType(Material.AIR);
+                                        if (above.getBlockData() instanceof Snow || isUnderTree) {
+                                            if (above.getBlockData() instanceof Snow snow) {
+                                                int snowLayers = snow.getLayers();
+                                                if (snowLayers > 1) {
+                                                    snow.setLayers(snowLayers - 1);
+                                                    above.setBlockData(snow);
+                                                }
+                                                // Removes snow when there is only 1 layer left
+                                                else {
+                                                    above.setType(Material.AIR);
+                                                }
                                             }
 
-                                            if (surfaceBlock.getType().name().endsWith("LEAVES")) {
+                                            if (isUnderTree) {
                                                 Location location = surfaceBlock.getLocation();
                                                 // Keep going down to apply to the next blocks
                                                 for (int i = location.getBlockY(); i > 61; i--) {
@@ -2245,6 +2251,26 @@ public class DateUtils {
                 }
             }.runTaskTimer(AranarthCore.getInstance(), 0, 5); // Runs every 5 ticks
         }
+    }
+
+    /**
+     * Helper method to verify if there is snow underneath the leaves of a tree.
+     *
+     * @param surfaceBlock The leaves block at the surface.
+     * @return Confirmation whether there is snow underneath the leaves.
+     */
+    private boolean hasSnowUnderLeaves(Block surfaceBlock) {
+        for (int y = surfaceBlock.getY() - 1; y > 61; y--) {
+            Block block = surfaceBlock.getWorld().getBlockAt(surfaceBlock.getX(), y, surfaceBlock.getZ());
+            if (block.getType() == Material.SNOW) {
+                return true;
+            }
+            // Stop once the ground beneath the tree is reached
+            if (!block.getType().name().endsWith("LEAVES") && !block.getType().name().endsWith("_LOG") && block.getType().isSolid()) {
+                return false;
+            }
+        }
+        return false;
     }
 
     /**
