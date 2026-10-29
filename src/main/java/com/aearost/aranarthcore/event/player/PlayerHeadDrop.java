@@ -2,12 +2,10 @@ package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Material;
+import com.aearost.aranarthcore.utils.MobHeadUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.Random;
 
@@ -47,12 +45,7 @@ public class PlayerHeadDrop {
                 int chance = random.nextInt(range) + 1;
                 if (chance <= threshold) {
                     AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                    ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
-                    SkullMeta meta = (SkullMeta) skull.getItemMeta();
-                    meta.setOwningPlayer(player);
-                    meta.setDisplayName(ChatUtils.translateToColor("&e" + aranarthPlayer.getNickname() + "&e's Skull"));
-                    skull.setItemMeta(meta);
-                    e.getDrops().add(skull);
+                    e.getDrops().add(MobHeadUtils.createPlayerHead(player, "&e" + aranarthPlayer.getNickname() + "&e's Skull"));
                 }
             }
         }

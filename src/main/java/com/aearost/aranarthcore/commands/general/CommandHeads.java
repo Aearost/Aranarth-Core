@@ -7,15 +7,14 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.HeadsDatabaseManager;
+import com.aearost.aranarthcore.utils.MobHeadUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.UUID;
 
@@ -59,12 +58,8 @@ public class CommandHeads implements CommandExecutor {
             }
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(skullUuid);
             OfflinePlayer skullPlayer = Bukkit.getOfflinePlayer(skullUuid);
-            ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
-            SkullMeta meta = (SkullMeta) skull.getItemMeta();
-            meta.setOwningPlayer(skullPlayer);
             String displayName = aranarthPlayer != null ? aranarthPlayer.getNickname() : skullPlayer.getName();
-            meta.setDisplayName(ChatUtils.translateToColor("&e" + displayName + "&e's Skull"));
-            skull.setItemMeta(meta);
+            ItemStack skull = MobHeadUtils.createPlayerHead(skullPlayer, "&e" + displayName + "&e's Skull");
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "heads.skull_given", "player", skullPlayer.getName())));
             player.getInventory().addItem(skull);
             return true;
