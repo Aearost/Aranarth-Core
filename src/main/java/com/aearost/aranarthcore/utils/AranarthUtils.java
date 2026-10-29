@@ -3399,7 +3399,7 @@ public class AranarthUtils {
             }
         }
 
-        // Send reminder messages at 60, 30, and 1 minute remaining
+        // Send reminder messages at 60, 30, 10, and 1 minute remaining (Discord only at 60)
         for (Boost boost : serverBoosts.keySet()) {
             String name = "";
             if (boost == Boost.MINER) {
@@ -3419,7 +3419,7 @@ public class AranarthUtils {
 
             int[] thresholds = {60, 30, 10, 1};
             String[] labels = {Lang.key("boost.time_hour"), Lang.key("boost.time_30_minutes"), Lang.key("boost.time_10_minutes"), Lang.key("boost.time_minute")};
-            String[] discordLabels = {"1 hour", "30 minutes", "10 minutes", null};
+            String[] discordLabels = {"1 hour", null, null, null};
             for (int i = 0; i < thresholds.length; i++) {
                 String key = boost.name() + "_" + thresholds[i];
                 if (minutesLeft == thresholds[i] && !sentBoostReminders.contains(key)) {

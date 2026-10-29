@@ -4,6 +4,7 @@ World & Events
 [+] The Horn of the Target now also sends nearby pet wolves and cats after the targeted area
 [~] Wandering Traders that spawn nearby AFK players now spawn nearby another online player that is not AFK instead
 [~] Potion effects from survival are now saved when going to the arena or creative and given back when returning
+[~] Boost messages in Discord are now only sent when a boost is activated, when 1 hour is left, and when it expires
 
 Bending & Abilities
 [~] EnergyBurst's fall auto-proc now only triggers after falling at least 10 blocks

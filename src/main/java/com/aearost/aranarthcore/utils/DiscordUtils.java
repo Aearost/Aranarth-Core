@@ -779,7 +779,7 @@ public class DiscordUtils {
 	/**
 	 * Sends a reminder embed to #server-chat when a boost is about to expire.
 	 * @param boost The boost.
-	 * @param timeLabel Human-readable time remaining (e.g. "1 hour", "30 minutes", "1 minute").
+	 * @param timeLabel Human-readable time remaining (e.g. "1 hour").
 	 */
 	public static void sendBoostReminderToDiscord(Boost boost, String timeLabel) {
 		String name = "";
