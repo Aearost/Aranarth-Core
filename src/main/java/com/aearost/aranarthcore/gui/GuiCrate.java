@@ -42,7 +42,7 @@ public class GuiCrate {
 		} else if (type == CrateType.GODLY) {
 			this.initializedGui = initializeGodlyCrate(player);
 			// Updating the enhanced aranarthium, spawn eggs, and alternating items to allow for dynamic updates
-			updateGodlyCrateItems(indexes.get(0), indexes.get(1), indexes.get(2), indexes.get(3));
+			updateGodlyCrateItems(indexes.get(0), indexes.get(1), indexes.get(2));
 		} else {
 			this.initializedGui = initializeVoteCrate(player);
 			if (indexes != null) {
@@ -382,32 +382,13 @@ public class GuiCrate {
 	private Inventory initializeGodlyCrate(Player player) {
 		Inventory gui = GuiHolder.create(player, 27, Lang.getFor(player, "gui.crate.title_godly"));
 
-		ItemStack money25000 = new ItemStack(Material.GOLD_INGOT);
-		ItemMeta money25000Meta = money25000.getItemMeta();
-		money25000Meta.setDisplayName(Lang.getFor(player, "gui.crate.money_godly"));
-		List<String> money25000Lore = new ArrayList<>();
-		money25000Lore.add(Lang.getFor(player, "gui.crate.chance_12"));
-		money25000Meta.setLore(money25000Lore);
-		money25000.setItemMeta(money25000Meta);
-		gui.setItem(2, money25000);
-
-		ItemStack diamondBlock = new ItemStack(Material.DIAMOND_BLOCK, 64);
-		ItemMeta diamondBlockMeta = diamondBlock.getItemMeta();
-		diamondBlockMeta.setDisplayName(Lang.getFor(player, "gui.crate.diamond_block"));
-		List<String> diamondBlockLore = new ArrayList<>();
-		diamondBlockLore.add(Lang.getFor(player, "gui.crate.chance_12"));
-		diamondBlockMeta.setLore(diamondBlockLore);
-		diamondBlock.setItemMeta(diamondBlockMeta);
-		gui.setItem(3, diamondBlock);
-
-		ItemStack iron = new ItemStack(Material.NETHERITE_BLOCK, 1);
-		ItemMeta ironMeta = iron.getItemMeta();
-		ironMeta.setDisplayName(Lang.getFor(player, "gui.crate.netherite_block"));
-		List<String> ironLore = new ArrayList<>();
-		ironLore.add(Lang.getFor(player, "gui.crate.chance_12"));
-		ironMeta.setLore(ironLore);
-		iron.setItemMeta(ironMeta);
-		gui.setItem(5, iron);
+		ItemStack aranarthium = new AranarthiumIngot().getItem();
+		ItemMeta aranarthiumMeta = aranarthium.getItemMeta();
+		List<String> aranarthiumLore = new ArrayList<>();
+		aranarthiumLore.add(Lang.getFor(player, "gui.crate.chance_12"));
+		aranarthiumMeta.setLore(aranarthiumLore);
+		aranarthium.setItemMeta(aranarthiumMeta);
+		gui.setItem(2, aranarthium);
 
 		ItemStack mcmmo30 = new ItemStack(Material.PAPER, 1);
 		ItemMeta mcmmo30Meta = mcmmo30.getItemMeta();
@@ -416,7 +397,7 @@ public class GuiCrate {
 		mcmmo30Lore.add(Lang.getFor(player, "gui.crate.chance_8"));
 		mcmmo30Meta.setLore(mcmmo30Lore);
 		mcmmo30.setItemMeta(mcmmo30Meta);
-		gui.setItem(11, mcmmo30);
+		gui.setItem(10, mcmmo30);
 
 		ItemStack netherStar = new ItemStack(Material.NETHER_STAR, 1);
 		ItemMeta netherStarMeta = netherStar.getItemMeta();
@@ -427,21 +408,29 @@ public class GuiCrate {
 		netherStar.setItemMeta(netherStarMeta);
 		gui.setItem(6, netherStar);
 
-		ItemStack lifestealDefault = new EssenceLifesteal().getItem();
-		ItemMeta lifestealDefaultMeta = lifestealDefault.getItemMeta();
-		List<String> lifestealDefaultLore = new ArrayList<>();
-		lifestealDefaultLore.add(Lang.getFor(player, "gui.crate.chance_8"));
-		lifestealDefaultMeta.setLore(lifestealDefaultLore);
-		lifestealDefault.setItemMeta(lifestealDefaultMeta);
-		gui.setItem(15, lifestealDefault);
+		ItemStack plentiful = new EssencePlentiful().getItem();
+		ItemMeta plentifulMeta = plentiful.getItemMeta();
+		List<String> plentifulLore = new ArrayList<>();
+		plentifulLore.add(Lang.getFor(player, "gui.crate.chance_5"));
+		plentifulMeta.setLore(plentifulLore);
+		plentiful.setItemMeta(plentifulMeta);
+		gui.setItem(23, plentiful);
 
-		ItemStack aranarthium = new AranarthiumIngot().getItem();
-		ItemMeta aranarthiumMeta = aranarthium.getItemMeta();
-		List<String> aranarthiumLore = new ArrayList<>();
-		aranarthiumLore.add(Lang.getFor(player, "gui.crate.chance_8"));
-		aranarthiumMeta.setLore(aranarthiumLore);
-		aranarthium.setItemMeta(aranarthiumMeta);
-		gui.setItem(16, aranarthium);
+		ItemStack lifesteal = new EssenceLifesteal().getItem();
+		ItemMeta lifestealMeta = lifesteal.getItemMeta();
+		List<String> lifestealLore = new ArrayList<>();
+		lifestealLore.add(Lang.getFor(player, "gui.crate.chance_8"));
+		lifestealMeta.setLore(lifestealLore);
+		lifesteal.setItemMeta(lifestealMeta);
+		gui.setItem(15, lifesteal);
+
+		ItemStack preservation = new EssencePreservation().getItem();
+		ItemMeta preservationMeta = preservation.getItemMeta();
+		List<String> preservationLore = new ArrayList<>();
+		preservationLore.add(Lang.getFor(player, "gui.crate.chance_8"));
+		preservationMeta.setLore(preservationLore);
+		preservation.setItemMeta(preservationMeta);
+		gui.setItem(16, preservation);
 
 		ItemStack epicKey = new KeyEpic().getItem();
 		epicKey.setAmount(3);
@@ -702,10 +691,9 @@ public class GuiCrate {
 	 * Provides the Aranarthium Ingot that is associated to the input index for a Godly Crate.
 	 * @param ingotIndex The index of the cluster.
 	 * @param eggIndex The index of the spawn egg.
-	 * @param diamondShulkerIndex The index of the diamond blocks/shulker shells.
-	 * @param essenceIndex The index of the essence rotation (0=Lifesteal, 1=Preservation, 2=Plentiful).
+	 * @param blockShulkerIndex The index of the diamond blocks/netherite block/shulker shells rotation.
 	 */
-	public void updateGodlyCrateItems(int ingotIndex, int eggIndex, int diamondShulkerIndex, int essenceIndex) {
+	public void updateGodlyCrateItems(int ingotIndex, int eggIndex, int blockShulkerIndex) {
 		ItemStack ingot = null;
 		switch (ingotIndex) {
 			case 1 -> ingot = new AranarthiumAquatic().getItem();
@@ -717,10 +705,10 @@ public class GuiCrate {
 		}
 		ItemMeta cycledIngotMeta = ingot.getItemMeta();
 		List<String> cycledIngotLore = new ArrayList<>();
-		cycledIngotLore.add(Lang.getFor(player, "gui.crate.chance_8"));
+		cycledIngotLore.add(Lang.getFor(player, "gui.crate.chance_12"));
 		cycledIngotMeta.setLore(cycledIngotLore);
 		ingot.setItemMeta(cycledIngotMeta);
-		initializedGui.setItem(10, ingot);
+		initializedGui.setItem(3, ingot);
 
 		ItemStack egg = null;
 		switch (eggIndex) {
@@ -738,47 +726,31 @@ public class GuiCrate {
 			cycledEggMeta.setDisplayName(Lang.getFor(player, "gui.crate.slime_egg"));
 		}
 		List<String> cycledEggLore = new ArrayList<>();
-		cycledEggLore.add(Lang.getFor(player, "gui.crate.chance_5"));
+		cycledEggLore.add(Lang.getFor(player, "gui.crate.chance_8"));
 		cycledEggMeta.setLore(cycledEggLore);
 		egg.setItemMeta(cycledEggMeta);
-		initializedGui.setItem(23, egg);
+		initializedGui.setItem(11, egg);
 
-		// Cycle through Diamond Block x32 and Shulker Shells x32
-		ItemStack diamondShulker = null;
-		if (diamondShulkerIndex == 1) {
-			diamondShulker = new ItemStack(Material.SHULKER_SHELL, 32);
-			ItemMeta shulkerMeta = diamondShulker.getItemMeta();
-			shulkerMeta.setDisplayName(Lang.getFor(player, "gui.crate.shulker_shells"));
-			List<String> shulkerLore = new ArrayList<>();
-			shulkerLore.add(Lang.getFor(player, "gui.crate.chance_12"));
-			shulkerMeta.setLore(shulkerLore);
-			diamondShulker.setItemMeta(shulkerMeta);
+		// Cycle through Diamond Block x64, Netherite Block x1 and Shulker Shells x32
+		ItemStack blockShulker = null;
+		String blockShulkerName = "";
+		if (blockShulkerIndex == 1) {
+			blockShulker = new ItemStack(Material.NETHERITE_BLOCK, 1);
+			blockShulkerName = Lang.getFor(player, "gui.crate.netherite_block");
+		} else if (blockShulkerIndex == 2) {
+			blockShulker = new ItemStack(Material.SHULKER_SHELL, 32);
+			blockShulkerName = Lang.getFor(player, "gui.crate.shulker_shells");
 		} else {
-			diamondShulker = new ItemStack(Material.DIAMOND_BLOCK, 64);
-			ItemMeta diamondMeta = diamondShulker.getItemMeta();
-			diamondMeta.setDisplayName(Lang.getFor(player, "gui.crate.diamond_block"));
-			List<String> diamondLore = new ArrayList<>();
-			diamondLore.add(Lang.getFor(player, "gui.crate.chance_12"));
-			diamondMeta.setLore(diamondLore);
-			diamondShulker.setItemMeta(diamondMeta);
+			blockShulker = new ItemStack(Material.DIAMOND_BLOCK, 64);
+			blockShulkerName = Lang.getFor(player, "gui.crate.diamond_block");
 		}
-		initializedGui.setItem(3, diamondShulker);
-
-		// Cycle through essences (Lifesteal, Preservation, Plentiful)
-		ItemStack essenceItem;
-		if (essenceIndex == 1) {
-			essenceItem = new EssencePreservation().getItem();
-		} else if (essenceIndex == 2) {
-			essenceItem = new EssencePlentiful().getItem();
-		} else {
-			essenceItem = new EssenceLifesteal().getItem();
-		}
-		ItemMeta cycledEssenceMeta = essenceItem.getItemMeta();
-		List<String> cycledEssenceLore = new ArrayList<>();
-		cycledEssenceLore.add(Lang.getFor(player, "gui.crate.chance_8"));
-		cycledEssenceMeta.setLore(cycledEssenceLore);
-		essenceItem.setItemMeta(cycledEssenceMeta);
-		initializedGui.setItem(15, essenceItem);
+		ItemMeta blockShulkerMeta = blockShulker.getItemMeta();
+		blockShulkerMeta.setDisplayName(blockShulkerName);
+		List<String> blockShulkerLore = new ArrayList<>();
+		blockShulkerLore.add(Lang.getFor(player, "gui.crate.chance_12"));
+		blockShulkerMeta.setLore(blockShulkerLore);
+		blockShulker.setItemMeta(blockShulkerMeta);
+		initializedGui.setItem(5, blockShulker);
 	}
 
 }

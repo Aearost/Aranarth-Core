@@ -27,6 +27,12 @@ Aranarthium, Items & Crafting
 [~] Aranarthium size changes are now reset to normal while combat tagge`d, and return automatically once the combat tag ends
 [~] Lifesteal no longer heals from damage dealt to undead mobs
 [~] Heads dropped from killing players and mobs are now stackable
+[~] Essences of Lifesteal and Preservation now have an 8% chance of being rolled in the Godly Crate
+[~] Essence of Plentiful now has a 5% chance of being rolled in the Godly Crate
+[~] Spawn eggs now have an 8% chance of being rolled in the Godly Crate
+[~] Aranarthium chances are raised to 12% in the Godly Crate
+[~] Diamond Blocks/Netherite Block/Shulker Shells now share one 12% slot in the Godly Crate
+[-] The money reward was removed from the Godly Crate
 
 Economy, Jobs & Quests
 [~] Fixed /vptransfer throwing an error when the receiver has never joined the current server

@@ -314,20 +314,18 @@ public class CrateOpen {
                                 indexes.add(0);
                                 indexes.add(0);
                                 indexes.add(0);
-                                indexes.add(0); // essence index (Lifesteal, Preservation, Plentiful)
                                 GuiCrate gui = new GuiCrate(player, CrateType.GODLY, indexes);
                                 gui.openGui();
                                 // Updates to next slot so task can update it accordingly
                                 indexes.set(0, 1);
                                 indexes.set(1, 1);
                                 indexes.set(2, 1);
-                                indexes.set(3, 1);
 
                                 scheduledSkipTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(AranarthCore.getInstance(), new Runnable() {
                                     @Override
                                     public void run() {
                                         if (aranarthPlayer.isOpeningCrateWithCyclingItem()) {
-                                            gui.updateGodlyCrateItems(indexes.get(0), indexes.get(1), indexes.get(2), indexes.get(3));
+                                            gui.updateGodlyCrateItems(indexes.get(0), indexes.get(1), indexes.get(2));
 
                                             // Cycle through the next enhanced aranarthium iteration
                                             if (indexes.get(0) < 5) {
@@ -343,18 +341,11 @@ public class CrateOpen {
                                                 indexes.set(1, 0);
                                             }
 
-                                            // Cycle through the next diamond block / shulker shells iteration
-                                            if (indexes.get(2) < 1) {
+                                            // Cycle through the next diamond block / netherite block / shulker shells iteration
+                                            if (indexes.get(2) < 2) {
                                                 indexes.set(2, indexes.get(2) + 1);
                                             } else {
                                                 indexes.set(2, 0);
-                                            }
-
-                                            // Cycle through essences (Lifesteal, Preservation, Plentiful)
-                                            if (indexes.get(3) < 2) {
-                                                indexes.set(3, indexes.get(3) + 1);
-                                            } else {
-                                                indexes.set(3, 0);
                                             }
                                         } else {
                                             Bukkit.getScheduler().cancelTask(scheduledSkipTask);
@@ -1054,35 +1045,34 @@ public class CrateOpen {
 
             // Pre-roll all random values before animation starts
             final int chance = new Random().nextInt(100) + 1;
-            final boolean isDiamond = new Random().nextBoolean();
+            final int blockShulkerRoll = new Random().nextInt(3);
             final int aranarthiumRoll = new Random().nextInt(6);
             final int godlyEggRoll = new Random().nextInt(3);
-            final int incantRoll = new Random().nextInt(3);
 
             // Determine the display item shown in the animation as the winner
             final ItemStack displayItem;
             if (chance <= 12) {
-                displayItem = new ItemStack(Material.GOLD_INGOT);
-            } else if (chance <= 24) {
-                displayItem = isDiamond ? new ItemStack(Material.DIAMOND_BLOCK, 64) : new ItemStack(Material.SHULKER_SHELL, 32);
-            } else if (chance <= 32) {
-                displayItem = getCycledAranarthium(aranarthiumRoll);
-            } else if (chance <= 44) {
-                displayItem = new ItemStack(Material.NETHERITE_BLOCK);
-            } else if (chance <= 52) {
-                displayItem = new ItemStack(Material.ENCHANTED_BOOK);
-            } else if (chance <= 60) {
                 displayItem = new AranarthiumIngot().getItem();
-            } else if (chance <= 72) {
-                displayItem = new ItemStack(Material.NETHER_STAR);
-            } else if (chance <= 80) {
-                if (incantRoll == 0) {
-                    displayItem = new EssenceLifesteal().getItem();
-                } else if (incantRoll == 1) {
-                    displayItem = new EssencePreservation().getItem();
+            } else if (chance <= 24) {
+                displayItem = getCycledAranarthium(aranarthiumRoll);
+            } else if (chance <= 36) {
+                if (blockShulkerRoll == 0) {
+                    displayItem = new ItemStack(Material.DIAMOND_BLOCK, 64);
+                } else if (blockShulkerRoll == 1) {
+                    displayItem = new ItemStack(Material.NETHERITE_BLOCK);
                 } else {
-                    displayItem = new EssencePlentiful().getItem();
+                    displayItem = new ItemStack(Material.SHULKER_SHELL, 32);
                 }
+            } else if (chance <= 48) {
+                displayItem = new ItemStack(Material.NETHER_STAR);
+            } else if (chance <= 56) {
+                displayItem = new ItemStack(Material.ENCHANTED_BOOK);
+            } else if (chance <= 64) {
+                displayItem = getCycledGodlySpawnEgg(godlyEggRoll);
+            } else if (chance <= 72) {
+                displayItem = new EssenceLifesteal().getItem();
+            } else if (chance <= 80) {
+                displayItem = new EssencePreservation().getItem();
             } else if (chance <= 85) {
                 ItemStack key = new KeyGodly().getItem();
                 key.setAmount(2);
@@ -1102,7 +1092,7 @@ public class CrateOpen {
                 key.setAmount(3);
                 displayItem = key;
             } else {
-                displayItem = getCycledGodlySpawnEgg(godlyEggRoll);
+                displayItem = new EssencePlentiful().getItem();
             }
 
             List<ItemStack> sequence = buildAnimationSequence(CrateType.GODLY, displayItem);
@@ -1119,36 +1109,28 @@ public class CrateOpen {
                 String name = "";
 
                 if (chance <= 12) {
-                    player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
-                    aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 75000);
-                    if (NetworkManager.isActive()) {
-                        NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), 75000);
-                    }
-                    aranarthPlayer.setCrateTypeBeingOpened(null);
-                    AranarthUtils.removeCrateFromUse(CrateType.GODLY);
-                    AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                    PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
-                    broadcastRewardToNearbyPlayers(player, aranarthPlayer, Lang.key("gui.crate.money_godly"), Lang.key("crate.name_godly"));
-                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "crate.earned_currency", "amount", "75,000")));
-                    Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled $75,000 of In-Game Currency in a Godly Crate"));
-                    return;
+                    reward = new AranarthiumIngot().getItem();
+                    name = reward.getItemMeta().getDisplayName() + " &f&lx1";
                 } else if (chance <= 24) {
-                    // Use pre-rolled isDiamond
-                    if (isDiamond) {
+                    // Use pre-rolled aranarthiumRoll
+                    reward = getCycledAranarthium(aranarthiumRoll);
+                    name = reward.getItemMeta().getDisplayName() + " x1";
+                } else if (chance <= 36) {
+                    // Use pre-rolled blockShulkerRoll
+                    if (blockShulkerRoll == 0) {
                         reward = new ItemStack(Material.DIAMOND_BLOCK, 64);
                         name = Lang.key("crate.reward_amount", "name", Lang.key("gui.crate.diamond_block"), "amount", 64);
+                    } else if (blockShulkerRoll == 1) {
+                        reward = new ItemStack(Material.NETHERITE_BLOCK, 1);
+                        name = Lang.key("crate.reward_amount", "name", Lang.key("gui.crate.netherite_block"), "amount", 1);
                     } else {
                         reward = new ItemStack(Material.SHULKER_SHELL, 32);
                         name = Lang.key("crate.reward_amount", "name", Lang.key("gui.crate.shulker_shells"), "amount", 32);
                     }
-                } else if (chance <= 32) {
-                    // Use pre-rolled aranarthiumRoll
-                    reward = getCycledAranarthium(aranarthiumRoll);
-                    name = reward.getItemMeta().getDisplayName() + " x1";
-                } else if (chance <= 44) {
-                    reward = new ItemStack(Material.NETHERITE_BLOCK, 1);
-                    name = Lang.key("crate.reward_amount", "name", Lang.key("gui.crate.netherite_block"), "amount", 1);
-                } else if (chance <= 52) {
+                } else if (chance <= 48) {
+                    reward = new ItemStack(Material.NETHER_STAR, 1);
+                    name = Lang.key("crate.reward_amount", "name", Lang.key("gui.crate.nether_star"), "amount", 1);
+                } else if (chance <= 56) {
                     player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                     McMMOPlayer mcMMOPlayer = EventUtils.getMcMMOPlayer(player);
                     PlayerProfile profile = mcMMOPlayer.getProfile();
@@ -1171,24 +1153,22 @@ public class CrateOpen {
                     player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "crate.mcmmo_levels", "levels", "30")));
                     Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled All Skills +30 Levels in a Godly Crate"));
                     return;
-                } else if (chance <= 60) {
-                    reward = new AranarthiumIngot().getItem();
-                    name = reward.getItemMeta().getDisplayName() + " &f&lx1";
-                } else if (chance <= 72) {
-                    reward = new ItemStack(Material.NETHER_STAR, 1);
-                    name = Lang.key("crate.reward_amount", "name", Lang.key("gui.crate.nether_star"), "amount", 1);
-                } else if (chance <= 80) {
-                    // Use pre-rolled incantRoll
-                    if (incantRoll == 0) {
-                        reward = new EssenceLifesteal().getItem();
-                        name = reward.getItemMeta().getDisplayName() + " x1";
-                    } else if (incantRoll == 1) {
-                        reward = new EssencePreservation().getItem();
-                        name = reward.getItemMeta().getDisplayName() + " x1";
+                } else if (chance <= 64) {
+                    // Use pre-rolled godlyEggRoll
+                    reward = getCycledGodlySpawnEgg(godlyEggRoll);
+                    if (reward.getType() == Material.MAGMA_CUBE_SPAWN_EGG) {
+                        name = Lang.key("gui.crate.magma_cube_egg");
+                    } else if (reward.getType() == Material.BLAZE_SPAWN_EGG) {
+                        name = Lang.key("gui.crate.blaze_egg");
                     } else {
-                        reward = new EssencePlentiful().getItem();
-                        name = reward.getItemMeta().getDisplayName() + " x1";
+                        name = Lang.key("gui.crate.slime_egg");
                     }
+                } else if (chance <= 72) {
+                    reward = new EssenceLifesteal().getItem();
+                    name = reward.getItemMeta().getDisplayName() + " x1";
+                } else if (chance <= 80) {
+                    reward = new EssencePreservation().getItem();
+                    name = reward.getItemMeta().getDisplayName() + " x1";
                 } else if (chance <= 85) {
                     reward = new KeyGodly().getItem();
                     reward.setAmount(2);
@@ -1209,15 +1189,8 @@ public class CrateOpen {
                     reward.setAmount(3);
                     name = Lang.key("crate.reward_amount", "name", Lang.key("gui.crate.epic_key"), "amount", 3);
                 } else {
-                    // Use pre-rolled godlyEggRoll
-                    reward = getCycledGodlySpawnEgg(godlyEggRoll);
-                    if (reward.getType() == Material.MAGMA_CUBE_SPAWN_EGG) {
-                        name = Lang.key("gui.crate.magma_cube_egg");
-                    } else if (reward.getType() == Material.BLAZE_SPAWN_EGG) {
-                        name = Lang.key("gui.crate.blaze_egg");
-                    } else {
-                        name = Lang.key("gui.crate.slime_egg");
-                    }
+                    reward = new EssencePlentiful().getItem();
+                    name = reward.getItemMeta().getDisplayName() + " x1";
                 }
 
                 aranarthPlayer.setCrateTypeBeingOpened(null);
@@ -1649,6 +1622,8 @@ public class CrateOpen {
                 pool.add(new ItemStack(Material.NETHER_STAR));
                 pool.add(new AranarthiumArdent().getItem());
                 pool.add(new EssenceLifesteal().getItem());
+                pool.add(new EssencePlentiful().getItem());
+                pool.add(new EssencePreservation().getItem());
                 pool.add(new ItemStack(Material.MAGMA_CUBE_SPAWN_EGG));
                 pool.add(new ItemStack(Material.SHULKER_SHELL));
                 pool.add(new ItemStack(Material.ENCHANTED_BOOK));
