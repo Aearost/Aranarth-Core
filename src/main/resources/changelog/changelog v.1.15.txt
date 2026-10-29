@@ -15,6 +15,7 @@ Dominion
 [+] Added the council command /ac dominionrank to temporarily update a dominion's level
 [~] Fixed inaccurate leader-only error when using /d resources despite having permission
 [~] /d rank now shows the 6 criteria and your dominion's progress on each, even at the max level
+[~] Conquered dominions now consume their food reserves daily again, with food worth 25% less power
 
 Aranarthium, Items & Crafting
 [~] Fixed applying Essences consuming 2 Aranarthium at a time if thrown at once

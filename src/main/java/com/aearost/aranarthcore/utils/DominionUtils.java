@@ -1063,14 +1063,12 @@ public class DominionUtils {
                 continue;
             }
 
-            // Conquered dominions are exempt from daily food/money/land taxes
-            if (getConquerorOfDominion(dominion) != null) {
-                continue;
-            }
+            // Conquered dominions still consume food, but are exempt from money/land taxes as the conqueror funds them
+            boolean isConquered = getConquerorOfDominion(dominion) != null;
 
             // If the dominion has more chunks than its member count allows, unclaim one chunk
             // per day with priority over food/money consumption until within the limit
-            if (dominion.getChunks().size() > dominion.getMaxChunks()) {
+            if (!isConquered && dominion.getChunks().size() > dominion.getMaxChunks()) {
                 Chunk chunkToRemove = null;
                 for (Chunk chunk : dominion.getChunks()) {
                     if (dominion.getChunks().size() > 1 && dominion.getDominionHome().getChunk().equals(chunk)) {
@@ -1106,6 +1104,13 @@ public class DominionUtils {
                 if (Bukkit.getOfflinePlayer(dominion.getLeader()).isOnline()) {
                     Player onlineLeader = Bukkit.getPlayer(dominion.getLeader());
                     onlineLeader.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlineLeader, "dominion.food_consumed", "name", dominion.getName())));
+                }
+            } else if (isConquered) {
+                for (UUID memberUuid : dominion.getMembers()) {
+                    if (Bukkit.getOfflinePlayer(memberUuid).isOnline()) {
+                        Player member = Bukkit.getPlayer(memberUuid);
+                        member.sendMessage(ChatUtils.chatMessage(Lang.getFor(member, "dominion.food_not_enough", "name", dominion.getName())));
+                    }
                 }
             } else {
                 double dailyCost = DominionLevelUtils.getDailyBalanceCost(dominion.getDominionLevel());
@@ -1267,7 +1272,8 @@ public class DominionUtils {
 
         // Provides different yields based on the input
         power = switch (amplifier) {
-            case -1 -> (int) (power * 0.75);
+            // Never reduce a food item to 0 power, otherwise it would be consumed for nothing
+            case -1 -> power > 0 ? Math.max(1, (int) (power * 0.75)) : 0;
             case 1 -> (int) (power * 1.25);
             case 2 -> (int) (power * 1.5);
             case 3 -> (int) (power * 1.75);
