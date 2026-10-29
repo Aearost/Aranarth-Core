@@ -819,7 +819,7 @@ public class AranarthCore extends JavaPlugin {
             if (!AranarthCore.isSmpServer() && NetworkManager.isActive()) {
                 World timeWorld = Bukkit.getWorld("world");
                 if (timeWorld != null) {
-                    NetworkManager.getInstance().publishSyncTime(timeWorld.getTime());
+                    NetworkManager.getInstance().publishSyncTime(timeWorld.getTime(), false);
                 }
             }
         }, 6000, 6000);

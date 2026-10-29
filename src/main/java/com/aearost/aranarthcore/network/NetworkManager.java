@@ -872,11 +872,13 @@ public class NetworkManager {
      * Broadcasts a time change to all other servers so their sync worlds stay in lockstep.
      *
      * @param time The new world time in ticks.
+     * @param isSleepSkip Whether the time change came from players sleeping, which is the only case that ends a storm early.
      */
-    public void publishSyncTime(long time) {
+    public void publishSyncTime(long time, boolean isSleepSkip) {
         JsonObject json = new JsonObject();
         json.addProperty("server", thisServer);
         json.addProperty("time", time);
+        json.addProperty("isSleepSkip", isSleepSkip);
         publish(CH_SYNC_TIME, json);
     }
 
@@ -2394,7 +2396,9 @@ public class NetworkManager {
         for (World w : syncWorlds) {
             w.setTime(time);
         }
-        if (AranarthUtils.getWeather() != Weather.CLEAR) {
+        // Only sleeping may end a storm before its planned duration is reached
+        boolean isSleepSkip = json.has("isSleepSkip") && json.get("isSleepSkip").getAsBoolean();
+        if (isSleepSkip && AranarthUtils.getWeather() != Weather.CLEAR) {
             AranarthUtils.setStormDuration(0);
             for (World w : syncWorlds) {
                 w.setThunderDuration(0);

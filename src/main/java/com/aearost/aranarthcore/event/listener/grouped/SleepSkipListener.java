@@ -199,7 +199,7 @@ public class SleepSkipListener implements Listener {
 			}
 
 			if (NetworkManager.isActive()) {
-				NetworkManager.getInstance().publishSyncTime(23980);
+				NetworkManager.getInstance().publishSyncTime(23980, true);
 			}
 
 			scheduledSkipTask = -1;

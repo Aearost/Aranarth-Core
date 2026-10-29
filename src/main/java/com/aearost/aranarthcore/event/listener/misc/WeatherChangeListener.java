@@ -57,6 +57,16 @@ public class WeatherChangeListener implements Listener {
 		else {
 			// If storm is ending before the duration is over (i.e sleeping in bed)
 			if (AranarthUtils.getStormDuration() > 100 && AranarthUtils.getStormDelay() <= 0) {
+				// Only sleeping may end a storm early - vanilla's own weather cycle must wait for the planned end
+				if (e.getCause() != WeatherChangeEvent.Cause.SLEEP) {
+					e.setCancelled(true);
+					World stormWorld = e.getWorld();
+					int remainingDuration = AranarthUtils.getStormDuration() + 100;
+					// Re-aligns vanilla's rain timer with the remaining storm duration
+					Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> stormWorld.setWeatherDuration(remainingDuration));
+					return;
+				}
+
 				if (e.getWorld().getName().equals("world")) {
 					Random random = new Random();
 					AranarthUtils.setWeather(Weather.CLEAR);
