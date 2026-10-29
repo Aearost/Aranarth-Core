@@ -3508,7 +3508,7 @@ public class CommandDominion implements CommandExecutor {
                     handleOutpost(args, dominion, player);
                 } else if (args[0].equalsIgnoreCase("defender")) {
                     handleDefender(dominion, player);
-                } else if (args[0].equalsIgnoreCase("region")) {
+                } else if (args[0].equalsIgnoreCase("region") || args[0].equalsIgnoreCase("r")) {
                     handleRegion(args, dominion, player);
                 } else if (args[0].equalsIgnoreCase("rescan")) {
                     rescanDominion(args, player);

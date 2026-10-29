@@ -147,7 +147,7 @@ public class CommandDominionCompleter implements TabCompleter {
 				}
 				yield List.of();
 			}
-			case "region" -> {
+			case "region", "r" -> {
 				if (args.length == 2) {
 					yield filter(List.of("add", "claim", "create", "mapcolor", "private", "public", "remove", "rename", "unclaim"), args[1]);
 				}
