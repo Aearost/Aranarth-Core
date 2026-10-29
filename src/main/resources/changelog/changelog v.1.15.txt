@@ -62,5 +62,6 @@ Cross-server & Technical
 [~] Fixed duplicate Discord messages when a player's mute or temporary ban automatically ends
 [+] Added /ac disable and /ac enable to temporarily block access to specific worlds for players not in admin or architect mode
 [~] Fixed /ac og changes not syncing between servers, being overwritten by the other server, and removals being undone on restart
+[~] Vanish, vote point edits, broadcasts, clear chat, date changes and manual world events now apply on both Survival and SMP
 
 Miscellaneous

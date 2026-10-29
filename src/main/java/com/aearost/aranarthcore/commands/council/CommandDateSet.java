@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands.council;
 
 import com.aearost.aranarthcore.enums.Month;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
@@ -51,7 +52,13 @@ public class CommandDateSet {
 				AranarthUtils.setYear(Integer.parseInt(args[2]));
 				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "dateset.success", "field", "year", "value", String.valueOf(AranarthUtils.getYear()))));
 			}
-			default -> sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac dateset <field> <value>")));
+			default -> {
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac dateset <field> <value>")));
+				return true;
+			}
+		}
+		if (NetworkManager.isActive()) {
+			NetworkManager.getInstance().publishDateSet(AranarthUtils.getDay(), AranarthUtils.getWeekday(), AranarthUtils.getMonth(), AranarthUtils.getYear());
 		}
 		return true;
 	}

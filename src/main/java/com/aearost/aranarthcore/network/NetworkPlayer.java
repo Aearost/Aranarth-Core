@@ -15,7 +15,7 @@ public class NetworkPlayer {
     private int councilRank;
     private int saintRank;
     private int architectRank;
-    private final boolean vanished;
+    private boolean vanished;
     private final String textureValue;
     private final String textureSignature;
     private boolean afk;
@@ -78,6 +78,10 @@ public class NetworkPlayer {
 
     public boolean isVanished() {
         return vanished;
+    }
+
+    public void setVanished(boolean vanished) {
+        this.vanished = vanished;
     }
 
     public String getTextureValue() {

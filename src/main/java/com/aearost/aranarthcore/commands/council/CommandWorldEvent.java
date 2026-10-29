@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands.council;
 import com.aearost.aranarthcore.enums.WorldEvent;
 import java.util.Random;
 import com.aearost.aranarthcore.event.world.WorldEventManager;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -72,6 +73,9 @@ public class CommandWorldEvent {
         }
 
         WorldEventManager.getInstance().startEvent(event, intensity);
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishWorldEventStart(event, intensity);
+        }
         return true;
     }
 }

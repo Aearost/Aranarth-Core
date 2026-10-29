@@ -7,6 +7,8 @@ import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.PrefixStyle;
 import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.enums.Weather;
+import com.aearost.aranarthcore.enums.WorldEvent;
+import com.aearost.aranarthcore.event.world.WorldEventManager;
 import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
 import com.aearost.aranarthcore.items.key.KeyRare;
@@ -133,6 +135,10 @@ public class NetworkManager {
     public static final String CH_PRONOUNS_UPDATE = "aranarth:pronouns_update";
     public static final String CH_PREFIX_UPDATE = "aranarth:prefix_update";
     public static final String CH_NICKNAME_UPDATE = "aranarth:nickname_update";
+    public static final String CH_VANISH_UPDATE = "aranarth:vanish_update";
+    public static final String CH_CLEAR_CHAT = "aranarth:clear_chat";
+    public static final String CH_DATE_SET = "aranarth:date_set";
+    public static final String CH_WORLD_EVENT_START = "aranarth:world_event_start";
     public static final String CH_PING_UPDATE = "aranarth:ping_update";
     public static final String CH_HEARTBEAT = "aranarth:heartbeat";
     public static final String CH_RESOURCE_WORLD_LOCK = "aranarth:resource_world_lock";
@@ -618,6 +624,10 @@ public class NetworkManager {
             case CH_PRONOUNS_UPDATE -> handlePronounsUpdate(json);
             case CH_PREFIX_UPDATE -> handlePrefixUpdate(json);
             case CH_NICKNAME_UPDATE -> handleNicknameUpdate(json);
+            case CH_VANISH_UPDATE -> handleVanishUpdate(json);
+            case CH_CLEAR_CHAT -> handleClearChat(json);
+            case CH_DATE_SET -> handleDateSet(json);
+            case CH_WORLD_EVENT_START -> handleWorldEventStart(json);
             case CH_PING_UPDATE -> handlePingUpdate(json);
             case CH_HEARTBEAT -> handleHeartbeat(json);
             case CH_RESOURCE_WORLD_LOCK -> handleResourceWorldLock(json);
@@ -960,9 +970,19 @@ public class NetworkManager {
      * The message should already contain translated § color codes.
      */
     public void publishBroadcast(String rawMessage) {
+        publishBroadcast(rawMessage, false);
+    }
+
+    /**
+     * Relays a pre-formatted broadcast, optionally playing the ping sound for each recipient.
+     */
+    public void publishBroadcast(String rawMessage, boolean isPing) {
         JsonObject json = new JsonObject();
         json.addProperty("server", thisServer);
         json.addProperty("message", rawMessage);
+        if (isPing) {
+            json.addProperty("ping", true);
+        }
         publish(CH_BROADCAST, json);
     }
 
@@ -1155,6 +1175,55 @@ public class NetworkManager {
         json.addProperty("username", username);
         json.addProperty("nickname", nickname);
         publish(CH_NICKNAME_UPDATE, json);
+    }
+
+    /**
+     * Notifies other servers that a player has vanished or reappeared, so they can hide or show
+     * them in the TAB list and online count.
+     */
+    public void publishVanishUpdate(UUID uuid, boolean isVanished) {
+        // Update DB so the roster survives server restarts and the Discord online list stays accurate
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
+                db.updateRosterVanished(uuid, isVanished)
+        );
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", uuid.toString());
+        json.addProperty("vanished", isVanished);
+        publish(CH_VANISH_UPDATE, json);
+    }
+
+    /**
+     * Tells other servers to clear the chat of all their online players.
+     */
+    public void publishClearChat() {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        publish(CH_CLEAR_CHAT, json);
+    }
+
+    /**
+     * Notifies other servers that the in-game date was manually changed, without triggering any new day logic.
+     */
+    public void publishDateSet(int day, int weekday, Month month, int year) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("day", day);
+        json.addProperty("weekday", weekday);
+        json.addProperty("month", month.name());
+        json.addProperty("year", year);
+        publish(CH_DATE_SET, json);
+    }
+
+    /**
+     * Notifies other servers that a world event was manually started, ending any event active there first.
+     */
+    public void publishWorldEventStart(WorldEvent event, int intensity) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("event", event.name());
+        json.addProperty("intensity", intensity);
+        publish(CH_WORLD_EVENT_START, json);
     }
 
     /**
@@ -2695,6 +2764,75 @@ public class NetworkManager {
         }
     }
 
+    private void handleVanishUpdate(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        boolean isVanished = json.get("vanished").getAsBoolean();
+
+        NetworkPlayer np = remoteRoster.get(uuid);
+        if (np != null) {
+            np.setVanished(isVanished);
+            if (isVanished) {
+                NetworkTabManager.removeFromTab(uuid);
+            } else {
+                NetworkTabManager.addToTab(np);
+            }
+            AranarthUtils.updateTab();
+        }
+
+        // Keeps the in-memory copy accurate so the player stays vanished when transferring to this server
+        AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+        if (ap != null) {
+            ap.setVanished(isVanished);
+            AranarthUtils.setPlayer(uuid, ap);
+        }
+    }
+
+    private void handleClearChat(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        for (int i = 0; i < 128; i++) {
+            Bukkit.broadcastMessage("");
+        }
+    }
+
+    private void handleDateSet(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        AranarthUtils.setDay(json.get("day").getAsInt());
+        AranarthUtils.setWeekday(json.get("weekday").getAsInt());
+        AranarthUtils.setMonth(Month.valueOf(json.get("month").getAsString()));
+        AranarthUtils.setYear(json.get("year").getAsInt());
+    }
+
+    private void handleWorldEventStart(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        WorldEvent event;
+        try {
+            event = WorldEvent.valueOf(json.get("event").getAsString());
+        } catch (IllegalArgumentException e) {
+            return;
+        }
+        int intensity = json.get("intensity").getAsInt();
+
+        // Only the Survival server announces the event and posts it to Discord, so it is never shown twice
+        if (AranarthUtils.getActiveWorldEvent() != null) {
+            WorldEventManager.getInstance().endEvent();
+        }
+        WorldEventManager.getInstance().startEvent(event, intensity);
+    }
+
     private void handlePrefixUpdate(JsonObject json) {
         String originServer = json.get("server").getAsString();
         if (originServer.equals(thisServer)) {
@@ -2821,6 +2959,7 @@ public class NetworkManager {
         }
         String message = json.get("message").getAsString();
         boolean isServerTip = json.has("type") && json.get("type").getAsString().equals("server_tip");
+        boolean isPing = json.has("ping") && json.get("ping").getAsBoolean();
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (isServerTip) {
                 AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
@@ -2829,6 +2968,9 @@ public class NetworkManager {
                 }
             }
             player.sendMessage(message);
+            if (isPing) {
+                AranarthUtils.playPingSound(player);
+            }
         }
         Bukkit.getConsoleSender().sendMessage(message);
     }
@@ -3531,11 +3673,21 @@ public class NetworkManager {
      * Called after addVote() and the DB sync on the server that received the VotifierEvent.
      */
     public void publishVoteAward(UUID uuid, int amount, long timestamp) {
+        publishVoteAward(uuid, amount, timestamp, null);
+    }
+
+    /**
+     * Same as publishVoteAward, but also notifies the player with the given lang key if they are online on the other server.
+     */
+    public void publishVoteAward(UUID uuid, int amount, long timestamp, String notifyLangKey) {
         JsonObject json = new JsonObject();
         json.addProperty("server", thisServer);
         json.addProperty("uuid", uuid.toString());
         json.addProperty("amount", amount);
         json.addProperty("timestamp", timestamp);
+        if (notifyLangKey != null) {
+            json.addProperty("langKey", notifyLangKey);
+        }
         publish(CH_VOTE_AWARD, json);
     }
 
@@ -3544,6 +3696,12 @@ public class NetworkManager {
         int amount = json.get("amount").getAsInt();
         long timestamp = json.get("timestamp").getAsLong();
         AranarthUtils.addVote(new AranarthVote(uuid, amount, timestamp));
+        if (json.has("langKey")) {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, json.get("langKey").getAsString(), "amount", amount)));
+            }
+        }
         Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[VOTE] Received cross-server vote award for " + uuid + ": +" + amount + " points");
     }
 

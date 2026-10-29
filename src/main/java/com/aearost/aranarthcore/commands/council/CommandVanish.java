@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.council;
 
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -29,9 +30,10 @@ public class CommandVanish {
 			String langKey = aranarthPlayer.isVanished() ? "vanish.now_vanished" : "vanish.no_longer_vanished";
 			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, langKey)));
 
-
-
 			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+			if (NetworkManager.isActive()) {
+				NetworkManager.getInstance().publishVanishUpdate(player.getUniqueId(), aranarthPlayer.isVanished());
+			}
 			return true;
 		} else {
 			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));

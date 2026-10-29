@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands.council;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
@@ -34,11 +35,16 @@ public class CommandBroadcast {
                         messageBuilder.append(" ");
                     }
                 }
+                String message = ChatUtils.chatMessage(messageBuilder.toString());
                 if (sender instanceof Player || !AranarthCore.isSmpServer()) {
-                    Bukkit.broadcastMessage(ChatUtils.chatMessage(messageBuilder.toString()));
+                    Bukkit.broadcastMessage(message);
                 }
                 for (Player online : Bukkit.getOnlinePlayers()) {
                     AranarthUtils.playPingSound(online);
+                }
+                // The console runs this on every server, so only a player's broadcast is relayed
+                if (sender instanceof Player && NetworkManager.isActive()) {
+                    NetworkManager.getInstance().publishBroadcast(message, true);
                 }
                 return true;
             } else {

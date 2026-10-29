@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.council;
 
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.AranarthVote;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -77,7 +78,13 @@ public class CommandVpEdit {
 			}
 		}
 
-		AranarthUtils.addVote(new AranarthVote(target.getUniqueId(), amount, System.currentTimeMillis()));
+		long timestamp = System.currentTimeMillis();
+		AranarthUtils.addVote(new AranarthVote(target.getUniqueId(), amount, timestamp));
+		// Relays the edit so the other server's vote point totals stay in sync, and notifies the player if they are there
+		if (NetworkManager.isActive()) {
+			NetworkManager.getInstance().publishVoteAward(target.getUniqueId(), amount, timestamp,
+					amount > 0 ? "vpedit.points_increased" : "vpedit.points_decreased");
+		}
 
 		int total = AranarthUtils.getAvailableVotePoints(target.getUniqueId());
 		sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "vpedit.success", "player", displayName, "amount", String.valueOf(amount), "total", String.valueOf(total))));

@@ -1342,6 +1342,18 @@ public class DatabaseManager {
         }
     }
 
+    public void updateRosterVanished(UUID uuid, boolean vanished) {
+        String sql = "UPDATE network_roster SET vanished = ? WHERE uuid = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBoolean(1, vanished);
+            ps.setString(2, uuid.toString());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to update roster vanished for " + uuid + ": " + e.getMessage());
+        }
+    }
+
     public void updateRosterAfk(UUID uuid, boolean afk) {
         String sql = "UPDATE network_roster SET afk = ? WHERE uuid = ?";
         try (Connection conn = dataSource.getConnection();
