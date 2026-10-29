@@ -331,6 +331,8 @@ public class PlayerServerJoinListener implements Listener {
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 player.teleport(new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0));
                 isNewPlayer = true;
+                // Otherwise the other server would not know about this player until they log out
+                PersistenceUtils.shareNewPlayer(player.getUniqueId());
             }
         }
         // If the player changed their username/it was never resolved

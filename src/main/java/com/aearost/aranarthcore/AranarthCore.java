@@ -416,6 +416,8 @@ public class AranarthCore extends JavaPlugin {
 
         LangManager.getInstance().load();
         initializeUtils();
+        // Every stored player is loaded by now, so any still missing are looked up as they are needed
+        AranarthUtils.enableLoadingMissingPlayers();
         initializeEvents();
         initializeRecipes();
         initializeCommands();

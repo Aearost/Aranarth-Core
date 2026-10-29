@@ -824,6 +824,43 @@ public class DatabaseManager {
     }
 
     /**
+     * Returns uuid -> stored username for every player that has one.
+     */
+    public Map<UUID, String> loadAllPlayerUsernames() {
+        String sql = "SELECT uuid, username FROM aranarth_players WHERE username IS NOT NULL AND username != ''";
+        Map<UUID, String> result = new HashMap<>();
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                result.put(UUID.fromString(rs.getString("uuid")), rs.getString("username"));
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load player usernames: " + e.getMessage());
+        }
+        return result;
+    }
+
+    /**
+     * Returns the stored username for the given uuid, or null if not found.
+     */
+    public String loadPlayerUsername(UUID uuid) {
+        String sql = "SELECT username FROM aranarth_players WHERE uuid = ? AND username IS NOT NULL AND username != ''";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("username");
+                }
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load username for " + uuid + ": " + e.getMessage());
+        }
+        return null;
+    }
+
+    /**
      * Returns the raw pipe-delimited row for the given uuid, or null if not found.
      */
     public String loadAranarthPlayerRaw(UUID uuid) {

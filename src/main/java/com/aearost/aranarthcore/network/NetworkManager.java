@@ -145,6 +145,7 @@ public class NetworkManager {
     public static final String CH_RESOURCE_WORLD_LOCK = "aranarth:resource_world_lock";
     public static final String CH_AVATAR_UPDATE = "aranarth:avatar_update";
     public static final String CH_ORIGINAL_PLAYER_UPDATE = "aranarth:original_player_update";
+    public static final String CH_PLAYER_CREATED = "aranarth:player_created";
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
     private static final String KEY_RETURN_LOC = "return_loc:";
@@ -635,6 +636,7 @@ public class NetworkManager {
             case CH_RESOURCE_WORLD_LOCK -> handleResourceWorldLock(json);
             case CH_AVATAR_UPDATE -> handleAvatarUpdate(json);
             case CH_ORIGINAL_PLAYER_UPDATE -> handleOriginalPlayerUpdate(json);
+            case CH_PLAYER_CREATED -> handlePlayerCreated(json);
         }
     }
 
@@ -2153,6 +2155,46 @@ public class NetworkManager {
             NetworkTabManager.addToTab(np);
         }
         AranarthUtils.updateTab();
+
+        // Loads the player if this server has never seen them, so commands targeting them work here too
+        if (AranarthUtils.getLoadedPlayer(uuid) == null) {
+            Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+                String rawRow = db.loadAranarthPlayerRaw(uuid);
+                if (rawRow == null) {
+                    return;
+                }
+                Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+                    if (AranarthUtils.getLoadedPlayer(uuid) == null) {
+                        PersistenceUtils.reloadPlayerFromRow(uuid, rawRow);
+                    }
+                });
+            });
+        }
+    }
+
+    /**
+     * Sends the row of a player who just joined the network for the first time to the other server.
+     */
+    public void publishPlayerCreated(UUID uuid, String username, String rawRow) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", uuid.toString());
+        json.addProperty("username", username);
+        json.addProperty("raw", rawRow);
+        publish(CH_PLAYER_CREATED, json);
+    }
+
+    private void handlePlayerCreated(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        // Never replaces a copy this server already has
+        if (AranarthUtils.getLoadedPlayer(uuid) == null) {
+            String username = json.has("username") ? json.get("username").getAsString() : null;
+            PersistenceUtils.reloadPlayerFromRow(uuid, json.get("raw").getAsString(), username);
+        }
     }
 
     private void handleJoinMsg(JsonObject json) {
@@ -3024,7 +3066,8 @@ public class NetworkManager {
         }
         UUID uuid = UUID.fromString(json.get("uuid").getAsString());
         double delta = json.get("delta").getAsDouble();
-        AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+        // A player loaded from the DB here may already include the delta, so only an existing copy is adjusted
+        AranarthPlayer ap = AranarthUtils.getLoadedPlayer(uuid);
         if (ap != null) {
             ap.setBalance(ap.getBalance() + delta);
             if (Bukkit.getPlayer(uuid) != null) {

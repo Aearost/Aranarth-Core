@@ -75,5 +75,6 @@ Cross-server & Technical
 [~] Fixed /ac og changes not syncing between servers, being overwritten by the other server, and removals being undone on restart
 [~] Vanish, vote point edits, broadcasts, clear chat, date changes and manual world events now apply on both Survival and SMP
 [~] /ac sudo now works on players who are on the other server
+[~] Fixed AranarthPlayer not loading in SMP when player had never joined
 
 Miscellaneous

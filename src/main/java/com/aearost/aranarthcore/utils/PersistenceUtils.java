@@ -4,7 +4,9 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.*;
 import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.objects.*;
+import com.destroystokyo.paper.profile.PlayerProfile;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -5467,14 +5469,61 @@ public class PersistenceUtils {
     }
 
     /**
+     * Loads a player this server has never seen from MySQL.
+     */
+    public static void loadMissingPlayerFromDatabase(UUID uuid) {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        String rawRow = DatabaseManager.getInstance().loadAranarthPlayerRaw(uuid);
+        if (rawRow != null && reloadPlayerFromRow(uuid, rawRow)) {
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[DB] Loaded " + uuid + " from MySQL as they were missing on this server");
+        }
+    }
+
+    /**
+     * Saves a player who just joined the network for the first time to MySQL and sends their row to the
+     * other server.
+     */
+    public static void shareNewPlayer(UUID uuid) {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+        if (ap == null) {
+            return;
+        }
+        String rawRow = buildAranarthPlayerRow(uuid, ap);
+        ap.setBalanceSnapshot(ap.getBalance());
+        String apUsername = ap.getUsername() != null ? ap.getUsername() : "";
+        DatabaseManager db = DatabaseManager.getInstance();
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
+                db.saveAranarthPlayerRaw(uuid, apUsername, rawRow)
+        );
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishPlayerCreated(uuid, apUsername, rawRow);
+        }
+    }
+
+    /**
      * Replaces a single player's in-memory AranarthPlayer with the given raw pipe-delimited row
-     * (e.g. one carried inside the SMP fallback snapshot). Call on the main thread only.
+     * (e.g. one carried inside the SMP fallback snapshot).
      *
      * @return true if the row was parsed and applied.
      */
     public static boolean reloadPlayerFromRow(UUID uuid, String rawRow) {
+        return reloadPlayerFromRow(uuid, rawRow, null);
+    }
+
+    /**
+     * Replaces a single player's in-memory AranarthPlayer with the given raw pipe-delimited row,
+     * using the given username if neither Bukkit nor the network roster knows it.
+     *
+     * @return true if the row was parsed and applied.
+     */
+    public static boolean reloadPlayerFromRow(UUID uuid, String rawRow, String username) {
         try {
-            parseAndAddAranarthPlayer(rawRow);
+            parseAndAddAranarthPlayer(rawRow, username);
             loadBlacklistPresetsForPlayer(uuid);
             return true;
         } catch (Exception e) {
@@ -7699,10 +7748,53 @@ public class PersistenceUtils {
     }
 
     /**
+     * Resolves a player's username.
+     *
+     * @param storedUsername The username from the aranarth_players table, or null if it has not been looked up yet.
+     * @return The username, or null if no source has it.
+     */
+    private static String resolveUsername(UUID uuid, String storedUsername) {
+        // Only reads this server's playerdata file, which players who never joined this server do not have
+        String username = Bukkit.getOfflinePlayer(uuid).getName();
+        if (username != null) {
+            return username;
+        }
+        // The server's usercache.json, without any web request
+        PlayerProfile profile = Bukkit.createProfile(uuid);
+        profile.completeFromCache();
+        if (profile.getName() != null && !profile.getName().isEmpty()) {
+            return profile.getName();
+        }
+        if (NetworkManager.isActive()) {
+            NetworkPlayer remote = NetworkManager.getInstance().getRemotePlayer(uuid);
+            if (remote != null && !remote.getUsername().isEmpty()) {
+                return remote.getUsername();
+            }
+        }
+        AranarthPlayer existing = AranarthUtils.getLoadedPlayer(uuid);
+        if (existing != null && existing.getUsername() != null) {
+            return existing.getUsername();
+        }
+        if (storedUsername == null && DatabaseManager.isActive()) {
+            storedUsername = DatabaseManager.getInstance().loadPlayerUsername(uuid);
+        }
+        return storedUsername == null || storedUsername.isEmpty() ? null : storedUsername;
+    }
+
+    /**
      * Shared parser - same logic as the while-loop body in loadAranarthPlayers().
      * Parses a single pipe-delimited row and registers the player via AranarthUtils.
      */
     static void parseAndAddAranarthPlayer(String row) throws Exception {
+        parseAndAddAranarthPlayer(row, null);
+    }
+
+    /**
+     * Shared parser - same logic as the while-loop body in loadAranarthPlayers().
+     *
+     * @param storedUsername The username from the aranarth_players table, or null to look it up if needed.
+     */
+    static void parseAndAddAranarthPlayer(String row, String storedUsername) throws Exception {
         String[] fields = row.split("\\|");
         int lastIndex = fields.length - 1;
 
@@ -7831,7 +7923,7 @@ public class PersistenceUtils {
                     + ", arenaInventory=" + (arenaInventory.isEmpty() ? "empty" : "set") + ")"
                     + " - will skip clear if they switch to survival");
         }
-        AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname,
+        AranarthUtils.addPlayer(uuid, new AranarthPlayer(resolveUsername(uuid, storedUsername), nickname,
                 survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist,
                 blacklistingMethod, balance, rank, saintRank, councilRank, architectRank, homes,
                 muteEndDate, particles, perks, saintExpireDate, isCompressingItems, votePointsSpent, isUsingSpawnBoost,
@@ -7879,10 +7971,12 @@ public class PersistenceUtils {
             return;
         }
         Bukkit.getLogger().info("[AC] Loading " + rawRows.size() + " players from MySQL...");
+        // Loaded in one query, as Bukkit does not know the names of players who have never joined this server
+        Map<UUID, String> usernames = db.loadAllPlayerUsernames();
         int failCount = 0;
         for (Map.Entry<UUID, String> entry : rawRows.entrySet()) {
             try {
-                parseAndAddAranarthPlayer(entry.getValue());
+                parseAndAddAranarthPlayer(entry.getValue(), usernames.getOrDefault(entry.getKey(), ""));
             } catch (Exception e) {
                 failCount++;
                 Bukkit.getLogger().warning("[AC] Failed to parse DB player row for " + entry.getKey() + ": " + e.getMessage());

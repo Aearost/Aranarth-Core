@@ -143,6 +143,10 @@ public class AranarthUtils {
     private static final HashMap<UUID, Integer> pendingRareKeys = new HashMap<>();
     private static final HashMap<UUID, Integer> pendingEpicKeys = new HashMap<>();
     private static final HashMap<UUID, Integer> pendingGodlyKeys = new HashMap<>();
+    // Players looked up in the shared DB with no row there, so NPC UUIDs etc. are not queried on every call
+    private static final Map<UUID, Long> missingPlayerLookups = new ConcurrentHashMap<>();
+    private static final long MISSING_PLAYER_RETRY_MS = 5L * 60 * 1000;
+    private static boolean isLoadingMissingPlayers = false;
     private static final Set<String> SURVIVAL_WORLD_PREFIXES = Set.of("world", "resource", "spawn");
     private static List<Home> homes = new ArrayList<>();
     private static List<LockedContainer> lockedContainers;
@@ -190,12 +194,47 @@ public class AranarthUtils {
 
     /**
      * Gets the AranarthPlayer corresponding to an input UUID.
-     *
      * @param uuid The UUID of the player to be found.
      * @return The AranarthPlayer tied to the UUID.
      */
     public static AranarthPlayer getPlayer(UUID uuid) {
+        AranarthPlayer aranarthPlayer = players.get(uuid);
+        if (aranarthPlayer == null && uuid != null && shouldLoadMissingPlayer(uuid)) {
+            PersistenceUtils.loadMissingPlayerFromDatabase(uuid);
+            aranarthPlayer = players.get(uuid);
+            if (aranarthPlayer == null) {
+                missingPlayerLookups.put(uuid, System.currentTimeMillis());
+            }
+        }
+        return aranarthPlayer;
+    }
+
+    /**
+     * Gets the AranarthPlayer corresponding to an input UUID only if this server already has them in memory.
+     *
+     * @param uuid The UUID of the player to be found.
+     * @return The AranarthPlayer tied to the UUID, or null if this server does not have them.
+     */
+    public static AranarthPlayer getLoadedPlayer(UUID uuid) {
         return players.get(uuid);
+    }
+
+    /**
+     * Determines whether a player missing from memory should be looked up in the shared database.
+     */
+    private static boolean shouldLoadMissingPlayer(UUID uuid) {
+        if (!isLoadingMissingPlayers || !DatabaseManager.isActive() || !Bukkit.isPrimaryThread()) {
+            return false;
+        }
+        Long lastLookup = missingPlayerLookups.get(uuid);
+        return lastLookup == null || System.currentTimeMillis() - lastLookup >= MISSING_PLAYER_RETRY_MS;
+    }
+
+    /**
+     * Allows players missing from memory to be loaded from the shared database.
+     */
+    public static void enableLoadingMissingPlayers() {
+        isLoadingMissingPlayers = true;
     }
 
     /**
@@ -206,6 +245,7 @@ public class AranarthUtils {
      */
     public static void setPlayer(UUID uuid, AranarthPlayer aranarthPlayer) {
         players.put(uuid, aranarthPlayer);
+        missingPlayerLookups.remove(uuid);
     }
 
     /**
@@ -233,6 +273,7 @@ public class AranarthUtils {
      */
     public static void addPlayer(UUID uuid, AranarthPlayer aranarthPlayer) {
         players.put(uuid, aranarthPlayer);
+        missingPlayerLookups.remove(uuid);
     }
 
     /**
@@ -302,7 +343,7 @@ public class AranarthUtils {
      * @return The username of the player.
      */
     public static String getUsername(OfflinePlayer player) {
-        return players.get(player.getUniqueId()).getUsername();
+        return getPlayer(player.getUniqueId()).getUsername();
     }
 
     /**
@@ -312,7 +353,7 @@ public class AranarthUtils {
      * @return The nickname of the player, or username if no nickname was found.
      */
     public static String getNickname(OfflinePlayer player) {
-        AranarthPlayer ap = players.get(player.getUniqueId());
+        AranarthPlayer ap = getPlayer(player.getUniqueId());
         if (ap != null) {
             String nickname = ap.getNickname();
             return (nickname == null || nickname.isEmpty()) ? getUsername(player) : nickname;
