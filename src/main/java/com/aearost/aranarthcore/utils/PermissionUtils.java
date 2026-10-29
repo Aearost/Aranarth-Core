@@ -44,6 +44,31 @@ public class PermissionUtils {
     }
 
     /**
+     * Determines whether the player has the shulker assist perk, even while they are offline or on the other server.
+     *
+     * @param uuid The player's UUID.
+     * @return True if the player has the shulker assist perk.
+     */
+    public static boolean hasShulkerAssist(UUID uuid) {
+        Player player = Bukkit.getPlayer(uuid);
+        if (player != null) {
+            return player.hasPermission("aranarth.shulker");
+        }
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+        if (aranarthPlayer == null) {
+            return false;
+        }
+        if (aranarthPlayer.getPerks() != null && aranarthPlayer.getPerks().getOrDefault(Perk.SHULKER, 0) == 1) {
+            return true;
+        }
+        // Saint 2 grants the perk, and Council 2 includes Saint 2
+        if (aranarthPlayer.getSaintRank() >= 2 || aranarthPlayer.getCouncilRank() >= 2) {
+            return true;
+        }
+        return Bukkit.getOfflinePlayer(uuid).isOp();
+    }
+
+    /**
      * Centralizes all permissions logic being set.
      *
      * @param player The player.

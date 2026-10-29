@@ -255,7 +255,9 @@ public class ShopInteract {
                 if (isPlayerShop) {
                     // Verifies that there is enough quantity in the chest's inventory
                     // Cycles through the chest's inventory starting from end to beginning
-                    HashMap<Boolean, ItemStack[]> result = checkIfContentsHasShopItems(chestInventory.getContents(), shop, true);
+                    // Shulker box contents are only sold from if the shop owner has the shulker assist perk
+                    HashMap<Boolean, ItemStack[]> result = checkIfContentsHasShopItems(chestInventory.getContents(), shop,
+                            ShopUtils.isChestShulkerStockEnabled(shop));
                     if (result.containsKey(true)) {
                         chestInventory.clear();
                         chestInventory.setContents(result.get(true));
@@ -403,6 +405,7 @@ public class ShopInteract {
                         shopPlayer.sendMessage(
                                 ChatUtils.chatMessage(Lang.getFor(shopPlayer, "shop.owner_purchase_notify", "player", player.getName(), "quantity", shop.getQuantity(), "item", itemname, "price", formatter.format(shop.getBuyPrice()))));
                     }
+                    ShopUtils.refreshShopStockAt(shop.getLocation());
                 }
             } else {
                 if (clickUser.getBulkTransactionNum() <= 0 && AranarthUtils.isPhysicallySneaking(player.getUniqueId())) {
@@ -468,32 +471,18 @@ public class ShopInteract {
             }
 
             Inventory chestInventory = null;
-            Container copyOfChest = null;
 
             if (isPlayerShop) {
                 BlockState state = locationBelow.getBlock().getState();
                 Container container = (Container) state;
-                copyOfChest = (Container) container.copy();
                 chestInventory = container.getInventory();
                 if (chestInventory.getHolder() instanceof DoubleChest doubleChest) {
                     chestInventory = doubleChest.getInventory(); // Get the full 54 slot inventory
                 }
 
                 // Verifies there is enough space in the chest's inventory to add the items
-                int spaceForShopItemInChestInventory = 0;
-                for (ItemStack chestItem : copyOfChest.getInventory().getStorageContents()) {
-                    if (chestItem == null || chestItem.getType() == Material.AIR) {
-                        spaceForShopItemInChestInventory += 64;
-                        continue;
-                    }
-
-                    // Each month changes the lore of crop seeds, must consider that
-                    boolean isSameCropSeed = chestItem.getType() == shop.getItem().getType() && CropUtils.isCropSeed(chestItem.getType());
-                    if (chestItem.isSimilar(shop.getItem()) || isSameCropSeed) {
-                        spaceForShopItemInChestInventory += chestItem.getMaxStackSize() - chestItem.getAmount();
-                    }
-                }
-                if (spaceForShopItemInChestInventory < shop.getQuantity()) {
+                // Uses the item's real stack size so sold items can never overflow and be lost
+                if (ShopUtils.computeChestFreeSpaceForItem(shop) < shop.getQuantity()) {
                     player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.no_chest_space")));
                     clickUser.setBulkTransactionNum(-1);
                     AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
@@ -578,6 +567,7 @@ public class ShopInteract {
                         shopPlayer.sendMessage(
                                 ChatUtils.chatMessage(Lang.getFor(shopPlayer, "shop.owner_sold_notify", "player", player.getName(), "quantity", shop.getQuantity(), "item", itemname, "price", formatter.format(shop.getSellPrice()))));
                     }
+                    ShopUtils.refreshShopStockAt(shop.getLocation());
                 }
             } else {
                 player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "inventory.not_enough")));

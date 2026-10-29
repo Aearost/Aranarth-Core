@@ -20,6 +20,9 @@ public class Shop {
     private double sellPrice;
     // The server the shop is on, since both servers have worlds with the same names
     private String serverName;
+    // Cached chest contents for shops-world shops, so the shop search works on both servers. -1 means not yet counted
+    private int stock = -1;
+    private int freeSpace = -1;
 
     public Shop(UUID uuid, Location location, ItemStack item, int quantity, double buyPrice, double sellPrice) {
         this.uuid = uuid;
@@ -135,5 +138,37 @@ public class Shop {
      */
     public void setSellPrice(double sellPrice) {
         this.sellPrice = sellPrice;
+    }
+
+    /**
+     * Provides the last counted quantity of the shop item in the shop chest.
+     * @return The cached stock, or -1 if it has not been counted yet.
+     */
+    public int getStock() {
+        return stock;
+    }
+
+    /**
+     * Sets the last counted quantity of the shop item in the shop chest.
+     * @param stock The cached stock.
+     */
+    public void setStock(int stock) {
+        this.stock = stock;
+    }
+
+    /**
+     * Provides the last counted space for the shop item in the shop chest.
+     * @return The cached free space, or -1 if it has not been counted yet.
+     */
+    public int getFreeSpace() {
+        return freeSpace;
+    }
+
+    /**
+     * Sets the last counted space for the shop item in the shop chest.
+     * @param freeSpace The cached free space.
+     */
+    public void setFreeSpace(int freeSpace) {
+        this.freeSpace = freeSpace;
     }
 }

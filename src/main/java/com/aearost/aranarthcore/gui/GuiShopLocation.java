@@ -42,6 +42,8 @@ public class GuiShopLocation {
     private static final Map<UUID, String> activeFilters = new HashMap<>();
     // The shop order each viewer was shown, so clicks resolve to the same shop even if earnings change meanwhile
     private static final Map<UUID, List<UUID>> playerShopOrder = new HashMap<>();
+    // The search results each viewer was shown, so clicks resolve to the same shop even if stock changes meanwhile
+    private static final Map<UUID, List<Shop>> playerSearchResults = new HashMap<>();
 
     // Thread pool for parallel skin fetches - keeps fetches concurrent without spawning unbounded threads
     private static final ExecutorService SKIN_EXECUTOR = Executors.newFixedThreadPool(8);
@@ -186,8 +188,13 @@ public class GuiShopLocation {
         }
 
         // Compute total pages
+        List<Shop> results = Collections.emptyList();
+        if (filter != null) {
+            results = getFilteredShops(filter);
+            playerSearchResults.put(player.getUniqueId(), results);
+        }
         int totalEntries = (filter != null)
-                ? getFilteredShops(filter).size()
+                ? results.size()
                 : shopOrder.size();
         int totalPages = Math.max(1, (int) Math.ceil((double) totalEntries / ITEMS_PER_PAGE));
         int safePage = Math.min(pageNum, totalPages - 1);
@@ -228,7 +235,6 @@ public class GuiShopLocation {
         int guiSlot = ITEMS_START;
         if (filter != null) {
             // Search results: show shop items matching the filter
-            List<Shop> results = getFilteredShops(filter);
             int start = safePage * ITEMS_PER_PAGE;
             int end = Math.min(start + ITEMS_PER_PAGE, results.size());
             for (int i = start; i < end; i++) {
@@ -249,11 +255,31 @@ public class GuiShopLocation {
                         lore.add(Lang.getFor(player, "gui.shoplocation.result_buy",
                                 "price", TradeMarketUtils.formatPrice(shop.getBuyPrice()),
                                 "qty", String.valueOf(shop.getQuantity())));
+                        // Shops that have not been counted yet show no stock line
+                        if (shop.getStock() >= 0) {
+                            if (shop.getStock() >= shop.getQuantity()) {
+                                lore.add(Lang.getFor(player, "gui.shoplocation.result_stock",
+                                        "amount", String.valueOf(shop.getStock())));
+                            } else {
+                                lore.add(Lang.getFor(player, "gui.shoplocation.result_out_of_stock"));
+                            }
+                        }
                     }
                     if (shop.getSellPrice() > 0) {
                         lore.add(Lang.getFor(player, "gui.shoplocation.result_sell",
                                 "price", TradeMarketUtils.formatPrice(shop.getSellPrice()),
                                 "qty", String.valueOf(shop.getQuantity())));
+                        double ownerBalance = owner.getBalance();
+                        if (shop.getFreeSpace() >= 0 && shop.getFreeSpace() < shop.getQuantity()) {
+                            lore.add(Lang.getFor(player, "gui.shoplocation.result_container_full"));
+                        } else if (ownerBalance < shop.getSellPrice()) {
+                            lore.add(Lang.getFor(player, "gui.shoplocation.result_owner_broke"));
+                        } else if (shop.getFreeSpace() >= 0) {
+                            // Limited by both the chest space and how many sales the owner can pay for
+                            int transactions = Math.min(shop.getFreeSpace() / shop.getQuantity(), (int) (ownerBalance / shop.getSellPrice()));
+                            lore.add(Lang.getFor(player, "gui.shoplocation.result_capacity",
+                                    "amount", String.valueOf(transactions * shop.getQuantity())));
+                        }
                     }
                     lore.add(Lang.getFor(player, "gui.shoplocation.result_click"));
                     meta.setLore(lore);
@@ -293,16 +319,19 @@ public class GuiShopLocation {
     }
 
     /**
-     * Returns all shops in the shops world matching the given filter (case-insensitive item name match),
-     * sorted alphabetically by item name then by shop owner name.
+     * Returns all shops in the shops world matching the given filter (case-insensitive item name match)
+     * that can currently be bought from or sold to, sorted alphabetically by item name then by shop owner name.
      */
     public static List<Shop> getFilteredShops(String filter) {
         String lowerFilter = filter.toLowerCase();
         List<Shop> results = new ArrayList<>();
         for (Map.Entry<UUID, List<Shop>> entry : ShopUtils.getShops().entrySet()) {
             if (entry.getKey() == null) continue; // skip server shops
+            AranarthPlayer owner = AranarthUtils.getPlayer(entry.getKey());
+            if (owner == null) continue;
             for (Shop shop : entry.getValue()) {
                 if (!ShopIslandUtils.SHOPS_WORLD.equals(shop.getWorldName())) continue;
+                if (!canBuyFrom(shop) && !canSellTo(shop, owner)) continue;
                 ItemStack item = shop.getItem();
                 if (item == null) continue;
                 String itemName;
@@ -327,6 +356,40 @@ public class GuiShopLocation {
             return owner != null ? owner.getNickname().toLowerCase() : "";
         }));
         return results;
+    }
+
+    /**
+     * Determines whether a customer can buy at least one full transaction from the shop.
+     * @param shop The player shop.
+     * @return True if the shop can be bought from.
+     */
+    private static boolean canBuyFrom(Shop shop) {
+        return shop.getBuyPrice() > 0 && (shop.getStock() < 0 || shop.getStock() >= shop.getQuantity());
+    }
+
+    /**
+     * Determines whether a customer can sell at least one full transaction to the shop.
+     * @param shop The player shop.
+     * @param owner The shop owner, who pays for each sale.
+     * @return True if the shop can be sold to.
+     */
+    private static boolean canSellTo(Shop shop, AranarthPlayer owner) {
+        if (shop.getSellPrice() <= 0) {
+            return false;
+        }
+        if (shop.getFreeSpace() >= 0 && shop.getFreeSpace() < shop.getQuantity()) {
+            return false;
+        }
+        return owner.getBalance() >= shop.getSellPrice();
+    }
+
+    /**
+     * Provides the search results the player was last shown.
+     * @param uuid The player's UUID.
+     * @return The shops in the order they were displayed.
+     */
+    public static List<Shop> getSearchResults(UUID uuid) {
+        return playerSearchResults.getOrDefault(uuid, Collections.emptyList());
     }
 
     public static void initiateSearch(Player player) {
@@ -356,6 +419,7 @@ public class GuiShopLocation {
 
     public static void clearFilter(UUID uuid) {
         activeFilters.remove(uuid);
+        playerSearchResults.remove(uuid);
     }
 
     public static String getActiveFilter(UUID uuid) {

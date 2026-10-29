@@ -50,6 +50,7 @@ Economy, Jobs & Quests
 [+] Added /t jobsmsg to toggle the jobs earnings message
 [~] Changed wording of jobs earnings message[~] Max level players now show their total XP instead of "Max Level"
 [~] Shops in the shop menu are now sorted by most profit, with shop earnings tracked across both servers
+[~] Shop search now shows the stock of the item in the lore of the displayed shop item
 
 Chat, UI & Sounds
 [+] Added fully customizable prefixes in chat, allowing full, shortened, or symbols for the rank, council, and saint ranks

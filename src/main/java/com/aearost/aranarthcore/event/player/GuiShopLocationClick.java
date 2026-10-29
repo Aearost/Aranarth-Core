@@ -46,7 +46,7 @@ public class GuiShopLocationClick {
         String filter = GuiShopLocation.getActiveFilter(player.getUniqueId());
 
         int totalEntries = (filter != null)
-                ? GuiShopLocation.getFilteredShops(filter).size()
+                ? GuiShopLocation.getSearchResults(player.getUniqueId()).size()
                 : GuiShopLocation.getShopOrder(player.getUniqueId()).size();
         int totalPages = Math.max(1, (int) Math.ceil((double) totalEntries / GuiShopLocation.ITEMS_PER_PAGE));
 
@@ -84,7 +84,7 @@ public class GuiShopLocationClick {
             UUID targetUuid = null;
 
             if (filter != null) {
-                List<Shop> results = GuiShopLocation.getFilteredShops(filter);
+                List<Shop> results = GuiShopLocation.getSearchResults(player.getUniqueId());
                 if (itemIndex >= results.size()) return;
                 targetUuid = results.get(itemIndex).getUuid();
             } else {

@@ -58,6 +58,11 @@ public class InventoryCloseEventListener implements Listener {
                 new GuiTradeClose().execute(e);
             }
         }
+        // Shop containers, which are real blocks and never GUIs
+        else if (!isGui && (e.getView().getType() == InventoryType.CHEST || e.getView().getType() == InventoryType.BARREL
+                || e.getView().getType() == InventoryType.SHULKER_BOX)) {
+            new ShopContainerClose().execute(e, player);
+        }
         // Anvils and crafting tables cannot be given a custom title, so these titles can be trusted
         else if (e.getView().getType() == InventoryType.ANVIL) {
             if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarthium Anvil")) {

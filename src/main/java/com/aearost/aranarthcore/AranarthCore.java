@@ -576,6 +576,8 @@ public class AranarthCore extends JavaPlugin {
                 PersistenceUtils.saveToggledFeatures();
                 PersistenceUtils.saveLockedContainers();
                 PersistenceUtils.saveServerDate();
+                // Recounted before saving so the saved shop search stock is current
+                ShopUtils.refreshAllShopStock();
                 PersistenceUtils.saveShops();
                 ShopUtils.removeAllHolograms();
                 ShopUtils.initializeAllHolograms();

@@ -6572,6 +6572,8 @@ public class PersistenceUtils {
         s.addProperty("quantity", shop.getQuantity());
         s.addProperty("buyPrice", shop.getBuyPrice());
         s.addProperty("sellPrice", shop.getSellPrice());
+        s.addProperty("stock", shop.getStock());
+        s.addProperty("freeSpace", shop.getFreeSpace());
         return s;
     }
 
@@ -6660,6 +6662,8 @@ public class PersistenceUtils {
         Shop shop = new Shop(uuid, new Location(world, x, y, z), item, quantity, buyPrice, sellPrice);
         shop.setWorldName(worldName);
         shop.setServerName(serverName);
+        shop.setStock(s.has("stock") ? s.get("stock").getAsInt() : -1);
+        shop.setFreeSpace(s.has("freeSpace") ? s.get("freeSpace").getAsInt() : -1);
         return shop;
     }
 

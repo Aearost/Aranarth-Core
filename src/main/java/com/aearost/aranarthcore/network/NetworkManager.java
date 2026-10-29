@@ -146,6 +146,7 @@ public class NetworkManager {
     public static final String CH_AVATAR_UPDATE = "aranarth:avatar_update";
     public static final String CH_ORIGINAL_PLAYER_UPDATE = "aranarth:original_player_update";
     public static final String CH_PLAYER_CREATED = "aranarth:player_created";
+    public static final String CH_SHOP_STOCK = "aranarth:shop_stock";
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
     private static final String KEY_RETURN_LOC = "return_loc:";
@@ -637,6 +638,7 @@ public class NetworkManager {
             case CH_AVATAR_UPDATE -> handleAvatarUpdate(json);
             case CH_ORIGINAL_PLAYER_UPDATE -> handleOriginalPlayerUpdate(json);
             case CH_PLAYER_CREATED -> handlePlayerCreated(json);
+            case CH_SHOP_STOCK -> handleShopStock(json);
         }
     }
 
@@ -1044,6 +1046,48 @@ public class NetworkManager {
         json.addProperty("uuid", uuid.toString());
         json.addProperty("delta", delta);
         publish(CH_BALANCE_ADJUST, json);
+    }
+
+    /**
+     * Notifies all other servers of a player shop's recounted stock, so the shop search stays current on both servers.
+     *
+     * @param shop The shop whose stock was recounted.
+     */
+    public void publishShopStockUpdate(Shop shop) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", shop.getUuid().toString());
+        json.addProperty("worldName", shop.getWorldName());
+        json.addProperty("x", shop.getLocation().getBlockX());
+        json.addProperty("y", shop.getLocation().getBlockY());
+        json.addProperty("z", shop.getLocation().getBlockZ());
+        json.addProperty("stock", shop.getStock());
+        json.addProperty("freeSpace", shop.getFreeSpace());
+        publish(CH_SHOP_STOCK, json);
+    }
+
+    private void handleShopStock(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        List<Shop> ownerShops = ShopUtils.getShops().get(UUID.fromString(json.get("uuid").getAsString()));
+        if (ownerShops == null) {
+            return;
+        }
+        String worldName = json.get("worldName").getAsString();
+        int x = json.get("x").getAsInt();
+        int y = json.get("y").getAsInt();
+        int z = json.get("z").getAsInt();
+        for (Shop shop : ownerShops) {
+            Location loc = shop.getLocation();
+            if (originServer.equals(shop.getServerName()) && worldName.equals(shop.getWorldName())
+                    && loc.getBlockX() == x && loc.getBlockY() == y && loc.getBlockZ() == z) {
+                shop.setStock(json.get("stock").getAsInt());
+                shop.setFreeSpace(json.get("freeSpace").getAsInt());
+                return;
+            }
+        }
     }
 
     /**
