@@ -542,7 +542,6 @@ public class PermissionUtils {
         perms.setPermission("aranarth.unmute", false);
         perms.setPermission("aranarth.unban", false);
         perms.setPermission("aranarth.dominion.create", false);
-        perms.setPermission("aranarth.dominion.home", false);
         perms.setPermission("aranarth.give", false);
         perms.setPermission("aranarth.rankset", false);
         perms.setPermission("aranarth.warp.modify", false);
@@ -922,7 +921,6 @@ public class PermissionUtils {
             perms.setPermission("bending.earth.sandbending", true);
             perms.setPermission("bending.ability.SandBlast", true);          // JedCore sand
             perms.setPermission("aranarth.seen", true);
-            perms.setPermission("aranarth.dominion.home", true);
             perms.setPermission("aranarth.mount", true);
         } else {
             return;

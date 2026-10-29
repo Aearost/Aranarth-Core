@@ -38,18 +38,20 @@ public class CommandDominion implements CommandExecutor {
     private static void teleportToDominionHome(Player player) {
         Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
         if (dominion != null) {
-            if (player.hasPermission("aranarth.dominion.home")) {
-                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                AranarthUtils.teleportPlayer(player, player.getLocation(), dominion.getDominionHome(), aranarthPlayer.isInAdminMode(), dominion.getName(), Lang.getFor(player, "dominion.teleported_to", "name", dominion.getName()), success -> {
-                    if (success) {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.teleported_to", "name", dominion.getName())));
-                    } else {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.could_not_teleport", "name", dominion.getName())));
-                    }
-                });
-            } else {
+            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+            if (!aranarthPlayer.isInAdminMode()
+                    && !dominion.getLeader().equals(player.getUniqueId())
+                    && !DominionUtils.hasPermission(player, dominion, DominionPermission.HOME)) {
                 player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.no_permission_home")));
+                return;
             }
+            AranarthUtils.teleportPlayer(player, player.getLocation(), dominion.getDominionHome(), aranarthPlayer.isInAdminMode(), dominion.getName(), Lang.getFor(player, "dominion.teleported_to", "name", dominion.getName()), success -> {
+                if (success) {
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.teleported_to", "name", dominion.getName())));
+                } else {
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.could_not_teleport", "name", dominion.getName())));
+                }
+            });
         } else {
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.not_in_dominion")));
         }
@@ -3334,10 +3336,6 @@ public class CommandDominion implements CommandExecutor {
                         player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.not_in_dominion")));
                     }
                 } else if (args[0].equalsIgnoreCase("home")) {
-                    if (!player.hasPermission("aranarth.dominion.home")) {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
-                        return true;
-                    }
                     HomeTarget homeTarget = args.length >= 2 ? resolveHomeTarget(Arrays.copyOfRange(args, 1, args.length)) : null;
                     // Check access to another dominion's home before any transfer, so the destination
                     // server is never asked to teleport a player who is not allowed there

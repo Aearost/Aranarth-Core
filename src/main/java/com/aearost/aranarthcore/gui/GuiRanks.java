@@ -100,7 +100,6 @@ public class GuiRanks {
 		esquireLore.add(Lang.getFor(player, "gui.ranks.perks"));
 		esquireLore.add(Lang.getFor(player, "gui.ranks.esquire_perk1"));
 		esquireLore.add(Lang.getFor(player, "gui.ranks.esquire_perk2"));
-		esquireLore.add(Lang.getFor(player, "gui.ranks.esquire_perk3"));
 		esquireLore.add(Lang.getFor(player, "gui.ranks.esquire_perk4"));
 		esquireLore.add(Lang.getFor(player, "gui.ranks.esquire_perk5"));
 		esquireLore.add("");
