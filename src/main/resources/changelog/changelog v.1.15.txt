@@ -74,5 +74,6 @@ Cross-server & Technical
 [+] Added /ac disable and /ac enable to temporarily block access to specific worlds for players not in admin or architect mode
 [~] Fixed /ac og changes not syncing between servers, being overwritten by the other server, and removals being undone on restart
 [~] Vanish, vote point edits, broadcasts, clear chat, date changes and manual world events now apply on both Survival and SMP
+[~] /ac sudo now works on players who are on the other server
 
 Miscellaneous

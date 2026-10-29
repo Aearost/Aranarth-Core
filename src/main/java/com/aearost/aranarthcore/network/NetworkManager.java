@@ -97,6 +97,7 @@ public class NetworkManager {
     public static final String CH_BREW_UNLOCK = "aranarth:brew_unlock";
     public static final String CH_BALANCE_ADJUST = "aranarth:balance_adjust";
     public static final String CH_PAY_NOTIFY = "aranarth:pay_notify";
+    public static final String CH_SUDO = "aranarth:sudo";
     public static final String CH_SENTINEL_SUMMON = "aranarth:sentinel_summon";
     public static final String CH_SENTINEL_SPAWN = "aranarth:sentinel_spawn";
     public static final String CH_SENTINEL_DEATH = "aranarth:sentinel_death";
@@ -586,6 +587,7 @@ public class NetworkManager {
             case CH_BREW_UNLOCK -> handleBrewUnlock(json);
             case CH_BALANCE_ADJUST -> handleBalanceAdjust(json);
             case CH_PAY_NOTIFY -> handlePayNotify(json);
+            case CH_SUDO -> handleSudo(json);
             case CH_SENTINEL_SUMMON -> handleSentinelSummon(json);
             case CH_SENTINEL_SPAWN -> handleSentinelSpawn(json);
             case CH_SENTINEL_DEATH -> handleSentinelDeath(json);
@@ -1070,6 +1072,20 @@ public class NetworkManager {
         json.addProperty("fromNickname", fromNickname);
         json.addProperty("formattedAmount", formattedAmount);
         publish(CH_PAY_NOTIFY, json);
+    }
+
+    /**
+     * Tells the server where the target player is online to run a command on their behalf.
+     *
+     * @param targetUuid The UUID of the player the command will be run as.
+     * @param command    The command to run, without the leading slash.
+     */
+    public void publishSudo(UUID targetUuid, String command) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("targetUuid", targetUuid.toString());
+        json.addProperty("command", command);
+        publish(CH_SUDO, json);
     }
 
     /**
@@ -3050,6 +3066,30 @@ public class NetworkManager {
         String fromNickname = json.get("fromNickname").getAsString();
         String formattedAmount = json.get("formattedAmount").getAsString();
         target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "economy.received_payment", "amount", formattedAmount, "player", fromNickname)));
+    }
+
+    private void handleSudo(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        UUID targetUuid = UUID.fromString(json.get("targetUuid").getAsString());
+        String command = json.get("command").getAsString();
+
+        // Commands must be dispatched on the main thread
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+            Player target = Bukkit.getPlayer(targetUuid);
+            if (target == null || !target.isOnline()) {
+                return;
+            }
+            // Re-check the council rank in case it changed since the origin server's roster was updated
+            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(targetUuid);
+            if (aranarthPlayer != null && aranarthPlayer.getCouncilRank() >= 2) {
+                return;
+            }
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[SUDO] Running cross-server command as " + target.getName() + ": /" + command);
+            target.performCommand(command);
+        });
     }
 
     private void handleSleepMessage(JsonObject json) {
