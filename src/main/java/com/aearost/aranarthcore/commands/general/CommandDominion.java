@@ -2004,6 +2004,9 @@ public class CommandDominion implements CommandExecutor {
         String foundedDate = DominionLevelUtils.formatFoundedDate(player, dominion.getFoundedTimestamp());
         if (foundedDate != null) {
             player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.info_founded", "date", foundedDate)));
+        } else {
+            // Legacy dominions were founded before founding dates were recorded
+            player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.info_founded_ancient")));
         }
 
         List<Outpost> dominionOutposts = OutpostUtils.getDominionOutposts(dominion.getId());
