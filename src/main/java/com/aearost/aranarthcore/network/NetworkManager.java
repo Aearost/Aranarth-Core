@@ -132,6 +132,7 @@ public class NetworkManager {
     public static final String CH_PUNISHMENT = "aranarth:punishment";
     public static final String CH_PRONOUNS_UPDATE = "aranarth:pronouns_update";
     public static final String CH_PREFIX_UPDATE = "aranarth:prefix_update";
+    public static final String CH_NICKNAME_UPDATE = "aranarth:nickname_update";
     public static final String CH_PING_UPDATE = "aranarth:ping_update";
     public static final String CH_HEARTBEAT = "aranarth:heartbeat";
     public static final String CH_RESOURCE_WORLD_LOCK = "aranarth:resource_world_lock";
@@ -616,6 +617,7 @@ public class NetworkManager {
             case CH_PUNISHMENT -> handlePunishment(json);
             case CH_PRONOUNS_UPDATE -> handlePronounsUpdate(json);
             case CH_PREFIX_UPDATE -> handlePrefixUpdate(json);
+            case CH_NICKNAME_UPDATE -> handleNicknameUpdate(json);
             case CH_PING_UPDATE -> handlePingUpdate(json);
             case CH_HEARTBEAT -> handleHeartbeat(json);
             case CH_RESOURCE_WORLD_LOCK -> handleResourceWorldLock(json);
@@ -1133,6 +1135,26 @@ public class NetworkManager {
         json.addProperty("uuid", uuid.toString());
         json.addProperty("pronouns", pronouns);
         publish(CH_PRONOUNS_UPDATE, json);
+    }
+
+    /**
+     * Notifies other servers that a player's nickname has changed so they can update the
+     * remote roster, refresh the TAB list, and keep their copy of the player in sync.
+     *
+     * @param nickname The raw nickname, or an empty string if it was removed.
+     */
+    public void publishNicknameUpdate(UUID uuid, String username, String nickname) {
+        String rosterNickname = nickname.isEmpty() ? username : nickname;
+        // Update DB so the roster survives server restarts
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
+                db.updateRosterNickname(uuid, rosterNickname)
+        );
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", uuid.toString());
+        json.addProperty("username", username);
+        json.addProperty("nickname", nickname);
+        publish(CH_NICKNAME_UPDATE, json);
     }
 
     /**
@@ -2643,6 +2665,33 @@ public class NetworkManager {
                     AranarthUtils.setPlayer(uuid, ap);
                 }
             }
+        }
+    }
+
+    private void handleNicknameUpdate(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        String username = json.get("username").getAsString();
+        String nickname = json.get("nickname").getAsString();
+
+        NetworkPlayer np = remoteRoster.get(uuid);
+        if (np != null) {
+            np.setNickname(nickname.isEmpty() ? username : nickname);
+            if (!np.isVanished()) {
+                NetworkTabManager.addToTab(np);
+            }
+            AranarthUtils.updateTab();
+        }
+
+        // Keeps the in-memory copy accurate so the player keeps their nickname when transferring to this server
+        AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+        if (ap != null) {
+            ap.setNickname(nickname);
+            AranarthUtils.setPlayer(uuid, ap);
         }
     }
 

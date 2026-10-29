@@ -1330,6 +1330,18 @@ public class DatabaseManager {
         }
     }
 
+    public void updateRosterNickname(UUID uuid, String nickname) {
+        String sql = "UPDATE network_roster SET nickname = ? WHERE uuid = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, nickname);
+            ps.setString(2, uuid.toString());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to update roster nickname for " + uuid + ": " + e.getMessage());
+        }
+    }
+
     public void updateRosterAfk(UUID uuid, boolean afk) {
         String sql = "UPDATE network_roster SET afk = ? WHERE uuid = ?";
         try (Connection conn = dataSource.getConnection();
