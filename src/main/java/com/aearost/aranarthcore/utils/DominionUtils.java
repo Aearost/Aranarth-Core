@@ -1909,11 +1909,11 @@ public class DominionUtils {
     }
 
     // 1 in X odds of a Swift Sneak Book when simulating an Ancient City
-    private static final int SWIFT_SNEAK_BOOK_ODDS = 10;
+    private static final int SWIFT_SNEAK_BOOK_ODDS = 13;
 
     /**
      * Rolls the Ancient City drops that cannot be expressed as 1 in X odds.
-     * Echo Shard has a 10% chance per Dominion rank, and the Swift Sneak Book has a 10% chance
+     * Echo Shard has a 10% chance per Dominion rank, and the Swift Sneak Book has a 1 in 13 chance
      * with its level chosen from the levels available at the Dominion's rank.
      *
      * @param items  The items being claimed.
@@ -2046,7 +2046,7 @@ public class DominionUtils {
                 "Disc Fragment (" + formatPct(4) + " if simulating Ancient City)"));
         ancientCityDrops.add(new ResourceDrop(createSwiftSneakBook(swiftSneakLevels[swiftSneakLevels.length - 1]), 0, 0,
                 "Swift Sneak " + swiftSneakLevelText + " Book (" + formatPct(SWIFT_SNEAK_BOOK_ODDS) + " if simulating Ancient City)", true));
-        SimulationGroup ancientCity = new SimulationGroup("Ancient City", 5, ancientCityDrops);
+        SimulationGroup ancientCity = new SimulationGroup("Ancient City", 15, ancientCityDrops);
 
         List<ResourceDrop> amethystGeodeDrops = new ArrayList<>();
         amethystGeodeDrops.add(new ResourceDrop(new ItemStack(Material.AMETHYST_BLOCK, 16)));
@@ -2669,16 +2669,17 @@ public class DominionUtils {
         } else if (biome == Biome.DEEP_DARK) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COBBLED_DEEPSLATE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COBBLED_DEEPSLATE, 64)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.SCULK, 64)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.SCULK_VEIN, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.DEEPSLATE_IRON_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SCULK, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SCULK_VEIN, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.DEEPSLATE_IRON_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.DEEPSLATE_GOLD_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.DEEPSLATE_REDSTONE_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.DEEPSLATE_REDSTONE_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.DEEPSLATE_LAPIS_ORE, 2)));
             rares.add(new ResourceDrop(new ItemStack(Material.SCULK_SENSOR, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
-            rares.add(new ResourceDrop(new ItemStack(Material.SCULK_CATALYST, 1), 0, rareOdds[rank - 1],
-                    "Rare Drop (" + formatPct(rareOdds[rank - 1]) + " chance)"));
+            int[] sculkCatalystOdds = {60, 45, 30, 15, 6};
+            rares.add(new ResourceDrop(new ItemStack(Material.SCULK_CATALYST, 1), 0, sculkCatalystOdds[rank - 1],
+                    "Rare Drop (" + formatPct(sculkCatalystOdds[rank - 1]) + " chance)"));
             simulations.add(ancientCity);
             simulations.add(amethystGeode);
         } else if (biome == Biome.SULFUR_CAVES) {

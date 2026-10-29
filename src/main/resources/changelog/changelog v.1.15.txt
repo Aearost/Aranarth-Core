@@ -21,6 +21,7 @@ Dominion
 [~] Conquered dominions now consume their food reserves daily again, with food worth 25% less power
 [+] Added /d r as an alilas to /d region
 [~] /d home is no longer restricted to Esquire rank
+[~] Decreased yields of Deep Dark dominion resource claims
 
 Aranarthium, Items & Crafting
 [~] Fixed applying Essences consuming 2 Aranarthium at a time if thrown at once
