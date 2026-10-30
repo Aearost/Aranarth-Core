@@ -224,6 +224,7 @@ public class GuiRanks {
 		dukeLore.add(Lang.getFor(player, "gui.ranks.bending"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] &7&oSuffocate, " + Element.SPIRITUAL.getColor() + "&oAstralProjection, AstralShot,"));
 		dukeLore.add(ChatUtils.translateToColor(SoundAbility.SOUND.getColor() + "       &o" + Lang.getFor(player, "gui.ranks_basic_sound")));
+		dukeLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] " + Element.PLANT.getColor() + "&oPetalStorm"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.LAVA.getColor() + "&o" + Lang.getFor(player, "gui.ranks_basic_lava")));
 		dukeLore.add(Lang.getFor(player, "gui.ranks.duke_bending1"));
 		dukeLore.add(Lang.getFor(player, "gui.ranks.perks"));

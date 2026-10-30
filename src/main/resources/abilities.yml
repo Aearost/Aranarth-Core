@@ -594,6 +594,34 @@ IceShards:
   Speed: 2.5
   ProjectileMaxLifetime: 5000
 
+PetalStorm:
+  # 1 damage = 0.5 hearts
+  Damage: 1.0
+  # The cooldown is this value multiplied by the flowers sourced
+  CooldownPerFlower: 2000
+  # Each floating petal is one shot, so this is both the shots and the petals granted by each flower sourced
+  ShotsPerFlower: 5
+  # How long the player has to fire their shots once they switch to PetalShots
+  Duration: 10000
+  Range: 20.0
+  # Blocks travelled per tick
+  Speed: 2.0
+  HitRadius: 0.8
+  # How far the shots sway from a straight path
+  WindAmplitude: 0.3
+  # How tightly the shots wind as they travel
+  WindFrequency: 0.9
+  # The length of each shot's line
+  LineLength: 2.0
+  # Number of petal particles in each shot's line
+  LinePetals: 12
+  LinePetalSize: 0.7
+  # Number of smaller petal particles scattered around each shot's line per tick
+  WispPetals: 4
+  WispPetalSize: 0.35
+  # How far the smaller petals scatter from the line
+  WispSpread: 0.3
+
 # ==================== Earth ====================
 
 Tremorsense:

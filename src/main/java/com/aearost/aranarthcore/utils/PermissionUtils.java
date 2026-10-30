@@ -300,6 +300,7 @@ public class PermissionUtils {
             perms.setPermission("bending.ability.rootsnare", true);
             perms.setPermission("bending.ability.petalrush", true);
             perms.setPermission("bending.ability.petalshots", true);
+            perms.setPermission("bending.ability.petalstorm", true);
             perms.setPermission("bending.ability.energyburst", true);
             perms.setPermission("bending.ability.magmaglaives", true);
             perms.setPermission("bending.ability.moltenblast", true);
@@ -427,6 +428,7 @@ public class PermissionUtils {
         perms.setPermission("bending.ability.rootsnare", true);
         perms.setPermission("bending.ability.petalrush", true);
         perms.setPermission("bending.ability.petalshots", true);
+        perms.setPermission("bending.ability.petalstorm", true);
         perms.setPermission("bending.ability.energyburst", true);
         perms.setPermission("bending.ability.magmaglaives", true);
         perms.setPermission("bending.ability.moltenblast", true);
@@ -787,6 +789,7 @@ public class PermissionUtils {
                     perms.setPermission("bending.ability.rootsnare", true);
                     perms.setPermission("bending.ability.petalrush", true);
                     perms.setPermission("bending.ability.petalshots", true);
+                    perms.setPermission("bending.ability.petalstorm", true);
                     perms.setPermission("bending.ability.energyburst", true);
                     perms.setPermission("bending.ability.lightofraava", true);
                     perms.setPermission("bending.ability.magmaglaives", true);
@@ -1021,6 +1024,7 @@ public class PermissionUtils {
             perms.setPermission("bending.ability.suffocate", true);
             perms.setPermission("bending.ability.astralprojection", true);    // spiritual
             perms.setPermission("bending.ability.astralshot", true);          // spiritual combo
+            perms.setPermission("bending.ability.petalstorm", true);          // plant combo
             perms.setPermission("bending.ability.LavaThrow", true);           // JedCore lava
             perms.setPermission("aranarth.nick", true);
             perms.setPermission("bending.command.preset.create.12", true);

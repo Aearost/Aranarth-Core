@@ -98,7 +98,7 @@ public class PetalRush extends PlantAbility implements AddonAbility {
     /**
      * A flower that was turned to air, reverted when the ability ends
      */
-    private static class SourcedFlower {
+    static class SourcedFlower {
         final List<TempBlock> tempBlocks;
         final Color color;
 
@@ -115,7 +115,7 @@ public class PetalRush extends PlantAbility implements AddonAbility {
     /*
      * A petal drifting from its flower towards the caster, then swaying behind them.
      */
-    private static class Petal {
+    static class Petal {
         final Location position;
         final Particle.DustOptions dust;
         final double angleOffset;
@@ -132,7 +132,7 @@ public class PetalRush extends PlantAbility implements AddonAbility {
     /**
      * A path through the cone that stops at the first solid block, optionally winding as if blown by the wind.
      */
-    private static class RushPath {
+    static class RushPath {
         final Location start;
         final Vector direction;
         final Vector windAxisA;
@@ -165,6 +165,21 @@ public class PetalRush extends PlantAbility implements AddonAbility {
             return position
                     .add(windAxisA.clone().multiply(sway * Math.sin(distance * windFrequency + windPhaseA)))
                     .add(windAxisB.clone().multiply(sway * Math.cos(distance * windFrequency * 0.7 + windPhaseB)));
+        }
+
+        /**
+         * Draws a trail of petals behind the given distance along the path.
+         */
+        void drawLine(double head, int petalCount, double length, Particle.DustOptions dust) {
+            for (int i = 0; i < petalCount; i++) {
+                double distance = head - i * length / petalCount;
+                if (distance < 0) {
+                    break;
+                }
+                if (distance <= clearDistance) {
+                    start.getWorld().spawnParticle(Particle.DUST, getPosition(distance), 1, 0, 0, 0, 0, dust);
+                }
+            }
         }
     }
 
@@ -308,12 +323,22 @@ public class PetalRush extends PlantAbility implements AddonAbility {
     }
 
     /**
-     * Cancels the ability without a cooldown if the player switches slots while charging.
+     * Hands the sourced flowers to PetalStorm if fully charged and switching to PetalShots, otherwise cancels the
+     * ability without a cooldown if the player switches slots while charging.
      */
-    public void cancelFromSlotChange() {
-        if (phase == Phase.CHARGING) {
-            remove();
+    public void onSlotChange(int newSlot) {
+        if (phase != Phase.CHARGING) {
+            return;
         }
+        if (isCharged() && !sourcedFlowers.isEmpty()
+                && "PetalShots".equalsIgnoreCase(bPlayer.getAbilities().get(newSlot + 1))) {
+            PetalStorm petalStorm = new PetalStorm(player, sourcedFlowers, petals);
+            if (petalStorm.isStarted()) {
+                // The flowers now belong to PetalStorm, which reverts them when it ends
+                sourcedFlowers.clear();
+            }
+        }
+        remove();
     }
 
     @Override
@@ -343,7 +368,7 @@ public class PetalRush extends PlantAbility implements AddonAbility {
         if (!isCharged()) {
             drawChargeSwirl();
         }
-        tickPetals();
+        tickPetals(player, petals);
     }
 
     private void progressRush() {
@@ -402,7 +427,7 @@ public class PetalRush extends PlantAbility implements AddonAbility {
 
     private void drawChargeSwirl() {
         double chargeFraction = (double) (System.currentTimeMillis() - chargeStartTime) / chargeDuration;
-        double angle = getBackAngle() + Math.sin(chargeFraction * Math.PI * 6) * PETAL_BACK_ARC;
+        double angle = getBackAngle(player) + Math.sin(chargeFraction * Math.PI * 6) * PETAL_BACK_ARC;
         Location loc = player.getLocation().add(
                 Math.cos(angle) * PETAL_ORBIT_RADIUS, 0.1 + chargeFraction * 1.6, Math.sin(angle) * PETAL_ORBIT_RADIUS);
         player.getWorld().spawnParticle(Particle.FALLING_SPORE_BLOSSOM, loc, 1, 0, 0, 0, 0);
@@ -411,14 +436,14 @@ public class PetalRush extends PlantAbility implements AddonAbility {
     /**
      * Keeps the sourced petals swaying in an arc behind the player so they only show in peripheral vision.
      */
-    private void tickPetals() {
+    static void tickPetals(Player player, List<Petal> petals) {
         if (petals.isEmpty()) {
             return;
         }
         World world = player.getWorld();
         Location base = player.getLocation();
         double time = System.currentTimeMillis() / 1000.0;
-        double backAngle = getBackAngle();
+        double backAngle = getBackAngle(player);
 
         for (Petal petal : petals) {
             if (!world.equals(petal.position.getWorld())) {
@@ -489,22 +514,12 @@ public class PetalRush extends PlantAbility implements AddonAbility {
      * Dashes each launched line through the cone as a trail of petals behind its head.
      */
     private void drawRushLines(long elapsed) {
-        World world = origin.getWorld();
         for (RushLine line : rushLines) {
             long age = elapsed - line.launchDelay;
             if (age < 0 || age >= lineDuration) {
                 continue;
             }
-            double head = range * age / lineDuration;
-            for (int i = 0; i < linePetals; i++) {
-                double distance = head - i * lineLength / linePetals;
-                if (distance < 0) {
-                    break;
-                }
-                if (distance <= line.path.clearDistance) {
-                    world.spawnParticle(Particle.DUST, line.path.getPosition(distance), 1, 0, 0, 0, 0, line.dust);
-                }
-            }
+            line.path.drawLine(range * age / lineDuration, linePetals, lineLength, line.dust);
         }
     }
 
@@ -566,7 +581,7 @@ public class PetalRush extends PlantAbility implements AddonAbility {
     /**
      * Gets the horizontal angle pointing directly behind the player.
      */
-    private double getBackAngle() {
+    private static double getBackAngle(Player player) {
         Vector dir = player.getLocation().getDirection();
         return Math.atan2(-dir.getZ(), -dir.getX());
     }
