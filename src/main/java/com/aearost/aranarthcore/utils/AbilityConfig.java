@@ -38,6 +38,15 @@ public class AbilityConfig {
             YamlConfiguration defaults = YamlConfiguration.loadConfiguration(new InputStreamReader(stream, StandardCharsets.UTF_8));
             loaded.setDefaults(defaults);
 
+            // Removes the values of renamed or removed abilities from the server's copy
+            boolean hasStaleKeys = false;
+            for (String key : loaded.getKeys(true)) {
+                if (!defaults.contains(key)) {
+                    loaded.set(key, null);
+                    hasStaleKeys = true;
+                }
+            }
+
             // Adds the values of newly added abilities to the server's copy so they can be edited
             boolean hasMissingKeys = false;
             for (String key : defaults.getKeys(true)) {
@@ -48,10 +57,12 @@ public class AbilityConfig {
             }
             if (hasMissingKeys) {
                 loaded.options().copyDefaults(true);
+            }
+            if (hasStaleKeys || hasMissingKeys) {
                 try {
                     loaded.save(file);
                 } catch (IOException e) {
-                    Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Failed to add missing values to " + FILE_NAME + ": " + e.getMessage());
+                    Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Failed to update " + FILE_NAME + ": " + e.getMessage());
                 }
             }
         }
