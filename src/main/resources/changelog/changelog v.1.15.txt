@@ -10,6 +10,7 @@ World & Events
 
 Bending & Abilities
 [+] Implemented the PetalRush ability for plantbenders
+[~] Renamed ToxicSpores to Spores
 [~] EnergyBurst's fall auto-proc now only triggers after falling at least 10 blocks
 [~] Renamed CombustionStrike to CombustiveStrike
 [~] Fixed sneaking not standing players up from stairs and slabs at the arena spawn and other no-bending zones

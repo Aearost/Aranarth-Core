@@ -699,9 +699,9 @@ public class AranarthCoreBendingListener implements Listener {
                             // Re-source in SOURCED phase; ignored in CASTING phase
                             existing.onSneak();
                         }
-                    } else if (abilityName.equalsIgnoreCase("toxicspores")) {
-                        if (!ToxicSpores.hasActiveInstance(player.getUniqueId())) {
-                            new ToxicSpores(player);
+                    } else if (abilityName.equalsIgnoreCase("spores")) {
+                        if (!Spores.hasActiveInstance(player.getUniqueId())) {
+                            new Spores(player);
                         }
                     } else if (abilityName.equalsIgnoreCase("petalrush")) {
                         if (!PetalRush.hasActiveInstance(player.getUniqueId())) {
@@ -974,10 +974,10 @@ public class AranarthCoreBendingListener implements Listener {
             return;
         }
 
-        // ToxicSpores: left-click begins channeling from the READY state
-        ToxicSpores toxicSpores = ToxicSpores.getActiveInstance(player.getUniqueId());
-        if (toxicSpores != null) {
-            toxicSpores.startChanneling();
+        // Spores: left-click begins channeling from the READY state
+        Spores spores = Spores.getActiveInstance(player.getUniqueId());
+        if (spores != null) {
+            spores.startChanneling();
             return;
         }
 
@@ -1249,7 +1249,7 @@ public class AranarthCoreBendingListener implements Listener {
             e.setCancelled(true);
             return;
         }
-        if (ToxicSpores.hasActiveInstance(player.getUniqueId())) {
+        if (Spores.hasActiveInstance(player.getUniqueId())) {
             e.setCancelled(true);
             return;
         }
@@ -1406,9 +1406,9 @@ public class AranarthCoreBendingListener implements Listener {
         if (noxiousFumes != null) {
             noxiousFumes.endChanneling();
         }
-        ToxicSpores toxicSpores = ToxicSpores.getActiveInstance(e.getPlayer().getUniqueId());
-        if (toxicSpores != null) {
-            toxicSpores.endChanneling();
+        Spores spores = Spores.getActiveInstance(e.getPlayer().getUniqueId());
+        if (spores != null) {
+            spores.endChanneling();
         }
         RootSnare rootSnareSlot = RootSnare.getActiveInstance(e.getPlayer().getUniqueId());
         if (rootSnareSlot != null) {
@@ -1897,7 +1897,7 @@ public class AranarthCoreBendingListener implements Listener {
             e.setCancelled(true);
             return;
         }
-        if (ToxicSpores.hasActiveInstance(player.getUniqueId())) {
+        if (Spores.hasActiveInstance(player.getUniqueId())) {
             e.setCancelled(true);
             return;
         }

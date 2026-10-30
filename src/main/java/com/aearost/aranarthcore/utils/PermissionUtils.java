@@ -295,7 +295,7 @@ public class PermissionUtils {
             perms.setPermission("bending.ability.burial", true);
             perms.setPermission("bending.ability.deafeningscream", true);
             perms.setPermission("bending.ability.sonicpulse", true);
-            perms.setPermission("bending.ability.toxicspores", true);
+            perms.setPermission("bending.ability.spores", true);
             perms.setPermission("bending.ability.leafscythe", true);
             perms.setPermission("bending.ability.rootsnare", true);
             perms.setPermission("bending.ability.petalrush", true);
@@ -421,7 +421,7 @@ public class PermissionUtils {
         perms.setPermission("bending.ability.burial", true);
         perms.setPermission("bending.ability.deafeningscream", true);
         perms.setPermission("bending.ability.sonicpulse", true);
-        perms.setPermission("bending.ability.toxicspores", true);
+        perms.setPermission("bending.ability.spores", true);
         perms.setPermission("bending.ability.leafscythe", true);
         perms.setPermission("bending.ability.rootsnare", true);
         perms.setPermission("bending.ability.petalrush", true);
@@ -780,7 +780,7 @@ public class PermissionUtils {
                     perms.setPermission("bending.ability.burial", true);
                     perms.setPermission("bending.ability.deafeningscream", true);
                     perms.setPermission("bending.ability.sonicpulse", true);
-                    perms.setPermission("bending.ability.toxicspores", true);
+                    perms.setPermission("bending.ability.spores", true);
                     perms.setPermission("bending.ability.leafscythe", true);
                     perms.setPermission("bending.ability.rootsnare", true);
                     perms.setPermission("bending.ability.petalrush", true);
@@ -975,7 +975,7 @@ public class PermissionUtils {
             perms.setPermission("bending.air.spiritual", true);
             perms.setPermission("bending.ability.waterarms", true);
             perms.setPermission("bending.ability.Meditate", true);            // JedCore spiritual
-            perms.setPermission("bending.ability.toxicspores", true);         // plant
+            perms.setPermission("bending.ability.spores", true);         // plant
             perms.setPermission("bending.ability.vinewhip", true);            // plant
             perms.setPermission("bending.ability.leafscythe", true);          // plant
             perms.setPermission("bending.ability.rootsnare", true);           // plant

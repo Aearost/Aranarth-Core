@@ -16,7 +16,7 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
-public class ToxicSpores extends PlantAbility implements AddonAbility {
+public class Spores extends PlantAbility implements AddonAbility {
 
     public enum Phase {READY, CHANNELING, DISPERSING}
 
@@ -58,7 +58,7 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
     private final Map<UUID, Long> entityEntryTime = new HashMap<>();
     private final Map<UUID, Long> entityLastEffectTime = new HashMap<>();
 
-    private static final Map<UUID, ToxicSpores> activeInstances = new HashMap<>();
+    private static final Map<UUID, Spores> activeInstances = new HashMap<>();
     private final Random random = new Random();
 
     // -------------------------------------------------------------------------
@@ -117,24 +117,24 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
     // Constructor
     // -------------------------------------------------------------------------
 
-    public ToxicSpores(Player player) {
+    public Spores(Player player) {
         super(player);
 
         if (!bPlayer.canBend(this)) {
             return;
         }
 
-        cooldown = AbilityConfig.getLong("ToxicSpores.Cooldown");
-        range = AbilityConfig.getDouble("ToxicSpores.Range");
-        sporeSpeed = AbilityConfig.getDouble("ToxicSpores.SporeSpeed");
-        maxChannelingDuration = AbilityConfig.getLong("ToxicSpores.MaxChannelingDuration");
-        puffLifespan = AbilityConfig.getLong("ToxicSpores.PuffLifespan");
-        puffRadius = AbilityConfig.getDouble("ToxicSpores.PuffRadius");
-        sourceCheckRadius = AbilityConfig.getDouble("ToxicSpores.SourceCheckRadius");
-        chargeDuration = AbilityConfig.getLong("ToxicSpores.ChargeDuration");
-        effectInterval = AbilityConfig.getLong("ToxicSpores.EffectInterval");
-        effectDurationTicks = AbilityConfig.getInt("ToxicSpores.EffectDurationTicks");
-        poisonAmplifier = AbilityConfig.getInt("ToxicSpores.PoisonAmplifier");
+        cooldown = AbilityConfig.getLong("Spores.Cooldown");
+        range = AbilityConfig.getDouble("Spores.Range");
+        sporeSpeed = AbilityConfig.getDouble("Spores.SporeSpeed");
+        maxChannelingDuration = AbilityConfig.getLong("Spores.MaxChannelingDuration");
+        puffLifespan = AbilityConfig.getLong("Spores.PuffLifespan");
+        puffRadius = AbilityConfig.getDouble("Spores.PuffRadius");
+        sourceCheckRadius = AbilityConfig.getDouble("Spores.SourceCheckRadius");
+        chargeDuration = AbilityConfig.getLong("Spores.ChargeDuration");
+        effectInterval = AbilityConfig.getLong("Spores.EffectInterval");
+        effectDurationTicks = AbilityConfig.getInt("Spores.EffectDurationTicks");
+        poisonAmplifier = AbilityConfig.getInt("Spores.PoisonAmplifier");
 
         sourceBlock = findNearestFlower();
         if (sourceBlock == null) {
@@ -488,7 +488,7 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
         return activeInstances.containsKey(uuid);
     }
 
-    public static ToxicSpores getActiveInstance(UUID uuid) {
+    public static Spores getActiveInstance(UUID uuid) {
         return activeInstances.get(uuid);
     }
 
@@ -519,7 +519,7 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
 
     @Override
     public String getName() {
-        return "ToxicSpores";
+        return "Spores";
     }
 
     @Override
@@ -556,7 +556,7 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
 
     @Override
     public String getDescription() {
-        return "Draw toxic spores from a nearby flower and release them toward your desired location, " +
+        return "Draw spores from a nearby flower and release them toward your desired location, " +
                 "creating a lingering cloud that nauseates and critically poisons any entity caught within.\n" +
                 ChatUtils.translateToColor("&fUsage: Hold Sneak (flower source) > Left-Click");
     }

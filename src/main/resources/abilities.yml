@@ -430,7 +430,7 @@ RootSnare:
   MinWoodPillars: 2
   MaxTargets: 5
 
-ToxicSpores:
+Spores:
   Cooldown: 12000
   Range: 10.0
   SporeSpeed: 35.0

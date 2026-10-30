@@ -163,7 +163,7 @@ public class WorldEventManager implements Listener {
         perms.setPermission("bending.ability.mendingwaters", true);
         perms.setPermission("bending.ability.healinghelix", true);
         perms.setPermission("bending.ability.corruptinghelix", true);
-        perms.setPermission("bending.ability.toxicspores", true);
+        perms.setPermission("bending.ability.spores", true);
         perms.setPermission("bending.ability.vinewhip", true);
         perms.setPermission("bending.ability.leafscythe", true);
         perms.setPermission("bending.ability.rootsnare", true);
