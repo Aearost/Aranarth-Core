@@ -2,10 +2,8 @@ package com.aearost.aranarthcore.abilities.waterbending.plantbending;
 
 import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
-import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
-import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.PlantAbility;
 import com.projectkorra.projectkorra.attribute.Attribute;
@@ -13,8 +11,6 @@ import com.projectkorra.projectkorra.util.DamageHandler;
 import com.projectkorra.projectkorra.util.TempBlock;
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.data.Bisected;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -103,22 +99,16 @@ public class PetalRush extends PlantAbility implements AddonAbility {
      * A flower that was turned to air, reverted when the ability ends
      */
     private static class SourcedFlower {
-        final List<TempBlock> tempBlocks = new ArrayList<>();
+        final List<TempBlock> tempBlocks;
         final Color color;
 
-        SourcedFlower(Color color) {
+        SourcedFlower(List<TempBlock> tempBlocks, Color color) {
+            this.tempBlocks = tempBlocks;
             this.color = color;
         }
 
         void revert() {
-            // Revert in reverse order so the upper half of a tall flower is restored first
-            for (int i = tempBlocks.size() - 1; i >= 0; i--) {
-                TempBlock tempBlock = tempBlocks.get(i);
-                if (!tempBlock.isReverted()) {
-                    tempBlock.revertBlock();
-                }
-            }
-            tempBlocks.clear();
+            AranarthBendingUtils.revertFlower(tempBlocks);
         }
     }
 
@@ -256,30 +246,14 @@ public class PetalRush extends PlantAbility implements AddonAbility {
             return;
         }
 
-        Block block = findTargetedFlower();
+        Block block = AranarthBendingUtils.findTargetedFlower(this, player, sourceRange, sourceAngle);
         if (block == null) {
             return;
         }
         Location blockCenter = block.getLocation().add(0.5, 0.5, 0.5);
 
         Color color = AranarthBendingUtils.getFlowerPetalColor(block.getType());
-        SourcedFlower flower = new SourcedFlower(color);
-
-        // Tall flowers are cleared as a whole so no floating half is left behind
-        if (block.getBlockData() instanceof Bisected bisected) {
-            Block lower = bisected.getHalf() == Bisected.Half.TOP ? block.getRelative(BlockFace.DOWN) : block;
-            Block upper = lower.getRelative(BlockFace.UP);
-            Material flowerType = block.getType();
-            if (lower.getType() == flowerType && !TempBlock.isTempBlock(lower)) {
-                flower.tempBlocks.add(new TempBlock(lower, Material.AIR.createBlockData()));
-            }
-            if (upper.getType() == flowerType && !TempBlock.isTempBlock(upper)) {
-                flower.tempBlocks.add(new TempBlock(upper, Material.AIR.createBlockData()));
-            }
-        } else {
-            flower.tempBlocks.add(new TempBlock(block, Material.AIR.createBlockData()));
-        }
-        sourcedFlowers.add(flower);
+        sourcedFlowers.add(new SourcedFlower(AranarthBendingUtils.breakFlower(block), color));
 
         World world = block.getWorld();
         Particle.DustOptions sourceDust = new Particle.DustOptions(color, heldPetalSize);
@@ -578,7 +552,7 @@ public class PetalRush extends PlantAbility implements AddonAbility {
             if (sideways > startRadius + forward * spreadPerBlock + HIT_MARGIN) {
                 continue;
             }
-            if (isPathClear(origin, point)) {
+            if (AranarthBendingUtils.isPathClear(origin, point)) {
                 return true;
             }
         }
@@ -595,74 +569,6 @@ public class PetalRush extends PlantAbility implements AddonAbility {
     private double getBackAngle() {
         Vector dir = player.getLocation().getDirection();
         return Math.atan2(-dir.getZ(), -dir.getX());
-    }
-
-    /**
-     * Finds the sourceable flower closest to the player's look direction within sourceAngle and sourceRange.
-     */
-    private Block findTargetedFlower() {
-        Location eye = player.getEyeLocation();
-        Vector look = eye.getDirection().normalize();
-        double minDot = Math.cos(Math.toRadians(sourceAngle));
-        double rangeSq = sourceRange * sourceRange;
-        int r = (int) Math.ceil(sourceRange);
-        Block eyeBlock = eye.getBlock();
-
-        Block best = null;
-        double bestDot = minDot;
-        for (int x = -r; x <= r; x++) {
-            for (int y = -r; y <= r; y++) {
-                for (int z = -r; z <= r; z++) {
-                    Block candidate = eyeBlock.getRelative(x, y, z);
-                    if (!AranarthUtils.isFlower(candidate.getType())) {
-                        continue;
-                    }
-                    Location candidateCenter = candidate.getLocation().add(0.5, 0.5, 0.5);
-                    Vector toFlower = candidateCenter.toVector().subtract(eye.toVector());
-                    double distSq = toFlower.lengthSquared();
-                    if (distSq > rangeSq || distSq < 0.01) {
-                        continue;
-                    }
-                    double dot = toFlower.clone().normalize().dot(look);
-                    if (dot <= bestDot) {
-                        continue;
-                    }
-                    if (TempBlock.isTempBlock(candidate) || !isPathClear(eye, candidateCenter)
-                            || !AranarthBendingUtils.canBendBlock(player, candidate)
-                            || GeneralMethods.isRegionProtectedFromBuild(this, candidate.getLocation())) {
-                        continue;
-                    }
-                    best = candidate;
-                    bestDot = dot;
-                }
-            }
-        }
-        return best;
-    }
-
-    /**
-     * Checks that no solid block sits between the two locations.
-     */
-    private boolean isPathClear(Location from, Location to) {
-        Vector path = to.toVector().subtract(from.toVector());
-        double length = path.length();
-        if (length < 0.01) {
-            return true;
-        }
-        Block target = to.getBlock();
-        Vector step = path.normalize().multiply(0.25);
-        Location point = from.clone();
-        for (double d = 0; d < length; d += 0.25) {
-            Block block = point.getBlock();
-            if (block.equals(target)) {
-                return true;
-            }
-            if (block.getType().isSolid()) {
-                return false;
-            }
-            point.add(step);
-        }
-        return true;
     }
 
     private void revertFlowers() {

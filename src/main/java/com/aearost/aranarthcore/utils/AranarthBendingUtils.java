@@ -5,14 +5,18 @@ import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.Outpost;
 import com.projectkorra.projectkorra.BendingPlayer;
+import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.Ability;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.util.DamageHandler;
+import com.projectkorra.projectkorra.util.TempBlock;
 import com.projectkorra.projectkorra.waterbending.util.WaterReturn;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.Bisected;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -503,5 +507,124 @@ public class AranarthBendingUtils {
                  HANGING_ROOTS, BIG_DRIPLEAF, SMALL_DRIPLEAF -> true;
             default -> AranarthUtils.isFlower(mat);
         };
+    }
+
+    /**
+     * Finds the sourceable flower closest to the player's look direction.
+     *
+     * @param ability The ability sourcing the flower.
+     * @param player  The player sourcing the flower.
+     * @param range   How far away the flower can be.
+     * @param angle   How far (in degrees) the flower can be from the look direction.
+     * @return The flower, or null if there is none.
+     */
+    public static Block findTargetedFlower(Ability ability, Player player, double range, double angle) {
+        Location eye = player.getEyeLocation();
+        Vector look = eye.getDirection().normalize();
+        double minDot = Math.cos(Math.toRadians(angle));
+        double rangeSq = range * range;
+        int r = (int) Math.ceil(range);
+        Block eyeBlock = eye.getBlock();
+
+        Block best = null;
+        double bestDot = minDot;
+        for (int x = -r; x <= r; x++) {
+            for (int y = -r; y <= r; y++) {
+                for (int z = -r; z <= r; z++) {
+                    Block candidate = eyeBlock.getRelative(x, y, z);
+                    if (!AranarthUtils.isFlower(candidate.getType())) {
+                        continue;
+                    }
+                    Location candidateCenter = candidate.getLocation().add(0.5, 0.5, 0.5);
+                    Vector toFlower = candidateCenter.toVector().subtract(eye.toVector());
+                    double distSq = toFlower.lengthSquared();
+                    if (distSq > rangeSq || distSq < 0.01) {
+                        continue;
+                    }
+                    double dot = toFlower.clone().normalize().dot(look);
+                    if (dot <= bestDot) {
+                        continue;
+                    }
+                    if (TempBlock.isTempBlock(candidate) || !isPathClear(eye, candidateCenter)
+                            || !canBendBlock(player, candidate)
+                            || GeneralMethods.isRegionProtectedFromBuild(ability, candidate.getLocation())) {
+                        continue;
+                    }
+                    best = candidate;
+                    bestDot = dot;
+                }
+            }
+        }
+        return best;
+    }
+
+    /**
+     * Checks that no solid block sits between the two locations.
+     *
+     * @param from The starting location.
+     * @param to   The ending location.
+     * @return Whether the path between the locations is clear.
+     */
+    public static boolean isPathClear(Location from, Location to) {
+        Vector path = to.toVector().subtract(from.toVector());
+        double length = path.length();
+        if (length < 0.01) {
+            return true;
+        }
+        Block target = to.getBlock();
+        Vector step = path.normalize().multiply(0.25);
+        Location point = from.clone();
+        for (double d = 0; d < length; d += 0.25) {
+            Block block = point.getBlock();
+            if (block.equals(target)) {
+                return true;
+            }
+            if (block.getType().isSolid()) {
+                return false;
+            }
+            point.add(step);
+        }
+        return true;
+    }
+
+    /**
+     * Temporarily turns a flower to air. Tall flowers are cleared as a whole so no floating half is left behind.
+     *
+     * @param block The flower.
+     * @return The temporary blocks, to be given to revertFlower() when the ability ends.
+     */
+    public static List<TempBlock> breakFlower(Block block) {
+        List<TempBlock> tempBlocks = new ArrayList<>();
+        if (block.getBlockData() instanceof Bisected bisected) {
+            Block lower = bisected.getHalf() == Bisected.Half.TOP ? block.getRelative(BlockFace.DOWN) : block;
+            Block upper = lower.getRelative(BlockFace.UP);
+            Material flowerType = block.getType();
+            if (lower.getType() == flowerType && !TempBlock.isTempBlock(lower)) {
+                tempBlocks.add(new TempBlock(lower, Material.AIR.createBlockData()));
+            }
+            if (upper.getType() == flowerType && !TempBlock.isTempBlock(upper)) {
+                tempBlocks.add(new TempBlock(upper, Material.AIR.createBlockData()));
+            }
+        } else {
+            tempBlocks.add(new TempBlock(block, Material.AIR.createBlockData()));
+        }
+        return tempBlocks;
+    }
+
+    /**
+     * Restores a flower that was broken with breakFlower().
+     *
+     * @param tempBlocks The temporary blocks of the flower.
+     */
+    public static void revertFlower(List<TempBlock> tempBlocks) {
+        // Revert in reverse order so the upper half of a tall flower is restored first
+        for (int i = tempBlocks.size() - 1; i >= 0; i--) {
+            TempBlock tempBlock = tempBlocks.get(i);
+            // A block placed in the flower's spot removes the TempBlock, and must not be overwritten by the flower
+            if (!tempBlock.isReverted() && TempBlock.isTempBlock(tempBlock.getBlock())) {
+                tempBlock.revertBlock();
+            }
+        }
+        tempBlocks.clear();
     }
 }

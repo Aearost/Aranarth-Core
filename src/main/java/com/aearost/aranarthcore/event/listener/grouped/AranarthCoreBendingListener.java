@@ -559,6 +559,11 @@ public class AranarthCoreBendingListener implements Listener {
                 petalRushRelease.onSneakRelease();
                 return;
             }
+            PetalShots petalShotsRelease = PetalShots.getActiveInstance(player.getUniqueId());
+            if (petalShotsRelease != null && petalShotsRelease.getPhase() == PetalShots.Phase.SOURCING) {
+                petalShotsRelease.onSneakRelease();
+                return;
+            }
             ElectricStrike electricStrikeRelease = ElectricStrike.getActiveInstance(player.getUniqueId());
             if (electricStrikeRelease != null && electricStrikeRelease.getPhase() == ElectricStrike.Phase.CHARGING) {
                 electricStrikeRelease.onSneakRelease();
@@ -706,6 +711,10 @@ public class AranarthCoreBendingListener implements Listener {
                     } else if (abilityName.equalsIgnoreCase("petalrush")) {
                         if (!PetalRush.hasActiveInstance(player.getUniqueId())) {
                             new PetalRush(player);
+                        }
+                    } else if (abilityName.equalsIgnoreCase("petalshots")) {
+                        if (!PetalShots.hasActiveInstance(player.getUniqueId())) {
+                            new PetalShots(player);
                         }
                     } else if (abilityName.equalsIgnoreCase("regrowth")) {
                         if (!Regrowth.hasActiveInstance(player.getUniqueId())) {
@@ -988,6 +997,13 @@ public class AranarthCoreBendingListener implements Listener {
             return;
         }
 
+        // PetalShots: left-click fires a petal once the line has reached the player
+        PetalShots petalShots = PetalShots.getActiveInstance(player.getUniqueId());
+        if (petalShots != null) {
+            petalShots.onLeftClick();
+            return;
+        }
+
         // IceShards: left-click fires the charged shards
         IceShards iceShards = IceShards.getActiveInstance(player.getUniqueId());
         if (iceShards != null) {
@@ -1265,6 +1281,10 @@ public class AranarthCoreBendingListener implements Listener {
             e.setCancelled(true);
             return;
         }
+        if (PetalShots.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
         // Left-clicking on a plant to source it should never destroy the block
         BendingPlayer bpLeafBreak = BendingPlayer.getBendingPlayer(player);
         if (bpLeafBreak != null) {
@@ -1417,6 +1437,10 @@ public class AranarthCoreBendingListener implements Listener {
         PetalRush petalRushSlot = PetalRush.getActiveInstance(e.getPlayer().getUniqueId());
         if (petalRushSlot != null) {
             petalRushSlot.cancelFromSlotChange();
+        }
+        PetalShots petalShotsSlot = PetalShots.getActiveInstance(e.getPlayer().getUniqueId());
+        if (petalShotsSlot != null) {
+            petalShotsSlot.cancelFromSlotChange();
         }
         Regrowth regrowth = Regrowth.getActiveInstance(e.getPlayer().getUniqueId());
         if (regrowth != null) {
@@ -1906,6 +1930,10 @@ public class AranarthCoreBendingListener implements Listener {
             return;
         }
         if (PetalRush.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (PetalShots.hasActiveInstance(player.getUniqueId())) {
             e.setCancelled(true);
             return;
         }

@@ -399,6 +399,33 @@ PetalRush:
   # Each petal in the cone is randomly sized from its scaled size up to this many times larger
   MaxPetalSizeMultiplier: 1.5
 
+PetalShots:
+  # 1 damage = 0.5 hearts
+  Damage: 1.0
+  Shots: 5
+  Cooldown: 5000
+  Range: 25.0
+  # Blocks travelled per tick
+  Speed: 2.0
+  HitRadius: 0.6
+  # Minimum time between shots
+  ShotCooldown: 150
+  # How far away a flower can be sourced
+  SourceRange: 9.0
+  # How far (in degrees) a flower can be from the look direction and still be sourced
+  SourceAngle: 12.0
+  # How long unfired shots stay available once the line reaches the player
+  ReadyDuration: 15000
+  # The time for the line to reach the player scales from the minimum (right next to them) to the maximum (at SourceRange)
+  MinLineDuration: 500
+  MaxLineDuration: 1000
+  # The size of the petals in the line drawn to the player
+  LinePetalSize: 0.7
+  # The size of the petals circling the player's hand
+  HeldPetalSize: 0.5
+  # The size of the petals in each shot's trail
+  ShotPetalSize: 0.6
+
 RazorLeaves:
   Damage: 2.0
   Cooldown: 8000
