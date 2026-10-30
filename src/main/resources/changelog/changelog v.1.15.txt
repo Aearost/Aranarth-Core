@@ -11,6 +11,8 @@ World & Events
 Bending & Abilities
 [+] Implemented the PetalRush ability for plantbenders
 [~] Renamed ToxicSpores to Spores
+[~] Changed default permissions of LeafScythe, RootSnare, and VineWhip to be unlocked at Esquire
+[~] Removed Static from being mentioned in /ranks as it was a basic lightning ability and didn't need to be explicitly mentioned
 [~] EnergyBurst's fall auto-proc now only triggers after falling at least 10 blocks
 [~] Renamed CombustionStrike to CombustiveStrike
 [~] Fixed sneaking not standing players up from stairs and slabs at the arena spawn and other no-bending zones

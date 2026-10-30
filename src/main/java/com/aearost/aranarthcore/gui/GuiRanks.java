@@ -152,8 +152,7 @@ public class GuiRanks {
 		}
 		baronLore.add(Lang.getFor(player, "gui.ranks.bending"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] " + Element.SPIRITUAL.getColor() + "&o" + Lang.getFor(player, "gui.ranks_basic_spiritual")));
-		baronLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] &b&oWaterArms, " + Element.PLANT.getColor() + "&oSpores, "));
-		baronLore.add(ChatUtils.translateToColor(Element.PLANT.getColor() + "       &oVineWhip, LeafScythe, PetalRush"));
+		baronLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] &b&oWaterArms, " + Element.PLANT.getColor() + "&oSpores, PetalRush"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.SAND.getColor() + "&oSandstorm, Burial, " + Element.METAL.getColor() + "&oCableThrash,"));
 		baronLore.add(ChatUtils.translateToColor(Element.METAL.getColor() + "       &oCableSlash, MetalBlade, MetalFragments"));
 		baronLore.add(Lang.getFor(player, "gui.ranks.baron_bending1"));
@@ -258,7 +257,7 @@ public class GuiRanks {
 			}
 		}
 		princeLore.add(Lang.getFor(player, "gui.ranks.bending"));
-		princeLore.add(ChatUtils.translateToColor("&f&o- &4[&cF&4] " + Element.LIGHTNING.getColor() + "&o" + Lang.getFor(player, "gui.ranks_basic_lightning") + ", Static"));
+		princeLore.add(ChatUtils.translateToColor("&f&o- &4[&cF&4] " + Element.LIGHTNING.getColor() + "&o" + Lang.getFor(player, "gui.ranks_basic_lightning")));
 		princeLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] " + Element.SPIRITUAL.getColor() + "&oEnergyBurst, " + SoundAbility.SOUND.getColor() + "&oSonicPulse"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] &3&oCorruptingHelix, " + Element.BLOOD.getColor() + "&o" + Lang.getFor(player, "gui.ranks_basic_blood")));
 		princeLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.LAVA.getColor() + "&oLavaDisc, MagmaBlast"));

@@ -26,13 +26,10 @@ public class RankCanBindHook implements CanBindHook {
 
         // Baron
         ABILITY_MIN_RANKS.put("waterarms", 3);
-        ABILITY_MIN_RANKS.put("vinewhip", 3);
         ABILITY_MIN_RANKS.put("cableslash", 3);
         ABILITY_MIN_RANKS.put("sandstorm", 3);
         ABILITY_MIN_RANKS.put("burial", 3);
         ABILITY_MIN_RANKS.put("spores", 3);
-        ABILITY_MIN_RANKS.put("leafscythe", 3);
-        ABILITY_MIN_RANKS.put("rootsnare", 3);
         ABILITY_MIN_RANKS.put("petalrush", 3);
         ABILITY_MIN_RANKS.put("metalblade", 3);
         ABILITY_MIN_RANKS.put("cablethrash", 3);

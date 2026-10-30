@@ -946,6 +946,9 @@ public class PermissionUtils {
         // Esquire
         if (rank >= 1) {
             perms.setPermission("bending.water.plantbending", true);
+            perms.setPermission("bending.ability.vinewhip", true);            // plant
+            perms.setPermission("bending.ability.leafscythe", true);          // plant
+            perms.setPermission("bending.ability.rootsnare", true);           // plant
             perms.setPermission("bending.earth.sandbending", true);
             perms.setPermission("bending.ability.SandBlast", true);          // JedCore sand
             perms.setPermission("aranarth.seen", true);
@@ -975,10 +978,7 @@ public class PermissionUtils {
             perms.setPermission("bending.air.spiritual", true);
             perms.setPermission("bending.ability.waterarms", true);
             perms.setPermission("bending.ability.Meditate", true);            // JedCore spiritual
-            perms.setPermission("bending.ability.spores", true);         // plant
-            perms.setPermission("bending.ability.vinewhip", true);            // plant
-            perms.setPermission("bending.ability.leafscythe", true);          // plant
-            perms.setPermission("bending.ability.rootsnare", true);           // plant
+            perms.setPermission("bending.ability.spores", true);              // plant
             perms.setPermission("bending.ability.petalrush", true);           // plant
             perms.setPermission("bending.ability.sandstorm", true);           // sand
             perms.setPermission("bending.ability.burial", true);              // sand
