@@ -153,7 +153,7 @@ public class GuiRanks {
 		baronLore.add(Lang.getFor(player, "gui.ranks.bending"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] " + Element.SPIRITUAL.getColor() + "&o" + Lang.getFor(player, "gui.ranks_basic_spiritual")));
 		baronLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] &b&oWaterArms, " + Element.PLANT.getColor() + "&oToxicSpores, "));
-		baronLore.add(ChatUtils.translateToColor(Element.PLANT.getColor() + "       &oVineWhip, LeafScythe"));
+		baronLore.add(ChatUtils.translateToColor(Element.PLANT.getColor() + "       &oVineWhip, LeafScythe, PetalRush"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.SAND.getColor() + "&oSandstorm, Burial, " + Element.METAL.getColor() + "&oCableThrash,"));
 		baronLore.add(ChatUtils.translateToColor(Element.METAL.getColor() + "       &oCableSlash, MetalBlade, MetalFragments"));
 		baronLore.add(Lang.getFor(player, "gui.ranks.baron_bending1"));

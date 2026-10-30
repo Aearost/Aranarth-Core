@@ -9,6 +9,7 @@ World & Events
 [~] Fixed snow not melting under trees when the snow on top of the leaves was removed
 
 Bending & Abilities
+[+] Implemented the PetalRush ability for plantbenders
 [~] EnergyBurst's fall auto-proc now only triggers after falling at least 10 blocks
 [~] Renamed CombustionStrike to CombustiveStrike
 [~] Fixed sneaking not standing players up from stairs and slabs at the arena spawn and other no-bending zones

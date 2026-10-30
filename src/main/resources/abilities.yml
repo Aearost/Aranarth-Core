@@ -351,6 +351,54 @@ LeafScythe:
   # How long a selected source stays valid
   SourcedTimeout: 5000
 
+PetalRush:
+  # The damage and cooldown of each cast are these values multiplied by the flowers sourced
+  DamagePerFlower: 1.0
+  CooldownPerFlower: 1000
+  ChargeDuration: 1500
+  # How far away a flower can be left-clicked to source it
+  SourceRange: 9.0
+  # How far (in degrees) a flower can be from the look direction and still be sourced
+  SourceAngle: 12.0
+  MaxFlowers: 9
+  # The cone's range grows by this much for each flower sourced
+  RangePerFlower: 1.0
+  # The cone's range before any flowers are added
+  BaseRange: 5.0
+  # The radius of the cone at its base, right in front of the player
+  StartRadius: 1.0
+  # The angle (in degrees) the edge of the cone widens at scales from the minimum (1 flower) to the maximum (MaxFlowers)
+  MinConeAngle: 15.0
+  MaxConeAngle: 25.0
+  # How long the cone's petals take to flow from its base to its end
+  TravelDuration: 600
+  # How long the cone stays animated, with the flowers' lines launching across it
+  RushDuration: 1000
+  # How long each flower's line takes to dash through the cone
+  LineDuration: 400
+  # The length of each flower's line
+  LineLength: 3.0
+  # Number of petal particles in each flower's line
+  LinePetals: 20
+  LinePetalSize: 1.0
+  # How far the lines sway from a straight path
+  WindAmplitude: 0.4
+  # How tightly the lines wind as they travel
+  WindFrequency: 0.9
+  # How long the petals take to fade once the rush ends
+  FadeDuration: 300
+  # Number of petal particles pulled from each sourced flower while charging
+  PetalsPerFlower: 4
+  # The size of the petals held behind the player while charging
+  HeldPetalSize: 0.4
+  # Number of petal particles flowing through the cone for each flower sourced
+  RushPetalsPerFlower: 6
+  # The size of the petals in the cone scales from the minimum (1 flower) to the maximum (MaxFlowers)
+  MinPetalSize: 0.4
+  MaxPetalSize: 0.7
+  # Each petal in the cone is randomly sized from its scaled size up to this many times larger
+  MaxPetalSizeMultiplier: 1.5
+
 RazorLeaves:
   Damage: 2.0
   Cooldown: 8000

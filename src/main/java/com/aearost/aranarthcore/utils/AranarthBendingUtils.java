@@ -72,6 +72,48 @@ public class AranarthBendingUtils {
     public static final Color SOUND_COLOR_PULSE = Color.fromRGB(100, 210, 255);
 
     /**
+     * Primary petal colour of every flower recognized by AranarthUtils.isFlower().
+     */
+    public static final Map<Material, Color> FLOWER_PETAL_COLORS = Map.ofEntries(
+            Map.entry(Material.DANDELION, Color.fromRGB(0xF5D63A)),
+            Map.entry(Material.POPPY, Color.fromRGB(0xED302C)),
+            Map.entry(Material.BLUE_ORCHID, Color.fromRGB(0x2ABFFD)),
+            Map.entry(Material.ALLIUM, Color.fromRGB(0xB878ED)),
+            Map.entry(Material.AZURE_BLUET, Color.fromRGB(0xE6EBEC)),
+            Map.entry(Material.RED_TULIP, Color.fromRGB(0xEB4A3F)),
+            Map.entry(Material.ORANGE_TULIP, Color.fromRGB(0xF0862F)),
+            Map.entry(Material.WHITE_TULIP, Color.fromRGB(0xF2F2F2)),
+            Map.entry(Material.PINK_TULIP, Color.fromRGB(0xF4B8D9)),
+            Map.entry(Material.OXEYE_DAISY, Color.fromRGB(0xF5F2E8)),
+            Map.entry(Material.CORNFLOWER, Color.fromRGB(0x466AEB)),
+            Map.entry(Material.LILY_OF_THE_VALLEY, Color.fromRGB(0xFFFFFF)),
+            Map.entry(Material.TORCHFLOWER, Color.fromRGB(0xE8752C)),
+            Map.entry(Material.PITCHER_PLANT, Color.fromRGB(0x6C8FD3)),
+            Map.entry(Material.CACTUS_FLOWER, Color.fromRGB(0xF07EB4)),
+            Map.entry(Material.OPEN_EYEBLOSSOM, Color.fromRGB(0xF59A3A)),
+            Map.entry(Material.CLOSED_EYEBLOSSOM, Color.fromRGB(0x8A8A9C)),
+            Map.entry(Material.WITHER_ROSE, Color.fromRGB(0x2B2B2B)),
+            Map.entry(Material.PINK_PETALS, Color.fromRGB(0xF5A9C8)),
+            Map.entry(Material.WILDFLOWERS, Color.fromRGB(0xF2D64B)),
+            Map.entry(Material.SPORE_BLOSSOM, Color.fromRGB(0xE06FA8)),
+            Map.entry(Material.SUNFLOWER, Color.fromRGB(0xFFCA2A)),
+            Map.entry(Material.LILAC, Color.fromRGB(0xD29BE6)),
+            Map.entry(Material.ROSE_BUSH, Color.fromRGB(0xD3262C)),
+            Map.entry(Material.PEONY, Color.fromRGB(0xEBB5E5)),
+            Map.entry(Material.CHORUS_FLOWER, Color.fromRGB(0x9D7FAE))
+    );
+
+    /**
+     * Gets the primary petal colour of the given flower.
+     *
+     * @param type The flower material.
+     * @return The petal colour, or white if the material is not a known flower.
+     */
+    public static Color getFlowerPetalColor(Material type) {
+        return FLOWER_PETAL_COLORS.getOrDefault(type, Color.WHITE);
+    }
+
+    /**
      * Hex colour used for the action bar electrocution message, matching LIGHTNING_DUST.
      */
     private static final TextColor ELECTROCUTION_COLOR = TextColor.fromHexString("#FFF050");

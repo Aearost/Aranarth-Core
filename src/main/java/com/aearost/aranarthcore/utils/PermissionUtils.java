@@ -298,6 +298,7 @@ public class PermissionUtils {
             perms.setPermission("bending.ability.toxicspores", true);
             perms.setPermission("bending.ability.leafscythe", true);
             perms.setPermission("bending.ability.rootsnare", true);
+            perms.setPermission("bending.ability.petalrush", true);
             perms.setPermission("bending.ability.energyburst", true);
             perms.setPermission("bending.ability.magmaglaives", true);
             perms.setPermission("bending.ability.moltenblast", true);
@@ -423,6 +424,7 @@ public class PermissionUtils {
         perms.setPermission("bending.ability.toxicspores", true);
         perms.setPermission("bending.ability.leafscythe", true);
         perms.setPermission("bending.ability.rootsnare", true);
+        perms.setPermission("bending.ability.petalrush", true);
         perms.setPermission("bending.ability.energyburst", true);
         perms.setPermission("bending.ability.magmaglaives", true);
         perms.setPermission("bending.ability.moltenblast", true);
@@ -781,6 +783,7 @@ public class PermissionUtils {
                     perms.setPermission("bending.ability.toxicspores", true);
                     perms.setPermission("bending.ability.leafscythe", true);
                     perms.setPermission("bending.ability.rootsnare", true);
+                    perms.setPermission("bending.ability.petalrush", true);
                     perms.setPermission("bending.ability.energyburst", true);
                     perms.setPermission("bending.ability.lightofraava", true);
                     perms.setPermission("bending.ability.magmaglaives", true);
@@ -976,6 +979,7 @@ public class PermissionUtils {
             perms.setPermission("bending.ability.vinewhip", true);            // plant
             perms.setPermission("bending.ability.leafscythe", true);          // plant
             perms.setPermission("bending.ability.rootsnare", true);           // plant
+            perms.setPermission("bending.ability.petalrush", true);           // plant
             perms.setPermission("bending.ability.sandstorm", true);           // sand
             perms.setPermission("bending.ability.burial", true);              // sand
             perms.setPermission("bending.ability.cablethrash", true);         // metal
