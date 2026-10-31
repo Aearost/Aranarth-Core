@@ -20,8 +20,6 @@ import org.bukkit.entity.*;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.Duration;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -41,12 +39,6 @@ public class AvatarUtils {
         SELECTED, ALREADY_REIGNING, NOT_ELIGIBLE, NONE_FOUND, BUSY
     }
 
-    // TODO Remove AUTO_SELECT_TIME, AUTO_SELECT_WINDOW and their checks once this time has passed. Successors must
-    //  stay automatic, and an empty list must then never auto-select, as it means the list failed to load
-    // The one-time automatic selection of the first Avatar (Survival only)
-    private static final ZonedDateTime AUTO_SELECT_TIME = ZonedDateTime.of(2026, 10, 31, 13, 0, 0, 0, ZoneId.of("America/New_York"));
-    // Stops the automatic selection from ever re-running later if the avatar list somehow failed to load
-    private static final Duration AUTO_SELECT_WINDOW = Duration.ofDays(7);
     private static final Duration INACTIVITY_LIMIT = Duration.ofDays(7);
     // Lets the end of a reign play out before the next Avatar rises
     private static final Duration SUCCESSOR_DELAY = Duration.ofMinutes(1);
@@ -73,7 +65,6 @@ public class AvatarUtils {
     private static long lastAvatarChangeAt = 0;
     // Stops a selection that keeps failing the same way from repeating in the logs every minute
     private static String lastSelectionSummary = null;
-    private static boolean isAutoSelectSkipLogged = false;
     // Incremented on every refresh so that mannequins from an older refresh are never spawned
     private static int mannequinGeneration = 0;
 
@@ -241,21 +232,15 @@ public class AvatarUtils {
      * Logs the state of the Avatar system once the server has started.
      */
     public static void logStartupStatus() {
-        ZonedDateTime now = ZonedDateTime.now(AUTO_SELECT_TIME.getZone());
         boolean isSmp = AranarthCore.isSmpServer();
         logInfo("Startup status: " + describeState() + ", scheduledChecks=" + !isSmp
                 + ", publicServer=" + AranarthCore.isPublicServer()
                 + ", database=" + DatabaseManager.isActive() + ", network=" + NetworkManager.isActive());
-        logInfo("Clock check: now=" + now + ", autoSelectTime=" + AUTO_SELECT_TIME
-                + ", minutesUntil=" + Duration.between(now, AUTO_SELECT_TIME).toMinutes());
         if (!isSmp && !NetworkManager.isActive()) {
             logWarning("The network is not active, so players on the other server cannot be selected");
         }
         if (!AranarthCore.isPublicServer()) {
             logWarning("This is a test server, so isSmpServer() is false and any test SMP runs the scheduled checks too");
-        }
-        if (!isSmp && now.isBefore(AUTO_SELECT_TIME) && getCurrentAvatar() != null) {
-            logWarning("The automatic selection will be skipped, as there is already a reigning Avatar");
         }
     }
 
@@ -370,34 +355,17 @@ public class AvatarUtils {
     }
 
     /**
-     * Logs the time remaining until the automatic selection, more often as it gets closer.
-     *
-     * @param now The current time.
-     */
-    private static void logCountdown(ZonedDateTime now) {
-        long minutes = Duration.between(now, AUTO_SELECT_TIME).toMinutes();
-        if (minutes <= 5 || minutes % 60 == 0 || (minutes <= 60 && minutes % 10 == 0)) {
-            logInfo("Automatic selection in " + minutes + " minute(s) at " + AUTO_SELECT_TIME + ": " + describeState()
-                    + ", onlineHere=" + Bukkit.getOnlinePlayers().size()
-                    + ", onlineRemote=" + (NetworkManager.isActive() ? NetworkManager.getInstance().getRemoteRoster().size() : "network inactive"));
-        }
-    }
-
-    /**
      * Runs the scheduled Avatar logic. Must only be called on the Survival server.
-     * Selects a new Avatar once the automatic selection time has passed if there currently is none, and
-     * ends the reign of an Avatar that has been inactive on every server for too long.
+     * Selects a successor once a reign has ended, and ends the reign of an Avatar that has been
+     * inactive on every server for too long.
      */
     public static void runScheduledChecks() {
-        ZonedDateTime now = ZonedDateTime.now(AUTO_SELECT_TIME.getZone());
-
         // A new Avatar is selected automatically, retrying each check until someone eligible is online
         Avatar avatar = getCurrentAvatar();
         if (avatar == null) {
-            if (now.isBefore(AUTO_SELECT_TIME)) {
-                logCountdown(now);
-            } else if (avatars.isEmpty() && !now.isBefore(AUTO_SELECT_TIME.plus(AUTO_SELECT_WINDOW))) {
-                logSelection("Automatic selection refused, the list is empty after the selection window: was it loaded?");
+            if (avatars.isEmpty()) {
+                // A reign that ended leaves an entry in the list, so an empty list means it failed to load
+                logSelection("Automatic selection refused, the list is empty: was it loaded?");
             } else if (System.currentTimeMillis() - lastReignEndedAt < SUCCESSOR_DELAY.toMillis()) {
                 logInfo("Waiting for the end of the last reign to play out before selecting a successor");
             } else {
@@ -405,11 +373,6 @@ public class AvatarUtils {
                 });
             }
             return;
-        }
-
-        if (!isAutoSelectSkipLogged && !now.isBefore(AUTO_SELECT_TIME)) {
-            isAutoSelectSkipLogged = true;
-            logInfo("Automatic selection not needed: " + describeState());
         }
 
         UUID uuid = avatar.getUuid();
