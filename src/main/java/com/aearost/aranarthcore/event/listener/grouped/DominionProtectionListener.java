@@ -356,6 +356,11 @@ public class DominionProtectionListener implements Listener {
      * Handles damage to tamed pets using PvP permission and relation-based defaults.
      */
     private void handlePetDamage(Player attacker, Tameable pet, EntityDamageEvent e) {
+        // The Avatar's pets are not protected by the dominion or wanderer PvP rules
+        if (pet.getOwner() != null && AvatarUtils.isCurrentAvatar(pet.getOwner().getUniqueId())) {
+            return;
+        }
+
         Dominion attackerDominion = DominionUtils.getPlayerDominion(attacker.getUniqueId());
         boolean petHasOwner = pet.getOwner() != null;
         Dominion targetDominion = petHasOwner ? DominionUtils.getPlayerDominion(pet.getOwner().getUniqueId()) : null;
@@ -448,6 +453,10 @@ public class DominionProtectionListener implements Listener {
             return;
         }
         if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
+            return;
+        }
+        // The Avatar's mount is not protected by the dominion or wanderer PvP rules
+        if (AvatarUtils.isCurrentAvatar(mountOwner.getUniqueId())) {
             return;
         }
 

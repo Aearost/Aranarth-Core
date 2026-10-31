@@ -71,6 +71,7 @@ import static com.aearost.aranarthcore.objects.CustomKeys.*;
  */
 public class AranarthUtils {
 
+    private static final int ARENA_SPAWN_RADIUS = 250;
     public static final Map<UUID, Boolean> playerInFaeBiome = new HashMap<>();
     public static final Map<UUID, Boolean> playerUnderground = new HashMap<>();
     public static final Map<UUID, Boolean> playerWasOnGround = new HashMap<>();
@@ -2353,6 +2354,50 @@ public class AranarthUtils {
     }
 
     /**
+     * Confirms if the input coordinate has the Spawn protections, being either Spawn or the arena spawn area.
+     *
+     * @param loc The location of the block or entity.
+     * @return Confirmation if the input coordinate has the Spawn protections.
+     */
+    public static boolean isProtectedSpawnLocation(Location loc) {
+        return isSpawnLocation(loc) || isArenaSpawnLocation(loc);
+    }
+
+    /**
+     * Provides the spawn location of the arena world.
+     *
+     * @return The spawn location of the arena world.
+     */
+    public static Location getArenaSpawnLocation() {
+        return new Location(Bukkit.getWorld("arena"), 0.5, 4, 0.5, 0, 0);
+    }
+
+    /**
+     * Provides the location that players respawn at after dying in the arena world.
+     *
+     * @return The respawn location of the arena world.
+     */
+    public static Location getArenaRespawnLocation() {
+        return new Location(Bukkit.getWorld("arena"), 0.5, 2, 54.5, 0, 0);
+    }
+
+    /**
+     * Confirms if the input coordinate is within the protected spawn area of the arena world.
+     *
+     * @param loc The location of the block or entity.
+     * @return Confirmation if the input coordinate is within the arena spawn area.
+     */
+    public static boolean isArenaSpawnLocation(Location loc) {
+        if (loc.getWorld() == null || !loc.getWorld().getName().equals("arena")) {
+            return false;
+        }
+
+        int x = loc.getBlockX();
+        int z = loc.getBlockZ();
+        return (x >= -ARENA_SPAWN_RADIUS && x <= ARENA_SPAWN_RADIUS) && (z >= -ARENA_SPAWN_RADIUS && z <= ARENA_SPAWN_RADIUS);
+    }
+
+    /**
      * Confirms if the input world has been disabled on this server via /ac disable.
      *
      * @param worldName The name of the world.
@@ -2859,7 +2904,7 @@ public class AranarthUtils {
      */
     public static void applySpawnBuffs() {
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (isSpawnLocation(player.getLocation())) {
+            if (isProtectedSpawnLocation(player.getLocation())) {
                 if (AranarthUtils.getPlayer(player.getUniqueId()).isUsingSpawnBoost()) {
                     player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 4));
                     player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 100, 2));

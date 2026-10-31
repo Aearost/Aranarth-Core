@@ -7,8 +7,6 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -51,8 +49,7 @@ public class CommandArena implements CommandExecutor {
 				return true;
 			}
 
-			Location arenaSpawn = new Location(Bukkit.getWorld("arena"), 0.5, 105, 0.5, 180, 0);
-			AranarthUtils.teleportPlayer(player, player.getLocation(), arenaSpawn, aranarthPlayer.isInAdminMode(), Lang.getFor(player, "teleport.title_arena"), Lang.getFor(player, "teleport.to_arena"), success -> {
+			AranarthUtils.teleportPlayer(player, player.getLocation(), AranarthUtils.getArenaSpawnLocation(), aranarthPlayer.isInAdminMode(), Lang.getFor(player, "teleport.title_arena"), Lang.getFor(player, "teleport.to_arena"), success -> {
 				if (success) {
 					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.to_arena")));
 				} else {

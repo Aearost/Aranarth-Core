@@ -240,16 +240,8 @@ public class AranarthCoreBendingListener implements Listener {
      * Returns true if bending should be blocked for the player at the given location.
      */
     private boolean isBendingRestricted(Player player, Location loc) {
-        if (AranarthUtils.isSpawnLocation(loc)) {
+        if (AranarthUtils.isProtectedSpawnLocation(loc)) {
             return true;
-        }
-        if (loc.getWorld() != null && loc.getWorld().getName().equals("arena")) {
-            int x = loc.getBlockX();
-            int y = loc.getBlockY();
-            int z = loc.getBlockZ();
-            if ((x >= -10 && x <= 10) && (y >= 100 && y <= 111) && (z >= -10 && z <= 10)) {
-                return true;
-            }
         }
         if (loc.getWorld() != null && loc.getWorld().getName().equals(ShopIslandUtils.SHOPS_WORLD)) {
             UUID owner = ShopIslandUtils.getIslandOwnerAtLocation(loc);

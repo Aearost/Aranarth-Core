@@ -117,6 +117,17 @@ public class AvatarUtils {
     }
 
     /**
+     * Confirms if the player is the current reigning Avatar.
+     *
+     * @param uuid The player's UUID.
+     * @return Confirmation if the player is the current reigning Avatar.
+     */
+    public static boolean isCurrentAvatar(UUID uuid) {
+        Avatar avatar = getCurrentAvatar();
+        return avatar != null && avatar.getUuid().equals(uuid);
+    }
+
+    /**
      * Provides the most recent Avatar whose reign has ended.
      *
      * @return The most recent Avatar whose reign has ended, or null if there is none.

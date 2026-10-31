@@ -616,10 +616,9 @@ public class AranarthCore extends JavaPlugin {
                 DiscordUtils.updateAllDiscordRoles();
                 Bukkit.getLogger().info(LOG_PREFIX + "Aranarth data has been saved");
 
-                // Resets the two bending arenas (Survival server only - arena world doesn't exist on SMP)
+                // Resets the bending arena (Survival server only - arena world doesn't exist on SMP)
                 if (!isSmpServer()) {
                     Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "arenas reset arena1");
-                    Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "arenas reset arena2");
                 }
 
                 AranarthUtils.removeInactiveLockedContainers();

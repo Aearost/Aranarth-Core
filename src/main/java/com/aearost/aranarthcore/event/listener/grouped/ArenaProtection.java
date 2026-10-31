@@ -10,15 +10,19 @@ import io.papermc.paper.event.player.PlayerOpenSignEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.player.*;
@@ -26,6 +30,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionType;
 
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -33,6 +38,26 @@ import java.util.UUID;
  * Handles preventing behaviour in the arena world.
  */
 public class ArenaProtection implements Listener {
+
+	/**
+	 * A sign at the arena spawn and the location in the arena that it brings the player to.
+	 */
+	private record ArenaDropOff(int signX, int signY, int signZ, double x, double y, double z, float yaw, float pitch) {
+		private boolean isSign(Location loc) {
+			return loc.getBlockX() == signX && loc.getBlockY() == signY && loc.getBlockZ() == signZ;
+		}
+	}
+
+	// The drop off locations of arena1, each with its own sign. The random teleport sign selects one of them.
+	private static final List<ArenaDropOff> ARENA1_DROP_OFFS = List.of(
+			new ArenaDropOff(10, 2, 59, 4960.5, 182, 4937.5, -45, 0),
+			new ArenaDropOff(-4, 2, 62, 4998.5, 180, 5069.5, -135, 0),
+			new ArenaDropOff(-8, 4, 59, 4969.5, 189, 5077.5, -135, 0),
+			new ArenaDropOff(8, 2, 66, 5022.5, 180, 4945.5, 0, 0),
+			new ArenaDropOff(1, 3, 68, 5044.5, 185, 5024.5, 45, 0),
+			new ArenaDropOff(-6, 8, 67, 5014.5, 252, 5068.5, -135, 0),
+			new ArenaDropOff(-7, 3, 73, 5078.5, 186.625, 5089.5, 135, 0)
+	);
 
 	public ArenaProtection(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
@@ -64,7 +89,7 @@ public class ArenaProtection implements Listener {
 	 */
 	@EventHandler
 	public void onBlockBreak(final BlockBreakEvent e) {
-		if (isArenaSpawn(e.getBlock().getLocation())) {
+		if (AranarthUtils.isArenaSpawnLocation(e.getBlock().getLocation())) {
 			if (!canModify(e.getPlayer())) {
 				e.setCancelled(true);
 				e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "access.no_break")));
@@ -83,6 +108,39 @@ public class ArenaProtection implements Listener {
 				e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "arena.cannot_place")));
 			}
 		}
+	}
+
+	/**
+	 * Prevents mobs from naturally spawning at the arena spawn.
+	 */
+	@EventHandler
+	public void onMobSpawn(CreatureSpawnEvent e) {
+		if (AranarthUtils.isArenaSpawnLocation(e.getLocation())) {
+			if (e.getEntityType() == EntityType.ARMOR_STAND || e.getEntityType() == EntityType.MANNEQUIN) {
+				return;
+			}
+			CreatureSpawnEvent.SpawnReason reason = e.getSpawnReason();
+			if (reason != CreatureSpawnEvent.SpawnReason.SPAWNER_EGG && reason != CreatureSpawnEvent.SpawnReason.COMMAND
+					&& reason != CreatureSpawnEvent.SpawnReason.CUSTOM) {
+				e.setCancelled(true);
+			}
+		}
+	}
+
+	/**
+	 * Prevents entity explosions from destroying blocks at the arena spawn.
+	 */
+	@EventHandler
+	public void onEntityExplode(EntityExplodeEvent e) {
+		e.blockList().removeIf(block -> AranarthUtils.isArenaSpawnLocation(block.getLocation()));
+	}
+
+	/**
+	 * Prevents block explosions from destroying blocks at the arena spawn.
+	 */
+	@EventHandler
+	public void onBlockExplode(BlockExplodeEvent e) {
+		e.blockList().removeIf(block -> AranarthUtils.isArenaSpawnLocation(block.getLocation()));
 	}
 
 	/**
@@ -132,23 +190,6 @@ public class ArenaProtection implements Listener {
 		if (e.getEntity().getWorld().getName().equalsIgnoreCase("arena")) {
 			e.setCancelled(true);
 		}
-	}
-
-	/**
-	 * Determines if the location is within the Arena spawn area.
-	 * @param loc The location.
-	 * @return Confirmation if the location is within the Arena spawn area.
-	 */
-	private boolean isArenaSpawn(Location loc) {
-		if (!loc.getWorld().getName().equals("arena")) {
-			return false;
-		}
-
-		int x = loc.getBlockX();
-		int y = loc.getBlockY();
-		int z = loc.getBlockZ();
-
-		return (x >= -10 && x <= 10) && (y >= 100 && y <= 111) && (z >= -10 && z <= 10);
 	}
 
 	private Double pendingArenaCap = null;
@@ -226,20 +267,6 @@ public class ArenaProtection implements Listener {
 	}
 
 	/**
-	 * Prevents players from dealing and taking damage at the arena spawn.
-	 */
-	@EventHandler
-	private void onDamage(EntityDamageEvent e) {
-		if (isArenaSpawn(e.getEntity().getLocation())) {
-			if (e.getDamageSource().getCausingEntity() instanceof Player attacker) {
-				attacker.sendMessage(ChatUtils.chatMessage(Lang.getFor(attacker, "spawn.no_harm_players")));
-			}
-			// Additionally prevents the target from being damaged, regardless of the source of damage
-			e.setCancelled(true);
-		}
-	}
-
-	/**
 	 * Adds functionality to the signs at the Arena spawn
 	 */
 	@EventHandler
@@ -248,58 +275,41 @@ public class ArenaProtection implements Listener {
 			Player player = e.getPlayer();
 			Location loc = e.getClickedBlock().getLocation();
 			if (loc.getWorld().getName().equalsIgnoreCase("arena")) {
-				// Small arena
-				if (loc.getBlockX() == -1 && loc.getBlockY() == 106 && loc.getBlockZ() == -3) {
-					e.setCancelled(true);
-					Location arenaLoc = new Location(Bukkit.getWorld("arena"), 1000, 101, 1000);
-					AranarthUtils.teleportPlayer(player, player.getLocation(), arenaLoc, true, Lang.getFor(player, "teleport.title_small_arena"), Lang.getFor(player, "arena.tp_small_success"), success -> {
-						if (success) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arena.tp_small_success")));
-						} else {
-							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arena.tp_small_fail")));
-						}
-					});
+				// Players in admin or architect mode can edit the signs instead of using them
+				if (canModify(player)) {
+					return;
 				}
-				// Large arena
-				else if (loc.getBlockX() == 1 && loc.getBlockY() == 106 && loc.getBlockZ() == -3) {
+
+				// Random teleport into arena1
+				if (loc.getBlockX() == 0 && loc.getBlockY() == 2 && loc.getBlockZ() == 56) {
 					e.setCancelled(true);
-					Location arenaLoc = null;
-					int locationNum = new Random().nextInt(5);
-					if (locationNum == 0) {
-						arenaLoc = new Location(Bukkit.getWorld("arena"), -1000, 101, -1000);
-					} else if (locationNum == 1) {
-						arenaLoc = new Location(Bukkit.getWorld("arena"), -960, 104, -1050, 45, 0);
-					} else if (locationNum == 2) {
-						arenaLoc = new Location(Bukkit.getWorld("arena"), -1068, 105, -1026, -45, 0);
-					} else if (locationNum == 3) {
-						arenaLoc = new Location(Bukkit.getWorld("arena"), -1042, 103, -937, -135, 0);
-					} else if (locationNum == 4) {
-						arenaLoc = new Location(Bukkit.getWorld("arena"), -940, 104, -947, 135, 0);
+					teleportToDropOff(player, ARENA1_DROP_OFFS.get(new Random().nextInt(ARENA1_DROP_OFFS.size())));
+					return;
+				}
+				// Specific drop off signs of arena1
+				for (ArenaDropOff dropOff : ARENA1_DROP_OFFS) {
+					if (dropOff.isSign(loc)) {
+						e.setCancelled(true);
+						teleportToDropOff(player, dropOff);
+						return;
 					}
-					AranarthUtils.teleportPlayer(player, player.getLocation(), arenaLoc, true, Lang.getFor(player, "teleport.title_large_arena"), Lang.getFor(player, "arena.tp_large_success"), success -> {
-						if (success) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arena.tp_large_success")));
-						} else {
-							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arena.tp_large_fail")));
-						}
-					});
 				}
 				// Arrows
-				else if (loc.getBlockX() == 1 && loc.getBlockY() == 106 && loc.getBlockZ() == 3) {
+				if (loc.getBlockX() == -7 && loc.getBlockY() == 2 && loc.getBlockZ() == 25) {
 					e.setCancelled(true);
 					for (int i = 0; i < 9; i++) {
 						player.getInventory().addItem(new ItemStack(Material.ARROW, 64));
 					}
 				}
 				// Iron Ingots
-				else if (loc.getBlockX() == 0 && loc.getBlockY() == 106 && loc.getBlockZ() == 3) {
+				else if (loc.getBlockX() == -7 && loc.getBlockY() == 2 && loc.getBlockZ() == 27) {
 					e.setCancelled(true);
 					for (int i = 0; i < 9; i++) {
 						player.getInventory().addItem(new ItemStack(Material.IRON_INGOT, 64));
 					}
 				}
 				// Water Bottles
-				else if (loc.getBlockX() == -1 && loc.getBlockY() == 106 && loc.getBlockZ() == 3) {
+				else if (loc.getBlockX() == -7 && loc.getBlockY() == 2 && loc.getBlockZ() == 26) {
 					e.setCancelled(true);
 					ItemStack bottle = new ItemStack(Material.POTION);
 					PotionMeta meta = (PotionMeta) bottle.getItemMeta();
@@ -311,6 +321,22 @@ public class ArenaProtection implements Listener {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Teleports the player to the arena drop off location.
+	 * @param player The player.
+	 * @param dropOff The drop off location.
+	 */
+	private void teleportToDropOff(Player player, ArenaDropOff dropOff) {
+		Location arenaLoc = new Location(Bukkit.getWorld("arena"), dropOff.x(), dropOff.y(), dropOff.z(), dropOff.yaw(), dropOff.pitch());
+		AranarthUtils.teleportPlayer(player, player.getLocation(), arenaLoc, true, Lang.getFor(player, "teleport.title_arena"), Lang.getFor(player, "arena.tp_success"), success -> {
+			if (success) {
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arena.tp_success")));
+			} else {
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arena.tp_fail")));
+			}
+		});
 	}
 
 	/**

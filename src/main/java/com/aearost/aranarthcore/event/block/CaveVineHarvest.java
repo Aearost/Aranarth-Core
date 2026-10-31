@@ -38,7 +38,7 @@ public class CaveVineHarvest {
 			return;
 		}
 
-		if (AranarthUtils.isSpawnLocation(block.getLocation())) {
+		if (AranarthUtils.isProtectedSpawnLocation(block.getLocation())) {
 			return;
 		}
 

@@ -42,7 +42,7 @@ public class SweetBerryHarvest {
 				return;
 			}
 
-			if (AranarthUtils.isSpawnLocation(block.getLocation())) {
+			if (AranarthUtils.isProtectedSpawnLocation(block.getLocation())) {
 				return;
 			}
 

@@ -348,7 +348,7 @@ public class AranarthBendingUtils {
             return true;
         }
         Location location = block.getLocation();
-        if (AranarthUtils.isSpawnLocation(location)) {
+        if (AranarthUtils.isProtectedSpawnLocation(location)) {
             return false;
         }
         if (block.getWorld().getName().equals(ShopIslandUtils.SHOPS_WORLD)) {

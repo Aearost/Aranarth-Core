@@ -35,7 +35,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class CropHarvest {
 
 	public void execute(BlockBreakEvent e) {
-		if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
+		if (AranarthUtils.isProtectedSpawnLocation(e.getBlock().getLocation())) {
 			return;
 		}
 

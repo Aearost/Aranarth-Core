@@ -88,5 +88,6 @@ Cross-server & Technical
 [~] /ac sudo now works on players who are on the other server
 [~] Fixed AranarthPlayer not loading in SMP when player had never joined
 [~] Added logic to auto-remove old bending ability values from the config when changing name or functionality
+[~] Updated the arena functionality to be based on the new arena
 
 Miscellaneous

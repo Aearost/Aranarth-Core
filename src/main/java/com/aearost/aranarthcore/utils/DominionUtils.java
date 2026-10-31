@@ -246,7 +246,7 @@ public class DominionUtils {
      * @return Whether the attacker may harm the target.
      */
     public static boolean canAttackPlayer(Player attacker, Player target) {
-        if (AranarthUtils.isSpawnLocation(target.getLocation()) || AranarthUtils.isSpawnLocation(attacker.getLocation())) {
+        if (AranarthUtils.isProtectedSpawnLocation(target.getLocation()) || AranarthUtils.isProtectedSpawnLocation(attacker.getLocation())) {
             return false;
         }
         return getPvpDenyMessage(attacker, target) == null;
@@ -267,6 +267,10 @@ public class DominionUtils {
         }
         // Spawn has its own protection
         if (AranarthUtils.isSpawnLocation(target.getLocation())) {
+            return null;
+        }
+        // The Avatar is never protected by the dominion or wanderer PvP rules
+        if (AvatarUtils.isCurrentAvatar(target.getUniqueId())) {
             return null;
         }
 

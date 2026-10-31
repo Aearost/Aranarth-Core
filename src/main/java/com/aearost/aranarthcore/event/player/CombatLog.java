@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.AvatarUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.Lang;
@@ -28,7 +29,8 @@ public class CombatLog {
 			if (e.getEntity() instanceof Player player) {
 				Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 				Dominion attackerDominion = DominionUtils.getPlayerDominion(attacker.getUniqueId());
-				if (playerDominion != null) {
+				// The Avatar is never protected by the dominion PvP rules, so is always combat tagged
+				if (playerDominion != null && !AvatarUtils.isCurrentAvatar(player.getUniqueId())) {
 					if (attackerDominion != null && attackerDominion.isSameDominion(playerDominion)) {
 						if (!playerDominion.isMemberPvpEnabled()) {
 							return;

@@ -250,7 +250,7 @@ public class GuiToggleClick {
                 if (aranarthPlayer.isUsingSpawnBoost()) {
                     aranarthPlayer.setUsingSpawnBoost(false);
                     player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.disabled", "feature", "the spawn boost effects")));
-                    if (AranarthUtils.isSpawnLocation(player.getLocation())) {
+                    if (AranarthUtils.isProtectedSpawnLocation(player.getLocation())) {
                         player.clearActivePotionEffects();
                     }
                 } else {

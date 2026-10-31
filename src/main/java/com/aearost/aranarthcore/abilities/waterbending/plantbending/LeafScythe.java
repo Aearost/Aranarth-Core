@@ -302,7 +302,7 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
         }
 
         // Same protection as harvesting by hand, where enemies may also harvest crops (including in outposts)
-        if (AranarthUtils.isSpawnLocation(block.getLocation())) {
+        if (AranarthUtils.isProtectedSpawnLocation(block.getLocation())) {
             return;
         }
         Dominion blockDominion = DominionUtils.getDominionOfChunkAnywhere(block.getChunk());

@@ -88,7 +88,7 @@ public class CommandToggle implements CommandExecutor {
 					if (aranarthPlayer.isUsingSpawnBoost()) {
 						aranarthPlayer.setUsingSpawnBoost(false);
 						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.spawnboost_disabled")));
-						if (AranarthUtils.isSpawnLocation(player.getLocation())) {
+						if (AranarthUtils.isProtectedSpawnLocation(player.getLocation())) {
 							player.clearActivePotionEffects();
 						}
 					} else {
