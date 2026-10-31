@@ -7,6 +7,7 @@ World & Events
 [~] Boost messages in Discord are now only sent when a boost is activated, when 1 hour is left, and when it expires
 [~] Storms now only end early when players sleep through the night
 [~] Fixed snow not melting under trees when the snow on top of the leaves was removed
+[~] Fixed armor being deleted or moved to another inventory when changing worlds, switching servers, logging out, or dying while invisible
 
 Bending & Abilities
 [+] Implemented the PetalRush ability for plantbenders

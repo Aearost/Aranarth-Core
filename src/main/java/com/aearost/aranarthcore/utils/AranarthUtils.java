@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.enums.PrefixStyle;
 import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.enums.WorldEvent;
+import com.aearost.aranarthcore.event.listener.misc.InvisibilityListener;
 import com.aearost.aranarthcore.event.listener.misc.PotionEffectListener;
 import com.aearost.aranarthcore.items.SugarcaneBlock;
 import com.aearost.aranarthcore.items.arrow.*;
@@ -574,6 +575,8 @@ public class AranarthUtils {
                 return;
             }
         } else {
+            // Invisibility removes the armor from the inventory, so it must be back on before that inventory is saved
+            InvisibilityListener.restoreArmorBeforeLeaving(player, currentWorld);
             // Survival effects are kept so they can be given back when the player returns
             if (currentWorld.startsWith("world")) {
                 aranarthPlayer.setSurvivalEffects(serializePotionEffects(player));

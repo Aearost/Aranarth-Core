@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.enums.PrefixStyle;
 import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.enums.WorldEvent;
+import com.aearost.aranarthcore.event.listener.misc.InvisibilityListener;
 import com.aearost.aranarthcore.event.world.WorldEventManager;
 import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
@@ -1869,6 +1870,8 @@ public class NetworkManager {
         // Closing first runs every GUI close handler (held shulker, quiver, potions, dominion food)
         // and returns the crafting grid and cursor, so the serialized inventory is the final one
         player.closeInventory();
+        // Invisibility stores the armor on this server's disk, so it must be in the inventory that gets handed off
+        InvisibilityListener.restoreArmorBeforeLeaving(player, player.getWorld().getName());
         // Nothing may change between serialization and the player leaving this server
         lockPlayer(uuid);
 

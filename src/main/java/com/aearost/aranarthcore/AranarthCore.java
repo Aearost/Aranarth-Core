@@ -1832,6 +1832,8 @@ public class AranarthCore extends JavaPlugin {
         Bukkit.getLogger().info(LOG_PREFIX + "[Shutdown] saveAll() called - " + onlinePlayers.size() + " player(s) still online.");
         for (Player p : onlinePlayers) {
             try {
+                // Quit events are not received during a shutdown, so the armor must be put back here to be saved
+                InvisibilityListener.restoreArmorBeforeLeaving(p, p.getWorld().getName());
                 // Both servers auto-restart around the same time, so SMP players can get bounced here
                 // seconds before this server also shuts down. SMP already saved their data and location,
                 // so writing ours would send them to Survival on next login and could overwrite SMP's data.

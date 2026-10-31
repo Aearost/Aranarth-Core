@@ -1,6 +1,8 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -8,6 +10,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent.Action;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
@@ -21,8 +24,10 @@ import org.bukkit.attribute.AttributeInstance;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -77,17 +82,47 @@ public class InvisibilityListener implements Listener {
     }
 
     /**
-     * If a player logs off while invisible, their armor file stays on disk.
-     * On next join it will be restored.
+     * Puts the armor back on before the quit listener saves the inventory, so that the saved
+     * inventory is complete on whichever server the player logs in to next.
      */
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerQuit(PlayerQuitEvent e) {
-        invisiblePlayers.remove(e.getPlayer().getUniqueId());
+        Player player = e.getPlayer();
+        restoreArmorBeforeLeaving(player, player.getWorld().getName());
+        invisiblePlayers.remove(player.getUniqueId());
     }
 
+    /**
+     * Death drops do not include the removed armor, so it is put back on before the armor-based
+     * death logic runs (i.e Soulbound) and is dropped along with the rest of the inventory.
+     */
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerDeath(PlayerDeathEvent e) {
+        Player player = e.getEntity();
+        if (invisiblePlayers.contains(player.getUniqueId())) {
+            // Any armor it displaces is already part of the drops, so it must not be dropped a second time
+            e.getDrops().addAll(restoreArmor(player, player.getWorld().getName(), false, false));
+        }
+    }
+
+    /**
+     * A file only remains at this point if the server did not shut down cleanly.
+     * Waits for the login inventory to be applied, as it would otherwise replace the armor.
+     */
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
-        restoreArmor(e.getPlayer());
+        Player player = e.getPlayer();
+        UUID uuid = player.getUniqueId();
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            if (!player.isOnline() || invisiblePlayers.contains(uuid)) {
+                return;
+            }
+            // The inventory on this server is not the player's while they wait to be routed elsewhere
+            if (NetworkManager.isActive() && NetworkManager.getInstance().isNonAuthoritative(uuid)) {
+                return;
+            }
+            restoreArmor(player, player.getWorld().getName(), true, true);
+        }, 60L);
     }
 
     public static boolean isInvisible(UUID uuid) {
@@ -95,6 +130,13 @@ public class InvisibilityListener implements Listener {
     }
 
     private static void saveAndRemoveArmor(Player player) {
+        // The effect may have ended or the player may have left since this was scheduled
+        if (!player.isOnline() || !player.hasPotionEffect(PotionEffectType.INVISIBILITY)) return;
+
+        // Overwriting an existing file would delete the armor stored in it
+        Path file = armorFile(player.getUniqueId(), player.getWorld().getName());
+        if (Files.exists(file)) return;
+
         PlayerInventory inv = player.getInventory();
         ItemStack[] armor = inv.getArmorContents();
 
@@ -117,8 +159,12 @@ public class InvisibilityListener implements Listener {
 
         byte[] data = ItemStack.serializeItemsAsBytes(armor);
         try {
-            Files.write(armorStoreDir.resolve(player.getUniqueId() + ".dat"), data);
-        } catch (IOException ex) { }
+            Files.write(file, data);
+        } catch (IOException ex) {
+            // The armor must stay on the player if there is no copy of it
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] Failed to store the armor of " + player.getName() + ": " + ex.getMessage());
+            return;
+        }
 
         inv.setHelmet(null);
         inv.setChestplate(null);
@@ -131,16 +177,78 @@ public class InvisibilityListener implements Listener {
     }
 
     public static void restoreArmor(Player player) {
-        Path file = armorStoreDir.resolve(player.getUniqueId() + ".dat");
-        if (!Files.exists(file)) return;
+        restoreArmor(player, player.getWorld().getName(), true, false);
+    }
+
+    /**
+     * Puts the armor back on before the player's inventory is saved and replaced.
+     *
+     * @param player The player.
+     * @param fromWorld The name of the world that the inventory being saved belongs to.
+     */
+    public static void restoreArmorBeforeLeaving(Player player, String fromWorld) {
+        if (!invisiblePlayers.contains(player.getUniqueId())) {
+            return;
+        }
+        // Some callers have already teleported the player, and creative or arena items must not land outside of their world
+        String fromGroup = AranarthUtils.getInventoryGroup(fromWorld);
+        boolean canDrop = fromGroup.equals("world") || fromGroup.equals(AranarthUtils.getInventoryGroup(player.getWorld().getName()));
+        restoreArmor(player, fromWorld, canDrop, false);
+    }
+
+    /**
+     * Puts the stored armor of the given world's inventory back on the player.
+     *
+     * @param player The player.
+     * @param world The name of the world that the armor was stored from.
+     * @param canDrop Whether armor that does not fit in the inventory may be dropped.
+     * @param isRecovery Whether this is after a crash, where the worn armor may already be the stored armor.
+     * @return The pieces that were put back on.
+     */
+    private static List<ItemStack> restoreArmor(Player player, String world, boolean canDrop, boolean isRecovery) {
+        List<ItemStack> restored = new ArrayList<>();
+        Path file = armorFile(player.getUniqueId(), world);
+        if (!Files.exists(file)) return restored;
 
         try {
-            byte[] data = Files.readAllBytes(file);
-            ItemStack[] armor = ItemStack.deserializeItemsFromBytes(data);
-            player.getInventory().setArmorContents(armor);
+            ItemStack[] armor = ItemStack.deserializeItemsFromBytes(Files.readAllBytes(file));
+            PlayerInventory inv = player.getInventory();
+            ItemStack[] worn = inv.getArmorContents();
+            List<ItemStack> displaced = new ArrayList<>();
+            for (int i = 0; i < armor.length; i++) {
+                boolean isWearing = worn[i] != null && !worn[i].getType().isAir();
+                if (armor[i] == null || armor[i].getType().isAir()
+                        || (isRecovery && isWearing && worn[i].getType() == armor[i].getType())) {
+                    armor[i] = worn[i];
+                    continue;
+                }
+                if (isWearing) {
+                    displaced.add(worn[i]);
+                }
+                restored.add(armor[i]);
+            }
+            inv.setArmorContents(armor);
+            for (ItemStack piece : displaced) {
+                for (ItemStack overflow : inv.addItem(piece).values()) {
+                    if (canDrop) {
+                        player.getWorld().dropItemNaturally(player.getLocation(), overflow);
+                    }
+                }
+            }
             Files.delete(file);
-        } catch (IOException ex) { }
+        } catch (IOException ex) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] Failed to restore the armor of " + player.getName() + ": " + ex.getMessage());
+        }
         storedArmorValues.remove(player.getUniqueId());
         invisiblePlayers.remove(player.getUniqueId());
+        return restored;
+    }
+
+    /**
+     * Provides the file storing the armor removed from the given world's inventory.
+     */
+    private static Path armorFile(UUID uuid, String world) {
+        String group = AranarthUtils.getInventoryGroup(world);
+        return armorStoreDir.resolve(group.equals("world") ? uuid + ".dat" : uuid + "_" + group + ".dat");
     }
 }
