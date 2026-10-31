@@ -125,7 +125,7 @@ public class PlayerRespawnEventListener implements Listener {
         Avatar avatar = AvatarUtils.getCurrentAvatar();
         if (avatar != null && AranarthUtils.isSurvivalWorld(world)) {
             if (avatar.getUuid().equals(player.getUniqueId())) {
-                AvatarUtils.removeCurrentAvatar();
+                AvatarUtils.removeCurrentAvatar("died in " + world);
             }
         }
     }

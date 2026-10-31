@@ -10,6 +10,10 @@ import com.destroystokyo.paper.profile.PlayerProfile;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.OfflineBendingPlayer;
+import com.projectkorra.projectkorra.ability.AvatarAbility;
+import com.projectkorra.projectkorra.ability.CoreAbility;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonParser;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import org.bukkit.*;
 import org.bukkit.entity.*;
@@ -22,6 +26,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 
 
 /**
@@ -36,11 +41,15 @@ public class AvatarUtils {
         SELECTED, ALREADY_REIGNING, NOT_ELIGIBLE, NONE_FOUND, BUSY
     }
 
+    // TODO Remove AUTO_SELECT_TIME, AUTO_SELECT_WINDOW and their checks once this time has passed. Successors must
+    //  stay automatic, and an empty list must then never auto-select, as it means the list failed to load
     // The one-time automatic selection of the first Avatar (Survival only)
     private static final ZonedDateTime AUTO_SELECT_TIME = ZonedDateTime.of(2026, 10, 31, 13, 0, 0, 0, ZoneId.of("America/New_York"));
     // Stops the automatic selection from ever re-running later if the avatar list somehow failed to load
     private static final Duration AUTO_SELECT_WINDOW = Duration.ofDays(7);
     private static final Duration INACTIVITY_LIMIT = Duration.ofDays(7);
+    // Lets the end of a reign play out before the next Avatar rises
+    private static final Duration SUCCESSOR_DELAY = Duration.ofMinutes(1);
     private static final String KEY_AVATAR_LAST_SEEN = "avatar_last_seen:";
     private static final String MANNEQUIN_TAG = "aranarth_avatar_mannequin";
     // x, y, z, yaw of each mannequin, the first being the current Avatar's spot
@@ -60,6 +69,11 @@ public class AvatarUtils {
     private static List<Avatar> avatars = new ArrayList<>();
     private static boolean isSelecting = false;
     private static long lastSeenSavedAt = 0;
+    private static long lastReignEndedAt = 0;
+    private static long lastAvatarChangeAt = 0;
+    // Stops a selection that keeps failing the same way from repeating in the logs every minute
+    private static String lastSelectionSummary = null;
+    private static boolean isAutoSelectSkipLogged = false;
     // Incremented on every refresh so that mannequins from an older refresh are never spawned
     private static int mannequinGeneration = 0;
 
@@ -107,7 +121,7 @@ public class AvatarUtils {
      *
      * @return The most recent Avatar whose reign has ended, or null if there is none.
      */
-    private static Avatar getPreviousAvatar() {
+    public static Avatar getPreviousAvatar() {
         for (int i = avatars.size() - 1; i >= 0; i--) {
             Avatar avatar = avatars.get(i);
             if (avatar != null && avatar != getCurrentAvatar()) {
@@ -118,28 +132,273 @@ public class AvatarUtils {
     }
 
     /**
+     * Logs a message about the Avatar system.
+     *
+     * @param message The message.
+     */
+    public static void logInfo(String message) {
+        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Avatar] " + message);
+    }
+
+    /**
+     * Logs a problem with the Avatar system.
+     *
+     * @param message The message.
+     */
+    public static void logWarning(String message) {
+        Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Avatar] " + message);
+    }
+
+    /**
+     * Logs a failure of the Avatar system along with its stack trace.
+     *
+     * @param message The message.
+     * @param ex      The cause of the failure.
+     */
+    public static void logError(String message, Throwable ex) {
+        Bukkit.getLogger().log(Level.SEVERE, AranarthCore.LOG_PREFIX + "[Avatar] " + message, ex);
+    }
+
+    /**
+     * Runs one step of a reign starting or ending. A step that fails is logged and the remaining steps
+     * still run, so that a Discord outage for example cannot stop the reign from being saved or announced.
+     *
+     * @param step The name of the step.
+     * @param task The step.
+     */
+    private static void runStep(String step, Runnable task) {
+        try {
+            task.run();
+        } catch (Exception e) {
+            logError("FAILED step: " + step, e);
+        }
+    }
+
+    /**
+     * Provides the player's name and UUID for the logs.
+     *
+     * @param uuid The player's UUID.
+     * @return The player's name and UUID.
+     */
+    public static String describe(UUID uuid) {
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+        String name = aranarthPlayer != null ? aranarthPlayer.getUsername() : Bukkit.getOfflinePlayer(uuid).getName();
+        return name + " (" + uuid + ")";
+    }
+
+    /**
+     * Provides the state of the avatar list for the logs.
+     *
+     * @return The state of the avatar list.
+     */
+    public static String describeState() {
+        Avatar current = getCurrentAvatar();
+        Avatar previous = getPreviousAvatar();
+        return "entries=" + avatars.size()
+                + ", current=" + (current == null ? "none" : describe(current.getUuid()) + "/" + current.getElement())
+                + ", previous=" + (previous == null ? "none" : describe(previous.getUuid()) + "/" + previous.getElement());
+    }
+
+    /**
+     * Provides the names of the elements for the logs, as their toString() includes colour codes.
+     *
+     * @param elements The elements.
+     * @return The names of the elements.
+     */
+    public static List<String> elementNames(Collection<? extends Element> elements) {
+        List<String> names = new ArrayList<>();
+        for (Element element : elements) {
+            names.add(element.getName());
+        }
+        return names;
+    }
+
+    /**
+     * Provides where the player currently is for the logs.
+     *
+     * @param uuid The player's UUID.
+     * @return Where the player currently is.
+     */
+    private static String describeLocation(UUID uuid) {
+        if (Bukkit.getPlayer(uuid) != null) {
+            return "online here";
+        }
+        return isOnlineRemotely(uuid) ? "online on the other server" : "offline";
+    }
+
+    /**
+     * Logs the state of the Avatar system once the server has started.
+     */
+    public static void logStartupStatus() {
+        ZonedDateTime now = ZonedDateTime.now(AUTO_SELECT_TIME.getZone());
+        boolean isSmp = AranarthCore.isSmpServer();
+        logInfo("Startup status: " + describeState() + ", scheduledChecks=" + !isSmp
+                + ", publicServer=" + AranarthCore.isPublicServer()
+                + ", database=" + DatabaseManager.isActive() + ", network=" + NetworkManager.isActive());
+        logInfo("Clock check: now=" + now + ", autoSelectTime=" + AUTO_SELECT_TIME
+                + ", minutesUntil=" + Duration.between(now, AUTO_SELECT_TIME).toMinutes());
+        if (!isSmp && !NetworkManager.isActive()) {
+            logWarning("The network is not active, so players on the other server cannot be selected");
+        }
+        if (!AranarthCore.isPublicServer()) {
+            logWarning("This is a test server, so isSmpServer() is false and any test SMP runs the scheduled checks too");
+        }
+        if (!isSmp && now.isBefore(AUTO_SELECT_TIME) && getCurrentAvatar() != null) {
+            logWarning("The automatic selection will be skipped, as there is already a reigning Avatar");
+        }
+    }
+
+    /**
+     * Compares the avatar list on this server with the list in MySQL and logs any difference, as a server
+     * that missed an update would overwrite the correct list on its next periodic save.
+     */
+    public static void verifyAgainstDatabase() {
+        if (!DatabaseManager.isActive() || System.currentTimeMillis() - lastAvatarChangeAt < 30_000) {
+            return;
+        }
+        JsonArray local = PersistenceUtils.avatarsToJson();
+        String localState = describeState();
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+            try {
+                String json = DatabaseManager.getInstance().loadAvatars();
+                if (json == null || json.isEmpty()) {
+                    if (!local.isEmpty()) {
+                        logWarning("DESYNC: this server has avatars but MySQL has none. Local: " + localState);
+                    }
+                    return;
+                }
+                JsonArray stored = JsonParser.parseString(json).getAsJsonObject().getAsJsonArray("avatars");
+                if (!local.equals(stored)) {
+                    logWarning("DESYNC: this server does not match MySQL. Local: " + localState
+                            + " | MySQL entries=" + stored.size() + ", last=" + (stored.isEmpty() ? "none" : stored.get(stored.size() - 1)));
+                }
+            } catch (Exception e) {
+                logError("Failed to compare the avatar list with MySQL", e);
+            }
+        });
+    }
+
+    /**
+     * Confirms that the player ended up with the correct elements, sub-elements, permissions and binds, once
+     * everything that changes them has run. Never changes anything, it only logs the result.
+     *
+     * @param uuid          The player's UUID.
+     * @param reason        What caused this check.
+     * @param formerElement The element the player should have if their reign ended, or null if they are the Avatar.
+     */
+    public static void scheduleStateCheck(UUID uuid, String reason, Character formerElement) {
+        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player == null) {
+                logInfo("State check (" + reason + ") skipped for " + describe(uuid) + ", they are " + describeLocation(uuid));
+                return;
+            }
+            // The reign changed again during the delay, and that change runs its own check
+            Avatar current = getCurrentAvatar();
+            boolean isAvatar = current != null && current.getUuid().equals(uuid);
+            if (isAvatar != (formerElement == null)) {
+                logInfo("State check (" + reason + ") skipped for " + describe(uuid) + ", the reign has since changed");
+                return;
+            }
+            BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+            if (bendingPlayer == null) {
+                logWarning("State check (" + reason + ") FAILED for " + describe(uuid) + ": their bending data never loaded");
+                return;
+            }
+
+            List<String> problems = new ArrayList<>();
+            boolean isInArena = player.getWorld().getName().equalsIgnoreCase("arena");
+            if (formerElement == null) {
+                for (Element element : List.of(Element.AIR, Element.WATER, Element.EARTH, Element.FIRE)) {
+                    if (!bendingPlayer.getElements().contains(element)) {
+                        problems.add("missing element " + element.getName());
+                    }
+                }
+                for (Element.SubElement sub : Element.SubElement.getSubElements()) {
+                    if (sub != Element.SubElement.BLOOD && sub != Element.SubElement.FLIGHT
+                            && sub != Element.SubElement.BLUE_FIRE && !bendingPlayer.hasSubElement(sub)) {
+                        problems.add("missing sub-element " + sub.getName());
+                    }
+                }
+                if (bendingPlayer.hasSubElement(Element.SubElement.BLOOD) == isInArena) {
+                    problems.add((isInArena ? "has" : "missing") + " Blood");
+                }
+                if (isInArena && bendingPlayer.hasSubElement(Element.SubElement.FLIGHT)) {
+                    problems.add("has Flight in the arena");
+                }
+                if (!player.hasPermission("bending.avatar")) {
+                    problems.add("missing permission bending.avatar");
+                }
+                if (player.hasPermission("bending.command.rechoose")) {
+                    problems.add("can still use rechoose");
+                }
+            } else {
+                List<Element> elements = bendingPlayer.getElements();
+                if (elements.size() != 1 || elements.getFirst().getName().charAt(0) != formerElement) {
+                    problems.add("expected only element " + formerElement);
+                }
+                if (player.hasPermission("bending.avatar")) {
+                    problems.add("still has permission bending.avatar");
+                }
+                for (String ability : bendingPlayer.getAbilities().values()) {
+                    if (CoreAbility.getAbility(ability) instanceof AvatarAbility) {
+                        problems.add("still has " + ability + " bound");
+                    }
+                }
+            }
+
+            String state = "elements=" + elementNames(bendingPlayer.getElements())
+                    + ", subElements=" + elementNames(bendingPlayer.getSubElements())
+                    + ", binds=" + bendingPlayer.getAbilities() + ", world=" + player.getWorld().getName();
+            if (problems.isEmpty()) {
+                logInfo("State check (" + reason + ") OK for " + describe(uuid) + ": " + state);
+            } else {
+                logWarning("State check (" + reason + ") FOUND PROBLEMS for " + describe(uuid) + ": " + problems + " | " + state);
+            }
+        }, 140L);
+    }
+
+    /**
+     * Logs the time remaining until the automatic selection, more often as it gets closer.
+     *
+     * @param now The current time.
+     */
+    private static void logCountdown(ZonedDateTime now) {
+        long minutes = Duration.between(now, AUTO_SELECT_TIME).toMinutes();
+        if (minutes <= 5 || minutes % 60 == 0 || (minutes <= 60 && minutes % 10 == 0)) {
+            logInfo("Automatic selection in " + minutes + " minute(s) at " + AUTO_SELECT_TIME + ": " + describeState()
+                    + ", onlineHere=" + Bukkit.getOnlinePlayers().size()
+                    + ", onlineRemote=" + (NetworkManager.isActive() ? NetworkManager.getInstance().getRemoteRoster().size() : "network inactive"));
+        }
+    }
+
+    /**
      * Runs the scheduled Avatar logic. Must only be called on the Survival server.
-     * Selects the first-ever Avatar once the automatic selection time has passed, and ends the reign
-     * of an Avatar that has been inactive on every server for too long.
+     * Selects a new Avatar once the automatic selection time has passed if there currently is none, and
+     * ends the reign of an Avatar that has been inactive on every server for too long.
      */
     public static void runScheduledChecks() {
         ZonedDateTime now = ZonedDateTime.now(AUTO_SELECT_TIME.getZone());
 
-        // The first-ever Avatar is selected automatically, retrying each check until someone eligible is online
-        if (avatars.isEmpty()) {
-            if (!now.isBefore(AUTO_SELECT_TIME) && now.isBefore(AUTO_SELECT_TIME.plus(AUTO_SELECT_WINDOW))) {
+        // A new Avatar is selected automatically, retrying each check until someone eligible is online
+        Avatar avatar = getCurrentAvatar();
+        if (avatar == null) {
+            if (now.isBefore(AUTO_SELECT_TIME)) {
+                logCountdown(now);
+            } else if (avatars.isEmpty() && !now.isBefore(AUTO_SELECT_TIME.plus(AUTO_SELECT_WINDOW))) {
+                logSelection("Automatic selection refused, the list is empty after the selection window: was it loaded?");
+            } else if (System.currentTimeMillis() - lastReignEndedAt < SUCCESSOR_DELAY.toMillis()) {
+                logInfo("Waiting for the end of the last reign to play out before selecting a successor");
+            } else {
                 selectAvatar(null, result -> {
-                    if (result == SelectionResult.NONE_FOUND) {
-                        Bukkit.getLogger().info("[AC] A new Avatar could not be selected, will try again next check");
-                    }
                 });
             }
             return;
         }
 
-        Avatar avatar = getCurrentAvatar();
-        if (avatar == null) {
-            return;
+        if (!isAutoSelectSkipLogged && !now.isBefore(AUTO_SELECT_TIME)) {
+            isAutoSelectSkipLogged = true;
+            logInfo("Automatic selection not needed: " + describeState());
         }
 
         UUID uuid = avatar.getUuid();
@@ -166,15 +425,18 @@ public class AvatarUtils {
                     }
                 }
             }
-            if (lastSeen <= 0 || System.currentTimeMillis() - lastSeen < INACTIVITY_LIMIT.toMillis()) {
+            if (lastSeen <= 0) {
+                logWarning("The last seen time of Avatar " + uuid + " is unknown, so their inactivity cannot be checked");
+                return;
+            }
+            if (System.currentTimeMillis() - lastSeen < INACTIVITY_LIMIT.toMillis()) {
                 return;
             }
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                 // The reign may have changed while the last seen time was being read
                 Avatar current = getCurrentAvatar();
                 if (current != null && current.getUuid().equals(uuid) && !isOnlineAnywhere(uuid)) {
-                    Bukkit.getLogger().info("[AC] Avatar " + Bukkit.getOfflinePlayer(uuid).getName() + " has been inactive for 7 days");
-                    removeCurrentAvatar();
+                    removeCurrentAvatar("inactive for 7 days");
                 }
             });
         });
@@ -212,18 +474,23 @@ public class AvatarUtils {
      */
     public static void selectAvatar(UUID target, Consumer<SelectionResult> callback) {
         if (getCurrentAvatar() != null) {
-            callback.accept(SelectionResult.ALREADY_REIGNING);
+            finishSelection(SelectionResult.ALREADY_REIGNING, "current=" + describe(getCurrentAvatar().getUuid()), callback);
             return;
         }
         if (isSelecting) {
-            callback.accept(SelectionResult.BUSY);
+            finishSelection(SelectionResult.BUSY, "a selection is already running", callback);
             return;
         }
 
         List<UUID> candidates = new ArrayList<>();
+        List<String> rejected = new ArrayList<>();
         if (target != null) {
             if (!isOnlineAnywhere(target)) {
-                callback.accept(SelectionResult.NOT_ELIGIBLE);
+                finishSelection(SelectionResult.NOT_ELIGIBLE, describe(target) + " is not online", callback);
+                return;
+            }
+            if (!isLoadable(target)) {
+                finishSelection(SelectionResult.NOT_ELIGIBLE, describe(target) + " has never been on this server, run this on the server they are on", callback);
                 return;
             }
             candidates.add(target);
@@ -232,11 +499,17 @@ public class AvatarUtils {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                 if (aranarthPlayer == null || !aranarthPlayer.isVanished()) {
                     candidates.add(player.getUniqueId());
+                } else {
+                    rejected.add(player.getName() + ": vanished");
                 }
             }
             if (NetworkManager.isActive()) {
                 for (NetworkPlayer networkPlayer : NetworkManager.getInstance().getRemoteRoster().values()) {
-                    if (!networkPlayer.isVanished() && !candidates.contains(networkPlayer.getUuid())) {
+                    if (networkPlayer.isVanished()) {
+                        rejected.add(networkPlayer.getUsername() + ": vanished");
+                    } else if (!isLoadable(networkPlayer.getUuid())) {
+                        rejected.add(networkPlayer.getUsername() + ": has never been on this server");
+                    } else if (!candidates.contains(networkPlayer.getUuid())) {
                         candidates.add(networkPlayer.getUuid());
                     }
                 }
@@ -244,7 +517,7 @@ public class AvatarUtils {
         }
 
         if (candidates.isEmpty()) {
-            callback.accept(SelectionResult.NONE_FOUND);
+            finishSelection(SelectionResult.NONE_FOUND, "no candidates, rejected=" + sorted(rejected), callback);
             return;
         }
 
@@ -252,9 +525,18 @@ public class AvatarUtils {
         isSelecting = true;
         Map<UUID, CompletableFuture<OfflineBendingPlayer>> futures = new LinkedHashMap<>();
         for (UUID uuid : candidates) {
+            // ProjectKorra keeps a copy from when they were last here, which may be from before they changed element
+            if (isOnlineRemotely(uuid)) {
+                BendingPlayer.getOfflinePlayers().remove(uuid);
+            }
+            // Copied so that the timeout cannot fail the future that ProjectKorra itself is waiting on
             futures.put(uuid, BendingPlayer.getOrLoadOfflineAsync(Bukkit.getOfflinePlayer(uuid))
+                    .copy()
                     .orTimeout(10, TimeUnit.SECONDS)
-                    .exceptionally(ex -> null));
+                    .exceptionally(ex -> {
+                        logWarning("Failed to load the bending data of candidate " + uuid + ": " + ex);
+                        return null;
+                    }));
         }
 
         CompletableFuture.allOf(futures.values().toArray(new CompletableFuture[0])).whenComplete((ignored, ex) ->
@@ -262,7 +544,7 @@ public class AvatarUtils {
                     isSelecting = false;
                     // Another selection may have completed in the meantime
                     if (getCurrentAvatar() != null) {
-                        callback.accept(SelectionResult.ALREADY_REIGNING);
+                        finishSelection(SelectionResult.ALREADY_REIGNING, "selected while the candidates were loading", callback);
                         return;
                     }
 
@@ -281,16 +563,26 @@ public class AvatarUtils {
                     List<UUID> shuffled = new ArrayList<>(futures.keySet());
                     Collections.shuffle(shuffled);
                     for (UUID uuid : shuffled) {
-                        Character element = getEligibleElement(futures.get(uuid).getNow(null));
-                        if (element == null || !isOnlineAnywhere(uuid)) {
+                        OfflineBendingPlayer bendingPlayer = futures.get(uuid).getNow(null);
+                        Character element = getEligibleElement(bendingPlayer);
+                        String name = describe(uuid);
+                        if (element == null) {
+                            rejected.add(name + ": no eligible element, data="
+                                    + (bendingPlayer == null ? "not loaded" : elementNames(bendingPlayer.getElements()).toString()));
+                            continue;
+                        }
+                        if (!isOnlineAnywhere(uuid)) {
+                            rejected.add(name + ": went offline");
                             continue;
                         }
                         // The element cycle is always respected
-                        if (requiredElement != null && element != requiredElement) {
+                        if (requiredElement != null && !requiredElement.equals(element)) {
+                            rejected.add(name + ": element " + element + " is not next in the cycle");
                             continue;
                         }
                         // A manually chosen player skips the last five rule
                         if (target == null && isOneOfLastFiveAvatars(uuid)) {
+                            rejected.add(name + ": one of the last five Avatars");
                             continue;
                         }
 
@@ -300,13 +592,64 @@ public class AvatarUtils {
                         if (!avatars.isEmpty() && avatars.get(avatars.size() - 1) == null) {
                             avatars.remove(avatars.size() - 1);
                         }
+                        logInfo("Selected " + name + " with element " + element + ", requiredElement=" + requiredElement
+                                + ", candidates=" + shuffled.size() + ", rejected=" + sorted(rejected));
                         setNewAvatar(avatar);
-                        DiscordUtils.addAvatarMessageToDiscord(avatar, true);
+                        runStep("posting the new Avatar to Discord", () -> DiscordUtils.addAvatarMessageToDiscord(avatar, true));
                         callback.accept(SelectionResult.SELECTED);
                         return;
                     }
-                    callback.accept(target != null ? SelectionResult.NOT_ELIGIBLE : SelectionResult.NONE_FOUND);
+                    finishSelection(target != null ? SelectionResult.NOT_ELIGIBLE : SelectionResult.NONE_FOUND,
+                            "requiredElement=" + requiredElement + ", candidates=" + shuffled.size()
+                                    + ", rejected=" + sorted(rejected), callback);
                 }));
+    }
+
+    /**
+     * Logs the result of a selection that did not select anyone and passes it on to the callback.
+     *
+     * @param result   The result of the selection.
+     * @param details  The reason for the result.
+     * @param callback Called with the result of the selection.
+     */
+    private static void finishSelection(SelectionResult result, String details, Consumer<SelectionResult> callback) {
+        logSelection("Selection result " + result + ": " + details);
+        callback.accept(result);
+    }
+
+    /**
+     * Logs the outcome of a selection, unless it is identical to the last one.
+     *
+     * @param summary The outcome of the selection.
+     */
+    private static void logSelection(String summary) {
+        if (!summary.equals(lastSelectionSummary)) {
+            lastSelectionSummary = summary;
+            logInfo(summary + " (identical repeats are not logged)");
+        }
+    }
+
+    /**
+     * Provides the list in a stable order, so that the same outcome always produces the same log message.
+     *
+     * @param list The list.
+     * @return The sorted list.
+     */
+    private static List<String> sorted(List<String> list) {
+        List<String> sorted = new ArrayList<>(list);
+        Collections.sort(sorted);
+        return sorted;
+    }
+
+    /**
+     * Determines if ProjectKorra can load the player's data on this server. Its loader fails when this server
+     * has no name for the player, which leaves them stuck as loading so that they could never bend here.
+     *
+     * @param uuid The player's UUID.
+     * @return Confirmation if the player's data can be loaded.
+     */
+    public static boolean isLoadable(UUID uuid) {
+        return Bukkit.getOfflinePlayer(uuid).getName() != null;
     }
 
     /**
@@ -320,7 +663,8 @@ public class AvatarUtils {
                 || bendingPlayer.getElements().contains(Element.CHI)) {
             return null;
         }
-        return bendingPlayer.getElements().getFirst().getName().charAt(0);
+        char element = bendingPlayer.getElements().getFirst().getName().charAt(0);
+        return "AWEF".indexOf(element) >= 0 ? element : null;
     }
 
     /**
@@ -352,88 +696,119 @@ public class AvatarUtils {
      * @param avatar The new Avatar.
      */
     public static void setNewAvatar(Avatar avatar) {
+        UUID uuid = avatar.getUuid();
         avatars.add(avatar);
-        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(avatar.getUuid());
+        lastAvatarChangeAt = System.currentTimeMillis();
+        lastSelectionSummary = null;
+        // The last seen time of the new Avatar is saved on the next check
+        lastSeenSavedAt = 0;
+        logInfo("REIGN STARTED: " + describe(uuid) + ", element=" + avatar.getElement() + ", they are "
+                + describeLocation(uuid) + ", " + describeState());
+
         // An Avatar on the other server is handled by that server once it receives the update
-        Player onlineAvatar = Bukkit.getPlayer(avatar.getUuid());
+        Player onlineAvatar = Bukkit.getPlayer(uuid);
         if (onlineAvatar != null) {
-            PermissionUtils.evaluatePlayerPermissions(onlineAvatar);
+            runStep("applying the new Avatar's permissions", () -> PermissionUtils.evaluatePlayerPermissions(onlineAvatar));
         }
-        PersistenceUtils.saveAvatars();
+        runStep("saving the avatars", PersistenceUtils::saveAvatars);
         if (NetworkManager.isActive()) {
-            NetworkManager.getInstance().publishAvatarUpdate(avatar.getUuid(), true);
+            runStep("sending the new Avatar to the other server", () -> NetworkManager.getInstance().publishAvatarUpdate(uuid, true));
+        } else {
+            logWarning("The network is not active, so the other server does not know about the new Avatar");
         }
 
         // Despawns the mannequins and then respawns them with the updated values
-        refreshAvatarMannequins();
+        runStep("refreshing the mannequins", AvatarUtils::refreshAvatarMannequins);
+        runStep("updating the tab list", AranarthUtils::updateTab);
 
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            int avVol = AranarthUtils.getPlayer(player.getUniqueId()).getAvatarSoundVolume();
-			if (avVol > 0) {
-				player.playSound(player, Sound.ENTITY_BREEZE_INHALE, avVol / 100f, 0.1F);
+        runStep("playing the new Avatar sound", () -> {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                int avVol = AranarthUtils.getPlayer(player.getUniqueId()).getAvatarSoundVolume();
+				if (avVol > 0) {
+					player.playSound(player, Sound.ENTITY_BREEZE_INHALE, avVol / 100f, 0.1F);
+				}
+            }
+			if (NetworkManager.isActive()) {
+				NetworkManager.getInstance().publishSoundAll("minecraft:entity.breeze.inhale", 1F, 0.1F);
 			}
-        }
-		if (NetworkManager.isActive()) {
-			NetworkManager.getInstance().publishSoundAll("minecraft:entity.breeze.inhale", 1F, 0.1F);
-		}
+        });
 
         // Adds a 2-second delay
         new BukkitRunnable() {
             @Override
             public void run() {
-                Lang.broadcast("avatar.new_risen", "player", aranarthPlayer.getNickname());
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    int avVol = AranarthUtils.getPlayer(player.getUniqueId()).getAvatarSoundVolume();
-					if (avVol > 0) {
-						player.playSound(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, avVol / 100f, 0.8F);
+                runStep("announcing the new Avatar", () -> {
+                    Lang.broadcast("avatar.new_risen", "player", AranarthUtils.getNickname(Bukkit.getOfflinePlayer(uuid)));
+                    for (Player player : Bukkit.getOnlinePlayers()) {
+                        int avVol = AranarthUtils.getPlayer(player.getUniqueId()).getAvatarSoundVolume();
+						if (avVol > 0) {
+							player.playSound(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, avVol / 100f, 0.8F);
+						}
+                    }
+					if (NetworkManager.isActive()) {
+						NetworkManager.getInstance().publishSoundAll("minecraft:ui.toast.challenge_complete", 1F, 0.8F);
 					}
-                }
-				if (NetworkManager.isActive()) {
-					NetworkManager.getInstance().publishSoundAll("minecraft:ui.toast.challenge_complete", 1F, 0.8F);
-				}
-                PersistenceUtils.saveAvatarBinds();
+                });
+                runStep("saving the new Avatar's binds", PersistenceUtils::saveAvatarBinds);
             }
         }.runTaskLater(AranarthCore.getInstance(), 30);
+
+        scheduleStateCheck(uuid, "reign started", null);
     }
 
     /**
      * Removes the current Avatar.
+     *
+     * @param reason Why the reign ended, for the logs.
      */
-    public static void removeCurrentAvatar() {
+    public static void removeCurrentAvatar(String reason) {
         Avatar oldAvatar = getCurrentAvatar();
         if (oldAvatar == null) {
+            logWarning("Asked to end the reign (" + reason + ") but there is no current Avatar");
             return;
         }
 
+        UUID uuid = oldAvatar.getUuid();
         oldAvatar.setEndInGame(DateUtils.getRawInGameDate());
         oldAvatar.setEndInRealLife(DateUtils.getRawInRealLifeDate());
         avatars.set(avatars.size() - 1, oldAvatar);
         avatars.add(null);
+        lastReignEndedAt = System.currentTimeMillis();
+        lastAvatarChangeAt = lastReignEndedAt;
+        lastSelectionSummary = null;
+        logInfo("REIGN ENDED: " + describe(uuid) + ", reason=" + reason + ", element=" + oldAvatar.getElement()
+                + ", they are " + describeLocation(uuid) + ", " + describeState());
+
         // An Avatar on the other server is handled by that server once it receives the update
-        if (!isOnlineRemotely(oldAvatar.getUuid())) {
-            PermissionUtils.updateAvatarPermissions(oldAvatar.getUuid(), true);
+        if (!isOnlineRemotely(uuid)) {
+            runStep("restoring the old Avatar's element", () -> PermissionUtils.updateAvatarPermissions(uuid, true));
         }
-        PersistenceUtils.saveAvatars();
+        runStep("saving the avatars", PersistenceUtils::saveAvatars);
         if (NetworkManager.isActive()) {
-            NetworkManager.getInstance().publishAvatarUpdate(oldAvatar.getUuid(), false);
+            runStep("sending the end of the reign to the other server", () -> NetworkManager.getInstance().publishAvatarUpdate(uuid, false));
+        } else {
+            logWarning("The network is not active, so the other server does not know the reign ended");
         }
 
         // Despawns the mannequins and then respawns them with the updated values
-        refreshAvatarMannequins();
+        runStep("refreshing the mannequins", AvatarUtils::refreshAvatarMannequins);
+        runStep("updating the tab list", AranarthUtils::updateTab);
 
-        DiscordUtils.addAvatarMessageToDiscord(oldAvatar, false);
+        runStep("posting the end of the reign to Discord", () -> DiscordUtils.addAvatarMessageToDiscord(oldAvatar, false));
 
-        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(oldAvatar.getUuid());
-        Lang.broadcast("avatar.deceased", "player", aranarthPlayer.getNickname());
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            int avVol = AranarthUtils.getPlayer(player.getUniqueId()).getAvatarSoundVolume();
-			if (avVol > 0) {
-				player.playSound(player, Sound.ENTITY_WITHER_DEATH, avVol / 100f, 1.5F);
+        runStep("announcing the end of the reign", () -> {
+            Lang.broadcast("avatar.deceased", "player", AranarthUtils.getNickname(Bukkit.getOfflinePlayer(uuid)));
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                int avVol = AranarthUtils.getPlayer(player.getUniqueId()).getAvatarSoundVolume();
+				if (avVol > 0) {
+					player.playSound(player, Sound.ENTITY_WITHER_DEATH, avVol / 100f, 1.5F);
+				}
+            }
+			if (NetworkManager.isActive()) {
+				NetworkManager.getInstance().publishSoundAll("minecraft:entity.wither.death", 1F, 1.5F);
 			}
-        }
-		if (NetworkManager.isActive()) {
-			NetworkManager.getInstance().publishSoundAll("minecraft:entity.wither.death", 1F, 1.5F);
-		}
+        });
+        scheduleStateCheck(uuid, "reign ended: " + reason, oldAvatar.getElement());
 
         // Adds a 2-second delay
         new BukkitRunnable() {
@@ -461,16 +836,39 @@ public class AvatarUtils {
      * @param isNewAvatar Whether the player became the Avatar, or their reign ended.
      */
     public static void applyRemoteUpdate(List<Avatar> newAvatars, UUID uuid, boolean isNewAvatar) {
+        Avatar localAvatar = getCurrentAvatar();
+        if (isNewAvatar && localAvatar != null && !localAvatar.getUuid().equals(uuid)) {
+            logWarning("TWO AVATARS: this server selected " + describe(localAvatar.getUuid()) + " while the other server selected "
+                    + describe(uuid) + ". The other server's choice is being applied here, check both servers with /avatar");
+        }
+        if (newAvatars.size() < avatars.size()) {
+            logWarning("The other server sent a shorter list (" + newAvatars.size() + ") than this server has (" + avatars.size() + ")");
+        }
+
         avatars = newAvatars;
+        lastAvatarChangeAt = System.currentTimeMillis();
+        lastSelectionSummary = null;
+        if (!isNewAvatar) {
+            lastReignEndedAt = lastAvatarChangeAt;
+        }
+        logInfo("Update from the other server: " + (isNewAvatar ? "reign started" : "reign ended") + " for "
+                + describe(uuid) + ", they are " + describeLocation(uuid) + ", " + describeState());
+
         Player player = Bukkit.getPlayer(uuid);
         if (player != null) {
             if (isNewAvatar) {
-                PermissionUtils.evaluatePlayerPermissions(player);
+                runStep("applying the new Avatar's permissions", () -> PermissionUtils.evaluatePlayerPermissions(player));
+                scheduleStateCheck(uuid, "reign started on the other server", null);
             } else {
-                PermissionUtils.updateAvatarPermissions(uuid, true);
+                runStep("restoring the old Avatar's element", () -> PermissionUtils.updateAvatarPermissions(uuid, true));
+                Avatar previousAvatar = getPreviousAvatar();
+                if (previousAvatar != null && previousAvatar.getUuid().equals(uuid)) {
+                    scheduleStateCheck(uuid, "reign ended on the other server", previousAvatar.getElement());
+                }
             }
         }
-        refreshAvatarMannequins();
+        runStep("refreshing the mannequins", AvatarUtils::refreshAvatarMannequins);
+        runStep("updating the tab list", AranarthUtils::updateTab);
     }
 
     /**
@@ -479,6 +877,7 @@ public class AvatarUtils {
     public static void refreshAvatarMannequins() {
         World spawn = Bukkit.getWorld("spawn");
         if (spawn == null) {
+            logInfo("Mannequins not refreshed, this server has no spawn world");
             return;
         }
         int generation = ++mannequinGeneration;
@@ -493,6 +892,7 @@ public class AvatarUtils {
      */
     private static void despawnAvatarMannequins(World spawn) {
         // Loads the chunks so that mannequins in unloaded chunks are not left behind as duplicates
+        int removed = 0;
         for (int chunkX = -2; chunkX <= 2; chunkX++) {
             for (int chunkZ = -1; chunkZ <= 3; chunkZ++) {
                 for (Entity entity : spawn.getChunkAt(chunkX, chunkZ).getEntities()) {
@@ -504,12 +904,14 @@ public class AvatarUtils {
                             }
                         }
                         mannequin.remove();
+                        removed++;
                     } else if (entity instanceof TextDisplay display && display.getScoreboardTags().contains(MANNEQUIN_TAG)) {
                         display.remove();
                     }
                 }
             }
         }
+        logInfo("Despawned " + removed + " mannequin(s)");
     }
 
     /**
@@ -520,10 +922,11 @@ public class AvatarUtils {
      */
     private static void respawnAvatarMannequins(World spawn, int generation) {
         if (avatars.isEmpty()) {
-            Bukkit.getLogger().info("[AC] There are no avatars");
+            logInfo("There are no avatars, so no mannequins are spawned");
             return;
         }
 
+        int queued = 0;
         for (int i = 0; i < MANNEQUIN_SPOTS.length; i++) {
             int avatarIndex = avatars.size() - 1 - i;
             if (avatarIndex < 0) {
@@ -536,7 +939,9 @@ public class AvatarUtils {
             }
             double[] spot = MANNEQUIN_SPOTS[i];
             spawnAvatar(new Location(spawn, spot[0], spot[1], spot[2], (float) spot[3], 0), avatar, generation);
+            queued++;
         }
+        logInfo("Queued " + queued + " mannequin(s) out of " + avatars.size() + " list entries, generation=" + generation);
     }
 
     /**
@@ -553,7 +958,14 @@ public class AvatarUtils {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             // Fetch and complete the profile (blocking Mojang API call)
             PlayerProfile profile = plugin.getServer().createProfile(uuid);
-            boolean completed = profile.complete(true); // Fetches the skin from Mojang
+            boolean isProfileComplete;
+            try {
+                isProfileComplete = profile.complete(true); // Fetches the skin from Mojang
+            } catch (Exception e) {
+                logWarning("The skin lookup failed for the mannequin of " + uuid + ": " + e);
+                isProfileComplete = false;
+            }
+            boolean completed = isProfileComplete;
 
             // Jump back to main thread to spawn the mannequin
             Bukkit.getScheduler().runTask(plugin, () -> {
@@ -562,27 +974,33 @@ public class AvatarUtils {
                     return;
                 }
 
-                Mannequin mannequin = (Mannequin) loc.getWorld().spawnEntity(loc, EntityType.MANNEQUIN);
-                // Mojang servers unreachable, so the skin is resolved from the UUID later instead
-                mannequin.setProfile(completed ? ResolvableProfile.resolvableProfile(profile)
-                        : ResolvableProfile.resolvableProfile().uuid(uuid).build());
-                mannequin.setInvulnerable(true);
-                mannequin.setGravity(false);
-                mannequin.setPersistent(true);
-                mannequin.setNoPhysics(false);
-                mannequin.setImmovable(true);
-                mannequin.addScoreboardTag(MANNEQUIN_TAG);
+                runStep("spawning the mannequin of " + describe(uuid), () -> {
+                    // The Mojang lookup can outlast the chunks staying loaded after the despawn
+                    loc.getChunk().load();
+                    Mannequin mannequin = (Mannequin) loc.getWorld().spawnEntity(loc, EntityType.MANNEQUIN);
+                    // Mojang servers unreachable, so the skin is resolved from the UUID later instead
+                    mannequin.setProfile(completed ? ResolvableProfile.resolvableProfile(profile)
+                            : ResolvableProfile.resolvableProfile().uuid(uuid).build());
+                    mannequin.setInvulnerable(true);
+                    mannequin.setGravity(false);
+                    mannequin.setPersistent(true);
+                    mannequin.setNoPhysics(false);
+                    mannequin.setImmovable(true);
+                    mannequin.addScoreboardTag(MANNEQUIN_TAG);
 
-                Location above = mannequin.getLocation().clone().add(0, 2, 0);
-                String elementSymbol = getElementSymbol(uuid, avatar);
-                String name = ChatUtils.translateToColor(elementSymbol + " &r"
-                        + AranarthUtils.getPlayer(uuid).getNickname() + " " + elementSymbol);
+                    Location above = mannequin.getLocation().clone().add(0, 2, 0);
+                    String elementSymbol = getElementSymbol(uuid, avatar);
+                    String name = ChatUtils.translateToColor(elementSymbol + " &r"
+                            + AranarthUtils.getNickname(Bukkit.getOfflinePlayer(uuid)) + " " + elementSymbol);
 
-                // Always will create a new text display
-                mannequin.getWorld().spawn(above, TextDisplay.class, displayEntity -> {
-                    displayEntity.setText(name);
-                    displayEntity.setBillboard(Display.Billboard.VERTICAL); // Pivots only around the vertical axis
-                    displayEntity.addScoreboardTag(MANNEQUIN_TAG);
+                    // Always will create a new text display
+                    mannequin.getWorld().spawn(above, TextDisplay.class, displayEntity -> {
+                        displayEntity.setText(name);
+                        displayEntity.setBillboard(Display.Billboard.VERTICAL); // Pivots only around the vertical axis
+                        displayEntity.addScoreboardTag(MANNEQUIN_TAG);
+                    });
+                    logInfo("Spawned the mannequin of " + describe(uuid) + " at " + loc.getBlockX() + ", " + loc.getBlockY()
+                            + ", " + loc.getBlockZ() + (completed ? "" : " without a Mojang skin lookup"));
                 });
             });
         });

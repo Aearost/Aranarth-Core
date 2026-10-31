@@ -2853,7 +2853,7 @@ public class PersistenceUtils {
         }
         // MySQL sync
         if (DatabaseManager.isActive()) {
-            runDbSync(PersistenceUtils::syncAvatarsToDatabase);
+            syncAvatarsToDatabase();
         }
     }
 
@@ -2943,7 +2943,7 @@ public class PersistenceUtils {
         }
         // MySQL sync (updates the same server_avatars table)
         if (DatabaseManager.isActive()) {
-            runDbSync(PersistenceUtils::syncAvatarsToDatabase);
+            syncAvatarsToDatabase();
         }
     }
 
@@ -7088,35 +7088,42 @@ public class PersistenceUtils {
         if (!DatabaseManager.isActive()) {
             return;
         }
-        DatabaseManager db = DatabaseManager.getInstance();
+        // Read before going async, as the BendingPlayer is removed shortly after the Avatar quits
         JsonArray avatarsArr = avatarsToJson();
-        JsonArray bindsArr = new JsonArray();
         Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
-        if (currentAvatar != null) {
-            BendingPlayer bp = BendingPlayer.getBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()));
-            if (bp != null) {
-                for (Map.Entry<Integer, String> bindEntry : bp.getAbilities().entrySet()) {
-                    JsonObject bind = new JsonObject();
-                    bind.addProperty("slot", bindEntry.getKey());
-                    bind.addProperty("ability", bindEntry.getValue());
-                    bindsArr.add(bind);
-                }
-            } else {
-                // The Avatar is not on this server, so the binds saved by the server they are on are kept
-                JsonArray storedBinds = loadStoredAvatarBinds(currentAvatar.getUuid());
+        UUID avatarUuid = currentAvatar != null ? currentAvatar.getUuid() : null;
+        BendingPlayer bp = avatarUuid != null ? BendingPlayer.getBendingPlayer(Bukkit.getOfflinePlayer(avatarUuid)) : null;
+        JsonArray onlineBinds = new JsonArray();
+        if (bp != null) {
+            for (Map.Entry<Integer, String> bindEntry : bp.getAbilities().entrySet()) {
+                JsonObject bind = new JsonObject();
+                bind.addProperty("slot", bindEntry.getKey());
+                bind.addProperty("ability", bindEntry.getValue());
+                onlineBinds.add(bind);
+            }
+        }
+        boolean isAvatarHere = bp != null;
+
+        runDbSync(() -> {
+            JsonArray bindsArr = onlineBinds;
+            // The Avatar is not on this server, so the binds saved by the server they are on are kept
+            if (avatarUuid != null && !isAvatarHere) {
+                JsonArray storedBinds = loadStoredAvatarBinds(avatarUuid);
                 if (storedBinds != null) {
                     bindsArr = storedBinds;
                 }
             }
-        }
-        JsonObject root = new JsonObject();
-        root.add("avatars", avatarsArr);
-        root.add("binds", bindsArr);
-        try {
-            db.saveAvatars(GSON.toJson(root));
-        } catch (Exception e) {
-            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync avatars: " + e.getMessage());
-        }
+            JsonObject root = new JsonObject();
+            root.add("avatars", avatarsArr);
+            root.add("binds", bindsArr);
+            try {
+                DatabaseManager.getInstance().saveAvatars(GSON.toJson(root));
+                AvatarUtils.logInfo("Saved to MySQL: entries=" + avatarsArr.size() + ", binds=" + bindsArr.size()
+                        + (isAvatarHere ? " from this server" : " kept from the last save"));
+            } catch (Exception e) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync avatars: " + e.getMessage());
+            }
+        });
     }
 
     /**
@@ -7205,26 +7212,35 @@ public class PersistenceUtils {
         if (currentAvatar == null) {
             return;
         }
-        if (!DatabaseManager.isActive()) {
-            loadAvatarBinds();
-            return;
-        }
         UUID uuid = currentAvatar.getUuid();
-        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
-            JsonArray bindsArr = loadStoredAvatarBinds(uuid);
-            if (bindsArr == null) {
+        // Binds applied before ProjectKorra finishes loading the player would be overwritten by its load
+        BendingPlayer.getOrLoadOfflineAsync(Bukkit.getOfflinePlayer(uuid)).thenAccept(loaded -> {
+            if (!DatabaseManager.isActive()) {
+                loadAvatarBinds();
                 return;
             }
-            Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
-                OfflineBendingPlayer bendingPlayer = BendingPlayer.getOfflineBendingPlayer(Bukkit.getOfflinePlayer(uuid).getName());
-                if (bendingPlayer == null) {
+            Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+                JsonArray bindsArr = loadStoredAvatarBinds(uuid);
+                if (bindsArr == null) {
+                    AvatarUtils.logInfo("No stored binds to apply for " + uuid + ", keeping their ProjectKorra binds");
                     return;
                 }
-                for (com.google.gson.JsonElement bindEl : bindsArr) {
-                    JsonObject bind = bindEl.getAsJsonObject();
-                    bendingPlayer.bindAbility(bind.get("ability").getAsString(), bind.get("slot").getAsInt());
-                }
+                Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+                    OfflineBendingPlayer bendingPlayer = BendingPlayer.getOfflineBendingPlayer(Bukkit.getOfflinePlayer(uuid).getName());
+                    if (bendingPlayer == null) {
+                        AvatarUtils.logWarning("Could not apply the stored binds of " + uuid + ", they left or never loaded");
+                        return;
+                    }
+                    for (com.google.gson.JsonElement bindEl : bindsArr) {
+                        JsonObject bind = bindEl.getAsJsonObject();
+                        bendingPlayer.bindAbility(bind.get("ability").getAsString(), bind.get("slot").getAsInt());
+                    }
+                    AvatarUtils.logInfo("Applied " + bindsArr.size() + " stored bind(s) to " + AvatarUtils.describe(uuid));
+                });
             });
+        }).exceptionally(ex -> {
+            AvatarUtils.logError("FAILED to apply the stored binds of " + uuid, ex);
+            return null;
         });
     }
 
@@ -9678,6 +9694,7 @@ public class PersistenceUtils {
         if (json == null || json.isEmpty()) {
             loadAvatars();
             loadAvatarBinds();
+            AvatarUtils.logWarning("MySQL had no avatars, loaded from the files instead: " + AvatarUtils.describeState());
             return;
         }
         Bukkit.getLogger().info("[AC] Loading avatars from MySQL...");
@@ -9702,8 +9719,9 @@ public class PersistenceUtils {
                 }
             }
             Bukkit.getLogger().info("[AC] Avatars initialized from MySQL");
+            AvatarUtils.logInfo("Loaded from MySQL: " + AvatarUtils.describeState());
         } catch (Exception e) {
-            Bukkit.getLogger().warning("[AC] Failed to parse avatars from DB: " + e.getMessage());
+            AvatarUtils.logError("FAILED to parse the avatars from MySQL, falling back to the files", e);
             loadAvatars();
             loadAvatarBinds();
         }

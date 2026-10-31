@@ -651,6 +651,9 @@ public class AranarthCore extends JavaPlugin {
             // Refreshes the mannequins in case the Avatars changed while this server was offline
             Bukkit.getScheduler().runTaskLater(this, AvatarUtils::refreshAvatarMannequins, 200);
         }
+        Bukkit.getScheduler().runTaskLater(this, AvatarUtils::logStartupStatus, 200);
+        // Run every 5 minutes - logs if this server's Avatars no longer match MySQL
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, AvatarUtils::verifyAgainstDatabase, 6000, 6000);
 
         // Check every 5 seconds to update Aranarthium effects, and to see if it is a new day
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {

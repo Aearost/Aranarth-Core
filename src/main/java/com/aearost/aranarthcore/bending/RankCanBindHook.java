@@ -1,7 +1,10 @@
 package com.aearost.aranarthcore.bending;
 
+import com.aearost.aranarthcore.objects.Avatar;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.AvatarUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
+import com.projectkorra.projectkorra.ability.AvatarAbility;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.hooks.CanBindHook;
 import org.bukkit.entity.Player;
@@ -84,6 +87,14 @@ public class RankCanBindHook implements CanBindHook {
 
     @Override
     public @NotNull Optional<Boolean> canBind(@NotNull BendingPlayer bPlayer, @NotNull CoreAbility ability) {
+        Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
+        boolean isAvatar = currentAvatar != null && currentAvatar.getUuid().equals(bPlayer.getUUID());
+        // Some addons such as JedCore's ElementSphere opt out of ProjectKorra's check, and the permissions
+        // must stay true so that the abilities remain visible in /b d avatar
+        if (ability instanceof AvatarAbility && !isAvatar) {
+            return Optional.of(false);
+        }
+
         Integer minRank = ABILITY_MIN_RANKS.get(ability.getName().toLowerCase());
         if (minRank == null) {
             return Optional.empty();
@@ -94,6 +105,10 @@ public class RankCanBindHook implements CanBindHook {
         }
         // All rank-locked abilities are available in the arena, blood and flight are still blocked by their permissions
         if (player.getWorld().getName().equalsIgnoreCase("arena")) {
+            return Optional.empty();
+        }
+        // The Avatar has mastered all elements, so they are not held back by their rank
+        if (isAvatar) {
             return Optional.empty();
         }
         int rank = AranarthUtils.getPlayer(player.getUniqueId()).getRank();

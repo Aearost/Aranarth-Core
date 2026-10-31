@@ -51,7 +51,7 @@ public class PunishmentUtils {
                 // A banned Avatar's reign ends right away
                 Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
                 if (currentAvatar != null && currentAvatar.getUuid().equals(uuid)) {
-                    AvatarUtils.removeCurrentAvatar();
+                    AvatarUtils.removeCurrentAvatar("banned");
                 }
             }
             case UNBAN -> {

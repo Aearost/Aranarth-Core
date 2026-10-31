@@ -175,7 +175,7 @@ public class PlayerServerJoinListener implements Listener {
         } else if (avatar.getUuid().equals(player.getUniqueId())) {
             player.sendMessage("  " + Lang.getFor(player, "motd.avatar_self"));
         } else {
-            String avatarNickname = AranarthUtils.getPlayer(avatar.getUuid()).getNickname();
+            String avatarNickname = AranarthUtils.getNickname(Bukkit.getOfflinePlayer(avatar.getUuid()));
             String element = "";
             if (avatar.getElement() == 'W') {
                 element = "&b水";
@@ -343,8 +343,6 @@ public class PlayerServerJoinListener implements Listener {
         if (AvatarUtils.getCurrentAvatar() != null) {
             // Called to bind the Avatar's abilities to prevent loss of avatar abilities
             if (AvatarUtils.getCurrentAvatar().getUuid().equals(player.getUniqueId())) {
-                PersistenceUtils.applyAvatarBindsOnJoin();
-
                 // Adds a 2-second delay
                 new BukkitRunnable() {
                     @Override
@@ -384,6 +382,12 @@ public class PlayerServerJoinListener implements Listener {
 
         // Permissions must be applied before nickname check is done
         PermissionUtils.evaluatePlayerPermissions(player);
+
+        if (AvatarUtils.getCurrentAvatar() != null && AvatarUtils.getCurrentAvatar().getUuid().equals(player.getUniqueId())) {
+            AvatarUtils.logInfo("The Avatar " + AvatarUtils.describe(player.getUniqueId()) + " joined this server");
+            PersistenceUtils.applyAvatarBindsOnJoin();
+            AvatarUtils.scheduleStateCheck(player.getUniqueId(), "joined the server", null);
+        }
 
         // Clears a player's nickname if they do not have permission for one
         if (!player.hasPermission("aranarth.nick")) {
@@ -1117,6 +1121,7 @@ public class PlayerServerJoinListener implements Listener {
         if (player == null || !player.isOnline()) {
             return;
         }
+        PermissionUtils.restoreOldAvatarElement(player);
         PermissionUtils.updateSubElements(player);
 
         // Apply active elemental world event permissions now that BendingPlayer is loaded

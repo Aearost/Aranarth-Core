@@ -673,34 +673,38 @@ public class DiscordUtils {
 
 		Guild guild = getGuild();
 
-		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(avatar.getUuid());
 		String uuidNoDashes = avatar.getUuid().toString().replaceAll("-", "");
 		String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
 		Role role = guild.getRoleById(discordRole("avatar"));
+		if (role == null) {
+			AvatarUtils.logWarning("The Avatar Discord role could not be found, so it was not updated for " + username);
+		}
+		Consumer<Throwable> onSendFailure = ex -> AvatarUtils.logError("A Discord message about Avatar " + username + " could not be sent", ex);
 
 		// If it is a player who has become the Avatar
 		if (isNewAvatar) {
 			EmbedBuilder embed = new EmbedBuilder()
 					.setAuthor("Avatar " + username + " has risen!", null, url)
 					.setColor(Color.MAGENTA);
-			if (playerDiscordId != null) {
+			if (playerDiscordId != null && role != null) {
 				guild.addRoleToMember(playerDiscordId, role).queue(null, unlinkIfUnknownMember(avatar.getUuid()));
 			}
-			serverChatChannel.sendMessageEmbeds(embed.build()).queue();
-			roleChangesChannel.sendMessageEmbeds(embed.build()).queue();
-			notifications.sendMessageEmbeds(embed.build()).queue();
+			serverChatChannel.sendMessageEmbeds(embed.build()).queue(null, onSendFailure);
+			roleChangesChannel.sendMessageEmbeds(embed.build()).queue(null, onSendFailure);
+			notifications.sendMessageEmbeds(embed.build()).queue(null, onSendFailure);
 		}
 		// If the avatar has deceased
 		else {
 			EmbedBuilder embed = new EmbedBuilder()
 					.setAuthor("Avatar " + username + " has deceased...", null, url)
 					.setColor(Color.MAGENTA);
-			if (playerDiscordId != null) {
+			if (playerDiscordId != null && role != null) {
 				guild.removeRoleFromMember(playerDiscordId, role).queue(null, unlinkIfUnknownMember(avatar.getUuid()));
 			}
-			serverChatChannel.sendMessageEmbeds(embed.build()).queue();
-			roleChangesChannel.sendMessageEmbeds(embed.build()).queue();
+			serverChatChannel.sendMessageEmbeds(embed.build()).queue(null, onSendFailure);
+			roleChangesChannel.sendMessageEmbeds(embed.build()).queue(null, onSendFailure);
 		}
+		AvatarUtils.logInfo("Posted the " + (isNewAvatar ? "new Avatar" : "end of the reign") + " to Discord for " + username);
 	}
 
 	/**

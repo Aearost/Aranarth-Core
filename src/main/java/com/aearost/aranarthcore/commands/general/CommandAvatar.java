@@ -1,11 +1,11 @@
 package com.aearost.aranarthcore.commands.general;
 
-import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Avatar;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.AvatarUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -35,8 +35,8 @@ public class CommandAvatar implements CommandExecutor {
 				return true;
 			}
 			String element = AvatarUtils.getElementSymbol(currentAvatar.getUuid(), currentAvatar);
-			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(currentAvatar.getUuid());
-			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "avatar.current", "element", element, "player", aranarthPlayer.getNickname())));
+			String nickname = AranarthUtils.getNickname(Bukkit.getOfflinePlayer(currentAvatar.getUuid()));
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "avatar.current", "element", element, "player", nickname)));
 			return true;
 		}
 
@@ -56,7 +56,7 @@ public class CommandAvatar implements CommandExecutor {
 				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "bending.no_avatar")));
 				return true;
 			}
-			AvatarUtils.removeCurrentAvatar();
+			AvatarUtils.removeCurrentAvatar("/avatar end by " + sender.getName());
 			return true;
 		}
 
@@ -76,7 +76,9 @@ public class CommandAvatar implements CommandExecutor {
 		}
 
 		String targetName = args.length >= 2 ? args[1] : "";
+		AvatarUtils.logInfo(sender.getName() + " ran /avatar set " + targetName);
 		AvatarUtils.selectAvatar(target, result -> {
+			AvatarUtils.logInfo("/avatar set by " + sender.getName() + " finished with " + result);
 			switch (result) {
 				case ALREADY_REIGNING -> sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "avatar.already_reigning")));
 				case NOT_ELIGIBLE -> sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "avatar.not_eligible", "player", targetName)));
