@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.event.listener.misc.PotionEffectListener;
 import com.aearost.aranarthcore.event.mob.MountListener;
 import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.utils.AbilityConfig;
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.projectkorra.projectkorra.Element;
@@ -654,7 +655,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
             double upOffset = Math.sin(angle) * 0.22;
             Location particleLoc = chest.clone()
                     .add(right.getX() * rightOffset, upOffset, right.getZ() * rightOffset);
-            world.spawnParticle(Particle.DUST, particleLoc, 1, 0, 0, 0, 0, dustOptions);
+            AranarthBendingUtils.spawnParticle(world, Particle.DUST, particleLoc, 1, 0, 0, 0, 0, dustOptions);
         }
 
         // Trailing tendrils below the oval, animated
@@ -665,7 +666,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
             double downOffset = 0.18 + i * 0.12;
             Location tendrilLoc = chest.clone()
                     .add(right.getX() * (sideOffset + wave), -downOffset, right.getZ() * (sideOffset + wave));
-            world.spawnParticle(Particle.DUST, tendrilLoc, 1, 0, 0, 0, 0, dustOptions);
+            AranarthBendingUtils.spawnParticle(world, Particle.DUST, tendrilLoc, 1, 0, 0, 0, 0, dustOptions);
         }
     }
 

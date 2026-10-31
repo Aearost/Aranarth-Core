@@ -417,26 +417,26 @@ public class IceDiscs extends IceAbility implements AddonAbility, ComboAbility {
     private void spawnFormationParticles() {
         final double yOffset = this.currentLayers > 8 ? 1.1 : 0.1;
         final Location loc = this.pillarBase.clone().add(0.5, yOffset, 0.5);
-        loc.getWorld().spawnParticle(Particle.SNOWFLAKE, loc, 5, 0.25, 0.1, 0.25, 0.03);
-        loc.getWorld().spawnParticle(Particle.BLOCK, loc, 4, 0.25, 0.1, 0.25, 0.05, Material.SNOW.createBlockData());
+        AranarthBendingUtils.spawnParticle(loc.getWorld(), Particle.SNOWFLAKE, loc, 5, 0.25, 0.1, 0.25, 0.03);
+        AranarthBendingUtils.spawnParticle(loc.getWorld(), Particle.BLOCK, loc, 4, 0.25, 0.1, 0.25, 0.05, Material.SNOW.createBlockData());
     }
 
     private void spawnTrailParticles(final Location loc) {
-        loc.getWorld().spawnParticle(Particle.SNOWFLAKE, loc, 3, 0.1, 0.1, 0.1, 0.02);
-        loc.getWorld().spawnParticle(Particle.BLOCK, loc, 2, 0.1, 0.1, 0.1, 0.02, Material.ICE.createBlockData());
+        AranarthBendingUtils.spawnParticle(loc.getWorld(), Particle.SNOWFLAKE, loc, 3, 0.1, 0.1, 0.1, 0.02);
+        AranarthBendingUtils.spawnParticle(loc.getWorld(), Particle.BLOCK, loc, 2, 0.1, 0.1, 0.1, 0.02, Material.ICE.createBlockData());
     }
 
     private void spawnImpactParticles(final Location loc) {
-        loc.getWorld().spawnParticle(Particle.SNOWFLAKE, loc, 8, 0.2, 0.2, 0.2, 0.05);
-        loc.getWorld().spawnParticle(Particle.BLOCK, loc, 6, 0.2, 0.2, 0.2, 0.06, Material.SNOW.createBlockData());
-        loc.getWorld().spawnParticle(Particle.BLOCK, loc, 4, 0.2, 0.2, 0.2, 0.06, Material.ICE.createBlockData());
+        AranarthBendingUtils.spawnParticle(loc.getWorld(), Particle.SNOWFLAKE, loc, 8, 0.2, 0.2, 0.2, 0.05);
+        AranarthBendingUtils.spawnParticle(loc.getWorld(), Particle.BLOCK, loc, 6, 0.2, 0.2, 0.2, 0.06, Material.SNOW.createBlockData());
+        AranarthBendingUtils.spawnParticle(loc.getWorld(), Particle.BLOCK, loc, 4, 0.2, 0.2, 0.2, 0.06, Material.ICE.createBlockData());
     }
 
     private void crumblePillar() {
         if (this.currentLayers > 0) {
             final Location crumbleLoc = this.pillarBase.clone().add(0.5, 0.5, 0.5);
-            crumbleLoc.getWorld().spawnParticle(Particle.BLOCK, crumbleLoc, 18, 0.4, 0.5, 0.4, 0.1, Material.SNOW.createBlockData());
-            crumbleLoc.getWorld().spawnParticle(Particle.BLOCK, crumbleLoc, 12, 0.4, 0.5, 0.4, 0.1, Material.ICE.createBlockData());
+            AranarthBendingUtils.spawnParticle(crumbleLoc.getWorld(), Particle.BLOCK, crumbleLoc, 18, 0.4, 0.5, 0.4, 0.1, Material.SNOW.createBlockData());
+            AranarthBendingUtils.spawnParticle(crumbleLoc.getWorld(), Particle.BLOCK, crumbleLoc, 12, 0.4, 0.5, 0.4, 0.1, Material.ICE.createBlockData());
         }
         this.currentLayers = 0;
         if (this.pillarLower != null) {

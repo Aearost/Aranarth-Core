@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.chiblocking;
 
 import com.aearost.aranarthcore.utils.AbilityConfig;
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.ChiAbility;
@@ -122,8 +123,8 @@ public class HighJump extends ChiAbility implements AddonAbility {
 
     private void poof() {
         final Location loc = player.getLocation();
-        loc.getWorld().spawnParticle(Particle.CRIT,  loc, 20, 0.5, 1.0, 0.5, 0.5);
-        loc.getWorld().spawnParticle(Particle.CLOUD, loc, 30, 0.5, 1.0, 0.5, 0.002);
+        AranarthBendingUtils.spawnParticle(loc.getWorld(), Particle.CRIT,  loc, 20, 0.5, 1.0, 0.5, 0.5);
+        AranarthBendingUtils.spawnParticle(loc.getWorld(), Particle.CLOUD, loc, 30, 0.5, 1.0, 0.5, 0.002);
         player.playSound(loc, Sound.ENTITY_HORSE_BREATHE, 0.5f, 1.0f);
     }
 

@@ -282,9 +282,9 @@ public class JetBolt extends LightningAbility implements AddonAbility, ComboAbil
                 default -> AranarthBendingUtils.LIGHTNING_DUST;
             };
 
-            world.spawnParticle(Particle.DUST, next, 1, 0, 0, 0, 0, dust);
+            AranarthBendingUtils.spawnParticle(world, Particle.DUST, next, 1, 0, 0, 0, 0, dust);
             if (random.nextDouble() < 0.25) {
-                world.spawnParticle(Particle.ELECTRIC_SPARK, next, 1, 0.05, 0.05, 0.05, 0.0);
+                AranarthBendingUtils.spawnParticle(world, Particle.ELECTRIC_SPARK, next, 1, 0.05, 0.05, 0.05, 0.0);
             }
 
             current = next;
@@ -321,9 +321,9 @@ public class JetBolt extends LightningAbility implements AddonAbility, ComboAbil
                 default -> AranarthBendingUtils.LIGHTNING_DUST;
             };
 
-            world.spawnParticle(Particle.DUST, next, 1, 0, 0, 0, 0, dust);
+            AranarthBendingUtils.spawnParticle(world, Particle.DUST, next, 1, 0, 0, 0, 0, dust);
             if (random.nextDouble() < 0.3) {
-                world.spawnParticle(Particle.ELECTRIC_SPARK, next, 1, 0.05, 0.05, 0.05, 0.0);
+                AranarthBendingUtils.spawnParticle(world, Particle.ELECTRIC_SPARK, next, 1, 0.05, 0.05, 0.05, 0.0);
             }
 
             current = next;
@@ -364,7 +364,8 @@ public class JetBolt extends LightningAbility implements AddonAbility, ComboAbil
                     case 1 -> AranarthBendingUtils.LIGHTNING_DUST_BLUE;
                     default -> AranarthBendingUtils.LIGHTNING_DUST;
                 };
-                entity.getLocation().getWorld().spawnParticle(
+                AranarthBendingUtils.spawnParticle(
+                        entity.getLocation().getWorld(),
                         Particle.DUST, entity.getLocation(), 1,
                         random.nextDouble() * 0.4,
                         random.nextDouble() * living.getHeight() * 0.5,

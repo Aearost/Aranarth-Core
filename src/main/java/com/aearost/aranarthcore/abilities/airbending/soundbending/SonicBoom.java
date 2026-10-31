@@ -135,7 +135,7 @@ public class SonicBoom extends SoundAbility implements AddonAbility {
 
 			// Spawn particles every ~0.5 blocks
 			if (i % 2 == 0) {
-				blastLocation.getWorld().spawnParticle(Particle.SONIC_BOOM, blastLocation, 1, 0, 0, 0, 0);
+				AranarthBendingUtils.spawnParticle(blastLocation.getWorld(), Particle.SONIC_BOOM, blastLocation, 1, 0, 0, 0, 0);
 			}
 
 			Block block = blastLocation.getBlock();
@@ -156,7 +156,7 @@ public class SonicBoom extends SoundAbility implements AddonAbility {
 			double offX = (Math.random() - 0.5) * spread * 2;
 			double offY = (Math.random() - 0.5) * spread;
 			double offZ = (Math.random() - 0.5) * spread * 2;
-			eyeLoc.getWorld().spawnParticle(Particle.DUST, eyeLoc.clone().add(offX, offY, offZ), 1, 0, 0, 0, 0, CHARGE_DUST);
+			AranarthBendingUtils.spawnParticle(eyeLoc.getWorld(), Particle.DUST, eyeLoc.clone().add(offX, offY, offZ), 1, 0, 0, 0, 0, CHARGE_DUST);
 		}
 	}
 

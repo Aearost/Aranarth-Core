@@ -279,7 +279,7 @@ public class BloodGrip extends BloodAbility implements AddonAbility {
             double x = Math.cos(angle) * radius;
             double z = Math.sin(angle) * radius;
             double y = Math.sin(elapsed * 4.0 + i) * 0.35;
-            center.getWorld().spawnParticle(Particle.DUST, center.clone().add(x, y, z), 1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST);
+            AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.DUST, center.clone().add(x, y, z), 1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST);
         }
     }
 
@@ -293,7 +293,7 @@ public class BloodGrip extends BloodAbility implements AddonAbility {
             double x = Math.cos(pitch) * Math.cos(yaw);
             double y = Math.sin(pitch);
             double z = Math.cos(pitch) * Math.sin(yaw);
-            center.getWorld().spawnParticle(Particle.DUST, center.clone().add(x, y, z), 1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST_BRIGHT);
+            AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.DUST, center.clone().add(x, y, z), 1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST_BRIGHT);
         }
     }
 
@@ -307,7 +307,7 @@ public class BloodGrip extends BloodAbility implements AddonAbility {
             double angle = baseAngle + (2.0 * Math.PI / points) * i;
             double x = Math.cos(angle) * 0.6;
             double z = Math.sin(angle) * 0.6;
-            center.getWorld().spawnParticle(Particle.DUST, center.clone().add(x, 0, z), 1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST);
+            AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.DUST, center.clone().add(x, 0, z), 1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST);
         }
     }
 

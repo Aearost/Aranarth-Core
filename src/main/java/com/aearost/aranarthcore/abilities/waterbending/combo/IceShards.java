@@ -478,9 +478,11 @@ public class IceShards extends IceAbility implements AddonAbility, ComboAbility 
     private void shatterShard(final Shard shard, final Location loc) {
         if (!shard.display.isDead()) shard.display.remove();
         loc.getWorld().playSound(loc, Sound.BLOCK_GLASS_BREAK, 1.0f, 1.2f);
-        loc.getWorld().spawnParticle(
+        AranarthBendingUtils.spawnParticle(
+                loc.getWorld(),
                 Particle.BLOCK, loc, 14, 0.3, 0.3, 0.3, 0.15, Material.ICE.createBlockData());
-        loc.getWorld().spawnParticle(
+        AranarthBendingUtils.spawnParticle(
+                loc.getWorld(),
                 Particle.SNOWFLAKE, loc, 8, 0.25, 0.25, 0.25, 0.05);
     }
 

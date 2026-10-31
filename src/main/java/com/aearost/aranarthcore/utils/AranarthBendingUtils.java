@@ -1,12 +1,14 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.Outpost;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.Ability;
+import com.projectkorra.projectkorra.ability.AirAbility;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.util.DamageHandler;
 import com.projectkorra.projectkorra.util.TempBlock;
@@ -26,6 +28,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class AranarthBendingUtils {
 
@@ -159,6 +162,17 @@ public class AranarthBendingUtils {
      */
     public static final Particle.DustOptions LIGHTNING_DUST_BLUE =
             new Particle.DustOptions(Color.fromRGB(100, 200, 255), 1.0f);
+    /**
+     * The dust of ProjectKorra's Lightningbending particle.
+     */
+    private static final Particle.DustOptions LIGHTNING_PARTICLE_DUST =
+            new Particle.DustOptions(Color.fromRGB(0x01, 0xE1, 0xFF), 1.0f);
+
+    /**
+     * The squared distances that particles reach viewers, matching World#spawnParticle.
+     */
+    private static final double PARTICLE_RANGE_SQUARED = 32 * 32;
+    private static final double PARTICLE_FORCED_RANGE_SQUARED = 512 * 512;
 
     public static final Particle.DustOptions SOUND_RING_DUST = new Particle.DustOptions(SOUND_COLOR_TURQUOISE, 0.8f);
     public static final Particle.DustOptions SOUND_CHARGE_DUST = new Particle.DustOptions(SOUND_COLOR_TEAL, 0.5f);
@@ -626,5 +640,191 @@ public class AranarthBendingUtils {
             }
         }
         tempBlocks.clear();
+    }
+
+    /**
+     * Spawns a bending particle, scaled per viewer by their /particles value.
+     *
+     * @param world The world to spawn the particle in.
+     * @param particle The particle to spawn.
+     * @param location The location to spawn the particle at.
+     * @param count The base number of particles, before scaling.
+     * @param offsetX The X offset.
+     * @param offsetY The Y offset.
+     * @param offsetZ The Z offset.
+     * @param extra The extra particle data, typically the speed.
+     */
+    public static void spawnParticle(World world, Particle particle, Location location, int count,
+                                     double offsetX, double offsetY, double offsetZ, double extra) {
+        spawnParticle(world, particle, location, count, offsetX, offsetY, offsetZ, extra, null, false);
+    }
+
+    /**
+     * Spawns a bending particle with data, scaled per viewer by their /particles value.
+     *
+     * @param world The world to spawn the particle in.
+     * @param particle The particle to spawn.
+     * @param location The location to spawn the particle at.
+     * @param count The base number of particles, before scaling.
+     * @param offsetX The X offset.
+     * @param offsetY The Y offset.
+     * @param offsetZ The Z offset.
+     * @param extra The extra particle data, typically the speed.
+     * @param data The particle data.
+     */
+    public static <T> void spawnParticle(World world, Particle particle, Location location, int count,
+                                         double offsetX, double offsetY, double offsetZ, double extra, T data) {
+        spawnParticle(world, particle, location, count, offsetX, offsetY, offsetZ, extra, data, false);
+    }
+
+    /**
+     * Spawns a bending particle with data, scaled per viewer by their /particles value.
+     *
+     * @param world The world to spawn the particle in.
+     * @param particle The particle to spawn.
+     * @param location The location to spawn the particle at.
+     * @param count The base number of particles, before scaling.
+     * @param offsetX The X offset.
+     * @param offsetY The Y offset.
+     * @param offsetZ The Z offset.
+     * @param extra The extra particle data, typically the speed.
+     * @param data The particle data.
+     * @param force Whether the particle is sent to viewers at the extended range.
+     */
+    public static <T> void spawnParticle(World world, Particle particle, Location location, int count,
+                                         double offsetX, double offsetY, double offsetZ, double extra, T data, boolean force) {
+        spawnParticle(world, particle, location.getX(), location.getY(), location.getZ(), count,
+                offsetX, offsetY, offsetZ, extra, data, force);
+    }
+
+    /**
+     * Spawns a bending particle, scaled per viewer by their /particles value.
+     *
+     * @param world The world to spawn the particle in.
+     * @param particle The particle to spawn.
+     * @param x The X coordinate.
+     * @param y The Y coordinate.
+     * @param z The Z coordinate.
+     * @param count The base number of particles, before scaling.
+     * @param offsetX The X offset.
+     * @param offsetY The Y offset.
+     * @param offsetZ The Z offset.
+     * @param extra The extra particle data, typically the speed.
+     */
+    public static void spawnParticle(World world, Particle particle, double x, double y, double z, int count,
+                                     double offsetX, double offsetY, double offsetZ, double extra) {
+        spawnParticle(world, particle, x, y, z, count, offsetX, offsetY, offsetZ, extra, null, false);
+    }
+
+    /**
+     * Spawns a bending particle with data, scaled per viewer by their /particles value.
+     *
+     * @param world The world to spawn the particle in.
+     * @param particle The particle to spawn.
+     * @param x The X coordinate.
+     * @param y The Y coordinate.
+     * @param z The Z coordinate.
+     * @param count The base number of particles, before scaling.
+     * @param offsetX The X offset.
+     * @param offsetY The Y offset.
+     * @param offsetZ The Z offset.
+     * @param extra The extra particle data, typically the speed.
+     * @param data The particle data.
+     */
+    public static <T> void spawnParticle(World world, Particle particle, double x, double y, double z, int count,
+                                         double offsetX, double offsetY, double offsetZ, double extra, T data) {
+        spawnParticle(world, particle, x, y, z, count, offsetX, offsetY, offsetZ, extra, data, false);
+    }
+
+    /**
+     * Sends a bending particle to each viewer in range, matching the reach of World#spawnParticle.
+     * A count of 0 is a single directional particle using the offsets as its velocity, so the
+     * packet is repeated or skipped rather than having its count changed.
+     *
+     * @param world The world to spawn the particle in.
+     * @param particle The particle to spawn.
+     * @param x The X coordinate.
+     * @param y The Y coordinate.
+     * @param z The Z coordinate.
+     * @param count The base number of particles, before scaling.
+     * @param offsetX The X offset.
+     * @param offsetY The Y offset.
+     * @param offsetZ The Z offset.
+     * @param extra The extra particle data, typically the speed.
+     * @param data The particle data.
+     * @param force Whether the particle is sent to viewers at the extended range.
+     */
+    private static <T> void spawnParticle(World world, Particle particle, double x, double y, double z, int count,
+                                          double offsetX, double offsetY, double offsetZ, double extra, T data, boolean force) {
+        double maxDistanceSquared = force ? PARTICLE_FORCED_RANGE_SQUARED : PARTICLE_RANGE_SQUARED;
+        for (Player viewer : world.getPlayers()) {
+            Location viewerLocation = viewer.getLocation();
+            double distanceX = viewerLocation.getX() - x;
+            double distanceY = viewerLocation.getY() - y;
+            double distanceZ = viewerLocation.getZ() - z;
+            if (distanceX * distanceX + distanceY * distanceY + distanceZ * distanceZ > maxDistanceSquared) {
+                continue;
+            }
+
+            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(viewer.getUniqueId());
+            int percent = aranarthPlayer == null ? 100 : aranarthPlayer.getParticleNum();
+            int amount = scaleParticleCount(Math.max(count, 1), percent);
+            if (amount == 0) {
+                continue;
+            }
+
+            if (count == 0) {
+                for (int i = 0; i < amount; i++) {
+                    viewer.spawnParticle(particle, x, y, z, 0, offsetX, offsetY, offsetZ, extra, data, force);
+                }
+            } else {
+                viewer.spawnParticle(particle, x, y, z, amount, offsetX, offsetY, offsetZ, extra, data, force);
+            }
+        }
+    }
+
+    /**
+     * Scales a particle count, rolling the fractional remainder so that the single particles
+     * most abilities spawn in loops still thin out evenly at low percentages.
+     *
+     * @param count The base number of particles.
+     * @param percent The viewer's /particles value.
+     * @return The number of particles to show the viewer.
+     */
+    private static int scaleParticleCount(int count, int percent) {
+        if (percent == 100) {
+            return count;
+        }
+        double scaled = count * (percent / 100.0);
+        int whole = (int) scaled;
+        return ThreadLocalRandom.current().nextDouble() < scaled - whole ? whole + 1 : whole;
+    }
+
+    /**
+     * Plays the configured Airbending particle, scaled per viewer by their /particles value.
+     * Mirrors AirAbility#playAirbendingParticles, which would broadcast to every viewer.
+     *
+     * @param location The location to spawn the particle at.
+     * @param amount The base number of particles, before scaling.
+     * @param offsetX The X offset.
+     * @param offsetY The Y offset.
+     * @param offsetZ The Z offset.
+     */
+    public static void playAirbendingParticles(Location location, int amount, double offsetX, double offsetY, double offsetZ) {
+        spawnParticle(location.getWorld(), AirAbility.getAirbendingParticles().getParticle(), location, amount,
+                offsetX, offsetY, offsetZ, 0, null, true);
+    }
+
+    /**
+     * Plays the Lightningbending particle, scaled per viewer by their /particles value.
+     * Mirrors FireAbility#playLightningbendingParticle, which would broadcast to every viewer.
+     *
+     * @param location The location to spawn the particle at.
+     * @param offsetX The X offset.
+     * @param offsetY The Y offset.
+     * @param offsetZ The Z offset.
+     */
+    public static void playLightningbendingParticle(Location location, double offsetX, double offsetY, double offsetZ) {
+        spawnParticle(location.getWorld(), Particle.DUST, location, 1, offsetX, offsetY, offsetZ, 0, LIGHTNING_PARTICLE_DUST, true);
     }
 }

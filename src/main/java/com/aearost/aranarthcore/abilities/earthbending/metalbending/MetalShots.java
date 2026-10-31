@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.abilities.earthbending.metalbending;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.AbilityConfig;
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -310,7 +311,8 @@ public class MetalShots extends MetalAbility implements AddonAbility {
             final Location orbitPos = orbitTarget(source.orbitAngle).subtract(0.25, 0.25, 0.25);
             source.entity.teleport(orbitPos);
 
-            source.entity.getWorld().spawnParticle(
+            AranarthBendingUtils.spawnParticle(
+                    source.entity.getWorld(),
                     Particle.DUST,
                     source.entity.getLocation().clone().add(0.25, 0.25, 0.25),
                     1, 0.15, 0.15, 0.15, 0, SOURCE_DUST
@@ -343,7 +345,8 @@ public class MetalShots extends MetalAbility implements AddonAbility {
                 final Location checkPos = shot.startLocation.clone()
                         .add(shot.direction.clone().multiply(shot.distanceTraveled));
 
-                checkPos.getWorld().spawnParticle(
+                AranarthBendingUtils.spawnParticle(
+                        checkPos.getWorld(),
                         Particle.DUST, checkPos, 1, 0, 0, 0, 0, SHOT_TRAIL_DUST);
 
                 if (shot.distanceTraveled > range) {
@@ -379,7 +382,8 @@ public class MetalShots extends MetalAbility implements AddonAbility {
             if (shouldRemove) {
                 // Spawn an impact burst at the hit point so close-range hits have a clear visual
                 if (entityHit && hitLocation != null) {
-                    hitLocation.getWorld().spawnParticle(
+                    AranarthBendingUtils.spawnParticle(
+                            hitLocation.getWorld(),
                             Particle.DUST, hitLocation, 8, 0.15, 0.15, 0.15, 0, SHOT_TRAIL_DUST);
                 }
                 shot.entity.remove();

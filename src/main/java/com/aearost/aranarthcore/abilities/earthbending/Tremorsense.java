@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.earthbending;
 
 import com.aearost.aranarthcore.utils.AbilityConfig;
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
@@ -239,7 +240,7 @@ public class Tremorsense extends EarthAbility implements AddonAbility {
                     }
                 }
                 if (foundAir && smokeBlock != null) {
-                    smokeBlock.getWorld().spawnParticle(Particle.LARGE_SMOKE,
+                    AranarthBendingUtils.spawnParticle(smokeBlock.getWorld(), Particle.LARGE_SMOKE,
                             smokeBlock.getRelative(BlockFace.UP).getLocation().add(0.5, 0.5, 0.5),
                             3, 0.3, 0.3, 0.3, 0);
                 }

@@ -146,7 +146,7 @@ public class CableSlash extends MetalAbility implements AddonAbility, ComboAbili
         for (int i = 0; i <= steps; i++) {
             final double s   = (double) i / steps;
             final Location loc = hand.clone().add(direction.clone().multiply(s * range));
-            loc.getWorld().spawnParticle(Particle.DUST, loc, 1, 0, 0, 0, 0, CABLE_DUST);
+            AranarthBendingUtils.spawnParticle(loc.getWorld(), Particle.DUST, loc, 1, 0, 0, 0, 0, CABLE_DUST);
         }
     }
 

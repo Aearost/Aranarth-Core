@@ -174,7 +174,7 @@ public class ElectricStrike extends LightningAbility implements AddonAbility {
                 Particle.DustOptions dust = (k % 2 == 0)
                         ? AranarthBendingUtils.LIGHTNING_DUST_BRIGHT
                         : AranarthBendingUtils.LIGHTNING_DUST_BLUE;
-                entity.getLocation().getWorld().spawnParticle(Particle.DUST, entity.getLocation(), 1,
+                AranarthBendingUtils.spawnParticle(entity.getLocation().getWorld(), Particle.DUST, entity.getLocation(), 1,
                         Math.random() * 0.4, Math.random() * living.getHeight() * 0.5, Math.random() * 0.4, 0, dust);
             }
 
@@ -198,9 +198,9 @@ public class ElectricStrike extends LightningAbility implements AddonAbility {
             double rx = (Math.random() - 0.5) * aoeRadius * 2;
             double ry = (Math.random() - 0.5) * aoeRadius * 2;
             double rz = (Math.random() - 0.5) * aoeRadius * 2;
-            loc.getWorld().spawnParticle(Particle.DUST, loc.clone().add(rx, ry, rz), 1, 0, 0, 0, 0, dust);
+            AranarthBendingUtils.spawnParticle(loc.getWorld(), Particle.DUST, loc.clone().add(rx, ry, rz), 1, 0, 0, 0, 0, dust);
         }
-        loc.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, loc, 40, aoeRadius * 0.4, aoeRadius * 0.4, aoeRadius * 0.4, 0.05);
+        AranarthBendingUtils.spawnParticle(loc.getWorld(), Particle.ELECTRIC_SPARK, loc, 40, aoeRadius * 0.4, aoeRadius * 0.4, aoeRadius * 0.4, 0.05);
         loc.getWorld().playSound(loc, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 0.7f, 1.8f);
 
         // Damage all nearby entities (reduced damage for AOE)
@@ -214,7 +214,7 @@ public class ElectricStrike extends LightningAbility implements AddonAbility {
                 Particle.DustOptions dust = (k % 2 == 0)
                         ? AranarthBendingUtils.LIGHTNING_DUST_BRIGHT
                         : AranarthBendingUtils.LIGHTNING_DUST_BLUE;
-                entity.getLocation().getWorld().spawnParticle(Particle.DUST, entity.getLocation(), 1,
+                AranarthBendingUtils.spawnParticle(entity.getLocation().getWorld(), Particle.DUST, entity.getLocation(), 1,
                         Math.random() * 0.4, Math.random() * living.getHeight() * 0.5, Math.random() * 0.4, 0, dust);
             }
             entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_BEE_HURT, 0.6f, 0.2f);
@@ -242,7 +242,7 @@ public class ElectricStrike extends LightningAbility implements AddonAbility {
             double rx = (Math.random() - 0.5) * aoeRadius * 1.6;
             double ry = (Math.random() - 0.5) * aoeRadius * 1.0;
             double rz = (Math.random() - 0.5) * aoeRadius * 1.6;
-            fizzleLocation.getWorld().spawnParticle(Particle.ELECTRIC_SPARK,
+            AranarthBendingUtils.spawnParticle(fizzleLocation.getWorld(), Particle.ELECTRIC_SPARK,
                     fizzleLocation.clone().add(rx, ry, rz), 1, 0, 0, 0, 0.03);
         }
 
@@ -254,7 +254,7 @@ public class ElectricStrike extends LightningAbility implements AddonAbility {
             double rx = (Math.random() - 0.5) * aoeRadius;
             double ry = (Math.random() - 0.5) * aoeRadius * 0.8;
             double rz = (Math.random() - 0.5) * aoeRadius;
-            fizzleLocation.getWorld().spawnParticle(Particle.DUST,
+            AranarthBendingUtils.spawnParticle(fizzleLocation.getWorld(), Particle.DUST,
                     fizzleLocation.clone().add(rx, ry, rz), 1, 0, 0, 0, 0, dust);
         }
 
@@ -276,9 +276,9 @@ public class ElectricStrike extends LightningAbility implements AddonAbility {
         Particle.DustOptions dust = (stepIndex % 2 == 0)
                 ? AranarthBendingUtils.LIGHTNING_DUST_BRIGHT
                 : AranarthBendingUtils.LIGHTNING_DUST_BLUE;
-        pos.getWorld().spawnParticle(Particle.DUST, pos, 1, 0.02, 0.02, 0.02, 0, dust);
+        AranarthBendingUtils.spawnParticle(pos.getWorld(), Particle.DUST, pos, 1, 0.02, 0.02, 0.02, 0, dust);
         if (Math.random() < 0.3) {
-            pos.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, pos, 1, 0.02, 0.02, 0.02, 0.0);
+            AranarthBendingUtils.spawnParticle(pos.getWorld(), Particle.ELECTRIC_SPARK, pos, 1, 0.02, 0.02, 0.02, 0.0);
         }
     }
 
@@ -293,17 +293,17 @@ public class ElectricStrike extends LightningAbility implements AddonAbility {
                 Particle.DustOptions dust = (i % 2 == 0)
                         ? AranarthBendingUtils.LIGHTNING_DUST_BRIGHT
                         : AranarthBendingUtils.LIGHTNING_DUST_BLUE;
-                p.getWorld().spawnParticle(Particle.DUST, p, 1, 0, 0, 0, 0, dust);
+                AranarthBendingUtils.spawnParticle(p.getWorld(), Particle.DUST, p, 1, 0, 0, 0, 0, dust);
             }
             if (Math.random() < 0.4) {
-                hand.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, hand, 1, 0.08, 0.08, 0.08, 0.01);
+                AranarthBendingUtils.spawnParticle(hand.getWorld(), Particle.ELECTRIC_SPARK, hand, 1, 0.08, 0.08, 0.08, 0.01);
             }
         } else {
             if (Math.random() < 0.5) {
-                hand.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, hand, 1, 0.06, 0.06, 0.06, 0.01);
+                AranarthBendingUtils.spawnParticle(hand.getWorld(), Particle.ELECTRIC_SPARK, hand, 1, 0.06, 0.06, 0.06, 0.01);
             }
             if (Math.random() < 0.3) {
-                hand.getWorld().spawnParticle(Particle.DUST, hand, 1, 0.1, 0.1, 0.1, 0, AranarthBendingUtils.LIGHTNING_DUST_BLUE);
+                AranarthBendingUtils.spawnParticle(hand.getWorld(), Particle.DUST, hand, 1, 0.1, 0.1, 0.1, 0, AranarthBendingUtils.LIGHTNING_DUST_BLUE);
             }
         }
     }

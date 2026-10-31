@@ -282,7 +282,7 @@ public class Disalignment extends BloodAbility implements AddonAbility {
                 double y = (t - 0.5) * target.getHeight() * 1.2;
                 double x = Math.cos(angle) * radius;
                 double z = Math.sin(angle) * radius;
-                center.getWorld().spawnParticle(Particle.DUST,
+                AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.DUST,
                         center.clone().add(x, y, z), 1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST_BRIGHT);
             }
         }
@@ -298,7 +298,7 @@ public class Disalignment extends BloodAbility implements AddonAbility {
             double x = Math.cos(pitch) * Math.cos(yaw) * 0.6;
             double y = Math.sin(pitch) * 0.6;
             double z = Math.cos(pitch) * Math.sin(yaw) * 0.6;
-            center.getWorld().spawnParticle(Particle.DUST, center.clone().add(x, y, z), 1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST);
+            AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.DUST, center.clone().add(x, y, z), 1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST);
         }
     }
 
@@ -307,10 +307,10 @@ public class Disalignment extends BloodAbility implements AddonAbility {
         long tick = System.currentTimeMillis() / 50L;
         double angle = (tick % 40) * (2.0 * Math.PI / 40.0);
 
-        center.getWorld().spawnParticle(Particle.DUST,
+        AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.DUST,
                 center.clone().add(Math.cos(angle) * 0.3, 0, Math.sin(angle) * 0.3),
                 1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST);
-        center.getWorld().spawnParticle(Particle.DUST,
+        AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.DUST,
                 center.clone().add(Math.cos(angle + Math.PI) * 0.3, 0, Math.sin(angle + Math.PI) * 0.3),
                 1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST_BRIGHT);
     }
@@ -321,13 +321,13 @@ public class Disalignment extends BloodAbility implements AddonAbility {
 
         for (int i = 0; i < outerPoints; i++) {
             double angle = (2.0 * Math.PI / outerPoints) * i;
-            center.getWorld().spawnParticle(Particle.DUST,
+            AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.DUST,
                     center.clone().add(Math.cos(angle) * 0.6, 0, Math.sin(angle) * 0.6),
                     1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST_BRIGHT);
         }
         // Vertical column of particles through the body to represent disrupted chi flow
         for (int i = 0; i < 8; i++) {
-            center.getWorld().spawnParticle(Particle.DUST,
+            AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.DUST,
                     center.clone().add(0, (i - 3.5) * (target.getHeight() / 8.0), 0),
                     1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST);
         }

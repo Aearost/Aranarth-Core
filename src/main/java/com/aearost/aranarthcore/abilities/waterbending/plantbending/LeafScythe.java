@@ -114,7 +114,8 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
         }
 
         sourceBlock = found;
-        sourceBlock.getWorld().spawnParticle(
+        AranarthBendingUtils.spawnParticle(
+                sourceBlock.getWorld(),
                 Particle.HAPPY_VILLAGER,
                 sourceBlock.getLocation().add(0.5, 0.5, 0.5),
                 16, 0.35, 0.35, 0.35, 0);
@@ -144,7 +145,8 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
             return;
         }
         if (player.isSneaking()) {
-            sourceBlock.getWorld().spawnParticle(
+            AranarthBendingUtils.spawnParticle(
+                    sourceBlock.getWorld(),
                     Particle.HAPPY_VILLAGER,
                     sourceBlock.getLocation().add(0.5, 0.5, 0.5),
                     1, 0.15, 0.1, 0.15, 0);
@@ -205,7 +207,8 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
             return;
         }
 
-        sourceBlock.getWorld().spawnParticle(
+        AranarthBendingUtils.spawnParticle(
+                sourceBlock.getWorld(),
                 Particle.HAPPY_VILLAGER,
                 sourceBlock.getLocation().add(0.5, 0.5, 0.5),
                 16, 0.35, 0.35, 0.35, 0);
@@ -244,7 +247,7 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
             for (int s = 0; s <= steps; s++) {
                 double t = (double) s / steps;
                 Vector pos = from.clone().multiply(1 - t).add(to.clone().multiply(t));
-                world.spawnParticle(Particle.DUST, pos.getX(), pos.getY(), pos.getZ(),
+                AranarthBendingUtils.spawnParticle(world, Particle.DUST, pos.getX(), pos.getY(), pos.getZ(),
                         1, 0, 0, 0, 0, SCYTHE_DUST);
             }
         }

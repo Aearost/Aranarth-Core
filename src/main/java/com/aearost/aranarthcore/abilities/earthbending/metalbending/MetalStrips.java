@@ -288,7 +288,8 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
                 .subtract(this.firedItem.getLocation().toVector());
         this.firedItem.setVelocity(correction);
 
-        exactPos.getWorld().spawnParticle(
+        AranarthBendingUtils.spawnParticle(
+                exactPos.getWorld(),
                 Particle.DUST,
                 exactPos,
                 1, 0.05, 0.05, 0.05, 0,
@@ -381,7 +382,8 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
                                 .multiply(recallSpeed);
                         item.setGravity(false);
                         item.setVelocity(toPlayer);
-                        item.getWorld().spawnParticle(
+                        AranarthBendingUtils.spawnParticle(
+                                item.getWorld(),
                                 Particle.DUST, item.getLocation(), 1, 0.05, 0.05, 0.05, 0, particle);
                     }
                 }
@@ -434,7 +436,8 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
                             .normalize()
                             .multiply(recallSpeed);
                     item.setVelocity(toPlayer);
-                    item.getWorld().spawnParticle(
+                    AranarthBendingUtils.spawnParticle(
+                            item.getWorld(),
                             Particle.DUST, item.getLocation(), 1, 0.05, 0.05, 0.05, 0,
                             METAL_PARTICLES.get(Material.IRON_INGOT));
                 }

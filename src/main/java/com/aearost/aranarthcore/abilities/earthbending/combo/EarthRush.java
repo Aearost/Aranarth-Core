@@ -237,7 +237,8 @@ public class EarthRush extends EarthAbility implements AddonAbility, ComboAbilit
         boulderCenter.setY(currentBottomY + 0.5);
 
         // Rumble particles during the rise
-        boulderCenter.getWorld().spawnParticle(
+        AranarthBendingUtils.spawnParticle(
+                boulderCenter.getWorld(),
                 Particle.BLOCK, boulderCenter, 5, 0.5, 0.3, 0.5, 0.0, projectileData);
     }
 
@@ -341,7 +342,7 @@ public class EarthRush extends EarthAbility implements AddonAbility, ComboAbilit
             return;
         }
 
-        world.spawnParticle(Particle.BLOCK, boulderCenter, 6, 0.6, 0.5, 0.6, 0.05, projectileData);
+        AranarthBendingUtils.spawnParticle(world, Particle.BLOCK, boulderCenter, 6, 0.6, 0.5, 0.6, 0.05, projectileData);
     }
 
     /**

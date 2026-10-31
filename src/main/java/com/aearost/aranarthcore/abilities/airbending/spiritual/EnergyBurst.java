@@ -210,7 +210,7 @@ public class EnergyBurst extends SpiritualAbility implements AddonAbility {
             for (int j = 0; j < 6; j++) {
                 final double angle = (j / 6.0) * 2 * Math.PI;
                 final Location loc = center.clone().add(Math.cos(angle) * 0.9, 0, Math.sin(angle) * 0.9);
-                loc.getWorld().spawnParticle(Particle.DUST, loc, 3, 0.1, 0.1, 0.1, 0, dust);
+                AranarthBendingUtils.spawnParticle(loc.getWorld(), Particle.DUST, loc, 3, 0.1, 0.1, 0.1, 0, dust);
             }
         }
     }
@@ -225,7 +225,7 @@ public class EnergyBurst extends SpiritualAbility implements AddonAbility {
             final double angle = (i / 4.0) * 2 * Math.PI + time;
             final Location loc = player.getLocation().add(0, 1.2, 0)
                     .add(Math.cos(angle) * 0.8, 0.25 * Math.sin(time + i), Math.sin(angle) * 0.8);
-            loc.getWorld().spawnParticle(Particle.DUST, loc, 3, 0.05, 0.05, 0.05, 0, dust);
+            AranarthBendingUtils.spawnParticle(loc.getWorld(), Particle.DUST, loc, 3, 0.05, 0.05, 0.05, 0, dust);
         }
     }
 
@@ -261,9 +261,9 @@ public class EnergyBurst extends SpiritualAbility implements AddonAbility {
                     break;
                 }
 
-                pos.getWorld().spawnParticle(Particle.DUST, pos, 1, 0, 0, 0, 0, dust);
+                AranarthBendingUtils.spawnParticle(pos.getWorld(), Particle.DUST, pos, 1, 0, 0, 0, 0, dust);
                 if (s % 4 == 0) {
-                    pos.getWorld().spawnParticle(Particle.SOUL, pos, 1, 0.05, 0.05, 0.05, 0);
+                    AranarthBendingUtils.spawnParticle(pos.getWorld(), Particle.SOUL, pos, 1, 0.05, 0.05, 0.05, 0);
                 }
             }
         }

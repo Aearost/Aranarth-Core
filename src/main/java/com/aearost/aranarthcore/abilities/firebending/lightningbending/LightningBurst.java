@@ -114,9 +114,9 @@ public class LightningBurst extends LightningAbility implements AddonAbility {
                 final Particle.DustOptions chargeDust = ThreadLocalRandom.current().nextBoolean()
                         ? AranarthBendingUtils.LIGHTNING_DUST_BRIGHT
                         : AranarthBendingUtils.LIGHTNING_DUST_BLUE;
-                particleLoc.getWorld().spawnParticle(Particle.DUST, particleLoc, 1, 0, 0, 0, 0, chargeDust);
+                AranarthBendingUtils.spawnParticle(particleLoc.getWorld(), Particle.DUST, particleLoc, 1, 0, 0, 0, 0, chargeDust);
                 if (ThreadLocalRandom.current().nextDouble() < 0.15) {
-                    particleLoc.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, particleLoc, 1, 0.05, 0.05, 0.05, 0);
+                    AranarthBendingUtils.spawnParticle(particleLoc.getWorld(), Particle.ELECTRIC_SPARK, particleLoc, 1, 0.05, 0.05, 0.05, 0);
                 }
             }
             if (ThreadLocalRandom.current().nextDouble() < 0.2) {
@@ -251,9 +251,9 @@ public class LightningBurst extends LightningAbility implements AddonAbility {
                 final Particle.DustOptions boltDust = ThreadLocalRandom.current().nextBoolean()
                         ? AranarthBendingUtils.LIGHTNING_DUST_BRIGHT
                         : AranarthBendingUtils.LIGHTNING_DUST_BLUE;
-                location.getWorld().spawnParticle(Particle.DUST, location, 1, 0, 0, 0, 0, boltDust);
+                AranarthBendingUtils.spawnParticle(location.getWorld(), Particle.DUST, location, 1, 0, 0, 0, 0, boltDust);
                 if (ThreadLocalRandom.current().nextDouble() < 0.3) {
-                    location.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, location, 1, 0, 0, 0, 0);
+                    AranarthBendingUtils.spawnParticle(location.getWorld(), Particle.ELECTRIC_SPARK, location, 1, 0, 0, 0, 0);
                 }
                 emitFirebendingLight(location);
             }

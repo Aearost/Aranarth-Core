@@ -83,6 +83,7 @@ Quality of Life
 [-] Made the Aranarth Support bot handle the preview of online players in Discord, rather than using AranarthCore for this
 [~] Fixed Infinite Library wearing off before the first roll by starting its duration on the first paid roll
 [~] Clarified the Arcane Ascension description
+[~] Made all AranarthCore abilities' particles be client-side and not server-side
 
 Cross-server & Technical
 [~] AFK players are now marked with [AFK] in the Discord online player list

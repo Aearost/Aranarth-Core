@@ -289,7 +289,7 @@ public class LifeRip extends BloodAbility implements AddonAbility {
                 double radius = 0.45 + Math.sin(rise * Math.PI) * 0.15;
                 double x = Math.cos(columnAngle) * radius;
                 double z = Math.sin(columnAngle) * radius;
-                base.getWorld().spawnParticle(Particle.DUST, base.clone().add(x, y, z),
+                AranarthBendingUtils.spawnParticle(base.getWorld(), Particle.DUST, base.clone().add(x, y, z),
                         1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST_BRIGHT);
             }
         }
@@ -305,14 +305,14 @@ public class LifeRip extends BloodAbility implements AddonAbility {
             double x = Math.cos(pitch) * Math.cos(yaw) * 0.7;
             double y = Math.sin(pitch) * 0.7;
             double z = Math.cos(pitch) * Math.sin(yaw) * 0.7;
-            center.getWorld().spawnParticle(Particle.DUST, center.clone().add(x, y, z),
+            AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.DUST, center.clone().add(x, y, z),
                     1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST_BRIGHT);
         }
         // Vertical column shooting upward to represent life force leaving the body
         int columnPoints = 10;
         for (int i = 0; i < columnPoints; i++) {
             double y = (double) i / columnPoints * target.getHeight() * 1.5;
-            center.getWorld().spawnParticle(Particle.DUST, center.clone().add(0, y, 0),
+            AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.DUST, center.clone().add(0, y, 0),
                     1, 0.05, 0, 0.05, 0, AranarthBendingUtils.BLOOD_DUST);
         }
     }

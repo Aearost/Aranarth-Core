@@ -192,7 +192,7 @@ public class PetalStorm extends PlantAbility implements AddonAbility, ComboAbili
                 continue;
             }
             DamageHandler.damageEntity(living, damage, this);
-            point.getWorld().spawnParticle(Particle.DUST, point, 8, 0.2, 0.2, 0.2, 0, shot.lineDust);
+            AranarthBendingUtils.spawnParticle(point.getWorld(), Particle.DUST, point, 8, 0.2, 0.2, 0.2, 0, shot.lineDust);
             point.getWorld().playSound(point, Sound.BLOCK_PINK_PETALS_BREAK, 0.8f, 1.6f);
             return true;
         }
@@ -212,7 +212,7 @@ public class PetalStorm extends PlantAbility implements AddonAbility, ComboAbili
                     (random.nextDouble() - 0.5) * 2 * wispSpread,
                     (random.nextDouble() - 0.5) * 2 * wispSpread,
                     (random.nextDouble() - 0.5) * 2 * wispSpread);
-            wisp.getWorld().spawnParticle(Particle.DUST, wisp, 1, 0, 0, 0, 0, shot.wispDust);
+            AranarthBendingUtils.spawnParticle(wisp.getWorld(), Particle.DUST, wisp, 1, 0, 0, 0, 0, shot.wispDust);
         }
     }
 

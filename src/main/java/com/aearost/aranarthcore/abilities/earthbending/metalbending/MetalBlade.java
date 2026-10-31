@@ -139,14 +139,14 @@ public class MetalBlade extends MetalAbility implements AddonAbility {
         for (int i = 0; i <= formedSteps; i++) {
             final double t = (double) i / BLADE_STEPS;
             final Location spineLoc = origin.clone().add(down.clone().multiply(t * 0.4));
-            spineLoc.getWorld().spawnParticle(Particle.DUST, spineLoc, 1, 0, 0, 0, 0, dust);
+            AranarthBendingUtils.spawnParticle(spineLoc.getWorld(), Particle.DUST, spineLoc, 1, 0, 0, 0, 0, dust);
 
             final double halfWidth = BLADE_HALF_WIDTH * (1.0 - t);
             if (halfWidth > 0.015) {
-                spineLoc.getWorld().spawnParticle(Particle.DUST,
+                AranarthBendingUtils.spawnParticle(spineLoc.getWorld(), Particle.DUST,
                         spineLoc.clone().add(right.clone().multiply(halfWidth)),
                         1, 0, 0, 0, 0, dust);
-                spineLoc.getWorld().spawnParticle(Particle.DUST,
+                AranarthBendingUtils.spawnParticle(spineLoc.getWorld(), Particle.DUST,
                         spineLoc.clone().subtract(right.clone().multiply(halfWidth)),
                         1, 0, 0, 0, 0, dust);
             }
@@ -169,7 +169,7 @@ public class MetalBlade extends MetalAbility implements AddonAbility {
         applyingBladeHit = false;
 
         final Location impactLoc = entity.getLocation().add(0, entity.getHeight() * 0.5, 0);
-        impactLoc.getWorld().spawnParticle(Particle.DUST, impactLoc, 8, 0.12, 0.18, 0.12, 0, BLADE_DUST);
+        AranarthBendingUtils.spawnParticle(impactLoc.getWorld(), Particle.DUST, impactLoc, 8, 0.12, 0.18, 0.12, 0, BLADE_DUST);
         impactLoc.getWorld().playSound(impactLoc, Sound.ENTITY_IRON_GOLEM_ATTACK, 1.0f, 1.9f);
         impactLoc.getWorld().playSound(impactLoc, Sound.BLOCK_METAL_HIT, 0.8f, 2.0f);
 

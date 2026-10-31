@@ -168,7 +168,7 @@ public class SapStrike extends PlantAbility implements AddonAbility {
         Location faceLocation = sourceBlock.getLocation().add(0.5, 0.5, 0.5).add(face.getDirection().multiply(0.55));
         double fraction = (double) (System.currentTimeMillis() - sourceStartTime) / sourceDuration;
         int particles = 1 + (int) (Math.min(1.0, fraction) * 3);
-        sourceBlock.getWorld().spawnParticle(Particle.DUST, faceLocation, particles, 0.2, 0.2, 0.2, 0, SAP_DUST);
+        AranarthBendingUtils.spawnParticle(sourceBlock.getWorld(), Particle.DUST, faceLocation, particles, 0.2, 0.2, 0.2, 0, SAP_DUST);
 
         if (fraction >= 1.0) {
             formSap(face);
@@ -190,7 +190,7 @@ public class SapStrike extends PlantAbility implements AddonAbility {
         sapTempBlock = new TempBlock(sapBlock, sapData);
 
         Location sapLocation = sapBlock.getLocation().add(0.5, 0.5, 0.5);
-        sapLocation.getWorld().spawnParticle(Particle.DUST, sapLocation, 12, 0.3, 0.3, 0.3, 0, SAP_DUST);
+        AranarthBendingUtils.spawnParticle(sapLocation.getWorld(), Particle.DUST, sapLocation, 12, 0.3, 0.3, 0.3, 0, SAP_DUST);
         sapLocation.getWorld().playSound(sapLocation, Sound.BLOCK_HONEY_BLOCK_PLACE, 1.0f, 0.8f);
 
         phase = Phase.SOURCED;
@@ -207,7 +207,7 @@ public class SapStrike extends PlantAbility implements AddonAbility {
             return;
         }
 
-        sapBlock.getWorld().spawnParticle(Particle.DUST, sapBlock.getLocation().add(0.5, 0.5, 0.5),
+        AranarthBendingUtils.spawnParticle(sapBlock.getWorld(), Particle.DUST, sapBlock.getLocation().add(0.5, 0.5, 0.5),
                 1, 0.25, 0.25, 0.25, 0, SAP_DUST);
     }
 
@@ -243,11 +243,11 @@ public class SapStrike extends PlantAbility implements AddonAbility {
 
             Block block = dart.location.getBlock();
             if (dart.distanceTraveled > range || (block.getType().isSolid() && !block.isPassable())) {
-                world.spawnParticle(Particle.DUST, dart.location, 4, 0.1, 0.1, 0.1, 0, DART_DUST);
+                AranarthBendingUtils.spawnParticle(world, Particle.DUST, dart.location, 4, 0.1, 0.1, 0.1, 0, DART_DUST);
                 return true;
             }
 
-            world.spawnParticle(Particle.DUST, dart.location, 1, 0, 0, 0, 0, DART_DUST);
+            AranarthBendingUtils.spawnParticle(world, Particle.DUST, dart.location, 1, 0, 0, 0, 0, DART_DUST);
 
             for (Entity entity : GeneralMethods.getEntitiesAroundPoint(dart.location, hitRadius)) {
                 if (!(entity instanceof LivingEntity living) || entity instanceof ArmorStand
@@ -262,7 +262,7 @@ public class SapStrike extends PlantAbility implements AddonAbility {
                     DamageHandler.damageEntity(living, damage, this);
                     living.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, slownessDuration,
                             slownessAmplifier, false, true, true));
-                    world.spawnParticle(Particle.DUST, dart.location, 8, 0.2, 0.2, 0.2, 0, DART_DUST);
+                    AranarthBendingUtils.spawnParticle(world, Particle.DUST, dart.location, 8, 0.2, 0.2, 0.2, 0, DART_DUST);
                     world.playSound(dart.location, Sound.BLOCK_GLASS_BREAK, 0.8f, 1.6f);
                 }
                 return true;
@@ -304,7 +304,7 @@ public class SapStrike extends PlantAbility implements AddonAbility {
         if (length > 0) {
             Vector dir = toHand.normalize();
             for (double d = 0; d < length; d += LINE_PARTICLE_SPACING) {
-                sapLocation.getWorld().spawnParticle(Particle.DUST, sapLocation.clone().add(dir.clone().multiply(d)),
+                AranarthBendingUtils.spawnParticle(sapLocation.getWorld(), Particle.DUST, sapLocation.clone().add(dir.clone().multiply(d)),
                         1, 0, 0, 0, 0, SAP_DUST);
             }
         }
@@ -343,7 +343,7 @@ public class SapStrike extends PlantAbility implements AddonAbility {
         for (int i = 0; i < dartCount; i++) {
             Location base = hand.clone().add(getRingOffset(lookDir, i, HELD_RING_RADIUS));
             for (double d = 0; d < HELD_DART_LENGTH; d += STEP) {
-                player.getWorld().spawnParticle(Particle.DUST, base.clone().add(lookDir.clone().multiply(d)),
+                AranarthBendingUtils.spawnParticle(player.getWorld(), Particle.DUST, base.clone().add(lookDir.clone().multiply(d)),
                         1, 0, 0, 0, 0, DART_DUST);
             }
         }

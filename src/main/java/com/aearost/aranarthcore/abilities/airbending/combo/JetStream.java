@@ -131,7 +131,7 @@ public class JetStream extends AirAbility implements AddonAbility, ComboAbility 
                 release();
                 return;
             }
-            playAirbendingParticles(point, 3, this.radius * 0.5, this.radius * 0.5, this.radius * 0.5);
+            AranarthBendingUtils.playAirbendingParticles(point, 3, this.radius * 0.5, this.radius * 0.5, this.radius * 0.5);
             pullEntities(point);
         }
         this.streamLocation = previous.clone().add(this.direction.clone().multiply(this.speed));

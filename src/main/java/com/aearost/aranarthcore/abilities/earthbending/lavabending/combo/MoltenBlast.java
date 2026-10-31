@@ -519,10 +519,10 @@ public class MoltenBlast extends LavaAbility implements AddonAbility, ComboAbili
     private void spawnSplatter(final Location loc) {
         final World world = loc.getWorld();
 
-        world.spawnParticle(Particle.LAVA, loc, 25, 1.5, 1.0, 1.5, 0.4);
-        world.spawnParticle(Particle.FLAME, loc, 20, 1.5, 1.0, 1.5, 0.18);
-        world.spawnParticle(Particle.SMOKE, loc, 20, 1.5, 1.0, 1.5, 0.1);
-        world.spawnParticle(Particle.FIREWORK, loc, 30, 2.0, 1.5, 2.0, 0.25);
+        AranarthBendingUtils.spawnParticle(world, Particle.LAVA, loc, 25, 1.5, 1.0, 1.5, 0.4);
+        AranarthBendingUtils.spawnParticle(world, Particle.FLAME, loc, 20, 1.5, 1.0, 1.5, 0.18);
+        AranarthBendingUtils.spawnParticle(world, Particle.SMOKE, loc, 20, 1.5, 1.0, 1.5, 0.1);
+        AranarthBendingUtils.spawnParticle(world, Particle.FIREWORK, loc, 30, 2.0, 1.5, 2.0, 0.25);
 
         // FallingBlock debris is purely visual
         final List<FallingBlock> spawnedFbs = new ArrayList<>();
@@ -586,8 +586,8 @@ public class MoltenBlast extends LavaAbility implements AddonAbility, ComboAbili
         final Location eye = player.getEyeLocation();
         final Location loc = eye.clone().add(eye.getDirection().normalize().multiply(1.0));
         final World world = loc.getWorld();
-        world.spawnParticle(Particle.LARGE_SMOKE, loc, 3, 0.15, 0.15, 0.15, 0.01);
-        world.spawnParticle(Particle.DUST, loc, 2, 0.1, 0.1, 0.1, 0,
+        AranarthBendingUtils.spawnParticle(world, Particle.LARGE_SMOKE, loc, 3, 0.15, 0.15, 0.15, 0.01);
+        AranarthBendingUtils.spawnParticle(world, Particle.DUST, loc, 2, 0.1, 0.1, 0.1, 0,
                 LAVA_PALETTE[random.nextInt(LAVA_PALETTE.length)]);
     }
 
@@ -598,9 +598,9 @@ public class MoltenBlast extends LavaAbility implements AddonAbility, ComboAbili
             final double angle = random.nextDouble() * Math.PI * 2;
             final double r = progress * convertRadius;
             final Location loc = ballCenter.clone().add(Math.cos(angle) * r, 0.1, Math.sin(angle) * r);
-            world.spawnParticle(Particle.LAVA, loc, 1, 0.1, 0.1, 0.1, 0);
-            world.spawnParticle(Particle.FLAME, loc, 1, 0.1, 0.1, 0.1, 0.01);
-            world.spawnParticle(Particle.DUST, loc, 1, 0, 0, 0, 0,
+            AranarthBendingUtils.spawnParticle(world, Particle.LAVA, loc, 1, 0.1, 0.1, 0.1, 0);
+            AranarthBendingUtils.spawnParticle(world, Particle.FLAME, loc, 1, 0.1, 0.1, 0.1, 0.01);
+            AranarthBendingUtils.spawnParticle(world, Particle.DUST, loc, 1, 0, 0, 0, 0,
                     LAVA_PALETTE[random.nextInt(LAVA_PALETTE.length)]);
         }
     }
@@ -620,9 +620,9 @@ public class MoltenBlast extends LavaAbility implements AddonAbility, ComboAbili
                     r * Math.cos(phi),
                     r * Math.sin(phi) * Math.sin(theta)
             );
-            world.spawnParticle(Particle.LAVA, loc, 1, 0, 0, 0, 0);
-            world.spawnParticle(Particle.FLAME, loc, 1, 0.05, 0.05, 0.05, 0.02);
-            world.spawnParticle(Particle.DUST, loc, 1, 0, 0, 0, 0,
+            AranarthBendingUtils.spawnParticle(world, Particle.LAVA, loc, 1, 0, 0, 0, 0);
+            AranarthBendingUtils.spawnParticle(world, Particle.FLAME, loc, 1, 0.05, 0.05, 0.05, 0.02);
+            AranarthBendingUtils.spawnParticle(world, Particle.DUST, loc, 1, 0, 0, 0, 0,
                     LAVA_PALETTE[random.nextInt(LAVA_PALETTE.length)]);
         }
     }

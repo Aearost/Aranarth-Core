@@ -142,11 +142,13 @@ public class AstralShot extends SpiritualAbility implements AddonAbility, ComboA
             }
 
             if (i % 2 == 0) {
-                this.shotLocation.getWorld().spawnParticle(
+                AranarthBendingUtils.spawnParticle(
+                        this.shotLocation.getWorld(),
                         Particle.END_ROD, this.shotLocation, 1, 0.05, 0.05, 0.05, 0.0);
             }
             if (i % 5 == 0) {
-                this.shotLocation.getWorld().spawnParticle(
+                AranarthBendingUtils.spawnParticle(
+                        this.shotLocation.getWorld(),
                         Particle.SOUL, this.shotLocation, 1, 0.05, 0.1, 0.05, 0.0);
             }
 

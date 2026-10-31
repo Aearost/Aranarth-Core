@@ -111,7 +111,7 @@ public class PetalShots extends PlantAbility implements AddonAbility {
 
         sourceLocation = flower.getLocation().add(0.5, 0.5, 0.5);
         sourceTempBlocks = AranarthBendingUtils.breakFlower(flower);
-        sourceLocation.getWorld().spawnParticle(Particle.DUST, sourceLocation, 12, 0.3, 0.3, 0.3, 0, lineDust);
+        AranarthBendingUtils.spawnParticle(sourceLocation.getWorld(), Particle.DUST, sourceLocation, 12, 0.3, 0.3, 0.3, 0, lineDust);
         sourceLocation.getWorld().playSound(sourceLocation, Sound.BLOCK_PINK_PETALS_BREAK, 1.0f, 1.2f);
 
         // The further away the flower is, the longer its petals take to reach the player
@@ -192,7 +192,7 @@ public class PetalShots extends PlantAbility implements AddonAbility {
                 return true;
             }
 
-            world.spawnParticle(Particle.DUST, shot.location, 1, 0, 0, 0, 0, shotDust);
+            AranarthBendingUtils.spawnParticle(world, Particle.DUST, shot.location, 1, 0, 0, 0, 0, shotDust);
 
             for (Entity entity : GeneralMethods.getEntitiesAroundPoint(shot.location, hitRadius)) {
                 if (!(entity instanceof LivingEntity living) || entity instanceof ArmorStand
@@ -203,7 +203,7 @@ public class PetalShots extends PlantAbility implements AddonAbility {
                     continue;
                 }
                 DamageHandler.damageEntity(living, damage, this);
-                world.spawnParticle(Particle.DUST, shot.location, 8, 0.2, 0.2, 0.2, 0, shotDust);
+                AranarthBendingUtils.spawnParticle(world, Particle.DUST, shot.location, 8, 0.2, 0.2, 0.2, 0, shotDust);
                 world.playSound(shot.location, Sound.BLOCK_PINK_PETALS_BREAK, 0.8f, 1.6f);
                 return true;
             }
@@ -225,7 +225,7 @@ public class PetalShots extends PlantAbility implements AddonAbility {
         Vector dir = toHand.normalize();
         World world = sourceLocation.getWorld();
         for (double d = 0; d < drawLength; d += LINE_PARTICLE_SPACING) {
-            world.spawnParticle(Particle.DUST, sourceLocation.clone().add(dir.clone().multiply(d)),
+            AranarthBendingUtils.spawnParticle(world, Particle.DUST, sourceLocation.clone().add(dir.clone().multiply(d)),
                     1, 0, 0, 0, 0, lineDust);
         }
     }
@@ -240,7 +240,7 @@ public class PetalShots extends PlantAbility implements AddonAbility {
             double angle = time + i * Math.PI * 2 / maxShots;
             Location petal = hand.clone().add(
                     HELD_PETAL_RADIUS * Math.cos(angle), 0, HELD_PETAL_RADIUS * Math.sin(angle));
-            player.getWorld().spawnParticle(Particle.DUST, petal, 1, 0, 0, 0, 0, heldDust);
+            AranarthBendingUtils.spawnParticle(player.getWorld(), Particle.DUST, petal, 1, 0, 0, 0, 0, heldDust);
         }
     }
 

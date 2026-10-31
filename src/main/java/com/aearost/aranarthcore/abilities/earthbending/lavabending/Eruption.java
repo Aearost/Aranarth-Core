@@ -432,13 +432,13 @@ public class Eruption extends LavaAbility implements AddonAbility {
 
         for (double a = 0; a < Math.PI * 2; a += Math.PI / 14) {
             Location loc = center.clone().add(Math.cos(a) * ANIM_RADIUS, 0, Math.sin(a) * ANIM_RADIUS);
-            world.spawnParticle(Particle.DUST, loc, 1, 0, 0, 0, 0, SOURCE_OUTLINE_DUST);
+            AranarthBendingUtils.spawnParticle(world, Particle.DUST, loc, 1, 0, 0, 0, 0, SOURCE_OUTLINE_DUST);
         }
         for (int i = 0; i < 4; i++) {
             double a = random.nextDouble() * Math.PI * 2;
             double dist = random.nextDouble() * (ANIM_RADIUS - 0.5);
             Location loc = center.clone().add(Math.cos(a) * dist, 0, Math.sin(a) * dist);
-            world.spawnParticle(Particle.DUST, loc, 1, 0, 0, 0, 0, SOURCE_FILL_DUST);
+            AranarthBendingUtils.spawnParticle(world, Particle.DUST, loc, 1, 0, 0, 0, 0, SOURCE_FILL_DUST);
         }
     }
 
@@ -458,8 +458,8 @@ public class Eruption extends LavaAbility implements AddonAbility {
                 double a = random.nextDouble() * Math.PI * 2;
                 double dr = random.nextDouble() * LAVA_RADIUS * 0.5;
                 Location p = loc.clone().add(Math.cos(a) * dr, random.nextDouble() * 0.4, Math.sin(a) * dr);
-                world.spawnParticle(Particle.FLAME, p, 1, 0.1, 0.25, 0.1, 0.06);
-                world.spawnParticle(Particle.LAVA, p, 1, 0, 0, 0, 0);
+                AranarthBendingUtils.spawnParticle(world, Particle.FLAME, p, 1, 0.1, 0.25, 0.1, 0.06);
+                AranarthBendingUtils.spawnParticle(world, Particle.LAVA, p, 1, 0, 0, 0, 0);
             }
         }
     }

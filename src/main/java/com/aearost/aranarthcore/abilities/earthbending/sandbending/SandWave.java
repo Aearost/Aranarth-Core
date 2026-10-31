@@ -284,7 +284,7 @@ public class SandWave extends SandAbility implements AddonAbility {
                 // Surface only - one particle at the top of the arch curve
                 Location loc = new Location(world, px, groundY + 1.0 + columnH, pz);
                 if (!loc.getBlock().getType().isSolid()) {
-                    world.spawnParticle(Particle.DUST, loc, 1, 0.03, 0.03, 0.03, 0,
+                    AranarthBendingUtils.spawnParticle(world, Particle.DUST, loc, 1, 0.03, 0.03, 0.03, 0,
                             dustPalette[random.nextInt(dustPalette.length)]);
                 }
             }
@@ -313,7 +313,7 @@ public class SandWave extends SandAbility implements AddonAbility {
 
                 Location loc = new Location(world, px, faceGroundY + 1.0 + h, pz);
                 if (!loc.getBlock().getType().isSolid()) {
-                    world.spawnParticle(Particle.DUST, loc, 1, 0.03, 0.03, 0.03, 0,
+                    AranarthBendingUtils.spawnParticle(world, Particle.DUST, loc, 1, 0.03, 0.03, 0.03, 0,
                             dustPalette[random.nextInt(dustPalette.length)]);
                 }
             }
@@ -389,7 +389,7 @@ public class SandWave extends SandAbility implements AddonAbility {
 
         Particle.DustOptions indicator = AranarthBendingUtils.pickSandDustPalette(block.getType())[0];
         BukkitTask task = Bukkit.getScheduler().runTaskTimer(AranarthCore.getInstance(), () ->
-                        block.getWorld().spawnParticle(Particle.DUST,
+                        AranarthBendingUtils.spawnParticle(block.getWorld(), Particle.DUST,
                                 block.getLocation().clone().add(0.5, 1.05, 0.5),
                                 3, 0.25, 0.05, 0.25, 0,
                                 indicator),

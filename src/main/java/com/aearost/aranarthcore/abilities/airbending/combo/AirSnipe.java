@@ -109,10 +109,10 @@ public class AirSnipe extends AirAbility implements AddonAbility, ComboAbility {
         Location hand = getHandPosition();
         for (int i = 0; i < 8; i++) {
             Location burstLoc = hand.clone().add(this.direction.clone().multiply(i * 0.25));
-            hand.getWorld().spawnParticle(Particle.DUST, burstLoc, 2, 0.03, 0.03, 0.03, 0,
+            AranarthBendingUtils.spawnParticle(hand.getWorld(), Particle.DUST, burstLoc, 2, 0.03, 0.03, 0.03, 0,
                     new Particle.DustOptions(Color.WHITE, 0.8f));
             if (i % 3 == 0) {
-                hand.getWorld().spawnParticle(Particle.CRIT, burstLoc,
+                AranarthBendingUtils.spawnParticle(hand.getWorld(), Particle.CRIT, burstLoc,
                         1, 0.04, 0.04, 0.04, 0);
             }
         }
@@ -151,7 +151,7 @@ public class AirSnipe extends AirAbility implements AddonAbility, ComboAbility {
      * Spawns a single white dust particle with a given size directly at loc.
      */
     private void spawnVortexParticle(final Location loc, final float size) {
-        loc.getWorld().spawnParticle(Particle.DUST, loc, 1, 0, 0, 0, 0,
+        AranarthBendingUtils.spawnParticle(loc.getWorld(), Particle.DUST, loc, 1, 0, 0, 0, 0,
                 new Particle.DustOptions(Color.WHITE, size));
     }
 
@@ -246,12 +246,12 @@ public class AirSnipe extends AirAbility implements AddonAbility, ComboAbility {
             }
 
             if (i % 3 == 0) {
-                this.shotLocation.getWorld().spawnParticle(Particle.DUST, this.shotLocation,
+                AranarthBendingUtils.spawnParticle(this.shotLocation.getWorld(), Particle.DUST, this.shotLocation,
                         2, 0.04, 0.04, 0.04, 0,
                         new Particle.DustOptions(Color.WHITE, 0.7f));
                 // Sparse spell flicker for a little crispness
                 if (i % 12 == 0) {
-                    this.shotLocation.getWorld().spawnParticle(Particle.CRIT,
+                    AranarthBendingUtils.spawnParticle(this.shotLocation.getWorld(), Particle.CRIT,
                             this.shotLocation, 1, 0.05, 0.05, 0.05, 0);
                 }
             }

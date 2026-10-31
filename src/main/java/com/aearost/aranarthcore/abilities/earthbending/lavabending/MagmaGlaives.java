@@ -218,7 +218,8 @@ public class MagmaGlaives extends LavaAbility implements AddonAbility {
                     random.nextDouble() * 0.2,
                     Math.sin(angle) * r
             );
-            base.getWorld().spawnParticle(
+            AranarthBendingUtils.spawnParticle(
+                    base.getWorld(),
                     Particle.DUST, loc, 1, 0, 0, 0, 0,
                     LAVA_PALETTE[random.nextInt(LAVA_PALETTE.length)]
             );
@@ -434,7 +435,7 @@ public class MagmaGlaives extends LavaAbility implements AddonAbility {
 
                 // Colour gradient: dark red at center, bright orange at tip
                 int colourIdx = (int) (t * (LAVA_PALETTE.length - 1));
-                world.spawnParticle(Particle.DUST, loc, 1, 0, 0, 0, 0, LAVA_PALETTE[colourIdx]);
+                AranarthBendingUtils.spawnParticle(world, Particle.DUST, loc, 1, 0, 0, 0, 0, LAVA_PALETTE[colourIdx]);
             }
         }
     }

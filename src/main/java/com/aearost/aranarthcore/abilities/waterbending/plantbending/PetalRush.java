@@ -177,7 +177,7 @@ public class PetalRush extends PlantAbility implements AddonAbility {
                     break;
                 }
                 if (distance <= clearDistance) {
-                    start.getWorld().spawnParticle(Particle.DUST, getPosition(distance), 1, 0, 0, 0, 0, dust);
+                    AranarthBendingUtils.spawnParticle(start.getWorld(), Particle.DUST, getPosition(distance), 1, 0, 0, 0, 0, dust);
                 }
             }
         }
@@ -272,7 +272,7 @@ public class PetalRush extends PlantAbility implements AddonAbility {
 
         World world = block.getWorld();
         Particle.DustOptions sourceDust = new Particle.DustOptions(color, heldPetalSize);
-        world.spawnParticle(Particle.DUST, blockCenter, 12, 0.3, 0.3, 0.3, 0, sourceDust);
+        AranarthBendingUtils.spawnParticle(world, Particle.DUST, blockCenter, 12, 0.3, 0.3, 0.3, 0, sourceDust);
         world.playSound(blockCenter, Sound.BLOCK_PINK_PETALS_BREAK, 1.0f, 1.2f);
 
         for (int i = 0; i < petalsPerFlower; i++) {
@@ -430,7 +430,7 @@ public class PetalRush extends PlantAbility implements AddonAbility {
         double angle = getBackAngle(player) + Math.sin(chargeFraction * Math.PI * 6) * PETAL_BACK_ARC;
         Location loc = player.getLocation().add(
                 Math.cos(angle) * PETAL_ORBIT_RADIUS, 0.1 + chargeFraction * 1.6, Math.sin(angle) * PETAL_ORBIT_RADIUS);
-        player.getWorld().spawnParticle(Particle.FALLING_SPORE_BLOSSOM, loc, 1, 0, 0, 0, 0);
+        AranarthBendingUtils.spawnParticle(player.getWorld(), Particle.FALLING_SPORE_BLOSSOM, loc, 1, 0, 0, 0, 0);
     }
 
     /**
@@ -458,7 +458,7 @@ public class PetalRush extends PlantAbility implements AddonAbility {
 
             Vector pull = target.toVector().subtract(petal.position.toVector()).multiply(PETAL_PULL_FACTOR);
             petal.position.add(pull);
-            world.spawnParticle(Particle.DUST, petal.position, 1, 0, 0, 0, 0, petal.dust);
+            AranarthBendingUtils.spawnParticle(world, Particle.DUST, petal.position, 1, 0, 0, 0, 0, petal.dust);
         }
     }
 
@@ -506,7 +506,7 @@ public class PetalRush extends PlantAbility implements AddonAbility {
             if (distance > front || distance > petal.path.clearDistance || random.nextDouble() > fadeFactor) {
                 continue;
             }
-            world.spawnParticle(Particle.DUST, petal.path.getPosition(distance), 1, 0, 0, 0, 0, petal.dust);
+            AranarthBendingUtils.spawnParticle(world, Particle.DUST, petal.path.getPosition(distance), 1, 0, 0, 0, 0, petal.dust);
         }
     }
 

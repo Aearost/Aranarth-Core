@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.DominionRank;
 import com.aearost.aranarthcore.utils.AbilityConfig;
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DefenderUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
@@ -253,7 +254,7 @@ public class LightOfRaava extends AvatarAbility implements AddonAbility {
             final double z = Math.sin(angle) * ringRadius;
             final Location loc = center.clone().add(x, 0, z);
             final Particle.DustOptions dust = (i % 2 == 0) ? READY_WHITE_DUST : READY_BLUE_DUST;
-            loc.getWorld().spawnParticle(Particle.DUST, loc, 1, 0, 0, 0, 0, dust);
+            AranarthBendingUtils.spawnParticle(loc.getWorld(), Particle.DUST, loc, 1, 0, 0, 0, 0, dust);
         }
     }
 
@@ -269,7 +270,7 @@ public class LightOfRaava extends AvatarAbility implements AddonAbility {
             final double y = radius * cosPhi;
             final double z = radius * sinPhi * Math.sin(theta);
             final Particle.DustOptions dust = (Math.random() < 0.65) ? BURST_WHITE_DUST : BURST_BLUE_DUST;
-            center.getWorld().spawnParticle(Particle.DUST, center.clone().add(x, y, z), 1, 0, 0, 0, 0, dust);
+            AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.DUST, center.clone().add(x, y, z), 1, 0, 0, 0, 0, dust);
         }
 
         final int rodPoints = (int) Math.max(6, radius * 6);
@@ -280,7 +281,7 @@ public class LightOfRaava extends AvatarAbility implements AddonAbility {
             final double x = radius * sinPhi * Math.cos(theta);
             final double y = radius * cosPhi;
             final double z = radius * sinPhi * Math.sin(theta);
-            center.getWorld().spawnParticle(Particle.END_ROD, center.clone().add(x, y, z), 1, 0, 0, 0, 0);
+            AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.END_ROD, center.clone().add(x, y, z), 1, 0, 0, 0, 0);
         }
     }
 

@@ -152,7 +152,7 @@ public class Jolt extends LightningAbility implements AddonAbility {
             AranarthBendingUtils.applyElectrocution(living, stunDuration, stunChance);
 
             for (int k = 0; k < 6; k++) {
-                playLightningbendingParticle(
+                AranarthBendingUtils.playLightningbendingParticle(
                         entity.getLocation().clone().add(
                                 (Math.random() - 0.5) * 0.6,
                                 Math.random() * living.getHeight(),
@@ -195,17 +195,17 @@ public class Jolt extends LightningAbility implements AddonAbility {
                 double angle = time + (i * Math.PI / 2.0);
                 Location p = hand.clone().add(0.22 * Math.cos(angle), 0.0, 0.22 * Math.sin(angle));
                 Particle.DustOptions dust = (i % 2 == 0) ? AranarthBendingUtils.LIGHTNING_DUST_BRIGHT : AranarthBendingUtils.LIGHTNING_DUST;
-                p.getWorld().spawnParticle(Particle.DUST, p, 1, 0, 0, 0, 0, dust);
+                AranarthBendingUtils.spawnParticle(p.getWorld(), Particle.DUST, p, 1, 0, 0, 0, 0, dust);
             }
             if (Math.random() < 0.4) {
-                hand.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, hand, 1, 0.08, 0.08, 0.08, 0.01);
+                AranarthBendingUtils.spawnParticle(hand.getWorld(), Particle.ELECTRIC_SPARK, hand, 1, 0.08, 0.08, 0.08, 0.01);
             }
         } else {
             if (Math.random() < 0.5) {
-                hand.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, hand, 1, 0.06, 0.06, 0.06, 0.01);
+                AranarthBendingUtils.spawnParticle(hand.getWorld(), Particle.ELECTRIC_SPARK, hand, 1, 0.06, 0.06, 0.06, 0.01);
             }
             if (Math.random() < 0.3) {
-                hand.getWorld().spawnParticle(Particle.DUST, hand, 1, 0.1, 0.1, 0.1, 0, AranarthBendingUtils.LIGHTNING_DUST);
+                AranarthBendingUtils.spawnParticle(hand.getWorld(), Particle.DUST, hand, 1, 0.1, 0.1, 0.1, 0, AranarthBendingUtils.LIGHTNING_DUST);
             }
         }
     }
@@ -216,11 +216,11 @@ public class Jolt extends LightningAbility implements AddonAbility {
      * @param pos World position of the particle.
      */
     private void spawnShotParticle(Location pos) {
-        pos.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, pos, 1, 0.02, 0.02, 0.02, 0.0);
+        AranarthBendingUtils.spawnParticle(pos.getWorld(), Particle.ELECTRIC_SPARK, pos, 1, 0.02, 0.02, 0.02, 0.0);
         if (Math.random() < 0.5) {
-            pos.getWorld().spawnParticle(Particle.DUST, pos, 1, 0.03, 0.03, 0.03, 0, AranarthBendingUtils.LIGHTNING_DUST_BRIGHT);
+            AranarthBendingUtils.spawnParticle(pos.getWorld(), Particle.DUST, pos, 1, 0.03, 0.03, 0.03, 0, AranarthBendingUtils.LIGHTNING_DUST_BRIGHT);
         }
-        playLightningbendingParticle(pos.clone(), 0f, 0f, 0f);
+        AranarthBendingUtils.playLightningbendingParticle(pos.clone(), 0f, 0f, 0f);
     }
 
     public static void markPendingCharge(UUID uuid) {
