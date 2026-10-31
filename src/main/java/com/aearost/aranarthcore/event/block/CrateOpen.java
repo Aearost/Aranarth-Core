@@ -1587,6 +1587,7 @@ public class CrateOpen {
                 pool.add(new KeyRare().getItem());
             }
             case RARE -> {
+                pool.add(new ItemStack(Material.GOLD_INGOT));
                 pool.add(new ItemStack(Material.ENCHANTED_BOOK));
                 pool.add(new HoneyGlazedHam().getItem());
                 pool.add(new ItemStack(Material.DIAMOND));
@@ -1601,18 +1602,23 @@ public class CrateOpen {
                 pool.add(new KeyEpic().getItem());
             }
             case EPIC -> {
+                pool.add(new ItemStack(Material.GOLD_INGOT));
                 pool.add(new HoneyGlazedHam().getItem());
                 pool.add(new ItemStack(Material.NETHERITE_INGOT));
                 pool.add(new ItemStack(Material.DIAMOND));
                 pool.add(new ItemStack(Material.TRIDENT));
                 pool.add(new ItemStack(Material.ELYTRA));
                 pool.add(new ItemStack(Material.CONDUIT));
+                pool.add(new ItemStack(Material.HEAVY_CORE));
                 pool.add(new CopperCluster().getItem());
                 pool.add(new ItemStack(Material.ZOMBIE_SPAWN_EGG));
                 pool.add(new EssenceMagnetism().getItem());
+                pool.add(new EssenceResilience().getItem());
                 pool.add(new ItemStack(Material.SNIFFER_EGG));
                 pool.add(new ItemStack(Material.SHULKER_SHELL));
                 pool.add(new ItemStack(Material.ENCHANTED_BOOK));
+                pool.add(new KeyRare().getItem());
+                pool.add(new KeyEpic().getItem());
                 pool.add(new KeyGodly().getItem());
             }
             case GODLY -> {

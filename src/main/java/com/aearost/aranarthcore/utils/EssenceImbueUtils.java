@@ -67,8 +67,8 @@ public class EssenceImbueUtils {
         }
         return switch (essenceType) {
             case "essence_beheading" -> Tier.RARE;
-            case "essence_lifesteal", "essence_magnetism" -> Tier.EPIC;
-            case "essence_resilience", "essence_preservation", "essence_plentiful" -> Tier.GODLY;
+            case "essence_resilience", "essence_magnetism" -> Tier.EPIC;
+            case "essence_lifesteal", "essence_preservation", "essence_plentiful" -> Tier.GODLY;
             default -> null;
         };
     }
