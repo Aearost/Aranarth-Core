@@ -37,10 +37,6 @@ public class GuiRanksClick {
 		boolean isClickedRankLowerThanCurrent = false;
 		boolean isClickedRankHigherThanCurrent = false;
 
-		String[] maleRanks = new String[] { "peasant", "esquire", "knight", "baron", "count",
-				"duke", "prince", "king", "emperor" };
-		String[] femaleRanks = new String[] { "peasant", "esquire", "knight", "baroness",
-				"countess", "duchess", "princess", "queen", "empress" };
 		String[] rankupCosts = new String[] { Lang.getFor(player, "rank.cost_free"), "$1,000", "$5,000", "$15,000", "$50,000", "$125,000", "$500,000",
 				"$2,500,000", "$10,000,000" };
 		// Hardcoded indexes of all the upgradable ranks
@@ -79,25 +75,24 @@ public class GuiRanksClick {
 		Pronouns pronouns = aranarthPlayer.getPronouns();
 
 		// Feedback Messages and Functionality
-		String[] rankIds = pronouns == Pronouns.MALE ? maleRanks : femaleRanks;
 		if (isClickedRankSameAsCurrent) {
 			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "rank.already_rank",
-					"article", Lang.key("rank.article_" + rankIds[clickedRank]), "rank", Lang.key("rank.title_" + rankIds[clickedRank]))));
+					"article", Lang.key("rank.article_" + pronouns.getRankId(clickedRank)), "rank", Lang.key("rank.title_" + pronouns.getRankId(clickedRank)))));
 			player.playSound(player, Sound.ENTITY_ENDER_EYE_DEATH, 0.5F, 0.5F);
 			player.closeInventory();
 		} else if (isClickedRankLowerThanCurrent) {
 			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "rank.cannot_rank_down",
-					"article", Lang.key("rank.article_" + rankIds[clickedRank]), "rank", Lang.key("rank.title_" + rankIds[clickedRank]))));
+					"article", Lang.key("rank.article_" + pronouns.getRankId(clickedRank)), "rank", Lang.key("rank.title_" + pronouns.getRankId(clickedRank)))));
 			player.playSound(player, Sound.ENTITY_ENDER_EYE_DEATH, 0.5F, 0.5F);
 			player.closeInventory();
 		} else if (isClickedRankHigherThanCurrent) {
-			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "rank.must_rankup_first", "rank", Lang.key("rank.title_" + rankIds[rank + 1]))));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "rank.must_rankup_first", "rank", Lang.key("rank.title_" + pronouns.getRankId(rank + 1)))));
 			player.playSound(player, Sound.ENTITY_ENDER_EYE_DEATH, 0.8F, 0.5F);
 			player.closeInventory();
 		} else if (isRankup) {
 			String rankupCost = rankupCosts[clickedRank];
 
-			GuiRankup gui = new GuiRankup(player, rankIds[clickedRank], rankupCost);
+			GuiRankup gui = new GuiRankup(player, pronouns.getRankId(clickedRank), rankupCost);
 			gui.openGui();
 		}
 	}

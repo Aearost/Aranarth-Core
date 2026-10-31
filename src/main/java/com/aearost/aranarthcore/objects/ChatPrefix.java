@@ -20,18 +20,18 @@ public class ChatPrefix {
     private final int saintRank;
     private final boolean isAvatar;
     private final int rank;
-    private final boolean isFemale;
+    private final Pronouns pronouns;
     private final String nickname;
     private final String username;
 
     public ChatPrefix(int councilRank, boolean isArchitect, int saintRank, boolean isAvatar,
-                      int rank, boolean isFemale, String nickname, String username) {
+                      int rank, Pronouns pronouns, String nickname, String username) {
         this.councilRank = councilRank;
         this.isArchitect = isArchitect;
         this.saintRank = saintRank;
         this.isAvatar = isAvatar;
         this.rank = rank;
-        this.isFemale = isFemale;
+        this.pronouns = pronouns;
         this.nickname = nickname != null ? nickname : "";
         this.username = username != null ? username : "";
     }
@@ -47,7 +47,7 @@ public class ChatPrefix {
         String name = player.getName() != null ? player.getName() : aranarthPlayer.getUsername();
         return new ChatPrefix(aranarthPlayer.getCouncilRank(), !AranarthUtils.getArchitectRank(aranarthPlayer).isEmpty(),
                 aranarthPlayer.getSaintRank(), !AranarthUtils.getAvatarRank(aranarthPlayer).isEmpty(),
-                aranarthPlayer.getRank(), aranarthPlayer.getPronouns() != Pronouns.MALE,
+                aranarthPlayer.getRank(), aranarthPlayer.getPronouns(),
                 aranarthPlayer.getNickname(), name);
     }
 
@@ -56,7 +56,7 @@ public class ChatPrefix {
      */
     private String getElements(PrefixStyle[] styles) {
         return AranarthUtils.buildPrefixElements(councilRank, styles[0], isArchitect,
-                saintRank, styles[1], isAvatar, rank, isFemale, styles[2]);
+                saintRank, styles[1], isAvatar, rank, pronouns, styles[2]);
     }
 
     /**
@@ -101,7 +101,7 @@ public class ChatPrefix {
         json.addProperty("saintRank", saintRank);
         json.addProperty("avatar", isAvatar);
         json.addProperty("rank", rank);
-        json.addProperty("female", isFemale);
+        json.addProperty("pronouns", pronouns.name());
         json.addProperty("nickname", nickname);
         json.addProperty("username", username);
         return json;
@@ -110,7 +110,7 @@ public class ChatPrefix {
     public static ChatPrefix fromJson(JsonObject json) {
         return new ChatPrefix(json.get("councilRank").getAsInt(), json.get("architect").getAsBoolean(),
                 json.get("saintRank").getAsInt(), json.get("avatar").getAsBoolean(),
-                json.get("rank").getAsInt(), json.get("female").getAsBoolean(),
+                json.get("rank").getAsInt(), Pronouns.fromName(json.get("pronouns").getAsString()),
                 json.get("nickname").getAsString(), json.get("username").getAsString());
     }
 }

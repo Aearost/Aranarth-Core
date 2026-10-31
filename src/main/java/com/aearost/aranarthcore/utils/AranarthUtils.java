@@ -105,8 +105,6 @@ public class AranarthUtils {
                     PrimarySkillType.SALVAGE, PrimarySkillType.SMELTING}
     };
     // Prefix display data for each rank, indexed from Peasant (0) to Emperor (8)
-    private static final String[] RANK_NAMES_MALE = {"Peasant", "Esquire", "Knight", "Baron", "Count", "Duke", "Prince", "King", "Emperor"};
-    private static final String[] RANK_NAMES_FEMALE = {"Peasant", "Esquire", "Knight", "Baroness", "Countess", "Duchess", "Princess", "Queen", "Empress"};
     private static final String[] RANK_BRACKET_COLORS = {"&8", "&d", "&7", "&5", "&8", "&6", "&6", "&6", "&6"};
     private static final String[] RANK_TEXT_COLORS = {"&a", "&a", "&f", "&d", "&7", "&e", "&b", "&9", "&4"};
     private static final String[] RANK_SYMBOL_COLORS = {"&#6FCF4F", "&#FF9EC7", "&#F0F0F0", "&#B05CE6", "&#8A8A8A", "&#FFE14D", "&#4DE0FF", "&#4D6BFF", "&#D11A1A"};
@@ -2167,32 +2165,32 @@ public class AranarthUtils {
      * @return The String portion of the player's rank.
      */
     public static String getRank(AranarthPlayer aranarthPlayer) {
-        return formatRank(aranarthPlayer.getRank(), aranarthPlayer.getPronouns() != Pronouns.MALE, PrefixStyle.FULL) + " &r";
+        return formatRank(aranarthPlayer.getRank(), aranarthPlayer.getPronouns(), PrefixStyle.FULL) + " &r";
     }
 
     /**
      * Provides the String portion of a rank in the given prefix style.
      *
      * @param rank     The rank, where 0 is Peasant and 8 is Emperor.
-     * @param isFemale Whether the female variant of the rank name should be used.
+     * @param pronouns The pronouns that determine the variant of the rank name.
      * @param style    The prefix style to display the rank in.
      * @return The String portion of the rank.
      */
-    public static String getRankPrefix(int rank, boolean isFemale, PrefixStyle style) {
-        return formatRank(rank, isFemale, style) + "&r";
+    public static String getRankPrefix(int rank, Pronouns pronouns, PrefixStyle style) {
+        return formatRank(rank, pronouns, style) + "&r";
     }
 
     /**
      * Formats a rank in the given prefix style, without any trailing reset or spacing.
      */
-    private static String formatRank(int rank, boolean isFemale, PrefixStyle style) {
+    private static String formatRank(int rank, Pronouns pronouns, PrefixStyle style) {
         if (rank < 0 || rank >= RANK_SYMBOL_COLORS.length) {
             rank = 0;
         }
         if (style == PrefixStyle.SYMBOL) {
             return RANK_SYMBOL_COLORS[rank] + RANK_SYMBOL;
         }
-        String name = isFemale ? RANK_NAMES_FEMALE[rank] : RANK_NAMES_MALE[rank];
+        String name = pronouns.getRankName(rank);
         if (style == PrefixStyle.SHORT) {
             name = name.substring(0, 1);
         }
@@ -2224,7 +2222,7 @@ public class AranarthUtils {
      */
     public static String buildPrefixElements(int councilRank, PrefixStyle councilStyle, boolean isArchitect,
                                              int saintRank, PrefixStyle saintStyle, boolean isAvatar,
-                                             int rank, boolean isFemale, PrefixStyle rankStyle) {
+                                             int rank, Pronouns pronouns, PrefixStyle rankStyle) {
         // Indexed by PrefixStyle ordinal: FULL, SHORT, SYMBOL
         StringBuilder[] groups = {new StringBuilder(), new StringBuilder(), new StringBuilder()};
         groups[councilStyle.ordinal()].append(getCouncilPrefix(councilRank, councilStyle));
@@ -2235,7 +2233,7 @@ public class AranarthUtils {
         if (isAvatar) {
             groups[PrefixStyle.SYMBOL.ordinal()].append(AVATAR_SYMBOL);
         }
-        groups[rankStyle.ordinal()].append(getRankPrefix(rank, isFemale, rankStyle));
+        groups[rankStyle.ordinal()].append(getRankPrefix(rank, pronouns, rankStyle));
         return groups[PrefixStyle.SYMBOL.ordinal()].toString()
                 + groups[PrefixStyle.SHORT.ordinal()]
                 + groups[PrefixStyle.FULL.ordinal()];

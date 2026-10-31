@@ -71,6 +71,7 @@ Chat, UI & Sounds
 [~] Made every topic menu be centered automatically
 [~] Fixed the Avatar symbol not appearing in tab for players on the other server
 [~] Nickname changes now apply on both Survival and SMP straight away
+[~] Added /pronouns neutral
 
 Quality of Life
 [+] Added /vc list as an alias for /vc who

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.network;
 
 import com.aearost.aranarthcore.enums.PrefixStyle;
+import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.objects.Avatar;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.AvatarUtils;
@@ -471,15 +472,13 @@ public class NetworkTabManager {
      * @param styles The council, saint, and rank styles chosen by the viewer via /prefix.
      */
     public static String buildDisplayName(NetworkPlayer np, PrefixStyle[] styles) {
-        // Rank title - use female variants when applicable
-        boolean isFemale = "FEMALE".equals(np.getPronouns());
         // The Avatar list is synced across servers, so the current Avatar can be checked locally
         Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
         boolean isAvatar = currentAvatar != null && np.getUuid().equals(currentAvatar.getUuid());
         String display = AranarthUtils.buildPrefixElements(
                 np.getCouncilRank(), styles[0], np.getArchitectRank() >= 1,
                 np.getSaintRank(), styles[1], isAvatar,
-                np.getRank(), isFemale, styles[2]) + " ";
+                np.getRank(), Pronouns.fromName(np.getPronouns()), styles[2]) + " ";
 
         String name = np.getNickname().isEmpty() ? "Unknown" : np.getNickname();
         display += name;

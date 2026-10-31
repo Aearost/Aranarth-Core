@@ -2827,19 +2827,13 @@ public class NetworkManager {
                 NetworkTabManager.addToTab(np);
             }
             AranarthUtils.updateTab();
-        } else {
-            Player localPlayer = Bukkit.getPlayer(uuid);
-            if (localPlayer != null) {
-                AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
-                if (ap != null) {
-                    try {
-                        ap.setPronouns(Pronouns.valueOf(pronounsStr));
-                    } catch (IllegalArgumentException ignored) {
-                        ap.setPronouns(Pronouns.MALE);
-                    }
-                    AranarthUtils.setPlayer(uuid, ap);
-                }
-            }
+        }
+
+        // Keeps the in-memory copy accurate so /info and transfers to this server show the new pronouns
+        AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+        if (ap != null) {
+            ap.setPronouns(Pronouns.fromName(pronounsStr));
+            AranarthUtils.setPlayer(uuid, ap);
         }
     }
 

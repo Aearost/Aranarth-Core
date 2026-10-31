@@ -248,14 +248,9 @@ public class DiscordUtils {
 
 			// Only display intentional changes in Discord, not auto-assign
 			if (isIntentionalChange) {
-				String aOrAn = "a";
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-				String rankName = AranarthUtils.getRank(aranarthPlayer).substring(5);
-				String[] rankNameNoBrackets = rankName.split("]");
-				rankName = ChatUtils.stripColorFormatting(rankNameNoBrackets[0].substring(0, rankNameNoBrackets[0].length() - 4));
-				if (rankName.equals("Esquire") || rankName.equals("Emperor") || rankName.equals("Empress")) {
-					aOrAn = "an";
-				}
+				String rankName = aranarthPlayer.getPronouns().getRankName(aranarthPlayer.getRank());
+				String aOrAn = Lang.getDefault("rank.article_" + aranarthPlayer.getPronouns().getRankId(aranarthPlayer.getRank()));
 
 				String uuidNoDashes = player.getUniqueId().toString().replaceAll("-", "");
 				String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";

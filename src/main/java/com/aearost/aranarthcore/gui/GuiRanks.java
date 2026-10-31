@@ -137,19 +137,7 @@ public class GuiRanks {
 		// Baron
 		ItemMeta baronMeta = baron.getItemMeta();
 		ArrayList<String> baronLore = new ArrayList<>();
-		if (pronouns == Pronouns.MALE) {
-			if (rank == 3) {
-				baronMeta.setDisplayName(Lang.getFor(player, "gui.ranks.baron") + Lang.getFor(player, "gui.ranks.current_suffix"));
-			} else {
-				baronMeta.setDisplayName(Lang.getFor(player, "gui.ranks.baron"));
-			}
-		} else {
-			if (rank == 3) {
-				baronMeta.setDisplayName(Lang.getFor(player, "gui.ranks.baroness") + Lang.getFor(player, "gui.ranks.current_suffix"));
-			} else {
-				baronMeta.setDisplayName(Lang.getFor(player, "gui.ranks.baroness"));
-			}
-		}
+		baronMeta.setDisplayName(getRankDisplayName(player, pronouns, 3, rank));
 		baronLore.add(Lang.getFor(player, "gui.ranks.bending"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] " + Element.SPIRITUAL.getColor() + "&o" + Lang.getFor(player, "gui.ranks_basic_spiritual")));
 		baronLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] &b&oWaterArms, " + Element.PLANT.getColor() + "&oSpores, PetalRush"));
@@ -173,19 +161,7 @@ public class GuiRanks {
 		// Count
 		ItemMeta countMeta = count.getItemMeta();
 		ArrayList<String> countLore = new ArrayList<>();
-		if (pronouns == Pronouns.MALE) {
-			if (rank == 4) {
-				countMeta.setDisplayName(Lang.getFor(player, "gui.ranks.count") + Lang.getFor(player, "gui.ranks.current_suffix"));
-			} else {
-				countMeta.setDisplayName(Lang.getFor(player, "gui.ranks.count"));
-			}
-		} else {
-			if (rank == 4) {
-				countMeta.setDisplayName(Lang.getFor(player, "gui.ranks.countess") + Lang.getFor(player, "gui.ranks.current_suffix"));
-			} else {
-				countMeta.setDisplayName(Lang.getFor(player, "gui.ranks.countess"));
-			}
-		}
+		countMeta.setDisplayName(getRankDisplayName(player, pronouns, 4, rank));
 		countLore.add(Lang.getFor(player, "gui.ranks.bending"));
 		countLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] &7&oJetStream, " + Element.SPIRITUAL.getColor() + "&oAngeredSpirits"));
 		countLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] &b&oIceShards, &3&oHealingHelix"));
@@ -208,19 +184,7 @@ public class GuiRanks {
 		// Duke
 		ItemMeta dukeMeta = duke.getItemMeta();
 		ArrayList<String> dukeLore = new ArrayList<>();
-		if (pronouns == Pronouns.MALE) {
-			if (rank == 5) {
-				dukeMeta.setDisplayName(Lang.getFor(player, "gui.ranks.duke") + Lang.getFor(player, "gui.ranks.current_suffix"));
-			} else {
-				dukeMeta.setDisplayName(Lang.getFor(player, "gui.ranks.duke"));
-			}
-		} else {
-			if (rank == 5) {
-				dukeMeta.setDisplayName(Lang.getFor(player, "gui.ranks.duchess") + Lang.getFor(player, "gui.ranks.current_suffix"));
-			} else {
-				dukeMeta.setDisplayName(Lang.getFor(player, "gui.ranks.duchess"));
-			}
-		}
+		dukeMeta.setDisplayName(getRankDisplayName(player, pronouns, 5, rank));
 		dukeLore.add(Lang.getFor(player, "gui.ranks.bending"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] &7&oSuffocate, " + Element.SPIRITUAL.getColor() + "&oAstralProjection, AstralShot,"));
 		dukeLore.add(ChatUtils.translateToColor(SoundAbility.SOUND.getColor() + "       &o" + Lang.getFor(player, "gui.ranks_basic_sound")));
@@ -244,19 +208,7 @@ public class GuiRanks {
 		// Prince
 		ItemMeta princeMeta = prince.getItemMeta();
 		ArrayList<String> princeLore = new ArrayList<>();
-		if (pronouns == Pronouns.MALE) {
-			if (rank == 6) {
-				princeMeta.setDisplayName(Lang.getFor(player, "gui.ranks.prince") + Lang.getFor(player, "gui.ranks.current_suffix"));
-			} else {
-				princeMeta.setDisplayName(Lang.getFor(player, "gui.ranks.prince"));
-			}
-		} else {
-			if (rank == 6) {
-				princeMeta.setDisplayName(Lang.getFor(player, "gui.ranks.princess") + Lang.getFor(player, "gui.ranks.current_suffix"));
-			} else {
-				princeMeta.setDisplayName(Lang.getFor(player, "gui.ranks.princess"));
-			}
-		}
+		princeMeta.setDisplayName(getRankDisplayName(player, pronouns, 6, rank));
 		princeLore.add(Lang.getFor(player, "gui.ranks.bending"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- &4[&cF&4] " + Element.LIGHTNING.getColor() + "&o" + Lang.getFor(player, "gui.ranks_basic_lightning")));
 		princeLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] " + Element.SPIRITUAL.getColor() + "&oEnergyBurst, " + SoundAbility.SOUND.getColor() + "&oSonicPulse"));
@@ -281,19 +233,7 @@ public class GuiRanks {
 		// King
 		ItemMeta kingMeta = king.getItemMeta();
 		ArrayList<String> kingLore = new ArrayList<>();
-		if (pronouns == Pronouns.MALE) {
-			if (rank == 7) {
-				kingMeta.setDisplayName(Lang.getFor(player, "gui.ranks.king") + Lang.getFor(player, "gui.ranks.current_suffix"));
-			} else {
-				kingMeta.setDisplayName(Lang.getFor(player, "gui.ranks.king"));
-			}
-		} else {
-			if (rank == 7) {
-				kingMeta.setDisplayName(Lang.getFor(player, "gui.ranks.queen") + Lang.getFor(player, "gui.ranks.current_suffix"));
-			} else {
-				kingMeta.setDisplayName(Lang.getFor(player, "gui.ranks.queen"));
-			}
-		}
+		kingMeta.setDisplayName(getRankDisplayName(player, pronouns, 7, rank));
 		kingLore.add(Lang.getFor(player, "gui.ranks.bending"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- &4[&cF&4] &c&oFireComet, " + Element.LIGHTNING.getColor() + "&oBolt, LightningBurst,"));
 		kingLore.add(ChatUtils.translateToColor(Element.LIGHTNING.getColor() + "       &oElectricStrike, JetBolt,"));
@@ -319,19 +259,7 @@ public class GuiRanks {
 		// Emperor
 		ItemMeta emperorMeta = emperor.getItemMeta();
 		ArrayList<String> emperorLore = new ArrayList<>();
-		if (pronouns == Pronouns.MALE) {
-			if (rank == 8) {
-				emperorMeta.setDisplayName(Lang.getFor(player, "gui.ranks.emperor") + Lang.getFor(player, "gui.ranks.current_suffix"));
-			} else {
-				emperorMeta.setDisplayName(Lang.getFor(player, "gui.ranks.emperor"));
-			}
-		} else {
-			if (rank == 8) {
-				emperorMeta.setDisplayName(Lang.getFor(player, "gui.ranks.empress") + Lang.getFor(player, "gui.ranks.current_suffix"));
-			} else {
-				emperorMeta.setDisplayName(Lang.getFor(player, "gui.ranks.empress"));
-			}
-		}
+		emperorMeta.setDisplayName(getRankDisplayName(player, pronouns, 8, rank));
 
 		emperorLore.add(Lang.getFor(player, "gui.ranks.bending"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- &4[&cF&4] " + Element.COMBUSTION.getColor() + "&oCombustion, CombustiveStrike, Barrage"));
@@ -405,6 +333,23 @@ public class GuiRanks {
 		gui.setItem(44, yellowPane);
 
 		return gui;
+	}
+
+	/**
+	 * Provides the display name of a rank's item for the player's pronouns.
+	 *
+	 * @param player The player viewing the GUI.
+	 * @param pronouns The pronouns of the player.
+	 * @param displayedRank The rank of the item.
+	 * @param currentRank The current rank of the player.
+	 * @return The display name, marked as current if it is the player's rank.
+	 */
+	private String getRankDisplayName(Player player, Pronouns pronouns, int displayedRank, int currentRank) {
+		String name = Lang.getFor(player, "gui.ranks." + pronouns.getRankId(displayedRank));
+		if (displayedRank == currentRank) {
+			return name + Lang.getFor(player, "gui.ranks.current_suffix");
+		}
+		return name;
 	}
 
 }

@@ -37,6 +37,8 @@ public class CommandPronouns implements CommandExecutor {
 					aranarthPlayer.setPronouns(Pronouns.MALE);
 				} else if (args[0].equalsIgnoreCase("FEMALE")) {
 					aranarthPlayer.setPronouns(Pronouns.FEMALE);
+				} else if (args[0].equalsIgnoreCase("NEUTRAL")) {
+					aranarthPlayer.setPronouns(Pronouns.NEUTRAL);
 				} else {
 					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "pronouns.unsupported")));
 					return true;

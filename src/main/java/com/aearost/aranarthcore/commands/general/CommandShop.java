@@ -1,7 +1,6 @@
 package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.gui.GuiShopLocation;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.PendingTeleport;
@@ -115,8 +114,7 @@ public class CommandShop implements CommandExecutor {
 //                return true;
 //            }
             if (aranarthPlayer.getRank() < 3 && !aranarthPlayer.isInAdminMode()) {
-                String suffix = aranarthPlayer.getPronouns() == Pronouns.FEMALE ? "ess" : "";
-                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.rank_required", "suffix", suffix)));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.rank_required", "rank", Lang.key("rank.title_" + aranarthPlayer.getPronouns().getRankId(3)))));
                 return true;
             }
             if (AranarthUtils.getShopLocations().containsKey(player.getUniqueId())) {

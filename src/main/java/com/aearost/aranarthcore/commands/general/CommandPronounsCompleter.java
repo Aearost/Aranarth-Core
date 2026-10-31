@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
  */
 public class CommandPronounsCompleter implements TabCompleter {
 
-	private static final List<String> OPTIONS = List.of("female", "male");
+	private static final List<String> OPTIONS = List.of("female", "male", "neutral");
 
 	/**
 	 * @param sender The user that entered the command.

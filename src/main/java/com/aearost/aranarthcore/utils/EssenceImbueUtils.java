@@ -168,4 +168,13 @@ public class EssenceImbueUtils {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
         return aranarthPlayer != null && aranarthPlayer.getRank() >= REQUIRED_RANK;
     }
+
+    /**
+     * Provides the lang key suffix of the rank required to imbue Essences, in the player's pronouns.
+     * @param player The player.
+     * @return The lang key suffix of the required rank.
+     */
+    public static String getRequiredRankId(Player player) {
+        return AranarthUtils.getPlayer(player.getUniqueId()).getPronouns().getRankId(REQUIRED_RANK);
+    }
 }

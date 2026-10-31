@@ -324,7 +324,9 @@ public class EssenceImbueListener implements Listener {
         }
         e.getInventory().setResult(null);
         if (!errorKey.isEmpty() && e.getView().getPlayer() instanceof Player player) {
-            sendActionBar(player, Lang.getFor(player, errorKey, "percent", getRequiredPercent(e.getRecipe())));
+            String rankId = EssenceImbueUtils.getRequiredRankId(player);
+            sendActionBar(player, Lang.getFor(player, errorKey, "percent", getRequiredPercent(e.getRecipe()),
+                    "article", Lang.key("rank.article_" + rankId), "rank", Lang.key("rank.title_" + rankId)));
         }
     }
 

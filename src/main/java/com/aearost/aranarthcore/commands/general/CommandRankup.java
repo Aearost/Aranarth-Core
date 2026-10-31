@@ -1,7 +1,6 @@
 package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.gui.GuiRankup;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -30,10 +29,6 @@ public class CommandRankup implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
-			String[] maleRanks = new String[] { "peasant", "esquire", "knight", "baron", "count",
-					"duke", "prince", "king", "emperor" };
-			String[] femaleRanks = new String[] { "peasant", "esquire", "knight", "baroness",
-					"countess", "duchess", "princess", "queen", "empress" };
 			List<Double> configCosts = AranarthCore.getInstance().getConfig().getDoubleList("economy.rankup-costs");
 			NumberFormat nf = NumberFormat.getNumberInstance();
 			// Index 0 is a placeholder so that rankupCosts[currentRank+1] lines up after the increment below
@@ -54,15 +49,8 @@ public class CommandRankup implements CommandExecutor {
 
 			// Increase to display the next rank
 			currentRank++;
-			Pronouns pronouns = aranarthPlayer.getPronouns();
-			String rankName = "";
-
-			if (pronouns == Pronouns.MALE) {
-				rankName = maleRanks[currentRank];
-			} else {
-				rankName = femaleRanks[currentRank];
-			}
-			GuiRankup gui = new GuiRankup(player, rankName, rankupCosts[currentRank]);
+			String rankId = aranarthPlayer.getPronouns().getRankId(currentRank);
+			GuiRankup gui = new GuiRankup(player, rankId, rankupCosts[currentRank]);
 			gui.openGui();
 		} else {
 			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));

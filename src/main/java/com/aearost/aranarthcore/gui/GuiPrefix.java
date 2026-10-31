@@ -1,7 +1,6 @@
 package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.enums.PrefixStyle;
-import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.items.aranarthium.ingots.AranarthiumIngot;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -90,7 +89,7 @@ public class GuiPrefix {
         String example = switch (type) {
             case 0 -> AranarthUtils.getCouncilPrefix(Math.max(1, aranarthPlayer.getCouncilRank()), style);
             case 1 -> AranarthUtils.getSaintPrefix(Math.max(1, aranarthPlayer.getSaintRank()), style);
-            default -> AranarthUtils.getRankPrefix(aranarthPlayer.getRank(), aranarthPlayer.getPronouns() != Pronouns.MALE, style);
+            default -> AranarthUtils.getRankPrefix(aranarthPlayer.getRank(), aranarthPlayer.getPronouns(), style);
         };
 
         ItemStack item = switch (type) {
