@@ -457,6 +457,32 @@ RootSnare:
   MinWoodPillars: 2
   MaxTargets: 5
 
+SapStrike:
+  # 6 damage = 3 hearts, only dealt once per target no matter how many darts strike them
+  Damage: 6.0
+  Darts: 5
+  Cooldown: 7000
+  Range: 25.0
+  # Blocks travelled per tick
+  Speed: 2.5
+  HitRadius: 0.6
+  # How far (in degrees) each dart spreads from the look direction
+  SpreadAngle: 2.0
+  # How far away a log can be sourced
+  SourceRange: 8.0
+  # How long Sneak must be held at the log to form the sap
+  SourceDuration: 1000
+  # How long the sap stays on the log before it is lost, with no cooldown
+  SourcedTimeout: 15000
+  # How long the darts stay available once extracted before they are lost
+  ReadyDuration: 15000
+  # How long left-click must be released for after extracting the sap before a click can fire the darts
+  FireClickGap: 250
+  # 60 ticks = 3 seconds
+  SlownessDurationTicks: 60
+  # 0 = Slowness I
+  SlownessAmplifier: 0
+
 Spores:
   Cooldown: 12000
   Range: 10.0

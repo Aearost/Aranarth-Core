@@ -471,7 +471,7 @@ public class RootSnare extends PlantAbility implements AddonAbility {
         return false;
     }
 
-    private static boolean isUnstrippedLog(Material mat) {
+    static boolean isUnstrippedLog(Material mat) {
         return switch (mat) {
             case OAK_LOG, SPRUCE_LOG, BIRCH_LOG, JUNGLE_LOG,
                  ACACIA_LOG, DARK_OAK_LOG, MANGROVE_LOG, CHERRY_LOG,

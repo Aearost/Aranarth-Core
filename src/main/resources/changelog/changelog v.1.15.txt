@@ -12,6 +12,7 @@ Bending & Abilities
 [+] Implemented the PetalRush ability for plantbenders
 [+] Implemented the PetalShots ability for plantbenders
 [+] Implemented the PetalStorm combo for plantbenders
+[+] Implemented the SapStrike ability for plantbenders
 [~] Renamed ToxicSpores to Spores
 [~] Changed default permissions of LeafScythe, RootSnare, and VineWhip to be unlocked at Esquire
 [~] Removed Static from being mentioned in /ranks as it was a basic lightning ability and didn't need to be explicitly mentioned

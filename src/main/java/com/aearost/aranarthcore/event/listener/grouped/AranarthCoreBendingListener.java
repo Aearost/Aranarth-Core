@@ -722,6 +722,10 @@ public class AranarthCoreBendingListener implements Listener {
                         if (!PetalShots.hasActiveInstance(player.getUniqueId())) {
                             new PetalShots(player);
                         }
+                    } else if (abilityName.equalsIgnoreCase("sapstrike")) {
+                        if (!SapStrike.hasActiveInstance(player.getUniqueId())) {
+                            new SapStrike(player);
+                        }
                     } else if (abilityName.equalsIgnoreCase("regrowth")) {
                         if (!Regrowth.hasActiveInstance(player.getUniqueId())) {
                             new Regrowth(player);
@@ -1017,6 +1021,13 @@ public class AranarthCoreBendingListener implements Listener {
             return;
         }
 
+        // SapStrike: left-click extracts the sap, then fires the darts
+        SapStrike sapStrike = SapStrike.getActiveInstance(player.getUniqueId());
+        if (sapStrike != null) {
+            sapStrike.onLeftClick();
+            return;
+        }
+
         // IceShards: left-click fires the charged shards
         IceShards iceShards = IceShards.getActiveInstance(player.getUniqueId());
         if (iceShards != null) {
@@ -1298,6 +1309,10 @@ public class AranarthCoreBendingListener implements Listener {
             e.setCancelled(true);
             return;
         }
+        if (SapStrike.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
         if (PetalStorm.hasActiveInstance(player.getUniqueId())) {
             e.setCancelled(true);
             return;
@@ -1458,6 +1473,10 @@ public class AranarthCoreBendingListener implements Listener {
         PetalShots petalShotsSlot = PetalShots.getActiveInstance(e.getPlayer().getUniqueId());
         if (petalShotsSlot != null) {
             petalShotsSlot.cancelFromSlotChange();
+        }
+        SapStrike sapStrikeSlot = SapStrike.getActiveInstance(e.getPlayer().getUniqueId());
+        if (sapStrikeSlot != null) {
+            sapStrikeSlot.cancelFromSlotChange();
         }
         Regrowth regrowth = Regrowth.getActiveInstance(e.getPlayer().getUniqueId());
         if (regrowth != null) {
@@ -1951,6 +1970,10 @@ public class AranarthCoreBendingListener implements Listener {
             return;
         }
         if (PetalShots.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (SapStrike.hasActiveInstance(player.getUniqueId())) {
             e.setCancelled(true);
             return;
         }
