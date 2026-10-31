@@ -21,6 +21,7 @@ Bending & Abilities
 [~] Fixed sneaking not standing players up from stairs and slabs at the arena spawn and other no-bending zones
 [~] LifeRip hearts now stay the same across Survival and SMP and after restarts
 [~] Fixed gaps and vulnerabilities in avatar selection/cycle functionality
+[~] Fixed the Avatar's reign not ending when they die in the arena
 
 Dominion
 [+] Added the council command /ac dominionrank to temporarily update a dominion's level
