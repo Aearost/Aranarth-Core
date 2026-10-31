@@ -618,7 +618,7 @@ public class AranarthCore extends JavaPlugin {
 
                 // Resets the bending arena (Survival server only - arena world doesn't exist on SMP)
                 if (!isSmpServer()) {
-                    Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "arenas reset arena1");
+                    Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "arenas reset largearena1");
                 }
 
                 AranarthUtils.removeInactiveLockedContainers();
