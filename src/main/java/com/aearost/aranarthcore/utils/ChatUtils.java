@@ -981,21 +981,34 @@ public class ChatUtils {
             }
         }
 
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            if (recipientUuids.contains(onlinePlayer.getUniqueId())) {
-                onlinePlayer.sendMessage(ChatUtils.translateToColor(prefixReceive + assembledMsg));
-            }
-        }
+        deliverDominionMessage(prefixReceive + assembledMsg, recipientUuids);
 
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            AranarthPlayer onlineAranarthPlayer = AranarthUtils.getPlayer(onlinePlayer.getUniqueId());
-            if (onlineAranarthPlayer.isInSpyMode() && !recipientUuids.contains(onlinePlayer.getUniqueId())) {
-                onlinePlayer.sendMessage(ChatUtils.translateToColor("&8&l[&4&lSPY&8&l] " + prefixReceive + assembledMsg));
-            }
+        // Relay to recipients and spies on other servers
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishDominionMessage(prefixReceive + assembledMsg, recipientUuids);
         }
 
         Bukkit.getConsoleSender().sendMessage(net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection().deserialize(
                 prefixReceive + assembledMsg));
+    }
+
+    /**
+     * Sends a dominion chat message to the recipients online on this server, and to anyone else here in spy mode.
+     *
+     * @param message    The full message, including its prefix.
+     * @param recipients The UUIDs of all players that should receive the message, on any server.
+     */
+    public static void deliverDominionMessage(String message, Collection<UUID> recipients) {
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            if (recipients.contains(onlinePlayer.getUniqueId())) {
+                onlinePlayer.sendMessage(ChatUtils.translateToColor(message));
+            } else {
+                AranarthPlayer onlineAranarthPlayer = AranarthUtils.getPlayer(onlinePlayer.getUniqueId());
+                if (onlineAranarthPlayer != null && onlineAranarthPlayer.isInSpyMode()) {
+                    onlinePlayer.sendMessage(ChatUtils.translateToColor("&8&l[&4&lSPY&8&l] " + message));
+                }
+            }
+        }
     }
 
     /**

@@ -81,6 +81,7 @@ public class NetworkManager {
     public static final String CH_SOUND_ALL = "aranarth:sound_all";
     public static final String CH_MAIL_NOTIFY = "aranarth:mail_notify";
     public static final String CH_COUNCIL_MSG = "aranarth:council_msg";
+    public static final String CH_DOMINION_MSG = "aranarth:dominion_msg";
     public static final String CH_DOMINION_DISBAND = "aranarth:dominion_disband";
     public static final String CH_DOMINION_CREATE = "aranarth:dominion_create";
     public static final String CH_DOMINION_DIPLO_REQUEST = "aranarth:dominion_diplo_request";
@@ -573,6 +574,7 @@ public class NetworkManager {
             case CH_SOUND_ALL -> handleSoundAll(json);
             case CH_MAIL_NOTIFY -> handleMailNotification(json);
             case CH_COUNCIL_MSG -> handleCouncilMessage(json);
+            case CH_DOMINION_MSG -> handleDominionMessage(json);
             case CH_DOMINION_DISBAND -> handleDominionDisband(json);
             case CH_DOMINION_CREATE -> handleDominionCreate(json);
             case CH_DOMINION_DIPLO_REQUEST -> handleDominionDiploRequest(json);
@@ -1465,6 +1467,25 @@ public class NetworkManager {
         json.addProperty("server", thisServer);
         json.addProperty("message", formattedMessage);
         publish(CH_COUNCIL_MSG, json);
+    }
+
+    /**
+     * Relays a dominion (/d msg) message to the other server so recipients and spies there see it.
+     *
+     * @param message    The full message, including its prefix.
+     * @param recipients The UUIDs of all players that should receive the message.
+     */
+    public void publishDominionMessage(String message, Collection<UUID> recipients) {
+        JsonArray recipientArray = new JsonArray();
+        for (UUID recipient : recipients) {
+            recipientArray.add(recipient.toString());
+        }
+
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("message", message);
+        json.add("recipients", recipientArray);
+        publish(CH_DOMINION_MSG, json);
     }
 
     /**
@@ -3312,6 +3333,19 @@ public class NetworkManager {
                 p.sendMessage(ChatUtils.translateToColor(message));
             }
         }
+    }
+
+    private void handleDominionMessage(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+
+        Set<UUID> recipients = new HashSet<>();
+        for (var recipient : json.getAsJsonArray("recipients")) {
+            recipients.add(UUID.fromString(recipient.getAsString()));
+        }
+        ChatUtils.deliverDominionMessage(json.get("message").getAsString(), recipients);
     }
 
     /**
