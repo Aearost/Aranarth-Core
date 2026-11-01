@@ -81,6 +81,18 @@ public class CommandOverrides {
             return;
         }
 
+        // Architects can only change their own game mode, and only in architect mode in spawn and the non-Survival worlds
+        if ((parts[0].equalsIgnoreCase("/gamemode") || parts[0].equalsIgnoreCase("/minecraft:gamemode"))
+                && !AranarthUtils.hasUnrestrictedGameMode(player)) {
+            boolean isTargetingOther = parts.length > 2 && !parts[2].equalsIgnoreCase(player.getName()) && !parts[2].equals("@s");
+            if (isTargetingOther || !aranarthPlayer.isInArchitectMode()
+                    || !AranarthUtils.canArchitectChangeGameMode(player.getWorld().getName())) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
+                e.setCancelled(true);
+                return;
+            }
+        }
+
         // Prevent the command entirely
         if (parts[0].equals("/me")) {
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));

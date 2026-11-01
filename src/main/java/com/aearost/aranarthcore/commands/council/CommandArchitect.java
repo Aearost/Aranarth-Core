@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.PermissionUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -33,6 +34,9 @@ public class CommandArchitect {
 				aranarthPlayer.setInArchitectMode(true);
 			}
 			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+			// WorldEdit and changing game mode are only available while in architect mode
+			PermissionUtils.evaluatePlayerPermissions(player);
+			AranarthUtils.removeRevokedGameMode(player);
 			return true;
 		} else {
 			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));

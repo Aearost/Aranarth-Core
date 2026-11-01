@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.utils.Lang;
 import com.projectkorra.projectkorra.event.AbilityDamageEntityEvent;
 import io.papermc.paper.event.player.PlayerOpenSignEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
@@ -85,15 +86,43 @@ public class ArenaProtection implements Listener {
 	}
 
 	/**
-	 * Prevents blocks from being destroyed in the arena world spawn.
+	 * Provides whether a player in creative mode must be stopped from building in the arena world.
+	 */
+	private boolean isCreativeBuildDenied(Player player, Location loc) {
+		return loc.getWorld().getName().equalsIgnoreCase("arena") && player.getGameMode() == GameMode.CREATIVE
+				&& !canModify(player) && !AranarthUtils.hasUnrestrictedGameMode(player);
+	}
+
+	/**
+	 * Prevents blocks from being destroyed in the arena world spawn, or anywhere in the arena world while in creative mode.
 	 */
 	@EventHandler
 	public void onBlockBreak(final BlockBreakEvent e) {
-		if (AranarthUtils.isArenaSpawnLocation(e.getBlock().getLocation())) {
-			if (!canModify(e.getPlayer())) {
-				e.setCancelled(true);
-				e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "access.no_break")));
-			}
+		Location loc = e.getBlock().getLocation();
+		boolean isDenied = AranarthUtils.isArenaSpawnLocation(loc) ? !canModify(e.getPlayer()) : isCreativeBuildDenied(e.getPlayer(), loc);
+		if (isDenied) {
+			e.setCancelled(true);
+			e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "access.no_break")));
+		}
+	}
+
+	/**
+	 * Prevents players in creative mode from emptying buckets in the arena world unless in admin or architect mode.
+	 */
+	@EventHandler
+	public void onBucketEmpty(final PlayerBucketEmptyEvent e) {
+		if (isCreativeBuildDenied(e.getPlayer(), e.getBlock().getLocation())) {
+			e.setCancelled(true);
+		}
+	}
+
+	/**
+	 * Prevents players in creative mode from filling buckets in the arena world unless in admin or architect mode.
+	 */
+	@EventHandler
+	public void onBucketFill(final PlayerBucketFillEvent e) {
+		if (isCreativeBuildDenied(e.getPlayer(), e.getBlock().getLocation())) {
+			e.setCancelled(true);
 		}
 	}
 

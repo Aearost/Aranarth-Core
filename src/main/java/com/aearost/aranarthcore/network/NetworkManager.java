@@ -2828,8 +2828,10 @@ public class NetworkManager {
                     ap.setSaintRank(saintRank);
                     ap.setArchitectRank(architectRank);
                     AranarthUtils.setPlayer(uuid, ap);
-                    Bukkit.getScheduler().runTask(AranarthCore.getInstance(),
-                            () -> PermissionUtils.evaluatePlayerPermissions(localPlayer));
+                    Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+                        PermissionUtils.evaluatePlayerPermissions(localPlayer);
+                        AranarthUtils.removeRevokedGameMode(localPlayer);
+                    });
                 }
             }
         }

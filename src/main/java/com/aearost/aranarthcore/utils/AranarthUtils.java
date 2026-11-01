@@ -566,10 +566,14 @@ public class AranarthUtils {
         boolean isSurvivalToSurvival = currentWorld.startsWith("world") && destinationWorld.startsWith("world");
         boolean isSameWorld = currentWorld.equals(destinationWorld);
 
+        // Architects keep their game mode when teleporting within a world they can change it in
+        boolean isArchitectStaying = rawFrom.equals(rawTo) && aranarthPlayer.getArchitectRank() >= 1
+                && canArchitectChangeGameMode(rawTo);
+
         // No need to change inventory
         if (isSurvivalToSurvival || isSameWorld) {
             if (!destinationWorld.startsWith("creative")) {
-                if (aranarthPlayer.getCouncilRank() != 3) {
+                if (aranarthPlayer.getCouncilRank() != 3 && !isArchitectStaying) {
                     player.setGameMode(GameMode.SURVIVAL);
                 }
                 return;
@@ -5287,6 +5291,44 @@ public class AranarthUtils {
                 || isSmpWorld(worldName)
                 || worldName.equals("resource") || worldName.equals("resource_nether") || worldName.equals("resource_the_end")
                 || worldName.equals("spawn") || worldName.equals("shops");
+    }
+
+    /**
+     * Provides whether Architects can change their game mode in the world, being spawn and every non-Survival world.
+     *
+     * @param worldName The name of the world.
+     * @return Confirmation if Architects can change their game mode in the world.
+     */
+    public static boolean canArchitectChangeGameMode(String worldName) {
+        return worldName.equals("spawn") || !isSurvivalWorld(worldName);
+    }
+
+    /**
+     * Provides whether the player can change game modes without the Architect restrictions.
+     *
+     * @param player The player.
+     * @return Confirmation if the player is an operator or Council 2 and above.
+     */
+    public static boolean hasUnrestrictedGameMode(Player player) {
+        AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+        return player.isOp() || (aranarthPlayer != null && aranarthPlayer.getCouncilRank() >= 2);
+    }
+
+    /**
+     * Returns a player who lost their Architect rank or left architect mode to survival mode, unless they are in a creative world.
+     *
+     * @param player The player.
+     */
+    public static void removeRevokedGameMode(Player player) {
+        AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+        GameMode gameMode = player.getGameMode();
+        if (aranarthPlayer == null || (aranarthPlayer.getArchitectRank() >= 1 && aranarthPlayer.isInArchitectMode())
+                || hasUnrestrictedGameMode(player)
+                || (gameMode != GameMode.CREATIVE && gameMode != GameMode.SPECTATOR)
+                || getInventoryGroup(player.getWorld().getName()).equals("creative")) {
+            return;
+        }
+        player.setGameMode(GameMode.SURVIVAL);
     }
 
     /**

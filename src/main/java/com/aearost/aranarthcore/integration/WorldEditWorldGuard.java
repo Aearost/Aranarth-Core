@@ -38,7 +38,7 @@ public class WorldEditWorldGuard {
     }
 
     /**
-     * Blocks every change a non-staff player makes in a survival world.
+     * Blocks every change made in a survival world unless the player is Council or in architect mode.
      */
     @Subscribe
     public void onEditSession(EditSessionEvent event) {
@@ -51,7 +51,7 @@ public class WorldEditWorldGuard {
             return;
         }
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(actor.getUniqueId());
-        if (aranarthPlayer != null && (aranarthPlayer.getCouncilRank() > 0 || aranarthPlayer.getArchitectRank() > 0)) {
+        if (aranarthPlayer != null && (aranarthPlayer.getCouncilRank() > 0 || aranarthPlayer.isInArchitectMode())) {
             return;
         }
 

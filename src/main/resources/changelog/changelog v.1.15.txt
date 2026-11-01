@@ -98,3 +98,6 @@ Cross-server & Technical
 [~] Fixed Dominion messages not being sent across servers
 
 Miscellaneous
+[~] Architects can now only change their game mode while in architect mode
+[~] Architects can build without restrictions only in architect mode
+[~] Limited Architects to using WorldEdit in architect mode

@@ -382,6 +382,8 @@ public class PlayerServerJoinListener implements Listener {
 
         // Permissions must be applied before nickname check is done
         PermissionUtils.evaluatePlayerPermissions(player);
+        // Players who are no longer in architect mode could not change back on their own
+        AranarthUtils.removeRevokedGameMode(player);
 
         if (AvatarUtils.getCurrentAvatar() != null && AvatarUtils.getCurrentAvatar().getUuid().equals(player.getUniqueId())) {
             AvatarUtils.logInfo("The Avatar " + AvatarUtils.describe(player.getUniqueId()) + " joined this server");

@@ -193,6 +193,7 @@ public class CommandRankSet {
 
                     if (player.isOnline()) {
                         PermissionUtils.evaluatePlayerPermissions(player.getPlayer());
+                        AranarthUtils.removeRevokedGameMode(player.getPlayer());
                     }
 
                     if (isSuccessful) {

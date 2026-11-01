@@ -8906,6 +8906,12 @@ public class PersistenceUtils {
                 ap.setLanguage(obj.get("language").getAsString());
             }
             AranarthUtils.setPlayer(uuid, ap);
+            // Toggles load after the join permissions, and an Architect's permissions depend on architect mode
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null && ap.getArchitectRank() >= 1) {
+                PermissionUtils.evaluatePlayerPermissions(player);
+                AranarthUtils.removeRevokedGameMode(player);
+            }
         } catch (Exception e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load toggles for " + uuid + ": " + e.getMessage());
         }

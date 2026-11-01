@@ -117,6 +117,11 @@ public class PermissionUtils {
 
         setCreativeWorldEditPermissions(player, perms, aranarthPlayer);
 
+        // Limited to their own game mode and the worlds allowed by CommandOverrides
+        if (aranarthPlayer.getArchitectRank() >= 1 && aranarthPlayer.isInArchitectMode()) {
+            perms.setPermission("minecraft.command.gamemode", true);
+        }
+
         // Must update arena permissions after base permissions apply
         toggleArenaBendingPermissions(player, player.getWorld().getName().equalsIgnoreCase("arena"));
         updateSubElements(player);
@@ -1196,9 +1201,10 @@ public class PermissionUtils {
      */
     private static void setCreativeWorldEditPermissions(Player player, PermissionAttachment perms, AranarthPlayer aranarthPlayer) {
         String worldName = player.getWorld().getName();
+        boolean isArchitectEditing = aranarthPlayer.getArchitectRank() >= 1 && aranarthPlayer.isInArchitectMode();
         if (PlotUtils.isSmpCreativeWorld(worldName)) {
             perms.setPermission("worldedit.*", true);
-            if (aranarthPlayer.getCouncilRank() == 0 && aranarthPlayer.getArchitectRank() == 0) {
+            if (aranarthPlayer.getCouncilRank() == 0 && !isArchitectEditing) {
                 // Nothing that reaches another world, the server's files, or other players' mobs
                 for (String node : List.of("worldedit.world", "worldedit.schematic.*", "worldedit.schematic.load",
                         "worldedit.schematic.save", "worldedit.schematic.delete", "worldedit.schematic.list",
@@ -1211,17 +1217,20 @@ public class PermissionUtils {
             return;
         }
         if (!PlotUtils.isPlotWorld(worldName)) {
+            if (isArchitectEditing) {
+                perms.setPermission("worldedit.*", true);
+            }
             return;
         }
 
-        if (aranarthPlayer.getCouncilRank() > 0) {
+        if (aranarthPlayer.getCouncilRank() > 0 || isArchitectEditing) {
             perms.setPermission("worldedit.*", true);
             return;
         }
 
         // Negate everything first so that only the permissions below are granted
         perms.setPermission("worldedit.*", false);
-        int tier = PlotUtils.getSaintTier(aranarthPlayer);
+        int tier = aranarthPlayer.getSaintRank();
         if (tier == 0) {
             return;
         }
@@ -1253,7 +1262,7 @@ public class PermissionUtils {
             return;
         }
 
-        // Saint III and Architect - brushes and masks
+        // Saint III - brushes and masks
         for (String node : List.of(
                 "worldedit.brush.sphere", "worldedit.brush.cylinder", "worldedit.brush.smooth",
                 "worldedit.brush.clipboard", "worldedit.brush.gravity",
@@ -1317,6 +1326,7 @@ public class PermissionUtils {
             perms.setPermission("aranarth.vote.test", true);
             perms.setPermission("aranarth.sudo", true);
             perms.setPermission("aranarth.shop.modify", true);
+            perms.setPermission("worldedit.*", true);
             setSaintPermissions(perms, 3);
             setArchitectPermissions(perms, 1);
         } else {
@@ -1376,7 +1386,6 @@ public class PermissionUtils {
         if (architectRank == 1) {
             perms.setPermission("aranarth.ac", true);
             perms.setPermission("aranarth.creative", true);
-            perms.setPermission("worldedit.*", true);
             perms.setPermission("aranarth.heads.player", true);
             perms.setPermission("aranarth.gate", true);
             perms.setPermission("aranarth.nick", true);

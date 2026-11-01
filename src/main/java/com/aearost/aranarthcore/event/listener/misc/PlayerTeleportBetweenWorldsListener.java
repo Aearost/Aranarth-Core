@@ -107,6 +107,7 @@ public class PlayerTeleportBetweenWorldsListener implements Listener {
 
     /**
      * Removes creative mode from a player who ends up outside of a creative world without it being changed.
+     * Architects also lose spectator mode, as its teleport menu can bring them into a Survival world.
      *
      * @param e The event.
      */
@@ -117,16 +118,21 @@ public class PlayerTeleportBetweenWorldsListener implements Listener {
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (!player.isOnline() || player.getGameMode() != GameMode.CREATIVE
-                        || AranarthUtils.getInventoryGroup(player.getWorld().getName()).equals("creative")) {
+                if (!player.isOnline() || AranarthUtils.getInventoryGroup(player.getWorld().getName()).equals("creative")) {
                     return;
                 }
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+                GameMode gameMode = player.getGameMode();
+                boolean isArchitectSpectating = gameMode == GameMode.SPECTATOR && aranarthPlayer != null
+                        && aranarthPlayer.getArchitectRank() >= 1 && !AranarthUtils.hasUnrestrictedGameMode(player);
+                if (gameMode != GameMode.CREATIVE && !isArchitectSpectating) {
+                    return;
+                }
                 if (aranarthPlayer != null && aranarthPlayer.getCouncilRank() == 3) {
                     return;
                 }
                 player.setGameMode(GameMode.SURVIVAL);
-                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] " + player.getName() + " was in creative mode in "
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] " + player.getName() + " was in " + gameMode.name().toLowerCase() + " mode in "
                         + player.getWorld().getName() + " after coming from " + e.getFrom().getName() + " - set to survival mode");
             }
         }.runTaskLater(AranarthCore.getInstance(), 1L);

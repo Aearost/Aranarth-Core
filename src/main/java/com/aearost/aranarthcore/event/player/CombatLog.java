@@ -9,6 +9,7 @@ import com.aearost.aranarthcore.utils.AvatarUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.PermissionUtils;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -80,6 +81,7 @@ public class CombatLog {
 								if (isNotTaggedByAttacker && player.getGameMode() == GameMode.SURVIVAL && aranarthPlayer.isInArchitectMode()) {
 									aranarthPlayer.setInArchitectMode(false);
 									player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "architect.mode_exit_combat")));
+									PermissionUtils.evaluatePlayerPermissions(player);
 								}
 								AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 								HashMap<UUID, Long> attackerCombatLog = new HashMap<>();
@@ -92,6 +94,7 @@ public class CombatLog {
 								if (isAlreadyTaggingPlayer && attacker.getGameMode() == GameMode.SURVIVAL && attackerAranarthPlayer.isInArchitectMode()) {
 									attackerAranarthPlayer.setInArchitectMode(false);
 									attacker.sendMessage(ChatUtils.chatMessage(Lang.getFor(attacker, "architect.mode_exit_combat")));
+									PermissionUtils.evaluatePlayerPermissions(attacker);
 								}
 								AranarthUtils.setPlayer(attacker.getUniqueId(), attackerAranarthPlayer);
 
