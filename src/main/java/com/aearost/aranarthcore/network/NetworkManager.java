@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.network;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralProjection;
+import com.aearost.aranarthcore.commands.council.CommandGive;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.PrefixStyle;
@@ -100,6 +101,7 @@ public class NetworkManager {
     public static final String CH_BALANCE_ADJUST = "aranarth:balance_adjust";
     public static final String CH_PAY_NOTIFY = "aranarth:pay_notify";
     public static final String CH_SUDO = "aranarth:sudo";
+    public static final String CH_GIVE = "aranarth:give";
     public static final String CH_SENTINEL_SUMMON = "aranarth:sentinel_summon";
     public static final String CH_SENTINEL_SPAWN = "aranarth:sentinel_spawn";
     public static final String CH_SENTINEL_DEATH = "aranarth:sentinel_death";
@@ -593,6 +595,7 @@ public class NetworkManager {
             case CH_BALANCE_ADJUST -> handleBalanceAdjust(json);
             case CH_PAY_NOTIFY -> handlePayNotify(json);
             case CH_SUDO -> handleSudo(json);
+            case CH_GIVE -> handleGive(json);
             case CH_SENTINEL_SUMMON -> handleSentinelSummon(json);
             case CH_SENTINEL_SPAWN -> handleSentinelSpawn(json);
             case CH_SENTINEL_DEATH -> handleSentinelDeath(json);
@@ -1135,6 +1138,21 @@ public class NetworkManager {
         json.addProperty("targetUuid", targetUuid.toString());
         json.addProperty("command", command);
         publish(CH_SUDO, json);
+    }
+
+    /**
+     * Tells the server where the target player is online to deliver an /ac give item.
+     * The permission and input of the command must already be validated by the origin server.
+     *
+     * @param targetUuid The UUID of the player receiving the item.
+     * @param args       The arguments of the command.
+     */
+    public void publishGive(UUID targetUuid, String[] args) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("targetUuid", targetUuid.toString());
+        json.addProperty("args", String.join(" ", args));
+        publish(CH_GIVE, json);
     }
 
     /**
@@ -3197,6 +3215,26 @@ public class NetworkManager {
             Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[SUDO] Running cross-server command as " + target.getName() + ": /" + command);
             target.performCommand(command);
         });
+    }
+
+    private void handleGive(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) {
+            return;
+        }
+        UUID targetUuid = UUID.fromString(json.get("targetUuid").getAsString());
+        String[] args = json.get("args").getAsString().split(" ");
+
+        Player target = Bukkit.getPlayer(targetUuid);
+        if (target == null) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[GIVE] Could not deliver cross-server item as " + targetUuid + " is not online: /ac " + String.join(" ", args));
+            return;
+        }
+
+        // Runs as the console as the origin server already validated the sender
+        args[1] = target.getName();
+        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[GIVE] Running cross-server command: /ac " + String.join(" ", args));
+        CommandGive.onCommand(Bukkit.getConsoleSender(), args);
     }
 
     private void handleSleepMessage(JsonObject json) {

@@ -96,6 +96,7 @@ Cross-server & Technical
 [~] Added logic to auto-remove old bending ability values from the config when changing name or functionality
 [~] Updated the arena functionality to be based on the new arena
 [~] Fixed Dominion messages not being sent across servers
+[~] Fixed /ac give not working on players on the other server
 
 Miscellaneous
 [~] Architects can now only change their game mode while in architect mode
