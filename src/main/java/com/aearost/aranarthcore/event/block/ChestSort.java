@@ -223,6 +223,11 @@ public class ChestSort {
         Player player = e.getPlayer();
         Block block = e.getClickedBlock();
 
+        // Inventory Assist is disabled in the arena
+        if (player.getWorld().getName().startsWith("arena")) {
+            return;
+        }
+
         if (!player.hasPermission("aranarth.inventory")) {
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "lock.no_permission_sort")));
             return;

@@ -84,6 +84,7 @@ Quality of Life
 [~] Fixed Infinite Library wearing off before the first roll by starting its duration on the first paid roll
 [~] Clarified the Arcane Ascension description
 [~] Made all AranarthCore abilities' particles be client-side and not server-side
+[~] Disabled the inventory assist perk in the Arena world
 
 Cross-server & Technical
 [~] AFK players are now marked with [AFK] in the Discord online player list

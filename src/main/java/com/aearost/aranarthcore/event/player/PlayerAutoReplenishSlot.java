@@ -281,6 +281,12 @@ public class PlayerAutoReplenishSlot {
     }
 
     private void replenishSlot(Player player, ItemStack referenceItem, int slot, BiPredicate<ItemStack, ItemStack> matcher) {
+        // Inventory Assist is disabled in the arena. Checked here so it also covers replenishments
+        // that are scheduled for the next tick, as the player's world may have changed by then
+        if (player.getWorld().getName().startsWith("arena")) {
+            return;
+        }
+
         PlayerInventory inventory = player.getInventory();
         ItemStack[] contents = inventory.getContents();
 
