@@ -455,6 +455,12 @@ public class DatabaseManager {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
                 """
+            CREATE TABLE IF NOT EXISTS player_last_seen (
+                uuid VARCHAR(36) PRIMARY KEY,
+                last_seen BIGINT NOT NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+                """
             CREATE TABLE IF NOT EXISTS player_last_location (
                 uuid      VARCHAR(36) PRIMARY KEY,
                 server    VARCHAR(64) NOT NULL,
@@ -2987,6 +2993,55 @@ public class DatabaseManager {
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save last location for " + uuid + ": " + e.getMessage());
         }
+    }
+
+    /**
+     * Records when players were last seen on the network. An older time never replaces a newer one,
+     * so each server can safely submit what it knows.
+     *
+     * @param lastSeenTimes The time in milliseconds each player was last seen.
+     */
+    public void savePlayerLastSeen(Map<UUID, Long> lastSeenTimes) {
+        if (lastSeenTimes.isEmpty()) {
+            return;
+        }
+        String sql = """
+                INSERT INTO player_last_seen (uuid, last_seen) VALUES (?, ?)
+                ON DUPLICATE KEY UPDATE last_seen = GREATEST(last_seen, VALUES(last_seen))
+                """;
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            for (Map.Entry<UUID, Long> entry : lastSeenTimes.entrySet()) {
+                ps.setString(1, entry.getKey().toString());
+                ps.setLong(2, entry.getValue());
+                ps.addBatch();
+            }
+            ps.executeBatch();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save last seen times: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Provides when the player was last seen on the network.
+     *
+     * @param uuid The player.
+     * @return The time in milliseconds, or 0 if it is not known.
+     */
+    public long loadPlayerLastSeen(UUID uuid) {
+        String sql = "SELECT last_seen FROM player_last_seen WHERE uuid = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong("last_seen");
+                }
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load last seen time for " + uuid + ": " + e.getMessage());
+        }
+        return 0;
     }
 
     // -------------------------------------------------------------------------

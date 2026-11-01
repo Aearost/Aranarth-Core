@@ -418,6 +418,7 @@ public class AranarthCore extends JavaPlugin {
         initializeUtils();
         // Every stored player is loaded by now, so any still missing are looked up as they are needed
         AranarthUtils.enableLoadingMissingPlayers();
+        shareLastSeenTimes();
         initializeEvents();
         initializeRecipes();
         initializeCommands();
@@ -1816,9 +1817,29 @@ public class AranarthCore extends JavaPlugin {
     }
 
     /**
+     * Shares this server's last played times with the network, so that players who have never joined
+     * the other server still have a last seen time there. It also repairs any times missed by a crash.
+     */
+    private void shareLastSeenTimes() {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        OfflinePlayer[] offlinePlayers = Bukkit.getOfflinePlayers();
+        // getLastPlayed() reads each player's data file, so it must not hold up the main thread
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            Map<UUID, Long> lastSeenTimes = new HashMap<>();
+            for (OfflinePlayer offlinePlayer : offlinePlayers) {
+                long lastPlayed = offlinePlayer.getLastPlayed();
+                if (lastPlayed > 0) {
+                    lastSeenTimes.put(offlinePlayer.getUniqueId(), lastPlayed);
+                }
+            }
+            DatabaseManager.getInstance().savePlayerLastSeen(lastSeenTimes);
+        });
+    }
+
+    /**
      * Saves all persistent data to disk.
-     * Called from onDisable() and from the JVM shutdown hook (fallback for
-     * restarters like UltimateAutoRestart that may bypass onDisable()).
      */
     private void saveAll() {
         // Flush all online players' Bukkit data (inventory, ender chest, XP, health, etc.) to
@@ -1831,6 +1852,14 @@ public class AranarthCore extends JavaPlugin {
         // after the restart).
         Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
         Bukkit.getLogger().info(LOG_PREFIX + "[Shutdown] saveAll() called - " + onlinePlayers.size() + " player(s) still online.");
+        // Quit events are not received during a shutdown, so the last seen times must be saved here
+        if (DatabaseManager.isActive()) {
+            Map<UUID, Long> lastSeenTimes = new HashMap<>();
+            for (Player p : onlinePlayers) {
+                lastSeenTimes.put(p.getUniqueId(), System.currentTimeMillis());
+            }
+            DatabaseManager.getInstance().savePlayerLastSeen(lastSeenTimes);
+        }
         for (Player p : onlinePlayers) {
             try {
                 // Quit events are not received during a shutdown, so the armor must be put back here to be saved

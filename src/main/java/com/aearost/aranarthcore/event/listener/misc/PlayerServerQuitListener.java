@@ -18,6 +18,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Adds a new entry to the players HashMap if the player is not being tracked.
@@ -64,6 +65,12 @@ public class PlayerServerQuitListener implements Listener {
         // their inventory and location is not theirs, so nothing about it may be saved
         boolean isNonAuthoritative = NetworkManager.isActive()
                 && NetworkManager.getInstance().isNonAuthoritative(player.getUniqueId());
+
+        // getLastPlayed() only covers this server, so this is how the other server knows when they were last seen.
+        // Saved synchronously for the same reason as the logout location below
+        if (DatabaseManager.isActive()) {
+            DatabaseManager.getInstance().savePlayerLastSeen(Map.of(player.getUniqueId(), System.currentTimeMillis()));
+        }
 
         // Persist the player's logout location so they are returned here on next login.
         // Skipped for cross-server transfers; the receiving server will track their location.

@@ -103,6 +103,7 @@ Cross-server & Technical
 [~] Fixed Dominion messages not being sent across servers
 [~] Fixed /ac give not working on players on the other server
 [~] Fixed doubled messages when using /ac msg from the console
+[~] Fixed /seen and /info showing Dec 31st 1969 or outdated dates for players who were last on the other server
 
 Miscellaneous
 [~] Architects can now only change their game mode while in architect mode
