@@ -26,6 +26,7 @@ Bending & Abilities
 [~] Fixed the Avatar's reign not ending when they die in the arena
 [~] Removed AirBlast launching arrows in the arena
 [~] Avatars removed for inactivity are no longer automatically replaced, and the next Avatar is selected manually
+[+] The Avatar State now automatically activates at 3 hearts if bound
 
 Dominion
 [+] Added the council command /ac dominionrank to temporarily update a dominion's level

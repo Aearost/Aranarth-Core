@@ -43,6 +43,7 @@ import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.AvatarUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.ShopIslandUtils;
@@ -56,9 +57,12 @@ import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.*;
 import com.projectkorra.projectkorra.ability.util.ComboManager;
 import com.projectkorra.projectkorra.airbending.AirBlast;
+import com.projectkorra.projectkorra.avatar.AvatarState;
+import com.projectkorra.projectkorra.configuration.ConfigManager;
 import com.projectkorra.projectkorra.event.*;
 import com.projectkorra.projectkorra.util.TempBlock;
 import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
@@ -177,9 +181,53 @@ public class AranarthCoreBendingListener implements Listener {
             @Override
             public void run() {
                 CoreAbility.registerPluginAbilities(AranarthCore.getInstance(), "com.aearost.aranarthcore.abilities");
+                disableProjectKorraLowHealth();
                 Bukkit.getLogger().info("[AC] AranarthCore Bending Reloaded");
             }
         }.runTaskLater(AranarthCore.getInstance(), 1L);
+    }
+
+    /**
+     * Turns off ProjectKorra's low health Avatar State activation, as onAvatarStateLowHealth replaces it.
+     */
+    public static void disableProjectKorraLowHealth() {
+        ConfigManager.avatarStateConfig.get().set("LowHealth.Enabled", false);
+    }
+
+    /**
+     * Auto activates the Avatar State when the Avatar drops to 3 hearts or below with it bound.
+     */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onAvatarStateLowHealth(final EntityDamageEvent e) {
+        if (!(e.getEntity() instanceof Player player) || !AvatarUtils.isCurrentAvatar(player.getUniqueId())) {
+            return;
+        }
+        double healthAfterDamage = player.getHealth() - e.getFinalDamage();
+        if (healthAfterDamage <= 0 || healthAfterDamage > AbilityConfig.getDouble("AvatarState.AutoActivateHealth")) {
+            return;
+        }
+        BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+        if (bendingPlayer == null || !bendingPlayer.getAbilities().containsValue("AvatarState")
+                || bendingPlayer.isOnCooldown("AvatarState") || CoreAbility.hasAbility(player, AvatarState.class)) {
+            return;
+        }
+        if (!bendingPlayer.canBendIgnoreBindsCooldowns(CoreAbility.getAbility(AvatarState.class))
+                || isBendingRestricted(player, player.getLocation())) {
+            return;
+        }
+
+        new AvatarState(player);
+        if (!CoreAbility.hasAbility(player, AvatarState.class)) {
+            return;
+        }
+
+        // Delayed by a tick as the health is only reduced once this event has finished
+        double boost = AbilityConfig.getDouble("AvatarState.AutoActivateHealthBoost");
+        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
+            if (player.isOnline() && !player.isDead()) {
+                player.setHealth(Math.min(player.getHealth() + boost, player.getAttribute(Attribute.MAX_HEALTH).getValue()));
+            }
+        }, 1L);
     }
 
     /**

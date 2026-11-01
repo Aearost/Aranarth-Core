@@ -281,6 +281,12 @@ LightOfRaava:
   WitherDurationTicks: 200
   RegenerationDurationTicks: 100
 
+AvatarState:
+  # The Avatar State auto activates at or below this health if bound (6.0 = 3 hearts)
+  AutoActivateHealth: 6.0
+  # Health restored when auto activating (2.0 = 1 heart)
+  AutoActivateHealthBoost: 2.0
+
 AstralProjection:
   Cooldown: 60000
   Range: 30.0

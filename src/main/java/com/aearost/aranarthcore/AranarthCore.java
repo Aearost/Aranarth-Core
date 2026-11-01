@@ -464,6 +464,7 @@ public class AranarthCore extends JavaPlugin {
             Bukkit.getLogger().warning("Failed to set sub-element colors: " + e.getMessage());
         }
         CoreAbility.registerPluginAbilities(AranarthCore.getInstance(), "com.aearost.aranarthcore.abilities");
+        AranarthCoreBendingListener.disableProjectKorraLowHealth();
         BendingPlayer.registerCanBindHook(this, new RankCanBindHook());
         Bukkit.getLogger().info(LOG_PREFIX + "AranarthCore Bending has been loaded");
 
