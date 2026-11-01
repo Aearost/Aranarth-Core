@@ -306,6 +306,10 @@ public class AranarthCoreBendingListener implements Listener {
             return;
         }
         Player player = airBlast.getPlayer();
+        // Launching arrows is too strong for the arena, so the AirBlast fires as normal instead
+        if (player.getWorld().getName().startsWith("arena")) {
+            return;
+        }
         if (!player.isSneaking()) {
             return;
         }
