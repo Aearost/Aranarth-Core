@@ -27,6 +27,7 @@ Bending & Abilities
 [~] Removed AirBlast launching arrows in the arena
 [~] Avatars removed for inactivity are no longer automatically replaced, and the next Avatar is selected manually
 [+] The Avatar State now automatically activates at 3 hearts if bound
+[~] Fixed JetStream dropping the user/caught entities due to briefly falling behind the stream
 
 Dominion
 [+] Added the council command /ac dominionrank to temporarily update a dominion's level

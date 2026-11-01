@@ -811,8 +811,36 @@ public class AranarthBendingUtils {
      * @param offsetZ The Z offset.
      */
     public static void playAirbendingParticles(Location location, int amount, double offsetX, double offsetY, double offsetZ) {
-        spawnParticle(location.getWorld(), AirAbility.getAirbendingParticles().getParticle(), location, amount,
-                offsetX, offsetY, offsetZ, 0, null, true);
+        Particle particle = getAirbendingParticle();
+        Object data = switch (particle.getDataType().getSimpleName()) {
+            case "Color" -> Color.WHITE;
+            case "BlockData" -> Material.WHITE_WOOL.createBlockData();
+            case "DustOptions" -> new Particle.DustOptions(Color.WHITE, 1.0f);
+            case "DustTransition" -> new Particle.DustTransition(Color.WHITE, Color.WHITE, 1.0f);
+            case "Float" -> 1.0f;
+            case "Integer" -> 1;
+            case "ItemStack" -> new ItemStack(Material.WHITE_WOOL);
+            case "Spell" -> new Particle.Spell(Color.WHITE, 1.0f);
+            case "Trail" -> new Particle.Trail(location, Color.WHITE, 1);
+            case "Vibration" -> new Vibration(new Vibration.Destination.BlockDestination(location.getBlock()), 0);
+            default -> null;
+        };
+        spawnParticle(location.getWorld(), particle, location, amount, offsetX, offsetY, offsetZ, 0, data, true);
+    }
+
+    /**
+     * Gets the configured Air particle directly from the ProjectKorra config.
+     * AirAbility#getAirbendingParticles has a different return type between the compile and server versions of
+     * ProjectKorra, so calling it throws a NoSuchMethodError at runtime.
+     *
+     * @return The configured Air particle, or EFFECT if it is not a valid particle.
+     */
+    private static Particle getAirbendingParticle() {
+        try {
+            return Particle.valueOf(AirAbility.getConfig().getString("Properties.Air.Particles", "EFFECT").toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return Particle.EFFECT;
+        }
     }
 
     /**

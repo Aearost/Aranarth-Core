@@ -335,8 +335,14 @@ JetStream:
   TurnRate: 0.03
   # How strongly carried entities are pulled toward the stream each tick
   PullStrength: 0.4
-  # Carried entities (including the caster) further than this from the stream (e.g. stuck behind a wall) are freed from it
+  # The most blocks per tick that pull can add, so entities catching up to the stream are not launched
+  MaxPull: 2.0
+  # Carried entities (including the caster) further than this from the stream may be freed from it
   CarryRange: 3.0
+  # Ticks an entity can stay out of range without closing the gap (e.g. stuck behind a wall) before being freed from the stream
+  StallGrace: 8
+  # Blocks ahead of the stream that particles are drawn while the caster rides it, as riders outrun particles spawned at the stream
+  ParticleLead: 9.0
   # How long the caster and carried entities stay protected from fall damage after release
   FallProtection: 5000
   # Max time between two sneak presses for a double-tap to end the stream early

@@ -22,7 +22,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -45,7 +47,10 @@ public class JetStream extends AirAbility implements AddonAbility, ComboAbility 
 
     private double turnRate;
     private double pullStrength;
+    private double maxPull;
     private double carryRange;
+    private int stallGrace;
+    private double particleLead;
     private long fallProtection;
     private long doubleTapWindow;
 
@@ -57,6 +62,8 @@ public class JetStream extends AirAbility implements AddonAbility, ComboAbility 
     private long lastSneakPressTime;
     private final Set<Entity> carriedEntities = new HashSet<>();
     private final Set<Entity> releasedEntities = new HashSet<>();
+    private final Map<Entity, Double> lastGaps = new HashMap<>();
+    private final Map<Entity, Integer> stalledTicks = new HashMap<>();
 
     public JetStream(final Player player) {
         super(player);
@@ -77,7 +84,10 @@ public class JetStream extends AirAbility implements AddonAbility, ComboAbility 
         this.radius = AbilityConfig.getDouble("JetStream.Radius");
         this.turnRate = AbilityConfig.getDouble("JetStream.TurnRate");
         this.pullStrength = AbilityConfig.getDouble("JetStream.PullStrength");
+        this.maxPull = AbilityConfig.getDouble("JetStream.MaxPull");
         this.carryRange = AbilityConfig.getDouble("JetStream.CarryRange");
+        this.stallGrace = AbilityConfig.getInt("JetStream.StallGrace");
+        this.particleLead = AbilityConfig.getDouble("JetStream.ParticleLead");
         this.fallProtection = AbilityConfig.getLong("JetStream.FallProtection");
         this.doubleTapWindow = AbilityConfig.getLong("JetStream.DoubleTapWindow");
 
@@ -125,13 +135,15 @@ public class JetStream extends AirAbility implements AddonAbility, ComboAbility 
 
         // The stream passes through blocks, catching anything along the segment it travels this tick
         final Location previous = this.streamLocation.clone();
+        // A rider passes particles spawned at the stream before they appear, so they are drawn ahead for the rider to see
+        final Vector particleOffset = this.direction.clone().multiply(this.carriedEntities.contains(player) ? this.particleLead : 0);
         for (double d = STEP_SIZE; d <= this.speed; d += STEP_SIZE) {
             final Location point = previous.clone().add(this.direction.clone().multiply(d));
             if (GeneralMethods.isRegionProtectedFromBuild(this, point)) {
                 release();
                 return;
             }
-            AranarthBendingUtils.playAirbendingParticles(point, 3, this.radius * 0.5, this.radius * 0.5, this.radius * 0.5);
+            AranarthBendingUtils.playAirbendingParticles(point.clone().add(particleOffset), 3, this.radius * 0.5, this.radius * 0.5, this.radius * 0.5);
             pullEntities(point);
         }
         this.streamLocation = previous.clone().add(this.direction.clone().multiply(this.speed));
@@ -190,7 +202,7 @@ public class JetStream extends AirAbility implements AddonAbility, ComboAbility 
     }
 
     /**
-     * Frees any carried entity (including the caster) that is no longer touching the stream.
+     * Frees any carried entity (including the caster) that can no longer keep up with the stream.
      */
     private void freeDetachedEntities() {
         this.carriedEntities.removeIf(entity -> {
@@ -199,7 +211,7 @@ public class JetStream extends AirAbility implements AddonAbility, ComboAbility 
                 return true;
             }
             if (!entity.getWorld().equals(this.streamLocation.getWorld())
-                    || getCenter(entity).distance(this.streamLocation) > this.carryRange) {
+                    || isStalled(entity)) {
                 stopGliding(entity);
                 this.releasedEntities.add(entity);
                 return true;
@@ -209,11 +221,27 @@ public class JetStream extends AirAbility implements AddonAbility, ComboAbility 
     }
 
     /**
+     * Determines if a carried entity is stuck rather than briefly behind the stream.
+     */
+    private boolean isStalled(final Entity entity) {
+        final double gap = getCenter(entity).distance(this.streamLocation);
+        final Double lastGap = this.lastGaps.put(entity, gap);
+        if (gap <= this.carryRange || (lastGap != null && gap < lastGap)) {
+            this.stalledTicks.remove(entity);
+            return false;
+        }
+        return this.stalledTicks.merge(entity, 1, Integer::sum) > this.stallGrace;
+    }
+
+    /**
      * Moves all carried entities along with the stream, drawing them in toward its current point.
      */
     private void carryEntities(final Location point) {
         for (final Entity entity : this.carriedEntities) {
             final Vector pull = point.toVector().subtract(getCenter(entity).toVector()).multiply(this.pullStrength);
+            if (pull.length() > this.maxPull) {
+                pull.normalize().multiply(this.maxPull);
+            }
             entity.setVelocity(this.direction.clone().multiply(this.speed).add(pull));
             entity.setFallDistance(0f);
             // Re-applied every tick as the server otherwise drops gliding without an elytra
