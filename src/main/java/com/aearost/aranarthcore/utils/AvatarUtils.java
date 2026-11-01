@@ -356,16 +356,17 @@ public class AvatarUtils {
 
     /**
      * Runs the scheduled Avatar logic. Must only be called on the Survival server.
-     * Selects a successor once a reign has ended, and ends the reign of an Avatar that has been
-     * inactive on every server for too long.
      */
     public static void runScheduledChecks() {
         // A new Avatar is selected automatically, retrying each check until someone eligible is online
         Avatar avatar = getCurrentAvatar();
         if (avatar == null) {
+            Avatar previousAvatar = getPreviousAvatar();
             if (avatars.isEmpty()) {
                 // A reign that ended leaves an entry in the list, so an empty list means it failed to load
                 logSelection("Automatic selection refused, the list is empty: was it loaded?");
+            } else if (previousAvatar != null && previousAvatar.isEndedByInactivity()) {
+                logSelection("Automatic selection skipped, the last reign ended by inactivity so /avatar set must be used");
             } else if (System.currentTimeMillis() - lastReignEndedAt < SUCCESSOR_DELAY.toMillis()) {
                 logInfo("Waiting for the end of the last reign to play out before selecting a successor");
             } else {
@@ -410,6 +411,8 @@ public class AvatarUtils {
                 // The reign may have changed while the last seen time was being read
                 Avatar current = getCurrentAvatar();
                 if (current != null && current.getUuid().equals(uuid) && !isOnlineAnywhere(uuid)) {
+                    // Saved with the reign so that it still applies after a restart and on the other server
+                    current.setEndedByInactivity(true);
                     removeCurrentAvatar("inactive for 7 days");
                 }
             });

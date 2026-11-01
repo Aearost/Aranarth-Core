@@ -2770,7 +2770,7 @@ public class PersistenceUtils {
                     continue;
                 }
 
-                // uuid|startInGame|endInGame|startInRealLife|endInRealLife|element
+                // uuid|startInGame|endInGame|startInRealLife|endInRealLife|element|endedByInactivity
                 String[] fields = row.split("\\|");
 
                 UUID uuid = UUID.fromString(fields[0]);
@@ -2781,6 +2781,8 @@ public class PersistenceUtils {
                 char element = fields[5].charAt(0);
 
                 Avatar avatar = new Avatar(uuid, startInGame, endInGame, startInRealLife, endInRealLife, element);
+                // Rows saved before this field was added do not have it
+                avatar.setEndedByInactivity(fields.length > 6 && Boolean.parseBoolean(fields[6]));
                 AvatarUtils.addAvatar(avatar);
             }
             Bukkit.getLogger().info("[AC] All avatars have been initialized");
@@ -2829,7 +2831,7 @@ public class PersistenceUtils {
                     }
                 }
 
-                writer.write("#uuid|startInGame|endInGame|startInRealLife|endInRealLife|element\n");
+                writer.write("#uuid|startInGame|endInGame|startInRealLife|endInRealLife|element|endedByInactivity\n");
 
                 for (Avatar avatar : AvatarUtils.getAvatars()) {
                     if (avatar == null) {
@@ -2843,7 +2845,7 @@ public class PersistenceUtils {
                         char element = avatar.getElement();
 
                         writer.write(uuid + "|" + startInGame + "|" + endInGame + "|"
-                                + startInRealLife + "|" + endInRealLife + "|" + element + "\n");
+                                + startInRealLife + "|" + endInRealLife + "|" + element + "|" + avatar.isEndedByInactivity() + "\n");
                     }
                 }
                 writer.close();
@@ -7144,6 +7146,7 @@ public class PersistenceUtils {
                 a.addProperty("startInRealLife", avatar.getStartInRealLife());
                 a.addProperty("endInRealLife", avatar.getEndInRealLife());
                 a.addProperty("element", String.valueOf(avatar.getElement()));
+                a.addProperty("endedByInactivity", avatar.isEndedByInactivity());
                 avatarsArr.add(a);
             }
         }
@@ -7169,7 +7172,10 @@ public class PersistenceUtils {
                 String startInRealLife = a.get("startInRealLife").getAsString();
                 String endInRealLife = a.get("endInRealLife").getAsString();
                 char element = a.get("element").getAsString().charAt(0);
-                avatars.add(new Avatar(uuid, startInGame, endInGame, startInRealLife, endInRealLife, element));
+                Avatar avatar = new Avatar(uuid, startInGame, endInGame, startInRealLife, endInRealLife, element);
+                // Entries saved before this field was added do not have it
+                avatar.setEndedByInactivity(a.has("endedByInactivity") && a.get("endedByInactivity").getAsBoolean());
+                avatars.add(avatar);
             }
         }
         return avatars;

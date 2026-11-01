@@ -25,6 +25,7 @@ Bending & Abilities
 [~] Fixed gaps and vulnerabilities in avatar selection/cycle functionality
 [~] Fixed the Avatar's reign not ending when they die in the arena
 [~] Removed AirBlast launching arrows in the arena
+[~] Avatars removed for inactivity are no longer automatically replaced, and the next Avatar is selected manually
 
 Dominion
 [+] Added the council command /ac dominionrank to temporarily update a dominion's level
