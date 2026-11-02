@@ -9385,6 +9385,11 @@ public class PersistenceUtils {
         if (!DatabaseManager.isActive()) {
             return;
         }
+        // A cross-server stub has no land, so saving it would blank the stored chunks and stop the row
+        // from parsing. Balance changes made here reach the hosting server as a delta, which saves them.
+        if (!DominionUtils.isHostedHere(dominion)) {
+            return;
+        }
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
             try {
                 String row = buildDominionRow(dominion);
