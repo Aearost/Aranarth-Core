@@ -44,7 +44,7 @@ public class FlyingBisonBellow {
         World world = center.getWorld();
         Random random = new Random();
 
-        playBellowSound(center, random);
+        playBellowSound(rider, random);
 
         // Apply effects to every living entity in the AOE
         int hits = 0;
@@ -92,23 +92,25 @@ public class FlyingBisonBellow {
 
     /**
      * Plays a random bellow, which is made of a deep primary sound with a quieter sound layered behind it.
+     * The sounds are attached to the rider so that they travel with the Flying Bison while it moves.
+     * They cannot be attached to the Flying Bison itself, as sounds attached to a silent entity are not played.
      *
-     * @param center The centre of the Flying Bison.
+     * @param rider  The player riding the Flying Bison.
      * @param random The random used to pick the sounds.
      */
-    private static void playBellowSound(Location center, Random random) {
-        World world = center.getWorld();
+    private static void playBellowSound(Player rider, Random random) {
+        World world = rider.getWorld();
 
         switch (random.nextInt(8)) {
-            case 0 -> world.playSound(center, Sound.ENTITY_RAVAGER_ROAR, PRIMARY_VOLUME, LOW_PITCH);
-            case 1 -> world.playSound(center, Sound.ENTITY_SNIFFER_IDLE, PRIMARY_VOLUME, SHORTENED_PITCH);
-            case 2 -> world.playSound(center, Sound.ENTITY_WARDEN_AGITATED, PRIMARY_VOLUME, SHORTENED_PITCH);
-            case 3 -> world.playSound(center, Sound.ENTITY_WARDEN_AMBIENT, PRIMARY_VOLUME, SHORTENED_PITCH);
-            default -> world.playSound(center, Sound.ENTITY_POLAR_BEAR_WARNING, PRIMARY_VOLUME, LOW_PITCH);
+            case 0 -> world.playSound(rider, Sound.ENTITY_RAVAGER_ROAR, PRIMARY_VOLUME, LOW_PITCH);
+            case 1 -> world.playSound(rider, Sound.ENTITY_SNIFFER_IDLE, PRIMARY_VOLUME, SHORTENED_PITCH);
+            case 2 -> world.playSound(rider, Sound.ENTITY_WARDEN_AGITATED, PRIMARY_VOLUME, SHORTENED_PITCH);
+            case 3 -> world.playSound(rider, Sound.ENTITY_WARDEN_AMBIENT, PRIMARY_VOLUME, SHORTENED_PITCH);
+            default -> world.playSound(rider, Sound.ENTITY_POLAR_BEAR_WARNING, PRIMARY_VOLUME, LOW_PITCH);
         }
 
         Sound secondary = random.nextBoolean() ? Sound.ENTITY_COW_AMBIENT : Sound.ENTITY_CAMEL_AMBIENT;
-        world.playSound(center, secondary, SECONDARY_VOLUME, LOW_PITCH);
+        world.playSound(rider, secondary, SECONDARY_VOLUME, LOW_PITCH);
     }
 
     private static Vector radialKnockback(Location targetLoc, Location origin,

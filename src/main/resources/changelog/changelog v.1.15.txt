@@ -29,6 +29,7 @@ Bending & Abilities
 [+] The Avatar State now automatically activates at 3 hearts if bound
 [~] Fixed JetStream dropping the user/caught entities due to briefly falling behind the stream
 [~] The Flying Bison's Bellow now uses a variety of deeper animal sounds
+[~] Made the Flying Bison bellow follow the location of the mount
 
 Dominion
 [+] Added the council command /ac dominionrank to temporarily update a dominion's level
