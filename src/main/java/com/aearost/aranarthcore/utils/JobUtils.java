@@ -167,11 +167,11 @@ public class JobUtils {
     }
 
     /**
-     * Holds the Builder pay for a placed block until it has stayed in place for BUILDER_PAY_DELAY_MS.
+     * Holds the Builder pay for a block until it has stayed as the expected material for BUILDER_PAY_DELAY_MS.
      */
-    public static void queueBuilderPay(Player player, Block block, double basePay) {
+    public static void queueBuilderPay(Player player, Block block, Material expectedMaterial, double basePay) {
         pendingBuilds.addLast(new PendingBuild(player.getUniqueId(), block.getWorld().getUID(), block.getX(), block.getY(),
-                block.getZ(), block.getType(), basePay, System.currentTimeMillis()));
+                block.getZ(), expectedMaterial, basePay, System.currentTimeMillis()));
     }
 
     /**

@@ -131,7 +131,7 @@ public class GuiJobsJoin {
 
     private List<String> getJobActions(JobType job) {
         return switch (job) {
-            case BUILDER -> List.of(Lang.getFor(player, "jobs.action_builder"));
+            case BUILDER -> List.of(Lang.getFor(player, "jobs.action_builder"), Lang.getFor(player, "jobs.action_builder_path"));
             case FARMER -> List.of(Lang.getFor(player, "jobs.action_farmer_crops"), Lang.getFor(player, "jobs.action_farmer_honey"), Lang.getFor(player, "jobs.action_farmer_mobs"));
             case MINER -> List.of(Lang.getFor(player, "jobs.action_miner_stone"), Lang.getFor(player, "jobs.action_miner_ores"), Lang.getFor(player, "jobs.action_miner_amethyst"));
             case EXCAVATOR -> List.of(Lang.getFor(player, "jobs.action_excavator_dig"), Lang.getFor(player, "jobs.action_excavator_brush"));

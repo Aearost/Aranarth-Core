@@ -27,6 +27,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.ChatColor;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -340,8 +341,39 @@ public class JobEventListener implements Listener {
 
         Material mat = block.getType();
         if (isBuildableBlock(mat)) {
-            JobUtils.queueBuilderPay(player, block, 1.00);
+            JobUtils.queueBuilderPay(player, block, mat, 1.00);
         }
+    }
+
+    /**
+     * Pays Builders for using a shovel to turn a natural block into a dirt path.
+     * The event fires before the block changes, so the pay is held against DIRT_PATH rather than the current type.
+     */
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    public void onDirtPathCreate(EntityChangeBlockEvent e) {
+        if (e.getTo() != Material.DIRT_PATH || !(e.getEntity() instanceof Player player)) {
+            return;
+        }
+        if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
+            return;
+        }
+
+        Block block = e.getBlock();
+        if (!hasChunkPermission(player, block.getChunk(), DominionPermission.BUILD)) {
+            return;
+        }
+        // Player-placed blocks already pay when placed
+        if (!mcMMO.getChunkManager().isEligible(block)) {
+            return;
+        }
+        // Marked for all players so that tilling and trampling the path back into dirt cannot pay again
+        mcMMO.getChunkManager().setIneligible(block);
+
+        AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
+        if (ap == null || !ap.getJobData().hasJob(JobType.BUILDER)) {
+            return;
+        }
+        JobUtils.queueBuilderPay(player, block, Material.DIRT_PATH, 0.25);
     }
 
     private boolean isBuildableBlock(Material mat) {

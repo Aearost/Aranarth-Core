@@ -132,7 +132,9 @@ public class GuiJobsStatsClick {
             );
             case BUILDER -> List.of(
                 Lang.getFor(player, "jobs.act_header_place"),
-                Lang.getFor(player, "jobs.act_any_block", "xp", fmt(1.00, multiplier))
+                Lang.getFor(player, "jobs.act_any_block", "xp", fmt(1.00, multiplier)),
+                Lang.getFor(player, "jobs.act_header_shovel"),
+                Lang.getFor(player, "jobs.act_dirt_path", "xp", fmt(0.25, multiplier))
             );
             case EXPLORER -> List.of(
                 Lang.getFor(player, "jobs.act_header_travel"),
