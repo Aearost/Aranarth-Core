@@ -1141,8 +1141,9 @@ public class MountListener implements Listener {
                     }
                 });
 
-        // Apply saved harness color to Flying Bison (defaults to brown)
+        // Apply saved harness color to Flying Bison (defaults to brown), and mute its Happy Ghast sounds
         if (mount instanceof HappyGhast happyGhast) {
+            happyGhast.setSilent(true);
             Material harnessMaterial = getHarnessMaterialFromColorName(mountData.getHarnessColor());
             happyGhast.getEquipment().setItem(EquipmentSlot.BODY, new ItemStack(harnessMaterial));
         }

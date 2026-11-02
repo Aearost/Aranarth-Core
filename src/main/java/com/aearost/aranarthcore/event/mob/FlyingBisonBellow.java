@@ -24,6 +24,11 @@ public class FlyingBisonBellow {
     private static final double KNOCKBACK_V = 0.45;
     static final int BASE_XP = 5;
     static final int XP_PER_HIT = 2;
+    private static final float PRIMARY_VOLUME = 1.5f;
+    private static final float SECONDARY_VOLUME = 0.6f;
+    private static final float LOW_PITCH = 0.5f;
+    // The lowest pitch doubles the length of a sound, so the longer ones are pitched slightly higher
+    private static final float SHORTENED_PITCH = 0.65f;
 
     /**
      * Executes the bellow ability.
@@ -39,8 +44,7 @@ public class FlyingBisonBellow {
         World world = center.getWorld();
         Random random = new Random();
 
-        world.playSound(center, Sound.ENTITY_GHAST_SCREAM, 1.5f, 0.50f);
-        world.playSound(center, Sound.ENTITY_GHAST_SHOOT, 0.8f, 0.30f);
+        playBellowSound(center, random);
 
         // Apply effects to every living entity in the AOE
         int hits = 0;
@@ -84,6 +88,27 @@ public class FlyingBisonBellow {
         }
 
         spawnExpandingWave(center);
+    }
+
+    /**
+     * Plays a random bellow, which is made of a deep primary sound with a quieter sound layered behind it.
+     *
+     * @param center The centre of the Flying Bison.
+     * @param random The random used to pick the sounds.
+     */
+    private static void playBellowSound(Location center, Random random) {
+        World world = center.getWorld();
+
+        switch (random.nextInt(8)) {
+            case 0 -> world.playSound(center, Sound.ENTITY_RAVAGER_ROAR, PRIMARY_VOLUME, LOW_PITCH);
+            case 1 -> world.playSound(center, Sound.ENTITY_SNIFFER_IDLE, PRIMARY_VOLUME, SHORTENED_PITCH);
+            case 2 -> world.playSound(center, Sound.ENTITY_WARDEN_AGITATED, PRIMARY_VOLUME, SHORTENED_PITCH);
+            case 3 -> world.playSound(center, Sound.ENTITY_WARDEN_AMBIENT, PRIMARY_VOLUME, SHORTENED_PITCH);
+            default -> world.playSound(center, Sound.ENTITY_POLAR_BEAR_WARNING, PRIMARY_VOLUME, LOW_PITCH);
+        }
+
+        Sound secondary = random.nextBoolean() ? Sound.ENTITY_COW_AMBIENT : Sound.ENTITY_CAMEL_AMBIENT;
+        world.playSound(center, secondary, SECONDARY_VOLUME, LOW_PITCH);
     }
 
     private static Vector radialKnockback(Location targetLoc, Location origin,
