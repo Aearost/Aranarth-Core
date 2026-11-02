@@ -165,7 +165,7 @@ public class GuiDominionResources {
 		} else if (biome == Biome.WINDSWEPT_HILLS) {
 			return Material.STONE;
 		} else if (biome == Biome.FOREST) {
-			return Material.GRASS_BLOCK;
+			return Material.OAK_LEAVES;
 		} else if (biome == Biome.TAIGA) {
 			return Material.SPRUCE_LEAVES;
 		} else if (biome == Biome.SWAMP) {
@@ -269,7 +269,7 @@ public class GuiDominionResources {
 		} else if (biome == Biome.GROVE) {
 			return Material.SPRUCE_LEAVES;
 		} else if (biome == Biome.SNOWY_SLOPES) {
-			return Material.SNOW;
+			return Material.SNOW_BLOCK;
 		} else if (biome == Biome.FROZEN_PEAKS) {
 			return Material.PACKED_ICE;
 		} else if (biome == Biome.JAGGED_PEAKS) {

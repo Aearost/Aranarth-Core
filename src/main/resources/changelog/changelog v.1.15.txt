@@ -40,6 +40,7 @@ Dominion
 [~] /d home is no longer restricted to Esquire rank
 [~] Decreased yields of Deep Dark dominion resource claims
 [+] Added the Ancient Times phrasing in /d info for legacy Dominions
+[~] Forest biomes now use Oak Leaves as their dominion resource icon and Snowy Slopes now uses a Snow Block
 
 Aranarthium, Items & Crafting
 [~] Fixed applying Essences consuming 2 Aranarthium at a time if thrown at once
