@@ -6,7 +6,6 @@ import com.aearost.aranarthcore.items.essence.Essence;
 import com.aearost.aranarthcore.items.essence.EssenceBlank;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.NetworkPlayer;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
@@ -71,8 +70,7 @@ public class CommandGive {
                 // Inline handling for store coupons
                 if (args[2].equals("Coupon10") || args[2].equals("Coupon30")) {
                     if (sender instanceof Player senderPlayer) {
-                        AranarthPlayer senderAranarthPlayer = AranarthUtils.getPlayer(senderPlayer.getUniqueId());
-                        if (senderAranarthPlayer == null || senderAranarthPlayer.getCouncilRank() < 2) {
+                        if (!senderPlayer.hasPermission("aranarth.give.coupon")) {
                             senderPlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(senderPlayer, "general.no_permission")));
                             return;
                         }
@@ -317,8 +315,7 @@ public class CommandGive {
         ItemStack item;
         int quantity = 1;
         if (args[2].equals("Coupon10") || args[2].equals("Coupon30")) {
-            AranarthPlayer senderAranarthPlayer = AranarthUtils.getPlayer(sender.getUniqueId());
-            if (senderAranarthPlayer == null || senderAranarthPlayer.getCouncilRank() < 2) {
+            if (!sender.hasPermission("aranarth.give.coupon")) {
                 sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission")));
                 return true;
             }

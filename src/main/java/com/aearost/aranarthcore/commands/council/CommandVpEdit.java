@@ -23,8 +23,7 @@ public class CommandVpEdit {
 	 */
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (sender instanceof Player player) {
-			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			if (aranarthPlayer.getCouncilRank() < 3) {
+			if (!player.hasPermission("aranarth.vpedit")) {
 				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return true;
 			}

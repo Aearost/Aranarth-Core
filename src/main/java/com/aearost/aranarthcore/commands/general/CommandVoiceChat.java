@@ -1,7 +1,5 @@
 package com.aearost.aranarthcore.commands.general;
 
-import com.aearost.aranarthcore.objects.AranarthPlayer;
-import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.Lang;
@@ -53,8 +51,7 @@ public class CommandVoiceChat implements CommandExecutor {
         if (args[0].equalsIgnoreCase("who") || args[0].equalsIgnoreCase("list")) {
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "voicechat.who_header")));
             // Matches tab list vanish visibility - only admins can see vanished players
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-            boolean canSeeVanished = aranarthPlayer != null && aranarthPlayer.getCouncilRank() == 3;
+            boolean canSeeVanished = player.hasPermission("aranarth.vanish.see");
             boolean canUseCouncil = VoiceChatManager.canUseCouncil(player);
             for (VoiceChannel channel : VoiceChannel.values()) {
                 // The council channel is only shown to those who can join it

@@ -29,7 +29,7 @@ public class CommandAdminHome {
 		}
 
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		if (aranarthPlayer.getCouncilRank() != 3) {
+		if (!player.hasPermission("aranarth.adminhome")) {
 			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 			return true;
 		} else if (!aranarthPlayer.isInAdminMode()) {

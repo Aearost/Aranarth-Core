@@ -119,11 +119,10 @@ public class ShopInteract {
                 if (shop != null) {
                     if (shop.getUuid() == null) {
                         e.setCancelled(true);
-                        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
                         if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
                             // If editing a server shop
-                            if (aranarthPlayer.getCouncilRank() == 3 && AranarthUtils.isPhysicallySneaking(player.getUniqueId()) && player.getGameMode() == GameMode.CREATIVE) {
+                            if (player.hasPermission("aranarth.shop.modify") && AranarthUtils.isPhysicallySneaking(player.getUniqueId()) && player.getGameMode() == GameMode.CREATIVE) {
                                 if (e.getClickedBlock().getState() instanceof Sign sign) {
                                     player.openSign(sign);
                                 }
@@ -579,7 +578,7 @@ public class ShopInteract {
             if (shop.getUuid() != null) {
                 player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.cannot_destroy_others")));
             } else {
-                if (AranarthUtils.getPlayer(player.getUniqueId()).getCouncilRank() < 3) {
+                if (!player.hasPermission("aranarth.shop.modify")) {
                     player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.cannot_destroy_server")));
                 }
             }

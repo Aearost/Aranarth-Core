@@ -446,7 +446,7 @@ public class CommandShop implements CommandExecutor {
         }
 
         if (args[0].equalsIgnoreCase("biome")) {
-            if (aranarthPlayer.getSaintRank() < 1 && aranarthPlayer.getCouncilRank() < 1 && !aranarthPlayer.isInAdminMode()) {
+            if (!player.hasPermission("aranarth.shop.biome") && !aranarthPlayer.isInAdminMode()) {
                 player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.biome_rank_required", "rank", "1")));
                 return true;
             }

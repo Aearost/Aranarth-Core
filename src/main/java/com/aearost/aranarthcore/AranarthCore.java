@@ -638,7 +638,10 @@ public class AranarthCore extends JavaPlugin {
                 }
 
                 for (Player player : Bukkit.getOnlinePlayers()) {
-                    PermissionUtils.reEvaluateMonthlySaints(player);
+                    // An expired Saint must lose their permissions right away, not on their next evaluation
+                    if (PermissionUtils.reEvaluateMonthlySaints(player)) {
+                        PermissionUtils.evaluatePlayerPermissions(player);
+                    }
                 }
                 // Each server scans only its own dominions
                 DominionLevelUtils.runPeriodicScan();

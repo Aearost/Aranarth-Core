@@ -52,7 +52,7 @@ public class CommandMessage implements CommandExecutor {
 					Player target = Bukkit.getPlayer(targetUuid);
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 					AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(targetUuid);
-					if (targetAranarthPlayer != null && targetAranarthPlayer.isTogglingMessages() && aranarthPlayer.getCouncilRank() == 0) {
+					if (targetAranarthPlayer != null && targetAranarthPlayer.isTogglingMessages() && !player.hasPermission("aranarth.toggle.bypass")) {
 						String targetNick = targetAranarthPlayer.getNickname().isEmpty() ? args[0] : ChatUtils.stripColorFormatting(targetAranarthPlayer.getNickname());
 						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "message.toggling", "player", targetNick)));
 						return true;

@@ -62,7 +62,7 @@ public class CommandOverrides {
             return;
         }
 
-        if (aranarthPlayer.getCouncilRank() != 3) {
+        if (!player.hasPermission("aranarth.whisper")) {
             if (parts[0].equals("/w")) {
                 player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
                 e.setCancelled(true);
@@ -72,7 +72,7 @@ public class CommandOverrides {
 
         // Prevent the command entirely
         if (parts[0].equals("/time") && AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
-            if (aranarthPlayer.getCouncilRank() < 2) {
+            if (!player.hasPermission("aranarth.time")) {
                 player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
             } else {
                 player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "commands.use_ac_time")));
@@ -120,7 +120,7 @@ public class CommandOverrides {
                             PermissionUtils.evaluatePlayerPermissions(player);
                         }
                         // Saints always get their element change cooldown reset
-                        if (aranarthPlayer.getSaintRank() >= 1) {
+                        if (player.hasPermission("aranarth.element.cooldown")) {
                             BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
                             if (bendingPlayer != null) {
                                 bendingPlayer.removeCooldown("ChooseElement");

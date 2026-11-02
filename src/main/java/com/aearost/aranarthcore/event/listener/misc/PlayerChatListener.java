@@ -307,7 +307,7 @@ public class PlayerChatListener implements Listener {
             AranarthPlayer recipientAranarthPlayer = AranarthUtils.getPlayer(recipient.getUniqueId());
             if (recipientAranarthPlayer.isTogglingChat()) {
                 // Only block non-council messages
-                if (aranarthPlayer.getCouncilRank() == 0) {
+                if (!player.hasPermission("aranarth.toggle.bypass")) {
                     toRemove.add(recipient);
                     continue;
                 }
@@ -347,7 +347,7 @@ public class PlayerChatListener implements Listener {
         // Build the message component, injecting interactive chat keywords where applicable.
         Component messageComponent = null;
         List<UUID> createdSnapshotIds = new ArrayList<>();
-        boolean canUseInteractiveChat = InteractiveChatManager.hasInteractiveChatPerm(aranarthPlayer)
+        boolean canUseInteractiveChat = player.hasPermission("aranarth.interactivechat")
                 && aranarthPlayer.isInteractiveChatEnabled()
                 && INTERACTIVE_PATTERN.matcher(message).find();
         if (canUseInteractiveChat) {

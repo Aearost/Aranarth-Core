@@ -1,7 +1,6 @@
 package com.aearost.aranarthcore.commands.council;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -38,14 +37,11 @@ public class CommandAC implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
-			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			boolean isCouncil = aranarthPlayer.getCouncilRank() > 0;
-			boolean isArchitect = aranarthPlayer.getArchitectRank() >= 1;
-			if (!isCouncil && !isArchitect) {
+			if (!player.hasPermission("aranarth.ac")) {
 				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return false;
 			}
-			if (!isCouncil && isArchitect) {
+			if (!player.hasPermission("aranarth.ac.council")) {
 				if (args.length == 0 || (!args[0].equalsIgnoreCase("msg") && !args[0].equalsIgnoreCase("speed")
 						&& !args[0].equalsIgnoreCase("architect"))) {
 					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
@@ -78,7 +74,7 @@ public class CommandAC implements CommandExecutor {
 				return true;
 			}
 			// Destructive and server-wide sub-commands are limited to the highest Council rank
-			if (OWNER_SUBCOMMANDS.contains(subCommand) && AranarthUtils.getPlayer(player.getUniqueId()).getCouncilRank() < 3) {
+			if (OWNER_SUBCOMMANDS.contains(subCommand) && !player.hasPermission("aranarth.ac.owner")) {
 				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return true;
 			}

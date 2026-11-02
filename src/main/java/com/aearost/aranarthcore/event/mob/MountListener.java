@@ -4,10 +4,8 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthMount;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.objects.Mount;
-import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.MountUtils;
@@ -504,8 +502,7 @@ public class MountListener implements Listener {
         if (clickedEntity instanceof HappyGhast happyGhast && ownerUUID != null) {
             Material harnessMaterial = getHarnessMaterialFromDye(mainHand.getType());
             if (harnessMaterial != null) {
-                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                if (aranarthPlayer.getSaintRank() >= 1) {
+                if (player.hasPermission("aranarth.mount.harness")) {
                     happyGhast.getEquipment().setItem(EquipmentSlot.BODY, new ItemStack(harnessMaterial));
                     String colorName = mainHand.getType().name().replace("_DYE", "");
                     Mount mountData = MountUtils.get(ownerUUID, "AIR");

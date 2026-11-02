@@ -1811,7 +1811,7 @@ public class AranarthUtils {
             return false;
         }
         AranarthPlayer viewerAranarthPlayer = getPlayer(viewerPlayer.getUniqueId());
-        if (viewerAranarthPlayer != null && viewerAranarthPlayer.getCouncilRank() == 3) {
+        if (viewerPlayer.hasPermission("aranarth.vanish.see")) {
             return false;
         }
         if (Bukkit.getPlayer(uuid) != null) {
@@ -4098,13 +4098,12 @@ public class AranarthUtils {
 
         // Handle vanish visibility
         for (Player player : onlinePlayers) {
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
             for (Player hiddenPlayer : onlinePlayers) {
                 AranarthPlayer hiddenAranarthPlayer = AranarthUtils.getPlayer(hiddenPlayer.getUniqueId());
 
                 if (hiddenAranarthPlayer.isVanished()) {
-                    if (aranarthPlayer.getCouncilRank() == 3) {
+                    if (player.hasPermission("aranarth.vanish.see")) {
                         player.showPlayer(AranarthCore.getInstance(), hiddenPlayer);
                     } else {
                         player.hidePlayer(AranarthCore.getInstance(), hiddenPlayer);

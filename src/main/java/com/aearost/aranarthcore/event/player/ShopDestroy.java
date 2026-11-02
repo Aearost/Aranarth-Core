@@ -150,8 +150,7 @@ public class ShopDestroy {
 		}
 		// If it is a server shop
 		else if (shop.getUuid() == null) {
-			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			if (aranarthPlayer.getCouncilRank() == 3) {
+			if (player.hasPermission("aranarth.shop.modify")) {
 				ShopUtils.removeShop(shop);
 				return 1;
 			}

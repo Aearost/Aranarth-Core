@@ -1059,8 +1059,7 @@ public class ChatUtils {
         String prefixReceive = ChatUtils.translateToColor(prefixStart + "&8&lCouncil &e" + nickname + prefixEnd + " &7&o>> &6&o");
 
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            AranarthPlayer onlineAranarthPlayer = AranarthUtils.getPlayer(onlinePlayer.getUniqueId());
-            if (onlineAranarthPlayer.getCouncilRank() > 0 || onlineAranarthPlayer.getArchitectRank() >= 1) {
+            if (onlinePlayer.hasPermission("aranarth.councilchat")) {
                 onlinePlayer.sendMessage(ChatUtils.translateToColor(prefixReceive + assembledMsg));
             }
         }

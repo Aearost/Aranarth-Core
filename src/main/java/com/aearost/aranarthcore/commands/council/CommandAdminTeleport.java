@@ -63,7 +63,7 @@ public class CommandAdminTeleport {
 			player = (Player) sender;
 			aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
-			if (aranarthPlayer.getCouncilRank() < 2) {
+			if (!player.hasPermission("aranarth.admintp")) {
 				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return true;
 			}
@@ -80,7 +80,7 @@ public class CommandAdminTeleport {
 
 		if (args[0].equalsIgnoreCase("tpw")) {
 			// /ac tpw <worldname> - teleport self to surface of 0,0 in the specified world
-			if (isSenderPlayer && aranarthPlayer.getCouncilRank() < 3) {
+			if (isSenderPlayer && !player.hasPermission("aranarth.admintp.free")) {
 				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return true;
 			}
@@ -111,7 +111,7 @@ public class CommandAdminTeleport {
 			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "admin.teleport_world_success", "world", world.getName())));
 			return true;
 		} else if (args[0].equalsIgnoreCase("tpf")) {
-			if (isSenderPlayer && aranarthPlayer.getCouncilRank() < 3) {
+			if (isSenderPlayer && !player.hasPermission("aranarth.admintp.free")) {
 				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return true;
 			}

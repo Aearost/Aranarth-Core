@@ -28,7 +28,7 @@ public class ShopBulkTransaction {
         Shop shop = ShopUtils.getShopFromLocation(e.getClickedBlock().getLocation());
 
         // Skip bulk transaction logic when an admin is modifying a server shop
-        if (shop != null && shop.getUuid() == null && aranarthPlayer.getCouncilRank() == 3
+        if (shop != null && shop.getUuid() == null && player.hasPermission("aranarth.shop.modify")
                 && AranarthUtils.isPhysicallySneaking(player.getUniqueId()) && player.getGameMode() == GameMode.CREATIVE) {
             return;
         }

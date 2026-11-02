@@ -87,11 +87,8 @@ public class CommandACCompleter implements TabCompleter {
         boolean isAuthorized = false;
         boolean isArchitectOnly = false;
         if (sender instanceof Player player) {
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-            boolean isCouncil = aranarthPlayer.getCouncilRank() > 0;
-            boolean isArchitect = aranarthPlayer.getArchitectRank() >= 1;
-            isAuthorized = isCouncil || isArchitect;
-            isArchitectOnly = !isCouncil && isArchitect;
+            isAuthorized = player.hasPermission("aranarth.ac");
+            isArchitectOnly = isAuthorized && !player.hasPermission("aranarth.ac.council");
         } else if (sender instanceof ConsoleCommandSender) {
             isAuthorized = true;
         }
@@ -137,8 +134,7 @@ public class CommandACCompleter implements TabCompleter {
                         }
                         List<String> giveItems = new ArrayList<>(ITEM_NAMES);
                         if (sender instanceof Player givePlayer) {
-                            AranarthPlayer giveAranarthPlayer = AranarthUtils.getPlayer(givePlayer.getUniqueId());
-                            if (giveAranarthPlayer != null && giveAranarthPlayer.getCouncilRank() >= 2) {
+                            if (givePlayer.hasPermission("aranarth.give.coupon")) {
                                 giveItems.add("Coupon10");
                                 giveItems.add("Coupon30");
                                 Collections.sort(giveItems);

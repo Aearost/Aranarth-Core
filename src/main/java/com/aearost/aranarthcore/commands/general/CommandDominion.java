@@ -282,7 +282,7 @@ public class CommandDominion implements CommandExecutor {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
         // Admin path of /d disband <name>
-        if (args.length >= 2 && aranarthPlayer.isInAdminMode() && aranarthPlayer.getCouncilRank() == 3) {
+        if (args.length >= 2 && aranarthPlayer.isInAdminMode() && player.hasPermission("aranarth.dominion.admin")) {
             String targetName = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
             Dominion target = DominionUtils.getDominions().stream()
                     .filter(d -> ChatUtils.stripColorFormatting(d.getName()).equalsIgnoreCase(targetName))
@@ -3491,8 +3491,7 @@ public class CommandDominion implements CommandExecutor {
                     CommandDominions.giveBook(player);
                 } else if (args[0].equalsIgnoreCase("rank")) {
                     if (args.length >= 2 && args[1].equalsIgnoreCase("scan")) {
-                        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                        if (aranarthPlayer.getCouncilRank() == 3) {
+                        if (player.hasPermission("aranarth.dominion.admin")) {
                             DominionLevelUtils.runPeriodicScan();
                             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.scan_triggered")));
                         } else {

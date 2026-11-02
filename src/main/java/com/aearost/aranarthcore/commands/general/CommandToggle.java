@@ -324,7 +324,7 @@ public class CommandToggle implements CommandExecutor {
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("interactivechat")) {
-					boolean hasPerm = aranarthPlayer.getSaintRank() >= 2 || aranarthPlayer.getCouncilRank() > 0;
+					boolean hasPerm = player.hasPermission("aranarth.interactivechat");
 					if (!hasPerm) {
 						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 						return true;
@@ -421,7 +421,7 @@ public class CommandToggle implements CommandExecutor {
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("sit")) {
-					if (aranarthPlayer.getSaintRank() < 1 && aranarthPlayer.getCouncilRank() < 1) {
+					if (!player.hasPermission("aranarth.sit.toggle")) {
 						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 						return true;
 					}

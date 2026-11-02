@@ -559,8 +559,7 @@ public class CommandPlot implements CommandExecutor {
             Bukkit.dispatchCommand(player, "creative");
             return;
         }
-        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-        if (aranarthPlayer.getCouncilRank() != 3) {
+        if (!player.hasPermission("aranarth.plot.spawn")) {
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
             return;
         }

@@ -1,6 +1,5 @@
 package com.aearost.aranarthcore.commands.council;
 
-import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
@@ -23,7 +22,7 @@ public class CommandEnchant implements CommandExecutor {
             return true;
         }
 
-        if (AranarthUtils.getPlayer(player.getUniqueId()).getCouncilRank() != 3) {
+        if (!player.hasPermission("aranarth.enchant")) {
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
             return true;
         }

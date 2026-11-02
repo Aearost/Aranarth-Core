@@ -4,7 +4,6 @@ import com.aearost.aranarthcore.enums.WorldEvent;
 import java.util.Random;
 import com.aearost.aranarthcore.event.world.WorldEventManager;
 import com.aearost.aranarthcore.network.NetworkManager;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
@@ -22,8 +21,7 @@ public class CommandWorldEvent {
      */
     public static boolean onCommand(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-            if (aranarthPlayer.getCouncilRank() < 3) {
+            if (!player.hasPermission("aranarth.worldevent")) {
                 player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
                 return true;
             }

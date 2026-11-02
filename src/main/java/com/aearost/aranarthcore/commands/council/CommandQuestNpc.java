@@ -1,7 +1,5 @@
 package com.aearost.aranarthcore.commands.council;
 
-import com.aearost.aranarthcore.objects.AranarthPlayer;
-import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.QuestUtils;
@@ -21,8 +19,7 @@ public class CommandQuestNpc {
             return true;
         }
 
-        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-        if (aranarthPlayer.getCouncilRank() != 3) {
+        if (!player.hasPermission("aranarth.questnpc")) {
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
             return true;
         }

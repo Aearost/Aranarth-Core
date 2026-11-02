@@ -301,7 +301,7 @@ public class GuiToggleClick {
             }
             // Interactive Chat
             case 32 -> {
-                boolean hasPerm = aranarthPlayer.getSaintRank() >= 2 || aranarthPlayer.getCouncilRank() > 0;
+                boolean hasPerm = player.hasPermission("aranarth.interactivechat");
                 if (!hasPerm) {
                     return;
                 }
@@ -368,7 +368,7 @@ public class GuiToggleClick {
             }
             // Sit
             case 39 -> {
-                if (aranarthPlayer.getSaintRank() < 1 && aranarthPlayer.getCouncilRank() < 1) {
+                if (!player.hasPermission("aranarth.sit.toggle")) {
                     return;
                 }
                 if (aranarthPlayer.isSitDisabled()) {

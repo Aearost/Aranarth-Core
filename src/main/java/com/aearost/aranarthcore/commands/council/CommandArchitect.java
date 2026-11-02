@@ -21,7 +21,7 @@ public class CommandArchitect {
 		if (sender instanceof Player player) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
-			if (aranarthPlayer.getCouncilRank() == 0 && aranarthPlayer.getArchitectRank() == 0) {
+			if (!player.hasPermission("aranarth.architect")) {
 				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return true;
 			}

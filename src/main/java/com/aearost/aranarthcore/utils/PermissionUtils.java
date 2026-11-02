@@ -110,9 +110,10 @@ public class PermissionUtils {
             restoreOldAvatarElement(player);
         }
 
-        // Grant the SMP map link to original players
+        // Grant the SMP map link and SMP creative world access to original players
         if (AranarthUtils.isOriginalPlayer(player.getUniqueId())) {
             perms.setPermission("aranarth.smpmap", true);
+            perms.setPermission("aranarth.smpcreative", true);
         }
 
         setCreativeWorldEditPermissions(player, perms, aranarthPlayer);
@@ -587,6 +588,41 @@ public class PermissionUtils {
         perms.setPermission("aranarth.heads.player", false);
         perms.setPermission("aranarth.resetquests", false);
         perms.setPermission("aranarth.sudo", false);
+        perms.setPermission("aranarth.ac.council", false);
+        perms.setPermission("aranarth.ac.owner", false);
+        perms.setPermission("aranarth.adminhome", false);
+        perms.setPermission("aranarth.adminmode", false);
+        perms.setPermission("aranarth.admintp", false);
+        perms.setPermission("aranarth.admintp.free", false);
+        perms.setPermission("aranarth.architect", false);
+        perms.setPermission("aranarth.balance.others", false);
+        perms.setPermission("aranarth.brewbook.unlock", false);
+        perms.setPermission("aranarth.councilchat", false);
+        perms.setPermission("aranarth.creative.expand", false);
+        perms.setPermission("aranarth.dominion.admin", false);
+        perms.setPermission("aranarth.element.cooldown", false);
+        perms.setPermission("aranarth.enchant", false);
+        perms.setPermission("aranarth.give.coupon", false);
+        perms.setPermission("aranarth.interactivechat", false);
+        perms.setPermission("aranarth.invswap", false);
+        perms.setPermission("aranarth.jobs.admin", false);
+        perms.setPermission("aranarth.mount.harness", false);
+        perms.setPermission("aranarth.og", false);
+        perms.setPermission("aranarth.plot.spawn", false);
+        perms.setPermission("aranarth.questnpc", false);
+        perms.setPermission("aranarth.shop.biome", false);
+        perms.setPermission("aranarth.sit.toggle", false);
+        perms.setPermission("aranarth.smpcreative", false);
+        perms.setPermission("aranarth.speed", false);
+        perms.setPermission("aranarth.spy", false);
+        perms.setPermission("aranarth.toggle.bypass", false);
+        perms.setPermission("aranarth.unscramble", false);
+        perms.setPermission("aranarth.vanish", false);
+        perms.setPermission("aranarth.vanish.see", false);
+        perms.setPermission("aranarth.vpedit", false);
+        perms.setPermission("aranarth.weather", false);
+        perms.setPermission("aranarth.whisper", false);
+        perms.setPermission("aranarth.worldevent", false);
         perms.setPermission("aranarth.trash", false);
         perms.setPermission("aranarth.enderchest", false);
         perms.setPermission("aranarth.chat.gradient", false);
@@ -1112,8 +1148,9 @@ public class PermissionUtils {
      * Re-evaluates the player's temporary saint status.
      *
      * @param player The player.
+     * @return True if the player's Saint rank expired, meaning their permissions must be re-evaluated.
      */
-    public static void reEvaluateMonthlySaints(Player player) {
+    public static boolean reEvaluateMonthlySaints(Player player) {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
         if (aranarthPlayer.getSaintExpireDate() != 0) {
             Instant now = Instant.now();
@@ -1122,8 +1159,10 @@ public class PermissionUtils {
                 aranarthPlayer.setSaintRank(aranarthPlayer.getPermanentSaintRank());
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "rank.saint_expired")));
+                return true;
             }
         }
+        return false;
     }
 
     /**
@@ -1149,6 +1188,10 @@ public class PermissionUtils {
             perms.setPermission("aranarth.blacklist", true);
             perms.setPermission("aranarth.tables", true);
             perms.setPermission("aranarth.trash", true);
+            perms.setPermission("aranarth.element.cooldown", true);
+            perms.setPermission("aranarth.mount.harness", true);
+            perms.setPermission("aranarth.shop.biome", true);
+            perms.setPermission("aranarth.sit.toggle", true);
             perms.setPermission("aranarthcore.armorstand.athena", true);
             perms.setPermission("aranarthcore.armorstand.athenamirrored", true);
             perms.setPermission("aranarthcore.armorstand.brandish", true);
@@ -1170,6 +1213,7 @@ public class PermissionUtils {
             perms.setPermission("aranarthcore.armorstand.salute", true);
             perms.setPermission("aranarthcore.armorstand.zombie", true);
             perms.setPermission("aranarth.gate", true);
+            perms.setPermission("aranarth.interactivechat", true);
             perms.setPermission("aranarth.invisiblearmor", true);
         } else {
             return;
@@ -1295,6 +1339,13 @@ public class PermissionUtils {
             perms.setPermission("aranarth.nick.color", true);
             perms.setPermission("aranarth.nick.hex", true);
             perms.setPermission("aranarth.nick.gradient", true);
+            perms.setPermission("aranarth.ac.council", true);
+            perms.setPermission("aranarth.architect", true);
+            perms.setPermission("aranarth.councilchat", true);
+            perms.setPermission("aranarth.interactivechat", true);
+            perms.setPermission("aranarth.smpcreative", true);
+            perms.setPermission("aranarth.speed", true);
+            perms.setPermission("aranarth.toggle.bypass", true);
             setSaintPermissions(perms, 1);
         } else {
             return;
@@ -1311,6 +1362,8 @@ public class PermissionUtils {
             perms.setPermission("aranarth.heads.player", true);
             perms.setPermission("aranarth.resetquests", true);
             perms.setPermission("minecraft.command.gamemode", true);
+            perms.setPermission("aranarth.admintp", true);
+            perms.setPermission("aranarth.give.coupon", true);
             setSaintPermissions(perms, 2);
         } else {
             return;
@@ -1327,6 +1380,28 @@ public class PermissionUtils {
             perms.setPermission("aranarth.sudo", true);
             perms.setPermission("aranarth.shop.modify", true);
             perms.setPermission("worldedit.*", true);
+            perms.setPermission("aranarth.ac.owner", true);
+            perms.setPermission("aranarth.adminhome", true);
+            perms.setPermission("aranarth.adminmode", true);
+            perms.setPermission("aranarth.admintp.free", true);
+            perms.setPermission("aranarth.balance.others", true);
+            perms.setPermission("aranarth.brewbook.unlock", true);
+            perms.setPermission("aranarth.creative.expand", true);
+            perms.setPermission("aranarth.dominion.admin", true);
+            perms.setPermission("aranarth.enchant", true);
+            perms.setPermission("aranarth.invswap", true);
+            perms.setPermission("aranarth.jobs.admin", true);
+            perms.setPermission("aranarth.og", true);
+            perms.setPermission("aranarth.plot.spawn", true);
+            perms.setPermission("aranarth.questnpc", true);
+            perms.setPermission("aranarth.spy", true);
+            perms.setPermission("aranarth.unscramble", true);
+            perms.setPermission("aranarth.vanish", true);
+            perms.setPermission("aranarth.vanish.see", true);
+            perms.setPermission("aranarth.vpedit", true);
+            perms.setPermission("aranarth.weather", true);
+            perms.setPermission("aranarth.whisper", true);
+            perms.setPermission("aranarth.worldevent", true);
             setSaintPermissions(perms, 3);
             setArchitectPermissions(perms, 1);
         } else {
@@ -1384,6 +1459,10 @@ public class PermissionUtils {
         }
 
         if (architectRank == 1) {
+            perms.setPermission("aranarth.architect", true);
+            perms.setPermission("aranarth.councilchat", true);
+            perms.setPermission("aranarth.smpcreative", true);
+            perms.setPermission("aranarth.speed", true);
             perms.setPermission("aranarth.ac", true);
             perms.setPermission("aranarth.creative", true);
             perms.setPermission("aranarth.heads.player", true);

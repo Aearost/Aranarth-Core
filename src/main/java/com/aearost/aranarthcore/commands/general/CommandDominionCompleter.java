@@ -187,8 +187,7 @@ public class CommandDominionCompleter implements TabCompleter {
 			}
 			case "rank" -> {
 				if (args.length == 2 && sender instanceof Player player) {
-					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-					if (aranarthPlayer != null && aranarthPlayer.getCouncilRank() == 3) {
+					if (player.hasPermission("aranarth.dominion.admin")) {
 						yield filter(List.of("scan"), args[1]);
 					}
 				}
@@ -216,7 +215,7 @@ public class CommandDominionCompleter implements TabCompleter {
 			case "disband" -> {
 				if (sender instanceof Player player) {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-					if (aranarthPlayer != null && aranarthPlayer.isInAdminMode() && aranarthPlayer.getCouncilRank() == 3) {
+					if (aranarthPlayer != null && aranarthPlayer.isInAdminMode() && player.hasPermission("aranarth.dominion.admin")) {
 						String query = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
 						yield DominionUtils.getDominions().stream()
 							.map(d -> ChatUtils.stripColorFormatting(d.getName()))

@@ -69,7 +69,7 @@ public class CommandCreative implements CommandExecutor {
 	 * Adds rings of plots around the Creative plots world, pre-generating the new area.
 	 */
 	private void expand(Player player, AranarthPlayer aranarthPlayer, String[] args) {
-		if (aranarthPlayer.getCouncilRank() != 3) {
+		if (!player.hasPermission("aranarth.creative.expand")) {
 			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 			return;
 		}

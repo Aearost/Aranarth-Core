@@ -3371,8 +3371,7 @@ public class NetworkManager {
 
         String message = json.get("message").getAsString();
         for (Player p : Bukkit.getOnlinePlayers()) {
-            AranarthPlayer ap = AranarthUtils.getPlayer(p.getUniqueId());
-            if (ap != null && (ap.getCouncilRank() > 0 || ap.getArchitectRank() >= 1)) {
+            if (p.hasPermission("aranarth.councilchat")) {
                 p.sendMessage(ChatUtils.translateToColor(message));
             }
         }

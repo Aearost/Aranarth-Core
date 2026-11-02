@@ -31,7 +31,7 @@ public class CommandJobsCompleter implements TabCompleter {
             return completions;
         }
 
-        boolean isAdmin = ap.getCouncilRank() == 3;
+        boolean isAdmin = player.hasPermission("aranarth.jobs.admin");
 
         if (args.length == 1) {
             List<String> subs = new ArrayList<>(PLAYER_SUBS);

@@ -1,7 +1,5 @@
 package com.aearost.aranarthcore.commands.council;
 
-import com.aearost.aranarthcore.objects.AranarthPlayer;
-import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatGameUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
@@ -18,8 +16,7 @@ public class CommandUnscramble {
             sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
             return true;
         }
-        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-        if (aranarthPlayer.getCouncilRank() < 3) {
+        if (!player.hasPermission("aranarth.unscramble")) {
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
             return true;
         }

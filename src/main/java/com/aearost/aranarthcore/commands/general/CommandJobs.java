@@ -147,7 +147,7 @@ public class CommandJobs implements CommandExecutor {
 
         // Admin commands - council rank 3 only
         if (sub.equals("xp") || sub.equals("remove") || sub.equals("reset") || sub.equals("add")) {
-            if (ap.getCouncilRank() != 3) {
+            if (!player.hasPermission("aranarth.jobs.admin")) {
                 player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "jobs [join|quit|stats|top|who] [args]")));
                 return true;
             }
