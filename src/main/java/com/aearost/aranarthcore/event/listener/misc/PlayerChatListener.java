@@ -381,7 +381,7 @@ public class PlayerChatListener implements Listener {
         }
 
         if (!aranarthPlayer.isInCouncilChat() && !aranarthPlayer.isInDominionChat()) {
-            DiscordUtils.sendChatMessage(prefix + chatMessage);
+            DiscordUtils.sendChatMessage(prefix + ChatUtils.formatCodesToDiscordMarkdown(chatMessage));
             // Relay to the other server so its players see public chat
             if (NetworkManager.isActive()) {
                 if (!createdSnapshotIds.isEmpty()) {

@@ -86,6 +86,7 @@ Chat, UI & Sounds
 [~] Nickname changes now apply on both Survival and SMP straight away
 [~] Added /pronouns neutral
 [+] Emojis are now translated in /msg, /reply, /mail, /d msg, and /ac msg
+[~] Bold and italics are now converted between Discord and in-game chat in both directions
 
 Quality of Life
 [+] Added /vc list as an alias for /vc who

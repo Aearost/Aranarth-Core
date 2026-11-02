@@ -112,9 +112,12 @@ public class DiscordUtils {
 					if (fullInputUsername.endsWith(" ")) {
 						fullInputUsername = fullInputUsername.substring(0, fullInputUsername.length() - 1);
 					}
-					String id = findMemberToPing(fullInputUsername);
+					// Bold or italic markers closing right after a ping are not part of the username
+					String usernameWithoutMarkers = fullInputUsername.replaceAll("\\*+$", "");
+					String closingMarkers = fullInputUsername.substring(usernameWithoutMarkers.length());
+					String id = findMemberToPing(usernameWithoutMarkers);
 					if (id != null) {
-						finalMessage += "<@" + id + "> ";
+						finalMessage += "<@" + id + ">" + closingMarkers + " ";
 					} else {
 						finalMessage += fullInputUsername + " ";
 					}

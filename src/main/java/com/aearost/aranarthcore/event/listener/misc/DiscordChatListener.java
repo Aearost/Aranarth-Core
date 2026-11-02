@@ -50,7 +50,7 @@ public class DiscordChatListener {
             return;
         }
 
-        String formatted = ChatUtils.translateToColor("&8[&6Discord&8] &e" + discordName + " &7» &r" + content);
+        String formatted = ChatUtils.translateToColor("&8[&6Discord&8] &e" + discordName + " &7» &r" + ChatUtils.discordMarkdownToFormatCodes(content));
         Component message = LegacyComponentSerializer.legacySection().deserialize(formatted);
 
         for (Player player : Bukkit.getOnlinePlayers()) {

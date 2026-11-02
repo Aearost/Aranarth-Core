@@ -32,6 +32,18 @@ public class ChatUtils {
     private static final Pattern URL_PATTERN = Pattern.compile("https?://[^\\s\u00A7]+");
     private static int tipIndex = 0;
 
+    /**
+     * Matches the Discord markdown that changes in-game, following Discord's rules for what renders as formatting.
+     */
+    private static final Pattern DISCORD_MARKDOWN = Pattern.compile(
+            "```.+?```|`[^`]+`|https?://\\S+"
+                    + "|\\\\([*_`\\\\])"
+                    + "|\\*\\*\\*(?=\\S)(.+?)(?<=\\S)\\*\\*\\*(?!\\*)"
+                    + "|\\*\\*(?=\\S)(.+?)(?<=\\S)\\*\\*(?!\\*)"
+                    + "|\\*(?=[^\\s*])(.+?)(?<=[^\\s*]|\\*\\*)\\*(?!\\*)"
+                    + "|(?<![\\p{L}\\p{N}_])_(?=[^\\s_])(.+?)(?<=[^\\s_])_(?![\\p{L}\\p{N}_])",
+            Pattern.DOTALL);
+
     // Maps &0-&f color codes to their Minecraft hex equivalents
     private static final Map<Character, String> COLOR_CODE_TO_HEX = new HashMap<>();
 
@@ -276,6 +288,121 @@ public class ChatUtils {
         colorStripped = colorStripped.replaceAll("(?<!&)#[a-fA-F0-9]{6}", "");
 
         return colorStripped;
+    }
+
+    /**
+     * Converts the bold and italics markdown of a Discord message to their in-game format codes.
+     *
+     * @param msg The Discord message.
+     * @return The message using &amp;l and &amp;o format codes.
+     */
+    public static String discordMarkdownToFormatCodes(String msg) {
+        return applyDiscordMarkdown(msg, "");
+    }
+
+    /**
+     * Converts a section of a Discord message, which is nested within any already active format codes.
+     *
+     * @param msg         The section of the Discord message.
+     * @param activeCodes The format codes applied to the whole section.
+     * @return The section using format codes.
+     */
+    private static String applyDiscordMarkdown(String msg, String activeCodes) {
+        Matcher matcher = DISCORD_MARKDOWN.matcher(msg);
+        StringBuilder result = new StringBuilder();
+        int lastEnd = 0;
+        while (matcher.find()) {
+            result.append(msg, lastEnd, matcher.start());
+            lastEnd = matcher.end();
+
+            String content;
+            String codes;
+            if (matcher.group(2) != null) {
+                content = matcher.group(2);
+                codes = "&l&o";
+            } else if (matcher.group(3) != null) {
+                content = matcher.group(3);
+                codes = "&l";
+            } else if (matcher.group(4) != null || matcher.group(5) != null) {
+                content = matcher.group(4) != null ? matcher.group(4) : matcher.group(5);
+                codes = "&o";
+            } else {
+                // Code blocks and URLs are kept as written, and escaped characters lose their backslash
+                result.append(matcher.group(1) != null ? matcher.group(1) : matcher.group());
+                continue;
+            }
+
+            String nestedCodes = activeCodes + codes;
+            result.append(nestedCodes).append(applyDiscordMarkdown(content, nestedCodes)).append("&r").append(activeCodes);
+        }
+        return result.append(msg.substring(lastEnd)).toString();
+    }
+
+    /**
+     * Converts the bold and italics of a formatted in-game message to Discord markdown.
+     *
+     * @param msg The message with § format codes, without the prefix of the sender.
+     * @return The message using Discord markdown.
+     */
+    public static String formatCodesToDiscordMarkdown(String msg) {
+        if (msg == null) {
+            return null;
+        }
+
+        StringBuilder result = new StringBuilder();
+        // Whitespace is held back as Discord does not render a marker that is next to whitespace on its inner side
+        StringBuilder pendingWhitespace = new StringBuilder();
+        Deque<String> openMarkers = new ArrayDeque<>();
+        boolean isBold = false;
+        boolean isItalic = false;
+
+        for (int i = 0; i < msg.length(); i++) {
+            char character = msg.charAt(i);
+            if (character == '§' && i + 1 < msg.length()) {
+                char code = Character.toLowerCase(msg.charAt(i + 1));
+                if (code == 'l') {
+                    isBold = true;
+                } else if (code == 'o') {
+                    isItalic = true;
+                } else if (code == 'r' || code == 'x' || Character.digit(code, 16) != -1) {
+                    isBold = false;
+                    isItalic = false;
+                }
+                i++;
+                continue;
+            }
+
+            if (Character.isWhitespace(character)) {
+                pendingWhitespace.append(character);
+                continue;
+            }
+
+            // Markers must close in the opposite order they were opened, so closing one also closes those after it
+            while ((openMarkers.contains("**") && !isBold) || (openMarkers.contains("*") && !isItalic)) {
+                result.append(openMarkers.pop());
+            }
+            result.append(pendingWhitespace);
+            pendingWhitespace.setLength(0);
+            if (isBold && !openMarkers.contains("**")) {
+                openMarkers.push("**");
+                result.append("**");
+            }
+            if (isItalic && !openMarkers.contains("*")) {
+                openMarkers.push("*");
+                result.append("*");
+            }
+
+            // A literal asterisk would otherwise end the formatting early
+            if (character == '*' && !openMarkers.isEmpty()) {
+                result.append('\\');
+            }
+            result.append(character);
+        }
+
+        while (!openMarkers.isEmpty()) {
+            result.append(openMarkers.pop());
+        }
+        return result.append(pendingWhitespace).toString();
     }
 
     /**
