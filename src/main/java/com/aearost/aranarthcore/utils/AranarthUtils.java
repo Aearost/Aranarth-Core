@@ -61,6 +61,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 
@@ -4023,6 +4024,25 @@ public class AranarthUtils {
      */
     public static void playPingSound(Player player) {
         player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1F, 1F);
+    }
+
+    /**
+     * Plays the donation sound for all online players on this server.
+     */
+    public static void playDonationSound() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 1F, ThreadLocalRandom.current().nextFloat(1.2F, 1.6F));
+        }
+    }
+
+    /**
+     * Plays the donation sound for all online players across the network.
+     */
+    public static void playNetworkDonationSound() {
+        playDonationSound();
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishSoundAll("minecraft:entity.player.levelup", 1F, ThreadLocalRandom.current().nextFloat(1.2F, 1.6F));
+        }
     }
 
     /**
