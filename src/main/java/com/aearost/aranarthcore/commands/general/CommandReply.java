@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.EmojiUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -66,7 +67,7 @@ public class CommandReply implements CommandExecutor {
 								msg.append(args[i]);
 								if (i < args.length - 1) msg.append(" ");
 							}
-							String assembledMsg = msg.toString();
+							String assembledMsg = EmojiUtils.translateFor(player, msg.toString());
 							String formattedMsg;
 							if (player.hasPermission("aranarth.chat.hex")) {
 								formattedMsg = ChatUtils.translateToColor(assembledMsg);

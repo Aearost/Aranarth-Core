@@ -84,6 +84,7 @@ Chat, UI & Sounds
 [~] Fixed the Avatar symbol not appearing in tab for players on the other server
 [~] Nickname changes now apply on both Survival and SMP straight away
 [~] Added /pronouns neutral
+[+] Emojis are now translated in /msg, /reply, /mail, /d msg, and /ac msg
 
 Quality of Life
 [+] Added /vc list as an alias for /vc who

@@ -580,7 +580,7 @@ public class ChatUtils {
                 msg.append(" ");
             }
         }
-        String assembledMsg = msg.toString();
+        String assembledMsg = EmojiUtils.translateFor(player, msg.toString());
 
         // If sending the message to yourself
         if (player.getUniqueId().equals(target.getUniqueId())) {
@@ -915,7 +915,8 @@ public class ChatUtils {
                 msg.append(" ");
             }
         }
-        String assembledMsg = msg.toString();
+        // Toggled dominion chat has already been translated by PlayerChatListener
+        String assembledMsg = isSingleMessage ? EmojiUtils.translateFor(player, msg.toString()) : msg.toString();
 
         DominionRank rank = dominion.getMemberRank(player.getUniqueId());
         if (rank == null) {
@@ -1041,7 +1042,8 @@ public class ChatUtils {
                 msg.append(" ");
             }
         }
-        String assembledMsg = msg.toString();
+        // Toggled council chat has already been translated by PlayerChatListener
+        String assembledMsg = isSingleMessage ? EmojiUtils.translateFor(sender, msg.toString()) : msg.toString();
 
         String nickname = "";
         Player player = null;
