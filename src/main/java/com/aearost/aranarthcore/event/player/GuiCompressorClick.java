@@ -1,10 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.gui.GuiCompressor;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
-import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -27,7 +24,6 @@ public class GuiCompressorClick {
 		}
 
 		Player player = (Player) e.getWhoClicked();
-		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
 		int slot = e.getSlot();
 		if (slot < 9 || slot >= 38) {
@@ -35,14 +31,7 @@ public class GuiCompressorClick {
 			if (slot == 4) {
 				player.closeInventory();
 				player.playSound(player, Sound.UI_BUTTON_CLICK, 1F, 0.8F);
-				if (aranarthPlayer.isCompressingItems()) {
-					aranarthPlayer.setCompressingItems(false);
-					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "compress.no_longer")));
-				} else {
-					aranarthPlayer.setCompressingItems(true);
-					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "compress.now_compressing")));
-				}
-				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				AranarthUtils.toggleCompressor(player);
 			}
 			// Exit
 			else if (slot == 49) {

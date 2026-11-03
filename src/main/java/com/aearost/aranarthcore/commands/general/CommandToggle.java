@@ -157,14 +157,7 @@ public class CommandToggle implements CommandExecutor {
 					}
 				} else if (args[0].equalsIgnoreCase("compressor")) {
 					if (player.hasPermission("aranarth.compressor")) {
-						if (aranarthPlayer.isCompressingItems()) {
-							aranarthPlayer.setCompressingItems(false);
-							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.compressor_disabled")));
-						} else {
-							aranarthPlayer.setCompressingItems(true);
-							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.compressor_enabled")));
-						}
-						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+						AranarthUtils.toggleCompressor(player);
 					} else {
 						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.no_compressor_perk")));
 					}

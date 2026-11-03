@@ -3677,6 +3677,21 @@ public class AranarthUtils {
     }
 
     /**
+     * Toggles the player's compressor on or off and notifies them.
+     *
+     * @param player The player toggling their compressor.
+     * @return The new compressor state.
+     */
+    public static boolean toggleCompressor(Player player) {
+        AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+        boolean enabled = !aranarthPlayer.isCompressingItems();
+        aranarthPlayer.setCompressingItems(enabled);
+        setPlayer(player.getUniqueId(), aranarthPlayer);
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, enabled ? "toggle.compressor_enabled" : "toggle.compressor_disabled")));
+        return enabled;
+    }
+
+    /**
      * Disables the compressor for all Materials.
      *
      * @param uuid The player's UUID.

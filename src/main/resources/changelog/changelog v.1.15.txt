@@ -61,6 +61,8 @@ Aranarthium, Items & Crafting
 [-] The money reward was removed from the Godly Crate
 [~] Fixed crate animations that were no longer accurate due to recent changes with crates
 [~] Fixed armor and Aranarthium being deleted in the anvil when the armor had over-leveled enchantments
+[-] Custom Aranarth items can no longer be used in crafting recipes or other types of tables
+[~] Custom items with durability such as Wrenches can now be crafted with each other to repair durability
 
 Economy, Jobs & Quests
 [~] Fixed /vptransfer throwing an error when the receiver has never joined the current server
@@ -99,6 +101,8 @@ Quality of Life
 [~] Clarified the Arcane Ascension description
 [~] Made all AranarthCore abilities' particles be client-side and not server-side
 [~] Disabled the inventory assist perk in the Arena world
+[~] Fixed the randomizer invalid format error showing the wrong syntax
+[~] The compressor toggle in /comp, the /toggle GUI, and /toggle compressor now all behave identically and show the same message
 
 Cross-server & Technical
 [~] AFK players are now marked with [AFK] in the Discord online player list

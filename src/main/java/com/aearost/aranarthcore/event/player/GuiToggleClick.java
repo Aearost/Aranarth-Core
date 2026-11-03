@@ -133,15 +133,8 @@ public class GuiToggleClick {
 				if (!player.hasPermission("aranarth.compressor")) {
 					return;
 				}
-                if (aranarthPlayer.isCompressingItems()) {
-                    aranarthPlayer.setCompressingItems(false);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.disabled", "feature", "the compressor")));
-                } else {
-                    aranarthPlayer.setCompressingItems(true);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.enabled", "feature", "the compressor")));
-                }
-                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.PISTON, "&f&lCompressor", aranarthPlayer.isCompressingItems()));
+                boolean compressing = AranarthUtils.toggleCompressor(player);
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.PISTON, "&f&lCompressor", compressing));
             }
             // Day Message
             case 19 -> {
