@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.mob;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
+import com.aearost.aranarthcore.event.listener.grouped.JobEventListener;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthMount;
 import com.aearost.aranarthcore.objects.CustomKeys;
@@ -385,6 +386,8 @@ public class MountListener implements Listener {
                         continue;
                     }
                     applyMovement(mount, rider);
+                    double[] in = playerInputs.getOrDefault(rider.getUniqueId(), new double[]{0, 0});
+                    JobEventListener.trackMountTravel(rider, mount, in[0] != 0 || in[1] != 0);
                 }
             }
         }.runTaskTimer(plugin, 0L, 1L);
@@ -671,6 +674,7 @@ public class MountListener implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         MountUtils.cleanupPlayerBars(player.getUniqueId());
+        JobEventListener.clearMountTravel(player.getUniqueId());
         despawnMountOnQuit(player);
 
         // Persist this player's mounts now and tell the other server to reload them

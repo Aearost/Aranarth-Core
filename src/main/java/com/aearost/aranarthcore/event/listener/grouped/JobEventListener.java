@@ -47,6 +47,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.projectiles.ProjectileSource;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -118,6 +120,24 @@ public class JobEventListener implements Listener {
 
     // Explorer: track last position for travel rewards
     private static final Map<UUID, Location> lastTravelPos = new HashMap<>();
+
+    private static final double WALKING_PAY_PER_BLOCK = 0.25;
+    private static final double WALKING_SPEED_BLOCKS_PER_SECOND = 4.317;
+    public static final double MOUNT_PAY_PER_SECOND = WALKING_PAY_PER_BLOCK * WALKING_SPEED_BLOCKS_PER_SECOND / 2;
+    // The mount must cover at least this many blocks over the last MOUNT_STALL_WINDOW_SECONDS to keep earning
+    private static final double MOUNT_STALL_MIN_DISTANCE = 3.0;
+    private static final int MOUNT_STALL_WINDOW_SECONDS = 5;
+    // A single-tick jump larger than this is a teleport, never travel
+    private static final double MOUNT_MAX_TICK_DISTANCE = 4.0;
+    private static final Map<UUID, MountTravelState> mountTravelStates = new HashMap<>();
+
+    private static final class MountTravelState {
+        private Location lastLocation;
+        private long lastTick;
+        private int ticksSinceSample;
+        private int activeTicks;
+        private final Deque<Location> samples = new ArrayDeque<>();
+    }
 
     // Explorer: PDC key for claimed chests
     private static final org.bukkit.NamespacedKey EXPLORER_CHEST_CLAIMED_KEY =
@@ -1055,6 +1075,83 @@ public class JobEventListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerTeleport(PlayerTeleportEvent e) {
         AranarthUtils.markTeleported(e.getPlayer().getUniqueId());
+    }
+
+    /**
+     * Pays Explorers for time spent actively moving on their /mount, called every tick by the mount movement loop.
+     *
+     * @param rider The player riding the mount.
+     * @param mount The mount entity.
+     * @param hasInput Whether the rider is currently pressing a movement key.
+     */
+    public static void trackMountTravel(Player rider, LivingEntity mount, boolean hasInput) {
+        UUID riderId = rider.getUniqueId();
+        AranarthPlayer ap = AranarthUtils.getPlayer(riderId);
+        if (ap == null || !ap.getJobData().hasJob(JobType.EXPLORER)
+                || !AranarthUtils.isSurvivalWorld(mount.getWorld().getName())) {
+            mountTravelStates.remove(riderId);
+            return;
+        }
+
+        long tick = mount.getWorld().getGameTime();
+        Location current = mount.getLocation();
+        MountTravelState state = mountTravelStates.get(riderId);
+
+        // Start fresh after dismounting, changing worlds or teleporting
+        if (state == null || tick - state.lastTick != 1
+                || state.lastLocation.getWorld() != current.getWorld()
+                || horizontalDistanceSquared(state.lastLocation, current) > MOUNT_MAX_TICK_DISTANCE * MOUNT_MAX_TICK_DISTANCE) {
+            state = new MountTravelState();
+            state.samples.addLast(current);
+            state.lastLocation = current;
+            state.lastTick = tick;
+            mountTravelStates.put(riderId, state);
+            return;
+        }
+
+        if (hasInput && horizontalDistanceSquared(state.lastLocation, current) > 0.0001) {
+            state.activeTicks++;
+        }
+        state.lastLocation = current;
+        state.lastTick = tick;
+
+        // Once per second, check the mount covered enough ground over the window and pay for the active time
+        state.ticksSinceSample++;
+        if (state.ticksSinceSample < 20) {
+            return;
+        }
+        state.ticksSinceSample = 0;
+        state.samples.addLast(current);
+        if (state.samples.size() > MOUNT_STALL_WINDOW_SECONDS + 1) {
+            state.samples.removeFirst();
+        }
+        // Not enough history yet, keep accumulating so the first few seconds are paid once the window fills
+        if (state.samples.size() <= MOUNT_STALL_WINDOW_SECONDS) {
+            return;
+        }
+        if (horizontalDistanceSquared(state.samples.peekFirst(), current) < MOUNT_STALL_MIN_DISTANCE * MOUNT_STALL_MIN_DISTANCE) {
+            state.activeTicks = 0;
+            return;
+        }
+        if (state.activeTicks > 0) {
+            JobUtils.awardJob(rider, JobType.EXPLORER, MOUNT_PAY_PER_SECOND * state.activeTicks / 20.0);
+            state.activeTicks = 0;
+        }
+    }
+
+    /**
+     * Clears the player's /mount travel tracking.
+     *
+     * @param uuid The player's UUID.
+     */
+    public static void clearMountTravel(UUID uuid) {
+        mountTravelStates.remove(uuid);
+    }
+
+    private static double horizontalDistanceSquared(Location a, Location b) {
+        double dx = a.getX() - b.getX();
+        double dz = a.getZ() - b.getZ();
+        return dx * dx + dz * dz;
     }
 
     // -------------------------------------------------------------------------
