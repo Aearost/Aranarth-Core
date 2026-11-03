@@ -278,141 +278,6 @@ public class DateUtils {
     }
 
     /**
-     * Provides the Description of the month of Ignivor.
-     *
-     * @return The Description of the month.
-     */
-    public static String getIgnivorDescription() {
-        return "The month of Ignivór represents the beginning of the new year. Players are granted passive Regeneration I, as well as passive Luck. While snowstorms are still a possibility, they are much rarer, and snow begins to melt.";
-    }
-
-    /**
-     * Provides the Description of the month of Aquinvor.
-     *
-     * @return The Description of the month.
-     */
-    public static String getAquinvorDescription() {
-        return "The month of Aquinvór marks the springtime. Rain falls more frequently and lasts longer than other months, rapidly melting the remaining snow, especially while it rains. Whenever the sky is clear, a rainbow shines, granting 50% more EXP and job earnings.";
-    }
-
-    /**
-     * Provides the Description of the month of Ventivor.
-     *
-     * @return The Description of the month.
-     */
-    public static String getVentivorDescription() {
-        return "The month of Ventivór brings a wind behind your tail. The sound of wind is heard flying through the air, spawning Breezes on occasion, granting passive effect of Speed I.";
-    }
-
-    /**
-     * Provides the Description of the month of Florivor.
-     *
-     * @return The Description of the month.
-     */
-    public static String getFlorivorDescription() {
-        return "The smells of flower petals will drift through the wind, spawning at random. Additionally, eyeblossoms can be used to brew the Potions of Order and Chaos using a base of a Mundane potion.";
-    }
-
-    /**
-     * Provides the Description of the month of Aestivor.
-     *
-     * @return The Description of the month.
-     */
-    public static String getAestivorDescription() {
-        return "The month of Aestivór is riddled with violent thunderstorms. The skies will thunder far more frequently than other months. There is also a 20% chance that creepers will spawn as the charged variant.";
-    }
-
-    /**
-     * Provides the Description of the month of Calorvor.
-     *
-     * @return The Description of the month.
-     */
-    public static String getCalorvorDescription() {
-        return "The month of Calorvór starts off the summer. Baby animals mature at a quicker rate, and have a 50% chance of being born as a twin.";
-    }
-
-    /**
-     * Provides the Description of the month of Ardorvor.
-     *
-     * @return The Description of the month.
-     */
-    public static String getArdorvorDescription() {
-        return "The month of Ardorvór is the month of flames. All sources of fire deal more damage, and random bursts of weakness and mining fatigue are felt under the blistering sun.";
-    }
-
-    /**
-     * Provides the Description of the month of Solarvor.
-     *
-     * @return The Description of the month.
-     */
-    public static String getSolarvorDescription() {
-        return "The month of Solarvór favours the picking of apples. Increased apple drop rates, and frequent &6God Apple Fragment &rdrops - there will be plenty for all.";
-    }
-
-    /**
-     * Provides the Description of the month of Follivor.
-     *
-     * @return The Description of the month.
-     */
-    public static String getFollivorDescription() {
-        return "The month of Follivór introduces the start of autumn. Trees provide more EXP and additional log drops, and saplings grow at quicker speeds.";
-    }
-
-    /**
-     * Provides the Description of the month of Strigavor.
-     *
-     * @return The Description of the month.
-     */
-    public static String getStrigavorDescription() {
-        return "The month of Strigavór is for witchcraft, providing increased positive effects during the day, and increased negative effects during the night. Also grants a 25% chance for a doubled potion.";
-    }
-
-    /**
-     * Provides the Description of the month of Faunivor.
-     *
-     * @return The Description of the month.
-     */
-    public static String getFaunivorDescription() {
-        return "The month of Faunivór encourages a little bloodshed. Weapons will deal increased damage, and mob drop rates will be doubled for both meat and animal products.";
-    }
-
-    /**
-     * Provides the Description of the month of Umbravor.
-     *
-     * @return The Description of the month.
-     */
-    public static String getUmbravorDescription() {
-        return "The month of Umbravór marks the beginning of winter. There is a low chance of world-wide snowstorms, and crops are no longer harvested as efficiently.";
-    }
-
-    /**
-     * Provides the Description of the month of Glacivor.
-     *
-     * @return The Description of the month.
-     */
-    public static String getGlacivorDescription() {
-        return "The month of Glacivór sends shivers down your spine. You will be slowed down in your tracks, and water begins to freeze in rivers and the sea. Lingering outdoors will lead to frostbite.";
-    }
-
-    /**
-     * Provides the Description of the month of Frigorvor.
-     *
-     * @return The Description of the month.
-     */
-    public static String getFrigorvorDescription() {
-        return "The month of Frigorvór brings the heaviest snowfalls. Your movements will be slowed even further, as will your crop growth rates. Frostbite strikes faster when night falls.";
-    }
-
-    /**
-     * Provides the Description of the month of Obscurvor.
-     *
-     * @return The Description of the month.
-     */
-    public static String getObscurvorDescription() {
-        return "The month of Obscurvór is the month of rest. The slowness of Winter lingers, with more aggression from phantoms, and an increased amount of sleeping players to skip the night. The cold still bites those who stay outside too long.";
-    }
-
-    /**
      * Confirms if the current month is a winter month.
      *
      * @param month The current month.
@@ -710,25 +575,10 @@ public class DateUtils {
         Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(messages[1]));
         Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(messages[2]));
 
+        // The Discord post reuses the /aranarth calendar description, joined into a single paragraph
         String description = "";
         if (isNewMonth) {
-            switch (month) {
-                case Month.IGNIVOR -> description = DateUtils.getIgnivorDescription();
-                case Month.AQUINVOR -> description = DateUtils.getAquinvorDescription();
-                case Month.VENTIVOR -> description = DateUtils.getVentivorDescription();
-                case Month.FLORIVOR -> description = DateUtils.getFlorivorDescription();
-                case Month.AESTIVOR -> description = DateUtils.getAestivorDescription();
-                case Month.CALORVOR -> description = DateUtils.getCalorvorDescription();
-                case Month.ARDORVOR -> description = DateUtils.getArdorvorDescription();
-                case Month.SOLARVOR -> description = DateUtils.getSolarvorDescription();
-                case Month.FOLLIVOR -> description = DateUtils.getFollivorDescription();
-                case Month.STRIGAVOR -> description = DateUtils.getStrigavorDescription();
-                case Month.FAUNIVOR -> description = DateUtils.getFaunivorDescription();
-                case Month.UMBRAVOR -> description = DateUtils.getUmbravorDescription();
-                case Month.GLACIVOR -> description = DateUtils.getGlacivorDescription();
-                case Month.FRIGORVOR -> description = DateUtils.getFrigorvorDescription();
-                case Month.OBSCURVOR -> description = DateUtils.getObscurvorDescription();
-            }
+            description = Lang.getDefault("calendar." + month.name().toLowerCase() + "_desc").replace("\n", " ");
         }
 
         for (Player player : Bukkit.getOnlinePlayers()) {

@@ -116,6 +116,7 @@ Cross-server & Technical
 [~] Fixed issue which stopped dominion changes from syncing between servers, affecting voice chat
 [~] Standardized rank and council access checks into PermissionUtils permissions, and expired monthly Saints now lose their permissions immediately
 [~] Monthly Saint ranks purchased from the vote shop now play the donation sound on both servers and only show the vote points message, including when purchased on SMP
+[-] Removed all descriptions of months in the code, and fully handling them in literals
 
 Miscellaneous
 [~] Architects can now only change their game mode while in architect mode
