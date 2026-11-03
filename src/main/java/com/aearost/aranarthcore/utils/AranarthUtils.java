@@ -162,6 +162,7 @@ public class AranarthUtils {
     private static int stormDuration;
     private static int stormDelay;
     private static boolean hasStormedInMonth;
+    public static final double RAINBOW_MULTIPLIER = 1.5;
     private static int currentTime;
     private static int windPlayTimer;
     private static boolean isPlayingWindSound;
@@ -1370,6 +1371,16 @@ public class AranarthUtils {
      */
     public static void setWeather(Weather newWeather) {
         weather = newWeather;
+    }
+
+    /**
+     * Provides whether the Aquinvor rainbow is currently shining, granting bonus EXP and job earnings.
+     * The rainbow shines whenever the sky is clear during Aquinvor.
+     *
+     * @return Confirmation whether the rainbow is active.
+     */
+    public static boolean isRainbowActive() {
+        return month == Month.AQUINVOR && weather == Weather.CLEAR;
     }
 
     /**

@@ -2610,7 +2610,8 @@ public class NetworkManager {
                     if (ap.isWeatherMessageDisabled()) {
                         continue;
                     }
-                    p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, "weather.clear")));
+                    String clearKey = AranarthUtils.isRainbowActive() ? "weather.rainbow" : "weather.clear";
+                    p.sendMessage(ChatUtils.chatMessage(Lang.getFor(p, clearKey)));
                     if (!isNewDay) {
                         int wVol = ap.getWeatherSoundVolume();
                         if (wVol > 0) {

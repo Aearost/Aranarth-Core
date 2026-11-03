@@ -450,6 +450,14 @@ public class AranarthCore extends JavaPlugin {
         // Sets default storm values
         AranarthUtils.setWeather(Weather.CLEAR);
         AranarthUtils.setStormDelay(new Random().nextInt(18000));
+        // SMP only learns the weather from Survival when it changes, so it starts from its own world's storm state
+        // Otherwise a restart during a storm would treat the sky as clear, such as granting the Aquinvor rainbow in the rain
+        if (isSmpServer()) {
+            World smpWorld = Bukkit.getWorld(getSmpMainWorldName());
+            if (smpWorld != null && smpWorld.hasStorm()) {
+                AranarthUtils.setWeather(smpWorld.isThundering() ? Weather.THUNDER : Weather.RAIN);
+            }
+        }
 
         SoundAbility.SOUND = new Element.SubElement("Sound", Element.AIR, Element.ElementType.NO_SUFFIX, this);
         FireParticleRegistry.WHITE_FIRE_SUB = new Element.SubElement("WhiteFire", Element.FIRE, Element.ElementType.NO_SUFFIX, this);
@@ -1286,6 +1294,7 @@ public class AranarthCore extends JavaPlugin {
         new PlayerTeleportBetweenWorldsListener(this);
         new DefenderFollowTeleportListener(this);
         new ExpGainPreventListener(this);
+        new RainbowExpBoostListener(this);
         new VillagerCamelDismountListener(this);
         new PotionEffectListener(this);
         new InvisibilityListener(this);

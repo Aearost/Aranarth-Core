@@ -133,6 +133,10 @@ public class JobUtils {
         double levelMultiplier = getLevelMultiplier(level);
         double rankMultiplier = getRankPayMultiplier(ap.getRank());
         double actualPay = basePay * levelMultiplier * rankMultiplier;
+        // The Aquinvor rainbow increases job earnings, but not job XP
+        if (AranarthUtils.isRainbowActive()) {
+            actualPay *= AranarthUtils.RAINBOW_MULTIPLIER;
+        }
 
         ap.setBalance(ap.getBalance() + actualPay);
         PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());

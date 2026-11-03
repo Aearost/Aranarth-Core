@@ -292,7 +292,7 @@ public class DateUtils {
      * @return The Description of the month.
      */
     public static String getAquinvorDescription() {
-        return "The month of Aquinvór marks the springtime. Players are granted the passive effects of Dolphin's Grace, and Water Breathing. Rain falls more frequently and lasts longer than other months, melting the remaining snow.";
+        return "The month of Aquinvór marks the springtime. Rain falls more frequently and lasts longer than other months, rapidly melting the remaining snow, especially while it rains. Whenever the sky is clear, a rainbow shines, granting 50% more EXP and job earnings.";
     }
 
     /**
@@ -1014,17 +1014,13 @@ public class DateUtils {
 
     /**
      * Apply the effects during the second month of Aquinvor.
-     * Players are given the Dolphin's Grace and Water Breathing effects during this month.
-     * There is also an increased chance of rain during the month of Aquinvor.
+     * There is an increased chance of rain during the month of Aquinvor, which melts snow rapidly.
+     * Whenever the sky is clear, a rainbow grants bonus EXP and job earnings.
      */
     private void applyAquinvorEffects() {
-        if (AranarthUtils.getWeather() == Weather.RAIN || AranarthUtils.getWeather() == Weather.THUNDER) {
-            List<PotionEffect> effects = new ArrayList<>();
-            effects.add(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
-            effects.add(new PotionEffect(PotionEffectType.WATER_BREATHING, 320, 0));
-            applyWeatherEffectsToAllPlayers(effects);
-        }
-        meltSnow(2);
+        // Snow melts quickly in the spring, and even quicker while it rains
+        boolean isRaining = AranarthUtils.getWeather() == Weather.RAIN || AranarthUtils.getWeather() == Weather.THUNDER;
+        meltSnow(isRaining ? 8 : 4);
 
         // Increased rain chance
         if (!AranarthUtils.getHasStormedInMonth()) {
@@ -2541,7 +2537,7 @@ public class DateUtils {
                     }
                 }
             }
-            messageKey = "weather.storm_subsided";
+            messageKey = AranarthUtils.isRainbowActive() ? "weather.rainbow" : "weather.storm_subsided";
         }
         for (Player player : Bukkit.getOnlinePlayers()) {
             String playerWorld = player.getWorld().getName();
