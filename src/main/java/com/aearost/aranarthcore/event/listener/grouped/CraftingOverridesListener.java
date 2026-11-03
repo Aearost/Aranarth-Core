@@ -4,6 +4,8 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.crafting.*;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.CustomItemUtils;
+import com.aearost.aranarthcore.utils.CustomItemUtils.Station;
 import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -46,6 +48,20 @@ public class CraftingOverridesListener implements Listener {
 	 */
 	@EventHandler
 	public void preCraftItem(final PrepareItemCraftEvent e) {
+		ItemStack[] matrix = e.getInventory().getMatrix();
+		// Any matched recipe consumes both items, such as two Wrenches placed diagonally matching Shears
+		if (e.getRecipe() != null) {
+			ItemStack repairResult = getCustomRepairResult(matrix);
+			if (repairResult != null) {
+				e.getInventory().setResult(repairResult);
+				return;
+			}
+		}
+		if (CustomItemUtils.containsDisallowed(matrix, Station.CRAFTING)) {
+			// Silently hidden, as the matrix is often only partially filled (i.e a single Wrench matching Iron Nuggets)
+			e.getInventory().setResult(null);
+			return;
+		}
 		if (e.getInventory().contains(Material.BAMBOO_BLOCK)) {
 			new CraftingOverridesSugarcaneBlock().preCraft(e);
 		}
@@ -62,6 +78,15 @@ public class CraftingOverridesListener implements Listener {
 	public void onCraftItem(final CraftItemEvent e) {
 		HumanEntity player = e.getWhoClicked();
 		ItemStack result = e.getRecipe().getResult();
+		// Repairing two of the same custom item is handled in preCraftItem
+		if (getCustomRepairResult(e.getInventory().getMatrix()) != null) {
+			return;
+		}
+		if (CustomItemUtils.containsDisallowed(e.getInventory().getMatrix(), Station.CRAFTING)) {
+			e.setCancelled(true);
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "crafting.cannot_use_ingredient")));
+			return;
+		}
 		if (CraftingOverridesMap.isMapCopyRecipe(e.getInventory().getMatrix(), result)) {
 			CraftingOverridesMap mapHandler = new CraftingOverridesMap();
 			mapHandler.onCraft(e, player);
@@ -245,6 +270,32 @@ public class CraftingOverridesListener implements Listener {
 			mapHandler.tagAsOriginal(originalMap);
 			Bukkit.getScheduler().runTask(plugin, () -> inv.setItem(0, originalMap));
 		}
+	}
+
+	/**
+	 * Provides the result of repairing two of the same custom item together.
+	 * @param matrix The crafting matrix.
+	 * @return The repaired item, or null if the matrix is not two of the same durable custom item.
+	 */
+	private ItemStack getCustomRepairResult(ItemStack[] matrix) {
+		ItemStack first = null;
+		ItemStack second = null;
+		for (ItemStack ingredient : matrix) {
+			if (ingredient == null || ingredient.getType() == Material.AIR) {
+				continue;
+			}
+			if (first == null) {
+				first = ingredient;
+			} else if (second == null) {
+				second = ingredient;
+			} else {
+				return null;
+			}
+		}
+		if (second == null) {
+			return null;
+		}
+		return CustomItemUtils.createRepairResult(first, second);
 	}
 
 	/**
