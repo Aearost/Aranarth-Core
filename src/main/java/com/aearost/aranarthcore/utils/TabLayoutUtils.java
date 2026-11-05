@@ -121,11 +121,14 @@ public class TabLayoutUtils {
         return skins;
     }
 
+    /**
+     * Provides the texture value and signature at the input config path.
+     * Read without a fallback value, so a key only merged into config.yml on this startup still falls back to the jar's default.
+     */
     private static String[] loadSkin(String path) {
-        return new String[]{
-                AranarthCore.getInstance().getConfig().getString(path + ".value", ""),
-                AranarthCore.getInstance().getConfig().getString(path + ".signature", "")
-        };
+        String value = AranarthCore.getInstance().getConfig().getString(path + ".value");
+        String signature = AranarthCore.getInstance().getConfig().getString(path + ".signature");
+        return new String[]{value != null ? value : "", signature != null ? signature : ""};
     }
 
     /**
@@ -257,7 +260,7 @@ public class TabLayoutUtils {
                 continue;
             }
             UUID layoutUuid = getLayoutUuid(layoutIndex);
-            // The head of an entry can only be changed by adding it again
+            // The head of an entry can only be changed by removing it and adding it again
             String skin = getSlotSkin(slot);
             if (shownSkins == null || layoutIndex >= shownSkins.size() || !shownSkins.get(layoutIndex).equals(skin)) {
                 String[] texture = skins.get(skin);
@@ -278,9 +281,13 @@ public class TabLayoutUtils {
             layoutIndex++;
         }
 
+        // The client ignores adding an entry it already has, so an entry whose head changes is removed before being added again
         List<UUID> removedEntries = new ArrayList<>();
-        for (int i = layoutIndex; i < removeUpTo; i++) {
-            removedEntries.add(getLayoutUuid(i));
+        for (int i = 0; i < removeUpTo; i++) {
+            UUID layoutUuid = getLayoutUuid(i);
+            if (i >= layoutIndex || newEntries.containsKey(layoutUuid)) {
+                removedEntries.add(layoutUuid);
+            }
         }
 
         NetworkTabManager.removeEntries(viewer, removedEntries);
