@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.network;
 
+import com.aearost.aranarthcore.enums.TabGroup;
+
 import java.util.UUID;
 
 /**
@@ -22,6 +24,7 @@ public class NetworkPlayer {
     private long afkStartTime = 0;
     private String pronouns;
     private int ping = -1;
+    private TabGroup tabGroup = TabGroup.SURVIVAL;
 
     public NetworkPlayer(UUID uuid, String username, String nickname, String server,
                          int rank, int councilRank, int saintRank, int architectRank, boolean vanished,
@@ -138,5 +141,13 @@ public class NetworkPlayer {
 
     public void setPing(int ping) {
         this.ping = ping;
+    }
+
+    public TabGroup getTabGroup() {
+        return tabGroup;
+    }
+
+    public void setTabGroup(TabGroup tabGroup) {
+        this.tabGroup = tabGroup;
     }
 }

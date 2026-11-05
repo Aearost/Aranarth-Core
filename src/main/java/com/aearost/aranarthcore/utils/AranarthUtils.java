@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.PrefixStyle;
 import com.aearost.aranarthcore.enums.Pronouns;
+import com.aearost.aranarthcore.enums.TabGroup;
 import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.enums.WorldEvent;
 import com.aearost.aranarthcore.event.listener.misc.InvisibilityListener;
@@ -63,6 +64,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.ToIntFunction;
 
 import static com.aearost.aranarthcore.objects.CustomKeys.*;
@@ -3427,10 +3429,12 @@ public class AranarthUtils {
                 case CHI -> "chi";
             });
             String duration = getRemainingBoostDuration(boost).replace("&e", "&e&o");
+            if (!boostFooter.isEmpty()) {
+                boostFooter.append("\n");
+            }
             boostFooter.append(color).append("&o").append(name)
-                    .append(" ").append(color).append("&o(").append(duration).append(color).append("&o)\n");
+                    .append(" ").append(color).append("&o(").append(duration).append(color).append("&o)");
         }
-        boostFooter.append("&8&l---------------------");
         return boostFooter.toString();
     }
 
@@ -4161,12 +4165,6 @@ public class AranarthUtils {
             }
         }
 
-        // Remove vanished players from tab
-        onlinePlayers.removeIf(player -> {
-            AranarthPlayer data = AranarthUtils.getPlayer(player.getUniqueId());
-            return data.isVanished();
-        });
-
         // Collect non-vanished remote players for the combined sort
         List<NetworkPlayer> remotePlayers = new ArrayList<>();
         if (NetworkManager.isActive()) {
@@ -4182,7 +4180,9 @@ public class AranarthUtils {
         //   1. roleGroup  - council(5) > architect(4) > saint(3) > avatar(2) > regular(1)
         //   2. roleTier   - councilRank/saintRank/architectRank within the same group
         //   3. playerRank - game rank (8–0) as tiebreaker within the same role+tier
-        record SortEntry(int roleGroup, int roleTier, int playerRank, Player localPlayer, NetworkPlayer remotePlayer) {
+        //   4. name       - alphabetical (ascending), so players with the same ranks stay in a consistent order
+        // Vanished local players are included so that players who can see them have them in the right group
+        record SortEntry(int roleGroup, int roleTier, int playerRank, String name, Player localPlayer, NetworkPlayer remotePlayer, boolean vanished) {
         }
 
         List<SortEntry> combined = new ArrayList<>();
@@ -4190,12 +4190,14 @@ public class AranarthUtils {
             AranarthPlayer ap = getPlayer(p.getUniqueId());
             if (ap != null) {
                 int[] fields = computeSortFields(p.getUniqueId(), ap.getCouncilRank(), ap.getArchitectRank(), ap.getSaintRank(), ap.getRank());
-                combined.add(new SortEntry(fields[0], fields[1], fields[2], p, null));
+                String name = ap.getNickname() != null && !ap.getNickname().isEmpty() ? ap.getNickname() : p.getName();
+                combined.add(new SortEntry(fields[0], fields[1], fields[2], ChatUtils.stripColorFormatting(name), p, null, ap.isVanished()));
             }
         }
         for (NetworkPlayer np : remotePlayers) {
             int[] fields = computeSortFields(np.getUuid(), np.getCouncilRank(), np.getArchitectRank(), np.getSaintRank(), np.getRank());
-            combined.add(new SortEntry(fields[0], fields[1], fields[2], null, np));
+            String name = np.getNickname() != null && !np.getNickname().isEmpty() ? np.getNickname() : np.getUsername();
+            combined.add(new SortEntry(fields[0], fields[1], fields[2], ChatUtils.stripColorFormatting(name), null, np, false));
         }
 
         // Sort highest priority first across all servers combined
@@ -4206,20 +4208,18 @@ public class AranarthUtils {
             if (a.roleTier() != b.roleTier()) {
                 return Integer.compare(b.roleTier(), a.roleTier());
             }
-            return Integer.compare(b.playerRank(), a.playerRank());
+            if (a.playerRank() != b.playerRank()) {
+                return Integer.compare(b.playerRank(), a.playerRank());
+            }
+            return a.name().compareToIgnoreCase(b.name());
         });
 
-        // Apply display names and list order.  Local players can be ordered directly;
-        // remote players get an NMS list-order packet via NetworkTabManager.
-        // The list name set here uses the default prefix styles, and is overridden below for
+        // Apply display names. The list name set here uses the default prefix styles, and is overridden below for
         // any viewer who has chosen their own prefix styles.
         Map<UUID, ChatPrefix> localPrefixes = new LinkedHashMap<>();
         Map<UUID, String> localSuffixes = new HashMap<>();
-        int total = combined.size();
-        for (int i = 0; i < total; i++) {
-            SortEntry entry = combined.get(i);
-            int order = total - 1 - i;
-            if (entry.localPlayer() != null) {
+        for (SortEntry entry : combined) {
+            if (entry.localPlayer() != null && !entry.vanished()) {
                 Player player = entry.localPlayer();
                 UUID uuid = player.getUniqueId();
                 ChatPrefix prefix = ChatPrefix.of(player);
@@ -4239,18 +4239,26 @@ public class AranarthUtils {
                 localPrefixes.put(uuid, prefix);
                 localSuffixes.put(uuid, suffix);
                 player.setPlayerListName(ChatUtils.translateToColor(prefix.formatName(PrefixStyle.defaults()) + suffix));
-                player.setPlayerListOrder(order);
-            } else {
-                // Send a list-order packet for the remote fake entry so it slots in at
-                // the correct combined position instead of floating at the bottom.
-                NetworkTabManager.sendListOrder(
-                        entry.remotePlayer().getUuid(), order, onlinePlayers);
             }
         }
 
+        // Builds every tab name in each set of prefix styles that a viewer uses
+        Map<String, Map<UUID, String>> displayNamesByStyles = new HashMap<>();
+        Function<PrefixStyle[], Map<UUID, String>> getDisplayNames = styles -> displayNamesByStyles.computeIfAbsent(
+                PrefixStyle.encode(styles[0], styles[1], styles[2]), k -> {
+                    Map<UUID, String> names = new HashMap<>();
+                    for (Map.Entry<UUID, ChatPrefix> local : localPrefixes.entrySet()) {
+                        names.put(local.getKey(), ChatUtils.translateToColor(
+                                local.getValue().formatName(styles) + localSuffixes.get(local.getKey())));
+                    }
+                    for (NetworkPlayer np : remotePlayers) {
+                        names.put(np.getUuid(), NetworkTabManager.buildDisplayName(np, styles));
+                    }
+                    return names;
+                });
+
         // Sends each viewer with custom prefix styles their own version of every tab name. Viewers who just
         // went back to the default styles are sent the default names once, replacing their old overrides.
-        Map<String, Map<UUID, String>> displayNamesByStyles = new HashMap<>();
         for (Player viewer : Bukkit.getOnlinePlayers()) {
             PrefixStyle[] styles = getPrefixStyles(viewer);
             if (Arrays.equals(styles, PrefixStyle.defaults())) {
@@ -4260,20 +4268,21 @@ public class AranarthUtils {
             } else {
                 customTabViewers.add(viewer.getUniqueId());
             }
-            Map<UUID, String> displayNames = displayNamesByStyles.computeIfAbsent(
-                    PrefixStyle.encode(styles[0], styles[1], styles[2]), k -> {
-                        Map<UUID, String> names = new HashMap<>();
-                        for (Map.Entry<UUID, ChatPrefix> local : localPrefixes.entrySet()) {
-                            names.put(local.getKey(), ChatUtils.translateToColor(
-                                    local.getValue().formatName(styles) + localSuffixes.get(local.getKey())));
-                        }
-                        for (NetworkPlayer np : remotePlayers) {
-                            names.put(np.getUuid(), NetworkTabManager.buildDisplayName(np, styles));
-                        }
-                        return names;
-                    });
-            NetworkTabManager.sendDisplayNames(viewer, displayNames);
+            NetworkTabManager.sendDisplayNames(viewer, getDisplayNames.apply(styles));
         }
+
+        // Arranges each viewer's tab list into groups based on where each player is, keeping the rank order within each group.
+        // The names each viewer sees are used to size the group dividers to the width of the columns.
+        List<TabLayoutUtils.TabMember> members = new ArrayList<>();
+        for (SortEntry entry : combined) {
+            if (entry.localPlayer() != null) {
+                members.add(new TabLayoutUtils.TabMember(entry.localPlayer().getUniqueId(),
+                        TabGroup.fromWorld(entry.localPlayer().getWorld().getName()), entry.vanished()));
+            } else {
+                members.add(new TabLayoutUtils.TabMember(entry.remotePlayer().getUuid(), entry.remotePlayer().getTabGroup(), false));
+            }
+        }
+        TabLayoutUtils.applyLayout(members, Bukkit.getOnlinePlayers(), viewer -> getDisplayNames.apply(getPrefixStyles(viewer)));
     }
 
     /**

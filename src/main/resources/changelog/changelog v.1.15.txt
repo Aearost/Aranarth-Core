@@ -93,6 +93,7 @@ Chat, UI & Sounds
 [~] Added /pronouns neutral
 [+] Emojis are now translated in /msg, /reply, /mail, /d msg, and /ac msg
 [~] Bold and italics are now converted between Discord and in-game chat in both directions
+[+] The tab list is now split into different world groups
 
 Quality of Life
 [+] Added /vc list as an alias for /vc who

@@ -225,6 +225,98 @@ public class NetworkTabManager {
     }
 
     /**
+     * Sends a single UPDATE_LIST_ORDER packet to one viewer, setting the tab position of each given entry for that viewer only.
+     *
+     * @param viewer The player whose tab list is being updated.
+     * @param orders The list order of each entry, keyed by its UUID.
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static void sendListOrders(Player viewer, Map<UUID, Integer> orders) {
+        ensureInitialised();
+        if (!available || orders.isEmpty()) return;
+        try {
+            Enum updateOrderAction;
+            try {
+                updateOrderAction = Enum.valueOf((Class<Enum>) actionClass, "UPDATE_LIST_ORDER");
+            } catch (IllegalArgumentException ignored) {
+                return; // Action not present in this server version - skip silently
+            }
+            EnumSet set = (EnumSet) EnumSet.class.getMethod("of", Enum.class).invoke(null, updateOrderAction);
+            List<Object> entries = new ArrayList<>();
+            for (Map.Entry<UUID, Integer> order : orders.entrySet()) {
+                entries.add(createEntry(order.getKey(), null, null, order.getValue(), 0));
+            }
+            Object packet = updatePacketClass
+                    .getDeclaredConstructor(EnumSet.class, List.class)
+                    .newInstance(set, entries);
+            sendPacket(viewer, packet);
+        } catch (Exception ex) {
+            Bukkit.getLogger().log(Level.WARNING, "[AC] sendListOrders failed for " + viewer.getName(), ex);
+        }
+    }
+
+    /**
+     * A tab entry that does not belong to any player.
+     *
+     * @param profileName      The profile name used if an empty one is not accepted.
+     * @param textureValue     The skin texture shown as the head of the entry, or empty for the default skin.
+     * @param textureSignature The signature of the skin texture.
+     */
+    public record LayoutEntry(String profileName, String textureValue, String textureSignature) {
+    }
+
+    /**
+     * Adds tab entries that do not belong to any player (group dividers and blank fillers) to one viewer's tab list.
+     *
+     * @param viewer        The player whose tab list is being updated.
+     * @param layoutEntries The entries to add, keyed by their UUID.
+     */
+    public static void addLayoutEntries(Player viewer, Map<UUID, LayoutEntry> layoutEntries) {
+        ensureInitialised();
+        if (!available || layoutEntries.isEmpty()) return;
+        try {
+            Object emptyName = toNmsComponent("");
+            List<Object> entries = new ArrayList<>();
+            for (Map.Entry<UUID, LayoutEntry> layoutEntry : layoutEntries.entrySet()) {
+                LayoutEntry entry = layoutEntry.getValue();
+                // An empty profile name keeps these entries out of the client's chat name suggestions
+                Object gameProfile;
+                try {
+                    gameProfile = createGameProfile(layoutEntry.getKey(), "", entry.textureValue(), entry.textureSignature());
+                } catch (Exception emptyNameException) {
+                    gameProfile = createGameProfile(layoutEntry.getKey(), entry.profileName(), entry.textureValue(), entry.textureSignature());
+                }
+                entries.add(createEntry(layoutEntry.getKey(), gameProfile, emptyName, 0, 0));
+            }
+            Object packet = updatePacketClass
+                    .getDeclaredConstructor(EnumSet.class, List.class)
+                    .newInstance(createActionEnumSet(), entries);
+            sendPacket(viewer, packet);
+        } catch (Exception ex) {
+            Bukkit.getLogger().log(Level.WARNING, "[AC] addLayoutEntries failed for " + viewer.getName(), ex);
+        }
+    }
+
+    /**
+     * Removes the given tab entries from one viewer's tab list.
+     *
+     * @param viewer The player whose tab list is being updated.
+     * @param uuids  The UUIDs of the entries to remove.
+     */
+    public static void removeEntries(Player viewer, List<UUID> uuids) {
+        ensureInitialised();
+        if (!available || uuids.isEmpty()) return;
+        try {
+            Object packet = removePacketClass
+                    .getDeclaredConstructor(List.class)
+                    .newInstance(uuids);
+            sendPacket(viewer, packet);
+        } catch (Exception ex) {
+            Bukkit.getLogger().log(Level.WARNING, "[AC] removeEntries failed for " + viewer.getName(), ex);
+        }
+    }
+
+    /**
      * Groups the viewers by their encoded prefix styles, so a packet only needs to be built once per set of styles.
      */
     private static Map<String, List<Player>> groupByPrefixStyles(Collection<? extends Player> viewers) {

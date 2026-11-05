@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.PrefixStyle;
 import com.aearost.aranarthcore.enums.Pronouns;
+import com.aearost.aranarthcore.enums.TabGroup;
 import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.enums.WorldEvent;
 import com.aearost.aranarthcore.event.listener.misc.InvisibilityListener;
@@ -801,6 +802,9 @@ public class NetworkManager {
         json.addProperty("textureValue", textureValue);
         json.addProperty("textureSignature", textureSignature);
         json.addProperty("pronouns", ap.getPronouns() != null ? ap.getPronouns().name() : "MALE");
+        if (onlinePlayer != null) {
+            json.addProperty("tabGroup", TabGroup.fromWorld(onlinePlayer.getWorld().getName()).name());
+        }
         publish(CH_JOIN, json);
     }
 
@@ -1409,12 +1413,22 @@ public class NetworkManager {
      */
     public void publishPingUpdates() {
         for (Player p : Bukkit.getOnlinePlayers()) {
-            JsonObject json = new JsonObject();
-            json.addProperty("server", thisServer);
-            json.addProperty("uuid", p.getUniqueId().toString());
-            json.addProperty("ping", p.getPing());
-            publish(CH_PING_UPDATE, json);
+            publishPingUpdate(p);
         }
+    }
+
+    /**
+     * Publishes the current ping and tab group of a locally online player, so other servers
+     * show them with the right ping and in the right group of the tab list.
+     * Also called right away when the player changes worlds.
+     */
+    public void publishPingUpdate(Player player) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", player.getUniqueId().toString());
+        json.addProperty("ping", player.getPing());
+        json.addProperty("tabGroup", TabGroup.fromWorld(player.getWorld().getName()).name());
+        publish(CH_PING_UPDATE, json);
     }
 
     /**
@@ -2236,6 +2250,9 @@ public class NetworkManager {
                 textureSignature,
                 pronouns
         );
+        if (json.has("tabGroup")) {
+            np.setTabGroup(TabGroup.fromName(json.get("tabGroup").getAsString()));
+        }
         remoteRoster.put(uuid, np);
         if (!vanished) {
             NetworkTabManager.addToTab(np);
@@ -2771,6 +2788,14 @@ public class NetworkManager {
             np.setPing(ping);
             if (!np.isVanished()) {
                 NetworkTabManager.updatePingInTab(np);
+            }
+            // Moves the player to their new group in the tab list
+            if (json.has("tabGroup")) {
+                TabGroup tabGroup = TabGroup.fromName(json.get("tabGroup").getAsString());
+                if (tabGroup != np.getTabGroup()) {
+                    np.setTabGroup(tabGroup);
+                    AranarthUtils.updateTab();
+                }
             }
         }
     }

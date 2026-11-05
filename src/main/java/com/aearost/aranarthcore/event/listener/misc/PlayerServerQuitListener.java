@@ -250,6 +250,7 @@ public class PlayerServerQuitListener implements Listener {
         }
 
         AranarthUtils.updateTab();
+        TabLayoutUtils.clearViewer(player.getUniqueId());
     }
 
     /**

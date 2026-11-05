@@ -1,6 +1,8 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.enums.TabGroup;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -114,6 +116,16 @@ public class PlayerTeleportBetweenWorldsListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onChangedWorld(PlayerChangedWorldEvent e) {
         Player player = e.getPlayer();
+
+        // Moves the player to their new group in the tab list on both servers right away
+        if (TabGroup.fromWorld(e.getFrom().getName()) != TabGroup.fromWorld(player.getWorld().getName())) {
+            AranarthUtils.updateTab();
+            if (NetworkManager.isActive()) {
+                NetworkManager.getInstance().publishPingUpdate(player);
+            }
+        }
+
+
         // Checked a tick later, as teleports that switch the inventory change the game mode right after the world
         new BukkitRunnable() {
             @Override

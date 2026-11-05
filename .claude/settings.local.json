@@ -661,7 +661,9 @@
       "PowerShell($mvn = Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1; & $mvn.FullName -q -o compile 2>&1 | Select-Object -Last 40)",
       "PowerShell($mvn = Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1; & $mvn.FullName -q -o compile 2>&1 | Where-Object { $_ -notmatch \"WARNING\" } | Select-Object -Last 30)",
       "PowerShell($mvn = Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1; & $mvn.FullName -q -o compile; \"exit $LASTEXITCODE\")",
-      "PowerShell($mvn = Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1; & $mvn.FullName -q -o compile; \"exit: $LASTEXITCODE\")"
+      "PowerShell($mvn = Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1; & $mvn.FullName -q -o compile; \"exit: $LASTEXITCODE\")",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\liamh\\\\Desktop\\\\Folders\\\\Minecraft\\\\Testing\" -Directory | ForEach-Object { $s=$_.Name; Get-ChildItem $_.FullName -Directory | Where-Object { Test-Path \\(Join-Path $_.FullName \"level.dat\"\\) } | ForEach-Object { \"$s : $\\($_.Name\\)\" } })",
+      "PowerShell(git diff --stat; $env:MAVEN_OPTS=''; $mvn = Get-ChildItem \"C:\\\\Program Files\\\\JetBrains\" -Recurse -Filter mvn.cmd -ErrorAction SilentlyContinue | Select-Object -First 1; & $mvn.FullName -q -o compile 2>&1 | Select-Object -Last 30)"
     ]
   }
 }
