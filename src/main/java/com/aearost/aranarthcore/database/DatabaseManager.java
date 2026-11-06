@@ -11,6 +11,8 @@ import org.bukkit.Bukkit;
 import java.sql.*;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -213,6 +215,7 @@ public class DatabaseManager {
                 architect_rank INT DEFAULT 0,
                 vanished TINYINT(1) DEFAULT 0,
                 pronouns VARCHAR(64) DEFAULT '',
+                afk TINYINT(1) NOT NULL DEFAULT 0,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
@@ -445,6 +448,19 @@ public class DatabaseManager {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
                 """
+            CREATE TABLE IF NOT EXISTS player_shop_earnings (
+                uuid VARCHAR(36) PRIMARY KEY,
+                earnings DOUBLE NOT NULL DEFAULT 0,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+                """
+            CREATE TABLE IF NOT EXISTS player_last_seen (
+                uuid VARCHAR(36) PRIMARY KEY,
+                last_seen BIGINT NOT NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+                """
             CREATE TABLE IF NOT EXISTS player_last_location (
                 uuid      VARCHAR(36) PRIMARY KEY,
                 server    VARCHAR(64) NOT NULL,
@@ -565,7 +581,8 @@ public class DatabaseManager {
                 "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_z DOUBLE NOT NULL DEFAULT 0",
                 "ALTER TABLE player_reaper ADD COLUMN IF NOT EXISTS death_server VARCHAR(32) NULL DEFAULT NULL",
                 "ALTER TABLE network_temp_data MODIFY COLUMN value_json MEDIUMTEXT NOT NULL",
-                "ALTER TABLE network_roster ADD COLUMN IF NOT EXISTS pronouns VARCHAR(10) NOT NULL DEFAULT 'MALE'"
+                "ALTER TABLE network_roster ADD COLUMN IF NOT EXISTS pronouns VARCHAR(10) NOT NULL DEFAULT 'MALE'",
+                "ALTER TABLE network_roster ADD COLUMN IF NOT EXISTS afk TINYINT(1) NOT NULL DEFAULT 0"
         };
         try (Connection conn = dataSource.getConnection(); Statement stmt = conn.createStatement()) {
             for (String sql : migrations) {
@@ -810,6 +827,43 @@ public class DatabaseManager {
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to set field " + index + " for " + uuid + ": " + e.getMessage());
         }
+    }
+
+    /**
+     * Returns uuid -> stored username for every player that has one.
+     */
+    public Map<UUID, String> loadAllPlayerUsernames() {
+        String sql = "SELECT uuid, username FROM aranarth_players WHERE username IS NOT NULL AND username != ''";
+        Map<UUID, String> result = new HashMap<>();
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                result.put(UUID.fromString(rs.getString("uuid")), rs.getString("username"));
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load player usernames: " + e.getMessage());
+        }
+        return result;
+    }
+
+    /**
+     * Returns the stored username for the given uuid, or null if not found.
+     */
+    public String loadPlayerUsername(UUID uuid) {
+        String sql = "SELECT username FROM aranarth_players WHERE uuid = ? AND username IS NOT NULL AND username != ''";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("username");
+                }
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load username for " + uuid + ": " + e.getMessage());
+        }
+        return null;
     }
 
     /**
@@ -1283,7 +1337,7 @@ public class DatabaseManager {
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE username=VALUES(username), nickname=VALUES(nickname), server=VALUES(server),
                 `rank`=VALUES(`rank`), council_rank=VALUES(council_rank), saint_rank=VALUES(saint_rank),
-                architect_rank=VALUES(architect_rank), vanished=VALUES(vanished), pronouns=VALUES(pronouns)
+                architect_rank=VALUES(architect_rank), vanished=VALUES(vanished), pronouns=VALUES(pronouns), afk=0
                 """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -1316,6 +1370,42 @@ public class DatabaseManager {
             ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to update roster pronouns for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    public void updateRosterNickname(UUID uuid, String nickname) {
+        String sql = "UPDATE network_roster SET nickname = ? WHERE uuid = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, nickname);
+            ps.setString(2, uuid.toString());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to update roster nickname for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    public void updateRosterVanished(UUID uuid, boolean vanished) {
+        String sql = "UPDATE network_roster SET vanished = ? WHERE uuid = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBoolean(1, vanished);
+            ps.setString(2, uuid.toString());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to update roster vanished for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    public void updateRosterAfk(UUID uuid, boolean afk) {
+        String sql = "UPDATE network_roster SET afk = ? WHERE uuid = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBoolean(1, afk);
+            ps.setString(2, uuid.toString());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to update roster AFK status for " + uuid + ": " + e.getMessage());
         }
     }
 
@@ -2596,13 +2686,42 @@ public class DatabaseManager {
         return null;
     }
 
-    public void saveServerShops(String dataJson) {
-        String sql = "INSERT INTO server_shops (id, data_json) VALUES (1, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
-        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, dataJson);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save server shops: " + e.getMessage());
+    /**
+     * Rewrites the server shops while they are locked, so both servers saving at once cannot overwrite each other.
+     *
+     * @param merger Given the stored server shops JSON (or null), returns the JSON to store.
+     * @return The JSON that was stored, or null if it failed.
+     */
+    public String mergeServerShops(UnaryOperator<String> merger) {
+        String select = "SELECT data_json FROM server_shops WHERE id = 1 FOR UPDATE";
+        String upsert = "INSERT INTO server_shops (id, data_json) VALUES (1, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
+        try (Connection conn = dataSource.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                String stored = null;
+                try (PreparedStatement ps = conn.prepareStatement(select); ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        stored = rs.getString("data_json");
+                    }
+                }
+                String merged = merger.apply(stored);
+                if (!merged.equals(stored)) {
+                    try (PreparedStatement ps = conn.prepareStatement(upsert)) {
+                        ps.setString(1, merged);
+                        ps.executeUpdate();
+                    }
+                }
+                conn.commit();
+                return merged;
+            } catch (SQLException | RuntimeException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        } catch (SQLException | RuntimeException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to merge server shops: " + e.getMessage());
+            return null;
         }
     }
 
@@ -2706,14 +2825,47 @@ public class DatabaseManager {
         return result;
     }
 
-    public void savePlayerShops(UUID uuid, String dataJson) {
-        String sql = "INSERT INTO player_shops (uuid, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
-        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, uuid.toString());
-            ps.setString(2, dataJson);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save player shops for " + uuid + ": " + e.getMessage());
+    /**
+     * Rewrites every player's shops while they are locked, so both servers saving at once cannot overwrite each other.
+     *
+     * @param merger Given each player's stored shops JSON, returns the JSON to store for each player.
+     * @return The JSON that was stored for each player, or null if it failed.
+     */
+    public Map<UUID, String> mergePlayerShops(Function<Map<UUID, String>, Map<UUID, String>> merger) {
+        String select = "SELECT uuid, data_json FROM player_shops FOR UPDATE";
+        String upsert = "INSERT INTO player_shops (uuid, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
+        try (Connection conn = dataSource.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                Map<UUID, String> stored = new HashMap<>();
+                try (PreparedStatement ps = conn.prepareStatement(select); ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        stored.put(UUID.fromString(rs.getString("uuid")), rs.getString("data_json"));
+                    }
+                }
+                Map<UUID, String> merged = merger.apply(stored);
+                try (PreparedStatement ps = conn.prepareStatement(upsert)) {
+                    for (Map.Entry<UUID, String> entry : merged.entrySet()) {
+                        if (entry.getValue().equals(stored.get(entry.getKey()))) {
+                            continue;
+                        }
+                        ps.setString(1, entry.getKey().toString());
+                        ps.setString(2, entry.getValue());
+                        ps.addBatch();
+                    }
+                    ps.executeBatch();
+                }
+                conn.commit();
+                return merged;
+            } catch (SQLException | RuntimeException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        } catch (SQLException | RuntimeException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to merge player shops: " + e.getMessage());
+            return null;
         }
     }
 
@@ -2762,6 +2914,34 @@ public class DatabaseManager {
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all player shop locations: " + e.getMessage());
+        }
+        return result;
+    }
+
+    /**
+     * Atomically adds the amount to the owner's net shop earnings, so both servers can write concurrently.
+     */
+    public void addPlayerShopEarnings(UUID uuid, double amount) {
+        String sql = "INSERT INTO player_shop_earnings (uuid, earnings) VALUES (?, ?) ON DUPLICATE KEY UPDATE earnings = earnings + VALUES(earnings)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            ps.setDouble(2, amount);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to add player shop earnings for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    public Map<UUID, Double> loadAllPlayerShopEarnings() {
+        String sql = "SELECT uuid, earnings FROM player_shop_earnings";
+        Map<UUID, Double> result = new HashMap<>();
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                result.put(UUID.fromString(rs.getString("uuid")), rs.getDouble("earnings"));
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all player shop earnings: " + e.getMessage());
         }
         return result;
     }
@@ -2815,6 +2995,55 @@ public class DatabaseManager {
         }
     }
 
+    /**
+     * Records when players were last seen on the network. An older time never replaces a newer one,
+     * so each server can safely submit what it knows.
+     *
+     * @param lastSeenTimes The time in milliseconds each player was last seen.
+     */
+    public void savePlayerLastSeen(Map<UUID, Long> lastSeenTimes) {
+        if (lastSeenTimes.isEmpty()) {
+            return;
+        }
+        String sql = """
+                INSERT INTO player_last_seen (uuid, last_seen) VALUES (?, ?)
+                ON DUPLICATE KEY UPDATE last_seen = GREATEST(last_seen, VALUES(last_seen))
+                """;
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            for (Map.Entry<UUID, Long> entry : lastSeenTimes.entrySet()) {
+                ps.setString(1, entry.getKey().toString());
+                ps.setLong(2, entry.getValue());
+                ps.addBatch();
+            }
+            ps.executeBatch();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save last seen times: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Provides when the player was last seen on the network.
+     *
+     * @param uuid The player.
+     * @return The time in milliseconds, or 0 if it is not known.
+     */
+    public long loadPlayerLastSeen(UUID uuid) {
+        String sql = "SELECT last_seen FROM player_last_seen WHERE uuid = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong("last_seen");
+                }
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load last seen time for " + uuid + ": " + e.getMessage());
+        }
+        return 0;
+    }
+
     // -------------------------------------------------------------------------
     // server_original_players
     // -------------------------------------------------------------------------
@@ -2838,27 +3067,19 @@ public class DatabaseManager {
     }
 
     /**
-     * Replaces all rows in server_original_players with the given list.
+     * Adds or removes a single row in server_original_players. Writes per row rather than replacing the
+     * whole table so a stale in-memory list on one server can never wipe a change made on the other.
      */
-    public void saveAllOriginalPlayers(List<UUID> uuids) {
-        try (Connection conn = dataSource.getConnection()) {
-            conn.setAutoCommit(false);
-            try (PreparedStatement del = conn.prepareStatement("DELETE FROM server_original_players")) {
-                del.executeUpdate();
-            }
-            if (!uuids.isEmpty()) {
-                try (PreparedStatement ins = conn.prepareStatement(
-                        "INSERT IGNORE INTO server_original_players (uuid) VALUES (?)")) {
-                    for (UUID uuid : uuids) {
-                        ins.setString(1, uuid.toString());
-                        ins.addBatch();
-                    }
-                    ins.executeBatch();
-                }
-            }
-            conn.commit();
+    public void setOriginalPlayer(UUID uuid, boolean isOriginal) {
+        String sql = isOriginal
+                ? "INSERT IGNORE INTO server_original_players (uuid) VALUES (?)"
+                : "DELETE FROM server_original_players WHERE uuid = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            ps.executeUpdate();
         } catch (SQLException e) {
-            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save original players: " + e.getMessage());
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save original player " + uuid + ": " + e.getMessage());
         }
     }
 

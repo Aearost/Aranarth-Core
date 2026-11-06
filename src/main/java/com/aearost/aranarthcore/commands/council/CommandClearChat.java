@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands.council;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
 import com.aearost.aranarthcore.utils.Lang;
@@ -24,6 +25,11 @@ public class CommandClearChat {
 			}
 
 			if (sender instanceof Player player) {
+				// The console runs this on every server, so only a player's clear is relayed
+				// Published before the notice below so the other server clears before showing it
+				if (NetworkManager.isActive()) {
+					NetworkManager.getInstance().publishClearChat();
+				}
 				DiscordUtils.createNotification(AranarthUtils.getNickname(player) + " has cleared the chat", player.getUniqueId());
 				Lang.broadcast("chat.cleared", "player", AranarthUtils.getNickname(player));
 			} else {

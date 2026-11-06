@@ -143,7 +143,7 @@ public class WorldEventManager implements Listener {
         perms.setPermission("bending.fire.combustionbending", true);
         perms.setPermission("bending.fire.lightningbending", true);
         perms.setPermission("bending.ability.barrage", true);
-        perms.setPermission("bending.ability.combustionstrike", true);
+        perms.setPermission("bending.ability.combustivestrike", true);
         perms.setPermission("bending.ability.Combustion", true);
         perms.setPermission("bending.ability.Discharge", true);
         perms.setPermission("bending.ability.Lightning", true);
@@ -163,10 +163,14 @@ public class WorldEventManager implements Listener {
         perms.setPermission("bending.ability.mendingwaters", true);
         perms.setPermission("bending.ability.healinghelix", true);
         perms.setPermission("bending.ability.corruptinghelix", true);
-        perms.setPermission("bending.ability.toxicspores", true);
+        perms.setPermission("bending.ability.spores", true);
         perms.setPermission("bending.ability.vinewhip", true);
         perms.setPermission("bending.ability.leafscythe", true);
         perms.setPermission("bending.ability.rootsnare", true);
+        perms.setPermission("bending.ability.petalrush", true);
+        perms.setPermission("bending.ability.petalshots", true);
+        perms.setPermission("bending.ability.sapstrike", true);
+        perms.setPermission("bending.ability.petalstorm", true);
         perms.setPermission("bending.ability.bloodfreeze", true);
         perms.setPermission("bending.ability.disalignment", true);
         perms.setPermission("bending.ability.liferip", true);

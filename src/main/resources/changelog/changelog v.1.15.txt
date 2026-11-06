@@ -1,0 +1,136 @@
+AranarthCore v. 1.15
+
+World & Events
+[+] The Horn of the Target now also sends nearby pet wolves and cats after the targeted area
+[~] Wandering Traders that spawn nearby AFK players now spawn nearby another online player that is not AFK instead
+[~] Potion effects from survival are now saved when going to the arena or creative and given back when returning
+[~] Boost messages in Discord are now only sent when a boost is activated, when 1 hour is left, and when it expires
+[~] Storms now only end early when players sleep through the night
+[~] Fixed snow not melting under trees when the snow on top of the leaves was removed
+[~] Fixed armor being deleted or moved to another inventory when changing worlds, switching servers, logging out, or dying while invisible
+[~] Changed the arena being reset to be the new largearena1
+[+] Added the "rainbow" functionality after a storm during Aquinvor, granting 50% more EXP and job earnings
+[~] Snow melts much faster during Aquinvor
+[-] Aquinvor no longer grants Dolphin's Grace or Water Breathing
+
+Bending & Abilities
+[+] Implemented the PetalRush ability for plantbenders
+[+] Implemented the PetalShots ability for plantbenders
+[+] Implemented the PetalStorm combo for plantbenders
+[+] Implemented the SapStrike ability for plantbenders
+[~] Renamed ToxicSpores to Spores
+[~] Changed default permissions of LeafScythe, RootSnare, and VineWhip to be unlocked at Esquire
+[~] Removed Static from being mentioned in /ranks as it was a basic lightning ability and didn't need to be explicitly mentioned
+[~] EnergyBurst's fall auto-proc now only triggers after falling at least 10 blocks
+[~] Renamed CombustionStrike to CombustiveStrike
+[~] Fixed sneaking not standing players up from stairs and slabs at the arena spawn and other no-bending zones
+[~] LifeRip hearts now stay the same across Survival and SMP and after restarts
+[~] Fixed gaps and vulnerabilities in avatar selection/cycle functionality
+[~] Fixed the Avatar's reign not ending when they die in the arena
+[~] Removed AirBlast launching arrows in the arena
+[~] Avatars removed for inactivity are no longer automatically replaced, and the next Avatar is selected manually
+[+] The Avatar State now automatically activates at 3 hearts if bound
+[~] Fixed JetStream dropping the user/caught entities due to briefly falling behind the stream
+[~] The Flying Bison's Bellow now uses a variety of deeper animal sounds
+[~] Made the Flying Bison bellow follow the location of the mount
+
+Dominion
+[+] Added the council command /ac dominionrank to temporarily update a dominion's level
+[~] Fixed inaccurate leader-only error when using /d resources despite having permission
+[~] /d rank now shows the 6 criteria and your dominion's progress on each, even at the max level
+[~] Conquered dominions now consume their food reserves daily again, with food worth 25% less power
+[+] Added /d r as an alilas to /d region
+[~] /d home is no longer restricted to Esquire rank
+[~] Decreased yields of Deep Dark dominion resource claims
+[+] Added the Ancient Times phrasing in /d info for legacy Dominions
+[~] Forest biomes now use Oak Leaves as their dominion resource icon and Snowy Slopes now uses a Snow Block
+
+Aranarthium, Items & Crafting
+[~] Fixed applying Essences consuming 2 Aranarthium at a time if thrown at once
+[~] The Essence of Resilience is now found in the Epic Crate
+[~] The Essence of Lifesteal in the Godly Crate
+[~] The Rare Crate now has a 50% chance of rewarding an Essence of Beheading or an unimbued Essence
+[~] Aranarthium size changes are now reset to normal while combat tagge`d, and return automatically once the combat tag ends
+[~] Lifesteal no longer heals from damage dealt to undead mobs
+[~] Heads dropped from killing players and mobs are now stackable
+[~] Essences of Lifesteal and Preservation now have an 8% chance of being rolled in the Godly Crate
+[~] Essence of Plentiful now has a 5% chance of being rolled in the Godly Crate
+[~] Spawn eggs now have an 8% chance of being rolled in the Godly Crate
+[~] Aranarthium chances are raised to 12% in the Godly Crate
+[~] Diamond Blocks/Netherite Block/Shulker Shells now share one 12% slot in the Godly Crate
+[-] The money reward was removed from the Godly Crate
+[~] Fixed crate animations that were no longer accurate due to recent changes with crates
+[~] Fixed armor and Aranarthium being deleted in the anvil when the armor had over-leveled enchantments
+[-] Custom Aranarth items can no longer be used in crafting recipes or other types of tables
+[~] Custom items with durability such as Wrenches can now be crafted with each other to repair durability
+
+Economy, Jobs & Quests
+[~] Overhauled quests to be job-oriented, and restructured all quest thresholds and rewards, adding several new quests for each job
+[+] Added the option to re-roll quests once per day for dailies and once per week for weeklies
+[+] Added extra bonus reward for completing all three daily or all three weekly quests
+[+] Added a cooldown to joining new jobs
+[-] Removed the cooldown from leaving jobs
+[~] Fixed /vptransfer throwing an error when the receiver has never joined the current server
+[~] Market sell prices now drop at a proportional rate to the item's max stack size
+[+] Poplar and Pale Oak logs now count towards quests and Lumberjack job XP
+[~] Every 10 seconds, players now see in their action bar how much money their jobs earned them in that time
+[~] Potions in /mv are now grouped by effect, amplifier, and duration, instead of all showing as "Potion"
+[~] Fixed the Explorer job and travel quests counting teleports and portal trips as travelled distance
+[~] Fixed the Explorer job not rewarding XP while riding a horse
+[~] Fixed /jobs top showing outdated or missing XP for players on the other server
+[+] Added /t jobsmsg to toggle the jobs earnings message
+[~] Changed wording of jobs earnings message[~] Max level players now show their total XP instead of "Max Level"
+[~] Shops in the shop menu are now sorted by most profit, with shop earnings tracked across both servers
+[~] Shop search now shows the stock of the item in the lore of the displayed shop item
+[+] Builders now earn money for using a shovel to turn dirt into dirt paths
+[+] Explorers now earn job money while actively moving on their /mount
+
+Chat, UI & Sounds
+[+] Added fully customizable prefixes in chat, allowing full, shortened, or symbols for the rank, council, and saint ranks
+[+] /mcstats now also shows the levels of the 3 sub-skills
+[+] /mcstats now shows the Gathering, Combat and Misc level totals, along with the highest rank each total qualifies for
+[~] Overhauled the /aranarth guide text content for every topic
+[+] Added new topics for Creative, new Fire Types, Dominion Commands and 9 Mechanics pages
+[~] Corrected outdated pages across every topic
+[~] Made every topic menu be centered automatically
+[~] Fixed the Avatar symbol not appearing in tab for players on the other server
+[~] Nickname changes now apply on both Survival and SMP straight away
+[~] Added /pronouns neutral
+[+] Emojis are now translated in /msg, /reply, /mail, /d msg, and /ac msg
+[~] Bold and italics are now converted between Discord and in-game chat in both directions
+[+] The tab list is now split into different world groups
+[~] Made AFK functionality take you out of AFK with actual keyboard input of movement, rather than the location changing
+
+Quality of Life
+[+] Added /vc list as an alias for /vc who
+[-] Made the Aranarth Support bot handle the preview of online players in Discord, rather than using AranarthCore for this
+[~] Fixed Infinite Library wearing off before the first roll by starting its duration on the first paid roll
+[~] Clarified the Arcane Ascension description
+[~] Made all AranarthCore abilities' particles be client-side and not server-side
+[~] Disabled the inventory assist perk in the Arena world
+[~] Fixed the randomizer invalid format error showing the wrong syntax
+[~] The compressor toggle in /comp, the /toggle GUI, and /toggle compressor now all behave identically and show the same message
+
+Cross-server & Technical
+[~] AFK players are now marked with [AFK] in the Discord online player list
+[~] Fixed duplicate Discord messages when a player's mute or temporary ban automatically ends
+[+] Added /ac disable and /ac enable to temporarily block access to specific worlds for players not in admin or architect mode
+[~] Fixed /ac og changes not syncing between servers, being overwritten by the other server, and removals being undone on restart
+[~] Vanish, vote point edits, broadcasts, clear chat, date changes and manual world events now apply on both Survival and SMP
+[~] /ac sudo now works on players who are on the other server
+[~] Fixed AranarthPlayer not loading in SMP when player had never joined
+[~] Added logic to auto-remove old bending ability values from the config when changing name or functionality
+[~] Updated the arena functionality to be based on the new arena
+[~] Fixed Dominion messages not being sent across servers
+[~] Fixed /ac give not working on players on the other server
+[~] Fixed doubled messages when using /ac msg from the console
+[~] Fixed /seen and /info showing Dec 31st 1969 or outdated dates for players who were last on the other server
+[~] Fixed issue which stopped dominion changes from syncing between servers, affecting voice chat
+[~] Standardized rank and council access checks into PermissionUtils permissions, and expired monthly Saints now lose their permissions immediately
+[~] Monthly Saint ranks purchased from the vote shop now play the donation sound on both servers and only show the vote points message, including when purchased on SMP
+[-] Removed all descriptions of months in the code, and fully handling them in literals
+
+Miscellaneous
+[~] Architects can now only change their game mode while in architect mode
+[~] Architects can build without restrictions only in architect mode
+[~] Limited Architects to using WorldEdit in architect mode

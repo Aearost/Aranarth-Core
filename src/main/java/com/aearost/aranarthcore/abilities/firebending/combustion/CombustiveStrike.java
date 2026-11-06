@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.firebending.combustion;
 
 import com.aearost.aranarthcore.utils.AbilityConfig;
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.CombustionAbility;
@@ -23,7 +24,7 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class CombustionStrike extends CombustionAbility implements AddonAbility {
+public class CombustiveStrike extends CombustionAbility implements AddonAbility {
 
     public enum Phase {CHARGING, CHARGED, TRAVELING}
 
@@ -60,24 +61,24 @@ public class CombustionStrike extends CombustionAbility implements AddonAbility 
     // Radius within which nearby entities take damage from the impact explosion
     private double damageRadius;
 
-    private static final Map<UUID, CombustionStrike> activeInstances = new HashMap<>();
+    private static final Map<UUID, CombustiveStrike> activeInstances = new HashMap<>();
 
-    public CombustionStrike(Player player) {
+    public CombustiveStrike(Player player) {
         super(player);
 
         if (!bPlayer.canBend(this)) {
             return;
         }
 
-        cooldown = AbilityConfig.getLong("CombustionStrike.Cooldown");
-        range = AbilityConfig.getDouble("CombustionStrike.Range");
-        damage = AbilityConfig.getDouble("CombustionStrike.Damage");
-        chargeDuration = AbilityConfig.getLong("CombustionStrike.ChargeDuration");
-        misfireDamage = AbilityConfig.getDouble("CombustionStrike.MisfireDamage");
-        explosionRadius = AbilityConfig.getDouble("CombustionStrike.ExplosionRadius");
-        speed = AbilityConfig.getDouble("CombustionStrike.Speed");
-        hitRadius = AbilityConfig.getDouble("CombustionStrike.HitRadius");
-        damageRadius = AbilityConfig.getDouble("CombustionStrike.DamageRadius");
+        cooldown = AbilityConfig.getLong("CombustiveStrike.Cooldown");
+        range = AbilityConfig.getDouble("CombustiveStrike.Range");
+        damage = AbilityConfig.getDouble("CombustiveStrike.Damage");
+        chargeDuration = AbilityConfig.getLong("CombustiveStrike.ChargeDuration");
+        misfireDamage = AbilityConfig.getDouble("CombustiveStrike.MisfireDamage");
+        explosionRadius = AbilityConfig.getDouble("CombustiveStrike.ExplosionRadius");
+        speed = AbilityConfig.getDouble("CombustiveStrike.Speed");
+        hitRadius = AbilityConfig.getDouble("CombustiveStrike.HitRadius");
+        damageRadius = AbilityConfig.getDouble("CombustiveStrike.DamageRadius");
 
         phase = Phase.CHARGING;
         chargeStartTime = System.currentTimeMillis();
@@ -176,8 +177,8 @@ public class CombustionStrike extends CombustionAbility implements AddonAbility 
 
             // Trail particles every other step
             if (((int) (distanceTraveled / STEP)) % 2 == 0) {
-                strikePosition.getWorld().spawnParticle(Particle.LARGE_SMOKE, strikePosition.clone(), 1, 0, 0, 0, 0.04, null, true);
-                strikePosition.getWorld().spawnParticle(Particle.FIREWORK, strikePosition.clone(), 1, 0, 0, 0, 0.04, null, true);
+                AranarthBendingUtils.spawnParticle(strikePosition.getWorld(), Particle.LARGE_SMOKE, strikePosition.clone(), 1, 0, 0, 0, 0.04, null, true);
+                AranarthBendingUtils.spawnParticle(strikePosition.getWorld(), Particle.FIREWORK, strikePosition.clone(), 1, 0, 0, 0, 0.04, null, true);
             }
 
             // Firework burst ring + sound every 20 blocks
@@ -209,15 +210,15 @@ public class CombustionStrike extends CombustionAbility implements AddonAbility 
         double z = RING_RADIUS * Math.sin(chargeRingAngle);
         Location head = center.clone().add(x, 0, z);
 
-        center.getWorld().spawnParticle(Particle.FLAME, head, 3, 0.04, 0.04, 0.04, 0.01, null, true);
-        center.getWorld().spawnParticle(Particle.FIREWORK, head, 1, 0, 0, 0, 0.02, null, true);
+        AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.FLAME, head, 3, 0.04, 0.04, 0.04, 0.01, null, true);
+        AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.FIREWORK, head, 1, 0, 0, 0, 0.02, null, true);
     }
 
     private void spawnReadyVisionSmoke() {
         Location eye = player.getEyeLocation();
         Vector forward = eye.getDirection().normalize();
         Location loc = eye.clone().add(forward.multiply(0.6));
-        eye.getWorld().spawnParticle(Particle.SMOKE, loc, 3, 0.15, 0.10, 0.15, 0.01, null, true);
+        AranarthBendingUtils.spawnParticle(eye.getWorld(), Particle.SMOKE, loc, 3, 0.15, 0.10, 0.15, 0.01, null, true);
     }
 
     private void spawnBurstRing(Location center, Vector direction) {
@@ -240,15 +241,15 @@ public class CombustionStrike extends CombustionAbility implements AddonAbility 
             Vector vel = perp1.clone().multiply(cos * radius * 0.12).add(perp2.clone().multiply(sin * radius * 0.12));
 
             Location spawnLoc = center.clone().add(offset);
-            center.getWorld().spawnParticle(Particle.FIREWORK, spawnLoc, 0, vel.getX(), vel.getY(), vel.getZ(), 0.12, null, true);
+            AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.FIREWORK, spawnLoc, 0, vel.getX(), vel.getY(), vel.getZ(), 0.12, null, true);
         }
     }
 
     private void createExplosion(Location center) {
-        center.getWorld().spawnParticle(Particle.FLAME, center, 16, 1.0, 1.0, 1.0, 0.4, null, true);
-        center.getWorld().spawnParticle(Particle.LARGE_SMOKE, center, 12, 1.0, 1.0, 1.0, 0.3, null, true);
-        center.getWorld().spawnParticle(Particle.FIREWORK, center, 16, 1.0, 1.0, 1.0, 0.4, null, true);
-        center.getWorld().spawnParticle(Particle.EXPLOSION, center, 4, 0.5, 0.5, 0.5, 0.0, null, true);
+        AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.FLAME, center, 16, 1.0, 1.0, 1.0, 0.4, null, true);
+        AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.LARGE_SMOKE, center, 12, 1.0, 1.0, 1.0, 0.3, null, true);
+        AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.FIREWORK, center, 16, 1.0, 1.0, 1.0, 0.4, null, true);
+        AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.EXPLOSION, center, 4, 0.5, 0.5, 0.5, 0.0, null, true);
 
         center.getWorld().playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 2.0f, 0.9f);
         scatterBlockDamage(center);
@@ -342,7 +343,7 @@ public class CombustionStrike extends CombustionAbility implements AddonAbility 
         return activeInstances.containsKey(uuid);
     }
 
-    public static CombustionStrike getActiveInstance(UUID uuid) {
+    public static CombustiveStrike getActiveInstance(UUID uuid) {
         return activeInstances.get(uuid);
     }
 
@@ -367,7 +368,7 @@ public class CombustionStrike extends CombustionAbility implements AddonAbility 
 
     @Override
     public String getName() {
-        return "CombustionStrike";
+        return "CombustiveStrike";
     }
 
     @Override

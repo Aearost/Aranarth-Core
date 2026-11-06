@@ -190,7 +190,7 @@ public class Lightning extends LightningAbility implements AddonAbility {
      */
     private void powerLightningRods(final Block block) {
         if (isLightningRod(block)) {
-            block.getWorld().spawnParticle(Particle.valueOf("ELECTRIC_SPARK"), block.getLocation().clone().add(0.5, 0.5, 0.5), 6, 0.125, 0.125, 0.125, 0.05);
+            AranarthBendingUtils.spawnParticle(block.getWorld(), Particle.valueOf("ELECTRIC_SPARK"), block.getLocation().clone().add(0.5, 0.5, 0.5), 6, 0.125, 0.125, 0.125, 0.05);
 
             List<Block> blocks = new ArrayList<>();
             Block down = block.getRelative(BlockFace.DOWN);
@@ -369,9 +369,9 @@ public class Lightning extends LightningAbility implements AddonAbility {
                     Particle.DustOptions chargedDust = (ThreadLocalRandom.current().nextBoolean())
                             ? AranarthBendingUtils.LIGHTNING_DUST_BRIGHT
                             : AranarthBendingUtils.LIGHTNING_DUST_BLUE;
-                    loc.getWorld().spawnParticle(Particle.DUST, loc, 1, 0.2, 0.2, 0.2, 0, chargedDust);
+                    AranarthBendingUtils.spawnParticle(loc.getWorld(), Particle.DUST, loc, 1, 0.2, 0.2, 0.2, 0, chargedDust);
                     if (ThreadLocalRandom.current().nextDouble() < 0.3) {
-                        loc.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, loc, 1, 0.1, 0.1, 0.1, 0.01);
+                        AranarthBendingUtils.spawnParticle(loc.getWorld(), Particle.ELECTRIC_SPARK, loc, 1, 0.1, 0.1, 0.1, 0.01);
                     }
                     emitFirebendingLight(loc);
                     if (ThreadLocalRandom.current().nextDouble() < .2) {
@@ -427,7 +427,7 @@ public class Lightning extends LightningAbility implements AddonAbility {
                 Particle.DustOptions spiralDust = (ThreadLocalRandom.current().nextBoolean())
                         ? AranarthBendingUtils.LIGHTNING_DUST_BRIGHT
                         : AranarthBendingUtils.LIGHTNING_DUST_BLUE;
-                localLocation2.getWorld().spawnParticle(Particle.DUST, localLocation2, 1, 0, 0, 0, 0, spiralDust);
+                AranarthBendingUtils.spawnParticle(localLocation2.getWorld(), Particle.DUST, localLocation2, 1, 0, 0, 0, 0, spiralDust);
                 emitFirebendingLight(localLocation2);
                 this.particleRotation += 1.0D / d3;
                 if (ThreadLocalRandom.current().nextDouble() < .2) {
@@ -690,9 +690,9 @@ public class Lightning extends LightningAbility implements AddonAbility {
             Particle.DustOptions boltDust = (count % 2 == 0)
                     ? AranarthBendingUtils.LIGHTNING_DUST_BRIGHT
                     : AranarthBendingUtils.LIGHTNING_DUST_BLUE;
-            this.location.getWorld().spawnParticle(Particle.DUST, this.location, 1, 0, 0, 0, 0, boltDust);
+            AranarthBendingUtils.spawnParticle(this.location.getWorld(), Particle.DUST, this.location, 1, 0, 0, 0, 0, boltDust);
             if (ThreadLocalRandom.current().nextDouble() < 0.3) {
-                this.location.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, this.location, 1, 0, 0, 0, 0);
+                AranarthBendingUtils.spawnParticle(this.location.getWorld(), Particle.ELECTRIC_SPARK, this.location, 1, 0, 0, 0, 0);
             }
             emitFirebendingLight(this.location);
 

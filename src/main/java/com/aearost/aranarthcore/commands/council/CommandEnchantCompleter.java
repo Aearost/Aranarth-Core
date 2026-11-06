@@ -27,7 +27,7 @@ public class CommandEnchantCompleter implements TabCompleter {
         if (!(sender instanceof Player player)) {
             return List.of();
         }
-        if (AranarthUtils.getPlayer(player.getUniqueId()).getCouncilRank() != 3) {
+        if (!player.hasPermission("aranarth.enchant")) {
             return List.of();
         }
 

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.waterbending.plantbending;
 
 import com.aearost.aranarthcore.utils.AbilityConfig;
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
@@ -16,7 +17,7 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
-public class ToxicSpores extends PlantAbility implements AddonAbility {
+public class Spores extends PlantAbility implements AddonAbility {
 
     public enum Phase {READY, CHANNELING, DISPERSING}
 
@@ -58,7 +59,7 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
     private final Map<UUID, Long> entityEntryTime = new HashMap<>();
     private final Map<UUID, Long> entityLastEffectTime = new HashMap<>();
 
-    private static final Map<UUID, ToxicSpores> activeInstances = new HashMap<>();
+    private static final Map<UUID, Spores> activeInstances = new HashMap<>();
     private final Random random = new Random();
 
     // -------------------------------------------------------------------------
@@ -117,24 +118,24 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
     // Constructor
     // -------------------------------------------------------------------------
 
-    public ToxicSpores(Player player) {
+    public Spores(Player player) {
         super(player);
 
         if (!bPlayer.canBend(this)) {
             return;
         }
 
-        cooldown = AbilityConfig.getLong("ToxicSpores.Cooldown");
-        range = AbilityConfig.getDouble("ToxicSpores.Range");
-        sporeSpeed = AbilityConfig.getDouble("ToxicSpores.SporeSpeed");
-        maxChannelingDuration = AbilityConfig.getLong("ToxicSpores.MaxChannelingDuration");
-        puffLifespan = AbilityConfig.getLong("ToxicSpores.PuffLifespan");
-        puffRadius = AbilityConfig.getDouble("ToxicSpores.PuffRadius");
-        sourceCheckRadius = AbilityConfig.getDouble("ToxicSpores.SourceCheckRadius");
-        chargeDuration = AbilityConfig.getLong("ToxicSpores.ChargeDuration");
-        effectInterval = AbilityConfig.getLong("ToxicSpores.EffectInterval");
-        effectDurationTicks = AbilityConfig.getInt("ToxicSpores.EffectDurationTicks");
-        poisonAmplifier = AbilityConfig.getInt("ToxicSpores.PoisonAmplifier");
+        cooldown = AbilityConfig.getLong("Spores.Cooldown");
+        range = AbilityConfig.getDouble("Spores.Range");
+        sporeSpeed = AbilityConfig.getDouble("Spores.SporeSpeed");
+        maxChannelingDuration = AbilityConfig.getLong("Spores.MaxChannelingDuration");
+        puffLifespan = AbilityConfig.getLong("Spores.PuffLifespan");
+        puffRadius = AbilityConfig.getDouble("Spores.PuffRadius");
+        sourceCheckRadius = AbilityConfig.getDouble("Spores.SourceCheckRadius");
+        chargeDuration = AbilityConfig.getLong("Spores.ChargeDuration");
+        effectInterval = AbilityConfig.getLong("Spores.EffectInterval");
+        effectDurationTicks = AbilityConfig.getInt("Spores.EffectDurationTicks");
+        poisonAmplifier = AbilityConfig.getInt("Spores.PoisonAmplifier");
 
         sourceBlock = findNearestFlower();
         if (sourceBlock == null) {
@@ -271,7 +272,7 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
         double sz = sourceTop.getZ();
         double step = 0.3;
         for (double d = 0; d < drawLength; d += step) {
-            world.spawnParticle(Particle.DUST,
+            AranarthBendingUtils.spawnParticle(world, Particle.DUST,
                     sx + dir.getX() * d,
                     sy + dir.getY() * d,
                     sz + dir.getZ() * d,
@@ -301,14 +302,16 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
             double step = Math.min(distPerTick, distToTarget);
             traveler.position.add(traveler.direction.clone().multiply(step));
 
-            traveler.position.getWorld().spawnParticle(
+            AranarthBendingUtils.spawnParticle(
+                    traveler.position.getWorld(),
                     Particle.DUST, traveler.position.clone(),
                     2, 0.04, 0.04, 0.04, 0,
                     SPORE_DUST);
 
             if (traveler.hasArrived()) {
                 puffs.add(new SporePuff(traveler.target, puffLifespan));
-                traveler.target.getWorld().spawnParticle(
+                AranarthBendingUtils.spawnParticle(
+                        traveler.target.getWorld(),
                         Particle.DUST, traveler.target,
                         5, 0.25, 0.25, 0.25, 0,
                         SPORE_DUST);
@@ -348,7 +351,7 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
             Location loc = puff.center.clone().add(dx, dy, dz);
             if (!loc.getBlock().getType().isSolid()) {
                 Particle.DustOptions dust = random.nextInt(12) == 0 ? SPORE_DUST_PINK : SPORE_DUST;
-                world.spawnParticle(Particle.DUST, loc, 1, 0, 0, 0, 0, dust);
+                AranarthBendingUtils.spawnParticle(world, Particle.DUST, loc, 1, 0, 0, 0, 0, dust);
             }
         }
     }
@@ -488,7 +491,7 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
         return activeInstances.containsKey(uuid);
     }
 
-    public static ToxicSpores getActiveInstance(UUID uuid) {
+    public static Spores getActiveInstance(UUID uuid) {
         return activeInstances.get(uuid);
     }
 
@@ -519,7 +522,7 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
 
     @Override
     public String getName() {
-        return "ToxicSpores";
+        return "Spores";
     }
 
     @Override
@@ -556,7 +559,7 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
 
     @Override
     public String getDescription() {
-        return "Draw toxic spores from a nearby flower and release them toward your desired location, " +
+        return "Draw spores from a nearby flower and release them toward your desired location, " +
                 "creating a lingering cloud that nauseates and critically poisons any entity caught within.\n" +
                 ChatUtils.translateToColor("&fUsage: Hold Sneak (flower source) > Left-Click");
     }

@@ -171,7 +171,7 @@ public class GuiToggle {
         gui.setItem(31, buildToggleItem(player, Material.COMPASS, Lang.getFor(player, "gui.toggle.dominion_compact"), aranarthPlayer.isDominionMsgCompact()));
 
         // Interactive Chat
-        boolean hasInteractivePerm = aranarthPlayer.getSaintRank() >= 2 || aranarthPlayer.getCouncilRank() > 0;
+        boolean hasInteractivePerm = player.hasPermission("aranarth.interactivechat");
         if (hasInteractivePerm) {
             gui.setItem(32, buildToggleItem(player, Material.RECOVERY_COMPASS, Lang.getFor(player, "gui.toggle.interactive_chat"), aranarthPlayer.isInteractiveChatEnabled()));
         } else {
@@ -195,11 +195,14 @@ public class GuiToggle {
         gui.setItem(38, buildToggleItem(player, Material.KNOWLEDGE_BOOK, Lang.getFor(player, "gui.toggle.server_tips"), !aranarthPlayer.isServerTipsDisabled()));
 
         // Sit
-        if (aranarthPlayer.getSaintRank() >= 1 || aranarthPlayer.getCouncilRank() >= 1) {
+        if (player.hasPermission("aranarth.sit.toggle")) {
             gui.setItem(39, buildToggleItem(player, Material.WHITE_CUSHION, Lang.getFor(player, "gui.toggle.sit"), !aranarthPlayer.isSitDisabled()));
         } else {
             gui.setItem(39, buildLockedItem(player, Material.WHITE_CUSHION, Lang.getFor(player, "gui.toggle.sit")));
         }
+
+        // Jobs Earnings Message
+        gui.setItem(40, buildToggleItem(player, Material.GOLD_INGOT, Lang.getFor(player, "gui.toggle.jobs_message"), !aranarthPlayer.isJobsMessageDisabled()));
 
         return gui;
     }

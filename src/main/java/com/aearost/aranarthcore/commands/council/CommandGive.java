@@ -6,7 +6,6 @@ import com.aearost.aranarthcore.items.essence.Essence;
 import com.aearost.aranarthcore.items.essence.EssenceBlank;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.NetworkPlayer;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
@@ -51,11 +50,11 @@ public class CommandGive {
             sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac give <player> <item> <quantity>")));
             return;
         } else {
-            // Store purchases must only be processed on the Survival server, which forwards
-            // the key to the SMP server if the player is there
+            // Store purchases are dispatched on both servers, so they must only be processed on
+            // the Survival server, which forwards the key to the SMP server if the player is there
             boolean isStoreKeyPurchase = args[2].startsWith("Key") && !args[2].equals("KeyVote")
                     && args.length >= 5 && args[4].equalsIgnoreCase("broadcast");
-            if (isStoreKeyPurchase && AranarthCore.isSmpServer()) {
+            if (isStoreKeyPurchase && AranarthCore.isSmpServer() && !(sender instanceof Player)) {
                 return;
             }
 
@@ -71,20 +70,14 @@ public class CommandGive {
                 // Inline handling for store coupons
                 if (args[2].equals("Coupon10") || args[2].equals("Coupon30")) {
                     if (sender instanceof Player senderPlayer) {
-                        AranarthPlayer senderAranarthPlayer = AranarthUtils.getPlayer(senderPlayer.getUniqueId());
-                        if (senderAranarthPlayer == null || senderAranarthPlayer.getCouncilRank() < 2) {
+                        if (!senderPlayer.hasPermission("aranarth.give.coupon")) {
                             senderPlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(senderPlayer, "general.no_permission")));
                             return;
                         }
                     }
                     int discountPercentage = args[2].equals("Coupon10") ? 10 : 30;
-                    ItemStack coupon = new ItemStack(Material.PAPER, 1);
+                    ItemStack coupon = createCoupon(discountPercentage);
                     ItemMeta couponMeta = coupon.getItemMeta();
-                    couponMeta.setMaxStackSize(1);
-                    couponMeta.setDisplayName(ChatUtils.translateToColor("&6&l" + discountPercentage + "% Store Coupon"));
-                    couponMeta.setLore(Collections.singletonList(ChatUtils.translateToColor("&7&oSneak and Right-Click to Redeem")));
-                    couponMeta.getPersistentDataContainer().set(COUPON_DISCOUNT, PersistentDataType.INTEGER, discountPercentage);
-                    coupon.setItemMeta(couponMeta);
                     HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(coupon);
                     if (!remainder.isEmpty()) {
                         for (ItemStack value : remainder.values()) {
@@ -99,39 +92,9 @@ public class CommandGive {
                     return;
                 }
 
-                boolean isKey = false;
-                String fullPathName = "";
-                if (args[2].startsWith("Aranarthium")) {
-                    fullPathName = "com.aearost.aranarthcore.items.aranarthium.ingots." + args[2];
-                } else if (args[2].endsWith("Cluster")) {
-                    fullPathName = "com.aearost.aranarthcore.items.aranarthium.clusters." + args[2];
-                } else if (args[2].startsWith("Netherite")) {
-                    fullPathName = "com.aearost.aranarthcore.items.netherite." + args[2];
-                } else if (args[2].endsWith("Helmet") || args[2].endsWith("Chestplate")
-                        || args[2].endsWith("Leggings") || args[2].endsWith("Boots")
-                        || args[2].endsWith("Elytra")) {
-                    fullPathName = "com.aearost.aranarthcore.items.aranarthium.armour." + args[2];
-                } else if (args[2].startsWith("Arrow")) {
-                    if (args[2].startsWith("Arrowhead")) {
-                        fullPathName = "com.aearost.aranarthcore.items.arrowhead." + args[2];
-                    } else {
-                        fullPathName = "com.aearost.aranarthcore.items.arrow." + args[2];
-                    }
-                } else if (args[2].startsWith("Key")) {
-                    isKey = true;
-                    fullPathName = "com.aearost.aranarthcore.items.key." + args[2];
-                } else if (args[2].startsWith("Essence")) {
-                    fullPathName = "com.aearost.aranarthcore.items.essence." + args[2];
-                } else {
-                    fullPathName = "com.aearost.aranarthcore.items." + args[2];
-                }
-
-                Object instance = null;
-                try {
-                    Class<?> unknownClass = Class.forName(fullPathName);
-                    instance = unknownClass.getDeclaredConstructor().newInstance();
-                } catch (ClassNotFoundException | InvocationTargetException | InstantiationException
-                         | IllegalAccessException | NoSuchMethodException e) {
+                boolean isKey = args[2].startsWith("Key");
+                Object instance = createItemInstance(args[2]);
+                if (instance == null) {
                     sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "give.no_such_item")));
                     return;
                 }
@@ -315,9 +278,143 @@ public class CommandGive {
                         sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", args[1])));
                     }
                 } else {
+                    // Console dispatches run on both servers, so only a player's command is forwarded.
+                    // Otherwise the item would also be delivered by the server the target is on.
+                    if (sender instanceof Player senderPlayer && forwardToRemotePlayer(senderPlayer, args)) {
+                        return;
+                    }
                     sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", args[1])));
                 }
             }
+        }
+    }
+
+    /**
+     * Validates the command on this server and tells the server the target is on to deliver the item.
+     *
+     * @param sender The player that entered the command.
+     * @param args   The arguments of the command.
+     * @return True if the target is on the other server, even if the command was then rejected.
+     */
+    private static boolean forwardToRemotePlayer(Player sender, String[] args) {
+        if (!NetworkManager.isActive()) {
+            return false;
+        }
+
+        NetworkPlayer target = null;
+        for (NetworkPlayer np : NetworkManager.getInstance().getRemoteRoster().values()) {
+            if (np.getUsername().equalsIgnoreCase(args[1])) {
+                target = np;
+                break;
+            }
+        }
+        if (target == null) {
+            return false;
+        }
+
+        ItemStack item;
+        int quantity = 1;
+        if (args[2].equals("Coupon10") || args[2].equals("Coupon30")) {
+            if (!sender.hasPermission("aranarth.give.coupon")) {
+                sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission")));
+                return true;
+            }
+            item = createCoupon(args[2].equals("Coupon10") ? 10 : 30);
+        } else {
+            Object instance = createItemInstance(args[2]);
+            if (instance instanceof AranarthItem aranarthItem) {
+                item = aranarthItem.getItem();
+            } else if (instance instanceof Essence essence) {
+                item = essence.getItem();
+            } else {
+                sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "give.no_such_item")));
+                return true;
+            }
+
+            if (args.length >= 4) {
+                boolean isBlankEssence = instance instanceof EssenceBlank;
+                try {
+                    if (isBlankEssence) {
+                        double percent = Double.parseDouble(args[3]);
+                        if (percent < 0 || percent > 100) {
+                            throw new NumberFormatException();
+                        }
+                    } else {
+                        quantity = Integer.parseInt(args[3]);
+                        if (quantity <= 0 || quantity > item.getMaxStackSize()) {
+                            throw new NumberFormatException();
+                        }
+                    }
+                } catch (NumberFormatException e) {
+                    sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, isBlankEssence ? "particles.invalid_range" : "give.invalid_quantity")));
+                    return true;
+                }
+            }
+        }
+
+        ItemMeta meta = item.getItemMeta();
+        String itemName = ChatUtils.getFormattedItemName(item.getType().name());
+        if (meta != null && meta.hasDisplayName()) {
+            itemName = meta.getDisplayName();
+        }
+
+        NetworkManager.getInstance().publishGive(target.getUuid(), args);
+        sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "give.success", "player", target.getUsername(), "amount", String.valueOf(quantity), "item", itemName)));
+        return true;
+    }
+
+    /**
+     * @param discountPercentage The discount the coupon provides.
+     * @return The store coupon item.
+     */
+    private static ItemStack createCoupon(int discountPercentage) {
+        ItemStack coupon = new ItemStack(Material.PAPER, 1);
+        ItemMeta couponMeta = coupon.getItemMeta();
+        couponMeta.setMaxStackSize(1);
+        couponMeta.setDisplayName(ChatUtils.translateToColor("&6&l" + discountPercentage + "% Store Coupon"));
+        couponMeta.setLore(Collections.singletonList(ChatUtils.translateToColor("&7&oSneak and Right-Click to Redeem")));
+        couponMeta.getPersistentDataContainer().set(COUPON_DISCOUNT, PersistentDataType.INTEGER, discountPercentage);
+        coupon.setItemMeta(couponMeta);
+        return coupon;
+    }
+
+    /**
+     * Dynamically creates the item object associated to the input class name.
+     *
+     * @param className The simple class name of the item.
+     * @return The item object, or null if there is no class by that name.
+     */
+    private static Object createItemInstance(String className) {
+        String fullPathName;
+        if (className.startsWith("Aranarthium")) {
+            fullPathName = "com.aearost.aranarthcore.items.aranarthium.ingots." + className;
+        } else if (className.endsWith("Cluster")) {
+            fullPathName = "com.aearost.aranarthcore.items.aranarthium.clusters." + className;
+        } else if (className.startsWith("Netherite")) {
+            fullPathName = "com.aearost.aranarthcore.items.netherite." + className;
+        } else if (className.endsWith("Helmet") || className.endsWith("Chestplate")
+                || className.endsWith("Leggings") || className.endsWith("Boots")
+                || className.endsWith("Elytra")) {
+            fullPathName = "com.aearost.aranarthcore.items.aranarthium.armour." + className;
+        } else if (className.startsWith("Arrow")) {
+            if (className.startsWith("Arrowhead")) {
+                fullPathName = "com.aearost.aranarthcore.items.arrowhead." + className;
+            } else {
+                fullPathName = "com.aearost.aranarthcore.items.arrow." + className;
+            }
+        } else if (className.startsWith("Key")) {
+            fullPathName = "com.aearost.aranarthcore.items.key." + className;
+        } else if (className.startsWith("Essence")) {
+            fullPathName = "com.aearost.aranarthcore.items.essence." + className;
+        } else {
+            fullPathName = "com.aearost.aranarthcore.items." + className;
+        }
+
+        try {
+            return Class.forName(fullPathName).getDeclaredConstructor().newInstance();
+        } catch (ClassNotFoundException | InvocationTargetException | InstantiationException
+                 | IllegalAccessException | NoSuchMethodException e) {
+            return null;
         }
     }
 

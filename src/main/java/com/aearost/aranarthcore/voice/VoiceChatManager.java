@@ -138,8 +138,7 @@ public class VoiceChatManager {
      * Determines whether the player can use the council channel, matching council chat: any council rank, or an architect.
      */
     public static boolean canUseCouncil(Player player) {
-        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-        return aranarthPlayer != null && (aranarthPlayer.getCouncilRank() > 0 || aranarthPlayer.getArchitectRank() >= 1);
+        return player.hasPermission("aranarth.councilchat");
     }
 
     /**

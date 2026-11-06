@@ -416,6 +416,9 @@ public class AranarthCore extends JavaPlugin {
 
         LangManager.getInstance().load();
         initializeUtils();
+        // Every stored player is loaded by now, so any still missing are looked up as they are needed
+        AranarthUtils.enableLoadingMissingPlayers();
+        shareLastSeenTimes();
         initializeEvents();
         initializeRecipes();
         initializeCommands();
@@ -447,6 +450,14 @@ public class AranarthCore extends JavaPlugin {
         // Sets default storm values
         AranarthUtils.setWeather(Weather.CLEAR);
         AranarthUtils.setStormDelay(new Random().nextInt(18000));
+        // SMP only learns the weather from Survival when it changes, so it starts from its own world's storm state
+        // Otherwise a restart during a storm would treat the sky as clear, such as granting the Aquinvor rainbow in the rain
+        if (isSmpServer()) {
+            World smpWorld = Bukkit.getWorld(getSmpMainWorldName());
+            if (smpWorld != null && smpWorld.hasStorm()) {
+                AranarthUtils.setWeather(smpWorld.isThundering() ? Weather.THUNDER : Weather.RAIN);
+            }
+        }
 
         SoundAbility.SOUND = new Element.SubElement("Sound", Element.AIR, Element.ElementType.NO_SUFFIX, this);
         FireParticleRegistry.WHITE_FIRE_SUB = new Element.SubElement("WhiteFire", Element.FIRE, Element.ElementType.NO_SUFFIX, this);
@@ -462,6 +473,7 @@ public class AranarthCore extends JavaPlugin {
             Bukkit.getLogger().warning("Failed to set sub-element colors: " + e.getMessage());
         }
         CoreAbility.registerPluginAbilities(AranarthCore.getInstance(), "com.aearost.aranarthcore.abilities");
+        AranarthCoreBendingListener.disableProjectKorraLowHealth();
         BendingPlayer.registerCanBindHook(this, new RankCanBindHook());
         Bukkit.getLogger().info(LOG_PREFIX + "AranarthCore Bending has been loaded");
 
@@ -490,6 +502,8 @@ public class AranarthCore extends JavaPlugin {
             if (NetworkManager.isActive()) {
                 // Re-populate remote roster in case the other server was already running
                 NetworkManager.getInstance().syncRosterFromDatabase();
+                // Keeps worlds disabled via /ac disable disabled across restarts
+                AranarthUtils.loadDisabledWorlds();
                 // Register BungeeCord plugin messaging channel for player transfers
                 getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
                 Bukkit.getLogger().info(LOG_PREFIX + "Cross-server networking enabled via MySQL");
@@ -537,6 +551,7 @@ public class AranarthCore extends JavaPlugin {
                                 ap.setSurvivalSaturation(p.getSaturation());
                                 ap.setSurvivalExpLevel(p.getLevel());
                                 ap.setSurvivalExpProgress(p.getExp());
+                                ap.setSurvivalEffects(AranarthUtils.serializePotionEffects(p));
                                 AranarthUtils.setPlayer(p.getUniqueId(), ap);
                             }
                         }
@@ -571,6 +586,8 @@ public class AranarthCore extends JavaPlugin {
                 PersistenceUtils.saveToggledFeatures();
                 PersistenceUtils.saveLockedContainers();
                 PersistenceUtils.saveServerDate();
+                // Recounted before saving so the saved shop search stock is current
+                ShopUtils.refreshAllShopStock();
                 PersistenceUtils.saveShops();
                 ShopUtils.removeAllHolograms();
                 ShopUtils.initializeAllHolograms();
@@ -609,10 +626,9 @@ public class AranarthCore extends JavaPlugin {
                 DiscordUtils.updateAllDiscordRoles();
                 Bukkit.getLogger().info(LOG_PREFIX + "Aranarth data has been saved");
 
-                // Resets the two bending arenas (Survival server only - arena world doesn't exist on SMP)
+                // Resets the bending arena (Survival server only - arena world doesn't exist on SMP)
                 if (!isSmpServer()) {
-                    Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "arenas reset arena1");
-                    Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "arenas reset arena2");
+                    Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "arenas reset largearena1");
                 }
 
                 AranarthUtils.removeInactiveLockedContainers();
@@ -630,7 +646,10 @@ public class AranarthCore extends JavaPlugin {
                 }
 
                 for (Player player : Bukkit.getOnlinePlayers()) {
-                    PermissionUtils.reEvaluateMonthlySaints(player);
+                    // An expired Saint must lose their permissions right away, not on their next evaluation
+                    if (PermissionUtils.reEvaluateMonthlySaints(player)) {
+                        PermissionUtils.evaluatePlayerPermissions(player);
+                    }
                 }
                 // Each server scans only its own dominions
                 DominionLevelUtils.runPeriodicScan();
@@ -644,6 +663,9 @@ public class AranarthCore extends JavaPlugin {
             // Refreshes the mannequins in case the Avatars changed while this server was offline
             Bukkit.getScheduler().runTaskLater(this, AvatarUtils::refreshAvatarMannequins, 200);
         }
+        Bukkit.getScheduler().runTaskLater(this, AvatarUtils::logStartupStatus, 200);
+        // Run every 5 minutes - logs if this server's Avatars no longer match MySQL
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, AvatarUtils::verifyAgainstDatabase, 6000, 6000);
 
         // Check every 5 seconds to update Aranarthium effects, and to see if it is a new day
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
@@ -816,7 +838,7 @@ public class AranarthCore extends JavaPlugin {
             if (!AranarthCore.isSmpServer() && NetworkManager.isActive()) {
                 World timeWorld = Bukkit.getWorld("world");
                 if (timeWorld != null) {
-                    NetworkManager.getInstance().publishSyncTime(timeWorld.getTime());
+                    NetworkManager.getInstance().publishSyncTime(timeWorld.getTime(), false);
                 }
             }
         }, 6000, 6000);
@@ -1234,6 +1256,7 @@ public class AranarthCore extends JavaPlugin {
         new ExplosionListener(this);
         new SoilTrampleListener(this);
         new CraftingOverridesListener(this);
+        new CustomItemStationListener(this);
         new PotionConsumeListener(this);
         new WaterbendingBottleRefillListener(this);
         new PlayerRespawnEventListener(this);
@@ -1272,6 +1295,7 @@ public class AranarthCore extends JavaPlugin {
         new PlayerTeleportBetweenWorldsListener(this);
         new DefenderFollowTeleportListener(this);
         new ExpGainPreventListener(this);
+        new RainbowExpBoostListener(this);
         new VillagerCamelDismountListener(this);
         new PotionEffectListener(this);
         new InvisibilityListener(this);
@@ -1456,6 +1480,8 @@ public class AranarthCore extends JavaPlugin {
         getCommand("ping").setTabCompleter(new CommandPingCompleter());
         getCommand("potions").setExecutor(new CommandPotions());
         getCommand("potions").setTabCompleter(new CommandPotionsCompleter());
+        getCommand("prefix").setExecutor(new CommandPrefix());
+        getCommand("prefix").setTabCompleter(new CommandPrefixCompleter());
         getCommand("pronouns").setExecutor(new CommandPronouns());
         getCommand("pronouns").setTabCompleter(new CommandPronounsCompleter());
         getCommand("randomizer").setExecutor(new CommandRandomizer());
@@ -1784,6 +1810,7 @@ public class AranarthCore extends JavaPlugin {
     public void onDisable() {
         savedOnDisable = true;
         SitUtils.standUpAll();
+        PetRallyUtils.endAllRallies();
         saveAll();
 
         if (squaremapIntegration != null) {
@@ -1803,9 +1830,29 @@ public class AranarthCore extends JavaPlugin {
     }
 
     /**
+     * Shares this server's last played times with the network, so that players who have never joined
+     * the other server still have a last seen time there. It also repairs any times missed by a crash.
+     */
+    private void shareLastSeenTimes() {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        OfflinePlayer[] offlinePlayers = Bukkit.getOfflinePlayers();
+        // getLastPlayed() reads each player's data file, so it must not hold up the main thread
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            Map<UUID, Long> lastSeenTimes = new HashMap<>();
+            for (OfflinePlayer offlinePlayer : offlinePlayers) {
+                long lastPlayed = offlinePlayer.getLastPlayed();
+                if (lastPlayed > 0) {
+                    lastSeenTimes.put(offlinePlayer.getUniqueId(), lastPlayed);
+                }
+            }
+            DatabaseManager.getInstance().savePlayerLastSeen(lastSeenTimes);
+        });
+    }
+
+    /**
      * Saves all persistent data to disk.
-     * Called from onDisable() and from the JVM shutdown hook (fallback for
-     * restarters like UltimateAutoRestart that may bypass onDisable()).
      */
     private void saveAll() {
         // Flush all online players' Bukkit data (inventory, ender chest, XP, health, etc.) to
@@ -1818,8 +1865,18 @@ public class AranarthCore extends JavaPlugin {
         // after the restart).
         Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
         Bukkit.getLogger().info(LOG_PREFIX + "[Shutdown] saveAll() called - " + onlinePlayers.size() + " player(s) still online.");
+        // Quit events are not received during a shutdown, so the last seen times must be saved here
+        if (DatabaseManager.isActive()) {
+            Map<UUID, Long> lastSeenTimes = new HashMap<>();
+            for (Player p : onlinePlayers) {
+                lastSeenTimes.put(p.getUniqueId(), System.currentTimeMillis());
+            }
+            DatabaseManager.getInstance().savePlayerLastSeen(lastSeenTimes);
+        }
         for (Player p : onlinePlayers) {
             try {
+                // Quit events are not received during a shutdown, so the armor must be put back here to be saved
+                InvisibilityListener.restoreArmorBeforeLeaving(p, p.getWorld().getName());
                 // Both servers auto-restart around the same time, so SMP players can get bounced here
                 // seconds before this server also shuts down. SMP already saved their data and location,
                 // so writing ours would send them to Survival on next login and could overwrite SMP's data.
@@ -1841,6 +1898,7 @@ public class AranarthCore extends JavaPlugin {
                         ap.setSurvivalSaturation(p.getSaturation());
                         ap.setSurvivalExpLevel(p.getLevel());
                         ap.setSurvivalExpProgress(p.getExp());
+                        ap.setSurvivalEffects(AranarthUtils.serializePotionEffects(p));
                         AranarthUtils.setPlayer(p.getUniqueId(), ap);
                         // Write raw_data synchronously during shutdown so MySQL is current even if
                         // syncAranarthPlayersToDatabase's async path never fires (plugin disabled).

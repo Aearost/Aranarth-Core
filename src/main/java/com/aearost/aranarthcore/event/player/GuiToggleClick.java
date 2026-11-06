@@ -133,15 +133,8 @@ public class GuiToggleClick {
 				if (!player.hasPermission("aranarth.compressor")) {
 					return;
 				}
-                if (aranarthPlayer.isCompressingItems()) {
-                    aranarthPlayer.setCompressingItems(false);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.disabled", "feature", "the compressor")));
-                } else {
-                    aranarthPlayer.setCompressingItems(true);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.enabled", "feature", "the compressor")));
-                }
-                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.PISTON, "&f&lCompressor", aranarthPlayer.isCompressingItems()));
+                boolean compressing = AranarthUtils.toggleCompressor(player);
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.PISTON, "&f&lCompressor", compressing));
             }
             // Day Message
             case 19 -> {
@@ -250,7 +243,7 @@ public class GuiToggleClick {
                 if (aranarthPlayer.isUsingSpawnBoost()) {
                     aranarthPlayer.setUsingSpawnBoost(false);
                     player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.disabled", "feature", "the spawn boost effects")));
-                    if (AranarthUtils.isSpawnLocation(player.getLocation())) {
+                    if (AranarthUtils.isProtectedSpawnLocation(player.getLocation())) {
                         player.clearActivePotionEffects();
                     }
                 } else {
@@ -301,7 +294,7 @@ public class GuiToggleClick {
             }
             // Interactive Chat
             case 32 -> {
-                boolean hasPerm = aranarthPlayer.getSaintRank() >= 2 || aranarthPlayer.getCouncilRank() > 0;
+                boolean hasPerm = player.hasPermission("aranarth.interactivechat");
                 if (!hasPerm) {
                     return;
                 }
@@ -368,7 +361,7 @@ public class GuiToggleClick {
             }
             // Sit
             case 39 -> {
-                if (aranarthPlayer.getSaintRank() < 1 && aranarthPlayer.getCouncilRank() < 1) {
+                if (!player.hasPermission("aranarth.sit.toggle")) {
                     return;
                 }
                 if (aranarthPlayer.isSitDisabled()) {
@@ -382,6 +375,18 @@ public class GuiToggleClick {
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 PermissionUtils.evaluatePlayerPermissions(player);
                 refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.WHITE_CUSHION, "&f&lSit", !aranarthPlayer.isSitDisabled()));
+            }
+            // Jobs Earnings Message
+            case 40 -> {
+                if (aranarthPlayer.isJobsMessageDisabled()) {
+                    aranarthPlayer.setJobsMessageDisabled(false);
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.jobsmsg_enabled")));
+                } else {
+                    aranarthPlayer.setJobsMessageDisabled(true);
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.jobsmsg_disabled")));
+                }
+                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.GOLD_INGOT, Lang.getFor(player, "gui.toggle.jobs_message"), !aranarthPlayer.isJobsMessageDisabled()));
             }
         }
     }

@@ -12,6 +12,7 @@ import com.aearost.aranarthcore.utils.DefenderUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
+import com.aearost.aranarthcore.utils.PetRallyUtils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
@@ -137,24 +138,22 @@ public class GoatHornUse {
     }
 
     /**
-     * Rallies all nearby defenders of the player's dominion to the targeted location.
+     * Rallies all nearby defenders of the player's dominion, as well as the player's nearby pet wolves and cats,
+     * to the targeted location.
      *
      * @param player The player blowing the horn.
      */
     private void callNearbyDefenders(Player player) {
-        Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
-        if (playerDominion == null) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "horn.no_dominion")));
-            return;
-        }
-
         // The block the player is aiming at (up to 48 blocks)
         Block targetBlock = player.getTargetBlockExact(48);
         Location targetLocation = targetBlock != null
                 ? targetBlock.getLocation().add(0.5, 1, 0.5)
                 : player.getLocation();
 
-        List<UUID> defenderIds = DefenderUtils.getDefendersInDominion(playerDominion.getId());
+        Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+        List<UUID> defenderIds = playerDominion != null
+                ? DefenderUtils.getDefendersInDominion(playerDominion.getId())
+                : new ArrayList<>();
         int count = 0;
 
         for (UUID entityUUID : defenderIds) {
@@ -188,10 +187,18 @@ public class GoatHornUse {
         world.spawnParticle(Particle.SMOKE, targetLocation.clone().add(0, 1, 0), 20, 1, 1, 1, 0.05);
         world.playSound(targetLocation, Sound.BLOCK_BELL_USE, 1.5F, 0.8F);
 
-        if (count == 0) {
+        // Pet wolves attack hostile mobs at the target location, while pet cats repel creepers
+        int petCount = PetRallyUtils.rallyPets(player, targetLocation, player.getTargetEntity(48));
+
+        if (count == 0 && petCount == 0) {
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "horn.no_defenders")));
-        } else {
+            return;
+        }
+        if (count > 0) {
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "horn.sentinels_sent", "count", count)));
+        }
+        if (petCount > 0) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "horn.pets_sent", "count", petCount)));
         }
     }
 

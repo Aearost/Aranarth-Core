@@ -4,7 +4,9 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.*;
 import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.objects.*;
+import com.destroystokyo.paper.profile.PlayerProfile;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -42,6 +44,8 @@ public class PersistenceUtils {
     // Latest unsaved mount snapshot per player; only the newest is ever written
     private static final Map<UUID, String> pendingMountWrites = new ConcurrentHashMap<>();
     private static final Object MOUNT_WRITE_LOCK = new Object();
+    // Shops saved before shops recorded their server, which this server found the sign for and saves as its own
+    private static final Set<String> claimedLegacyShops = ConcurrentHashMap.newKeySet();
     // Used for one-time migration.
     private static final long[] OLD_CUMULATIVE_XP = {0, 500, 2500, 8500, 23500, 63500, 153500, 328500, 628500, 1128500};
 
@@ -382,6 +386,9 @@ public class PersistenceUtils {
                     boolean isBarbarian = fields.length > 31 && fields[30].equals("1");
                     long barbarianCooldownEnd = fields.length > 32 ? Long.parseLong(fields[31]) : 0L;
                     int permanentSaintRank = fields.length > 33 ? Integer.parseInt(fields[32]) : 0;
+                    String survivalEffects = fields.length > 34 ? fields[33] : "";
+                    double lifeRipDrain = fields.length > 35 ? Double.parseDouble(fields[34]) : -1;
+                    double lifeRipGain = fields.length > 36 ? Double.parseDouble(fields[35]) : -1;
                     AranarthUtils.getPlayer(uuid).setConquestDisbandCooldownEnd(conquestDisbandCooldownEnd);
                     AranarthUtils.getPlayer(uuid).setSurvivalEnderChest(survivalEnderChest);
                     AranarthUtils.getPlayer(uuid).setSurvivalHealth(survivalHealth);
@@ -392,6 +399,9 @@ public class PersistenceUtils {
                     AranarthUtils.getPlayer(uuid).setBarbarian(isBarbarian);
                     AranarthUtils.getPlayer(uuid).setBarbarianCooldownEnd(barbarianCooldownEnd);
                     AranarthUtils.getPlayer(uuid).setPermanentSaintRank(permanentSaintRank);
+                    AranarthUtils.getPlayer(uuid).setSurvivalEffects(survivalEffects);
+                    AranarthUtils.getPlayer(uuid).setLifeRipDrain(lifeRipDrain);
+                    AranarthUtils.getPlayer(uuid).setLifeRipGain(lifeRipGain);
                 } catch (Exception e) {
                     // Skip malformed rows without aborting the rest of the load
                     Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Load] Skipping malformed player row (first 40 chars: "
@@ -505,6 +515,9 @@ public class PersistenceUtils {
         int barbarianValue = aranarthPlayer.isBarbarian() ? 1 : 0;
         long barbarianCooldownEnd = aranarthPlayer.getBarbarianCooldownEnd();
         int permanentSaintRank = aranarthPlayer.getPermanentSaintRank();
+        String survivalEffects = aranarthPlayer.getSurvivalEffects();
+        double lifeRipDrain = aranarthPlayer.getLifeRipDrain();
+        double lifeRipGain = aranarthPlayer.getLifeRipGain();
         return uuidStr + "|" + nickname + "|" + survivalInventory + "|" + arenaInventory + "|"
                 + creativeInventory + "|" + potions + "|" + arrows + "|" + blacklist + "|" + blacklistingMethod
                 + "|" + balance + "|" + rank + "|" + saint + "|" + council + "|" + architect + "|"
@@ -514,6 +527,7 @@ public class PersistenceUtils {
                 + survivalHealth + "|" + survivalFoodLevel + "|" + survivalSaturation + "|"
                 + survivalExpLevel + "|" + survivalExpProgress + "|"
                 + barbarianValue + "|" + barbarianCooldownEnd + "|" + permanentSaintRank + "|"
+                + survivalEffects + "|" + lifeRipDrain + "|" + lifeRipGain + "|"
                 // Keep pronouns at the end and add before this
                 + pronouns;
     }
@@ -569,7 +583,7 @@ public class PersistenceUtils {
                 boolean writeSucceeded = false;
                 try (FileWriter writer = new FileWriter(tempFile)) {
                     // Template line
-                    writer.write("#uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|perks|saintExpirationDate|isCompressingItems|votePointsSpent|spawnBoostValue|firstJoinDate|conquestDisbandCooldownEnd|survivalEnderChest|survivalHealth|survivalFoodLevel|survivalSaturation|survivalExpLevel|survivalExpProgress|barbarianValue|barbarianCooldownEnd|permanentSaintRank|pronouns\n");
+                    writer.write("#uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|perks|saintExpirationDate|isCompressingItems|votePointsSpent|spawnBoostValue|firstJoinDate|conquestDisbandCooldownEnd|survivalEnderChest|survivalHealth|survivalFoodLevel|survivalSaturation|survivalExpLevel|survivalExpProgress|barbarianValue|barbarianCooldownEnd|permanentSaintRank|survivalEffects|lifeRipDrain|lifeRipGain|pronouns\n");
 
                     for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
                         String row = buildAranarthPlayerRow(entry.getKey(), entry.getValue()) + "\n";
@@ -913,6 +927,16 @@ public class PersistenceUtils {
                     aranarthPlayer.setSitCushionColor(fields[38]);
                 }
 
+                // Prefix Styles (index 39)
+                if (fields.length > 39) {
+                    aranarthPlayer.setEncodedPrefixStyles(fields[39]);
+                }
+
+                // Jobs Message Disabled (index 40)
+                if (fields.length > 40) {
+                    aranarthPlayer.setJobsMessageDisabled(!fields[40].equals("0"));
+                }
+
                 AranarthUtils.setPlayer(uuid, aranarthPlayer);
             }
             Bukkit.getLogger().info("[AC] All toggled features have been initialized");
@@ -952,7 +976,7 @@ public class PersistenceUtils {
                 try {
                     FileWriter writer = new AtomicFileWriter(filePath);
                     // Template line
-                    writer.write("#uuid|chat|messages|teleport|spawnboost|changeclaim|inventory|shulker|blacklist|compressing|chestlock|firetype|gradientchatenabled|gradientchatcolors|daymessage|weathermessage|dominionmsgcompact|joinsound|leavesound|votesound|cratesound|weathersound|newdaysound|newmonthsound|privatemsgsound|teleportsound|avatarsound|dominionSound|aranarthiumsound|chatgamesound|chestsortsound|jobssound|expstoresponud|interactivechat|emojienabled|sizescaleenabled|servertipsdisabled|sitdisabled|sitcushioncolor\n");
+                    writer.write("#uuid|chat|messages|teleport|spawnboost|changeclaim|inventory|shulker|blacklist|compressing|chestlock|firetype|gradientchatenabled|gradientchatcolors|daymessage|weathermessage|dominionmsgcompact|joinsound|leavesound|votesound|cratesound|weathersound|newdaysound|newmonthsound|privatemsgsound|teleportsound|avatarsound|dominionSound|aranarthiumsound|chatgamesound|chestsortsound|jobssound|expstoresponud|interactivechat|emojienabled|sizescaleenabled|servertipsdisabled|sitdisabled|sitcushioncolor|prefixstyles\n");
 
                     for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
                         AranarthPlayer aranarthPlayer = entry.getValue();
@@ -997,6 +1021,7 @@ public class PersistenceUtils {
                         String sizeScaleEnabled = aranarthPlayer.isSizeScaleEnabled() ? "1" : "0";
                         String serverTipsDisabled = aranarthPlayer.isServerTipsDisabled() ? "1" : "0";
                         String sitDisabled = aranarthPlayer.isSitDisabled() ? "1" : "0";
+                        String jobsMessageDisabled = aranarthPlayer.isJobsMessageDisabled() ? "1" : "0";
                         String row = uuid + "|" + chat + "|" + messages + "|" + teleport + "|" + spawnboost + "|" + changeClaim
                                 + "|" + inventory + "|" + shulker + "|" + blacklist + "|" + compressing + "|" + chestLock + "|"
                                 + bluefire + "|" + gradientEnabled + "|" + gradientColors + "|" + dayMessage + "|" + weatherMessage
@@ -1005,7 +1030,8 @@ public class PersistenceUtils {
                                 + "|" + teleportSound + "|" + avatarSound + "|" + dominionSound + "|" + aranarthiumSound
                                 + "|" + chatGameSound + "|" + chestSortSound + "|" + jobsSound + "|" + expStoreSound
                                 + "|" + interactiveChat + "|" + emojiEnabled + "|" + sizeScaleEnabled + "|" + serverTipsDisabled
-                                + "|" + sitDisabled + "|" + aranarthPlayer.getSitCushionColor() + "\n";
+                                + "|" + sitDisabled + "|" + aranarthPlayer.getSitCushionColor()
+                                + "|" + aranarthPlayer.getEncodedPrefixStyles() + "|" + jobsMessageDisabled + "\n";
                         writer.write(row);
                     }
                     writer.close();
@@ -1140,10 +1166,12 @@ public class PersistenceUtils {
                 }
             }
         }
-        // MySQL sync
+        // MySQL sync - each server only saves its own shops, since the other server's are not up to date here
         if (DatabaseManager.isActive()) {
-            runDbSync(PersistenceUtils::syncShopsToDatabase);
-            runDbSync(PersistenceUtils::syncServerShopsToDatabase);
+            Map<UUID, JsonArray> ownShops = getOwnShopsJson();
+            JsonArray ownServerShops = ownShops.remove(null);
+            runDbSync(() -> syncShopsToDatabase(ownShops));
+            runDbSync(() -> syncServerShopsToDatabase(ownServerShops != null ? ownServerShops : new JsonArray()));
         }
     }
 
@@ -2449,6 +2477,11 @@ public class PersistenceUtils {
                     DatabaseManager.getInstance().mergeOriginalPlayers(fileUuids);
                     Bukkit.getLogger().info("[AC] Merged " + fileUuids.size() + " original players from file into database");
                 }
+                // Retire the file so a later /ac og remove is not undone by re-merging it on the next startup
+                File migratedFile = new File(filePath + ".migrated");
+                if (!file.renameTo(migratedFile)) {
+                    Bukkit.getLogger().warning("[AC] Could not rename original_players.txt after migrating it to the database");
+                }
             }
 
             List<UUID> uuids = DatabaseManager.getInstance().loadAllOriginalPlayers();
@@ -2458,11 +2491,12 @@ public class PersistenceUtils {
     }
 
     /**
-     * Saves the original players list to the database.
+     * Saves a single original player addition or removal to the database.
      */
-    public static void saveOriginalPlayers() {
+    public static void saveOriginalPlayer(UUID uuid, boolean isOriginal) {
         if (DatabaseManager.isActive()) {
-            DatabaseManager.getInstance().saveAllOriginalPlayers(AranarthUtils.getOriginalPlayers());
+            Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                    () -> DatabaseManager.getInstance().setOriginalPlayer(uuid, isOriginal));
         } else {
             Bukkit.getLogger().warning("[AC] Database is not active, original players could not be saved!");
         }
@@ -2736,7 +2770,7 @@ public class PersistenceUtils {
                     continue;
                 }
 
-                // uuid|startInGame|endInGame|startInRealLife|endInRealLife|element
+                // uuid|startInGame|endInGame|startInRealLife|endInRealLife|element|endedByInactivity
                 String[] fields = row.split("\\|");
 
                 UUID uuid = UUID.fromString(fields[0]);
@@ -2747,6 +2781,8 @@ public class PersistenceUtils {
                 char element = fields[5].charAt(0);
 
                 Avatar avatar = new Avatar(uuid, startInGame, endInGame, startInRealLife, endInRealLife, element);
+                // Rows saved before this field was added do not have it
+                avatar.setEndedByInactivity(fields.length > 6 && Boolean.parseBoolean(fields[6]));
                 AvatarUtils.addAvatar(avatar);
             }
             Bukkit.getLogger().info("[AC] All avatars have been initialized");
@@ -2795,7 +2831,7 @@ public class PersistenceUtils {
                     }
                 }
 
-                writer.write("#uuid|startInGame|endInGame|startInRealLife|endInRealLife|element\n");
+                writer.write("#uuid|startInGame|endInGame|startInRealLife|endInRealLife|element|endedByInactivity\n");
 
                 for (Avatar avatar : AvatarUtils.getAvatars()) {
                     if (avatar == null) {
@@ -2809,7 +2845,7 @@ public class PersistenceUtils {
                         char element = avatar.getElement();
 
                         writer.write(uuid + "|" + startInGame + "|" + endInGame + "|"
-                                + startInRealLife + "|" + endInRealLife + "|" + element + "\n");
+                                + startInRealLife + "|" + endInRealLife + "|" + element + "|" + avatar.isEndedByInactivity() + "\n");
                     }
                 }
                 writer.close();
@@ -2819,7 +2855,7 @@ public class PersistenceUtils {
         }
         // MySQL sync
         if (DatabaseManager.isActive()) {
-            runDbSync(PersistenceUtils::syncAvatarsToDatabase);
+            syncAvatarsToDatabase();
         }
     }
 
@@ -2909,7 +2945,7 @@ public class PersistenceUtils {
         }
         // MySQL sync (updates the same server_avatars table)
         if (DatabaseManager.isActive()) {
-            runDbSync(PersistenceUtils::syncAvatarsToDatabase);
+            syncAvatarsToDatabase();
         }
     }
 
@@ -4127,9 +4163,9 @@ public class PersistenceUtils {
     }
 
     /**
-     * Loads per-player quest progress (including active quest assignments) from quest_progress.txt.
-     * Format: uuid|rank|d0task|d0prog|d0done|d0claimed|d1task|d1prog|d1done|d1claimed|d2task|d2prog|d2done|d2claimed|
-     * w0task|w0prog|w0done|w0claimed|w1task|w1prog|w1done|w1claimed|w2task|w2prog|w2done|w2claimed
+     * Loads every player's quest board from quest_progress.txt.
+     * Format per line: uuid|board JSON. Lines from the quest system before #450 are skipped, so those
+     * players get a new board.
      */
     public static void loadQuestProgress() {
         String currentPath = System.getProperty("user.dir");
@@ -4141,161 +4177,40 @@ public class PersistenceUtils {
             return;
         }
 
-        Scanner reader;
-        try {
-            reader = new Scanner(file);
+        try (Scanner reader = new Scanner(file)) {
             Bukkit.getLogger().info("[AC] Attempting to read the quest_progress file...");
-
+            int loaded = 0;
             while (reader.hasNextLine()) {
                 String row = reader.nextLine().trim();
                 if (row.startsWith("#") || row.isEmpty()) {
                     continue;
                 }
-
-                String[] fields = row.split("\\|");
-                if (fields.length < 26) {
+                int separator = row.indexOf('|');
+                if (separator <= 0) {
                     continue;
                 }
-
-                UUID uuid = UUID.fromString(fields[0]);
-                int rank = Integer.parseInt(fields[1]);
-
-                // New format (32 fields): task|reward|prog|done|claimed per quest slot
-                // Old format (26 fields): task|prog|done|claimed per quest slot (reward falls back to random)
-                boolean hasRewards = fields.length >= 32;
-
-                String[] dTasks;
-                double[] dRewards;
-                int[] dailyProgress;
-                boolean[] dailyCompleted, dailyClaimed;
-                String[] wTasks;
-                double[] wRewards;
-                int[] weeklyProgress;
-                boolean[] weeklyCompleted, weeklyClaimed;
-
-                if (hasRewards) {
-                    dTasks = new String[]{fields[2], fields[7], fields[12]};
-                    dRewards = new double[]{Double.parseDouble(fields[3]), Double.parseDouble(fields[8]), Double.parseDouble(fields[13])};
-                    dailyProgress = new int[]{Integer.parseInt(fields[4]), Integer.parseInt(fields[9]), Integer.parseInt(fields[14])};
-                    dailyCompleted = new boolean[]{fields[5].equals("1"), fields[10].equals("1"), fields[15].equals("1")};
-                    dailyClaimed = new boolean[]{fields[6].equals("1"), fields[11].equals("1"), fields[16].equals("1")};
-                    wTasks = new String[]{fields[17], fields[22], fields[27]};
-                    wRewards = new double[]{Double.parseDouble(fields[18]), Double.parseDouble(fields[23]), Double.parseDouble(fields[28])};
-                    weeklyProgress = new int[]{Integer.parseInt(fields[19]), Integer.parseInt(fields[24]), Integer.parseInt(fields[29])};
-                    weeklyCompleted = new boolean[]{fields[20].equals("1"), fields[25].equals("1"), fields[30].equals("1")};
-                    weeklyClaimed = new boolean[]{fields[21].equals("1"), fields[26].equals("1"), fields[31].equals("1")};
-                } else {
-                    // Old format - rewards will be regenerated randomly
-                    dTasks = new String[]{fields[2], fields[6], fields[10]};
-                    dRewards = new double[]{0.0, 0.0, 0.0};
-                    dailyProgress = new int[]{Integer.parseInt(fields[3]), Integer.parseInt(fields[7]), Integer.parseInt(fields[11])};
-                    dailyCompleted = new boolean[]{fields[4].equals("1"), fields[8].equals("1"), fields[12].equals("1")};
-                    dailyClaimed = new boolean[]{fields[5].equals("1"), fields[9].equals("1"), fields[13].equals("1")};
-                    wTasks = new String[]{fields[14], fields[18], fields[22]};
-                    wRewards = new double[]{0.0, 0.0, 0.0};
-                    weeklyProgress = new int[]{Integer.parseInt(fields[15]), Integer.parseInt(fields[19]), Integer.parseInt(fields[23])};
-                    weeklyCompleted = new boolean[]{fields[16].equals("1"), fields[20].equals("1"), fields[24].equals("1")};
-                    weeklyClaimed = new boolean[]{fields[17].equals("1"), fields[21].equals("1"), fields[25].equals("1")};
+                PlayerQuestBoard board = QuestBoardSerializer.fromJson(row.substring(separator + 1));
+                if (board == null) {
+                    continue;
                 }
-
-                // Restore active daily quests from the pool using stored task types and rewards
-                List<Quest> activeDailyQuests = resolveQuestsFromPool(uuid, rank, dTasks, dRewards, QuestType.DAILY);
-                List<Quest> activeWeeklyQuests = resolveQuestsFromPool(uuid, rank, wTasks, wRewards, QuestType.WEEKLY);
-
-                if (activeDailyQuests != null) {
-                    QuestUtils.setPlayerActiveDailyQuests(uuid, activeDailyQuests);
-                }
-                if (activeWeeklyQuests != null) {
-                    QuestUtils.setPlayerActiveWeeklyQuests(uuid, activeWeeklyQuests);
-                }
-
-                QuestUtils.getPlayerDailyProgress().put(uuid, dailyProgress);
-                QuestUtils.getPlayerDailyCompleted().put(uuid, dailyCompleted);
-                QuestUtils.getPlayerDailyClaimed().put(uuid, dailyClaimed);
-                QuestUtils.getPlayerWeeklyProgress().put(uuid, weeklyProgress);
-                QuestUtils.getPlayerWeeklyCompleted().put(uuid, weeklyCompleted);
-                QuestUtils.getPlayerWeeklyClaimed().put(uuid, weeklyClaimed);
-                QuestUtils.getPlayerQuestRank().put(uuid, rank);
+                QuestUtils.setBoard(UUID.fromString(row.substring(0, separator)), board);
+                loaded++;
             }
-
-            Bukkit.getLogger().info("[AC] Quest progress has been initialized");
-            reader.close();
-        } catch (FileNotFoundException e) {
+            Bukkit.getLogger().info("[AC] Quest progress has been initialized for " + loaded + " players");
+        } catch (FileNotFoundException | IllegalArgumentException e) {
             Bukkit.getLogger().info("[AC] Something went wrong with loading quest progress!");
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Login Streak Persistence
-    // -------------------------------------------------------------------------
-
     /**
-     * Resolves Quest objects from the quest pool using stored task type names and rewards.
-     * If a stored reward is 0 (old format), a new random reward is generated.
-     * Returns null if no valid quests could be resolved.
-     */
-    private static List<Quest> resolveQuestsFromPool(UUID uuid, int rank, String[] taskNames, double[] rewards, QuestType type) {
-        List<Quest> pool = type == QuestType.DAILY ? QuestUtils.getDailyQuestPool(rank) : QuestUtils.getWeeklyQuestPool(rank);
-        List<Quest> resolved = new ArrayList<>();
-        for (int i = 0; i < taskNames.length; i++) {
-            String taskName = taskNames[i];
-            if (taskName.equals("NONE")) {
-                continue;
-            }
-            try {
-                // Parse optional stored required count
-                int storedRequired = 0;
-                if (taskName.contains(":")) {
-                    String[] parts = taskName.split(":", 2);
-                    taskName = parts[0];
-                    storedRequired = Integer.parseInt(parts[1]);
-                }
-                QuestTaskType taskType = QuestTaskType.valueOf(taskName);
-                Quest found = null;
-                for (Quest q : pool) {
-                    if (q.getTaskType() == taskType) {
-                        found = q;
-                        break;
-                    }
-                }
-                if (found != null) {
-                    // Use stored required count if available
-                    if (storedRequired > 0) {
-                        found = found.withRequired(storedRequired, QuestUtils.generateDisplayName(taskType, storedRequired));
-                    }
-                    if (rewards[i] < 0) {
-                        resolved.add(found.withItemReward(QuestUtils.resolveKeyFromSentinel((int) rewards[i])));
-                    } else {
-                        double reward = rewards[i] > 0 ? rewards[i] : QuestUtils.generateRandomReward(rank, type);
-                        resolved.add(found.withReward(reward));
-                    }
-                }
-            } catch (IllegalArgumentException ignored) {
-            }
-        }
-        return resolved.isEmpty() ? null : resolved;
-    }
-
-    /**
-     * Saves per-player quest progress (including active quest assignments) to quest_progress.txt.
-     * Format: uuid|rank|d0task|d0prog|d0done|d0claimed|d1task|...|w2task|w2prog|w2done|w2claimed
+     * Saves every player's quest board to quest_progress.txt, then syncs the boards changed on this server to MySQL.
+     * Format per line: uuid|board JSON
      */
     public static void saveQuestProgress() {
-        HashMap<UUID, List<Quest>> activeDailyMap = QuestUtils.getPlayerActiveDailyQuestsMap();
-        HashMap<UUID, List<Quest>> activeWeeklyMap = QuestUtils.getPlayerActiveWeeklyQuestsMap();
-        HashMap<UUID, int[]> dailyProgress = QuestUtils.getPlayerDailyProgress();
-        HashMap<UUID, boolean[]> dailyCompleted = QuestUtils.getPlayerDailyCompleted();
-        HashMap<UUID, boolean[]> dailyClaimed = QuestUtils.getPlayerDailyClaimed();
-        HashMap<UUID, int[]> weeklyProgress = QuestUtils.getPlayerWeeklyProgress();
-        HashMap<UUID, boolean[]> weeklyCompleted = QuestUtils.getPlayerWeeklyCompleted();
-        HashMap<UUID, boolean[]> weeklyClaimed = QuestUtils.getPlayerWeeklyClaimed();
-        HashMap<UUID, Integer> questRanks = QuestUtils.getPlayerQuestRank();
-
         String currentPath = System.getProperty("user.dir");
         String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
                 + File.separator + "quest_progress.txt";
         File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
-        File file = new File(filePath);
 
         boolean isDirectoryCreated = true;
         if (!pluginDirectory.isDirectory()) {
@@ -4306,57 +4221,11 @@ public class PersistenceUtils {
         }
 
         try {
-            // If the file isn't already there
-            if (file.createNewFile()) {
-                Bukkit.getLogger().info("[AC] A new quest_progress.txt file has been generated");
-            }
-        } catch (IOException e) {
-            Bukkit.getLogger().info("[AC] An error occurred in the creation of quest_progress.txt");
-        }
-
-        try {
             FileWriter writer = new AtomicFileWriter(filePath);
-            writer.write("#uuid|rank|d0task|d0reward|d0prog|d0done|d0claimed|d1task|d1reward|d1prog|d1done|d1claimed|d2task|d2reward|d2prog|d2done|d2claimed|w0task|w0reward|w0prog|w0done|w0claimed|w1task|w1reward|w1prog|w1done|w1claimed|w2task|w2reward|w2prog|w2done|w2claimed\n");
-
-            Set<UUID> allUuids = new HashSet<>();
-            allUuids.addAll(activeDailyMap.keySet());
-            allUuids.addAll(activeWeeklyMap.keySet());
-            allUuids.addAll(dailyProgress.keySet());
-            allUuids.addAll(weeklyProgress.keySet());
-
-            for (UUID uuid : allUuids) {
-                int rank = questRanks.getOrDefault(uuid, 0);
-
-                List<Quest> dq = activeDailyMap.getOrDefault(uuid, new ArrayList<>());
-                int[] dp = dailyProgress.getOrDefault(uuid, new int[3]);
-                boolean[] dc = dailyCompleted.getOrDefault(uuid, new boolean[3]);
-                boolean[] dClaim = dailyClaimed.getOrDefault(uuid, new boolean[3]);
-
-                List<Quest> wq = activeWeeklyMap.getOrDefault(uuid, new ArrayList<>());
-                int[] wp = weeklyProgress.getOrDefault(uuid, new int[3]);
-                boolean[] wc = weeklyCompleted.getOrDefault(uuid, new boolean[3]);
-                boolean[] wClaim = weeklyClaimed.getOrDefault(uuid, new boolean[3]);
-
-                StringBuilder row = new StringBuilder(uuid + "|" + rank);
-                for (int i = 0; i < 3; i++) {
-                    String task = i < dq.size() ? (dq.get(i).getTaskType().name() + ":" + dq.get(i).getRequired()) : "NONE";
-                    int reward = i < dq.size() ? (dq.get(i).hasItemReward() ? QuestUtils.getItemRewardSentinel(dq.get(i).getItemReward()) : (int) dq.get(i).getReward()) : 0;
-                    int prog = i < dp.length ? dp[i] : 0;
-                    int done = (i < dc.length && dc[i]) ? 1 : 0;
-                    int claimed = (i < dClaim.length && dClaim[i]) ? 1 : 0;
-                    row.append("|").append(task).append("|").append(reward).append("|").append(prog).append("|").append(done).append("|").append(claimed);
-                }
-                for (int i = 0; i < 3; i++) {
-                    String task = i < wq.size() ? (wq.get(i).getTaskType().name() + ":" + wq.get(i).getRequired()) : "NONE";
-                    int reward = i < wq.size() ? (wq.get(i).hasItemReward() ? QuestUtils.getItemRewardSentinel(wq.get(i).getItemReward()) : (int) wq.get(i).getReward()) : 0;
-                    int prog = i < wp.length ? wp[i] : 0;
-                    int done = (i < wc.length && wc[i]) ? 1 : 0;
-                    int claimed = (i < wClaim.length && wClaim[i]) ? 1 : 0;
-                    row.append("|").append(task).append("|").append(reward).append("|").append(prog).append("|").append(done).append("|").append(claimed);
-                }
-                writer.write(row + "\n");
+            writer.write("#uuid|quest board JSON\n");
+            for (Map.Entry<UUID, PlayerQuestBoard> entry : QuestUtils.getBoards().entrySet()) {
+                writer.write(entry.getKey() + "|" + QuestBoardSerializer.toJson(entry.getValue()) + "\n");
             }
-
             writer.close();
         } catch (IOException e) {
             Bukkit.getLogger().info("[AC] There was an error in saving quest progress");
@@ -5435,14 +5304,61 @@ public class PersistenceUtils {
     }
 
     /**
+     * Loads a player this server has never seen from MySQL.
+     */
+    public static void loadMissingPlayerFromDatabase(UUID uuid) {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        String rawRow = DatabaseManager.getInstance().loadAranarthPlayerRaw(uuid);
+        if (rawRow != null && reloadPlayerFromRow(uuid, rawRow)) {
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[DB] Loaded " + uuid + " from MySQL as they were missing on this server");
+        }
+    }
+
+    /**
+     * Saves a player who just joined the network for the first time to MySQL and sends their row to the
+     * other server.
+     */
+    public static void shareNewPlayer(UUID uuid) {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+        if (ap == null) {
+            return;
+        }
+        String rawRow = buildAranarthPlayerRow(uuid, ap);
+        ap.setBalanceSnapshot(ap.getBalance());
+        String apUsername = ap.getUsername() != null ? ap.getUsername() : "";
+        DatabaseManager db = DatabaseManager.getInstance();
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
+                db.saveAranarthPlayerRaw(uuid, apUsername, rawRow)
+        );
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishPlayerCreated(uuid, apUsername, rawRow);
+        }
+    }
+
+    /**
      * Replaces a single player's in-memory AranarthPlayer with the given raw pipe-delimited row
-     * (e.g. one carried inside the SMP fallback snapshot). Call on the main thread only.
+     * (e.g. one carried inside the SMP fallback snapshot).
      *
      * @return true if the row was parsed and applied.
      */
     public static boolean reloadPlayerFromRow(UUID uuid, String rawRow) {
+        return reloadPlayerFromRow(uuid, rawRow, null);
+    }
+
+    /**
+     * Replaces a single player's in-memory AranarthPlayer with the given raw pipe-delimited row,
+     * using the given username if neither Bukkit nor the network roster knows it.
+     *
+     * @return true if the row was parsed and applied.
+     */
+    public static boolean reloadPlayerFromRow(UUID uuid, String rawRow, String username) {
         try {
-            parseAndAddAranarthPlayer(rawRow);
+            parseAndAddAranarthPlayer(rawRow, username);
             loadBlacklistPresetsForPlayer(uuid);
             return true;
         } catch (Exception e) {
@@ -5452,7 +5368,7 @@ public class PersistenceUtils {
     }
 
     /**
-     * Reloads a single player's quest assignments and progress from MySQL.
+     * Reloads a single player's quest board from MySQL.
      * Call on the main thread when a player arrives via cross-server transfer.
      */
     public static void reloadQuestProgressForPlayer(UUID uuid) {
@@ -5464,81 +5380,12 @@ public class PersistenceUtils {
             if (row == null || row[1] == null) {
                 return;
             }
-            JsonObject prog = GSON.fromJson(row[1], JsonObject.class);
-            int rank = prog.has("rank") ? prog.get("rank").getAsInt() : 0;
-            // Discard data that was saved before the last reset (stale from previous period)
-            long dailyPeriod = prog.has("dailyPeriod") ? prog.get("dailyPeriod").getAsLong() : 0L;
-            long weeklyPeriod = prog.has("weeklyPeriod") ? prog.get("weeklyPeriod").getAsLong() : 0L;
-            boolean dailyCurrent = dailyPeriod >= QuestUtils.getLastDailyReset();
-            boolean weeklyCurrent = weeklyPeriod >= QuestUtils.getLastWeeklyReset();
-            if (dailyCurrent) {
-                if (prog.has("dp")) {
-                    QuestUtils.getPlayerDailyProgress().put(uuid, GSON.fromJson(prog.get("dp"), int[].class));
-                }
-                if (prog.has("dc")) {
-                    QuestUtils.getPlayerDailyCompleted().put(uuid, GSON.fromJson(prog.get("dc"), boolean[].class));
-                }
-                if (prog.has("dClaim")) {
-                    QuestUtils.getPlayerDailyClaimed().put(uuid, GSON.fromJson(prog.get("dClaim"), boolean[].class));
-                }
-            } else {
-                Bukkit.getLogger().info("[AC] [Quest] Discarding stale daily data on transfer for " + uuid
-                        + " (savedPeriod=" + dailyPeriod + ", lastDailyReset=" + QuestUtils.getLastDailyReset() + ")");
-                QuestUtils.getPlayerDailyProgress().remove(uuid);
-                QuestUtils.getPlayerDailyCompleted().remove(uuid);
-                QuestUtils.getPlayerDailyClaimed().remove(uuid);
+            PlayerQuestBoard board = QuestBoardSerializer.fromJson(row[1]);
+            if (board == null) {
+                return;
             }
-            if (weeklyCurrent) {
-                if (prog.has("wp")) {
-                    QuestUtils.getPlayerWeeklyProgress().put(uuid, GSON.fromJson(prog.get("wp"), int[].class));
-                }
-                if (prog.has("wc")) {
-                    QuestUtils.getPlayerWeeklyCompleted().put(uuid, GSON.fromJson(prog.get("wc"), boolean[].class));
-                }
-                if (prog.has("wClaim")) {
-                    QuestUtils.getPlayerWeeklyClaimed().put(uuid, GSON.fromJson(prog.get("wClaim"), boolean[].class));
-                }
-            } else {
-                Bukkit.getLogger().info("[AC] [Quest] Discarding stale weekly data on transfer for " + uuid
-                        + " (savedPeriod=" + weeklyPeriod + ", lastWeeklyReset=" + QuestUtils.getLastWeeklyReset() + ")");
-                QuestUtils.getPlayerWeeklyProgress().remove(uuid);
-                QuestUtils.getPlayerWeeklyCompleted().remove(uuid);
-                QuestUtils.getPlayerWeeklyClaimed().remove(uuid);
-            }
-            QuestUtils.getPlayerQuestRank().put(uuid, rank);
-            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quest] Reloaded from DB for " + uuid
-                    + " daily=" + java.util.Arrays.toString(QuestUtils.getPlayerDailyProgress().get(uuid))
-                    + " weekly=" + java.util.Arrays.toString(QuestUtils.getPlayerWeeklyProgress().get(uuid))
-                    + " rank=" + rank
-                    + " dailyCurrent=" + dailyCurrent + " weeklyCurrent=" + weeklyCurrent);
-            if (dailyCurrent && prog.has("dTasks") && prog.has("dRewards")) {
-                String[] dTasks = GSON.fromJson(prog.get("dTasks"), String[].class);
-                double[] dRewards = GSON.fromJson(prog.get("dRewards"), double[].class);
-                List<Quest> activeDailyQuests = resolveQuestsFromPool(uuid, rank, dTasks, dRewards, QuestType.DAILY);
-                if (activeDailyQuests != null) {
-                    QuestUtils.setPlayerActiveDailyQuests(uuid, activeDailyQuests);
-                } else {
-                    Bukkit.getLogger().warning("[AC] [Quest] Could not resolve daily quest assignments on transfer for " + uuid
-                            + " from stored tasks: " + java.util.Arrays.toString(dTasks));
-                    QuestUtils.getPlayerActiveDailyQuestsMap().remove(uuid);
-                }
-            } else if (!dailyCurrent) {
-                QuestUtils.getPlayerActiveDailyQuestsMap().remove(uuid);
-            }
-            if (weeklyCurrent && prog.has("wTasks") && prog.has("wRewards")) {
-                String[] wTasks = GSON.fromJson(prog.get("wTasks"), String[].class);
-                double[] wRewards = GSON.fromJson(prog.get("wRewards"), double[].class);
-                List<Quest> activeWeeklyQuests = resolveQuestsFromPool(uuid, rank, wTasks, wRewards, QuestType.WEEKLY);
-                if (activeWeeklyQuests != null) {
-                    QuestUtils.setPlayerActiveWeeklyQuests(uuid, activeWeeklyQuests);
-                } else {
-                    Bukkit.getLogger().warning("[AC] [Quest] Could not resolve weekly quest assignments on transfer for " + uuid
-                            + " from stored tasks: " + java.util.Arrays.toString(wTasks));
-                    QuestUtils.getPlayerActiveWeeklyQuestsMap().remove(uuid);
-                }
-            } else if (!weeklyCurrent) {
-                QuestUtils.getPlayerActiveWeeklyQuestsMap().remove(uuid);
-            }
+            QuestUtils.setBoard(uuid, board);
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quest] Reloaded quest board from DB for " + uuid);
         } catch (Exception e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to reload quest progress for " + uuid + ": " + e.getMessage());
         }
@@ -5818,65 +5665,15 @@ public class PersistenceUtils {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync quest state: " + e.getMessage());
         }
 
-        // Per-player quest progress - only sync UUIDs that had actual quest actions on THIS
-        // server this session, so we don't overwrite data for players active on the other server
-        // (both servers load all players from the shared DB at startup, but only the server where
-        // the player is actually playing should write back their progress).
+        // Per-player boards - only sync UUIDs that had quest actions on THIS server this session,
+        // so we don't overwrite data for players active on the other server
         for (UUID uuid : uuidsToSync) {
-            // Build a compact JSON snapshot of the player's quest progress + assignments
-            JsonObject prog = new JsonObject();
-            int[] dp = QuestUtils.getPlayerDailyProgress().getOrDefault(uuid, new int[3]);
-            boolean[] dc = QuestUtils.getPlayerDailyCompleted().getOrDefault(uuid, new boolean[3]);
-            boolean[] dClaim = QuestUtils.getPlayerDailyClaimed().getOrDefault(uuid, new boolean[3]);
-            int[] wp = QuestUtils.getPlayerWeeklyProgress().getOrDefault(uuid, new int[3]);
-            boolean[] wc = QuestUtils.getPlayerWeeklyCompleted().getOrDefault(uuid, new boolean[3]);
-            boolean[] wClaim = QuestUtils.getPlayerWeeklyClaimed().getOrDefault(uuid, new boolean[3]);
-            int rank = QuestUtils.getPlayerQuestRank().getOrDefault(uuid, 0);
-            prog.addProperty("rank", rank);
-            prog.add("dp", GSON.toJsonTree(dp));
-            prog.add("dc", GSON.toJsonTree(dc));
-            prog.add("dClaim", GSON.toJsonTree(dClaim));
-            prog.add("wp", GSON.toJsonTree(wp));
-            prog.add("wc", GSON.toJsonTree(wc));
-            prog.add("wClaim", GSON.toJsonTree(wClaim));
-            // Tag progress with the reset period so stale data is detected on reload
-            prog.addProperty("dailyPeriod", QuestUtils.getLastDailyReset());
-            prog.addProperty("weeklyPeriod", QuestUtils.getLastWeeklyReset());
-            // Persist quest assignments so the other server can restore the same tasks
-            List<Quest> dq = QuestUtils.getPlayerActiveDailyQuestsMap().getOrDefault(uuid, new ArrayList<>());
-            List<Quest> wq = QuestUtils.getPlayerActiveWeeklyQuestsMap().getOrDefault(uuid, new ArrayList<>());
-            String[] dTasks = new String[3];
-            double[] dRewards = new double[3];
-            String[] wTasks = new String[3];
-            double[] wRewards = new double[3];
-            for (int i = 0; i < 3; i++) {
-                if (i < dq.size()) {
-                    Quest q = dq.get(i);
-                    dTasks[i] = q.getTaskType().name() + ":" + q.getRequired();
-                    dRewards[i] = q.hasItemReward() ? QuestUtils.getItemRewardSentinel(q.getItemReward()) : q.getReward();
-                } else {
-                    dTasks[i] = "NONE";
-                    dRewards[i] = 0;
-                }
-                if (i < wq.size()) {
-                    Quest q = wq.get(i);
-                    wTasks[i] = q.getTaskType().name() + ":" + q.getRequired();
-                    wRewards[i] = q.hasItemReward() ? QuestUtils.getItemRewardSentinel(q.getItemReward()) : q.getReward();
-                } else {
-                    wTasks[i] = "NONE";
-                    wRewards[i] = 0;
-                }
+            PlayerQuestBoard board = QuestUtils.getBoardIfPresent(uuid);
+            if (board == null) {
+                continue;
             }
-            prog.add("dTasks", GSON.toJsonTree(dTasks));
-            prog.add("dRewards", GSON.toJsonTree(dRewards));
-            prog.add("wTasks", GSON.toJsonTree(wTasks));
-            prog.add("wRewards", GSON.toJsonTree(wRewards));
-            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quest] Writing to DB for " + uuid
-                    + " daily=" + java.util.Arrays.toString(dp)
-                    + " weekly=" + java.util.Arrays.toString(wp)
-                    + " tasks=" + java.util.Arrays.toString(dTasks));
             try {
-                db.saveQuestData(uuid, null, GSON.toJson(prog));
+                db.saveQuestData(uuid, null, QuestBoardSerializer.toJson(board));
             } catch (Exception e) {
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync quest progress for " + uuid + ": " + e.getMessage());
             }
@@ -6409,7 +6206,9 @@ public class PersistenceUtils {
             obj.addProperty("reaperDisabled", ap.isReaperDisabled());
             obj.addProperty("serverTipsDisabled", ap.isServerTipsDisabled());
             obj.addProperty("sitDisabled", ap.isSitDisabled());
+            obj.addProperty("jobsMessageDisabled", ap.isJobsMessageDisabled());
             obj.addProperty("sitCushionColor", ap.getSitCushionColor());
+            obj.addProperty("prefixStyles", ap.getEncodedPrefixStyles());
             obj.addProperty("language", ap.getLanguage());
             try {
                 db.savePlayerToggles(uuid, GSON.toJson(obj));
@@ -6420,67 +6219,202 @@ public class PersistenceUtils {
     }
 
     /**
-     * Syncs per-player shop data to MySQL.
+     * Syncs this server's player shops to MySQL, keeping the other server's shops that are already saved.
+     *
+     * @param ownShops This server's shops by owner, from getOwnShopsJson().
      */
-    public static void syncShopsToDatabase() {
+    private static void syncShopsToDatabase(Map<UUID, JsonArray> ownShops) {
         if (!DatabaseManager.isActive()) {
             return;
         }
-        DatabaseManager db = DatabaseManager.getInstance();
-        for (Map.Entry<UUID, List<Shop>> entry : ShopUtils.getShops().entrySet()) {
-            UUID uuid = entry.getKey();
-            if (uuid == null) {
-                continue; // server shops are handled by syncServerShopsToDatabase
+        Map<UUID, String> merged = DatabaseManager.getInstance().mergePlayerShops(stored -> {
+            Set<UUID> uuids = new HashSet<>(stored.keySet());
+            for (UUID uuid : ownShops.keySet()) {
+                if (uuid != null) {
+                    uuids.add(uuid);
+                }
             }
-            JsonArray arr = new JsonArray();
-            for (Shop shop : entry.getValue()) {
-                JsonObject s = new JsonObject();
-                s.addProperty("worldName", shop.getWorldName());
-                s.addProperty("x", shop.getLocation().getBlockX());
-                s.addProperty("y", shop.getLocation().getBlockY());
-                s.addProperty("z", shop.getLocation().getBlockZ());
-                s.addProperty("item", ItemUtils.itemStackArrayToBase64(new ItemStack[]{shop.getItem()}));
-                s.addProperty("quantity", shop.getQuantity());
-                s.addProperty("buyPrice", shop.getBuyPrice());
-                s.addProperty("sellPrice", shop.getSellPrice());
-                arr.add(s);
+            Map<UUID, String> result = new HashMap<>();
+            for (UUID uuid : uuids) {
+                result.put(uuid, GSON.toJson(mergeShopsJson(stored.get(uuid), ownShops.get(uuid))));
             }
-            try {
-                db.savePlayerShops(uuid, GSON.toJson(arr));
-            } catch (Exception e) {
-                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync shops for " + uuid + ": " + e.getMessage());
-            }
+            return result;
+        });
+        if (merged != null) {
+            runOnMainThread(() -> merged.forEach(PersistenceUtils::refreshOtherServerShops));
         }
     }
 
     /**
-     * Syncs server shop data (null-UUID shops) to MySQL as a singleton blob.
+     * Syncs this server's server shops to MySQL, keeping the other server's server shops that are already saved.
+     *
+     * @param ownShops This server's server shops, from getOwnShopsJson().
      */
-    public static void syncServerShopsToDatabase() {
+    private static void syncServerShopsToDatabase(JsonArray ownShops) {
         if (!DatabaseManager.isActive()) {
             return;
         }
-        DatabaseManager db = DatabaseManager.getInstance();
-        List<Shop> serverShops = ShopUtils.getShops().get(null);
-        JsonArray arr = new JsonArray();
-        if (serverShops != null) {
-            for (Shop shop : serverShops) {
-                JsonObject s = new JsonObject();
-                s.addProperty("worldName", shop.getWorldName());
-                s.addProperty("x", shop.getLocation().getBlockX());
-                s.addProperty("y", shop.getLocation().getBlockY());
-                s.addProperty("z", shop.getLocation().getBlockZ());
-                s.addProperty("item", ItemUtils.itemStackArrayToBase64(new ItemStack[]{shop.getItem()}));
-                s.addProperty("quantity", shop.getQuantity());
-                s.addProperty("buyPrice", shop.getBuyPrice());
-                s.addProperty("sellPrice", shop.getSellPrice());
-                arr.add(s);
+        String merged = DatabaseManager.getInstance().mergeServerShops(stored -> GSON.toJson(mergeShopsJson(stored, ownShops)));
+        if (merged != null) {
+            runOnMainThread(() -> refreshOtherServerShops(null, merged));
+        }
+    }
+
+    /**
+     * Runs the task on the main thread, unless the plugin is shutting down.
+     */
+    private static void runOnMainThread(Runnable task) {
+        if (AranarthCore.getInstance().isEnabled() && !AranarthCore.isShutdownHookMode()) {
+            Bukkit.getScheduler().runTask(AranarthCore.getInstance(), task);
+        }
+    }
+
+    private static String getThisServerName() {
+        return AranarthCore.getInstance().getConfig().getString("network.this-server", "survival");
+    }
+
+    private static String getShopLocationKey(JsonObject s) {
+        return s.get("worldName").getAsString() + "," + s.get("x").getAsInt() + "," + s.get("y").getAsInt() + "," + s.get("z").getAsInt();
+    }
+
+    private static JsonObject shopToJson(Shop shop) {
+        JsonObject s = new JsonObject();
+        s.addProperty("worldName", shop.getWorldName());
+        s.addProperty("serverName", shop.getServerName());
+        s.addProperty("x", shop.getLocation().getBlockX());
+        s.addProperty("y", shop.getLocation().getBlockY());
+        s.addProperty("z", shop.getLocation().getBlockZ());
+        s.addProperty("item", ItemUtils.itemStackArrayToBase64(new ItemStack[]{shop.getItem()}));
+        s.addProperty("quantity", shop.getQuantity());
+        s.addProperty("buyPrice", shop.getBuyPrice());
+        s.addProperty("sellPrice", shop.getSellPrice());
+        s.addProperty("stock", shop.getStock());
+        s.addProperty("freeSpace", shop.getFreeSpace());
+        return s;
+    }
+
+    /**
+     * Returns the shops on this server as JSON by owner, with server shops under the null key.
+     * Built on the main thread so the async save does not read the shops while they change.
+     */
+    private static Map<UUID, JsonArray> getOwnShopsJson() {
+        String thisServer = getThisServerName();
+        Map<UUID, JsonArray> ownShops = new HashMap<>();
+        for (Map.Entry<UUID, List<Shop>> entry : ShopUtils.getShops().entrySet()) {
+            JsonArray arr = new JsonArray();
+            for (Shop shop : entry.getValue()) {
+                if (thisServer.equals(shop.getServerName())) {
+                    arr.add(shopToJson(shop));
+                }
+            }
+            ownShops.put(entry.getKey(), arr);
+        }
+        return ownShops;
+    }
+
+    /**
+     * Keeps the other server's shops from the saved JSON and replaces this server's shops with the given ones.
+     */
+    private static JsonArray mergeShopsJson(String storedJson, JsonArray ownShops) {
+        String thisServer = getThisServerName();
+        JsonArray merged = new JsonArray();
+        if (storedJson != null && !storedJson.isBlank()) {
+            for (com.google.gson.JsonElement el : GSON.fromJson(storedJson, JsonArray.class)) {
+                JsonObject s = el.getAsJsonObject();
+                boolean isOwnShop = s.has("serverName")
+                        ? thisServer.equals(s.get("serverName").getAsString())
+                        : claimedLegacyShops.contains(getShopLocationKey(s));
+                if (!isOwnShop) {
+                    merged.add(s);
+                }
+            }
+        }
+        if (ownShops != null) {
+            merged.addAll(ownShops);
+        }
+        return merged;
+    }
+
+    /**
+     * Builds a shop from its saved JSON.
+     * Shops on the other server have no world, so they are not treated as a shop at the same spot on this server.
+     *
+     * @param uuid          The owner, or null for a server shop.
+     * @param s             The saved shop.
+     * @param resolveLegacy Whether a shop saved before shops recorded their server is checked for its sign on this server.
+     */
+    private static Shop shopFromJson(UUID uuid, JsonObject s, boolean resolveLegacy) {
+        String thisServer = getThisServerName();
+        String worldName = s.get("worldName").getAsString();
+        int x = s.get("x").getAsInt();
+        int y = s.get("y").getAsInt();
+        int z = s.get("z").getAsInt();
+        ItemStack item;
+        try {
+            item = ItemUtils.itemStackArrayFromBase64(s.get("item").getAsString())[0];
+        } catch (Exception ex) {
+            item = new ItemStack(Material.AIR, 1);
+        }
+        int quantity = s.get("quantity").getAsInt();
+        double buyPrice = s.get("buyPrice").getAsDouble();
+        double sellPrice = s.get("sellPrice").getAsDouble();
+
+        String serverName = "";
+        String locationKey = getShopLocationKey(s);
+        if (s.has("serverName")) {
+            serverName = s.get("serverName").getAsString();
+        } else if (claimedLegacyShops.contains(locationKey)) {
+            serverName = thisServer;
+        } else if (resolveLegacy) {
+            // Both servers have worlds with the same names, so the shop belongs to whichever server has its sign
+            World world = Bukkit.getWorld(worldName);
+            if (world != null && Tag.ALL_SIGNS.isTagged(world.getBlockAt(x, y, z).getType())) {
+                serverName = thisServer;
+                claimedLegacyShops.add(locationKey);
+            }
+        }
+
+        World world = thisServer.equals(serverName) ? Bukkit.getWorld(worldName) : null;
+        Shop shop = new Shop(uuid, new Location(world, x, y, z), item, quantity, buyPrice, sellPrice);
+        shop.setWorldName(worldName);
+        shop.setServerName(serverName);
+        shop.setStock(s.has("stock") ? s.get("stock").getAsInt() : -1);
+        shop.setFreeSpace(s.has("freeSpace") ? s.get("freeSpace").getAsInt() : -1);
+        return shop;
+    }
+
+    /**
+     * Replaces the other server's shops in memory with the latest saved ones, so shop limits and market values stay current.
+     *
+     * @param uuid The owner, or null for server shops.
+     * @param json The saved shops of the owner.
+     */
+    private static void refreshOtherServerShops(UUID uuid, String json) {
+        String thisServer = getThisServerName();
+        List<Shop> shops = new ArrayList<>();
+        List<Shop> current = ShopUtils.getShops().get(uuid);
+        if (current != null) {
+            for (Shop shop : current) {
+                if (thisServer.equals(shop.getServerName())) {
+                    shops.add(shop);
+                }
             }
         }
         try {
-            db.saveServerShops(GSON.toJson(arr));
+            for (com.google.gson.JsonElement el : GSON.fromJson(json, JsonArray.class)) {
+                Shop shop = shopFromJson(uuid, el.getAsJsonObject(), false);
+                if (!thisServer.equals(shop.getServerName())) {
+                    shops.add(shop);
+                }
+            }
         } catch (Exception e) {
-            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync server shops: " + e.getMessage());
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to refresh shops for " + uuid + ": " + e.getMessage());
+            return;
+        }
+        if (shops.isEmpty()) {
+            ShopUtils.getShops().remove(uuid);
+        } else {
+            ShopUtils.getShops().put(uuid, shops);
         }
     }
 
@@ -6870,35 +6804,42 @@ public class PersistenceUtils {
         if (!DatabaseManager.isActive()) {
             return;
         }
-        DatabaseManager db = DatabaseManager.getInstance();
+        // Read before going async, as the BendingPlayer is removed shortly after the Avatar quits
         JsonArray avatarsArr = avatarsToJson();
-        JsonArray bindsArr = new JsonArray();
         Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
-        if (currentAvatar != null) {
-            BendingPlayer bp = BendingPlayer.getBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()));
-            if (bp != null) {
-                for (Map.Entry<Integer, String> bindEntry : bp.getAbilities().entrySet()) {
-                    JsonObject bind = new JsonObject();
-                    bind.addProperty("slot", bindEntry.getKey());
-                    bind.addProperty("ability", bindEntry.getValue());
-                    bindsArr.add(bind);
-                }
-            } else {
-                // The Avatar is not on this server, so the binds saved by the server they are on are kept
-                JsonArray storedBinds = loadStoredAvatarBinds(currentAvatar.getUuid());
+        UUID avatarUuid = currentAvatar != null ? currentAvatar.getUuid() : null;
+        BendingPlayer bp = avatarUuid != null ? BendingPlayer.getBendingPlayer(Bukkit.getOfflinePlayer(avatarUuid)) : null;
+        JsonArray onlineBinds = new JsonArray();
+        if (bp != null) {
+            for (Map.Entry<Integer, String> bindEntry : bp.getAbilities().entrySet()) {
+                JsonObject bind = new JsonObject();
+                bind.addProperty("slot", bindEntry.getKey());
+                bind.addProperty("ability", bindEntry.getValue());
+                onlineBinds.add(bind);
+            }
+        }
+        boolean isAvatarHere = bp != null;
+
+        runDbSync(() -> {
+            JsonArray bindsArr = onlineBinds;
+            // The Avatar is not on this server, so the binds saved by the server they are on are kept
+            if (avatarUuid != null && !isAvatarHere) {
+                JsonArray storedBinds = loadStoredAvatarBinds(avatarUuid);
                 if (storedBinds != null) {
                     bindsArr = storedBinds;
                 }
             }
-        }
-        JsonObject root = new JsonObject();
-        root.add("avatars", avatarsArr);
-        root.add("binds", bindsArr);
-        try {
-            db.saveAvatars(GSON.toJson(root));
-        } catch (Exception e) {
-            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync avatars: " + e.getMessage());
-        }
+            JsonObject root = new JsonObject();
+            root.add("avatars", avatarsArr);
+            root.add("binds", bindsArr);
+            try {
+                DatabaseManager.getInstance().saveAvatars(GSON.toJson(root));
+                AvatarUtils.logInfo("Saved to MySQL: entries=" + avatarsArr.size() + ", binds=" + bindsArr.size()
+                        + (isAvatarHere ? " from this server" : " kept from the last save"));
+            } catch (Exception e) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync avatars: " + e.getMessage());
+            }
+        });
     }
 
     /**
@@ -6919,6 +6860,7 @@ public class PersistenceUtils {
                 a.addProperty("startInRealLife", avatar.getStartInRealLife());
                 a.addProperty("endInRealLife", avatar.getEndInRealLife());
                 a.addProperty("element", String.valueOf(avatar.getElement()));
+                a.addProperty("endedByInactivity", avatar.isEndedByInactivity());
                 avatarsArr.add(a);
             }
         }
@@ -6944,7 +6886,10 @@ public class PersistenceUtils {
                 String startInRealLife = a.get("startInRealLife").getAsString();
                 String endInRealLife = a.get("endInRealLife").getAsString();
                 char element = a.get("element").getAsString().charAt(0);
-                avatars.add(new Avatar(uuid, startInGame, endInGame, startInRealLife, endInRealLife, element));
+                Avatar avatar = new Avatar(uuid, startInGame, endInGame, startInRealLife, endInRealLife, element);
+                // Entries saved before this field was added do not have it
+                avatar.setEndedByInactivity(a.has("endedByInactivity") && a.get("endedByInactivity").getAsBoolean());
+                avatars.add(avatar);
             }
         }
         return avatars;
@@ -6987,26 +6932,35 @@ public class PersistenceUtils {
         if (currentAvatar == null) {
             return;
         }
-        if (!DatabaseManager.isActive()) {
-            loadAvatarBinds();
-            return;
-        }
         UUID uuid = currentAvatar.getUuid();
-        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
-            JsonArray bindsArr = loadStoredAvatarBinds(uuid);
-            if (bindsArr == null) {
+        // Binds applied before ProjectKorra finishes loading the player would be overwritten by its load
+        BendingPlayer.getOrLoadOfflineAsync(Bukkit.getOfflinePlayer(uuid)).thenAccept(loaded -> {
+            if (!DatabaseManager.isActive()) {
+                loadAvatarBinds();
                 return;
             }
-            Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
-                OfflineBendingPlayer bendingPlayer = BendingPlayer.getOfflineBendingPlayer(Bukkit.getOfflinePlayer(uuid).getName());
-                if (bendingPlayer == null) {
+            Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+                JsonArray bindsArr = loadStoredAvatarBinds(uuid);
+                if (bindsArr == null) {
+                    AvatarUtils.logInfo("No stored binds to apply for " + uuid + ", keeping their ProjectKorra binds");
                     return;
                 }
-                for (com.google.gson.JsonElement bindEl : bindsArr) {
-                    JsonObject bind = bindEl.getAsJsonObject();
-                    bendingPlayer.bindAbility(bind.get("ability").getAsString(), bind.get("slot").getAsInt());
-                }
+                Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+                    OfflineBendingPlayer bendingPlayer = BendingPlayer.getOfflineBendingPlayer(Bukkit.getOfflinePlayer(uuid).getName());
+                    if (bendingPlayer == null) {
+                        AvatarUtils.logWarning("Could not apply the stored binds of " + uuid + ", they left or never loaded");
+                        return;
+                    }
+                    for (com.google.gson.JsonElement bindEl : bindsArr) {
+                        JsonObject bind = bindEl.getAsJsonObject();
+                        bendingPlayer.bindAbility(bind.get("ability").getAsString(), bind.get("slot").getAsInt());
+                    }
+                    AvatarUtils.logInfo("Applied " + bindsArr.size() + " stored bind(s) to " + AvatarUtils.describe(uuid));
+                });
             });
+        }).exceptionally(ex -> {
+            AvatarUtils.logError("FAILED to apply the stored binds of " + uuid, ex);
+            return null;
         });
     }
 
@@ -7088,6 +7042,29 @@ public class PersistenceUtils {
         } catch (Exception e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to delete shop location for " + uuid + ": " + e.getMessage());
         }
+    }
+
+    /**
+     * Adds the amount to the shop owner's net shop earnings in MySQL.
+     * @param uuid The shop owner's UUID.
+     * @param amount The amount earned (positive) or paid out (negative).
+     */
+    public static void addShopEarningsToDatabase(UUID uuid, double amount) {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        runDbSync(() -> DatabaseManager.getInstance().addPlayerShopEarnings(uuid, amount));
+    }
+
+    /**
+     * Loads every shop owner's net shop earnings from MySQL. Must not be called on the main thread.
+     * @return The earnings of each shop owner, or an empty map if the database is unavailable.
+     */
+    public static Map<UUID, Double> loadShopEarningsFromDatabase() {
+        if (!DatabaseManager.isActive()) {
+            return new HashMap<>();
+        }
+        return DatabaseManager.getInstance().loadAllPlayerShopEarnings();
     }
 
     /**
@@ -7511,10 +7488,53 @@ public class PersistenceUtils {
     }
 
     /**
+     * Resolves a player's username.
+     *
+     * @param storedUsername The username from the aranarth_players table, or null if it has not been looked up yet.
+     * @return The username, or null if no source has it.
+     */
+    private static String resolveUsername(UUID uuid, String storedUsername) {
+        // Only reads this server's playerdata file, which players who never joined this server do not have
+        String username = Bukkit.getOfflinePlayer(uuid).getName();
+        if (username != null) {
+            return username;
+        }
+        // The server's usercache.json, without any web request
+        PlayerProfile profile = Bukkit.createProfile(uuid);
+        profile.completeFromCache();
+        if (profile.getName() != null && !profile.getName().isEmpty()) {
+            return profile.getName();
+        }
+        if (NetworkManager.isActive()) {
+            NetworkPlayer remote = NetworkManager.getInstance().getRemotePlayer(uuid);
+            if (remote != null && !remote.getUsername().isEmpty()) {
+                return remote.getUsername();
+            }
+        }
+        AranarthPlayer existing = AranarthUtils.getLoadedPlayer(uuid);
+        if (existing != null && existing.getUsername() != null) {
+            return existing.getUsername();
+        }
+        if (storedUsername == null && DatabaseManager.isActive()) {
+            storedUsername = DatabaseManager.getInstance().loadPlayerUsername(uuid);
+        }
+        return storedUsername == null || storedUsername.isEmpty() ? null : storedUsername;
+    }
+
+    /**
      * Shared parser - same logic as the while-loop body in loadAranarthPlayers().
      * Parses a single pipe-delimited row and registers the player via AranarthUtils.
      */
     static void parseAndAddAranarthPlayer(String row) throws Exception {
+        parseAndAddAranarthPlayer(row, null);
+    }
+
+    /**
+     * Shared parser - same logic as the while-loop body in loadAranarthPlayers().
+     *
+     * @param storedUsername The username from the aranarth_players table, or null to look it up if needed.
+     */
+    static void parseAndAddAranarthPlayer(String row, String storedUsername) throws Exception {
         String[] fields = row.split("\\|");
         int lastIndex = fields.length - 1;
 
@@ -7643,7 +7663,7 @@ public class PersistenceUtils {
                     + ", arenaInventory=" + (arenaInventory.isEmpty() ? "empty" : "set") + ")"
                     + " - will skip clear if they switch to survival");
         }
-        AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname,
+        AranarthUtils.addPlayer(uuid, new AranarthPlayer(resolveUsername(uuid, storedUsername), nickname,
                 survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist,
                 blacklistingMethod, balance, rank, saintRank, councilRank, architectRank, homes,
                 muteEndDate, particles, perks, saintExpireDate, isCompressingItems, votePointsSpent, isUsingSpawnBoost,
@@ -7661,6 +7681,9 @@ public class PersistenceUtils {
         boolean isBarbarian = fields.length > 31 && fields[30].equals("1");
         long barbarianCooldownEnd = fields.length > 32 ? Long.parseLong(fields[31]) : 0L;
         int permanentSaintRank = fields.length > 33 ? Integer.parseInt(fields[32]) : 0;
+        String survivalEffects = fields.length > 34 ? fields[33] : "";
+        double lifeRipDrain = fields.length > 35 ? Double.parseDouble(fields[34]) : -1;
+        double lifeRipGain = fields.length > 36 ? Double.parseDouble(fields[35]) : -1;
         AranarthUtils.getPlayer(uuid).setConquestDisbandCooldownEnd(conquestDisbandCooldownEnd);
         AranarthUtils.getPlayer(uuid).setSurvivalEnderChest(survivalEnderChest);
         AranarthUtils.getPlayer(uuid).setSurvivalHealth(survivalHealth);
@@ -7671,6 +7694,9 @@ public class PersistenceUtils {
         AranarthUtils.getPlayer(uuid).setBarbarian(isBarbarian);
         AranarthUtils.getPlayer(uuid).setBarbarianCooldownEnd(barbarianCooldownEnd);
         AranarthUtils.getPlayer(uuid).setPermanentSaintRank(permanentSaintRank);
+        AranarthUtils.getPlayer(uuid).setSurvivalEffects(survivalEffects);
+        AranarthUtils.getPlayer(uuid).setLifeRipDrain(lifeRipDrain);
+        AranarthUtils.getPlayer(uuid).setLifeRipGain(lifeRipGain);
     }
 
     /**
@@ -7685,10 +7711,12 @@ public class PersistenceUtils {
             return;
         }
         Bukkit.getLogger().info("[AC] Loading " + rawRows.size() + " players from MySQL...");
+        // Loaded in one query, as Bukkit does not know the names of players who have never joined this server
+        Map<UUID, String> usernames = db.loadAllPlayerUsernames();
         int failCount = 0;
         for (Map.Entry<UUID, String> entry : rawRows.entrySet()) {
             try {
-                parseAndAddAranarthPlayer(entry.getValue());
+                parseAndAddAranarthPlayer(entry.getValue(), usernames.getOrDefault(entry.getKey(), ""));
             } catch (Exception e) {
                 failCount++;
                 Bukkit.getLogger().warning("[AC] Failed to parse DB player row for " + entry.getKey() + ": " + e.getMessage());
@@ -7918,7 +7946,8 @@ public class PersistenceUtils {
     }
 
     /**
-     * Loads per-player quest progress from MySQL. Falls back to file if empty.
+     * Loads every player's quest board from MySQL. Falls back to file if empty.
+     * Boards from the quest system before #450 are skipped, so those players get a new board.
      */
     public static void loadQuestProgressFromDatabase() {
         DatabaseManager db = DatabaseManager.getInstance();
@@ -7929,79 +7958,20 @@ public class PersistenceUtils {
         }
         Bukkit.getLogger().info("[AC] Loading quest progress from MySQL...");
         UUID stateKey = new UUID(0L, 0L);
-        int loaded = 0, staleDaily = 0, staleWeekly = 0;
+        int loaded = 0;
         for (Map.Entry<UUID, String[]> entry : all.entrySet()) {
             UUID uuid = entry.getKey();
             if (uuid.equals(stateKey)) {
                 continue;
             }
-            String progressJson = entry.getValue()[1];
-            if (progressJson == null) {
+            PlayerQuestBoard board = QuestBoardSerializer.fromJson(entry.getValue()[1]);
+            if (board == null) {
                 continue;
             }
-            try {
-                JsonObject prog = GSON.fromJson(progressJson, JsonObject.class);
-                int rank = prog.has("rank") ? prog.get("rank").getAsInt() : 0;
-                int[] dp = GSON.fromJson(prog.get("dp"), int[].class);
-                boolean[] dc = GSON.fromJson(prog.get("dc"), boolean[].class);
-                boolean[] dClaim = GSON.fromJson(prog.get("dClaim"), boolean[].class);
-                int[] wp = GSON.fromJson(prog.get("wp"), int[].class);
-                boolean[] wc = GSON.fromJson(prog.get("wc"), boolean[].class);
-                boolean[] wClaim = GSON.fromJson(prog.get("wClaim"), boolean[].class);
-                // Discard data that was saved before the last reset (stale from previous period)
-                long dailyPeriod = prog.has("dailyPeriod") ? prog.get("dailyPeriod").getAsLong() : 0L;
-                long weeklyPeriod = prog.has("weeklyPeriod") ? prog.get("weeklyPeriod").getAsLong() : 0L;
-                boolean dailyCurrent = dailyPeriod >= QuestUtils.getLastDailyReset();
-                boolean weeklyCurrent = weeklyPeriod >= QuestUtils.getLastWeeklyReset();
-                if (!dailyCurrent) {
-                    staleDaily++;
-                    dp = new int[3];
-                    dc = new boolean[3];
-                    dClaim = new boolean[3];
-                }
-                if (!weeklyCurrent) {
-                    staleWeekly++;
-                    wp = new int[3];
-                    wc = new boolean[3];
-                    wClaim = new boolean[3];
-                }
-                loaded++;
-                QuestUtils.getPlayerDailyProgress().put(uuid, dp);
-                QuestUtils.getPlayerDailyCompleted().put(uuid, dc);
-                QuestUtils.getPlayerDailyClaimed().put(uuid, dClaim);
-                QuestUtils.getPlayerWeeklyProgress().put(uuid, wp);
-                QuestUtils.getPlayerWeeklyCompleted().put(uuid, wc);
-                QuestUtils.getPlayerWeeklyClaimed().put(uuid, wClaim);
-                QuestUtils.getPlayerQuestRank().put(uuid, rank);
-                // Restore quest assignments if present and still current
-                String[] dTasks = (dailyCurrent && prog.has("dTasks")) ? GSON.fromJson(prog.get("dTasks"), String[].class) : null;
-                double[] dRewards = (dailyCurrent && prog.has("dRewards")) ? GSON.fromJson(prog.get("dRewards"), double[].class) : null;
-                String[] wTasks = (weeklyCurrent && prog.has("wTasks")) ? GSON.fromJson(prog.get("wTasks"), String[].class) : null;
-                double[] wRewards = (weeklyCurrent && prog.has("wRewards")) ? GSON.fromJson(prog.get("wRewards"), double[].class) : null;
-                if (dTasks != null && dRewards != null) {
-                    List<Quest> activeDailyQuests = resolveQuestsFromPool(uuid, rank, dTasks, dRewards, QuestType.DAILY);
-                    if (activeDailyQuests != null) {
-                        QuestUtils.setPlayerActiveDailyQuests(uuid, activeDailyQuests);
-                    } else {
-                        Bukkit.getLogger().warning("[AC] [Quest] Could not resolve daily quest assignments for " + uuid
-                                + " from stored tasks: " + java.util.Arrays.toString(dTasks));
-                    }
-                }
-                if (wTasks != null && wRewards != null) {
-                    List<Quest> activeWeeklyQuests = resolveQuestsFromPool(uuid, rank, wTasks, wRewards, QuestType.WEEKLY);
-                    if (activeWeeklyQuests != null) {
-                        QuestUtils.setPlayerActiveWeeklyQuests(uuid, activeWeeklyQuests);
-                    } else {
-                        Bukkit.getLogger().warning("[AC] [Quest] Could not resolve weekly quest assignments for " + uuid
-                                + " from stored tasks: " + java.util.Arrays.toString(wTasks));
-                    }
-                }
-            } catch (Exception e) {
-                Bukkit.getLogger().warning("[AC] Failed to parse quest progress for " + uuid + " from DB: " + e.getMessage());
-            }
+            QuestUtils.setBoard(uuid, board);
+            loaded++;
         }
-        Bukkit.getLogger().info("[AC] Quest progress loaded from MySQL: " + loaded + " players"
-                + " (" + staleDaily + " stale daily, " + staleWeekly + " stale weekly discarded)");
+        Bukkit.getLogger().info("[AC] Quest progress loaded from MySQL: " + loaded + " players");
     }
 
     /**
@@ -8343,8 +8313,14 @@ public class PersistenceUtils {
                 if (obj.has("sitDisabled")) {
                     ap.setSitDisabled(obj.get("sitDisabled").getAsBoolean());
                 }
+                if (obj.has("jobsMessageDisabled")) {
+                    ap.setJobsMessageDisabled(obj.get("jobsMessageDisabled").getAsBoolean());
+                }
                 if (obj.has("sitCushionColor")) {
                     ap.setSitCushionColor(obj.get("sitCushionColor").getAsString());
+                }
+                if (obj.has("prefixStyles")) {
+                    ap.setEncodedPrefixStyles(obj.get("prefixStyles").getAsString());
                 }
                 if (obj.has("language")) {
                     ap.setLanguage(obj.get("language").getAsString());
@@ -8413,7 +8389,9 @@ public class PersistenceUtils {
         obj.addProperty("reaperDisabled", ap.isReaperDisabled());
         obj.addProperty("serverTipsDisabled", ap.isServerTipsDisabled());
         obj.addProperty("sitDisabled", ap.isSitDisabled());
+        obj.addProperty("jobsMessageDisabled", ap.isJobsMessageDisabled());
         obj.addProperty("sitCushionColor", ap.getSitCushionColor());
+        obj.addProperty("prefixStyles", ap.getEncodedPrefixStyles());
         obj.addProperty("language", ap.getLanguage());
         return GSON.toJson(obj);
     }
@@ -8577,13 +8555,25 @@ public class PersistenceUtils {
             if (obj.has("sitDisabled")) {
                 ap.setSitDisabled(obj.get("sitDisabled").getAsBoolean());
             }
+            if (obj.has("jobsMessageDisabled")) {
+                ap.setJobsMessageDisabled(obj.get("jobsMessageDisabled").getAsBoolean());
+            }
             if (obj.has("sitCushionColor")) {
                 ap.setSitCushionColor(obj.get("sitCushionColor").getAsString());
+            }
+            if (obj.has("prefixStyles")) {
+                ap.setEncodedPrefixStyles(obj.get("prefixStyles").getAsString());
             }
             if (obj.has("language")) {
                 ap.setLanguage(obj.get("language").getAsString());
             }
             AranarthUtils.setPlayer(uuid, ap);
+            // Toggles load after the join permissions, and an Architect's permissions depend on architect mode
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null && ap.getArchitectRank() >= 1) {
+                PermissionUtils.evaluatePlayerPermissions(player);
+                AranarthUtils.removeRevokedGameMode(player);
+            }
         } catch (Exception e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load toggles for " + uuid + ": " + e.getMessage());
         }
@@ -8605,24 +8595,7 @@ public class PersistenceUtils {
             try {
                 JsonArray arr = GSON.fromJson(entry.getValue(), JsonArray.class);
                 for (com.google.gson.JsonElement el : arr) {
-                    JsonObject s = el.getAsJsonObject();
-                    String worldName = s.get("worldName").getAsString();
-                    int x = s.get("x").getAsInt();
-                    int y = s.get("y").getAsInt();
-                    int z = s.get("z").getAsInt();
-                    ItemStack item;
-                    try {
-                        item = ItemUtils.itemStackArrayFromBase64(s.get("item").getAsString())[0];
-                    } catch (Exception ex) {
-                        item = new ItemStack(Material.AIR, 1);
-                    }
-                    int quantity = s.get("quantity").getAsInt();
-                    double buyPrice = s.get("buyPrice").getAsDouble();
-                    double sellPrice = s.get("sellPrice").getAsDouble();
-                    Location location = new Location(Bukkit.getWorld(worldName), x, y, z);
-                    Shop shop = new Shop(uuid, location, item, quantity, buyPrice, sellPrice);
-                    shop.setWorldName(worldName);
-                    ShopUtils.addShop(uuid, shop);
+                    ShopUtils.addShop(uuid, shopFromJson(uuid, el.getAsJsonObject(), true));
                 }
             } catch (Exception e) {
                 Bukkit.getLogger().warning("[AC] Failed to parse shops for " + uuid + ": " + e.getMessage());
@@ -8644,24 +8617,7 @@ public class PersistenceUtils {
         try {
             JsonArray arr = GSON.fromJson(json, JsonArray.class);
             for (com.google.gson.JsonElement el : arr) {
-                JsonObject s = el.getAsJsonObject();
-                String worldName = s.get("worldName").getAsString();
-                int x = s.get("x").getAsInt();
-                int y = s.get("y").getAsInt();
-                int z = s.get("z").getAsInt();
-                ItemStack item;
-                try {
-                    item = ItemUtils.itemStackArrayFromBase64(s.get("item").getAsString())[0];
-                } catch (Exception ex) {
-                    item = new ItemStack(Material.AIR, 1);
-                }
-                int quantity = s.get("quantity").getAsInt();
-                double buyPrice = s.get("buyPrice").getAsDouble();
-                double sellPrice = s.get("sellPrice").getAsDouble();
-                Location location = new Location(Bukkit.getWorld(worldName), x, y, z);
-                Shop shop = new Shop(null, location, item, quantity, buyPrice, sellPrice);
-                shop.setWorldName(worldName);
-                ShopUtils.addShop(null, shop);
+                ShopUtils.addShop(null, shopFromJson(null, el.getAsJsonObject(), true));
             }
             Bukkit.getLogger().info("[AC] Server shops initialized from MySQL");
         } catch (Exception e) {
@@ -9085,6 +9041,11 @@ public class PersistenceUtils {
         if (!DatabaseManager.isActive()) {
             return;
         }
+        // A cross-server stub has no land, so saving it would blank the stored chunks and stop the row
+        // from parsing. Balance changes made here reach the hosting server as a delta, which saves them.
+        if (!DominionUtils.isHostedHere(dominion)) {
+            return;
+        }
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
             try {
                 String row = buildDominionRow(dominion);
@@ -9406,6 +9367,7 @@ public class PersistenceUtils {
         if (json == null || json.isEmpty()) {
             loadAvatars();
             loadAvatarBinds();
+            AvatarUtils.logWarning("MySQL had no avatars, loaded from the files instead: " + AvatarUtils.describeState());
             return;
         }
         Bukkit.getLogger().info("[AC] Loading avatars from MySQL...");
@@ -9430,8 +9392,9 @@ public class PersistenceUtils {
                 }
             }
             Bukkit.getLogger().info("[AC] Avatars initialized from MySQL");
+            AvatarUtils.logInfo("Loaded from MySQL: " + AvatarUtils.describeState());
         } catch (Exception e) {
-            Bukkit.getLogger().warning("[AC] Failed to parse avatars from DB: " + e.getMessage());
+            AvatarUtils.logError("FAILED to parse the avatars from MySQL, falling back to the files", e);
             loadAvatars();
             loadAvatarBinds();
         }
@@ -9974,7 +9937,7 @@ public class PersistenceUtils {
         return uuid.toString();
     }
 
-    private static String serializeJobData(JobData jobData) {
+    public static String serializeJobData(JobData jobData) {
         JsonObject obj = new JsonObject();
         com.google.gson.JsonArray activeJobs = new com.google.gson.JsonArray();
         for (JobType job : jobData.getActiveJobs()) {
@@ -9986,6 +9949,7 @@ public class PersistenceUtils {
             totalXp.addProperty(entry.getKey().name(), entry.getValue());
         }
         obj.add("totalXp", totalXp);
+        obj.addProperty("lastLeftAt", jobData.getLastLeftAt());
         return obj.toString();
     }
 
@@ -10005,6 +9969,9 @@ public class PersistenceUtils {
                     }
                 }
                 jobData.setActiveJobs(activeJobs);
+            }
+            if (obj.has("lastLeftAt")) {
+                jobData.setLastLeftAt(obj.get("lastLeftAt").getAsLong());
             }
             if (obj.has("totalXp")) {
                 // Total accumulated XP stored directly

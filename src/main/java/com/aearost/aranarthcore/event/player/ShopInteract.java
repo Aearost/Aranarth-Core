@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.utils.QuestUtils;
+import com.aearost.aranarthcore.enums.QuestTrigger;
 import com.aearost.aranarthcore.network.NetworkManager;
 import org.bukkit.Bukkit;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
@@ -10,6 +12,7 @@ import com.aearost.aranarthcore.utils.CropUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.MarketUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
+import com.aearost.aranarthcore.utils.ShopIslandUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import com.aearost.aranarthcore.utils.TradeMarketUtils;
 import org.bukkit.*;
@@ -118,11 +121,10 @@ public class ShopInteract {
                 if (shop != null) {
                     if (shop.getUuid() == null) {
                         e.setCancelled(true);
-                        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
                         if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
                             // If editing a server shop
-                            if (aranarthPlayer.getCouncilRank() == 3 && AranarthUtils.isPhysicallySneaking(player.getUniqueId()) && player.getGameMode() == GameMode.CREATIVE) {
+                            if (player.hasPermission("aranarth.shop.modify") && AranarthUtils.isPhysicallySneaking(player.getUniqueId()) && player.getGameMode() == GameMode.CREATIVE) {
                                 if (e.getClickedBlock().getState() instanceof Sign sign) {
                                     player.openSign(sign);
                                 }
@@ -254,7 +256,9 @@ public class ShopInteract {
                 if (isPlayerShop) {
                     // Verifies that there is enough quantity in the chest's inventory
                     // Cycles through the chest's inventory starting from end to beginning
-                    HashMap<Boolean, ItemStack[]> result = checkIfContentsHasShopItems(chestInventory.getContents(), shop, true);
+                    // Shulker box contents are only sold from if the shop owner has the shulker assist perk
+                    HashMap<Boolean, ItemStack[]> result = checkIfContentsHasShopItems(chestInventory.getContents(), shop,
+                            ShopUtils.isChestShulkerStockEnabled(shop));
                     if (result.containsKey(true)) {
                         chestInventory.clear();
                         chestInventory.setContents(result.get(true));
@@ -321,6 +325,10 @@ public class ShopInteract {
                     if (Bukkit.getPlayer(shop.getUuid()) == null && NetworkManager.isActive()) {
                         NetworkManager.getInstance().publishBalanceAdjust(shop.getUuid(), shop.getBuyPrice());
                     }
+                    // Ranks the owner's shop island in the shop location GUI
+                    if (ShopIslandUtils.SHOPS_WORLD.equals(shop.getWorldName())) {
+                        PersistenceUtils.addShopEarningsToDatabase(shop.getUuid(), shop.getBuyPrice());
+                    }
                 }
 
                 // Logic to add items to player's inventory
@@ -381,6 +389,9 @@ public class ShopInteract {
                 }
 
                 player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.purchased", "amount", shop.getQuantity(), "item", itemname, "price", formatter.format(shop.getBuyPrice()))));
+                if (shop.getUuid() != null && !shop.getUuid().equals(player.getUniqueId())) {
+                    QuestUtils.progress(player, QuestTrigger.SHOP_BUY, "SHOP", 1, java.util.Set.of(), shop.getUuid().toString());
+                }
                 ItemStack marketBuyItem = shop.getItem().clone();
                 marketBuyItem.setAmount(shop.getQuantity());
                 TradeMarketUtils.recordTradeTransaction(new ItemStack[]{marketBuyItem}, shop.getBuyPrice());
@@ -398,6 +409,7 @@ public class ShopInteract {
                         shopPlayer.sendMessage(
                                 ChatUtils.chatMessage(Lang.getFor(shopPlayer, "shop.owner_purchase_notify", "player", player.getName(), "quantity", shop.getQuantity(), "item", itemname, "price", formatter.format(shop.getBuyPrice()))));
                     }
+                    ShopUtils.refreshShopStockAt(shop.getLocation());
                 }
             } else {
                 if (clickUser.getBulkTransactionNum() <= 0 && AranarthUtils.isPhysicallySneaking(player.getUniqueId())) {
@@ -463,32 +475,18 @@ public class ShopInteract {
             }
 
             Inventory chestInventory = null;
-            Container copyOfChest = null;
 
             if (isPlayerShop) {
                 BlockState state = locationBelow.getBlock().getState();
                 Container container = (Container) state;
-                copyOfChest = (Container) container.copy();
                 chestInventory = container.getInventory();
                 if (chestInventory.getHolder() instanceof DoubleChest doubleChest) {
                     chestInventory = doubleChest.getInventory(); // Get the full 54 slot inventory
                 }
 
                 // Verifies there is enough space in the chest's inventory to add the items
-                int spaceForShopItemInChestInventory = 0;
-                for (ItemStack chestItem : copyOfChest.getInventory().getStorageContents()) {
-                    if (chestItem == null || chestItem.getType() == Material.AIR) {
-                        spaceForShopItemInChestInventory += 64;
-                        continue;
-                    }
-
-                    // Each month changes the lore of crop seeds, must consider that
-                    boolean isSameCropSeed = chestItem.getType() == shop.getItem().getType() && CropUtils.isCropSeed(chestItem.getType());
-                    if (chestItem.isSimilar(shop.getItem()) || isSameCropSeed) {
-                        spaceForShopItemInChestInventory += chestItem.getMaxStackSize() - chestItem.getAmount();
-                    }
-                }
-                if (spaceForShopItemInChestInventory < shop.getQuantity()) {
+                // Uses the item's real stack size so sold items can never overflow and be lost
+                if (ShopUtils.computeChestFreeSpaceForItem(shop) < shop.getQuantity()) {
                     player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.no_chest_space")));
                     clickUser.setBulkTransactionNum(-1);
                     AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
@@ -539,6 +537,10 @@ public class ShopInteract {
                     if (Bukkit.getPlayer(shop.getUuid()) == null && NetworkManager.isActive()) {
                         NetworkManager.getInstance().publishBalanceAdjust(shop.getUuid(), -shop.getSellPrice());
                     }
+                    // Payouts count against earnings so buy/sell-back loops cannot inflate the ranking
+                    if (ShopIslandUtils.SHOPS_WORLD.equals(shop.getWorldName())) {
+                        PersistenceUtils.addShopEarningsToDatabase(shop.getUuid(), -shop.getSellPrice());
+                    }
                     ItemStack shopItem = shop.getItem().clone();
                     shopItem.setAmount(shop.getQuantity());
                     chestInventory.addItem(shopItem);
@@ -569,6 +571,7 @@ public class ShopInteract {
                         shopPlayer.sendMessage(
                                 ChatUtils.chatMessage(Lang.getFor(shopPlayer, "shop.owner_sold_notify", "player", player.getName(), "quantity", shop.getQuantity(), "item", itemname, "price", formatter.format(shop.getSellPrice()))));
                     }
+                    ShopUtils.refreshShopStockAt(shop.getLocation());
                 }
             } else {
                 player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "inventory.not_enough")));
@@ -580,7 +583,7 @@ public class ShopInteract {
             if (shop.getUuid() != null) {
                 player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.cannot_destroy_others")));
             } else {
-                if (AranarthUtils.getPlayer(player.getUniqueId()).getCouncilRank() < 3) {
+                if (!player.hasPermission("aranarth.shop.modify")) {
                     player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.cannot_destroy_server")));
                 }
             }

@@ -142,7 +142,7 @@ public class Sandstorm extends SandAbility implements AddonAbility {
         }
 
         // Show particles at the source block
-        sourceBlock.getWorld().spawnParticle(Particle.DUST,
+        AranarthBendingUtils.spawnParticle(sourceBlock.getWorld(), Particle.DUST,
                 sourceBlock.getLocation().clone().add(0.5, 1.05, 0.5),
                 3, 0.25, 0.05, 0.25, 0,
                 dustPalette[0]
@@ -224,7 +224,8 @@ public class Sandstorm extends SandAbility implements AddonAbility {
         for (int i = 0; i < 45; i++) {
             double angle = random.nextDouble() * 2 * Math.PI;
             double r = random.nextDouble();
-            world.spawnParticle(
+            AranarthBendingUtils.spawnParticle(
+                    world,
                     Particle.DUST,
                     bx + r * Math.cos(angle),
                     by + random.nextDouble() * 1.2,
@@ -258,7 +259,7 @@ public class Sandstorm extends SandAbility implements AddonAbility {
             double dz = r * Math.sin(theta) * Math.sin(phi);
             Location loc = center.clone().add(dx, dy, dz);
             if (!hasSolidBlockBetween(center, loc)) {
-                world.spawnParticle(Particle.DUST, loc, 1, 0, 0, 0, 0,
+                AranarthBendingUtils.spawnParticle(world, Particle.DUST, loc, 1, 0, 0, 0, 0,
                         dustPalette[random.nextInt(dustPalette.length)]);
             }
         }
@@ -274,7 +275,7 @@ public class Sandstorm extends SandAbility implements AddonAbility {
             double dz = rSample * Math.sin(theta) * Math.sin(phi);
             Location loc = center.clone().add(dx, dy, dz);
             if (!loc.getBlock().getType().isSolid()) {
-                world.spawnParticle(Particle.DUST, loc, 1, 0, 0, 0, 0,
+                AranarthBendingUtils.spawnParticle(world, Particle.DUST, loc, 1, 0, 0, 0, 0,
                         dustPalette[random.nextInt(dustPalette.length)]);
             }
         }

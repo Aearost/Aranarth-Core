@@ -1,7 +1,6 @@
 package com.aearost.aranarthcore.commands.council;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -9,6 +8,7 @@ import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.LangManager;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -25,7 +25,7 @@ public class CommandAC implements CommandExecutor {
 	/**
 	 * Sub-commands that are destructive or affect the whole server, limited to Council rank 3 and the console.
 	 */
-	private static final Set<String> OWNER_SUBCOMMANDS = Set.of("disband", "reload", "reloadlang", "dateset", "discordreload");
+	private static final Set<String> OWNER_SUBCOMMANDS = Set.of("disband", "reload", "reloadlang", "dateset", "discordreload", "dominionrank", "disable", "enable");
 
 	/**
 	 * @param sender The user that entered the command.
@@ -37,14 +37,11 @@ public class CommandAC implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
-			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			boolean isCouncil = aranarthPlayer.getCouncilRank() > 0;
-			boolean isArchitect = aranarthPlayer.getArchitectRank() >= 1;
-			if (!isCouncil && !isArchitect) {
+			if (!player.hasPermission("aranarth.ac")) {
 				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return false;
 			}
-			if (!isCouncil && isArchitect) {
+			if (!player.hasPermission("aranarth.ac.council")) {
 				if (args.length == 0 || (!args[0].equalsIgnoreCase("msg") && !args[0].equalsIgnoreCase("speed")
 						&& !args[0].equalsIgnoreCase("architect"))) {
 					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
@@ -77,7 +74,7 @@ public class CommandAC implements CommandExecutor {
 				return true;
 			}
 			// Destructive and server-wide sub-commands are limited to the highest Council rank
-			if (OWNER_SUBCOMMANDS.contains(subCommand) && AranarthUtils.getPlayer(player.getUniqueId()).getCouncilRank() < 3) {
+			if (OWNER_SUBCOMMANDS.contains(subCommand) && !player.hasPermission("aranarth.ac.owner")) {
 				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return true;
 			}
@@ -161,6 +158,25 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandOG.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("worldevent")) {
 			commandResult = CommandWorldEvent.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("dominionrank")) {
+			commandResult = CommandDominionRank.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("disable") || args[0].equalsIgnoreCase("enable")) {
+			boolean isDisabling = subCommand.equals("disable");
+			if (args.length != 2) {
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac " + subCommand + " <world name>")));
+			} else {
+				World world = Bukkit.getWorld(args[1]);
+				// A world can still be re-enabled after it has been unloaded
+				String worldName = world != null ? world.getName() : args[1];
+				if (world == null && (isDisabling || !AranarthUtils.isWorldDisabled(worldName))) {
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "admin.world_not_found", "name", args[1])));
+				} else if (AranarthUtils.setWorldDisabled(worldName, isDisabling)) {
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, isDisabling ? "ac.world_disabled" : "ac.world_enabled", "world", worldName)));
+				} else {
+					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, isDisabling ? "ac.world_already_disabled" : "ac.world_not_disabled", "world", worldName)));
+				}
+			}
+			commandResult = true;
 		} else if (args[0].equalsIgnoreCase("disband")) {
 			if (args.length < 2) {
 				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.invalid_syntax", "usage", "ac disband <dominion name>")));

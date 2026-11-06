@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.enums.JobType;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.JobData;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -12,6 +13,8 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -32,12 +35,41 @@ public class JobUtils {
     // Builder pay is only given for blocks that are still in place after this delay
     public static final long BUILDER_PAY_DELAY_MS = 3 * 60 * 1000L;
     private static final ArrayDeque<PendingBuild> pendingBuilds = new ArrayDeque<>();
+    public static final long EARNINGS_SUMMARY_INTERVAL_MS = 10 * 1000L;
+    private static final Map<UUID, Double> recentEarnings = new HashMap<>();
+    private static final Map<UUID, Long> earningsWindowStart = new HashMap<>();
 
     /**
      * A placed block whose Builder pay is held until it has stayed in place long enough.
      */
     private record PendingBuild(UUID playerUuid, UUID worldUuid, int x, int y, int z, Material material,
                                 double basePay, long placedAt) {
+    }
+
+    private static final long JOIN_COOLDOWN_MS = 3_600_000L; // 1 hour
+
+    /**
+     * Players can leave a job at any time, but must wait after leaving one before joining another.
+     * @param ap The player.
+     * @return The time left before the player can join a job, or 0 if they can join now.
+     */
+    public static long getJoinCooldownRemaining(AranarthPlayer ap) {
+        if (ap.isInAdminMode()) {
+            return 0;
+        }
+        long remaining = JOIN_COOLDOWN_MS - (System.currentTimeMillis() - ap.getJobData().getLastLeftAt());
+        return Math.max(0, remaining);
+    }
+
+    /**
+     * @param remaining The cooldown left, in milliseconds.
+     * @return The cooldown formatted as "1h 5m" or "12m".
+     */
+    public static String formatCooldown(long remaining) {
+        long totalMinutes = Math.max(1, (remaining + 59_999L) / 60_000L);
+        long hours = totalMinutes / 60;
+        long minutes = totalMinutes % 60;
+        return hours > 0 ? hours + "h " + minutes + "m" : minutes + "m";
     }
 
     public static int getMaxJobs(int rank) {
@@ -127,12 +159,17 @@ public class JobUtils {
         double levelMultiplier = getLevelMultiplier(level);
         double rankMultiplier = getRankPayMultiplier(ap.getRank());
         double actualPay = basePay * levelMultiplier * rankMultiplier;
+        // The Aquinvor rainbow increases job earnings, but not job XP
+        if (AranarthUtils.isRainbowActive()) {
+            actualPay *= AranarthUtils.RAINBOW_MULTIPLIER;
+        }
 
         ap.setBalance(ap.getBalance() + actualPay);
         PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
         if (NetworkManager.isActive()) {
             NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), actualPay);
         }
+        trackEarnings(player.getUniqueId(), actualPay);
 
         if (level < 10) {
             double xpGain = basePay * 100;
@@ -160,11 +197,11 @@ public class JobUtils {
     }
 
     /**
-     * Holds the Builder pay for a placed block until it has stayed in place for BUILDER_PAY_DELAY_MS.
+     * Holds the Builder pay for a block until it has stayed as the expected material for BUILDER_PAY_DELAY_MS.
      */
-    public static void queueBuilderPay(Player player, Block block, double basePay) {
+    public static void queueBuilderPay(Player player, Block block, Material expectedMaterial, double basePay) {
         pendingBuilds.addLast(new PendingBuild(player.getUniqueId(), block.getWorld().getUID(), block.getX(), block.getY(),
-                block.getZ(), block.getType(), basePay, System.currentTimeMillis()));
+                block.getZ(), expectedMaterial, basePay, System.currentTimeMillis()));
     }
 
     /**
@@ -191,6 +228,54 @@ public class JobUtils {
             if (player != null) {
                 awardJob(player, JobType.BUILDER, entry.getValue());
             }
+        }
+    }
+
+    /**
+     * Adds job pay to the player's running total, starting a new summary window if one is not already running.
+     */
+    private static void trackEarnings(UUID playerUuid, double amount) {
+        if (amount <= 0) {
+            return;
+        }
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(playerUuid);
+        if (aranarthPlayer != null && aranarthPlayer.isJobsMessageDisabled()) {
+            return;
+        }
+        recentEarnings.merge(playerUuid, amount, Double::sum);
+        earningsWindowStart.putIfAbsent(playerUuid, System.currentTimeMillis());
+    }
+
+    /**
+     * Shows each player how much they earned from jobs once their summary window has elapsed.
+     */
+    public static void processEarningsSummaries() {
+        long now = System.currentTimeMillis();
+        Iterator<Map.Entry<UUID, Long>> iterator = earningsWindowStart.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<UUID, Long> entry = iterator.next();
+            UUID uuid = entry.getKey();
+            Player player = Bukkit.getPlayer(uuid);
+            if (player == null) {
+                iterator.remove();
+                recentEarnings.remove(uuid);
+                continue;
+            }
+            if (now - entry.getValue() < EARNINGS_SUMMARY_INTERVAL_MS) {
+                continue;
+            }
+            double earned = recentEarnings.getOrDefault(uuid, 0.0);
+            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+            boolean isMessageDisabled = aranarthPlayer != null && aranarthPlayer.isJobsMessageDisabled();
+            if (earned < 0.005 || isMessageDisabled) {
+                iterator.remove();
+                recentEarnings.remove(uuid);
+                continue;
+            }
+            player.sendActionBar(LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(
+                    Lang.getFor(player, "jobs.earned_recently", "amount", String.format(Locale.US, "%,.2f", earned)))));
+            recentEarnings.put(uuid, 0.0);
+            entry.setValue(now);
         }
     }
 

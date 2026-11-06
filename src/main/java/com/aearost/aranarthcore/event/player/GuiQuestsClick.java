@@ -1,57 +1,81 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.enums.QuestType;
+import com.aearost.aranarthcore.gui.GuiQuests;
+import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.QuestUtils;
-
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
-import java.util.UUID;
-
 /**
  * Handles clicks within the Aranarth Quests GUI.
- * Cancels all clicks, and claims quest rewards when completed quests are clicked.
  */
 public class GuiQuestsClick {
 
     public void execute(InventoryClickEvent e) {
         e.setCancelled(true);
-        if (!(e.getWhoClicked() instanceof Player player)) return;
-        if (e.getClickedInventory() == null) return;
+        if (!(e.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+        if (e.getClickedInventory() == null) {
+            return;
+        }
         // Only handle clicks on the GUI itself, not the player's own inventory
-        if (!e.getClickedInventory().equals(e.getView().getTopInventory())) return;
+        if (!e.getClickedInventory().equals(e.getView().getTopInventory())) {
+            return;
+        }
 
         int slot = e.getRawSlot();
-        UUID uuid = player.getUniqueId();
+        if (slot == GuiQuests.DAILY_BONUS_SLOT || slot == GuiQuests.WEEKLY_BONUS_SLOT) {
+            QuestType type = slot == GuiQuests.DAILY_BONUS_SLOT ? QuestType.DAILY : QuestType.WEEKLY;
+            if (QuestUtils.claimBoardBonus(player, type)) {
+                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+                GuiQuests.refresh(player, e.getView().getTopInventory());
+            }
+            return;
+        }
 
         QuestType type = null;
         int index = -1;
+        for (int i = 0; i < 3; i++) {
+            if (slot == GuiQuests.DAILY_SLOTS[i]) {
+                type = QuestType.DAILY;
+                index = i;
+            } else if (slot == GuiQuests.WEEKLY_SLOTS[i]) {
+                type = QuestType.WEEKLY;
+                index = i;
+            }
+        }
+        if (type == null || index >= QuestUtils.getQuests(player.getUniqueId(), type).size()) {
+            return;
+        }
 
-        // Daily quest slots: 4 → index 0, 11 → index 1, 15 → index 2
-        // Weekly quest slots: 29 → index 0, 33 → index 1, 40 → index 2
-        if (slot == 4) { type = QuestType.DAILY; index = 0; }
-        else if (slot == 11) { type = QuestType.DAILY; index = 1; }
-        else if (slot == 15) { type = QuestType.DAILY; index = 2; }
-        else if (slot == 29) { type = QuestType.WEEKLY; index = 0; }
-        else if (slot == 33) { type = QuestType.WEEKLY; index = 1; }
-        else if (slot == 40) { type = QuestType.WEEKLY; index = 2; }
+        boolean isCompleted = QuestUtils.getQuests(player.getUniqueId(), type).get(index).isCompleted();
+        if (isCompleted) {
+            if (QuestUtils.claimQuestReward(player, type, index)) {
+                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+                GuiQuests.refresh(player, e.getView().getTopInventory());
+            }
+            return;
+        }
 
-        if (type == null) return;
-
-        boolean completed = type == QuestType.DAILY
-                ? QuestUtils.isDailyCompleted(uuid, index)
-                : QuestUtils.isWeeklyCompleted(uuid, index);
-        boolean claimed = type == QuestType.DAILY
-                ? QuestUtils.isDailyClaimed(uuid, index)
-                : QuestUtils.isWeeklyClaimed(uuid, index);
-
-        if (!completed || claimed) return;
-
-        boolean success = QuestUtils.claimQuestReward(player, type, index);
-        if (!success) return;
-
-        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
-        player.closeInventory();
+        if (!e.isRightClick()) {
+            return;
+        }
+        switch (QuestUtils.reroll(player, type, index)) {
+            case SUCCESS -> {
+                player.playSound(player.getLocation(), Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1.0f, 1.2f);
+                GuiQuests.refresh(player, e.getView().getTopInventory());
+            }
+            case ALREADY_USED -> player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player,
+                    type == QuestType.DAILY ? "quest.reroll_used_daily" : "quest.reroll_used_weekly")));
+            case NOT_ENOUGH_MONEY -> player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "quest.reroll_no_money",
+                    "amount", "$" + QuestUtils.formatNumber(QuestUtils.getRerollCost(QuestUtils.getQuests(player.getUniqueId(), type).get(index))))));
+            case NONE_AVAILABLE -> player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "quest.reroll_none")));
+            default -> {
+            }
+        }
     }
 }

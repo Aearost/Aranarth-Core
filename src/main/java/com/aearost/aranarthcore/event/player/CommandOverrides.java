@@ -62,7 +62,7 @@ public class CommandOverrides {
             return;
         }
 
-        if (aranarthPlayer.getCouncilRank() != 3) {
+        if (!player.hasPermission("aranarth.whisper")) {
             if (parts[0].equals("/w")) {
                 player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
                 e.setCancelled(true);
@@ -72,13 +72,25 @@ public class CommandOverrides {
 
         // Prevent the command entirely
         if (parts[0].equals("/time") && AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
-            if (aranarthPlayer.getCouncilRank() < 2) {
+            if (!player.hasPermission("aranarth.time")) {
                 player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
             } else {
                 player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "commands.use_ac_time")));
             }
             e.setCancelled(true);
             return;
+        }
+
+        // Architects can only change their own game mode, and only in architect mode in spawn and the non-Survival worlds
+        if ((parts[0].equalsIgnoreCase("/gamemode") || parts[0].equalsIgnoreCase("/minecraft:gamemode"))
+                && !AranarthUtils.hasUnrestrictedGameMode(player)) {
+            boolean isTargetingOther = parts.length > 2 && !parts[2].equalsIgnoreCase(player.getName()) && !parts[2].equals("@s");
+            if (isTargetingOther || !aranarthPlayer.isInArchitectMode()
+                    || !AranarthUtils.canArchitectChangeGameMode(player.getWorld().getName())) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
+                e.setCancelled(true);
+                return;
+            }
         }
 
         // Prevent the command entirely
@@ -108,7 +120,7 @@ public class CommandOverrides {
                             PermissionUtils.evaluatePlayerPermissions(player);
                         }
                         // Saints always get their element change cooldown reset
-                        if (aranarthPlayer.getSaintRank() >= 1) {
+                        if (player.hasPermission("aranarth.element.cooldown")) {
                             BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
                             if (bendingPlayer != null) {
                                 bendingPlayer.removeCooldown("ChooseElement");

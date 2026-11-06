@@ -17,6 +17,10 @@ public class AvatarAbilityChange {
     public void execute(PlayerCommandPreprocessEvent e) {
         Player player = e.getPlayer();
         BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+        // Their bending data is still loading
+        if (bendingPlayer == null) {
+            return;
+        }
 
         String[] parts = e.getMessage().split(" ");
         if (parts.length > 1) {

@@ -217,10 +217,7 @@ public class PlotUtils {
             return false;
         }
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-        if (aranarthPlayer != null && aranarthPlayer.isInAdminMode()) {
-            return true;
-        }
-        if (aranarthPlayer != null && aranarthPlayer.isInArchitectMode() && isSpawnPlotLocation(loc)) {
+        if (aranarthPlayer != null && (aranarthPlayer.isInAdminMode() || aranarthPlayer.isInArchitectMode())) {
             return true;
         }
         return canBuild(player.getUniqueId(), loc.getBlockX(), loc.getBlockZ());
@@ -363,7 +360,7 @@ public class PlotUtils {
     }
 
     /**
-     * Provides the Saint tier used for plot limits and WorldEdit access. Architects count as Saint III.
+     * Provides the Saint tier used for plot limits. Architects count as Saint III.
      */
     public static int getSaintTier(AranarthPlayer aranarthPlayer) {
         int tier = aranarthPlayer.getSaintRank();

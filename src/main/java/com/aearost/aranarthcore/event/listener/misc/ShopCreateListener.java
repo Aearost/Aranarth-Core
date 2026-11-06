@@ -1,7 +1,6 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -132,8 +131,7 @@ public class ShopCreateListener implements Listener {
 			// If placing a Server Shop
 			else if (ChatUtils.stripColorFormatting(lines[0]).equals("[Server Shop]")) {
 				if (signState.getBlockData() instanceof WallSign wallSign) {
-					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-					if (aranarthPlayer.getCouncilRank() == 3) {
+					if (player.hasPermission("aranarth.shop.modify")) {
 						int[] validSignFormatResult = validSignFormat(lines, player, false);
 						// If all the lines were entered correctly
 						if (validSignFormatResult[1] == 0 && validSignFormatResult[2] == 0 && validSignFormatResult[3] == 0) {

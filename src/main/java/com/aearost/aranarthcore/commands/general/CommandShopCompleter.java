@@ -43,7 +43,7 @@ public class CommandShopCompleter implements TabCompleter {
 				return filterPlayers(args[1]);
 			}
 			// /shop biome <biome> - saint rank 1+ or council rank 1+
-			if (args[0].equalsIgnoreCase("biome") && (aranarthPlayer.getSaintRank() >= 1 || aranarthPlayer.getCouncilRank() >= 1 || aranarthPlayer.isInAdminMode())) {
+			if (args[0].equalsIgnoreCase("biome") && (player.hasPermission("aranarth.shop.biome") || aranarthPlayer.isInAdminMode())) {
 				return filter(BIOME_NAMES, args[1]);
 			}
 			// /shop invite <username> - shop owner only

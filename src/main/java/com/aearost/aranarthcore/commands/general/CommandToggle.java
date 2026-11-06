@@ -88,7 +88,7 @@ public class CommandToggle implements CommandExecutor {
 					if (aranarthPlayer.isUsingSpawnBoost()) {
 						aranarthPlayer.setUsingSpawnBoost(false);
 						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.spawnboost_disabled")));
-						if (AranarthUtils.isSpawnLocation(player.getLocation())) {
+						if (AranarthUtils.isProtectedSpawnLocation(player.getLocation())) {
 							player.clearActivePotionEffects();
 						}
 					} else {
@@ -157,14 +157,7 @@ public class CommandToggle implements CommandExecutor {
 					}
 				} else if (args[0].equalsIgnoreCase("compressor")) {
 					if (player.hasPermission("aranarth.compressor")) {
-						if (aranarthPlayer.isCompressingItems()) {
-							aranarthPlayer.setCompressingItems(false);
-							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.compressor_disabled")));
-						} else {
-							aranarthPlayer.setCompressingItems(true);
-							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.compressor_enabled")));
-						}
-						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+						AranarthUtils.toggleCompressor(player);
 					} else {
 						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.no_compressor_perk")));
 					}
@@ -324,7 +317,7 @@ public class CommandToggle implements CommandExecutor {
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("interactivechat")) {
-					boolean hasPerm = aranarthPlayer.getSaintRank() >= 2 || aranarthPlayer.getCouncilRank() > 0;
+					boolean hasPerm = player.hasPermission("aranarth.interactivechat");
 					if (!hasPerm) {
 						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 						return true;
@@ -411,8 +404,17 @@ public class CommandToggle implements CommandExecutor {
 						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.servertips_disabled")));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				} else if (args[0].equalsIgnoreCase("jobsmsg")) {
+					if (aranarthPlayer.isJobsMessageDisabled()) {
+						aranarthPlayer.setJobsMessageDisabled(false);
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.jobsmsg_enabled")));
+					} else {
+						aranarthPlayer.setJobsMessageDisabled(true);
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.jobsmsg_disabled")));
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("sit")) {
-					if (aranarthPlayer.getSaintRank() < 1 && aranarthPlayer.getCouncilRank() < 1) {
+					if (!player.hasPermission("aranarth.sit.toggle")) {
 						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 						return true;
 					}

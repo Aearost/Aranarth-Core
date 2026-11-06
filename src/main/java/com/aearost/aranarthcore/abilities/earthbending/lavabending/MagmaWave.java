@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.abilities.earthbending.lavabending;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.AbilityConfig;
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.LavaAbility;
@@ -300,11 +301,11 @@ public class MagmaWave extends LavaAbility implements AddonAbility {
         for (int i = 0; i < 12; i++) {
             double angle = rng.nextDouble() * Math.PI * 2;
             double r = 0.15 + rng.nextDouble() * 0.45;
-            center.getWorld().spawnParticle(Particle.DUST,
+            AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.DUST,
                     center.clone().add(Math.cos(angle) * r, rng.nextDouble() * 0.2, Math.sin(angle) * r),
                     1, 0, 0, 0, 0, SELECT_DUST);
         }
-        center.getWorld().spawnParticle(Particle.LAVA, center, 4, 0.2, 0.1, 0.2, 0);
+        AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.LAVA, center, 4, 0.2, 0.1, 0.2, 0);
     }
 
     public static boolean hasPendingSource(UUID uuid) {

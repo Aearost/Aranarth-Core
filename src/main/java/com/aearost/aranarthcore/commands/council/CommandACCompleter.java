@@ -6,8 +6,10 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatGameUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -32,8 +34,8 @@ import java.util.stream.Collectors;
 public class CommandACCompleter implements TabCompleter {
 
     private static final List<String> COUNCIL_OPTIONS = List.of(
-            "admin", "architect", "ban", "broadcast", "clearchat", "dateset", "discordreload", "give",
-            "home", "invsee", "invswap", "msg", "mute", "og", "perks", "punishments", "questnpc", "rankset",
+            "admin", "architect", "ban", "broadcast", "clearchat", "dateset", "disable", "discordreload", "dominionrank",
+            "enable", "give", "home", "invsee", "invswap", "msg", "mute", "og", "perks", "punishments", "questnpc", "rankset",
             "reload", "resetquest", "speed", "spy", "sudo", "time", "tp", "tpf", "tpw", "unban", "unmute",
             "unscramble", "vanish", "vpedit", "warn", "weather", "whereis", "worldevent"
     );
@@ -85,11 +87,8 @@ public class CommandACCompleter implements TabCompleter {
         boolean isAuthorized = false;
         boolean isArchitectOnly = false;
         if (sender instanceof Player player) {
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-            boolean isCouncil = aranarthPlayer.getCouncilRank() > 0;
-            boolean isArchitect = aranarthPlayer.getArchitectRank() >= 1;
-            isAuthorized = isCouncil || isArchitect;
-            isArchitectOnly = !isCouncil && isArchitect;
+            isAuthorized = player.hasPermission("aranarth.ac");
+            isArchitectOnly = isAuthorized && !player.hasPermission("aranarth.ac.council");
         } else if (sender instanceof ConsoleCommandSender) {
             isAuthorized = true;
         }
@@ -135,8 +134,7 @@ public class CommandACCompleter implements TabCompleter {
                         }
                         List<String> giveItems = new ArrayList<>(ITEM_NAMES);
                         if (sender instanceof Player givePlayer) {
-                            AranarthPlayer giveAranarthPlayer = AranarthUtils.getPlayer(givePlayer.getUniqueId());
-                            if (giveAranarthPlayer != null && giveAranarthPlayer.getCouncilRank() >= 2) {
+                            if (givePlayer.hasPermission("aranarth.give.coupon")) {
                                 giveItems.add("Coupon10");
                                 giveItems.add("Coupon30");
                                 Collections.sort(giveItems);
@@ -219,6 +217,26 @@ public class CommandACCompleter implements TabCompleter {
                 }
                 yield List.of();
             }
+            case "dominionrank" -> {
+                // Dominion names may contain spaces, so complete the name word by word, then the rank
+                String typedName = String.join(" ", Arrays.copyOfRange(args, 1, args.length - 1));
+                List<String> names = DominionUtils.getDominions().stream()
+                        .map(d -> ChatUtils.stripColorFormatting(d.getName()))
+                        .toList();
+                if (args.length >= 3 && names.stream().anyMatch(name -> name.equalsIgnoreCase(typedName))) {
+                    yield filter(List.of("1", "2", "3", "4", "5"), args[args.length - 1]);
+                }
+                String prefix = args.length == 2 ? "" : typedName + " ";
+                int wordIndex = args.length - 2;
+                yield names.stream()
+                        .filter(name -> name.toLowerCase().startsWith(prefix.toLowerCase()))
+                        .map(name -> name.split(" "))
+                        .filter(words -> words.length > wordIndex)
+                        .map(words -> words[wordIndex])
+                        .filter(word -> word.toLowerCase().startsWith(args[args.length - 1].toLowerCase()))
+                        .distinct()
+                        .collect(Collectors.toList());
+            }
             case "questnpc" -> args.length == 2 ? filter(List.of("spawn", "remove"), args[1]) : List.of();
             case "unscramble" -> {
                 if (args.length == 2) {
@@ -263,6 +281,16 @@ public class CommandACCompleter implements TabCompleter {
                 }
                 yield List.of();
             }
+            case "disable" -> {
+                if (args.length == 2) {
+                    yield filter(Bukkit.getWorlds().stream()
+                            .map(World::getName)
+                            .filter(name -> !AranarthUtils.isWorldDisabled(name))
+                            .collect(Collectors.toList()), args[1]);
+                }
+                yield List.of();
+            }
+            case "enable" -> args.length == 2 ? filter(AranarthUtils.getDisabledWorlds(), args[1]) : List.of();
             case "tp", "tpf" -> {
                 if (args.length == 2) {
                     yield List.of("username", "x");

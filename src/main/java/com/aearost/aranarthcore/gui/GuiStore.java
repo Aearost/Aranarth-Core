@@ -4,10 +4,15 @@ import com.aearost.aranarthcore.items.InvisibleItemFrame;
 import com.aearost.aranarthcore.objects.StorePage;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Material;
+import org.bukkit.DyeColor;
+import org.bukkit.Material;
+import org.bukkit.block.banner.Pattern;
+import org.bukkit.block.banner.PatternType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
@@ -28,7 +33,7 @@ public class GuiStore {
         meta.setDisplayName(ChatUtils.translateToColor("&f"));
         blank.setItemMeta(meta);
 
-        previous = new ItemStack(Material.RED_WOOL);
+        previous = new ItemStack(Material.BARRIER);
         ItemMeta previousMeta = previous.getItemMeta();
         previousMeta.setDisplayName(Lang.getFor(player, "gui.page_prev"));
         previous.setItemMeta(previousMeta);
@@ -127,6 +132,32 @@ public class GuiStore {
         return gui;
     }
 
+    /**
+     * Builds the banner icon of a Saint rank, matching the color of its prefix.
+     *
+     * @param bannerType The banner of the Saint rank's color.
+     * @param isLifetime Whether a heart should be added to the banner to show it is a lifetime rank.
+     * @return The Saint rank's banner icon.
+     */
+    private ItemStack buildSaintBanner(Material bannerType, boolean isLifetime) {
+        ItemStack banner = new ItemStack(bannerType);
+        BannerMeta bannerMeta = (BannerMeta) banner.getItemMeta();
+        if (isLifetime) {
+            // A red diamond and circle form the heart, then a V cut in the banner's color splits its top into two lobes
+            DyeColor baseColor = switch (bannerType) {
+                case YELLOW_BANNER -> DyeColor.YELLOW;
+                case LIGHT_BLUE_BANNER -> DyeColor.LIGHT_BLUE;
+                default -> DyeColor.PINK;
+            };
+            bannerMeta.addPattern(new Pattern(DyeColor.RED, PatternType.RHOMBUS));
+            bannerMeta.addPattern(new Pattern(DyeColor.RED, PatternType.CIRCLE));
+            bannerMeta.addPattern(new Pattern(baseColor, PatternType.TRIANGLE_TOP));
+        }
+        bannerMeta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
+        banner.setItemMeta(bannerMeta);
+        return banner;
+    }
+
     private Inventory initializeGuiSaint(Player player) {
         Inventory gui = GuiHolder.create(player, 36, Lang.getFor(player, "gui.store.title_saint"));
 
@@ -165,7 +196,7 @@ public class GuiStore {
         gui.setItem(35, blank);
 
         // Specified Slots
-        ItemStack saint1monthly = new ItemStack(Material.PINK_CONCRETE_POWDER);
+        ItemStack saint1monthly = buildSaintBanner(Material.YELLOW_BANNER, false);
         ItemMeta saint1monthlyMeta = saint1monthly.getItemMeta();
         saint1monthlyMeta.setDisplayName(Lang.getFor(player, "gui.store.saint1_monthly"));
         List<String> saint1monthlyLore = new ArrayList<>();
@@ -174,7 +205,7 @@ public class GuiStore {
         saint1monthly.setItemMeta(saint1monthlyMeta);
         gui.setItem(11, saint1monthly);
 
-        ItemStack saint2monthly = new ItemStack(Material.MAGENTA_CONCRETE_POWDER);
+        ItemStack saint2monthly = buildSaintBanner(Material.LIGHT_BLUE_BANNER, false);
         ItemMeta saint2monthlyMeta = saint2monthly.getItemMeta();
         saint2monthlyMeta.setDisplayName(Lang.getFor(player, "gui.store.saint2_monthly"));
         List<String> saint2monthlyLore = new ArrayList<>();
@@ -183,7 +214,7 @@ public class GuiStore {
         saint2monthly.setItemMeta(saint2monthlyMeta);
         gui.setItem(13, saint2monthly);
 
-        ItemStack saint3monthly = new ItemStack(Material.PURPLE_CONCRETE_POWDER);
+        ItemStack saint3monthly = buildSaintBanner(Material.PINK_BANNER, false);
         ItemMeta saint3monthlyMeta = saint3monthly.getItemMeta();
         saint3monthlyMeta.setDisplayName(Lang.getFor(player, "gui.store.saint3_monthly"));
         List<String> saint3monthlyLore = new ArrayList<>();
@@ -192,7 +223,7 @@ public class GuiStore {
         saint3monthly.setItemMeta(saint3monthlyMeta);
         gui.setItem(15, saint3monthly);
 
-        ItemStack saint1 = new ItemStack(Material.PINK_CONCRETE);
+        ItemStack saint1 = buildSaintBanner(Material.YELLOW_BANNER, true);
         ItemMeta saint1Meta = saint1.getItemMeta();
         saint1Meta.setDisplayName(Lang.getFor(player, "gui.store.saint1"));
         List<String> saint1Lore = new ArrayList<>();
@@ -201,7 +232,7 @@ public class GuiStore {
         saint1.setItemMeta(saint1Meta);
         gui.setItem(20, saint1);
 
-        ItemStack saint2 = new ItemStack(Material.MAGENTA_CONCRETE);
+        ItemStack saint2 = buildSaintBanner(Material.LIGHT_BLUE_BANNER, true);
         ItemMeta saint2Meta = saint2.getItemMeta();
         saint2Meta.setDisplayName(Lang.getFor(player, "gui.store.saint2"));
         List<String> saint2Lore = new ArrayList<>();
@@ -210,7 +241,7 @@ public class GuiStore {
         saint2.setItemMeta(saint2Meta);
         gui.setItem(22, saint2);
 
-        ItemStack saint3 = new ItemStack(Material.PURPLE_CONCRETE);
+        ItemStack saint3 = buildSaintBanner(Material.PINK_BANNER, true);
         ItemMeta saint3Meta = saint3.getItemMeta();
         saint3Meta.setDisplayName(Lang.getFor(player, "gui.store.saint3"));
         List<String> saint3Lore = new ArrayList<>();

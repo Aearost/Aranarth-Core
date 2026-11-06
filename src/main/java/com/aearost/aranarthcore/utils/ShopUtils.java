@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.utils;
 
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Shop;
 import org.bukkit.Location;
@@ -173,6 +174,7 @@ public class ShopUtils {
         }
 
         initializeShopHologram(newShop);
+        refreshShopStock(newShop);
         e.getPlayer().playSound(e.getPlayer(), Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
     }
 
@@ -488,16 +490,39 @@ public class ShopUtils {
     }
 
     /**
-     * Computes the quantity of the shop's item currently in the shop chest.
+     * Provides the full inventory of the shop's chest, including both halves of a double chest.
+     * @param shop The player shop.
+     * @return The chest inventory, or null if the shop has no container.
      */
-    public static int computeChestQuantityOfItem(Shop shop) {
-        BlockState chestBlockState = getChestBlockForSign(shop.getLocation().getBlock()).getState();
-        Container container = (Container) chestBlockState;
+    public static Inventory getShopChestInventory(Shop shop) {
+        Block chestBlock = getChestBlockForSign(shop.getLocation().getBlock());
+        if (chestBlock == null || !(chestBlock.getState() instanceof Container container)) {
+            return null;
+        }
         Inventory chestInventory = container.getInventory();
         if (chestInventory.getHolder() instanceof DoubleChest doubleChest) {
             chestInventory = doubleChest.getInventory();
         }
-        boolean shopItemIsShulker = isShulkerBox(shop.getItem());
+        return chestInventory;
+    }
+
+    /**
+     * Determines whether customers can transact with the shop item inside shulker boxes in the shop chest.
+     * @param shop The player shop.
+     * @return True if shulker box contents in the shop chest count toward the shop.
+     */
+    public static boolean isChestShulkerStockEnabled(Shop shop) {
+        return shop.getUuid() != null && !isShulkerBox(shop.getItem()) && PermissionUtils.hasShulkerAssist(shop.getUuid());
+    }
+
+    /**
+     * Computes the quantity of the shop's item currently in the shop chest.
+     */
+    public static int computeChestQuantityOfItem(Shop shop) {
+        Inventory chestInventory = getShopChestInventory(shop);
+        if (chestInventory == null) {
+            return 0;
+        }
         int quantity = 0;
         for (ItemStack item : chestInventory.getContents()) {
             if (item == null || item.getType() == Material.AIR) continue;
@@ -506,17 +531,29 @@ public class ShopUtils {
                 quantity += item.getAmount();
             }
         }
-        if (!shopItemIsShulker) {
-            for (ItemStack item : chestInventory.getContents()) {
-                if (!isShulkerBox(item)) continue;
-                BlockStateMeta bsm = (BlockStateMeta) item.getItemMeta();
-                ShulkerBox shulker = (ShulkerBox) bsm.getBlockState();
-                for (ItemStack shulkerItem : shulker.getInventory().getContents()) {
-                    if (shulkerItem == null) continue;
-                    boolean isSameCropSeed = shulkerItem.getType() == shop.getItem().getType() && CropUtils.isCropSeed(shulkerItem.getType());
-                    if (shulkerItem.isSimilar(shop.getItem()) || isSameCropSeed) {
-                        quantity += shulkerItem.getAmount();
-                    }
+        if (isChestShulkerStockEnabled(shop)) {
+            quantity += countShopItemInShulkers(chestInventory, shop);
+        }
+        return quantity;
+    }
+
+    /**
+     * Counts the shop's item stored inside shulker boxes in the given inventory.
+     * @param inventory The inventory holding the shulker boxes.
+     * @param shop The shop.
+     * @return The quantity of the shop item inside shulker boxes.
+     */
+    private static int countShopItemInShulkers(Inventory inventory, Shop shop) {
+        int quantity = 0;
+        for (ItemStack item : inventory.getContents()) {
+            if (!isShulkerBox(item)) continue;
+            BlockStateMeta bsm = (BlockStateMeta) item.getItemMeta();
+            ShulkerBox shulker = (ShulkerBox) bsm.getBlockState();
+            for (ItemStack shulkerItem : shulker.getInventory().getContents()) {
+                if (shulkerItem == null) continue;
+                boolean isSameCropSeed = shulkerItem.getType() == shop.getItem().getType() && CropUtils.isCropSeed(shulkerItem.getType());
+                if (shulkerItem.isSimilar(shop.getItem()) || isSameCropSeed) {
+                    quantity += shulkerItem.getAmount();
                 }
             }
         }
@@ -524,27 +561,87 @@ public class ShopUtils {
     }
 
     /**
+     * Determines whether the shop chest holds the shop item inside shulker boxes.
+     * @param shop The player shop.
+     * @return True if any shulker box in the shop chest contains the shop item.
+     */
+    public static boolean hasShopItemInChestShulkers(Shop shop) {
+        if (isShulkerBox(shop.getItem())) {
+            return false;
+        }
+        Inventory chestInventory = getShopChestInventory(shop);
+        return chestInventory != null && countShopItemInShulkers(chestInventory, shop) > 0;
+    }
+
+    /**
      * Computes the free space for the shop's item in the shop chest.
+     * Sold items are only ever placed in loose chest slots, never inside shulker boxes.
      */
     public static int computeChestFreeSpaceForItem(Shop shop) {
-        BlockState chestBlockState = getChestBlockForSign(shop.getLocation().getBlock()).getState();
-        Container container = (Container) chestBlockState;
-        Inventory chestInventory = container.getInventory();
-        if (chestInventory.getHolder() instanceof DoubleChest doubleChest) {
-            chestInventory = doubleChest.getInventory();
+        Inventory chestInventory = getShopChestInventory(shop);
+        if (chestInventory == null) {
+            return 0;
         }
+        int maxStackSize = shop.getItem().getMaxStackSize();
         int free = 0;
-        for (ItemStack item : chestInventory.getContents()) {
+        for (ItemStack item : chestInventory.getStorageContents()) {
             if (item == null || item.getType() == Material.AIR) {
-                free += 64;
+                free += maxStackSize;
                 continue;
             }
             boolean isSameCropSeed = item.getType() == shop.getItem().getType() && CropUtils.isCropSeed(item.getType());
             if (item.isSimilar(shop.getItem()) || isSameCropSeed) {
-                free += item.getMaxStackSize() - item.getAmount();
+                free += Math.max(0, item.getMaxStackSize() - item.getAmount());
             }
         }
         return free;
+    }
+
+    /**
+     * Recounts the cached stock and free space of a player shop on the shops world, so the shop search stays accurate.
+     * @param shop The shop.
+     */
+    public static void refreshShopStock(Shop shop) {
+        if (shop == null || shop.getUuid() == null || !ShopIslandUtils.SHOPS_WORLD.equals(shop.getWorldName())) {
+            return;
+        }
+        Location loc = shop.getLocation();
+        if (loc.getWorld() == null || !loc.getWorld().isChunkLoaded(loc.getBlockX() >> 4, loc.getBlockZ() >> 4)) {
+            return;
+        }
+        if (getShopChestInventory(shop) == null) {
+            return;
+        }
+        int stock = computeChestQuantityOfItem(shop);
+        int freeSpace = computeChestFreeSpaceForItem(shop);
+        if (stock == shop.getStock() && freeSpace == shop.getFreeSpace()) {
+            return;
+        }
+        shop.setStock(stock);
+        shop.setFreeSpace(freeSpace);
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishShopStockUpdate(shop);
+        }
+    }
+
+    /**
+     * Recounts the cached stock of every player shop on the shops world that is in a loaded chunk.
+     */
+    public static void refreshAllShopStock() {
+        for (Map.Entry<UUID, List<Shop>> entry : shops.entrySet()) {
+            if (entry.getKey() == null) continue;
+            for (Shop shop : entry.getValue()) {
+                refreshShopStock(shop);
+            }
+        }
+    }
+
+    /**
+     * Recounts the cached stock of the registered shop at the given sign location.
+     * @param signLocation The location of the shop sign.
+     */
+    public static void refreshShopStockAt(Location signLocation) {
+        refreshShopStock(getShopFromLocation(signLocation));
     }
 
     /**
@@ -616,46 +713,8 @@ public class ShopUtils {
         // Calculates the available space for the item, and the quantity already in the chest's inventory
         // Only for player shops
         if (shop.getUuid() != null) {
-            Inventory chestInventory = null;
-            BlockState chestBlockState = getChestBlockForSign(shop.getLocation().getBlock()).getState();
-            Container container = (Container) chestBlockState;
-            chestInventory = container.getInventory();
-            if (chestInventory.getHolder() instanceof DoubleChest doubleChest) {
-                chestInventory = doubleChest.getInventory(); // Get the full 54 slot inventory
-            }
-
-            for (ItemStack chestItem : chestInventory.getContents()) {
-                if (chestItem == null || chestItem.getType() == Material.AIR) {
-                    chestFreeInventorySpace += 64;
-                    continue;
-                }
-
-                // Each month changes the lore of crop seeds, must consider that
-                boolean isSameCropSeed = chestItem.getType() == shop.getItem().getType() && CropUtils.isCropSeed(chestItem.getType());
-                if (chestItem.isSimilar(shop.getItem()) || isSameCropSeed) {
-                    chestQuantityOfShopItem += chestItem.getAmount();
-                    int extraSpaceInStack = chestItem.getMaxStackSize() - chestItem.getAmount();
-                    if (extraSpaceInStack > 0) {
-                        chestFreeInventorySpace += extraSpaceInStack;
-                    }
-                }
-            }
-
-            // Also count items inside shulker boxes in the chest
-            if (!shopItemIsShulker) {
-                for (ItemStack chestItem : chestInventory.getContents()) {
-                    if (!isShulkerBox(chestItem)) continue;
-                    BlockStateMeta bsm = (BlockStateMeta) chestItem.getItemMeta();
-                    ShulkerBox shulker = (ShulkerBox) bsm.getBlockState();
-                    for (ItemStack shulkerItem : shulker.getInventory().getContents()) {
-                        if (shulkerItem == null) continue;
-                        boolean isSameCropSeed = shulkerItem.getType() == shop.getItem().getType() && CropUtils.isCropSeed(shulkerItem.getType());
-                        if (shulkerItem.isSimilar(shop.getItem()) || isSameCropSeed) {
-                            chestQuantityOfShopItem += shulkerItem.getAmount();
-                        }
-                    }
-                }
-            }
+            chestFreeInventorySpace = computeChestFreeSpaceForItem(shop);
+            chestQuantityOfShopItem = computeChestQuantityOfItem(shop);
         }
 
         // Buying

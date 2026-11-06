@@ -63,6 +63,15 @@ public class DominionLevelUtils {
     public static final long PENALTY_BUFFER_MS = 174_000_000L; // 145 MC days in ms
 
     /**
+     * The level and penalty clock a dominion had before its level was temporarily set by /ac dominionrank.
+     */
+    private record LevelOverride(int level, long dropTimestamp) {
+    }
+
+    // Dominion ID to its state before the override, cleared on the dominion's next re-evaluation
+    private static final Map<UUID, LevelOverride> levelOverrides = new HashMap<>();
+
+    /**
      * Money drained per 30-minute penalty scan cycle, indexed by the level the dominion
      * failed to maintain (index 0 = failed level 2, ..., index 3 = failed level 5).
      */
@@ -589,6 +598,7 @@ public class DominionLevelUtils {
             // Skip cross-server stubs
             if (dominion.getChunks().isEmpty()) continue;
             int newLevel = evaluateLevel(dominion);
+            if (resetLevelOverride(dominion, newLevel)) continue;
             int oldLevel = dominion.getDominionLevel();
 
             if (newLevel < oldLevel) {
@@ -622,6 +632,7 @@ public class DominionLevelUtils {
     public static void reevaluateDominion(Dominion dominion) {
         if (dominion.getChunks().isEmpty()) return; // cross-server stub, skip
         int newLevel = evaluateLevel(dominion);
+        if (resetLevelOverride(dominion, newLevel)) return;
         int oldLevel = dominion.getDominionLevel();
 
         if (newLevel < oldLevel) {
@@ -641,6 +652,84 @@ public class DominionLevelUtils {
             dominion.setDominionLevel(newLevel);
             DominionUtils.resizeFoodArray(dominion);
             notifyMembersLevelUp(dominion, newLevel);
+        }
+    }
+
+    /**
+     * Temporarily sets a dominion's level until its next re-evaluation, which moves it back to the
+     * level its criteria earn. Must be called on the server hosting the dominion.
+     *
+     * @param dominion The dominion.
+     * @param level    The temporary level (1-5).
+     */
+    public static void overrideLevel(Dominion dominion, int level) {
+        int oldLevel = dominion.getDominionLevel();
+        // Keep the state from before the first override so stacked overrides still reset to the real one
+        levelOverrides.putIfAbsent(dominion.getId(), new LevelOverride(oldLevel, dominion.getLevelDropTimestamp()));
+        if (level == oldLevel) {
+            return;
+        }
+        dominion.setDominionLevel(level);
+        // Only grow the food storage so lowering the level temporarily never deletes stored food
+        if (DominionUtils.getFoodArraySize(dominion) > dominion.getFood().length) {
+            DominionUtils.resizeFoodArray(dominion);
+        }
+        DominionUtils.updateDominion(dominion);
+        if (level > oldLevel) {
+            notifyMembersLevelUp(dominion, level);
+        } else {
+            notifyMembersLevelDown(dominion, level);
+        }
+    }
+
+    /**
+     * Resets a temporary level override back to the level the dominion's criteria earn.
+     * The penalty clock is judged against the level from before the override, so an override
+     * never starts or clears penalties on its own.
+     *
+     * @param dominion The dominion.
+     * @param newLevel The level the dominion's criteria earn.
+     * @return True if the dominion had an override that has now been reset.
+     */
+    private static boolean resetLevelOverride(Dominion dominion, int newLevel) {
+        LevelOverride override = levelOverrides.remove(dominion.getId());
+        if (override == null) {
+            return false;
+        }
+        int overriddenLevel = dominion.getDominionLevel();
+        dominion.setLevelDropTimestamp(override.dropTimestamp());
+
+        boolean droppedFromReal = newLevel < override.level();
+        if (droppedFromReal && dominion.getLevelDropTimestamp() == 0L) {
+            dominion.setLevelDropTimestamp(System.currentTimeMillis());
+        } else if (newLevel > override.level() && dominion.getLevelDropTimestamp() != 0L) {
+            dominion.setLevelDropTimestamp(0L);
+            notifyMembers(dominion, "&7Your dominion is no longer subject to penalties");
+        }
+
+        dominion.setDominionLevel(newLevel);
+        DominionUtils.resizeFoodArray(dominion);
+        if (newLevel > overriddenLevel) {
+            notifyMembersLevelUp(dominion, newLevel);
+        } else if (newLevel < overriddenLevel) {
+            if (droppedFromReal) {
+                notifyMembers(dominion, "&cYour dominion &e" + dominion.getName()
+                        + " &chas dropped to &6Level " + newLevel + "&7!"
+                        + " &cRegain 4/6 criteria within 1 in-game month to avoid penalties!");
+            } else {
+                notifyMembersLevelDown(dominion, newLevel);
+            }
+        }
+        DominionUtils.updateDominion(dominion);
+        return true;
+    }
+
+    private static void notifyMembersLevelDown(Dominion dominion, int newLevel) {
+        for (UUID memberUuid : dominion.getMembers()) {
+            Player member = Bukkit.getPlayer(memberUuid);
+            if (member != null && member.isOnline()) {
+                member.sendMessage(ChatUtils.chatMessage(Lang.getFor(member, "dominion.level_down", "level", newLevel)));
+            }
         }
     }
 

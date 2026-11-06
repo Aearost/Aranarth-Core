@@ -1,123 +1,1964 @@
-# Values are indexed by rank: [Peasant, Esquire, Knight, Baron, Count, Duke, Prince, King, Emperor]
-# A value of 0 means the quest does not appear in that rank's pool
-# Actual required amounts at assignment are programmatically randomised +/- 20% from these base values
+# Aranarth quests (#450). Generated from the reviewed design; edit values here to rebalance.
+# Rank arrays: [Peasant, Esquire, Knight, Baron, Count, Duke, Prince, King, Emperor]. 0 = not offered at that rank.
+# Amounts roll daily 0.75x-1.25x and weekly 1.0x-1.5x (unless fixed), and the reward follows the roll.
+# Targets: material/entity/biome/structure names; * is a wildcard and a leading ! excludes.
+# 'weight' makes a quest more likely to be picked than others (default 1).
+# Variant 'level' is the job level needed, 'alchemy_tier' the mcMMO Alchemy tier, 'month' limits it to one Aranarth month.
 
-daily:
-  - task: BREAK_LOG
-    values: [25, 70, 120, 190, 280, 420, 600, 850, 1100]
-  - task: MINE_STONE
-    values: [50, 128, 256, 350, 0, 0, 0, 0, 0]
-  - task: MINE_COAL_ORE
-    values: [0, 16, 35, 60, 100, 0, 0, 0, 0]
-  - task: MINE_IRON_ORE
-    values: [0, 20, 55, 96, 100, 140, 0, 0, 0]
-  - task: MINE_GOLD_ORE
-    values: [0, 0, 20, 40, 60, 100, 0, 0, 0]
-  - task: MINE_DIAMOND
-    values: [0, 0, 0, 15, 30, 55, 90, 130, 175]
-  - task: MINE_ANCIENT_DEBRIS
-    values: [0, 0, 0, 0, 0, 0, 5, 12, 20]
-  - task: BREAK_SAND
-    values: [32, 64, 100, 0, 0, 0, 0, 0, 0]
-  - task: BREAK_GRAVEL
-    values: [0, 48, 62, 80, 0, 0, 0, 0, 0]
-  - task: BREAK_DIRT
-    values: [32, 0, 0, 0, 0, 0, 0, 0, 0]
-  - task: HARVEST_CROPS
-    values: [100, 250, 450, 750, 1200, 2000, 3200, 5000, 8000]
-  - task: HARVEST_CROPS
-    values: [200, 0, 0, 0, 0, 0, 0, 0, 0]
-  - task: BREED_ANIMALS
-    values: [3, 10, 20, 40, 75, 125, 200, 300, 450]
-  - task: FISH
-    values: [5, 10, 18, 30, 48, 72, 100, 145, 200]
-  - task: KILL_HOSTILE_MOB
-    values: [8, 22, 40, 65, 100, 155, 230, 330, 475]
-  - task: KILL_PASSIVE_MOB
-    values: [5, 15, 28, 45, 70, 110, 165, 240, 340]
-  - task: KILL_WITH_MELEE
-    values: [15, 40, 75, 120, 185, 285, 425, 610, 875]
-  - task: KILL_WITH_RANGED
-    values: [12, 35, 65, 105, 160, 250, 375, 540, 775]
-  - task: KILL_SKELETON
-    values: [0, 4, 7, 10, 15, 22, 30, 43, 63]
-  - task: KILL_ZOMBIE
-    values: [0, 4, 7, 14, 21, 29, 40, 54, 78]
-  - task: KILL_CREEPER
-    values: [0, 0, 2, 5, 8, 12, 17, 23, 34]
-  - task: KILL_ENDERMAN
-    values: [0, 0, 0, 12, 20, 35, 55, 85, 125]
-  - task: KILL_SPIDER
-    values: [0, 0, 0, 0, 0, 10, 16, 23, 34]
-  - task: KILL_WITCH
-    values: [0, 0, 0, 0, 0, 4, 7, 10, 12]
-  - task: KILL_BLAZE
-    values: [0, 0, 0, 0, 0, 0, 6, 13, 21]
-  - task: KILL_GHAST
-    values: [0, 0, 0, 0, 0, 0, 0, 4, 9]
-  - task: KILL_COW
-    values: [5, 10, 18, 28, 40, 60, 85, 120, 170]
-  - task: KILL_PIG
-    values: [5, 10, 18, 28, 40, 60, 85, 120, 170]
-  - task: KILL_CHICKEN
-    values: [6, 12, 20, 30, 45, 65, 90, 130, 185]
-  - task: KILL_SHEEP
-    values: [0, 8, 15, 25, 38, 55, 78, 110, 160]
-  - task: KILL_RABBIT
-    values: [0, 0, 6, 11, 17, 25, 36, 52, 75]
-  - task: TRAVEL_BLOCKS
-    values: [500, 1200, 2500, 5000, 10000, 0, 0, 0, 0]
+settings:
+  daily-roll: [0.75, 1.25]
+  weekly-roll: [1.0, 1.5]
+  daily-xp-percent: 2.5
+  weekly-xp-percent: 10.0
+  master-daily-bonus: [50, 100, 250, 500, 900, 1350, 2000, 2700, 3750]
+  master-weekly-bonus: [200, 400, 800, 1650, 3000, 4500, 6600, 10000, 16500]
+  board-bonus-percent: 25
+  daily-item-chance: 0.20
+  weekly-item-chance: 0.30
+  contract-chance: 0.20
+  reroll-cost-fraction: 0.25
+  daily-cooldown-days: 3
+  weekly-cooldown-weeks: 2
+  daily-key-chance: [0.0, 0.05, 0.10, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65]
+  weekly-key-chance: [0.15, 0.20, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.80]
+  weekly-godly-chance: [0.05, 0.05, 0.05, 0.10, 0.10, 0.15, 0.15, 0.20, 0.25]
+  daily-epic-chance: 0.15
+  daily-bonus-epic-chance: [0.05, 0.08, 0.11, 0.14, 0.17, 0.20, 0.23, 0.26, 0.30]
+  legendary-recipe-chance: 0.33
+  pvp-victim-cooldown-minutes: 60
+  milk-cooldown-seconds: 10
 
-weekly:
-  - task: BREAK_LOG
-    values: [150, 400, 600, 950, 1400, 2100, 3000, 4250, 5500]
-  - task: HARVEST_CROPS
-    values: [500, 1250, 2250, 3750, 6000, 10000, 16000, 25000, 40000]
-  - task: BREED_ANIMALS
-    values: [15, 50, 100, 200, 375, 625, 1000, 1500, 2250]
-  - task: FISH
-    values: [25, 50, 90, 150, 240, 360, 500, 725, 1000]
-  - task: KILL_HOSTILE_MOB
-    values: [40, 110, 200, 325, 500, 775, 1150, 1650, 2400]
-  - task: KILL_PLAYER
-    values: [2, 3, 5, 8, 10, 12, 15, 18, 20]
-  - task: MINE_COAL_ORE
-    values: [0, 80, 175, 300, 500, 0, 0, 0, 0]
-  - task: MINE_IRON_ORE
-    values: [0, 0, 275, 480, 550, 0, 0, 0, 0]
-  - task: MINE_GOLD_ORE
-    values: [0, 0, 100, 200, 300, 500, 0, 0, 0]
-  - task: MINE_DIAMOND
-    values: [0, 0, 0, 75, 150, 275, 450, 650, 875]
-  - task: MINE_ANCIENT_DEBRIS
-    values: [0, 0, 0, 0, 0, 0, 25, 60, 100]
-  - task: KILL_WITH_MELEE
-    values: [0, 200, 375, 600, 925, 1425, 2125, 3050, 4375]
-  - task: KILL_WITH_RANGED
-    values: [0, 175, 325, 525, 800, 1250, 1875, 2700, 3875]
-  - task: KILL_SKELETON
-    values: [0, 0, 34, 50, 76, 109, 0, 0, 0]
-  - task: KILL_ZOMBIE
-    values: [0, 0, 34, 73, 105, 147, 0, 0, 0]
-  - task: KILL_CREEPER
-    values: [0, 0, 0, 25, 38, 59, 84, 0, 0]
-  - task: KILL_ENDERMAN
-    values: [0, 0, 0, 60, 100, 175, 275, 425, 625]
-  - task: KILL_SPIDER
-    values: [0, 0, 0, 0, 0, 53, 80, 115, 0]
-  - task: KILL_WITCH
-    values: [0, 0, 0, 0, 0, 20, 35, 50, 60]
-  - task: KILL_BLAZE
-    values: [0, 0, 0, 0, 0, 0, 31, 63, 105]
-  - task: KILL_GHAST
-    values: [0, 0, 0, 0, 0, 0, 0, 21, 46]
-  - task: KILL_COW
-    values: [25, 50, 90, 140, 200, 300, 425, 600, 850]
-  - task: KILL_PIG
-    values: [0, 50, 90, 140, 200, 300, 425, 600, 850]
-  - task: KILL_CHICKEN
-    values: [30, 60, 100, 150, 225, 325, 450, 650, 925]
-  - task: KILL_SHEEP
-    values: [0, 40, 75, 125, 190, 275, 390, 550, 800]
-  - task: KILL_RABBIT
-    values: [0, 0, 30, 54, 84, 126, 180, 258, 375]
+quests:
+  mi_stone:
+    jobs: [MINER]
+    tier: EASY
+    family: stone
+    acts: ["b:stone"]
+    trigger: BREAK
+    targets: ["STONE", "DEEPSLATE", "COBBLESTONE", "COBBLED_DEEPSLATE"]
+    level: 1
+    daily:
+      amount: [350, 450, 575, 675, 800, 1050, 1300, 1600, 1950]
+      reward: [240, 600, 1450, 2800, 4800, 7200, 10500, 14500, 20000]
+  mi_stonevar:
+    jobs: [MINER]
+    tier: EASY
+    family: stone
+    acts: ["b:stonevar"]
+    trigger: BREAK
+    level: 1
+    daily:
+      amount: [170, 230, 290, 340, 400, 525, 650, 800, 975]
+      reward: [240, 600, 1450, 2800, 4800, 7200, 10500, 14500, 20000]
+    variants:
+      andesite:
+        targets: ["ANDESITE"]
+      diorite:
+        targets: ["DIORITE"]
+      granite:
+        targets: ["GRANITE"]
+      tuff:
+        targets: ["TUFF"]
+      calcite:
+        targets: ["CALCITE"]
+      dripstone_block:
+        targets: ["DRIPSTONE_BLOCK"]
+      basalt:
+        targets: ["BASALT"]
+      blackstone:
+        targets: ["BLACKSTONE"]
+      end_stone:
+        targets: ["END_STONE"]
+        level: 7
+  mi_coal:
+    jobs: [MINER]
+    tier: STANDARD
+    family: ore-common
+    acts: ["o:coal"]
+    trigger: BREAK
+    targets: ["COAL_ORE", "DEEPSLATE_COAL_ORE"]
+    level: 1
+    daily:
+      amount: [40, 50, 65, 75, 90, 120, 150, 180, 220]
+      reward: [300, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+    weekly:
+      amount: [220, 290, 400, 500, 625, 825, 1050, 1300, 1550]
+      reward: [1200, 2600, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+  mi_copper:
+    jobs: [MINER]
+    tier: STANDARD
+    family: ore-common
+    acts: ["o:copper"]
+    trigger: BREAK
+    targets: ["COPPER_ORE", "DEEPSLATE_COPPER_ORE"]
+    level: 1
+    daily:
+      amount: [30, 40, 50, 55, 65, 85, 110, 130, 160]
+      reward: [300, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+    weekly:
+      amount: [170, 220, 300, 380, 460, 600, 775, 975, 1150]
+      reward: [1200, 2600, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+  mi_iron:
+    jobs: [MINER]
+    tier: STANDARD
+    family: ore-common
+    acts: ["o:iron"]
+    trigger: BREAK
+    targets: ["IRON_ORE", "DEEPSLATE_IRON_ORE"]
+    level: 1
+    daily:
+      amount: [0, 25, 30, 40, 45, 60, 75, 90, 110]
+      reward: [0, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+    weekly:
+      amount: [0, 140, 200, 250, 310, 410, 525, 650, 775]
+      reward: [0, 2600, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+  mi_redstone:
+    jobs: [MINER]
+    tier: STANDARD
+    family: ore-mid
+    acts: ["o:redstone"]
+    trigger: BREAK
+    targets: ["REDSTONE_ORE", "DEEPSLATE_REDSTONE_ORE"]
+    level: 1
+    daily:
+      amount: [0, 19, 25, 30, 35, 45, 55, 65, 80]
+      reward: [0, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+    weekly:
+      amount: [0, 110, 150, 190, 230, 310, 390, 480, 575]
+      reward: [0, 2600, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+  mi_lapis:
+    jobs: [MINER]
+    tier: STANDARD
+    family: ore-mid
+    acts: ["o:lapis"]
+    trigger: BREAK
+    targets: ["LAPIS_ORE", "DEEPSLATE_LAPIS_ORE"]
+    level: 1
+    daily:
+      amount: [0, 13, 16, 19, 20, 30, 35, 45, 55]
+      reward: [0, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+    weekly:
+      amount: [0, 70, 100, 130, 150, 200, 260, 320, 390]
+      reward: [0, 2600, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+  mi_quartz:
+    jobs: [MINER]
+    tier: STANDARD
+    family: ore-nether
+    acts: ["o:quartz"]
+    trigger: BREAK
+    targets: ["NETHER_QUARTZ_ORE"]
+    level: 1
+    daily:
+      amount: [0, 0, 65, 75, 90, 120, 150, 180, 220]
+      reward: [0, 0, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+    weekly:
+      amount: [0, 0, 400, 500, 625, 825, 1050, 1300, 1550]
+      reward: [0, 0, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+  mi_gold:
+    jobs: [MINER]
+    tier: HARD
+    family: ore-mid
+    acts: ["o:gold"]
+    trigger: BREAK
+    targets: ["GOLD_ORE", "DEEPSLATE_GOLD_ORE", "NETHER_GOLD_ORE"]
+    level: 1
+    daily:
+      amount: [0, 0, 14, 17, 20, 25, 35, 40, 50]
+      reward: [0, 0, 2700, 5250, 9000, 13500, 19500, 27000, 37500]
+    weekly:
+      amount: [0, 0, 90, 110, 140, 180, 230, 290, 350]
+      reward: [0, 0, 7800, 16500, 30000, 45000, 66000, 103500, 165000]
+  mi_amethyst:
+    jobs: [MINER]
+    tier: STANDARD
+    family: geode
+    acts: ["o:amethyst"]
+    trigger: BREAK
+    targets: ["LARGE_AMETHYST_BUD"]
+    level: 4
+    weekly:
+      amount: [0, 0, 100, 130, 150, 200, 260, 320, 390]
+      reward: [0, 0, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+  mi_diamond:
+    jobs: [MINER]
+    tier: HARD
+    family: ore-rare
+    acts: ["o:diamond"]
+    trigger: BREAK
+    targets: ["DIAMOND_ORE", "DEEPSLATE_DIAMOND_ORE"]
+    level: 4
+    daily:
+      amount: [0, 0, 0, 11, 13, 17, 20, 25, 30]
+      reward: [0, 0, 0, 5250, 9000, 13500, 19500, 27000, 37500]
+    weekly:
+      amount: [0, 0, 0, 75, 90, 120, 160, 190, 230]
+      reward: [0, 0, 0, 16500, 30000, 45000, 66000, 103500, 165000]
+  mi_emerald:
+    jobs: [MINER]
+    tier: HARD
+    family: ore-rare
+    acts: ["o:emerald"]
+    trigger: BREAK
+    targets: ["EMERALD_ORE", "DEEPSLATE_EMERALD_ORE"]
+    level: 7
+    weekly:
+      amount: [0, 0, 0, 15, 18, 25, 30, 40, 45]
+      reward: [0, 0, 0, 16500, 30000, 45000, 66000, 103500, 165000]
+  mi_debris:
+    jobs: [MINER]
+    tier: MASTER
+    family: ore-rare
+    acts: ["o:debris"]
+    trigger: BREAK
+    targets: ["ANCIENT_DEBRIS"]
+    level: 7
+    daily:
+      amount: [0, 0, 0, 0, 0, 4, 5, 7, 8]
+      reward: [0, 0, 0, 0, 0, 20000, 28500, 39500, 55000]
+    weekly:
+      amount: [0, 0, 0, 0, 0, 30, 40, 50, 60]
+      reward: [0, 0, 0, 0, 0, 66000, 97000, 152000, 242000]
+  mi_vein:
+    jobs: [MINER]
+    tier: STANDARD
+    family: ore-any
+    acts: ["o:coal", "o:copper", "o:iron", "o:redstone", "o:lapis", "o:quartz", "o:gold", "o:diamond", "o:emerald", "o:debris"]
+    trigger: BREAK
+    targets: ["COAL_ORE", "DEEPSLATE_COAL_ORE", "COPPER_ORE", "DEEPSLATE_COPPER_ORE", "IRON_ORE", "DEEPSLATE_IRON_ORE", "REDSTONE_ORE", "DEEPSLATE_REDSTONE_ORE", "LAPIS_ORE", "DEEPSLATE_LAPIS_ORE", "NETHER_QUARTZ_ORE", "GOLD_ORE", "DEEPSLATE_GOLD_ORE", "NETHER_GOLD_ORE", "DIAMOND_ORE", "DEEPSLATE_DIAMOND_ORE", "EMERALD_ORE", "DEEPSLATE_EMERALD_ORE", "ANCIENT_DEBRIS"]
+    level: 1
+    weekly:
+      amount: [340, 430, 600, 750, 925, 1200, 1550, 1950, 2350]
+      reward: [1200, 2600, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+  fa_harvest:
+    jobs: [FARMER]
+    tier: EASY
+    family: crop-any
+    acts: ["h:wheat", "h:carrot", "h:potato", "h:beet", "h:wart", "h:cocoa", "h:melon", "h:pumpkin", "h:berries"]
+    trigger: HARVEST
+    targets: ["WHEAT", "CARROTS", "POTATOES", "BEETROOTS", "NETHER_WART", "COCOA", "MELON", "PUMPKIN", "SWEET_BERRY_BUSH", "CAVE_VINES"]
+    level: 1
+    daily:
+      amount: [460, 600, 775, 900, 1050, 1400, 1750, 2150, 2600]
+      reward: [240, 600, 1450, 2800, 4800, 7200, 10500, 14500, 20000]
+    weekly:
+      amount: [2700, 3450, 4800, 6000, 7400, 9800, 12500, 15500, 18700]
+      reward: [950, 2100, 4150, 8800, 16000, 24000, 35000, 55000, 88000]
+  fa_crop:
+    jobs: [FARMER]
+    tier: STANDARD
+    family: crop-one
+    acts: ["h:wheat", "h:carrot", "h:potato", "h:beet", "h:wart", "h:cocoa"]
+    trigger: HARVEST
+    level: 1
+    daily:
+      amount: [290, 380, 480, 575, 650, 875, 1100, 1350, 1600]
+      reward: [300, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+    variants:
+      wheat:
+        targets: ["WHEAT"]
+      carrots:
+        targets: ["CARROTS"]
+      potatoes:
+        targets: ["POTATOES"]
+      beetroot:
+        targets: ["BEETROOTS"]
+      nether_wart:
+        targets: ["NETHER_WART"]
+        level: 4
+      cocoa:
+        targets: ["COCOA"]
+        level: 4
+  fa_block:
+    jobs: [FARMER]
+    tier: STANDARD
+    family: crop-block
+    acts: ["h:melon", "h:pumpkin", "h:cane", "h:cactus"]
+    trigger: HARVEST
+    level: 1
+    daily:
+      amount: [0, 190, 240, 280, 330, 430, 550, 675, 800]
+      reward: [0, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+    weekly:
+      amount: [0, 1100, 1500, 1900, 2300, 3050, 3900, 4850, 5900]
+      reward: [0, 2600, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+    variants:
+      melons:
+        targets: ["MELON"]
+      pumpkins:
+        targets: ["PUMPKIN"]
+      sugar_cane:
+        targets: ["SUGAR_CANE"]
+      cactus:
+        targets: ["CACTUS"]
+        level: 4
+  fa_berries:
+    jobs: [FARMER]
+    tier: STANDARD
+    family: berries
+    acts: ["h:berries"]
+    trigger: HARVEST
+    level: 1
+    daily:
+      amount: [0, 50, 65, 75, 90, 120, 150, 180, 220]
+      reward: [0, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+    variants:
+      sweet_berries:
+        targets: ["SWEET_BERRY_BUSH"]
+      glow_berries:
+        targets: ["CAVE_VINES"]
+        level: 4
+  fa_plant:
+    jobs: [FARMER]
+    tier: EASY
+    family: plant
+    acts: ["p:crop"]
+    trigger: PLANT
+    targets: ["WHEAT", "CARROTS", "POTATOES", "BEETROOTS", "NETHER_WART", "MELON_STEM", "PUMPKIN_STEM", "TORCHFLOWER_CROP", "PITCHER_CROP"]
+    level: 1
+    daily:
+      amount: [120, 150, 190, 230, 260, 350, 440, 550, 650]
+      reward: [240, 600, 1450, 2800, 4800, 7200, 10500, 14500, 20000]
+  fa_breed:
+    jobs: [FARMER]
+    tier: STANDARD
+    family: breed
+    acts: ["br"]
+    trigger: BREED
+    targets: []
+    level: 1
+    daily:
+      amount: [0, 65, 80, 95, 110, 140, 180, 220, 270]
+      reward: [0, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+    weekly:
+      amount: [0, 360, 500, 625, 775, 1000, 1300, 1600, 1950]
+      reward: [0, 2600, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+  fa_breedone:
+    jobs: [FARMER]
+    tier: STANDARD
+    family: breed-one
+    acts: ["br"]
+    trigger: BREED
+    level: 1
+    weekly:
+      amount: [0, 0, 300, 380, 460, 600, 775, 975, 1150]
+      reward: [0, 0, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+    variants:
+      cows:
+        targets: ["COW"]
+      sheep:
+        targets: ["SHEEP"]
+      pigs:
+        targets: ["PIG"]
+      chickens:
+        targets: ["CHICKEN"]
+      rabbits:
+        targets: ["RABBIT"]
+        level: 4
+      bees:
+        targets: ["BEE"]
+        level: 4
+      goats:
+        targets: ["GOAT"]
+        level: 4
+      horses:
+        targets: ["HORSE"]
+        level: 7
+  fa_milk:
+    jobs: [FARMER]
+    tier: STANDARD
+    family: husbandry
+    acts: ["u:milk"]
+    trigger: MILK
+    targets: ["COW", "GOAT"]
+    level: 1
+    daily:
+      amount: [0, 0, 40, 45, 55, 70, 90, 110, 140]
+      reward: [0, 0, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+  fa_shear:
+    jobs: [FARMER]
+    tier: STANDARD
+    family: husbandry
+    acts: ["u:shear"]
+    trigger: SHEAR
+    targets: ["SHEEP"]
+    level: 1
+    daily:
+      amount: [0, 0, 30, 40, 45, 60, 75, 90, 110]
+      reward: [0, 0, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+  fa_honey:
+    jobs: [FARMER]
+    tier: HARD
+    family: apiary
+    acts: ["u:honey"]
+    trigger: HONEY
+    targets: ["HONEY_BOTTLE", "HONEYCOMB"]
+    level: 4
+    daily:
+      amount: [0, 0, 0, 6, 7, 9, 11, 13, 16]
+      reward: [0, 0, 0, 5250, 9000, 13500, 19500, 27000, 37500]
+    weekly:
+      amount: [0, 0, 0, 40, 45, 60, 80, 95, 120]
+      reward: [0, 0, 0, 16500, 30000, 45000, 66000, 103500, 165000]
+  fa_butcher:
+    jobs: [FARMER]
+    tier: EASY
+    family: butcher
+    acts: ["k:cow", "k:pig", "k:chicken", "k:sheep", "k:rabbit"]
+    trigger: KILL
+    tags: [bred]
+    level: 1
+    daily:
+      amount: [12, 15, 19, 25, 25, 35, 45, 55, 65]
+      reward: [240, 600, 1450, 2800, 4800, 7200, 10500, 14500, 20000]
+    variants:
+      cows:
+        targets: ["COW"]
+      pigs:
+        targets: ["PIG"]
+      chickens:
+        targets: ["CHICKEN"]
+      sheep:
+        targets: ["SHEEP"]
+      rabbits:
+        targets: ["RABBIT"]
+  fa_bake:
+    jobs: [FARMER]
+    tier: STANDARD
+    family: kitchen
+    acts: ["c:bake"]
+    trigger: CRAFT
+    level: 4
+    daily:
+      amount: [0, 0, 0, 0, 0, 22, 33, 48, 72]
+      reward: [0, 0, 0, 0, 0, 9000, 13000, 18000, 25000]
+    variants:
+      cakes:
+        targets: ["CAKE"]
+        daily-amount: [0, 0, 0, 0, 0, 22, 33, 48, 72]
+      pumpkin_pies:
+        targets: ["PUMPKIN_PIE"]
+        daily-amount: [0, 0, 0, 0, 0, 88, 132, 192, 288]
+      bread:
+        targets: ["BREAD"]
+        daily-amount: [0, 0, 0, 0, 0, 176, 264, 384, 576]
+      cookies:
+        targets: ["COOKIE"]
+        daily-amount: [0, 0, 0, 0, 0, 940, 1410, 2048, 3072]
+  ex_dirt:
+    jobs: [EXCAVATOR]
+    tier: EASY
+    family: dig-common
+    acts: ["b:ex_dirt"]
+    trigger: BREAK
+    targets: ["DIRT", "GRASS_BLOCK", "COARSE_DIRT", "ROOTED_DIRT"]
+    level: 1
+    daily:
+      amount: [380, 500, 650, 750, 875, 1150, 1450, 1800, 2150]
+      reward: [240, 600, 1450, 2800, 4800, 7200, 10500, 14500, 20000]
+  ex_sand:
+    jobs: [EXCAVATOR]
+    tier: EASY
+    family: dig-common
+    acts: ["b:ex_sand"]
+    trigger: BREAK
+    targets: ["SAND"]
+    level: 1
+    daily:
+      amount: [350, 450, 575, 675, 800, 1050, 1300, 1600, 1950]
+      reward: [240, 600, 1450, 2800, 4800, 7200, 10500, 14500, 20000]
+    weekly:
+      amount: [2000, 2600, 3600, 4550, 5500, 7300, 9400, 11600, 14000]
+      reward: [950, 2100, 4150, 8800, 16000, 24000, 35000, 55000, 88000]
+  ex_gravel:
+    jobs: [EXCAVATOR]
+    tier: EASY
+    family: dig-common
+    acts: ["b:ex_gravel"]
+    trigger: BREAK
+    targets: ["GRAVEL"]
+    level: 1
+    daily:
+      amount: [190, 250, 320, 380, 440, 575, 725, 900, 1100]
+      reward: [240, 600, 1450, 2800, 4800, 7200, 10500, 14500, 20000]
+    weekly:
+      amount: [1100, 1450, 2000, 2500, 3100, 4100, 5200, 6400, 7800]
+      reward: [950, 2100, 4150, 8800, 16000, 24000, 35000, 55000, 88000]
+  ex_clay:
+    jobs: [EXCAVATOR]
+    tier: STANDARD
+    family: dig-water
+    acts: ["b:ex_clay"]
+    trigger: BREAK
+    targets: ["CLAY"]
+    level: 1
+    daily:
+      amount: [0, 130, 160, 190, 220, 290, 360, 450, 550]
+      reward: [0, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+    weekly:
+      amount: [0, 725, 1000, 1250, 1550, 2050, 2600, 3200, 3900]
+      reward: [0, 2600, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+  ex_mud:
+    jobs: [EXCAVATOR]
+    tier: STANDARD
+    family: dig-water
+    acts: ["b:ex_mud"]
+    trigger: BREAK
+    targets: ["MUD"]
+    level: 1
+    daily:
+      amount: [0, 190, 240, 280, 330, 430, 550, 675, 800]
+      reward: [0, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+  ex_snow:
+    jobs: [EXCAVATOR]
+    tier: STANDARD
+    family: dig-biome
+    acts: ["b:ex_snow"]
+    trigger: BREAK
+    targets: ["SNOW_BLOCK"]
+    level: 4
+    daily:
+      amount: [0, 190, 240, 280, 330, 430, 550, 675, 800]
+      reward: [0, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+  ex_redsand:
+    jobs: [EXCAVATOR]
+    tier: STANDARD
+    family: dig-biome
+    acts: ["b:ex_redsand"]
+    trigger: BREAK
+    targets: ["RED_SAND"]
+    level: 4
+    daily:
+      amount: [0, 0, 320, 380, 440, 575, 725, 900, 1100]
+      reward: [0, 0, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+    weekly:
+      amount: [0, 0, 2000, 2500, 3100, 4100, 5200, 6400, 7800]
+      reward: [0, 0, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+  ex_soul:
+    jobs: [EXCAVATOR]
+    tier: STANDARD
+    family: dig-nether
+    acts: ["b:ex_soul"]
+    trigger: BREAK
+    targets: ["SOUL_SAND", "SOUL_SOIL"]
+    level: 4
+    daily:
+      amount: [0, 0, 550, 650, 775, 1000, 1250, 1550, 1900]
+      reward: [0, 0, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+    weekly:
+      amount: [0, 0, 3500, 4400, 5400, 7100, 9100, 11300, 13700]
+      reward: [0, 0, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+  ex_podzol:
+    jobs: [EXCAVATOR]
+    tier: HARD
+    family: dig-biome
+    acts: ["b:ex_podzol"]
+    trigger: BREAK
+    targets: ["PODZOL", "MYCELIUM"]
+    level: 7
+    weekly:
+      amount: [0, 0, 0, 1500, 1850, 2450, 3100, 3850, 4700]
+      reward: [0, 0, 0, 16500, 30000, 45000, 66000, 103500, 165000]
+  ex_brush:
+    jobs: [EXCAVATOR]
+    tier: HARD
+    family: archaeology
+    acts: ["a:brush"]
+    trigger: BRUSH
+    targets: []
+    level: 7
+    daily:
+      amount: [0, 0, 10, 11, 13, 17, 20, 25, 30]
+      reward: [0, 0, 2700, 5250, 9000, 13500, 19500, 27000, 37500]
+    weekly:
+      amount: [0, 0, 60, 75, 90, 120, 160, 190, 230]
+      reward: [0, 0, 7800, 16500, 30000, 45000, 66000, 103500, 165000]
+  ex_sherd:
+    jobs: [EXCAVATOR]
+    tier: MASTER
+    family: archaeology
+    acts: ["a:brush"]
+    trigger: BRUSH
+    targets: ["*_POTTERY_SHERD"]
+    level: 10
+    weekly:
+      amount: [0, 0, 0, 0, 3, 5, 7, 9, 12]
+      reward: [0, 0, 0, 0, 44000, 66000, 97000, 152000, 242000]
+      fixed: true
+  lu_logs:
+    jobs: [LUMBERJACK]
+    tier: EASY
+    family: wood-any
+    acts: ["w:oak", "w:birch", "w:spruce", "w:poplar", "w:darkoak", "w:jungle", "w:acacia", "w:mangrove", "w:crimson", "w:warped", "w:cherry", "w:paleoak"]
+    trigger: BREAK
+    targets: ["OAK_LOG", "OAK_WOOD", "SPRUCE_LOG", "SPRUCE_WOOD", "BIRCH_LOG", "BIRCH_WOOD", "JUNGLE_LOG", "JUNGLE_WOOD", "ACACIA_LOG", "ACACIA_WOOD", "DARK_OAK_LOG", "DARK_OAK_WOOD", "MANGROVE_LOG", "MANGROVE_WOOD", "CHERRY_LOG", "CHERRY_WOOD", "PALE_OAK_LOG", "PALE_OAK_WOOD", "POPLAR_LOG", "POPLAR_WOOD", "CRIMSON_STEM", "CRIMSON_HYPHAE", "WARPED_STEM", "WARPED_HYPHAE"]
+    level: 1
+    daily:
+      amount: [75, 100, 130, 150, 180, 230, 290, 360, 430]
+      reward: [240, 600, 1450, 2800, 4800, 7200, 10500, 14500, 20000]
+    weekly:
+      amount: [450, 575, 800, 1000, 1250, 1650, 2100, 2600, 3100]
+      reward: [950, 2100, 4150, 8800, 16000, 24000, 35000, 55000, 88000]
+  lu_species:
+    jobs: [LUMBERJACK]
+    tier: STANDARD
+    family: wood-one
+    acts: ["w:oak", "w:birch", "w:spruce", "w:poplar", "w:darkoak", "w:jungle", "w:acacia", "w:mangrove", "w:crimson", "w:warped", "w:cherry", "w:paleoak"]
+    trigger: BREAK
+    level: 1
+    daily:
+      amount: [70, 95, 120, 140, 170, 220, 270, 340, 410]
+      reward: [300, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+    weekly:
+      amount: [420, 550, 750, 950, 1150, 1550, 1950, 2400, 2950]
+      reward: [1200, 2600, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+    variants:
+      oak:
+        targets: ["OAK_LOG", "OAK_WOOD"]
+      birch:
+        targets: ["BIRCH_LOG", "BIRCH_WOOD"]
+      spruce:
+        targets: ["SPRUCE_LOG", "SPRUCE_WOOD"]
+      poplar:
+        targets: ["POPLAR_LOG", "POPLAR_WOOD"]
+      dark_oak:
+        targets: ["DARK_OAK_LOG", "DARK_OAK_WOOD"]
+        level: 4
+      jungle:
+        targets: ["JUNGLE_LOG", "JUNGLE_WOOD"]
+        level: 4
+      acacia:
+        targets: ["ACACIA_LOG", "ACACIA_WOOD"]
+        level: 4
+      mangrove:
+        targets: ["MANGROVE_LOG", "MANGROVE_WOOD"]
+        level: 4
+      crimson_stems:
+        targets: ["CRIMSON_STEM", "CRIMSON_HYPHAE"]
+        level: 4
+      warped_stems:
+        targets: ["WARPED_STEM", "WARPED_HYPHAE"]
+        level: 4
+      cherry:
+        targets: ["CHERRY_LOG", "CHERRY_WOOD"]
+        level: 7
+      pale_oak:
+        targets: ["PALE_OAK_LOG", "PALE_OAK_WOOD"]
+        level: 7
+  lu_leaves:
+    jobs: [LUMBERJACK]
+    tier: EASY
+    family: canopy
+    acts: ["b:leaves"]
+    trigger: BREAK
+    targets: ["*_LEAVES"]
+    level: 1
+    daily:
+      amount: [150, 200, 260, 300, 350, 460, 575, 725, 875]
+      reward: [240, 600, 1450, 2800, 4800, 7200, 10500, 14500, 20000]
+  lu_shroom:
+    jobs: [LUMBERJACK]
+    tier: STANDARD
+    family: fungus
+    acts: ["b:shroom"]
+    trigger: BREAK
+    targets: ["MUSHROOM_STEM", "BROWN_MUSHROOM_BLOCK", "RED_MUSHROOM_BLOCK"]
+    level: 4
+    weekly:
+      amount: [0, 290, 400, 500, 625, 825, 1050, 1300, 1550]
+      reward: [0, 2600, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+  lu_sapling:
+    jobs: [LUMBERJACK]
+    tier: STANDARD
+    family: reforest
+    acts: ["p:sapling"]
+    trigger: PLANT
+    targets: ["*_SAPLING", "MANGROVE_PROPAGULE"]
+    level: 1
+    daily:
+      amount: [25, 30, 40, 45, 55, 70, 90, 110, 140]
+      reward: [300, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+  lu_grow:
+    jobs: [LUMBERJACK]
+    tier: HARD
+    family: reforest
+    acts: ["p:sapling"]
+    trigger: TREE_GROW
+    targets: []
+    level: 4
+    weekly:
+      amount: [0, 0, 90, 110, 140, 180, 230, 290, 350]
+      reward: [0, 0, 7800, 16500, 30000, 45000, 66000, 103500, 165000]
+  lu_sawmill:
+    jobs: [LUMBERJACK]
+    tier: STANDARD
+    family: sawmill
+    acts: ["c:saw"]
+    trigger: SAWMILL
+    targets: []
+    level: 4
+    daily:
+      amount: [0, 300, 380, 450, 525, 700, 875, 1100, 1300]
+      reward: [0, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+  lu_carpenter:
+    jobs: [LUMBERJACK]
+    tier: STANDARD
+    family: carpentry
+    acts: ["c:carp"]
+    trigger: CRAFT
+    level: 1
+    daily:
+      amount: [0, 65, 80, 95, 110, 140, 180, 220, 270]
+      reward: [0, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+    variants:
+      doors:
+        targets: ["OAK_DOOR", "SPRUCE_DOOR", "BIRCH_DOOR", "JUNGLE_DOOR", "ACACIA_DOOR", "DARK_OAK_DOOR", "MANGROVE_DOOR", "CHERRY_DOOR", "PALE_OAK_DOOR", "POPLAR_DOOR", "BAMBOO_DOOR", "CRIMSON_DOOR", "WARPED_DOOR"]
+      trapdoors:
+        targets: ["OAK_TRAPDOOR", "SPRUCE_TRAPDOOR", "BIRCH_TRAPDOOR", "JUNGLE_TRAPDOOR", "ACACIA_TRAPDOOR", "DARK_OAK_TRAPDOOR", "MANGROVE_TRAPDOOR", "CHERRY_TRAPDOOR", "PALE_OAK_TRAPDOOR", "POPLAR_TRAPDOOR", "BAMBOO_TRAPDOOR", "CRIMSON_TRAPDOOR", "WARPED_TRAPDOOR"]
+      fence_gates:
+        targets: ["OAK_FENCE_GATE", "SPRUCE_FENCE_GATE", "BIRCH_FENCE_GATE", "JUNGLE_FENCE_GATE", "ACACIA_FENCE_GATE", "DARK_OAK_FENCE_GATE", "MANGROVE_FENCE_GATE", "CHERRY_FENCE_GATE", "PALE_OAK_FENCE_GATE", "POPLAR_FENCE_GATE", "BAMBOO_FENCE_GATE", "CRIMSON_FENCE_GATE", "WARPED_FENCE_GATE"]
+      stairs:
+        targets: ["OAK_STAIRS", "SPRUCE_STAIRS", "BIRCH_STAIRS", "JUNGLE_STAIRS", "ACACIA_STAIRS", "DARK_OAK_STAIRS", "MANGROVE_STAIRS", "CHERRY_STAIRS", "PALE_OAK_STAIRS", "POPLAR_STAIRS", "BAMBOO_STAIRS", "CRIMSON_STAIRS", "WARPED_STAIRS", "BAMBOO_MOSAIC_STAIRS"]
+      chiseled_bookshelves:
+        targets: ["CHISELED_BOOKSHELF"]
+        level: 7
+  lu_feller:
+    jobs: [LUMBERJACK]
+    tier: STANDARD
+    family: feller
+    acts: ["w:oak", "w:birch", "w:spruce", "w:poplar", "w:darkoak", "w:jungle", "w:acacia", "w:mangrove", "w:crimson", "w:warped", "w:cherry", "w:paleoak"]
+    trigger: TREE_FELLER
+    targets: []
+    level: 4
+    daily:
+      amount: [0, 0, 25, 30, 35, 45, 55, 65, 80]
+      reward: [0, 0, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+  bu_place:
+    jobs: [BUILDER]
+    tier: EASY
+    family: build-any
+    acts: ["p:block"]
+    trigger: PLACE
+    targets: []
+    tags: [solid]
+    level: 1
+    daily:
+      amount: [290, 380, 480, 575, 650, 875, 1100, 1350, 1600]
+      reward: [240, 600, 1450, 2800, 4800, 7200, 10500, 14500, 20000]
+    weekly:
+      amount: [1700, 2150, 3000, 3800, 4600, 6100, 7800, 9700, 11700]
+      reward: [950, 2100, 4150, 8800, 16000, 24000, 35000, 55000, 88000]
+  bu_palette:
+    jobs: [BUILDER]
+    tier: STANDARD
+    family: build-mat
+    acts: ["p:block"]
+    trigger: PLACE
+    tags: [solid]
+    level: 1
+    daily:
+      amount: [60, 75, 95, 110, 130, 170, 220, 270, 320]
+      reward: [300, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+    weekly:
+      amount: [340, 430, 600, 750, 925, 1200, 1550, 1950, 2350]
+      reward: [1200, 2600, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+    variants:
+      brick_or_stone_brick:
+        targets: ["BRICKS", "BRICK_*", "STONE_BRICK*", "MOSSY_STONE_BRICK*", "CRACKED_STONE_BRICKS", "CHISELED_STONE_BRICKS"]
+      planks:
+        targets: ["*_PLANKS"]
+      glass:
+        targets: ["GLASS", "TINTED_GLASS", "*_STAINED_GLASS"]
+      wool:
+        targets: ["*_WOOL"]
+      concrete:
+        targets: ["*_CONCRETE"]
+        level: 4
+      terracotta:
+        targets: ["TERRACOTTA", "*_TERRACOTTA"]
+        level: 4
+      quartz:
+        targets: ["QUARTZ_*", "SMOOTH_QUARTZ*", "CHISELED_QUARTZ_BLOCK"]
+        level: 7
+      deepslate_bricks:
+        targets: ["DEEPSLATE_BRICK*", "DEEPSLATE_TILE*", "CRACKED_DEEPSLATE_*", "CHISELED_DEEPSLATE", "POLISHED_DEEPSLATE*"]
+        level: 7
+      copper:
+        targets: ["*COPPER*", "!*_ORE", "!RAW_COPPER_BLOCK"]
+        level: 7
+      prismarine:
+        targets: ["*PRISMARINE*"]
+        level: 7
+  bu_shape:
+    jobs: [BUILDER]
+    tier: STANDARD
+    family: build-shape
+    acts: ["p:block"]
+    trigger: PLACE
+    targets: ["*_STAIRS", "*_SLAB"]
+    tags: [solid]
+    level: 1
+    daily:
+      amount: [0, 150, 190, 230, 260, 350, 440, 550, 650]
+      reward: [0, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+  bu_path:
+    jobs: [BUILDER]
+    tier: EASY
+    family: landscaping
+    acts: ["u:path"]
+    trigger: DIRT_PATH
+    targets: []
+    level: 1
+    daily:
+      amount: [75, 100, 130, 150, 180, 230, 290, 360, 430]
+      reward: [240, 600, 1450, 2800, 4800, 7200, 10500, 14500, 20000]
+  bu_light:
+    jobs: [BUILDER]
+    tier: STANDARD
+    family: landscaping
+    acts: ["p:light"]
+    trigger: PLACE
+    targets: ["TORCH", "WALL_TORCH", "SOUL_TORCH", "SOUL_WALL_TORCH", "COPPER_TORCH", "COPPER_WALL_TORCH", "LANTERN", "SOUL_LANTERN", "COPPER_LANTERN", "*_COPPER_LANTERN"]
+    level: 1
+    daily:
+      amount: [0, 0, 80, 95, 110, 140, 180, 220, 270]
+      reward: [0, 0, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+  bu_variety:
+    jobs: [BUILDER]
+    tier: STANDARD
+    family: build-variety
+    acts: ["p:block"]
+    trigger: PLACE
+    targets: []
+    tags: [solid]
+    distinct: true
+    level: 4
+    weekly:
+      amount: [0, 0, 75, 95, 120, 150, 200, 240, 290]
+      reward: [0, 0, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+  bu_dominion:
+    jobs: [BUILDER]
+    tier: STANDARD
+    family: build-home
+    acts: ["p:block"]
+    trigger: PLACE
+    targets: []
+    tags: [solid, dominion]
+    level: 4
+    eligibility: bu_dominion
+    daily:
+      amount: [0, 200, 260, 300, 350, 460, 575, 725, 875]
+      reward: [0, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+    weekly:
+      amount: [0, 1150, 1600, 2000, 2450, 3250, 4150, 5200, 6200]
+      reward: [0, 2600, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+  bu_outpost:
+    jobs: [BUILDER]
+    tier: HARD
+    family: build-home
+    acts: ["p:block"]
+    trigger: PLACE
+    targets: []
+    tags: [solid, outpost]
+    level: 7
+    eligibility: bu_outpost
+    weekly:
+      amount: [0, 0, 0, 1200, 1500, 1950, 2500, 3100, 3750]
+      reward: [0, 0, 0, 16500, 30000, 45000, 66000, 103500, 165000]
+  bu_stonecut:
+    jobs: [BUILDER]
+    tier: STANDARD
+    family: mason
+    acts: ["c:stonecut"]
+    trigger: STONECUT
+    targets: []
+    level: 4
+    daily:
+      amount: [0, 300, 380, 450, 525, 700, 875, 1100, 1300]
+      reward: [0, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+  xp_walk:
+    jobs: [EXPLORER]
+    tier: EASY
+    family: travel
+    acts: ["t:walk"]
+    trigger: TRAVEL
+    targets: ["WALK"]
+    level: 1
+    daily:
+      amount: [775, 1000, 1300, 1500, 1750, 2300, 2900, 3600, 4300]
+      reward: [240, 600, 1450, 2800, 4800, 7200, 10500, 14500, 20000]
+  xp_ride:
+    jobs: [EXPLORER]
+    tier: STANDARD
+    family: travel-mount
+    acts: ["t:horse"]
+    trigger: TRAVEL
+    targets: ["HORSE"]
+    level: 1
+    daily:
+      amount: [0, 2200, 2800, 3300, 3850, 5000, 6400, 7800, 9500]
+      reward: [0, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+    weekly:
+      amount: [0, 12600, 17500, 22100, 27000, 35700, 45500, 56300, 68300]
+      reward: [0, 2600, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+  xp_boat:
+    jobs: [EXPLORER]
+    tier: STANDARD
+    family: travel-water
+    acts: ["t:boat"]
+    trigger: TRAVEL
+    targets: ["BOAT"]
+    level: 1
+    daily:
+      amount: [1200, 1600, 2000, 2350, 2750, 3600, 4550, 5600, 6800]
+      reward: [300, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+  xp_mount:
+    jobs: [EXPLORER]
+    tier: STANDARD
+    family: travel-mount
+    acts: ["t:mount"]
+    trigger: TRAVEL
+    targets: ["MOUNT"]
+    level: 4
+    eligibility: xp_mount
+    daily:
+      amount: [0, 0, 2400, 2850, 3300, 4300, 5500, 6700, 8100]
+      reward: [0, 0, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+  xp_elytra:
+    jobs: [EXPLORER]
+    tier: HARD
+    family: travel-air
+    acts: ["t:glide"]
+    trigger: TRAVEL
+    targets: ["GLIDE"]
+    level: 7
+    eligibility: xp_elytra
+    daily:
+      amount: [0, 0, 0, 0, 10600, 13800, 17500, 21500, 25900]
+      reward: [0, 0, 0, 0, 9000, 13500, 19500, 27000, 37500]
+    weekly:
+      amount: [0, 0, 0, 0, 73900, 97900, 124800, 154600, 187200]
+      reward: [0, 0, 0, 0, 30000, 45000, 66000, 103500, 165000]
+  xp_chests:
+    jobs: [EXPLORER]
+    tier: STANDARD
+    family: loot
+    acts: ["l:chest"]
+    trigger: LOOT
+    targets: []
+    level: 1
+    daily:
+      amount: [1, 2, 2, 3, 3, 4, 5, 7, 8]
+      reward: [300, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+    weekly:
+      amount: [8, 11, 15, 19, 25, 30, 40, 50, 60]
+      reward: [1200, 2600, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+  xp_nether:
+    jobs: [EXPLORER]
+    tier: HARD
+    family: loot
+    acts: ["l:chest"]
+    trigger: LOOT
+    targets: ["NETHER"]
+    level: 4
+    eligibility: xp_nether
+    weekly:
+      amount: [0, 0, 9, 11, 14, 18, 25, 30, 35]
+      reward: [0, 0, 7800, 16500, 30000, 45000, 66000, 103500, 165000]
+  xp_end:
+    jobs: [EXPLORER]
+    tier: MASTER
+    family: loot
+    acts: ["l:chest"]
+    trigger: LOOT
+    targets: ["THE_END"]
+    level: 7
+    eligibility: xp_end
+    weekly:
+      amount: [0, 0, 0, 0, 6, 8, 10, 12, 15]
+      reward: [0, 0, 0, 0, 44000, 66000, 97000, 152000, 242000]
+      fixed: true
+  xp_biomes:
+    jobs: [EXPLORER]
+    tier: STANDARD
+    family: biome
+    acts: ["t:walk", "t:horse", "t:boat", "t:mount", "t:glide"]
+    trigger: BIOME
+    distinct: true
+    level: 1
+    weekly:
+      amount: [14, 18, 25, 30, 40, 50, 65, 80, 100]
+      reward: [1200, 2600, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+    variants:
+      common:
+        targets: ["PLAINS", "SUNFLOWER_PLAINS", "FOREST", "FLOWER_FOREST", "BIRCH_FOREST", "DARK_FOREST", "TAIGA", "SNOWY_PLAINS", "SNOWY_TAIGA", "SAVANNA", "SAVANNA_PLATEAU", "DESERT", "SWAMP", "RIVER", "FROZEN_RIVER", "BEACH", "SNOWY_BEACH", "STONY_SHORE", "OCEAN", "DEEP_OCEAN", "WARM_OCEAN", "LUKEWARM_OCEAN", "DEEP_LUKEWARM_OCEAN", "COLD_OCEAN", "DEEP_COLD_OCEAN", "FROZEN_OCEAN", "DEEP_FROZEN_OCEAN", "MEADOW", "WINDSWEPT_HILLS", "WINDSWEPT_FOREST", "DRIPSTONE_CAVES", "LUSH_CAVES", "NETHER_WASTES"]
+        weekly-amount: [3, 4, 5, 6, 7, 8, 9, 10, 12]
+      uncommon:
+        targets: ["JUNGLE", "SPARSE_JUNGLE", "BAMBOO_JUNGLE", "BADLANDS", "WOODED_BADLANDS", "MANGROVE_SWAMP", "CHERRY_GROVE", "OLD_GROWTH_BIRCH_FOREST", "OLD_GROWTH_PINE_TAIGA", "OLD_GROWTH_SPRUCE_TAIGA", "GROVE", "SNOWY_SLOPES", "JAGGED_PEAKS", "FROZEN_PEAKS", "STONY_PEAKS", "WINDSWEPT_GRAVELLY_HILLS", "WINDSWEPT_SAVANNA", "CRIMSON_FOREST", "WARPED_FOREST", "SOUL_SAND_VALLEY", "BASALT_DELTAS"]
+        level: 4
+        weekly-amount: [2, 2, 3, 3, 4, 4, 5, 6, 7]
+      rare:
+        targets: ["MUSHROOM_FIELDS", "ICE_SPIKES", "DEEP_DARK", "PALE_GARDEN", "ERODED_BADLANDS"]
+        level: 7
+        weekly-amount: [1, 1, 1, 2, 2, 2, 2, 3, 3]
+  xp_target:
+    jobs: [EXPLORER]
+    tier: HARD
+    family: biome-target
+    acts: ["t:walk", "t:horse", "t:boat", "t:mount", "t:glide"]
+    trigger: BIOME
+    level: 4
+    weekly:
+      amount: [0, 1, 1, 1, 1, 1, 1, 1, 1]
+      reward: [0, 3900, 7800, 16500, 30000, 45000, 66000, 103500, 165000]
+      fixed: true
+    variants:
+      cherry_grove:
+        targets: ["CHERRY_GROVE"]
+      badlands:
+        targets: ["BADLANDS", "WOODED_BADLANDS", "ERODED_BADLANDS"]
+      jungle:
+        targets: ["JUNGLE", "SPARSE_JUNGLE", "BAMBOO_JUNGLE"]
+      mangrove_swamp:
+        targets: ["MANGROVE_SWAMP"]
+        level: 7
+      pale_garden:
+        targets: ["PALE_GARDEN"]
+        level: 7
+      mushroom_fields:
+        targets: ["MUSHROOM_FIELDS"]
+        level: 10
+      ice_spikes:
+        targets: ["ICE_SPIKES"]
+        level: 10
+  xp_structures:
+    jobs: [EXPLORER]
+    tier: HARD
+    family: structure
+    acts: ["t:walk", "t:horse", "t:boat", "t:mount", "t:glide"]
+    trigger: STRUCTURE
+    distinct: true
+    level: 1
+    weekly:
+      amount: [0, 1, 1, 1, 1, 1, 1, 1, 1]
+      reward: [0, 3900, 7800, 16500, 30000, 45000, 66000, 103500, 165000]
+    variants:
+      villages:
+        targets: ["minecraft:village_*"]
+        weekly-amount: [0, 3, 4, 5, 6, 7, 8, 9, 10]
+      desert_pyramids:
+        targets: ["minecraft:desert_pyramid"]
+        weekly-amount: [0, 2, 3, 3, 4, 4, 5, 5, 6]
+      shipwrecks:
+        targets: ["minecraft:shipwreck*"]
+        weekly-amount: [0, 2, 3, 3, 4, 4, 5, 5, 6]
+      ocean_ruins:
+        targets: ["minecraft:ocean_ruin_*"]
+        weekly-amount: [0, 2, 3, 3, 4, 4, 5, 5, 6]
+      ruined_portals:
+        targets: ["minecraft:ruined_portal*"]
+        weekly-amount: [0, 3, 4, 4, 5, 6, 7, 7, 8]
+      nether_fortresses:
+        targets: ["minecraft:fortress"]
+        level: 4
+        weekly-amount: [0, 2, 2, 3, 3, 4, 4, 5, 5]
+      mineshafts:
+        targets: ["minecraft:mineshaft*"]
+        level: 4
+        weekly-amount: [0, 2, 2, 3, 3, 4, 4, 5, 5]
+      pillager_outposts:
+        targets: ["minecraft:pillager_outpost"]
+        level: 4
+        weekly-amount: [0, 1, 1, 2, 2, 3, 3, 4, 4]
+      jungle_pyramids:
+        targets: ["minecraft:jungle_pyramid"]
+        level: 4
+        weekly-amount: [0, 1, 1, 2, 2, 2, 2, 3, 3]
+      swamp_huts:
+        targets: ["minecraft:swamp_hut"]
+        level: 4
+        weekly-amount: [0, 1, 1, 2, 2, 2, 2, 3, 3]
+      igloos:
+        targets: ["minecraft:igloo"]
+        level: 4
+        weekly-amount: [0, 1, 1, 2, 2, 2, 2, 3, 3]
+      trail_ruins:
+        targets: ["minecraft:trail_ruins"]
+        level: 4
+        weekly-amount: [0, 1, 1, 2, 2, 2, 2, 3, 3]
+      bastions:
+        targets: ["minecraft:bastion_remnant"]
+        level: 7
+        weekly-amount: [0, 2, 2, 3, 3, 3, 3, 4, 4]
+      ocean_monuments:
+        targets: ["minecraft:monument"]
+        level: 7
+        weekly-amount: [0, 1, 1, 1, 1, 2, 2, 2, 2]
+      trial_chambers:
+        targets: ["minecraft:trial_chambers"]
+        level: 7
+        weekly-amount: [0, 1, 1, 2, 2, 2, 2, 3, 3]
+      strongholds:
+        targets: ["minecraft:stronghold"]
+        level: 10
+        weekly-amount: [0, 1, 1, 2, 2, 2, 2, 3, 3]
+      ancient_cities:
+        targets: ["minecraft:ancient_city"]
+        level: 10
+        weekly-amount: [0, 1, 1, 1, 1, 2, 2, 2, 2]
+      end_cities:
+        targets: ["minecraft:end_city"]
+        level: 10
+        weekly-amount: [0, 2, 2, 3, 3, 4, 4, 5, 5]
+      woodland_mansions:
+        targets: ["minecraft:mansion"]
+        level: 10
+        weekly-amount: [0, 1, 1, 1, 1, 1, 1, 1, 1]
+  xp_dominions:
+    jobs: [EXPLORER]
+    tier: STANDARD
+    family: social-travel
+    acts: ["t:walk", "t:horse", "t:boat", "t:mount", "t:glide"]
+    trigger: DOMINION_VISIT
+    targets: []
+    distinct: true
+    level: 4
+    weekly:
+      amount: [0, 1, 1, 2, 2, 3, 3, 4, 5]
+      reward: [0, 2600, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+      fixed: true
+  xp_trader:
+    jobs: [EXPLORER]
+    tier: HARD
+    family: trader
+    acts: ["u:trader"]
+    trigger: TRADER
+    targets: []
+    distinct: true
+    level: 4
+    weekly:
+      amount: [0, 1, 1, 2, 2, 2, 3, 3, 3]
+      reward: [0, 3900, 7800, 16500, 30000, 45000, 66000, 103500, 165000]
+      fixed: true
+  al_brew:
+    jobs: [ALCHEMIST]
+    tier: EASY
+    family: potion-any
+    acts: ["pot"]
+    trigger: BREW
+    targets: []
+    level: 1
+    weight: 2
+    daily:
+      amount: [25, 30, 40, 45, 55, 70, 85, 110, 130]
+      reward: [240, 600, 1450, 2800, 4800, 7200, 10500, 14500, 20000]
+    weekly:
+      amount: [130, 170, 240, 300, 370, 490, 625, 775, 925]
+      reward: [950, 2100, 4150, 8800, 16000, 24000, 35000, 55000, 88000]
+  al_brewone:
+    jobs: [ALCHEMIST]
+    tier: STANDARD
+    family: potion-one
+    acts: ["pot"]
+    trigger: BREW
+    level: 1
+    weight: 4
+    daily:
+      amount: [19, 25, 30, 40, 45, 60, 75, 90, 110]
+      reward: [300, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+    weekly:
+      amount: [100, 150, 200, 250, 300, 350, 400, 450, 500]
+      reward: [1200, 2600, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+    variants:
+      healing:
+        targets: ["HEALING"]
+      swiftness:
+        targets: ["SWIFTNESS"]
+      night_vision:
+        targets: ["NIGHT_VISION"]
+      fire_resistance:
+        targets: ["FIRE_RESISTANCE"]
+      strength:
+        targets: ["STRENGTH"]
+      poison:
+        targets: ["POISON"]
+      regeneration:
+        targets: ["REGENERATION"]
+      water_breathing:
+        targets: ["WATER_BREATHING"]
+      invisibility:
+        targets: ["INVISIBILITY"]
+      weakness:
+        targets: ["WEAKNESS"]
+      slowness:
+        targets: ["SLOWNESS"]
+      harming:
+        targets: ["HARMING"]
+      turtle_master:
+        targets: ["TURTLE_MASTER"]
+      wind_charging:
+        targets: ["WIND_CHARGING"]
+      infestation:
+        targets: ["INFESTATION"]
+      oozing:
+        targets: ["OOZING"]
+      weaving:
+        targets: ["WEAVING"]
+      haste:
+        targets: ["HASTE"]
+        alchemy_tier: 2
+      dullness:
+        targets: ["DULLNESS"]
+        alchemy_tier: 2
+      slow_falling:
+        targets: ["SLOW_FALLING"]
+        alchemy_tier: 2
+      absorption:
+        targets: ["ABSORPTION"]
+        alchemy_tier: 3
+      leaping:
+        targets: ["LEAPING"]
+        alchemy_tier: 3
+      luck:
+        targets: ["LUCK"]
+        alchemy_tier: 3
+      health_boost:
+        targets: ["HEALTH_BOOST"]
+        alchemy_tier: 4
+      hunger:
+        targets: ["HUNGER"]
+        alchemy_tier: 4
+      nausea:
+        targets: ["NAUSEA"]
+        alchemy_tier: 5
+      blindness:
+        targets: ["BLINDNESS"]
+        alchemy_tier: 5
+      saturation:
+        targets: ["SATURATION"]
+        alchemy_tier: 6
+      decay:
+        targets: ["DECAY"]
+        alchemy_tier: 7
+      resistance:
+        targets: ["RESISTANCE"]
+        alchemy_tier: 8
+      order:
+        targets: ["ORDER"]
+        month: FLORIVOR
+        daily-weight: 4
+      chaos:
+        targets: ["CHAOS"]
+        month: FLORIVOR
+        daily-weight: 4
+  al_enchant:
+    jobs: [ALCHEMIST]
+    tier: EASY
+    family: enchant
+    acts: ["en"]
+    trigger: ENCHANT
+    targets: []
+    level: 1
+    daily:
+      amount: [8, 10, 13, 15, 18, 25, 30, 35, 45]
+      reward: [240, 600, 1450, 2800, 4800, 7200, 10500, 14500, 20000]
+    weekly:
+      amount: [45, 60, 80, 100, 120, 160, 210, 260, 310]
+      reward: [950, 2100, 4150, 8800, 16000, 24000, 35000, 55000, 88000]
+  al_enchant30:
+    jobs: [ALCHEMIST]
+    tier: HARD
+    family: enchant
+    acts: ["en"]
+    trigger: ENCHANT
+    targets: []
+    tags: [level30]
+    level: 4
+    daily:
+      amount: [0, 0, 10, 11, 13, 17, 20, 25, 30]
+      reward: [0, 0, 2700, 5250, 9000, 13500, 19500, 27000, 37500]
+    weekly:
+      amount: [0, 0, 60, 75, 90, 120, 160, 190, 230]
+      reward: [0, 0, 7800, 16500, 30000, 45000, 66000, 103500, 165000]
+  al_anvil:
+    jobs: [ALCHEMIST]
+    tier: STANDARD
+    family: anvil
+    acts: ["anvil"]
+    trigger: ANVIL_BOOK
+    targets: []
+    level: 1
+    daily:
+      amount: [0, 0, 0, 9, 11, 14, 18, 20, 25]
+      reward: [0, 0, 0, 3500, 6000, 9000, 13000, 18000, 25000]
+    weekly:
+      amount: [0, 0, 0, 65, 75, 100, 130, 160, 200]
+      reward: [0, 0, 0, 11000, 20000, 30000, 44000, 69000, 110000]
+  al_grind:
+    jobs: [ALCHEMIST]
+    tier: STANDARD
+    family: grindstone
+    acts: ["grind"]
+    trigger: GRINDSTONE
+    targets: []
+    level: 4
+    daily:
+      amount: [0, 0, 0, 9, 11, 14, 18, 20, 25]
+      reward: [0, 0, 0, 3500, 6000, 9000, 13000, 18000, 25000]
+  al_bottle:
+    jobs: [ALCHEMIST]
+    tier: HARD
+    family: brewery
+    acts: ["bx"]
+    trigger: BREWERY
+    targets: []
+    level: 1
+    weekly:
+      amount: [0, 45, 60, 75, 90, 120, 160, 190, 230]
+      reward: [0, 3900, 7800, 16500, 30000, 45000, 66000, 103500, 165000]
+  al_quality:
+    jobs: [ALCHEMIST]
+    tier: HARD
+    family: brewery
+    acts: ["bx"]
+    trigger: BREWERY
+    targets: []
+    tags: [quality4]
+    level: 4
+    weekly:
+      amount: [0, 0, 30, 40, 45, 60, 80, 95, 120]
+      reward: [0, 0, 7800, 16500, 30000, 45000, 66000, 103500, 165000]
+  al_legend:
+    jobs: [ALCHEMIST]
+    tier: MASTER
+    family: brewery
+    acts: ["bx"]
+    trigger: BREWERY
+    targets: []
+    tags: [legendary]
+    level: 10
+    eligibility: al_legend
+    weekly:
+      amount: [0, 0, 0, 0, 3, 3, 6, 6, 9]
+      reward: [0, 0, 0, 0, 44000, 66000, 97000, 152000, 242000]
+      fixed: true
+  al_arrows:
+    jobs: [HUNTER]
+    tier: STANDARD
+    family: fletching
+    acts: ["c:fletch"]
+    trigger: FLETCH
+    targets: []
+    level: 4
+    daily:
+      amount: [0, 50, 65, 75, 90, 120, 150, 180, 220]
+      reward: [0, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+  al_cure:
+    jobs: [ALCHEMIST]
+    tier: HARD
+    family: cure
+    acts: ["cure"]
+    trigger: CURE
+    targets: []
+    level: 7
+    weekly:
+      amount: [0, 0, 1, 1, 2, 2, 3, 3, 4]
+      reward: [0, 0, 7800, 16500, 30000, 45000, 66000, 103500, 165000]
+      fixed: true
+  al_essence:
+    jobs: [ALCHEMIST]
+    tier: MASTER
+    family: essence
+    acts: ["ess"]
+    trigger: ESSENCE
+    targets: []
+    level: 10
+    eligibility: al_essence
+    weekly:
+      amount: [0, 0, 0, 0, 0, 0, 1, 1, 2]
+      reward: [0, 0, 0, 0, 0, 0, 97000, 152000, 242000]
+      fixed: true
+  hu_hostile:
+    jobs: [HUNTER]
+    tier: EASY
+    family: mob-any
+    acts: ["k:zombie", "k:skeleton", "k:spider", "k:creeper", "k:enderman", "k:witch", "k:blaze", "k:ghast", "k:witherskel", "k:guardian", "k:breeze", "k:slime", "k:phantom", "k:magma", "k:piglin", "k:silverfish", "k:pillager", "k:shulker", "k:elder", "k:boss"]
+    trigger: KILL
+    targets: []
+    tags: [hostile]
+    level: 1
+    daily:
+      amount: [25, 30, 40, 45, 55, 70, 85, 110, 130]
+      reward: [240, 600, 1450, 2800, 4800, 7200, 10500, 14500, 20000]
+    weekly:
+      amount: [130, 170, 240, 300, 370, 490, 625, 775, 925]
+      reward: [950, 2100, 4150, 8800, 16000, 24000, 35000, 55000, 88000]
+  hu_melee:
+    jobs: [HUNTER]
+    tier: EASY
+    family: mob-style
+    acts: ["k:zombie", "k:skeleton", "k:spider", "k:creeper", "k:enderman", "k:witch", "k:blaze", "k:ghast", "k:witherskel", "k:guardian", "k:breeze", "k:slime", "k:phantom", "k:magma", "k:piglin", "k:silverfish", "k:pillager", "k:shulker", "k:elder", "k:boss", "k:cow", "k:pig", "k:chicken", "k:sheep", "k:rabbit"]
+    trigger: KILL
+    targets: []
+    tags: [mob, melee]
+    level: 1
+    daily:
+      amount: [15, 20, 25, 30, 35, 45, 60, 70, 85]
+      reward: [240, 600, 1450, 2800, 4800, 7200, 10500, 14500, 20000]
+  hu_ranged:
+    jobs: [HUNTER]
+    tier: EASY
+    family: mob-style
+    acts: ["k:zombie", "k:skeleton", "k:spider", "k:creeper", "k:enderman", "k:witch", "k:blaze", "k:ghast", "k:witherskel", "k:guardian", "k:breeze", "k:slime", "k:phantom", "k:magma", "k:piglin", "k:silverfish", "k:pillager", "k:shulker", "k:elder", "k:boss", "k:cow", "k:pig", "k:chicken", "k:sheep", "k:rabbit"]
+    trigger: KILL
+    targets: []
+    tags: [mob, ranged]
+    level: 1
+    daily:
+      amount: [15, 20, 25, 30, 35, 45, 60, 70, 85]
+      reward: [240, 600, 1450, 2800, 4800, 7200, 10500, 14500, 20000]
+  hu_zombie:
+    jobs: [HUNTER]
+    tier: STANDARD
+    family: mob-one
+    acts: ["k:zombie"]
+    trigger: KILL
+    targets: ["ZOMBIE", "ZOMBIE_VILLAGER", "HUSK", "DROWNED"]
+    level: 1
+    daily:
+      amount: [10, 13, 16, 19, 20, 30, 35, 45, 55]
+      reward: [300, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+  hu_skeleton:
+    jobs: [HUNTER]
+    tier: STANDARD
+    family: mob-one
+    acts: ["k:skeleton"]
+    trigger: KILL
+    targets: ["SKELETON", "STRAY", "BOGGED"]
+    level: 1
+    daily:
+      amount: [8, 11, 14, 17, 19, 25, 30, 40, 45]
+      reward: [300, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+  hu_spider:
+    jobs: [HUNTER]
+    tier: STANDARD
+    family: mob-one
+    acts: ["k:spider"]
+    trigger: KILL
+    targets: ["SPIDER", "CAVE_SPIDER"]
+    level: 1
+    daily:
+      amount: [7, 9, 12, 14, 17, 20, 25, 35, 40]
+      reward: [300, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+  hu_creeper:
+    jobs: [HUNTER]
+    tier: STANDARD
+    family: mob-one
+    acts: ["k:creeper"]
+    trigger: KILL
+    targets: ["CREEPER"]
+    level: 1
+    daily:
+      amount: [0, 8, 10, 12, 14, 18, 25, 30, 35]
+      reward: [0, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+  hu_enderman:
+    jobs: [HUNTER]
+    tier: STANDARD
+    family: mob-end
+    acts: ["k:enderman"]
+    trigger: KILL
+    targets: ["ENDERMAN"]
+    level: 4
+    daily:
+      amount: [0, 0, 14, 17, 19, 25, 30, 40, 45]
+      reward: [0, 0, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+    weekly:
+      amount: [0, 0, 90, 110, 130, 180, 230, 280, 340]
+      reward: [0, 0, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+  hu_witch:
+    jobs: [HUNTER]
+    tier: HARD
+    family: mob-rare
+    acts: ["k:witch"]
+    trigger: KILL
+    targets: ["WITCH"]
+    level: 4
+    daily:
+      amount: [0, 0, 0, 3, 3, 4, 5, 7, 8]
+      reward: [0, 0, 0, 5250, 9000, 13500, 19500, 27000, 37500]
+    weekly:
+      amount: [0, 0, 0, 19, 25, 30, 40, 50, 60]
+      reward: [0, 0, 0, 16500, 30000, 45000, 66000, 103500, 165000]
+  hu_blaze:
+    jobs: [HUNTER]
+    tier: HARD
+    family: mob-nether
+    acts: ["k:blaze"]
+    trigger: KILL
+    targets: ["BLAZE"]
+    level: 4
+    daily:
+      amount: [0, 0, 0, 17, 20, 25, 35, 40, 50]
+      reward: [0, 0, 0, 5250, 9000, 13500, 19500, 27000, 37500]
+    weekly:
+      amount: [0, 0, 0, 110, 140, 180, 230, 290, 350]
+      reward: [0, 0, 0, 16500, 30000, 45000, 66000, 103500, 165000]
+  hu_ghast:
+    jobs: [HUNTER]
+    tier: HARD
+    family: mob-nether
+    acts: ["k:ghast"]
+    trigger: KILL
+    targets: ["GHAST"]
+    level: 7
+    daily:
+      amount: [0, 0, 0, 0, 3, 4, 5, 7, 8]
+      reward: [0, 0, 0, 0, 9000, 13500, 19500, 27000, 37500]
+    weekly:
+      amount: [0, 0, 0, 0, 25, 30, 40, 50, 60]
+      reward: [0, 0, 0, 0, 30000, 45000, 66000, 103500, 165000]
+  hu_wither:
+    jobs: [HUNTER]
+    tier: HARD
+    family: mob-nether
+    acts: ["k:witherskel"]
+    trigger: KILL
+    targets: ["WITHER_SKELETON"]
+    level: 7
+    daily:
+      amount: [0, 0, 0, 0, 10, 13, 16, 20, 25]
+      reward: [0, 0, 0, 0, 9000, 13500, 19500, 27000, 37500]
+    weekly:
+      amount: [0, 0, 0, 0, 70, 90, 120, 140, 180]
+      reward: [0, 0, 0, 0, 30000, 45000, 66000, 103500, 165000]
+  hu_guardian:
+    jobs: [HUNTER]
+    tier: HARD
+    family: mob-ocean
+    acts: ["k:guardian"]
+    trigger: KILL
+    targets: ["GUARDIAN"]
+    level: 4
+    daily:
+      amount: [0, 0, 0, 0, 13, 17, 20, 25, 30]
+      reward: [0, 0, 0, 0, 9000, 13500, 19500, 27000, 37500]
+    weekly:
+      amount: [0, 0, 0, 0, 90, 120, 160, 190, 230]
+      reward: [0, 0, 0, 0, 30000, 45000, 66000, 103500, 165000]
+  hu_breeze:
+    jobs: [HUNTER]
+    tier: HARD
+    family: mob-trial
+    acts: ["k:breeze"]
+    trigger: KILL
+    targets: ["BREEZE"]
+    level: 7
+    boost: {month: VENTIVOR, weight: 3}
+    weekly:
+      amount: [0, 0, 0, 0, 70, 90, 120, 140, 180]
+      reward: [0, 0, 0, 0, 30000, 45000, 66000, 103500, 165000]
+  hu_misc:
+    jobs: [HUNTER]
+    tier: STANDARD
+    family: mob-variety
+    acts: ["k:slime", "k:phantom", "k:magma", "k:piglin", "k:silverfish", "k:pillager", "k:shulker"]
+    trigger: KILL
+    level: 1
+    daily:
+      amount: [0, 5, 6, 7, 8, 11, 14, 17, 20]
+      reward: [0, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+    variants:
+      slimes:
+        targets: ["SLIME"]
+      phantoms:
+        targets: ["PHANTOM"]
+      magma_cubes:
+        targets: ["MAGMA_CUBE"]
+      piglins:
+        targets: ["PIGLIN", "PIGLIN_BRUTE"]
+      silverfish:
+        targets: ["SILVERFISH"]
+        level: 4
+      pillagers:
+        targets: ["PILLAGER"]
+        level: 4
+      shulkers:
+        targets: ["SHULKER"]
+        level: 10
+  hu_elder:
+    jobs: [HUNTER]
+    tier: MASTER
+    family: boss
+    acts: ["k:elder"]
+    trigger: KILL
+    targets: ["ELDER_GUARDIAN"]
+    level: 10
+    weekly:
+      amount: [0, 0, 0, 0, 0, 0, 0, 3, 3]
+      reward: [0, 0, 0, 0, 0, 0, 0, 152000, 242000]
+      fixed: true
+  hu_boss:
+    jobs: [HUNTER]
+    tier: MASTER
+    family: boss
+    acts: ["k:boss"]
+    trigger: KILL
+    level: 10
+    eligibility: hu_boss
+    weekly:
+      amount: [0, 0, 0, 0, 0, 0, 4, 5, 6]
+      reward: [0, 0, 0, 0, 0, 0, 97000, 152000, 242000]
+      fixed: true
+      range:
+        6: [3, 4]
+        7: [4, 5]
+        8: [5, 6]
+    variants:
+      wither:
+        targets: ["WITHER"]
+      ender_dragon:
+        targets: ["ENDER_DRAGON"]
+      warden:
+        targets: ["WARDEN"]
+  hu_fish:
+    jobs: [HUNTER]
+    tier: STANDARD
+    family: fishing
+    acts: ["f"]
+    trigger: FISH
+    targets: []
+    tags: [fish]
+    level: 1
+    daily:
+      amount: [14, 19, 25, 30, 35, 45, 55, 65, 80]
+      reward: [300, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+    weekly:
+      amount: [85, 110, 150, 190, 230, 310, 390, 480, 575]
+      reward: [1200, 2600, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+  hu_fishone:
+    jobs: [HUNTER]
+    tier: STANDARD
+    family: fishing
+    acts: ["f"]
+    trigger: FISH
+    level: 1
+    daily:
+      amount: [0, 13, 16, 19, 20, 30, 35, 45, 55]
+      reward: [0, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+    variants:
+      salmon:
+        targets: ["SALMON"]
+      pufferfish:
+        targets: ["PUFFERFISH"]
+        level: 4
+      tropical_fish:
+        targets: ["TROPICAL_FISH"]
+        level: 4
+  hu_treasure:
+    jobs: [HUNTER]
+    tier: HARD
+    family: fishing
+    acts: ["f"]
+    trigger: FISH
+    targets: []
+    tags: [treasure]
+    level: 4
+    weekly:
+      amount: [0, 0, 12, 15, 18, 25, 30, 40, 45]
+      reward: [0, 0, 7800, 16500, 30000, 45000, 66000, 103500, 165000]
+  hu_heads:
+    jobs: [HUNTER]
+    tier: HARD
+    family: trophy
+    acts: ["k:zombie", "k:skeleton", "k:spider", "k:creeper", "k:enderman", "k:witch", "k:blaze", "k:ghast", "k:witherskel", "k:guardian", "k:breeze", "k:slime", "k:phantom", "k:magma", "k:piglin", "k:silverfish", "k:pillager", "k:shulker", "k:elder", "k:boss", "k:cow", "k:pig", "k:chicken", "k:sheep", "k:rabbit"]
+    trigger: MOB_HEAD
+    targets: []
+    level: 7
+    weekly:
+      amount: [0, 0, 0, 2, 3, 5, 7, 9, 12]
+      reward: [0, 0, 0, 20500, 37500, 56500, 82500, 129500, 206500]
+      fixed: true
+  hu_bounty:
+    jobs: [HUNTER]
+    tier: HARD
+    family: pvp
+    acts: ["k:player"]
+    trigger: PLAYER_KILL
+    targets: []
+    level: 4
+    weekly:
+      amount: [0, 1, 2, 3, 5, 6, 8, 10, 12]
+      reward: [0, 3900, 7800, 16500, 30000, 45000, 66000, 103500, 165000]
+      fixed: true
+  ge_bendkill:
+    jobs: [HUNTER]
+    tier: STANDARD
+    family: mob-style
+    acts: ["k:zombie", "k:skeleton", "k:spider", "k:creeper", "k:enderman", "k:witch", "k:blaze", "k:ghast", "k:witherskel", "k:guardian", "k:breeze", "k:slime", "k:phantom", "k:magma", "k:piglin", "k:silverfish", "k:pillager", "k:shulker", "k:elder", "k:boss", "k:cow", "k:pig", "k:chicken", "k:sheep", "k:rabbit"]
+    trigger: KILL
+    targets: []
+    tags: [mob, bending]
+    level: 1
+    daily:
+      amount: [19, 25, 30, 40, 45, 60, 75, 90, 110]
+      reward: [300, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+  ge_mount:
+    jobs: []
+    tier: STANDARD
+    family: mount
+    acts: ["ms"]
+    trigger: MOUNT_SKILL
+    targets: []
+    level: 1
+    eligibility: ge_mount
+    weekly:
+      amount: [0, 0, 50, 65, 75, 100, 130, 160, 200]
+      reward: [0, 0, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+  ge_superab:
+    jobs: []
+    tier: EASY
+    family: mcmmo
+    acts: ["sa"]
+    trigger: SUPER_ABILITY
+    targets: []
+    level: 1
+    daily:
+      amount: [0, 5, 6, 8, 9, 12, 15, 18, 20]
+      reward: [0, 600, 1450, 2800, 4800, 7200, 10500, 14500, 20000]
+  ge_repair:
+    jobs: []
+    tier: STANDARD
+    family: mcmmo
+    acts: ["rp"]
+    trigger: REPAIR
+    targets: []
+    level: 1
+    daily:
+      amount: [0, 6, 8, 9, 11, 14, 18, 20, 25]
+      reward: [0, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+  ge_shop:
+    jobs: []
+    tier: STANDARD
+    family: shop
+    acts: ["buy"]
+    trigger: SHOP_BUY
+    targets: []
+    distinct: true
+    level: 1
+    eligibility: ge_shop
+    weekly:
+      amount: [0, 2, 2, 3, 3, 4, 4, 5, 5]
+      reward: [0, 2600, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+      fixed: true
+  ge_resource:
+    jobs: []
+    tier: EASY
+    family: dominion
+    acts: ["res"]
+    trigger: RESOURCE_CLAIM
+    targets: []
+    level: 1
+    eligibility: ge_resource
+    weekly:
+      amount: [0, 3, 4, 5, 6, 8, 10, 13, 16]
+      reward: [0, 2100, 4150, 8800, 16000, 24000, 35000, 55000, 88000]
+  ge_homekill:
+    jobs: [HUNTER]
+    tier: STANDARD
+    family: mob-home
+    acts: ["k:zombie", "k:skeleton", "k:spider", "k:creeper", "k:enderman", "k:witch", "k:blaze", "k:ghast", "k:witherskel", "k:guardian", "k:breeze", "k:slime", "k:phantom", "k:magma", "k:piglin", "k:silverfish", "k:pillager", "k:shulker", "k:elder", "k:boss", "k:cow", "k:pig", "k:chicken", "k:sheep", "k:rabbit"]
+    trigger: KILL
+    targets: []
+    tags: [hostile, home]
+    level: 1
+    eligibility: ge_homekill
+    daily:
+      amount: [0, 19, 25, 30, 35, 45, 55, 65, 80]
+      reward: [0, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+  ge_chat:
+    jobs: []
+    tier: STANDARD
+    family: social
+    acts: ["chat"]
+    trigger: CHAT_GAME
+    targets: []
+    level: 1
+    weekly:
+      amount: [3, 5, 8, 10, 12, 15, 18, 22, 25]
+      reward: [1200, 2600, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+      fixed: true
+  ge_tame:
+    jobs: [FARMER, HUNTER]
+    tier: STANDARD
+    family: tame
+    acts: ["tame"]
+    trigger: TAME
+    level: 1
+    weekly:
+      amount: [14, 18, 25, 30, 40, 50, 65, 80, 100]
+      reward: [1200, 2600, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+    variants:
+      wolves:
+        targets: ["WOLF"]
+      cats:
+        targets: ["CAT"]
+      horses:
+        targets: ["HORSE", "DONKEY", "MULE"]
+      parrots:
+        targets: ["PARROT"]
+      camels:
+        targets: ["CAMEL"]
+        level: 4
+  bu_smelt:
+    jobs: [BUILDER]
+    tier: STANDARD
+    family: smelt
+    acts: ["solo:bu_smelt"]
+    trigger: SMELT
+    targets: ["GLASS", "BRICK", "NETHER_BRICK", "SMOOTH_STONE"]
+    level: 1
+    daily:
+      amount: [75, 100, 130, 150, 180, 230, 290, 360, 430]
+      reward: [300, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+  bu_craft:
+    jobs: [BUILDER]
+    tier: EASY
+    family: craft-shape
+    acts: ["solo:bu_craft"]
+    trigger: CRAFT
+    targets: ["*_STAIRS", "*_SLAB", "*_WALL"]
+    level: 1
+    daily:
+      amount: [150, 200, 260, 300, 350, 460, 575, 725, 875]
+      reward: [240, 600, 1450, 2800, 4800, 7200, 10500, 14500, 20000]
+
+# Job Contracts: weekly, for players holding both jobs. Each part needs its own amount; the reward is both parts' weekly rewards.
+contracts:
+  co_prospector:
+    jobs: [MINER, EXCAVATOR]
+    parts:
+      - quest: ex_gravel
+        amount: [0, 0, 1500, 1875, 2325, 3075, 3900, 4800, 5850]
+      - quest: mi_iron
+        amount: [0, 0, 150, 188, 233, 308, 394, 488, 581]
+    reward: [0, 0, 9350, 19800, 36000, 54000, 79000, 124000, 198000]
+  co_homestead:
+    jobs: [FARMER, BUILDER]
+    parts:
+      - quest: fa_harvest
+        amount: [0, 2588, 3600, 4500, 5550, 7350, 9375, 11625, 14025]
+      - quest: bu_place
+        amount: [0, 1613, 2250, 2850, 3450, 4575, 5850, 7275, 8775]
+    reward: [0, 4200, 8300, 17600, 32000, 48000, 70000, 110000, 176000]
+  co_timber:
+    jobs: [LUMBERJACK, BUILDER]
+    parts:
+      - quest: lu_logs
+        amount: [0, 431, 600, 750, 938, 1238, 1575, 1950, 2325]
+      - quest: bu_palette
+        amount: [0, 323, 450, 563, 694, 900, 1163, 1463, 1763]
+    reward: [0, 4700, 9350, 19800, 36000, 54000, 79000, 124000, 198000]
+  co_ranger:
+    jobs: [HUNTER, EXPLORER]
+    parts:
+      - quest: hu_hostile
+        amount: [0, 128, 180, 225, 278, 368, 469, 581, 694]
+      - quest: xp_walk
+        amount: [0, 4350, 6000, 7575, 9225, 12225, 15600, 19350, 23400]
+    reward: [0, 4200, 8300, 17600, 32000, 48000, 70000, 110000, 176000]
+  co_apoth:
+    jobs: [FARMER, ALCHEMIST]
+    parts:
+      - quest: fa_crop
+        amount: [0, 0, 2250, 2850, 3450, 4575, 5850, 7275, 8775]
+        variant: nether_wart
+      - quest: al_brew
+        amount: [0, 0, 180, 225, 278, 368, 469, 581, 694]
+    reward: [0, 0, 9350, 19800, 36000, 54000, 79000, 124000, 198000]
+  co_forge:
+    jobs: [ALCHEMIST, HUNTER]
+    parts:
+      - quest: al_enchant
+        amount: [0, 0, 60, 75, 90, 120, 158, 195, 233]
+      - quest: hu_hostile
+        amount: [0, 0, 180, 225, 278, 368, 469, 581, 694]
+    reward: [0, 0, 8300, 17600, 32000, 48000, 70000, 110000, 176000]
+  co_hearth:
+    jobs: [HUNTER, FARMER]
+    parts:
+      - quest: hu_fish
+        amount: [0, 83, 113, 143, 173, 233, 293, 360, 431]
+      - quest: fa_butcher
+        amount: [0, 64, 90, 113, 135, 180, 233, 293, 353]
+    reward: [0, 4700, 9350, 19800, 36000, 54000, 79000, 124000, 198000]
+  co_quarry:
+    jobs: [MINER, BUILDER]
+    parts:
+      - quest: mi_stonevar
+        amount: [0, 975, 1350, 1688, 2063, 2738, 3525, 4350, 5250]
+      - quest: bu_stonecut
+        amount: [0, 1313, 1800, 2250, 2775, 3675, 4650, 5775, 7050]
+    reward: [0, 4700, 9350, 19800, 36000, 54000, 79000, 124000, 198000]
+  co_glass:
+    jobs: [EXCAVATOR, ALCHEMIST]
+    parts:
+      - quest: ex_sand
+        amount: [0, 1950, 2700, 3413, 4125, 5475, 7050, 8700, 10500]
+      - quest: al_brew
+        amount: [0, 128, 180, 225, 278, 368, 469, 581, 694]
+    reward: [0, 4200, 8300, 17600, 32000, 48000, 70000, 110000, 176000]
+  co_arch:
+    jobs: [EXCAVATOR, EXPLORER]
+    parts:
+      - quest: ex_brush
+        amount: [0, 0, 45, 56, 68, 90, 120, 143, 173]
+      - quest: xp_biomes
+        amount: [0, 0, 3, 3, 4, 5, 6, 7, 8]
+    reward: [0, 0, 13000, 27500, 50000, 75000, 110000, 172500, 275000]
+  co_armour:
+    jobs: [MINER, ALCHEMIST]
+    parts:
+      - quest: mi_iron
+        amount: [0, 0, 0, 188, 233, 308, 394, 488, 581]
+      - quest: al_anvil
+        amount: [0, 0, 0, 49, 56, 75, 98, 120, 150]
+    reward: [0, 0, 0, 22000, 40000, 60000, 88000, 138000, 220000]
+  co_ranch:
+    jobs: [FARMER, EXPLORER]
+    parts:
+      - quest: fa_breed
+        amount: [0, 270, 375, 469, 581, 750, 975, 1200, 1463]
+      - quest: xp_ride
+        amount: [0, 9450, 13125, 16575, 20250, 26775, 34125, 42225, 51225]
+    reward: [0, 5200, 10400, 22000, 40000, 60000, 88000, 138000, 220000]
+  co_soil:
+    jobs: [EXCAVATOR, FARMER]
+    parts:
+      - quest: ex_dirt
+        amount: [0, 2175, 3000, 3750, 4650, 6150, 7800, 9675, 11700]
+      - quest: fa_plant
+        amount: [0, 656, 900, 1125, 1388, 1838, 2325, 2888, 3525]
+    reward: [0, 4200, 8300, 17600, 32000, 48000, 70000, 110000, 176000]
+  co_orchard:
+    jobs: [LUMBERJACK, FARMER]
+    parts:
+      - quest: lu_grow
+        amount: [0, 0, 68, 83, 105, 135, 173, 218, 263]
+      - quest: fa_harvest
+        amount: [0, 0, 3600, 4500, 5550, 7350, 9375, 11625, 14025]
+    reward: [0, 0, 11950, 25300, 46000, 69000, 101000, 158500, 253000]
+  co_woods:
+    jobs: [LUMBERJACK, HUNTER]
+    parts:
+      - quest: lu_logs
+        amount: [0, 431, 600, 750, 938, 1238, 1575, 1950, 2325]
+      - quest: hu_hostile
+        amount: [0, 128, 180, 225, 278, 368, 469, 581, 694]
+    reward: [0, 4200, 8300, 17600, 32000, 48000, 70000, 110000, 176000]
+  co_boat:
+    jobs: [LUMBERJACK, EXPLORER]
+    parts:
+      - quest: lu_logs
+        amount: [0, 431, 600, 750, 938, 1238, 1575, 1950, 2325]
+      - quest: xp_boat
+        amount: [0, 6750, 9375, 11850, 14475, 19125, 24375, 30225, 36600]
+    reward: [0, 4700, 9350, 19800, 36000, 54000, 79000, 124000, 198000]

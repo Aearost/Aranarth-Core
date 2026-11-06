@@ -185,7 +185,7 @@ public class Static extends LightningAbility implements AddonAbility {
             Particle.DustOptions dust = (k % 2 == 0)
                     ? AranarthBendingUtils.LIGHTNING_DUST_BRIGHT
                     : AranarthBendingUtils.LIGHTNING_DUST_BLUE;
-            target.getLocation().getWorld().spawnParticle(Particle.DUST, target.getLocation(), 1,
+            AranarthBendingUtils.spawnParticle(target.getLocation().getWorld(), Particle.DUST, target.getLocation(), 1,
                     rand.nextDouble() * 0.4, rand.nextDouble() * target.getHeight() * 0.5,
                     rand.nextDouble() * 0.4, 0, dust);
         }
@@ -217,7 +217,7 @@ public class Static extends LightningAbility implements AddonAbility {
             Particle.DustOptions dust = (i % 2 == 0)
                     ? AranarthBendingUtils.LIGHTNING_DUST_BRIGHT
                     : AranarthBendingUtils.LIGHTNING_DUST_BLUE;
-            drawPos.getWorld().spawnParticle(Particle.DUST, drawPos, 1, 0.01, 0.01, 0.01, 0, dust);
+            AranarthBendingUtils.spawnParticle(drawPos.getWorld(), Particle.DUST, drawPos, 1, 0.01, 0.01, 0.01, 0, dust);
             current.add(stepVec);
             i++;
         }
@@ -233,7 +233,7 @@ public class Static extends LightningAbility implements AddonAbility {
         Particle.DustOptions dust = (stepIndex % 2 == 0)
                 ? AranarthBendingUtils.LIGHTNING_DUST_BRIGHT
                 : AranarthBendingUtils.LIGHTNING_DUST_BLUE;
-        pos.getWorld().spawnParticle(Particle.DUST, pos, 1, 0.02, 0.02, 0.02, 0, dust);
+        AranarthBendingUtils.spawnParticle(pos.getWorld(), Particle.DUST, pos, 1, 0.02, 0.02, 0.02, 0, dust);
     }
 
     /**

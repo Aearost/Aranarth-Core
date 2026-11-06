@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.council;
 
+import com.aearost.aranarthcore.enums.QuestType;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
@@ -40,18 +41,12 @@ public class CommandResetQuest {
         }
 
         Player target = Bukkit.getPlayer(uuid);
-        if (type.equals("daily")) {
-            QuestUtils.resetPlayerDailyQuests(uuid);
-            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "quest.reset_success", "player", targetName)));
-            if (target != null) {
-                target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "quest.daily_reset_personal")));
-            }
-        } else {
-            QuestUtils.resetPlayerWeeklyQuests(uuid);
-            sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "quest.reset_success", "player", targetName)));
-            if (target != null) {
-                target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "quest.weekly_reset_personal")));
-            }
+        QuestType questType = type.equals("daily") ? QuestType.DAILY : QuestType.WEEKLY;
+        QuestUtils.resetPlayerQuests(uuid, questType);
+        sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "quest.reset_success", "player", targetName)));
+        if (target != null) {
+            target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target,
+                    questType == QuestType.DAILY ? "quest.daily_reset_personal" : "quest.weekly_reset_personal")));
         }
 
         return true;

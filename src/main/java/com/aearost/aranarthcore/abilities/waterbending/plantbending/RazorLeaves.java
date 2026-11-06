@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.waterbending.plantbending;
 
 import com.aearost.aranarthcore.utils.AbilityConfig;
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.PlantAbility;
@@ -211,7 +212,8 @@ public class RazorLeaves extends PlantAbility implements AddonAbility {
             }
 
             // Particle trail
-            proj.position.getWorld().spawnParticle(
+            AranarthBendingUtils.spawnParticle(
+                    proj.position.getWorld(),
                     Particle.DUST,
                     proj.position.clone(),
                     1, 0.05, 0.05, 0.05, 0,
@@ -232,7 +234,8 @@ public class RazorLeaves extends PlantAbility implements AddonAbility {
         leafData.setPersistent(true);
         sourceBlock.setBlockData(leafData);
 
-        sourceBlock.getWorld().spawnParticle(
+        AranarthBendingUtils.spawnParticle(
+                sourceBlock.getWorld(),
                 Particle.DUST,
                 sourceBlock.getLocation().add(0.5, 1.2, 0.5),
                 6, 0.3, 0.3, 0.3, 0,

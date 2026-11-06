@@ -1,6 +1,6 @@
 package com.aearost.aranarthcore.event.block;
 
-import com.aearost.aranarthcore.enums.QuestTaskType;
+import com.aearost.aranarthcore.enums.QuestTrigger;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -38,7 +38,7 @@ public class CaveVineHarvest {
 			return;
 		}
 
-		if (AranarthUtils.isSpawnLocation(block.getLocation())) {
+		if (AranarthUtils.isProtectedSpawnLocation(block.getLocation())) {
 			return;
 		}
 
@@ -64,6 +64,6 @@ public class CaveVineHarvest {
 		block.setBlockData(vine);
 
 		block.getWorld().playSound(block.getLocation(), Sound.BLOCK_CAVE_VINES_PICK_BERRIES, 1.0F, 1.0F);
-		QuestUtils.updateProgress(player, QuestTaskType.HARVEST_CROPS, 1);
+		QuestUtils.progress(player, QuestTrigger.HARVEST, "CAVE_VINES", 1);
 	}
 }

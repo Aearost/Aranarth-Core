@@ -12,6 +12,8 @@ public class JobData {
 
     private List<JobType> activeJobs = new ArrayList<>();
     private final Map<JobType, Double> totalXp = new HashMap<>();
+    // When the player last left a job, which starts the cooldown before they can join another
+    private long lastLeftAt = 0;
 
     public JobData() {
     }
@@ -72,5 +74,13 @@ public class JobData {
 
     public void removeJob(JobType job) {
         activeJobs.remove(job);
+    }
+
+    public long getLastLeftAt() {
+        return lastLeftAt;
+    }
+
+    public void setLastLeftAt(long lastLeftAt) {
+        this.lastLeftAt = lastLeftAt;
     }
 }

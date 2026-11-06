@@ -1,0 +1,48 @@
+package com.aearost.aranarthcore.enums;
+
+/**
+ * The in-game actions that can progress a quest. Each quest in quests.yml names one trigger.
+ */
+public enum QuestTrigger {
+    BREAK,
+    HARVEST,
+    PLANT,
+    PLACE,
+    DIRT_PATH,
+    BREED,
+    MILK,
+    SHEAR,
+    HONEY,
+    KILL,
+    PLAYER_KILL,
+    FISH,
+    CRAFT,
+    SMELT,
+    STONECUT,
+    SAWMILL,
+    FLETCH,
+    TRAVEL,
+    LOOT,
+    BIOME,
+    STRUCTURE,
+    DOMINION_VISIT,
+    TRADER,
+    BREW,
+    ENCHANT,
+    ANVIL_BOOK,
+    GRINDSTONE,
+    BREWERY,
+    CURE,
+    ESSENCE,
+    BRUSH,
+    MOB_HEAD,
+    TREE_GROW,
+    TREE_FELLER,
+    MOUNT_SKILL,
+    SUPER_ABILITY,
+    REPAIR,
+    SHOP_BUY,
+    RESOURCE_CLAIM,
+    CHAT_GAME,
+    TAME
+}

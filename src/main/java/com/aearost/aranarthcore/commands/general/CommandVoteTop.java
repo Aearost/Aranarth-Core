@@ -116,7 +116,7 @@ public class CommandVoteTop implements CommandExecutor {
 		for (Map.Entry<UUID, Integer> entry : sorted) {
 			UUID uuid = entry.getKey();
 			int count = entry.getValue();
-			String displayedName = ChatUtils.providePrefixAndName(uuid);
+			String displayedName = ChatUtils.providePrefixAndName(uuid, sender);
 			String voteWord = count == 1 ? "vote" : "votes";
 			sender.sendMessage(ChatUtils.translateToColor("&8[&6" + rank + "&8] &e" + displayedName + ", &6" + count + " &e" + voteWord));
 			rank++;

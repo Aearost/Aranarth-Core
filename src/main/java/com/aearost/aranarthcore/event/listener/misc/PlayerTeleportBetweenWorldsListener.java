@@ -1,6 +1,8 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.enums.TabGroup;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -16,7 +18,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.IOException;
@@ -32,7 +33,7 @@ public class PlayerTeleportBetweenWorldsListener implements Listener {
      *
      * @param e The event.
      */
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onTeleport(PlayerTeleportEvent e) {
         if (e.getCause() == TeleportCause.COMMAND) {
             Player player = e.getPlayer();
@@ -49,11 +50,9 @@ public class PlayerTeleportBetweenWorldsListener implements Listener {
                 }
 
                 try {
+                    // Also clears the potion effects, and gives back the saved ones when returning to Survival
                     AranarthUtils.switchInventory(player, currentWorld, destinationWorld);
                     player.setGameMode(newMode);
-                    for (PotionEffect effect : player.getActivePotionEffects()) {
-                        player.removePotionEffect(effect.getType());
-                    }
                 } catch (IOException exception) {
                     player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.error")));
                     e.setCancelled(true);
@@ -110,26 +109,42 @@ public class PlayerTeleportBetweenWorldsListener implements Listener {
 
     /**
      * Removes creative mode from a player who ends up outside of a creative world without it being changed.
+     * Architects also lose spectator mode, as its teleport menu can bring them into a Survival world.
      *
      * @param e The event.
      */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onChangedWorld(PlayerChangedWorldEvent e) {
         Player player = e.getPlayer();
+
+        // Moves the player to their new group in the tab list on both servers right away
+        if (TabGroup.fromWorld(e.getFrom().getName()) != TabGroup.fromWorld(player.getWorld().getName())) {
+            AranarthUtils.updateTab();
+            if (NetworkManager.isActive()) {
+                NetworkManager.getInstance().publishPingUpdate(player);
+            }
+        }
+
+
         // Checked a tick later, as teleports that switch the inventory change the game mode right after the world
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (!player.isOnline() || player.getGameMode() != GameMode.CREATIVE
-                        || AranarthUtils.getInventoryGroup(player.getWorld().getName()).equals("creative")) {
+                if (!player.isOnline() || AranarthUtils.getInventoryGroup(player.getWorld().getName()).equals("creative")) {
                     return;
                 }
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+                GameMode gameMode = player.getGameMode();
+                boolean isArchitectSpectating = gameMode == GameMode.SPECTATOR && aranarthPlayer != null
+                        && aranarthPlayer.getArchitectRank() >= 1 && !AranarthUtils.hasUnrestrictedGameMode(player);
+                if (gameMode != GameMode.CREATIVE && !isArchitectSpectating) {
+                    return;
+                }
                 if (aranarthPlayer != null && aranarthPlayer.getCouncilRank() == 3) {
                     return;
                 }
                 player.setGameMode(GameMode.SURVIVAL);
-                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] " + player.getName() + " was in creative mode in "
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] " + player.getName() + " was in " + gameMode.name().toLowerCase() + " mode in "
                         + player.getWorld().getName() + " after coming from " + e.getFrom().getName() + " - set to survival mode");
             }
         }.runTaskLater(AranarthCore.getInstance(), 1L);

@@ -1,7 +1,7 @@
 package com.aearost.aranarthcore.abilities.waterbending.plantbending;
 
 import com.aearost.aranarthcore.enums.Month;
-import com.aearost.aranarthcore.enums.QuestTaskType;
+import com.aearost.aranarthcore.enums.QuestTrigger;
 import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AbilityConfig;
@@ -114,7 +114,8 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
         }
 
         sourceBlock = found;
-        sourceBlock.getWorld().spawnParticle(
+        AranarthBendingUtils.spawnParticle(
+                sourceBlock.getWorld(),
                 Particle.HAPPY_VILLAGER,
                 sourceBlock.getLocation().add(0.5, 0.5, 0.5),
                 16, 0.35, 0.35, 0.35, 0);
@@ -144,7 +145,8 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
             return;
         }
         if (player.isSneaking()) {
-            sourceBlock.getWorld().spawnParticle(
+            AranarthBendingUtils.spawnParticle(
+                    sourceBlock.getWorld(),
                     Particle.HAPPY_VILLAGER,
                     sourceBlock.getLocation().add(0.5, 0.5, 0.5),
                     1, 0.15, 0.1, 0.15, 0);
@@ -205,7 +207,8 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
             return;
         }
 
-        sourceBlock.getWorld().spawnParticle(
+        AranarthBendingUtils.spawnParticle(
+                sourceBlock.getWorld(),
                 Particle.HAPPY_VILLAGER,
                 sourceBlock.getLocation().add(0.5, 0.5, 0.5),
                 16, 0.35, 0.35, 0.35, 0);
@@ -244,7 +247,7 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
             for (int s = 0; s <= steps; s++) {
                 double t = (double) s / steps;
                 Vector pos = from.clone().multiply(1 - t).add(to.clone().multiply(t));
-                world.spawnParticle(Particle.DUST, pos.getX(), pos.getY(), pos.getZ(),
+                AranarthBendingUtils.spawnParticle(world, Particle.DUST, pos.getX(), pos.getY(), pos.getZ(),
                         1, 0, 0, 0, 0, SCYTHE_DUST);
             }
         }
@@ -302,7 +305,7 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
         }
 
         // Same protection as harvesting by hand, where enemies may also harvest crops (including in outposts)
-        if (AranarthUtils.isSpawnLocation(block.getLocation())) {
+        if (AranarthUtils.isProtectedSpawnLocation(block.getLocation())) {
             return;
         }
         Dominion blockDominion = DominionUtils.getDominionOfChunkAnywhere(block.getChunk());
@@ -316,7 +319,7 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
         boolean isRewarded = AranarthUtils.isSurvivalWorld(block.getWorld().getName());
         if (isRewarded) {
             JobUtils.awardFarmerCropHarvest(player, block.getType());
-            QuestUtils.updateProgress(player, QuestTaskType.HARVEST_CROPS, 1);
+            QuestUtils.progress(player, QuestTrigger.HARVEST, block.getType().name(), 1);
         }
 
         // Get vanilla fortune-based drops, then scale by seasonal yield multiplier

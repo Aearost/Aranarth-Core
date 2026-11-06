@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.EmojiUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -54,7 +55,7 @@ public class CommandReply implements CommandExecutor {
 						NetworkPlayer remoteTarget = NetworkManager.getInstance().getRemotePlayer(lastMessaged);
 						if (remoteTarget != null) {
 							AranarthPlayer targetAp = AranarthUtils.getPlayer(lastMessaged);
-							if (targetAp != null && targetAp.isTogglingMessages() && aranarthPlayer.getCouncilRank() == 0) {
+							if (targetAp != null && targetAp.isTogglingMessages() && !player.hasPermission("aranarth.toggle.bypass")) {
 								String targetNick = targetAp.getNickname().isEmpty()
 										? remoteTarget.getUsername()
 										: ChatUtils.stripColorFormatting(targetAp.getNickname());
@@ -66,7 +67,7 @@ public class CommandReply implements CommandExecutor {
 								msg.append(args[i]);
 								if (i < args.length - 1) msg.append(" ");
 							}
-							String assembledMsg = msg.toString();
+							String assembledMsg = EmojiUtils.translateFor(player, msg.toString());
 							String formattedMsg;
 							if (player.hasPermission("aranarth.chat.hex")) {
 								formattedMsg = ChatUtils.translateToColor(assembledMsg);
@@ -97,7 +98,7 @@ public class CommandReply implements CommandExecutor {
 				}
 
 				AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(lastMessaged);
-				if (targetAranarthPlayer.isTogglingMessages() && aranarthPlayer.getCouncilRank() == 0) {
+				if (targetAranarthPlayer.isTogglingMessages() && !player.hasPermission("aranarth.toggle.bypass")) {
 					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "message.toggling", "player", targetAranarthPlayer.getNickname())));
 					return true;
 				}

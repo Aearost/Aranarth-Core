@@ -5,9 +5,11 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.AvatarUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.PermissionUtils;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -28,7 +30,8 @@ public class CombatLog {
 			if (e.getEntity() instanceof Player player) {
 				Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 				Dominion attackerDominion = DominionUtils.getPlayerDominion(attacker.getUniqueId());
-				if (playerDominion != null) {
+				// The Avatar is never protected by the dominion PvP rules, so is always combat tagged
+				if (playerDominion != null && !AvatarUtils.isCurrentAvatar(player.getUniqueId())) {
 					if (attackerDominion != null && attackerDominion.isSameDominion(playerDominion)) {
 						if (!playerDominion.isMemberPvpEnabled()) {
 							return;
@@ -78,6 +81,7 @@ public class CombatLog {
 								if (isNotTaggedByAttacker && player.getGameMode() == GameMode.SURVIVAL && aranarthPlayer.isInArchitectMode()) {
 									aranarthPlayer.setInArchitectMode(false);
 									player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "architect.mode_exit_combat")));
+									PermissionUtils.evaluatePlayerPermissions(player);
 								}
 								AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 								HashMap<UUID, Long> attackerCombatLog = new HashMap<>();
@@ -90,8 +94,13 @@ public class CombatLog {
 								if (isAlreadyTaggingPlayer && attacker.getGameMode() == GameMode.SURVIVAL && attackerAranarthPlayer.isInArchitectMode()) {
 									attackerAranarthPlayer.setInArchitectMode(false);
 									attacker.sendMessage(ChatUtils.chatMessage(Lang.getFor(attacker, "architect.mode_exit_combat")));
+									PermissionUtils.evaluatePlayerPermissions(attacker);
 								}
 								AranarthUtils.setPlayer(attacker.getUniqueId(), attackerAranarthPlayer);
+
+								// Combat tagged players are reset to the normal size
+								AranarthUtils.applyAranarthiumScale(player);
+								AranarthUtils.applyAranarthiumScale(attacker);
 
 								new BukkitRunnable() {
 									@Override
@@ -106,6 +115,10 @@ public class CombatLog {
 												updatedCombatLog.remove(attacker.getUniqueId());
 												updatedAranarthPlayer.setCombatLogTime(updatedCombatLog);
 												AranarthUtils.setPlayer(player.getUniqueId(), updatedAranarthPlayer);
+												// Restores the Aranarthium size once the combat tag ends
+												if (player.isOnline()) {
+													AranarthUtils.applyAranarthiumScale(player);
+												}
 											}
 										}
 
@@ -119,6 +132,9 @@ public class CombatLog {
 												updatedAttackerCombatLog.remove(player.getUniqueId());
 												updatedAttackerAranarthPlayer.setCombatLogTime(updatedAttackerCombatLog);
 												AranarthUtils.setPlayer(attacker.getUniqueId(), updatedAttackerAranarthPlayer);
+												if (attacker.isOnline()) {
+													AranarthUtils.applyAranarthiumScale(attacker);
+												}
 											}
 										}
 									}

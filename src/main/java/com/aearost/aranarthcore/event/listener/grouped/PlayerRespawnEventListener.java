@@ -121,11 +121,11 @@ public class PlayerRespawnEventListener implements Listener {
         }
         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
-        // Dying in the arena or a creative world does not end the Avatar's reign
+        // Dying in a creative world does not end the Avatar's reign
         Avatar avatar = AvatarUtils.getCurrentAvatar();
-        if (avatar != null && AranarthUtils.isSurvivalWorld(world)) {
+        if (avatar != null && (AranarthUtils.isSurvivalWorld(world) || world.equalsIgnoreCase("arena"))) {
             if (avatar.getUuid().equals(player.getUniqueId())) {
-                AvatarUtils.removeCurrentAvatar();
+                AvatarUtils.removeCurrentAvatar("died in " + world);
             }
         }
     }
@@ -149,6 +149,14 @@ public class PlayerRespawnEventListener implements Listener {
         } else {
             new RespawnSurvival().execute(e);
         }
+
+        // The player respawned in a world that was disabled via /ac disable, i.e at their bed
+        Player player = e.getPlayer();
+        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
+            if (player.isOnline() && AranarthUtils.isWorldDisabledFor(player, player.getWorld().getName())) {
+                AranarthUtils.evacuateDisabledWorld(player);
+            }
+        }, 1L);
     }
 
     /**

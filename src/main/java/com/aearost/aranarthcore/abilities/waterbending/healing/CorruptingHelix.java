@@ -307,10 +307,10 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
 
                 Location loc = base.clone().add(x, y, z);
                 Particle.DustOptions dust = (i % 3 == 0) ? AranarthBendingUtils.WATER_DUST_DARK : AranarthBendingUtils.WATER_DUST;
-                loc.getWorld().spawnParticle(Particle.DUST, loc, 1, 0, 0, 0, 0, dust);
+                AranarthBendingUtils.spawnParticle(loc.getWorld(), Particle.DUST, loc, 1, 0, 0, 0, 0, dust);
 
                 if (Math.random() < 0.08) {
-                    loc.getWorld().spawnParticle(Particle.SPLASH, loc, 1, 0.04, 0.04, 0.04, 0.01);
+                    AranarthBendingUtils.spawnParticle(loc.getWorld(), Particle.SPLASH, loc, 1, 0.04, 0.04, 0.04, 0.01);
                 }
             }
         }
@@ -344,10 +344,10 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
 
                 Location loc = base.clone().add(x, y, z);
                 Particle.DustOptions dust = (i % 4 == 0) ? PURPLE_DUST_PALE : PURPLE_DUST;
-                loc.getWorld().spawnParticle(Particle.DUST, loc, 1, 0, 0, 0, 0, dust);
+                AranarthBendingUtils.spawnParticle(loc.getWorld(), Particle.DUST, loc, 1, 0, 0, 0, 0, dust);
 
                 if (Math.random() < 0.06) {
-                    loc.getWorld().spawnParticle(Particle.WITCH, loc, 1, 0.04, 0.04, 0.04, 0);
+                    AranarthBendingUtils.spawnParticle(loc.getWorld(), Particle.WITCH, loc, 1, 0.04, 0.04, 0.04, 0);
                 }
             }
         }
@@ -386,13 +386,13 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
                     double x = radius * Math.cos(angle);
                     double z = radius * Math.sin(angle);
                     Location loc = base.clone().add(x, yOffset, z);
-                    loc.getWorld().spawnParticle(Particle.DUST, loc, 1, 0.1, 0.1, 0.1, 0, dust);
+                    AranarthBendingUtils.spawnParticle(loc.getWorld(), Particle.DUST, loc, 1, 0.1, 0.1, 0.1, 0, dust);
                 }
 
                 if (endPhase == Phase.WATER) {
                     double angle = Math.random() * 2.0 * Math.PI;
                     double yOff = Math.random() * totalHeight * endProgress * 0.5;
-                    base.getWorld().spawnParticle(Particle.SPLASH,
+                    AranarthBendingUtils.spawnParticle(base.getWorld(), Particle.SPLASH,
                             base.clone().add(radius * Math.cos(angle), yOff, radius * Math.sin(angle)),
                             2, 0.1, 0.1, 0.1, 0.04);
                 }
@@ -496,7 +496,7 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
                     cancel();
                     return;
                 }
-                block.getWorld().spawnParticle(Particle.SMOKE, smokeLoc, 4, 0, 0, 0, 0, null, true);
+                AranarthBendingUtils.spawnParticle(block.getWorld(), Particle.SMOKE, smokeLoc, 4, 0, 0, 0, 0, null, true);
             }
         };
         smokeTask.runTaskTimer(AranarthCore.getInstance(), 0L, 1L);

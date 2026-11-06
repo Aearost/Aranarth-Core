@@ -51,7 +51,7 @@ public class PunishmentUtils {
                 // A banned Avatar's reign ends right away
                 Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
                 if (currentAvatar != null && currentAvatar.getUuid().equals(uuid)) {
-                    AvatarUtils.removeCurrentAvatar();
+                    AvatarUtils.removeCurrentAvatar("banned");
                 }
             }
             case UNBAN -> {
@@ -140,7 +140,7 @@ public class PunishmentUtils {
 
     public static void notifyBan(String nickname, String duration, String reason, boolean isPermanent) {
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            if (AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getCouncilRank() > 0) {
+            if (onlinePlayer.hasPermission("aranarth.punishments")) {
                 onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "ban.issued", "player", nickname, "duration", duration, "reason", reason)));
             } else {
                 onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "ban.permanent", "player", nickname, "reason", reason)));
@@ -153,7 +153,7 @@ public class PunishmentUtils {
             if (onlinePlayer.getUniqueId().equals(targetUuid)) {
                 onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "mute.received", "duration", duration, "reason", reason)));
                 onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_GHAST_HURT, 1F, 1.1F);
-            } else if (AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getCouncilRank() > 0) {
+            } else if (onlinePlayer.hasPermission("aranarth.punishments")) {
                 onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "mute.issued", "player", nickname, "duration", duration, "reason", reason)));
             } else {
                 onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "mute.permanent", "player", nickname, "reason", reason)));
@@ -173,7 +173,7 @@ public class PunishmentUtils {
             if (onlinePlayer.getUniqueId().equals(targetUuid)) {
                 onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "warn.received", "reason", reason)));
                 onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_GHAST_HURT, 1F, 1.1F);
-            } else if (AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getCouncilRank() > 0) {
+            } else if (onlinePlayer.hasPermission("aranarth.punishments")) {
                 onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "warn.issued", "player", nickname, "reason", reason)));
             } else {
                 onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "warn.issued_public", "player", nickname)));

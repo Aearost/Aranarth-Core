@@ -264,7 +264,7 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
                 double y = (t - 0.5) * target.getHeight() * 1.2;
                 double x = Math.cos(angle) * radius;
                 double z = Math.sin(angle) * radius;
-                center.getWorld().spawnParticle(Particle.DUST,
+                AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.DUST,
                         center.clone().add(x, y, z), 1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST_BRIGHT);
             }
         }
@@ -279,10 +279,10 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
         for (int i = 0; i < arms; i++) {
             double angle = baseAngle + (2.0 * Math.PI / arms) * i;
             double yOffset = Math.sin(tick * 0.2 + i) * 0.25;
-            center.getWorld().spawnParticle(Particle.DUST,
+            AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.DUST,
                     center.clone().add(Math.cos(angle) * 0.25, yOffset, Math.sin(angle) * 0.25),
                     1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST);
-            center.getWorld().spawnParticle(Particle.DUST,
+            AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.DUST,
                     center.clone().add(Math.cos(angle) * 0.5, -yOffset, Math.sin(angle) * 0.5),
                     1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST_BRIGHT);
         }
@@ -293,7 +293,7 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
         int points = 14;
         for (int i = 0; i < points; i++) {
             double angle = (2.0 * Math.PI / points) * i;
-            center.getWorld().spawnParticle(Particle.DUST,
+            AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.DUST,
                     center.clone().add(Math.cos(angle) * 0.65, 0, Math.sin(angle) * 0.65),
                     1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST_BRIGHT);
         }

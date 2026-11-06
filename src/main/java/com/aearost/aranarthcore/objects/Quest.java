@@ -1,83 +1,171 @@
 package com.aearost.aranarthcore.objects;
 
-import com.aearost.aranarthcore.enums.QuestTaskType;
 import com.aearost.aranarthcore.enums.QuestType;
-import org.bukkit.inventory.ItemStack;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * Represents an immutable quest definition for the Aranarth quest system.
+ * A quest on a player's board, with its rolled amount, reward and progress.
+ * It points to a QuestDefinition, or to a QuestContract when it is a Job Contract.
  */
 public class Quest {
 
-    private final QuestTaskType taskType;
-    private final int required;
-    private final double reward;
-    private final QuestType questType;
+    private final String id;
+    private final boolean isContract;
+    private final QuestType type;
     private final int rank;
-    private final String displayName;
-    /** Non-null when this quest rewards an item instead of money. */
-    private final ItemStack itemReward;
+    // Normal quests use the first entry only; contracts use one entry per part
+    private final String[] variants;
+    private final int[] required;
+    private final int[] progress;
+    private final Set<String> seen = new HashSet<>();
+    private final double baseReward;
+    private double reward;
+    /** A reward item descriptor such as key:epic or frames:8, or null when the quest pays money. */
+    private String itemReward;
+    private boolean isCompleted;
+    private boolean isClaimed;
 
-    public Quest(QuestTaskType taskType, int required, double reward, QuestType questType, int rank, String displayName) {
-        this(taskType, required, reward, questType, rank, displayName, null);
-    }
-
-    public Quest(QuestTaskType taskType, int required, double reward, QuestType questType, int rank, String displayName, ItemStack itemReward) {
-        this.taskType = taskType;
-        this.required = required;
-        this.reward = reward;
-        this.questType = questType;
+    public Quest(String id, boolean isContract, QuestType type, int rank, String[] variants, int[] required,
+                 double baseReward) {
+        this.id = id;
+        this.isContract = isContract;
+        this.type = type;
         this.rank = rank;
-        this.displayName = displayName;
-        this.itemReward = itemReward;
+        this.variants = variants;
+        this.required = required;
+        this.progress = new int[required.length];
+        this.baseReward = baseReward;
+        this.reward = baseReward;
     }
 
-    public QuestTaskType getTaskType() {
-        return taskType;
+    public String getId() {
+        return id;
     }
 
-    public int getRequired() {
-        return required;
+    public boolean isContract() {
+        return isContract;
     }
 
-    public double getReward() {
-        return reward;
+    public QuestType getType() {
+        return type;
     }
 
-    public QuestType getQuestType() {
-        return questType;
-    }
-
+    /**
+     * @return The rank the quest was rolled for.
+     */
     public int getRank() {
         return rank;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public int getPartCount() {
+        return required.length;
     }
 
-    /** Returns the item reward, or null if this quest rewards money. */
-    public ItemStack getItemReward() {
+    public String getVariant(int part) {
+        return variants[part];
+    }
+
+    public String getVariant() {
+        return variants[0];
+    }
+
+    public String[] getVariants() {
+        return variants;
+    }
+
+    public int getRequired(int part) {
+        return required[part];
+    }
+
+    public int getRequired() {
+        return required[0];
+    }
+
+    public int[] getRequiredArray() {
+        return required;
+    }
+
+    public int getProgress(int part) {
+        return progress[part];
+    }
+
+    public int getProgress() {
+        return progress[0];
+    }
+
+    public int[] getProgressArray() {
+        return progress;
+    }
+
+    public void setProgress(int part, int value) {
+        progress[part] = Math.max(0, Math.min(value, required[part]));
+    }
+
+    public boolean isPartDone(int part) {
+        return progress[part] >= required[part];
+    }
+
+    public boolean hasStarted() {
+        for (int value : progress) {
+            if (value > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return The distinct targets already counted, such as biomes or Dominions, prefixed by part index.
+     */
+    public Set<String> getSeen() {
+        return seen;
+    }
+
+    /**
+     * @return The money the quest is worth, used for re-roll costs and the board bonus even when an item replaces it.
+     */
+    public double getBaseReward() {
+        return baseReward;
+    }
+
+    /**
+     * @return The money paid on claim, which is 0 when an item reward replaces it.
+     */
+    public double getReward() {
+        return reward;
+    }
+
+    public String getItemReward() {
         return itemReward;
     }
 
-    /** Returns true if this quest rewards an item instead of money. */
     public boolean hasItemReward() {
         return itemReward != null;
     }
 
-    /** Returns a copy of this quest with the given reward value, preserving any item reward. */
-    public Quest withReward(double newReward) {
-        return new Quest(this.taskType, this.required, newReward, this.questType, this.rank, this.displayName, this.itemReward);
+    /**
+     * Replaces the money reward with an item, or restores the money when given null.
+     */
+    public void setItemReward(String itemReward) {
+        this.itemReward = itemReward;
+        this.reward = itemReward == null ? baseReward : 0;
     }
 
-    /** Returns a copy of this quest with the given required count and display name. */
-    public Quest withRequired(int newRequired, String newDisplayName) {
-        return new Quest(this.taskType, newRequired, this.reward, this.questType, this.rank, newDisplayName, this.itemReward);
+    public boolean isCompleted() {
+        return isCompleted;
     }
 
-    /** Returns a copy of this quest with the given item reward (money reward set to 0). */
-    public Quest withItemReward(ItemStack newItemReward) {
-        return new Quest(this.taskType, this.required, 0.0, this.questType, this.rank, this.displayName, newItemReward);
+    public void setCompleted(boolean isCompleted) {
+        this.isCompleted = isCompleted;
+    }
+
+    public boolean isClaimed() {
+        return isClaimed;
+    }
+
+    public void setClaimed(boolean isClaimed) {
+        this.isClaimed = isClaimed;
     }
 }

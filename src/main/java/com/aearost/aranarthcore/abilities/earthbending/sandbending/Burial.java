@@ -226,7 +226,7 @@ public class Burial extends SandAbility implements AddonAbility {
             double[] pt = pathPoints.get(i);
             boolean isLead = i >= leadIdx - 1;
 
-            world.spawnParticle(Particle.DUST,
+            AranarthBendingUtils.spawnParticle(world, Particle.DUST,
                     pt[0] + (random.nextDouble() - 0.5) * 0.1,
                     pt[1] + random.nextDouble() * 0.07,
                     pt[2] + (random.nextDouble() - 0.5) * 0.1,
@@ -234,7 +234,7 @@ public class Burial extends SandAbility implements AddonAbility {
                     dustPalette[random.nextInt(dustPalette.length)]);
 
             if (isLead) {
-                world.spawnParticle(Particle.DUST,
+                AranarthBendingUtils.spawnParticle(world, Particle.DUST,
                         pt[0] + (random.nextDouble() - 0.5) * 0.15,
                         pt[1] + 0.06 + random.nextDouble() * 0.13,
                         pt[2] + (random.nextDouble() - 0.5) * 0.15,

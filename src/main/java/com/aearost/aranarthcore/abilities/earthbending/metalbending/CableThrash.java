@@ -177,7 +177,7 @@ public class CableThrash extends MetalAbility implements AddonAbility {
 
             // Slightly brighter particles near the whipping tips for visual contrast
             final Particle.DustOptions dust = (s > 0.75) ? CABLE_DUST_TIP : CABLE_DUST;
-            world.spawnParticle(Particle.DUST, loc, 1, 0, 0, 0, 0, dust);
+            AranarthBendingUtils.spawnParticle(world, Particle.DUST, loc, 1, 0, 0, 0, 0, dust);
         }
     }
 

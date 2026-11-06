@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.event.listener;
 
+import com.aearost.aranarthcore.utils.QuestUtils;
+import com.aearost.aranarthcore.enums.QuestTrigger;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.essence.EssenceBlank;
 import com.aearost.aranarthcore.recipes.RecipeEssences;
@@ -164,6 +166,7 @@ public class EssenceImbueListener implements Listener {
     private static void notifyThresholds(Player player, int previousXp, int newXp, int maxXp) {
         if (newXp >= maxXp && previousXp < maxXp) {
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.imbue_complete")));
+            QuestUtils.progress(player, QuestTrigger.ESSENCE, "ESSENCE", 1);
             return;
         }
         for (EssenceImbueUtils.Tier tier : EssenceImbueUtils.Tier.values()) {
@@ -324,7 +327,9 @@ public class EssenceImbueListener implements Listener {
         }
         e.getInventory().setResult(null);
         if (!errorKey.isEmpty() && e.getView().getPlayer() instanceof Player player) {
-            sendActionBar(player, Lang.getFor(player, errorKey, "percent", getRequiredPercent(e.getRecipe())));
+            String rankId = EssenceImbueUtils.getRequiredRankId(player);
+            sendActionBar(player, Lang.getFor(player, errorKey, "percent", getRequiredPercent(e.getRecipe()),
+                    "article", Lang.key("rank.article_" + rankId), "rank", Lang.key("rank.title_" + rankId)));
         }
     }
 

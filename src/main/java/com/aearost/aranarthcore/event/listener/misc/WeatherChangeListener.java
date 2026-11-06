@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.listener.misc;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Weather;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -57,6 +58,16 @@ public class WeatherChangeListener implements Listener {
 		else {
 			// If storm is ending before the duration is over (i.e sleeping in bed)
 			if (AranarthUtils.getStormDuration() > 100 && AranarthUtils.getStormDelay() <= 0) {
+				// Only sleeping may end a storm early - vanilla's own weather cycle must wait for the planned end
+				if (e.getCause() != WeatherChangeEvent.Cause.SLEEP) {
+					e.setCancelled(true);
+					World stormWorld = e.getWorld();
+					int remainingDuration = AranarthUtils.getStormDuration() + 100;
+					// Re-aligns vanilla's rain timer with the remaining storm duration
+					Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> stormWorld.setWeatherDuration(remainingDuration));
+					return;
+				}
+
 				if (e.getWorld().getName().equals("world")) {
 					Random random = new Random();
 					AranarthUtils.setWeather(Weather.CLEAR);
@@ -97,6 +108,12 @@ public class WeatherChangeListener implements Listener {
 						resource.setTime(world.getTime());
 					}
 
+					// Keeps the SMP weather in sync with the storm ending early
+					if (NetworkManager.isActive() && !AranarthCore.isSmpServer()) {
+						NetworkManager.getInstance().publishSyncWeather("CLEAR", delay, false, 0, delay);
+					}
+
+					String clearKey = AranarthUtils.isRainbowActive() ? "weather.rainbow" : "weather.clear";
 					for (Player player : Bukkit.getOnlinePlayers()) {
 							String worldName = player.getWorld().getName();
 							if (worldName.equals("arena") || worldName.startsWith("creative")) {
@@ -106,7 +123,7 @@ public class WeatherChangeListener implements Listener {
 							if (aranarthPlayer.isWeatherMessageDisabled()) {
 								continue;
 							}
-							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "weather.clear")));
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, clearKey)));
 						}
 				}
 			}

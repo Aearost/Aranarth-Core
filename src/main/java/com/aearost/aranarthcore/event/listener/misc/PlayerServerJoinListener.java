@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.abilities.waterbending.bloodbending.LifeRip;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.FireType;
 import com.aearost.aranarthcore.enums.SpecialDay;
@@ -77,14 +78,15 @@ public class PlayerServerJoinListener implements Listener {
         if (e.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
             return;
         }
-        if (!AranarthCore.isSmpServer() || !NetworkManager.isActive()) {
+        if (!AranarthCore.isSmpServer()) {
             return;
         }
         UUID uuid = e.getUniqueId();
         if (AranarthUtils.isOriginalPlayer(uuid)) {
             return;
         }
-        if (NetworkManager.getInstance().getPendingTeleport(uuid) != null) {
+        // Fails closed when the network is down, as this is the SMP's only whitelist
+        if (NetworkManager.isActive() && NetworkManager.getInstance().getPendingTeleport(uuid) != null) {
             return;
         }
         Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Join] Refused SMP connection for " + e.getName()
@@ -173,7 +175,7 @@ public class PlayerServerJoinListener implements Listener {
         } else if (avatar.getUuid().equals(player.getUniqueId())) {
             player.sendMessage("  " + Lang.getFor(player, "motd.avatar_self"));
         } else {
-            String avatarNickname = AranarthUtils.getPlayer(avatar.getUuid()).getNickname();
+            String avatarNickname = AranarthUtils.getNickname(Bukkit.getOfflinePlayer(avatar.getUuid()));
             String element = "";
             if (avatar.getElement() == 'W') {
                 element = "&b水";
@@ -329,6 +331,8 @@ public class PlayerServerJoinListener implements Listener {
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 player.teleport(new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0));
                 isNewPlayer = true;
+                // Otherwise the other server would not know about this player until they log out
+                PersistenceUtils.shareNewPlayer(player.getUniqueId());
             }
         }
         // If the player changed their username/it was never resolved
@@ -339,8 +343,6 @@ public class PlayerServerJoinListener implements Listener {
         if (AvatarUtils.getCurrentAvatar() != null) {
             // Called to bind the Avatar's abilities to prevent loss of avatar abilities
             if (AvatarUtils.getCurrentAvatar().getUuid().equals(player.getUniqueId())) {
-                PersistenceUtils.applyAvatarBindsOnJoin();
-
                 // Adds a 2-second delay
                 new BukkitRunnable() {
                     @Override
@@ -380,6 +382,14 @@ public class PlayerServerJoinListener implements Listener {
 
         // Permissions must be applied before nickname check is done
         PermissionUtils.evaluatePlayerPermissions(player);
+        // Players who are no longer in architect mode could not change back on their own
+        AranarthUtils.removeRevokedGameMode(player);
+
+        if (AvatarUtils.getCurrentAvatar() != null && AvatarUtils.getCurrentAvatar().getUuid().equals(player.getUniqueId())) {
+            AvatarUtils.logInfo("The Avatar " + AvatarUtils.describe(player.getUniqueId()) + " joined this server");
+            PersistenceUtils.applyAvatarBindsOnJoin();
+            AvatarUtils.scheduleStateCheck(player.getUniqueId(), "joined the server", null);
+        }
 
         // Clears a player's nickname if they do not have permission for one
         if (!player.hasPermission("aranarth.nick")) {
@@ -538,11 +548,14 @@ public class PlayerServerJoinListener implements Listener {
                                 }
                             }
                             if (apInv != null) {
+                                // This server's player data has its own maximum health, which may be outdated
+                                LifeRip.syncMaxHealth(player);
                                 player.setHealth(Math.min(apInv.getSurvivalHealth(), player.getAttribute(Attribute.MAX_HEALTH).getValue()));
                                 player.setFoodLevel(apInv.getSurvivalFoodLevel());
                                 player.setSaturation(apInv.getSurvivalSaturation());
                                 player.setLevel(apInv.getSurvivalExpLevel());
                                 player.setExp(apInv.getSurvivalExpProgress());
+                                AranarthUtils.applyPotionEffects(player, apInv.getSurvivalEffects());
                             }
                             player.setGameMode(GameMode.SURVIVAL);
                             // If the player's last position on this server was in a non-survival world
@@ -684,6 +697,11 @@ public class PlayerServerJoinListener implements Listener {
                             }
                         }
                     }
+                }
+
+                // The player logged in to a world that was disabled via /ac disable, or a pending teleport into one was refused
+                if (AranarthUtils.isWorldDisabledFor(player, player.getWorld().getName())) {
+                    AranarthUtils.evacuateDisabledWorld(player);
                 }
 
                 // Reload quest progress from DB so assignments and progress match the source server.
@@ -831,6 +849,10 @@ public class PlayerServerJoinListener implements Listener {
                                                     ItemUtils.itemStackArrayFromBase64(snap.get("inventory").getAsString()));
                                             player.getEnderChest().setContents(
                                                     ItemUtils.itemStackArrayFromBase64(snap.get("enderChest").getAsString()));
+                                            LifeRip.syncMaxHealth(player);
+                                            if (snap.has("effects")) {
+                                                AranarthUtils.applyPotionEffects(player, snap.get("effects").getAsString());
+                                            }
                                             if (snap.has("health")) {
                                                 double maxHp = player.getAttribute(Attribute.MAX_HEALTH).getValue();
                                                 player.setHealth(Math.min(snap.get("health").getAsDouble(), maxHp));
@@ -850,6 +872,7 @@ public class PlayerServerJoinListener implements Listener {
                                                 if (snap.has("saturation")) ap.setSurvivalSaturation(player.getSaturation());
                                                 if (snap.has("expLevel")) ap.setSurvivalExpLevel(player.getLevel());
                                                 if (snap.has("expProgress")) ap.setSurvivalExpProgress(player.getExp());
+                                                if (snap.has("effects")) ap.setSurvivalEffects(snap.get("effects").getAsString());
                                                 AranarthUtils.setPlayer(uuidForAsync, ap);
                                             }
                                             // Paper restored their last position on this server, which may be in a world with another inventory
@@ -909,6 +932,7 @@ public class PlayerServerJoinListener implements Listener {
                                             NetworkManager.getInstance().clearNonAuthoritative(uuidForAsync);
                                             NetworkManager.getInstance().unlockPlayer(uuidForAsync);
                                             reloadFallbackLandingData(uuidForAsync, true);
+                                            LifeRip.syncMaxHealth(player);
                                             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Join] " + player.getName()
                                                     + " - no SMP fallback snapshot found and " + sourceServer
                                                     + " is offline; player stays on Survival with existing Survival inventory.");
@@ -997,6 +1021,7 @@ public class PlayerServerJoinListener implements Listener {
                                         + "[Inv] Failed to apply ender chest on login for " + player.getName() + ": " + ex.getMessage());
                             }
                         }
+                        LifeRip.syncMaxHealth(player);
                         if (apInv.getSurvivalHealth() > 0) {
                             player.setHealth(Math.min(apInv.getSurvivalHealth(), player.getAttribute(Attribute.MAX_HEALTH).getValue()));
                         }
@@ -1014,6 +1039,10 @@ public class PlayerServerJoinListener implements Listener {
                 // Anyone not waiting to be routed elsewhere now holds their own inventory
                 if (NetworkManager.isActive() && !NetworkManager.getInstance().isNonAuthoritative(player.getUniqueId())) {
                     NetworkManager.getInstance().unlockPlayer(player.getUniqueId());
+                }
+                // Covers every other arrival, such as joining into a creative or arena world
+                if (!NetworkManager.isActive() || !NetworkManager.getInstance().isNonAuthoritative(player.getUniqueId())) {
+                    LifeRip.syncMaxHealth(player);
                 }
 
                 // Displays a welcome message after the join message
@@ -1094,6 +1123,7 @@ public class PlayerServerJoinListener implements Listener {
         if (player == null || !player.isOnline()) {
             return;
         }
+        PermissionUtils.restoreOldAvatarElement(player);
         PermissionUtils.updateSubElements(player);
 
         // Apply active elemental world event permissions now that BendingPlayer is loaded

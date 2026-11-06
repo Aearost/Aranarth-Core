@@ -43,6 +43,7 @@ public class EnchantingUtils {
     private static final Map<UUID, Long> readiedPlayers = new HashMap<>();
     private static final Map<UUID, Long> infiniteLibraryEnds = new HashMap<>();
     private static final Map<UUID, Location> infiniteLibraryTables = new HashMap<>();
+    private static final Map<UUID, Long> infiniteLibraryDurations = new HashMap<>();
 
     /**
      * Provides the player's Enchanting level, being the average of their Alchemy and Repair levels.
@@ -260,8 +261,33 @@ public class EnchantingUtils {
      * @param durationMillis The duration of the ability.
      */
     public static void startInfiniteLibrary(Player player, Location table, long durationMillis) {
-        infiniteLibraryEnds.put(player.getUniqueId(), System.currentTimeMillis() + durationMillis);
+        infiniteLibraryEnds.put(player.getUniqueId(), Long.MAX_VALUE);
         infiniteLibraryTables.put(player.getUniqueId(), table);
+        infiniteLibraryDurations.put(player.getUniqueId(), durationMillis);
+    }
+
+    /**
+     * Starts counting down the player's Infinite Library duration, if it has not started yet.
+     * @param uuid The player's UUID.
+     * @return The time at which the ability ends, or 0 if the countdown had already started.
+     */
+    public static long startInfiniteLibraryCountdown(UUID uuid) {
+        Long duration = infiniteLibraryDurations.remove(uuid);
+        if (duration == null) {
+            return 0;
+        }
+        long end = System.currentTimeMillis() + duration;
+        infiniteLibraryEnds.put(uuid, end);
+        return end;
+    }
+
+    /**
+     * Determines whether the player has Infinite Library active but has not rolled any offers with it yet.
+     * @param uuid The player's UUID.
+     * @return Whether the countdown is still waiting for the first roll.
+     */
+    public static boolean isInfiniteLibraryAwaitingRoll(UUID uuid) {
+        return infiniteLibraryDurations.containsKey(uuid);
     }
 
     /**
@@ -287,5 +313,21 @@ public class EnchantingUtils {
     public static void endInfiniteLibrary(UUID uuid) {
         infiniteLibraryEnds.remove(uuid);
         infiniteLibraryTables.remove(uuid);
+        infiniteLibraryDurations.remove(uuid);
+    }
+
+    /**
+     * Ends Infinite Library only if it is still the activation that ends at the input time.
+     * @param uuid The player's UUID.
+     * @param end The time returned when the countdown was started.
+     * @return Whether the ability was ended.
+     */
+    public static boolean endInfiniteLibrary(UUID uuid, long end) {
+        Long current = infiniteLibraryEnds.get(uuid);
+        if (current == null || current != end) {
+            return false;
+        }
+        endInfiniteLibrary(uuid);
+        return true;
     }
 }

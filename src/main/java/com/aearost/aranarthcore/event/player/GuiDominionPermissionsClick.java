@@ -45,8 +45,12 @@ public class GuiDominionPermissionsClick {
             return;
         }
 
-        // Only the leader can use this GUI
-        if (!dominion.getLeader().equals(player.getUniqueId())) {
+        String title = ChatUtils.stripColorFormatting(e.getView().getTitle());
+        boolean isHub = title.equals(Lang.getFor(player, GuiDominionPermissions.HUB_TITLE_KEY));
+
+        // Only the leader can use this GUI, except for the Resources item which is gated by its own permission
+        if (!dominion.getLeader().equals(player.getUniqueId())
+                && !(isHub && e.getSlot() == GuiDominionPermissions.RESOURCES_SLOT)) {
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.leader_only_permissions")));
             return;
         }
@@ -56,10 +60,8 @@ public class GuiDominionPermissionsClick {
             return;
         }
 
-        String title = ChatUtils.stripColorFormatting(e.getView().getTitle());
-
         // Main hub screen, navigate to sections or toggle settings
-        if (title.equals(Lang.getFor(player, GuiDominionPermissions.HUB_TITLE_KEY))) {
+        if (isHub) {
             int slot = e.getSlot();
             switch (slot) {
                 case GuiDominionPermissions.BENDING_SLOT -> {

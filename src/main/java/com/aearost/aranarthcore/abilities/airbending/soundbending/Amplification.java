@@ -231,7 +231,7 @@ public class Amplification extends SoundAbility implements AddonAbility {
             double angle = (2.0 * Math.PI / points) * i;
             double x = Math.cos(angle) * radius;
             double z = Math.sin(angle) * radius;
-            center.getWorld().spawnParticle(Particle.DUST, center.clone().add(x, 0, z), 1, 0, 0, 0, 0, AranarthBendingUtils.SOUND_RING_DUST);
+            AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.DUST, center.clone().add(x, 0, z), 1, 0, 0, 0, 0, AranarthBendingUtils.SOUND_RING_DUST);
         }
     }
 

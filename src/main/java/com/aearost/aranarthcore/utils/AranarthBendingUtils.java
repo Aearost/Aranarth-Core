@@ -1,18 +1,24 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.Outpost;
 import com.projectkorra.projectkorra.BendingPlayer;
+import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.Ability;
+import com.projectkorra.projectkorra.ability.AirAbility;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.util.DamageHandler;
+import com.projectkorra.projectkorra.util.TempBlock;
 import com.projectkorra.projectkorra.waterbending.util.WaterReturn;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.Bisected;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -22,6 +28,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class AranarthBendingUtils {
 
@@ -72,6 +79,48 @@ public class AranarthBendingUtils {
     public static final Color SOUND_COLOR_PULSE = Color.fromRGB(100, 210, 255);
 
     /**
+     * Primary petal colour of every flower recognized by AranarthUtils.isFlower().
+     */
+    public static final Map<Material, Color> FLOWER_PETAL_COLORS = Map.ofEntries(
+            Map.entry(Material.DANDELION, Color.fromRGB(0xF5D63A)),
+            Map.entry(Material.POPPY, Color.fromRGB(0xED302C)),
+            Map.entry(Material.BLUE_ORCHID, Color.fromRGB(0x2ABFFD)),
+            Map.entry(Material.ALLIUM, Color.fromRGB(0xB878ED)),
+            Map.entry(Material.AZURE_BLUET, Color.fromRGB(0xE6EBEC)),
+            Map.entry(Material.RED_TULIP, Color.fromRGB(0xEB4A3F)),
+            Map.entry(Material.ORANGE_TULIP, Color.fromRGB(0xF0862F)),
+            Map.entry(Material.WHITE_TULIP, Color.fromRGB(0xF2F2F2)),
+            Map.entry(Material.PINK_TULIP, Color.fromRGB(0xF4B8D9)),
+            Map.entry(Material.OXEYE_DAISY, Color.fromRGB(0xF5F2E8)),
+            Map.entry(Material.CORNFLOWER, Color.fromRGB(0x466AEB)),
+            Map.entry(Material.LILY_OF_THE_VALLEY, Color.fromRGB(0xFFFFFF)),
+            Map.entry(Material.TORCHFLOWER, Color.fromRGB(0xE8752C)),
+            Map.entry(Material.PITCHER_PLANT, Color.fromRGB(0x6C8FD3)),
+            Map.entry(Material.CACTUS_FLOWER, Color.fromRGB(0xF07EB4)),
+            Map.entry(Material.OPEN_EYEBLOSSOM, Color.fromRGB(0xF59A3A)),
+            Map.entry(Material.CLOSED_EYEBLOSSOM, Color.fromRGB(0x8A8A9C)),
+            Map.entry(Material.WITHER_ROSE, Color.fromRGB(0x2B2B2B)),
+            Map.entry(Material.PINK_PETALS, Color.fromRGB(0xF5A9C8)),
+            Map.entry(Material.WILDFLOWERS, Color.fromRGB(0xF2D64B)),
+            Map.entry(Material.SPORE_BLOSSOM, Color.fromRGB(0xE06FA8)),
+            Map.entry(Material.SUNFLOWER, Color.fromRGB(0xFFCA2A)),
+            Map.entry(Material.LILAC, Color.fromRGB(0xD29BE6)),
+            Map.entry(Material.ROSE_BUSH, Color.fromRGB(0xD3262C)),
+            Map.entry(Material.PEONY, Color.fromRGB(0xEBB5E5)),
+            Map.entry(Material.CHORUS_FLOWER, Color.fromRGB(0x9D7FAE))
+    );
+
+    /**
+     * Gets the primary petal colour of the given flower.
+     *
+     * @param type The flower material.
+     * @return The petal colour, or white if the material is not a known flower.
+     */
+    public static Color getFlowerPetalColor(Material type) {
+        return FLOWER_PETAL_COLORS.getOrDefault(type, Color.WHITE);
+    }
+
+    /**
      * Hex colour used for the action bar electrocution message, matching LIGHTNING_DUST.
      */
     private static final TextColor ELECTROCUTION_COLOR = TextColor.fromHexString("#FFF050");
@@ -113,6 +162,17 @@ public class AranarthBendingUtils {
      */
     public static final Particle.DustOptions LIGHTNING_DUST_BLUE =
             new Particle.DustOptions(Color.fromRGB(100, 200, 255), 1.0f);
+    /**
+     * The dust of ProjectKorra's Lightningbending particle.
+     */
+    private static final Particle.DustOptions LIGHTNING_PARTICLE_DUST =
+            new Particle.DustOptions(Color.fromRGB(0x01, 0xE1, 0xFF), 1.0f);
+
+    /**
+     * The squared distances that particles reach viewers, matching World#spawnParticle.
+     */
+    private static final double PARTICLE_RANGE_SQUARED = 32 * 32;
+    private static final double PARTICLE_FORCED_RANGE_SQUARED = 512 * 512;
 
     public static final Particle.DustOptions SOUND_RING_DUST = new Particle.DustOptions(SOUND_COLOR_TURQUOISE, 0.8f);
     public static final Particle.DustOptions SOUND_CHARGE_DUST = new Particle.DustOptions(SOUND_COLOR_TEAL, 0.5f);
@@ -302,7 +362,7 @@ public class AranarthBendingUtils {
             return true;
         }
         Location location = block.getLocation();
-        if (AranarthUtils.isSpawnLocation(location)) {
+        if (AranarthUtils.isProtectedSpawnLocation(location)) {
             return false;
         }
         if (block.getWorld().getName().equals(ShopIslandUtils.SHOPS_WORLD)) {
@@ -461,5 +521,338 @@ public class AranarthBendingUtils {
                  HANGING_ROOTS, BIG_DRIPLEAF, SMALL_DRIPLEAF -> true;
             default -> AranarthUtils.isFlower(mat);
         };
+    }
+
+    /**
+     * Finds the sourceable flower closest to the player's look direction.
+     *
+     * @param ability The ability sourcing the flower.
+     * @param player  The player sourcing the flower.
+     * @param range   How far away the flower can be.
+     * @param angle   How far (in degrees) the flower can be from the look direction.
+     * @return The flower, or null if there is none.
+     */
+    public static Block findTargetedFlower(Ability ability, Player player, double range, double angle) {
+        Location eye = player.getEyeLocation();
+        Vector look = eye.getDirection().normalize();
+        double minDot = Math.cos(Math.toRadians(angle));
+        double rangeSq = range * range;
+        int r = (int) Math.ceil(range);
+        Block eyeBlock = eye.getBlock();
+
+        Block best = null;
+        double bestDot = minDot;
+        for (int x = -r; x <= r; x++) {
+            for (int y = -r; y <= r; y++) {
+                for (int z = -r; z <= r; z++) {
+                    Block candidate = eyeBlock.getRelative(x, y, z);
+                    if (!AranarthUtils.isFlower(candidate.getType())) {
+                        continue;
+                    }
+                    Location candidateCenter = candidate.getLocation().add(0.5, 0.5, 0.5);
+                    Vector toFlower = candidateCenter.toVector().subtract(eye.toVector());
+                    double distSq = toFlower.lengthSquared();
+                    if (distSq > rangeSq || distSq < 0.01) {
+                        continue;
+                    }
+                    double dot = toFlower.clone().normalize().dot(look);
+                    if (dot <= bestDot) {
+                        continue;
+                    }
+                    if (TempBlock.isTempBlock(candidate) || !isPathClear(eye, candidateCenter)
+                            || !canBendBlock(player, candidate)
+                            || GeneralMethods.isRegionProtectedFromBuild(ability, candidate.getLocation())) {
+                        continue;
+                    }
+                    best = candidate;
+                    bestDot = dot;
+                }
+            }
+        }
+        return best;
+    }
+
+    /**
+     * Checks that no solid block sits between the two locations.
+     *
+     * @param from The starting location.
+     * @param to   The ending location.
+     * @return Whether the path between the locations is clear.
+     */
+    public static boolean isPathClear(Location from, Location to) {
+        Vector path = to.toVector().subtract(from.toVector());
+        double length = path.length();
+        if (length < 0.01) {
+            return true;
+        }
+        Block target = to.getBlock();
+        Vector step = path.normalize().multiply(0.25);
+        Location point = from.clone();
+        for (double d = 0; d < length; d += 0.25) {
+            Block block = point.getBlock();
+            if (block.equals(target)) {
+                return true;
+            }
+            if (block.getType().isSolid()) {
+                return false;
+            }
+            point.add(step);
+        }
+        return true;
+    }
+
+    /**
+     * Temporarily turns a flower to air. Tall flowers are cleared as a whole so no floating half is left behind.
+     *
+     * @param block The flower.
+     * @return The temporary blocks, to be given to revertFlower() when the ability ends.
+     */
+    public static List<TempBlock> breakFlower(Block block) {
+        List<TempBlock> tempBlocks = new ArrayList<>();
+        if (block.getBlockData() instanceof Bisected bisected) {
+            Block lower = bisected.getHalf() == Bisected.Half.TOP ? block.getRelative(BlockFace.DOWN) : block;
+            Block upper = lower.getRelative(BlockFace.UP);
+            Material flowerType = block.getType();
+            if (lower.getType() == flowerType && !TempBlock.isTempBlock(lower)) {
+                tempBlocks.add(new TempBlock(lower, Material.AIR.createBlockData()));
+            }
+            if (upper.getType() == flowerType && !TempBlock.isTempBlock(upper)) {
+                tempBlocks.add(new TempBlock(upper, Material.AIR.createBlockData()));
+            }
+        } else {
+            tempBlocks.add(new TempBlock(block, Material.AIR.createBlockData()));
+        }
+        return tempBlocks;
+    }
+
+    /**
+     * Restores a flower that was broken with breakFlower().
+     *
+     * @param tempBlocks The temporary blocks of the flower.
+     */
+    public static void revertFlower(List<TempBlock> tempBlocks) {
+        // Revert in reverse order so the upper half of a tall flower is restored first
+        for (int i = tempBlocks.size() - 1; i >= 0; i--) {
+            TempBlock tempBlock = tempBlocks.get(i);
+            // A block placed in the flower's spot removes the TempBlock, and must not be overwritten by the flower
+            if (!tempBlock.isReverted() && TempBlock.isTempBlock(tempBlock.getBlock())) {
+                tempBlock.revertBlock();
+            }
+        }
+        tempBlocks.clear();
+    }
+
+    /**
+     * Spawns a bending particle, scaled per viewer by their /particles value.
+     *
+     * @param world The world to spawn the particle in.
+     * @param particle The particle to spawn.
+     * @param location The location to spawn the particle at.
+     * @param count The base number of particles, before scaling.
+     * @param offsetX The X offset.
+     * @param offsetY The Y offset.
+     * @param offsetZ The Z offset.
+     * @param extra The extra particle data, typically the speed.
+     */
+    public static void spawnParticle(World world, Particle particle, Location location, int count,
+                                     double offsetX, double offsetY, double offsetZ, double extra) {
+        spawnParticle(world, particle, location, count, offsetX, offsetY, offsetZ, extra, null, false);
+    }
+
+    /**
+     * Spawns a bending particle with data, scaled per viewer by their /particles value.
+     *
+     * @param world The world to spawn the particle in.
+     * @param particle The particle to spawn.
+     * @param location The location to spawn the particle at.
+     * @param count The base number of particles, before scaling.
+     * @param offsetX The X offset.
+     * @param offsetY The Y offset.
+     * @param offsetZ The Z offset.
+     * @param extra The extra particle data, typically the speed.
+     * @param data The particle data.
+     */
+    public static <T> void spawnParticle(World world, Particle particle, Location location, int count,
+                                         double offsetX, double offsetY, double offsetZ, double extra, T data) {
+        spawnParticle(world, particle, location, count, offsetX, offsetY, offsetZ, extra, data, false);
+    }
+
+    /**
+     * Spawns a bending particle with data, scaled per viewer by their /particles value.
+     *
+     * @param world The world to spawn the particle in.
+     * @param particle The particle to spawn.
+     * @param location The location to spawn the particle at.
+     * @param count The base number of particles, before scaling.
+     * @param offsetX The X offset.
+     * @param offsetY The Y offset.
+     * @param offsetZ The Z offset.
+     * @param extra The extra particle data, typically the speed.
+     * @param data The particle data.
+     * @param force Whether the particle is sent to viewers at the extended range.
+     */
+    public static <T> void spawnParticle(World world, Particle particle, Location location, int count,
+                                         double offsetX, double offsetY, double offsetZ, double extra, T data, boolean force) {
+        spawnParticle(world, particle, location.getX(), location.getY(), location.getZ(), count,
+                offsetX, offsetY, offsetZ, extra, data, force);
+    }
+
+    /**
+     * Spawns a bending particle, scaled per viewer by their /particles value.
+     *
+     * @param world The world to spawn the particle in.
+     * @param particle The particle to spawn.
+     * @param x The X coordinate.
+     * @param y The Y coordinate.
+     * @param z The Z coordinate.
+     * @param count The base number of particles, before scaling.
+     * @param offsetX The X offset.
+     * @param offsetY The Y offset.
+     * @param offsetZ The Z offset.
+     * @param extra The extra particle data, typically the speed.
+     */
+    public static void spawnParticle(World world, Particle particle, double x, double y, double z, int count,
+                                     double offsetX, double offsetY, double offsetZ, double extra) {
+        spawnParticle(world, particle, x, y, z, count, offsetX, offsetY, offsetZ, extra, null, false);
+    }
+
+    /**
+     * Spawns a bending particle with data, scaled per viewer by their /particles value.
+     *
+     * @param world The world to spawn the particle in.
+     * @param particle The particle to spawn.
+     * @param x The X coordinate.
+     * @param y The Y coordinate.
+     * @param z The Z coordinate.
+     * @param count The base number of particles, before scaling.
+     * @param offsetX The X offset.
+     * @param offsetY The Y offset.
+     * @param offsetZ The Z offset.
+     * @param extra The extra particle data, typically the speed.
+     * @param data The particle data.
+     */
+    public static <T> void spawnParticle(World world, Particle particle, double x, double y, double z, int count,
+                                         double offsetX, double offsetY, double offsetZ, double extra, T data) {
+        spawnParticle(world, particle, x, y, z, count, offsetX, offsetY, offsetZ, extra, data, false);
+    }
+
+    /**
+     * Sends a bending particle to each viewer in range, matching the reach of World#spawnParticle.
+     * A count of 0 is a single directional particle using the offsets as its velocity, so the
+     * packet is repeated or skipped rather than having its count changed.
+     *
+     * @param world The world to spawn the particle in.
+     * @param particle The particle to spawn.
+     * @param x The X coordinate.
+     * @param y The Y coordinate.
+     * @param z The Z coordinate.
+     * @param count The base number of particles, before scaling.
+     * @param offsetX The X offset.
+     * @param offsetY The Y offset.
+     * @param offsetZ The Z offset.
+     * @param extra The extra particle data, typically the speed.
+     * @param data The particle data.
+     * @param force Whether the particle is sent to viewers at the extended range.
+     */
+    private static <T> void spawnParticle(World world, Particle particle, double x, double y, double z, int count,
+                                          double offsetX, double offsetY, double offsetZ, double extra, T data, boolean force) {
+        double maxDistanceSquared = force ? PARTICLE_FORCED_RANGE_SQUARED : PARTICLE_RANGE_SQUARED;
+        for (Player viewer : world.getPlayers()) {
+            Location viewerLocation = viewer.getLocation();
+            double distanceX = viewerLocation.getX() - x;
+            double distanceY = viewerLocation.getY() - y;
+            double distanceZ = viewerLocation.getZ() - z;
+            if (distanceX * distanceX + distanceY * distanceY + distanceZ * distanceZ > maxDistanceSquared) {
+                continue;
+            }
+
+            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(viewer.getUniqueId());
+            int percent = aranarthPlayer == null ? 100 : aranarthPlayer.getParticleNum();
+            int amount = scaleParticleCount(Math.max(count, 1), percent);
+            if (amount == 0) {
+                continue;
+            }
+
+            if (count == 0) {
+                for (int i = 0; i < amount; i++) {
+                    viewer.spawnParticle(particle, x, y, z, 0, offsetX, offsetY, offsetZ, extra, data, force);
+                }
+            } else {
+                viewer.spawnParticle(particle, x, y, z, amount, offsetX, offsetY, offsetZ, extra, data, force);
+            }
+        }
+    }
+
+    /**
+     * Scales a particle count, rolling the fractional remainder so that the single particles
+     * most abilities spawn in loops still thin out evenly at low percentages.
+     *
+     * @param count The base number of particles.
+     * @param percent The viewer's /particles value.
+     * @return The number of particles to show the viewer.
+     */
+    private static int scaleParticleCount(int count, int percent) {
+        if (percent == 100) {
+            return count;
+        }
+        double scaled = count * (percent / 100.0);
+        int whole = (int) scaled;
+        return ThreadLocalRandom.current().nextDouble() < scaled - whole ? whole + 1 : whole;
+    }
+
+    /**
+     * Plays the configured Airbending particle, scaled per viewer by their /particles value.
+     * Mirrors AirAbility#playAirbendingParticles, which would broadcast to every viewer.
+     *
+     * @param location The location to spawn the particle at.
+     * @param amount The base number of particles, before scaling.
+     * @param offsetX The X offset.
+     * @param offsetY The Y offset.
+     * @param offsetZ The Z offset.
+     */
+    public static void playAirbendingParticles(Location location, int amount, double offsetX, double offsetY, double offsetZ) {
+        Particle particle = getAirbendingParticle();
+        Object data = switch (particle.getDataType().getSimpleName()) {
+            case "Color" -> Color.WHITE;
+            case "BlockData" -> Material.WHITE_WOOL.createBlockData();
+            case "DustOptions" -> new Particle.DustOptions(Color.WHITE, 1.0f);
+            case "DustTransition" -> new Particle.DustTransition(Color.WHITE, Color.WHITE, 1.0f);
+            case "Float" -> 1.0f;
+            case "Integer" -> 1;
+            case "ItemStack" -> new ItemStack(Material.WHITE_WOOL);
+            case "Spell" -> new Particle.Spell(Color.WHITE, 1.0f);
+            case "Trail" -> new Particle.Trail(location, Color.WHITE, 1);
+            case "Vibration" -> new Vibration(new Vibration.Destination.BlockDestination(location.getBlock()), 0);
+            default -> null;
+        };
+        spawnParticle(location.getWorld(), particle, location, amount, offsetX, offsetY, offsetZ, 0, data, true);
+    }
+
+    /**
+     * Gets the configured Air particle directly from the ProjectKorra config.
+     * AirAbility#getAirbendingParticles has a different return type between the compile and server versions of
+     * ProjectKorra, so calling it throws a NoSuchMethodError at runtime.
+     *
+     * @return The configured Air particle, or EFFECT if it is not a valid particle.
+     */
+    private static Particle getAirbendingParticle() {
+        try {
+            return Particle.valueOf(AirAbility.getConfig().getString("Properties.Air.Particles", "EFFECT").toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return Particle.EFFECT;
+        }
+    }
+
+    /**
+     * Plays the Lightningbending particle, scaled per viewer by their /particles value.
+     * Mirrors FireAbility#playLightningbendingParticle, which would broadcast to every viewer.
+     *
+     * @param location The location to spawn the particle at.
+     * @param offsetX The X offset.
+     * @param offsetY The Y offset.
+     * @param offsetZ The Z offset.
+     */
+    public static void playLightningbendingParticle(Location location, double offsetX, double offsetY, double offsetZ) {
+        spawnParticle(location.getWorld(), Particle.DUST, location, 1, offsetX, offsetY, offsetZ, 0, LIGHTNING_PARTICLE_DUST, true);
     }
 }

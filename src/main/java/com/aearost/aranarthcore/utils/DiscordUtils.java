@@ -3,6 +3,8 @@ package com.aearost.aranarthcore.utils;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.WorldEvent;
+import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.objects.*;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.EmbedBuilder;
@@ -15,9 +17,7 @@ import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.Sound;
 import org.bukkit.ban.ProfileBanList;
-import org.bukkit.entity.Player;
 
 import java.awt.*;
 import java.time.Instant;
@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -113,9 +112,12 @@ public class DiscordUtils {
 					if (fullInputUsername.endsWith(" ")) {
 						fullInputUsername = fullInputUsername.substring(0, fullInputUsername.length() - 1);
 					}
-					String id = findMemberToPing(fullInputUsername);
+					// Bold or italic markers closing right after a ping are not part of the username
+					String usernameWithoutMarkers = fullInputUsername.replaceAll("\\*+$", "");
+					String closingMarkers = fullInputUsername.substring(usernameWithoutMarkers.length());
+					String id = findMemberToPing(usernameWithoutMarkers);
 					if (id != null) {
-						finalMessage += "<@" + id + "> ";
+						finalMessage += "<@" + id + ">" + closingMarkers + " ";
 					} else {
 						finalMessage += fullInputUsername + " ";
 					}
@@ -246,14 +248,9 @@ public class DiscordUtils {
 
 			// Only display intentional changes in Discord, not auto-assign
 			if (isIntentionalChange) {
-				String aOrAn = "a";
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-				String rankName = AranarthUtils.getRank(aranarthPlayer).substring(5);
-				String[] rankNameNoBrackets = rankName.split("]");
-				rankName = ChatUtils.stripColorFormatting(rankNameNoBrackets[0].substring(0, rankNameNoBrackets[0].length() - 4));
-				if (rankName.equals("Esquire") || rankName.equals("Emperor") || rankName.equals("Empress")) {
-					aOrAn = "an";
-				}
+				String rankName = aranarthPlayer.getPronouns().getRankName(aranarthPlayer.getRank());
+				String aOrAn = Lang.getDefault("rank.article_" + aranarthPlayer.getPronouns().getRankId(aranarthPlayer.getRank()));
 
 				String uuidNoDashes = player.getUniqueId().toString().replaceAll("-", "");
 				String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
@@ -538,16 +535,28 @@ public class DiscordUtils {
 			appliedBy = Bukkit.getOfflinePlayer(punishment.getAppliedBy()).getName();
 		}
 
+		// The username is null on a server the player has never joined
+		String username = aranarthPlayer.getUsername();
+		if (username == null && NetworkManager.isActive()) {
+			NetworkPlayer remote = NetworkManager.getInstance().getRemotePlayer(punishment.getUuid());
+			if (remote != null) {
+				username = remote.getUsername();
+			}
+		}
+		if (username == null) {
+			username = ChatUtils.stripColorFormatting(aranarthPlayer.getNickname());
+		}
+
         switch (punishment.getType()) {
             case "WARN" -> {
-                embed.setAuthor(aranarthPlayer.getUsername() + " has been warned", null, url);
+                embed.setAuthor(username + " has been warned", null, url);
                 embed.setColor(new Color(253, 233, 146));
                 embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
 						"**Warned by:** " + appliedBy + "\n" +
                         "**Reason:** " + punishment.getReason());
             }
 			case "MUTE" -> {
-				embed.setAuthor(aranarthPlayer.getUsername() + " has been muted", null, url);
+				embed.setAuthor(username + " has been muted", null, url);
 				embed.setColor(new Color(255, 255, 0));
 
 				String formattedEndDate = "None";
@@ -582,7 +591,7 @@ public class DiscordUtils {
 					String minute = endDate.getMinute() < 10 ? "0" + endDate.getMinute() : endDate.getMinute() + "";
 					formattedEndDate = month + "/" + day + "/" + year + " at " + hour + ":" + minute + " EST";
 				}
-				embed.setAuthor(aranarthPlayer.getUsername() + " has been banned", null, url);
+				embed.setAuthor(username + " has been banned", null, url);
 				embed.setColor(new Color(70, 0, 0));
 				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
 						"**Banned by:** " + appliedBy + "\n" +
@@ -590,49 +599,49 @@ public class DiscordUtils {
 						"**Reason:** " + punishment.getReason());
 			}
 			case "UNMUTE" -> {
-				embed.setAuthor(aranarthPlayer.getUsername() + " has been unmuted", null, url);
+				embed.setAuthor(username + " has been unmuted", null, url);
 				embed.setColor(Color.GREEN);
 				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
 						"**Unmuted by:** " + appliedBy + "\n" +
 						"**Reason:** " + punishment.getReason());
 			}
 			case "UNBAN" -> {
-				embed.setAuthor(aranarthPlayer.getUsername() + " has been unbanned", null, url);
+				embed.setAuthor(username + " has been unbanned", null, url);
 				embed.setColor(Color.GREEN);
 				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
 						"**Unbanned by:** " + appliedBy + "\n" +
 						"**Reason:** " + punishment.getReason());
 			}
 			case "REMOVE_WARN" -> {
-				embed.setAuthor("A warning has been removed from " + aranarthPlayer.getUsername(), null, url);
+				embed.setAuthor("A warning has been removed from " + username, null, url);
 				embed.setColor(Color.CYAN);
 				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
 						"**Warning removed by:** " + appliedBy + "\n" +
 						"**Original Warn Reason:** " + punishment.getReason());
 			}
 			case "REMOVE_MUTE" -> {
-				embed.setAuthor("A mute has been removed from " + aranarthPlayer.getUsername(), null, url);
+				embed.setAuthor("A mute has been removed from " + username, null, url);
 				embed.setColor(Color.CYAN);
 				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
 						"**Mute removed by:** " + appliedBy + "\n" +
 						"**Original Mute Reason:** " + punishment.getReason());
 			}
 			case "REMOVE_BAN" -> {
-				embed.setAuthor("A ban has been removed from " + aranarthPlayer.getUsername(), null, url);
+				embed.setAuthor("A ban has been removed from " + username, null, url);
 				embed.setColor(Color.CYAN);
 				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
 						"**Ban removed by:** " + appliedBy + "\n" +
 						"**Original Ban Reason:** " + punishment.getReason());
 			}
 			case "REMOVE_UNMUTE" -> {
-				embed.setAuthor("An unmute has been removed from " + aranarthPlayer.getUsername(), null, url);
+				embed.setAuthor("An unmute has been removed from " + username, null, url);
 				embed.setColor(Color.CYAN);
 				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
 						"**Unmute removed by:** " + appliedBy + "\n" +
 						"**Original Unmute Reason:** " + punishment.getReason());
 			}
 			case "REMOVE_UNBAN" -> {
-				embed.setAuthor("An unban has been removed from " + aranarthPlayer.getUsername(), null, url);
+				embed.setAuthor("An unban has been removed from " + username, null, url);
 				embed.setColor(Color.CYAN);
 				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
 						"**Unban removed by:** " + appliedBy + "\n" +
@@ -659,34 +668,38 @@ public class DiscordUtils {
 
 		Guild guild = getGuild();
 
-		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(avatar.getUuid());
 		String uuidNoDashes = avatar.getUuid().toString().replaceAll("-", "");
 		String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
 		Role role = guild.getRoleById(discordRole("avatar"));
+		if (role == null) {
+			AvatarUtils.logWarning("The Avatar Discord role could not be found, so it was not updated for " + username);
+		}
+		Consumer<Throwable> onSendFailure = ex -> AvatarUtils.logError("A Discord message about Avatar " + username + " could not be sent", ex);
 
 		// If it is a player who has become the Avatar
 		if (isNewAvatar) {
 			EmbedBuilder embed = new EmbedBuilder()
 					.setAuthor("Avatar " + username + " has risen!", null, url)
 					.setColor(Color.MAGENTA);
-			if (playerDiscordId != null) {
+			if (playerDiscordId != null && role != null) {
 				guild.addRoleToMember(playerDiscordId, role).queue(null, unlinkIfUnknownMember(avatar.getUuid()));
 			}
-			serverChatChannel.sendMessageEmbeds(embed.build()).queue();
-			roleChangesChannel.sendMessageEmbeds(embed.build()).queue();
-			notifications.sendMessageEmbeds(embed.build()).queue();
+			serverChatChannel.sendMessageEmbeds(embed.build()).queue(null, onSendFailure);
+			roleChangesChannel.sendMessageEmbeds(embed.build()).queue(null, onSendFailure);
+			notifications.sendMessageEmbeds(embed.build()).queue(null, onSendFailure);
 		}
 		// If the avatar has deceased
 		else {
 			EmbedBuilder embed = new EmbedBuilder()
 					.setAuthor("Avatar " + username + " has deceased...", null, url)
 					.setColor(Color.MAGENTA);
-			if (playerDiscordId != null) {
+			if (playerDiscordId != null && role != null) {
 				guild.removeRoleFromMember(playerDiscordId, role).queue(null, unlinkIfUnknownMember(avatar.getUuid()));
 			}
-			serverChatChannel.sendMessageEmbeds(embed.build()).queue();
-			roleChangesChannel.sendMessageEmbeds(embed.build()).queue();
+			serverChatChannel.sendMessageEmbeds(embed.build()).queue(null, onSendFailure);
+			roleChangesChannel.sendMessageEmbeds(embed.build()).queue(null, onSendFailure);
 		}
+		AvatarUtils.logInfo("Posted the " + (isNewAvatar ? "new Avatar" : "end of the reign") + " to Discord for " + username);
 	}
 
 	/**
@@ -765,7 +778,7 @@ public class DiscordUtils {
 	/**
 	 * Sends a reminder embed to #server-chat when a boost is about to expire.
 	 * @param boost The boost.
-	 * @param timeLabel Human-readable time remaining (e.g. "1 hour", "30 minutes", "1 minute").
+	 * @param timeLabel Human-readable time remaining (e.g. "1 hour").
 	 */
 	public static void sendBoostReminderToDiscord(Boost boost, String timeLabel) {
 		String name = "";
@@ -832,10 +845,7 @@ public class DiscordUtils {
 	 * @param uuid The UUID of the player who donated.
 	 */
 	public static void donationNotification(String message, UUID uuid, Color color) {
-		// Plays a donation sound for all online players
-		for (Player player : Bukkit.getOnlinePlayers()) {
-			player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP , 1F, ThreadLocalRandom.current().nextFloat(1.2F, 1.6F));
-		}
+		AranarthUtils.playDonationSound();
 
 		Guild guild = getGuild();
 		EmbedBuilder embed = new EmbedBuilder();

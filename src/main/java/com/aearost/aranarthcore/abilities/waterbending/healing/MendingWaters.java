@@ -252,9 +252,9 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
         final double selfHeal = healAmount / 2.0;
         player.setHealth(Math.min(player.getHealth() + selfHeal, player.getMaxHealth()));
 
-        hitPos.getWorld().spawnParticle(Particle.DUST, hitPos, 12, 0.25, 0.25, 0.25, 0, AQUA_DUST_BRIGHT);
+        AranarthBendingUtils.spawnParticle(hitPos.getWorld(), Particle.DUST, hitPos, 12, 0.25, 0.25, 0.25, 0, AQUA_DUST_BRIGHT);
         final Location heartPos = target.getLocation().clone().add(0, target.getEyeHeight() * 0.5, 0);
-        heartPos.getWorld().spawnParticle(Particle.HEART, heartPos, 3, 0.2, 0.3, 0.2, 0);
+        AranarthBendingUtils.spawnParticle(heartPos.getWorld(), Particle.HEART, heartPos, 3, 0.2, 0.3, 0.2, 0);
         target.getWorld().playSound(target.getLocation(), Sound.BLOCK_AMETHYST_CLUSTER_BREAK, 0.5f, 1.8f);
     }
 
@@ -274,11 +274,11 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
                 final Location p = hand.clone().add(0.22 * Math.cos(angle), 0.0, 0.22 * Math.sin(angle));
                 final Particle.DustOptions dust = (i % 2 == 0)
                         ? AranarthBendingUtils.WATER_DUST : AranarthBendingUtils.WATER_DUST_DARK;
-                p.getWorld().spawnParticle(Particle.DUST, p, 1, 0, 0, 0, 0, dust);
+                AranarthBendingUtils.spawnParticle(p.getWorld(), Particle.DUST, p, 1, 0, 0, 0, 0, dust);
             }
         } else {
             if (Math.random() < 0.5) {
-                hand.getWorld().spawnParticle(Particle.DRIPPING_WATER, hand, 1, 0.1, 0.1, 0.1, 0.02);
+                AranarthBendingUtils.spawnParticle(hand.getWorld(), Particle.DRIPPING_WATER, hand, 1, 0.1, 0.1, 0.1, 0.02);
             }
         }
     }
@@ -297,9 +297,9 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
             dust = (Math.random() < 0.35)
                     ? AranarthBendingUtils.WATER_DUST : AranarthBendingUtils.WATER_DUST_DARK;
         }
-        pos.getWorld().spawnParticle(Particle.DUST, pos, 1, 0.04, 0.04, 0.04, 0, dust);
+        AranarthBendingUtils.spawnParticle(pos.getWorld(), Particle.DUST, pos, 1, 0.04, 0.04, 0.04, 0, dust);
         if (Math.random() < 0.12) {
-            pos.getWorld().spawnParticle(Particle.SPLASH, pos, 1, 0.04, 0.04, 0.04, 0.01);
+            AranarthBendingUtils.spawnParticle(pos.getWorld(), Particle.SPLASH, pos, 1, 0.04, 0.04, 0.04, 0.01);
         }
     }
 
@@ -368,7 +368,7 @@ public class MendingWaters extends HealingAbility implements AddonAbility {
                     cancel();
                     return;
                 }
-                block.getWorld().spawnParticle(Particle.SMOKE, smokeLoc, 4, 0, 0, 0, 0, null, true);
+                AranarthBendingUtils.spawnParticle(block.getWorld(), Particle.SMOKE, smokeLoc, 4, 0, 0, 0, 0, null, true);
             }
         };
         smokeTask.runTaskTimer(AranarthCore.getInstance(), 0L, 1L);

@@ -1,7 +1,10 @@
 package com.aearost.aranarthcore.bending;
 
+import com.aearost.aranarthcore.objects.Avatar;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.AvatarUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
+import com.projectkorra.projectkorra.ability.AvatarAbility;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.hooks.CanBindHook;
 import org.bukkit.entity.Player;
@@ -26,13 +29,11 @@ public class RankCanBindHook implements CanBindHook {
 
         // Baron
         ABILITY_MIN_RANKS.put("waterarms", 3);
-        ABILITY_MIN_RANKS.put("vinewhip", 3);
         ABILITY_MIN_RANKS.put("cableslash", 3);
         ABILITY_MIN_RANKS.put("sandstorm", 3);
         ABILITY_MIN_RANKS.put("burial", 3);
-        ABILITY_MIN_RANKS.put("toxicspores", 3);
-        ABILITY_MIN_RANKS.put("leafscythe", 3);
-        ABILITY_MIN_RANKS.put("rootsnare", 3);
+        ABILITY_MIN_RANKS.put("spores", 3);
+        ABILITY_MIN_RANKS.put("petalrush", 3);
         ABILITY_MIN_RANKS.put("metalblade", 3);
         ABILITY_MIN_RANKS.put("cablethrash", 3);
         ABILITY_MIN_RANKS.put("metalfragments", 3);
@@ -51,6 +52,7 @@ public class RankCanBindHook implements CanBindHook {
         ABILITY_MIN_RANKS.put("astralprojection", 5);
         ABILITY_MIN_RANKS.put("astralshot", 5);
         ABILITY_MIN_RANKS.put("suffocate", 5);
+        ABILITY_MIN_RANKS.put("petalstorm", 5);
 
         // Prince
         ABILITY_MIN_RANKS.put("sonicpulse", 6);
@@ -75,7 +77,7 @@ public class RankCanBindHook implements CanBindHook {
 
         // Emperor
         ABILITY_MIN_RANKS.put("barrage", 8);
-        ABILITY_MIN_RANKS.put("combustionstrike", 8);
+        ABILITY_MIN_RANKS.put("combustivestrike", 8);
         ABILITY_MIN_RANKS.put("eruption", 8);
         ABILITY_MIN_RANKS.put("disalignment", 8);
         ABILITY_MIN_RANKS.put("liferip", 8);
@@ -85,6 +87,14 @@ public class RankCanBindHook implements CanBindHook {
 
     @Override
     public @NotNull Optional<Boolean> canBind(@NotNull BendingPlayer bPlayer, @NotNull CoreAbility ability) {
+        Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
+        boolean isAvatar = currentAvatar != null && currentAvatar.getUuid().equals(bPlayer.getUUID());
+        // Some addons such as JedCore's ElementSphere opt out of ProjectKorra's check, and the permissions
+        // must stay true so that the abilities remain visible in /b d avatar
+        if (ability instanceof AvatarAbility && !isAvatar) {
+            return Optional.of(false);
+        }
+
         Integer minRank = ABILITY_MIN_RANKS.get(ability.getName().toLowerCase());
         if (minRank == null) {
             return Optional.empty();
@@ -95,6 +105,10 @@ public class RankCanBindHook implements CanBindHook {
         }
         // All rank-locked abilities are available in the arena, blood and flight are still blocked by their permissions
         if (player.getWorld().getName().equalsIgnoreCase("arena")) {
+            return Optional.empty();
+        }
+        // The Avatar has mastered all elements, so they are not held back by their rank
+        if (isAvatar) {
             return Optional.empty();
         }
         int rank = AranarthUtils.getPlayer(player.getUniqueId()).getRank();

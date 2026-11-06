@@ -229,7 +229,7 @@ public class CableWhip extends MetalAbility implements AddonAbility {
         for (int i = 0; i <= drawSteps; i++) {
             final double s   = (double) i / drawSteps;
             final Location loc = hand.clone().add(whipDirection.clone().multiply(s * range));
-            loc.getWorld().spawnParticle(Particle.DUST, loc, 1, 0, 0, 0, 0, CABLE_DUST);
+            AranarthBendingUtils.spawnParticle(loc.getWorld(), Particle.DUST, loc, 1, 0, 0, 0, 0, CABLE_DUST);
         }
     }
 
@@ -310,10 +310,12 @@ public class CableWhip extends MetalAbility implements AddonAbility {
 
         for (int i = 0; i < HANG_STEPS; i++) {
             final double drop = i * HANG_STEP_SIZE;
-            mainHand.getWorld().spawnParticle(
+            AranarthBendingUtils.spawnParticle(
+                    mainHand.getWorld(),
                     Particle.DUST, mainHand.clone().add(0, -drop, 0),
                     1, 0, 0, 0, 0, CABLE_DUST);
-            offHand.getWorld().spawnParticle(
+            AranarthBendingUtils.spawnParticle(
+                    offHand.getWorld(),
                     Particle.DUST, offHand.clone().add(0, -drop, 0),
                     1, 0, 0, 0, 0, CABLE_DUST);
         }

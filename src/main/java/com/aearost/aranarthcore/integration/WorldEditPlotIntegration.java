@@ -2,7 +2,6 @@ package com.aearost.aranarthcore.integration;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
-import com.aearost.aranarthcore.objects.CreativePlot;
 import com.aearost.aranarthcore.objects.PlotPattern;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.PlotUtils;
@@ -65,28 +64,19 @@ public class WorldEditPlotIntegration {
         Actor actor = event.getActor();
         UUID uuid = actor != null && actor.isPlayer() ? actor.getUniqueId() : null;
         boolean bypass = false;
-        boolean architectMode = false;
         if (uuid != null) {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-            bypass = aranarthPlayer != null && aranarthPlayer.isInAdminMode();
-            architectMode = aranarthPlayer != null && aranarthPlayer.isInArchitectMode();
+            bypass = aranarthPlayer != null && (aranarthPlayer.isInAdminMode() || aranarthPlayer.isInArchitectMode());
         }
-        final boolean isAdmin = bypass;
-        final boolean canBuildSpawn = architectMode;
+        final boolean canBuildAnywhere = bypass;
 
         event.setExtent(new AbstractDelegateExtent(event.getExtent()) {
             private boolean isAllowed(int x, int y, int z) {
                 if (y <= PlotPattern.BEDROCK_Y) {
                     return false;
                 }
-                if (isAdmin) {
+                if (canBuildAnywhere) {
                     return true;
-                }
-                if (canBuildSpawn) {
-                    CreativePlot plot = PlotUtils.getAreaPlot(x, z);
-                    if (plot != null && plot.isSpawn()) {
-                        return true;
-                    }
                 }
                 return uuid != null && PlotUtils.canBuild(uuid, x, z);
             }

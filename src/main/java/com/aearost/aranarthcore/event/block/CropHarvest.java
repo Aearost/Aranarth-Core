@@ -4,7 +4,7 @@ import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.objects.Dominion;
-import com.aearost.aranarthcore.enums.QuestTaskType;
+import com.aearost.aranarthcore.enums.QuestTrigger;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.CropUtils;
 import com.aearost.aranarthcore.utils.JobUtils;
@@ -35,7 +35,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class CropHarvest {
 
 	public void execute(BlockBreakEvent e) {
-		if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
+		if (AranarthUtils.isProtectedSpawnLocation(e.getBlock().getLocation())) {
 			return;
 		}
 
@@ -74,7 +74,7 @@ public class CropHarvest {
 
 		// Award Farmer job pay and quest progress - CropHarvest cancels the BlockBreakEvent so those listeners never see crop breaks
 		JobUtils.awardFarmerCropHarvest(player, block.getType());
-		QuestUtils.updateProgress(player, QuestTaskType.HARVEST_CROPS, 1);
+		QuestUtils.progress(player, QuestTrigger.HARVEST, block.getType().name(), 1);
 
 		// Get vanilla fortune-based drops, then scale each by the seasonal yield multiplier
 		ArrayList<ItemStack> drops = new ArrayList<>(block.getDrops(player.getInventory().getItemInMainHand()));
@@ -169,7 +169,7 @@ public class CropHarvest {
 
 		// Award Farmer job pay and quest progress for naturally generated non-Ageable crops
 		JobUtils.awardFarmerCropHarvest(player, block.getType());
-		QuestUtils.updateProgress(player, QuestTaskType.HARVEST_CROPS, 1);
+		QuestUtils.progress(player, QuestTrigger.HARVEST, block.getType().name(), 1);
 
 		e.setCancelled(true);
 

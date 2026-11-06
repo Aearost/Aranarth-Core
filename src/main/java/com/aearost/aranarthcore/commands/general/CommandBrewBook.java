@@ -38,8 +38,7 @@ public class CommandBrewBook implements CommandExecutor {
 
     private boolean handleUnlock(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
-            AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
-            if (ap == null || ap.getCouncilRank() < 3) {
+            if (!player.hasPermission("aranarth.brewbook.unlock")) {
                 player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
                 return true;
             }
@@ -80,7 +79,7 @@ public class CommandBrewBook implements CommandExecutor {
 
         AranarthPlayer targetAp = AranarthUtils.getPlayer(targetUuid);
         if (targetAp != null) {
-            boolean questUpdated = QuestUtils.regenerateWeeklyQuestIfBrewReward(targetUuid, targetAp.getRank(), recipe.getId());
+            boolean questUpdated = QuestUtils.regenerateWeeklyQuestIfBrewReward(targetUuid, recipe.getId());
             if (questUpdated) {
                 Player targetOnline = Bukkit.getPlayer(targetUuid);
                 if (targetOnline != null) {

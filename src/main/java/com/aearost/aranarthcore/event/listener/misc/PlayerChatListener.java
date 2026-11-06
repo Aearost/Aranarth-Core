@@ -1,6 +1,9 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
+import com.aearost.aranarthcore.utils.QuestUtils;
+import com.aearost.aranarthcore.enums.QuestTrigger;
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.enums.PrefixStyle;
 import com.aearost.aranarthcore.gui.GuiBlacklistEditor;
 import com.aearost.aranarthcore.gui.GuiBrewBook;
 import com.aearost.aranarthcore.gui.GuiHeads;
@@ -15,6 +18,7 @@ import com.aearost.aranarthcore.gui.GuiTrade;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.BlacklistPreset;
+import com.aearost.aranarthcore.objects.ChatPrefix;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.Trade;
@@ -274,6 +278,7 @@ public class PlayerChatListener implements Listener {
                         org.bukkit.scheduler.BukkitTask timer = GuiDominionResourcesClick.claimTimerTasks.remove(dominion.getId());
                         if (timer != null) timer.cancel();
                         Bukkit.getScheduler().runTask(plugin, () -> {
+                            QuestUtils.progress(player, QuestTrigger.RESOURCE_CLAIM, "RESOURCE", count);
                             for (int i = 0; i < count; i++) {
                                 claimDominionResources(dominion, player, capturedBiome, avgYield);
                             }
@@ -305,7 +310,7 @@ public class PlayerChatListener implements Listener {
             AranarthPlayer recipientAranarthPlayer = AranarthUtils.getPlayer(recipient.getUniqueId());
             if (recipientAranarthPlayer.isTogglingChat()) {
                 // Only block non-council messages
-                if (aranarthPlayer.getCouncilRank() == 0) {
+                if (!player.hasPermission("aranarth.toggle.bypass")) {
                     toRemove.add(recipient);
                     continue;
                 }
@@ -334,21 +339,18 @@ public class PlayerChatListener implements Listener {
             message = EmojiUtils.translateEmojis(message);
         }
 
-        String prefix = ChatUtils.formatChatPrefix(player);
+        // Each recipient sees the prefix in their own prefix styles, while the console, logs, and Discord use the defaults
+        ChatPrefix chatPrefix = ChatPrefix.of(player);
+        String prefix = chatPrefix.format(PrefixStyle.defaults());
         String chatMessage = ChatUtils.formatChatMessage(player, message);
         // preserve unescaped form for council routing
 
         e.setCancelled(true);
 
-        String hoverMsg = ChatUtils.translateToColor("&7Click to view &e" + aranarthPlayer.getNickname() + "&e's &7info");
-        // Deserialize with legacySection() since formatChatPrefix has already translated & → §
-        Component prefixComponent = LegacyComponentSerializer.legacySection().deserialize(prefix);
-        prefixComponent = ChatUtils.clickableCommand(prefixComponent, hoverMsg, "/info " + player.getName(), true);
-
         // Build the message component, injecting interactive chat keywords where applicable.
         Component messageComponent = null;
         List<UUID> createdSnapshotIds = new ArrayList<>();
-        boolean canUseInteractiveChat = InteractiveChatManager.hasInteractiveChatPerm(aranarthPlayer)
+        boolean canUseInteractiveChat = player.hasPermission("aranarth.interactivechat")
                 && aranarthPlayer.isInteractiveChatEnabled()
                 && INTERACTIVE_PATTERN.matcher(message).find();
         if (canUseInteractiveChat) {
@@ -365,12 +367,6 @@ public class PlayerChatListener implements Listener {
             messageComponent = ChatUtils.buildMessageWithUrls(chatMessage);
         }
 
-        // Use Component.empty() as root so chatMessage is a sibling of prefixComponent, not a child.
-        // Children inherit hover/click from their parent, siblings do not.
-        Component fullMessage = Component.empty()
-                .append(prefixComponent)
-                .append(messageComponent);
-
         if (aranarthPlayer.isInCouncilChat()) {
             // Council chat toggle is on - route to council chat once (evaluateCouncilMessage sends to all council members)
             // Pass raw message (no gradient) since council chat is not public chat
@@ -379,9 +375,7 @@ public class PlayerChatListener implements Listener {
             // Dominion chat toggle is on - route to dominion chat
             ChatUtils.evaluateDominionMessage(player, message.split(" "), false);
         } else {
-            for (Player recipient : e.getRecipients()) {
-                recipient.sendMessage(fullMessage);
-            }
+            ChatUtils.sendChatToViewers(e.getRecipients(), chatPrefix, messageComponent);
         }
 
         if (!aranarthPlayer.isInCouncilChat() && !aranarthPlayer.isInDominionChat()) {
@@ -390,7 +384,7 @@ public class PlayerChatListener implements Listener {
         }
 
         if (!aranarthPlayer.isInCouncilChat() && !aranarthPlayer.isInDominionChat()) {
-            DiscordUtils.sendChatMessage(prefix + chatMessage);
+            DiscordUtils.sendChatMessage(prefix + ChatUtils.formatCodesToDiscordMarkdown(chatMessage));
             // Relay to the other server so its players see public chat
             if (NetworkManager.isActive()) {
                 if (!createdSnapshotIds.isEmpty()) {
@@ -398,9 +392,9 @@ public class PlayerChatListener implements Listener {
                             .map(InteractiveChatManager::getSnapshot)
                             .filter(Objects::nonNull)
                             .collect(java.util.stream.Collectors.toList());
-                    NetworkManager.getInstance().publishInteractiveChat(prefix, chatMessage, fullMessage, snapshots);
+                    NetworkManager.getInstance().publishInteractiveChat(chatPrefix, chatMessage, messageComponent, snapshots);
                 } else {
-                    NetworkManager.getInstance().publishChat(prefix, chatMessage, fullMessage);
+                    NetworkManager.getInstance().publishChat(chatPrefix, chatMessage, messageComponent);
                 }
             }
         }

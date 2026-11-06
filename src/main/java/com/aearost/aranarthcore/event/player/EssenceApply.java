@@ -123,7 +123,7 @@ public class EssenceApply {
 							}
 							itemMeta.setLore(lore);
 							item.setItemMeta(itemMeta);
-							essenceFloorItem.remove();
+							consumeOne(essenceFloorItem);
 							floorItem.setItemStack(item);
 							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.applied", "name", essence.getItem().getItemMeta().getDisplayName())));
 							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
@@ -142,7 +142,7 @@ public class EssenceApply {
 							itemMeta.getPersistentDataContainer().set(ESSENCE_LEVEL, PersistentDataType.INTEGER, 1);
 							itemMeta.setLore(lore);
 							item.setItemMeta(itemMeta);
-							essenceFloorItem.remove();
+							consumeOne(essenceFloorItem);
 							floorItem.setItemStack(item);
 							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.applied", "name", essence.getItem().getItemMeta().getDisplayName())));
 							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
@@ -195,8 +195,8 @@ public class EssenceApply {
 						toolMeta.setLore(lore);
 						tool.setItemMeta(toolMeta);
 						toolItem.setItemStack(tool);
-						aranarthiumItem.remove();
-						essenceFloorItem.remove();
+						consumeOne(aranarthiumItem);
+						consumeOne(essenceFloorItem);
 						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.applied", "name", essence.getItem().getItemMeta().getDisplayName())));
 						player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 					} else if (essenceType.equals("essence_lifesteal")) {
@@ -233,8 +233,8 @@ public class EssenceApply {
 							toolMeta.setLore(lore);
 							tool.setItemMeta(toolMeta);
 							toolItem.setItemStack(tool);
-							aranarthiumItem.remove();
-							essenceFloorItem.remove();
+							consumeOne(aranarthiumItem);
+							consumeOne(essenceFloorItem);
 							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.applied", "name", essence.getItem().getItemMeta().getDisplayName())));
 							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 						}
@@ -262,8 +262,8 @@ public class EssenceApply {
 							toolMeta.setLore(lore);
 							tool.setItemMeta(toolMeta);
 							toolItem.setItemStack(tool);
-							aranarthiumItem.remove();
-							essenceFloorItem.remove();
+							consumeOne(aranarthiumItem);
+							consumeOne(essenceFloorItem);
 							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.applied", "name", essence.getItem().getItemMeta().getDisplayName())));
 							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 						}
@@ -296,8 +296,8 @@ public class EssenceApply {
 							toolMeta.setLore(lore);
 							tool.setItemMeta(toolMeta);
 							toolItem.setItemStack(tool);
-							aranarthiumItem.remove();
-							essenceFloorItem.remove();
+							consumeOne(aranarthiumItem);
+							consumeOne(essenceFloorItem);
 							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.applied", "name", essence.getItem().getItemMeta().getDisplayName())));
 							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 						}
@@ -305,6 +305,20 @@ public class EssenceApply {
 				}
 			}
 		}.runTaskLater(AranarthCore.getInstance(), 30L);
+	}
+
+	/**
+	 * Consumes a single item from the floor item, so that only one is used when several are stacked together.
+	 * @param floorItem The floor item.
+	 */
+	private void consumeOne(Item floorItem) {
+		ItemStack stack = floorItem.getItemStack();
+		if (stack.getAmount() > 1) {
+			stack.setAmount(stack.getAmount() - 1);
+			floorItem.setItemStack(stack);
+		} else {
+			floorItem.remove();
+		}
 	}
 
 	/**

@@ -1,5 +1,5 @@
 name: AranarthCore
-version: 1.14
+version: 1.15
 authors: [ Aearost ]
 main: com.aearost.aranarthcore.AranarthCore
 api-version: 26.3
@@ -194,6 +194,9 @@ commands:
   potions:
     description: Opens the GUI of the player's potions
     permission: aranarth.potions
+  prefix:
+    description: Changes whether everyone's council, saint, and rank prefixes are shown to the player in full, shortened, or as a symbol
+    permission: aranarth.prefix
   pronouns:
     description: Allows the player to update their pronouns
     permission: aranarth.pronouns

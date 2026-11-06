@@ -3,9 +3,12 @@ package com.aearost.aranarthcore.utils;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.Month;
+import com.aearost.aranarthcore.enums.PrefixStyle;
 import com.aearost.aranarthcore.enums.Pronouns;
+import com.aearost.aranarthcore.enums.TabGroup;
 import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.enums.WorldEvent;
+import com.aearost.aranarthcore.event.listener.misc.InvisibilityListener;
 import com.aearost.aranarthcore.event.listener.misc.PotionEffectListener;
 import com.aearost.aranarthcore.items.SugarcaneBlock;
 import com.aearost.aranarthcore.items.arrow.*;
@@ -13,10 +16,14 @@ import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.network.NetworkTabManager;
 import com.aearost.aranarthcore.objects.*;
+import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
+import com.gmail.nossr50.util.skills.SkillTools;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.projectkorra.projectkorra.BendingPlayer;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
@@ -55,7 +62,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.ToIntFunction;
 
 import static com.aearost.aranarthcore.objects.CustomKeys.*;
 
@@ -65,6 +75,7 @@ import static com.aearost.aranarthcore.objects.CustomKeys.*;
  */
 public class AranarthUtils {
 
+    private static final int ARENA_SPAWN_RADIUS = 250;
     public static final Map<UUID, Boolean> playerInFaeBiome = new HashMap<>();
     public static final Map<UUID, Boolean> playerUnderground = new HashMap<>();
     public static final Map<UUID, Boolean> playerWasOnGround = new HashMap<>();
@@ -88,12 +99,43 @@ public class AranarthUtils {
             Material.MUDDY_MANGROVE_ROOTS, Material.MYCELIUM
     );
     private static final HashMap<UUID, int[]> shopIslandCenters = new HashMap<>();
+    private static final Set<UUID> customTabViewers = new HashSet<>();
+    private static final PrimarySkillType[][] MCMMO_CATEGORIES = {
+            {PrimarySkillType.EXCAVATION, PrimarySkillType.FISHING, PrimarySkillType.HERBALISM,
+                    PrimarySkillType.MINING, PrimarySkillType.WOODCUTTING},
+            {PrimarySkillType.ARCHERY, PrimarySkillType.AXES, PrimarySkillType.CROSSBOWS, PrimarySkillType.MACES,
+                    PrimarySkillType.SWORDS, PrimarySkillType.SPEARS, PrimarySkillType.TAMING,
+                    PrimarySkillType.TRIDENTS, PrimarySkillType.UNARMED},
+            {PrimarySkillType.ACROBATICS, PrimarySkillType.ALCHEMY, PrimarySkillType.REPAIR,
+                    PrimarySkillType.SALVAGE, PrimarySkillType.SMELTING}
+    };
+    // Prefix display data for each rank, indexed from Peasant (0) to Emperor (8)
+    private static final String[] RANK_BRACKET_COLORS = {"&8", "&d", "&7", "&5", "&8", "&6", "&6", "&6", "&6"};
+    private static final String[] RANK_TEXT_COLORS = {"&a", "&a", "&f", "&d", "&7", "&e", "&b", "&9", "&4"};
+    private static final String[] RANK_SYMBOL_COLORS = {"&#6FCF4F", "&#FF9EC7", "&#F0F0F0", "&#B05CE6", "&#8A8A8A", "&#FFE14D", "&#4DE0FF", "&#4D6BFF", "&#D11A1A"};
+    private static final String RANK_SYMBOL = "❖";
+    private static final String ARCHITECT_SYMBOL = "&#4CA64C&l\uD83D\uDD28&r"; // Hammer emoji
+    private static final String AVATAR_SYMBOL = "&5❋&r";
+    // Prefix display data for Council (Helper, Moderator, Admin) and Saint (Acolyte, Disciple, Seraph) ranks
+    private static final String[] COUNCIL_NAMES = {"Helper", "Moderator", "Admin"};
+    private static final String[] COUNCIL_COLORS = {"&6", "&3", "&4"};
+    private static final String[] SAINT_NAMES = {"Acolyte", "Disciple", "Seraph"};
+    private static final String[] SAINT_COLORS = {"&#FFE58A", "&#8AB8FF", "&#FF8A8A"};
+    private static final String ROLE_BRACKET_COLOR = "&8";
     private static final HashMap<UUID, Set<UUID>> shopCollaborators = new HashMap<>();
     private static final HashMap<UUID, UUID> collaboratorShop = new HashMap<>(); // collaborator UUID → owner UUID
     private static final HashMap<UUID, UUID> pendingShopInvites = new HashMap<>(); // invitee UUID → owner UUID
     private static final HashMap<UUID, String> shopNames = new HashMap<>();
     private static final HashMap<UUID, BukkitTask> teleportingPlayers = new HashMap<>();
     private static final Set<UUID> skipCountdown = new HashSet<>();
+    // Travel rewards: moves larger than this (in blocks) or shortly after a teleport are not active travel
+    private static final Map<UUID, Long> recentTeleports = new HashMap<>();
+    private static final double MAX_TRAVEL_DISTANCE_PER_MOVE = 32.0;
+    private static final long TELEPORT_TRAVEL_GRACE_MS = 1000L;
+    // Worlds disabled via /ac disable - world names are not unique across the network, so each server tracks its own
+    private static final Set<String> disabledWorlds = ConcurrentHashMap.newKeySet();
+    private static final Map<UUID, Long> lastDisabledWorldMessage = new HashMap<>();
+    private static final String KEY_DISABLED_WORLDS = "disabled_worlds:";
     private static final List<AranarthVote> votes = new ArrayList<>();
     private static final HashMap<UUID, List<PlayerKillDeathScore>> killDeathScores = new HashMap<>();
     private static final HashMap<UUID, Integer> chatGameGuesses = new HashMap<>();
@@ -104,6 +146,10 @@ public class AranarthUtils {
     private static final HashMap<UUID, Integer> pendingRareKeys = new HashMap<>();
     private static final HashMap<UUID, Integer> pendingEpicKeys = new HashMap<>();
     private static final HashMap<UUID, Integer> pendingGodlyKeys = new HashMap<>();
+    // Players looked up in the shared DB with no row there, so NPC UUIDs etc. are not queried on every call
+    private static final Map<UUID, Long> missingPlayerLookups = new ConcurrentHashMap<>();
+    private static final long MISSING_PLAYER_RETRY_MS = 5L * 60 * 1000;
+    private static boolean isLoadingMissingPlayers = false;
     private static final Set<String> SURVIVAL_WORLD_PREFIXES = Set.of("world", "resource", "spawn");
     private static List<Home> homes = new ArrayList<>();
     private static List<LockedContainer> lockedContainers;
@@ -118,6 +164,7 @@ public class AranarthUtils {
     private static int stormDuration;
     private static int stormDelay;
     private static boolean hasStormedInMonth;
+    public static final double RAINBOW_MULTIPLIER = 1.5;
     private static int currentTime;
     private static int windPlayTimer;
     private static boolean isPlayingWindSound;
@@ -151,12 +198,47 @@ public class AranarthUtils {
 
     /**
      * Gets the AranarthPlayer corresponding to an input UUID.
-     *
      * @param uuid The UUID of the player to be found.
      * @return The AranarthPlayer tied to the UUID.
      */
     public static AranarthPlayer getPlayer(UUID uuid) {
+        AranarthPlayer aranarthPlayer = players.get(uuid);
+        if (aranarthPlayer == null && uuid != null && shouldLoadMissingPlayer(uuid)) {
+            PersistenceUtils.loadMissingPlayerFromDatabase(uuid);
+            aranarthPlayer = players.get(uuid);
+            if (aranarthPlayer == null) {
+                missingPlayerLookups.put(uuid, System.currentTimeMillis());
+            }
+        }
+        return aranarthPlayer;
+    }
+
+    /**
+     * Gets the AranarthPlayer corresponding to an input UUID only if this server already has them in memory.
+     *
+     * @param uuid The UUID of the player to be found.
+     * @return The AranarthPlayer tied to the UUID, or null if this server does not have them.
+     */
+    public static AranarthPlayer getLoadedPlayer(UUID uuid) {
         return players.get(uuid);
+    }
+
+    /**
+     * Determines whether a player missing from memory should be looked up in the shared database.
+     */
+    private static boolean shouldLoadMissingPlayer(UUID uuid) {
+        if (!isLoadingMissingPlayers || !DatabaseManager.isActive() || !Bukkit.isPrimaryThread()) {
+            return false;
+        }
+        Long lastLookup = missingPlayerLookups.get(uuid);
+        return lastLookup == null || System.currentTimeMillis() - lastLookup >= MISSING_PLAYER_RETRY_MS;
+    }
+
+    /**
+     * Allows players missing from memory to be loaded from the shared database.
+     */
+    public static void enableLoadingMissingPlayers() {
+        isLoadingMissingPlayers = true;
     }
 
     /**
@@ -167,6 +249,7 @@ public class AranarthUtils {
      */
     public static void setPlayer(UUID uuid, AranarthPlayer aranarthPlayer) {
         players.put(uuid, aranarthPlayer);
+        missingPlayerLookups.remove(uuid);
     }
 
     /**
@@ -194,6 +277,7 @@ public class AranarthUtils {
      */
     public static void addPlayer(UUID uuid, AranarthPlayer aranarthPlayer) {
         players.put(uuid, aranarthPlayer);
+        missingPlayerLookups.remove(uuid);
     }
 
     /**
@@ -263,7 +347,7 @@ public class AranarthUtils {
      * @return The username of the player.
      */
     public static String getUsername(OfflinePlayer player) {
-        return players.get(player.getUniqueId()).getUsername();
+        return getPlayer(player.getUniqueId()).getUsername();
     }
 
     /**
@@ -273,7 +357,7 @@ public class AranarthUtils {
      * @return The nickname of the player, or username if no nickname was found.
      */
     public static String getNickname(OfflinePlayer player) {
-        AranarthPlayer ap = players.get(player.getUniqueId());
+        AranarthPlayer ap = getPlayer(player.getUniqueId());
         if (ap != null) {
             String nickname = ap.getNickname();
             return (nickname == null || nickname.isEmpty()) ? getUsername(player) : nickname;
@@ -420,6 +504,55 @@ public class AranarthUtils {
         return "world";
     }
 
+    /**
+     * Serializes the player's potion effects so they can be restored once they are back in Survival.
+     *
+     * @param player The player.
+     * @return The serialized effects, or an empty string if there are none.
+     */
+    public static String serializePotionEffects(Player player) {
+        List<String> parts = new ArrayList<>();
+        for (PotionEffect effect : player.getActivePotionEffects()) {
+            if (effect.isInfinite()) {
+                continue;
+            }
+            parts.add(effect.getType().getKey() + "," + effect.getDuration() + "," + effect.getAmplifier() + ","
+                    + (effect.isAmbient() ? 1 : 0) + "," + (effect.hasParticles() ? 1 : 0) + "," + (effect.hasIcon() ? 1 : 0));
+        }
+        return String.join(";", parts);
+    }
+
+    /**
+     * Replaces the player's potion effects with the serialized effects.
+     *
+     * @param player  The player.
+     * @param effects The effects serialized by serializePotionEffects().
+     */
+    public static void applyPotionEffects(Player player, String effects) {
+        for (PotionEffect effect : player.getActivePotionEffects()) {
+            player.removePotionEffect(effect.getType());
+        }
+        if (effects == null || effects.isEmpty()) {
+            return;
+        }
+        for (String part : effects.split(";")) {
+            String[] fields = part.split(",");
+            if (fields.length < 6) {
+                continue;
+            }
+            NamespacedKey key = NamespacedKey.fromString(fields[0]);
+            PotionEffectType type = key == null ? null : Registry.EFFECT.get(key);
+            if (type == null) {
+                continue;
+            }
+            try {
+                player.addPotionEffect(new PotionEffect(type, Integer.parseInt(fields[1]), Integer.parseInt(fields[2]),
+                        fields[3].equals("1"), fields[4].equals("1"), fields[5].equals("1")));
+            } catch (NumberFormatException ignored) {
+            }
+        }
+    }
+
     public static void switchInventory(Player player, String currentWorld, String destinationWorld) throws IOException {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
@@ -437,15 +570,25 @@ public class AranarthUtils {
         boolean isSurvivalToSurvival = currentWorld.startsWith("world") && destinationWorld.startsWith("world");
         boolean isSameWorld = currentWorld.equals(destinationWorld);
 
+        // Architects keep their game mode when teleporting within a world they can change it in
+        boolean isArchitectStaying = rawFrom.equals(rawTo) && aranarthPlayer.getArchitectRank() >= 1
+                && canArchitectChangeGameMode(rawTo);
+
         // No need to change inventory
         if (isSurvivalToSurvival || isSameWorld) {
             if (!destinationWorld.startsWith("creative")) {
-                if (aranarthPlayer.getCouncilRank() != 3) {
+                if (aranarthPlayer.getCouncilRank() != 3 && !isArchitectStaying) {
                     player.setGameMode(GameMode.SURVIVAL);
                 }
                 return;
             }
         } else {
+            // Invisibility removes the armor from the inventory, so it must be back on before that inventory is saved
+            InvisibilityListener.restoreArmorBeforeLeaving(player, currentWorld);
+            // Survival effects are kept so they can be given back when the player returns
+            if (currentWorld.startsWith("world")) {
+                aranarthPlayer.setSurvivalEffects(serializePotionEffects(player));
+            }
             // Remove potion effects when changing the world
             for (PotionEffect effect : player.getActivePotionEffects()) {
                 player.removePotionEffect(effect.getType());
@@ -513,6 +656,7 @@ public class AranarthUtils {
                 }
                 player.setFoodLevel(aranarthPlayer.getSurvivalFoodLevel());
                 player.setSaturation(aranarthPlayer.getSurvivalSaturation());
+                applyPotionEffects(player, aranarthPlayer.getSurvivalEffects());
                 player.setGameMode(GameMode.SURVIVAL);
                 PermissionUtils.evaluatePlayerPermissions(player);
                 return;
@@ -547,6 +691,7 @@ public class AranarthUtils {
                     Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] survivalInventory empty for "
                             + player.getName() + " during creative→world switch - skipping clear to protect items");
                 }
+                applyPotionEffects(player, aranarthPlayer.getSurvivalEffects());
                 player.setGameMode(GameMode.SURVIVAL);
                 return;
             } else if (destinationWorld.startsWith("arena")) {
@@ -747,7 +892,7 @@ public class AranarthUtils {
      */
     public static void applyAranarthiumScale(Player player) {
         AranarthPlayer ap = getPlayer(player.getUniqueId());
-        if (ap != null && ap.isSizeScaleEnabled()) {
+        if (ap != null && ap.isSizeScaleEnabled() && ap.getCombatLogTime().isEmpty()) {
             if (isWearingArmorType(player, "dwarven")) {
                 setPlayerScale(player, 0.75, 0.6);
                 return;
@@ -1231,6 +1376,16 @@ public class AranarthUtils {
     }
 
     /**
+     * Provides whether the Aquinvor rainbow is currently shining, granting bonus EXP and job earnings.
+     * The rainbow shines whenever the sky is clear during Aquinvor.
+     *
+     * @return Confirmation whether the rainbow is active.
+     */
+    public static boolean isRainbowActive() {
+        return month == Month.AQUINVOR && weather == Weather.CLEAR;
+    }
+
+    /**
      * Provides the list of locked containers.
      *
      * @return The list of locked containers.
@@ -1670,7 +1825,7 @@ public class AranarthUtils {
             return false;
         }
         AranarthPlayer viewerAranarthPlayer = getPlayer(viewerPlayer.getUniqueId());
-        if (viewerAranarthPlayer != null && viewerAranarthPlayer.getCouncilRank() == 3) {
+        if (viewerPlayer.hasPermission("aranarth.vanish.see")) {
             return false;
         }
         if (Bukkit.getPlayer(uuid) != null) {
@@ -1948,9 +2103,12 @@ public class AranarthUtils {
                 aranarthPlayer.setMuteEndDate("");
                 AranarthUtils.setPlayer(uuid, aranarthPlayer);
 
-                Punishment punishment = new Punishment(
-                        uuid, LocalDateTime.now(), "UNMUTE", "The player's mute has automatically ended", null);
-                DiscordUtils.addPunishmentToDiscord(punishment);
+                // Both servers expire the mute, so only Survival posts it to Discord
+                if (!AranarthCore.isSmpServer()) {
+                    Punishment punishment = new Punishment(
+                            uuid, LocalDateTime.now(), "UNMUTE", "The player's mute has automatically ended", null);
+                    DiscordUtils.addPunishmentToDiscord(punishment);
+                }
 
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
                 if (offlinePlayer.isOnline()) {
@@ -1974,9 +2132,12 @@ public class AranarthUtils {
             if (entry.getExpiration() != null) {
                 // If they are no longer banned
                 if (entry.getExpiration().before(new Date())) {
-                    Punishment punishment = new Punishment(
-                            uuid, LocalDateTime.now(), "UNBAN", "The player's ban has automatically ended", null);
-                    DiscordUtils.addPunishmentToDiscord(punishment);
+                    // Both servers expire the ban, so only Survival posts it to Discord
+                    if (!AranarthCore.isSmpServer()) {
+                        Punishment punishment = new Punishment(
+                                uuid, LocalDateTime.now(), "UNBAN", "The player's ban has automatically ended", null);
+                        DiscordUtils.addPunishmentToDiscord(punishment);
+                    }
                     entry.remove();
                 }
             }
@@ -2026,78 +2187,149 @@ public class AranarthUtils {
      * @return The String portion of the player's rank.
      */
     public static String getRank(AranarthPlayer aranarthPlayer) {
-        int rank = aranarthPlayer.getRank();
-        if (aranarthPlayer.getPronouns() == Pronouns.MALE) {
-            switch (rank) {
-                case 1:
-                    return "&d&l[&a&lEsquire&d&l] &r";
-                case 2:
-                    return "&7&l[&f&lKnight&7&l] &r";
-                case 3:
-                    return "&5&l[&d&lBaron&5&l] &r";
-                case 4:
-                    return "&8&l[&7&lCount&8&l] &r";
-                case 5:
-                    return "&6&l[&e&lDuke&6&l] &r";
-                case 6:
-                    return "&6&l[&b&lPrince&6&l] &r";
-                case 7:
-                    return "&6&l[&9&lKing&6&l] &r";
-                case 8:
-                    return "&6&l[&4&lEmperor&6&l] &r";
-            }
-        } else {
-            switch (rank) {
-                case 1:
-                    return "&d&l[&a&lEsquire&d&l] &r";
-                case 2:
-                    return "&7&l[&f&lKnight&7&l] &r";
-                case 3:
-                    return "&5&l[&d&lBaroness&5&l] &r";
-                case 4:
-                    return "&8&l[&7&lCountess&8&l] &r";
-                case 5:
-                    return "&6&l[&e&lDuchess&6&l] &r";
-                case 6:
-                    return "&6&l[&b&lPrincess&6&l] &r";
-                case 7:
-                    return "&6&l[&9&lQueen&6&l] &r";
-                case 8:
-                    return "&6&l[&4&lEmpress&6&l] &r";
-            }
-        }
-        return "&8&l[&a&lPeasant&8&l] &r";
+        return formatRank(aranarthPlayer.getRank(), aranarthPlayer.getPronouns(), PrefixStyle.FULL) + " &r";
     }
 
     /**
-     * Provides the String portion of the player's Saint rank.
+     * Provides the String portion of a rank in the given prefix style.
      *
-     * @param aranarthPlayer The AranarthPlayer that is being analyzed.
-     * @return The String portion of the player's Saint rank.
+     * @param rank     The rank, where 0 is Peasant and 8 is Emperor.
+     * @param pronouns The pronouns that determine the variant of the rank name.
+     * @param style    The prefix style to display the rank in.
+     * @return The String portion of the rank.
      */
-    public static String getSaintRank(AranarthPlayer aranarthPlayer) {
-        int saintRank = aranarthPlayer.getSaintRank();
-        return switch (saintRank) {
-            case 1 -> "&b⚜&r";
-            case 2 -> "&e⚜&r";
-            case 3 -> "&c⚜&r";
-            default -> "";
+    public static String getRankPrefix(int rank, Pronouns pronouns, PrefixStyle style) {
+        return formatRank(rank, pronouns, style) + "&r";
+    }
+
+    /**
+     * Formats a rank in the given prefix style, without any trailing reset or spacing.
+     */
+    private static String formatRank(int rank, Pronouns pronouns, PrefixStyle style) {
+        if (rank < 0 || rank >= RANK_SYMBOL_COLORS.length) {
+            rank = 0;
+        }
+        if (style == PrefixStyle.SYMBOL) {
+            return RANK_SYMBOL_COLORS[rank] + RANK_SYMBOL;
+        }
+        String name = pronouns.getRankName(rank);
+        if (style == PrefixStyle.SHORT) {
+            name = name.substring(0, 1);
+        }
+        return RANK_BRACKET_COLORS[rank] + "&l[" + RANK_TEXT_COLORS[rank] + "&l" + name + RANK_BRACKET_COLORS[rank] + "&l]";
+    }
+
+    /**
+     * Provides the styles the viewer sees everyone's prefixes in.
+     * The console and any other non-player viewer always uses the default styles.
+     *
+     * @param viewer The user who will see the prefixes.
+     * @return The council, saint, and rank prefix styles.
+     */
+    public static PrefixStyle[] getPrefixStyles(CommandSender viewer) {
+        if (viewer instanceof Player player) {
+            AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+            if (aranarthPlayer != null) {
+                return aranarthPlayer.getPrefixStyles();
+            }
+        }
+        return PrefixStyle.defaults();
+    }
+
+    /**
+     * Builds the prefix elements, grouped as symbols on the left, short values in the middle, and full values
+     * on the right. Within each group, the Council, Architect, Saint, Avatar, and rank priority is kept.
+     *
+     * @return The prefix elements, without any trailing space.
+     */
+    public static String buildPrefixElements(int councilRank, PrefixStyle councilStyle, boolean isArchitect,
+                                             int saintRank, PrefixStyle saintStyle, boolean isAvatar,
+                                             int rank, Pronouns pronouns, PrefixStyle rankStyle) {
+        // Indexed by PrefixStyle ordinal: FULL, SHORT, SYMBOL
+        StringBuilder[] groups = {new StringBuilder(), new StringBuilder(), new StringBuilder()};
+        groups[councilStyle.ordinal()].append(getCouncilPrefix(councilRank, councilStyle));
+        if (isArchitect) {
+            groups[PrefixStyle.SYMBOL.ordinal()].append(ARCHITECT_SYMBOL);
+        }
+        groups[saintStyle.ordinal()].append(getSaintPrefix(saintRank, saintStyle));
+        if (isAvatar) {
+            groups[PrefixStyle.SYMBOL.ordinal()].append(AVATAR_SYMBOL);
+        }
+        groups[rankStyle.ordinal()].append(getRankPrefix(rank, pronouns, rankStyle));
+        return groups[PrefixStyle.SYMBOL.ordinal()].toString()
+                + groups[PrefixStyle.SHORT.ordinal()]
+                + groups[PrefixStyle.FULL.ordinal()];
+    }
+
+    /**
+     * Provides the sum of mcMMO levels in each of the three rank-up categories (Gathering, Combat, Miscellaneous).
+     *
+     * @param levelOf Provides the level of the given skill, including child skills.
+     * @return The totals in the order Gathering, Combat, Miscellaneous.
+     */
+    public static int[] getMcmmoCategoryTotals(ToIntFunction<PrimarySkillType> levelOf) {
+        int[] totals = new int[MCMMO_CATEGORIES.length];
+        for (int i = 0; i < MCMMO_CATEGORIES.length; i++) {
+            for (PrimarySkillType skill : MCMMO_CATEGORIES[i]) {
+                totals[i] += levelOf.applyAsInt(skill);
+            }
+        }
+        return totals;
+    }
+
+    /**
+     * Provides every non-child skill that counts towards one of the mcMMO rank-up categories.
+     *
+     * @return The non-child skills of all three categories, without duplicates.
+     */
+    public static Set<PrimarySkillType> getMcmmoCategoryParentSkills() {
+        Set<PrimarySkillType> skills = new LinkedHashSet<>();
+        for (PrimarySkillType[] category : MCMMO_CATEGORIES) {
+            for (PrimarySkillType skill : category) {
+                if (!SkillTools.isChildSkill(skill)) {
+                    skills.add(skill);
+                }
+            }
+        }
+        return skills;
+    }
+
+    /**
+     * Provides the String portion of a Saint rank in the given prefix style.
+     *
+     * @param saintRank The Saint rank, where 0 is no Saint rank.
+     * @param style     The prefix style to display the Saint rank in.
+     * @return The String portion of the Saint rank.
+     */
+    public static String getSaintPrefix(int saintRank, PrefixStyle style) {
+        if (saintRank < 1 || saintRank > SAINT_NAMES.length) {
+            return "";
+        }
+        String color = SAINT_COLORS[saintRank - 1];
+        return switch (style) {
+            case SYMBOL -> color + "⚜&r";
+            case SHORT -> ROLE_BRACKET_COLOR + "&l[" + color + "&lS" + ROLE_BRACKET_COLOR + "&l]&r";
+            case FULL -> ROLE_BRACKET_COLOR + "&l[" + color + "&l" + SAINT_NAMES[saintRank - 1] + ROLE_BRACKET_COLOR + "&l]&r";
         };
     }
 
     /**
-     * Provides the String portion of the player's Council rank.
+     * Provides the String portion of a Council rank in the given prefix style.
      *
-     * @param aranarthPlayer The AranarthPlayer that is being analyzed.
-     * @return The String portion of the player's Council rank.
+     * @param councilRank The Council rank, where 0 is no Council rank.
+     * @param style       The prefix style to display the Council rank in.
+     * @return The String portion of the Council rank.
      */
-    public static String getCouncilRank(AranarthPlayer aranarthPlayer) {
-        int councilRank = aranarthPlayer.getCouncilRank();
-        return switch (councilRank) {
-            case 1 -> "&3۞&r";
-            case 2 -> "&6۞&r";
-            case 3 -> "&4۞&r";
-            default -> "";
+    public static String getCouncilPrefix(int councilRank, PrefixStyle style) {
+        if (councilRank < 1 || councilRank > COUNCIL_NAMES.length) {
+            return "";
+        }
+        String color = COUNCIL_COLORS[councilRank - 1];
+        String name = COUNCIL_NAMES[councilRank - 1];
+        return switch (style) {
+            case SYMBOL -> color + "۞&r";
+            case SHORT -> ROLE_BRACKET_COLOR + "&l[" + color + "&l" + name.charAt(0) + ROLE_BRACKET_COLOR + "&l]&r";
+            case FULL -> ROLE_BRACKET_COLOR + "&l[" + color + "&l" + name + ROLE_BRACKET_COLOR + "&l]&r";
         };
     }
 
@@ -2110,7 +2342,7 @@ public class AranarthUtils {
     public static String getArchitectRank(AranarthPlayer aranarthPlayer) {
         int architectRank = aranarthPlayer.getArchitectRank();
         return switch (architectRank) {
-            case 1 -> "&a&l\uD83D\uDD28&r"; // Hammer emoji
+            case 1 -> ARCHITECT_SYMBOL;
             default -> "";
         };
     }
@@ -2125,7 +2357,7 @@ public class AranarthUtils {
         if (AvatarUtils.getCurrentAvatar() != null) {
             UUID uuid = AvatarUtils.getCurrentAvatar().getUuid();
             if (uuid != null && getUUIDFromUsername(aranarthPlayer.getUsername()) != null && uuid.equals(getUUIDFromUsername(aranarthPlayer.getUsername()))) {
-                return "&5✵";
+                return AVATAR_SYMBOL;
             }
         }
 
@@ -2140,6 +2372,189 @@ public class AranarthUtils {
      */
     public static boolean isSpawnLocation(Location loc) {
         return loc.getWorld().getName().equals("spawn") || PlotUtils.isSpawnPlotLocation(loc);
+    }
+
+    /**
+     * Confirms if the input coordinate has the Spawn protections, being either Spawn or the arena spawn area.
+     *
+     * @param loc The location of the block or entity.
+     * @return Confirmation if the input coordinate has the Spawn protections.
+     */
+    public static boolean isProtectedSpawnLocation(Location loc) {
+        return isSpawnLocation(loc) || isArenaSpawnLocation(loc);
+    }
+
+    /**
+     * Provides the spawn location of the arena world.
+     *
+     * @return The spawn location of the arena world.
+     */
+    public static Location getArenaSpawnLocation() {
+        return new Location(Bukkit.getWorld("arena"), 0.5, 4, 0.5, 0, 0);
+    }
+
+    /**
+     * Provides the location that players respawn at after dying in the arena world.
+     *
+     * @return The respawn location of the arena world.
+     */
+    public static Location getArenaRespawnLocation() {
+        return new Location(Bukkit.getWorld("arena"), 0.5, 2, 54.5, 0, 0);
+    }
+
+    /**
+     * Confirms if the input coordinate is within the protected spawn area of the arena world.
+     *
+     * @param loc The location of the block or entity.
+     * @return Confirmation if the input coordinate is within the arena spawn area.
+     */
+    public static boolean isArenaSpawnLocation(Location loc) {
+        if (loc.getWorld() == null || !loc.getWorld().getName().equals("arena")) {
+            return false;
+        }
+
+        int x = loc.getBlockX();
+        int z = loc.getBlockZ();
+        return (x >= -ARENA_SPAWN_RADIUS && x <= ARENA_SPAWN_RADIUS) && (z >= -ARENA_SPAWN_RADIUS && z <= ARENA_SPAWN_RADIUS);
+    }
+
+    /**
+     * Confirms if the input world has been disabled on this server via /ac disable.
+     *
+     * @param worldName The name of the world.
+     * @return Confirmation if the world is disabled.
+     */
+    public static boolean isWorldDisabled(String worldName) {
+        return disabledWorlds.contains(worldName);
+    }
+
+    /**
+     * Confirms if the input world cannot be entered by the player, as they are not in admin or architect mode.
+     *
+     * @param player    The player.
+     * @param worldName The name of the world.
+     * @return Confirmation if the world is disabled for the player.
+     */
+    public static boolean isWorldDisabledFor(Player player, String worldName) {
+        if (!isWorldDisabled(worldName)) {
+            return false;
+        }
+        AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+        return aranarthPlayer == null || (!aranarthPlayer.isInAdminMode() && !aranarthPlayer.isInArchitectMode());
+    }
+
+    /**
+     * Provides the names of all disabled worlds on this server.
+     *
+     * @return The sorted names of the disabled worlds.
+     */
+    public static List<String> getDisabledWorlds() {
+        List<String> names = new ArrayList<>(disabledWorlds);
+        Collections.sort(names);
+        return names;
+    }
+
+    /**
+     * Disables or re-enables the world, moving every player in it that cannot bypass it when disabling.
+     *
+     * @param worldName  The name of the world.
+     * @param isDisabled Whether the world is being disabled.
+     * @return Confirmation if the world's state was changed.
+     */
+    public static boolean setWorldDisabled(String worldName, boolean isDisabled) {
+        boolean isChanged = isDisabled ? disabledWorlds.add(worldName) : disabledWorlds.remove(worldName);
+        if (!isChanged) {
+            return false;
+        }
+        // Saved so the world stays disabled across restarts
+        if (NetworkManager.isActive()) {
+            String key = KEY_DISABLED_WORLDS + NetworkManager.getInstance().getThisServer();
+            JsonArray json = new JsonArray();
+            getDisabledWorlds().forEach(json::add);
+            Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                    () -> DatabaseManager.getInstance().saveTempData(key, json.toString(), 365 * 24 * 60 * 60));
+        }
+        World world = Bukkit.getWorld(worldName);
+        if (isDisabled && world != null) {
+            for (Player player : world.getPlayers()) {
+                if (isWorldDisabledFor(player, worldName)) {
+                    evacuateDisabledWorld(player);
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Loads this server's disabled worlds from the database.
+     */
+    public static void loadDisabledWorlds() {
+        if (!NetworkManager.isActive()) {
+            return;
+        }
+        String json = DatabaseManager.getInstance().loadTempData(KEY_DISABLED_WORLDS + NetworkManager.getInstance().getThisServer());
+        if (json == null) {
+            return;
+        }
+        JsonParser.parseString(json).getAsJsonArray().forEach(name -> disabledWorlds.add(name.getAsString()));
+        if (!disabledWorlds.isEmpty()) {
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "Loaded disabled worlds: " + disabledWorlds);
+        }
+    }
+
+    /**
+     * Informs the player that the world is currently disabled.
+     *
+     * @param player The player.
+     */
+    public static void sendWorldDisabledMessage(Player player) {
+        long now = System.currentTimeMillis();
+        Long last = lastDisabledWorldMessage.get(player.getUniqueId());
+        // Prevents spam while standing in a portal
+        if (last != null && now - last < 3000) {
+            return;
+        }
+        lastDisabledWorldMessage.put(player.getUniqueId(), now);
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.world_disabled")));
+    }
+
+    /**
+     * Moves the player to Spawn, or this server's main world if Spawn is unavailable, out of a disabled world.
+     *
+     * @param player The player.
+     */
+    public static void evacuateDisabledWorld(Player player) {
+        World spawn = Bukkit.getWorld("spawn");
+        World main = Bukkit.getWorlds().get(0);
+        Location destination = null;
+        if (spawn != null && !isWorldDisabled(spawn.getName())) {
+            destination = new Location(spawn, 0.5, 101, 0.5, 180, 0);
+        } else if (!isWorldDisabled(main.getName())) {
+            destination = main.getSpawnLocation();
+        }
+
+        Runnable kick = () -> {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Could not move " + player.getName() + " out of the disabled world "
+                    + player.getWorld().getName() + " - kicked them instead");
+            player.kick(LegacyComponentSerializer.legacySection().deserialize(
+                    ChatUtils.translateToColor(Lang.getFor(player, "teleport.world_disabled_kick"))));
+        };
+        if (destination == null || player.isDead()) {
+            kick.run();
+            return;
+        }
+
+        player.leaveVehicle();
+        String title = destination.getWorld() == spawn ? "&e&lSpawn" : Lang.getFor(player, "teleport.title_survival");
+        // Switches the inventory when leaving i.e the creative or arena world
+        teleportPlayer(player, player.getLocation(), destination, true, title,
+                Lang.getFor(player, "teleport.world_disabled_moved"), success -> {
+                    if (success) {
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "teleport.world_disabled_moved")));
+                    } else {
+                        kick.run();
+                    }
+                });
     }
 
     /**
@@ -2225,6 +2640,12 @@ public class AranarthUtils {
      * @return Confirmation if the teleportation was successful.
      */
     private static boolean handleTeleportLogic(Player player, Location from, Location to) {
+        // The world was disabled via /ac disable
+        if (to.getWorld() != null && to.getWorld() != player.getWorld()
+                && isWorldDisabledFor(player, to.getWorld().getName())) {
+            sendWorldDisabledMessage(player);
+            return false;
+        }
         // The resource world is still being reset and pre-generated
         if (to.getWorld() != null && ResourceWorldUtils.isLockedFor(player, to.getWorld().getName())) {
             ResourceWorldUtils.sendLockedMessage(player);
@@ -2303,6 +2724,7 @@ public class AranarthUtils {
             aranarthPlayer.setSurvivalSaturation(player.getSaturation());
             aranarthPlayer.setSurvivalExpLevel(player.getLevel());
             aranarthPlayer.setSurvivalExpProgress(player.getExp());
+            aranarthPlayer.setSurvivalEffects(serializePotionEffects(player));
         }
 
         setPlayer(player.getUniqueId(), aranarthPlayer);
@@ -2503,7 +2925,7 @@ public class AranarthUtils {
      */
     public static void applySpawnBuffs() {
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (isSpawnLocation(player.getLocation())) {
+            if (isProtectedSpawnLocation(player.getLocation())) {
                 if (AranarthUtils.getPlayer(player.getUniqueId()).isUsingSpawnBoost()) {
                     player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 4));
                     player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 100, 2));
@@ -3007,10 +3429,12 @@ public class AranarthUtils {
                 case CHI -> "chi";
             });
             String duration = getRemainingBoostDuration(boost).replace("&e", "&e&o");
+            if (!boostFooter.isEmpty()) {
+                boostFooter.append("\n");
+            }
             boostFooter.append(color).append("&o").append(name)
-                    .append(" ").append(color).append("&o(").append(duration).append(color).append("&o)\n");
+                    .append(" ").append(color).append("&o(").append(duration).append(color).append("&o)");
         }
-        boostFooter.append("&8&l---------------------");
         return boostFooter.toString();
     }
 
@@ -3082,7 +3506,7 @@ public class AranarthUtils {
             }
         }
 
-        // Send reminder messages at 60, 30, and 1 minute remaining
+        // Send reminder messages at 60, 30, 10, and 1 minute remaining (Discord only at 60)
         for (Boost boost : serverBoosts.keySet()) {
             String name = "";
             if (boost == Boost.MINER) {
@@ -3102,7 +3526,7 @@ public class AranarthUtils {
 
             int[] thresholds = {60, 30, 10, 1};
             String[] labels = {Lang.key("boost.time_hour"), Lang.key("boost.time_30_minutes"), Lang.key("boost.time_10_minutes"), Lang.key("boost.time_minute")};
-            String[] discordLabels = {"1 hour", "30 minutes", "10 minutes", null};
+            String[] discordLabels = {"1 hour", null, null, null};
             for (int i = 0; i < thresholds.length; i++) {
                 String key = boost.name() + "_" + thresholds[i];
                 if (minutesLeft == thresholds[i] && !sentBoostReminders.contains(key)) {
@@ -3254,6 +3678,21 @@ public class AranarthUtils {
         addCompressibleItem(uuid, Material.CLAY_BALL);
         addCompressibleItem(uuid, Material.QUARTZ);
         addCompressibleItem(uuid, Material.BAMBOO);
+    }
+
+    /**
+     * Toggles the player's compressor on or off and notifies them.
+     *
+     * @param player The player toggling their compressor.
+     * @return The new compressor state.
+     */
+    public static boolean toggleCompressor(Player player) {
+        AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+        boolean enabled = !aranarthPlayer.isCompressingItems();
+        aranarthPlayer.setCompressingItems(enabled);
+        setPlayer(player.getUniqueId(), aranarthPlayer);
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, enabled ? "toggle.compressor_enabled" : "toggle.compressor_disabled")));
+        return enabled;
     }
 
     /**
@@ -3618,6 +4057,25 @@ public class AranarthUtils {
     }
 
     /**
+     * Plays the donation sound for all online players on this server.
+     */
+    public static void playDonationSound() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 1F, ThreadLocalRandom.current().nextFloat(1.2F, 1.6F));
+        }
+    }
+
+    /**
+     * Plays the donation sound for all online players across the network.
+     */
+    public static void playNetworkDonationSound() {
+        playDonationSound();
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishSoundAll("minecraft:entity.player.levelup", 1F, ThreadLocalRandom.current().nextFloat(1.2F, 1.6F));
+        }
+    }
+
+    /**
      * Plays the jingle when a player sends or receives a teleport request.
      *
      * @param player The player that sent or received the request.
@@ -3690,13 +4148,12 @@ public class AranarthUtils {
 
         // Handle vanish visibility
         for (Player player : onlinePlayers) {
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
             for (Player hiddenPlayer : onlinePlayers) {
                 AranarthPlayer hiddenAranarthPlayer = AranarthUtils.getPlayer(hiddenPlayer.getUniqueId());
 
                 if (hiddenAranarthPlayer.isVanished()) {
-                    if (aranarthPlayer.getCouncilRank() == 3) {
+                    if (player.hasPermission("aranarth.vanish.see")) {
                         player.showPlayer(AranarthCore.getInstance(), hiddenPlayer);
                     } else {
                         player.hidePlayer(AranarthCore.getInstance(), hiddenPlayer);
@@ -3707,12 +4164,6 @@ public class AranarthUtils {
                 }
             }
         }
-
-        // Remove vanished players from tab
-        onlinePlayers.removeIf(player -> {
-            AranarthPlayer data = AranarthUtils.getPlayer(player.getUniqueId());
-            return data.isVanished();
-        });
 
         // Collect non-vanished remote players for the combined sort
         List<NetworkPlayer> remotePlayers = new ArrayList<>();
@@ -3729,7 +4180,9 @@ public class AranarthUtils {
         //   1. roleGroup  - council(5) > architect(4) > saint(3) > avatar(2) > regular(1)
         //   2. roleTier   - councilRank/saintRank/architectRank within the same group
         //   3. playerRank - game rank (8–0) as tiebreaker within the same role+tier
-        record SortEntry(int roleGroup, int roleTier, int playerRank, Player localPlayer, NetworkPlayer remotePlayer) {
+        //   4. name       - alphabetical (ascending), so players with the same ranks stay in a consistent order
+        // Vanished local players are included so that players who can see them have them in the right group
+        record SortEntry(int roleGroup, int roleTier, int playerRank, String name, Player localPlayer, NetworkPlayer remotePlayer, boolean vanished) {
         }
 
         List<SortEntry> combined = new ArrayList<>();
@@ -3737,12 +4190,14 @@ public class AranarthUtils {
             AranarthPlayer ap = getPlayer(p.getUniqueId());
             if (ap != null) {
                 int[] fields = computeSortFields(p.getUniqueId(), ap.getCouncilRank(), ap.getArchitectRank(), ap.getSaintRank(), ap.getRank());
-                combined.add(new SortEntry(fields[0], fields[1], fields[2], p, null));
+                String name = ap.getNickname() != null && !ap.getNickname().isEmpty() ? ap.getNickname() : p.getName();
+                combined.add(new SortEntry(fields[0], fields[1], fields[2], ChatUtils.stripColorFormatting(name), p, null, ap.isVanished()));
             }
         }
         for (NetworkPlayer np : remotePlayers) {
             int[] fields = computeSortFields(np.getUuid(), np.getCouncilRank(), np.getArchitectRank(), np.getSaintRank(), np.getRank());
-            combined.add(new SortEntry(fields[0], fields[1], fields[2], null, np));
+            String name = np.getNickname() != null && !np.getNickname().isEmpty() ? np.getNickname() : np.getUsername();
+            combined.add(new SortEntry(fields[0], fields[1], fields[2], ChatUtils.stripColorFormatting(name), null, np, false));
         }
 
         // Sort highest priority first across all servers combined
@@ -3753,41 +4208,81 @@ public class AranarthUtils {
             if (a.roleTier() != b.roleTier()) {
                 return Integer.compare(b.roleTier(), a.roleTier());
             }
-            return Integer.compare(b.playerRank(), a.playerRank());
+            if (a.playerRank() != b.playerRank()) {
+                return Integer.compare(b.playerRank(), a.playerRank());
+            }
+            return a.name().compareToIgnoreCase(b.name());
         });
 
-        // Apply display names and list order.  Local players can be ordered directly;
-        // remote players get an NMS list-order packet via NetworkTabManager.
-        int total = combined.size();
-        for (int i = 0; i < total; i++) {
-            SortEntry entry = combined.get(i);
-            int order = total - 1 - i;
-            if (entry.localPlayer() != null) {
+        // Apply display names. The list name set here uses the default prefix styles, and is overridden below for
+        // any viewer who has chosen their own prefix styles.
+        Map<UUID, ChatPrefix> localPrefixes = new LinkedHashMap<>();
+        Map<UUID, String> localSuffixes = new HashMap<>();
+        for (SortEntry entry : combined) {
+            if (entry.localPlayer() != null && !entry.vanished()) {
                 Player player = entry.localPlayer();
                 UUID uuid = player.getUniqueId();
-                String display = ChatUtils.providePrefixAndName(uuid);
+                ChatPrefix prefix = ChatPrefix.of(player);
+                String suffix = "";
                 AranarthPlayer aranarthPlayer = getPlayer(uuid);
                 if (isAfk(aranarthPlayer)) {
-                    display += " &7[AFK]";
+                    suffix += " &7[AFK]";
                 }
                 int ping = player.getPing();
                 if (ping <= 150) {
-                    display += " &8[&a" + ping + "ms&8]";
+                    suffix += " &8[&a" + ping + "ms&8]";
                 } else if (ping <= 250) {
-                    display += " &8[&e" + ping + "ms&8]";
+                    suffix += " &8[&e" + ping + "ms&8]";
                 } else {
-                    display += " &8[&c" + ping + "ms&8]";
+                    suffix += " &8[&c" + ping + "ms&8]";
                 }
-                player.setPlayerListName(ChatUtils.translateToColor(display));
-                player.setPlayerListOrder(order);
-            } else {
-                // Send a list-order packet for the remote fake entry so it slots in at
-                // the correct combined position instead of floating at the bottom.
-                NetworkTabManager.sendListOrder(
-                        entry.remotePlayer().getUuid(), order, onlinePlayers);
+                localPrefixes.put(uuid, prefix);
+                localSuffixes.put(uuid, suffix);
+                player.setPlayerListName(ChatUtils.translateToColor(prefix.formatName(PrefixStyle.defaults()) + suffix));
             }
         }
 
+        // Builds every tab name in each set of prefix styles that a viewer uses
+        Map<String, Map<UUID, String>> displayNamesByStyles = new HashMap<>();
+        Function<PrefixStyle[], Map<UUID, String>> getDisplayNames = styles -> displayNamesByStyles.computeIfAbsent(
+                PrefixStyle.encode(styles[0], styles[1], styles[2]), k -> {
+                    Map<UUID, String> names = new HashMap<>();
+                    for (Map.Entry<UUID, ChatPrefix> local : localPrefixes.entrySet()) {
+                        names.put(local.getKey(), ChatUtils.translateToColor(
+                                local.getValue().formatName(styles) + localSuffixes.get(local.getKey())));
+                    }
+                    for (NetworkPlayer np : remotePlayers) {
+                        names.put(np.getUuid(), NetworkTabManager.buildDisplayName(np, styles));
+                    }
+                    return names;
+                });
+
+        // Sends each viewer with custom prefix styles their own version of every tab name. Viewers who just
+        // went back to the default styles are sent the default names once, replacing their old overrides.
+        for (Player viewer : Bukkit.getOnlinePlayers()) {
+            PrefixStyle[] styles = getPrefixStyles(viewer);
+            if (Arrays.equals(styles, PrefixStyle.defaults())) {
+                if (!customTabViewers.remove(viewer.getUniqueId())) {
+                    continue;
+                }
+            } else {
+                customTabViewers.add(viewer.getUniqueId());
+            }
+            NetworkTabManager.sendDisplayNames(viewer, getDisplayNames.apply(styles));
+        }
+
+        // Arranges each viewer's tab list into groups based on where each player is, keeping the rank order within each group.
+        // The names each viewer sees are used to size the group dividers to the width of the columns.
+        List<TabLayoutUtils.TabMember> members = new ArrayList<>();
+        for (SortEntry entry : combined) {
+            if (entry.localPlayer() != null) {
+                members.add(new TabLayoutUtils.TabMember(entry.localPlayer().getUniqueId(),
+                        TabGroup.fromWorld(entry.localPlayer().getWorld().getName()), entry.vanished()));
+            } else {
+                members.add(new TabLayoutUtils.TabMember(entry.remotePlayer().getUuid(), entry.remotePlayer().getTabGroup(), false));
+            }
+        }
+        TabLayoutUtils.applyLayout(members, Bukkit.getOnlinePlayers(), viewer -> getDisplayNames.apply(getPrefixStyles(viewer)));
     }
 
     /**
@@ -4850,6 +5345,73 @@ public class AranarthUtils {
                 || isSmpWorld(worldName)
                 || worldName.equals("resource") || worldName.equals("resource_nether") || worldName.equals("resource_the_end")
                 || worldName.equals("spawn") || worldName.equals("shops");
+    }
+
+    /**
+     * Provides whether Architects can change their game mode in the world, being spawn and every non-Survival world.
+     *
+     * @param worldName The name of the world.
+     * @return Confirmation if Architects can change their game mode in the world.
+     */
+    public static boolean canArchitectChangeGameMode(String worldName) {
+        return worldName.equals("spawn") || !isSurvivalWorld(worldName);
+    }
+
+    /**
+     * Provides whether the player can change game modes without the Architect restrictions.
+     *
+     * @param player The player.
+     * @return Confirmation if the player is an operator or Council 2 and above.
+     */
+    public static boolean hasUnrestrictedGameMode(Player player) {
+        AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+        return player.isOp() || (aranarthPlayer != null && aranarthPlayer.getCouncilRank() >= 2);
+    }
+
+    /**
+     * Returns a player who lost their Architect rank or left architect mode to survival mode, unless they are in a creative world.
+     *
+     * @param player The player.
+     */
+    public static void removeRevokedGameMode(Player player) {
+        AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+        GameMode gameMode = player.getGameMode();
+        if (aranarthPlayer == null || (aranarthPlayer.getArchitectRank() >= 1 && aranarthPlayer.isInArchitectMode())
+                || hasUnrestrictedGameMode(player)
+                || (gameMode != GameMode.CREATIVE && gameMode != GameMode.SPECTATOR)
+                || getInventoryGroup(player.getWorld().getName()).equals("creative")) {
+            return;
+        }
+        player.setGameMode(GameMode.SURVIVAL);
+    }
+
+    /**
+     * Marks the player as having just teleported, so their next few moves do not count as travel.
+     */
+    public static void markTeleported(UUID uuid) {
+        recentTeleports.put(uuid, System.currentTimeMillis());
+    }
+
+    /**
+     * Returns true if the move is the player actively travelling, rather than a teleport.
+     */
+    public static boolean isActiveTravel(Player player, Location from, Location to) {
+        if (to == null || from.getWorld() != to.getWorld()) {
+            return false;
+        }
+        double dx = to.getX() - from.getX();
+        double dz = to.getZ() - from.getZ();
+        if (dx * dx + dz * dz > MAX_TRAVEL_DISTANCE_PER_MOVE * MAX_TRAVEL_DISTANCE_PER_MOVE) {
+            return false;
+        }
+        Long teleportedAt = recentTeleports.get(player.getUniqueId());
+        if (teleportedAt != null) {
+            if (System.currentTimeMillis() - teleportedAt < TELEPORT_TRAVEL_GRACE_MS) {
+                return false;
+            }
+            recentTeleports.remove(player.getUniqueId());
+        }
+        return true;
     }
 
     /**

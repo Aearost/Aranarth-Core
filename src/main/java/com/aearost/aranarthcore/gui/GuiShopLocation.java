@@ -6,12 +6,12 @@ import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import com.aearost.aranarthcore.utils.ShopIslandUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import com.aearost.aranarthcore.utils.TradeMarketUtils;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 
@@ -40,6 +40,10 @@ public class GuiShopLocation {
     public static final Map<UUID, Integer> playerPage = new HashMap<>();
     private static final Set<UUID> awaitingSearch = new HashSet<>();
     private static final Map<UUID, String> activeFilters = new HashMap<>();
+    // The shop order each viewer was shown, so clicks resolve to the same shop even if earnings change meanwhile
+    private static final Map<UUID, List<UUID>> playerShopOrder = new HashMap<>();
+    // The search results each viewer was shown, so clicks resolve to the same shop even if stock changes meanwhile
+    private static final Map<UUID, List<Shop>> playerSearchResults = new HashMap<>();
 
     // Thread pool for parallel skin fetches - keeps fetches concurrent without spawning unbounded threads
     private static final ExecutorService SKIN_EXECUTOR = Executors.newFixedThreadPool(8);
@@ -47,9 +51,9 @@ public class GuiShopLocation {
     private final Player player;
     private final Inventory gui;
 
-    private GuiShopLocation(Player player, int pageNum, String filter, Map<UUID, PlayerProfile> profiles) {
+    private GuiShopLocation(Player player, int pageNum, String filter, List<UUID> shopOrder, Map<UUID, PlayerProfile> profiles) {
         this.player = player;
-        this.gui = build(pageNum, filter, profiles);
+        this.gui = build(pageNum, filter, shopOrder, profiles);
     }
 
     public void openGui() {
@@ -68,23 +72,54 @@ public class GuiShopLocation {
 
     /**
      * Opens the shop location GUI. If a filter is active, builds synchronously (no skulls needed).
-     * Otherwise, fetches all skull profiles in parallel before opening so the delay is
+     * Otherwise, loads shop earnings from the database so the most profitable shops are listed first,
+     * then fetches all skull profiles in parallel before opening so the delay is
      * one request latency instead of N * request latency.
      */
     public static void open(Player player, int pageNum) {
         String filter = activeFilters.get(player.getUniqueId());
         if (filter != null) {
             playerPage.put(player.getUniqueId(), pageNum);
-            new GuiShopLocation(player, pageNum, filter, Collections.emptyMap()).openGui();
+            new GuiShopLocation(player, pageNum, filter, Collections.emptyList(), Collections.emptyMap()).openGui();
             return;
         }
 
-        HashMap<UUID, Location> shopLocations = AranarthUtils.getShopLocations();
-        List<UUID> uuidList = new ArrayList<>(shopLocations.keySet());
+        // Earnings are read from the database so sales made on both servers are reflected
+        CompletableFuture.supplyAsync(PersistenceUtils::loadShopEarningsFromDatabase, SKIN_EXECUTOR).thenAccept(earnings ->
+                Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () ->
+                        fetchProfilesAndOpen(player, pageNum, getShopOwnersByEarnings(earnings))));
+    }
+
+    /**
+     * Provides every shop island owner, sorted by highest net shop earnings, then by nickname.
+     * @param earnings The net shop earnings of each shop owner.
+     * @return The sorted shop island owners.
+     */
+    private static List<UUID> getShopOwnersByEarnings(Map<UUID, Double> earnings) {
+        List<UUID> uuidList = new ArrayList<>(AranarthUtils.getShopLocations().keySet());
+        uuidList.removeIf(Objects::isNull);
+        uuidList.sort(Comparator.comparingDouble((UUID uuid) -> earnings.getOrDefault(uuid, 0.0)).reversed()
+                .thenComparing(uuid -> {
+                    AranarthPlayer owner = AranarthUtils.getPlayer(uuid);
+                    return owner != null ? ChatUtils.stripColorFormatting(owner.getNickname()).toLowerCase() : "";
+                }));
+        return uuidList;
+    }
+
+    /**
+     * Provides the shop order the player was last shown in the default view.
+     * @param uuid The player's UUID.
+     * @return The shop owners in the order they were displayed.
+     */
+    public static List<UUID> getShopOrder(UUID uuid) {
+        return playerShopOrder.getOrDefault(uuid, Collections.emptyList());
+    }
+
+    private static void fetchProfilesAndOpen(Player player, int pageNum, List<UUID> shopOrder) {
         int startIndex = pageNum * ITEMS_PER_PAGE;
         List<UUID> pageUuids = new ArrayList<>();
-        for (int i = startIndex; i < Math.min(startIndex + ITEMS_PER_PAGE, uuidList.size()); i++) {
-            pageUuids.add(uuidList.get(i));
+        for (int i = startIndex; i < Math.min(startIndex + ITEMS_PER_PAGE, shopOrder.size()); i++) {
+            pageUuids.add(shopOrder.get(i));
         }
 
         // Kick off all skin fetches in parallel, then open the GUI once all are ready
@@ -106,7 +141,8 @@ public class GuiShopLocation {
             }
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                 playerPage.put(player.getUniqueId(), pageNum);
-                new GuiShopLocation(player, pageNum, null, profiles).openGui();
+                playerShopOrder.put(player.getUniqueId(), shopOrder);
+                new GuiShopLocation(player, pageNum, null, shopOrder, profiles).openGui();
             });
         });
     }
@@ -116,10 +152,10 @@ public class GuiShopLocation {
      */
     public static void refreshInPlace(Player player, int pageNum, String filter, Inventory inv) {
         playerPage.put(player.getUniqueId(), pageNum);
-        new GuiShopLocation(player, pageNum, filter, Collections.emptyMap()).populateInto(inv);
+        new GuiShopLocation(player, pageNum, filter, Collections.emptyList(), Collections.emptyMap()).populateInto(inv);
     }
 
-    private Inventory build(int pageNum, String filter, Map<UUID, PlayerProfile> profiles) {
+    private Inventory build(int pageNum, String filter, List<UUID> shopOrder, Map<UUID, PlayerProfile> profiles) {
         Inventory inv = GuiHolder.create(player, 54, Lang.getFor(player, TITLE_KEY));
 
         ItemStack grayPane = makeGlass(Material.GRAY_STAINED_GLASS_PANE);
@@ -152,9 +188,14 @@ public class GuiShopLocation {
         }
 
         // Compute total pages
+        List<Shop> results = Collections.emptyList();
+        if (filter != null) {
+            results = getFilteredShops(filter);
+            playerSearchResults.put(player.getUniqueId(), results);
+        }
         int totalEntries = (filter != null)
-                ? getFilteredShops(filter).size()
-                : AranarthUtils.getShopLocations().size();
+                ? results.size()
+                : shopOrder.size();
         int totalPages = Math.max(1, (int) Math.ceil((double) totalEntries / ITEMS_PER_PAGE));
         int safePage = Math.min(pageNum, totalPages - 1);
 
@@ -194,7 +235,6 @@ public class GuiShopLocation {
         int guiSlot = ITEMS_START;
         if (filter != null) {
             // Search results: show shop items matching the filter
-            List<Shop> results = getFilteredShops(filter);
             int start = safePage * ITEMS_PER_PAGE;
             int end = Math.min(start + ITEMS_PER_PAGE, results.size());
             for (int i = start; i < end; i++) {
@@ -215,11 +255,31 @@ public class GuiShopLocation {
                         lore.add(Lang.getFor(player, "gui.shoplocation.result_buy",
                                 "price", TradeMarketUtils.formatPrice(shop.getBuyPrice()),
                                 "qty", String.valueOf(shop.getQuantity())));
+                        // Shops that have not been counted yet show no stock line
+                        if (shop.getStock() >= 0) {
+                            if (shop.getStock() >= shop.getQuantity()) {
+                                lore.add(Lang.getFor(player, "gui.shoplocation.result_stock",
+                                        "amount", String.valueOf(shop.getStock())));
+                            } else {
+                                lore.add(Lang.getFor(player, "gui.shoplocation.result_out_of_stock"));
+                            }
+                        }
                     }
                     if (shop.getSellPrice() > 0) {
                         lore.add(Lang.getFor(player, "gui.shoplocation.result_sell",
                                 "price", TradeMarketUtils.formatPrice(shop.getSellPrice()),
                                 "qty", String.valueOf(shop.getQuantity())));
+                        double ownerBalance = owner.getBalance();
+                        if (shop.getFreeSpace() >= 0 && shop.getFreeSpace() < shop.getQuantity()) {
+                            lore.add(Lang.getFor(player, "gui.shoplocation.result_container_full"));
+                        } else if (ownerBalance < shop.getSellPrice()) {
+                            lore.add(Lang.getFor(player, "gui.shoplocation.result_owner_broke"));
+                        } else if (shop.getFreeSpace() >= 0) {
+                            // Limited by both the chest space and how many sales the owner can pay for
+                            int transactions = Math.min(shop.getFreeSpace() / shop.getQuantity(), (int) (ownerBalance / shop.getSellPrice()));
+                            lore.add(Lang.getFor(player, "gui.shoplocation.result_capacity",
+                                    "amount", String.valueOf(transactions * shop.getQuantity())));
+                        }
                     }
                     lore.add(Lang.getFor(player, "gui.shoplocation.result_click"));
                     meta.setLore(lore);
@@ -228,13 +288,11 @@ public class GuiShopLocation {
                 inv.setItem(guiSlot++, displayItem);
             }
         } else {
-            // Default view: show player shop owner heads
-            HashMap<UUID, Location> shopLocations = AranarthUtils.getShopLocations();
-            List<UUID> uuidList = new ArrayList<>(shopLocations.keySet());
+            // Default view: show player shop owner heads, most profitable first
             int start = safePage * ITEMS_PER_PAGE;
-            int end = Math.min(start + ITEMS_PER_PAGE, uuidList.size());
+            int end = Math.min(start + ITEMS_PER_PAGE, shopOrder.size());
             for (int i = start; i < end; i++) {
-                UUID uuid = uuidList.get(i);
+                UUID uuid = shopOrder.get(i);
                 AranarthPlayer shopOwnerPlayer = AranarthUtils.getPlayer(uuid);
                 ItemStack shopItem = new ItemStack(Material.PLAYER_HEAD);
                 SkullMeta shopItemMeta = (SkullMeta) shopItem.getItemMeta();
@@ -261,16 +319,19 @@ public class GuiShopLocation {
     }
 
     /**
-     * Returns all shops in the shops world matching the given filter (case-insensitive item name match),
-     * sorted alphabetically by item name then by shop owner name.
+     * Returns all shops in the shops world matching the given filter (case-insensitive item name match)
+     * that can currently be bought from or sold to, sorted alphabetically by item name then by shop owner name.
      */
     public static List<Shop> getFilteredShops(String filter) {
         String lowerFilter = filter.toLowerCase();
         List<Shop> results = new ArrayList<>();
         for (Map.Entry<UUID, List<Shop>> entry : ShopUtils.getShops().entrySet()) {
             if (entry.getKey() == null) continue; // skip server shops
+            AranarthPlayer owner = AranarthUtils.getPlayer(entry.getKey());
+            if (owner == null) continue;
             for (Shop shop : entry.getValue()) {
                 if (!ShopIslandUtils.SHOPS_WORLD.equals(shop.getWorldName())) continue;
+                if (!canBuyFrom(shop) && !canSellTo(shop, owner)) continue;
                 ItemStack item = shop.getItem();
                 if (item == null) continue;
                 String itemName;
@@ -297,6 +358,40 @@ public class GuiShopLocation {
         return results;
     }
 
+    /**
+     * Determines whether a customer can buy at least one full transaction from the shop.
+     * @param shop The player shop.
+     * @return True if the shop can be bought from.
+     */
+    private static boolean canBuyFrom(Shop shop) {
+        return shop.getBuyPrice() > 0 && (shop.getStock() < 0 || shop.getStock() >= shop.getQuantity());
+    }
+
+    /**
+     * Determines whether a customer can sell at least one full transaction to the shop.
+     * @param shop The player shop.
+     * @param owner The shop owner, who pays for each sale.
+     * @return True if the shop can be sold to.
+     */
+    private static boolean canSellTo(Shop shop, AranarthPlayer owner) {
+        if (shop.getSellPrice() <= 0) {
+            return false;
+        }
+        if (shop.getFreeSpace() >= 0 && shop.getFreeSpace() < shop.getQuantity()) {
+            return false;
+        }
+        return owner.getBalance() >= shop.getSellPrice();
+    }
+
+    /**
+     * Provides the search results the player was last shown.
+     * @param uuid The player's UUID.
+     * @return The shops in the order they were displayed.
+     */
+    public static List<Shop> getSearchResults(UUID uuid) {
+        return playerSearchResults.getOrDefault(uuid, Collections.emptyList());
+    }
+
     public static void initiateSearch(Player player) {
         awaitingSearch.add(player.getUniqueId());
         player.closeInventory();
@@ -318,12 +413,13 @@ public class GuiShopLocation {
         activeFilters.put(player.getUniqueId(), query);
         Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
             playerPage.put(player.getUniqueId(), 0);
-            new GuiShopLocation(player, 0, query, Collections.emptyMap()).openGui();
+            new GuiShopLocation(player, 0, query, Collections.emptyList(), Collections.emptyMap()).openGui();
         });
     }
 
     public static void clearFilter(UUID uuid) {
         activeFilters.remove(uuid);
+        playerSearchResults.remove(uuid);
     }
 
     public static String getActiveFilter(UUID uuid) {

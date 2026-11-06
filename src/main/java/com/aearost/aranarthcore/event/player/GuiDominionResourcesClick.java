@@ -55,9 +55,11 @@ public class GuiDominionResourcesClick {
         if (slot < 9) {
             if (slot == 4) {
                 Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
-                if (dominion != null && dominion.getLeader().equals(player.getUniqueId())) {
+                if (dominion != null && DominionUtils.hasPermission(player, dominion, DominionPermission.RESOURCES)) {
                     new GuiDominionResourceFilters(player).openGui();
                     player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
+                } else {
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.resources_no_permission")));
                 }
             }
             return;

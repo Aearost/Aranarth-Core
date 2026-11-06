@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -34,8 +35,7 @@ public class CommandNickname implements CommandExecutor {
 			}
 
 			if (args.length == 0) {
-				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-				aranarthPlayer.setNickname("");
+				updateNickname(player, "");
 				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "nickname.removed")));
 				return true;
 
@@ -75,8 +75,7 @@ public class CommandNickname implements CommandExecutor {
 					return true;
 				}
 
-				aranarthPlayer.setNickname(args[0]);
-				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				updateNickname(player, args[0]);
 				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "nickname.set", "name", args[0])));
 				return true;
 			} else {
@@ -119,7 +118,7 @@ public class CommandNickname implements CommandExecutor {
 							return true;
 						}
 
-						aranarthPlayer.setNickname(nickname);
+						updateNickname(player, nickname);
 						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "nickname.set", "name", nickname)));
 						return true;
 					}
@@ -135,13 +134,30 @@ public class CommandNickname implements CommandExecutor {
 					return true;
 				}
 
-				aranarthPlayer.setNickname(nickname);
+				updateNickname(player, nickname);
 				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "nickname.set", "name", nickname)));
 				return true;
 			}
 		} else {
 			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
+		}
+	}
+
+	/**
+	 * Sets the player's nickname and propagates it to the other server.
+	 *
+	 * @param player The player.
+	 * @param nickname The new nickname, or an empty string to remove it.
+	 */
+	private void updateNickname(Player player, String nickname) {
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		aranarthPlayer.setNickname(nickname);
+		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+		if (NetworkManager.isActive()) {
+			// An empty nickname is sent as-is so the other server also falls back to the username
+			String storedNickname = nickname.isEmpty() ? "" : aranarthPlayer.getNickname();
+			NetworkManager.getInstance().publishNicknameUpdate(player.getUniqueId(), player.getName(), storedNickname);
 		}
 	}
 }

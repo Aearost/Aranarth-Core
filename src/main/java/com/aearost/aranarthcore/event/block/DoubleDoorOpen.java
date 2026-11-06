@@ -18,7 +18,7 @@ public class DoubleDoorOpen {
         Block block = e.getClickedBlock();
 
         if (block.getBlockData() instanceof Door door) {
-            if (AranarthUtils.isSpawnLocation(block.getLocation())) {
+            if (AranarthUtils.isProtectedSpawnLocation(block.getLocation())) {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
                 if (!aranarthPlayer.isInAdminMode()) {
                     return;

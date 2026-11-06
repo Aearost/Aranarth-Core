@@ -246,7 +246,7 @@ public class DominionUtils {
      * @return Whether the attacker may harm the target.
      */
     public static boolean canAttackPlayer(Player attacker, Player target) {
-        if (AranarthUtils.isSpawnLocation(target.getLocation()) || AranarthUtils.isSpawnLocation(attacker.getLocation())) {
+        if (AranarthUtils.isProtectedSpawnLocation(target.getLocation()) || AranarthUtils.isProtectedSpawnLocation(attacker.getLocation())) {
             return false;
         }
         return getPvpDenyMessage(attacker, target) == null;
@@ -267,6 +267,10 @@ public class DominionUtils {
         }
         // Spawn has its own protection
         if (AranarthUtils.isSpawnLocation(target.getLocation())) {
+            return null;
+        }
+        // The Avatar is never protected by the dominion or wanderer PvP rules
+        if (AvatarUtils.isCurrentAvatar(target.getUniqueId())) {
             return null;
         }
 
@@ -1063,14 +1067,12 @@ public class DominionUtils {
                 continue;
             }
 
-            // Conquered dominions are exempt from daily food/money/land taxes
-            if (getConquerorOfDominion(dominion) != null) {
-                continue;
-            }
+            // Conquered dominions still consume food, but are exempt from money/land taxes as the conqueror funds them
+            boolean isConquered = getConquerorOfDominion(dominion) != null;
 
             // If the dominion has more chunks than its member count allows, unclaim one chunk
             // per day with priority over food/money consumption until within the limit
-            if (dominion.getChunks().size() > dominion.getMaxChunks()) {
+            if (!isConquered && dominion.getChunks().size() > dominion.getMaxChunks()) {
                 Chunk chunkToRemove = null;
                 for (Chunk chunk : dominion.getChunks()) {
                     if (dominion.getChunks().size() > 1 && dominion.getDominionHome().getChunk().equals(chunk)) {
@@ -1106,6 +1108,13 @@ public class DominionUtils {
                 if (Bukkit.getOfflinePlayer(dominion.getLeader()).isOnline()) {
                     Player onlineLeader = Bukkit.getPlayer(dominion.getLeader());
                     onlineLeader.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlineLeader, "dominion.food_consumed", "name", dominion.getName())));
+                }
+            } else if (isConquered) {
+                for (UUID memberUuid : dominion.getMembers()) {
+                    if (Bukkit.getOfflinePlayer(memberUuid).isOnline()) {
+                        Player member = Bukkit.getPlayer(memberUuid);
+                        member.sendMessage(ChatUtils.chatMessage(Lang.getFor(member, "dominion.food_not_enough", "name", dominion.getName())));
+                    }
                 }
             } else {
                 double dailyCost = DominionLevelUtils.getDailyBalanceCost(dominion.getDominionLevel());
@@ -1267,7 +1276,8 @@ public class DominionUtils {
 
         // Provides different yields based on the input
         power = switch (amplifier) {
-            case -1 -> (int) (power * 0.75);
+            // Never reduce a food item to 0 power, otherwise it would be consumed for nothing
+            case -1 -> power > 0 ? Math.max(1, (int) (power * 0.75)) : 0;
             case 1 -> (int) (power * 1.25);
             case 2 -> (int) (power * 1.5);
             case 3 -> (int) (power * 1.75);
@@ -1903,11 +1913,11 @@ public class DominionUtils {
     }
 
     // 1 in X odds of a Swift Sneak Book when simulating an Ancient City
-    private static final int SWIFT_SNEAK_BOOK_ODDS = 10;
+    private static final int SWIFT_SNEAK_BOOK_ODDS = 13;
 
     /**
      * Rolls the Ancient City drops that cannot be expressed as 1 in X odds.
-     * Echo Shard has a 10% chance per Dominion rank, and the Swift Sneak Book has a 10% chance
+     * Echo Shard has a 10% chance per Dominion rank, and the Swift Sneak Book has a 1 in 13 chance
      * with its level chosen from the levels available at the Dominion's rank.
      *
      * @param items  The items being claimed.
@@ -2040,7 +2050,7 @@ public class DominionUtils {
                 "Disc Fragment (" + formatPct(4) + " if simulating Ancient City)"));
         ancientCityDrops.add(new ResourceDrop(createSwiftSneakBook(swiftSneakLevels[swiftSneakLevels.length - 1]), 0, 0,
                 "Swift Sneak " + swiftSneakLevelText + " Book (" + formatPct(SWIFT_SNEAK_BOOK_ODDS) + " if simulating Ancient City)", true));
-        SimulationGroup ancientCity = new SimulationGroup("Ancient City", 5, ancientCityDrops);
+        SimulationGroup ancientCity = new SimulationGroup("Ancient City", 15, ancientCityDrops);
 
         List<ResourceDrop> amethystGeodeDrops = new ArrayList<>();
         amethystGeodeDrops.add(new ResourceDrop(new ItemStack(Material.AMETHYST_BLOCK, 16)));
@@ -2663,16 +2673,17 @@ public class DominionUtils {
         } else if (biome == Biome.DEEP_DARK) {
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COBBLED_DEEPSLATE, 64)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.COBBLED_DEEPSLATE, 64)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.SCULK, 64)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.SCULK_VEIN, 16)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.DEEPSLATE_IRON_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SCULK, 16)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.SCULK_VEIN, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.DEEPSLATE_IRON_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.DEEPSLATE_GOLD_ORE, 2)));
-            guaranteed.add(new ResourceDrop(new ItemStack(Material.DEEPSLATE_REDSTONE_ORE, 4)));
+            guaranteed.add(new ResourceDrop(new ItemStack(Material.DEEPSLATE_REDSTONE_ORE, 2)));
             guaranteed.add(new ResourceDrop(new ItemStack(Material.DEEPSLATE_LAPIS_ORE, 2)));
             rares.add(new ResourceDrop(new ItemStack(Material.SCULK_SENSOR, 1), 0, commonOdds[rank - 1],
                     "Rare Drop (" + formatPct(commonOdds[rank - 1]) + " chance)"));
-            rares.add(new ResourceDrop(new ItemStack(Material.SCULK_CATALYST, 1), 0, rareOdds[rank - 1],
-                    "Rare Drop (" + formatPct(rareOdds[rank - 1]) + " chance)"));
+            int[] sculkCatalystOdds = {60, 45, 30, 15, 6};
+            rares.add(new ResourceDrop(new ItemStack(Material.SCULK_CATALYST, 1), 0, sculkCatalystOdds[rank - 1],
+                    "Rare Drop (" + formatPct(sculkCatalystOdds[rank - 1]) + " chance)"));
             simulations.add(ancientCity);
             simulations.add(amethystGeode);
         } else if (biome == Biome.SULFUR_CAVES) {

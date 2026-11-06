@@ -160,7 +160,7 @@ public class DeafeningScream extends SoundAbility implements AddonAbility {
                     double angle = (2.0 * Math.PI / points) * i;
                     double x = Math.cos(angle) * ringRadius;
                     double z = Math.sin(angle) * ringRadius;
-                    center.getWorld().spawnParticle(Particle.DUST, center.clone().add(x, 0, z), 1, 0, 0, 0, 0, AranarthBendingUtils.SOUND_RING_DUST);
+                    AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.DUST, center.clone().add(x, 0, z), 1, 0, 0, 0, 0, AranarthBendingUtils.SOUND_RING_DUST);
                 }
             }
         }
@@ -188,7 +188,7 @@ public class DeafeningScream extends SoundAbility implements AddonAbility {
             Vector offset = right.clone().multiply(Math.cos(angle) * HALO_RADIUS)
                     .add(up.clone().multiply(Math.sin(angle) * HALO_RADIUS));
             Location point = center.clone().add(offset);
-            point.getWorld().spawnParticle(Particle.DUST, point, 1, 0, 0, 0, 0, AranarthBendingUtils.SOUND_RING_DUST);
+            AranarthBendingUtils.spawnParticle(point.getWorld(), Particle.DUST, point, 1, 0, 0, 0, 0, AranarthBendingUtils.SOUND_RING_DUST);
         }
     }
 

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.waterbending.plantbending;
 
 import com.aearost.aranarthcore.utils.AbilityConfig;
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.PlantAbility;
@@ -224,9 +225,9 @@ public class RootSnare extends PlantAbility implements AddonAbility {
         for (int i = startIdx; i <= endIdx && i < pts.size(); i++) {
             double[] pt = pts.get(i);
             Particle.DustOptions dust = (i % 3 == 0) ? ROOT_DUST_DARK : ROOT_DUST;
-            world.spawnParticle(Particle.DUST, pt[0], pt[1], pt[2], 1, 0, 0, 0, 0, dust);
+            AranarthBendingUtils.spawnParticle(world, Particle.DUST, pt[0], pt[1], pt[2], 1, 0, 0, 0, 0, dust);
             if (i >= endIdx - 1) {
-                world.spawnParticle(Particle.DUST,
+                AranarthBendingUtils.spawnParticle(world, Particle.DUST,
                         pt[0] + (random.nextDouble() - 0.5) * 0.12,
                         pt[1] + 0.05 + random.nextDouble() * 0.14,
                         pt[2] + (random.nextDouble() - 0.5) * 0.12,
@@ -260,7 +261,7 @@ public class RootSnare extends PlantAbility implements AddonAbility {
         if (entity instanceof Player snaredPlayer) {
             snaredPlayers.add(snaredPlayer.getUniqueId());
         }
-        entity.getWorld().spawnParticle(Particle.DUST,
+        AranarthBendingUtils.spawnParticle(entity.getWorld(), Particle.DUST,
                 entity.getLocation().add(0, 0.1, 0), 20, 0.5, 0.15, 0.5, 0, ROOT_DUST);
         entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_GRASS_BREAK, 0.8f, 0.45f);
         entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_GRASS_STEP, 0.6f, 0.4f);
@@ -439,7 +440,7 @@ public class RootSnare extends PlantAbility implements AddonAbility {
         double radius = 1.5 * (1.0 - chargeFraction * 0.8);
         for (int i = 0; i < pointCount; i++) {
             double angle = 2.0 * Math.PI * i / pointCount;
-            world.spawnParticle(Particle.DUST,
+            AranarthBendingUtils.spawnParticle(world, Particle.DUST,
                     base.clone().add(Math.cos(angle) * radius, 0, Math.sin(angle) * radius),
                     1, 0, 0, 0, 0, ROOT_DUST);
         }
@@ -471,7 +472,7 @@ public class RootSnare extends PlantAbility implements AddonAbility {
         return false;
     }
 
-    private static boolean isUnstrippedLog(Material mat) {
+    static boolean isUnstrippedLog(Material mat) {
         return switch (mat) {
             case OAK_LOG, SPRUCE_LOG, BIRCH_LOG, JUNGLE_LOG,
                  ACACIA_LOG, DARK_OAK_LOG, MANGROVE_LOG, CHERRY_LOG,

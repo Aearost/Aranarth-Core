@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.EmojiUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -51,7 +52,7 @@ public class CommandMessage implements CommandExecutor {
 					Player target = Bukkit.getPlayer(targetUuid);
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 					AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(targetUuid);
-					if (targetAranarthPlayer != null && targetAranarthPlayer.isTogglingMessages() && aranarthPlayer.getCouncilRank() == 0) {
+					if (targetAranarthPlayer != null && targetAranarthPlayer.isTogglingMessages() && !player.hasPermission("aranarth.toggle.bypass")) {
 						String targetNick = targetAranarthPlayer.getNickname().isEmpty() ? args[0] : ChatUtils.stripColorFormatting(targetAranarthPlayer.getNickname());
 						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "message.toggling", "player", targetNick)));
 						return true;
@@ -90,7 +91,7 @@ public class CommandMessage implements CommandExecutor {
 								msg.append(args[i]);
 								if (i < args.length - 1) msg.append(" ");
 							}
-							String assembledMsg = msg.toString();
+							String assembledMsg = EmojiUtils.translateFor(player, msg.toString());
 
 							// Format message text
 							String formattedMsg;

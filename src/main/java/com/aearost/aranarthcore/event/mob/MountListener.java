@@ -1,13 +1,15 @@
 package com.aearost.aranarthcore.event.mob;
 
+import com.aearost.aranarthcore.utils.QuestUtils;
+import com.aearost.aranarthcore.enums.QuestTrigger;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
+import com.aearost.aranarthcore.event.listener.grouped.JobEventListener;
+import com.aearost.aranarthcore.event.listener.grouped.QuestEventListener;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthMount;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.objects.Mount;
-import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.MountUtils;
@@ -81,6 +83,7 @@ public class MountListener implements Listener {
             activeTunnels.put(id, tunnel);
             tunnel.runTaskTimer(AranarthCore.getInstance(), 0L, 1L);
             rider.playSound(mount.getLocation(), Sound.BLOCK_ROOTED_DIRT_BREAK, 1.2f, 0.7f);
+            QuestUtils.progress(rider, QuestTrigger.MOUNT_SKILL, "DIG", 1);
         }
 
         @Override
@@ -387,6 +390,9 @@ public class MountListener implements Listener {
                         continue;
                     }
                     applyMovement(mount, rider);
+                    double[] in = playerInputs.getOrDefault(rider.getUniqueId(), new double[]{0, 0});
+                    JobEventListener.trackMountTravel(rider, mount, in[0] != 0 || in[1] != 0);
+                    QuestEventListener.onMountTick(rider, mount, in[0] != 0 || in[1] != 0);
                 }
             }
         }.runTaskTimer(plugin, 0L, 1L);
@@ -504,8 +510,7 @@ public class MountListener implements Listener {
         if (clickedEntity instanceof HappyGhast happyGhast && ownerUUID != null) {
             Material harnessMaterial = getHarnessMaterialFromDye(mainHand.getType());
             if (harnessMaterial != null) {
-                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                if (aranarthPlayer.getSaintRank() >= 1) {
+                if (player.hasPermission("aranarth.mount.harness")) {
                     happyGhast.getEquipment().setItem(EquipmentSlot.BODY, new ItemStack(harnessMaterial));
                     String colorName = mainHand.getType().name().replace("_DYE", "");
                     Mount mountData = MountUtils.get(ownerUUID, "AIR");
@@ -674,6 +679,7 @@ public class MountListener implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         MountUtils.cleanupPlayerBars(player.getUniqueId());
+        JobEventListener.clearMountTravel(player.getUniqueId());
         despawnMountOnQuit(player);
 
         // Persist this player's mounts now and tell the other server to reload them
@@ -1141,8 +1147,9 @@ public class MountListener implements Listener {
                     }
                 });
 
-        // Apply saved harness color to Flying Bison (defaults to brown)
+        // Apply saved harness color to Flying Bison (defaults to brown), and mute its Happy Ghast sounds
         if (mount instanceof HappyGhast happyGhast) {
+            happyGhast.setSilent(true);
             Material harnessMaterial = getHarnessMaterialFromColorName(mountData.getHarnessColor());
             happyGhast.getEquipment().setItem(EquipmentSlot.BODY, new ItemStack(harnessMaterial));
         }

@@ -31,6 +31,7 @@ public class ShopHologramChunkListener implements Listener {
                         && (loc.getBlockX() >> 4) == chunk.getX()
                         && (loc.getBlockZ() >> 4) == chunk.getZ()) {
                     ShopUtils.initializeShopHologram(shop);
+                    ShopUtils.refreshShopStock(shop);
                 }
             }
         }

@@ -14,7 +14,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.Set;
 
 /**
- * GUI that lets the Dominion leader toggle resource drop categories on or off.
+ * GUI that lets Dominion members with the Resources permission toggle resource drop categories on or off.
  */
 public class GuiDominionResourceFilters {
 

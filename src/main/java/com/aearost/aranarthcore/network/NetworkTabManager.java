@@ -1,5 +1,10 @@
 package com.aearost.aranarthcore.network;
 
+import com.aearost.aranarthcore.enums.PrefixStyle;
+import com.aearost.aranarthcore.enums.Pronouns;
+import com.aearost.aranarthcore.objects.Avatar;
+import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.AvatarUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
@@ -82,16 +87,20 @@ public class NetworkTabManager {
             String profileName  = !np.getUsername().isEmpty() ? np.getUsername() : "Unknown";
             Object gameProfile  = createGameProfile(np.getUuid(), profileName,
                     np.getTextureValue(), np.getTextureSignature());
-            Object displayName  = toNmsComponent(buildDisplayName(np)); // null on failure → falls back to profile name
             int latency = np.getPing() >= 0 ? np.getPing() : 0;
-            Object entry        = createEntry(np.getUuid(), gameProfile, displayName, 0, latency);
             EnumSet<?> actionsSet = createActionEnumSet();
-            Object packet       = updatePacketClass
-                    .getDeclaredConstructor(EnumSet.class, List.class)
-                    .newInstance(actionsSet, List.of(entry));
 
-            for (Player viewer : viewers) {
-                sendPacket(viewer, packet);
+            // One packet per set of prefix styles, as each viewer sees the prefix in their own styles
+            for (Map.Entry<String, List<Player>> group : groupByPrefixStyles(viewers).entrySet()) {
+                PrefixStyle[] styles = PrefixStyle.decode(group.getKey());
+                Object displayName  = toNmsComponent(buildDisplayName(np, styles)); // null on failure → falls back to profile name
+                Object entry        = createEntry(np.getUuid(), gameProfile, displayName, 0, latency);
+                Object packet       = updatePacketClass
+                        .getDeclaredConstructor(EnumSet.class, List.class)
+                        .newInstance(actionsSet, List.of(entry));
+                for (Player viewer : group.getValue()) {
+                    sendPacket(viewer, packet);
+                }
             }
         } catch (Exception ex) {
             Bukkit.getLogger().log(Level.WARNING, "[AC] addToTab failed", ex);
@@ -172,17 +181,151 @@ public class NetworkTabManager {
                 // Not present in all versions
             }
             int latency = np.getPing() >= 0 ? np.getPing() : 0;
-            Object displayName = toNmsComponent(buildDisplayName(np));
-            Object entry = createEntry(np.getUuid(), null, displayName, 0, latency);
-            Object packet = updatePacketClass
-                    .getDeclaredConstructor(EnumSet.class, List.class)
-                    .newInstance(set, List.of(entry));
-            for (Player viewer : Bukkit.getOnlinePlayers()) {
-                sendPacket(viewer, packet);
+            for (Map.Entry<String, List<Player>> group : groupByPrefixStyles(Bukkit.getOnlinePlayers()).entrySet()) {
+                Object displayName = toNmsComponent(buildDisplayName(np, PrefixStyle.decode(group.getKey())));
+                Object entry = createEntry(np.getUuid(), null, displayName, 0, latency);
+                Object packet = updatePacketClass
+                        .getDeclaredConstructor(EnumSet.class, List.class)
+                        .newInstance(set, List.of(entry));
+                for (Player viewer : group.getValue()) {
+                    sendPacket(viewer, packet);
+                }
             }
         } catch (Exception ex) {
             Bukkit.getLogger().log(Level.WARNING, "[AC] updatePingInTab failed for " + np.getUuid(), ex);
         }
+    }
+
+    /**
+     * Sends a single UPDATE_DISPLAY_NAME packet to one viewer, overriding the tab names of the given
+     * players for that viewer only. Used so each viewer sees everyone's prefixes in their own styles.
+     *
+     * @param viewer       The player whose tab list is being updated.
+     * @param displayNames The §-formatted display name of each player, keyed by their UUID.
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static void sendDisplayNames(Player viewer, Map<UUID, String> displayNames) {
+        ensureInitialised();
+        if (!available || displayNames.isEmpty()) return;
+        try {
+            EnumSet set = (EnumSet) EnumSet.class.getMethod("of", Enum.class)
+                    .invoke(null, Enum.valueOf((Class<Enum>) actionClass, "UPDATE_DISPLAY_NAME"));
+            List<Object> entries = new ArrayList<>();
+            for (Map.Entry<UUID, String> displayName : displayNames.entrySet()) {
+                // For UPDATE_DISPLAY_NAME only the UUID and display name fields are read by the codec
+                entries.add(createEntry(displayName.getKey(), null, toNmsComponent(displayName.getValue()), 0, 0));
+            }
+            Object packet = updatePacketClass
+                    .getDeclaredConstructor(EnumSet.class, List.class)
+                    .newInstance(set, entries);
+            sendPacket(viewer, packet);
+        } catch (Exception ex) {
+            Bukkit.getLogger().log(Level.WARNING, "[AC] sendDisplayNames failed for " + viewer.getName(), ex);
+        }
+    }
+
+    /**
+     * Sends a single UPDATE_LIST_ORDER packet to one viewer, setting the tab position of each given entry for that viewer only.
+     *
+     * @param viewer The player whose tab list is being updated.
+     * @param orders The list order of each entry, keyed by its UUID.
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static void sendListOrders(Player viewer, Map<UUID, Integer> orders) {
+        ensureInitialised();
+        if (!available || orders.isEmpty()) return;
+        try {
+            Enum updateOrderAction;
+            try {
+                updateOrderAction = Enum.valueOf((Class<Enum>) actionClass, "UPDATE_LIST_ORDER");
+            } catch (IllegalArgumentException ignored) {
+                return; // Action not present in this server version - skip silently
+            }
+            EnumSet set = (EnumSet) EnumSet.class.getMethod("of", Enum.class).invoke(null, updateOrderAction);
+            List<Object> entries = new ArrayList<>();
+            for (Map.Entry<UUID, Integer> order : orders.entrySet()) {
+                entries.add(createEntry(order.getKey(), null, null, order.getValue(), 0));
+            }
+            Object packet = updatePacketClass
+                    .getDeclaredConstructor(EnumSet.class, List.class)
+                    .newInstance(set, entries);
+            sendPacket(viewer, packet);
+        } catch (Exception ex) {
+            Bukkit.getLogger().log(Level.WARNING, "[AC] sendListOrders failed for " + viewer.getName(), ex);
+        }
+    }
+
+    /**
+     * A tab entry that does not belong to any player.
+     *
+     * @param profileName      The profile name used if an empty one is not accepted.
+     * @param textureValue     The skin texture shown as the head of the entry, or empty for the default skin.
+     * @param textureSignature The signature of the skin texture.
+     */
+    public record LayoutEntry(String profileName, String textureValue, String textureSignature) {
+    }
+
+    /**
+     * Adds tab entries that do not belong to any player (group dividers and blank fillers) to one viewer's tab list.
+     *
+     * @param viewer        The player whose tab list is being updated.
+     * @param layoutEntries The entries to add, keyed by their UUID.
+     */
+    public static void addLayoutEntries(Player viewer, Map<UUID, LayoutEntry> layoutEntries) {
+        ensureInitialised();
+        if (!available || layoutEntries.isEmpty()) return;
+        try {
+            Object emptyName = toNmsComponent("");
+            List<Object> entries = new ArrayList<>();
+            for (Map.Entry<UUID, LayoutEntry> layoutEntry : layoutEntries.entrySet()) {
+                LayoutEntry entry = layoutEntry.getValue();
+                // An empty profile name keeps these entries out of the client's chat name suggestions
+                Object gameProfile;
+                try {
+                    gameProfile = createGameProfile(layoutEntry.getKey(), "", entry.textureValue(), entry.textureSignature());
+                } catch (Exception emptyNameException) {
+                    gameProfile = createGameProfile(layoutEntry.getKey(), entry.profileName(), entry.textureValue(), entry.textureSignature());
+                }
+                entries.add(createEntry(layoutEntry.getKey(), gameProfile, emptyName, 0, 0));
+            }
+            Object packet = updatePacketClass
+                    .getDeclaredConstructor(EnumSet.class, List.class)
+                    .newInstance(createActionEnumSet(), entries);
+            sendPacket(viewer, packet);
+        } catch (Exception ex) {
+            Bukkit.getLogger().log(Level.WARNING, "[AC] addLayoutEntries failed for " + viewer.getName(), ex);
+        }
+    }
+
+    /**
+     * Removes the given tab entries from one viewer's tab list.
+     *
+     * @param viewer The player whose tab list is being updated.
+     * @param uuids  The UUIDs of the entries to remove.
+     */
+    public static void removeEntries(Player viewer, List<UUID> uuids) {
+        ensureInitialised();
+        if (!available || uuids.isEmpty()) return;
+        try {
+            Object packet = removePacketClass
+                    .getDeclaredConstructor(List.class)
+                    .newInstance(uuids);
+            sendPacket(viewer, packet);
+        } catch (Exception ex) {
+            Bukkit.getLogger().log(Level.WARNING, "[AC] removeEntries failed for " + viewer.getName(), ex);
+        }
+    }
+
+    /**
+     * Groups the viewers by their encoded prefix styles, so a packet only needs to be built once per set of styles.
+     */
+    private static Map<String, List<Player>> groupByPrefixStyles(Collection<? extends Player> viewers) {
+        Map<String, List<Player>> groups = new HashMap<>();
+        for (Player viewer : viewers) {
+            PrefixStyle[] styles = AranarthUtils.getPrefixStyles(viewer);
+            groups.computeIfAbsent(PrefixStyle.encode(styles[0], styles[1], styles[2]), k -> new ArrayList<>()).add(viewer);
+        }
+        return groups;
     }
 
     /**
@@ -416,44 +559,18 @@ public class NetworkTabManager {
     /**
      * Builds a §-formatted display name for a remote player, mirroring the local tab format:
      * rank badges + rank title + nickname + [SMP] tag (without the ⊰⊱ outer brackets).
+     *
+     * @param np     The remote player.
+     * @param styles The council, saint, and rank styles chosen by the viewer via /prefix.
      */
-    private static String buildDisplayName(NetworkPlayer np) {
-        String display = "";
-
-        // Council badge
-        display += switch (np.getCouncilRank()) {
-            case 1 -> "&3۞&r";
-            case 2 -> "&6۞&r";
-            case 3 -> "&4۞&r";
-            default -> "";
-        };
-
-        // Architect badge
-        if (np.getArchitectRank() >= 1) display += "&a&l\uD83D\uDD28&r";
-
-        // Saint badge
-        display += switch (np.getSaintRank()) {
-            case 1 -> "&b⚜&r";
-            case 2 -> "&e⚜&r";
-            case 3 -> "&c⚜&r";
-            default -> "";
-        };
-
-        if (!display.isEmpty()) display += " ";
-
-        // Rank title - use female variants when applicable
-        boolean isFemale = "FEMALE".equals(np.getPronouns());
-        display += switch (np.getRank()) {
-            case 1 -> "&d&l[&a&lEsquire&d&l] &r";
-            case 2 -> "&7&l[&f&lKnight&7&l] &r";
-            case 3 -> isFemale ? "&5&l[&d&lBaroness&5&l] &r" : "&5&l[&d&lBaron&5&l] &r";
-            case 4 -> isFemale ? "&8&l[&7&lCountess&8&l] &r" : "&8&l[&7&lCount&8&l] &r";
-            case 5 -> isFemale ? "&6&l[&e&lDuchess&6&l] &r" : "&6&l[&e&lDuke&6&l] &r";
-            case 6 -> isFemale ? "&6&l[&b&lPrincess&6&l] &r" : "&6&l[&b&lPrince&6&l] &r";
-            case 7 -> isFemale ? "&6&l[&9&lQueen&6&l] &r" : "&6&l[&9&lKing&6&l] &r";
-            case 8 -> isFemale ? "&6&l[&4&lEmpress&6&l] &r" : "&6&l[&4&lEmperor&6&l] &r";
-            default -> "&8&l[&a&lPeasant&8&l] &r";
-        };
+    public static String buildDisplayName(NetworkPlayer np, PrefixStyle[] styles) {
+        // The Avatar list is synced across servers, so the current Avatar can be checked locally
+        Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
+        boolean isAvatar = currentAvatar != null && np.getUuid().equals(currentAvatar.getUuid());
+        String display = AranarthUtils.buildPrefixElements(
+                np.getCouncilRank(), styles[0], np.getArchitectRank() >= 1,
+                np.getSaintRank(), styles[1], isAvatar,
+                np.getRank(), Pronouns.fromName(np.getPronouns()), styles[2]) + " ";
 
         String name = np.getNickname().isEmpty() ? "Unknown" : np.getNickname();
         display += name;

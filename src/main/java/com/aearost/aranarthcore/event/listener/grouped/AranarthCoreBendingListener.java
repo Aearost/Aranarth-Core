@@ -20,7 +20,7 @@ import com.aearost.aranarthcore.abilities.earthbending.sandbending.Burial;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.SandWave;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.Sandstorm;
 import com.aearost.aranarthcore.abilities.firebending.combustion.Barrage;
-import com.aearost.aranarthcore.abilities.firebending.combustion.CombustionStrike;
+import com.aearost.aranarthcore.abilities.firebending.combustion.CombustiveStrike;
 import com.aearost.aranarthcore.abilities.firebending.combustion.JetFumes;
 import com.aearost.aranarthcore.abilities.firebending.combustion.NoxiousFumes;
 import com.aearost.aranarthcore.abilities.firebending.lightningbending.*;
@@ -43,9 +43,11 @@ import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.AvatarUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.ShopIslandUtils;
+import com.aearost.aranarthcore.utils.SitUtils;
 import com.gmail.nossr50.api.ExperienceAPI;
 import com.gmail.nossr50.api.exceptions.McMMOPlayerNotFoundException;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
@@ -55,9 +57,12 @@ import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.*;
 import com.projectkorra.projectkorra.ability.util.ComboManager;
 import com.projectkorra.projectkorra.airbending.AirBlast;
+import com.projectkorra.projectkorra.avatar.AvatarState;
+import com.projectkorra.projectkorra.configuration.ConfigManager;
 import com.projectkorra.projectkorra.event.*;
 import com.projectkorra.projectkorra.util.TempBlock;
 import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
@@ -153,6 +158,7 @@ public class AranarthCoreBendingListener implements Listener {
         new ArrayList<>(CoreAbility.getAbilities(MetalShots.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(IceDiscs.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(IceShards.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(PetalStorm.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(JetFumes.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(DaggerVolley.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(BloodGrip.class)).forEach(CoreAbility::remove);
@@ -175,9 +181,53 @@ public class AranarthCoreBendingListener implements Listener {
             @Override
             public void run() {
                 CoreAbility.registerPluginAbilities(AranarthCore.getInstance(), "com.aearost.aranarthcore.abilities");
+                disableProjectKorraLowHealth();
                 Bukkit.getLogger().info("[AC] AranarthCore Bending Reloaded");
             }
         }.runTaskLater(AranarthCore.getInstance(), 1L);
+    }
+
+    /**
+     * Turns off ProjectKorra's low health Avatar State activation, as onAvatarStateLowHealth replaces it.
+     */
+    public static void disableProjectKorraLowHealth() {
+        ConfigManager.avatarStateConfig.get().set("LowHealth.Enabled", false);
+    }
+
+    /**
+     * Auto activates the Avatar State when the Avatar drops to 3 hearts or below with it bound.
+     */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onAvatarStateLowHealth(final EntityDamageEvent e) {
+        if (!(e.getEntity() instanceof Player player) || !AvatarUtils.isCurrentAvatar(player.getUniqueId())) {
+            return;
+        }
+        double healthAfterDamage = player.getHealth() - e.getFinalDamage();
+        if (healthAfterDamage <= 0 || healthAfterDamage > AbilityConfig.getDouble("AvatarState.AutoActivateHealth")) {
+            return;
+        }
+        BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+        if (bendingPlayer == null || !bendingPlayer.getAbilities().containsValue("AvatarState")
+                || bendingPlayer.isOnCooldown("AvatarState") || CoreAbility.hasAbility(player, AvatarState.class)) {
+            return;
+        }
+        if (!bendingPlayer.canBendIgnoreBindsCooldowns(CoreAbility.getAbility(AvatarState.class))
+                || isBendingRestricted(player, player.getLocation())) {
+            return;
+        }
+
+        new AvatarState(player);
+        if (!CoreAbility.hasAbility(player, AvatarState.class)) {
+            return;
+        }
+
+        // Delayed by a tick as the health is only reduced once this event has finished
+        double boost = AbilityConfig.getDouble("AvatarState.AutoActivateHealthBoost");
+        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
+            if (player.isOnline() && !player.isDead()) {
+                player.setHealth(Math.min(player.getHealth() + boost, player.getAttribute(Attribute.MAX_HEALTH).getValue()));
+            }
+        }, 1L);
     }
 
     /**
@@ -238,16 +288,8 @@ public class AranarthCoreBendingListener implements Listener {
      * Returns true if bending should be blocked for the player at the given location.
      */
     private boolean isBendingRestricted(Player player, Location loc) {
-        if (AranarthUtils.isSpawnLocation(loc)) {
+        if (AranarthUtils.isProtectedSpawnLocation(loc)) {
             return true;
-        }
-        if (loc.getWorld() != null && loc.getWorld().getName().equals("arena")) {
-            int x = loc.getBlockX();
-            int y = loc.getBlockY();
-            int z = loc.getBlockZ();
-            if ((x >= -10 && x <= 10) && (y >= 100 && y <= 111) && (z >= -10 && z <= 10)) {
-                return true;
-            }
         }
         if (loc.getWorld() != null && loc.getWorld().getName().equals(ShopIslandUtils.SHOPS_WORLD)) {
             UUID owner = ShopIslandUtils.getIslandOwnerAtLocation(loc);
@@ -312,6 +354,10 @@ public class AranarthCoreBendingListener implements Listener {
             return;
         }
         Player player = airBlast.getPlayer();
+        // Launching arrows is too strong for the arena, so the AirBlast fires as normal instead
+        if (player.getWorld().getName().startsWith("arena")) {
+            return;
+        }
         if (!player.isSneaking()) {
             return;
         }
@@ -553,6 +599,21 @@ public class AranarthCoreBendingListener implements Listener {
                 rootSnareRelease.onSneakRelease();
                 return;
             }
+            PetalStorm petalStormRelease = PetalStorm.getActiveInstance(player.getUniqueId());
+            if (petalStormRelease != null && petalStormRelease.getPhase() == PetalStorm.Phase.FIRING) {
+                petalStormRelease.onSneakRelease();
+                return;
+            }
+            PetalRush petalRushRelease = PetalRush.getActiveInstance(player.getUniqueId());
+            if (petalRushRelease != null && petalRushRelease.getPhase() == PetalRush.Phase.CHARGING) {
+                petalRushRelease.onSneakRelease();
+                return;
+            }
+            PetalShots petalShotsRelease = PetalShots.getActiveInstance(player.getUniqueId());
+            if (petalShotsRelease != null && petalShotsRelease.getPhase() == PetalShots.Phase.SOURCING) {
+                petalShotsRelease.onSneakRelease();
+                return;
+            }
             ElectricStrike electricStrikeRelease = ElectricStrike.getActiveInstance(player.getUniqueId());
             if (electricStrikeRelease != null && electricStrikeRelease.getPhase() == ElectricStrike.Phase.CHARGING) {
                 electricStrikeRelease.onSneakRelease();
@@ -578,6 +639,10 @@ public class AranarthCoreBendingListener implements Listener {
                 return;
             }
             if (isBendingRestricted(player, player.getLocation())) {
+                // Cancelling the sneak also blocks the vanilla dismount, so stand sitting players up manually
+                if (SitUtils.isSitting(player)) {
+                    SitUtils.standUp(player);
+                }
                 // Cancel the sneak-press event to prevent PK from sourcing abilities.
                 // Physical sneak state is tracked separately (onPlayerSneakTrack at LOWEST
                 // priority) so shop and shulker handlers can still detect the key-press.
@@ -689,9 +754,21 @@ public class AranarthCoreBendingListener implements Listener {
                             // Re-source in SOURCED phase; ignored in CASTING phase
                             existing.onSneak();
                         }
-                    } else if (abilityName.equalsIgnoreCase("toxicspores")) {
-                        if (!ToxicSpores.hasActiveInstance(player.getUniqueId())) {
-                            new ToxicSpores(player);
+                    } else if (abilityName.equalsIgnoreCase("spores")) {
+                        if (!Spores.hasActiveInstance(player.getUniqueId())) {
+                            new Spores(player);
+                        }
+                    } else if (abilityName.equalsIgnoreCase("petalrush")) {
+                        if (!PetalRush.hasActiveInstance(player.getUniqueId())) {
+                            new PetalRush(player);
+                        }
+                    } else if (abilityName.equalsIgnoreCase("petalshots")) {
+                        if (!PetalShots.hasActiveInstance(player.getUniqueId())) {
+                            new PetalShots(player);
+                        }
+                    } else if (abilityName.equalsIgnoreCase("sapstrike")) {
+                        if (!SapStrike.hasActiveInstance(player.getUniqueId())) {
+                            new SapStrike(player);
                         }
                     } else if (abilityName.equalsIgnoreCase("regrowth")) {
                         if (!Regrowth.hasActiveInstance(player.getUniqueId())) {
@@ -706,9 +783,9 @@ public class AranarthCoreBendingListener implements Listener {
                     if (!Barrage.hasActiveInstance(player.getUniqueId())) {
                         new Barrage(player);
                     }
-                } else if (abilityName.equalsIgnoreCase("combustionstrike")) {
-                    if (!CombustionStrike.hasActiveInstance(player.getUniqueId())) {
-                        new CombustionStrike(player);
+                } else if (abilityName.equalsIgnoreCase("combustivestrike")) {
+                    if (!CombustiveStrike.hasActiveInstance(player.getUniqueId())) {
+                        new CombustiveStrike(player);
                     }
                 } else if (abilityName.equalsIgnoreCase("noxiousfumes")) {
                     if (!NoxiousFumes.hasActiveInstance(player.getUniqueId())) {
@@ -960,10 +1037,38 @@ public class AranarthCoreBendingListener implements Listener {
             return;
         }
 
-        // ToxicSpores: left-click begins channeling from the READY state
-        ToxicSpores toxicSpores = ToxicSpores.getActiveInstance(player.getUniqueId());
-        if (toxicSpores != null) {
-            toxicSpores.startChanneling();
+        // Spores: left-click begins channeling from the READY state
+        Spores spores = Spores.getActiveInstance(player.getUniqueId());
+        if (spores != null) {
+            spores.startChanneling();
+            return;
+        }
+
+        // PetalStorm: left-click fires a random petal while the storm is active
+        PetalStorm petalStorm = PetalStorm.getActiveInstance(player.getUniqueId());
+        if (petalStorm != null && petalStorm.getPhase() == PetalStorm.Phase.FIRING) {
+            petalStorm.onLeftClick();
+            return;
+        }
+
+        // PetalRush: left-click sources the targeted flower while charging
+        PetalRush petalRush = PetalRush.getActiveInstance(player.getUniqueId());
+        if (petalRush != null) {
+            petalRush.onLeftClick();
+            return;
+        }
+
+        // PetalShots: left-click fires a petal once the line has reached the player
+        PetalShots petalShots = PetalShots.getActiveInstance(player.getUniqueId());
+        if (petalShots != null) {
+            petalShots.onLeftClick();
+            return;
+        }
+
+        // SapStrike: left-click extracts the sap, then fires the darts
+        SapStrike sapStrike = SapStrike.getActiveInstance(player.getUniqueId());
+        if (sapStrike != null) {
+            sapStrike.onLeftClick();
             return;
         }
 
@@ -1212,7 +1317,7 @@ public class AranarthCoreBendingListener implements Listener {
             e.setCancelled(true);
             return;
         }
-        if (CombustionStrike.hasActiveInstance(player.getUniqueId())) {
+        if (CombustiveStrike.hasActiveInstance(player.getUniqueId())) {
             e.setCancelled(true);
             return;
         }
@@ -1228,7 +1333,7 @@ public class AranarthCoreBendingListener implements Listener {
             e.setCancelled(true);
             return;
         }
-        if (ToxicSpores.hasActiveInstance(player.getUniqueId())) {
+        if (Spores.hasActiveInstance(player.getUniqueId())) {
             e.setCancelled(true);
             return;
         }
@@ -1237,6 +1342,22 @@ public class AranarthCoreBendingListener implements Listener {
             return;
         }
         if (RootSnare.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (PetalRush.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (PetalShots.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (SapStrike.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (PetalStorm.hasActiveInstance(player.getUniqueId())) {
             e.setCancelled(true);
             return;
         }
@@ -1381,13 +1502,25 @@ public class AranarthCoreBendingListener implements Listener {
         if (noxiousFumes != null) {
             noxiousFumes.endChanneling();
         }
-        ToxicSpores toxicSpores = ToxicSpores.getActiveInstance(e.getPlayer().getUniqueId());
-        if (toxicSpores != null) {
-            toxicSpores.endChanneling();
+        Spores spores = Spores.getActiveInstance(e.getPlayer().getUniqueId());
+        if (spores != null) {
+            spores.endChanneling();
         }
         RootSnare rootSnareSlot = RootSnare.getActiveInstance(e.getPlayer().getUniqueId());
         if (rootSnareSlot != null) {
             rootSnareSlot.cancelFromSlotChange();
+        }
+        PetalRush petalRushSlot = PetalRush.getActiveInstance(e.getPlayer().getUniqueId());
+        if (petalRushSlot != null) {
+            petalRushSlot.onSlotChange(e.getNewSlot());
+        }
+        PetalShots petalShotsSlot = PetalShots.getActiveInstance(e.getPlayer().getUniqueId());
+        if (petalShotsSlot != null) {
+            petalShotsSlot.cancelFromSlotChange();
+        }
+        SapStrike sapStrikeSlot = SapStrike.getActiveInstance(e.getPlayer().getUniqueId());
+        if (sapStrikeSlot != null) {
+            sapStrikeSlot.cancelFromSlotChange();
         }
         Regrowth regrowth = Regrowth.getActiveInstance(e.getPlayer().getUniqueId());
         if (regrowth != null) {
@@ -1402,9 +1535,9 @@ public class AranarthCoreBendingListener implements Listener {
         if (energyBurst != null) {
             energyBurst.onSlotChange();
         }
-        CombustionStrike combustionStrike = CombustionStrike.getActiveInstance(e.getPlayer().getUniqueId());
-        if (combustionStrike != null && combustionStrike.getPhase() != CombustionStrike.Phase.TRAVELING) {
-            combustionStrike.cancelInstantly();
+        CombustiveStrike combustiveStrike = CombustiveStrike.getActiveInstance(e.getPlayer().getUniqueId());
+        if (combustiveStrike != null && combustiveStrike.getPhase() != CombustiveStrike.Phase.TRAVELING) {
+            combustiveStrike.cancelInstantly();
         }
         MagmaGlaives magmaGlaives = MagmaGlaives.getActiveInstance(e.getPlayer().getUniqueId());
         if (magmaGlaives != null) {
@@ -1643,7 +1776,6 @@ public class AranarthCoreBendingListener implements Listener {
 
     /**
      * Triggers EnergyBurst as a fall proc when the player lands with EnergyBurst bound.
-     * Damage scales from FallBurstMinDamage at FallBurstMinDistance to full damage at FallBurstMaxDistance.
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEnergyBurstFallProc(final PlayerMoveEvent e) {
@@ -1670,7 +1802,7 @@ public class AranarthCoreBendingListener implements Listener {
         // The landing move's own drop is not yet included in the tracked distance
         final float fallDistance = Math.max(player.getFallDistance(),
                 trackedDistance + (float) Math.max(0, e.getFrom().getY() - e.getTo().getY()));
-        if (fallDistance < EnergyBurst.getFallBurstMinDistance()) {
+        if (fallDistance < EnergyBurst.getFallBurstTriggerDistance()) {
             return;
         }
         if (bPlayer.isChiBlocked() || bPlayer.isOnCooldown("EnergyBurst") || EnergyBurst.hasActiveInstance(uuid)) {
@@ -1869,11 +2001,27 @@ public class AranarthCoreBendingListener implements Listener {
             e.setCancelled(true);
             return;
         }
-        if (ToxicSpores.hasActiveInstance(player.getUniqueId())) {
+        if (Spores.hasActiveInstance(player.getUniqueId())) {
             e.setCancelled(true);
             return;
         }
         if (RootSnare.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (PetalRush.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (PetalShots.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (SapStrike.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (PetalStorm.hasActiveInstance(player.getUniqueId())) {
             e.setCancelled(true);
             return;
         }

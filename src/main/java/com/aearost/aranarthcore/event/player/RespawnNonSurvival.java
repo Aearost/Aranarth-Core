@@ -4,9 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.PlotUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -22,7 +20,7 @@ public class RespawnNonSurvival {
         player.getInventory().clear();
         String world = e.getPlayer().getWorld().getName();
         if (world.equalsIgnoreCase("arena")) {
-            e.setRespawnLocation(new Location(Bukkit.getWorld("arena"), 0.5, 105, 0.5, 180, 0));
+            e.setRespawnLocation(AranarthUtils.getArenaRespawnLocation());
         } else if (PlotUtils.isSmpCreativeWorld(world)) {
             e.setRespawnLocation(PlotUtils.getSmpCreativeSpawnLocation());
             player.setGameMode(GameMode.CREATIVE);

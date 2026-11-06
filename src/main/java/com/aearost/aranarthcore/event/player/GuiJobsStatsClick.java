@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.enums.JobType;
+import com.aearost.aranarthcore.event.listener.grouped.JobEventListener;
 import com.aearost.aranarthcore.gui.GuiJobs;
 import com.aearost.aranarthcore.gui.GuiJobsJoin;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
@@ -132,12 +133,15 @@ public class GuiJobsStatsClick {
             );
             case BUILDER -> List.of(
                 Lang.getFor(player, "jobs.act_header_place"),
-                Lang.getFor(player, "jobs.act_any_block", "xp", fmt(1.00, multiplier))
+                Lang.getFor(player, "jobs.act_any_block", "xp", fmt(1.00, multiplier)),
+                Lang.getFor(player, "jobs.act_header_shovel"),
+                Lang.getFor(player, "jobs.act_dirt_path", "xp", fmt(0.25, multiplier))
             );
             case EXPLORER -> List.of(
                 Lang.getFor(player, "jobs.act_header_travel"),
                 Lang.getFor(player, "jobs.act_walk", "xp", fmt(0.25, multiplier)),
                 Lang.getFor(player, "jobs.act_ride_horse", "xp", fmt(0.50, multiplier)),
+                Lang.getFor(player, "jobs.act_ride_mount", "xp", fmt(JobEventListener.MOUNT_PAY_PER_SECOND, multiplier)),
                 Lang.getFor(player, "jobs.act_header_discover"),
                 Lang.getFor(player, "jobs.act_chest_overworld", "xp", fmt(100.00, multiplier)),
                 Lang.getFor(player, "jobs.act_chest_nether", "xp", fmt(150.00, multiplier)),

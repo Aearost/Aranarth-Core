@@ -64,3 +64,6 @@ bin/
 
 ### Temporary files ###
 temp/
+
+### Backup scripts (contain server and DB connection details) ###
+backups/

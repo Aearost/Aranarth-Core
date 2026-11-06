@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.waterbending.plantbending;
 
 import com.aearost.aranarthcore.utils.AbilityConfig;
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.PlantAbility;
@@ -111,7 +112,8 @@ public class VineWhip extends PlantAbility implements AddonAbility {
         if (found != null && isValidPlantSource(found)) {
             sourceBlock = found;
             // Show particles at the source block as visual feedback
-            sourceBlock.getWorld().spawnParticle(
+            AranarthBendingUtils.spawnParticle(
+                    sourceBlock.getWorld(),
                     Particle.HAPPY_VILLAGER,
                     sourceBlock.getLocation().add(0.5, 1.0, 0.5),
                     2, 0.2, 0.1, 0.2, 0
@@ -244,7 +246,7 @@ public class VineWhip extends PlantAbility implements AddonAbility {
                 Sound sound = random.nextBoolean() ? Sound.BLOCK_GRASS_STEP : Sound.BLOCK_GRASS_BREAK;
                 block.getWorld().playSound(block.getLocation(), sound, 0.3f, 0.8f + random.nextFloat() * 0.4f);
             }
-            block.getWorld().spawnParticle(Particle.HAPPY_VILLAGER,
+            AranarthBendingUtils.spawnParticle(block.getWorld(), Particle.HAPPY_VILLAGER,
                     block.getLocation().add(0.5, 0.5, 0.5), 1, 0.2, 0.2, 0.2, 0);
         }
 
@@ -297,7 +299,7 @@ public class VineWhip extends PlantAbility implements AddonAbility {
                 block.getWorld().playSound(block.getLocation(), Sound.BLOCK_GRASS_BREAK,
                         0.3f, 0.8f + random.nextFloat() * 0.4f);
             }
-            block.getWorld().spawnParticle(Particle.HAPPY_VILLAGER,
+            AranarthBendingUtils.spawnParticle(block.getWorld(), Particle.HAPPY_VILLAGER,
                     block.getLocation().add(0.5, 0.5, 0.5), 1, 0.15, 0.15, 0.15, 0);
 
             retractionBlocksRemoved++;

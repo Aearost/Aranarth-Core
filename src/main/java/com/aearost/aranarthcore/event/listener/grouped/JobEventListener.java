@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.JobType;
+import com.aearost.aranarthcore.enums.QuestTrigger;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
@@ -10,6 +11,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.JobUtils;
 import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.QuestUtils;
 import com.dre.brewery.api.events.brew.BrewModifyEvent;
 import com.gmail.nossr50.mcMMO;
 import org.bukkit.Chunk;
@@ -27,6 +29,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.ChatColor;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -40,11 +43,14 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.projectiles.ProjectileSource;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -60,6 +66,8 @@ public class JobEventListener implements Listener {
             Material.OAK_WOOD, Material.SPRUCE_WOOD, Material.BIRCH_WOOD,
             Material.JUNGLE_WOOD, Material.ACACIA_WOOD, Material.DARK_OAK_WOOD,
             Material.MANGROVE_WOOD, Material.CHERRY_WOOD,
+            Material.PALE_OAK_LOG, Material.PALE_OAK_WOOD,
+            Material.POPLAR_LOG, Material.POPLAR_WOOD,
             Material.CRIMSON_STEM, Material.WARPED_STEM
     );
 
@@ -70,6 +78,8 @@ public class JobEventListener implements Listener {
             Material.STRIPPED_OAK_WOOD, Material.STRIPPED_SPRUCE_WOOD, Material.STRIPPED_BIRCH_WOOD,
             Material.STRIPPED_JUNGLE_WOOD, Material.STRIPPED_ACACIA_WOOD, Material.STRIPPED_DARK_OAK_WOOD,
             Material.STRIPPED_MANGROVE_WOOD, Material.STRIPPED_CHERRY_WOOD,
+            Material.STRIPPED_PALE_OAK_LOG, Material.STRIPPED_PALE_OAK_WOOD,
+            Material.STRIPPED_POPLAR_LOG, Material.STRIPPED_POPLAR_WOOD,
             Material.STRIPPED_CRIMSON_STEM, Material.STRIPPED_WARPED_STEM,
             Material.STRIPPED_BAMBOO_BLOCK
     );
@@ -78,7 +88,8 @@ public class JobEventListener implements Listener {
             Material.OAK_LEAVES, Material.SPRUCE_LEAVES, Material.BIRCH_LEAVES,
             Material.JUNGLE_LEAVES, Material.ACACIA_LEAVES, Material.DARK_OAK_LEAVES,
             Material.MANGROVE_LEAVES, Material.CHERRY_LEAVES, Material.AZALEA_LEAVES,
-            Material.FLOWERING_AZALEA_LEAVES
+            Material.FLOWERING_AZALEA_LEAVES, Material.PALE_OAK_LEAVES,
+            Material.RED_POPLAR_LEAVES, Material.ORANGE_POPLAR_LEAVES, Material.YELLOW_POPLAR_LEAVES
     );
 
     private static final Set<Material> MUSHROOM_BLOCK_MATERIALS = Set.of(
@@ -112,6 +123,24 @@ public class JobEventListener implements Listener {
     // Explorer: track last position for travel rewards
     private static final Map<UUID, Location> lastTravelPos = new HashMap<>();
 
+    private static final double WALKING_PAY_PER_BLOCK = 0.25;
+    private static final double WALKING_SPEED_BLOCKS_PER_SECOND = 4.317;
+    public static final double MOUNT_PAY_PER_SECOND = WALKING_PAY_PER_BLOCK * WALKING_SPEED_BLOCKS_PER_SECOND / 2;
+    // The mount must cover at least this many blocks over the last MOUNT_STALL_WINDOW_SECONDS to keep earning
+    private static final double MOUNT_STALL_MIN_DISTANCE = 3.0;
+    private static final int MOUNT_STALL_WINDOW_SECONDS = 5;
+    // A single-tick jump larger than this is a teleport, never travel
+    private static final double MOUNT_MAX_TICK_DISTANCE = 4.0;
+    private static final Map<UUID, MountTravelState> mountTravelStates = new HashMap<>();
+
+    private static final class MountTravelState {
+        private Location lastLocation;
+        private long lastTick;
+        private int ticksSinceSample;
+        private int activeTicks;
+        private final Deque<Location> samples = new ArrayDeque<>();
+    }
+
     // Explorer: PDC key for claimed chests
     private static final org.bukkit.NamespacedKey EXPLORER_CHEST_CLAIMED_KEY =
             new org.bukkit.NamespacedKey(AranarthCore.getInstance(), "explorer_chest_claimed");
@@ -120,6 +149,8 @@ public class JobEventListener implements Listener {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
         // Pays Builders for blocks that stayed in place, checked every 30 seconds
         plugin.getServer().getScheduler().runTaskTimer(plugin, JobUtils::processPendingBuilderPay, 600L, 600L);
+        // Shows each player their recent job earnings, checked every second
+        plugin.getServer().getScheduler().runTaskTimer(plugin, JobUtils::processEarningsSummaries, 20L, 20L);
     }
 
     private boolean hasChunkPermission(Player player, Chunk chunk, DominionPermission permission) {
@@ -332,8 +363,40 @@ public class JobEventListener implements Listener {
 
         Material mat = block.getType();
         if (isBuildableBlock(mat)) {
-            JobUtils.queueBuilderPay(player, block, 1.00);
+            JobUtils.queueBuilderPay(player, block, mat, 1.00);
         }
+    }
+
+    /**
+     * Pays Builders for using a shovel to turn a natural block into a dirt path.
+     * The event fires before the block changes, so the pay is held against DIRT_PATH rather than the current type.
+     */
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    public void onDirtPathCreate(EntityChangeBlockEvent e) {
+        if (e.getTo() != Material.DIRT_PATH || !(e.getEntity() instanceof Player player)) {
+            return;
+        }
+        if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
+            return;
+        }
+
+        Block block = e.getBlock();
+        if (!hasChunkPermission(player, block.getChunk(), DominionPermission.BUILD)) {
+            return;
+        }
+        // Player-placed blocks already pay when placed
+        if (!mcMMO.getChunkManager().isEligible(block)) {
+            return;
+        }
+        // Marked for all players so that tilling and trampling the path back into dirt cannot pay again
+        mcMMO.getChunkManager().setIneligible(block);
+        QuestUtils.progress(player, QuestTrigger.DIRT_PATH, Material.DIRT_PATH.name(), 1);
+
+        AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
+        if (ap == null || !ap.getJobData().hasJob(JobType.BUILDER)) {
+            return;
+        }
+        JobUtils.queueBuilderPay(player, block, Material.DIRT_PATH, 0.25);
     }
 
     private boolean isBuildableBlock(Material mat) {
@@ -921,6 +984,9 @@ public class JobEventListener implements Listener {
             return;
         }
 
+        ItemStack ingredient = brewer.getIngredient();
+        QuestEventListener.onBrewed(player, ingredient == null ? Material.AIR : ingredient.getType(), e.getResults());
+
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
         if (ap == null || !ap.getJobData().hasJob(JobType.ALCHEMIST)) {
             return;
@@ -981,6 +1047,10 @@ public class JobEventListener implements Listener {
         if (!AranarthUtils.isSurvivalWorld(worldName)) {
             return;
         }
+        // Teleports only pay for actively moving, never for the distance jumped
+        if (!AranarthUtils.isActiveTravel(player, e.getFrom(), e.getTo())) {
+            return;
+        }
 
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
         if (ap == null || !ap.getJobData().hasJob(JobType.EXPLORER)) {
@@ -988,22 +1058,106 @@ public class JobEventListener implements Listener {
         }
 
         // Must be on ground, not in water, not flying
-        if (!player.isOnGround()) {
+        // A rider's own ground state is never updated while mounted, so the mount's is used instead
+        Entity vehicle = player.getVehicle();
+        Entity grounded = vehicle != null ? vehicle : player;
+        if (!grounded.isOnGround()) {
             return;
         }
-        if (player.isInWater()) {
+        if (grounded.isInWater()) {
             return;
         }
         if (player.isFlying() || player.isGliding()) {
             return;
         }
 
-        Entity vehicle = player.getVehicle();
         if (vehicle instanceof AbstractHorse) {
             JobUtils.awardJob(player, JobType.EXPLORER, 0.50);
         } else if (vehicle == null) {
             JobUtils.awardJob(player, JobType.EXPLORER, 0.25);
         }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerTeleport(PlayerTeleportEvent e) {
+        AranarthUtils.markTeleported(e.getPlayer().getUniqueId());
+    }
+
+    /**
+     * Pays Explorers for time spent actively moving on their /mount, called every tick by the mount movement loop.
+     *
+     * @param rider The player riding the mount.
+     * @param mount The mount entity.
+     * @param hasInput Whether the rider is currently pressing a movement key.
+     */
+    public static void trackMountTravel(Player rider, LivingEntity mount, boolean hasInput) {
+        UUID riderId = rider.getUniqueId();
+        AranarthPlayer ap = AranarthUtils.getPlayer(riderId);
+        if (ap == null || !ap.getJobData().hasJob(JobType.EXPLORER)
+                || !AranarthUtils.isSurvivalWorld(mount.getWorld().getName())) {
+            mountTravelStates.remove(riderId);
+            return;
+        }
+
+        long tick = mount.getWorld().getGameTime();
+        Location current = mount.getLocation();
+        MountTravelState state = mountTravelStates.get(riderId);
+
+        // Start fresh after dismounting, changing worlds or teleporting
+        if (state == null || tick - state.lastTick != 1
+                || state.lastLocation.getWorld() != current.getWorld()
+                || horizontalDistanceSquared(state.lastLocation, current) > MOUNT_MAX_TICK_DISTANCE * MOUNT_MAX_TICK_DISTANCE) {
+            state = new MountTravelState();
+            state.samples.addLast(current);
+            state.lastLocation = current;
+            state.lastTick = tick;
+            mountTravelStates.put(riderId, state);
+            return;
+        }
+
+        if (hasInput && horizontalDistanceSquared(state.lastLocation, current) > 0.0001) {
+            state.activeTicks++;
+        }
+        state.lastLocation = current;
+        state.lastTick = tick;
+
+        // Once per second, check the mount covered enough ground over the window and pay for the active time
+        state.ticksSinceSample++;
+        if (state.ticksSinceSample < 20) {
+            return;
+        }
+        state.ticksSinceSample = 0;
+        state.samples.addLast(current);
+        if (state.samples.size() > MOUNT_STALL_WINDOW_SECONDS + 1) {
+            state.samples.removeFirst();
+        }
+        // Not enough history yet, keep accumulating so the first few seconds are paid once the window fills
+        if (state.samples.size() <= MOUNT_STALL_WINDOW_SECONDS) {
+            return;
+        }
+        if (horizontalDistanceSquared(state.samples.peekFirst(), current) < MOUNT_STALL_MIN_DISTANCE * MOUNT_STALL_MIN_DISTANCE) {
+            state.activeTicks = 0;
+            return;
+        }
+        if (state.activeTicks > 0) {
+            JobUtils.awardJob(rider, JobType.EXPLORER, MOUNT_PAY_PER_SECOND * state.activeTicks / 20.0);
+            state.activeTicks = 0;
+        }
+    }
+
+    /**
+     * Clears the player's /mount travel tracking.
+     *
+     * @param uuid The player's UUID.
+     */
+    public static void clearMountTravel(UUID uuid) {
+        mountTravelStates.remove(uuid);
+    }
+
+    private static double horizontalDistanceSquared(Location a, Location b) {
+        double dx = a.getX() - b.getX();
+        double dz = a.getZ() - b.getZ();
+        return dx * dx + dz * dz;
     }
 
     // -------------------------------------------------------------------------

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.firebending.combustion;
 
 import com.aearost.aranarthcore.utils.AbilityConfig;
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -346,7 +347,7 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
             double sy = origin.getY();
             double sz = origin.getZ();
             for (double d = 0; d < drawLength; d += step) {
-                world.spawnParticle(Particle.SMOKE,
+                AranarthBendingUtils.spawnParticle(world, Particle.SMOKE,
                         sx + dir.getX() * d,
                         sy + dir.getY() * d,
                         sz + dir.getZ() * d,
@@ -375,14 +376,16 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
             traveler.position.add(traveler.direction.clone().multiply(step));
 
             // Sparse trail of smoke along the travel path
-            traveler.position.getWorld().spawnParticle(
+            AranarthBendingUtils.spawnParticle(
+                    traveler.position.getWorld(),
                     Particle.SMOKE, traveler.position.clone(),
                     1, 0.06, 0.06, 0.06, 0.005);
 
             if (traveler.hasArrived()) {
                 // Settle a new puff at the destination
                 puffs.add(new SmokePuff(traveler.target, puffLifespan));
-                traveler.target.getWorld().spawnParticle(
+                AranarthBendingUtils.spawnParticle(
+                        traveler.target.getWorld(),
                         Particle.SMOKE, traveler.target,
                         3, 0.25, 0.25, 0.25, 0.01);
                 return true;
@@ -422,7 +425,7 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
             Location loc = puff.center.clone().add(dx, dy, dz);
             if (!loc.getBlock().getType().isSolid()) {
                 Particle particle = random.nextInt(5) == 0 ? Particle.LARGE_SMOKE : Particle.SMOKE;
-                world.spawnParticle(particle, loc, 1, 0, 0, 0, 0.004);
+                AranarthBendingUtils.spawnParticle(world, particle, loc, 1, 0, 0, 0, 0.004);
             }
         }
     }
@@ -511,7 +514,7 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
             player.setFireTicks(0);
             player.getWorld().playSound(player.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, 1.0f, 1.0f);
             if (sourceLocation != null) {
-                player.getWorld().spawnParticle(Particle.LARGE_SMOKE, sourceLocation,
+                AranarthBendingUtils.spawnParticle(player.getWorld(), Particle.LARGE_SMOKE, sourceLocation,
                         12, 0.3, 0.3, 0.3, 0.02);
             }
             return;
@@ -520,7 +523,7 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
             alliedSourcePlayer.setFireTicks(0);
             alliedSourcePlayer.getWorld().playSound(alliedSourcePlayer.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, 1.0f, 1.0f);
             if (sourceLocation != null) {
-                alliedSourcePlayer.getWorld().spawnParticle(Particle.LARGE_SMOKE, sourceLocation,
+                AranarthBendingUtils.spawnParticle(alliedSourcePlayer.getWorld(), Particle.LARGE_SMOKE, sourceLocation,
                         12, 0.3, 0.3, 0.3, 0.02);
             }
             return;

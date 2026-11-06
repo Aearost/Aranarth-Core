@@ -55,9 +55,8 @@ public class CommandBalance implements CommandExecutor {
 				return true;
 			} else if (args.length == 2) {
 				if (sender instanceof Player player) {
-					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 					// Only Council admins can run this command
-					if (aranarthPlayer.getCouncilRank() != 3) {
+					if (!player.hasPermission("aranarth.balance.others")) {
 						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "balance [player]")));
 						return false;
 					}

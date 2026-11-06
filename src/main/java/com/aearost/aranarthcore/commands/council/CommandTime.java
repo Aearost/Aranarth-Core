@@ -1,6 +1,5 @@
 package com.aearost.aranarthcore.commands.council;
 
-import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -96,17 +95,9 @@ public class CommandTime {
 			w.setTime(time);
 		}
 
-		// Immediately end any storm, will be picked up by DateUtils logic within 5 seconds
-		if (AranarthUtils.getWeather() != Weather.CLEAR) {
-			AranarthUtils.setStormDuration(0);
-			for (World w : syncWorlds) {
-				w.setThunderDuration(0);
-				w.setWeatherDuration(0);
-			}
-		}
-
+		// Storms are left untouched - only sleeping may end a storm early
 		if (NetworkManager.isActive()) {
-			NetworkManager.getInstance().publishSyncTime(time);
+			NetworkManager.getInstance().publishSyncTime(time, false);
 		}
 	}
 }

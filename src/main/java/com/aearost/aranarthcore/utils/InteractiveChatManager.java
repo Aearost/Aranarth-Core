@@ -1,6 +1,5 @@
 package com.aearost.aranarthcore.utils;
 
-import com.aearost.aranarthcore.objects.AranarthPlayer;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -104,10 +103,4 @@ public class InteractiveChatManager {
         snapshots.entrySet().removeIf(uuidSnapshotEntry -> now - uuidSnapshotEntry.getValue().getCreatedAt() > EXPIRY_MS);
     }
 
-    /**
-     * Returns true if the player has the Saint II/III or council rank required for interactive chat.
-     */
-    public static boolean hasInteractiveChatPerm(AranarthPlayer ap) {
-        return ap.getSaintRank() >= 2 || ap.getCouncilRank() > 0;
-    }
 }

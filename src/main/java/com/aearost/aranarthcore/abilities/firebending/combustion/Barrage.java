@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.firebending.combustion;
 
 import com.aearost.aranarthcore.utils.AbilityConfig;
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.CombustionAbility;
@@ -196,8 +197,8 @@ public class Barrage extends CombustionAbility implements AddonAbility {
 
             // Trail particles every other step (~every 0.8 blocks)
             if (((int) (burst.distanceTraveled / STEP)) % 2 == 0) {
-                burst.position.getWorld().spawnParticle(Particle.LARGE_SMOKE, burst.position.clone(), 1, 0, 0, 0, 0.04);
-                burst.position.getWorld().spawnParticle(Particle.FIREWORK, burst.position.clone(), 1, 0, 0, 0, 0.04);
+                AranarthBendingUtils.spawnParticle(burst.position.getWorld(), Particle.LARGE_SMOKE, burst.position.clone(), 1, 0, 0, 0, 0.04);
+                AranarthBendingUtils.spawnParticle(burst.position.getWorld(), Particle.FIREWORK, burst.position.clone(), 1, 0, 0, 0, 0.04);
             }
 
             // Periodic ring burst + sound
@@ -237,7 +238,7 @@ public class Barrage extends CombustionAbility implements AddonAbility {
             Vector vel = perp1.clone().multiply(cos * radius * 0.12).add(perp2.clone().multiply(sin * radius * 0.12));
 
             Location spawnLoc = center.clone().add(offset);
-            center.getWorld().spawnParticle(Particle.FIREWORK, spawnLoc, 0, vel.getX(), vel.getY(), vel.getZ(), 0.12);
+            AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.FIREWORK, spawnLoc, 0, vel.getX(), vel.getY(), vel.getZ(), 0.12);
         }
     }
 
@@ -246,10 +247,10 @@ public class Barrage extends CombustionAbility implements AddonAbility {
     // -------------------------------------------------------------------------
 
     private void createExplosion(Location center) {
-        center.getWorld().spawnParticle(Particle.FLAME, center, 8, 0.6, 0.6, 0.6, 0.3);
-        center.getWorld().spawnParticle(Particle.LARGE_SMOKE, center, 6, 0.6, 0.6, 0.6, 0.2);
-        center.getWorld().spawnParticle(Particle.FIREWORK, center, 8, 0.6, 0.6, 0.6, 0.3);
-        center.getWorld().spawnParticle(Particle.EXPLOSION, center, 2, 0.3, 0.3, 0.3, 0);
+        AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.FLAME, center, 8, 0.6, 0.6, 0.6, 0.3);
+        AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.LARGE_SMOKE, center, 6, 0.6, 0.6, 0.6, 0.2);
+        AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.FIREWORK, center, 8, 0.6, 0.6, 0.6, 0.3);
+        AranarthBendingUtils.spawnParticle(center.getWorld(), Particle.EXPLOSION, center, 2, 0.3, 0.3, 0.3, 0);
 
         center.getWorld().playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 1.5f, 1.0f);
         scatterBlockDamage(center);
@@ -300,10 +301,10 @@ public class Barrage extends CombustionAbility implements AddonAbility {
 
         Location misfireCenter = player.getEyeLocation();
 
-        misfireCenter.getWorld().spawnParticle(Particle.FLAME, misfireCenter, 10, 0.8, 0.8, 0.8, 0.3);
-        misfireCenter.getWorld().spawnParticle(Particle.LARGE_SMOKE, misfireCenter, 8, 0.8, 0.8, 0.8, 0.2);
-        misfireCenter.getWorld().spawnParticle(Particle.FIREWORK, misfireCenter, 10, 0.8, 0.8, 0.8, 0.3);
-        misfireCenter.getWorld().spawnParticle(Particle.EXPLOSION, misfireCenter, 3, 0.5, 0.5, 0.5, 0);
+        AranarthBendingUtils.spawnParticle(misfireCenter.getWorld(), Particle.FLAME, misfireCenter, 10, 0.8, 0.8, 0.8, 0.3);
+        AranarthBendingUtils.spawnParticle(misfireCenter.getWorld(), Particle.LARGE_SMOKE, misfireCenter, 8, 0.8, 0.8, 0.8, 0.2);
+        AranarthBendingUtils.spawnParticle(misfireCenter.getWorld(), Particle.FIREWORK, misfireCenter, 10, 0.8, 0.8, 0.8, 0.3);
+        AranarthBendingUtils.spawnParticle(misfireCenter.getWorld(), Particle.EXPLOSION, misfireCenter, 3, 0.5, 0.5, 0.5, 0);
 
         misfireCenter.getWorld().playSound(misfireCenter, Sound.ENTITY_GENERIC_EXPLODE, 1.5f, 0.8f);
 

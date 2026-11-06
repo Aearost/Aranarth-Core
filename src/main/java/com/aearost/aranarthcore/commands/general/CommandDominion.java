@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.enums.PrefixStyle;
 import com.aearost.aranarthcore.gui.*;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.PendingTeleport;
@@ -37,18 +38,20 @@ public class CommandDominion implements CommandExecutor {
     private static void teleportToDominionHome(Player player) {
         Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
         if (dominion != null) {
-            if (player.hasPermission("aranarth.dominion.home")) {
-                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                AranarthUtils.teleportPlayer(player, player.getLocation(), dominion.getDominionHome(), aranarthPlayer.isInAdminMode(), dominion.getName(), Lang.getFor(player, "dominion.teleported_to", "name", dominion.getName()), success -> {
-                    if (success) {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.teleported_to", "name", dominion.getName())));
-                    } else {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.could_not_teleport", "name", dominion.getName())));
-                    }
-                });
-            } else {
+            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+            if (!aranarthPlayer.isInAdminMode()
+                    && !dominion.getLeader().equals(player.getUniqueId())
+                    && !DominionUtils.hasPermission(player, dominion, DominionPermission.HOME)) {
                 player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.no_permission_home")));
+                return;
             }
+            AranarthUtils.teleportPlayer(player, player.getLocation(), dominion.getDominionHome(), aranarthPlayer.isInAdminMode(), dominion.getName(), Lang.getFor(player, "dominion.teleported_to", "name", dominion.getName()), success -> {
+                if (success) {
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.teleported_to", "name", dominion.getName())));
+                } else {
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.could_not_teleport", "name", dominion.getName())));
+                }
+            });
         } else {
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.not_in_dominion")));
         }
@@ -279,7 +282,7 @@ public class CommandDominion implements CommandExecutor {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
         // Admin path of /d disband <name>
-        if (args.length >= 2 && aranarthPlayer.isInAdminMode() && aranarthPlayer.getCouncilRank() == 3) {
+        if (args.length >= 2 && aranarthPlayer.isInAdminMode() && player.hasPermission("aranarth.dominion.admin")) {
             String targetName = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
             Dominion target = DominionUtils.getDominions().stream()
                     .filter(d -> ChatUtils.stripColorFormatting(d.getName()).equalsIgnoreCase(targetName))
@@ -1951,6 +1954,21 @@ public class CommandDominion implements CommandExecutor {
     }
 
     /**
+     * Provides the player's nickname preceded by their Saint, Architect, and Council badges.
+     *
+     * @param aranarthPlayer The AranarthPlayer whose name is being formatted.
+     * @param viewer         The player viewing the name, whose prefix styles are used.
+     * @return The player's nickname with their badges.
+     */
+    private static String formatBadgedName(AranarthPlayer aranarthPlayer, Player viewer) {
+        PrefixStyle[] styles = AranarthUtils.getPrefixStyles(viewer);
+        return AranarthUtils.getSaintPrefix(aranarthPlayer.getSaintRank(), styles[1])
+                + AranarthUtils.getArchitectRank(aranarthPlayer)
+                + AranarthUtils.getCouncilPrefix(aranarthPlayer.getCouncilRank(), styles[0])
+                + aranarthPlayer.getNickname();
+    }
+
+    /**
      * Displays the info for the input dominion.
      *
      * @param player   The player who executed the command.
@@ -1961,11 +1979,7 @@ public class CommandDominion implements CommandExecutor {
         String dominionName = "&e" + dominion.getName();
 
         AranarthPlayer leader = AranarthUtils.getPlayer(dominion.getLeader());
-        String leaderDisplayedName = "";
-        leaderDisplayedName += AranarthUtils.getSaintRank(leader);
-        leaderDisplayedName += AranarthUtils.getArchitectRank(leader);
-        leaderDisplayedName += AranarthUtils.getCouncilRank(leader);
-        leaderDisplayedName += leader.getNickname();
+        String leaderDisplayedName = formatBadgedName(leader, player);
 
         dominionName = Lang.getFor(player, "dominion.info_header", "name", dominion.getName(), "leader", leaderDisplayedName);
         player.sendMessage(ChatUtils.translateToColor(dominionName));
@@ -1990,6 +2004,9 @@ public class CommandDominion implements CommandExecutor {
         String foundedDate = DominionLevelUtils.formatFoundedDate(player, dominion.getFoundedTimestamp());
         if (foundedDate != null) {
             player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.info_founded", "date", foundedDate)));
+        } else {
+            // Legacy dominions were founded before founding dates were recorded
+            player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.info_founded_ancient")));
         }
 
         List<Outpost> dominionOutposts = OutpostUtils.getDominionOutposts(dominion.getId());
@@ -2025,13 +2042,7 @@ public class CommandDominion implements CommandExecutor {
                 if (aranarthPlayer == null) {
                     continue;
                 }
-                String displayedName = "";
-                displayedName += AranarthUtils.getSaintRank(aranarthPlayer);
-                displayedName += AranarthUtils.getArchitectRank(aranarthPlayer);
-                displayedName += AranarthUtils.getCouncilRank(aranarthPlayer);
-                displayedName += aranarthPlayer.getNickname();
-
-                membersBuilder.append(displayedName);
+                membersBuilder.append(formatBadgedName(aranarthPlayer, player));
                 if (i < dominion.getMembers().size() - 1) {
                     membersBuilder.append("&e, ");
                 }
@@ -3084,46 +3095,47 @@ public class CommandDominion implements CommandExecutor {
         player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_header", "name", dominion.getName(), "level", currentLevel)));
 
         // --- Level progress section ---
-        if (currentLevel < DominionLevelUtils.MAX_LEVEL) {
-            int nextLevel = currentLevel + 1;
-            boolean[] criteria = DominionLevelUtils.getCriteriaStatus(dominion, nextLevel);
+        // At max level, the criteria are still shown against the max level thresholds
+        int nextLevel = Math.min(currentLevel + 1, DominionLevelUtils.MAX_LEVEL);
+        boolean[] criteria = DominionLevelUtils.getCriteriaStatus(dominion, nextLevel);
 
+        if (currentLevel < DominionLevelUtils.MAX_LEVEL) {
             player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_criteria", "name", dominion.getName(),
                     "required", DominionLevelUtils.CRITERIA_REQUIRED, "count", DominionLevelUtils.CRITERIA_COUNT)));
-
-            // Members
-            int membThresh = DominionLevelUtils.getMembersThreshold(nextLevel);
-            player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_members", "mark", criteria[0] ? "&a✔" : "&cX",
-                    "current", dominion.getMembers().size(), "target", membThresh)));
-
-            // Balance
-            double balThresh = DominionLevelUtils.getBalanceThreshold(nextLevel);
-            player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_balance", "mark", criteria[1] ? "&a✔" : "&cX",
-                    "current", formatter.format(dominion.getBalance()), "target", formatter.format(balThresh))));
-
-            // Farmland
-            int farmThresh = DominionLevelUtils.getFarmlandThreshold(nextLevel);
-            player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_farmland", "mark", criteria[2] ? "&a✔" : "&cX",
-                    "current", dominion.getCachedFarmlandCount(), "target", farmThresh)));
-
-            // Livestock
-            int liveThresh = DominionLevelUtils.getLivestockThreshold(nextLevel);
-            player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_livestock", "mark", criteria[3] ? "&a✔" : "&cX",
-                    "current", dominion.getCachedLivestockCount(), "target", liveThresh)));
-
-            // Chunks
-            int chunkThresh = DominionLevelUtils.getChunksThreshold(nextLevel);
-            int totalChunks = dominion.getChunks().size() + OutpostUtils.getTotalOutpostChunkCount(dominion.getId());
-            player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_chunks", "mark", criteria[4] ? "&a✔" : "&cX",
-                    "current", totalChunks, "target", chunkThresh)));
-
-            // Age
-            int ageThresh = DominionLevelUtils.getAgeThreshold(nextLevel);
-            player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_age", "mark", criteria[5] ? "&a✔" : "&cX",
-                    "current", DominionLevelUtils.getFormattedAge(dominion), "target", ageThresh)));
         } else {
             player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_max")));
         }
+
+        // Members
+        int membThresh = DominionLevelUtils.getMembersThreshold(nextLevel);
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_members", "mark", criteria[0] ? "&a✔" : "&cX",
+                "current", dominion.getMembers().size(), "target", membThresh)));
+
+        // Balance
+        double balThresh = DominionLevelUtils.getBalanceThreshold(nextLevel);
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_balance", "mark", criteria[1] ? "&a✔" : "&cX",
+                "current", formatter.format(dominion.getBalance()), "target", formatter.format(balThresh))));
+
+        // Farmland
+        int farmThresh = DominionLevelUtils.getFarmlandThreshold(nextLevel);
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_farmland", "mark", criteria[2] ? "&a✔" : "&cX",
+                "current", dominion.getCachedFarmlandCount(), "target", farmThresh)));
+
+        // Livestock
+        int liveThresh = DominionLevelUtils.getLivestockThreshold(nextLevel);
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_livestock", "mark", criteria[3] ? "&a✔" : "&cX",
+                "current", dominion.getCachedLivestockCount(), "target", liveThresh)));
+
+        // Chunks
+        int chunkThresh = DominionLevelUtils.getChunksThreshold(nextLevel);
+        int totalChunks = dominion.getChunks().size() + OutpostUtils.getTotalOutpostChunkCount(dominion.getId());
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_chunks", "mark", criteria[4] ? "&a✔" : "&cX",
+                "current", totalChunks, "target", chunkThresh)));
+
+        // Age
+        int ageThresh = DominionLevelUtils.getAgeThreshold(nextLevel);
+        player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "dominion.level_age", "mark", criteria[5] ? "&a✔" : "&cX",
+                "current", DominionLevelUtils.getFormattedAge(dominion), "target", ageThresh)));
     }
 
     /**
@@ -3327,10 +3339,6 @@ public class CommandDominion implements CommandExecutor {
                         player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.not_in_dominion")));
                     }
                 } else if (args[0].equalsIgnoreCase("home")) {
-                    if (!player.hasPermission("aranarth.dominion.home")) {
-                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
-                        return true;
-                    }
                     HomeTarget homeTarget = args.length >= 2 ? resolveHomeTarget(Arrays.copyOfRange(args, 1, args.length)) : null;
                     // Check access to another dominion's home before any transfer, so the destination
                     // server is never asked to teleport a player who is not allowed there
@@ -3414,6 +3422,17 @@ public class CommandDominion implements CommandExecutor {
                         }
 
                         if (!wasDominionFound) {
+                            // Fall back to a player search so /d info <player> shows that player's Dominion
+                            UUID searchedUuid = args.length == 2 ? AranarthUtils.getUUIDFromUsernameOrNickname(args[1]) : null;
+                            if (searchedUuid != null) {
+                                Dominion searchedPlayerDominion = DominionUtils.getPlayerDominion(searchedUuid);
+                                if (searchedPlayerDominion != null) {
+                                    displayInfoForDominion(player, searchedPlayerDominion);
+                                } else {
+                                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.player_not_in", "player", AranarthUtils.getPlayer(searchedUuid).getNickname())));
+                                }
+                                return true;
+                            }
                             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.not_found", "name", dominionNameBuilder.toString())));
                         }
                     }
@@ -3472,8 +3491,7 @@ public class CommandDominion implements CommandExecutor {
                     CommandDominions.giveBook(player);
                 } else if (args[0].equalsIgnoreCase("rank")) {
                     if (args.length >= 2 && args[1].equalsIgnoreCase("scan")) {
-                        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                        if (aranarthPlayer.getCouncilRank() == 3) {
+                        if (player.hasPermission("aranarth.dominion.admin")) {
                             DominionLevelUtils.runPeriodicScan();
                             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.scan_triggered")));
                         } else {
@@ -3490,7 +3508,7 @@ public class CommandDominion implements CommandExecutor {
                     handleOutpost(args, dominion, player);
                 } else if (args[0].equalsIgnoreCase("defender")) {
                     handleDefender(dominion, player);
-                } else if (args[0].equalsIgnoreCase("region")) {
+                } else if (args[0].equalsIgnoreCase("region") || args[0].equalsIgnoreCase("r")) {
                     handleRegion(args, dominion, player);
                 } else if (args[0].equalsIgnoreCase("rescan")) {
                     rescanDominion(args, player);

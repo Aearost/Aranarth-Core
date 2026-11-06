@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Mail;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.EmojiUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.MailUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
@@ -79,7 +80,7 @@ public class CommandMail implements CommandExecutor {
                     if (i > 2) sb.append(" ");
                     sb.append(args[i]);
                 }
-                String rawMessage = sb.toString();
+                String rawMessage = EmojiUtils.translateFor(player, sb.toString());
 
                 String processedMessage;
                 if (player.hasPermission("aranarth.chat.hex")) {

@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
@@ -20,6 +22,8 @@ import java.time.ZoneId;
 import java.time.format.TextStyle;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.LongConsumer;
 
 /**
  * Provides the input player's last known time on the server.
@@ -78,22 +82,8 @@ public class CommandSeen implements CommandExecutor {
 					sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "seen.online", "prefix", rankPrefix, "player", displayName)));
 					return true;
 				} else {
-					if (sender instanceof Player player) {
-						final String finalRankPrefix = rankPrefix;
-						final String finalDisplayName = displayName;
-						AranarthUtils.getPlayerTimezone(player, zoneId -> {
-							String result = calculateDisplayDate(
-								offlinePlayer,
-								aranarthPlayer,
-								zoneId,
-								sender
-							);
-							sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "seen.last_seen", "prefix", finalRankPrefix, "player", finalDisplayName, "date", result)));
-						});
-					} else {
-						String result = calculateDisplayDate(offlinePlayer, aranarthPlayer, ZoneId.systemDefault(), sender);
-						sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "seen.last_seen", "prefix", rankPrefix, "player", displayName, "date", result)));
-					}
+					getDisplayDate(sender, offlinePlayer, result ->
+							sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "seen.last_seen", "prefix", rankPrefix, "player", displayName, "date", result))));
 					return true;
 				}
 			} else {
@@ -128,19 +118,53 @@ public class CommandSeen implements CommandExecutor {
 
 
 	/**
-	 * Determines the date to display in the player's timezone.
+	 * Provides the date the player was last seen on the network, in the sender's timezone.
+	 * @param sender The sender that executed the command.
 	 * @param offlinePlayer The player who is offline.
-	 * @param aranarthPlayer The player that executed the command.
-	 * @param timezone The player's timezone.
+	 * @param callback Receives the date to display, on the main thread.
+	 */
+	public static void getDisplayDate(CommandSender sender, OfflinePlayer offlinePlayer, Consumer<String> callback) {
+		if (sender instanceof Player player) {
+			AranarthUtils.getPlayerTimezone(player, zoneId ->
+					getLastSeen(offlinePlayer, lastSeen -> callback.accept(calculateDisplayDate(lastSeen, zoneId, sender))));
+		} else {
+			getLastSeen(offlinePlayer, lastSeen -> callback.accept(calculateDisplayDate(lastSeen, ZoneId.systemDefault(), sender)));
+		}
+	}
+
+	/**
+	 * Provides when the player was last seen on any server, as getLastPlayed() only covers this server.
+	 * @param offlinePlayer The player who is offline.
+	 * @param callback Receives the time in milliseconds, or 0 if it is not known, on the main thread.
+	 */
+	private static void getLastSeen(OfflinePlayer offlinePlayer, LongConsumer callback) {
+		long lastPlayedHere = offlinePlayer.getLastPlayed();
+		if (!DatabaseManager.isActive()) {
+			callback.accept(lastPlayedHere);
+			return;
+		}
+
+		UUID uuid = offlinePlayer.getUniqueId();
+		Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+			long lastSeen = Math.max(lastPlayedHere, DatabaseManager.getInstance().loadPlayerLastSeen(uuid));
+			Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> callback.accept(lastSeen));
+		});
+	}
+
+	/**
+	 * Determines the date to display in the sender's timezone.
+	 * @param lastSeen The time in milliseconds the player was last seen, or 0 if it is not known.
+	 * @param timezone The sender's timezone.
 	 * @param sender The sender that executed the command.
 	 */
-	public static String calculateDisplayDate(OfflinePlayer offlinePlayer, AranarthPlayer aranarthPlayer, ZoneId timezone, CommandSender sender) {
-		LocalDateTime localDateTime = null;
-		Instant lastPlayed = Instant.ofEpochMilli(offlinePlayer.getLastPlayed());
+	private static String calculateDisplayDate(long lastSeen, ZoneId timezone, CommandSender sender) {
+		if (lastSeen <= 0) {
+			return Lang.getFor(sender, "seen.date_unknown");
+		}
 		if (timezone == null) {
 			timezone = ZoneId.systemDefault();
 		}
-		localDateTime = LocalDateTime.ofInstant(lastPlayed, timezone);
+		LocalDateTime localDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(lastSeen), timezone);
 
 		String month = Lang.getFor(sender, getMonthName(localDateTime.getMonthValue()));
 		String dateWithSuffix = DateUtils.getDayNumWithSuffix(sender, localDateTime.getDayOfMonth());
@@ -162,9 +186,6 @@ public class CommandSeen implements CommandExecutor {
 			minute = minuteAsInt + "";
 		}
 
-		if (timezone == null) {
-
-		}
 		String timezoneName = timezone.getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
 		return Lang.getFor(sender, "seen.date_format", "month", month, "day", dateWithSuffix, "year", year, "time", hour + ":" + minute, "zone", timezoneName);
 	}

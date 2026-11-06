@@ -112,7 +112,7 @@ Barrage:
   Speed: 2.5
   HitRadius: 0.8
 
-CombustionStrike:
+CombustiveStrike:
   # 20 damage = 10 hearts
   Damage: 20.0
   MisfireDamage: 8.0
@@ -265,8 +265,9 @@ EnergyBurst:
   ChargeDuration: 1500
   Radius: 8.0
   BurstDuration: 1500
-  # When triggered by falling, damage scales from FallBurstMinDamage at FallBurstMinDistance to full damage at FallBurstMaxDistance
-  FallBurstMinDistance: 3.0
+  # Falling at least FallBurstTriggerDistance blocks auto-triggers the burst on landing
+  # Damage scales from FallBurstMinDamage at FallBurstTriggerDistance to full damage at FallBurstMaxDistance
+  FallBurstTriggerDistance: 10.0
   FallBurstMaxDistance: 75.0
   FallBurstMinDamage: 1.0
 
@@ -279,6 +280,12 @@ LightOfRaava:
   BurstDuration: 750
   WitherDurationTicks: 200
   RegenerationDurationTicks: 100
+
+AvatarState:
+  # The Avatar State auto activates at or below this health if bound (6.0 = 3 hearts)
+  AutoActivateHealth: 6.0
+  # Health restored when auto activating (2.0 = 1 heart)
+  AutoActivateHealthBoost: 2.0
 
 AstralProjection:
   Cooldown: 60000
@@ -328,8 +335,14 @@ JetStream:
   TurnRate: 0.03
   # How strongly carried entities are pulled toward the stream each tick
   PullStrength: 0.4
-  # Carried entities (including the caster) further than this from the stream (e.g. stuck behind a wall) are freed from it
+  # The most blocks per tick that pull can add, so entities catching up to the stream are not launched
+  MaxPull: 2.0
+  # Carried entities (including the caster) further than this from the stream may be freed from it
   CarryRange: 3.0
+  # Ticks an entity can stay out of range without closing the gap (e.g. stuck behind a wall) before being freed from the stream
+  StallGrace: 8
+  # Blocks ahead of the stream that particles are drawn while the caster rides it, as riders outrun particles spawned at the stream
+  ParticleLead: 9.0
   # How long the caster and carried entities stay protected from fall damage after release
   FallProtection: 5000
   # Max time between two sneak presses for a double-tap to end the stream early
@@ -349,6 +362,81 @@ LeafScythe:
   HitRadius: 1.5
   # How long a selected source stays valid
   SourcedTimeout: 5000
+
+PetalRush:
+  # The damage and cooldown of each cast are these values multiplied by the flowers sourced
+  DamagePerFlower: 1.0
+  CooldownPerFlower: 1000
+  ChargeDuration: 1500
+  # How far away a flower can be left-clicked to source it
+  SourceRange: 9.0
+  # How far (in degrees) a flower can be from the look direction and still be sourced
+  SourceAngle: 12.0
+  MaxFlowers: 9
+  # The cone's range grows by this much for each flower sourced
+  RangePerFlower: 1.0
+  # The cone's range before any flowers are added
+  BaseRange: 5.0
+  # The radius of the cone at its base, right in front of the player
+  StartRadius: 1.0
+  # The angle (in degrees) the edge of the cone widens at scales from the minimum (1 flower) to the maximum (MaxFlowers)
+  MinConeAngle: 15.0
+  MaxConeAngle: 25.0
+  # How long the cone's petals take to flow from its base to its end
+  TravelDuration: 600
+  # How long the cone stays animated, with the flowers' lines launching across it
+  RushDuration: 1000
+  # How long each flower's line takes to dash through the cone
+  LineDuration: 400
+  # The length of each flower's line
+  LineLength: 3.0
+  # Number of petal particles in each flower's line
+  LinePetals: 20
+  LinePetalSize: 1.0
+  # How far the lines sway from a straight path
+  WindAmplitude: 0.4
+  # How tightly the lines wind as they travel
+  WindFrequency: 0.9
+  # How long the petals take to fade once the rush ends
+  FadeDuration: 300
+  # Number of petal particles pulled from each sourced flower while charging
+  PetalsPerFlower: 4
+  # The size of the petals held behind the player while charging
+  HeldPetalSize: 0.4
+  # Number of petal particles flowing through the cone for each flower sourced
+  RushPetalsPerFlower: 6
+  # The size of the petals in the cone scales from the minimum (1 flower) to the maximum (MaxFlowers)
+  MinPetalSize: 0.4
+  MaxPetalSize: 0.7
+  # Each petal in the cone is randomly sized from its scaled size up to this many times larger
+  MaxPetalSizeMultiplier: 1.5
+
+PetalShots:
+  # 1 damage = 0.5 hearts
+  Damage: 1.0
+  Shots: 5
+  Cooldown: 5000
+  Range: 25.0
+  # Blocks travelled per tick
+  Speed: 2.0
+  HitRadius: 0.6
+  # Minimum time between shots
+  ShotCooldown: 150
+  # How far away a flower can be sourced
+  SourceRange: 9.0
+  # How far (in degrees) a flower can be from the look direction and still be sourced
+  SourceAngle: 12.0
+  # How long unfired shots stay available once the line reaches the player
+  ReadyDuration: 15000
+  # The time for the line to reach the player scales from the minimum (right next to them) to the maximum (at SourceRange)
+  MinLineDuration: 500
+  MaxLineDuration: 1000
+  # The size of the petals in the line drawn to the player
+  LinePetalSize: 0.7
+  # The size of the petals circling the player's hand
+  HeldPetalSize: 0.5
+  # The size of the petals in each shot's trail
+  ShotPetalSize: 0.6
 
 RazorLeaves:
   Damage: 2.0
@@ -381,7 +469,33 @@ RootSnare:
   MinWoodPillars: 2
   MaxTargets: 5
 
-ToxicSpores:
+SapStrike:
+  # 6 damage = 3 hearts, only dealt once per target no matter how many darts strike them
+  Damage: 6.0
+  Darts: 5
+  Cooldown: 7000
+  Range: 25.0
+  # Blocks travelled per tick
+  Speed: 2.5
+  HitRadius: 0.6
+  # How far (in degrees) each dart spreads from the look direction
+  SpreadAngle: 2.0
+  # How far away a log can be sourced
+  SourceRange: 8.0
+  # How long Sneak must be held at the log to form the sap
+  SourceDuration: 1000
+  # How long the sap stays on the log before it is lost, with no cooldown
+  SourcedTimeout: 15000
+  # How long the darts stay available once extracted before they are lost
+  ReadyDuration: 15000
+  # How long left-click must be released for after extracting the sap before a click can fire the darts
+  FireClickGap: 250
+  # 60 ticks = 3 seconds
+  SlownessDurationTicks: 60
+  # 0 = Slowness I
+  SlownessAmplifier: 0
+
+Spores:
   Cooldown: 12000
   Range: 10.0
   SporeSpeed: 35.0
@@ -517,6 +631,34 @@ IceShards:
   # Blocks travelled per tick
   Speed: 2.5
   ProjectileMaxLifetime: 5000
+
+PetalStorm:
+  # 1 damage = 0.5 hearts
+  Damage: 1.0
+  # The cooldown is this value multiplied by the flowers sourced
+  CooldownPerFlower: 2000
+  # Each floating petal is one shot, so this is both the shots and the petals granted by each flower sourced
+  ShotsPerFlower: 5
+  # How long the player has to fire their shots once they switch to PetalShots
+  Duration: 10000
+  Range: 20.0
+  # Blocks travelled per tick
+  Speed: 2.0
+  HitRadius: 0.8
+  # How far the shots sway from a straight path
+  WindAmplitude: 0.3
+  # How tightly the shots wind as they travel
+  WindFrequency: 0.9
+  # The length of each shot's line
+  LineLength: 2.0
+  # Number of petal particles in each shot's line
+  LinePetals: 12
+  LinePetalSize: 0.7
+  # Number of smaller petal particles scattered around each shot's line per tick
+  WispPetals: 4
+  WispPetalSize: 0.35
+  # How far the smaller petals scatter from the line
+  WispSpread: 0.3
 
 # ==================== Earth ====================
 

@@ -31,8 +31,7 @@ public class CommandSmpCreative implements CommandExecutor {
 		if (sender instanceof Player player) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			// Only the OG players, Council, and Architect are permitted into the SMP creative world
-			if (!AranarthUtils.isOriginalPlayer(player.getUniqueId()) && aranarthPlayer.getCouncilRank() == 0
-					&& aranarthPlayer.getArchitectRank() == 0) {
+			if (!player.hasPermission("aranarth.smpcreative")) {
 				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "access.world_restricted")));
 				return false;
 			}

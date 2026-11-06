@@ -1,7 +1,5 @@
 package com.aearost.aranarthcore.commands.general;
 
-import com.aearost.aranarthcore.objects.AranarthPlayer;
-import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -19,8 +17,7 @@ public class CommandCreativeCompleter implements TabCompleter {
 		if (!(sender instanceof Player player)) {
 			return List.of();
 		}
-		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		if (aranarthPlayer.getCouncilRank() != 3) {
+		if (!player.hasPermission("aranarth.creative.expand")) {
 			return List.of();
 		}
 		if (args.length == 1 && "expand".startsWith(args[0].toLowerCase())) {

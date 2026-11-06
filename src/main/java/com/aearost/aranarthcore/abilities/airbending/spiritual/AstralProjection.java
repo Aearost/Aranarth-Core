@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.abilities.airbending.spiritual;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.AbilityConfig;
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.projectkorra.projectkorra.Element;
@@ -102,7 +103,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
             } else {
                 if (player.isSneaking()) {
                     Location eyeLoc = player.getEyeLocation();
-                    player.getWorld().spawnParticle(Particle.ENCHANT, eyeLoc, 4, 0.25, 0.25, 0.25, 0.05);
+                    AranarthBendingUtils.spawnParticle(player.getWorld(), Particle.ENCHANT, eyeLoc, 4, 0.25, 0.25, 0.25, 0.05);
                 } else {
                     launchAstralForm();
                 }
@@ -134,7 +135,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
                 }
             }
 
-            player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation(), 1, 0.2, 0.2, 0.2, 0.0);
+            AranarthBendingUtils.spawnParticle(player.getWorld(), Particle.END_ROD, player.getLocation(), 1, 0.2, 0.2, 0.2, 0.0);
         }
     }
 
@@ -368,8 +369,8 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
         for (double angle = 0; angle < Math.PI * 2; angle += Math.PI / 16) {
             double x = Math.cos(angle) * radius;
             double z = Math.sin(angle) * radius;
-            player.getWorld().spawnParticle(Particle.WITCH, loc.clone().add(x, 0.5, z), 3, 0.1, 0.1, 0.1, 0);
-            player.getWorld().spawnParticle(Particle.WITCH, loc.clone().add(x, 1.5, z), 2, 0.1, 0.1, 0.1, 0);
+            AranarthBendingUtils.spawnParticle(player.getWorld(), Particle.WITCH, loc.clone().add(x, 0.5, z), 3, 0.1, 0.1, 0.1, 0);
+            AranarthBendingUtils.spawnParticle(player.getWorld(), Particle.WITCH, loc.clone().add(x, 1.5, z), 2, 0.1, 0.1, 0.1, 0);
         }
 
         for (Entity entity : player.getWorld().getNearbyEntities(loc, radius, radius, radius)) {
@@ -403,10 +404,10 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
                 double x = Math.sin(pitch) * Math.cos(yaw) * radius;
                 double y = Math.cos(pitch) * radius;
                 double z = Math.sin(pitch) * Math.sin(yaw) * radius;
-                player.getWorld().spawnParticle(Particle.SOUL, loc.clone().add(x, y, z), 2, 0.1, 0.1, 0.1, 0);
+                AranarthBendingUtils.spawnParticle(player.getWorld(), Particle.SOUL, loc.clone().add(x, y, z), 2, 0.1, 0.1, 0.1, 0);
             }
         }
-        player.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, loc, 30, 0.5, 0.5, 0.5, 0.05);
+        AranarthBendingUtils.spawnParticle(player.getWorld(), Particle.SOUL_FIRE_FLAME, loc, 30, 0.5, 0.5, 0.5, 0.05);
 
         subAbilityDamaging.add(player.getUniqueId());
         for (Entity entity : player.getWorld().getNearbyEntities(loc, radius, radius, radius)) {

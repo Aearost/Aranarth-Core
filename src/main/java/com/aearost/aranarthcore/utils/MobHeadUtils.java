@@ -5,6 +5,7 @@ import com.destroystokyo.paper.profile.PlayerProfile;
 import com.destroystokyo.paper.profile.ProfileProperty;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
@@ -13,6 +14,9 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
 
 import java.io.File;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.UUID;
@@ -86,9 +90,39 @@ public class MobHeadUtils {
     public static ItemStack createCustomHead(String texture, String displayName) {
         ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) skull.getItemMeta();
-        PlayerProfile profile = Bukkit.createProfile(UUID.randomUUID(), "");
+        meta.setPlayerProfile(createTextureProfile(texture));
+        meta.setDisplayName(ChatUtils.translateToColor(displayName));
+        skull.setItemMeta(meta);
+        return skull;
+    }
+
+    /**
+     * Creates a profile whose UUID is derived from the texture so that heads with the same texture stack.
+     */
+    private static PlayerProfile createTextureProfile(String texture) {
+        UUID uuid = UUID.nameUUIDFromBytes(texture.getBytes(StandardCharsets.UTF_8));
+        PlayerProfile profile = Bukkit.createProfile(uuid, "");
         profile.setProperty(new ProfileProperty("textures", texture));
-        meta.setPlayerProfile(profile);
+        return profile;
+    }
+
+    /**
+     * Creates a player's head that stacks with every other head of that player.
+     */
+    public static ItemStack createPlayerHead(OfflinePlayer owner, String displayName) {
+        ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
+        SkullMeta meta = (SkullMeta) skull.getItemMeta();
+        PlayerProfile ownerProfile = owner.getPlayerProfile();
+        URL skin = ownerProfile.getTextures().getSkin();
+        if (skin != null) {
+            PlayerProfile profile = Bukkit.createProfile(owner.getUniqueId(), ownerProfile.getName());
+            String json = "{\"textures\":{\"SKIN\":{\"url\":\"" + skin + "\"}}}";
+            String texture = Base64.getEncoder().encodeToString(json.getBytes(StandardCharsets.UTF_8));
+            profile.setProperty(new ProfileProperty("textures", texture));
+            meta.setPlayerProfile(profile);
+        } else {
+            meta.setOwningPlayer(owner);
+        }
         meta.setDisplayName(ChatUtils.translateToColor(displayName));
         skull.setItemMeta(meta);
         return skull;
@@ -121,16 +155,7 @@ public class MobHeadUtils {
             return null;
         }
 
-        ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
-        SkullMeta meta = (SkullMeta) skull.getItemMeta();
-
-        PlayerProfile profile = Bukkit.createProfile(UUID.randomUUID(), "");
-        profile.setProperty(new ProfileProperty("textures", textureValue));
-        meta.setPlayerProfile(profile);
-
-        meta.setDisplayName(ChatUtils.translateToColor(displayName));
-        skull.setItemMeta(meta);
-        return skull;
+        return createCustomHead(textureValue, displayName);
     }
 
     /**

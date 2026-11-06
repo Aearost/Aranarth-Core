@@ -1,5 +1,8 @@
 package com.aearost.aranarthcore.utils;
 
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -90,5 +93,19 @@ public class EmojiUtils {
         }
         // Strip VS16 so Minecraft doesn't render it as a visible glyph
         return message.replace(String.valueOf(VS16), "");
+    }
+
+    /**
+     * Translates emoji shorthands in a message written by the sender, if they have emojis toggled on.
+     *
+     * @param sender  The sender of the message.
+     * @param message The message to be translated.
+     * @return The translated message, or the original message if the sender is not a player or has emojis toggled off.
+     */
+    public static String translateFor(CommandSender sender, String message) {
+        if (sender instanceof Player player && AranarthUtils.getPlayer(player.getUniqueId()).isEmojiEnabled()) {
+            return translateEmojis(message);
+        }
+        return message;
     }
 }

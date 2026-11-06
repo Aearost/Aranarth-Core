@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.event.mob;
 
+import com.aearost.aranarthcore.utils.QuestUtils;
+import com.aearost.aranarthcore.enums.QuestTrigger;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.MobHeadUtils;
 import org.bukkit.entity.EntityType;
@@ -67,6 +69,7 @@ public class MobHeadDrop {
         ItemStack head = MobHeadUtils.createHead(type);
         if (head != null) {
             e.getDrops().add(head);
+            QuestUtils.progress(attacker, QuestTrigger.MOB_HEAD, type.name(), 1);
         }
     }
 }

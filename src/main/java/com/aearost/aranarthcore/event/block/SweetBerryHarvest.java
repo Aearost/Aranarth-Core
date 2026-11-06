@@ -4,7 +4,7 @@ import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.objects.Dominion;
-import com.aearost.aranarthcore.enums.QuestTaskType;
+import com.aearost.aranarthcore.enums.QuestTrigger;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.CropUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
@@ -42,7 +42,7 @@ public class SweetBerryHarvest {
 				return;
 			}
 
-			if (AranarthUtils.isSpawnLocation(block.getLocation())) {
+			if (AranarthUtils.isProtectedSpawnLocation(block.getLocation())) {
 				return;
 			}
 
@@ -93,7 +93,7 @@ public class SweetBerryHarvest {
 			block.setBlockData(bush);
 
 			block.getWorld().playSound(block.getLocation(), Sound.BLOCK_SWEET_BERRY_BUSH_PICK_BERRIES, 1.0F, 1.0F);
-			QuestUtils.updateProgress(player, QuestTaskType.HARVEST_CROPS, 1);
+			QuestUtils.progress(player, QuestTrigger.HARVEST, "SWEET_BERRY_BUSH", 1);
 		}
 	}
 }

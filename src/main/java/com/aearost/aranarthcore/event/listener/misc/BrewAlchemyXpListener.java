@@ -2,7 +2,9 @@ package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.brew.BrewRecipe;
+import com.aearost.aranarthcore.enums.QuestTrigger;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.QuestUtils;
 import com.dre.brewery.Brew;
 import com.dre.brewery.api.events.brew.BrewModifyEvent;
 import com.dre.brewery.recipe.BRecipe;
@@ -25,6 +27,9 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import static com.aearost.aranarthcore.objects.CustomKeys.BREW_ALCHEMY_XP;
 import static com.aearost.aranarthcore.objects.CustomKeys.BREW_BREWER;
@@ -168,6 +173,16 @@ public class BrewAlchemyXpListener implements Listener {
         }
 
         new AlchemyManager(mcMMOPlayer).applyXpGain(xp, XPGainReason.PVE, XPGainSource.CUSTOM);
+
+        // A finished brew counts once for the Bottle Brews quests, with 4 stars being a quality of 8 or more
+        Set<String> tags = new HashSet<>();
+        if (brew.getQuality() >= 8) {
+            tags.add("quality4");
+        }
+        if (recipe != null && recipe.getTier() == BrewRecipe.Tier.LEGENDARY) {
+            tags.add("legendary");
+        }
+        QuestUtils.progress(player, QuestTrigger.BREWERY, bRecipe.getId(), Math.max(1, item.getAmount()), tags);
 
         pdc.set(BREW_ALCHEMY_XP, PersistentDataType.BYTE, (byte) 1);
         item.setItemMeta(meta);

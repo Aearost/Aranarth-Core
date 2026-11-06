@@ -12,6 +12,7 @@ public class Avatar {
 	private String startInRealLife;
 	private String endInRealLife;
 	private char element;
+	private boolean endedByInactivity = false;
 
 	public Avatar(UUID uuid, String startInGame, String endInGame, String startInRealLife, String endInRealLife, char element) {
 		this.uuid = uuid;
@@ -112,6 +113,22 @@ public class Avatar {
 	 */
 	public void setElement(char element) {
 		this.element = element;
+	}
+
+	/**
+	 * Confirms if the avatar's reign ended because they were inactive for too long.
+	 * @return Confirmation if the avatar's reign ended because they were inactive for too long.
+	 */
+	public boolean isEndedByInactivity() {
+		return endedByInactivity;
+	}
+
+	/**
+	 * Updates whether the avatar's reign ended because they were inactive for too long.
+	 * @param endedByInactivity Whether the avatar's reign ended because they were inactive for too long.
+	 */
+	public void setEndedByInactivity(boolean endedByInactivity) {
+		this.endedByInactivity = endedByInactivity;
 	}
 
 }

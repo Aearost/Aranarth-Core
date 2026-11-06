@@ -1,7 +1,6 @@
 package com.aearost.aranarthcore.commands.council;
 
-import com.aearost.aranarthcore.objects.AranarthPlayer;
-import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.command.CommandSender;
@@ -18,8 +17,7 @@ public class CommandCouncilMessage {
 	 */
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (sender instanceof Player player) {
-			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			if (aranarthPlayer.getCouncilRank() == 0 && aranarthPlayer.getArchitectRank() == 0) {
+			if (!player.hasPermission("aranarth.councilchat")) {
 				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 				return false;
 			}
@@ -27,6 +25,10 @@ public class CommandCouncilMessage {
 			ChatUtils.evaluateCouncilMessage(sender, args, true);
 			return true;
 		} else {
+			// Console commands can run on both servers, and each one relays to the other, so only Survival sends it
+			if (AranarthCore.isSmpServer()) {
+				return true;
+			}
 			ChatUtils.evaluateCouncilMessage(sender, args, true);
 			return true;
 		}

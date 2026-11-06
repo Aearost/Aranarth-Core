@@ -1,7 +1,6 @@
 package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.items.brew.BrewRecipe;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.BrewRecipeUtils;
 import org.bukkit.command.Command;
@@ -23,8 +22,7 @@ public class CommandBrewBookCompleter implements TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (sender instanceof Player player) {
-            AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
-            if (ap == null || ap.getCouncilRank() < 3) return List.of();
+            if (!player.hasPermission("aranarth.brewbook.unlock")) return List.of();
         }
 
         if (args.length == 1) {

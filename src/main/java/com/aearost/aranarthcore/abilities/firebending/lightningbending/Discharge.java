@@ -138,7 +138,7 @@ public class Discharge extends LightningAbility implements AddonAbility {
 
             for (int j = 0; j < 10; j++) {
                 Particle.DustOptions dust = (j % 2 == 0) ? AranarthBendingUtils.LIGHTNING_DUST_BRIGHT : AranarthBendingUtils.LIGHTNING_DUST_BLUE;
-                l.getWorld().spawnParticle(Particle.DUST, l.clone(), 1, 0.03, 0.03, 0.03, 0, dust);
+                AranarthBendingUtils.spawnParticle(l.getWorld(), Particle.DUST, l.clone(), 1, 0.03, 0.03, 0.03, 0, dust);
 
                 if (rand.nextInt(6) == 0) {
                     l.getWorld().playSound(l, Sound.ENTITY_BEE_HURT, 0.6f, 0.2f);
@@ -181,7 +181,7 @@ public class Discharge extends LightningAbility implements AddonAbility {
 
             for (int k = 0; k < 5; k++) {
                 Particle.DustOptions dust = (k % 2 == 0) ? AranarthBendingUtils.LIGHTNING_DUST_BRIGHT : AranarthBendingUtils.LIGHTNING_DUST_BLUE;
-                entity.getLocation().getWorld().spawnParticle(Particle.DUST, entity.getLocation(), 1,
+                AranarthBendingUtils.spawnParticle(entity.getLocation().getWorld(), Particle.DUST, entity.getLocation(), 1,
                         rand.nextDouble() * 0.5, rand.nextDouble() * 0.5, rand.nextDouble() * 0.5, 0, dust);
             }
 

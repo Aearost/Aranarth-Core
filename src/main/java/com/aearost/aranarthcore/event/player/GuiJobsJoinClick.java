@@ -63,6 +63,12 @@ public class GuiJobsJoinClick {
             return;
         }
 
+        long cooldown = JobUtils.getJoinCooldownRemaining(ap);
+        if (cooldown > 0) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "jobs.join_cooldown", "time", JobUtils.formatCooldown(cooldown))));
+            return;
+        }
+
         jobData.addJob(job);
         ap.setJobDataLoaded(true);
         AranarthUtils.setPlayer(player.getUniqueId(), ap);

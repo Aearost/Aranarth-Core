@@ -24,7 +24,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.text.NumberFormat;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -171,7 +170,7 @@ public class CommandInfo implements CommandExecutor {
 		boolean isNicknameSameAsUsername = ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()).equalsIgnoreCase(resolvedName);
 		String username = !isNicknameSameAsUsername ? " &e(" + resolvedName + "&e)" : "";
 		sender.sendMessage(ChatUtils.translateToColor("&8      - - - &e"
-				+ ChatUtils.providePrefixAndName(uuid) + username + " &8- - -"));
+				+ ChatUtils.providePrefixAndName(uuid, sender) + username + " &8- - -"));
 
 		String firstJoinDate = aranarthPlayer.getFirstJoinDate();
 		boolean isOG = AranarthUtils.isOriginalPlayer(uuid);
@@ -290,26 +289,12 @@ public class CommandInfo implements CommandExecutor {
 					if (networkPlayer != null && !isVanished) {
 						sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "info.last_online_now", "location", getRemoteServerDisplay(sender, networkPlayer.getServer()))));
 					} else {
-						AranarthUtils.getPlayerTimezone(player, zoneId -> {
-							String result = CommandSeen.calculateDisplayDate(
-									offlinePlayer,
-									aranarthPlayer,
-									zoneId,
-									sender
-							);
-							sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "info.last_online", "date", result)));
-						});
+						CommandSeen.getDisplayDate(sender, offlinePlayer, result ->
+								sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "info.last_online", "date", result))));
 					}
 				} else {
-					AranarthUtils.getPlayerTimezone(player, zoneId -> {
-						String result = CommandSeen.calculateDisplayDate(
-								offlinePlayer,
-								aranarthPlayer,
-								zoneId,
-								sender
-						);
-						sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "info.last_online", "date", result)));
-					});
+					CommandSeen.getDisplayDate(sender, offlinePlayer, result ->
+							sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "info.last_online", "date", result))));
 				}
 			}
 		} else {
@@ -326,12 +311,12 @@ public class CommandInfo implements CommandExecutor {
 				if (networkPlayer != null) {
 					sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "info.last_online_now", "location", getRemoteServerDisplay(sender, networkPlayer.getServer()))));
 				} else {
-					String result = CommandSeen.calculateDisplayDate(offlinePlayer, aranarthPlayer, ZoneId.systemDefault(), sender);
-					sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "info.last_online", "date", result)));
+					CommandSeen.getDisplayDate(sender, offlinePlayer, result ->
+							sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "info.last_online", "date", result))));
 				}
 			} else {
-				String result = CommandSeen.calculateDisplayDate(offlinePlayer, aranarthPlayer, ZoneId.systemDefault(), sender);
-				sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "info.last_online", "date", result)));
+				CommandSeen.getDisplayDate(sender, offlinePlayer, result ->
+						sender.sendMessage(ChatUtils.translateToColor(Lang.getFor(sender, "info.last_online", "date", result))));
 			}
 		}
 	}

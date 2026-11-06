@@ -31,7 +31,7 @@ public class SingleDoorOpen {
             return;
         }
 
-        if (AranarthUtils.isSpawnLocation(block.getLocation())) {
+        if (AranarthUtils.isProtectedSpawnLocation(block.getLocation())) {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
             if (!aranarthPlayer.isInAdminMode()) {
                 return;

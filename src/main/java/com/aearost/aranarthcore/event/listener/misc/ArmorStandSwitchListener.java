@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.listener.misc;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.Lang;
@@ -31,7 +32,7 @@ public class ArmorStandSwitchListener implements Listener {
 	public void execute(PlayerInteractAtEntityEvent e) {
 		if (e.getRightClicked() instanceof ArmorStand armorStand) {
 			Player player = e.getPlayer();
-			if (player.getWorld().getName().equals("spawn")) {
+			if (player.getWorld().getName().equals("spawn") || AranarthUtils.isArenaSpawnLocation(e.getRightClicked().getLocation())) {
 				e.setCancelled(true);
 				return;
 			}

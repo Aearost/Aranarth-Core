@@ -67,8 +67,8 @@ public class EssenceImbueUtils {
         }
         return switch (essenceType) {
             case "essence_beheading" -> Tier.RARE;
-            case "essence_lifesteal", "essence_magnetism" -> Tier.EPIC;
-            case "essence_resilience", "essence_preservation", "essence_plentiful" -> Tier.GODLY;
+            case "essence_resilience", "essence_magnetism" -> Tier.EPIC;
+            case "essence_lifesteal", "essence_preservation", "essence_plentiful" -> Tier.GODLY;
             default -> null;
         };
     }
@@ -167,5 +167,14 @@ public class EssenceImbueUtils {
     public static boolean hasRequiredRank(Player player) {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
         return aranarthPlayer != null && aranarthPlayer.getRank() >= REQUIRED_RANK;
+    }
+
+    /**
+     * Provides the lang key suffix of the rank required to imbue Essences, in the player's pronouns.
+     * @param player The player.
+     * @return The lang key suffix of the required rank.
+     */
+    public static String getRequiredRankId(Player player) {
+        return AranarthUtils.getPlayer(player.getUniqueId()).getPronouns().getRankId(REQUIRED_RANK);
     }
 }

@@ -65,8 +65,7 @@ public class CommandPlotCompleter implements TabCompleter {
 					return filter(getStandingPlotMembers(player), args[1]);
 				}
 				case "spawn" -> {
-					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-					return aranarthPlayer.getCouncilRank() == 3 ? filter(List.of("claim", "unclaim"), args[1]) : List.of();
+					return player.hasPermission("aranarth.plot.spawn") ? filter(List.of("claim", "unclaim"), args[1]) : List.of();
 				}
 				default -> {
 					return List.of();

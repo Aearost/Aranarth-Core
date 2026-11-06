@@ -174,10 +174,14 @@ public class CommandRankSet {
                                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                             }
                             DiscordUtils.updateSaint(player, rank, !silent && canNotifyDiscord);
-                            if (silent && rank > 0 && (sender instanceof Player || !AranarthCore.isSmpServer())) {
+                            // Vote shop purchases only run on the buyer's server, so unlike store purchases they must not be limited to Survival
+                            if (silent && rank > 0) {
                                 String[] saintRankNames = {"", "&5&lAcolyte", "&5&lDisciple", "&5&lSeraph"};
                                 Lang.broadcast("rankset.voteshop_broadcast", "player", name, "rank", saintRankNames[rank]);
-                                DiscordUtils.voteShopNotification(name + " used vote points to purchase " + saintRankNames[rank], player.getUniqueId(), Color.MAGENTA);
+                                AranarthUtils.playNetworkDonationSound();
+                                if (AranarthCore.isPublicServer()) {
+                                    DiscordUtils.voteShopNotification(name + " used vote points to purchase " + saintRankNames[rank], player.getUniqueId(), Color.MAGENTA);
+                                }
                             }
                             isSuccessful = true;
                         } else {
@@ -193,6 +197,7 @@ public class CommandRankSet {
 
                     if (player.isOnline()) {
                         PermissionUtils.evaluatePlayerPermissions(player.getPlayer());
+                        AranarthUtils.removeRevokedGameMode(player.getPlayer());
                     }
 
                     if (isSuccessful) {

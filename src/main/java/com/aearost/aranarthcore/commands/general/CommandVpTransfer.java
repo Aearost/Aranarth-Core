@@ -67,7 +67,22 @@ public class CommandVpTransfer implements CommandExecutor {
 			return true;
 		}
 
-		String receiverNickname = receiverAp.getNickname();
+		// The receiver may only exist on the other server if they have never joined this one
+		String receiverNickname = null;
+		if (receiverAp != null) {
+			receiverNickname = receiverAp.getNickname();
+		} else if (NetworkManager.isActive()) {
+			NetworkPlayer remoteReceiver = NetworkManager.getInstance().getRemoteRoster().get(receiverUuid);
+			if (remoteReceiver != null) {
+				receiverNickname = remoteReceiver.getNickname() == null || remoteReceiver.getNickname().isEmpty()
+						? remoteReceiver.getUsername() : remoteReceiver.getNickname();
+			}
+		}
+		if (receiverNickname == null) {
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.not_found", "name", args[0])));
+			return true;
+		}
+
 		long timestamp = System.currentTimeMillis();
 
 		// Deduct from sender

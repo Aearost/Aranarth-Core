@@ -317,7 +317,8 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
                 // Size grows from 0.2 (at source) to 1.2 (at shoulder)
                 final float size = 0.2f + (float) (t * 1.0f);
                 final Particle.DustOptions dust = new Particle.DustOptions(shotType.color(), size);
-                spiritSources[c].getWorld().spawnParticle(
+                AranarthBendingUtils.spawnParticle(
+                        spiritSources[c].getWorld(),
                         Particle.DUST, particlePos.toLocation(spiritSources[c].getWorld()), 1, 0, 0, 0, 0, dust);
             }
         }
@@ -339,7 +340,7 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
                 final double angle = (j / 6.0) * 2 * Math.PI;
                 final Location loc = center.clone()
                         .add(Math.cos(angle) * 0.9, 0, Math.sin(angle) * 0.9);
-                loc.getWorld().spawnParticle(Particle.DUST, loc, 3, 0.1, 0.1, 0.1, 0, dust);
+                AranarthBendingUtils.spawnParticle(loc.getWorld(), Particle.DUST, loc, 3, 0.1, 0.1, 0.1, 0, dust);
             }
         }
     }
@@ -357,7 +358,7 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
             final double angle = (i / (double) MAX_SHOTS) * 2 * Math.PI + time;
             final Location loc = player.getLocation().add(0, 1.2, 0)
                     .add(Math.cos(angle) * 0.8, 0.25 * Math.sin(time + i), Math.sin(angle) * 0.8);
-            loc.getWorld().spawnParticle(Particle.DUST, loc, 3, 0.05, 0.05, 0.05, 0, dust);
+            AranarthBendingUtils.spawnParticle(loc.getWorld(), Particle.DUST, loc, 3, 0.05, 0.05, 0.05, 0, dust);
         }
     }
 
@@ -501,10 +502,10 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
 
                 final Particle.DustOptions dust = new Particle.DustOptions(shotType.color(), 0.8f);
                 if (i % 2 == 0) {
-                    location.getWorld().spawnParticle(Particle.DUST, location, 2, 0.1, 0.1, 0.1, 0, dust);
+                    AranarthBendingUtils.spawnParticle(location.getWorld(), Particle.DUST, location, 2, 0.1, 0.1, 0.1, 0, dust);
                 }
                 if (i % 3 == 0) {
-                    location.getWorld().spawnParticle(Particle.SOUL, location, 1, 0.05, 0.05, 0.05, 0);
+                    AranarthBendingUtils.spawnParticle(location.getWorld(), Particle.SOUL, location, 1, 0.05, 0.05, 0.05, 0);
                 }
 
                 checkCollisions();

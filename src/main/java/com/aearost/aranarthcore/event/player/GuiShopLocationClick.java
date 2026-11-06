@@ -17,7 +17,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -47,8 +46,8 @@ public class GuiShopLocationClick {
         String filter = GuiShopLocation.getActiveFilter(player.getUniqueId());
 
         int totalEntries = (filter != null)
-                ? GuiShopLocation.getFilteredShops(filter).size()
-                : AranarthUtils.getShopLocations().size();
+                ? GuiShopLocation.getSearchResults(player.getUniqueId()).size()
+                : GuiShopLocation.getShopOrder(player.getUniqueId()).size();
         int totalPages = Math.max(1, (int) Math.ceil((double) totalEntries / GuiShopLocation.ITEMS_PER_PAGE));
 
         if (slot == GuiShopLocation.SLOT_SEARCH) {
@@ -85,12 +84,11 @@ public class GuiShopLocationClick {
             UUID targetUuid = null;
 
             if (filter != null) {
-                List<Shop> results = GuiShopLocation.getFilteredShops(filter);
+                List<Shop> results = GuiShopLocation.getSearchResults(player.getUniqueId());
                 if (itemIndex >= results.size()) return;
                 targetUuid = results.get(itemIndex).getUuid();
             } else {
-                HashMap<UUID, Location> shopLocations = AranarthUtils.getShopLocations();
-                List<UUID> uuidList = new ArrayList<>(shopLocations.keySet());
+                List<UUID> uuidList = GuiShopLocation.getShopOrder(player.getUniqueId());
                 if (itemIndex >= uuidList.size()) return;
                 targetUuid = uuidList.get(itemIndex);
             }

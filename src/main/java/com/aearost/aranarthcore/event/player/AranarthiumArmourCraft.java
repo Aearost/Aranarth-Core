@@ -79,9 +79,11 @@ public class AranarthiumArmourCraft {
                     }
                     // Yield the enhanced armor
                     if (armor != null & ingot != null) {
+                        // Determined before the inputs are removed so that a failure can never delete them
+                        ItemStack result = determineArmourResult(armor, ingot);
                         inventory.clear();
                         e.getCursor().setAmount(0);
-                        new GuiEnhancedAranarthium(player, armor, ingot, determineArmourResult(armor, ingot), isArmorFirst).openGui();
+                        new GuiEnhancedAranarthium(player, armor, ingot, result, isArmorFirst).openGui();
                     }
                 }
                 // Picking up
@@ -247,10 +249,12 @@ public class AranarthiumArmourCraft {
 
                     // Yield the enhanced armor
                     if (armor != null & ingot != null) {
+                        // Determined before the inputs are removed so that a failure can never delete them
+                        ItemStack result = determineArmourResult(armor, ingot);
                         e.getView().getTopInventory().clear();
                         inventory.clear(e.getSlot());
                         e.getCursor().setAmount(0);
-                        new GuiEnhancedAranarthium(player, armor, ingot, determineArmourResult(armor, ingot), isArmorFirst).openGui();
+                        new GuiEnhancedAranarthium(player, armor, ingot, result, isArmorFirst).openGui();
                     }
                 }
             } else if (e.getClickedInventory().getType() == InventoryType.SMITHING) {
@@ -380,8 +384,8 @@ public class AranarthiumArmourCraft {
     private ItemStack determineArmourResult(ItemStack armor, ItemStack ingot) {
         if (ingot.getType() == Material.NETHERITE_INGOT) {
             ItemStack netheriteElytra = new NetheriteElytra().getItem();
-            // Transfer enchantments from the source elytra
-            armor.getEnchantments().forEach((enchantment, level) -> netheriteElytra.addEnchantment(enchantment, level));
+            // Transfer enchantments from the source elytra, which can be over-leveled
+            armor.getEnchantments().forEach(netheriteElytra::addUnsafeEnchantment);
             // Transfer durability from the source elytra
             if (armor.hasItemMeta() && netheriteElytra.hasItemMeta()) {
                 ItemMeta resultMeta = netheriteElytra.getItemMeta();
@@ -489,21 +493,11 @@ public class AranarthiumArmourCraft {
                 }
             }
         }
-        Map<Enchantment, Integer> enchantments = armor.getEnchantments();
-        for (Enchantment enchantment : enchantments.keySet()) {
-            if (enhancedAranarthiumArmor.containsEnchantment(enchantment)) {
-                int aranarthiumEnchantmentLevel = enhancedAranarthiumArmor.getEnchantmentLevel(enchantment);
-                int armorLevel = enchantments.get(enchantment);
-                if (aranarthiumEnchantmentLevel > armorLevel) {
-                    ItemMeta resultMeta = enhancedAranarthiumArmor.getItemMeta();
-                    resultMeta.addEnchant(enchantment, aranarthiumEnchantmentLevel, true);
-                    enhancedAranarthiumArmor.setItemMeta(resultMeta);
-                } else {
-                    enhancedAranarthiumArmor.addEnchantment(enchantment, enchantments.get(enchantment));
-                }
-            } else {
-                enhancedAranarthiumArmor.addEnchantment(enchantment, enchantments.get(enchantment));
-            }
+        // Keeps the higher of the two levels, where the source armor's enchants can be over-leveled
+        for (Map.Entry<Enchantment, Integer> entry : armor.getEnchantments().entrySet()) {
+            Enchantment enchantment = entry.getKey();
+            int level = Math.max(entry.getValue(), enhancedAranarthiumArmor.getEnchantmentLevel(enchantment));
+            enhancedAranarthiumArmor.addUnsafeEnchantment(enchantment, level);
         }
 
         // Transfer durability from the source armor

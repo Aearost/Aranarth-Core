@@ -10,6 +10,7 @@ import com.aearost.aranarthcore.objects.Avatar;
 import com.aearost.aranarthcore.objects.Perk;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
+import com.projectkorra.projectkorra.OfflineBendingPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -17,6 +18,7 @@ import org.bukkit.permissions.PermissionAttachment;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Provides a large variety of utility methods for everything related to items and inventory.
@@ -41,6 +43,31 @@ public class PermissionUtils {
                 }
             }
         }
+    }
+
+    /**
+     * Determines whether the player has the shulker assist perk, even while they are offline or on the other server.
+     *
+     * @param uuid The player's UUID.
+     * @return True if the player has the shulker assist perk.
+     */
+    public static boolean hasShulkerAssist(UUID uuid) {
+        Player player = Bukkit.getPlayer(uuid);
+        if (player != null) {
+            return player.hasPermission("aranarth.shulker");
+        }
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+        if (aranarthPlayer == null) {
+            return false;
+        }
+        if (aranarthPlayer.getPerks() != null && aranarthPlayer.getPerks().getOrDefault(Perk.SHULKER, 0) == 1) {
+            return true;
+        }
+        // Saint 2 grants the perk, and Council 2 includes Saint 2
+        if (aranarthPlayer.getSaintRank() >= 2 || aranarthPlayer.getCouncilRank() >= 2) {
+            return true;
+        }
+        return Bukkit.getOfflinePlayer(uuid).isOp();
     }
 
     /**
@@ -74,28 +101,27 @@ public class PermissionUtils {
         Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
         // If the player is the avatar
         if (currentAvatar != null && currentAvatar.getUuid().equals(player.getUniqueId())) {
+            // Must be applied before ProjectKorra loads the player on join, otherwise it unbinds their Avatar abilities
+            setAvatarPermissions(perms);
             updateAvatarPermissions(player.getUniqueId(), false);
         }
         // If elements were removed while the old avatar was offline, only applies to the actual previous avatar
         else {
-            List<Avatar> avatars = AvatarUtils.getAvatars();
-            if (avatars.size() >= 2) {
-                Avatar previousAvatar = avatars.get(avatars.size() - 2);
-                if (previousAvatar.getUuid().equals(player.getUniqueId())) {
-                    BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
-                    if (bendingPlayer != null && bendingPlayer.getElements().size() > 1) {
-                        updateAvatarPermissions(player.getUniqueId(), true);
-                    }
-                }
-            }
+            restoreOldAvatarElement(player);
         }
 
-        // Grant the SMP map link to original players
+        // Grant the SMP map link and SMP creative world access to original players
         if (AranarthUtils.isOriginalPlayer(player.getUniqueId())) {
             perms.setPermission("aranarth.smpmap", true);
+            perms.setPermission("aranarth.smpcreative", true);
         }
 
         setCreativeWorldEditPermissions(player, perms, aranarthPlayer);
+
+        // Limited to their own game mode and the worlds allowed by CommandOverrides
+        if (aranarthPlayer.getArchitectRank() >= 1 && aranarthPlayer.isInArchitectMode()) {
+            perms.setPermission("minecraft.command.gamemode", true);
+        }
 
         // Must update arena permissions after base permissions apply
         toggleArenaBendingPermissions(player, player.getWorld().getName().equalsIgnoreCase("arena"));
@@ -133,20 +159,12 @@ public class PermissionUtils {
                     } else {
                         Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
 
-                        // Removes sub-elements with the exception of the avatar
-                        if (currentAvatar == null || !currentAvatar.getUuid().equals(player.getUniqueId())) {
+                        // Removes sub-elements with the exception of the avatar, who only loses those that always
+                        // follow their permission, i.e blood and flight in the arena and blue fire when toggled
+                        if (currentAvatar == null || !currentAvatar.getUuid().equals(player.getUniqueId())
+                                || subElement == Element.SubElement.BLOOD || subElement == Element.SubElement.FLIGHT
+                                || subElement == Element.SubElement.BLUE_FIRE) {
                             bendingPlayer.getSubElements().remove(subElement);
-                        } else {
-                            // Different logic for the avatar
-                            // Toggling blue fire as needed based on avatar
-                            if (currentAvatar.getUuid().equals(player.getUniqueId())) {
-                                if (subElement == Element.SubElement.BLUE_FIRE) {
-                                    AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                                    if (aranarthPlayer.getFireType() != FireType.BLUE) {
-                                        bendingPlayer.getSubElements().remove(Element.SubElement.BLUE_FIRE);
-                                    }
-                                }
-                            }
                         }
                     }
                 }
@@ -270,15 +288,19 @@ public class PermissionUtils {
             perms.setPermission("bending.ability.burial", true);
             perms.setPermission("bending.ability.deafeningscream", true);
             perms.setPermission("bending.ability.sonicpulse", true);
-            perms.setPermission("bending.ability.toxicspores", true);
+            perms.setPermission("bending.ability.spores", true);
             perms.setPermission("bending.ability.leafscythe", true);
             perms.setPermission("bending.ability.rootsnare", true);
+            perms.setPermission("bending.ability.petalrush", true);
+            perms.setPermission("bending.ability.petalshots", true);
+            perms.setPermission("bending.ability.sapstrike", true);
+            perms.setPermission("bending.ability.petalstorm", true);
             perms.setPermission("bending.ability.energyburst", true);
             perms.setPermission("bending.ability.magmaglaives", true);
             perms.setPermission("bending.ability.moltenblast", true);
             perms.setPermission("bending.ability.eruption", true);
             perms.setPermission("bending.ability.magmawave", true);
-            perms.setPermission("bending.ability.combustionstrike", true);
+            perms.setPermission("bending.ability.combustivestrike", true);
             perms.setPermission("bending.ability.metalshots", true);
             perms.setPermission("bending.ability.metalstrips", true);
             perms.setPermission("bending.ability.metalshred", true);
@@ -336,6 +358,9 @@ public class PermissionUtils {
         perms.setPermission("bending.player", true);
 
         perms.setPermission("bending.command.rechoose", true);
+
+        // Only the current Avatar has the Avatar element, including over the default for operators
+        perms.setPermission("bending.avatar", false);
 
         // Vanilla messaging bypasses mutes and /ac spy through namespaced commands like /minecraft:msg,
         // and the plugin provides its own /msg
@@ -395,15 +420,19 @@ public class PermissionUtils {
         perms.setPermission("bending.ability.burial", true);
         perms.setPermission("bending.ability.deafeningscream", true);
         perms.setPermission("bending.ability.sonicpulse", true);
-        perms.setPermission("bending.ability.toxicspores", true);
+        perms.setPermission("bending.ability.spores", true);
         perms.setPermission("bending.ability.leafscythe", true);
         perms.setPermission("bending.ability.rootsnare", true);
+        perms.setPermission("bending.ability.petalrush", true);
+        perms.setPermission("bending.ability.petalshots", true);
+        perms.setPermission("bending.ability.sapstrike", true);
+        perms.setPermission("bending.ability.petalstorm", true);
         perms.setPermission("bending.ability.energyburst", true);
         perms.setPermission("bending.ability.magmaglaives", true);
         perms.setPermission("bending.ability.moltenblast", true);
         perms.setPermission("bending.ability.eruption", true);
         perms.setPermission("bending.ability.magmawave", true);
-        perms.setPermission("bending.ability.combustionstrike", true);
+        perms.setPermission("bending.ability.combustivestrike", true);
         perms.setPermission("bending.ability.metalshots", true);
         perms.setPermission("bending.ability.metalstrips", true);
         perms.setPermission("bending.ability.metalblade", true);
@@ -471,6 +500,7 @@ public class PermissionUtils {
         perms.setPermission("aranarth.pettransfer", true);
         perms.setPermission("aranarth.ping", true);
         perms.setPermission("aranarth.potions", true);
+        perms.setPermission("aranarth.prefix", true);
         perms.setPermission("aranarth.pronouns", true);
         perms.setPermission("aranarth.quests", true);
         perms.setPermission("aranarth.ranks", true);
@@ -541,7 +571,6 @@ public class PermissionUtils {
         perms.setPermission("aranarth.unmute", false);
         perms.setPermission("aranarth.unban", false);
         perms.setPermission("aranarth.dominion.create", false);
-        perms.setPermission("aranarth.dominion.home", false);
         perms.setPermission("aranarth.give", false);
         perms.setPermission("aranarth.rankset", false);
         perms.setPermission("aranarth.warp.modify", false);
@@ -559,6 +588,41 @@ public class PermissionUtils {
         perms.setPermission("aranarth.heads.player", false);
         perms.setPermission("aranarth.resetquests", false);
         perms.setPermission("aranarth.sudo", false);
+        perms.setPermission("aranarth.ac.council", false);
+        perms.setPermission("aranarth.ac.owner", false);
+        perms.setPermission("aranarth.adminhome", false);
+        perms.setPermission("aranarth.adminmode", false);
+        perms.setPermission("aranarth.admintp", false);
+        perms.setPermission("aranarth.admintp.free", false);
+        perms.setPermission("aranarth.architect", false);
+        perms.setPermission("aranarth.balance.others", false);
+        perms.setPermission("aranarth.brewbook.unlock", false);
+        perms.setPermission("aranarth.councilchat", false);
+        perms.setPermission("aranarth.creative.expand", false);
+        perms.setPermission("aranarth.dominion.admin", false);
+        perms.setPermission("aranarth.element.cooldown", false);
+        perms.setPermission("aranarth.enchant", false);
+        perms.setPermission("aranarth.give.coupon", false);
+        perms.setPermission("aranarth.interactivechat", false);
+        perms.setPermission("aranarth.invswap", false);
+        perms.setPermission("aranarth.jobs.admin", false);
+        perms.setPermission("aranarth.mount.harness", false);
+        perms.setPermission("aranarth.og", false);
+        perms.setPermission("aranarth.plot.spawn", false);
+        perms.setPermission("aranarth.questnpc", false);
+        perms.setPermission("aranarth.shop.biome", false);
+        perms.setPermission("aranarth.sit.toggle", false);
+        perms.setPermission("aranarth.smpcreative", false);
+        perms.setPermission("aranarth.speed", false);
+        perms.setPermission("aranarth.spy", false);
+        perms.setPermission("aranarth.toggle.bypass", false);
+        perms.setPermission("aranarth.unscramble", false);
+        perms.setPermission("aranarth.vanish", false);
+        perms.setPermission("aranarth.vanish.see", false);
+        perms.setPermission("aranarth.vpedit", false);
+        perms.setPermission("aranarth.weather", false);
+        perms.setPermission("aranarth.whisper", false);
+        perms.setPermission("aranarth.worldevent", false);
         perms.setPermission("aranarth.trash", false);
         perms.setPermission("aranarth.enderchest", false);
         perms.setPermission("aranarth.chat.gradient", false);
@@ -593,20 +657,55 @@ public class PermissionUtils {
     }
 
     /**
-     * Sets the permissions for either removing an avatar or for a new avatar.
+     * Restores the original element of the previous Avatar if they still have all the elements, i.e their
+     * reign ended while they were moving between servers.
      *
-     * @param uuid The player's UUID.
+     * @param player The player.
+     */
+    public static void restoreOldAvatarElement(Player player) {
+        Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
+        Avatar previousAvatar = AvatarUtils.getPreviousAvatar();
+        if (previousAvatar == null || !previousAvatar.getUuid().equals(player.getUniqueId())
+                || (currentAvatar != null && currentAvatar.getUuid().equals(player.getUniqueId()))) {
+            return;
+        }
+        BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+        if (bendingPlayer != null && bendingPlayer.getElements().size() > 1) {
+            AvatarUtils.logWarning(AvatarUtils.describe(player.getUniqueId()) + " still has all elements after their reign, restoring their element");
+            updateAvatarPermissions(player.getUniqueId(), true);
+        }
+    }
+
+    /**
+     * Updates the elements and sub-elements for either removing an avatar or for a new avatar.
+     *
+     * @param uuid      The player's UUID.
+     * @param isRemoval Whether the player's reign has ended.
      */
     public static void updateAvatarPermissions(UUID uuid, boolean isRemoval) {
         OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-        BendingPlayer.getOrLoadOfflineAsync(player).thenAccept(bendingPlayer -> {
+        // ProjectKorra's loader fails for them, their element is restored once they join instead
+        if (!AvatarUtils.isLoadable(uuid)) {
+            AvatarUtils.logWarning("Cannot update the elements of " + uuid + " as this server has no name for them, isRemoval=" + isRemoval);
+            return;
+        }
+        // Read now as a new Avatar may be selected while the player's data is loading
+        Avatar previousAvatar = isRemoval ? AvatarUtils.getPreviousAvatar() : null;
+        CompletableFuture<OfflineBendingPlayer> future = BendingPlayer.getOrLoadOfflineAsync(player);
+        boolean wasLoaded = future.isDone();
+        AvatarUtils.logInfo("Updating elements of " + AvatarUtils.describe(uuid) + ", isRemoval=" + isRemoval + ", dataAlreadyLoaded=" + wasLoaded);
+        future.thenAccept(bendingPlayer -> {
             if (bendingPlayer == null) {
+                AvatarUtils.logWarning("No bending data was loaded for " + AvatarUtils.describe(uuid) + ", isRemoval=" + isRemoval);
                 return;
             }
 
             // Remove the old avatar's permissions
             if (isRemoval) {
-                Avatar previousAvatar = AvatarUtils.getAvatars().get(AvatarUtils.getAvatars().size() - 2);
+                if (previousAvatar == null) {
+                    AvatarUtils.logWarning("Cannot restore the element of " + AvatarUtils.describe(uuid) + ", there is no previous Avatar");
+                    return;
+                }
                 // Removes all elements and sub-elements
                 bendingPlayer.getSubElements().clear();
                 bendingPlayer.saveSubElements();
@@ -627,27 +726,10 @@ public class PermissionUtils {
                 }
                 bendingPlayer.addElement(elementToAdd);
                 bendingPlayer.saveElements();
+                AvatarUtils.logInfo("Restored element " + elementToAdd.getName() + " to " + AvatarUtils.describe(uuid));
 
                 // Permissions will be reloaded once they join back if they are not online
                 if (player.isOnline()) {
-                    PermissionAttachment perms = player.getPlayer().addAttachment(AranarthCore.getInstance());
-
-                    // Allow manual element changes for the avatar
-                    perms.setPermission("bending.command.choose", true);
-                    perms.setPermission("bending.command.rechoose", true);
-
-                    // Removing avatar-exclusive permissions
-                    perms.setPermission("bending.avatar", false);
-                    perms.setPermission("bending.ability.avatarstate", false);
-                    perms.setPermission("bending.ability.elementsphere", false);
-                    perms.setPermission("bending.ability.elementsphere.air", false);
-                    perms.setPermission("bending.ability.elementsphere.earth", false);
-                    perms.setPermission("bending.ability.elementsphere.fire", false);
-                    perms.setPermission("bending.ability.elementsphere.water", false);
-                    perms.setPermission("bending.ability.elementsphere.stream", false);
-                    perms.setPermission("bending.ability.spiritbeam", false);
-                    perms.setPermission("bending.ability.LavaFlux", true);
-
                     evaluatePlayerPermissions(player.getPlayer());
                 }
             }
@@ -667,22 +749,9 @@ public class PermissionUtils {
                 }
 
                 for (Element.SubElement subElement : Element.SubElement.getSubElements()) {
-                    // Skips bloodbending, flight, and blue fire
-                    if (subElement != Element.SubElement.BLOOD && subElement != Element.SubElement.FLIGHT) {
-                        if (subElement == Element.SubElement.BLUE_FIRE) {
-                            if (player.isOnline()) {
-                                Player onlinePlayer = player.getPlayer();
-                                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                                if (!onlinePlayer.hasPermission("bending.fire.bluefirebending")) {
-                                    // Removes if they have the sub-element but not the permission (they toggled it)
-                                    if (bendingPlayer.hasSubElement(Element.SubElement.BLUE_FIRE)) {
-                                        bendingPlayer.getSubElements().remove(Element.SubElement.BLUE_FIRE);
-                                        continue;
-                                    }
-                                }
-                            }
-                        }
-
+                    // Skips bloodbending, flight, and blue fire as they follow their permission in updateSubElements()
+                    if (subElement != Element.SubElement.BLOOD && subElement != Element.SubElement.FLIGHT
+                            && subElement != Element.SubElement.BLUE_FIRE) {
                         if (!bendingPlayer.hasSubElement(subElement)) {
                             bendingPlayer.addSubElement(subElement);
                         }
@@ -690,107 +759,119 @@ public class PermissionUtils {
                 }
                 bendingPlayer.saveSubElements();
                 bendingPlayer.saveElements();
+                AvatarUtils.logInfo("Granted all elements to " + AvatarUtils.describe(uuid) + ": " + AvatarUtils.elementNames(bendingPlayer.getElements()));
 
-                if (player.isOnline()) {
-                    Player onlinePlayer = (Player) player;
-                    PermissionAttachment perms = onlinePlayer.addAttachment(AranarthCore.getInstance());
-
-                    // Do not allow manual element changes for the avatar
-                    perms.setPermission("bending.command.choose", false);
-                    perms.setPermission("bending.command.rechoose", false);
-
-                    // Enable all sub-elements
-                    perms.setPermission("bending.water.healing", true);
-                    perms.setPermission("bending.water.plantbending", true);
-                    perms.setPermission("bending.water.bloodbending", true);
-                    perms.setPermission("bending.fire.combustionbending", true);
-                    perms.setPermission("bending.fire.lightningbending", true);
-                    perms.setPermission("bending.earth.metalbending", true);
-                    perms.setPermission("bending.earth.lavabending", true);
-                    perms.setPermission("bending.earth.sandbending", true);
-                    perms.setPermission("bending.air.spiritual", true);
-                    perms.setPermission("bending.air.sound", true);
-                    perms.setPermission("bending.air.flight", true);
-
-                    // Enable all rank-gated abilities
-                    perms.setPermission("bending.ability.waterarms", true);
-                    perms.setPermission("bending.ability.firecomet", true);
-                    perms.setPermission("bending.ability.suffocate", true);
-                    // JedCore abilities
-                    perms.setPermission("bending.ability.SandBlast", true);
-                    perms.setPermission("bending.ability.AcrobatStance", true);
-                    perms.setPermission("bending.ability.WarriorStance", true);
-                    perms.setPermission("bending.ability.MetalShred", true);
-                    perms.setPermission("bending.ability.MagnetShield", true);
-                    perms.setPermission("bending.ability.MetalFragments", true);
-                    perms.setPermission("bending.ability.Meditate", true);
-                    perms.setPermission("bending.ability.LavaThrow", true);
-                    perms.setPermission("bending.ability.Discharge", true);
-                    perms.setPermission("bending.ability.Lightning", true);
-                    perms.setPermission("bending.ability.jolt", true);
-                    perms.setPermission("bending.ability.electricstrike", true);
-                    perms.setPermission("bending.ability.jetbolt", true);
-                    perms.setPermission("bending.ability.static", true);
-                    perms.setPermission("bending.ability.BloodPuppet", true);
-                    perms.setPermission("bending.ability.LavaDisc", true);
-                    perms.setPermission("bending.ability.MagmaBlast", true);
-                    perms.setPermission("bending.ability.LightningBurst", true);
-                    perms.setPermission("bending.ability.Bolt", true);
-                    perms.setPermission("bending.ability.Combustion", true);
-                    perms.setPermission("bending.ability.SwiftStream", true);
-                    // Aranarth abilities now rank-gated
-                    perms.setPermission("bending.ability.airsnipe", true);
-                    perms.setPermission("bending.ability.jetstream", true);
-                    perms.setPermission("bending.ability.astralprojection", true);
-                    perms.setPermission("bending.ability.astralshot", true);
-                    perms.setPermission("bending.ability.vinewhip", true);
-                    perms.setPermission("bending.ability.sonicboom", true);
-                    perms.setPermission("bending.ability.cableslash", true);
-                    perms.setPermission("bending.ability.sandstorm", true);
-                    perms.setPermission("bending.ability.iceshards", true);
-                    perms.setPermission("bending.ability.barrage", true);
-                    perms.setPermission("bending.ability.angeredspirits", true);
-                    perms.setPermission("bending.ability.burial", true);
-                    perms.setPermission("bending.ability.deafeningscream", true);
-                    perms.setPermission("bending.ability.sonicpulse", true);
-                    perms.setPermission("bending.ability.toxicspores", true);
-                    perms.setPermission("bending.ability.leafscythe", true);
-                    perms.setPermission("bending.ability.rootsnare", true);
-                    perms.setPermission("bending.ability.energyburst", true);
-                    perms.setPermission("bending.ability.lightofraava", true);
-                    perms.setPermission("bending.ability.magmaglaives", true);
-                    perms.setPermission("bending.ability.moltenblast", true);
-                    perms.setPermission("bending.ability.eruption", true);
-                    perms.setPermission("bending.ability.magmawave", true);
-                    perms.setPermission("bending.ability.combustionstrike", true);
-                    perms.setPermission("bending.ability.metalshots", true);
-                    perms.setPermission("bending.ability.metalstrips", true);
-                    perms.setPermission("bending.ability.metalshred", true);
-                    perms.setPermission("bending.ability.metalblade", true);
-                    perms.setPermission("bending.ability.cablethrash", true);
-                    perms.setPermission("bending.ability.daggervolley", true);
-                    perms.setPermission("bending.ability.bloodfreeze", true);
-                    perms.setPermission("bending.ability.disalignment", true);
-                    perms.setPermission("bending.ability.liferip", true);
-
-                    // Adding avatar-exclusive permissions
-                    perms.setPermission("bending.avatar", true);
-                    perms.setPermission("bending.ability.avatarstate", true);
-                    perms.setPermission("bending.ability.elementsphere", true);
-                    perms.setPermission("bending.ability.spiritbeam", true);
-                    perms.setPermission("bending.ability.elementsphere.air", true);
-                    perms.setPermission("bending.ability.elementsphere.earth", true);
-                    perms.setPermission("bending.ability.elementsphere.fire", true);
-                    perms.setPermission("bending.ability.elementsphere.water", true);
-                    perms.setPermission("bending.ability.elementsphere.stream", true);
-                    perms.setPermission("bending.ability.pastlives", true);
-                    perms.setPermission("bending.ability.lightofraava", true);
+                // The player's data was still loading, so their sub-elements could not be updated with their permissions
+                if (!wasLoaded && player.isOnline()) {
+                    updateSubElements(player.getPlayer());
                 }
             }
+        }).exceptionally(ex -> {
+            // Anything thrown above would otherwise disappear without a trace
+            AvatarUtils.logError("FAILED to update the elements of " + uuid + ", isRemoval=" + isRemoval, ex);
+            return null;
         });
+    }
 
+    /**
+     * Adds the permissions of the current Avatar.
+     *
+     * @param perms The permissions the player will have access to.
+     */
+    private static void setAvatarPermissions(PermissionAttachment perms) {
+        // Do not allow manual element changes for the avatar
+        perms.setPermission("bending.command.choose", false);
+        perms.setPermission("bending.command.rechoose", false);
 
-        return;
+        // Enable all sub-elements, with flight remaining locked to its rank
+        perms.setPermission("bending.water.healing", true);
+        perms.setPermission("bending.water.plantbending", true);
+        perms.setPermission("bending.water.bloodbending", true);
+        perms.setPermission("bending.fire.combustionbending", true);
+        perms.setPermission("bending.fire.lightningbending", true);
+        perms.setPermission("bending.earth.metalbending", true);
+        perms.setPermission("bending.earth.lavabending", true);
+        perms.setPermission("bending.earth.sandbending", true);
+        perms.setPermission("bending.air.spiritual", true);
+        perms.setPermission("bending.air.sound", true);
+
+        // Enable all rank-gated abilities
+        perms.setPermission("bending.ability.waterarms", true);
+        perms.setPermission("bending.ability.firecomet", true);
+        perms.setPermission("bending.ability.suffocate", true);
+        // JedCore abilities
+        perms.setPermission("bending.ability.SandBlast", true);
+        perms.setPermission("bending.ability.AcrobatStance", true);
+        perms.setPermission("bending.ability.WarriorStance", true);
+        perms.setPermission("bending.ability.MetalShred", true);
+        perms.setPermission("bending.ability.MagnetShield", true);
+        perms.setPermission("bending.ability.MetalFragments", true);
+        perms.setPermission("bending.ability.Meditate", true);
+        perms.setPermission("bending.ability.LavaThrow", true);
+        perms.setPermission("bending.ability.Discharge", true);
+        perms.setPermission("bending.ability.Lightning", true);
+        perms.setPermission("bending.ability.jolt", true);
+        perms.setPermission("bending.ability.electricstrike", true);
+        perms.setPermission("bending.ability.jetbolt", true);
+        perms.setPermission("bending.ability.static", true);
+        perms.setPermission("bending.ability.BloodPuppet", true);
+        perms.setPermission("bending.ability.LavaDisc", true);
+        perms.setPermission("bending.ability.MagmaBlast", true);
+        perms.setPermission("bending.ability.LightningBurst", true);
+        perms.setPermission("bending.ability.Bolt", true);
+        perms.setPermission("bending.ability.Combustion", true);
+        perms.setPermission("bending.ability.SwiftStream", true);
+        // Aranarth abilities now rank-gated
+        perms.setPermission("bending.ability.airsnipe", true);
+        perms.setPermission("bending.ability.jetstream", true);
+        perms.setPermission("bending.ability.astralprojection", true);
+        perms.setPermission("bending.ability.astralshot", true);
+        perms.setPermission("bending.ability.vinewhip", true);
+        perms.setPermission("bending.ability.sonicboom", true);
+        perms.setPermission("bending.ability.cableslash", true);
+        perms.setPermission("bending.ability.sandstorm", true);
+        perms.setPermission("bending.ability.iceshards", true);
+        perms.setPermission("bending.ability.barrage", true);
+        perms.setPermission("bending.ability.angeredspirits", true);
+        perms.setPermission("bending.ability.burial", true);
+        perms.setPermission("bending.ability.deafeningscream", true);
+        perms.setPermission("bending.ability.sonicpulse", true);
+        perms.setPermission("bending.ability.spores", true);
+        perms.setPermission("bending.ability.leafscythe", true);
+        perms.setPermission("bending.ability.rootsnare", true);
+        perms.setPermission("bending.ability.petalrush", true);
+        perms.setPermission("bending.ability.petalshots", true);
+        perms.setPermission("bending.ability.sapstrike", true);
+        perms.setPermission("bending.ability.petalstorm", true);
+        perms.setPermission("bending.ability.energyburst", true);
+        perms.setPermission("bending.ability.lightofraava", true);
+        perms.setPermission("bending.ability.magmaglaives", true);
+        perms.setPermission("bending.ability.moltenblast", true);
+        perms.setPermission("bending.ability.eruption", true);
+        perms.setPermission("bending.ability.magmawave", true);
+        perms.setPermission("bending.ability.combustivestrike", true);
+        perms.setPermission("bending.ability.metalshots", true);
+        perms.setPermission("bending.ability.metalstrips", true);
+        perms.setPermission("bending.ability.metalshred", true);
+        perms.setPermission("bending.ability.metalblade", true);
+        perms.setPermission("bending.ability.cablethrash", true);
+        perms.setPermission("bending.ability.daggervolley", true);
+        perms.setPermission("bending.ability.bloodfreeze", true);
+        perms.setPermission("bending.ability.disalignment", true);
+        perms.setPermission("bending.ability.liferip", true);
+
+        // Adding avatar-exclusive permissions
+        perms.setPermission("bending.avatar", true);
+        perms.setPermission("bending.ability.avatarstate", true);
+        perms.setPermission("bending.ability.elementsphere", true);
+        perms.setPermission("bending.ability.spiritbeam", true);
+        perms.setPermission("bending.ability.elementsphere.air", true);
+        perms.setPermission("bending.ability.elementsphere.earth", true);
+        perms.setPermission("bending.ability.elementsphere.fire", true);
+        perms.setPermission("bending.ability.elementsphere.water", true);
+        perms.setPermission("bending.ability.elementsphere.stream", true);
+        perms.setPermission("bending.ability.pastlives", true);
+        perms.setPermission("bending.ability.lightofraava", true);
     }
 
     /**
@@ -918,10 +999,14 @@ public class PermissionUtils {
         // Esquire
         if (rank >= 1) {
             perms.setPermission("bending.water.plantbending", true);
+            perms.setPermission("bending.ability.vinewhip", true);            // plant
+            perms.setPermission("bending.ability.leafscythe", true);          // plant
+            perms.setPermission("bending.ability.rootsnare", true);           // plant
+            perms.setPermission("bending.ability.petalshots", true);          // plant
+            perms.setPermission("bending.ability.sapstrike", true);           // plant
             perms.setPermission("bending.earth.sandbending", true);
             perms.setPermission("bending.ability.SandBlast", true);          // JedCore sand
             perms.setPermission("aranarth.seen", true);
-            perms.setPermission("aranarth.dominion.home", true);
             perms.setPermission("aranarth.mount", true);
         } else {
             return;
@@ -948,10 +1033,8 @@ public class PermissionUtils {
             perms.setPermission("bending.air.spiritual", true);
             perms.setPermission("bending.ability.waterarms", true);
             perms.setPermission("bending.ability.Meditate", true);            // JedCore spiritual
-            perms.setPermission("bending.ability.toxicspores", true);         // plant
-            perms.setPermission("bending.ability.vinewhip", true);            // plant
-            perms.setPermission("bending.ability.leafscythe", true);          // plant
-            perms.setPermission("bending.ability.rootsnare", true);           // plant
+            perms.setPermission("bending.ability.spores", true);              // plant
+            perms.setPermission("bending.ability.petalrush", true);           // plant
             perms.setPermission("bending.ability.sandstorm", true);           // sand
             perms.setPermission("bending.ability.burial", true);              // sand
             perms.setPermission("bending.ability.cablethrash", true);         // metal
@@ -989,6 +1072,7 @@ public class PermissionUtils {
             perms.setPermission("bending.ability.suffocate", true);
             perms.setPermission("bending.ability.astralprojection", true);    // spiritual
             perms.setPermission("bending.ability.astralshot", true);          // spiritual combo
+            perms.setPermission("bending.ability.petalstorm", true);          // plant combo
             perms.setPermission("bending.ability.LavaThrow", true);           // JedCore lava
             perms.setPermission("aranarth.nick", true);
             perms.setPermission("bending.command.preset.create.12", true);
@@ -1051,7 +1135,7 @@ public class PermissionUtils {
             perms.setPermission("bending.ability.eruption", true);            // lava
             perms.setPermission("bending.ability.Fissure", true);             // JedCore lava
             perms.setPermission("bending.ability.Combustion", true);          // JedCore combustion
-            perms.setPermission("bending.ability.combustionstrike", true);    // combustion
+            perms.setPermission("bending.ability.combustivestrike", true);    // combustion
             perms.setPermission("bending.ability.barrage", true);             // combustion
             perms.setPermission("bending.ability.SwiftStream", true);         // JedCore flight combo
             perms.setPermission("bending.command.preset.create.25", true);
@@ -1064,8 +1148,9 @@ public class PermissionUtils {
      * Re-evaluates the player's temporary saint status.
      *
      * @param player The player.
+     * @return True if the player's Saint rank expired, meaning their permissions must be re-evaluated.
      */
-    public static void reEvaluateMonthlySaints(Player player) {
+    public static boolean reEvaluateMonthlySaints(Player player) {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
         if (aranarthPlayer.getSaintExpireDate() != 0) {
             Instant now = Instant.now();
@@ -1074,8 +1159,10 @@ public class PermissionUtils {
                 aranarthPlayer.setSaintRank(aranarthPlayer.getPermanentSaintRank());
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "rank.saint_expired")));
+                return true;
             }
         }
+        return false;
     }
 
     /**
@@ -1101,6 +1188,10 @@ public class PermissionUtils {
             perms.setPermission("aranarth.blacklist", true);
             perms.setPermission("aranarth.tables", true);
             perms.setPermission("aranarth.trash", true);
+            perms.setPermission("aranarth.element.cooldown", true);
+            perms.setPermission("aranarth.mount.harness", true);
+            perms.setPermission("aranarth.shop.biome", true);
+            perms.setPermission("aranarth.sit.toggle", true);
             perms.setPermission("aranarthcore.armorstand.athena", true);
             perms.setPermission("aranarthcore.armorstand.athenamirrored", true);
             perms.setPermission("aranarthcore.armorstand.brandish", true);
@@ -1122,6 +1213,7 @@ public class PermissionUtils {
             perms.setPermission("aranarthcore.armorstand.salute", true);
             perms.setPermission("aranarthcore.armorstand.zombie", true);
             perms.setPermission("aranarth.gate", true);
+            perms.setPermission("aranarth.interactivechat", true);
             perms.setPermission("aranarth.invisiblearmor", true);
         } else {
             return;
@@ -1153,9 +1245,10 @@ public class PermissionUtils {
      */
     private static void setCreativeWorldEditPermissions(Player player, PermissionAttachment perms, AranarthPlayer aranarthPlayer) {
         String worldName = player.getWorld().getName();
+        boolean isArchitectEditing = aranarthPlayer.getArchitectRank() >= 1 && aranarthPlayer.isInArchitectMode();
         if (PlotUtils.isSmpCreativeWorld(worldName)) {
             perms.setPermission("worldedit.*", true);
-            if (aranarthPlayer.getCouncilRank() == 0 && aranarthPlayer.getArchitectRank() == 0) {
+            if (aranarthPlayer.getCouncilRank() == 0 && !isArchitectEditing) {
                 // Nothing that reaches another world, the server's files, or other players' mobs
                 for (String node : List.of("worldedit.world", "worldedit.schematic.*", "worldedit.schematic.load",
                         "worldedit.schematic.save", "worldedit.schematic.delete", "worldedit.schematic.list",
@@ -1168,17 +1261,20 @@ public class PermissionUtils {
             return;
         }
         if (!PlotUtils.isPlotWorld(worldName)) {
+            if (isArchitectEditing) {
+                perms.setPermission("worldedit.*", true);
+            }
             return;
         }
 
-        if (aranarthPlayer.getCouncilRank() > 0) {
+        if (aranarthPlayer.getCouncilRank() > 0 || isArchitectEditing) {
             perms.setPermission("worldedit.*", true);
             return;
         }
 
         // Negate everything first so that only the permissions below are granted
         perms.setPermission("worldedit.*", false);
-        int tier = PlotUtils.getSaintTier(aranarthPlayer);
+        int tier = aranarthPlayer.getSaintRank();
         if (tier == 0) {
             return;
         }
@@ -1210,7 +1306,7 @@ public class PermissionUtils {
             return;
         }
 
-        // Saint III and Architect - brushes and masks
+        // Saint III - brushes and masks
         for (String node : List.of(
                 "worldedit.brush.sphere", "worldedit.brush.cylinder", "worldedit.brush.smooth",
                 "worldedit.brush.clipboard", "worldedit.brush.gravity",
@@ -1243,6 +1339,13 @@ public class PermissionUtils {
             perms.setPermission("aranarth.nick.color", true);
             perms.setPermission("aranarth.nick.hex", true);
             perms.setPermission("aranarth.nick.gradient", true);
+            perms.setPermission("aranarth.ac.council", true);
+            perms.setPermission("aranarth.architect", true);
+            perms.setPermission("aranarth.councilchat", true);
+            perms.setPermission("aranarth.interactivechat", true);
+            perms.setPermission("aranarth.smpcreative", true);
+            perms.setPermission("aranarth.speed", true);
+            perms.setPermission("aranarth.toggle.bypass", true);
             setSaintPermissions(perms, 1);
         } else {
             return;
@@ -1259,6 +1362,8 @@ public class PermissionUtils {
             perms.setPermission("aranarth.heads.player", true);
             perms.setPermission("aranarth.resetquests", true);
             perms.setPermission("minecraft.command.gamemode", true);
+            perms.setPermission("aranarth.admintp", true);
+            perms.setPermission("aranarth.give.coupon", true);
             setSaintPermissions(perms, 2);
         } else {
             return;
@@ -1274,6 +1379,29 @@ public class PermissionUtils {
             perms.setPermission("aranarth.vote.test", true);
             perms.setPermission("aranarth.sudo", true);
             perms.setPermission("aranarth.shop.modify", true);
+            perms.setPermission("worldedit.*", true);
+            perms.setPermission("aranarth.ac.owner", true);
+            perms.setPermission("aranarth.adminhome", true);
+            perms.setPermission("aranarth.adminmode", true);
+            perms.setPermission("aranarth.admintp.free", true);
+            perms.setPermission("aranarth.balance.others", true);
+            perms.setPermission("aranarth.brewbook.unlock", true);
+            perms.setPermission("aranarth.creative.expand", true);
+            perms.setPermission("aranarth.dominion.admin", true);
+            perms.setPermission("aranarth.enchant", true);
+            perms.setPermission("aranarth.invswap", true);
+            perms.setPermission("aranarth.jobs.admin", true);
+            perms.setPermission("aranarth.og", true);
+            perms.setPermission("aranarth.plot.spawn", true);
+            perms.setPermission("aranarth.questnpc", true);
+            perms.setPermission("aranarth.spy", true);
+            perms.setPermission("aranarth.unscramble", true);
+            perms.setPermission("aranarth.vanish", true);
+            perms.setPermission("aranarth.vanish.see", true);
+            perms.setPermission("aranarth.vpedit", true);
+            perms.setPermission("aranarth.weather", true);
+            perms.setPermission("aranarth.whisper", true);
+            perms.setPermission("aranarth.worldevent", true);
             setSaintPermissions(perms, 3);
             setArchitectPermissions(perms, 1);
         } else {
@@ -1331,9 +1459,12 @@ public class PermissionUtils {
         }
 
         if (architectRank == 1) {
+            perms.setPermission("aranarth.architect", true);
+            perms.setPermission("aranarth.councilchat", true);
+            perms.setPermission("aranarth.smpcreative", true);
+            perms.setPermission("aranarth.speed", true);
             perms.setPermission("aranarth.ac", true);
             perms.setPermission("aranarth.creative", true);
-            perms.setPermission("worldedit.*", true);
             perms.setPermission("aranarth.heads.player", true);
             perms.setPermission("aranarth.gate", true);
             perms.setPermission("aranarth.nick", true);

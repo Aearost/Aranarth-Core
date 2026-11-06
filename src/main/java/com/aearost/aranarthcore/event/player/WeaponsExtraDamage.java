@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
+import org.bukkit.Tag;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.damage.DamageType;
 import org.bukkit.enchantments.Enchantment;
@@ -137,7 +138,9 @@ public class WeaponsExtraDamage {
                     if (essenceType != null) {
                         int level = AranarthUtils.getEssenceLevel(weapon);
                         if (essenceType.equals("essence_lifesteal")) {
-                            if (e.getDamageSource().getDamageType() == DamageType.PLAYER_ATTACK) {
+                            // Undead mobs have no life to steal
+                            if (e.getDamageSource().getDamageType() == DamageType.PLAYER_ATTACK
+                                    && !Tag.ENTITY_TYPES_UNDEAD.isTagged(entity.getType())) {
                                 double healAmount = 0;
                                 if (level == 1) {
                                     healAmount = e.getDamage() * 0.15;

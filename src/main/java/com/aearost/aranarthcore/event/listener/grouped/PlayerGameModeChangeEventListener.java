@@ -2,6 +2,8 @@ package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralProjection;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.airbending.AirScooter;
 import com.projectkorra.projectkorra.airbending.AirSpout;
@@ -74,6 +76,8 @@ public class PlayerGameModeChangeEventListener implements Listener {
         Player player = e.getPlayer();
         GameMode to = e.getNewGameMode();
 
+        logArchitectGameMode(e);
+
         if (to == GameMode.SURVIVAL) {
             new BukkitRunnable() {
                 @Override
@@ -104,6 +108,21 @@ public class PlayerGameModeChangeEventListener implements Listener {
                 }
             }.runTaskLater(plugin, 1L);
         }
+    }
+
+    /**
+     * Logs an Architect's game mode changes, as creative mode shares the Survival inventory at spawn.
+     */
+    private void logArchitectGameMode(PlayerGameModeChangeEvent e) {
+        Player player = e.getPlayer();
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        String worldName = player.getWorld().getName();
+        if (e.isCancelled() || aranarthPlayer == null || aranarthPlayer.getArchitectRank() == 0
+                || AranarthUtils.hasUnrestrictedGameMode(player) || AranarthUtils.getInventoryGroup(worldName).equals("creative")) {
+            return;
+        }
+        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Architect] " + player.getName() + " changed from "
+                + player.getGameMode().name().toLowerCase() + " to " + e.getNewGameMode().name().toLowerCase() + " mode in " + worldName);
     }
 
     /**

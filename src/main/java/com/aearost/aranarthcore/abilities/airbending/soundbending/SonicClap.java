@@ -172,7 +172,7 @@ public class SonicClap extends SoundAbility implements AddonAbility {
             Vector offset = right.clone().multiply(Math.cos(angle) * HALO_RADIUS)
                     .add(up.clone().multiply(Math.sin(angle) * HALO_RADIUS));
             Location point = center.clone().add(offset);
-            point.getWorld().spawnParticle(Particle.DUST, point, 1, 0, 0, 0, 0, CLAP_DUST);
+            AranarthBendingUtils.spawnParticle(point.getWorld(), Particle.DUST, point, 1, 0, 0, 0, 0, CLAP_DUST);
         }
     }
 

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.objects;
 
 import com.aearost.aranarthcore.enums.FireType;
+import com.aearost.aranarthcore.enums.PrefixStyle;
 import com.aearost.aranarthcore.enums.Pronouns;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -30,6 +31,10 @@ public class AranarthPlayer {
     private float survivalSaturation;
     private int survivalExpLevel;
     private float survivalExpProgress;
+    private String survivalEffects = "";
+    // -1 means the value was never saved, so the server's own player data is used
+    private double lifeRipDrain = -1;
+    private double lifeRipGain = -1;
     private String arenaInventory;
     private String creativeInventory;
     private int blacklistingMethod;
@@ -119,7 +124,11 @@ public class AranarthPlayer {
     private boolean isReaperDisabled = false;
     private boolean isServerTipsDisabled = false;
     private boolean isSitDisabled = false;
+    private boolean isJobsMessageDisabled = false;
     private String sitCushionColor = "WHITE";
+    private PrefixStyle councilPrefixStyle = PrefixStyle.SYMBOL;
+    private PrefixStyle saintPrefixStyle = PrefixStyle.SYMBOL;
+    private PrefixStyle rankPrefixStyle = PrefixStyle.FULL;
     private int joinSoundVolume = 100;
     private int leaveSoundVolume = 100;
     private int voteSoundVolume = 100;
@@ -423,6 +432,39 @@ public class AranarthPlayer {
 
     public void setSurvivalHealth(double survivalHealth) {
         this.survivalHealth = survivalHealth;
+    }
+
+    /**
+     * Provides the potion effects the player had in Survival, serialized by AranarthUtils.serializePotionEffects().
+     */
+    public String getSurvivalEffects() {
+        return survivalEffects;
+    }
+
+    public void setSurvivalEffects(String survivalEffects) {
+        this.survivalEffects = survivalEffects;
+    }
+
+    /**
+     * Provides the maximum health taken from the player by LifeRip, or -1 if it was never saved.
+     */
+    public double getLifeRipDrain() {
+        return lifeRipDrain;
+    }
+
+    public void setLifeRipDrain(double lifeRipDrain) {
+        this.lifeRipDrain = lifeRipDrain;
+    }
+
+    /**
+     * Provides the maximum health gained by the player from LifeRip, or -1 if it was never saved.
+     */
+    public double getLifeRipGain() {
+        return lifeRipGain;
+    }
+
+    public void setLifeRipGain(double lifeRipGain) {
+        this.lifeRipGain = lifeRipGain;
     }
 
     public int getSurvivalFoodLevel() {
@@ -2139,12 +2181,74 @@ public class AranarthPlayer {
         this.isSitDisabled = sitDisabled;
     }
 
+    public boolean isJobsMessageDisabled() {
+        return isJobsMessageDisabled;
+    }
+
+    public void setJobsMessageDisabled(boolean jobsMessageDisabled) {
+        this.isJobsMessageDisabled = jobsMessageDisabled;
+    }
+
     public String getSitCushionColor() {
         return sitCushionColor;
     }
 
     public void setSitCushionColor(String sitCushionColor) {
         this.sitCushionColor = sitCushionColor;
+    }
+
+    public PrefixStyle getCouncilPrefixStyle() {
+        return councilPrefixStyle;
+    }
+
+    public void setCouncilPrefixStyle(PrefixStyle councilPrefixStyle) {
+        this.councilPrefixStyle = councilPrefixStyle;
+    }
+
+    public PrefixStyle getSaintPrefixStyle() {
+        return saintPrefixStyle;
+    }
+
+    public void setSaintPrefixStyle(PrefixStyle saintPrefixStyle) {
+        this.saintPrefixStyle = saintPrefixStyle;
+    }
+
+    public PrefixStyle getRankPrefixStyle() {
+        return rankPrefixStyle;
+    }
+
+    public void setRankPrefixStyle(PrefixStyle rankPrefixStyle) {
+        this.rankPrefixStyle = rankPrefixStyle;
+    }
+
+    /**
+     * Provides the styles this player sees everyone's council, saint, and rank prefixes in.
+     *
+     * @return The council, saint, and rank prefix styles.
+     */
+    public PrefixStyle[] getPrefixStyles() {
+        return new PrefixStyle[]{councilPrefixStyle, saintPrefixStyle, rankPrefixStyle};
+    }
+
+    /**
+     * Provides the player's council, saint, and rank prefix styles encoded into a single String.
+     *
+     * @return The encoded prefix styles.
+     */
+    public String getEncodedPrefixStyles() {
+        return PrefixStyle.encode(councilPrefixStyle, saintPrefixStyle, rankPrefixStyle);
+    }
+
+    /**
+     * Applies the prefix styles from a String created by getEncodedPrefixStyles().
+     *
+     * @param encoded The encoded prefix styles.
+     */
+    public void setEncodedPrefixStyles(String encoded) {
+        PrefixStyle[] styles = PrefixStyle.decode(encoded);
+        this.councilPrefixStyle = styles[0];
+        this.saintPrefixStyle = styles[1];
+        this.rankPrefixStyle = styles[2];
     }
 
     public String getLanguage() {

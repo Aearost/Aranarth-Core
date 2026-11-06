@@ -39,7 +39,7 @@ public class BrewingListener implements Listener {
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onBrew(BrewEvent e) {
         BrewerInventory brewer = e.getContents();
         Location loc = brewer.getLocation();

@@ -208,7 +208,7 @@ public class SonicPulse extends SoundAbility implements AddonAbility {
             Vector offset = right.clone().multiply(Math.cos(angle) * pulse.visualRadius)
                     .add(up.clone().multiply(Math.sin(angle) * pulse.visualRadius));
             Location point = center.clone().add(offset);
-            point.getWorld().spawnParticle(Particle.DUST, point, 1, 0, 0, 0, 0, PULSE_DUST);
+            AranarthBendingUtils.spawnParticle(point.getWorld(), Particle.DUST, point, 1, 0, 0, 0, 0, PULSE_DUST);
         }
     }
 

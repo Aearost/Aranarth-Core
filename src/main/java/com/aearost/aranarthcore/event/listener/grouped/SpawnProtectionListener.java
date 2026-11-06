@@ -42,13 +42,14 @@ public class SpawnProtectionListener implements Listener {
 
     /**
      * Provides whether the player bypasses the spawn protections at the location.
-     * Players in architect mode can build in the spawn world and in the Creative spawn plots.
+     * Players in architect mode can build in the spawn world, the Creative spawn plots and the arena spawn.
      */
     private boolean canModify(Player player, Location loc) {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
         return aranarthPlayer.isInAdminMode()
                 || (aranarthPlayer.isInArchitectMode()
-                && (loc.getWorld().getName().equals("spawn") || PlotUtils.isSpawnPlotLocation(loc)));
+                && (loc.getWorld().getName().equals("spawn") || PlotUtils.isSpawnPlotLocation(loc)
+                || AranarthUtils.isArenaSpawnLocation(loc)));
     }
 
     /**
@@ -56,7 +57,7 @@ public class SpawnProtectionListener implements Listener {
      */
     @EventHandler
     public void onPlace(BlockPlaceEvent e) {
-        if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
+        if (AranarthUtils.isProtectedSpawnLocation(e.getBlock().getLocation())) {
             if (!canModify(e.getPlayer(), e.getBlock().getLocation())) {
                 e.setCancelled(true);
             }
@@ -68,7 +69,7 @@ public class SpawnProtectionListener implements Listener {
      */
     @EventHandler
     public void onBucketEmpty(PlayerBucketEmptyEvent e) {
-        if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
+        if (AranarthUtils.isProtectedSpawnLocation(e.getBlock().getLocation())) {
             if (!canModify(e.getPlayer(), e.getBlock().getLocation())) {
                 e.setCancelled(true);
             }
@@ -84,7 +85,7 @@ public class SpawnProtectionListener implements Listener {
         if (blockType != Material.WATER && blockType != Material.LAVA && blockType != Material.POWDER_SNOW) {
             return;
         }
-        if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
+        if (AranarthUtils.isProtectedSpawnLocation(e.getBlock().getLocation())) {
             if (!canModify(e.getPlayer(), e.getBlock().getLocation())) {
                 e.setCancelled(true);
             }
@@ -96,7 +97,7 @@ public class SpawnProtectionListener implements Listener {
      */
     @EventHandler
     public void onBreak(BlockBreakEvent e) {
-        if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
+        if (AranarthUtils.isProtectedSpawnLocation(e.getBlock().getLocation())) {
             if (!canModify(e.getPlayer(), e.getBlock().getLocation())) {
                 e.setCancelled(true);
             }
@@ -109,7 +110,7 @@ public class SpawnProtectionListener implements Listener {
     @EventHandler
     public void onInteractEntity(PlayerInteractEntityEvent e) {
         if (e.getRightClicked() != null) {
-            if (AranarthUtils.isSpawnLocation(e.getRightClicked().getLocation())) {
+            if (AranarthUtils.isProtectedSpawnLocation(e.getRightClicked().getLocation())) {
                 if (!canModify(e.getPlayer(), e.getRightClicked().getLocation())) {
                     e.setCancelled(true);
                 }
@@ -122,7 +123,7 @@ public class SpawnProtectionListener implements Listener {
      */
     @EventHandler
     public void onArmorStandManipulate(PlayerArmorStandManipulateEvent e) {
-        if (AranarthUtils.isSpawnLocation(e.getRightClicked().getLocation())) {
+        if (AranarthUtils.isProtectedSpawnLocation(e.getRightClicked().getLocation())) {
             if (!canModify(e.getPlayer(), e.getRightClicked().getLocation())) {
                 e.setCancelled(true);
             }
@@ -135,7 +136,7 @@ public class SpawnProtectionListener implements Listener {
     @EventHandler
     public void onPlaceEntity(EntityPlaceEvent e) {
         if (e.getEntity() != null) {
-            if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
+            if (AranarthUtils.isProtectedSpawnLocation(e.getEntity().getLocation())) {
                 if (e.getPlayer() != null && !canModify(e.getPlayer(), e.getEntity().getLocation())) {
                     e.setCancelled(true);
                 }
@@ -149,7 +150,7 @@ public class SpawnProtectionListener implements Listener {
     @EventHandler
     public void onAttackEntity(EntityDamageEvent e) {
         if (e.getEntity() != null) {
-            if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
+            if (AranarthUtils.isProtectedSpawnLocation(e.getEntity().getLocation())) {
                 if (e.getDamageSource().getCausingEntity() instanceof Player player) {
                     if (!canModify(player, e.getEntity().getLocation())) {
                         e.setCancelled(true);
@@ -164,7 +165,7 @@ public class SpawnProtectionListener implements Listener {
      */
     @EventHandler
     public void onHangingBreak(HangingBreakByEntityEvent e) {
-        if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
+        if (AranarthUtils.isProtectedSpawnLocation(e.getEntity().getLocation())) {
             if (e.getRemover() instanceof Player player) {
                 if (!canModify(player, e.getEntity().getLocation())) {
                     e.setCancelled(true);
@@ -178,7 +179,7 @@ public class SpawnProtectionListener implements Listener {
      */
     @EventHandler
     public void onEntityPlace(HangingPlaceEvent e) {
-        if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
+        if (AranarthUtils.isProtectedSpawnLocation(e.getEntity().getLocation())) {
             if (e.getPlayer() != null && !canModify(e.getPlayer(), e.getEntity().getLocation())) {
                 e.setCancelled(true);
             }
@@ -190,7 +191,7 @@ public class SpawnProtectionListener implements Listener {
      */
     @EventHandler
     public void onSignOpen(PlayerOpenSignEvent e) {
-        if (AranarthUtils.isSpawnLocation(e.getSign().getLocation())) {
+        if (AranarthUtils.isProtectedSpawnLocation(e.getSign().getLocation())) {
             if (!canModify(e.getPlayer(), e.getSign().getLocation())) {
                 e.setCancelled(true);
             }
@@ -202,7 +203,7 @@ public class SpawnProtectionListener implements Listener {
      */
     @EventHandler
     public void onFireCreate(BlockIgniteEvent e) {
-        if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
+        if (AranarthUtils.isProtectedSpawnLocation(e.getBlock().getLocation())) {
             e.setCancelled(true);
         }
     }
@@ -212,7 +213,7 @@ public class SpawnProtectionListener implements Listener {
      */
     @EventHandler
     public void onMobSpawn(CreatureSpawnEvent e) {
-        if (AranarthUtils.isSpawnLocation(e.getLocation())) {
+        if (AranarthUtils.isProtectedSpawnLocation(e.getLocation())) {
             if (e.getEntityType() != EntityType.ARMOR_STAND && e.getEntityType() != EntityType.MANNEQUIN) {
                 // Allow the spawning of the Quest NPC
                 if (e.getEntity() instanceof Villager villager) {
@@ -244,7 +245,7 @@ public class SpawnProtectionListener implements Listener {
     public void onInteract(PlayerInteractEvent e) {
         Block block = e.getClickedBlock();
         if (block != null) {
-            if (AranarthUtils.isSpawnLocation(block.getLocation())) {
+            if (AranarthUtils.isProtectedSpawnLocation(block.getLocation())) {
                 if (AranarthUtils.isContainerBlock(block) || block.getType().name().endsWith("_SIGN") || block.getType() == Material.NOTE_BLOCK
                         || block.getType() == Material.SMOKER || block.getType() == Material.BLAST_FURNACE || block.getType() == Material.FURNACE
                         || block.getType() == Material.JUKEBOX || block.getType() == Material.LEVER || block.getType().name().endsWith("_TRAPDOOR")
@@ -270,7 +271,7 @@ public class SpawnProtectionListener implements Listener {
      */
     @EventHandler
     public void onTakeLecternBook(PlayerTakeLecternBookEvent e) {
-        if (AranarthUtils.isSpawnLocation(e.getLectern().getLocation())) {
+        if (AranarthUtils.isProtectedSpawnLocation(e.getLectern().getLocation())) {
             if (!canModify(e.getPlayer(), e.getLectern().getLocation())) {
                 e.setCancelled(true);
             }
@@ -282,7 +283,7 @@ public class SpawnProtectionListener implements Listener {
      */
     @EventHandler
     private void onEnderPearlThrow(ProjectileLaunchEvent e) {
-        if (AranarthUtils.isSpawnLocation(e.getLocation())) {
+        if (AranarthUtils.isProtectedSpawnLocation(e.getLocation())) {
             if (e.getEntityType() == EntityType.ENDER_PEARL || e.getEntityType() == EntityType.ARROW
                     || e.getEntityType() == EntityType.SPECTRAL_ARROW || e.getEntityType() == EntityType.TRIDENT
                     || e.getEntityType() == EntityType.FIREBALL || e.getEntityType() == EntityType.SMALL_FIREBALL
@@ -304,7 +305,7 @@ public class SpawnProtectionListener implements Listener {
      */
     @EventHandler
     private void onChorusFruitEat(PlayerItemConsumeEvent e) {
-        if (AranarthUtils.isSpawnLocation(e.getPlayer().getLocation())) {
+        if (AranarthUtils.isProtectedSpawnLocation(e.getPlayer().getLocation())) {
             if (e.getItem().getType() == Material.CHORUS_FRUIT) {
                 e.setCancelled(true);
                 e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "spawn.no_item_use")));
@@ -317,7 +318,7 @@ public class SpawnProtectionListener implements Listener {
      */
     @EventHandler
     private void onDamage(EntityDamageEvent e) {
-        if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
+        if (AranarthUtils.isProtectedSpawnLocation(e.getEntity().getLocation())) {
             if (e.getEntity() instanceof Player target) {
                 if (e.getDamageSource().getCausingEntity() instanceof Player attacker) {
                     attacker.sendMessage(ChatUtils.chatMessage(Lang.getFor(attacker, "spawn.no_harm_players")));
@@ -593,7 +594,7 @@ public class SpawnProtectionListener implements Listener {
                     adjustedName = Lang.getFor(player, "teleport.dest_resource");
                     adjustedTitle = Lang.getFor(player, "teleport.title_resource");
                 } else if (worldName.equals("arena")) {
-                    selectedLocation = new Location(Bukkit.getWorld("arena"), 0.5, 105, 0.5, 180, 0);
+                    selectedLocation = AranarthUtils.getArenaSpawnLocation();
                     adjustedName = Lang.getFor(player, "teleport.dest_arena");
                     adjustedTitle = Lang.getFor(player, "teleport.title_arena");
                     break;
@@ -637,7 +638,7 @@ public class SpawnProtectionListener implements Listener {
      */
     @EventHandler
     private void onWaterFlow(BlockFromToEvent e) {
-        if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
+        if (AranarthUtils.isProtectedSpawnLocation(e.getBlock().getLocation())) {
             if (e.getBlock().getType() == Material.WATER) {
                 e.setCancelled(true);
             }

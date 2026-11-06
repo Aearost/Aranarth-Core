@@ -172,8 +172,8 @@ public class Regrowth extends PlantAbility implements AddonAbility {
                     above.setType(plant);
 
                     Location loc = above.getLocation().add(0.5, 0.3, 0.5);
-                    player.getWorld().spawnParticle(Particle.DUST, loc, 6, 0.2, 0.2, 0.2, 0, GROW_DUST);
-                    player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, loc, 2, 0.2, 0.2, 0.2, 0);
+                    AranarthBendingUtils.spawnParticle(player.getWorld(), Particle.DUST, loc, 6, 0.2, 0.2, 0.2, 0, GROW_DUST);
+                    AranarthBendingUtils.spawnParticle(player.getWorld(), Particle.HAPPY_VILLAGER, loc, 2, 0.2, 0.2, 0.2, 0);
                     player.getWorld().playSound(loc, Sound.BLOCK_GRASS_PLACE, 0.3f, 1.2f);
                     break; // One plant per x/z per tick
                 }
@@ -252,8 +252,8 @@ public class Regrowth extends PlantAbility implements AddonAbility {
                         grownCrops.add(block);
 
                         Location cropLoc = block.getLocation().add(0.5, 0.5, 0.5);
-                        player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, cropLoc, 4, 0.2, 0.2, 0.2, 0);
-                        player.getWorld().spawnParticle(Particle.DUST, cropLoc, 3, 0.2, 0.2, 0.2, 0, GROW_DUST);
+                        AranarthBendingUtils.spawnParticle(player.getWorld(), Particle.HAPPY_VILLAGER, cropLoc, 4, 0.2, 0.2, 0.2, 0);
+                        AranarthBendingUtils.spawnParticle(player.getWorld(), Particle.DUST, cropLoc, 3, 0.2, 0.2, 0.2, 0, GROW_DUST);
                         player.getWorld().playSound(cropLoc, Sound.BLOCK_GRASS_PLACE, 0.3f, 1.4f);
                     }
                 }
@@ -273,19 +273,19 @@ public class Regrowth extends PlantAbility implements AddonAbility {
             double x = Math.cos(angle) * r;
             double z = Math.sin(angle) * r;
             Location p = center.clone().add(x, 0, z);
-            world.spawnParticle(Particle.DUST, p, 1, 0, 0, 0, 0, dust);
+            AranarthBendingUtils.spawnParticle(world, Particle.DUST, p, 1, 0, 0, 0, 0, dust);
             if (extra != null) {
-                world.spawnParticle(extra, p, 1, 0, 0.02, 0, 0.01);
+                AranarthBendingUtils.spawnParticle(world, extra, p, 1, 0, 0.02, 0, 0.01);
             }
         }
     }
 
     private void spawnStreamParticles(Location head) {
         World world = player.getWorld();
-        world.spawnParticle(Particle.SPLASH, head, 4, 0.05, 0.05, 0.05, 0.04);
-        world.spawnParticle(Particle.DUST, head, 2, 0.04, 0.04, 0.04, 0, AranarthBendingUtils.WATER_DUST);
+        AranarthBendingUtils.spawnParticle(world, Particle.SPLASH, head, 4, 0.05, 0.05, 0.05, 0.04);
+        AranarthBendingUtils.spawnParticle(world, Particle.DUST, head, 2, 0.04, 0.04, 0.04, 0, AranarthBendingUtils.WATER_DUST);
         if (Math.random() < 0.5) {
-            world.spawnParticle(Particle.DRIPPING_WATER, head, 1, 0.06, 0.06, 0.06, 0);
+            AranarthBendingUtils.spawnParticle(world, Particle.DRIPPING_WATER, head, 1, 0.06, 0.06, 0.06, 0);
         }
     }
 
@@ -330,8 +330,9 @@ public class Regrowth extends PlantAbility implements AddonAbility {
                     cancel();
                     return;
                 }
-                block.getWorld().spawnParticle(Particle.SPLASH, loc, 2, 0.1, 0.1, 0.1, 0.02, null, true);
-                block.getWorld().spawnParticle(
+                AranarthBendingUtils.spawnParticle(block.getWorld(), Particle.SPLASH, loc, 2, 0.1, 0.1, 0.1, 0.02, null, true);
+                AranarthBendingUtils.spawnParticle(
+                        block.getWorld(),
                         Particle.DUST, loc, 1, 0.1, 0.1, 0.1, 0, AranarthBendingUtils.WATER_DUST, true);
             }
         };

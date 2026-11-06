@@ -1,8 +1,10 @@
 package com.aearost.aranarthcore.utils;
 
+import com.aearost.aranarthcore.enums.PrefixStyle;
 import com.aearost.aranarthcore.enums.SpecialDay;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.ChatPrefix;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionRank;
 import net.kyori.adventure.text.Component;
@@ -29,6 +31,18 @@ public class ChatUtils {
     private static final List<String> tips = new ArrayList<>();
     private static final Pattern URL_PATTERN = Pattern.compile("https?://[^\\s\u00A7]+");
     private static int tipIndex = 0;
+
+    /**
+     * Matches the Discord markdown that changes in-game, following Discord's rules for what renders as formatting.
+     */
+    private static final Pattern DISCORD_MARKDOWN = Pattern.compile(
+            "```.+?```|`[^`]+`|https?://\\S+"
+                    + "|\\\\([*_`\\\\])"
+                    + "|\\*\\*\\*(?=\\S)(.+?)(?<=\\S)\\*\\*\\*(?!\\*)"
+                    + "|\\*\\*(?=\\S)(.+?)(?<=\\S)\\*\\*(?!\\*)"
+                    + "|\\*(?=[^\\s*])(.+?)(?<=[^\\s*]|\\*\\*)\\*(?!\\*)"
+                    + "|(?<![\\p{L}\\p{N}_])_(?=[^\\s_])(.+?)(?<=[^\\s_])_(?![\\p{L}\\p{N}_])",
+            Pattern.DOTALL);
 
     // Maps &0-&f color codes to their Minecraft hex equivalents
     private static final Map<Character, String> COLOR_CODE_TO_HEX = new HashMap<>();
@@ -277,6 +291,121 @@ public class ChatUtils {
     }
 
     /**
+     * Converts the bold and italics markdown of a Discord message to their in-game format codes.
+     *
+     * @param msg The Discord message.
+     * @return The message using &amp;l and &amp;o format codes.
+     */
+    public static String discordMarkdownToFormatCodes(String msg) {
+        return applyDiscordMarkdown(msg, "");
+    }
+
+    /**
+     * Converts a section of a Discord message, which is nested within any already active format codes.
+     *
+     * @param msg         The section of the Discord message.
+     * @param activeCodes The format codes applied to the whole section.
+     * @return The section using format codes.
+     */
+    private static String applyDiscordMarkdown(String msg, String activeCodes) {
+        Matcher matcher = DISCORD_MARKDOWN.matcher(msg);
+        StringBuilder result = new StringBuilder();
+        int lastEnd = 0;
+        while (matcher.find()) {
+            result.append(msg, lastEnd, matcher.start());
+            lastEnd = matcher.end();
+
+            String content;
+            String codes;
+            if (matcher.group(2) != null) {
+                content = matcher.group(2);
+                codes = "&l&o";
+            } else if (matcher.group(3) != null) {
+                content = matcher.group(3);
+                codes = "&l";
+            } else if (matcher.group(4) != null || matcher.group(5) != null) {
+                content = matcher.group(4) != null ? matcher.group(4) : matcher.group(5);
+                codes = "&o";
+            } else {
+                // Code blocks and URLs are kept as written, and escaped characters lose their backslash
+                result.append(matcher.group(1) != null ? matcher.group(1) : matcher.group());
+                continue;
+            }
+
+            String nestedCodes = activeCodes + codes;
+            result.append(nestedCodes).append(applyDiscordMarkdown(content, nestedCodes)).append("&r").append(activeCodes);
+        }
+        return result.append(msg.substring(lastEnd)).toString();
+    }
+
+    /**
+     * Converts the bold and italics of a formatted in-game message to Discord markdown.
+     *
+     * @param msg The message with § format codes, without the prefix of the sender.
+     * @return The message using Discord markdown.
+     */
+    public static String formatCodesToDiscordMarkdown(String msg) {
+        if (msg == null) {
+            return null;
+        }
+
+        StringBuilder result = new StringBuilder();
+        // Whitespace is held back as Discord does not render a marker that is next to whitespace on its inner side
+        StringBuilder pendingWhitespace = new StringBuilder();
+        Deque<String> openMarkers = new ArrayDeque<>();
+        boolean isBold = false;
+        boolean isItalic = false;
+
+        for (int i = 0; i < msg.length(); i++) {
+            char character = msg.charAt(i);
+            if (character == '§' && i + 1 < msg.length()) {
+                char code = Character.toLowerCase(msg.charAt(i + 1));
+                if (code == 'l') {
+                    isBold = true;
+                } else if (code == 'o') {
+                    isItalic = true;
+                } else if (code == 'r' || code == 'x' || Character.digit(code, 16) != -1) {
+                    isBold = false;
+                    isItalic = false;
+                }
+                i++;
+                continue;
+            }
+
+            if (Character.isWhitespace(character)) {
+                pendingWhitespace.append(character);
+                continue;
+            }
+
+            // Markers must close in the opposite order they were opened, so closing one also closes those after it
+            while ((openMarkers.contains("**") && !isBold) || (openMarkers.contains("*") && !isItalic)) {
+                result.append(openMarkers.pop());
+            }
+            result.append(pendingWhitespace);
+            pendingWhitespace.setLength(0);
+            if (isBold && !openMarkers.contains("**")) {
+                openMarkers.push("**");
+                result.append("**");
+            }
+            if (isItalic && !openMarkers.contains("*")) {
+                openMarkers.push("*");
+                result.append("*");
+            }
+
+            // A literal asterisk would otherwise end the formatting early
+            if (character == '*' && !openMarkers.isEmpty()) {
+                result.append('\\');
+            }
+            result.append(character);
+        }
+
+        while (!openMarkers.isEmpty()) {
+            result.append(openMarkers.pop());
+        }
+        return result.append(pendingWhitespace).toString();
+    }
+
+    /**
      * Provides whether free text typed by a player is safe to store.
      *
      * @param value The text as typed by the player.
@@ -374,49 +503,55 @@ public class ChatUtils {
     }
 
     /**
-     * Formats the player's prefix based on their current ranks.
+     * Formats the player's prefix based on their current ranks, in the default prefix styles.
+     * Used for the console, logs, and Discord.
      *
      * @param player The player sending the message.
      * @return The formatted prefix.
      */
     public static String formatChatPrefix(OfflinePlayer player) {
-        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-        String nickname = aranarthPlayer.getNickname();
-        String prefix = "&l⊰&r";
-
-        prefix += AranarthUtils.getCouncilRank(aranarthPlayer);
-        prefix += AranarthUtils.getArchitectRank(aranarthPlayer);
-        prefix += AranarthUtils.getSaintRank(aranarthPlayer);
-        prefix += AranarthUtils.getAvatarRank(aranarthPlayer);
-
-        if (!prefix.equals("&l⊰&r")) {
-            prefix += " ";
-        }
-        prefix += AranarthUtils.getRank(aranarthPlayer);
-
-        if (nickname != null && !nickname.isEmpty()) {
-            prefix += nickname + "&r";
-        } else {
-            String name = player.getName();
-            prefix += (name != null) ? name : aranarthPlayer.getUsername();
-        }
-
-        prefix += "&l⊱ &r";
-        prefix = ChatUtils.translateToColor(prefix);
-        return prefix;
+        return ChatPrefix.of(player).format(PrefixStyle.defaults());
     }
 
     /**
-     * Provides the formatted prefix and the name of the player.
+     * Formats the player's prefix based on their current ranks, in the prefix styles chosen by the viewer.
      *
-     * @param uuid The UUID of the player.
+     * @param player The player sending the message.
+     * @param viewer The user who will see the prefix.
+     * @return The formatted prefix.
+     */
+    public static String formatChatPrefix(OfflinePlayer player, CommandSender viewer) {
+        return ChatPrefix.of(player).format(AranarthUtils.getPrefixStyles(viewer));
+    }
+
+    /**
+     * Sends a public chat message, with each viewer seeing the sender's prefix in their own prefix styles.
+     *
+     * @param viewers The players receiving the message.
+     * @param prefix  The prefix of the sender.
+     * @param message The message, without the prefix.
+     */
+    public static void sendChatToViewers(Collection<? extends Player> viewers, ChatPrefix prefix, Component message) {
+        Map<String, Component> messagesByStyles = new HashMap<>();
+        for (Player viewer : viewers) {
+            PrefixStyle[] styles = AranarthUtils.getPrefixStyles(viewer);
+            // Use Component.empty() as root so the message is a sibling of the prefix, not a child.
+            // Children inherit hover/click from their parent, siblings do not.
+            Component fullMessage = messagesByStyles.computeIfAbsent(PrefixStyle.encode(styles[0], styles[1], styles[2]),
+                    k -> Component.empty().append(prefix.toComponent(styles)).append(message));
+            viewer.sendMessage(fullMessage);
+        }
+    }
+
+    /**
+     * Provides the formatted prefix and the name of the player, in the prefix styles chosen by the viewer.
+     *
+     * @param uuid   The UUID of the player.
+     * @param viewer The user who will see the prefix.
      * @return The formatted prefix and the name of the player.
      */
-    public static String providePrefixAndName(UUID uuid) {
-        String prefixAndName = ChatUtils.formatChatPrefix(Bukkit.getOfflinePlayer(uuid));
-        prefixAndName = prefixAndName.substring(5, prefixAndName.length() - 1);
-        prefixAndName = prefixAndName.substring(0, prefixAndName.length() - 7);
-        return prefixAndName;
+    public static String providePrefixAndName(UUID uuid, CommandSender viewer) {
+        return ChatPrefix.of(Bukkit.getOfflinePlayer(uuid)).formatName(AranarthUtils.getPrefixStyles(viewer));
     }
 
     /**
@@ -572,7 +707,7 @@ public class ChatUtils {
                 msg.append(" ");
             }
         }
-        String assembledMsg = msg.toString();
+        String assembledMsg = EmojiUtils.translateFor(player, msg.toString());
 
         // If sending the message to yourself
         if (player.getUniqueId().equals(target.getUniqueId())) {
@@ -907,7 +1042,8 @@ public class ChatUtils {
                 msg.append(" ");
             }
         }
-        String assembledMsg = msg.toString();
+        // Toggled dominion chat has already been translated by PlayerChatListener
+        String assembledMsg = isSingleMessage ? EmojiUtils.translateFor(player, msg.toString()) : msg.toString();
 
         DominionRank rank = dominion.getMemberRank(player.getUniqueId());
         if (rank == null) {
@@ -973,21 +1109,34 @@ public class ChatUtils {
             }
         }
 
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            if (recipientUuids.contains(onlinePlayer.getUniqueId())) {
-                onlinePlayer.sendMessage(ChatUtils.translateToColor(prefixReceive + assembledMsg));
-            }
-        }
+        deliverDominionMessage(prefixReceive + assembledMsg, recipientUuids);
 
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            AranarthPlayer onlineAranarthPlayer = AranarthUtils.getPlayer(onlinePlayer.getUniqueId());
-            if (onlineAranarthPlayer.isInSpyMode() && !recipientUuids.contains(onlinePlayer.getUniqueId())) {
-                onlinePlayer.sendMessage(ChatUtils.translateToColor("&8&l[&4&lSPY&8&l] " + prefixReceive + assembledMsg));
-            }
+        // Relay to recipients and spies on other servers
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishDominionMessage(prefixReceive + assembledMsg, recipientUuids);
         }
 
         Bukkit.getConsoleSender().sendMessage(net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection().deserialize(
                 prefixReceive + assembledMsg));
+    }
+
+    /**
+     * Sends a dominion chat message to the recipients online on this server, and to anyone else here in spy mode.
+     *
+     * @param message    The full message, including its prefix.
+     * @param recipients The UUIDs of all players that should receive the message, on any server.
+     */
+    public static void deliverDominionMessage(String message, Collection<UUID> recipients) {
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            if (recipients.contains(onlinePlayer.getUniqueId())) {
+                onlinePlayer.sendMessage(ChatUtils.translateToColor(message));
+            } else {
+                AranarthPlayer onlineAranarthPlayer = AranarthUtils.getPlayer(onlinePlayer.getUniqueId());
+                if (onlineAranarthPlayer != null && onlineAranarthPlayer.isInSpyMode()) {
+                    onlinePlayer.sendMessage(ChatUtils.translateToColor("&8&l[&4&lSPY&8&l] " + message));
+                }
+            }
+        }
     }
 
     /**
@@ -1020,7 +1169,8 @@ public class ChatUtils {
                 msg.append(" ");
             }
         }
-        String assembledMsg = msg.toString();
+        // Toggled council chat has already been translated by PlayerChatListener
+        String assembledMsg = isSingleMessage ? EmojiUtils.translateFor(sender, msg.toString()) : msg.toString();
 
         String nickname = "";
         Player player = null;
@@ -1036,8 +1186,7 @@ public class ChatUtils {
         String prefixReceive = ChatUtils.translateToColor(prefixStart + "&8&lCouncil &e" + nickname + prefixEnd + " &7&o>> &6&o");
 
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            AranarthPlayer onlineAranarthPlayer = AranarthUtils.getPlayer(onlinePlayer.getUniqueId());
-            if (onlineAranarthPlayer.getCouncilRank() > 0 || onlineAranarthPlayer.getArchitectRank() >= 1) {
+            if (onlinePlayer.hasPermission("aranarth.councilchat")) {
                 onlinePlayer.sendMessage(ChatUtils.translateToColor(prefixReceive + assembledMsg));
             }
         }

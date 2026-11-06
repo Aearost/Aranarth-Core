@@ -3,8 +3,10 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.gui.GuiDominionResourceFilters;
 import com.aearost.aranarthcore.gui.GuiDominionResources;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.DominionResourceCategory;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
@@ -46,8 +48,8 @@ public class GuiDominionResourceFiltersClick {
             return;
         }
 
-        if (!dominion.getLeader().equals(player.getUniqueId())) {
-            player.sendMessage(com.aearost.aranarthcore.utils.ChatUtils.chatMessage(Lang.getFor(player, "dominion.leader_only_permissions")));
+        if (!DominionUtils.hasPermission(player, dominion, DominionPermission.RESOURCES)) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.resources_no_permission")));
             return;
         }
 

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.firebending.combustion;
 
 import com.aearost.aranarthcore.utils.AbilityConfig;
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -199,7 +200,7 @@ public class JetFumes extends CombustionAbility implements AddonAbility, ComboAb
 
     private void spawnFlightParticles() {
         Location loc = player.getLocation().add(0, 1, 0);
-        player.getWorld().spawnParticle(Particle.FLAME, loc, 4, 0.25, 0.4, 0.25, 0.02);
+        AranarthBendingUtils.spawnParticle(player.getWorld(), Particle.FLAME, loc, 4, 0.25, 0.4, 0.25, 0.02);
     }
 
     private void tickTrail(long now) {
@@ -234,7 +235,7 @@ public class JetFumes extends CombustionAbility implements AddonAbility, ComboAb
             Location loc = puff.center.clone().add(dx, dy, dz);
             if (!loc.getBlock().getType().isSolid()) {
                 Particle particle = random.nextInt(5) == 0 ? Particle.LARGE_SMOKE : Particle.SMOKE;
-                world.spawnParticle(particle, loc, 1, 0, 0, 0, 0.004);
+                AranarthBendingUtils.spawnParticle(world, particle, loc, 1, 0, 0, 0, 0.004);
             }
         }
     }
