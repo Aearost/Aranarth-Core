@@ -4163,9 +4163,9 @@ public class PersistenceUtils {
     }
 
     /**
-     * Loads per-player quest progress (including active quest assignments) from quest_progress.txt.
-     * Format: uuid|rank|d0task|d0prog|d0done|d0claimed|d1task|d1prog|d1done|d1claimed|d2task|d2prog|d2done|d2claimed|
-     * w0task|w0prog|w0done|w0claimed|w1task|w1prog|w1done|w1claimed|w2task|w2prog|w2done|w2claimed
+     * Loads every player's quest board from quest_progress.txt.
+     * Format per line: uuid|board JSON. Lines from the quest system before #450 are skipped, so those
+     * players get a new board.
      */
     public static void loadQuestProgress() {
         String currentPath = System.getProperty("user.dir");
@@ -4177,161 +4177,40 @@ public class PersistenceUtils {
             return;
         }
 
-        Scanner reader;
-        try {
-            reader = new Scanner(file);
+        try (Scanner reader = new Scanner(file)) {
             Bukkit.getLogger().info("[AC] Attempting to read the quest_progress file...");
-
+            int loaded = 0;
             while (reader.hasNextLine()) {
                 String row = reader.nextLine().trim();
                 if (row.startsWith("#") || row.isEmpty()) {
                     continue;
                 }
-
-                String[] fields = row.split("\\|");
-                if (fields.length < 26) {
+                int separator = row.indexOf('|');
+                if (separator <= 0) {
                     continue;
                 }
-
-                UUID uuid = UUID.fromString(fields[0]);
-                int rank = Integer.parseInt(fields[1]);
-
-                // New format (32 fields): task|reward|prog|done|claimed per quest slot
-                // Old format (26 fields): task|prog|done|claimed per quest slot (reward falls back to random)
-                boolean hasRewards = fields.length >= 32;
-
-                String[] dTasks;
-                double[] dRewards;
-                int[] dailyProgress;
-                boolean[] dailyCompleted, dailyClaimed;
-                String[] wTasks;
-                double[] wRewards;
-                int[] weeklyProgress;
-                boolean[] weeklyCompleted, weeklyClaimed;
-
-                if (hasRewards) {
-                    dTasks = new String[]{fields[2], fields[7], fields[12]};
-                    dRewards = new double[]{Double.parseDouble(fields[3]), Double.parseDouble(fields[8]), Double.parseDouble(fields[13])};
-                    dailyProgress = new int[]{Integer.parseInt(fields[4]), Integer.parseInt(fields[9]), Integer.parseInt(fields[14])};
-                    dailyCompleted = new boolean[]{fields[5].equals("1"), fields[10].equals("1"), fields[15].equals("1")};
-                    dailyClaimed = new boolean[]{fields[6].equals("1"), fields[11].equals("1"), fields[16].equals("1")};
-                    wTasks = new String[]{fields[17], fields[22], fields[27]};
-                    wRewards = new double[]{Double.parseDouble(fields[18]), Double.parseDouble(fields[23]), Double.parseDouble(fields[28])};
-                    weeklyProgress = new int[]{Integer.parseInt(fields[19]), Integer.parseInt(fields[24]), Integer.parseInt(fields[29])};
-                    weeklyCompleted = new boolean[]{fields[20].equals("1"), fields[25].equals("1"), fields[30].equals("1")};
-                    weeklyClaimed = new boolean[]{fields[21].equals("1"), fields[26].equals("1"), fields[31].equals("1")};
-                } else {
-                    // Old format - rewards will be regenerated randomly
-                    dTasks = new String[]{fields[2], fields[6], fields[10]};
-                    dRewards = new double[]{0.0, 0.0, 0.0};
-                    dailyProgress = new int[]{Integer.parseInt(fields[3]), Integer.parseInt(fields[7]), Integer.parseInt(fields[11])};
-                    dailyCompleted = new boolean[]{fields[4].equals("1"), fields[8].equals("1"), fields[12].equals("1")};
-                    dailyClaimed = new boolean[]{fields[5].equals("1"), fields[9].equals("1"), fields[13].equals("1")};
-                    wTasks = new String[]{fields[14], fields[18], fields[22]};
-                    wRewards = new double[]{0.0, 0.0, 0.0};
-                    weeklyProgress = new int[]{Integer.parseInt(fields[15]), Integer.parseInt(fields[19]), Integer.parseInt(fields[23])};
-                    weeklyCompleted = new boolean[]{fields[16].equals("1"), fields[20].equals("1"), fields[24].equals("1")};
-                    weeklyClaimed = new boolean[]{fields[17].equals("1"), fields[21].equals("1"), fields[25].equals("1")};
+                PlayerQuestBoard board = QuestBoardSerializer.fromJson(row.substring(separator + 1));
+                if (board == null) {
+                    continue;
                 }
-
-                // Restore active daily quests from the pool using stored task types and rewards
-                List<Quest> activeDailyQuests = resolveQuestsFromPool(uuid, rank, dTasks, dRewards, QuestType.DAILY);
-                List<Quest> activeWeeklyQuests = resolveQuestsFromPool(uuid, rank, wTasks, wRewards, QuestType.WEEKLY);
-
-                if (activeDailyQuests != null) {
-                    QuestUtils.setPlayerActiveDailyQuests(uuid, activeDailyQuests);
-                }
-                if (activeWeeklyQuests != null) {
-                    QuestUtils.setPlayerActiveWeeklyQuests(uuid, activeWeeklyQuests);
-                }
-
-                QuestUtils.getPlayerDailyProgress().put(uuid, dailyProgress);
-                QuestUtils.getPlayerDailyCompleted().put(uuid, dailyCompleted);
-                QuestUtils.getPlayerDailyClaimed().put(uuid, dailyClaimed);
-                QuestUtils.getPlayerWeeklyProgress().put(uuid, weeklyProgress);
-                QuestUtils.getPlayerWeeklyCompleted().put(uuid, weeklyCompleted);
-                QuestUtils.getPlayerWeeklyClaimed().put(uuid, weeklyClaimed);
-                QuestUtils.getPlayerQuestRank().put(uuid, rank);
+                QuestUtils.setBoard(UUID.fromString(row.substring(0, separator)), board);
+                loaded++;
             }
-
-            Bukkit.getLogger().info("[AC] Quest progress has been initialized");
-            reader.close();
-        } catch (FileNotFoundException e) {
+            Bukkit.getLogger().info("[AC] Quest progress has been initialized for " + loaded + " players");
+        } catch (FileNotFoundException | IllegalArgumentException e) {
             Bukkit.getLogger().info("[AC] Something went wrong with loading quest progress!");
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Login Streak Persistence
-    // -------------------------------------------------------------------------
-
     /**
-     * Resolves Quest objects from the quest pool using stored task type names and rewards.
-     * If a stored reward is 0 (old format), a new random reward is generated.
-     * Returns null if no valid quests could be resolved.
-     */
-    private static List<Quest> resolveQuestsFromPool(UUID uuid, int rank, String[] taskNames, double[] rewards, QuestType type) {
-        List<Quest> pool = type == QuestType.DAILY ? QuestUtils.getDailyQuestPool(rank) : QuestUtils.getWeeklyQuestPool(rank);
-        List<Quest> resolved = new ArrayList<>();
-        for (int i = 0; i < taskNames.length; i++) {
-            String taskName = taskNames[i];
-            if (taskName.equals("NONE")) {
-                continue;
-            }
-            try {
-                // Parse optional stored required count
-                int storedRequired = 0;
-                if (taskName.contains(":")) {
-                    String[] parts = taskName.split(":", 2);
-                    taskName = parts[0];
-                    storedRequired = Integer.parseInt(parts[1]);
-                }
-                QuestTaskType taskType = QuestTaskType.valueOf(taskName);
-                Quest found = null;
-                for (Quest q : pool) {
-                    if (q.getTaskType() == taskType) {
-                        found = q;
-                        break;
-                    }
-                }
-                if (found != null) {
-                    // Use stored required count if available
-                    if (storedRequired > 0) {
-                        found = found.withRequired(storedRequired, QuestUtils.generateDisplayName(taskType, storedRequired));
-                    }
-                    if (rewards[i] < 0) {
-                        resolved.add(found.withItemReward(QuestUtils.resolveKeyFromSentinel((int) rewards[i])));
-                    } else {
-                        double reward = rewards[i] > 0 ? rewards[i] : QuestUtils.generateRandomReward(rank, type);
-                        resolved.add(found.withReward(reward));
-                    }
-                }
-            } catch (IllegalArgumentException ignored) {
-            }
-        }
-        return resolved.isEmpty() ? null : resolved;
-    }
-
-    /**
-     * Saves per-player quest progress (including active quest assignments) to quest_progress.txt.
-     * Format: uuid|rank|d0task|d0prog|d0done|d0claimed|d1task|...|w2task|w2prog|w2done|w2claimed
+     * Saves every player's quest board to quest_progress.txt, then syncs the boards changed on this server to MySQL.
+     * Format per line: uuid|board JSON
      */
     public static void saveQuestProgress() {
-        HashMap<UUID, List<Quest>> activeDailyMap = QuestUtils.getPlayerActiveDailyQuestsMap();
-        HashMap<UUID, List<Quest>> activeWeeklyMap = QuestUtils.getPlayerActiveWeeklyQuestsMap();
-        HashMap<UUID, int[]> dailyProgress = QuestUtils.getPlayerDailyProgress();
-        HashMap<UUID, boolean[]> dailyCompleted = QuestUtils.getPlayerDailyCompleted();
-        HashMap<UUID, boolean[]> dailyClaimed = QuestUtils.getPlayerDailyClaimed();
-        HashMap<UUID, int[]> weeklyProgress = QuestUtils.getPlayerWeeklyProgress();
-        HashMap<UUID, boolean[]> weeklyCompleted = QuestUtils.getPlayerWeeklyCompleted();
-        HashMap<UUID, boolean[]> weeklyClaimed = QuestUtils.getPlayerWeeklyClaimed();
-        HashMap<UUID, Integer> questRanks = QuestUtils.getPlayerQuestRank();
-
         String currentPath = System.getProperty("user.dir");
         String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
                 + File.separator + "quest_progress.txt";
         File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
-        File file = new File(filePath);
 
         boolean isDirectoryCreated = true;
         if (!pluginDirectory.isDirectory()) {
@@ -4342,57 +4221,11 @@ public class PersistenceUtils {
         }
 
         try {
-            // If the file isn't already there
-            if (file.createNewFile()) {
-                Bukkit.getLogger().info("[AC] A new quest_progress.txt file has been generated");
-            }
-        } catch (IOException e) {
-            Bukkit.getLogger().info("[AC] An error occurred in the creation of quest_progress.txt");
-        }
-
-        try {
             FileWriter writer = new AtomicFileWriter(filePath);
-            writer.write("#uuid|rank|d0task|d0reward|d0prog|d0done|d0claimed|d1task|d1reward|d1prog|d1done|d1claimed|d2task|d2reward|d2prog|d2done|d2claimed|w0task|w0reward|w0prog|w0done|w0claimed|w1task|w1reward|w1prog|w1done|w1claimed|w2task|w2reward|w2prog|w2done|w2claimed\n");
-
-            Set<UUID> allUuids = new HashSet<>();
-            allUuids.addAll(activeDailyMap.keySet());
-            allUuids.addAll(activeWeeklyMap.keySet());
-            allUuids.addAll(dailyProgress.keySet());
-            allUuids.addAll(weeklyProgress.keySet());
-
-            for (UUID uuid : allUuids) {
-                int rank = questRanks.getOrDefault(uuid, 0);
-
-                List<Quest> dq = activeDailyMap.getOrDefault(uuid, new ArrayList<>());
-                int[] dp = dailyProgress.getOrDefault(uuid, new int[3]);
-                boolean[] dc = dailyCompleted.getOrDefault(uuid, new boolean[3]);
-                boolean[] dClaim = dailyClaimed.getOrDefault(uuid, new boolean[3]);
-
-                List<Quest> wq = activeWeeklyMap.getOrDefault(uuid, new ArrayList<>());
-                int[] wp = weeklyProgress.getOrDefault(uuid, new int[3]);
-                boolean[] wc = weeklyCompleted.getOrDefault(uuid, new boolean[3]);
-                boolean[] wClaim = weeklyClaimed.getOrDefault(uuid, new boolean[3]);
-
-                StringBuilder row = new StringBuilder(uuid + "|" + rank);
-                for (int i = 0; i < 3; i++) {
-                    String task = i < dq.size() ? (dq.get(i).getTaskType().name() + ":" + dq.get(i).getRequired()) : "NONE";
-                    int reward = i < dq.size() ? (dq.get(i).hasItemReward() ? QuestUtils.getItemRewardSentinel(dq.get(i).getItemReward()) : (int) dq.get(i).getReward()) : 0;
-                    int prog = i < dp.length ? dp[i] : 0;
-                    int done = (i < dc.length && dc[i]) ? 1 : 0;
-                    int claimed = (i < dClaim.length && dClaim[i]) ? 1 : 0;
-                    row.append("|").append(task).append("|").append(reward).append("|").append(prog).append("|").append(done).append("|").append(claimed);
-                }
-                for (int i = 0; i < 3; i++) {
-                    String task = i < wq.size() ? (wq.get(i).getTaskType().name() + ":" + wq.get(i).getRequired()) : "NONE";
-                    int reward = i < wq.size() ? (wq.get(i).hasItemReward() ? QuestUtils.getItemRewardSentinel(wq.get(i).getItemReward()) : (int) wq.get(i).getReward()) : 0;
-                    int prog = i < wp.length ? wp[i] : 0;
-                    int done = (i < wc.length && wc[i]) ? 1 : 0;
-                    int claimed = (i < wClaim.length && wClaim[i]) ? 1 : 0;
-                    row.append("|").append(task).append("|").append(reward).append("|").append(prog).append("|").append(done).append("|").append(claimed);
-                }
-                writer.write(row + "\n");
+            writer.write("#uuid|quest board JSON\n");
+            for (Map.Entry<UUID, PlayerQuestBoard> entry : QuestUtils.getBoards().entrySet()) {
+                writer.write(entry.getKey() + "|" + QuestBoardSerializer.toJson(entry.getValue()) + "\n");
             }
-
             writer.close();
         } catch (IOException e) {
             Bukkit.getLogger().info("[AC] There was an error in saving quest progress");
@@ -5535,7 +5368,7 @@ public class PersistenceUtils {
     }
 
     /**
-     * Reloads a single player's quest assignments and progress from MySQL.
+     * Reloads a single player's quest board from MySQL.
      * Call on the main thread when a player arrives via cross-server transfer.
      */
     public static void reloadQuestProgressForPlayer(UUID uuid) {
@@ -5547,81 +5380,12 @@ public class PersistenceUtils {
             if (row == null || row[1] == null) {
                 return;
             }
-            JsonObject prog = GSON.fromJson(row[1], JsonObject.class);
-            int rank = prog.has("rank") ? prog.get("rank").getAsInt() : 0;
-            // Discard data that was saved before the last reset (stale from previous period)
-            long dailyPeriod = prog.has("dailyPeriod") ? prog.get("dailyPeriod").getAsLong() : 0L;
-            long weeklyPeriod = prog.has("weeklyPeriod") ? prog.get("weeklyPeriod").getAsLong() : 0L;
-            boolean dailyCurrent = dailyPeriod >= QuestUtils.getLastDailyReset();
-            boolean weeklyCurrent = weeklyPeriod >= QuestUtils.getLastWeeklyReset();
-            if (dailyCurrent) {
-                if (prog.has("dp")) {
-                    QuestUtils.getPlayerDailyProgress().put(uuid, GSON.fromJson(prog.get("dp"), int[].class));
-                }
-                if (prog.has("dc")) {
-                    QuestUtils.getPlayerDailyCompleted().put(uuid, GSON.fromJson(prog.get("dc"), boolean[].class));
-                }
-                if (prog.has("dClaim")) {
-                    QuestUtils.getPlayerDailyClaimed().put(uuid, GSON.fromJson(prog.get("dClaim"), boolean[].class));
-                }
-            } else {
-                Bukkit.getLogger().info("[AC] [Quest] Discarding stale daily data on transfer for " + uuid
-                        + " (savedPeriod=" + dailyPeriod + ", lastDailyReset=" + QuestUtils.getLastDailyReset() + ")");
-                QuestUtils.getPlayerDailyProgress().remove(uuid);
-                QuestUtils.getPlayerDailyCompleted().remove(uuid);
-                QuestUtils.getPlayerDailyClaimed().remove(uuid);
+            PlayerQuestBoard board = QuestBoardSerializer.fromJson(row[1]);
+            if (board == null) {
+                return;
             }
-            if (weeklyCurrent) {
-                if (prog.has("wp")) {
-                    QuestUtils.getPlayerWeeklyProgress().put(uuid, GSON.fromJson(prog.get("wp"), int[].class));
-                }
-                if (prog.has("wc")) {
-                    QuestUtils.getPlayerWeeklyCompleted().put(uuid, GSON.fromJson(prog.get("wc"), boolean[].class));
-                }
-                if (prog.has("wClaim")) {
-                    QuestUtils.getPlayerWeeklyClaimed().put(uuid, GSON.fromJson(prog.get("wClaim"), boolean[].class));
-                }
-            } else {
-                Bukkit.getLogger().info("[AC] [Quest] Discarding stale weekly data on transfer for " + uuid
-                        + " (savedPeriod=" + weeklyPeriod + ", lastWeeklyReset=" + QuestUtils.getLastWeeklyReset() + ")");
-                QuestUtils.getPlayerWeeklyProgress().remove(uuid);
-                QuestUtils.getPlayerWeeklyCompleted().remove(uuid);
-                QuestUtils.getPlayerWeeklyClaimed().remove(uuid);
-            }
-            QuestUtils.getPlayerQuestRank().put(uuid, rank);
-            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quest] Reloaded from DB for " + uuid
-                    + " daily=" + java.util.Arrays.toString(QuestUtils.getPlayerDailyProgress().get(uuid))
-                    + " weekly=" + java.util.Arrays.toString(QuestUtils.getPlayerWeeklyProgress().get(uuid))
-                    + " rank=" + rank
-                    + " dailyCurrent=" + dailyCurrent + " weeklyCurrent=" + weeklyCurrent);
-            if (dailyCurrent && prog.has("dTasks") && prog.has("dRewards")) {
-                String[] dTasks = GSON.fromJson(prog.get("dTasks"), String[].class);
-                double[] dRewards = GSON.fromJson(prog.get("dRewards"), double[].class);
-                List<Quest> activeDailyQuests = resolveQuestsFromPool(uuid, rank, dTasks, dRewards, QuestType.DAILY);
-                if (activeDailyQuests != null) {
-                    QuestUtils.setPlayerActiveDailyQuests(uuid, activeDailyQuests);
-                } else {
-                    Bukkit.getLogger().warning("[AC] [Quest] Could not resolve daily quest assignments on transfer for " + uuid
-                            + " from stored tasks: " + java.util.Arrays.toString(dTasks));
-                    QuestUtils.getPlayerActiveDailyQuestsMap().remove(uuid);
-                }
-            } else if (!dailyCurrent) {
-                QuestUtils.getPlayerActiveDailyQuestsMap().remove(uuid);
-            }
-            if (weeklyCurrent && prog.has("wTasks") && prog.has("wRewards")) {
-                String[] wTasks = GSON.fromJson(prog.get("wTasks"), String[].class);
-                double[] wRewards = GSON.fromJson(prog.get("wRewards"), double[].class);
-                List<Quest> activeWeeklyQuests = resolveQuestsFromPool(uuid, rank, wTasks, wRewards, QuestType.WEEKLY);
-                if (activeWeeklyQuests != null) {
-                    QuestUtils.setPlayerActiveWeeklyQuests(uuid, activeWeeklyQuests);
-                } else {
-                    Bukkit.getLogger().warning("[AC] [Quest] Could not resolve weekly quest assignments on transfer for " + uuid
-                            + " from stored tasks: " + java.util.Arrays.toString(wTasks));
-                    QuestUtils.getPlayerActiveWeeklyQuestsMap().remove(uuid);
-                }
-            } else if (!weeklyCurrent) {
-                QuestUtils.getPlayerActiveWeeklyQuestsMap().remove(uuid);
-            }
+            QuestUtils.setBoard(uuid, board);
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quest] Reloaded quest board from DB for " + uuid);
         } catch (Exception e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to reload quest progress for " + uuid + ": " + e.getMessage());
         }
@@ -5901,65 +5665,15 @@ public class PersistenceUtils {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync quest state: " + e.getMessage());
         }
 
-        // Per-player quest progress - only sync UUIDs that had actual quest actions on THIS
-        // server this session, so we don't overwrite data for players active on the other server
-        // (both servers load all players from the shared DB at startup, but only the server where
-        // the player is actually playing should write back their progress).
+        // Per-player boards - only sync UUIDs that had quest actions on THIS server this session,
+        // so we don't overwrite data for players active on the other server
         for (UUID uuid : uuidsToSync) {
-            // Build a compact JSON snapshot of the player's quest progress + assignments
-            JsonObject prog = new JsonObject();
-            int[] dp = QuestUtils.getPlayerDailyProgress().getOrDefault(uuid, new int[3]);
-            boolean[] dc = QuestUtils.getPlayerDailyCompleted().getOrDefault(uuid, new boolean[3]);
-            boolean[] dClaim = QuestUtils.getPlayerDailyClaimed().getOrDefault(uuid, new boolean[3]);
-            int[] wp = QuestUtils.getPlayerWeeklyProgress().getOrDefault(uuid, new int[3]);
-            boolean[] wc = QuestUtils.getPlayerWeeklyCompleted().getOrDefault(uuid, new boolean[3]);
-            boolean[] wClaim = QuestUtils.getPlayerWeeklyClaimed().getOrDefault(uuid, new boolean[3]);
-            int rank = QuestUtils.getPlayerQuestRank().getOrDefault(uuid, 0);
-            prog.addProperty("rank", rank);
-            prog.add("dp", GSON.toJsonTree(dp));
-            prog.add("dc", GSON.toJsonTree(dc));
-            prog.add("dClaim", GSON.toJsonTree(dClaim));
-            prog.add("wp", GSON.toJsonTree(wp));
-            prog.add("wc", GSON.toJsonTree(wc));
-            prog.add("wClaim", GSON.toJsonTree(wClaim));
-            // Tag progress with the reset period so stale data is detected on reload
-            prog.addProperty("dailyPeriod", QuestUtils.getLastDailyReset());
-            prog.addProperty("weeklyPeriod", QuestUtils.getLastWeeklyReset());
-            // Persist quest assignments so the other server can restore the same tasks
-            List<Quest> dq = QuestUtils.getPlayerActiveDailyQuestsMap().getOrDefault(uuid, new ArrayList<>());
-            List<Quest> wq = QuestUtils.getPlayerActiveWeeklyQuestsMap().getOrDefault(uuid, new ArrayList<>());
-            String[] dTasks = new String[3];
-            double[] dRewards = new double[3];
-            String[] wTasks = new String[3];
-            double[] wRewards = new double[3];
-            for (int i = 0; i < 3; i++) {
-                if (i < dq.size()) {
-                    Quest q = dq.get(i);
-                    dTasks[i] = q.getTaskType().name() + ":" + q.getRequired();
-                    dRewards[i] = q.hasItemReward() ? QuestUtils.getItemRewardSentinel(q.getItemReward()) : q.getReward();
-                } else {
-                    dTasks[i] = "NONE";
-                    dRewards[i] = 0;
-                }
-                if (i < wq.size()) {
-                    Quest q = wq.get(i);
-                    wTasks[i] = q.getTaskType().name() + ":" + q.getRequired();
-                    wRewards[i] = q.hasItemReward() ? QuestUtils.getItemRewardSentinel(q.getItemReward()) : q.getReward();
-                } else {
-                    wTasks[i] = "NONE";
-                    wRewards[i] = 0;
-                }
+            PlayerQuestBoard board = QuestUtils.getBoardIfPresent(uuid);
+            if (board == null) {
+                continue;
             }
-            prog.add("dTasks", GSON.toJsonTree(dTasks));
-            prog.add("dRewards", GSON.toJsonTree(dRewards));
-            prog.add("wTasks", GSON.toJsonTree(wTasks));
-            prog.add("wRewards", GSON.toJsonTree(wRewards));
-            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quest] Writing to DB for " + uuid
-                    + " daily=" + java.util.Arrays.toString(dp)
-                    + " weekly=" + java.util.Arrays.toString(wp)
-                    + " tasks=" + java.util.Arrays.toString(dTasks));
             try {
-                db.saveQuestData(uuid, null, GSON.toJson(prog));
+                db.saveQuestData(uuid, null, QuestBoardSerializer.toJson(board));
             } catch (Exception e) {
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync quest progress for " + uuid + ": " + e.getMessage());
             }
@@ -8232,7 +7946,8 @@ public class PersistenceUtils {
     }
 
     /**
-     * Loads per-player quest progress from MySQL. Falls back to file if empty.
+     * Loads every player's quest board from MySQL. Falls back to file if empty.
+     * Boards from the quest system before #450 are skipped, so those players get a new board.
      */
     public static void loadQuestProgressFromDatabase() {
         DatabaseManager db = DatabaseManager.getInstance();
@@ -8243,79 +7958,20 @@ public class PersistenceUtils {
         }
         Bukkit.getLogger().info("[AC] Loading quest progress from MySQL...");
         UUID stateKey = new UUID(0L, 0L);
-        int loaded = 0, staleDaily = 0, staleWeekly = 0;
+        int loaded = 0;
         for (Map.Entry<UUID, String[]> entry : all.entrySet()) {
             UUID uuid = entry.getKey();
             if (uuid.equals(stateKey)) {
                 continue;
             }
-            String progressJson = entry.getValue()[1];
-            if (progressJson == null) {
+            PlayerQuestBoard board = QuestBoardSerializer.fromJson(entry.getValue()[1]);
+            if (board == null) {
                 continue;
             }
-            try {
-                JsonObject prog = GSON.fromJson(progressJson, JsonObject.class);
-                int rank = prog.has("rank") ? prog.get("rank").getAsInt() : 0;
-                int[] dp = GSON.fromJson(prog.get("dp"), int[].class);
-                boolean[] dc = GSON.fromJson(prog.get("dc"), boolean[].class);
-                boolean[] dClaim = GSON.fromJson(prog.get("dClaim"), boolean[].class);
-                int[] wp = GSON.fromJson(prog.get("wp"), int[].class);
-                boolean[] wc = GSON.fromJson(prog.get("wc"), boolean[].class);
-                boolean[] wClaim = GSON.fromJson(prog.get("wClaim"), boolean[].class);
-                // Discard data that was saved before the last reset (stale from previous period)
-                long dailyPeriod = prog.has("dailyPeriod") ? prog.get("dailyPeriod").getAsLong() : 0L;
-                long weeklyPeriod = prog.has("weeklyPeriod") ? prog.get("weeklyPeriod").getAsLong() : 0L;
-                boolean dailyCurrent = dailyPeriod >= QuestUtils.getLastDailyReset();
-                boolean weeklyCurrent = weeklyPeriod >= QuestUtils.getLastWeeklyReset();
-                if (!dailyCurrent) {
-                    staleDaily++;
-                    dp = new int[3];
-                    dc = new boolean[3];
-                    dClaim = new boolean[3];
-                }
-                if (!weeklyCurrent) {
-                    staleWeekly++;
-                    wp = new int[3];
-                    wc = new boolean[3];
-                    wClaim = new boolean[3];
-                }
-                loaded++;
-                QuestUtils.getPlayerDailyProgress().put(uuid, dp);
-                QuestUtils.getPlayerDailyCompleted().put(uuid, dc);
-                QuestUtils.getPlayerDailyClaimed().put(uuid, dClaim);
-                QuestUtils.getPlayerWeeklyProgress().put(uuid, wp);
-                QuestUtils.getPlayerWeeklyCompleted().put(uuid, wc);
-                QuestUtils.getPlayerWeeklyClaimed().put(uuid, wClaim);
-                QuestUtils.getPlayerQuestRank().put(uuid, rank);
-                // Restore quest assignments if present and still current
-                String[] dTasks = (dailyCurrent && prog.has("dTasks")) ? GSON.fromJson(prog.get("dTasks"), String[].class) : null;
-                double[] dRewards = (dailyCurrent && prog.has("dRewards")) ? GSON.fromJson(prog.get("dRewards"), double[].class) : null;
-                String[] wTasks = (weeklyCurrent && prog.has("wTasks")) ? GSON.fromJson(prog.get("wTasks"), String[].class) : null;
-                double[] wRewards = (weeklyCurrent && prog.has("wRewards")) ? GSON.fromJson(prog.get("wRewards"), double[].class) : null;
-                if (dTasks != null && dRewards != null) {
-                    List<Quest> activeDailyQuests = resolveQuestsFromPool(uuid, rank, dTasks, dRewards, QuestType.DAILY);
-                    if (activeDailyQuests != null) {
-                        QuestUtils.setPlayerActiveDailyQuests(uuid, activeDailyQuests);
-                    } else {
-                        Bukkit.getLogger().warning("[AC] [Quest] Could not resolve daily quest assignments for " + uuid
-                                + " from stored tasks: " + java.util.Arrays.toString(dTasks));
-                    }
-                }
-                if (wTasks != null && wRewards != null) {
-                    List<Quest> activeWeeklyQuests = resolveQuestsFromPool(uuid, rank, wTasks, wRewards, QuestType.WEEKLY);
-                    if (activeWeeklyQuests != null) {
-                        QuestUtils.setPlayerActiveWeeklyQuests(uuid, activeWeeklyQuests);
-                    } else {
-                        Bukkit.getLogger().warning("[AC] [Quest] Could not resolve weekly quest assignments for " + uuid
-                                + " from stored tasks: " + java.util.Arrays.toString(wTasks));
-                    }
-                }
-            } catch (Exception e) {
-                Bukkit.getLogger().warning("[AC] Failed to parse quest progress for " + uuid + " from DB: " + e.getMessage());
-            }
+            QuestUtils.setBoard(uuid, board);
+            loaded++;
         }
-        Bukkit.getLogger().info("[AC] Quest progress loaded from MySQL: " + loaded + " players"
-                + " (" + staleDaily + " stale daily, " + staleWeekly + " stale weekly discarded)");
+        Bukkit.getLogger().info("[AC] Quest progress loaded from MySQL: " + loaded + " players");
     }
 
     /**
@@ -10293,6 +9949,7 @@ public class PersistenceUtils {
             totalXp.addProperty(entry.getKey().name(), entry.getValue());
         }
         obj.add("totalXp", totalXp);
+        obj.addProperty("lastLeftAt", jobData.getLastLeftAt());
         return obj.toString();
     }
 
@@ -10312,6 +9969,9 @@ public class PersistenceUtils {
                     }
                 }
                 jobData.setActiveJobs(activeJobs);
+            }
+            if (obj.has("lastLeftAt")) {
+                jobData.setLastLeftAt(obj.get("lastLeftAt").getAsLong());
             }
             if (obj.has("totalXp")) {
                 // Total accumulated XP stored directly

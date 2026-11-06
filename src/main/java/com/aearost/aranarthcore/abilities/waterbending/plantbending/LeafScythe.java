@@ -1,7 +1,7 @@
 package com.aearost.aranarthcore.abilities.waterbending.plantbending;
 
 import com.aearost.aranarthcore.enums.Month;
-import com.aearost.aranarthcore.enums.QuestTaskType;
+import com.aearost.aranarthcore.enums.QuestTrigger;
 import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AbilityConfig;
@@ -319,7 +319,7 @@ public class LeafScythe extends PlantAbility implements AddonAbility {
         boolean isRewarded = AranarthUtils.isSurvivalWorld(block.getWorld().getName());
         if (isRewarded) {
             JobUtils.awardFarmerCropHarvest(player, block.getType());
-            QuestUtils.updateProgress(player, QuestTaskType.HARVEST_CROPS, 1);
+            QuestUtils.progress(player, QuestTrigger.HARVEST, block.getType().name(), 1);
         }
 
         // Get vanilla fortune-based drops, then scale by seasonal yield multiplier

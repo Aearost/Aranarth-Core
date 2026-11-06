@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.JobType;
+import com.aearost.aranarthcore.enums.QuestTrigger;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
@@ -10,6 +11,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.JobUtils;
 import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.QuestUtils;
 import com.dre.brewery.api.events.brew.BrewModifyEvent;
 import com.gmail.nossr50.mcMMO;
 import org.bukkit.Chunk;
@@ -388,6 +390,7 @@ public class JobEventListener implements Listener {
         }
         // Marked for all players so that tilling and trampling the path back into dirt cannot pay again
         mcMMO.getChunkManager().setIneligible(block);
+        QuestUtils.progress(player, QuestTrigger.DIRT_PATH, Material.DIRT_PATH.name(), 1);
 
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
         if (ap == null || !ap.getJobData().hasJob(JobType.BUILDER)) {
@@ -980,6 +983,9 @@ public class JobEventListener implements Listener {
         if (player == null) {
             return;
         }
+
+        ItemStack ingredient = brewer.getIngredient();
+        QuestEventListener.onBrewed(player, ingredient == null ? Material.AIR : ingredient.getType(), e.getResults());
 
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
         if (ap == null || !ap.getJobData().hasJob(JobType.ALCHEMIST)) {

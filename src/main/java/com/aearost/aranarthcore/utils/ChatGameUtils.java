@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.utils;
 
+import com.aearost.aranarthcore.enums.QuestTrigger;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.network.NetworkManager;
@@ -336,6 +337,7 @@ public class ChatGameUtils {
             }
             AranarthUtils.addChatGameGuess(player.getUniqueId());
             AranarthUtils.addChatGameEarnings(player.getUniqueId(), reward);
+            QuestUtils.progress(player, QuestTrigger.CHAT_GAME, "WIN", 1);
 
             // Increment in DB so /topguesses is always accurate across servers
             if (DatabaseManager.isActive()) {
@@ -572,6 +574,11 @@ public class ChatGameUtils {
         }
         if (newGlobalRecord && newHolderUUID != null) {
             updateGlobalBestCache(newHolderUUID, newHolderNickname, newGlobalBestTime);
+        }
+        // The winner answered on this server, so their quest progress is counted here
+        Player localWinner = Bukkit.getPlayer(winnerUUID);
+        if (localWinner != null) {
+            Bukkit.getScheduler().runTask(plugin, () -> QuestUtils.progress(localWinner, QuestTrigger.CHAT_GAME, "WIN", 1));
         }
         String timeStr = String.format("%.2f", elapsedSeconds);
         for (Player p : Bukkit.getOnlinePlayers()) {

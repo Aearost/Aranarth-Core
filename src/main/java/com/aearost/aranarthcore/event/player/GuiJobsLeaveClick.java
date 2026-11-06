@@ -15,44 +15,9 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 public class GuiJobsLeaveClick {
-
-    private static final long COOLDOWN_MS = 3_600_000L; // 1 hour
-    private static final Map<UUID, Long> leaveCooldowns = new HashMap<>();
-
-    public static boolean isOnCooldown(UUID uuid) {
-        Long last = leaveCooldowns.get(uuid);
-        if (last == null) {
-            return false;
-        }
-        return (System.currentTimeMillis() - last) < COOLDOWN_MS;
-    }
-
-    public static String getCooldownRemaining(UUID uuid) {
-        Long last = leaveCooldowns.get(uuid);
-        if (last == null) {
-            return "0m";
-        }
-        long remaining = COOLDOWN_MS - (System.currentTimeMillis() - last);
-        if (remaining <= 0) {
-            return "0m";
-        }
-        long hours = remaining / 3_600_000L;
-        long minutes = (remaining % 3_600_000L) / 60_000L;
-        if (hours > 0) {
-            return hours + "h " + minutes + "m";
-        }
-        return minutes + "m";
-    }
-
-    public static void applyCooldown(UUID uuid) {
-        leaveCooldowns.put(uuid, System.currentTimeMillis());
-    }
 
     public void execute(InventoryClickEvent e) {
         e.setCancelled(true);
@@ -84,13 +49,10 @@ public class GuiJobsLeaveClick {
         int[] slots = GuiJobsLeave.JOB_SLOTS;
         for (int i = 0; i < slots.length && i < activeJobs.size(); i++) {
             if (slots[i] == slot) {
-                if (isOnCooldown(player.getUniqueId())) {
-                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "jobs.leave_cooldown", "time", getCooldownRemaining(player.getUniqueId()))));
-                    return;
-                }
-
+                // Leaving is always allowed, and starts the cooldown before joining another job
                 JobType job = activeJobs.get(i);
                 jobData.removeJob(job);
+                jobData.setLastLeftAt(System.currentTimeMillis());
                 ap.setJobDataLoaded(true);
                 AranarthUtils.setPlayer(player.getUniqueId(), ap);
                 Bukkit.getLogger().info("[AC][Jobs] " + player.getName() + " left job " + job.name()
@@ -99,7 +61,6 @@ public class GuiJobsLeaveClick {
                 if (NetworkManager.isActive()) {
                     NetworkManager.getInstance().publishJobUpdate(player.getUniqueId());
                 }
-                applyCooldown(player.getUniqueId());
 
                 player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "jobs.left", "job", Lang.key(job.getNameKey()))));
                 int jobsVol = AranarthUtils.getPlayer(player.getUniqueId()).getJobsSoundVolume();

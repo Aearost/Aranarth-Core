@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.utils.QuestUtils;
+import com.aearost.aranarthcore.enums.QuestTrigger;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.arrowhead.*;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -106,6 +108,7 @@ public class FletchingTableCraft {
 					for (int i = 0; i < craftsPossible; i++) {
 						consumeIngredients(e.getInventory());
 					}
+					countFletched(player, result, result.getAmount());
 
 					addEmptyBottle(result, player);
 
@@ -127,6 +130,7 @@ public class FletchingTableCraft {
 					// Empty cursor → pick up full result stack (or you can limit to 1 if desired)
 					e.getWhoClicked().setItemOnCursor(result.clone());
 					consumeIngredients(e.getInventory()); // consume for one craft
+					countFletched(e.getWhoClicked(), result, result.getAmount());
 					addEmptyBottle(result, e.getWhoClicked());
 				} else if (cursor.isSimilar(result) && cursor.getAmount() < cursor.getMaxStackSize()) {
 					// Stack onto cursor
@@ -137,6 +141,7 @@ public class FletchingTableCraft {
 						e.getWhoClicked().setItemOnCursor(cursor);
 						consumeIngredients(e.getInventory()); // consume for one craft
 						addEmptyBottle(result, e.getWhoClicked());
+						countFletched(e.getWhoClicked(), result, toAdd);
 					}
 				}
 
@@ -165,6 +170,19 @@ public class FletchingTableCraft {
 		// Double clicking the item in inventory to take it from the result slot
 		if (e.getAction() == InventoryAction.COLLECT_TO_CURSOR) {
 			e.setCancelled(true);
+		}
+	}
+
+	/**
+	 * Counts custom arrows made in the Fletching Table towards the Fletch Custom Arrows quest.
+	 * @param crafter The player.
+	 * @param result The item that was made.
+	 * @param amount How many were made.
+	 */
+	private void countFletched(HumanEntity crafter, ItemStack result, int amount) {
+		if (crafter instanceof Player player && result.hasItemMeta()
+				&& result.getItemMeta().getPersistentDataContainer().has(ARROW, PersistentDataType.STRING)) {
+			QuestUtils.progress(player, QuestTrigger.FLETCH, result.getType().name(), amount);
 		}
 	}
 

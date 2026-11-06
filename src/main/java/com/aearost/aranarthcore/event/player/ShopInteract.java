@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.utils.QuestUtils;
+import com.aearost.aranarthcore.enums.QuestTrigger;
 import com.aearost.aranarthcore.network.NetworkManager;
 import org.bukkit.Bukkit;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
@@ -387,6 +389,9 @@ public class ShopInteract {
                 }
 
                 player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "shop.purchased", "amount", shop.getQuantity(), "item", itemname, "price", formatter.format(shop.getBuyPrice()))));
+                if (shop.getUuid() != null && !shop.getUuid().equals(player.getUniqueId())) {
+                    QuestUtils.progress(player, QuestTrigger.SHOP_BUY, "SHOP", 1, java.util.Set.of(), shop.getUuid().toString());
+                }
                 ItemStack marketBuyItem = shop.getItem().clone();
                 marketBuyItem.setAmount(shop.getQuantity());
                 TradeMarketUtils.recordTradeTransaction(new ItemStack[]{marketBuyItem}, shop.getBuyPrice());

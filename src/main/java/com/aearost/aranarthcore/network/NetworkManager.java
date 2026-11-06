@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.network;
 
+import com.aearost.aranarthcore.utils.QuestUtils;
+import com.aearost.aranarthcore.enums.QuestType;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralProjection;
 import com.aearost.aranarthcore.commands.council.CommandGive;
@@ -113,6 +115,7 @@ public class NetworkManager {
     public static final String CH_CREATIVE_PLOT_DELETE = "aranarth:creative_plot_delete";
     public static final String CH_CREATIVE_EXPAND = "aranarth:creative_expand";
     public static final String CH_JOB_UPDATE = "aranarth:job_update";
+    public static final String CH_QUEST_RESET = "aranarth:quest_reset";
     public static final String CH_JOB_TOP_REQUEST = "aranarth:job_top_request";
     public static final String CH_JOB_TOP_RESPONSE = "aranarth:job_top_response";
     public static final String CH_MOUNT_UPDATE = "aranarth:mount_update";
@@ -607,6 +610,7 @@ public class NetworkManager {
             case CH_CREATIVE_PLOT_DELETE -> handleCreativePlotDelete(json);
             case CH_CREATIVE_EXPAND -> handleCreativeExpand(json);
             case CH_JOB_UPDATE -> handleJobUpdate(json);
+            case CH_QUEST_RESET -> handleQuestReset(json);
             case CH_JOB_TOP_REQUEST -> handleJobTopRequest(json);
             case CH_JOB_TOP_RESPONSE -> handleJobTopResponse(json);
             case CH_MOUNT_UPDATE -> handleMountUpdate(json);
@@ -3756,6 +3760,39 @@ public class NetworkManager {
         json.addProperty("server", thisServer);
         json.addProperty("uuid", uuid.toString());
         publish(CH_JOB_UPDATE, json);
+    }
+
+    /**
+     * Tells the other server that a player's daily or weekly quests were reset with /ac resetquest.
+     *
+     * @param uuid The player.
+     * @param type The board that was reset.
+     * @param salt The salt the new board is rolled with, so both servers roll the same board.
+     */
+    public void publishQuestReset(UUID uuid, QuestType type, long salt) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", uuid.toString());
+        json.addProperty("type", type.name());
+        json.addProperty("salt", salt);
+        publish(CH_QUEST_RESET, json);
+    }
+
+    private void handleQuestReset(JsonObject json) {
+        if (json.get("server").getAsString().equals(thisServer)) {
+            return;
+        }
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        QuestType type = QuestType.valueOf(json.get("type").getAsString());
+        long salt = json.get("salt").getAsLong();
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+            QuestUtils.applyPlayerQuestReset(uuid, type, salt);
+            Player target = Bukkit.getPlayer(uuid);
+            if (target != null) {
+                target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target,
+                        type == QuestType.DAILY ? "quest.daily_reset_personal" : "quest.weekly_reset_personal")));
+            }
+        });
     }
 
     private void handleJobUpdate(JsonObject json) {

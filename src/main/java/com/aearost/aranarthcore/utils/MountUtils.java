@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.utils;
 
+import com.aearost.aranarthcore.enums.QuestTrigger;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.mob.MountListener;
 import com.aearost.aranarthcore.objects.Mount;
@@ -518,6 +519,7 @@ public class MountUtils {
         boolean leveled = pet.addThirdXp(RAM_XP_PER_HIT);
         Player owner = Bukkit.getPlayer(ownerUUID);
         if (owner != null) {
+            QuestUtils.progress(owner, QuestTrigger.MOUNT_SKILL, info[1].toUpperCase(), 1);
             refreshSkillBar(owner, info[1], BAR_THIRD);
             if (leveled) {
                 owner.sendMessage(ChatUtils.chatMessage(Lang.getFor(owner, "mount.skill_level_up", "mount", getElementColor(info[1]) + getDisplayName(ownerUUID, info[1]), "skill", Lang.getFor(owner, "mount.skill_ramming"), "color", getElementColor(info[1]), "level", pet.getThirdLevel())));
@@ -590,6 +592,7 @@ public class MountUtils {
         boolean leveled = pet.addThirdXp(xp);
         Player owner = Bukkit.getPlayer(ownerUUID);
         if (owner != null) {
+            QuestUtils.progress(owner, QuestTrigger.MOUNT_SKILL, info[1].toUpperCase(), 1);
             refreshSkillBar(owner, info[1], BAR_THIRD);
             if (leveled) {
                 owner.sendMessage(ChatUtils.chatMessage(Lang.getFor(owner, "mount.skill_level_up", "mount", getElementColor(info[1]) + getDisplayName(ownerUUID, info[1]), "skill", Lang.getFor(owner, "mount.skill_bellow_power"), "color", getElementColor(info[1]), "level", pet.getThirdLevel())));
@@ -626,6 +629,7 @@ public class MountUtils {
         boolean leveled = pet.addThirdXp(xp);
         Player owner = Bukkit.getPlayer(ownerUUID);
         if (owner != null) {
+            QuestUtils.progress(owner, QuestTrigger.MOUNT_SKILL, info[1].toUpperCase(), 1);
             refreshSkillBar(owner, info[1], BAR_THIRD);
             if (leveled) {
                 owner.sendMessage(ChatUtils.chatMessage(Lang.getFor(owner, "mount.skill_level_up", "mount", getElementColor(info[1]) + getDisplayName(ownerUUID, info[1]), "skill", Lang.getFor(owner, "mount.skill_bite_strength"), "color", getElementColor(info[1]), "level", pet.getThirdLevel())));

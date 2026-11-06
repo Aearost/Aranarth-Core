@@ -2,7 +2,6 @@ package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.JobType;
-import com.aearost.aranarthcore.event.player.GuiJobsLeaveClick;
 import com.aearost.aranarthcore.event.player.GuiJobsStatsClick;
 import com.aearost.aranarthcore.gui.GuiJobs;
 import com.aearost.aranarthcore.network.NetworkManager;
@@ -69,12 +68,21 @@ public class CommandJobs implements CommandExecutor {
                 player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "jobs.max_jobs", "max", String.valueOf(maxJobs))));
                 return true;
             }
+            long cooldown = JobUtils.getJoinCooldownRemaining(ap);
+            if (cooldown > 0) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "jobs.join_cooldown", "time", JobUtils.formatCooldown(cooldown))));
+                return true;
+            }
             jobData.addJob(job);
             ap.setJobDataLoaded(true);
             AranarthUtils.setPlayer(player.getUniqueId(), ap);
             Bukkit.getLogger().info("[AC][Jobs] " + player.getName() + " joined job (cmd) " + job.name()
                     + " - active=" + jobData.getActiveJobs());
-            PersistenceUtils.saveJobData(player.getUniqueId());
+            // Sync save and publish, as the GUI does, so the other server sees the change before a transfer
+            PersistenceUtils.saveJobDataSync(player.getUniqueId());
+            if (NetworkManager.isActive()) {
+                NetworkManager.getInstance().publishJobUpdate(player.getUniqueId());
+            }
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "jobs.joined", "job", Lang.key(job.getNameKey()))));
             return true;
         }
@@ -93,17 +101,17 @@ public class CommandJobs implements CommandExecutor {
                 player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "jobs.not_have", "job", Lang.key(job.getNameKey()))));
                 return true;
             }
-            if (GuiJobsLeaveClick.isOnCooldown(player.getUniqueId())) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "jobs.leave_cooldown", "time", GuiJobsLeaveClick.getCooldownRemaining(player.getUniqueId()))));
-                return true;
-            }
+            // Leaving is always allowed, and starts the cooldown before joining another job
             jobData.removeJob(job);
+            jobData.setLastLeftAt(System.currentTimeMillis());
             ap.setJobDataLoaded(true);
             AranarthUtils.setPlayer(player.getUniqueId(), ap);
             Bukkit.getLogger().info("[AC][Jobs] " + player.getName() + " left job (cmd) " + job.name()
                     + " - active=" + jobData.getActiveJobs());
-            PersistenceUtils.saveJobData(player.getUniqueId());
-            GuiJobsLeaveClick.applyCooldown(player.getUniqueId());
+            PersistenceUtils.saveJobDataSync(player.getUniqueId());
+            if (NetworkManager.isActive()) {
+                NetworkManager.getInstance().publishJobUpdate(player.getUniqueId());
+            }
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "jobs.quit", "job", Lang.key(job.getNameKey()))));
             return true;
         }

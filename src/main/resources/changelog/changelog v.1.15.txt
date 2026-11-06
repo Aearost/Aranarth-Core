@@ -65,6 +65,11 @@ Aranarthium, Items & Crafting
 [~] Custom items with durability such as Wrenches can now be crafted with each other to repair durability
 
 Economy, Jobs & Quests
+[~] Overhauled quests to be job-oriented, and restructured all quest thresholds and rewards, adding several new quests for each job
+[+] Added the option to re-roll quests once per day for dailies and once per week for weeklies
+[+] Added extra bonus reward for completing all three daily or all three weekly quests
+[+] Added a cooldown to joining new jobs
+[-] Removed the cooldown from leaving jobs
 [~] Fixed /vptransfer throwing an error when the receiver has never joined the current server
 [~] Market sell prices now drop at a proportional rate to the item's max stack size
 [+] Poplar and Pale Oak logs now count towards quests and Lumberjack job XP
@@ -94,6 +99,7 @@ Chat, UI & Sounds
 [+] Emojis are now translated in /msg, /reply, /mail, /d msg, and /ac msg
 [~] Bold and italics are now converted between Discord and in-game chat in both directions
 [+] The tab list is now split into different world groups
+[~] Made AFK functionality take you out of AFK with actual keyboard input of movement, rather than the location changing
 
 Quality of Life
 [+] Added /vc list as an alias for /vc who

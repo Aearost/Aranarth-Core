@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
+import com.aearost.aranarthcore.utils.QuestUtils;
+import com.aearost.aranarthcore.enums.QuestTrigger;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.PrefixStyle;
 import com.aearost.aranarthcore.gui.GuiBlacklistEditor;
@@ -276,6 +278,7 @@ public class PlayerChatListener implements Listener {
                         org.bukkit.scheduler.BukkitTask timer = GuiDominionResourcesClick.claimTimerTasks.remove(dominion.getId());
                         if (timer != null) timer.cancel();
                         Bukkit.getScheduler().runTask(plugin, () -> {
+                            QuestUtils.progress(player, QuestTrigger.RESOURCE_CLAIM, "RESOURCE", count);
                             for (int i = 0; i < count; i++) {
                                 claimDominionResources(dominion, player, capturedBiome, avgYield);
                             }

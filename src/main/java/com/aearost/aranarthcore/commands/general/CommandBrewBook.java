@@ -79,7 +79,7 @@ public class CommandBrewBook implements CommandExecutor {
 
         AranarthPlayer targetAp = AranarthUtils.getPlayer(targetUuid);
         if (targetAp != null) {
-            boolean questUpdated = QuestUtils.regenerateWeeklyQuestIfBrewReward(targetUuid, targetAp.getRank(), recipe.getId());
+            boolean questUpdated = QuestUtils.regenerateWeeklyQuestIfBrewReward(targetUuid, recipe.getId());
             if (questUpdated) {
                 Player targetOnline = Bukkit.getPlayer(targetUuid);
                 if (targetOnline != null) {

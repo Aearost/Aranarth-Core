@@ -1,8 +1,11 @@
 package com.aearost.aranarthcore.event.mob;
 
+import com.aearost.aranarthcore.utils.QuestUtils;
+import com.aearost.aranarthcore.enums.QuestTrigger;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.event.listener.grouped.JobEventListener;
+import com.aearost.aranarthcore.event.listener.grouped.QuestEventListener;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthMount;
 import com.aearost.aranarthcore.objects.CustomKeys;
@@ -80,6 +83,7 @@ public class MountListener implements Listener {
             activeTunnels.put(id, tunnel);
             tunnel.runTaskTimer(AranarthCore.getInstance(), 0L, 1L);
             rider.playSound(mount.getLocation(), Sound.BLOCK_ROOTED_DIRT_BREAK, 1.2f, 0.7f);
+            QuestUtils.progress(rider, QuestTrigger.MOUNT_SKILL, "DIG", 1);
         }
 
         @Override
@@ -388,6 +392,7 @@ public class MountListener implements Listener {
                     applyMovement(mount, rider);
                     double[] in = playerInputs.getOrDefault(rider.getUniqueId(), new double[]{0, 0});
                     JobEventListener.trackMountTravel(rider, mount, in[0] != 0 || in[1] != 0);
+                    QuestEventListener.onMountTick(rider, mount, in[0] != 0 || in[1] != 0);
                 }
             }
         }.runTaskTimer(plugin, 0L, 1L);

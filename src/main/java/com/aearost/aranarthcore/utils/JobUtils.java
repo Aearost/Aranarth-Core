@@ -46,6 +46,32 @@ public class JobUtils {
                                 double basePay, long placedAt) {
     }
 
+    private static final long JOIN_COOLDOWN_MS = 3_600_000L; // 1 hour
+
+    /**
+     * Players can leave a job at any time, but must wait after leaving one before joining another.
+     * @param ap The player.
+     * @return The time left before the player can join a job, or 0 if they can join now.
+     */
+    public static long getJoinCooldownRemaining(AranarthPlayer ap) {
+        if (ap.isInAdminMode()) {
+            return 0;
+        }
+        long remaining = JOIN_COOLDOWN_MS - (System.currentTimeMillis() - ap.getJobData().getLastLeftAt());
+        return Math.max(0, remaining);
+    }
+
+    /**
+     * @param remaining The cooldown left, in milliseconds.
+     * @return The cooldown formatted as "1h 5m" or "12m".
+     */
+    public static String formatCooldown(long remaining) {
+        long totalMinutes = Math.max(1, (remaining + 59_999L) / 60_000L);
+        long hours = totalMinutes / 60;
+        long minutes = totalMinutes % 60;
+        return hours > 0 ? hours + "h " + minutes + "m" : minutes + "m";
+    }
+
     public static int getMaxJobs(int rank) {
         if (rank >= 8) {
             return 5;
