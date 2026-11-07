@@ -1262,6 +1262,7 @@ public class AranarthCore extends JavaPlugin {
         new PlayerRespawnEventListener(this);
         new PlayerGameModeChangeEventListener(this);
         new DominionProtectionListener(this);
+        new EnemyProximityListener(this);
         new SpawnProtectionListener(this);
         new ShopProtectionListener(this);
         new PlotProtectionListener(this);

@@ -7,6 +7,7 @@ Bending & Abilities
 [-] Prevented AirBlast from being used while riding a horse, mount, or any other vehicle
 
 Dominion
+[+] Dominion and outpost bending flags are now bypassed while a member of an enemied dominion is within proximity of the land
 
 Aranarthium, Items & Crafting
 

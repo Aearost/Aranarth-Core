@@ -652,6 +652,16 @@ public class DominionUtils {
     }
 
     /**
+     * Returns the dominion that owns the chunk with the given lookup key, without loading the chunk.
+     *
+     * @param chunkKey The chunk key in the format world:x:z.
+     * @return The owning dominion, or null if unclaimed.
+     */
+    public static Dominion getDominionOfChunkKey(String chunkKey) {
+        return chunkKeyToDominion.get(chunkKey);
+    }
+
+    /**
      * Returns the dominion that owns the given chunk, checking both main dominion
      * claims and outpost claims. Returns null if the chunk is unclaimed.
      */
