@@ -22,6 +22,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -67,6 +68,8 @@ public class AvatarUtils {
     private static String lastSelectionSummary = null;
     // Incremented on every refresh so that mannequins from an older refresh are never spawned
     private static int mannequinGeneration = 0;
+    // Completed skin profiles, so that mannequin refreshes do not query Mojang every time
+    private static final Map<UUID, PlayerProfile> skinProfileCache = new ConcurrentHashMap<>();
 
     /**
      * Provides the list of all avatars.
@@ -932,17 +935,31 @@ public class AvatarUtils {
         UUID uuid = avatar.getUuid();
         AranarthCore plugin = AranarthCore.getInstance();
 
+        // An online player already has their skin, so Mojang does not need to be queried
+        Player online = Bukkit.getPlayer(uuid);
+        if (online != null && online.getPlayerProfile().hasTextures()) {
+            skinProfileCache.put(uuid, online.getPlayerProfile());
+        }
+
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            // Fetch and complete the profile (blocking Mojang API call)
-            PlayerProfile profile = plugin.getServer().createProfile(uuid);
-            boolean isProfileComplete;
-            try {
-                isProfileComplete = profile.complete(true); // Fetches the skin from Mojang
-            } catch (Exception e) {
-                logWarning("The skin lookup failed for the mannequin of " + uuid + ": " + e);
-                isProfileComplete = false;
+            PlayerProfile profile = skinProfileCache.get(uuid);
+            if (profile == null) {
+                // Fetch and complete the profile (blocking Mojang API call)
+                profile = plugin.getServer().createProfile(uuid);
+                try {
+                    // Fetches the skin from Mojang, Paper logs its own warning if the request times out
+                    if (profile.complete(true) && profile.hasTextures()) {
+                        skinProfileCache.put(uuid, profile);
+                    } else {
+                        profile = null;
+                    }
+                } catch (Exception e) {
+                    logWarning("The skin lookup failed for the mannequin of " + uuid + ": " + e);
+                    profile = null;
+                }
             }
-            boolean completed = isProfileComplete;
+            boolean completed = profile != null;
+            PlayerProfile skinProfile = profile;
 
             // Jump back to main thread to spawn the mannequin
             Bukkit.getScheduler().runTask(plugin, () -> {
@@ -956,7 +973,7 @@ public class AvatarUtils {
                     loc.getChunk().load();
                     Mannequin mannequin = (Mannequin) loc.getWorld().spawnEntity(loc, EntityType.MANNEQUIN);
                     // Mojang servers unreachable, so the skin is resolved from the UUID later instead
-                    mannequin.setProfile(completed ? ResolvableProfile.resolvableProfile(profile)
+                    mannequin.setProfile(completed ? ResolvableProfile.resolvableProfile(skinProfile)
                             : ResolvableProfile.resolvableProfile().uuid(uuid).build());
                     mannequin.setInvulnerable(true);
                     mannequin.setGravity(false);

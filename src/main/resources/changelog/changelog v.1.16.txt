@@ -17,5 +17,6 @@ Chat, UI & Sounds
 Quality of Life
 
 Cross-server & Technical
+[+] Added caching to avatar mannequin skins so refreshes avoid session server timeout warnings
 
 Miscellaneous
