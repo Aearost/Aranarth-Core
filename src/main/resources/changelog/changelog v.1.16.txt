@@ -1,0 +1,21 @@
+AranarthCore v. 1.16
+
+World & Events
+[~] Players now enter AFK status when only clicking or being moved by external factors
+
+Bending & Abilities
+
+Dominion
+
+Aranarthium, Items & Crafting
+
+Economy, Jobs & Quests
+[+] Added 1/4 pay when earning income from jobs while AFK
+
+Chat, UI & Sounds
+
+Quality of Life
+
+Cross-server & Technical
+
+Miscellaneous

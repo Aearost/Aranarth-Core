@@ -10,6 +10,7 @@ import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.enums.WorldEvent;
 import com.aearost.aranarthcore.event.listener.misc.InvisibilityListener;
 import com.aearost.aranarthcore.event.listener.misc.PotionEffectListener;
+import com.aearost.aranarthcore.event.player.AfkCancelByInteract;
 import com.aearost.aranarthcore.items.SugarcaneBlock;
 import com.aearost.aranarthcore.items.arrow.*;
 import com.aearost.aranarthcore.network.NetworkManager;
@@ -4692,38 +4693,31 @@ public class AranarthUtils {
      */
     public static void updateAfkLocations() {
         for (Player player : Bukkit.getOnlinePlayers()) {
+            // A key held through a long ride or walk only fires an input event when it is first pressed
+            Input input = player.getCurrentInput();
+            if (input.isForward() || input.isBackward() || input.isLeft() || input.isRight()) {
+                new AfkCancelByInteract().execute(player);
+            }
             AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
             AfkLocation afkLocation = aranarthPlayer.getAfkLocation();
             if (afkLocation == null) {
                 afkLocation = new AfkLocation(player.getLocation(), 0);
                 aranarthPlayer.setAfkLocation(afkLocation);
                 setPlayer(player.getUniqueId(), aranarthPlayer);
-            } else {
-                // If the player hasn't moved and isn't afk yet
-                if (isSameLocation(player.getLocation(), afkLocation.getLocation())) {
-                    if (afkLocation.getSeconds() < getAfkSecondsAmount()) {
-                        afkLocation.setSeconds(afkLocation.getSeconds() + 5);
-                        aranarthPlayer.setAfkLocation(afkLocation);
-                        setPlayer(player.getUniqueId(), aranarthPlayer);
-                    }
-                    // Auto-afk after the timeout, even if the timeout is not a multiple of 5
-                    else if (aranarthPlayer.getAfkStartTime() == 0) {
-                        toggleAfkStatus(player.getUniqueId(), true);
-                        // Prevents further calls
-                        afkLocation.setSeconds(AranarthUtils.getAfkSecondsAmount() + 5);
-                        aranarthPlayer.setAfkLocation(afkLocation);
-                        setPlayer(player.getUniqueId(), aranarthPlayer);
-                    }
-                }
-                // The player has moved
-                else {
-                    if (isAfk(aranarthPlayer)) {
-                        toggleAfkStatus(player.getUniqueId(), false);
-                    } else {
-                        aranarthPlayer.setAfkLocation(null);
-                        setPlayer(player.getUniqueId(), aranarthPlayer);
-                    }
-                }
+            }
+            // Only real input resets the timer, so being pushed around by water, mobs or pistons still counts as AFK
+            else if (afkLocation.getSeconds() < getAfkSecondsAmount()) {
+                afkLocation.setSeconds(afkLocation.getSeconds() + 5);
+                aranarthPlayer.setAfkLocation(afkLocation);
+                setPlayer(player.getUniqueId(), aranarthPlayer);
+            }
+            // Auto-afk after the timeout, even if the timeout is not a multiple of 5
+            else if (aranarthPlayer.getAfkStartTime() == 0) {
+                toggleAfkStatus(player.getUniqueId(), true);
+                // Prevents further calls
+                afkLocation.setSeconds(AranarthUtils.getAfkSecondsAmount() + 5);
+                aranarthPlayer.setAfkLocation(afkLocation);
+                setPlayer(player.getUniqueId(), aranarthPlayer);
             }
         }
     }

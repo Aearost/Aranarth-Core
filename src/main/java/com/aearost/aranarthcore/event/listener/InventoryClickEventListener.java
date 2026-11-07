@@ -103,6 +103,8 @@ public class InventoryClickEventListener implements Listener {
         if (!(e.getWhoClicked() instanceof Player player)) {
             return;
         }
+        // Done first so GUI clicks that return early still count as activity
+        new AfkCancelByInteract().execute(player);
         if (isGui && e.getView().getType() == InventoryType.CHEST) {
             if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.wrench.title"))) {
                 new GuiWrenchClick().execute(e);
@@ -259,8 +261,6 @@ public class InventoryClickEventListener implements Listener {
             }
         }
 
-        // Execute regardless of inventory type
-        new AfkCancelByInteract().execute(player);
 //        new QuiverSwitchSlots().execute(e);
     }
 }
