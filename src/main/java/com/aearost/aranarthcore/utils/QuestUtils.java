@@ -646,7 +646,8 @@ public class QuestUtils {
     private static int countOtherShopOwners(UUID uuid) {
         int count = 0;
         for (Map.Entry<UUID, List<Shop>> entry : ShopUtils.getShops().entrySet()) {
-            if (!entry.getKey().equals(uuid) && entry.getValue() != null && !entry.getValue().isEmpty()) {
+            // Server shops are stored under a null key and are not player owners
+            if (entry.getKey() != null && !entry.getKey().equals(uuid) && entry.getValue() != null && !entry.getValue().isEmpty()) {
                 count++;
             }
         }

@@ -20,5 +20,6 @@ Quality of Life
 
 Cross-server & Technical
 [+] Added caching to avatar mannequin skins so refreshes avoid session server timeout warnings
+[~] Fixed quest boards failing to generate when server shops exist, which caused errors on player movement
 
 Miscellaneous
