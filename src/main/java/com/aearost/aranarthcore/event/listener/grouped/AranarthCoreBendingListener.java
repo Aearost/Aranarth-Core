@@ -346,6 +346,23 @@ public class AranarthCoreBendingListener implements Listener {
     }
 
     /**
+     * Prevents AirBlast from being used while riding anything (horses, mounts, chairs, boats, etc).
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onAirBlastStartWhileRiding(final AbilityStartEvent e) {
+        if (!(e.getAbility() instanceof AirBlast airBlast) || airBlast.getSource() != null) {
+            return;
+        }
+        Player player = airBlast.getPlayer();
+        if (player == null || !player.isInsideVehicle()) {
+            return;
+        }
+        e.setCancelled(true);
+        // AirBlast applies its cooldown before starting
+        airBlast.getBendingPlayer().removeCooldown("AirBlast");
+    }
+
+    /**
      * Launches the held arrow into the AirBlast when an airbender with 100+ Archery fires it while sneaking and holding arrows.
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

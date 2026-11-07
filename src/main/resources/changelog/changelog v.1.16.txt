@@ -4,6 +4,7 @@ World & Events
 [~] Players now enter AFK status when only clicking or being moved by external factors
 
 Bending & Abilities
+[-] Prevented AirBlast from being used while riding a horse, mount, or any other vehicle
 
 Dominion
 
