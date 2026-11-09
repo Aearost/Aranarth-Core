@@ -15,6 +15,7 @@ Aranarthium, Items & Crafting
 Economy, Jobs & Quests
 [+] Added 1/4 pay when earning income from jobs while AFK
 [+] Server shop prices recover faster the cheaper the shop is, keeping the current rate for $500 and above
+[~] Alchemists now earn money when using potions
 
 Chat, UI & Sounds
 
