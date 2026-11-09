@@ -1,6 +1,7 @@
 AranarthCore v. 1.16
 
 World & Events
+[+] Implemented custom trees to be grown from saplings, toggleable with /toggle bigtree
 [~] Players now enter AFK status when only clicking or being moved by external factors
 
 Bending & Abilities

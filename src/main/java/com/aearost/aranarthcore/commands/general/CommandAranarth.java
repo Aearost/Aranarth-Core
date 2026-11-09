@@ -4,20 +4,27 @@ import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.gui.GuiAranarth;
 import com.aearost.aranarthcore.gui.GuiRecipes;
+import com.aearost.aranarthcore.trees.CustomTrees;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.CustomTreeUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
 import com.aearost.aranarthcore.utils.FireParticleRegistry;
 import com.aearost.aranarthcore.utils.Lang;
 import com.projectkorra.projectkorra.Element;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Centralised guide command for Aranarth topics.
@@ -74,10 +81,35 @@ public class CommandAranarth implements CommandExecutor {
             "fletchingtable", "specialarrows", "quiver",
             "potions", "dragonsbreath", "autoplant",
             "croptrample", "autolock", "bonemealwood",
-            "cauldronbottles", "goathorns", "navigation",
-            "voting", "voicechat", "language",
-            "toggles", "sounds", "heads",
-            "brewbook"
+            "bigtrees", "treetypes", "cauldronbottles",
+            "goathorns", "navigation", "voting",
+            "voicechat", "language", "toggles",
+            "sounds", "heads", "brewbook"
+    );
+
+    /**
+     * A row of the Tree Types chapter.
+     * @param key The lang key of the row's name, after "trees.sapling_".
+     * @param saplings The saplings whose trees are listed in the row.
+     */
+    private record TreeRow(String key, Material... saplings) {}
+
+    private static final List<TreeRow> TREE_ROWS = List.of(
+            new TreeRow("oak", Material.OAK_SAPLING),
+            new TreeRow("birch", Material.BIRCH_SAPLING),
+            new TreeRow("poplar", Material.POPLAR_SAPLING),
+            new TreeRow("spruce", Material.SPRUCE_SAPLING),
+            new TreeRow("jungle", Material.JUNGLE_SAPLING),
+            new TreeRow("acacia", Material.ACACIA_SAPLING),
+            new TreeRow("dark_oak", Material.DARK_OAK_SAPLING),
+            new TreeRow("pale_oak", Material.PALE_OAK_SAPLING),
+            new TreeRow("cherry", Material.CHERRY_SAPLING),
+            new TreeRow("mangrove", Material.MANGROVE_PROPAGULE),
+            new TreeRow("azalea", Material.AZALEA, Material.FLOWERING_AZALEA),
+            new TreeRow("crimson", Material.CRIMSON_FUNGUS),
+            new TreeRow("warped", Material.WARPED_FUNGUS),
+            new TreeRow("brown_mushroom", Material.BROWN_MUSHROOM),
+            new TreeRow("red_mushroom", Material.RED_MUSHROOM)
     );
 
     static final List<String> CREATIVE_SECTIONS = List.of(
@@ -114,6 +146,8 @@ public class CommandAranarth implements CommandExecutor {
                 }
             }
             case "rules" -> sendRules(player);
+            // A shortcut to the types of custom trees and the sizes they grow from
+            case "trees" -> sendSectionChapter(player, "mechanics", "treetypes");
             case "aranarthium", "essences", "dominions", "bending", "ranks", "economy", "perks", "mechanics",
                  "creative" -> {
                 String topic = args[0].toLowerCase();
@@ -293,7 +327,7 @@ public class CommandAranarth implements CommandExecutor {
             case "bending" -> new int[]{3, 3, 1};
             case "ranks", "creative" -> new int[]{3, 3};
             case "economy" -> new int[]{2, 2, 2, 2};
-            case "mechanics" -> new int[]{3, 3, 3, 3, 3, 3, 1};
+            case "mechanics" -> new int[]{3, 3, 3, 3, 3, 3, 3};
             default -> new int[]{3, 3, 3};
         };
     }
@@ -343,6 +377,10 @@ public class CommandAranarth implements CommandExecutor {
             sendMultilineIndented(player, Lang.getFor(player, "essences.section_" + section + "_content1"));
             player.sendMessage(Component.empty());
             sendMultilineIndented(player, Lang.getFor(player, "essences.section_" + section + "_content2"));
+        } else if (topic.equals("mechanics") && section.equals("treetypes")) {
+            sendMultilineIndented(player, Lang.getFor(player, "mechanics.section_treetypes_content"));
+            player.sendMessage(Component.empty());
+            sendTreeSizes(player);
         } else if (topic.equals("bending") || topic.equals("ranks")) {
             sendMultilineIndented(player, Lang.getFor(player, topic + ".section_" + section + "_content", getElementColors()));
         } else {
@@ -355,6 +393,56 @@ public class CommandAranarth implements CommandExecutor {
                 .append(buildNavBtn(player, Lang.getFor(player, topic + ".guide_back"), "/aranarth " + topic))
                 .append(Component.text("   "))
                 .append(buildNavBtn(Lang.getFor(player, "guide.nav_next"), Lang.getFor(player, topic + ".section_" + nextSection + "_label"), "/aranarth " + topic + " " + nextSection)));
+    }
+
+    /**
+     * Sends a row for each type of sapling, listing the sizes of square it grows a custom tree from.
+     */
+    private void sendTreeSizes(Player player) {
+        int labelWidth = 0;
+        for (TreeRow row : TREE_ROWS) {
+            labelWidth = Math.max(labelWidth, getPixelWidth(Lang.getFor(player, "trees.sapling_" + row.key())));
+        }
+        for (TreeRow row : TREE_ROWS) {
+            // Trees that grow from any number of saplings are listed under a single sapling
+            Map<Integer, List<String>> sizes = new TreeMap<>();
+            for (Material sapling : row.saplings()) {
+                for (CustomTrees.Variant variant : CustomTrees.Variant.forSapling(sapling)) {
+                    int size = Math.max(1, variant.getSize());
+                    sizes.computeIfAbsent(size, key -> new ArrayList<>())
+                            .add(Lang.getFor(player, "trees.variant_" + variant.name().toLowerCase()));
+                }
+            }
+            if (sizes.isEmpty()) {
+                continue;
+            }
+            String label = Lang.getFor(player, "trees.sapling_" + row.key());
+            // Pads the names so that the sizes line up in a column
+            int padding = (labelWidth - getPixelWidth(label)) / 4 + 2;
+            var line = Component.text().append(Component.text("  "))
+                    .append(LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(label)))
+                    .append(Component.text(" ".repeat(padding)));
+            for (Map.Entry<Integer, List<String>> entry : sizes.entrySet()) {
+                String size = entry.getKey() + "x" + entry.getKey();
+                StringBuilder trees = new StringBuilder();
+                for (String tree : entry.getValue()) {
+                    trees.append("\n").append(Lang.getFor(player, "mechanics.treetypes_tree", "name", tree));
+                }
+                // Sizes that only Dukes and above can grow stand out, and say so when hovered
+                boolean duke = entry.getKey() >= CustomTreeUtils.LARGE_TREE_SIZE;
+                if (duke) {
+                    trees.append("\n").append(Lang.getFor(player, "mechanics.treetypes_duke_hover"));
+                }
+                String hover = Lang.getFor(player, "mechanics.treetypes_hover", "size", size) + trees;
+                String sizeKey = duke ? "mechanics.treetypes_size_duke" : "mechanics.treetypes_size";
+                line.append(LegacyComponentSerializer.legacySection().deserialize(
+                                ChatUtils.translateToColor(Lang.getFor(player, sizeKey, "size", size)))
+                        .hoverEvent(HoverEvent.showText(LegacyComponentSerializer.legacySection().deserialize(
+                                ChatUtils.translateToColor(hover)))));
+                line.append(Component.text("  "));
+            }
+            player.sendMessage(line.build());
+        }
     }
 
     /**

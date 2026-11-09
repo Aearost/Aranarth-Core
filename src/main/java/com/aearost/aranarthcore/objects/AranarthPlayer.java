@@ -125,6 +125,7 @@ public class AranarthPlayer {
     private boolean isServerTipsDisabled = false;
     private boolean isSitDisabled = false;
     private boolean isJobsMessageDisabled = false;
+    private boolean isBigTreeDisabled = false;
     private String sitCushionColor = "WHITE";
     private PrefixStyle councilPrefixStyle = PrefixStyle.SYMBOL;
     private PrefixStyle saintPrefixStyle = PrefixStyle.SYMBOL;
@@ -2187,6 +2188,17 @@ public class AranarthPlayer {
 
     public void setJobsMessageDisabled(boolean jobsMessageDisabled) {
         this.isJobsMessageDisabled = jobsMessageDisabled;
+    }
+
+    /**
+     * Provides whether the saplings this player plants or bone meals grow into vanilla trees instead of custom trees.
+     */
+    public boolean isBigTreeDisabled() {
+        return isBigTreeDisabled;
+    }
+
+    public void setBigTreeDisabled(boolean bigTreeDisabled) {
+        this.isBigTreeDisabled = bigTreeDisabled;
     }
 
     public String getSitCushionColor() {

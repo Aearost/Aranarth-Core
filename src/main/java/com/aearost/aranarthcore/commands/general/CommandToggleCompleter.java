@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class CommandToggleCompleter implements TabCompleter {
 
     private static final List<String> TOGGLE_OPTIONS = List.of(
-            "barbarian", "blacklist", "changeclaim", "chat", "chestlock",
+            "barbarian", "bigtree", "blacklist", "changeclaim", "chat", "chestlock",
             "emoji", "firetype", "compressor", "daymessage", "dmsgcompact", "gate",
             "gradientchat", "inventory", "invisiblearmor", "jobsmsg", "messages", "pethurt",
             "reaper", "shulker", "shulkerbulk", "sit", "size", "spawnboost", "teleport", "weathermessage"

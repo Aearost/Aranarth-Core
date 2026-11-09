@@ -204,6 +204,9 @@ public class GuiToggle {
         // Jobs Earnings Message
         gui.setItem(40, buildToggleItem(player, Material.GOLD_INGOT, Lang.getFor(player, "gui.toggle.jobs_message"), !aranarthPlayer.isJobsMessageDisabled()));
 
+        // Big Trees
+        gui.setItem(41, buildToggleItem(player, Material.OAK_SAPLING, Lang.getFor(player, "gui.toggle.big_trees"), !aranarthPlayer.isBigTreeDisabled()));
+
         return gui;
     }
 

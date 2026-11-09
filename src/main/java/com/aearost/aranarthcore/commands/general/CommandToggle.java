@@ -413,6 +413,15 @@ public class CommandToggle implements CommandExecutor {
 						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.jobsmsg_disabled")));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				} else if (args[0].equalsIgnoreCase("bigtree")) {
+					if (aranarthPlayer.isBigTreeDisabled()) {
+						aranarthPlayer.setBigTreeDisabled(false);
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.bigtree_enabled")));
+					} else {
+						aranarthPlayer.setBigTreeDisabled(true);
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.bigtree_disabled")));
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("sit")) {
 					if (!player.hasPermission("aranarth.sit.toggle")) {
 						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
