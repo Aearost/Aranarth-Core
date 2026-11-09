@@ -717,37 +717,39 @@ public class CustomTrees {
     // ------------------------------------------------------------
 
     /**
-     * #1 Spreading Oak - a short single trunk that splits into a few limbs, which keep forking into an open,
-     * rounded crown made of many separate leaf clusters.
+     * #1 Spreading Oak - a small, simple tree: a short single trunk with a few stubby limbs, each ending in a leaf
+     * cluster, that together form a modest rounded crown.
      */
     private void spreadingOak(int x, int y, int z) {
         t = new TreeBuilder(world, r, Material.OAK_WOOD, Material.OAK_LEAVES);
         t.setLeafMix(Material.OAK_LEAVES, Material.DARK_OAK_LEAVES, 0.15);
-        t.setPorosity(0.25);
-        double scale = between(0.7, 1.4);
+        // No air pockets, as the crown is too small to hide them and they read as missing leaves
+        t.setPorosity(0);
+        double scale = between(1.0, 1.25);
         double cx = x + 0.5;
         double cz = z + 0.5;
-        int trunkHeight = (int) Math.round(between(3.5, 6.0) * scale);
+        int trunkHeight = (int) Math.round(between(3.5, 4.5) * scale);
         t.info("scale", scale);
         t.info("trunk", trunkHeight);
-        double topX = cx + jitter(0.7);
-        double topZ = cz + jitter(0.7);
+        double topX = cx + jitter(0.4);
+        double topZ = cz + jitter(0.4);
         t.branch(cx, y, cz, topX, y + trunkHeight, topZ);
 
-        LimbStyle style = new LimbStyle(0.25, 0.05, 0.35, 0.7, 2, 3, 0.6, 0.75, 1.6, 2.5, 1.8, 0.6, 0.4, 0.3);
+        // A dense core around the top of the trunk so the crown reads as one full, bushy mass
+        t.blob(topX, y + trunkHeight + 0.5, topZ, 2.5 * scale, 2.0 * scale, 2.5 * scale, 0.2);
+
+        // Limbs do not fork, so each one is just a short arm holding a single leaf cluster
+        LimbStyle style = new LimbStyle(0.2, 0.03, 0.6, 0.5, 1, 1, 0.6, 0.7, 99, 2.3, 1.8, 0.5, 0.2, 0);
         int limbs = between(3, 4);
         double start = randomAngle();
         for (int i = 0; i < limbs; i++) {
             double yaw = start + i * Math.PI * 2 / limbs + jitter(0.4);
-            int drop = between(0, 2);
+            int drop = between(0, 1);
             double progress = (double) (trunkHeight - drop) / trunkHeight;
             limb(cx + (topX - cx) * progress, y + trunkHeight - drop, cz + (topZ - cz) * progress,
-                    yaw, between(0.45, 0.85), between(4.5, 6.5) * scale, scale > 1.15 ? 3 : 2, style);
+                    yaw, between(0.6, 0.95), between(1.8, 2.6) * scale, 0, style);
         }
-        limb(topX, y + trunkHeight, topZ, randomAngle(), 1.3, between(2.5, 4.0) * scale, 1, style);
-        if (scale > 1.0) {
-            surfaceRoots(cx, y, cz, between(3, 5), 1.5, 3.0 * scale, 0.6, 1, Material.OAK_WOOD);
-        }
+        limb(topX, y + trunkHeight, topZ, randomAngle(), 1.35, between(1.6, 2.3) * scale, 0, style);
     }
 
     /**
