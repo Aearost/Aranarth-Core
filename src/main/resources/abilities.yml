@@ -695,6 +695,7 @@ MetalBlade:
   ChargeDuration: 750
   Duration: 6000
   MaxHits: 3
+  WeaponDamageRatio: 0.75
 
 MetalShots:
   Damage: 2.0

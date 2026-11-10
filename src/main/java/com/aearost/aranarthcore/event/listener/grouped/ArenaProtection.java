@@ -222,8 +222,19 @@ public class ArenaProtection implements Listener {
 		}
 	}
 
-	private Double pendingArenaCap = null;
-	private UUID pendingArenaCapTarget = null;
+	private static Double pendingArenaCap = null;
+	private static UUID pendingArenaCapTarget = null;
+
+	/**
+	 * Clears a pending arena cap for the given target.
+	 * @param targetUuid The UUID of the entity the cap was stored for.
+	 */
+	public static void clearPendingArenaCap(final UUID targetUuid) {
+		if (targetUuid.equals(pendingArenaCapTarget)) {
+			pendingArenaCap = null;
+			pendingArenaCapTarget = null;
+		}
+	}
 
 	/**
 	 * Reduces bending ability damage in the arena world using a tiered scale.

@@ -9,6 +9,7 @@ World & Events
 
 Bending & Abilities
 [-] Prevented AirBlast from being used while riding a horse, mount, or any other vehicle
+[~] MetalBlade now persists across slot changes once charged, and weapon hits with it active deal a portion of the blade's damage
 
 Dominion
 [+] Dominion and outpost bending flags are now bypassed while a member of an enemied dominion is within proximity of the land

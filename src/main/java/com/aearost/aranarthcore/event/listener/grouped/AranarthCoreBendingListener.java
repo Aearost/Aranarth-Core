@@ -1603,13 +1603,10 @@ public class AranarthCoreBendingListener implements Listener {
         if (metalShots != null) {
             metalShots.endWithCooldown();
         }
+        // Once fully charged, MetalBlade acts like a stim and persists across slot changes
         MetalBlade metalBlade = MetalBlade.getActiveInstance(e.getPlayer().getUniqueId());
-        if (metalBlade != null) {
-            if (metalBlade.getPhase() == MetalBlade.Phase.CHARGING) {
-                metalBlade.cancelInstantly();
-            } else {
-                metalBlade.endWithCooldown();
-            }
+        if (metalBlade != null && metalBlade.getPhase() == MetalBlade.Phase.CHARGING) {
+            metalBlade.cancelInstantly();
         }
         CableThrash cableThrash = CableThrash.getActiveInstance(e.getPlayer().getUniqueId());
         if (cableThrash != null) {
