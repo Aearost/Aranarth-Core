@@ -345,8 +345,6 @@ JetStream:
   ParticleLead: 9.0
   # How long the caster and carried entities stay protected from fall damage after release
   FallProtection: 5000
-  # Max time between two sneak presses for a double-tap to end the stream early
-  DoubleTapWindow: 400
 
 # ==================== Water - Plant ====================
 

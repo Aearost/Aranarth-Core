@@ -577,7 +577,7 @@ public class AranarthCoreBendingListener implements Listener {
         CoreAbility ability = bendingPlayer.getBoundAbility();
         String abilityName = bendingPlayer.getBoundAbilityName();
 
-        // Sneaking while riding a JetStream - cancel so PK cannot activate the bound ability, and double-tapping ends the stream
+        // Sneaking while riding a JetStream - cancel so PK cannot activate the bound ability, and tapping sneak ends the stream
         JetStream jetStream = CoreAbility.getAbility(player, JetStream.class);
         if (jetStream != null && jetStream.isCasterRiding()) {
             e.setCancelled(true);
@@ -1772,6 +1772,55 @@ public class AranarthCoreBendingListener implements Listener {
         if (!e.isGliding() && JetStream.isGliding(e.getEntity().getUniqueId())) {
             e.setCancelled(true);
         }
+    }
+
+    /**
+     * Prevents players gliding in a JetStream from taking wall impact damage when smashing into the arena's barriers.
+     */
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onJetStreamArenaWallImpact(final EntityDamageEvent e) {
+        if (e.getCause() != EntityDamageEvent.DamageCause.FLY_INTO_WALL) {
+            return;
+        }
+        if (!e.getEntity().getWorld().getName().equals("arena")) {
+            return;
+        }
+        if (JetStream.isGliding(e.getEntity().getUniqueId())) {
+            e.setCancelled(true);
+        }
+    }
+
+    /**
+     * Ends the caster's JetStream when they left-click while riding it.
+     * Runs before PK's own swing handler, which then has its ability start suppressed below.
+     */
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onJetStreamLeftClick(final PlayerSwingEvent e) {
+        JetStream jetStream = CoreAbility.getAbility(e.getPlayer(), JetStream.class);
+        if (jetStream != null && jetStream.isCasterRiding() && jetStream.onLeftClick()) {
+            e.setCancelled(true);
+        }
+    }
+
+    /**
+     * Prevents the left click that ended a JetStream from also activating the caster's bound ability.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onJetStreamCancelClickAbilityStart(final AbilityStartEvent e) {
+        if (!(e.getAbility() instanceof CoreAbility ability) || ability instanceof JetStream || ability instanceof PassiveAbility) {
+            return;
+        }
+        Player player = ability.getPlayer();
+        if (player == null) {
+            return;
+        }
+        JetStream jetStream = CoreAbility.getAbility(player, JetStream.class);
+        if (jetStream == null || !jetStream.wasClickReleasedThisTick()) {
+            return;
+        }
+        e.setCancelled(true);
+        // Some abilities apply their cooldown before starting, and the ability could not have started while already on cooldown
+        ability.getBendingPlayer().removeCooldown(ability.getName());
     }
 
     /**

@@ -12,6 +12,7 @@ import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.ability.util.ComboManager.AbilityInformation;
 import com.projectkorra.projectkorra.attribute.Attribute;
 import com.projectkorra.projectkorra.util.ClickType;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
@@ -34,6 +35,7 @@ public class JetStream extends AirAbility implements AddonAbility, ComboAbility 
 
     private static final double STEP_SIZE = 0.5;
     private static final double SOUND_STOP_RANGE = 64.0;
+    private static final int CLICK_GRACE_TICKS = 2;
     private static final Set<UUID> GLIDING_PLAYERS = new HashSet<>();
 
     @Attribute(Attribute.COOLDOWN)
@@ -52,14 +54,13 @@ public class JetStream extends AirAbility implements AddonAbility, ComboAbility 
     private int stallGrace;
     private double particleLead;
     private long fallProtection;
-    private long doubleTapWindow;
 
     private Phase phase;
     private Vector direction;
     private Location streamLocation;
     private long releaseTime;
     private int ticks;
-    private long lastSneakPressTime;
+    private int clickReleaseTick = -1;
     private final Set<Entity> carriedEntities = new HashSet<>();
     private final Set<Entity> releasedEntities = new HashSet<>();
     private final Map<Entity, Double> lastGaps = new HashMap<>();
@@ -89,7 +90,6 @@ public class JetStream extends AirAbility implements AddonAbility, ComboAbility 
         this.stallGrace = AbilityConfig.getInt("JetStream.StallGrace");
         this.particleLead = AbilityConfig.getDouble("JetStream.ParticleLead");
         this.fallProtection = AbilityConfig.getLong("JetStream.FallProtection");
-        this.doubleTapWindow = AbilityConfig.getLong("JetStream.DoubleTapWindow");
 
         // Tornado starts on the last sneak - suppress it (the final AirBlast is blocked by the bending listener)
         AranarthBendingUtils.suppressComboTrigger(this.bPlayer, player, "Tornado");
@@ -259,18 +259,38 @@ public class JetStream extends AirAbility implements AddonAbility, ComboAbility 
     }
 
     /**
-     * Called by the bending listener when the caster presses sneak while the stream is active.
+     * Called by the bending listener when the caster presses sneak while riding the stream, ending it.
      */
     public void onSneakPress() {
         if (this.phase != Phase.STREAMING) {
             return;
         }
-        final long now = System.currentTimeMillis();
-        if (now - this.lastSneakPressTime <= this.doubleTapWindow) {
-            release();
-            return;
+        release();
+    }
+
+    /**
+     * Called by the bending listener when the caster left-clicks while riding the stream, ending it.
+     * Clicks in the first few ticks are ignored so a quick follow-up to the combo's final click does not end it instantly.
+     *
+     * @return Whether the click ended the stream.
+     */
+    public boolean onLeftClick() {
+        if (this.phase != Phase.STREAMING || this.ticks < CLICK_GRACE_TICKS) {
+            return false;
         }
-        this.lastSneakPressTime = now;
+        release();
+        this.clickReleaseTick = Bukkit.getCurrentTick();
+        return true;
+    }
+
+    /**
+     * Determines if the stream was ended by a left click during the current server tick.
+     * Used to stop that same click from also activating the caster's bound ability.
+     *
+     * @return Whether the stream was ended by a click this tick.
+     */
+    public boolean wasClickReleasedThisTick() {
+        return this.clickReleaseTick == Bukkit.getCurrentTick();
     }
 
     /**
@@ -426,7 +446,7 @@ public class JetStream extends AirAbility implements AddonAbility, ComboAbility 
 
     @Override
     public String getDescription() {
-        return "Unleash a supercharged jet of wind that launches you forward at rapid speeds, dragging anything caught in its path along with you.\n" +
+        return "Unleash a supercharged jet of wind that launches you forward at rapid speeds, dragging anything caught in its path along with you. Tap sneak or left click to end it early.\n" +
                 ChatUtils.translateToColor("&7Usage: AirBurst (Hold Sneak) > AirShield (Release Sneak) > Tornado (Hold Sneak) > AirBlast (Left Click)");
     }
 }
