@@ -110,6 +110,10 @@ public class PlayerRespawnEventListener implements Listener {
             aranarthPlayer.setExpBeforeDeath(player.getExp());
             e.getDrops().clear();
             e.setDroppedExp(0);
+            // Players keep their arena inventory when dying in the arena
+            if (world.equalsIgnoreCase("arena")) {
+                e.setKeepInventory(true);
+            }
         } else {
             if (AranarthUtils.isWearingArmorType(player, "soulbound")) {
                 e.setKeepInventory(true);

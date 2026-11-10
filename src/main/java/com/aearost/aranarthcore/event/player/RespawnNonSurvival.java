@@ -11,20 +11,22 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  * Reverts the player's level and EXP when dying in the arena or creative world.
- * Automatically equips the player with iron armor when teleporting to the arena world.
+ * Clears the inventory when dying in a creative world, while the arena inventory is kept.
  * Additionally, forces the player to respawn in the same non-survival world when they die in it.
  */
 public class RespawnNonSurvival {
     public void execute(PlayerRespawnEvent e) {
         Player player = e.getPlayer();
-        player.getInventory().clear();
         String world = e.getPlayer().getWorld().getName();
         if (world.equalsIgnoreCase("arena")) {
+            // The arena inventory is kept on death
             e.setRespawnLocation(AranarthUtils.getArenaRespawnLocation());
         } else if (PlotUtils.isSmpCreativeWorld(world)) {
+            player.getInventory().clear();
             e.setRespawnLocation(PlotUtils.getSmpCreativeSpawnLocation());
             player.setGameMode(GameMode.CREATIVE);
         } else {
+            player.getInventory().clear();
             e.setRespawnLocation(PlotUtils.getSpawnLocation());
             player.setGameMode(GameMode.CREATIVE);
         }

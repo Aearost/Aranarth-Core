@@ -5,6 +5,7 @@ World & Events
 [~] Players now enter AFK status when only clicking or being moved by external factors
 [~] Entering the arena from a spawn sign now clears all potion effects, so the spawn boost no longer carries over
 [~] Entering an arena now clears all potion effects, so the spawn boost no longer carries into an arena
+[~] Players now keep their inventory when dying in the arena
 
 Bending & Abilities
 [-] Prevented AirBlast from being used while riding a horse, mount, or any other vehicle
