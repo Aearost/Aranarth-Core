@@ -1279,6 +1279,7 @@ public class AranarthCore extends JavaPlugin {
         new AranarthCoreBendingListener(this);
         new MountStatsListener(this);
         new SitListener(this);
+        new SparListener(this);
         new MountListener(this);
         new PotionAlchemyExpListener(this);
         new TamedPetStealPreventListener(this);
@@ -1811,6 +1812,7 @@ public class AranarthCore extends JavaPlugin {
     @Override
     public void onDisable() {
         savedOnDisable = true;
+        SparUtils.clearAllStuns();
         SitUtils.standUpAll();
         PetRallyUtils.endAllRallies();
         saveAll();

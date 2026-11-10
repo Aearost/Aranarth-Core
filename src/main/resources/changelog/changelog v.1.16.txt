@@ -23,6 +23,7 @@ Economy, Jobs & Quests
 Chat, UI & Sounds
 
 Quality of Life
+[~] Final blows no longer kill a player if the fight was from /countdown
 
 Cross-server & Technical
 [+] Added caching to avatar mannequin skins so refreshes avoid session server timeout warnings
