@@ -12,6 +12,7 @@ Bending & Abilities
 
 Dominion
 [+] Dominion and outpost bending flags are now bypassed while a member of an enemied dominion is within proximity of the land
+[~] Fixed severe lag when claiming or auto-claiming land in large Dominions
 
 Aranarthium, Items & Crafting
 

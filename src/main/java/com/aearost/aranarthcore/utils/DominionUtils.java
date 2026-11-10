@@ -35,6 +35,11 @@ public class DominionUtils {
     private static final Map<UUID, Dominion> playerToDominion = new HashMap<>();
     private static final Map<UUID, UUID> foodInventoryLocks = new HashMap<>();
     /**
+     * Biomes sampled from each claimed chunk, keyed by chunk key, so a claim or unclaim only samples the
+     * chunk that changed instead of loading and scanning every chunk the Dominion or Outpost owns.
+     */
+    private static final Map<String, Set<Biome>> chunkBiomeCache = new HashMap<>();
+    /**
      * Tracks the last in-game date on which the daily food/tax cycle ran, to prevent double-firing.
      */
     private static String lastFoodEvalDate = null;
@@ -1675,6 +1680,8 @@ public class DominionUtils {
      * then picked up separately by scanning beneath the surface of each overworld chunk. Non-overworld
      * chunks are sampled every 16 blocks across the world's full height range to account for 3D
      * biome placement.
+     * Each chunk is only sampled the first time it is seen, after which its biomes come from the
+     * per-chunk cache, so claiming or unclaiming never re-scans the rest of a large Dominion.
      *
      * @param chunks        The chunks to sample biomes from.
      * @param expectedWorld The world these chunks must belong to; chunks in any other world are ignored.
@@ -1690,14 +1697,24 @@ public class DominionUtils {
             if (world == null || !world.equals(expectedWorld)) {
                 continue;
             }
-            Chunk live = world.getChunkAt(chunk.getX(), chunk.getZ());
-            if (world.getEnvironment() == World.Environment.NORMAL) {
-                sampleBiomesAtSurface(live, biomes);
-                sampleCaveBiomes(live, biomes);
-            } else {
-                for (int y = world.getMinHeight(); y < world.getMaxHeight(); y += 16) {
-                    sampleBiomesAtY(live, y, biomes);
-                }
+            biomes.addAll(chunkBiomeCache.computeIfAbsent(getChunkKey(chunk), key -> sampleChunkBiomes(world, chunk)));
+        }
+        return biomes;
+    }
+
+    /**
+     * Samples the biomes of a single chunk, loading it if needed. Only called once per chunk, as the
+     * result is kept in the per-chunk biome cache.
+     */
+    private static Set<Biome> sampleChunkBiomes(World world, Chunk chunk) {
+        Set<Biome> biomes = new LinkedHashSet<>();
+        Chunk live = world.getChunkAt(chunk.getX(), chunk.getZ());
+        if (world.getEnvironment() == World.Environment.NORMAL) {
+            sampleBiomesAtSurface(live, biomes);
+            sampleCaveBiomes(live, biomes);
+        } else {
+            for (int y = world.getMinHeight(); y < world.getMaxHeight(); y += 16) {
+                sampleBiomesAtY(live, y, biomes);
             }
         }
         return biomes;
