@@ -3,6 +3,8 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PlotUtils;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
@@ -34,9 +36,17 @@ public class RespawnNonSurvival {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
         int level = aranarthPlayer.getLevelBeforeDeath();
         float exp = aranarthPlayer.getExpBeforeDeath();
+        boolean isArena = world.equalsIgnoreCase("arena");
         new BukkitRunnable() {
             @Override
             public void run() {
+                if (!player.isOnline()) {
+                    return;
+                }
+                // The arena keeps the armour equipped, but the Curse of Binding must still release on death
+                if (isArena && AranarthUtils.releaseBindingCurseArmor(player)) {
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "access.curse_binding_released")));
+                }
                 player.setLevel(level);
                 player.setExp(exp);
             }

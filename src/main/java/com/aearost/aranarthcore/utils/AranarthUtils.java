@@ -38,10 +38,12 @@ import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -859,6 +861,35 @@ public class AranarthUtils {
                 || biome == Biome.LUKEWARM_OCEAN || biome == Biome.DEEP_LUKEWARM_OCEAN
                 || biome == Biome.WARM_OCEAN
                 || biome == Biome.RIVER || biome == Biome.FROZEN_RIVER;
+    }
+
+    /**
+     * Unequips any armour with the Curse of Binding after a death where the inventory was kept (i.e Soulbound or the arena).
+     *
+     * @param player The player who respawned.
+     * @return Whether any armour was released.
+     */
+    public static boolean releaseBindingCurseArmor(Player player) {
+        PlayerInventory inventory = player.getInventory();
+        ItemStack[] armor = inventory.getArmorContents();
+        List<ItemStack> released = new ArrayList<>();
+        for (int i = 0; i < armor.length; i++) {
+            ItemStack piece = armor[i];
+            if (piece != null && piece.containsEnchantment(Enchantment.BINDING_CURSE)) {
+                released.add(piece);
+                armor[i] = null;
+            }
+        }
+        if (released.isEmpty()) {
+            return false;
+        }
+        inventory.setArmorContents(armor);
+        for (ItemStack piece : released) {
+            for (ItemStack leftover : inventory.addItem(piece).values()) {
+                player.getWorld().dropItemNaturally(player.getLocation(), leftover);
+            }
+        }
+        return true;
     }
 
     /**

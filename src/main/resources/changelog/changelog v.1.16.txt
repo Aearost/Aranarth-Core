@@ -17,6 +17,7 @@ Dominion
 [~] Fixed severe lag when claiming or auto-claiming land in large Dominions
 
 Aranarthium, Items & Crafting
+[~] Curse of Binding is now released on death even when the inventory is kept by Soulbound armour or the arena, so cursed armour can no longer be permanently stuck
 
 Economy, Jobs & Quests
 [+] Added 1/4 pay when earning income from jobs while AFK
