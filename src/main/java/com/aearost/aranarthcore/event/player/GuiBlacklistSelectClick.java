@@ -64,6 +64,10 @@ public class GuiBlacklistSelectClick {
             ap.getBlacklistPresets().add(new BlacklistPreset("", new ArrayList<>()));
         }
 
+        // Resolved before clearing, since clearing resets the name
+        String presetName = ap.getBlacklistPresets().get(presetIndex).getName();
+        String presetLabel = presetName.isEmpty() ? String.valueOf(presetIndex + 1) : ChatUtils.translateToColor(presetName);
+
         if (isClear) {
             ap.getBlacklistPresets().get(presetIndex).setItems(new ArrayList<>());
             ap.getBlacklistPresets().get(presetIndex).setName("");
@@ -72,12 +76,12 @@ public class GuiBlacklistSelectClick {
                 ap.setActivePresetIndex(-1);
             }
             PersistenceUtils.saveBlacklistPresetsAsync(player.getUniqueId());
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "blacklist.preset_cleared", "number", (presetIndex + 1))));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "blacklist.preset_cleared", "preset", presetLabel)));
             player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 0.5F, 0.8F);
         } else {
             ap.setActivePresetIndex(presetIndex);
             PersistenceUtils.saveBlacklistPresetsAsync(player.getUniqueId());
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "blacklist.preset_selected", "number", (presetIndex + 1))));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "blacklist.preset_selected", "preset", presetLabel)));
             player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 0.5F, 1.75F);
         }
 

@@ -34,6 +34,7 @@ Chat, UI & Sounds
 
 Quality of Life
 [~] Final blows no longer kill a player if the fight was from /countdown
+[~] Blacklist preset select and clear messages now show the preset's name instead of its number
 
 Cross-server & Technical
 [+] Added caching to avatar mannequin skins so refreshes avoid session server timeout warnings
