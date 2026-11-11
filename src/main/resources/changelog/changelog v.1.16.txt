@@ -35,6 +35,7 @@ Chat, UI & Sounds
 Quality of Life
 [~] Final blows no longer kill a player if the fight was from /countdown
 [~] Blacklist preset select and clear messages now show the preset's name instead of its number
+[+] Blank Essences can now be filled with your own EXP by sneaking and right-clicking per your Bottled Knowledge efficiency
 
 Cross-server & Technical
 [+] Added caching to avatar mannequin skins so refreshes avoid session server timeout warnings
