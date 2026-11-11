@@ -6208,6 +6208,7 @@ public class PersistenceUtils {
             obj.addProperty("sitDisabled", ap.isSitDisabled());
             obj.addProperty("jobsMessageDisabled", ap.isJobsMessageDisabled());
             obj.addProperty("bigTreeDisabled", ap.isBigTreeDisabled());
+            obj.addProperty("armorHidden", ap.isArmorHidden());
             obj.addProperty("sitCushionColor", ap.getSitCushionColor());
             obj.addProperty("prefixStyles", ap.getEncodedPrefixStyles());
             obj.addProperty("language", ap.getLanguage());
@@ -8320,6 +8321,9 @@ public class PersistenceUtils {
                 if (obj.has("bigTreeDisabled")) {
                     ap.setBigTreeDisabled(obj.get("bigTreeDisabled").getAsBoolean());
                 }
+                if (obj.has("armorHidden")) {
+                    ap.setArmorHidden(obj.get("armorHidden").getAsBoolean());
+                }
                 if (obj.has("sitCushionColor")) {
                     ap.setSitCushionColor(obj.get("sitCushionColor").getAsString());
                 }
@@ -8395,6 +8399,7 @@ public class PersistenceUtils {
         obj.addProperty("sitDisabled", ap.isSitDisabled());
         obj.addProperty("jobsMessageDisabled", ap.isJobsMessageDisabled());
         obj.addProperty("bigTreeDisabled", ap.isBigTreeDisabled());
+        obj.addProperty("armorHidden", ap.isArmorHidden());
         obj.addProperty("sitCushionColor", ap.getSitCushionColor());
         obj.addProperty("prefixStyles", ap.getEncodedPrefixStyles());
         obj.addProperty("language", ap.getLanguage());
@@ -8565,6 +8570,9 @@ public class PersistenceUtils {
             }
             if (obj.has("bigTreeDisabled")) {
                 ap.setBigTreeDisabled(obj.get("bigTreeDisabled").getAsBoolean());
+            }
+            if (obj.has("armorHidden")) {
+                ap.setArmorHidden(obj.get("armorHidden").getAsBoolean());
             }
             if (obj.has("sitCushionColor")) {
                 ap.setSitCushionColor(obj.get("sitCushionColor").getAsString());

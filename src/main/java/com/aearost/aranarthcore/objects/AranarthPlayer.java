@@ -126,6 +126,7 @@ public class AranarthPlayer {
     private boolean isSitDisabled = false;
     private boolean isJobsMessageDisabled = false;
     private boolean isBigTreeDisabled = false;
+    private boolean isArmorHidden = false;
     private String sitCushionColor = "WHITE";
     private PrefixStyle councilPrefixStyle = PrefixStyle.SYMBOL;
     private PrefixStyle saintPrefixStyle = PrefixStyle.SYMBOL;
@@ -2199,6 +2200,17 @@ public class AranarthPlayer {
 
     public void setBigTreeDisabled(boolean bigTreeDisabled) {
         this.isBigTreeDisabled = bigTreeDisabled;
+    }
+
+    /**
+     * Provides whether the player has the Invisible Armor perk toggled on, hiding their armor from other players.
+     */
+    public boolean isArmorHidden() {
+        return isArmorHidden;
+    }
+
+    public void setArmorHidden(boolean armorHidden) {
+        this.isArmorHidden = armorHidden;
     }
 
     public String getSitCushionColor() {

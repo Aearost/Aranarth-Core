@@ -6,11 +6,17 @@ World & Events
 [~] Entering the arena from a spawn sign now clears all potion effects, so the spawn boost no longer carries over
 [~] Entering an arena now clears all potion effects, so the spawn boost no longer carries into an arena
 [~] Players now keep their inventory when dying in the arena
+[~] Reworked invisibility so armor stays worn and is only hidden while invisible
+[~] Worn armor can no longer be changed while invisible
+[~] Any hit to an invisible player ends invisibility
+[~] All mobs other than bosses and Wardens stop chasing invisible players
+[~] Invisible Armor now works on both servers without flickering
 
 Bending & Abilities
 [-] Prevented AirBlast from being used while riding a horse, mount, or any other vehicle
 [~] MetalBlade now persists across slot changes once charged, and weapon hits with it active deal a portion of the blade's damage
 [~] JetStream no longer deals wall impact damage in the arena, and can now be ended early by tapping sneak or left-clicking
+[~] Active invisibility effects now return after AstralProjection
 
 Dominion
 [+] Dominion and outpost bending flags are now bypassed while a member of an enemied dominion is within proximity of the land
