@@ -102,7 +102,7 @@ public class EssenceTransfer {
             PENDING.put(uuid, new PendingTransfer(slot, imbuedXp, totalExp, System.currentTimeMillis() + CONFIRM_WINDOW_MILLIS));
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.transfer_confirm",
                     "levels", levels, "percent", percent)));
-            player.sendMessage(ChatUtils.translateToColor(Lang.getFor(player, "essence.transfer_confirm_hint")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.transfer_confirm_hint")));
             return;
         }
 
