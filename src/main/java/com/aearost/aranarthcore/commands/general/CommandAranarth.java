@@ -78,7 +78,7 @@ public class CommandAranarth implements CommandExecutor {
     );
 
     static final List<String> MECHANICS_SECTIONS = List.of(
-            "fletchingtable", "specialarrows", "quiver",
+            "sawmill", "fletchingtable", "specialarrows", "quiver",
             "potions", "dragonsbreath", "autoplant",
             "croptrample", "autolock", "bonemealwood",
             "bigtrees", "treetypes", "cauldronbottles",
@@ -327,7 +327,7 @@ public class CommandAranarth implements CommandExecutor {
             case "bending" -> new int[]{3, 3, 1};
             case "ranks", "creative" -> new int[]{3, 3};
             case "economy" -> new int[]{2, 2, 2, 2};
-            case "mechanics" -> new int[]{3, 3, 3, 3, 3, 3, 3};
+            case "mechanics" -> new int[]{2, 3, 3, 3, 3, 3, 3, 2};
             default -> new int[]{3, 3, 3};
         };
     }

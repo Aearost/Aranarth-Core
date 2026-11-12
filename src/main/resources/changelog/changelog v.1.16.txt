@@ -31,6 +31,7 @@ Economy, Jobs & Quests
 [~] Alchemists now earn money when using potions
 
 Chat, UI & Sounds
+[+] The Sawmill now has its own page in /aranarth mechanics
 
 Quality of Life
 [~] Final blows no longer kill a player if the fight was from /countdown
