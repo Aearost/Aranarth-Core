@@ -27,6 +27,7 @@ Aranarthium, Items & Crafting
 [~] Curse of Binding is now released on death even when the inventory is kept by Soulbound armour or the arena, so cursed armour can no longer be permanently stuck
 [~] Items that already have an essence applied are no longer treated as the essence itself
 [-] Invisible Item Frames can no longer be placed without the Invisible Item Frames perk
+[~] The Wrench no longer loses durability when used in Creative mode
 
 Economy, Jobs & Quests
 [+] Added 1/4 pay when earning income from jobs while AFK
