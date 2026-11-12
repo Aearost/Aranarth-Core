@@ -11,6 +11,7 @@ World & Events
 [~] Any hit to an invisible player ends invisibility
 [~] All mobs other than bosses and Wardens stop chasing invisible players
 [~] Invisible Armor now works on both servers without flickering
+[-] Mining Fatigue from the Ardorvor heat no longer applies while it is raining or thundering
 
 Bending & Abilities
 [-] Prevented AirBlast from being used while riding a horse, mount, or any other vehicle

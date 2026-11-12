@@ -936,7 +936,10 @@ public class DateUtils {
 
         if (isDaytime && new Random().nextInt(15) == 0) {
             List<PotionEffect> effects = new ArrayList<>();
-            effects.add(new PotionEffect(PotionEffectType.MINING_FATIGUE, 100, 0));
+            // The rain offers relief from the intense sunlight, so Mining Fatigue only applies under clear skies
+            if (AranarthUtils.getWeather() == Weather.CLEAR) {
+                effects.add(new PotionEffect(PotionEffectType.MINING_FATIGUE, 100, 0));
+            }
             effects.add(new PotionEffect(PotionEffectType.WEAKNESS, 320, 0));
             applyWeatherEffectsToAllPlayers(effects);
         }
