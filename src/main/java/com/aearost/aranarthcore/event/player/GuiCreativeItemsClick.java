@@ -61,7 +61,7 @@ public class GuiCreativeItemsClick {
             return;
         }
 
-        ItemStack item = GuiCreativeItems.getItemAt(currentPage, filter, slot);
+        ItemStack item = GuiCreativeItems.getItemAt(player, currentPage, filter, slot);
         if (item == null) {
             return;
         }

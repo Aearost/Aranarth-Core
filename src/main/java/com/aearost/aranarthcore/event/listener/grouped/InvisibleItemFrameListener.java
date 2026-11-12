@@ -3,6 +3,8 @@ package com.aearost.aranarthcore.event.listener.grouped;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
 import com.aearost.aranarthcore.runnable.ItemFrameUpdateRunnable;
+import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -13,6 +15,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
@@ -48,6 +51,12 @@ public class InvisibleItemFrameListener implements Listener {
         	if (is.getType() == Material.GLOW_ITEM_FRAME) {
             	if (is.hasItemMeta()) {
             		if (is.getItemMeta().hasLore()) {
+						// Placing Invisible Item Frames requires the perk, even if the item was obtained another way
+						if (e.getAction() == Action.RIGHT_CLICK_BLOCK && !e.getPlayer().hasPermission("aranarth.invisible_item_frame")) {
+							e.setCancelled(true);
+							e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "general.no_permission_invisible_framess")));
+							return;
+						}
             	        Block block = e.getClickedBlock();
             	        if (block != null) {
             	        	locationToPlace = block.getLocation();

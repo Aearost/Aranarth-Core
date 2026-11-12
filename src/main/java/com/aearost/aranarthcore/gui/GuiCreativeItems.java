@@ -66,18 +66,21 @@ public class GuiCreativeItems {
     }
 
     /**
-     * Provides every custom item available in the GUI in display order, or only those whose name matches the filter.
+     * Provides every custom item available to the player in display order, or only those whose name matches the filter.
      */
-    private static List<ItemStack> getItems(String filter) {
+    private static List<ItemStack> getItems(Player player, String filter) {
         if (items == null) {
             items = createItems();
         }
-        if (filter == null || filter.isEmpty()) {
+        boolean hasFramePerk = player.hasPermission("aranarth.invisible_item_frame");
+        String lowerFilter = filter == null || filter.isEmpty() ? null : filter.toLowerCase(Locale.ROOT);
+        if (hasFramePerk && lowerFilter == null) {
             return items;
         }
-        String lowerFilter = filter.toLowerCase(Locale.ROOT);
+        ItemStack invisibleItemFrame = new InvisibleItemFrame().getItem();
         return items.stream()
-                .filter(item -> RecipeGuideUtils.getName(item).toLowerCase(Locale.ROOT).contains(lowerFilter))
+                .filter(item -> hasFramePerk || !item.isSimilar(invisibleItemFrame))
+                .filter(item -> lowerFilter == null || RecipeGuideUtils.getName(item).toLowerCase(Locale.ROOT).contains(lowerFilter))
                 .toList();
     }
 
@@ -186,12 +189,12 @@ public class GuiCreativeItems {
     /**
      * Provides a fresh copy of the custom item displayed in the given slot of the given page, or null if there is none.
      */
-    public static ItemStack getItemAt(int page, String filter, int slot) {
+    public static ItemStack getItemAt(Player player, int page, String filter, int slot) {
         if (slot < CONTENT_START || slot >= CONTENT_START + PAGE_SIZE) {
             return null;
         }
         int index = page * PAGE_SIZE + (slot - CONTENT_START);
-        List<ItemStack> all = getItems(filter);
+        List<ItemStack> all = getItems(player, filter);
         return index >= 0 && index < all.size() ? all.get(index).clone() : null;
     }
 
@@ -249,7 +252,7 @@ public class GuiCreativeItems {
             inv.setItem(i, glass);
         }
 
-        List<ItemStack> all = getItems(filter);
+        List<ItemStack> all = getItems(player, filter);
         int start = page * PAGE_SIZE;
         int end = Math.min(start + PAGE_SIZE, all.size());
         for (int i = start; i < end; i++) {
