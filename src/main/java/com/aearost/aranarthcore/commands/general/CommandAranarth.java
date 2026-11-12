@@ -114,7 +114,7 @@ public class CommandAranarth implements CommandExecutor {
 
     static final List<String> CREATIVE_SECTIONS = List.of(
             "overview", "claiming", "merging",
-            "members", "finding", "worldedit"
+            "members", "finding", "worldedit", "items"
     );
 
     private static final Set<String> CALENDAR_EVENT_SET = Set.copyOf(CALENDAR_EVENTS);
@@ -325,7 +325,8 @@ public class CommandAranarth implements CommandExecutor {
             case "aranarthium" -> new int[]{3, 3, 4};
             case "dominions" -> new int[]{3, 3, 3, 2, 2};
             case "bending" -> new int[]{3, 3, 1};
-            case "ranks", "creative" -> new int[]{3, 3};
+            case "ranks" -> new int[]{3, 3};
+            case "creative" -> new int[]{2, 3, 2};
             case "economy" -> new int[]{2, 2, 2, 2};
             case "mechanics" -> new int[]{2, 3, 3, 3, 3, 3, 3, 2};
             default -> new int[]{3, 3, 3};

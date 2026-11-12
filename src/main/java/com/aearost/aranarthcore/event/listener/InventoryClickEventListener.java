@@ -139,6 +139,8 @@ public class InventoryClickEventListener implements Listener {
                 new GuiRecipesClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiRecipeView.TITLE_KEY))) {
                 new GuiRecipeViewClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiCreativeItems.TITLE_KEY))) {
+                new GuiCreativeItemsClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.ranks.title"))) {
                 new GuiRanksClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.rankup.title"))) {
