@@ -71,6 +71,8 @@ commands:
   creative:
     description: Teleports the player to the Creative plots world
     permission: aranarth.creative
+  treetest:
+    description: Grows every tree design under review in a test world
   date:
     description: Lists the current Aranarth calendar date
     permission: aranarth.date
@@ -275,6 +277,9 @@ commands:
   toggle:
     description: Allows the player to toggle different functionality
     aliases: [ t ]
+    permission: aranarth.toggle
+  trees:
+    description: Opens a GUI to choose which custom trees your saplings grow into
     permission: aranarth.toggle
   teleport:
     description: Sends a teleport request to the input player

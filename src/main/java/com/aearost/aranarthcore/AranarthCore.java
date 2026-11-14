@@ -1436,6 +1436,7 @@ public class AranarthCore extends JavaPlugin {
         getCommand("countdown").setTabCompleter(new CommandCountdownCompleter());
         getCommand("creative").setExecutor(new CommandCreative());
         getCommand("creative").setTabCompleter(new CommandCreativeCompleter());
+        getCommand("treetest").setExecutor(new CommandTreeTest());
         getCommand("date").setExecutor(new CommandDate());
         getCommand("deaths").setExecutor(new CommandDeaths());
         getCommand("deaths").setTabCompleter(new CommandDeathsCompleter());
@@ -1516,6 +1517,7 @@ public class AranarthCore extends JavaPlugin {
         getCommand("teleport").setTabCompleter(new CommandTeleportCompleter());
         getCommand("ichat").setExecutor(new CommandInteractiveChat());
         getCommand("toggle").setExecutor(new CommandToggle());
+        getCommand("trees").setExecutor(new CommandTrees());
         getCommand("toggle").setTabCompleter(new CommandToggleCompleter());
         getCommand("topdeaths").setExecutor(new CommandTopDeaths());
         getCommand("topkills").setExecutor(new CommandTopKills());

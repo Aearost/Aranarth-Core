@@ -10,22 +10,29 @@ import com.aearost.aranarthcore.utils.ShopIslandUtils;
 import com.gmail.nossr50.mcMMO;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.GameMode;
 import org.bukkit.GameRules;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.TreeType;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.data.type.Sapling;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.world.StructureGrowEvent;
@@ -117,6 +124,42 @@ public class CustomTreeListener implements Listener {
         }
     }
 
+    /**
+     * Lets bone meal grow a lone Dark Oak or Pale Oak sapling into its custom tree.
+     */
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onBoneMealLoneSapling(PlayerInteractEvent e) {
+        ItemStack item = e.getItem();
+        Block block = e.getClickedBlock();
+        if (e.getAction() != Action.RIGHT_CLICK_BLOCK || block == null || item == null || item.getType() != Material.BONE_MEAL
+                || e.getHand() == null || !CustomTreeUtils.growsOnTimer(block.getType())
+                || CustomTreeUtils.findSquareCorner(block, 2) != null) {
+            return;
+        }
+        Player player = e.getPlayer();
+        // A player who disabled big trees gets vanilla, which never grows a lone sapling of these
+        if (!CustomTreeUtils.isBigTreeEnabled(player.getUniqueId())) {
+            return;
+        }
+        e.setCancelled(true);
+        if (player.getGameMode() != GameMode.CREATIVE) {
+            item.setAmount(item.getAmount() - 1);
+        }
+        player.swingHand(e.getHand());
+        Location centre = block.getLocation().add(0.5, 0.5, 0.5);
+        block.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, centre, 15, 0.3, 0.3, 0.3);
+        block.getWorld().playSound(centre, Sound.ITEM_BONE_MEAL_USE, 1F, 1F);
+        if (random.nextDouble() >= 0.45) {
+            return;
+        }
+        if (block.getBlockData() instanceof Sapling sapling && sapling.getStage() < sapling.getMaximumStage()) {
+            sapling.setStage(sapling.getStage() + 1);
+            block.setBlockData(sapling, false);
+            return;
+        }
+        growNow(block, player);
+    }
+
     @EventHandler
     public void onChunkLoad(ChunkLoadEvent e) {
         CustomTreeUtils.trackTimedSaplings(e.getChunk());
@@ -187,14 +230,28 @@ public class CustomTreeListener implements Listener {
             return;
         }
 
+        // Trees a player turned off in /trees never grow: the player bone mealing it decides, otherwise whoever planted it
+        UUID decider = e.getPlayer() != null ? e.getPlayer().getUniqueId() : CustomTreeUtils.getPlanter(origin);
+        if (decider == null) {
+            for (Block sapling : saplings) {
+                decider = CustomTreeUtils.getPlanter(sapling);
+                if (decider != null) {
+                    break;
+                }
+            }
+        }
+        final UUID chooser = decider;
         Block base = corner != null ? corner : origin;
-        TreeBuilder tree = CustomTrees.design(type, size, base.getWorld(), new Random(), base.getX(), base.getY(), base.getZ());
+        TreeBuilder tree = CustomTrees.design(type, size, base.getWorld(), new Random(), base.getX(), base.getY(), base.getZ(),
+                variant -> CustomTreeUtils.isTreeEnabled(chooser, variant));
         if (tree == null) {
             return;
         }
         List<BlockState> states = tree.resolve(origin.getLocation(), saplings);
-        // It would grow into something a player built, into the land of another Dominion, or onto another shop island
+        // It would grow into something a player built, into the land of another Dominion, or onto another shop island, so
+        // the sapling waits instead of falling back to a vanilla tree
         if (states == null || entersOtherDominion(origin, states) || entersOtherIsland(origin, states)) {
+            e.setCancelled(true);
             return;
         }
         for (Block sapling : saplings) {

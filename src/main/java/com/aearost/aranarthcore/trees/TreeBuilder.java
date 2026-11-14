@@ -208,6 +208,24 @@ public class TreeBuilder {
     }
 
     /**
+     * Places a block of the trunk or a branch made of a specific wood, used for trees whose bark mixes several woods.
+     */
+    public void wood(int x, int y, int z, Material material) {
+        put(new Pos(x, y, z), new Entry(axisData(material, Axis.Y), Layer.LOG, null, false, false));
+    }
+
+    /**
+     * Replaces whatever part of the tree is at the position with another block, keeping its layer, such as covering
+     * leaves in snow or setting a block of resin into a trunk.
+     */
+    public void replace(int x, int y, int z, Material material) {
+        Pos pos = new Pos(x, y, z);
+        Entry entry = entries.get(pos);
+        Layer layer = entry == null ? Layer.LEAF : entry.layer();
+        entries.put(pos, new Entry(material.createBlockData(), layer, null, false, false));
+    }
+
+    /**
      * Places a block of the trunk that may also sink into the ground, such as roots.
      */
     public void root(int x, int y, int z, Material material, Axis axis, boolean replaceWater) {
@@ -241,6 +259,13 @@ public class TreeBuilder {
      */
     public void solid(int x, int y, int z, Material material) {
         put(new Pos(x, y, z), new Entry(material.createBlockData(), Layer.LEAF, null, false, false));
+    }
+
+    /**
+     * Places a non-log block that forms the body of the tree, turned along an axis, such as the bone blocks of a rib.
+     */
+    public void solid(int x, int y, int z, Material material, Axis axis) {
+        put(new Pos(x, y, z), new Entry(axisData(material, axis), Layer.LEAF, null, false, false));
     }
 
     /**

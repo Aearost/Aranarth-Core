@@ -3,8 +3,10 @@ package com.aearost.aranarthcore.commands.general;
 import com.aearost.aranarthcore.enums.FireType;
 import com.aearost.aranarthcore.event.listener.misc.InvisibleArmorManager;
 import com.aearost.aranarthcore.gui.GuiToggle;
+import com.aearost.aranarthcore.gui.GuiTrees;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Perk;
+import com.aearost.aranarthcore.trees.CustomTrees.Variant;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.GateUtils;
@@ -413,7 +415,31 @@ public class CommandToggle implements CommandExecutor {
 						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.jobsmsg_disabled")));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-				} else if (args[0].equalsIgnoreCase("bigtree")) {
+				} else if (args[0].equalsIgnoreCase("tree") || args[0].equalsIgnoreCase("bigtree")) {
+					// /toggle tree <tree> turns one custom tree on or off
+					if (args.length >= 2) {
+						Variant variant = null;
+						for (Variant choice : GuiTrees.choosable()) {
+							if (choice.name().equalsIgnoreCase(args[1])) {
+								variant = choice;
+								break;
+							}
+						}
+						if (variant == null) {
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.tree_unknown")));
+							return true;
+						}
+						String treeName = Lang.getFor(player, "trees.variant_" + variant.name().toLowerCase());
+						if (aranarthPlayer.isTreeDisabled(variant.name())) {
+							aranarthPlayer.setTreeDisabled(variant.name(), false);
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.tree_enabled", "tree", treeName)));
+						} else {
+							aranarthPlayer.setTreeDisabled(variant.name(), true);
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.tree_disabled", "tree", treeName)));
+						}
+						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+						return true;
+					}
 					if (aranarthPlayer.isBigTreeDisabled()) {
 						aranarthPlayer.setBigTreeDisabled(false);
 						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.bigtree_enabled")));

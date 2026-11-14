@@ -2,6 +2,7 @@ AranarthCore v. 1.16
 
 World & Events
 [+] Implemented custom trees to be grown from saplings, toggleable with /toggle bigtree
+[+] Added /trees to choose which custom trees your saplings can grow into
 [~] Players now enter AFK status when only clicking or being moved by external factors
 [~] Entering the arena from a spawn sign now clears all potion effects, so the spawn boost no longer carries over
 [~] Entering an arena now clears all potion effects, so the spawn boost no longer carries into an arena

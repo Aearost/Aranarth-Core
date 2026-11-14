@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.trees.CustomTrees.Variant;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -58,6 +59,21 @@ public class CustomTreeUtils {
         }
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
         return aranarthPlayer == null || !aranarthPlayer.isBigTreeDisabled();
+    }
+
+    /**
+     * Determines if a player lets their saplings grow into a custom tree, as they can turn any of them off in /trees.
+     *
+     * @param uuid The UUID of the player, or null if there is no player.
+     * @param variant The custom tree.
+     * @return Confirmation of whether the tree may grow.
+     */
+    public static boolean isTreeEnabled(UUID uuid, Variant variant) {
+        if (uuid == null) {
+            return true;
+        }
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+        return aranarthPlayer == null || !aranarthPlayer.isTreeDisabled(variant.name());
     }
 
     /**
