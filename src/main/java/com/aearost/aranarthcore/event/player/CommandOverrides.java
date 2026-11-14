@@ -3,6 +3,8 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.LifeRip;
 import com.aearost.aranarthcore.event.mob.MountListener;
+import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Mount;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -60,6 +62,33 @@ public class CommandOverrides {
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "plugins.list", "count", plugins.length, "list", sb)));
             e.setCancelled(true);
             return;
+        }
+
+        // The vanilla /give runs on the other server when the target is online there
+        if ((parts[0].equalsIgnoreCase("/give") || parts[0].equalsIgnoreCase("/minecraft:give"))
+                && parts.length >= 3 && player.hasPermission("minecraft.command.give")
+                && !parts[1].startsWith("@") && Bukkit.getPlayerExact(parts[1]) == null && NetworkManager.isActive()) {
+            NetworkPlayer remote = NetworkManager.getInstance().getRemoteRoster().values().stream()
+                    .filter(np -> np.getUsername().equalsIgnoreCase(parts[1]))
+                    .findFirst().orElse(null);
+            if (remote != null) {
+                e.setCancelled(true);
+                // Everything after the player's name, kept whole so item components are passed on unchanged
+                String arguments = e.getMessage().split(" ", 3)[2];
+                NetworkManager.getInstance().publishVanillaGive(remote.getUuid(), arguments);
+
+                // Components can contain spaces, so the quantity is only ever the last argument
+                String quantity = "1";
+                if (parts.length >= 4 && parts[parts.length - 1].matches("\\d+")) {
+                    quantity = parts[parts.length - 1];
+                }
+                String itemName = parts[2].split("[\\[{]")[0].replace("minecraft:", "");
+                AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(remote.getUuid());
+                String nickname = targetAranarthPlayer != null ? targetAranarthPlayer.getNickname() : remote.getUsername();
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "give.remote_success",
+                        "player", nickname, "quantity", quantity, "item", itemName)));
+                return;
+            }
         }
 
         if (!player.hasPermission("aranarth.whisper")) {

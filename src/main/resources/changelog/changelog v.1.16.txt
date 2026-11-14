@@ -29,6 +29,7 @@ Aranarthium, Items & Crafting
 [~] Items that already have an essence applied are no longer treated as the essence itself
 [-] Invisible Item Frames can no longer be placed without the Invisible Item Frames perk
 [~] The Wrench no longer loses durability when used in Creative mode
+[~] Fixed items being duplicated by double-clicking in /ac invsee or by editing an ender chest after its owner logged out
 
 Economy, Jobs & Quests
 [+] Added 1/4 pay when earning income from jobs while AFK
@@ -48,5 +49,10 @@ Quality of Life
 Cross-server & Technical
 [+] Added caching to avatar mannequin skins so refreshes avoid session server timeout warnings
 [~] Fixed quest boards failing to generate when server shops exist, which caused errors on player movement
+[+] The vanilla /give command now gives items to players on the other server
 
 Miscellaneous
+[+] Added /ac user to manage a player's location, inventory, ender chest and punishments from one centrallized GUI
+[~] Punishments are now issued by offence category, preselecting the player's next punishment from the punishment system's ladders
+[+] Inventories and ender chests of players on the other server can now be edited
+[~] Removing a punishment now applies on both servers

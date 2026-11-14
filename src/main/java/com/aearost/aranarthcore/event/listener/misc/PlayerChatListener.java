@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.utils.QuestUtils;
+import com.aearost.aranarthcore.commands.council.CommandUser;
 import com.aearost.aranarthcore.enums.QuestTrigger;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.PrefixStyle;
@@ -74,6 +75,13 @@ public class PlayerChatListener implements Listener {
         // Remove a leading period when the message starts with "./" followed by a letter (e.g. "./calendar" -> "/calendar")
         if (message.length() >= 3 && message.charAt(0) == '.' && message.charAt(1) == '/' && Character.isLetter(message.charAt(2))) {
             message = message.substring(1);
+        }
+
+        // If a Council member is typing a reason in /ac user, handle it first
+        if (CommandUser.isAwaitingInput(player.getUniqueId())) {
+            e.setCancelled(true);
+            CommandUser.handleInput(player, message);
+            return;
         }
 
         // If the player is awaiting a trade money amount, handle it first

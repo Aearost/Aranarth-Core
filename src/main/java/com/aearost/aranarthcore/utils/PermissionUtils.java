@@ -576,6 +576,7 @@ public class PermissionUtils {
         perms.setPermission("aranarth.warp.modify", false);
         perms.setPermission("aranarth.warn", false);
         perms.setPermission("aranarth.punishments", false);
+        perms.setPermission("aranarth.council.user", false);
         perms.setPermission("aranarth.avatar.set", false);
         perms.setPermission("aranarth.broadcast", false);
         perms.setPermission("aranarth.shulker", false);
@@ -1335,6 +1336,7 @@ public class PermissionUtils {
             perms.setPermission("aranarth.mute", true);
             perms.setPermission("aranarth.warn", true);
             perms.setPermission("aranarth.punishments", true);
+            perms.setPermission("aranarth.council.user", true);
             perms.setPermission("aranarth.nick", true);
             perms.setPermission("aranarth.nick.color", true);
             perms.setPermission("aranarth.nick.hex", true);

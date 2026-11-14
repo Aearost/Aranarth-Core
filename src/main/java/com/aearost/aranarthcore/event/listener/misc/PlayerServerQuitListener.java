@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.commands.council.CommandUser;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.SpecialDay;
 import com.aearost.aranarthcore.network.NetworkManager;
@@ -54,6 +55,13 @@ public class PlayerServerQuitListener implements Listener {
 
         // Cancel any active trade when a player disconnects
         TradeManager.handleQuit(player);
+        CommandUser.clear(player.getUniqueId());
+        // Anyone still editing this player's ender chest would be changing a copy that was already saved
+        for (Player viewer : Bukkit.getOnlinePlayers()) {
+            if (!viewer.equals(player) && viewer.getOpenInventory().getTopInventory().equals(player.getEnderChest())) {
+                viewer.closeInventory();
+            }
+        }
 
         // Must run before consumeTransferring() so transferring players keep their voice channel on the other server
         VoiceChatManager.onPlayerQuit(player, NetworkManager.isActive()

@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
+import com.aearost.aranarthcore.enums.PunishmentCategory;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Avatar;
@@ -18,6 +19,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -39,7 +41,21 @@ public class PunishmentUtils {
      * @param banExpiresAt When a ban ends in epoch milliseconds, or -1 for a permanent ban.
      */
     public static void issued(Punishment punishment, String nickname, String duration, long banExpiresAt) {
+        issued(punishment, nickname, duration, banExpiresAt, false);
+    }
+
+    /**
+     * Called by the commands after a punishment was applied on this server, saves it, and sends it to
+     * the other server.
+     *
+     * @param banExpiresAt  When a ban ends in epoch milliseconds, or -1 for a permanent ban.
+     * @param notifyCouncil Whether the punishment is an offence the Council must be alerted about.
+     */
+    public static void issued(Punishment punishment, String nickname, String duration, long banExpiresAt, boolean notifyCouncil) {
         UUID uuid = punishment.getUuid();
+        if (notifyCouncil) {
+            notifyCouncil(nickname, punishment.getCategory());
+        }
         savePunishmentsNow(uuid);
         switch (punishment.getType()) {
             case BAN -> {
@@ -65,7 +81,55 @@ public class PunishmentUtils {
         if (NetworkManager.isActive()) {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
             String muteEndDate = aranarthPlayer != null ? aranarthPlayer.getMuteEndDate() : "";
-            NetworkManager.getInstance().publishPunishment(punishment, nickname, duration, banExpiresAt, muteEndDate);
+            NetworkManager.getInstance().publishPunishment(punishment, nickname, duration, banExpiresAt, muteEndDate, notifyCouncil);
+        }
+    }
+
+    /**
+     * Deletes a punishment from the player's history on both servers, and logs the removal to Discord.
+     *
+     * @param punishment The punishment being deleted.
+     * @param removedBy  The UUID of the Council member deleting it, or null for the console.
+     */
+    public static void removed(Punishment punishment, UUID removedBy) {
+        UUID uuid = punishment.getUuid();
+        DiscordUtils.addPunishmentToDiscord(new Punishment(uuid, LocalDateTime.now(), "REMOVE_" + punishment.getType(),
+                punishment.getReason(), removedBy));
+        AranarthUtils.removePunishment(uuid, punishment);
+        savePunishmentsNow(uuid);
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishPunishmentRemoval(uuid, punishment.getDateMillis(), punishment.getType());
+        }
+    }
+
+    /**
+     * Deletes a punishment that was deleted on the other server. The other server already saved the history.
+     */
+    public static void onRemoteRemoval(UUID uuid, long dateMillis, String type) {
+        List<Punishment> punishments = AranarthUtils.getPunishments(uuid);
+        if (punishments == null) {
+            return;
+        }
+        punishments.removeIf(punishment -> punishment.getDateMillis() == dateMillis && punishment.getType().equals(type));
+    }
+
+    /**
+     * Alerts every Council member online on this server that the player has reached an offence that the
+     * Council must be told about.
+     *
+     * @param nickname The nickname of the punished player.
+     * @param category The key of the offence category, or null if there is none.
+     */
+    public static void notifyCouncil(String nickname, String category) {
+        PunishmentCategory punishmentCategory = category == null ? null : PunishmentCategory.fromKey(category);
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            if (onlinePlayer.hasPermission("aranarth.punishments")) {
+                String categoryName = punishmentCategory == null ? Lang.getFor(onlinePlayer, "punishment.type_other")
+                        : Lang.getFor(onlinePlayer, "user.category_" + punishmentCategory.getKey());
+                onlinePlayer.sendMessage(ChatUtils.chatMessage(Lang.getFor(onlinePlayer, "user.council_alert",
+                        "player", nickname, "category", categoryName)));
+                onlinePlayer.playSound(onlinePlayer, Sound.BLOCK_NOTE_BLOCK_BELL, 1F, 0.8F);
+            }
         }
     }
 
@@ -73,8 +137,11 @@ public class PunishmentUtils {
      * Applies a punishment that was issued on the other server.
      */
     public static void onRemotePunishment(Punishment punishment, String nickname, String duration,
-                                          long banExpiresAt, String muteEndDate) {
+                                          long banExpiresAt, String muteEndDate, boolean notifyCouncil) {
         UUID uuid = punishment.getUuid();
+        if (notifyCouncil) {
+            notifyCouncil(nickname, punishment.getCategory());
+        }
         // The issuing server already posted it to Discord
         AranarthUtils.addPunishment(uuid, punishment, true);
         String reason = punishment.getReason();

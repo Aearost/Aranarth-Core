@@ -4,14 +4,13 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Punishment;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import com.aearost.aranarthcore.utils.DiscordUtils;
 import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.PunishmentUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -135,17 +134,12 @@ public class CommandPunishments {
 						slotToRemove = Integer.parseInt(args[3]);
 						if (slotToRemove > 0) {
 							if (punishments.size() >= slotToRemove) {
-								String type = punishments.get(slotToRemove - 1).getType();
 								UUID senderUuid = null;
 								if (sender instanceof Player playerSender) {
 									senderUuid = playerSender.getUniqueId();
 								}
-								Punishment punishmentBeingRemoved = punishments.get(slotToRemove - 1);
-
-								Punishment punishment = new Punishment(
-										player.getUniqueId(), LocalDateTime.now(), "REMOVE_" + type, punishmentBeingRemoved.getReason(), senderUuid);
-								DiscordUtils.addPunishmentToDiscord(punishment);
-								AranarthUtils.removePunishment(player.getUniqueId(), punishmentBeingRemoved);
+								// Also removed on the other server, so its next save cannot put it back
+								PunishmentUtils.removed(punishments.get(slotToRemove - 1), senderUuid);
 								sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "punishment.removed", "number", String.valueOf(slotToRemove), "player", aranarthPlayer.getNickname())));
 							} else {
 								throw new NumberFormatException();

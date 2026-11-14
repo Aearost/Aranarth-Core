@@ -36,8 +36,8 @@ public class CommandACCompleter implements TabCompleter {
     private static final List<String> COUNCIL_OPTIONS = List.of(
             "admin", "architect", "ban", "broadcast", "clearchat", "dateset", "disable", "discordreload", "dominionrank",
             "enable", "give", "home", "invsee", "invswap", "msg", "mute", "og", "perks", "punishments", "questnpc", "rankset",
-            "reload", "resetquest", "speed", "spy", "sudo", "time", "tp", "tpf", "tpw", "unban", "unmute",
-            "unscramble", "vanish", "vpedit", "warn", "weather", "whereis", "worldevent"
+            "reload", "resetquest", "speed", "spy", "sudo", "time", "tp", "tpf", "tpw", "u", "unban", "unmute",
+            "unscramble", "user", "vanish", "vpedit", "warn", "weather", "whereis", "worldevent"
     );
 
     private static final List<String> ITEM_NAMES;
@@ -119,6 +119,7 @@ public class CommandACCompleter implements TabCompleter {
                 }
                 yield List.of();
             }
+            case "user", "u" -> args.length == 2 ? filterPlayers(args[1]) : List.of();
             case "whereis", "give", "mute", "unmute", "ban", "unban", "invsee", "warn", "punishments", "perks",
                  "sudo" -> {
                 if (args.length == 2) {

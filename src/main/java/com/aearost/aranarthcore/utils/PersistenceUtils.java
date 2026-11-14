@@ -2642,7 +2642,7 @@ public class PersistenceUtils {
                     continue;
                 }
 
-                // uuid|date|type|reason|appliedBy
+                // uuid|date|type|reason|appliedBy|category (the category is only written when there is one)
                 String[] fields = row.split("\\|");
 
                 UUID uuid = UUID.fromString(fields[0]);
@@ -2653,7 +2653,8 @@ public class PersistenceUtils {
                 if (!fields[4].equals("CONSOLE")) {
                     appliedBy = UUID.fromString(fields[4]);
                 }
-                Punishment punishment = new Punishment(uuid, date, type, reason, appliedBy);
+                String category = fields.length > 5 ? fields[5] : null;
+                Punishment punishment = new Punishment(uuid, date, type, reason, appliedBy, category);
                 AranarthUtils.addPunishment(uuid, punishment, true);
             }
             Bukkit.getLogger().info("[AC] All punishments have been initialized");
@@ -2706,7 +2707,8 @@ public class PersistenceUtils {
                             appliedBy = appliedByUuid.toString();
                         }
 
-                        String row = uuidString + "|" + date + "|" + type + "|" + reason + "|" + appliedBy + "\n";
+                        String category = punishment.getCategory() != null ? "|" + punishment.getCategory() : "";
+                        String row = uuidString + "|" + date + "|" + type + "|" + reason + "|" + appliedBy + category + "\n";
                         writer.write(row);
                     }
                 }
@@ -6073,6 +6075,9 @@ public class PersistenceUtils {
                 po.addProperty("type", p.getType());
                 po.addProperty("reason", p.getReason());
                 po.addProperty("appliedBy", p.getAppliedBy() != null ? p.getAppliedBy().toString() : "CONSOLE");
+                if (p.getCategory() != null) {
+                    po.addProperty("category", p.getCategory());
+                }
                 arr.add(po);
             }
         }
@@ -8089,7 +8094,8 @@ public class PersistenceUtils {
                     String reason = po.get("reason").getAsString();
                     UUID appliedBy = po.get("appliedBy").getAsString().equals("CONSOLE") ? null
                             : UUID.fromString(po.get("appliedBy").getAsString());
-                    AranarthUtils.addPunishment(uuid, new Punishment(uuid, date, type, reason, appliedBy), true);
+                    String category = po.has("category") ? po.get("category").getAsString() : null;
+                    AranarthUtils.addPunishment(uuid, new Punishment(uuid, date, type, reason, appliedBy, category), true);
                 }
             } catch (Exception e) {
                 Bukkit.getLogger().warning("[AC] Failed to parse punishments for " + uuid + ": " + e.getMessage());

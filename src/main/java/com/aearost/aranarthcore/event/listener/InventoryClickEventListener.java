@@ -106,7 +106,9 @@ public class InventoryClickEventListener implements Listener {
         // Done first so GUI clicks that return early still count as activity
         new AfkCancelByInteract().execute(player);
         if (isGui && e.getView().getType() == InventoryType.CHEST) {
-            if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.wrench.title"))) {
+            if (GuiHolder.of(e.getView().getTopInventory()).getData() instanceof GuiUser.HubData hubData) {
+                GuiUser.handleClick(e, hubData);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.wrench.title"))) {
                 new GuiWrenchClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.teleport.title"))) {
                 new GuiHomepadClick().execute(e);

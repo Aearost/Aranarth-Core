@@ -1,6 +1,5 @@
 package com.aearost.aranarthcore.commands.council;
 
-import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.Punishment;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -54,11 +53,6 @@ public class CommandBan {
 			return;
 		}
 
-		UUID senderUuid = null;
-		if (sender instanceof Player senderPlayer) {
-			senderUuid = senderPlayer.getUniqueId();
-		}
-
 		StringBuilder reasonBuilder = new StringBuilder();
 		for (int i = 3; i < args.length; i++) {
 			reasonBuilder.append(args[i]);
@@ -66,61 +60,74 @@ public class CommandBan {
 				reasonBuilder.append(" ");
 			}
 		}
-		String reason = reasonBuilder.toString();
 
-		boolean wasPlayerBanned = false;
-		String nickname = "";
 		UUID uuid = AranarthUtils.getUUIDFromUsername(args[1]);
-
-		if (uuid != null) {
-			OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-			wasPlayerBanned = true;
-			nickname = AranarthUtils.getNickname(player);
-			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			if (!PunishmentUtils.outranks(sender, uuid)) {
-				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ban.cannot_ban")));
-				return;
-			}
-
-			Date unbanDate = null;
-			// If it is not a permanent ban
-			if (!args[2].equals("-1")) {
-				LocalDateTime localDateTime = getEndDateOfBan(args[2], sender);
-				// If the date could not be determined
-				if (localDateTime == null) {
-					return;
-				} else {
-					unbanDate = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
-				}
-			}
-
-			LocalDateTime currentTime =  LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
-			player.ban(reason, unbanDate, null);
-			Punishment punishment = new Punishment(player.getUniqueId(), currentTime, "BAN", reason, senderUuid);
-			AranarthUtils.addPunishment(player.getUniqueId(), punishment, false);
-			PunishmentUtils.issued(punishment, nickname, args[2], unbanDate == null ? -1 : unbanDate.getTime());
-
-			// Permanent bans (unbanDate == null) remove the player from their dominion.
-			// If they are the leader, the dominion and all its outposts are disbanded.
-			if (unbanDate == null) {
-				Dominion dominion = DominionUtils.getPlayerDominion(uuid);
-				if (dominion != null) {
-					if (dominion.getLeader().equals(uuid)) {
-						DominionUtils.disbandDominion(dominion);
-					} else {
-						DominionUtils.removePlayerFromDominion(uuid);
-						dominion.getMembers().remove(uuid);
-						dominion.getMemberRanks().remove(uuid);
-						DominionUtils.updateDominion(dominion);
-						DominionLevelUtils.reevaluateDominion(dominion);
-					}
-				}
-			}
-		} else {
+		if (uuid == null) {
 			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", args[1])));
 			return;
 		}
-		PunishmentUtils.notifyBan(nickname, args[2], reason, args[2].equals("-1"));
+		ban(sender, uuid, args[2], reasonBuilder.toString(), null, false);
+	}
+
+	/**
+	 * Bans the player.
+	 * @param sender The user issuing the ban.
+	 * @param uuid The UUID of the player being banned.
+	 * @param duration The duration of the ban, such as 1h, 1d or 1w, or -1 for a permanent ban.
+	 * @param reason The reason of the ban.
+	 * @param category The key of the offence category, or null if it was issued without one.
+	 * @param notifyCouncil Whether the Council is alerted about the player.
+	 * @return Whether the player was banned.
+	 */
+	public static boolean ban(CommandSender sender, UUID uuid, String duration, String reason, String category, boolean notifyCouncil) {
+		UUID senderUuid = null;
+		if (sender instanceof Player senderPlayer) {
+			senderUuid = senderPlayer.getUniqueId();
+		}
+
+		OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
+		String nickname = AranarthUtils.getNickname(player);
+		if (!PunishmentUtils.outranks(sender, uuid)) {
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "ban.cannot_ban")));
+			return false;
+		}
+
+		Date unbanDate = null;
+		// If it is not a permanent ban
+		if (!duration.equals("-1")) {
+			LocalDateTime localDateTime = getEndDateOfBan(duration, sender);
+			// If the date could not be determined
+			if (localDateTime == null) {
+				return false;
+			} else {
+				unbanDate = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+			}
+		}
+
+		LocalDateTime currentTime =  LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
+		player.ban(reason, unbanDate, null);
+		Punishment punishment = new Punishment(uuid, currentTime, "BAN", reason, senderUuid, category);
+		AranarthUtils.addPunishment(uuid, punishment, false);
+		PunishmentUtils.issued(punishment, nickname, duration, unbanDate == null ? -1 : unbanDate.getTime(), notifyCouncil);
+
+		// Permanent bans (unbanDate == null) remove the player from their dominion.
+		// If they are the leader, the dominion and all its outposts are disbanded.
+		if (unbanDate == null) {
+			Dominion dominion = DominionUtils.getPlayerDominion(uuid);
+			if (dominion != null) {
+				if (dominion.getLeader().equals(uuid)) {
+					DominionUtils.disbandDominion(dominion);
+				} else {
+					DominionUtils.removePlayerFromDominion(uuid);
+					dominion.getMembers().remove(uuid);
+					dominion.getMemberRanks().remove(uuid);
+					DominionUtils.updateDominion(dominion);
+					DominionLevelUtils.reevaluateDominion(dominion);
+				}
+			}
+		}
+		PunishmentUtils.notifyBan(nickname, duration, reason, duration.equals("-1"));
+		return true;
 	}
 
 	/**

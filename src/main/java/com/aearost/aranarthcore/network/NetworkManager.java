@@ -20,6 +20,7 @@ import com.aearost.aranarthcore.items.key.KeyRare;
 import com.aearost.aranarthcore.items.key.KeyVote;
 import com.aearost.aranarthcore.objects.*;
 import com.aearost.aranarthcore.utils.*;
+import com.aearost.aranarthcore.gui.GuiInvsee;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -105,6 +106,7 @@ public class NetworkManager {
     public static final String CH_PAY_NOTIFY = "aranarth:pay_notify";
     public static final String CH_SUDO = "aranarth:sudo";
     public static final String CH_GIVE = "aranarth:give";
+    public static final String CH_VANILLA_GIVE = "aranarth:vanilla_give";
     public static final String CH_SENTINEL_SUMMON = "aranarth:sentinel_summon";
     public static final String CH_SENTINEL_SPAWN = "aranarth:sentinel_spawn";
     public static final String CH_SENTINEL_DEATH = "aranarth:sentinel_death";
@@ -127,6 +129,8 @@ public class NetworkManager {
     public static final String CH_INVSEE_RESPONSE = "aranarth:invsee_response";
     public static final String CH_INVSEE_UPDATE = "aranarth:invsee_update";
     public static final String CH_INVSEE_UNWATCH = "aranarth:invsee_unwatch";
+    public static final String CH_INVSEE_EDIT = "aranarth:invsee_edit";
+    public static final String CH_INVSEE_EDIT_RESULT = "aranarth:invsee_edit_result";
     public static final String CH_RANK_UPDATE = "aranarth:rank_update";
     public static final String CH_PERK_UPDATE = "aranarth:perk_update";
     public static final String CH_MARKET_UPDATE = "aranarth:market_update";
@@ -141,6 +145,7 @@ public class NetworkManager {
     public static final String CH_TRADE_EXECUTE = "aranarth:trade_execute";
     public static final String CH_TRADE_RESULT = "aranarth:trade_result";
     public static final String CH_PUNISHMENT = "aranarth:punishment";
+    public static final String CH_PUNISHMENT_REMOVE = "aranarth:punishment_remove";
     public static final String CH_PRONOUNS_UPDATE = "aranarth:pronouns_update";
     public static final String CH_PREFIX_UPDATE = "aranarth:prefix_update";
     public static final String CH_NICKNAME_UPDATE = "aranarth:nickname_update";
@@ -211,6 +216,12 @@ public class NetworkManager {
      * Keyed by target UUID. Populated by handleInvseeRequest, cleared on unwatch or target quit.
      */
     private final Map<UUID, Set<UUID>> remoteInvseeWatchers = new ConcurrentHashMap<>();
+    /**
+     * Tracks viewer UUIDs watching each local target player's ender chest from another server.
+     */
+    private final Map<UUID, Set<UUID>> remoteEnderWatchers = new ConcurrentHashMap<>();
+    public static final String CONTAINER_INVENTORY = "inventory";
+    public static final String CONTAINER_ENDER_CHEST = "ender_chest";
 
     /**
      * Cross-server /back locations for players who arrived from another server.
@@ -600,6 +611,7 @@ public class NetworkManager {
             case CH_PAY_NOTIFY -> handlePayNotify(json);
             case CH_SUDO -> handleSudo(json);
             case CH_GIVE -> handleGive(json);
+            case CH_VANILLA_GIVE -> handleVanillaGive(json);
             case CH_SENTINEL_SUMMON -> handleSentinelSummon(json);
             case CH_SENTINEL_SPAWN -> handleSentinelSpawn(json);
             case CH_SENTINEL_DEATH -> handleSentinelDeath(json);
@@ -622,6 +634,8 @@ public class NetworkManager {
             case CH_INVSEE_RESPONSE -> handleInvseeResponse(json);
             case CH_INVSEE_UPDATE -> handleInvseeUpdate(json);
             case CH_INVSEE_UNWATCH -> handleInvseeUnwatch(json);
+            case CH_INVSEE_EDIT -> handleInvseeEdit(json);
+            case CH_INVSEE_EDIT_RESULT -> handleInvseeEditResult(json);
             case CH_RANK_UPDATE -> handleRankUpdate(json);
             case CH_PERK_UPDATE -> handlePerkUpdate(json);
             case CH_MARKET_UPDATE -> handleMarketUpdate(json);
@@ -636,6 +650,7 @@ public class NetworkManager {
             case CH_TRADE_EXECUTE -> handleTradeExecute(json);
             case CH_TRADE_RESULT -> handleTradeResult(json);
             case CH_PUNISHMENT -> handlePunishment(json);
+            case CH_PUNISHMENT_REMOVE -> handlePunishmentRemoval(json);
             case CH_PRONOUNS_UPDATE -> handlePronounsUpdate(json);
             case CH_PREFIX_UPDATE -> handlePrefixUpdate(json);
             case CH_NICKNAME_UPDATE -> handleNicknameUpdate(json);
@@ -841,6 +856,7 @@ public class NetworkManager {
 
         // Clear any remote invsee watchers for this player
         remoteInvseeWatchers.remove(uuid);
+        remoteEnderWatchers.remove(uuid);
 
         JsonObject json = new JsonObject();
         json.addProperty("uuid", uuid.toString());
@@ -2376,7 +2392,7 @@ public class NetworkManager {
         pendingCrossServerRequests.values().removeIf(c -> c.remotePlayerUuid().equals(uuid));
 
         // Close any remote invsee GUIs local players have open for this player
-        com.aearost.aranarthcore.gui.GuiInvsee.closeAllRemoteFor(uuid);
+        GuiInvsee.closeAllRemoteFor(uuid);
         // Guard: if the player just transferred to THIS server, their vanilla tab entry is
         // already present - removing it would blank their skin and hide them from their own tab.
         if (Bukkit.getPlayer(uuid) == null) {
@@ -3245,6 +3261,39 @@ public class NetworkManager {
             Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[SUDO] Running cross-server command as " + target.getName() + ": /" + command);
             target.performCommand(command);
         });
+    }
+
+    /**
+     * Tells the server where the target player is online to run the vanilla /give command for them.
+     * The permission of the sender must already be validated by the origin server.
+     *
+     * @param targetUuid The UUID of the player receiving the item.
+     * @param arguments  The arguments of the /give command after the player's name.
+     */
+    public void publishVanillaGive(UUID targetUuid, String arguments) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("targetUuid", targetUuid.toString());
+        json.addProperty("arguments", arguments);
+        publish(CH_VANILLA_GIVE, json);
+    }
+
+    private void handleVanillaGive(JsonObject json) {
+        if (json.get("server").getAsString().equals(thisServer)) {
+            return;
+        }
+        UUID targetUuid = UUID.fromString(json.get("targetUuid").getAsString());
+        String arguments = json.get("arguments").getAsString();
+        Player target = Bukkit.getPlayer(targetUuid);
+        if (target == null) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[GIVE] Could not run cross-server /give as "
+                    + targetUuid + " is not online: /give " + arguments);
+            return;
+        }
+        // Runs as the console as the origin server already validated the sender
+        String command = "minecraft:give " + target.getName() + " " + arguments;
+        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[GIVE] Running cross-server command: /" + command);
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
     }
 
     private void handleGive(JsonObject json) {
@@ -4153,21 +4202,229 @@ public class NetworkManager {
      * Requests a snapshot of a remote player's inventory and registers the viewer as a live watcher.
      */
     public void publishInvseeRequest(UUID viewerUuid, UUID targetUuid) {
+        publishInvseeRequest(viewerUuid, targetUuid, CONTAINER_INVENTORY);
+    }
+
+    /**
+     * Requests a snapshot of a remote player's inventory or ender chest and registers the viewer as a live watcher.
+     *
+     * @param container Either CONTAINER_INVENTORY or CONTAINER_ENDER_CHEST.
+     */
+    public void publishInvseeRequest(UUID viewerUuid, UUID targetUuid, String container) {
         JsonObject json = new JsonObject();
         json.addProperty("fromServer", thisServer);
         json.addProperty("viewerUuid", viewerUuid.toString());
         json.addProperty("targetUuid", targetUuid.toString());
+        json.addProperty("container", container);
         publish(CH_INVSEE_REQUEST, json);
     }
 
     /**
      * Notifies the target's server that a viewer has closed their remote invsee GUI.
      */
-    public void publishInvseeUnwatch(UUID viewerUuid, UUID targetUuid) {
+    public void publishInvseeUnwatch(UUID viewerUuid, UUID targetUuid, String container) {
         JsonObject json = new JsonObject();
         json.addProperty("viewerUuid", viewerUuid.toString());
         json.addProperty("targetUuid", targetUuid.toString());
+        json.addProperty("container", container);
         publish(CH_INVSEE_UNWATCH, json);
+    }
+
+    /**
+     * Provides the container that an invsee message is about, which is the inventory for messages
+     * that predate ender chests being viewable.
+     */
+    private static String getContainer(JsonObject json) {
+        return json.has("container") ? json.get("container").getAsString() : CONTAINER_INVENTORY;
+    }
+
+    /**
+     * Provides the watchers of the given container, keyed by target UUID.
+     */
+    private Map<UUID, Set<UUID>> getWatchers(String container) {
+        return CONTAINER_ENDER_CHEST.equals(container) ? remoteEnderWatchers : remoteInvseeWatchers;
+    }
+
+    /**
+     * Provides the players on this server whose ender chest is being viewed from another server.
+     */
+    public Set<UUID> getRemoteEnderWatchedTargets() {
+        return remoteEnderWatchers.keySet();
+    }
+
+    /**
+     * Publishes a live ender chest update for all remote viewers watching the given target.
+     * Must be called on the main thread.
+     */
+    public void publishRemoteEnderUpdate(Player target) {
+        Set<UUID> watchers = remoteEnderWatchers.get(target.getUniqueId());
+        if (watchers == null || watchers.isEmpty()) {
+            return;
+        }
+        if (!target.isOnline()) {
+            remoteEnderWatchers.remove(target.getUniqueId());
+            return;
+        }
+        try {
+            JsonObject json = new JsonObject();
+            json.addProperty("targetUuid", target.getUniqueId().toString());
+            json.addProperty("container", CONTAINER_ENDER_CHEST);
+            json.addProperty("items", ItemUtils.itemStackArrayToBase64(snapshotEnderItems(target)));
+            publish(CH_INVSEE_UPDATE, json);
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+                    + "Failed to serialize remote ender chest update for " + target.getName() + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Asks the target's server to take the item out of a slot of the target's inventory or ender chest
+     * and send it to the viewer. It is only taken if the slot still holds exactly that item.
+     *
+     * @param guiSlot The slot in the viewer's GUI.
+     */
+    public void publishInvseeTake(UUID viewerUuid, UUID targetUuid, String container, int guiSlot, ItemStack expected) {
+        publishInvseeEdit(viewerUuid, targetUuid, container, "take", guiSlot, expected);
+    }
+
+    /**
+     * Sends an item that was already removed from the viewer to the target's server, to be placed in a slot
+     * of the target's inventory or ender chest.
+     *
+     * @param guiSlot The slot in the viewer's GUI, or -1 to place it in any free slot.
+     */
+    public void publishInvseePut(UUID viewerUuid, UUID targetUuid, String container, int guiSlot, ItemStack item) {
+        publishInvseeEdit(viewerUuid, targetUuid, container, "put", guiSlot, item);
+    }
+
+    private void publishInvseeEdit(UUID viewerUuid, UUID targetUuid, String container, String action, int guiSlot, ItemStack item) {
+        JsonObject json = new JsonObject();
+        json.addProperty("fromServer", thisServer);
+        json.addProperty("viewerUuid", viewerUuid.toString());
+        json.addProperty("targetUuid", targetUuid.toString());
+        json.addProperty("container", container);
+        json.addProperty("action", action);
+        json.addProperty("slot", guiSlot);
+        json.addProperty("item", ItemUtils.itemStackArrayToBase64(new ItemStack[]{item}));
+        publish(CH_INVSEE_EDIT, json);
+    }
+
+    /**
+     * Sends items back to the viewer's server, either taken from the target or returned because they
+     * could not be placed.
+     */
+    private void publishInvseeEditResult(String viewerServer, UUID viewerUuid, UUID targetUuid, String result, ItemStack item) {
+        JsonObject json = new JsonObject();
+        json.addProperty("viewerServer", viewerServer);
+        json.addProperty("fromServer", thisServer);
+        json.addProperty("viewerUuid", viewerUuid.toString());
+        json.addProperty("targetUuid", targetUuid.toString());
+        json.addProperty("result", result);
+        json.addProperty("item", item == null ? "" : ItemUtils.itemStackArrayToBase64(new ItemStack[]{item}));
+        publish(CH_INVSEE_EDIT_RESULT, json);
+    }
+
+    /**
+     * Received on the server that holds the target player. Applies a viewer's change to the target's
+     * inventory or ender chest. Items only ever exist on one side, so nothing is duplicated if either
+     * player leaves while a change is in flight.
+     */
+    private void handleInvseeEdit(JsonObject json) {
+        String fromServer = json.get("fromServer").getAsString();
+        if (fromServer.equals(thisServer)) {
+            return;
+        }
+        UUID viewerUuid = UUID.fromString(json.get("viewerUuid").getAsString());
+        UUID targetUuid = UUID.fromString(json.get("targetUuid").getAsString());
+        String container = getContainer(json);
+        String action = json.get("action").getAsString();
+        int guiSlot = json.get("slot").getAsInt();
+        ItemStack item;
+        try {
+            item = ItemUtils.itemStackArrayFromBase64(json.get("item").getAsString())[0];
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Failed to read a remote invsee edit: " + e.getMessage());
+            return;
+        }
+        if (item == null || item.getType().isAir()) {
+            return;
+        }
+
+        Player target = Bukkit.getPlayer(targetUuid);
+        if (action.equals("take")) {
+            ItemStack current = target == null ? null : InvseeUtils.getSlot(target, container, guiSlot);
+            // The slot changed since the viewer saw it, so nothing is taken and the viewer is shown it again
+            if (current == null || !current.isSimilar(item) || current.getAmount() != item.getAmount()) {
+                publishInvseeEditResult(fromServer, viewerUuid, targetUuid, "changed", null);
+                if (target != null) {
+                    publishRemoteInvseeUpdate(target);
+                    publishRemoteEnderUpdate(target);
+                }
+                return;
+            }
+            InvseeUtils.setSlot(target, container, guiSlot, null);
+            publishInvseeEditResult(fromServer, viewerUuid, targetUuid, "taken", current.clone());
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + viewerUuid + " took " + current.getAmount() + "x "
+                    + current.getType() + " from the " + container + " of " + target.getName() + " from another server");
+        } else if (action.equals("put")) {
+            // The target left, so the item goes back to the viewer
+            if (target == null) {
+                publishInvseeEditResult(fromServer, viewerUuid, targetUuid, "returned", item);
+                return;
+            }
+            InvseeUtils.place(target, container, guiSlot, item);
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + viewerUuid + " gave " + item.getAmount() + "x "
+                    + item.getType() + " to the " + container + " of " + target.getName() + " from another server");
+        } else {
+            return;
+        }
+        GuiInvsee.refreshForTarget(target);
+        publishRemoteInvseeUpdate(target);
+        publishRemoteEnderUpdate(target);
+    }
+
+    /**
+     * Received on the viewer's server. Gives the viewer the items that were taken or returned.
+     */
+    private void handleInvseeEditResult(JsonObject json) {
+        if (!json.get("viewerServer").getAsString().equals(thisServer)) {
+            return;
+        }
+        UUID viewerUuid = UUID.fromString(json.get("viewerUuid").getAsString());
+        UUID targetUuid = UUID.fromString(json.get("targetUuid").getAsString());
+        String result = json.get("result").getAsString();
+        Player viewer = Bukkit.getPlayer(viewerUuid);
+        if (result.equals("changed")) {
+            if (viewer != null) {
+                viewer.sendMessage(ChatUtils.chatMessage(Lang.getFor(viewer, "user.slot_changed")));
+            }
+            return;
+        }
+
+        ItemStack item;
+        try {
+            item = ItemUtils.itemStackArrayFromBase64(json.get("item").getAsString())[0];
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Failed to read a remote invsee result: " + e.getMessage());
+            return;
+        }
+        if (item == null || item.getType().isAir()) {
+            return;
+        }
+        if (viewer != null) {
+            for (ItemStack leftover : viewer.getInventory().addItem(item).values()) {
+                viewer.getWorld().dropItemNaturally(viewer.getLocation(), leftover);
+            }
+            if (result.equals("returned")) {
+                viewer.sendMessage(ChatUtils.chatMessage(Lang.getFor(viewer, "user.item_returned")));
+            }
+        } else if (result.equals("taken")) {
+            // The viewer left before the item arrived, so it goes back to the target
+            publishInvseePut(viewerUuid, targetUuid, CONTAINER_INVENTORY, -1, item);
+        } else {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Could not return " + item.getAmount() + "x " + item.getType()
+                    + " to " + viewerUuid + ", as they and " + targetUuid + " are both offline");
+        }
     }
 
     /**
@@ -4213,6 +4470,7 @@ public class NetworkManager {
 
         UUID viewerUuid = UUID.fromString(json.get("viewerUuid").getAsString());
         UUID targetUuid = UUID.fromString(json.get("targetUuid").getAsString());
+        String container = getContainer(json);
 
         Player target = Bukkit.getPlayer(targetUuid);
         if (target == null) {
@@ -4220,11 +4478,13 @@ public class NetworkManager {
         }
 
         // Register as a live watcher
-        remoteInvseeWatchers.computeIfAbsent(targetUuid, k -> ConcurrentHashMap.newKeySet()).add(viewerUuid);
+        getWatchers(container).computeIfAbsent(targetUuid, k -> ConcurrentHashMap.newKeySet()).add(viewerUuid);
 
         try {
-            String serialized = com.aearost.aranarthcore.utils.ItemUtils.itemStackArrayToBase64(snapshotGuiItems(target));
+            ItemStack[] items = CONTAINER_ENDER_CHEST.equals(container) ? snapshotEnderItems(target) : snapshotGuiItems(target);
+            String serialized = ItemUtils.itemStackArrayToBase64(items);
             JsonObject response = new JsonObject();
+            response.addProperty("container", container);
             response.addProperty("targetServer", fromServer);
             response.addProperty("viewerUuid", viewerUuid.toString());
             response.addProperty("targetUuid", targetUuid.toString());
@@ -4243,11 +4503,12 @@ public class NetworkManager {
     private void handleInvseeUnwatch(JsonObject json) {
         UUID viewerUuid = UUID.fromString(json.get("viewerUuid").getAsString());
         UUID targetUuid = UUID.fromString(json.get("targetUuid").getAsString());
-        Set<UUID> watchers = remoteInvseeWatchers.get(targetUuid);
+        Map<UUID, Set<UUID>> watchersByTarget = getWatchers(getContainer(json));
+        Set<UUID> watchers = watchersByTarget.get(targetUuid);
         if (watchers != null) {
             watchers.remove(viewerUuid);
             if (watchers.isEmpty()) {
-                remoteInvseeWatchers.remove(targetUuid);
+                watchersByTarget.remove(targetUuid);
             }
         }
     }
@@ -4265,14 +4526,19 @@ public class NetworkManager {
         UUID targetUuid = UUID.fromString(json.get("targetUuid").getAsString());
         String targetName = json.get("targetName").getAsString();
         String serialized = json.get("items").getAsString();
+        String container = getContainer(json);
 
         deserializeAndApply(serialized, targetUuid, guiItems -> {
             Player viewer = Bukkit.getPlayer(viewerUuid);
             if (viewer != null) {
-                com.aearost.aranarthcore.gui.GuiInvsee.openRemote(viewer, targetUuid, targetName, guiItems);
+                if (CONTAINER_ENDER_CHEST.equals(container)) {
+                    GuiInvsee.openRemoteEnder(viewer, targetUuid, targetName, guiItems);
+                } else {
+                    GuiInvsee.openRemote(viewer, targetUuid, targetName, guiItems);
+                }
             } else {
                 // Viewer left before response arrived - send unwatch so target's server cleans up
-                publishInvseeUnwatch(viewerUuid, targetUuid);
+                publishInvseeUnwatch(viewerUuid, targetUuid, container);
             }
         }, () -> {
             Player viewer = Bukkit.getPlayer(viewerUuid);
@@ -4288,12 +4554,19 @@ public class NetworkManager {
      */
     private void handleInvseeUpdate(JsonObject json) {
         UUID targetUuid = UUID.fromString(json.get("targetUuid").getAsString());
-        if (!com.aearost.aranarthcore.gui.GuiInvsee.hasRemoteInvseeOpen(targetUuid)) {
+        String serialized = json.get("items").getAsString();
+        if (CONTAINER_ENDER_CHEST.equals(getContainer(json))) {
+            if (GuiInvsee.hasRemoteEnderOpen(targetUuid)) {
+                deserializeAndApply(serialized, targetUuid,
+                        items -> GuiInvsee.refreshRemoteEnderForTarget(targetUuid, items), null);
+            }
             return;
         }
-        String serialized = json.get("items").getAsString();
+        if (!GuiInvsee.hasRemoteInvseeOpen(targetUuid)) {
+            return;
+        }
         deserializeAndApply(serialized, targetUuid,
-                guiItems -> com.aearost.aranarthcore.gui.GuiInvsee.refreshRemoteForTarget(targetUuid, guiItems),
+                guiItems -> GuiInvsee.refreshRemoteForTarget(targetUuid, guiItems),
                 null);
     }
 
@@ -4331,6 +4604,18 @@ public class NetworkManager {
         items[6] = clone(target.getInventory().getItemInOffHand());
         for (int i = 9; i <= 35; i++) items[i] = clone(target.getInventory().getItem(i));
         for (int i = 0; i <= 8; i++) items[i + 36] = clone(target.getInventory().getItem(i));
+        return items;
+    }
+
+    /**
+     * Builds a copy of the player's ender chest. Must be called on the main thread.
+     */
+    private static ItemStack[] snapshotEnderItems(Player target) {
+        ItemStack[] contents = target.getEnderChest().getContents();
+        ItemStack[] items = new ItemStack[contents.length];
+        for (int i = 0; i < contents.length; i++) {
+            items[i] = clone(contents[i]);
+        }
         return items;
     }
 
@@ -5221,8 +5506,11 @@ public class NetworkManager {
     /**
      * Sends a ban, unban, mute, unmute or warning to the other server so it applies it immediately.
      */
-    public void publishPunishment(Punishment punishment, String nickname, String duration, long banExpiresAt, String muteEndDate) {
+    public void publishPunishment(Punishment punishment, String nickname, String duration, long banExpiresAt, String muteEndDate,
+                                  boolean notifyCouncil) {
         JsonObject json = new JsonObject();
+        json.addProperty("category", punishment.getCategory() != null ? punishment.getCategory() : "");
+        json.addProperty("notifyCouncil", notifyCouncil);
         json.addProperty("server", thisServer);
         json.addProperty("uuid", punishment.getUuid().toString());
         json.addProperty("type", punishment.getType());
@@ -5243,9 +5531,32 @@ public class NetworkManager {
         UUID uuid = UUID.fromString(json.get("uuid").getAsString());
         String appliedBy = json.get("appliedBy").getAsString();
         LocalDateTime date = LocalDateTime.ofInstant(Instant.ofEpochMilli(json.get("date").getAsLong()), ZoneId.systemDefault());
+        String category = json.has("category") ? json.get("category").getAsString() : null;
         Punishment punishment = new Punishment(uuid, date, json.get("type").getAsString(), json.get("reason").getAsString(),
-                appliedBy.isEmpty() ? null : UUID.fromString(appliedBy));
+                appliedBy.isEmpty() ? null : UUID.fromString(appliedBy), category);
+        boolean notifyCouncil = json.has("notifyCouncil") && json.get("notifyCouncil").getAsBoolean();
         PunishmentUtils.onRemotePunishment(punishment, json.get("nickname").getAsString(), json.get("duration").getAsString(),
-                json.get("banExpiresAt").getAsLong(), json.get("muteEndDate").getAsString());
+                json.get("banExpiresAt").getAsLong(), json.get("muteEndDate").getAsString(), notifyCouncil);
+    }
+
+    /**
+     * Tells the other server that a punishment was deleted from a player's history, so it is not put back
+     * by that server's next save.
+     */
+    public void publishPunishmentRemoval(UUID uuid, long dateMillis, String type) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", uuid.toString());
+        json.addProperty("date", dateMillis);
+        json.addProperty("type", type);
+        publish(CH_PUNISHMENT_REMOVE, json);
+    }
+
+    private void handlePunishmentRemoval(JsonObject json) {
+        if (json.get("server").getAsString().equals(thisServer)) {
+            return;
+        }
+        PunishmentUtils.onRemoteRemoval(UUID.fromString(json.get("uuid").getAsString()),
+                json.get("date").getAsLong(), json.get("type").getAsString());
     }
 }

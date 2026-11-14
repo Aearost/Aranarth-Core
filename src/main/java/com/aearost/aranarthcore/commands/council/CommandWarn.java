@@ -1,13 +1,11 @@
 package com.aearost.aranarthcore.commands.council;
 
-import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Punishment;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PunishmentUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -50,50 +48,58 @@ public class CommandWarn {
 			return;
 		}
 
+		UUID targetUuid = AranarthUtils.getUUIDFromUsername(args[1]);
+		if (targetUuid == null) {
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", args[1])));
+			return;
+		}
+		if (args.length < 3) {
+			if (PunishmentUtils.outranks(sender, targetUuid)) {
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "warn.must_specify_reason")));
+			} else {
+				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "warn.cannot_warn")));
+			}
+			return;
+		}
+
+		StringBuilder reason = new StringBuilder();
+		for (int i = 2; i < args.length; i++) {
+			reason.append(args[i]);
+			if (i < args.length - 1) {
+				reason.append(" ");
+			}
+		}
+		warn(sender, targetUuid, reason.toString(), null, false);
+	}
+
+	/**
+	 * Warns the player.
+	 * @param sender The user issuing the warning.
+	 * @param targetUuid The UUID of the player being warned.
+	 * @param reason The reason of the warning.
+	 * @param category The key of the offence category, or null if it was issued without one.
+	 * @param notifyCouncil Whether the Council is alerted about the player.
+	 * @return Whether the player was warned.
+	 */
+	public static boolean warn(CommandSender sender, UUID targetUuid, String reason, String category, boolean notifyCouncil) {
+		if (!PunishmentUtils.outranks(sender, targetUuid)) {
+			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "warn.cannot_warn")));
+			return false;
+		}
+
 		UUID senderUuid = null;
 		if (sender instanceof Player senderPlayer) {
 			senderUuid = senderPlayer.getUniqueId();
 		}
+		String nickname = AranarthUtils.getNickname(Bukkit.getOfflinePlayer(targetUuid));
 
-		boolean wasPlayerWarned = false;
-		String playerName = args[1];
-		String nickname = "";
-		UUID targetUuid = AranarthUtils.getUUIDFromUsername(args[1]);
-		if (targetUuid != null) {
-			wasPlayerWarned = true;
-			OfflinePlayer player = Bukkit.getOfflinePlayer(targetUuid);
-			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(targetUuid);
-			playerName = aranarthPlayer.getUsername();
-			nickname = AranarthUtils.getNickname(player);
-			if (!PunishmentUtils.outranks(sender, targetUuid)) {
-				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "warn.cannot_warn")));
-				return;
-			}
+		Punishment punishment = new Punishment(targetUuid, LocalDateTime.ofInstant(Instant.now(),
+				ZoneId.systemDefault()), "WARN", reason, senderUuid, category);
+		AranarthUtils.addPunishment(targetUuid, punishment, false);
 
-			if (args.length >= 3) {
-				StringBuilder reason = new StringBuilder();
-				for (int i = 2; i < args.length; i++) {
-					reason.append(args[i]);
-					if (i < args.length - 1) {
-						reason.append(" ");
-					}
-				}
-
-				Punishment punishment = new Punishment(targetUuid, LocalDateTime.ofInstant(Instant.now(),
-						ZoneId.systemDefault()), "WARN", reason.toString(), senderUuid);
-				AranarthUtils.addPunishment(targetUuid, punishment, false);
-
-				PunishmentUtils.notifyWarn(targetUuid, nickname, reason.toString());
-				PunishmentUtils.issued(punishment, nickname, "", -1);
-			} else {
-				sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "warn.must_specify_reason")));
-				return;
-			}
-		}
-
-		if (!wasPlayerWarned) {
-			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "player.not_found", "name", args[1])));
-		}
+		PunishmentUtils.notifyWarn(targetUuid, nickname, reason);
+		PunishmentUtils.issued(punishment, nickname, "", -1, notifyCouncil);
+		return true;
 	}
 
 
