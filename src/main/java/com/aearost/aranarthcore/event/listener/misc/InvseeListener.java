@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.gui.GuiInvsee;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.CreativeSwapUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -70,6 +71,14 @@ public class InvseeListener implements Listener {
             e.setCancelled(true);
             viewer.closeInventory();
             viewer.sendMessage(ChatUtils.chatMessage(Lang.getFor(viewer, "invsee.offline")));
+            return;
+        }
+        // The target holds their creative inventory, so nothing may be moved in or out of it
+        if (CreativeSwapUtils.isSwapped(targetUUID) && (e.getClickedInventory() == e.getInventory()
+                || e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY)) {
+            e.setCancelled(true);
+            viewer.sendMessage(ChatUtils.chatMessage(Lang.getFor(viewer, "user.edit_blocked_target_creative",
+                    "player", AranarthUtils.getNickname(target))));
             return;
         }
         // Once the click is applied, anyone viewing the target from the other server sees the change
@@ -229,6 +238,11 @@ public class InvseeListener implements Listener {
      * would cross between another world's inventory, such as the arena or Creative worlds, and Survival.
      */
     private boolean isBlockedFromEditing(Player viewer) {
+        // In Creative mode in a Survival world, the viewer holds their creative inventory
+        if (CreativeSwapUtils.isSwapped(viewer.getUniqueId())) {
+            viewer.sendMessage(ChatUtils.chatMessage(Lang.getFor(viewer, "user.edit_blocked_creative")));
+            return true;
+        }
         if (!AranarthUtils.isSurvivalWorld(viewer.getWorld().getName())) {
             viewer.sendMessage(ChatUtils.chatMessage(Lang.getFor(viewer, "user.edit_blocked")));
             return true;

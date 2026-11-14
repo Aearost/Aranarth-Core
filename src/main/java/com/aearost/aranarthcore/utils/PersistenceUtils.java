@@ -7671,12 +7671,16 @@ public class PersistenceUtils {
                     + ", arenaInventory=" + (arenaInventory.isEmpty() ? "empty" : "set") + ")"
                     + " - will skip clear if they switch to survival");
         }
+        // Vanish is not stored in MySQL, so the in-memory state (kept in sync between servers) must survive the reload
+        AranarthPlayer previous = AranarthUtils.getLoadedPlayer(uuid);
+        boolean wasVanished = previous != null && previous.isVanished();
         AranarthUtils.addPlayer(uuid, new AranarthPlayer(resolveUsername(uuid, storedUsername), nickname,
                 survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist,
                 blacklistingMethod, balance, rank, saintRank, councilRank, architectRank, homes,
                 muteEndDate, particles, perks, saintExpireDate, isCompressingItems, votePointsSpent, isUsingSpawnBoost,
                 firstJoinDate,
                 pronouns));
+        AranarthUtils.getPlayer(uuid).setVanished(wasVanished);
         // Stamp the snapshot so cross-server delta logic knows what this server loaded from DB
         AranarthUtils.getPlayer(uuid).setBalanceSnapshot(balance);
         long conquestDisbandCooldownEnd = fields.length > 24 ? Long.parseLong(fields[23]) : 0L;

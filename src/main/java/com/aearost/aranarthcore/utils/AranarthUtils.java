@@ -557,6 +557,22 @@ public class AranarthUtils {
     }
 
     public static void switchInventory(Player player, String currentWorld, String destinationWorld) throws IOException {
+        // The game modes set while switching must not swap in the creative inventory, as this already gives the right inventory
+        boolean isSwitchStarted = CreativeSwapUtils.beginWorldSwitch(player.getUniqueId());
+        try {
+            switchInventoryBetweenWorlds(player, currentWorld, destinationWorld);
+        } finally {
+            if (isSwitchStarted) {
+                CreativeSwapUtils.endWorldSwitch(player.getUniqueId());
+            }
+        }
+    }
+
+    private static void switchInventoryBetweenWorlds(Player player, String currentWorld, String destinationWorld) throws IOException {
+        // The creative inventory held in Creative mode only stays while the player is in the Survival worlds
+        if (!getInventoryGroup(destinationWorld).equals("world")) {
+            CreativeSwapUtils.restoreBeforeLeaving(player);
+        }
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
         String rawFrom = currentWorld;
@@ -2742,7 +2758,7 @@ public class AranarthUtils {
         // is what saveInventoryAndTransfer() will flush to MySQL before the BungeeCord handoff.
         if (isSurvivalWorld(actualFromWorld)) {
             try {
-                aranarthPlayer.setSurvivalInventory(ItemUtils.itemStackArrayToBase64(player.getInventory().getContents()));
+                aranarthPlayer.setSurvivalInventory(CreativeSwapUtils.getSurvivalInventory(player));
             } catch (Exception e) {
                 Bukkit.getLogger().warning("[AC] Failed to serialize inventory for " + player.getName());
             }
@@ -4250,8 +4266,10 @@ public class AranarthUtils {
         // any viewer who has chosen their own prefix styles.
         Map<UUID, ChatPrefix> localPrefixes = new LinkedHashMap<>();
         Map<UUID, String> localSuffixes = new HashMap<>();
+        // Vanished players are formatted too, as those who can see them would otherwise see a plain name.
+        // Who sees a vanished player at all is decided by the vanish visibility above and the tab layout below
         for (SortEntry entry : combined) {
-            if (entry.localPlayer() != null && !entry.vanished()) {
+            if (entry.localPlayer() != null) {
                 Player player = entry.localPlayer();
                 UUID uuid = player.getUniqueId();
                 ChatPrefix prefix = ChatPrefix.of(player);

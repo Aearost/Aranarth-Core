@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands.council;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.CreativeSwapUtils;
 import com.aearost.aranarthcore.utils.ItemUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
@@ -52,6 +53,9 @@ public class CommandInvSwap {
                 target = player;
                 targetAranarthPlayer = aranarthPlayer;
             }
+
+            // In Creative mode in a Survival world, the target holds their creative inventory, so the survival one comes back first
+            CreativeSwapUtils.restoreBeforeLeaving(target);
 
             // Determine the current inventory type from the target's world
             String worldName = target.getWorld().getName();

@@ -5,16 +5,19 @@ import com.aearost.aranarthcore.enums.PunishmentCategory;
 import com.aearost.aranarthcore.gui.GuiUser;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.NetworkPlayer;
+import com.aearost.aranarthcore.network.PendingTeleport;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Punishment;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.CreativeSwapUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PunishmentUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -95,6 +98,7 @@ public class CommandUser {
 		String option = args.length > 3 ? args[3] : "";
 		switch (args[2].toLowerCase()) {
 			case "location" -> showLocation(player, username);
+			case "spectate" -> spectate(player, targetUuid, username);
 			case "inventory" -> CommandInvsee.onCommand(player, new String[]{"invsee", username});
 			case "enderchest" -> openEnderChest(player, targetUuid, username);
 			case "history" -> showHistory(player, targetUuid, username, parsePage(option));
@@ -124,14 +128,93 @@ public class CommandUser {
 	private static void showLocation(Player player, String username) {
 		CommandWhereIs.onCommand(player, new String[]{"whereis", username});
 		if (player.hasPermission("aranarth.whereis") && player.hasPermission("aranarth.admintp")) {
-			player.sendMessage(Component.text("  ").append(button(player, "user.button_teleport", "user.hover_teleport",
-					"/ac tp " + username)));
+			Component buttons = Component.text("  ").append(button(player, "user.button_teleport", "user.hover_teleport",
+					"/ac tp " + username));
+			if (canSpectate(player)) {
+				buttons = buttons.append(Component.text("   "))
+						.append(button(player, "user.button_spectate", "user.hover_spectate", "/ac user " + username + " spectate"));
+			}
+			player.sendMessage(buttons);
+		}
+	}
+
+	private static boolean canSpectate(Player player) {
+		return player.hasPermission("aranarth.whereis") && player.hasPermission("aranarth.admintp")
+				&& player.hasPermission("aranarth.vanish") && AranarthUtils.hasUnrestrictedGameMode(player);
+	}
+
+	/**
+	 * Vanishes and teleports to the player, then enters Creative mode, which swaps in the creative inventory.
+	 */
+	private static void spectate(Player player, UUID targetUuid, String username) {
+		if (!canSpectate(player)) {
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
+			return;
+		}
+		if (player.getUniqueId().equals(targetUuid)) {
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "user.spectate_self")));
+			return;
+		}
+
+		Player target = Bukkit.getPlayer(targetUuid);
+		if (target == null) {
+			NetworkPlayer remote = NetworkManager.isActive() ? NetworkManager.getInstance().getRemotePlayer(targetUuid) : null;
+			if (remote == null) {
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "user.not_online", "player", username)));
+				return;
+			}
+			// Vanished before leaving so they are never seen arriving on the other server
+			vanish(player);
+			String targetServer = AranarthCore.getInstance().getConfig()
+					.getString("network.servers." + remote.getServer(), remote.getServer());
+			PendingTeleport pending = PendingTeleport.forCommand("ac user " + username + " spectate",
+					"&e&l" + remote.getServer().toUpperCase(), Lang.getFor(player, "teleport.teleported_to", "player", remote.getNickname()));
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "admin.teleporting_to_player", "player", remote.getNickname())));
+			NetworkManager.getInstance().saveInventoryAndTransfer(player, targetServer, pending);
+			return;
+		}
+
+		vanish(player);
+		String nickname = AranarthUtils.getNickname(target);
+		// The teleport can briefly return the player to their survival inventory, which they do not need to be told about
+		CreativeSwapUtils.runQuietly(player.getUniqueId(), () -> AranarthUtils.teleportPlayer(player, player.getLocation(),
+				target.getLocation(), true, nickname, Lang.getFor(player, "admin.teleport_to_player_success", "player", nickname), success -> {
+			if (!success) {
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "admin.teleport_to_player_failed", "player", nickname)));
+				return;
+			}
+			// Entered after the teleport, which can return the player to Survival mode.
+			// The arena has its own inventory, so only Spectator mode is used there
+			boolean isArena = AranarthUtils.getInventoryGroup(player.getWorld().getName()).equals("arena");
+			player.setGameMode(isArena ? GameMode.SPECTATOR : GameMode.CREATIVE);
+			if (player.getGameMode() == GameMode.CREATIVE || isArena) {
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "user.spectating", "player", nickname)));
+			}
+		}));
+	}
+
+	private static void vanish(Player player) {
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		if (aranarthPlayer == null) {
+			return;
+		}
+		if (!aranarthPlayer.isVanished()) {
+			CommandVanish.onCommand(player, new String[]{"vanish"});
+		} else {
+			// Already vanished, possibly from the other server, so being invisible is applied on this one too
+			player.setInvisible(true);
+			AranarthUtils.updateTab();
 		}
 	}
 
 	private static void openEnderChest(Player player, UUID targetUuid, String username) {
 		if (!player.hasPermission("aranarth.invsee")) {
 			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
+			return;
+		}
+		// Creative mode items must never reach an ender chest
+		if (player.getGameMode() == GameMode.CREATIVE) {
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "access.cannot_ender_creative")));
 			return;
 		}
 		Player target = Bukkit.getPlayer(targetUuid);

@@ -739,10 +739,15 @@ public class PlayerServerJoinListener implements Listener {
 							if (!player.isOnline()) {
 								return;
 							}
+                            AranarthPlayer apRefresh = AranarthUtils.getPlayer(player.getUniqueId());
+                            boolean isVanished = apRefresh != null && apRefresh.isVanished();
                             for (Player other : Bukkit.getOnlinePlayers()) {
                                 if (!other.getUniqueId().equals(player.getUniqueId())) {
                                     other.hidePlayer(AranarthCore.getInstance(), player);
-                                    other.showPlayer(AranarthCore.getInstance(), player);
+                                    // A vanished player stays hidden from anyone who cannot see vanished players
+                                    if (!isVanished || other.hasPermission("aranarth.vanish.see")) {
+                                        other.showPlayer(AranarthCore.getInstance(), player);
+                                    }
                                 }
                             }
                             // Also force a tab update for the joining player to see themselves
@@ -1102,6 +1107,11 @@ public class PlayerServerJoinListener implements Listener {
             }
         } else if (!isCrossServerTransfer || isSurvivalFallbackLanding) {
             playJoinSound();
+        }
+        // Vanish carries over between servers, but being invisible only applies on the server it was set on
+        AranarthPlayer apVanished = AranarthUtils.getPlayer(player.getUniqueId());
+        if (apVanished != null && apVanished.isVanished()) {
+            player.setInvisible(true);
         }
         AranarthUtils.updateTab();
     }

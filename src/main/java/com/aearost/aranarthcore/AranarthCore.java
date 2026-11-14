@@ -544,7 +544,8 @@ public class AranarthCore extends JavaPlugin {
                         if (AranarthUtils.isSurvivalWorld(p.getWorld().getName())) {
                             AranarthPlayer ap = AranarthUtils.getPlayer(p.getUniqueId());
                             if (ap != null) {
-                                ap.setSurvivalInventory(ItemUtils.itemStackArrayToBase64(p.getInventory().getContents()));
+                                ap.setSurvivalInventory(CreativeSwapUtils.getSurvivalInventory(p));
+                                CreativeSwapUtils.snapshotCreativeInventory(p);
                                 ap.setSurvivalEnderChest(ItemUtils.itemStackArrayToBase64(p.getEnderChest().getContents()));
                                 ap.setSurvivalHealth(p.getHealth());
                                 ap.setSurvivalFoodLevel(p.getFoodLevel());
@@ -1262,6 +1263,7 @@ public class AranarthCore extends JavaPlugin {
         new WaterbendingBottleRefillListener(this);
         new PlayerRespawnEventListener(this);
         new PlayerGameModeChangeEventListener(this);
+        new CreativeInventorySwapListener(this);
         new DominionProtectionListener(this);
         new EnemyProximityListener(this);
         new SpawnProtectionListener(this);
@@ -1883,6 +1885,8 @@ public class AranarthCore extends JavaPlugin {
             try {
                 // Quit events are not received during a shutdown, so the armor must be put back here to be saved
                 InvisibilityListener.restoreArmorBeforeLeaving(p, p.getWorld().getName());
+                // The survival inventory must be the one in their player data and the snapshot below
+                CreativeSwapUtils.restoreBeforeLeaving(p);
                 // Both servers auto-restart around the same time, so SMP players can get bounced here
                 // seconds before this server also shuts down. SMP already saved their data and location,
                 // so writing ours would send them to Survival on next login and could overwrite SMP's data.

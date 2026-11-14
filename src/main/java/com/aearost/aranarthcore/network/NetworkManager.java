@@ -424,7 +424,7 @@ public class NetworkManager {
         snap.addProperty("ts", System.currentTimeMillis());
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(p.getUniqueId());
         if (AranarthUtils.isSurvivalWorld(p.getWorld().getName()) || aranarthPlayer == null) {
-            snap.addProperty("inventory", ItemUtils.itemStackArrayToBase64(p.getInventory().getContents()));
+            snap.addProperty("inventory", CreativeSwapUtils.getSurvivalInventory(p));
             snap.addProperty("health", p.getHealth());
             snap.addProperty("food", p.getFoodLevel());
             snap.addProperty("saturation", p.getSaturation());
@@ -1924,6 +1924,8 @@ public class NetworkManager {
         player.closeInventory();
         // Invisibility stores the armor on this server's disk, so it must be in the inventory that gets handed off
         InvisibilityListener.restoreArmorBeforeLeaving(player, player.getWorld().getName());
+        // The survival inventory is the one handed off, never the creative one
+        CreativeSwapUtils.restoreBeforeLeaving(player);
         // Nothing may change between serialization and the player leaving this server
         lockPlayer(uuid);
 
@@ -1935,7 +1937,7 @@ public class NetworkManager {
         if (ap != null) {
             if (AranarthUtils.isSurvivalWorld(transferFromWorld)) {
                 try {
-                    ap.setSurvivalInventory(ItemUtils.itemStackArrayToBase64(player.getInventory().getContents()));
+                    ap.setSurvivalInventory(CreativeSwapUtils.getSurvivalInventory(player));
                 } catch (Exception e) {
                     Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Failed to serialize inventory for " + player.getName() + ": " + e.getMessage());
                 }
@@ -4351,6 +4353,18 @@ public class NetworkManager {
         }
 
         Player target = Bukkit.getPlayer(targetUuid);
+        // The target holds their creative inventory, so nothing may be moved in or out of it
+        boolean isCreativeInventory = target != null && CONTAINER_INVENTORY.equals(container)
+                && CreativeSwapUtils.isSwapped(targetUuid);
+        if (isCreativeInventory) {
+            if (action.equals("put")) {
+                publishInvseeEditResult(fromServer, viewerUuid, targetUuid, "returned", item);
+            } else {
+                publishInvseeEditResult(fromServer, viewerUuid, targetUuid, "changed", null);
+                publishRemoteInvseeUpdate(target);
+            }
+            return;
+        }
         if (action.equals("take")) {
             ItemStack current = target == null ? null : InvseeUtils.getSlot(target, container, guiSlot);
             // The slot changed since the viewer saw it, so nothing is taken and the viewer is shown it again

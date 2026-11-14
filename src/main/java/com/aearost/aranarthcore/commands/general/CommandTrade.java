@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Trade;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.CreativeSwapUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.TradeManager;
 import net.kyori.adventure.text.Component;
@@ -36,6 +37,11 @@ public class CommandTrade implements CommandExecutor {
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "trade.wrong_world")));
             return true;
         }
+        // Creative mode in a Survival world gives the creative inventory, whose items must never reach another player
+        if (CreativeSwapUtils.isSwapped(player.getUniqueId())) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "trade.creative_mode")));
+            return true;
+        }
 
         if (args.length < 1) {
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "trade <player>")));
@@ -62,6 +68,11 @@ public class CommandTrade implements CommandExecutor {
 
         Player target = Bukkit.getPlayer(targetUuid);
         boolean targetOnThisServer = target != null;
+        if (targetOnThisServer && CreativeSwapUtils.isSwapped(targetUuid)) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "trade.target_creative",
+                    "player", AranarthUtils.getNickname(target))));
+            return true;
+        }
 
         // Cross-server
         NetworkPlayer networkTarget = null;

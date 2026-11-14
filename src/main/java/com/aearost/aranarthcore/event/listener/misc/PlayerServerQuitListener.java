@@ -162,7 +162,7 @@ public class PlayerServerQuitListener implements Listener {
             String quitWorld = player.getWorld() != null ? player.getWorld().getName() : "";
             if (AranarthUtils.isSurvivalWorld(quitWorld)) {
                 try {
-                    aranarthPlayer.setSurvivalInventory(ItemUtils.itemStackArrayToBase64(player.getInventory().getContents()));
+                    aranarthPlayer.setSurvivalInventory(CreativeSwapUtils.getSurvivalInventory(player));
                 } catch (Exception ignored) {
                 }
                 try {

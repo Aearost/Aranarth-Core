@@ -50,6 +50,9 @@ Cross-server & Technical
 [+] Added caching to avatar mannequin skins so refreshes avoid session server timeout warnings
 [~] Fixed quest boards failing to generate when server shops exist, which caused errors on player movement
 [+] The vanilla /give command now gives items to players on the other server
+[~] Switching to Creative mode in a survival world now swaps to your creative inventory, and back when returning to Survival
+[~] Ender chests can no longer be opened by anyone in Creative mode
+[~] Players in Creative mode in a survival world can no longer trade, and their inventory can no longer be edited through /ac invsee
 
 Miscellaneous
 [+] Added /ac user to manage a player's location, inventory, ender chest and punishments from one centrallized GUI
