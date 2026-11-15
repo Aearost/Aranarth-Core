@@ -30,6 +30,8 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockFromToEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -199,7 +201,7 @@ public class CustomTreeListener implements Listener {
                 saplings.add(block);
             }
         }
-        if (!growsCustomTree(origin, square.size(), saplings, e.getPlayer())) {
+        if (!growsCustomTree(origin, square, e.getPlayer())) {
             return;
         }
         // Planted saplings grow on the timer instead, so that they grow at the same pace wherever the vanilla tree fits
@@ -240,13 +242,22 @@ public class CustomTreeListener implements Listener {
     private record Square(Block corner, int size, Set<Block> saplings) {}
 
     /**
-     * Provides the largest square the sapling is part of, which decides which trees it can grow into.
+     * Provides the largest square the sapling is part of, which decides which trees it can grow into. A square only grown
+     * by rare trees counts only where one of their conditions is met, otherwise a smaller square is used.
      */
     private static Square findSquare(Block origin) {
         Material type = origin.getType();
-        for (int size : CustomTrees.Variant.squareSizes(type)) {
+        List<Integer> normalSizes = CustomTrees.Variant.squareSizes(type);
+        List<Integer> sizes = new ArrayList<>(normalSizes);
+        for (int size : CustomTrees.Variant.rareSquareSizes(type)) {
+            if (!sizes.contains(size)) {
+                sizes.add(size);
+            }
+        }
+        sizes.sort((a, b) -> b - a);
+        for (int size : sizes) {
             Block corner = CustomTreeUtils.findSquareCorner(origin, size);
-            if (corner != null) {
+            if (corner != null && (normalSizes.contains(size) || CustomTrees.hasRare(type, size, corner))) {
                 Set<Block> saplings = new HashSet<>();
                 for (int dx = 0; dx < size; dx++) {
                     for (int dz = 0; dz < size; dz++) {
@@ -271,10 +282,12 @@ public class CustomTreeListener implements Listener {
             return false;
         }
         Square square = findSquare(block);
-        return growsCustomTree(block, square.size(), square.saplings(), player);
+        return growsCustomTree(block, square, player);
     }
 
-    private static boolean growsCustomTree(Block origin, int size, Set<Block> saplings, Player player) {
+    private static boolean growsCustomTree(Block origin, Square square, Player player) {
+        int size = square.size();
+        Set<Block> saplings = square.saplings();
         Material type = origin.getType();
         // A player who bone meals the sapling decides, otherwise any planter who disabled big trees keeps it vanilla
         boolean canGrowLarge = false;
@@ -298,7 +311,7 @@ public class CustomTreeListener implements Listener {
         }
         // With every tree for it turned off in /trees, it grows vanilla
         UUID chooser = getChooser(origin, saplings, player);
-        return CustomTrees.hasDesign(type, size, variant -> CustomTreeUtils.isTreeEnabled(chooser, variant));
+        return CustomTrees.hasDesign(type, size, variant -> CustomTreeUtils.isTreeEnabled(chooser, variant), square.corner());
     }
 
     /**
@@ -386,6 +399,59 @@ public class CustomTreeListener implements Listener {
             block.setBlockData(state.getBlockData(), false);
             // Grown trees are natural, so they are never treated as player-placed
             mcMMO.getChunkManager().setEligible(block);
+            CustomTreeUtils.markNoDrop(block);
+        }
+    }
+
+    /**
+     * Blocks grown by custom trees that could otherwise be farmed with bone meal drop nothing.
+     */
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onBreakNoDrop(BlockBreakEvent e) {
+        if (CustomTreeUtils.isNoDrop(e.getBlock())) {
+            e.setDropItems(false);
+            e.setExpToDrop(0);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onEntityExplodeNoDrop(EntityExplodeEvent e) {
+        removeNoDrop(e.blockList());
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onBlockExplodeNoDrop(BlockExplodeEvent e) {
+        removeNoDrop(e.blockList());
+    }
+
+    /**
+     * Destroys the blocks that drop nothing straight away, so that the explosion does not drop them.
+     */
+    private void removeNoDrop(List<Block> blocks) {
+        blocks.removeIf(block -> {
+            if (!CustomTreeUtils.isNoDrop(block)) {
+                return false;
+            }
+            CustomTreeUtils.clearNoDrop(block);
+            block.setType(Material.AIR, false);
+            return true;
+        });
+    }
+
+    /**
+     * Blocks that drop nothing cannot be moved by pistons, so that they cannot be carried away from where they grew.
+     */
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onPistonExtend(BlockPistonExtendEvent e) {
+        if (e.getBlocks().stream().anyMatch(CustomTreeUtils::isNoDrop)) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onPistonRetract(BlockPistonRetractEvent e) {
+        if (e.getBlocks().stream().anyMatch(CustomTreeUtils::isNoDrop)) {
+            e.setCancelled(true);
         }
     }
 
@@ -400,11 +466,13 @@ public class CustomTreeListener implements Listener {
         } else {
             CustomTreeUtils.clearPlanter(block);
         }
+        CustomTreeUtils.clearNoDrop(block);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBreak(BlockBreakEvent e) {
         CustomTreeUtils.clearRemoved(e.getBlock());
+        CustomTreeUtils.clearNoDrop(e.getBlock());
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

@@ -37,6 +37,9 @@ public class CustomTreeUtils {
             Material.CHERRY_SAPLING, Material.MANGROVE_PROPAGULE, Material.AZALEA, Material.FLOWERING_AZALEA);
     private static final Set<Location> TIMED_SAPLINGS = new HashSet<>();
     private static final String KEY_PREFIX = "tree_planter_";
+    private static final String NO_DROP_PREFIX = "tree_nodrop_";
+    /** Blocks grown by custom trees that drop nothing, so that trees cannot be farmed for them with bone meal. */
+    private static final Set<Material> NO_DROP = EnumSet.of(Material.COBWEB, Material.PEARLESCENT_FROGLIGHT, Material.END_ROD);
     public static final int LARGE_TREE_SIZE = 5;
     public static final int LARGE_TREE_RANK = 5;
 
@@ -197,6 +200,42 @@ public class CustomTreeUtils {
         PersistentDataContainer pdc = block.getChunk().getPersistentDataContainer();
         NamespacedKey key = getKey(block);
         // Only changes the chunk when there is something to forget, as this runs for every block placed and broken
+        if (pdc.has(key, PersistentDataType.STRING)) {
+            pdc.remove(key);
+        }
+    }
+
+    private static NamespacedKey getNoDropKey(Block block) {
+        return new NamespacedKey("aranarthcore", NO_DROP_PREFIX + (block.getX() & 15) + "_" + block.getY() + "_" + (block.getZ() & 15));
+    }
+
+    /**
+     * Remembers that a block grown by a custom tree drops nothing, if it is one that could otherwise be farmed.
+     */
+    public static void markNoDrop(Block block) {
+        if (NO_DROP.contains(block.getType())) {
+            block.getChunk().getPersistentDataContainer().set(getNoDropKey(block), PersistentDataType.STRING,
+                    block.getType().name());
+        }
+    }
+
+    /**
+     * Determines if the block was grown by a custom tree and drops nothing.
+     */
+    public static boolean isNoDrop(Block block) {
+        if (!NO_DROP.contains(block.getType())) {
+            return false;
+        }
+        String value = block.getChunk().getPersistentDataContainer().get(getNoDropKey(block), PersistentDataType.STRING);
+        return value != null && value.equals(block.getType().name());
+    }
+
+    /**
+     * Forgets that the block drops nothing.
+     */
+    public static void clearNoDrop(Block block) {
+        PersistentDataContainer pdc = block.getChunk().getPersistentDataContainer();
+        NamespacedKey key = getNoDropKey(block);
         if (pdc.has(key, PersistentDataType.STRING)) {
             pdc.remove(key);
         }

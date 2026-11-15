@@ -223,6 +223,20 @@ public class CustomTrees {
             sizes.sort((a, b) -> b - a);
             return sizes;
         }
+
+        /**
+         * Provides the widths of the squares larger than 1x1 that the sapling grows a rare tree from, largest first.
+         */
+        public static List<Integer> rareSquareSizes(Material sapling) {
+            List<Integer> sizes = new ArrayList<>();
+            for (Variant variant : rare()) {
+                if (variant.sapling == sapling && variant.size > 1 && !sizes.contains(variant.size)) {
+                    sizes.add(variant.size);
+                }
+            }
+            sizes.sort((a, b) -> b - a);
+            return sizes;
+        }
     }
 
     /**
@@ -284,13 +298,14 @@ public class CustomTrees {
 
     /**
      * Designs a random custom tree that the sapling can grow into, out of the ones a player has left turned on.
+     * A rare tree whose conditions are met always grows instead, whatever the player has turned on.
      * @param enabled Determines if each tree may be picked. If every tree for this size is turned off, there is no
      *                custom tree, and the sapling grows its vanilla tree.
      * @return The designed tree, or null if the sapling has no custom tree it may grow into.
      */
     public static TreeBuilder design(Material sapling, int size, World world, Random random, int x, int y, int z,
                                      Predicate<Variant> enabled) {
-        List<Variant> sized = candidates(sapling, size, enabled);
+        List<Variant> sized = candidates(sapling, size, enabled, world.getBlockAt(x, y, z));
         if (sized.isEmpty()) {
             return null;
         }
@@ -299,15 +314,39 @@ public class CustomTrees {
 
     /**
      * Determines if the sapling has a custom tree it may grow into, out of the ones a player has left turned on.
+     * @param corner The north-west sapling of the square, or the sapling itself.
      */
-    public static boolean hasDesign(Material sapling, int size, Predicate<Variant> enabled) {
-        return !candidates(sapling, size, enabled).isEmpty();
+    public static boolean hasDesign(Material sapling, int size, Predicate<Variant> enabled, Block corner) {
+        return !candidates(sapling, size, enabled, corner).isEmpty();
+    }
+
+    /**
+     * Determines if a rare tree grows from the square of saplings, as its conditions are met.
+     * @param corner The north-west sapling of the square, or the sapling itself.
+     */
+    public static boolean hasRare(Material sapling, int size, Block corner) {
+        return !rareCandidates(sapling, size, corner).isEmpty();
+    }
+
+    private static List<Variant> rareCandidates(Material sapling, int size, Block corner) {
+        List<Variant> rare = new ArrayList<>();
+        for (Variant variant : Variant.rare()) {
+            if (variant.getSapling() == sapling && RareTreeConditions.isMet(variant, corner, size)) {
+                rare.add(variant);
+            }
+        }
+        return rare;
     }
 
     /**
      * Provides the custom trees the sapling may grow into, out of the ones a player has left turned on.
      */
-    private static List<Variant> candidates(Material sapling, int size, Predicate<Variant> enabled) {
+    private static List<Variant> candidates(Material sapling, int size, Predicate<Variant> enabled, Block corner) {
+        // Rare trees always win where their conditions are met, and are not part of the player's choices
+        List<Variant> rare = rareCandidates(sapling, size, corner);
+        if (!rare.isEmpty()) {
+            return rare;
+        }
         List<Variant> variants = Variant.forSapling(sapling);
         if (variants.isEmpty()) {
             return variants;
