@@ -30,6 +30,7 @@ Aranarthium, Items & Crafting
 [-] Invisible Item Frames can no longer be placed without the Invisible Item Frames perk
 [~] The Wrench no longer loses durability when used in Creative mode
 [~] Fixed items being duplicated by double-clicking in /ac invsee or by editing an ender chest after its owner logged out
+[~] Fixed Essence of Magnetism hoes not pulling drops from leaves and other blocks mined with a hoe
 
 Economy, Jobs & Quests
 [+] Added 1/4 pay when earning income from jobs while AFK

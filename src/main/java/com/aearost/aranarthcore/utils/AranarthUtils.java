@@ -1271,6 +1271,16 @@ public class AranarthUtils {
     }
 
     /**
+     * Confirms if the input item can be harvested by a hoe.
+     *
+     * @param type The type of item it is.
+     * @return Confirmation of whether the input item can be harvested by a hoe.
+     */
+    public static boolean isHarvestableWithHoe(Material type) {
+        return isBlockCrop(type) || Tag.MINEABLE_HOE.isTagged(type);
+    }
+
+    /**
      * Confirms if the input item can be harvested by a pickaxe.
      *
      * @param type The type of item it is.
