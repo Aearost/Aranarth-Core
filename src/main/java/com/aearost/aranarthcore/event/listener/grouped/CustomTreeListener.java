@@ -20,6 +20,7 @@ import org.bukkit.TreeType;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.data.Hangable;
 import org.bukkit.block.data.type.Sapling;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -51,10 +52,13 @@ import java.util.UUID;
 
 /**
  * Grows saplings into their custom tree, unless the player who planted them, or who bone mealed them, has big trees disabled.
+ * Bone meal and planted saplings grow through this plugin rather than vanilla, as vanilla only grows a sapling when its own
+ * tree would fit, which would stop custom trees from growing next to other trees.
  */
 public class CustomTreeListener implements Listener {
 
     private final Set<StructureGrowEvent> customTrees = Collections.newSetFromMap(new IdentityHashMap<>());
+    private static boolean growingNow = false;
     private static final long TIMED_GROWTH_TICKS = 600L;
     private static final double TIMED_GROWTH_CHANCE = 0.03;
     private final Random random = new Random();
@@ -92,12 +96,18 @@ public class CustomTreeListener implements Listener {
             case WARPED_FUNGUS -> TreeType.WARPED_FUNGUS;
             default -> TreeType.TREE;
         };
-        Bukkit.getPluginManager().callEvent(new StructureGrowEvent(block.getLocation(), species, player != null, player,
-                new ArrayList<>()));
+        growingNow = true;
+        try {
+            Bukkit.getPluginManager().callEvent(new StructureGrowEvent(block.getLocation(), species, player != null, player,
+                    new ArrayList<>()));
+        } finally {
+            growingNow = false;
+        }
     }
 
     /**
-     * Gives every planted lone Dark Oak and Pale Oak sapling a chance to grow, as vanilla never grows them on their own.
+     * Gives every planted sapling a chance to grow into its custom tree. Vanilla only grows a sapling when its own tree
+     * would fit, so the custom tree would otherwise never grow where the vanilla one does not.
      */
     private void growTimedSaplings() {
         for (Location loc : new ArrayList<>(CustomTreeUtils.getTimedSaplings())) {
@@ -106,13 +116,8 @@ public class CustomTreeListener implements Listener {
                 continue;
             }
             Block block = loc.getBlock();
-            UUID planter = CustomTreeUtils.getPlanter(block);
-            if (planter == null || !CustomTreeUtils.growsOnTimer(block.getType())) {
+            if (!CustomTreeUtils.growsOnTimer(block.getType()) || CustomTreeUtils.getPlanter(block) == null) {
                 CustomTreeUtils.getTimedSaplings().remove(loc);
-                continue;
-            }
-            // Saplings in a 2x2 are grown by vanilla, and lone ones only grow for players with big trees enabled
-            if (CustomTreeUtils.findSquareCorner(block, 2) != null || !CustomTreeUtils.isBigTreeEnabled(planter)) {
                 continue;
             }
             Integer tickSpeed = world.getGameRuleValue(GameRules.RANDOM_TICK_SPEED);
@@ -120,25 +125,29 @@ public class CustomTreeListener implements Listener {
                     || random.nextDouble() >= TIMED_GROWTH_CHANCE * tickSpeed / 3.0) {
                 continue;
             }
+            // Hanging propagules only age, and saplings that grow a vanilla tree are left to vanilla
+            if ((block.getBlockData() instanceof Hangable hangable && hangable.isHanging()) || !growsCustomTree(block, null)) {
+                continue;
+            }
             growNow(block, null);
         }
     }
 
     /**
-     * Lets bone meal grow a lone Dark Oak or Pale Oak sapling into its custom tree.
+     * Lets bone meal grow a sapling into its custom tree, even where its vanilla tree would not fit.
      */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onBoneMealLoneSapling(PlayerInteractEvent e) {
+    public void onBoneMealSapling(PlayerInteractEvent e) {
         ItemStack item = e.getItem();
         Block block = e.getClickedBlock();
         if (e.getAction() != Action.RIGHT_CLICK_BLOCK || block == null || item == null || item.getType() != Material.BONE_MEAL
-                || e.getHand() == null || !CustomTreeUtils.growsOnTimer(block.getType())
-                || CustomTreeUtils.findSquareCorner(block, 2) != null) {
+                || e.getHand() == null || !CustomTreeUtils.growsFromBoneMeal(block.getType())
+                || (block.getBlockData() instanceof Hangable hangable && hangable.isHanging())) {
             return;
         }
         Player player = e.getPlayer();
-        // A player who disabled big trees gets vanilla, which never grows a lone sapling of these
-        if (!CustomTreeUtils.isBigTreeEnabled(player.getUniqueId())) {
+        // Saplings that grow a vanilla tree are left to vanilla bone meal
+        if (!growsCustomTree(block, player)) {
             return;
         }
         e.setCancelled(true);
@@ -181,26 +190,8 @@ public class CustomTreeListener implements Listener {
             return;
         }
 
-        // The largest square the sapling is part of decides which trees it can grow into
-        Block corner = null;
-        int size = 1;
-        for (int squareSize : CustomTrees.Variant.squareSizes(type)) {
-            corner = CustomTreeUtils.findSquareCorner(origin, squareSize);
-            if (corner != null) {
-                size = squareSize;
-                break;
-            }
-        }
-        Set<Block> saplings = new HashSet<>();
-        if (corner != null) {
-            for (int dx = 0; dx < size; dx++) {
-                for (int dz = 0; dz < size; dz++) {
-                    saplings.add(corner.getRelative(dx, 0, dz));
-                }
-            }
-        } else {
-            saplings.add(origin);
-        }
+        Square square = findSquare(origin);
+        Set<Block> saplings = square.saplings();
         // Saplings that vanilla consumed as part of this growth are removed too
         for (BlockState state : e.getBlocks()) {
             Block block = state.getBlock();
@@ -208,42 +199,20 @@ public class CustomTreeListener implements Listener {
                 saplings.add(block);
             }
         }
-
-        // A player who bone meals the sapling decides, otherwise any planter who disabled big trees keeps it vanilla
-        boolean canGrowLarge = false;
-        if (e.getPlayer() != null) {
-            if (!CustomTreeUtils.isBigTreeEnabled(e.getPlayer().getUniqueId())) {
-                return;
-            }
-            canGrowLarge = CustomTreeUtils.canGrowLargeTrees(e.getPlayer().getUniqueId());
-        } else {
-            for (Block sapling : saplings) {
-                UUID planter = CustomTreeUtils.getPlanter(sapling);
-                if (planter != null && !CustomTreeUtils.isBigTreeEnabled(planter)) {
-                    return;
-                }
-                canGrowLarge |= CustomTreeUtils.canGrowLargeTrees(planter);
-            }
+        if (!growsCustomTree(origin, square.size(), saplings, e.getPlayer())) {
+            return;
         }
-        // The largest trees only grow for Dukes and above, so the world is not filled with them, otherwise it grows vanilla
-        if (size >= CustomTreeUtils.LARGE_TREE_SIZE && !canGrowLarge) {
+        // Planted saplings grow on the timer instead, so that they grow at the same pace wherever the vanilla tree fits
+        if (!growingNow && e.getPlayer() == null && !e.isFromBonemeal() && CustomTreeUtils.growsOnTimer(type)
+                && getChooser(origin, saplings, null) != null) {
+            e.setCancelled(true);
             return;
         }
 
-        // Trees a player turned off in /trees never grow: the player bone mealing it decides, otherwise whoever planted it
-        UUID decider = e.getPlayer() != null ? e.getPlayer().getUniqueId() : CustomTreeUtils.getPlanter(origin);
-        if (decider == null) {
-            for (Block sapling : saplings) {
-                decider = CustomTreeUtils.getPlanter(sapling);
-                if (decider != null) {
-                    break;
-                }
-            }
-        }
-        final UUID chooser = decider;
-        Block base = corner != null ? corner : origin;
-        TreeBuilder tree = CustomTrees.design(type, size, base.getWorld(), new Random(), base.getX(), base.getY(), base.getZ(),
-                variant -> CustomTreeUtils.isTreeEnabled(chooser, variant));
+        final UUID chooser = getChooser(origin, saplings, e.getPlayer());
+        Block base = square.corner();
+        TreeBuilder tree = CustomTrees.design(type, square.size(), base.getWorld(), new Random(), base.getX(), base.getY(),
+                base.getZ(), variant -> CustomTreeUtils.isTreeEnabled(chooser, variant));
         if (tree == null) {
             return;
         }
@@ -260,6 +229,97 @@ public class CustomTreeListener implements Listener {
         e.getBlocks().clear();
         e.getBlocks().addAll(states);
         customTrees.add(e);
+    }
+
+    /**
+     * The saplings a tree grows from.
+     * @param corner The north-west sapling, or the sapling itself if it is not part of a square.
+     * @param size The width of the square, or 1 if it is not part of a square.
+     * @param saplings Every sapling of the square.
+     */
+    private record Square(Block corner, int size, Set<Block> saplings) {}
+
+    /**
+     * Provides the largest square the sapling is part of, which decides which trees it can grow into.
+     */
+    private static Square findSquare(Block origin) {
+        Material type = origin.getType();
+        for (int size : CustomTrees.Variant.squareSizes(type)) {
+            Block corner = CustomTreeUtils.findSquareCorner(origin, size);
+            if (corner != null) {
+                Set<Block> saplings = new HashSet<>();
+                for (int dx = 0; dx < size; dx++) {
+                    for (int dz = 0; dz < size; dz++) {
+                        saplings.add(corner.getRelative(dx, 0, dz));
+                    }
+                }
+                return new Square(corner, size, saplings);
+            }
+        }
+        Set<Block> saplings = new HashSet<>();
+        saplings.add(origin);
+        return new Square(origin, 1, saplings);
+    }
+
+    /**
+     * Determines if the sapling grows into a custom tree rather than its vanilla tree.
+     * @param block The sapling.
+     * @param player The player who causes it to grow, or null if it grows on its own.
+     */
+    public static boolean growsCustomTree(Block block, Player player) {
+        if (!CustomTreeUtils.isGrowable(block.getType())) {
+            return false;
+        }
+        Square square = findSquare(block);
+        return growsCustomTree(block, square.size(), square.saplings(), player);
+    }
+
+    private static boolean growsCustomTree(Block origin, int size, Set<Block> saplings, Player player) {
+        Material type = origin.getType();
+        // A player who bone meals the sapling decides, otherwise any planter who disabled big trees keeps it vanilla
+        boolean canGrowLarge = false;
+        if (player != null) {
+            if (!CustomTreeUtils.isBigTreeEnabled(player.getUniqueId())) {
+                return false;
+            }
+            canGrowLarge = CustomTreeUtils.canGrowLargeTrees(player.getUniqueId());
+        } else {
+            for (Block sapling : saplings) {
+                UUID planter = CustomTreeUtils.getPlanter(sapling);
+                if (planter != null && !CustomTreeUtils.isBigTreeEnabled(planter)) {
+                    return false;
+                }
+                canGrowLarge |= CustomTreeUtils.canGrowLargeTrees(planter);
+            }
+        }
+        // The largest trees only grow for Dukes and above, so the world is not filled with them, otherwise it grows vanilla
+        if (size >= CustomTreeUtils.LARGE_TREE_SIZE && !canGrowLarge) {
+            return false;
+        }
+        // With every tree for it turned off in /trees, it grows vanilla
+        UUID chooser = getChooser(origin, saplings, player);
+        return CustomTrees.hasDesign(type, size, variant -> CustomTreeUtils.isTreeEnabled(chooser, variant));
+    }
+
+    /**
+     * Provides whose /trees choices decide the tree: the player bone mealing it, otherwise whoever planted it.
+     * @return The UUID of the player, or null if nobody is known.
+     */
+    private static UUID getChooser(Block origin, Set<Block> saplings, Player player) {
+        if (player != null) {
+            return player.getUniqueId();
+        }
+        UUID planter = CustomTreeUtils.getPlanter(origin);
+        if (planter != null) {
+            return planter;
+        }
+        for (Block sapling : saplings) {
+            planter = CustomTreeUtils.getPlanter(sapling);
+            if (planter != null) {
+                return planter;
+            }
+        }
+        return null;
     }
 
     /**

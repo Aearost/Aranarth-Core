@@ -27,7 +27,14 @@ public class CustomTreeUtils {
             Material.MANGROVE_PROPAGULE, Material.AZALEA, Material.FLOWERING_AZALEA,
             Material.CRIMSON_FUNGUS, Material.WARPED_FUNGUS, Material.BROWN_MUSHROOM, Material.RED_MUSHROOM);
 
-    private static final Set<Material> GROWS_ON_TIMER = EnumSet.of(Material.DARK_OAK_SAPLING, Material.PALE_OAK_SAPLING);
+    private static final Set<Material> GROWS_ON_TIMER = EnumSet.of(
+            Material.OAK_SAPLING, Material.BIRCH_SAPLING, Material.POPLAR_SAPLING, Material.SPRUCE_SAPLING,
+            Material.JUNGLE_SAPLING, Material.ACACIA_SAPLING, Material.DARK_OAK_SAPLING, Material.PALE_OAK_SAPLING,
+            Material.CHERRY_SAPLING, Material.MANGROVE_PROPAGULE);
+    private static final Set<Material> GROWS_FROM_BONE_MEAL = EnumSet.of(
+            Material.OAK_SAPLING, Material.BIRCH_SAPLING, Material.POPLAR_SAPLING, Material.SPRUCE_SAPLING,
+            Material.JUNGLE_SAPLING, Material.ACACIA_SAPLING, Material.DARK_OAK_SAPLING, Material.PALE_OAK_SAPLING,
+            Material.CHERRY_SAPLING, Material.MANGROVE_PROPAGULE, Material.AZALEA, Material.FLOWERING_AZALEA);
     private static final Set<Location> TIMED_SAPLINGS = new HashSet<>();
     private static final String KEY_PREFIX = "tree_planter_";
     public static final int LARGE_TREE_SIZE = 5;
@@ -41,10 +48,19 @@ public class CustomTreeUtils {
     }
 
     /**
-     * Determines if the material is a sapling that vanilla never grows on its own, so is grown on a timer instead.
+     * Determines if the material is a sapling that grows on its own. Planted ones are grown on a timer instead of by
+     * vanilla, as vanilla only grows them when its own tree would fit.
      */
     public static boolean growsOnTimer(Material material) {
         return GROWS_ON_TIMER.contains(material);
+    }
+
+    /**
+     * Determines if the material is a sapling that bone meal grows straight into its custom tree, as vanilla only grows
+     * it when its own tree would fit.
+     */
+    public static boolean growsFromBoneMeal(Material material) {
+        return GROWS_FROM_BONE_MEAL.contains(material);
     }
 
     /**
@@ -91,7 +107,7 @@ public class CustomTreeUtils {
     }
 
     /**
-     * Provides the lone saplings in loaded chunks that vanilla never grows, so are grown on a timer instead.
+     * Provides the planted saplings in loaded chunks, which are grown on a timer instead of by vanilla.
      */
     public static Set<Location> getTimedSaplings() {
         return TIMED_SAPLINGS;
@@ -135,7 +151,7 @@ public class CustomTreeUtils {
     }
 
     /**
-     * Remembers who planted the sapling. A lone sapling that vanilla never grows also starts its growth timer.
+     * Remembers who planted the sapling, and starts its growth timer.
      *
      * @param block   The sapling.
      * @param planter The UUID of the player who planted it.

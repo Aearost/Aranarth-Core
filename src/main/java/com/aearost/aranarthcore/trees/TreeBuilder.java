@@ -476,14 +476,15 @@ public class TreeBuilder {
      * @return The block states to place, in order, or null if the tree would grow into something a player placed.
      */
     public List<BlockState> resolve(Location origin, Set<Block> saplings) {
-        // Trees never grow into anything built by players, so the sapling waits instead
+        // Trees never grow into anything built by players, so the sapling waits instead. Placed trees, ground and plants
+        // do not stop it, the tree simply grows around them without replacing them
         for (Map.Entry<Pos, Entry> mapEntry : entries.entrySet()) {
             Pos pos = mapEntry.getKey();
             if (mapEntry.getValue().layer() == Layer.DECOR || pos.y() < world.getMinHeight() || pos.y() >= world.getMaxHeight()) {
                 continue;
             }
             Block block = world.getBlockAt(pos.x(), pos.y(), pos.z());
-            if (!block.getType().isAir() && !saplings.contains(block) && isPlayerPlaced(block)) {
+            if (!block.getType().isAir() && !saplings.contains(block) && !isNatural(block.getType()) && isPlayerPlaced(block)) {
                 return null;
             }
         }
@@ -649,12 +650,27 @@ public class TreeBuilder {
     }
 
     /**
+     * Determines if the block is part of a tree, the ground or a plant, which a tree may grow beside without it being a build.
+     */
+    private boolean isNatural(Material type) {
+        return Tag.LOGS.isTagged(type) || Tag.LEAVES.isTagged(type) || Tag.WART_BLOCKS.isTagged(type)
+                || Tag.SAPLINGS.isTagged(type) || Tag.FLOWERS.isTagged(type) || Tag.REPLACEABLE.isTagged(type)
+                || Tag.REPLACEABLE_BY_TREES.isTagged(type) || SOFT_GROUND.contains(type)
+                || type == Material.MUSHROOM_STEM || type == Material.BROWN_MUSHROOM_BLOCK || type == Material.RED_MUSHROOM_BLOCK
+                || type == Material.SHROOMLIGHT || type == Material.MANGROVE_ROOTS || type == Material.VINE;
+    }
+
+    /**
      * Determines if the part of the tree may replace the existing block, so that the tree never destroys builds.
      */
     private boolean canReplace(Block block, Entry entry, Set<Block> saplings) {
         Material type = block.getType();
         if (type.isAir() || saplings.contains(block)) {
             return true;
+        }
+        // Anything a player placed is kept, including their own trees, ground and plants
+        if (isPlayerPlaced(block)) {
+            return false;
         }
         if (type == Material.WATER) {
             return entry.replaceWater();

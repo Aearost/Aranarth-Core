@@ -290,9 +290,27 @@ public class CustomTrees {
      */
     public static TreeBuilder design(Material sapling, int size, World world, Random random, int x, int y, int z,
                                      Predicate<Variant> enabled) {
+        List<Variant> sized = candidates(sapling, size, enabled);
+        if (sized.isEmpty()) {
+            return null;
+        }
+        return design(sized.get(random.nextInt(sized.size())), world, random, x, y, z);
+    }
+
+    /**
+     * Determines if the sapling has a custom tree it may grow into, out of the ones a player has left turned on.
+     */
+    public static boolean hasDesign(Material sapling, int size, Predicate<Variant> enabled) {
+        return !candidates(sapling, size, enabled).isEmpty();
+    }
+
+    /**
+     * Provides the custom trees the sapling may grow into, out of the ones a player has left turned on.
+     */
+    private static List<Variant> candidates(Material sapling, int size, Predicate<Variant> enabled) {
         List<Variant> variants = Variant.forSapling(sapling);
         if (variants.isEmpty()) {
-            return null;
+            return variants;
         }
         // Variants tied to a square of saplings only grow from that square
         List<Variant> sized = new ArrayList<>();
@@ -307,10 +325,7 @@ public class CustomTrees {
         }
         // Only the trees the player has left turned on
         sized.removeIf(variant -> !enabled.test(variant));
-        if (sized.isEmpty()) {
-            return null;
-        }
-        return design(sized.get(random.nextInt(sized.size())), world, random, x, y, z);
+        return sized;
     }
 
     /**
