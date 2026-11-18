@@ -67,7 +67,8 @@ public enum ProduceType {
     KIWI_SEEDS("kiwi_seeds", Kind.SEED, false),
 
     // Nuts
-    ACORN("acorn", Kind.NUT, false);
+    ACORN("acorn", Kind.NUT, false),
+    ROASTED_ACORN("roasted_acorn", Kind.NUT, false);
 
     /**
      * What kind of produce it is.
@@ -143,8 +144,16 @@ public enum ProduceType {
             case CANTALOUPE_SLICE -> new Food(2, 1.2F, 1.6F);
             case KIWI -> new Food(3, 1.8F, 1.2F);
             case SWEET_POTATO -> new Food(1, 0.6F, 1.6F);
+            case ROASTED_ACORN -> new Food(2, 1.6F, 0.8F);
             default -> null;
         };
+    }
+
+    /**
+     * Determines if the item shows how the season changes its growth and yield.
+     */
+    public boolean hasSeasonalLore() {
+        return kind != Kind.NUT;
     }
 
     /**
@@ -158,6 +167,23 @@ public enum ProduceType {
      * @return The name used by /ac give, such as GreenApple.
      */
     public String getGiveName() {
+        // Bell peppers are named by colour last, so they sort together with Bell Pepper Seeds
+        switch (this) {
+            case GREEN_BELL_PEPPER -> {
+                return "BellPepperGreen";
+            }
+            case YELLOW_BELL_PEPPER -> {
+                return "BellPepperYellow";
+            }
+            case ORANGE_BELL_PEPPER -> {
+                return "BellPepperOrange";
+            }
+            case RED_BELL_PEPPER -> {
+                return "BellPepperRed";
+            }
+            default -> {
+            }
+        }
         StringBuilder name = new StringBuilder();
         for (String part : id.split("_")) {
             name.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1));

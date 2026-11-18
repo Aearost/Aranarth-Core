@@ -20,8 +20,25 @@ public class RecipeProduce {
 
     /**
      * What each piece of produce is crafted into, and how many.
+     * @param type The produce it is crafted into, or null if it is crafted into a vanilla item.
+     * @param vanilla The vanilla item it is crafted into, used when type is null.
      */
-    private record Result(ProduceType type, int amount) {}
+    private record Result(ProduceType type, Material vanilla, int amount) {
+
+        Result(ProduceType type, int amount) {
+            this(type, null, amount);
+        }
+
+        Result(Material vanilla, int amount) {
+            this(null, vanilla, amount);
+        }
+
+        ItemStack create() {
+            ItemStack item = type == null ? new ItemStack(vanilla) : new Produce(type).getItem();
+            item.setAmount(amount);
+            return item;
+        }
+    }
 
     private static final Map<ProduceType, Result> RESULTS = Map.ofEntries(
             Map.entry(ProduceType.RICE_STALK, new Result(ProduceType.RICE, 2)),
@@ -34,7 +51,8 @@ public class RecipeProduce {
             Map.entry(ProduceType.CABBAGE, new Result(ProduceType.CABBAGE_SEEDS, 1)),
             Map.entry(ProduceType.LETTUCE, new Result(ProduceType.LETTUCE_SEEDS, 1)),
             Map.entry(ProduceType.CANTALOUPE_SLICE, new Result(ProduceType.CANTALOUPE_SEEDS, 1)),
-            Map.entry(ProduceType.KIWI, new Result(ProduceType.KIWI_SEEDS, 2)));
+            Map.entry(ProduceType.KIWI, new Result(ProduceType.KIWI_SEEDS, 2)),
+            Map.entry(ProduceType.ACORN, new Result(Material.OAK_SAPLING, 1)));
 
     public RecipeProduce(Plugin plugin) {
         createRecipe(plugin);
@@ -65,12 +83,9 @@ public class RecipeProduce {
             }
             only = item;
         }
-        Result result = only == null ? null : RESULTS.get(Produce.getType(only));
-        if (result == null) {
-            return null;
-        }
-        ItemStack item = new Produce(result.type()).getItem();
-        item.setAmount(result.amount());
-        return item;
+        // A plain firework star is not produce, and the map cannot be searched for null
+        ProduceType type = only == null ? null : Produce.getType(only);
+        Result result = type == null ? null : RESULTS.get(type);
+        return result == null ? null : result.create();
     }
 }

@@ -2,6 +2,7 @@ package com.aearost.aranarthcore;
 
 import com.aearost.aranarthcore.recipes.produce.RecipeFruitSapling;
 import com.aearost.aranarthcore.recipes.produce.RecipeProduce;
+import com.aearost.aranarthcore.recipes.produce.RecipeRoastedAcorn;
 import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralProjection;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.PastLives;
@@ -1283,6 +1284,7 @@ public class AranarthCore extends JavaPlugin {
         new BoostEffectsListener(this);
         new McMMOListener(this);
         new LeafDropsListener(this);
+        new ForageListener(this);
         new AranarthCoreBendingListener(this);
         new MountStatsListener(this);
         new SitListener(this);
@@ -1352,6 +1354,7 @@ public class AranarthCore extends JavaPlugin {
         new RecipeAmethystUncraft(this);
         new RecipeProduce(this);
         new RecipeFruitSapling(this);
+        new RecipeRoastedAcorn(this);
         new RecipeDeepslateA(this);
         new RecipeDeepslateB(this);
         new RecipeHorseArmorIron(this);

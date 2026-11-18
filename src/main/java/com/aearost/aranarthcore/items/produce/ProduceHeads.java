@@ -42,6 +42,7 @@ public class ProduceHeads {
         HEADS.put("orange_bell_pepper", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvN2U1ZTgyOTNjMTU4ZWIyMzg4NWE0NzRmM2E3OWM3MDQ5MTM5MGI3NmZkZGM0NmIyNTFjOGRiYWQ2MDAxNTVmNCJ9fX0="); // Bell Pepper
         HEADS.put("green_bell_pepper", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWEzYWJkMzNkMWUyMzNmMzViNTAzYmZlM2Y2YjQwOGI5YTE4YWJiM2UyNjUwYmJhYTZjYTM4ZjQ5YjdhZDIyMSJ9fX0="); // Bell Pepper
         HEADS.put("red_bell_pepper", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjVmNzgxMDQxNGEyY2VlMmJjMWRlMTJlY2VmN2E0Yzg5ZmM5YjM4ZTlkMDQxNGE5MDk5MTI0MWE1ODYzNzA1ZiJ9fX0="); // Bell Pepper
+        HEADS.put("yellow_bell_pepper", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTM5NGZjOGNmOGEwODE5ZTIzZTM4Y2RiOThkNmU2MmJkNjFkYzg2NTUxNzZiOTIzZDU0NTJiNDM3ZTZiZWRkMCJ9fX0="); // Bell Pepper (own skin, recoloured orange pepper)
     }
 
     /**

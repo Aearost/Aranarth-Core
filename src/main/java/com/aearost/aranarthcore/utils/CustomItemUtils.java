@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.utils;
 
+import com.aearost.aranarthcore.items.produce.Produce;
+import com.aearost.aranarthcore.items.produce.ProduceType;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
@@ -57,7 +59,8 @@ public class CustomItemUtils {
         USAGES.put(COUPON_DISCOUNT, EnumSet.noneOf(Station.class));
         USAGES.put(HEAD_TEXTURE, EnumSet.noneOf(Station.class));
         USAGES.put(BREW_RECIPE, EnumSet.noneOf(Station.class));
-        // Fruit, berries, crops, seeds and nuts only plant or grow their own sapling, so they are used nowhere for now
+        // Fruit, berries, crops, seeds and nuts only plant or grow their own sapling, so they are used nowhere for now,
+        // apart from acorns being roasted (see isAllowed)
         USAGES.put(PRODUCE, EnumSet.noneOf(Station.class));
         // Fruit saplings work like any other sapling, such as furnace fuel
         USAGES.put(FRUIT_SAPLING, EnumSet.allOf(Station.class));
@@ -118,6 +121,10 @@ public class CustomItemUtils {
      */
     public static boolean isAllowed(ItemStack item, Station station) {
         NamespacedKey key = getIdentityKey(item);
+        // Acorns are roasted in a furnace, smoker or campfire
+        if (PRODUCE.equals(key) && station == Station.FURNACE && Produce.getType(item) == ProduceType.ACORN) {
+            return true;
+        }
         return key == null || USAGES.get(key).contains(station);
     }
 

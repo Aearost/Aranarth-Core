@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.utils;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.crops.CropType;
 import com.aearost.aranarthcore.items.produce.Produce;
+import com.aearost.aranarthcore.items.produce.ProduceType;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.Consumable;
 import io.papermc.paper.datacomponent.item.consumable.ItemUseAnimation;
@@ -97,7 +98,7 @@ public class CropUtils {
 		Material source;
 		if (isCropSeed(item.getType())) {
 			source = item.getType();
-		} else if (Produce.getType(item) != null) {
+		} else if (Produce.getType(item) != null && Produce.getType(item).hasSeasonalLore()) {
 			source = CropType.seasonFor(Produce.getType(item));
 		} else {
 			return;
@@ -582,7 +583,11 @@ public class CropUtils {
 	 * Determines if the item shows how the season changes its growth and yield.
 	 */
 	public static boolean hasSeasonalLore(ItemStack item) {
-		return item != null && (isCropSeed(item.getType()) || Produce.getType(item) != null);
+		if (item == null) {
+			return false;
+		}
+		ProduceType produce = Produce.getType(item);
+		return isCropSeed(item.getType()) || (produce != null && produce.hasSeasonalLore());
 	}
 
 	public static void refreshInventory(Inventory inventory, World world) {

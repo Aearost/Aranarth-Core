@@ -154,6 +154,23 @@ public class WildGrowth {
                     CropType.CANTALOUPE)
     );
 
+    /**
+     * Provides every crop that grows wild in the biome, such as the crops that grass found there may drop.
+     */
+    public static List<CropType> cropsFor(Biome biome) {
+        List<CropType> crops = new ArrayList<>();
+        for (Group group : GROUPS) {
+            if (!group.isTree() && group.biomes().contains(biome)) {
+                for (CropType crop : group.crops()) {
+                    if (!crops.contains(crop)) {
+                        crops.add(crop);
+                    }
+                }
+            }
+        }
+        return crops;
+    }
+
     private static Group trees(Shape shape, int min, int max, Set<Biome> biomes, Predicate<Block> condition,
                                Set<Material> ground, Variant... trees) {
         return new Group(shape, min, max, biomes, condition, ground, List.of(trees), List.of());
