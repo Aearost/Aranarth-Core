@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.trees.CustomTrees.Variant;
+import com.aearost.aranarthcore.trees.RareTreeConditions;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -160,11 +161,59 @@ public class CustomTreeUtils {
      * @param planter The UUID of the player who planted it.
      */
     public static void setPlanter(Block block, UUID planter) {
+        setPlanter(block, planter, null);
+    }
+
+    /**
+     * Remembers who planted the sapling and the fruit tree it grows into, and starts its growth timer.
+     *
+     * @param block   The sapling.
+     * @param planter The UUID of the player who planted it.
+     * @param fruit   The fruit tree it always grows into, or null for a plain sapling.
+     */
+    public static void setPlanter(Block block, UUID planter, Variant fruit) {
         block.getChunk().getPersistentDataContainer().set(getKey(block), PersistentDataType.STRING,
-                block.getType().name() + ";" + planter);
+                block.getType().name() + ";" + planter + (fruit == null ? "" : ";" + fruit.name()));
         if (GROWS_ON_TIMER.contains(block.getType())) {
             TIMED_SAPLINGS.add(block.getLocation());
         }
+    }
+
+    /**
+     * Provides the fruit tree that a planted fruit sapling grows into.
+     *
+     * @param block The block.
+     * @return The fruit tree, or null if the block is not a planted fruit sapling.
+     */
+    public static Variant getFruit(Block block) {
+        if (!GROWABLE.contains(block.getType())) {
+            return null;
+        }
+        String value = block.getChunk().getPersistentDataContainer().get(getKey(block), PersistentDataType.STRING);
+        if (value == null) {
+            return null;
+        }
+        String[] parts = value.split(";");
+        if (parts.length < 3 || block.getType() != Material.matchMaterial(parts[0])) {
+            return null;
+        }
+        try {
+            Variant variant = Variant.valueOf(parts[2]);
+            return variant.getSapling() == block.getType() ? variant : null;
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Determines if a fruit tree can grow from the sapling where it is planted.
+     *
+     * @param fruit The fruit tree.
+     * @param block The fruit sapling.
+     * @return Confirmation of whether it can grow there.
+     */
+    public static boolean canFruitGrow(Variant fruit, Block block) {
+        return !fruit.isRare() || RareTreeConditions.isMet(fruit, block, 1);
     }
 
     /**

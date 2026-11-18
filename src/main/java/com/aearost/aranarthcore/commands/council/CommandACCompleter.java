@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.commands.council;
 
 import com.aearost.aranarthcore.enums.WorldEvent;
 import com.aearost.aranarthcore.items.produce.Produce;
+import com.aearost.aranarthcore.items.produce.FruitSapling;
 import com.aearost.aranarthcore.items.produce.ProduceType;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
@@ -71,7 +72,9 @@ public class CommandACCompleter implements TabCompleter {
         names.remove(Produce.class.getSimpleName());
         names.remove(ProduceType.class.getSimpleName());
         names.remove(ProduceType.Kind.class.getSimpleName());
+        names.remove(FruitSapling.class.getSimpleName());
         names.addAll(ProduceType.getGiveNames());
+        names.addAll(FruitSapling.getGiveNames());
         Collections.sort(names);
         ITEM_NAMES = Collections.unmodifiableList(names);
     }

@@ -10,6 +10,7 @@ import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.Keyed;
+import com.aearost.aranarthcore.recipes.produce.RecipeFruitSapling;
 import com.aearost.aranarthcore.recipes.produce.RecipeProduce;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -64,6 +65,10 @@ public class CraftingOverridesListener implements Listener {
 			e.getInventory().setResult(RecipeProduce.getResult(matrix));
 			return;
 		}
+		if (isFruitSaplingRecipe(e.getRecipe())) {
+			e.getInventory().setResult(RecipeFruitSapling.getResult(matrix));
+			return;
+		}
 		if (CustomItemUtils.containsDisallowed(matrix, Station.CRAFTING)) {
 			// Silently hidden, as the matrix is often only partially filled (i.e a single Wrench matching Iron Nuggets)
 			e.getInventory().setResult(null);
@@ -81,6 +86,11 @@ public class CraftingOverridesListener implements Listener {
 		return recipe instanceof Keyed keyed && keyed.getKey().getKey().equalsIgnoreCase(RecipeProduce.KEY);
 	}
 
+	private static boolean isFruitSaplingRecipe(Recipe recipe) {
+		return recipe instanceof Keyed keyed
+				&& keyed.getKey().getKey().toUpperCase().startsWith(RecipeFruitSapling.KEY_PREFIX);
+	}
+
 	/**
 	 * Handles cancelling improper crafting recipes.
 	 * @param e The event.
@@ -95,6 +105,12 @@ public class CraftingOverridesListener implements Listener {
 		}
 		if (isProduceRecipe(e.getRecipe())) {
 			if (RecipeProduce.getResult(e.getInventory().getMatrix()) == null) {
+				e.setCancelled(true);
+			}
+			return;
+		}
+		if (isFruitSaplingRecipe(e.getRecipe())) {
+			if (RecipeFruitSapling.getResult(e.getInventory().getMatrix()) == null) {
 				e.setCancelled(true);
 			}
 			return;
@@ -177,7 +193,7 @@ public class CraftingOverridesListener implements Listener {
 			e.setCancelled(true);
 			return;
 		}
-		if (isProduceRecipe(e.getRecipe())) {
+		if (isProduceRecipe(e.getRecipe()) || isFruitSaplingRecipe(e.getRecipe())) {
 			e.setCancelled(true);
 			return;
 		}

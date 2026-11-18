@@ -10,7 +10,9 @@ import com.aearost.aranarthcore.items.arrowhead.*;
 import com.aearost.aranarthcore.items.essence.*;
 import com.aearost.aranarthcore.items.netherite.NetheriteElytra;
 import com.aearost.aranarthcore.items.produce.Produce;
+import com.aearost.aranarthcore.items.produce.FruitSapling;
 import com.aearost.aranarthcore.items.produce.ProduceType;
+import com.aearost.aranarthcore.trees.CustomTrees;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -189,6 +191,9 @@ public class GuiCreativeItems {
         // Fruit, berries, crops, seeds and nuts
         for (ProduceType type : ProduceType.values()) {
             list.add(new Produce(type).getItem());
+        }
+        for (CustomTrees.Variant variant : FruitSapling.getVariants()) {
+            list.add(new FruitSapling(variant).getItem());
         }
         return List.copyOf(list);
     }

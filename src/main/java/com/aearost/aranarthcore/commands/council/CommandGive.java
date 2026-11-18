@@ -5,7 +5,9 @@ import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.items.essence.Essence;
 import com.aearost.aranarthcore.items.essence.EssenceBlank;
 import com.aearost.aranarthcore.items.produce.Produce;
+import com.aearost.aranarthcore.items.produce.FruitSapling;
 import com.aearost.aranarthcore.items.produce.ProduceType;
+import com.aearost.aranarthcore.trees.CustomTrees;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -391,6 +393,10 @@ public class CommandGive {
         ProduceType produceType = ProduceType.fromGiveName(className);
         if (produceType != null) {
             return new Produce(produceType);
+        }
+        CustomTrees.Variant fruitSapling = FruitSapling.fromGiveName(className);
+        if (fruitSapling != null) {
+            return new FruitSapling(fruitSapling);
         }
         String fullPathName;
         if (className.startsWith("Aranarthium")) {

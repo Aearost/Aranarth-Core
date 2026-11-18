@@ -59,6 +59,8 @@ public class CustomItemUtils {
         USAGES.put(BREW_RECIPE, EnumSet.noneOf(Station.class));
         // Fruit, berries, crops, seeds and nuts only plant or grow their own sapling, so they are used nowhere for now
         USAGES.put(PRODUCE, EnumSet.noneOf(Station.class));
+        // Fruit saplings work like any other sapling, such as furnace fuel
+        USAGES.put(FRUIT_SAPLING, EnumSet.allOf(Station.class));
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore;
 
+import com.aearost.aranarthcore.recipes.produce.RecipeFruitSapling;
 import com.aearost.aranarthcore.recipes.produce.RecipeProduce;
 import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralProjection;
@@ -1350,6 +1351,7 @@ public class AranarthCore extends JavaPlugin {
         new RecipeChorusDiamond(this);
         new RecipeAmethystUncraft(this);
         new RecipeProduce(this);
+        new RecipeFruitSapling(this);
         new RecipeDeepslateA(this);
         new RecipeDeepslateB(this);
         new RecipeHorseArmorIron(this);

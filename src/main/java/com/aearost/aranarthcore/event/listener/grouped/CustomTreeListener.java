@@ -1,11 +1,14 @@
 package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.items.produce.FruitSapling;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.trees.CustomTrees;
 import com.aearost.aranarthcore.trees.TreeBuilder;
+import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.CustomTreeUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.ShopIslandUtils;
 import com.gmail.nossr50.mcMMO;
 import org.bukkit.Bukkit;
@@ -147,6 +150,13 @@ public class CustomTreeListener implements Listener {
             return;
         }
         Player player = e.getPlayer();
+        // A fruit sapling of a rare tree only grows where the rare tree can, and never into a vanilla tree
+        CustomTrees.Variant fruit = CustomTreeUtils.getFruit(block);
+        if (fruit != null && !CustomTreeUtils.canFruitGrow(fruit, block)) {
+            e.setCancelled(true);
+            sendCannotGrow(player, fruit);
+            return;
+        }
         // Saplings that grow a vanilla tree are left to vanilla bone meal
         if (!growsCustomTree(block, player)) {
             return;
@@ -200,7 +210,13 @@ public class CustomTreeListener implements Listener {
                 saplings.add(block);
             }
         }
-        if (!growsCustomTree(origin, square, e.getPlayer())) {
+        // A fruit sapling always grows its fruit tree, whatever the planter's /trees choices, and otherwise waits
+        CustomTrees.Variant fruit = CustomTreeUtils.getFruit(origin);
+        if (fruit != null && !CustomTreeUtils.canFruitGrow(fruit, origin)) {
+            e.setCancelled(true);
+            return;
+        }
+        if (fruit == null && !growsCustomTree(origin, square, e.getPlayer())) {
             return;
         }
         // Planted saplings grow on the timer instead, so that they grow at the same pace wherever the vanilla tree fits
@@ -212,9 +228,15 @@ public class CustomTreeListener implements Listener {
 
         final UUID chooser = getChooser(origin, saplings, e.getPlayer());
         Block base = square.corner();
-        TreeBuilder tree = CustomTrees.design(type, square.size(), base.getWorld(), new Random(), base.getX(), base.getY(),
-                base.getZ(), variant -> CustomTreeUtils.isTreeEnabled(chooser, variant));
+        // Fruit trees grow with their fruit already on them
+        TreeBuilder tree = fruit != null
+                ? CustomTrees.design(fruit, base.getWorld(), new Random(), base.getX(), base.getY(), base.getZ(), -1, true)
+                : CustomTrees.design(type, square.size(), base.getWorld(), new Random(), base.getX(), base.getY(),
+                        base.getZ(), variant -> CustomTreeUtils.isTreeEnabled(chooser, variant));
         if (tree == null) {
+            if (fruit != null) {
+                e.setCancelled(true);
+            }
             return;
         }
         List<BlockState> states = tree.resolve(origin.getLocation(), saplings);
@@ -248,6 +270,12 @@ public class CustomTreeListener implements Listener {
      */
     private static Square findSquare(Block origin, Player player) {
         Material type = origin.getType();
+        // A fruit sapling always grows on its own
+        if (CustomTreeUtils.getFruit(origin) != null) {
+            Set<Block> saplings = new HashSet<>();
+            saplings.add(origin);
+            return new Square(origin, 1, saplings);
+        }
         List<Integer> normalSizes = CustomTrees.Variant.squareSizes(type);
         List<Integer> sizes = new ArrayList<>(normalSizes);
         for (int size : CustomTrees.Variant.rareSquareSizes(type)) {
@@ -262,10 +290,17 @@ public class CustomTreeListener implements Listener {
                 continue;
             }
             Set<Block> saplings = new HashSet<>();
+            boolean hasFruit = false;
             for (int dx = 0; dx < size; dx++) {
                 for (int dz = 0; dz < size; dz++) {
-                    saplings.add(corner.getRelative(dx, 0, dz));
+                    Block sapling = corner.getRelative(dx, 0, dz);
+                    saplings.add(sapling);
+                    hasFruit |= CustomTreeUtils.getFruit(sapling) != null;
                 }
+            }
+            // A square with a fruit sapling in it does not count, so the fruit sapling is never used up by another tree
+            if (hasFruit) {
+                continue;
             }
             UUID chooser = getChooser(origin, saplings, player);
             if (normalSizes.contains(size)
@@ -286,6 +321,10 @@ public class CustomTreeListener implements Listener {
     public static boolean growsCustomTree(Block block, Player player) {
         if (!CustomTreeUtils.isGrowable(block.getType())) {
             return false;
+        }
+        CustomTrees.Variant fruit = CustomTreeUtils.getFruit(block);
+        if (fruit != null) {
+            return CustomTreeUtils.canFruitGrow(fruit, block);
         }
         Square square = findSquare(block, player);
         return growsCustomTree(block, square, player);
@@ -465,13 +504,122 @@ public class CustomTreeListener implements Listener {
     }
 
     /**
+     * Tells the player where a fruit sapling of a rare tree grows, as it does not grow where it is.
+     */
+    private static void sendCannotGrow(Player player, CustomTrees.Variant fruit) {
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "produce.fruit_sapling_cannot_grow",
+                "condition", Lang.getFor(player, FruitSapling.getConditionKey(fruit)))));
+    }
+
+    /**
+     * A broken fruit sapling drops itself rather than a plain sapling, as does one that pops off the block broken under it.
+     */
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onBreakFruitSapling(BlockBreakEvent e) {
+        Block block = e.getBlock();
+        boolean drops = e.getPlayer().getGameMode() != GameMode.CREATIVE;
+        CustomTrees.Variant fruit = CustomTreeUtils.getFruit(block);
+        if (fruit != null) {
+            e.setDropItems(false);
+            if (drops) {
+                block.getWorld().dropItemNaturally(block.getLocation().add(0.5, 0.25, 0.5), new FruitSapling(fruit).getItem());
+            }
+        }
+        popFruitSapling(block.getRelative(0, 1, 0), drops);
+    }
+
+    /**
+     * Fruit saplings cannot be potted, as a flower pot would give back a plain sapling.
+     */
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPotFruitSapling(PlayerInteractEvent e) {
+        Block block = e.getClickedBlock();
+        if (e.getAction() == Action.RIGHT_CLICK_BLOCK && block != null && block.getType() == Material.FLOWER_POT
+                && FruitSapling.getVariant(e.getItem()) != null) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onEntityExplodeFruitSapling(EntityExplodeEvent e) {
+        popFruitSaplings(e.blockList());
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onBlockExplodeFruitSapling(BlockExplodeEvent e) {
+        popFruitSaplings(e.blockList());
+    }
+
+    /**
+     * Pops off the fruit saplings caught in an explosion, or standing on a block it destroys, as fruit saplings.
+     */
+    private void popFruitSaplings(List<Block> blocks) {
+        List<Block> above = new ArrayList<>();
+        blocks.removeIf(block -> {
+            above.add(block.getRelative(0, 1, 0));
+            return popFruitSapling(block, true);
+        });
+        for (Block block : above) {
+            popFruitSapling(block, true);
+        }
+    }
+
+    /**
+     * Removes a fruit sapling and drops it as a fruit sapling.
+     * @param block The block, which is left alone if it is not a fruit sapling.
+     * @param drops Whether the fruit sapling is dropped.
+     * @return Confirmation of whether the block was a fruit sapling.
+     */
+    private static boolean popFruitSapling(Block block, boolean drops) {
+        CustomTrees.Variant fruit = CustomTreeUtils.getFruit(block);
+        if (fruit == null) {
+            return false;
+        }
+        CustomTreeUtils.clearPlanter(block);
+        block.setType(Material.AIR, false);
+        if (drops) {
+            block.getWorld().dropItemNaturally(block.getLocation().add(0.5, 0.25, 0.5), new FruitSapling(fruit).getItem());
+        }
+        return true;
+    }
+
+    /**
+     * Fruit saplings cannot be pushed by pistons, nor have the block under them pushed, which would break them into plain
+     * saplings.
+     */
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onPistonExtendFruitSapling(BlockPistonExtendEvent e) {
+        if (e.getBlocks().stream().anyMatch(CustomTreeListener::holdsFruitSapling)) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onPistonRetractFruitSapling(BlockPistonRetractEvent e) {
+        if (e.getBlocks().stream().anyMatch(CustomTreeListener::holdsFruitSapling)) {
+            e.setCancelled(true);
+        }
+    }
+
+    private static boolean holdsFruitSapling(Block block) {
+        return CustomTreeUtils.getFruit(block) != null || CustomTreeUtils.getFruit(block.getRelative(0, 1, 0)) != null;
+    }
+
+    /**
      * Remembers who planted each sapling, so that the tree follows their big tree toggle when it grows.
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlace(BlockPlaceEvent e) {
         Block block = e.getBlock();
         if (CustomTreeUtils.isGrowable(block.getType())) {
-            CustomTreeUtils.setPlanter(block, e.getPlayer().getUniqueId());
+            CustomTrees.Variant fruit = FruitSapling.getVariant(e.getItemInHand());
+            if (fruit != null && fruit.getSapling() != block.getType()) {
+                fruit = null;
+            }
+            CustomTreeUtils.setPlanter(block, e.getPlayer().getUniqueId(), fruit);
+            if (fruit != null && !CustomTreeUtils.canFruitGrow(fruit, block)) {
+                sendCannotGrow(e.getPlayer(), fruit);
+            }
         } else {
             CustomTreeUtils.clearPlanter(block);
         }
@@ -501,6 +649,14 @@ public class CustomTreeListener implements Listener {
     /**
      * Saplings washed away by water or lava forget their planter.
      */
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onFlowFruitSapling(BlockFromToEvent e) {
+        // Water and lava would wash a fruit sapling away as a plain sapling
+        if (CustomTreeUtils.getFruit(e.getToBlock()) != null) {
+            e.setCancelled(true);
+        }
+    }
+
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onFlow(BlockFromToEvent e) {
         if (CustomTreeUtils.isGrowable(e.getToBlock().getType())) {
