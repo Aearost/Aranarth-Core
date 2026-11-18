@@ -99,7 +99,7 @@ public class MobHeadUtils {
     /**
      * Creates a profile whose UUID is derived from the texture so that heads with the same texture stack.
      */
-    private static PlayerProfile createTextureProfile(String texture) {
+    public static PlayerProfile createTextureProfile(String texture) {
         UUID uuid = UUID.nameUUIDFromBytes(texture.getBytes(StandardCharsets.UTF_8));
         PlayerProfile profile = Bukkit.createProfile(uuid, "");
         profile.setProperty(new ProfileProperty("textures", texture));

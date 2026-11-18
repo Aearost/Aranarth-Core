@@ -5,6 +5,8 @@ import com.aearost.aranarthcore.event.block.EssenceMagnetismBlockBreak;
 import com.aearost.aranarthcore.event.block.TrialChamberLuck;
 import com.aearost.aranarthcore.utils.CropUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ItemSpawnEvent;
@@ -23,7 +25,13 @@ public class ItemSpawnEventListener implements Listener {
 
     @EventHandler
     public void onItemSpawn(ItemSpawnEvent e) {
-        if (CropUtils.isCropSeed(e.getEntity().getItemStack().getType())) {
+        // Dropped sweet berries and glow berries are eaten twice as fast, like every other berry
+        ItemStack berries = e.getEntity().getItemStack();
+        if (berries.getType() == Material.SWEET_BERRIES || berries.getType() == Material.GLOW_BERRIES) {
+            CropUtils.applyBerryEatSpeed(berries);
+            e.getEntity().setItemStack(berries);
+        }
+        if (CropUtils.hasSeasonalLore(e.getEntity().getItemStack())) {
             CropUtils.updateSeedLore(e.getEntity().getItemStack(), e.getLocation().getWorld());
         }
 

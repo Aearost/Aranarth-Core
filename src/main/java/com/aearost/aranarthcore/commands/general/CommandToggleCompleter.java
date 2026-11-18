@@ -41,7 +41,7 @@ public class CommandToggleCompleter implements TabCompleter {
                 return filter(List.of("off", "ignore", "trash"), args[1]);
             }
             if (args[0].equalsIgnoreCase("tree") || args[0].equalsIgnoreCase("bigtree")) {
-                return filter(GuiTrees.choosable().stream().map(variant -> variant.name().toLowerCase()).toList(), args[1]);
+                return filter(GuiTrees.toggleable().stream().map(variant -> variant.name().toLowerCase()).toList(), args[1]);
             }
         }
         return List.of();

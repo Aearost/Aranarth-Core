@@ -57,6 +57,8 @@ public class CustomItemUtils {
         USAGES.put(COUPON_DISCOUNT, EnumSet.noneOf(Station.class));
         USAGES.put(HEAD_TEXTURE, EnumSet.noneOf(Station.class));
         USAGES.put(BREW_RECIPE, EnumSet.noneOf(Station.class));
+        // Fruit, berries, crops, seeds and nuts only plant or grow their own sapling, so they are used nowhere for now
+        USAGES.put(PRODUCE, EnumSet.noneOf(Station.class));
     }
 
     /**

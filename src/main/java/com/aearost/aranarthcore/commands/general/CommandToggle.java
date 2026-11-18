@@ -419,7 +419,7 @@ public class CommandToggle implements CommandExecutor {
 					// /toggle tree <tree> turns one custom tree on or off
 					if (args.length >= 2) {
 						Variant variant = null;
-						for (Variant choice : GuiTrees.choosable()) {
+						for (Variant choice : GuiTrees.toggleable()) {
 							if (choice.name().equalsIgnoreCase(args[1])) {
 								variant = choice;
 								break;

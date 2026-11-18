@@ -1,7 +1,8 @@
 AranarthCore v. 1.16
 
 World & Events
-[+] Implemented custom trees to be grown from saplings, toggleable with /toggle bigtree
+[+] Implemented custom trees to be grown from saplings
+[~] All berries, both vanilla and custom, are eaten twice as fast
 [+] Added /trees to choose which custom trees your saplings can grow into
 [~] Players now enter AFK status when only clicking or being moved by external factors
 [~] Entering the arena from a spawn sign now clears all potion effects, so the spawn boost no longer carries over
@@ -25,6 +26,8 @@ Dominion
 [~] Fixed severe lag when claiming or auto-claiming land in large Dominions
 
 Aranarthium, Items & Crafting
+[+] Added over 50 new fruits, berries, vegetables, and more, with various trees and custom crops
+[~] Vote crates now give 8 random fruit instead of bread
 [~] Curse of Binding is now released on death even when the inventory is kept by Soulbound armour or the arena, so cursed armour can no longer be permanently stuck
 [~] Items that already have an essence applied are no longer treated as the essence itself
 [-] Invisible Item Frames can no longer be placed without the Invisible Item Frames perk

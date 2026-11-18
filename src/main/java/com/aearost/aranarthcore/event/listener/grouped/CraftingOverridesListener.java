@@ -8,6 +8,9 @@ import com.aearost.aranarthcore.utils.CustomItemUtils;
 import com.aearost.aranarthcore.utils.CustomItemUtils.Station;
 import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
+import org.bukkit.inventory.Recipe;
+import org.bukkit.Keyed;
+import com.aearost.aranarthcore.recipes.produce.RecipeProduce;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Crafter;
@@ -57,6 +60,10 @@ public class CraftingOverridesListener implements Listener {
 				return;
 			}
 		}
+		if (isProduceRecipe(e.getRecipe())) {
+			e.getInventory().setResult(RecipeProduce.getResult(matrix));
+			return;
+		}
 		if (CustomItemUtils.containsDisallowed(matrix, Station.CRAFTING)) {
 			// Silently hidden, as the matrix is often only partially filled (i.e a single Wrench matching Iron Nuggets)
 			e.getInventory().setResult(null);
@@ -70,6 +77,10 @@ public class CraftingOverridesListener implements Listener {
 		}
 	}
 
+	private static boolean isProduceRecipe(Recipe recipe) {
+		return recipe instanceof Keyed keyed && keyed.getKey().getKey().equalsIgnoreCase(RecipeProduce.KEY);
+	}
+
 	/**
 	 * Handles cancelling improper crafting recipes.
 	 * @param e The event.
@@ -80,6 +91,12 @@ public class CraftingOverridesListener implements Listener {
 		ItemStack result = e.getRecipe().getResult();
 		// Repairing two of the same custom item is handled in preCraftItem
 		if (getCustomRepairResult(e.getInventory().getMatrix()) != null) {
+			return;
+		}
+		if (isProduceRecipe(e.getRecipe())) {
+			if (RecipeProduce.getResult(e.getInventory().getMatrix()) == null) {
+				e.setCancelled(true);
+			}
 			return;
 		}
 		if (CustomItemUtils.containsDisallowed(e.getInventory().getMatrix(), Station.CRAFTING)) {
@@ -157,6 +174,10 @@ public class CraftingOverridesListener implements Listener {
 		ItemStack result = e.getResult();
 		Crafter crafter = (Crafter) e.getBlock().getState();
 		if (CraftingOverridesMap.isMapCopyRecipe(crafter.getInventory().getContents(), result)) {
+			e.setCancelled(true);
+			return;
+		}
+		if (isProduceRecipe(e.getRecipe())) {
 			e.setCancelled(true);
 			return;
 		}

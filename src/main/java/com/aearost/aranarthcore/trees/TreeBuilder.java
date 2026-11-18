@@ -3,6 +3,9 @@ package com.aearost.aranarthcore.trees;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.items.produce.ProduceHeads;
+import com.aearost.aranarthcore.utils.FruitUtils;
+import com.aearost.aranarthcore.utils.MobHeadUtils;
 import com.aearost.aranarthcore.utils.ShopIslandUtils;
 import com.gmail.nossr50.mcMMO;
 import org.bukkit.Axis;
@@ -12,8 +15,12 @@ import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.Skull;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Directional;
+import org.bukkit.block.data.type.HangingMoss;
 import org.bukkit.block.data.Orientable;
 import org.bukkit.block.data.Waterlogged;
 import org.bukkit.block.data.type.Leaves;
@@ -80,6 +87,15 @@ public class TreeBuilder {
             Material.SOUL_SAND, Material.SOUL_SOIL, Material.SNOW_BLOCK);
     private final Map<Pos, Entry> entries = new LinkedHashMap<>();
     private final Map<String, String> info = new LinkedHashMap<>();
+    private final Map<Pos, String> headTextures = new LinkedHashMap<>();
+   private final Map<Pos, FruitSpot> fruitSpots = new LinkedHashMap<>();
+
+    /**
+     * A spot on the tree where fruit grows.
+     * @param id The produce id of the fruit.
+     * @param kind How the fruit shows.
+     */
+    public record FruitSpot(String id, FruitUtils.Kind kind) {}
 
     public TreeBuilder(World world, Random random, Material woodType, Material leafType) {
         this.world = world;
@@ -278,6 +294,80 @@ public class TreeBuilder {
         }
         entries.put(pos, new Entry(data, Layer.DECOR, pos.offset(sx, sy, sz), false, false));
         return true;
+    }
+
+    /**
+     * Hangs a piece of fruit, shown as a textured player head clinging to the side of the block it hangs from.
+     * @param facing The direction the head faces, away from the block it hangs from.
+     * @param id The produce id of the fruit.
+     * @return Whether the fruit was placed.
+     */
+    public boolean fruitHead(int x, int y, int z, BlockFace facing, String id) {
+        String texture = ProduceHeads.get(id);
+        if (texture == null) {
+            return false;
+        }
+        Directional head = (Directional) Material.PLAYER_WALL_HEAD.createBlockData();
+        head.setFacing(facing);
+        if (!decor(x, y, z, head, -facing.getModX(), 0, -facing.getModZ())) {
+            return false;
+        }
+        headTextures.put(new Pos(x, y, z), texture);
+        fruitSpots.put(new Pos(x, y, z), new FruitSpot(id, FruitUtils.Kind.HEAD));
+        return true;
+    }
+
+    /**
+     * Hangs a single tip of pale moss under the block above it, showing small fruit such as olives.
+     * @return Whether the fruit was placed.
+     */
+    public boolean fruitMoss(int x, int y, int z, String id) {
+        HangingMoss moss = (HangingMoss) Material.PALE_HANGING_MOSS.createBlockData();
+        moss.setTip(true);
+        if (!decor(x, y, z, moss, 0, 1, 0)) {
+            return false;
+        }
+        fruitSpots.put(new Pos(x, y, z), new FruitSpot(id, FruitUtils.Kind.MOSS));
+        return true;
+    }
+
+    /**
+     * Marks a leaf already set on the tree as a bunch of fruit, such as dates or bananas.
+     */
+    public void fruitBunch(int x, int y, int z, String id) {
+        if (isLeaf(x, y, z)) {
+            fruitSpots.put(new Pos(x, y, z), new FruitSpot(id, FruitUtils.Kind.BUNCH));
+        }
+    }
+
+    /**
+     * Provides where fruit grows on the tree.
+     */
+    public Map<Pos, FruitSpot> getFruitSpots() {
+        return fruitSpots;
+    }
+
+    /**
+     * Gives every fruit head its texture once the tree has been placed, as a texture cannot be set before the head exists.
+     */
+    public void applyHeadTextures() {
+        applyHeadTexturesOnly();
+        // Every piece of fruit that was placed is remembered, so that it can be picked and grows back
+        for (Map.Entry<Pos, FruitSpot> spot : fruitSpots.entrySet()) {
+            Pos pos = spot.getKey();
+            FruitUtils.register(world.getBlockAt(pos.x(), pos.y(), pos.z()), spot.getValue().id(), spot.getValue().kind());
+        }
+    }
+
+    private void applyHeadTexturesOnly() {
+        for (Map.Entry<Pos, String> head : headTextures.entrySet()) {
+            Pos pos = head.getKey();
+            Block block = world.getBlockAt(pos.x(), pos.y(), pos.z());
+            if (block.getState() instanceof Skull skull) {
+                skull.setPlayerProfile(MobHeadUtils.createTextureProfile(head.getValue()));
+                skull.update(true, false);
+            }
+        }
     }
 
     private BlockData axisData(Material material, Axis axis) {

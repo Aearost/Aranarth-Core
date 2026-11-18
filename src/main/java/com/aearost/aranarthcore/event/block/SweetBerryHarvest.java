@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.block;
 
+import com.aearost.aranarthcore.crops.Crops;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Boost;
@@ -30,6 +31,11 @@ public class SweetBerryHarvest {
 		if (e.getHand() == EquipmentSlot.HAND) {
 			Block block = e.getClickedBlock();
 			if (block == null || block.getType() != Material.SWEET_BERRY_BUSH) {
+				return;
+			}
+
+			// Custom crops grown from sweet berry bushes, such as tomatoes and berries, are picked by their own rules
+			if (Crops.isCropBlock(block)) {
 				return;
 			}
 

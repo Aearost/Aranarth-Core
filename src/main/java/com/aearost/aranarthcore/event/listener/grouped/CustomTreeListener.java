@@ -41,7 +41,6 @@ import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.world.StructureGrowEvent;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -59,7 +58,7 @@ import java.util.UUID;
  */
 public class CustomTreeListener implements Listener {
 
-    private final Set<StructureGrowEvent> customTrees = Collections.newSetFromMap(new IdentityHashMap<>());
+    private final Map<StructureGrowEvent, TreeBuilder> customTrees = new IdentityHashMap<>();
     private static boolean growingNow = false;
     private static final long TIMED_GROWTH_TICKS = 600L;
     private static final double TIMED_GROWTH_CHANCE = 0.03;
@@ -192,7 +191,7 @@ public class CustomTreeListener implements Listener {
             return;
         }
 
-        Square square = findSquare(origin);
+        Square square = findSquare(origin, e.getPlayer());
         Set<Block> saplings = square.saplings();
         // Saplings that vanilla consumed as part of this growth are removed too
         for (BlockState state : e.getBlocks()) {
@@ -230,7 +229,7 @@ public class CustomTreeListener implements Listener {
         }
         e.getBlocks().clear();
         e.getBlocks().addAll(states);
-        customTrees.add(e);
+        customTrees.put(e, tree);
     }
 
     /**
@@ -243,9 +242,11 @@ public class CustomTreeListener implements Listener {
 
     /**
      * Provides the largest square the sapling is part of, which decides which trees it can grow into. A square only grown
-     * by rare trees counts only where one of their conditions is met, otherwise a smaller square is used.
+     * by rare trees counts only where one of their conditions is met and the chooser left that tree on, otherwise a smaller
+     * square is used.
+     * @param player The player who causes it to grow, or null if it grows on its own.
      */
-    private static Square findSquare(Block origin) {
+    private static Square findSquare(Block origin, Player player) {
         Material type = origin.getType();
         List<Integer> normalSizes = CustomTrees.Variant.squareSizes(type);
         List<Integer> sizes = new ArrayList<>(normalSizes);
@@ -257,13 +258,18 @@ public class CustomTreeListener implements Listener {
         sizes.sort((a, b) -> b - a);
         for (int size : sizes) {
             Block corner = CustomTreeUtils.findSquareCorner(origin, size);
-            if (corner != null && (normalSizes.contains(size) || CustomTrees.hasRare(type, size, corner))) {
-                Set<Block> saplings = new HashSet<>();
-                for (int dx = 0; dx < size; dx++) {
-                    for (int dz = 0; dz < size; dz++) {
-                        saplings.add(corner.getRelative(dx, 0, dz));
-                    }
+            if (corner == null) {
+                continue;
+            }
+            Set<Block> saplings = new HashSet<>();
+            for (int dx = 0; dx < size; dx++) {
+                for (int dz = 0; dz < size; dz++) {
+                    saplings.add(corner.getRelative(dx, 0, dz));
                 }
+            }
+            UUID chooser = getChooser(origin, saplings, player);
+            if (normalSizes.contains(size)
+                    || CustomTrees.hasRare(type, size, variant -> CustomTreeUtils.isTreeEnabled(chooser, variant), corner)) {
                 return new Square(corner, size, saplings);
             }
         }
@@ -281,7 +287,7 @@ public class CustomTreeListener implements Listener {
         if (!CustomTreeUtils.isGrowable(block.getType())) {
             return false;
         }
-        Square square = findSquare(block);
+        Square square = findSquare(block, player);
         return growsCustomTree(block, square, player);
     }
 
@@ -389,7 +395,8 @@ public class CustomTreeListener implements Listener {
      */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onStructureGrowPlace(StructureGrowEvent e) {
-        if (!customTrees.remove(e) || e.isCancelled()) {
+        TreeBuilder tree = customTrees.remove(e);
+        if (tree == null || e.isCancelled()) {
             return;
         }
         List<BlockState> states = new ArrayList<>(e.getBlocks());
@@ -401,6 +408,8 @@ public class CustomTreeListener implements Listener {
             mcMMO.getChunkManager().setEligible(block);
             CustomTreeUtils.markNoDrop(block);
         }
+        // Fruit heads get their texture once they exist, and every piece of fruit is remembered so it can be picked
+        tree.applyHeadTextures();
     }
 
     /**

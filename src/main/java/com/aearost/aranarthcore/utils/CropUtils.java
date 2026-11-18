@@ -1,6 +1,11 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.enums.Month;
+import com.aearost.aranarthcore.crops.CropType;
+import com.aearost.aranarthcore.items.produce.Produce;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.Consumable;
+import io.papermc.paper.datacomponent.item.consumable.ItemUseAnimation;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -88,21 +93,27 @@ public class CropUtils {
 			return;
 		}
 
-		if (!isCropSeed(item.getType())) {
+		// Fruit, berries, vegetables and their seeds follow the seasons of sweet berries
+		Material source;
+		if (isCropSeed(item.getType())) {
+			source = item.getType();
+		} else if (Produce.getType(item) != null) {
+			source = CropType.seasonFor(Produce.getType(item));
+		} else {
 			return;
 		}
 
-		double growthSpeed = getCropGrowthSpeed(AranarthUtils.getMonth(), item.getType());
+		double growthSpeed = getCropGrowthSpeed(AranarthUtils.getMonth(), source);
 		// Speed should not go below 1x in the nether
-		if (item.getType() == Material.NETHER_WART && world.getName().endsWith("_nether")) {
+		if (item.getType() == Material.NETHER_WART && world != null && world.getName().endsWith("_nether")) {
 			if (growthSpeed < 1) {
 				growthSpeed = 1;
 			}
 		}
 
-		double yieldMultiplier = getCropYieldMultiplier(AranarthUtils.getMonth(), item.getType());
+		double yieldMultiplier = getCropYieldMultiplier(AranarthUtils.getMonth(), source);
 		// Yield should not go below 1x in the nether
-		if (item.getType() == Material.NETHER_WART && world.getName().endsWith("_nether")) {
+		if (item.getType() == Material.NETHER_WART && world != null && world.getName().endsWith("_nether")) {
 			if (yieldMultiplier < 1) {
 				yieldMultiplier = 1;
 			}
@@ -567,18 +578,39 @@ public class CropUtils {
 		return 1;
 	}
 
-	/**
-	 * Scans an inventory and updates the lore on every crop seed stack found.
-	 * @param inventory The inventory to refresh.
-	 * @param world The world the inventory is in.
+    /**
+	 * Determines if the item shows how the season changes its growth and yield.
 	 */
+	public static boolean hasSeasonalLore(ItemStack item) {
+		return item != null && (isCropSeed(item.getType()) || Produce.getType(item) != null);
+	}
+
 	public static void refreshInventory(Inventory inventory, World world) {
 		ItemStack[] contents = inventory.getContents();
 		for (int i = 0; i < contents.length; i++) {
-			if (contents[i] != null && CropUtils.isCropSeed(contents[i].getType())) {
+			if (contents[i] != null && hasSeasonalLore(contents[i])) {
 				CropUtils.updateSeedLore(contents[i], world);
 				inventory.setItem(i, contents[i]);
 			}
 		}
+	}
+
+	/** How long a berry takes to eat: half the time of vanilla food, like the new berries. */
+	private static final float BERRY_EAT_SECONDS = 0.8F;
+
+	/**
+	 * Makes vanilla sweet berries and glow berries eaten twice as fast, like every other berry. Stacks already sped up
+	 * are left alone, so they keep stacking with each other.
+	 */
+	public static void applyBerryEatSpeed(ItemStack item) {
+		if (item == null || (item.getType() != Material.SWEET_BERRIES && item.getType() != Material.GLOW_BERRIES)) {
+			return;
+		}
+		Consumable current = item.getData(DataComponentTypes.CONSUMABLE);
+		if (current != null && current.consumeSeconds() == BERRY_EAT_SECONDS) {
+			return;
+		}
+		item.setData(DataComponentTypes.CONSUMABLE, Consumable.consumable().consumeSeconds(BERRY_EAT_SECONDS)
+				.animation(ItemUseAnimation.EAT).build());
 	}
 }

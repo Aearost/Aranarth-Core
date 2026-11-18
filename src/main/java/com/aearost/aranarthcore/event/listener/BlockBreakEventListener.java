@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.crops.Crops;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.event.block.*;
 import com.aearost.aranarthcore.event.player.HomepadBreak;
@@ -44,6 +45,10 @@ public class BlockBreakEventListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent e) {
+        // Custom crops are made of vanilla blocks such as beetroots and pitcher pods, so only CropListener handles them
+        if (Crops.isCropBlock(e.getBlock())) {
+            return;
+        }
         handlePlentifulBreak(e);
         if (e.isCancelled()) return;
         handleMagnetismBreak(e);

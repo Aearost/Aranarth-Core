@@ -1,6 +1,8 @@
 package com.aearost.aranarthcore.commands.council;
 
 import com.aearost.aranarthcore.enums.WorldEvent;
+import com.aearost.aranarthcore.items.produce.Produce;
+import com.aearost.aranarthcore.items.produce.ProduceType;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -65,6 +67,11 @@ public class CommandACCompleter implements TabCompleter {
             }
         } catch (Exception ignored) {
         }
+        // Produce is one class picked by type, so list each type instead of the classes
+        names.remove(Produce.class.getSimpleName());
+        names.remove(ProduceType.class.getSimpleName());
+        names.remove(ProduceType.Kind.class.getSimpleName());
+        names.addAll(ProduceType.getGiveNames());
         Collections.sort(names);
         ITEM_NAMES = Collections.unmodifiableList(names);
     }

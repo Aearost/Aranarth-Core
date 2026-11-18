@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.FruitUtils;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -85,6 +86,11 @@ public class EssencePlentifulBlockBreak {
 				harvestable = AranarthUtils.isHarvestableWithShovel(block.getType());
 			} else if (name.endsWith("_HOE")) {
 				harvestable = AranarthUtils.isBlockCrop(block.getType());
+			}
+
+			// Ripe fruit in reach of an axe or hoe is picked too
+			if ((name.endsWith("_AXE") || name.endsWith("_HOE")) && FruitUtils.getRipe(block) != null) {
+				harvestable = true;
 			}
 
 			if (harvestable) {

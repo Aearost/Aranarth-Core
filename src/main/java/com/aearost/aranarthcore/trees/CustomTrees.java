@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.trees;
 
 import com.aearost.aranarthcore.enums.Month;
+import com.aearost.aranarthcore.items.produce.ProduceHeads;
 import com.aearost.aranarthcore.trees.TreeBuilder.Layer;
 import com.aearost.aranarthcore.trees.TreeBuilder.Pos;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -125,7 +126,24 @@ public class CustomTrees {
         LANTERN_LILY(80, Material.PALE_OAK_SAPLING, 2, "Lantern Lily", "Any End biome"),
         BONE_SPINE(85, Material.PALE_OAK_SAPLING, 1, "Bone Spine", "Any End biome"),
         BONE_SPRAWL(84, Material.PALE_OAK_SAPLING, 1, "Bone Sprawl", "Any End biome"),
-        HALO_TREE(83, Material.POPLAR_SAPLING, 2, "Halo Tree", "Any End biome");
+        HALO_TREE(83, Material.POPLAR_SAPLING, 2, "Halo Tree", "Any End biome"),
+        // Fruit trees, which only grow from a fruit sapling: the fruit crafted with its sapling
+        APPLE_TREE(91, "apple", Material.OAK_SAPLING, "Apple Tree"),
+        GREEN_APPLE_TREE(92, "green_apple", Material.OAK_SAPLING, "Green Apple Tree"),
+        PEAR_TREE(93, "pear", Material.BIRCH_SAPLING, "Pear Tree"),
+        BANANA_PLANT(94, "banana", Material.JUNGLE_SAPLING, "Banana Plant"),
+        LEMON_TREE(95, "lemon", Material.AZALEA, "Lemon Tree"),
+        ORANGE_TREE(96, "orange", Material.AZALEA, "Orange Tree"),
+        LIME_TREE(97, "lime", Material.AZALEA, "Lime Tree"),
+        MANGO_TREE(98, "mango", Material.DARK_OAK_SAPLING, "Mango Tree"),
+        PLUM_TREE(99, "plum", Material.CHERRY_SAPLING, "Plum Tree"),
+        PEACH_TREE(100, "peach", Material.CHERRY_SAPLING, "Peach Tree"),
+        POMEGRANATE_TREE(101, "pomegranate", Material.SPRUCE_SAPLING, "Pomegranate Tree"),
+        APRICOT_TREE(102, "apricot", Material.CHERRY_SAPLING, "Apricot Tree"),
+        FIG_TREE(103, "fig", Material.PALE_OAK_SAPLING, "Fig Tree"),
+        AVOCADO_TREE(104, "avocado", Material.JUNGLE_SAPLING, "Avocado Tree"),
+        PERSIMMON_TREE(105, "persimmon", Material.DARK_OAK_SAPLING, "Persimmon Tree"),
+        LYCHEE_TREE(106, "lychee", Material.OAK_SAPLING, "Lychee Tree");
 
         private final int id;
         private final Material sapling;
@@ -134,6 +152,8 @@ public class CustomTrees {
         private final String displayName;
         /** Where a rare tree grows, or null for a tree that grows anywhere. */
         private final String condition;
+        /** The produce id of the fruit a fruit tree grows from, or null for a tree that is not a fruit tree. */
+        private final String fruitId;
 
         Variant(int id, Material sapling, String displayName) {
             this(id, sapling, 0, displayName);
@@ -149,6 +169,19 @@ public class CustomTrees {
             this.size = size;
             this.displayName = displayName;
             this.condition = condition;
+            this.fruitId = null;
+        }
+
+        /**
+         * A fruit tree, grown from a single fruit sapling.
+         */
+        Variant(int id, String fruitId, Material sapling, String displayName) {
+            this.id = id;
+            this.sapling = sapling;
+            this.size = 1;
+            this.displayName = displayName;
+            this.condition = null;
+            this.fruitId = fruitId;
         }
 
         /**
@@ -156,6 +189,33 @@ public class CustomTrees {
          */
         public boolean isRare() {
             return condition != null;
+        }
+
+        /**
+         * Determines if the variant is a fruit tree, which only grows from a fruit sapling.
+         */
+        public boolean isFruit() {
+            return fruitId != null;
+        }
+
+        /**
+         * Provides the produce id of the fruit a fruit tree grows from, or null for a tree that is not a fruit tree.
+         */
+        public String getFruitId() {
+            return fruitId;
+        }
+
+        /**
+         * Provides every fruit tree.
+         */
+        public static List<Variant> fruit() {
+            List<Variant> variants = new ArrayList<>();
+            for (Variant variant : values()) {
+                if (variant.isFruit()) {
+                    variants.add(variant);
+                }
+            }
+            return variants;
         }
 
         /**
@@ -198,12 +258,25 @@ public class CustomTrees {
         }
 
         /**
-         * Provides every variant that the sapling can grow into anywhere, leaving out rare trees.
+         * Provides every variant that grows anywhere, leaving out rare trees and fruit trees.
+         */
+        public static List<Variant> forAnySapling() {
+            List<Variant> variants = new ArrayList<>();
+            for (Variant variant : values()) {
+                if (!variant.isRare() && !variant.isFruit()) {
+                    variants.add(variant);
+                }
+            }
+            return variants;
+        }
+
+        /**
+         * Provides every variant that the sapling can grow into anywhere, leaving out rare trees and fruit trees.
          */
         public static List<Variant> forSapling(Material sapling) {
             List<Variant> variants = new ArrayList<>();
             for (Variant variant : values()) {
-                if (variant.sapling == sapling && !variant.isRare()) {
+                if (variant.sapling == sapling && !variant.isRare() && !variant.isFruit()) {
                     variants.add(variant);
                 }
             }
@@ -275,6 +348,8 @@ public class CustomTrees {
     private final World world;
     private final Random r;
     private TreeBuilder t;
+    /** Whether the tree grows with ripe fruit on it. */
+    private boolean fruit;
 
     private CustomTrees(World world, Random random) {
         this.world = world;
@@ -309,7 +384,8 @@ public class CustomTrees {
         if (sized.isEmpty()) {
             return null;
         }
-        return design(sized.get(random.nextInt(sized.size())), world, random, x, y, z);
+        // Trees grown in the world bear their fruit, which is picked and grows back slowly
+        return design(sized.get(random.nextInt(sized.size())), world, random, x, y, z, -1, true);
     }
 
     /**
@@ -321,17 +397,18 @@ public class CustomTrees {
     }
 
     /**
-     * Determines if a rare tree grows from the square of saplings, as its conditions are met.
+     * Determines if a rare tree grows from the square of saplings, as its conditions are met and the player has left it
+     * turned on.
      * @param corner The north-west sapling of the square, or the sapling itself.
      */
-    public static boolean hasRare(Material sapling, int size, Block corner) {
-        return !rareCandidates(sapling, size, corner).isEmpty();
+    public static boolean hasRare(Material sapling, int size, Predicate<Variant> enabled, Block corner) {
+        return !rareCandidates(sapling, size, enabled, corner).isEmpty();
     }
 
-    private static List<Variant> rareCandidates(Material sapling, int size, Block corner) {
+    private static List<Variant> rareCandidates(Material sapling, int size, Predicate<Variant> enabled, Block corner) {
         List<Variant> rare = new ArrayList<>();
         for (Variant variant : Variant.rare()) {
-            if (variant.getSapling() == sapling && RareTreeConditions.isMet(variant, corner, size)) {
+            if (variant.getSapling() == sapling && enabled.test(variant) && RareTreeConditions.isMet(variant, corner, size)) {
                 rare.add(variant);
             }
         }
@@ -342,8 +419,8 @@ public class CustomTrees {
      * Provides the custom trees the sapling may grow into, out of the ones a player has left turned on.
      */
     private static List<Variant> candidates(Material sapling, int size, Predicate<Variant> enabled, Block corner) {
-        // Rare trees always win where their conditions are met, and are not part of the player's choices
-        List<Variant> rare = rareCandidates(sapling, size, corner);
+        // Rare trees always win where their conditions are met, unless the player turned them off
+        List<Variant> rare = rareCandidates(sapling, size, enabled, corner);
         if (!rare.isEmpty()) {
             return rare;
         }
@@ -380,7 +457,18 @@ public class CustomTrees {
      * @param idea The form to grow, or -1 for a random one.
      */
     public static TreeBuilder design(Variant variant, World world, Random random, int x, int y, int z, int idea) {
+        return design(variant, world, random, x, y, z, idea, false);
+    }
+
+    /**
+     * Designs a custom tree of a specific variant, optionally already bearing its fruit.
+     * @param withFruit Whether the tree grows with ripe fruit on it. Only the test world grows fruit until picking fruit
+     *                  is in place, as fruit heads would otherwise be broken for free heads.
+     */
+    public static TreeBuilder design(Variant variant, World world, Random random, int x, int y, int z, int idea,
+                                     boolean withFruit) {
         CustomTrees trees = new CustomTrees(world, random);
+        trees.fruit = withFruit;
         // A fixed stage of autumn for each sample in the test world, otherwise taken from the calendar
         int season = idea < 0 ? -1 : idea % 4;
         switch (variant) {
@@ -461,6 +549,28 @@ public class CustomTrees {
             case BONE_SPINE -> trees.boneSpine(x, y, z);
             case BONE_SPRAWL -> trees.boneSprawl(x, y, z);
             case HALO_TREE -> trees.haloTree(x, y, z);
+            case APPLE_TREE -> trees.appleTree(x, y, z, false);
+            case GREEN_APPLE_TREE -> trees.appleTree(x, y, z, true);
+            case PEAR_TREE -> trees.pearTree(x, y, z);
+            case BANANA_PLANT -> trees.bananaPlant(x, y, z);
+            case LEMON_TREE -> trees.citrusTree(x, y, z, "lemon");
+            case ORANGE_TREE -> trees.citrusTree(x, y, z, "orange");
+            case LIME_TREE -> trees.citrusTree(x, y, z, "lime");
+            case MANGO_TREE -> trees.mangoTree(x, y, z);
+            case PLUM_TREE -> trees.plumTree(x, y, z);
+            case PEACH_TREE -> trees.peachTree(x, y, z);
+            case POMEGRANATE_TREE -> trees.pomegranateTree(x, y, z);
+            case APRICOT_TREE -> trees.apricotTree(x, y, z);
+            case FIG_TREE -> trees.figTree(x, y, z);
+            case AVOCADO_TREE -> trees.avocadoTree(x, y, z);
+            // Late in autumn a persimmon drops its leaves while its fruit stays on the bare branches
+            case PERSIMMON_TREE -> trees.persimmonTree(x, y, z, idea < 0 ? autumnStage() > 2.5 : idea >= 2);
+            case LYCHEE_TREE -> trees.lycheeTree(x, y, z);
+        }
+        // Every cherry tree a player grows bears cherries
+        if (trees.t != null && (variant == Variant.BLOSSOM_CHERRY || variant == Variant.GRAND_CHERRY
+                || variant == Variant.ELDER_CHERRY)) {
+            trees.hangFruit("cherry", trees.between(14, 20), 0.7);
         }
         if (trees.t != null && hasLeafLitter(variant)) {
             trees.leafLitter(x, y, z, Math.max(1, variant.getSize()));
@@ -676,7 +786,9 @@ public class CustomTrees {
         return switch (variant) {
             case SPREADING_OAK, ROUND_OAK, OLD_GIANT_OAK, TALL_FOREST_OAK, SILVER_BIRCH, COLUMN_BIRCH, BIRCH_SPIRE, LEANING_BIRCH,
                  POPLAR, GREAT_POPLAR, YOUNG_DARK_OAK, GNARLED_DARK_OAK, ANCIENT_DARK_OAK, AZALEA, FLOWERING_AZALEA,
-                 WINDSWEPT_HAWTHORN, MAPLE, MYCELIAL_OAK, ORCHARD_OAK, GIANT_BONSAI -> true;
+                 WINDSWEPT_HAWTHORN, MAPLE, MYCELIAL_OAK, ORCHARD_OAK, GIANT_BONSAI, APPLE_TREE, GREEN_APPLE_TREE, PEAR_TREE,
+                 PLUM_TREE, PEACH_TREE, APRICOT_TREE, PERSIMMON_TREE, FIG_TREE, POMEGRANATE_TREE, MANGO_TREE, AVOCADO_TREE,
+                 LYCHEE_TREE, LEMON_TREE, ORANGE_TREE, LIME_TREE -> true;
             default -> false;
         };
     }
@@ -4924,7 +5036,12 @@ public class CustomTrees {
         for (int i = 0; i < between(1, 2); i++) {
             frond(px, top + 1, pz, randomAngle(), between(2.5, 3.5), 1.5, 0.6);
         }
-        cocoaPods(between(3, 6), top - 2);
+        // Coconuts cluster on the top of the trunk beneath the fronds
+        if (fruit) {
+            woodFruit("coconut", between(5, 8), top - 2, top);
+        } else {
+            cocoaPods(between(3, 6), top - 2);
+        }
     }
 
     /**
@@ -4980,6 +5097,15 @@ public class CustomTrees {
             }
         }
         for (BlockFace face : dateSides) {
+            // With fruit, the dates are bunches of orange and yellow leaves hanging on these sides too
+            if (fruit) {
+                int length = between(2, 3);
+                for (int h = 1; h <= length; h++) {
+                    t.leaf(x + face.getModX(), top - h, z + face.getModZ());
+                    t.fruitBunch(x + face.getModX(), top - h, z + face.getModZ(), "date");
+                }
+                continue;
+            }
             for (int h = 1; h <= 3; h++) {
                 if (chance(0.55) && !t.has(x + face.getModX(), top - h, z + face.getModZ())) {
                     Cocoa date = (Cocoa) Material.COCOA.createBlockData();
@@ -6126,6 +6252,10 @@ public class CustomTrees {
         t.blob(top[0], top[1] + 2.5, top[2], 3.6, 2.2, 3.6, 0.35);
         // Every branch in the crown is wrapped in leaves, so none show bare
         coverWood(y + height + 1, 1.3);
+        // Ripe olives show as short tips of pale hanging moss under the crown
+        if (fruit) {
+            fruitMoss(between(12, 18), 0.7);
+        }
     }
 
     // ------------------------------------------------------------
@@ -6682,4 +6812,527 @@ public class CustomTrees {
         }
     }
 
+    /**
+     * Hangs fruit heads from the sides of the leaves in the lower part of the crown, spaced apart so each one shows.
+     * @param id The produce id of the fruit.
+     * @param reach How far up the crown fruit hangs, from 0 at its lowest leaf to 1 at its top.
+     */
+    private void hangFruit(String id, int count, double reach) {
+        String texture = ProduceHeads.get(id);
+        if (!fruit || texture == null) {
+            return;
+        }
+        List<Pos> leaves = new ArrayList<>(t.getPositions(Layer.LEAF));
+        leaves.removeIf(pos -> !t.isLeaf(pos.x(), pos.y(), pos.z()));
+        if (leaves.isEmpty()) {
+            return;
+        }
+        int minY = Integer.MAX_VALUE;
+        int maxY = Integer.MIN_VALUE;
+        for (Pos leaf : leaves) {
+            minY = Math.min(minY, leaf.y());
+            maxY = Math.max(maxY, leaf.y());
+        }
+        int limit = minY + (int) Math.round((maxY - minY) * reach);
+        leaves.removeIf(pos -> pos.y() > limit);
+        List<Pos> placedHeads = new ArrayList<>();
+        for (int attempt = 0; attempt < count * 15 && placedHeads.size() < count && !leaves.isEmpty(); attempt++) {
+            Pos leaf = leaves.get(r.nextInt(leaves.size()));
+            BlockFace face = HORIZONTAL[r.nextInt(4)];
+            int hx = leaf.x() + face.getModX();
+            int hz = leaf.z() + face.getModZ();
+            if (t.has(hx, leaf.y(), hz) || tooClose(placedHeads, hx, leaf.y(), hz)) {
+                continue;
+            }
+            if (t.fruitHead(hx, leaf.y(), hz, face, id)) {
+                placedHeads.add(new Pos(hx, leaf.y(), hz));
+            }
+        }
+    }
+
+    /**
+     * Hangs fruit heads from the sides of the tree's wood between two heights.
+     */
+    private void woodFruit(String id, int count, int minY, int maxY) {
+        String texture = ProduceHeads.get(id);
+        if (!fruit || texture == null) {
+            return;
+        }
+        List<Pos> wood = new ArrayList<>(t.getPositions(Layer.LOG));
+        wood.removeIf(pos -> pos.y() < minY || pos.y() > maxY);
+        List<Pos> placedHeads = new ArrayList<>();
+        for (int attempt = 0; attempt < count * 15 && placedHeads.size() < count && !wood.isEmpty(); attempt++) {
+            Pos pos = wood.get(r.nextInt(wood.size()));
+            BlockFace face = HORIZONTAL[r.nextInt(4)];
+            int hx = pos.x() + face.getModX();
+            int hz = pos.z() + face.getModZ();
+            if (t.has(hx, pos.y(), hz) || tooClose(placedHeads, hx, pos.y(), hz)) {
+                continue;
+            }
+            if (t.fruitHead(hx, pos.y(), hz, face, id)) {
+                placedHeads.add(new Pos(hx, pos.y(), hz));
+            }
+        }
+    }
+
+    /**
+     * Determines if a spot touches a piece of fruit already hung, so that fruit never clumps into a solid mass.
+     */
+    private static boolean tooClose(List<Pos> heads, int x, int y, int z) {
+        for (Pos head : heads) {
+            if (Math.abs(head.x() - x) <= 1 && Math.abs(head.y() - y) <= 1 && Math.abs(head.z() - z) <= 1) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Hangs a single tip of pale moss beneath some of the lower leaves, showing that a tree's small fruit is ripe.
+     * @param reach How far up the crown the tips hang, from 0 at its lowest leaf to 1 at its top.
+     */
+    private void fruitMoss(int count, double reach) {
+        List<Pos> leaves = new ArrayList<>(t.getPositions(Layer.LEAF));
+        leaves.removeIf(pos -> !t.isLeaf(pos.x(), pos.y(), pos.z()) || t.has(pos.x(), pos.y() - 1, pos.z()));
+        if (leaves.isEmpty()) {
+            return;
+        }
+        int minY = Integer.MAX_VALUE;
+        int maxY = Integer.MIN_VALUE;
+        for (Pos leaf : leaves) {
+            minY = Math.min(minY, leaf.y());
+            maxY = Math.max(maxY, leaf.y());
+        }
+        int limit = minY + (int) Math.round((maxY - minY) * reach);
+        leaves.removeIf(pos -> pos.y() > limit);
+        Collections.shuffle(leaves, r);
+        int placed = 0;
+        for (Pos leaf : leaves) {
+            if (placed >= count) {
+                break;
+            }
+            if (!t.has(leaf.x(), leaf.y() - 1, leaf.z()) && t.fruitMoss(leaf.x(), leaf.y() - 1, leaf.z(), "olive")) {
+                placed++;
+            }
+        }
+    }
+
+    /**
+     * Mixes a few blocks of a blossom leaf evenly through the crown, a block here and there rather than in patches.
+     */
+    private void sprinkleBlossom(Material base, Material other, Material blossom, double otherRatio, double blossomRatio) {
+        t.setLeafPicker((bx, by, bz) -> {
+            if (t.noise(bx * 5.7, by * 5.7, bz * 5.7, 3) < blossomRatio) {
+                return blossom;
+            }
+            return other != null && t.noise(bx / 3.0, by / 3.0, bz / 3.0, 1) < otherRatio ? other : base;
+        });
+    }
+
+    /**
+     * Apple Tree and Green Apple Tree - grown from an apple crafted with an oak sapling.
+     */
+    private void appleTree(int x, int y, int z, boolean green) {
+        t = new TreeBuilder(world, r, Material.OAK_WOOD, green ? Material.AZALEA_LEAVES : Material.OAK_LEAVES);
+        t.setPorosity(0.1);
+        double scale = between(0.5, 1.0);
+        t.info("scale", Math.round(scale * 100) / 100.0);
+        double cx = x + 0.5;
+        double cz = z + 0.5;
+        int trunk = scale < 0.7 ? 2 : between(2, 3);
+        double topX = cx + jitter(0.3);
+        double topZ = cz + jitter(0.3);
+        t.branch(cx, y, cz, topX, y + trunk, topZ);
+        t.info("trunk", trunk);
+        Crown crown = new Crown(0.04, 0.2, 0.35, 2, 2, 0.6, 1.2 + 0.2 * scale, 1.6 + 0.6 * scale, 1.4 + 0.3 * scale,
+                0.4, 0.3, 0.6);
+        int limbs = scale < 0.7 ? between(3, 4) : between(4, 5);
+        double start = randomAngle();
+        for (int i = 0; i < limbs; i++) {
+            naturalLimb(topX, y + trunk - (scale < 0.7 ? 0 : between(0, 1)), topZ,
+                    start + i * Math.PI * 2 / limbs + jitter(0.35), between(0.35, 0.55), between(3.5, 4.5) * scale, 0, 1,
+                    crown);
+        }
+        naturalLimb(topX, y + trunk, topZ, randomAngle(), 1.25, between(2.5, 3.2) * scale, 0, 1, crown);
+        double radius = Math.max(1.8, 3.0 * scale);
+        t.blob(topX, y + trunk + 1 + scale, topZ, radius, Math.max(1.5, 2.2 * scale), radius, 0.2);
+        coverWood(y + trunk, 1.2);
+        groundCover(x, y, z, 3.0, 0.2, Material.SHORT_GRASS, true);
+        hangFruit(green ? "green_apple" : "apple", (int) Math.round(between(12, 18) * (0.5 + scale / 2)), 0.65);
+    }
+
+    /**
+     * Pear Tree - grown from a pear crafted with a birch sapling. A tall, narrow tree on a straight trunk whose limbs
+     * climb steeply, shorter towards the top, under an upright oval crown with white blossom.
+     */
+    private void pearTree(int x, int y, int z) {
+        t = new TreeBuilder(world, r, Material.BIRCH_WOOD, Material.OAK_LEAVES);
+        sprinkleBlossom(Material.OAK_LEAVES, Material.BIRCH_LEAVES, Material.PALE_OAK_LEAVES, 0.35, 0.06);
+        t.setPorosity(0.1);
+        double cx = x + 0.5;
+        double cz = z + 0.5;
+        int height = between(7, 9);
+        t.branch(cx, y, cz, cx, y + height, cz);
+        t.info("height", height);
+        Crown crown = new Crown(0.06, 0.15, 0.35, 2, 2, 0.6, 1.3, 1.9, 2.0, 0.4, 0.25, 0.6);
+        int limbs = between(5, 6);
+        double yaw = randomAngle();
+        for (int i = 0; i < limbs; i++) {
+            double p = (double) i / (limbs - 1);
+            yaw += GOLDEN_ANGLE + jitter(0.3);
+            naturalLimb(cx, y + 2 + (height - 4) * p, cz, yaw, between(0.9, 1.15), 3.5 - 1.5 * p, 0, 1, crown);
+        }
+        t.blob(cx, y + height * 0.62, cz, 2.3, height * 0.4, 2.3, 0.08);
+        coverWood(y + 3, 1.4);
+        groundCover(x, y, z, 2.5, 0.2, Material.SHORT_GRASS, true);
+        hangFruit("pear", between(12, 16), 0.7);
+    }
+
+    /**
+     * Banana Plant - grown from a banana crafted with a jungle sapling. A short, straight stem of stripped jungle wood
+     * topped by a crown of huge drooping fronds, with a bunch of bananas, made of yellow leaves, hanging from under them.
+     */
+    private void bananaPlant(int x, int y, int z) {
+        t = new TreeBuilder(world, r, Material.STRIPPED_JUNGLE_WOOD, Material.JUNGLE_LEAVES);
+        t.setPorosity(0);
+        double cx = x + 0.5;
+        double cz = z + 0.5;
+        int height = between(4, 5);
+        for (int h = 0; h <= height; h++) {
+            t.wood(x, y + h, z);
+        }
+        t.info("height", height);
+        int top = y + height;
+        t.blob(cx, top + 0.5, cz, 1.1, 0.7, 1.1, 0);
+        int fronds = between(6, 8);
+        double start = randomAngle();
+        for (int i = 0; i < fronds; i++) {
+            double length = between(3.0, 4.2);
+            double lift = between(0.9, 1.3);
+            // The tip of a frond stays at least two blocks above the ground
+            double droop = Math.min(between(1.6, 2.2), lift + (height + 0.5 - 2) / length);
+            frond(cx, top + 0.5, cz, start + i * Math.PI * 2 / fronds + jitter(0.3), length, lift, droop);
+        }
+        // Young fronds still unrolling upwards
+        for (int i = 0; i < between(1, 2); i++) {
+            frond(cx, top + 1, cz, randomAngle(), between(2.0, 2.5), 1.8, 0.4);
+        }
+        if (fruit) {
+            t.setLeafPicker((bx, by, bz) -> Material.YELLOW_POPLAR_LEAVES);
+            List<BlockFace> sides = new ArrayList<>(List.of(HORIZONTAL));
+            Collections.shuffle(sides, r);
+            for (BlockFace side : sides.subList(0, between(1, 2))) {
+                int length = between(2, 3);
+                for (int h = 0; h < length; h++) {
+                    t.leaf(x + side.getModX(), top - 1 - h, z + side.getModZ());
+                    t.fruitBunch(x + side.getModX(), top - 1 - h, z + side.getModZ(), "banana");
+                }
+            }
+        }
+        groundCover(x, y, z, 2.5, 0.3, Material.FERN, true);
+    }
+
+    /**
+     * #Lemon Tree, #Orange Tree and #Lime Tree - grown from the fruit crafted with an azalea. Small, dense citrus
+     * trees of glossy leaves with a few white blossoms. The lemon is small and upright, the orange taller with a round
+     * globe of a crown, and the lime the smallest and bushiest, branching from the ground into several stems.
+     */
+    private void citrusTree(int x, int y, int z, String id) {
+        t = new TreeBuilder(world, r, Material.OAK_WOOD, Material.AZALEA_LEAVES);
+        sprinkleBlossom(Material.AZALEA_LEAVES, Material.JUNGLE_LEAVES, Material.FLOWERING_AZALEA_LEAVES, 0.3, 0.08);
+        t.setPorosity(0.05);
+        double cx = x + 0.5;
+        double cz = z + 0.5;
+        Crown crown = new Crown(0.05, 0.2, 0.3, 2, 2, 0.6, 1.2, 1.9, 1.6, 0.3, 0.25, 0.6);
+        switch (id) {
+            case "lemon" -> {
+                int trunk = 2;
+                t.branch(cx, y, cz, cx, y + trunk, cz);
+                double start = randomAngle();
+                for (int i = 0; i < 3; i++) {
+                    naturalLimb(cx, y + trunk, cz, start + i * Math.PI * 2 / 3 + jitter(0.3), between(0.8, 1.0),
+                            between(2.2, 2.8), 0, 1, crown);
+                }
+                t.blob(cx, y + trunk + 1.8, cz, 2.3, 2.1, 2.3, 0.25);
+                coverWood(y + trunk, 1.2);
+                groundCover(x, y, z, 2.5, 0.2, Material.SHORT_GRASS, true);
+                hangFruit(id, between(11, 15), 0.8);
+            }
+            case "orange" -> {
+                int trunk = between(2, 3);
+                t.branch(cx, y, cz, cx, y + trunk, cz);
+                double start = randomAngle();
+                for (int i = 0; i < 4; i++) {
+                    naturalLimb(cx, y + trunk, cz, start + i * Math.PI / 2 + jitter(0.3), between(0.6, 0.85),
+                            between(2.4, 3.0), 0, 1, crown);
+                }
+                t.blob(cx, y + trunk + 2.2, cz, 3.0, 2.6, 3.0, 0.2);
+                coverWood(y + trunk, 1.2);
+                groundCover(x, y, z, 2.5, 0.2, Material.SHORT_GRASS, true);
+                hangFruit(id, between(12, 17), 0.8);
+            }
+            default -> {
+                // Several stems leave the ground and lean apart under one low, bushy crown
+                int stems = between(2, 3);
+                double start = randomAngle();
+                for (int i = 0; i < stems; i++) {
+                    double yaw = start + i * Math.PI * 2 / stems + jitter(0.3);
+                    double ex = cx + Math.cos(yaw);
+                    double ez = cz + Math.sin(yaw);
+                    t.branch(cx, y, cz, ex, y + 2, ez);
+                    naturalLimb(ex, y + 2, ez, yaw, 0.7, between(1.8, 2.4), 0, 1, crown);
+                }
+                t.blob(cx, y + 2.6, cz, 2.7, 1.8, 2.7, 0.25);
+                coverWood(y + 1, 1.2);
+                groundCover(x, y, z, 2.5, 0.2, Material.SHORT_GRASS, true);
+                hangFruit(id, between(12, 17), 0.8);
+            }
+        }
+    }
+
+    /**
+     * Mango Tree - grown from a mango crafted with a dark oak sapling. A dark trunk with a few surface roots whose limbs
+     * spread wide under a broad, dense dome of dark leaves, the fruit hanging low beneath it.
+     */
+    private void mangoTree(int x, int y, int z) {
+        t = new TreeBuilder(world, r, Material.DARK_OAK_WOOD, Material.JUNGLE_LEAVES);
+        t.setLeafMix(Material.JUNGLE_LEAVES, Material.DARK_OAK_LEAVES, 0.3);
+        t.setPorosity(0.12);
+        double cx = x + 0.5;
+        double cz = z + 0.5;
+        int trunk = between(5, 6);
+        t.branch(cx, y, cz, cx, y + trunk, cz);
+        surfaceRoots(cx, y, cz, between(3, 4), 1.0, 2.0, 0.6, 1, Material.DARK_OAK_WOOD);
+        t.info("trunk", trunk);
+        Crown crown = new Crown(-0.04, 0.2, 0.45, 2, 3, 0.6, 1.5, 2.4, 1.9, 0.5, 0.3, 0.6);
+        int limbs = between(5, 6);
+        double start = randomAngle();
+        for (int i = 0; i < limbs; i++) {
+            naturalLimb(cx, y + trunk - between(0, 1), cz, start + i * Math.PI * 2 / limbs + jitter(0.3),
+                    between(0.55, 0.8), between(3.0, 4.2), 0, 2, crown);
+        }
+        t.blob(cx, y + trunk + 3, cz, 3.2, 2.8, 3.2, 0.25);
+        coverWood(y + trunk, 1.3);
+        groundCover(x, y, z, 3.5, 0.3, Material.FERN, true);
+        hangFruit("mango", between(13, 18), 0.45);
+    }
+
+    /**
+     * Plum Tree - grown from a plum crafted with a cherry sapling. A small tree with dark cherry bark and a crown of
+     * dark leaves.
+     */
+    private void plumTree(int x, int y, int z) {
+        t = new TreeBuilder(world, r, Material.CHERRY_WOOD, Material.DARK_OAK_LEAVES);
+        t.setPorosity(0.15);
+        double cx = x + 0.5;
+        double cz = z + 0.5;
+        int trunk = between(2, 3);
+        double topX = cx + jitter(0.4);
+        double topZ = cz + jitter(0.4);
+        t.branch(cx, y, cz, topX, y + trunk, topZ);
+        Crown crown = new Crown(0.02, 0.22, 0.4, 2, 2, 0.6, 1.3, 2.1, 1.6, 0.4, 0.3, 0.6);
+        int limbs = between(3, 4);
+        double start = randomAngle();
+        for (int i = 0; i < limbs; i++) {
+            naturalLimb(topX, y + trunk, topZ, start + i * Math.PI * 2 / limbs + jitter(0.35), between(0.6, 0.85),
+                    between(3.0, 4.0), 0, 1, crown);
+        }
+        t.blob(topX, y + trunk + 2, topZ, 2.6, 2.0, 2.6, 0.25);
+        coverWood(y + trunk, 1.2);
+        groundCover(x, y, z, 2.5, 0.2, Material.SHORT_GRASS, true);
+        hangFruit("plum", between(12, 16), 0.7);
+    }
+
+    /**
+     * Peach Tree - grown from a peach crafted with a cherry sapling. A low tree with an open centre: a short trunk
+     * splits into a few limbs that spread out like a vase, each holding its own cloud of leaves, with grass and fallen
+     * leaves below.
+     */
+    private void peachTree(int x, int y, int z) {
+        t = new TreeBuilder(world, r, Material.CHERRY_WOOD, Material.OAK_LEAVES);
+        t.setPorosity(0.15);
+        double cx = x + 0.5;
+        double cz = z + 0.5;
+        int trunk = 2;
+        t.branch(cx, y, cz, cx, y + trunk, cz);
+        // No leader and no core of leaves, so the middle of the tree stays open
+        Crown crown = new Crown(0.03, 0.2, 0.3, 2, 2, 0.6, 1.3, 2.0, 1.4, 0.4, 0.3, 0.5);
+        int limbs = between(3, 4);
+        double start = randomAngle();
+        for (int i = 0; i < limbs; i++) {
+            naturalLimb(cx, y + trunk, cz, start + i * Math.PI * 2 / limbs + jitter(0.3), between(0.45, 0.6),
+                    between(4.0, 5.0), 0, 1, crown);
+        }
+        coverWood(y + trunk + 1, 1.2);
+        groundCover(x, y, z, 3.0, 0.2, Material.SHORT_GRASS, true);
+        hangFruit("peach", between(12, 16), 0.7);
+    }
+
+    /**
+     * Pomegranate Tree - grown from a pomegranate crafted with a spruce sapling. A shrubby tree of several thin
+     * stems rising from the ground under a low, wide crown dotted with red flowers.
+     */
+    private void pomegranateTree(int x, int y, int z) {
+        t = new TreeBuilder(world, r, Material.SPRUCE_WOOD, Material.OAK_LEAVES);
+        sprinkleBlossom(Material.OAK_LEAVES, Material.DARK_OAK_LEAVES, Material.RED_POPLAR_LEAVES, 0.3, 0.07);
+        t.setPorosity(0.12);
+        double cx = x + 0.5;
+        double cz = z + 0.5;
+        Crown crown = new Crown(0.05, 0.25, 0.3, 1, 2, 0.6, 1.2, 1.6, 1.3, 0.3, 0.3, 0.5);
+        int stems = between(3, 5);
+        double start = randomAngle();
+        for (int i = 0; i < stems; i++) {
+            double yaw = start + i * Math.PI * 2 / stems + jitter(0.4);
+            double out = between(1.0, 1.8);
+            double ex = cx + Math.cos(yaw) * out;
+            double ez = cz + Math.sin(yaw) * out;
+            int rise = between(2, 3);
+            t.branch(cx + jitter(0.3), y, cz + jitter(0.3), ex, y + rise, ez);
+            naturalLimb(ex, y + rise, ez, yaw, 0.9, between(1.5, 2.5), 0, 1, crown);
+        }
+        t.blob(cx, y + 3, cz, 3.0, 1.6, 3.0, 0.3);
+        coverWood(y + 1, 1.2);
+        groundCover(x, y, z, 3.0, 0.2, Material.SHORT_GRASS, true);
+        hangFruit("pomegranate", between(9, 13), 0.75);
+    }
+
+    /**
+     * Apricot Tree - grown from an apricot crafted with a cherry sapling. Like a peach tree but taller and lighter,
+     * its steeper limbs holding a pale crown of birch leaves.
+     */
+    private void apricotTree(int x, int y, int z) {
+        t = new TreeBuilder(world, r, Material.CHERRY_WOOD, Material.BIRCH_LEAVES);
+        t.setPorosity(0.15);
+        double cx = x + 0.5;
+        double cz = z + 0.5;
+        int trunk = between(3, 4);
+        t.branch(cx, y, cz, cx, y + trunk, cz);
+        Crown crown = new Crown(0.04, 0.2, 0.35, 2, 2, 0.6, 1.3, 2.0, 1.7, 0.4, 0.3, 0.6);
+        int limbs = 4;
+        double start = randomAngle();
+        for (int i = 0; i < limbs; i++) {
+            naturalLimb(cx, y + trunk, cz, start + i * Math.PI / 2 + jitter(0.3), between(0.8, 1.0),
+                    between(3.5, 4.5), 0, 1, crown);
+        }
+        naturalLimb(cx, y + trunk, cz, randomAngle(), 1.3, between(2.5, 3.0), 0, 1, crown);
+        t.blob(cx, y + trunk + 2.5, cz, 2.6, 2.4, 2.6, 0.25);
+        coverWood(y + trunk, 1.2);
+        groundCover(x, y, z, 2.5, 0.2, Material.SHORT_GRASS, true);
+        hangFruit("apricot", between(12, 16), 0.7);
+    }
+
+    /**
+     * Fig Tree - grown from a fig crafted with a pale oak sapling. A wide, low tree of smooth grey bark: a few trunks
+     * lean apart from the ground and reach out almost flat under broad, big-leaved clusters.
+     */
+    private void figTree(int x, int y, int z) {
+        t = new TreeBuilder(world, r, Material.PALE_OAK_WOOD, Material.JUNGLE_LEAVES);
+        t.setPorosity(0.15);
+        double cx = x + 0.5;
+        double cz = z + 0.5;
+        Crown crown = new Crown(0.0, 0.2, 0.4, 2, 2, 0.6, 1.4, 2.4, 1.4, 0.3, 0.3, 0.6);
+        int trunks = between(2, 3);
+        double start = randomAngle();
+        for (int i = 0; i < trunks; i++) {
+            double yaw = start + i * Math.PI * 2 / trunks + jitter(0.3);
+            double ex = cx + Math.cos(yaw) * 1.5;
+            double ez = cz + Math.sin(yaw) * 1.5;
+            t.branch(cx, y, cz, ex, y + 2.5, ez);
+            naturalLimb(ex, y + 2.5, ez, yaw + jitter(0.4), between(0.2, 0.35), between(3.5, 4.5), 0, 1, crown);
+            naturalLimb(ex, y + 2.5, ez, yaw + (chance(0.5) ? 1 : -1) * between(0.8, 1.2), between(0.3, 0.5),
+                    between(2.5, 3.5), 0, 1, crown);
+        }
+        t.blob(cx, y + 4, cz, 3.0, 1.5, 3.0, 0.3);
+        coverWood(y + 2, 1.2);
+        groundCover(x, y, z, 3.0, 0.2, Material.SHORT_GRASS, true);
+        hangFruit("fig", between(10, 14), 0.6);
+    }
+
+    /**
+     * Avocado Tree - grown from an avocado crafted with a jungle sapling. A dense evergreen of jungle wood whose short
+     * trunk splits into steep limbs under an oval crown of dark leaves that comes down low enough to pick from.
+     */
+    private void avocadoTree(int x, int y, int z) {
+        t = new TreeBuilder(world, r, Material.JUNGLE_WOOD, Material.DARK_OAK_LEAVES);
+        t.setLeafMix(Material.DARK_OAK_LEAVES, Material.JUNGLE_LEAVES, 0.3);
+        t.setPorosity(0.1);
+        double cx = x + 0.5;
+        double cz = z + 0.5;
+        int height = between(6, 8);
+        int fork = y + 2;
+        t.branch(cx, y, cz, cx, fork, cz);
+        t.info("height", height);
+        Crown crown = new Crown(0.03, 0.18, 0.45, 2, 2, 0.6, 1.4, 2.2, 2.0, 0.4, 0.3, 0.6);
+        int limbs = between(3, 4);
+        double start = randomAngle();
+        for (int i = 0; i < limbs; i++) {
+            naturalLimb(cx, fork, cz, start + i * Math.PI * 2 / limbs + jitter(0.3), between(0.95, 1.15),
+                    height * 0.5, 0, 2, crown);
+        }
+        t.blob(cx, y + height * 0.62, cz, 2.8, height * 0.38, 2.8, 0.25);
+        coverWood(fork, 1.3);
+        groundCover(x, y, z, 3.0, 0.3, Material.FERN, true);
+        hangFruit("avocado", between(11, 15), 0.5);
+    }
+
+    /**
+     * Persimmon Tree - grown from a persimmon crafted with a dark oak sapling. A twisting dark tree with a dark green
+     * crown. Late in autumn it drops its leaves, and the fruit stays hanging on the bare branches.
+     * @param bare Whether the tree has dropped its leaves.
+     */
+    private void persimmonTree(int x, int y, int z, boolean bare) {
+        t = new TreeBuilder(world, r, Material.DARK_OAK_WOOD, Material.DARK_OAK_LEAVES);
+        t.setPorosity(0.15);
+        double cx = x + 0.5;
+        double cz = z + 0.5;
+        int trunk = between(3, 4);
+        double topX = cx + jitter(0.8);
+        double topZ = cz + jitter(0.8);
+        t.branch(cx, y, cz, topX, y + trunk, topZ);
+        t.info("bare", bare);
+        // Limbs wander a lot, so the branches twist
+        Crown crown = new Crown(0.02, 0.35, 0.45, 2, 2, 0.6, 1.4, 2.2, 1.7, 0.4, 0.3, 0.6);
+        int limbs = between(4, 5);
+        double start = randomAngle();
+        for (int i = 0; i < limbs; i++) {
+            naturalLimb(topX, y + trunk - between(0, 1), topZ, start + i * Math.PI * 2 / limbs + jitter(0.4),
+                    between(0.5, 0.8), between(3.5, 4.5), 0, 1, crown);
+        }
+        if (bare) {
+            for (Pos leaf : new ArrayList<>(t.getPositions(Layer.LEAF))) {
+                t.removeLeaf(leaf.x(), leaf.y(), leaf.z());
+            }
+            woodFruit("persimmon", between(13, 18), y + trunk, y + trunk + 8);
+            return;
+        }
+        t.blob(topX, y + trunk + 2, topZ, 2.8, 2.0, 2.8, 0.25);
+        coverWood(y + trunk, 1.2);
+        groundCover(x, y, z, 3.0, 0.2, Material.SHORT_GRASS, true);
+        hangFruit("persimmon", between(11, 15), 0.7);
+    }
+
+    /**
+     * Lychee Tree - grown from a lychee crafted with an oak sapling. A short trunk under a broad, low and very
+     * dense dome of glossy leaves, with clusters of red fruit around its edge.
+     */
+    private void lycheeTree(int x, int y, int z) {
+        t = new TreeBuilder(world, r, Material.OAK_WOOD, Material.JUNGLE_LEAVES);
+        t.setLeafMix(Material.JUNGLE_LEAVES, Material.OAK_LEAVES, 0.3);
+        t.setPorosity(0.05);
+        double cx = x + 0.5;
+        double cz = z + 0.5;
+        int trunk = between(2, 3);
+        t.branch(cx, y, cz, cx, y + trunk, cz);
+        Crown crown = new Crown(0.02, 0.2, 0.35, 2, 2, 0.6, 1.4, 2.4, 1.6, 0.4, 0.25, 0.6);
+        int limbs = 5;
+        double start = randomAngle();
+        for (int i = 0; i < limbs; i++) {
+            naturalLimb(cx, y + trunk, cz, start + i * Math.PI * 2 / limbs + jitter(0.3), between(0.4, 0.6),
+                    between(3.5, 4.5), 0, 1, crown);
+        }
+        t.blob(cx, y + trunk + 2, cz, 4.0, 2.4, 4.0, 0.2);
+        coverWood(y + trunk, 1.2);
+        groundCover(x, y, z, 3.5, 0.3, Material.FERN, true);
+        hangFruit("lychee", between(12, 16), 0.6);
+    }
 }

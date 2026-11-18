@@ -40,12 +40,17 @@ public class GuiTreesClick {
             }
             case GuiTrees.SLOT_ENABLE_ALL, GuiTrees.SLOT_DISABLE_ALL -> {
                 boolean disable = slot == GuiTrees.SLOT_DISABLE_ALL;
-                for (Variant variant : GuiTrees.choosable()) {
+                // Only the trees of the section being viewed, common or rare
+                for (Variant variant : GuiTrees.section(page)) {
                     aranarthPlayer.setTreeDisabled(variant.name(), disable);
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 0.5F, 1.75F);
                 new GuiTrees(player, page).populateInto(top);
+            }
+            case GuiTrees.SLOT_SECTION -> {
+                player.playSound(player, Sound.UI_BUTTON_CLICK, 1F, 0.8F);
+                new GuiTrees(player, GuiTrees.isRarePage(page) ? 0 : GuiTrees.firstRarePage()).populateInto(top);
             }
             case GuiTrees.SLOT_PREVIOUS, GuiTrees.SLOT_NEXT -> {
                 int target = page + (slot == GuiTrees.SLOT_NEXT ? 1 : -1);

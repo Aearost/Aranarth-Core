@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore;
 
+import com.aearost.aranarthcore.recipes.produce.RecipeProduce;
 import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralProjection;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.PastLives;
@@ -1259,6 +1260,8 @@ public class AranarthCore extends JavaPlugin {
         new CraftingOverridesListener(this);
         new CustomItemStationListener(this);
         new CustomTreeListener(this);
+        new FruitListener(this);
+        new CropListener(this);
         new PotionConsumeListener(this);
         new WaterbendingBottleRefillListener(this);
         new PlayerRespawnEventListener(this);
@@ -1345,6 +1348,7 @@ public class AranarthCore extends JavaPlugin {
         new RecipeHomePad(this);
         new RecipeChorusDiamond(this);
         new RecipeAmethystUncraft(this);
+        new RecipeProduce(this);
         new RecipeDeepslateA(this);
         new RecipeDeepslateB(this);
         new RecipeHorseArmorIron(this);

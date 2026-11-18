@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.trees.CustomTrees.Variant;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.CustomTreeUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -23,6 +24,7 @@ public class GuiTrees {
     public static final int CONTENT_START = 9;
     public static final int PAGE_SIZE = 36;
     public static final int SLOT_ENABLE_ALL = 45;
+    public static final int SLOT_SECTION = 46;
     public static final int SLOT_PREVIOUS = 48;
     public static final int SLOT_EXIT = 49;
     public static final int SLOT_NEXT = 50;
@@ -63,8 +65,8 @@ public class GuiTrees {
         }
         gui.setItem(SLOT_ALL, buildAllItem(player, aranarthPlayer));
 
-        List<Variant> variants = choosable();
-        int start = page * PAGE_SIZE;
+        List<Variant> variants = section(page);
+        int start = pageInSection(page) * PAGE_SIZE;
         int end = Math.min(start + PAGE_SIZE, variants.size());
         for (int i = start; i < end; i++) {
             gui.setItem(CONTENT_START + i - start, buildTreeItem(player, aranarthPlayer, variants.get(i)));
@@ -73,10 +75,19 @@ public class GuiTrees {
         gui.setItem(SLOT_ENABLE_ALL, buildItem(Material.LIME_WOOL, Lang.getFor(player, "gui.compressor.enable_all")));
         gui.setItem(SLOT_DISABLE_ALL, buildItem(Material.RED_WOOL, Lang.getFor(player, "gui.compressor.disable_all")));
         gui.setItem(SLOT_EXIT, buildItem(Material.BARRIER, Lang.getFor(player, "gui.exit")));
+        // Switches between the common trees and the rare trees
+        boolean onRare = isRarePage(page);
+        ItemStack sectionItem = buildItem(onRare ? Material.OAK_SAPLING : Material.SPRUCE_SAPLING,
+                Lang.getFor(player, onRare ? "gui.trees.common_page" : "gui.trees.rare_page"));
+        ItemMeta sectionMeta = sectionItem.getItemMeta();
+        sectionMeta.setLore(List.of(ChatUtils.translateToColor(Lang.getFor(player,
+                onRare ? "gui.trees.common_page_lore" : "gui.trees.rare_page_lore"))));
+        sectionItem.setItemMeta(sectionMeta);
+        gui.setItem(SLOT_SECTION, sectionItem);
         if (page > 0) {
             gui.setItem(SLOT_PREVIOUS, buildItem(Material.ARROW, Lang.getFor(player, "gui.page_prev")));
         }
-        if (end < variants.size()) {
+        if (page < pageCount() - 1) {
             gui.setItem(SLOT_NEXT, buildItem(Material.ARROW, Lang.getFor(player, "gui.page_next")));
         }
     }
@@ -86,10 +97,35 @@ public class GuiTrees {
     }
 
     /**
-     * Provides how many pages the trees take up.
+     * Provides how many pages the trees take up: the common trees first, then the rare trees on pages of their own.
      */
     public static int pageCount() {
+        return firstRarePage() + Math.max(1, (rare().size() + PAGE_SIZE - 1) / PAGE_SIZE);
+    }
+
+    /**
+     * Provides the first page of rare trees, which comes after every page of common trees.
+     */
+    public static int firstRarePage() {
         return Math.max(1, (choosable().size() + PAGE_SIZE - 1) / PAGE_SIZE);
+    }
+
+    /**
+     * Determines if the page shows rare trees.
+     */
+    public static boolean isRarePage(int page) {
+        return page >= firstRarePage();
+    }
+
+    /**
+     * Provides the trees of the section the page is in, either the common trees or the rare trees.
+     */
+    public static List<Variant> section(int page) {
+        return isRarePage(page) ? rare() : choosable();
+    }
+
+    private static int pageInSection(int page) {
+        return isRarePage(page) ? page - firstRarePage() : page;
     }
 
     /**
@@ -99,26 +135,49 @@ public class GuiTrees {
         if (slot < CONTENT_START || slot >= CONTENT_START + PAGE_SIZE) {
             return null;
         }
-        List<Variant> variants = choosable();
-        int index = page * PAGE_SIZE + slot - CONTENT_START;
+        List<Variant> variants = section(page);
+        int index = pageInSection(page) * PAGE_SIZE + slot - CONTENT_START;
         return index < variants.size() ? variants.get(index) : null;
     }
 
     /**
-     * Provides every tree a player can turn on or off, grouped by sapling in the order the saplings first appear. Rare
-     * trees are left out, as they always grow wherever their conditions are met.
+     * Provides every common tree a player can turn on or off, grouped by sapling in the order the saplings first appear.
+     * Rare trees are on pages of their own, and fruit trees are left out, as they only grow from fruit saplings.
      */
     public static List<Variant> choosable() {
-        List<Variant> variants = new ArrayList<>();
+        return grouped(Variant.forAnySapling());
+    }
+
+    /**
+     * Provides every rare tree, which a player can also turn on or off, grouped by sapling.
+     */
+    public static List<Variant> rare() {
+        return grouped(Variant.rare());
+    }
+
+    /**
+     * Provides every tree a player can turn on or off, common and rare.
+     */
+    public static List<Variant> toggleable() {
+        List<Variant> variants = new ArrayList<>(choosable());
+        variants.addAll(rare());
+        return variants;
+    }
+
+    /**
+     * Groups the trees by sapling, in the order the saplings first appear.
+     */
+    private static List<Variant> grouped(List<Variant> trees) {
         List<Material> saplings = new ArrayList<>();
-        for (Variant variant : Variant.values()) {
-            if (!variant.isRare() && !saplings.contains(variant.getSapling())) {
+        for (Variant variant : trees) {
+            if (!saplings.contains(variant.getSapling())) {
                 saplings.add(variant.getSapling());
             }
         }
+        List<Variant> variants = new ArrayList<>();
         for (Material sapling : saplings) {
-            for (Variant variant : Variant.values()) {
-                if (!variant.isRare() && variant.getSapling() == sapling) {
+            for (Variant variant : trees) {
+                if (variant.getSapling() == sapling) {
                     variants.add(variant);
                 }
             }
@@ -138,9 +197,19 @@ public class GuiTrees {
                 + " " + Lang.getFor(player, "gui.separator") + " " + status));
         int size = Math.max(1, variant.getSize());
         List<String> lore = new ArrayList<>();
+        if (variant.isRare()) {
+            lore.add(ChatUtils.translateToColor(Lang.getFor(player, "gui.trees.rare")));
+        }
         lore.add(ChatUtils.translateToColor(Lang.getFor(player, "gui.trees.grows_from",
                 "sapling", Lang.getFor(player, "trees.sapling_" + saplingKey(variant.getSapling())),
                 "size", size + "x" + size)));
+        if (variant.isRare()) {
+            lore.add(ChatUtils.translateToColor(Lang.getFor(player, "gui.trees.where",
+                    "condition", Lang.getFor(player, "trees.condition_" + variant.name().toLowerCase()))));
+        }
+        if (size >= CustomTreeUtils.LARGE_TREE_SIZE) {
+            lore.add(ChatUtils.translateToColor(Lang.getFor(player, "mechanics.treetypes_duke_hover")));
+        }
         lore.add(ChatUtils.translateToColor(Lang.getFor(player, "gui.trees.click")));
         meta.setLore(lore);
         meta.setEnchantmentGlintOverride(enabled);
@@ -174,7 +243,7 @@ public class GuiTrees {
     /**
      * Provides the lang key suffix of the name of a sapling, after "trees.sapling_".
      */
-    private static String saplingKey(Material sapling) {
+    public static String saplingKey(Material sapling) {
         if (sapling == Material.FLOWERING_AZALEA) {
             return "azalea";
         }

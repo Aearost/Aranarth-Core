@@ -7,6 +7,10 @@ import com.aearost.aranarthcore.trees.TreeBuilder;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.crops.CropType;
+import com.aearost.aranarthcore.crops.Crops;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRules;
 import org.bukkit.Location;
@@ -52,8 +56,12 @@ public class CommandTreeTest implements CommandExecutor {
             + "\"biome\":\"minecraft:plains\",\"lakes\":false,\"features\":false}";
     private static final int SAMPLES = 4;
     private static final int CELL = 48;
-    private static final List<Variant> REVIEW = List.of(Variant.ROUND_OAK, Variant.TALL_FOREST_OAK, Variant.JUNGLE_PARASOL,
-            Variant.ELDER_CHERRY);
+    /** Every tree that bears fruit, grown with its fruit on it. */
+    private static final List<Variant> REVIEW = List.of(Variant.APPLE_TREE, Variant.GREEN_APPLE_TREE, Variant.PEAR_TREE,
+            Variant.BLOSSOM_CHERRY, Variant.DATE_PALM, Variant.COCONUT_PALM, Variant.BANANA_PLANT, Variant.LEMON_TREE,
+            Variant.ORANGE_TREE, Variant.LIME_TREE, Variant.MANGO_TREE, Variant.OLIVE_TREE, Variant.PLUM_TREE,
+            Variant.PEACH_TREE, Variant.POMEGRANATE_TREE, Variant.APRICOT_TREE, Variant.FIG_TREE, Variant.AVOCADO_TREE,
+            Variant.PERSIMMON_TREE, Variant.LYCHEE_TREE);
     private static final List<Variant> ALL = showcase();
     private static final NamespacedKey GRID_KEY = new NamespacedKey(AranarthCore.getInstance(), "treetest_grid");
 
@@ -70,6 +78,17 @@ public class CommandTreeTest implements CommandExecutor {
 
         World world = getOrCreateWorld();
         Integer grid = world.getPersistentDataContainer().get(GRID_KEY, PersistentDataType.INTEGER);
+        // "crops" grows every custom crop at each of its stages, one row per crop
+        if (args.length > 0 && args[0].equalsIgnoreCase("crops")) {
+            grid = grid == null ? 0 : grid + 1;
+            world.getPersistentDataContainer().set(GRID_KEY, PersistentDataType.INTEGER, grid);
+            int originX = grid * 1000;
+            buildCrops(player, world, originX);
+            Location start = new Location(world, originX - 6, world.getHighestBlockYAt(originX, 0) + 8, -6, -45, 30);
+            AranarthUtils.teleportPlayer(player, player.getLocation(), start, true,
+                    Lang.getFor(player, "treetest.title"), "", success -> {});
+            return true;
+        }
         // "regen" grows the designs under review, "all" grows every custom tree
         boolean all = args.length > 0 && args[0].equalsIgnoreCase("all");
         boolean regenerate = all || args.length > 0 && args[0].equalsIgnoreCase("regen");
@@ -93,12 +112,14 @@ public class CommandTreeTest implements CommandExecutor {
     private static List<Variant> showcase() {
         List<Variant> normal = new ArrayList<>();
         List<Variant> rare = new ArrayList<>();
+        List<Variant> fruit = new ArrayList<>();
         for (Variant variant : Variant.values()) {
-            (variant.isRare() ? rare : normal).add(variant);
+            (variant.isFruit() ? fruit : variant.isRare() ? rare : normal).add(variant);
         }
         List<Material> saplingOrder = normal.stream().map(Variant::getSapling).distinct().toList();
         normal.sort(Comparator.comparingInt(variant -> saplingOrder.indexOf(variant.getSapling())));
         normal.addAll(rare);
+        normal.addAll(fruit);
         return normal;
     }
 
@@ -163,7 +184,7 @@ public class CommandTreeTest implements CommandExecutor {
 
                 long seed = random.nextLong();
                 // A variant still being compared between several ideas grows a different idea for each sample
-                TreeBuilder tree = CustomTrees.design(variant, world, new Random(seed), x, y, z, cell[1]);
+                TreeBuilder tree = CustomTrees.design(variant, world, new Random(seed), x, y, z, cell[1], true);
                 StringBuilder line = new StringBuilder("#" + variant.getId() + (char) ('a' + cell[1])
                         + " " + variant.getDisplayName() + " seed=" + seed);
                 if (tree != null) {
@@ -175,6 +196,7 @@ public class CommandTreeTest implements CommandExecutor {
                         for (BlockState state : states) {
                             state.getBlock().setBlockData(state.getBlockData(), false);
                         }
+                        tree.applyHeadTextures();
                     }
                 }
                 manifest.add(line.toString());
@@ -182,6 +204,66 @@ public class CommandTreeTest implements CommandExecutor {
                 spawnLabel(player, world, x, y, z - width / 3, variant, cell[1], idea);
             }
         }.runTaskTimer(AranarthCore.getInstance(), 1L, 1L);
+    }
+
+    /**
+     * Grows every custom crop at each of its stages.
+     */
+    private void buildCrops(Player player, World world, int originX) {
+        CropType[] types = CropType.values();
+        for (int row = 0; row < types.length; row++) {
+            CropType type = types[row];
+            int z = row * 8;
+            for (int stage = 0; stage < type.getStages(); stage++) {
+                int x = originX + stage * 7;
+                world.getChunkAt(x >> 4, z >> 4).load(true);
+                int y = world.getHighestBlockYAt(x, z);
+                Block soil = world.getBlockAt(x, y, z);
+                switch (type.getSoil()) {
+                    case FARMLAND -> soil.setType(Material.FARMLAND, false);
+                    case MUD_BANK -> {
+                        soil.setType(Material.MUD, false);
+                        soil.getRelative(BlockFace.NORTH).setType(Material.WATER, false);
+                    }
+                    default -> soil.setType(Material.GRASS_BLOCK, false);
+                }
+                // A vine grows beside a post of 4 fences, with a rail across its top to spread over
+                if (type.isVine()) {
+                    Block post = soil.getRelative(BlockFace.NORTH);
+                    post.setType(Material.GRASS_BLOCK, false);
+                    for (int h = 1; h <= 4; h++) {
+                        post.getRelative(0, h, 0).setType(Material.OAK_FENCE, false);
+                    }
+                    for (int dx = -2; dx <= 2; dx++) {
+                        if (dx != 0) {
+                            post.getRelative(dx, 4, 0).setType(Material.OAK_FENCE, false);
+                        }
+                    }
+                    for (int dx = -2; dx <= 2; dx++) {
+                        post.getRelative(dx, 4, 0).getState().update(true, true);
+                    }
+                }
+                // Each one stays at the stage it shows until it is first picked, so every stage can be compared
+                Crops.place(soil.getRelative(BlockFace.UP), type, stage, true);
+                String stageText = stage == type.getRipeStage() ? "&aRipe" : stage >= type.getHarvestStage() ? "&eCan be picked"
+                        : "&7Stage " + (stage + 1);
+                spawnText(world, x, y + 5, z, "&f" + Lang.getFor(player, type.getYield().getLangKey()) + "\n" + stageText);
+            }
+            String how = type.getMode() == CropType.HarvestMode.REPLANT ? "&7Break when ripe, then replant"
+                    : "&7Right-click or break the fruit when ripe, grows back";
+            spawnText(world, originX - 5, world.getHighestBlockYAt(originX, z) + 3, z,
+                    "&e&l" + Lang.getFor(player, type.getYield().getLangKey()) + "\n" + how
+                            + "\n&7Plant: " + Lang.getFor(player, type.getPlant().getLangKey()) + " &7on "
+                            + type.getSoil().name().toLowerCase().replace('_', ' '));
+        }
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "treetest.done")));
+    }
+
+    private void spawnText(World world, int x, int y, int z, String text) {
+        world.spawn(new Location(world, x + 0.5, y, z + 0.5), TextDisplay.class, display -> {
+            display.setText(ChatUtils.translateToColor(text));
+            display.setBillboard(Display.Billboard.CENTER);
+        });
     }
 
     /**
@@ -202,8 +284,10 @@ public class CommandTreeTest implements CommandExecutor {
                 .replace("_propagule", "");
         int size = Math.max(1, variant.getSize());
         String name = idea == null ? variant.getDisplayName() : idea.replace('_', ' ');
+        String where = variant.isFruit() ? "Fruit sapling: " + Lang.getFor(player, "produce." + variant.getFruitId())
+                : variant.getCondition() == null ? "Anywhere" : variant.getCondition();
         String text = "&e&l#" + variant.getId() + (char) ('a' + sample) + " &f&l" + name
-                + "\n&7" + (variant.getCondition() == null ? "Anywhere" : variant.getCondition())
+                + "\n&7" + where
                 + "\n" + Lang.getFor(player, "trees.sapling_" + saplingKey) + " &7" + size + "x" + size;
         world.spawn(location, TextDisplay.class, display -> {
             display.setText(ChatUtils.translateToColor(text));

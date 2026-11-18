@@ -4,6 +4,8 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.items.essence.Essence;
 import com.aearost.aranarthcore.items.essence.EssenceBlank;
+import com.aearost.aranarthcore.items.produce.Produce;
+import com.aearost.aranarthcore.items.produce.ProduceType;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -385,6 +387,11 @@ public class CommandGive {
      * @return The item object, or null if there is no class by that name.
      */
     private static Object createItemInstance(String className) {
+        // Every fruit, berry, crop, seed and nut shares one class, picked by its type
+        ProduceType produceType = ProduceType.fromGiveName(className);
+        if (produceType != null) {
+            return new Produce(produceType);
+        }
         String fullPathName;
         if (className.startsWith("Aranarthium")) {
             fullPathName = "com.aearost.aranarthcore.items.aranarthium.ingots." + className;
