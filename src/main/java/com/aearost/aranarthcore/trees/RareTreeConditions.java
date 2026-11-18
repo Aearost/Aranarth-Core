@@ -93,6 +93,17 @@ public class RareTreeConditions {
     }
 
     /**
+     * Determines if a rare tree may grow wild at the spot, as if a single sapling were planted there.
+     * @param variant The rare tree.
+     * @param spot The block the tree would grow from, just above the ground.
+     * @return Confirmation of whether its conditions are met. A tree with no conditions set never grows.
+     */
+    public static boolean isMetWild(Variant variant, Block spot) {
+        Condition condition = CONDITIONS.get(variant);
+        return condition != null && condition.isMet(new Spot(spot.getWorld(), spot, 1));
+    }
+
+    /**
      * Determines if every sapling of the square is in one of the biomes.
      */
     private static boolean inBiome(Spot spot, Set<Biome> biomes) {

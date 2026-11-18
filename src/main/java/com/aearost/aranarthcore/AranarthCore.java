@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.abilities.earthbending.Tremorsense;
 import com.aearost.aranarthcore.bending.RankCanBindHook;
 import com.aearost.aranarthcore.commands.council.*;
 import com.aearost.aranarthcore.commands.general.*;
+import com.aearost.aranarthcore.trees.WildGrowth;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Weather;
@@ -1524,6 +1525,9 @@ public class AranarthCore extends JavaPlugin {
         getCommand("ichat").setExecutor(new CommandInteractiveChat());
         getCommand("toggle").setExecutor(new CommandToggle());
         getCommand("trees").setExecutor(new CommandTrees());
+        getCommand("trees").setTabCompleter(new CommandTreesCompleter());
+        // Carries on growing wild plants where it stopped, once every world has loaded
+        Bukkit.getScheduler().runTaskLater(this, WildGrowth::resumeAll, 20L * 30);
         getCommand("toggle").setTabCompleter(new CommandToggleCompleter());
         getCommand("topdeaths").setExecutor(new CommandTopDeaths());
         getCommand("topkills").setExecutor(new CommandTopKills());
@@ -1820,6 +1824,7 @@ public class AranarthCore extends JavaPlugin {
     @Override
     public void onDisable() {
         savedOnDisable = true;
+        WildGrowth.shutdown();
         SparUtils.clearAllStuns();
         SitUtils.standUpAll();
         PetRallyUtils.endAllRallies();

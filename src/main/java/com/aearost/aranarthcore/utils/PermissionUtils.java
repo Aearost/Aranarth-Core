@@ -612,6 +612,7 @@ public class PermissionUtils {
         perms.setPermission("aranarth.plot.spawn", false);
         perms.setPermission("aranarth.questnpc", false);
         perms.setPermission("aranarth.shop.biome", false);
+        perms.setPermission("aranarth.trees.regen", false);
         perms.setPermission("aranarth.sit.toggle", false);
         perms.setPermission("aranarth.smpcreative", false);
         perms.setPermission("aranarth.speed", false);
@@ -1396,6 +1397,7 @@ public class PermissionUtils {
             perms.setPermission("aranarth.og", true);
             perms.setPermission("aranarth.plot.spawn", true);
             perms.setPermission("aranarth.questnpc", true);
+            perms.setPermission("aranarth.trees.regen", true);
             perms.setPermission("aranarth.spy", true);
             perms.setPermission("aranarth.unscramble", true);
             perms.setPermission("aranarth.vanish", true);

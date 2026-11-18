@@ -236,6 +236,20 @@ public class FruitUtils {
     }
 
     /**
+     * Takes a piece of ripe fruit off its tree without dropping anything.
+     * @param progress How far it has already grown back, from 0 when just picked to 1 when ripe.
+     */
+    public static void unripen(Block block, double progress) {
+        Spot spot = getRipe(block);
+        if (spot == null) {
+            return;
+        }
+        block.setType(Material.AIR, false);
+        long pickedAt = System.currentTimeMillis() - (long) (REGROW_MS * Math.max(0, Math.min(1, progress)));
+        save(block, new Spot(spot.id(), spot.kind(), spot.data(), pickedAt));
+    }
+
+    /**
      * Picks a ripe bunch of fruit whose leaf decayed. It drops its fruit but does not grow back, as its tree is gone.
      */
     public static void dropDecayedBunch(Block block) {

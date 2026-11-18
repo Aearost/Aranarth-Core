@@ -63,3 +63,4 @@ Miscellaneous
 [~] Punishments are now issued by offence category, preselecting the player's next punishment from the punishment system's ladders
 [+] Inventories and ender chests of players on the other server can now be edited
 [~] Removing a punishment now applies on both servers
+[+] Added /trees regen to generate wild orchards, fruit trees, berry bushes and crops across the existing land of a world
