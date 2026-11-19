@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.gui.GuiAranarth;
 import com.aearost.aranarthcore.gui.GuiRecipes;
 import com.aearost.aranarthcore.gui.GuiTrees;
+import com.aearost.aranarthcore.items.produce.FruitSapling;
 import com.aearost.aranarthcore.trees.CustomTrees;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.CustomTreeUtils;
@@ -403,6 +404,10 @@ public class CommandAranarth implements CommandExecutor {
             sendMultilineIndented(player, Lang.getFor(player, "farmingtrees.section_raretrees_content"));
             player.sendMessage(Component.empty());
             sendRareTrees(player);
+        } else if (topic.equals("farmingtrees") && section.equals("fruittrees")) {
+            sendMultilineIndented(player, Lang.getFor(player, "farmingtrees.section_fruittrees_content"));
+            player.sendMessage(Component.empty());
+            sendFruitSaplings(player);
         } else if (topic.equals("bending") || topic.equals("ranks")) {
             sendMultilineIndented(player, Lang.getFor(player, topic + ".section_" + section + "_content", getElementColors()));
         } else {
@@ -453,10 +458,36 @@ public class CommandAranarth implements CommandExecutor {
     }
 
     /**
-     * Sends the saplings as centred rows of [Sapling] buttons in the colour of their wood.
+     * Sends a button for each type of sapling that crafts a fruit sapling, which lists the fruits it is crafted with.
+     */
+    private void sendFruitSaplings(Player player) {
+        Map<String, List<CustomTrees.Variant>> bySapling = new LinkedHashMap<>();
+        for (CustomTrees.Variant variant : FruitSapling.getVariants()) {
+            bySapling.computeIfAbsent(GuiTrees.saplingKey(variant.getSapling()), key -> new ArrayList<>()).add(variant);
+        }
+        sendSaplingButtons(player, bySapling, this::getFruitSaplingHover);
+    }
+
+    /**
+     * Sends the saplings as centred rows of [Sapling] buttons in the colour of their wood, listing their trees.
      * @param bySapling The trees of each sapling, by the sapling's lang key after "trees.sapling_".
      */
     private void sendSaplingButtons(Player player, Map<String, List<CustomTrees.Variant>> bySapling) {
+        sendSaplingButtons(player, bySapling, this::getSaplingHover);
+    }
+
+    /** Builds the hover text of a sapling button from the player, the sapling's name and its trees. */
+    @FunctionalInterface
+    private interface SaplingHover {
+        String build(Player player, String sapling, List<CustomTrees.Variant> variants);
+    }
+
+    /**
+     * Sends the saplings as centred rows of [Sapling] buttons in the colour of their wood.
+     * @param bySapling The trees of each sapling, by the sapling's lang key after "trees.sapling_".
+     * @param hoverText The hover text of each button.
+     */
+    private void sendSaplingButtons(Player player, Map<String, List<CustomTrees.Variant>> bySapling, SaplingHover hoverText) {
         int gap = getPixelWidth("   ");
         var row = Component.text();
         int width = 0;
@@ -475,7 +506,7 @@ public class CommandAranarth implements CommandExecutor {
             }
             row.append(HEX_SERIALIZER.deserialize(ChatUtils.translateToColor(label))
                     .hoverEvent(HoverEvent.showText(HEX_SERIALIZER.deserialize(
-                            ChatUtils.translateToColor(getSaplingHover(player, sapling, entry.getValue()))))));
+                            ChatUtils.translateToColor(hoverText.build(player, sapling, entry.getValue()))))));
             width += labelWidth;
         }
         if (width > 0) {
@@ -502,6 +533,23 @@ public class CommandAranarth implements CommandExecutor {
             if (variant.isRare()) {
                 hover.append("\n  ").append(Lang.getFor(player, "gui.trees.where",
                         "condition", Lang.getFor(player, "trees.condition_" + variant.name().toLowerCase())));
+            }
+        }
+        return hover.toString();
+    }
+
+    /**
+     * Provides the hover text of a fruit sapling button: each fruit that crafts a fruit sapling with this sapling,
+     * with where it grows if it is a rare tree.
+     */
+    private String getFruitSaplingHover(Player player, String sapling, List<CustomTrees.Variant> variants) {
+        StringBuilder hover = new StringBuilder(sapling.replaceFirst("^(&#[0-9A-Fa-f]{6}|&[0-9a-f])", "$1&l"));
+        for (CustomTrees.Variant variant : variants) {
+            hover.append("\n").append(Lang.getFor(player, "farmingtrees.fruit_hover_entry",
+                    "fruit", Lang.getFor(player, "produce." + FruitSapling.getFruitId(variant))));
+            if (variant.isRare()) {
+                hover.append("\n  ").append(Lang.getFor(player, "gui.trees.where",
+                        "condition", Lang.getFor(player, FruitSapling.getConditionKey(variant))));
             }
         }
         return hover.toString();

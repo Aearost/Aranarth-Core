@@ -1,11 +1,13 @@
 package com.aearost.aranarthcore.items.produce;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.trees.CustomTrees.Variant;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.CustomItemUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -35,6 +37,8 @@ public record FruitSapling(Variant variant) implements AranarthItem {
         ItemStack item = new ItemStack(variant.getSapling(), 1);
         ItemMeta meta = item.getItemMeta();
         if (Objects.nonNull(meta)) {
+            // Only the item gets its own texture, the placed sapling stays the vanilla block
+            meta.setItemModel(new NamespacedKey(AranarthCore.getInstance(), "sapling_" + getFruitId(variant)));
             meta.getPersistentDataContainer().set(FRUIT_SAPLING, PersistentDataType.STRING, variant.name());
             meta.setDisplayName(ChatUtils.translateToColor(getName()));
             List<String> lore = new ArrayList<>();
