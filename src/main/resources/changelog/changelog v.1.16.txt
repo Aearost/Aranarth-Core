@@ -37,6 +37,8 @@ Aranarthium, Items & Crafting
 [~] The Wrench no longer loses durability when used in Creative mode
 [~] Fixed items being duplicated by double-clicking in /ac invsee or by editing an ender chest after its owner logged out
 [~] Fixed Essence of Magnetism hoes not pulling drops from leaves and other blocks mined with a hoe
+[~] Altered all brewing recipes to consider the custom produce ingredients where applicable
+[+] Added 17 new brews made from the custom produce ingredients
 
 Economy, Jobs & Quests
 [+] Custom crops and fruit now count towards Farmer quests, and harvesting them adds progress to Harvest Crops quests

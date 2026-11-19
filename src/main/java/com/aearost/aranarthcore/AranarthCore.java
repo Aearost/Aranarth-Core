@@ -25,6 +25,7 @@ import com.aearost.aranarthcore.integration.SquaremapIntegration;
 import com.aearost.aranarthcore.integration.WorldEditPlotIntegration;
 import com.aearost.aranarthcore.integration.WorldEditWorldGuard;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
+import com.aearost.aranarthcore.items.brew.ProduceBrewItem;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
@@ -34,6 +35,7 @@ import com.aearost.aranarthcore.recipes.*;
 import com.aearost.aranarthcore.recipes.aranarthium.*;
 import com.aearost.aranarthcore.utils.*;
 import com.aearost.aranarthcore.voice.VoiceChatManager;
+import com.dre.brewery.recipe.PluginItem;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
@@ -384,6 +386,16 @@ public class AranarthCore extends JavaPlugin {
             return;
         }
         super.saveConfig();
+    }
+
+    /**
+     * Called when the plugin is loaded, before any plugin is enabled.
+     */
+    @Override
+    public void onLoad() {
+        if (Bukkit.getPluginManager().getPlugin("BreweryX") != null) {
+            PluginItem.registerForConfig(ProduceBrewItem.PREFIX, ProduceBrewItem::new);
+        }
     }
 
     /**

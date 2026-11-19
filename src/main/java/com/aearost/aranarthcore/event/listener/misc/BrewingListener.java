@@ -1,6 +1,11 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.items.brew.ProduceBrewItem;
+import com.aearost.aranarthcore.items.produce.Produce;
+import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
+import com.dre.brewery.api.events.IngedientAddEvent;
 import com.dre.brewery.api.events.brew.BrewModifyEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -146,6 +151,21 @@ public class BrewingListener implements Listener {
             }
         }
         copyInputStands.remove(loc);
+    }
+
+    /**
+     * Stops produce from going into a brewing cauldron as its vanilla base item.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onIngredientAdd(IngedientAddEvent e) {
+        if (Produce.getType(e.getIngredient()) == null) {
+            return;
+        }
+        if (e.getRecipeItem() instanceof ProduceBrewItem) {
+            return;
+        }
+        e.setCancelled(true);
+        e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "brew.produce_not_ingredient")));
     }
 
     /**
