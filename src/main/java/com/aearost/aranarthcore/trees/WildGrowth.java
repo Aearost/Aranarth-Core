@@ -58,7 +58,8 @@ import java.util.function.Predicate;
  */
 public class WildGrowth {
 
-    private static final int RADIUS_CHUNKS = 25_000 >> 4;
+    /** The furthest from the centre plants may grow in blocks, so that a world without a border is not grown forever. */
+    private static final int MAX_RADIUS = 25_000;
     private static final int CLAIM_BUFFER = 4;
     private static final int CHANCE = 20;
     private static final int ROLLS_PER_TICK = 512;
@@ -186,7 +187,11 @@ public class WildGrowth {
      */
     private static class Run {
         final World world;
-        final List<int[]> regions;
+        /** The radius chosen when it started, or 0 to fit the world border. */
+        final int radius;
+        /** The chunks plants may grow in, being those wholly inside the area. */
+        final int minCx, maxCx, minCz, maxCz;
+        List<int[]> regions;
         int regionIndex;
         int chunkIndex;
         int groups;
@@ -208,9 +213,23 @@ public class WildGrowth {
         /** Where the first plant of the grouping grew. */
         Block first;
 
-        Run(World world, List<int[]> regions) {
+        Run(World world, int radius) {
             this.world = world;
-            this.regions = regions;
+            this.radius = radius;
+            // A chosen radius is a square around 0,0, otherwise the square inside the world border
+            double centerX = 0;
+            double centerZ = 0;
+            double half = radius;
+            if (radius <= 0) {
+                centerX = world.getWorldBorder().getCenter().getX();
+                centerZ = world.getWorldBorder().getCenter().getZ();
+                half = world.getWorldBorder().getSize() / 2;
+            }
+            half = Math.min(half, MAX_RADIUS);
+            minCx = Math.ceilDiv((int) Math.ceil(centerX - half), 16);
+            maxCx = Math.floorDiv((int) Math.floor(centerX + half), 16) - 1;
+            minCz = Math.ceilDiv((int) Math.ceil(centerZ - half), 16);
+            maxCz = Math.floorDiv((int) Math.floor(centerZ + half), 16) - 1;
         }
     }
 
@@ -223,15 +242,19 @@ public class WildGrowth {
     /**
      * Starts growing wild plants in the world, or carries on from where it stopped.
      * @param starter Who started it, or null for the console.
+     * @param radius How far from 0,0 plants may grow in every direction, 0 to fit the world border, or null to keep
+     *               the radius it was last started with.
      * @return Whether it started, false if it was already running.
      */
-    public static boolean start(World world, UUID starter) {
+    public static boolean start(World world, UUID starter, Integer radius) {
         if (RUNS.containsKey(world.getName())) {
             return false;
         }
-        Run run = new Run(world, findRegions(world));
-        run.starter = starter;
         ConfigurationSection saved = load().getConfigurationSection("worlds." + world.getName());
+        int chosen = radius != null ? radius : saved == null ? 0 : saved.getInt("radius", 0);
+        Run run = new Run(world, chosen);
+        run.regions = findRegions(run);
+        run.starter = starter;
         if (saved != null) {
             String region = saved.getString("region", "");
             for (int i = 0; i < run.regions.size(); i++) {
@@ -245,7 +268,8 @@ public class WildGrowth {
             run.groups = saved.getInt("groups", 0);
         }
         RUNS.put(world.getName(), run);
-        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "Growing wild plants in " + world.getName() + ": region "
+        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "Growing wild plants in " + world.getName() + " (chunks "
+                + run.minCx + " to " + run.maxCx + " by " + run.minCz + " to " + run.maxCz + "): region "
                 + Math.min(run.regionIndex + 1, run.regions.size()) + "/" + run.regions.size() + ", "
                 + run.groups + " groupings so far");
         run.task = Bukkit.getScheduler().runTaskTimer(AranarthCore.getInstance(), () -> tick(run), 1L, 1L);
@@ -295,7 +319,7 @@ public class WildGrowth {
             World world = Bukkit.getWorld(name);
             if (world != null && worlds.getBoolean(name + ".running")) {
                 String starter = worlds.getString(name + ".starter");
-                start(world, starter == null || starter.isEmpty() ? null : UUID.fromString(starter));
+                start(world, starter == null || starter.isEmpty() ? null : UUID.fromString(starter), null);
                 Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "Resumed growing wild plants in " + name);
             }
         }
@@ -391,10 +415,11 @@ public class WildGrowth {
     }
 
     /**
-     * Determines if plants may grow in the chunk: inside the radius, and away from claimed land.
+     * Determines if plants may grow in the chunk: wholly inside the area, and away from claimed land.
      */
     private static boolean isUsable(Run run, int cx, int cz) {
-        return (long) cx * cx + (long) cz * cz <= (long) RADIUS_CHUNKS * RADIUS_CHUNKS && !run.claimed.contains(key(cx, cz));
+        return cx >= run.minCx && cx <= run.maxCx && cz >= run.minCz && cz <= run.maxCz
+                && !run.claimed.contains(key(cx, cz));
     }
 
     /**
@@ -890,10 +915,11 @@ public class WildGrowth {
     }
 
     /**
-     * Provides every region file of the world within the radius, nearest to 0,0 first.
+     * Provides every region file of the world that overlaps the area of the run, nearest to its centre first.
      * @return The X and Z of each region.
      */
-    private static List<int[]> findRegions(World world) {
+    private static List<int[]> findRegions(Run run) {
+        World world = run.world;
         // Newer worlds keep each dimension under dimensions/minecraft, older ones keep the overworld's regions at the top
         String dimension = switch (world.getEnvironment()) {
             case NETHER -> "the_nether";
@@ -913,7 +939,6 @@ public class WildGrowth {
         if (files == null) {
             return regions;
         }
-        int limit = (RADIUS_CHUNKS >> 5) + 1;
         for (File file : files) {
             String[] parts = file.getName().split("\\.");
             if (parts.length != 4 || !parts[0].equals("r") || !parts[3].equals("mca") || file.length() == 0) {
@@ -922,14 +947,18 @@ public class WildGrowth {
             try {
                 int rx = Integer.parseInt(parts[1]);
                 int rz = Integer.parseInt(parts[2]);
-                if (Math.abs(rx) <= limit && Math.abs(rz) <= limit) {
+                if (rx >= run.minCx >> 5 && rx <= run.maxCx >> 5 && rz >= run.minCz >> 5 && rz <= run.maxCz >> 5) {
                     regions.add(new int[] {rx, rz});
                 }
             } catch (NumberFormatException ignored) {
                 // Not a region file
             }
         }
-        regions.sort(Comparator.<int[]>comparingLong(r -> (long) r[0] * r[0] + (long) r[1] * r[1])
+        // Twice the centre region, so that a centre between two regions sorts evenly
+        long midX = (long) (run.minCx >> 5) + (run.maxCx >> 5);
+        long midZ = (long) (run.minCz >> 5) + (run.maxCz >> 5);
+        regions.sort(Comparator.<int[]>comparingLong(r -> (2L * r[0] - midX) * (2L * r[0] - midX)
+                        + (2L * r[1] - midZ) * (2L * r[1] - midZ))
                 .thenComparingInt(r -> r[0]).thenComparingInt(r -> r[1]));
         return regions;
     }
@@ -1026,7 +1055,37 @@ public class WildGrowth {
             config.set(path + ".groups", run.groups);
             config.set(path + ".running", true);
             config.set(path + ".starter", run.starter == null ? "" : run.starter.toString());
+            config.set(path + ".radius", run.radius);
         }
         save(config);
+    }
+
+    /**
+     * Forgets everything grown in the world, for when it is deleted and made again, stopping it if it is running.
+     */
+    public static void forget(String worldName) {
+        Run run = RUNS.get(worldName);
+        if (run != null) {
+            end(run);
+        }
+        YamlConfiguration config = load();
+        config.set("worlds." + worldName, null);
+        save(config);
+        File file = getLogFile();
+        if (!file.exists()) {
+            return;
+        }
+        try {
+            List<String> kept = new ArrayList<>();
+            for (String line : Files.readAllLines(file.toPath(), StandardCharsets.UTF_8)) {
+                if (!line.startsWith(worldName + ",")) {
+                    kept.add(line);
+                }
+            }
+            Files.write(file.toPath(), kept, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Failed to forget the wild groupings of " + worldName
+                    + ": " + e.getMessage());
+        }
     }
 }

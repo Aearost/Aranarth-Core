@@ -96,7 +96,20 @@ public class CommandTrees implements CommandExecutor {
                     sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "trees.regen_world_invalid")));
                     return;
                 }
-                if (!WildGrowth.start(world, sender instanceof Player player ? player.getUniqueId() : null)) {
+                // A radius grows a square that far from 0,0, otherwise it fits the world border
+                Integer radius = null;
+                if (args.length > 3) {
+                    try {
+                        radius = Integer.parseInt(args[3]);
+                    } catch (NumberFormatException e) {
+                        radius = -1;
+                    }
+                    if (radius < 16) {
+                        sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "trees.regen_usage")));
+                        return;
+                    }
+                }
+                if (!WildGrowth.start(world, sender instanceof Player player ? player.getUniqueId() : null, radius)) {
                     sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "trees.regen_already", "world", name)));
                     return;
                 }

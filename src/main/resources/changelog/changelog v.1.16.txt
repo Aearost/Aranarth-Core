@@ -65,6 +65,8 @@ Cross-server & Technical
 [~] Switching to Creative mode in a survival world now swaps to your creative inventory, and back when returning to Survival
 [~] Ender chests can no longer be opened by anyone in Creative mode
 [~] Players in Creative mode in a survival world can no longer trade, and their inventory can no longer be edited through /ac invsee
+[+] Added /trees regen to grow the custom plants in the world as specified
+[~] The resource world now automatically grows custom plants when regenerating
 
 Miscellaneous
 [+] Added /ac user to manage a player's location, inventory, ender chest and punishments from one centrallized GUI

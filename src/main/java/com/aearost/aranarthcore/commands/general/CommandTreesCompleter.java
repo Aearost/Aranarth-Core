@@ -32,7 +32,9 @@ public class CommandTreesCompleter implements TabCompleter {
                 }
             }
         } else if (args.length == 3 && args[0].equalsIgnoreCase("regen")) {
-            options.addAll(List.of("stop", "status", "near"));
+            options.addAll(List.of("start", "stop", "status", "near"));
+        } else if (args.length == 4 && args[0].equalsIgnoreCase("regen") && args[2].equalsIgnoreCase("start")) {
+            options.add("<radius>");
         }
         String typed = args[args.length - 1].toLowerCase();
         options.removeIf(option -> !option.toLowerCase().startsWith(typed));

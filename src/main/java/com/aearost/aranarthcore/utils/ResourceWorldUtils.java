@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.utils;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.trees.WildGrowth;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -37,6 +38,8 @@ public class ResourceWorldUtils {
     private static final Map<UUID, Long> lastLockedMessage = new HashMap<>();
     private static volatile boolean isRemoteResourceLocked = false;
     private static long resetStartTime = 0L;
+    /** Whether the new resource overworld should grow wild plants once the reset is complete. */
+    private static boolean isGrowingPending = false;
 
     /**
      * Whether the resource world reset is still in progress on this server.
@@ -146,6 +149,9 @@ public class ResourceWorldUtils {
                 Bukkit.getLogger().info(LOG + "Cancelled the existing Chunky task for " + worldName);
             }
 
+            // The wild plants of the old world go with it, and are grown again once the new one is ready
+            WildGrowth.forget(worldName);
+
             World world = Bukkit.getWorld(worldName);
             File worldFolder;
             if (world != null) {
@@ -222,6 +228,9 @@ public class ResourceWorldUtils {
             world.setGameRule(GameRules.LOCATOR_BAR, false);
             world.getWorldBorder().setCenter(0, 0);
             world.getWorldBorder().setSize(BORDER_SIZE);
+            if (ENVIRONMENTS[index] == World.Environment.NORMAL) {
+                isGrowingPending = true;
+            }
             pregenerateWorld(worldName, () -> scheduleNextWorld(worldsToCreate, position));
         });
     }
@@ -337,6 +346,14 @@ public class ResourceWorldUtils {
         lastLockedMessage.clear();
         Bukkit.getLogger().info(LOG + "Resource world reset complete in "
                 + ((System.currentTimeMillis() - resetStartTime) / 1000) + "s | " + getPerformance());
+
+        // Only once every world is created and pre-generated, so the server is not doing both at once
+        World resource = Bukkit.getWorld("resource");
+        if (isGrowingPending && resource != null) {
+            WildGrowth.start(resource, null, 0);
+            Bukkit.getLogger().info(LOG + "Started growing wild plants in resource");
+        }
+        isGrowingPending = false;
     }
 
     private static void publishLock(boolean isLocked) {
