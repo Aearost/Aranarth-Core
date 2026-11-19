@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.items.produce.Produce;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.dre.brewery.api.events.IngedientAddEvent;
+import com.dre.brewery.api.events.brew.BrewDrinkEvent;
 import com.dre.brewery.api.events.brew.BrewModifyEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -13,6 +14,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.BrewEvent;
 import org.bukkit.event.inventory.InventoryAction;
@@ -166,6 +168,20 @@ public class BrewingListener implements Listener {
         }
         e.setCancelled(true);
         e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "brew.produce_not_ingredient")));
+    }
+
+    /**
+     * Drinking a brew that matched no recipe will refill the player's hunger and saturation bars.
+     */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onUnfinishedBrewDrink(BrewDrinkEvent e) {
+        if (e.getBrew().hasRecipe()) {
+            return;
+        }
+        Player player = e.getPlayer();
+        int food = Math.min(20, player.getFoodLevel() + 3);
+        player.setFoodLevel(food);
+        player.setSaturation(Math.min(food, player.getSaturation() + 2F));
     }
 
     /**
