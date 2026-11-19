@@ -12,8 +12,13 @@ import com.aearost.aranarthcore.items.aranarthium.ingots.*;
 import com.aearost.aranarthcore.items.arrowhead.*;
 import com.aearost.aranarthcore.items.essence.EssenceBlank;
 import com.aearost.aranarthcore.items.netherite.NetheriteElytra;
+import com.aearost.aranarthcore.items.produce.FruitSapling;
+import com.aearost.aranarthcore.items.produce.Produce;
+import com.aearost.aranarthcore.items.produce.ProduceType;
 import com.aearost.aranarthcore.objects.RecipeGuideEntry;
 import com.aearost.aranarthcore.recipes.RecipeEssences;
+import com.aearost.aranarthcore.recipes.produce.RecipeFruitSapling;
+import com.aearost.aranarthcore.trees.CustomTrees;
 import org.bukkit.Bukkit;
 import org.bukkit.Keyed;
 import org.bukkit.Material;
@@ -93,6 +98,10 @@ public class RecipeGuideUtils {
                 }
                 crafting.add(createEntry(RecipeStation.CRAFTING, grid, alternatives, List.of(shaped.getResult()), getCraftingNotes(key)));
             } else if (recipe instanceof ShapelessRecipe shapeless) {
+                // A fruit sapling recipe only stands in for every fruit of that sapling, so each fruit is listed on its own below
+                if (key.startsWith(RecipeFruitSapling.KEY_PREFIX.toLowerCase(Locale.ROOT))) {
+                    continue;
+                }
                 Map<Material, ItemStack> substitutions = getSubstitutions(key);
                 ItemStack[] grid = new ItemStack[9];
                 List<List<Material>> alternatives = emptyAlternatives();
@@ -105,6 +114,7 @@ public class RecipeGuideUtils {
             }
         }
 
+        addFruitSaplingEntries(crafting);
         crafting.sort(Comparator.comparing(entry -> getName(entry.getResults().getFirst())));
 
         List<RecipeGuideEntry> all = new ArrayList<>(crafting);
@@ -241,6 +251,22 @@ public class RecipeGuideUtils {
                 all.add(createEntry(RecipeStation.ANVIL, anvilGrid(bases[i], ingot),
                         emptyAlternatives(), List.of(pieces[i]), notes));
             }
+        }
+    }
+
+    /**
+     * Adds a recipe for each fruit sapling: its fruit, or a vanilla Apple for the Apple Tree, with the sapling of its tree.
+     */
+    private static void addFruitSaplingEntries(List<RecipeGuideEntry> crafting) {
+        for (CustomTrees.Variant variant : FruitSapling.getVariants()) {
+            String fruitId = FruitSapling.getFruitId(variant);
+            ProduceType produce = ProduceType.fromId(fruitId);
+            ItemStack fruit = produce == null ? new ItemStack(Material.APPLE) : new Produce(produce).getItem();
+            ItemStack[] grid = new ItemStack[9];
+            grid[0] = fruit;
+            grid[1] = new ItemStack(variant.getSapling());
+            crafting.add(createEntry(RecipeStation.CRAFTING, grid, emptyAlternatives(),
+                    List.of(new FruitSapling(variant).getItem()), List.of()));
         }
     }
 

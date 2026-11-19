@@ -80,13 +80,19 @@ public class CommandAranarth implements CommandExecutor {
     );
 
     static final List<String> MECHANICS_SECTIONS = List.of(
-            "sawmill", "fletchingtable", "specialarrows", "quiver",
-            "potions", "dragonsbreath", "autoplant",
-            "croptrample", "autolock", "bonemealwood",
-            "bigtrees", "treetypes", "raretrees", "cauldronbottles",
+            "sawmill", "fletchingtable", "specialarrows",
+            "quiver", "potions", "dragonsbreath",
+            "autolock", "bonemealwood", "cauldronbottles",
             "goathorns", "navigation", "voting",
             "voicechat", "language", "toggles",
             "sounds", "heads", "brewbook"
+    );
+
+    static final List<String> FARMING_SECTIONS = List.of(
+            "intro", "bigtrees", "treetypes",
+            "raretrees", "fruittrees", "crops",
+            "growing", "harvesting", "seasons",
+            "foraging", "autoplant", "croptrample"
     );
 
     /**
@@ -149,9 +155,9 @@ public class CommandAranarth implements CommandExecutor {
             }
             case "rules" -> sendRules(player);
             // A shortcut to the types of custom trees and the sizes they grow from
-            case "trees" -> sendSectionChapter(player, "mechanics", "treetypes");
+            case "trees" -> sendSectionChapter(player, "farmingtrees", "treetypes");
             case "aranarthium", "essences", "dominions", "bending", "ranks", "economy", "perks", "mechanics",
-                 "creative" -> {
+                 "creative", "farmingtrees" -> {
                 String topic = args[0].toLowerCase();
                 if (args.length == 1) sendSectionMenu(player, topic);
                 else sendSectionChapter(player, topic, args[1].toLowerCase());
@@ -315,6 +321,7 @@ public class CommandAranarth implements CommandExecutor {
             case "perks" -> PERKS_SECTIONS;
             case "mechanics" -> MECHANICS_SECTIONS;
             case "creative" -> CREATIVE_SECTIONS;
+            case "farmingtrees" -> FARMING_SECTIONS;
             default -> List.of();
         };
     }
@@ -330,7 +337,8 @@ public class CommandAranarth implements CommandExecutor {
             case "ranks" -> new int[]{3, 3};
             case "creative" -> new int[]{2, 3, 2};
             case "economy" -> new int[]{2, 2, 2, 2};
-            case "mechanics" -> new int[]{2, 3, 3, 3, 3, 3, 3, 2};
+            case "mechanics" -> new int[]{3, 3, 3, 3, 3, 3};
+            case "farmingtrees" -> new int[]{3, 3, 3, 3};
             default -> new int[]{3, 3, 3};
         };
     }
@@ -339,7 +347,14 @@ public class CommandAranarth implements CommandExecutor {
         List<String> sections = getSections(topic);
         player.sendMessage(Component.empty());
         player.sendMessage(Component.empty());
-        player.sendMessage(ChatUtils.translateToColor("           " + Lang.getFor(player, topic + ".guide_title")));
+        String title = Lang.getFor(player, topic + ".guide_title");
+        // A title with no spaces of its own in front, often a long one, is centred by its width instead
+        if (ChatUtils.stripColorFormatting(title).startsWith(" ")) {
+            player.sendMessage(ChatUtils.translateToColor("           " + title));
+        } else {
+            int spaces = Math.max(0, (MENU_WIDTH_PX - getTitleWidth(title)) / 2 / 4);
+            player.sendMessage(ChatUtils.translateToColor(" ".repeat(spaces) + title));
+        }
         player.sendMessage(ChatUtils.translateToColor("           " + Lang.getFor(player, topic + ".guide_select_section")));
         player.sendMessage(Component.empty());
 
@@ -380,12 +395,12 @@ public class CommandAranarth implements CommandExecutor {
             sendMultilineIndented(player, Lang.getFor(player, "essences.section_" + section + "_content1"));
             player.sendMessage(Component.empty());
             sendMultilineIndented(player, Lang.getFor(player, "essences.section_" + section + "_content2"));
-        } else if (topic.equals("mechanics") && section.equals("treetypes")) {
-            sendMultilineIndented(player, Lang.getFor(player, "mechanics.section_treetypes_content"));
+        } else if (topic.equals("farmingtrees") && section.equals("treetypes")) {
+            sendMultilineIndented(player, Lang.getFor(player, "farmingtrees.section_treetypes_content"));
             player.sendMessage(Component.empty());
             sendTreeSizes(player);
-        } else if (topic.equals("mechanics") && section.equals("raretrees")) {
-            sendMultilineIndented(player, Lang.getFor(player, "mechanics.section_raretrees_content"));
+        } else if (topic.equals("farmingtrees") && section.equals("raretrees")) {
+            sendMultilineIndented(player, Lang.getFor(player, "farmingtrees.section_raretrees_content"));
             player.sendMessage(Component.empty());
             sendRareTrees(player);
         } else if (topic.equals("bending") || topic.equals("ranks")) {
@@ -402,94 +417,116 @@ public class CommandAranarth implements CommandExecutor {
                 .append(buildNavBtn(Lang.getFor(player, "guide.nav_next"), Lang.getFor(player, topic + ".section_" + nextSection + "_label"), "/aranarth " + topic + " " + nextSection)));
     }
 
-    /** The widest a line of trees may be before it wraps, in pixels of the chat font. */
-    private static final int TREE_LINE_WIDTH = 300;
+    /** The widest a row of sapling buttons may be before the next row starts, in pixels of the chat font. */
+    private static final int SAPLING_ROW_WIDTH = 236;
+
+    /** Reads the hex colours of the saplings' names, which the plain legacy serializer would drop. */
+    private static final LegacyComponentSerializer HEX_SERIALIZER = LegacyComponentSerializer.builder()
+            .character(LegacyComponentSerializer.SECTION_CHAR).hexColors().useUnusualXRepeatedCharacterHexFormat().build();
 
     /**
-     * Sends a line for each type of sapling, listing every tree it grows into from the smallest square to the largest.
+     * Sends a button for each type of sapling, which lists every tree it grows into when hovered over.
      */
     private void sendTreeSizes(Player player) {
-        player.sendMessage(ChatUtils.translateToColor("  " + Lang.getFor(player, "mechanics.trees_legend")));
+        Map<String, List<CustomTrees.Variant>> bySapling = new LinkedHashMap<>();
         for (TreeRow row : TREE_ROWS) {
             List<CustomTrees.Variant> variants = new ArrayList<>();
             for (Material sapling : row.saplings()) {
                 variants.addAll(CustomTrees.Variant.forSapling(sapling));
             }
-            sendTreeLine(player, variants);
+            if (!variants.isEmpty()) {
+                bySapling.put(row.key(), variants);
+            }
         }
+        sendSaplingButtons(player, bySapling);
     }
 
     /**
-     * Sends a line for each type of sapling that grows a rare tree.
+     * Sends a button for each type of sapling that grows a rare tree, which lists its rare trees and where they grow.
      */
     private void sendRareTrees(Player player) {
-        player.sendMessage(ChatUtils.translateToColor("  " + Lang.getFor(player, "mechanics.trees_legend")));
         Map<String, List<CustomTrees.Variant>> bySapling = new LinkedHashMap<>();
         for (CustomTrees.Variant variant : GuiTrees.rare()) {
             bySapling.computeIfAbsent(GuiTrees.saplingKey(variant.getSapling()), key -> new ArrayList<>()).add(variant);
         }
-        for (List<CustomTrees.Variant> variants : bySapling.values()) {
-            sendTreeLine(player, variants);
+        sendSaplingButtons(player, bySapling);
+    }
+
+    /**
+     * Sends the saplings as centred rows of [Sapling] buttons in the colour of their wood.
+     * @param bySapling The trees of each sapling, by the sapling's lang key after "trees.sapling_".
+     */
+    private void sendSaplingButtons(Player player, Map<String, List<CustomTrees.Variant>> bySapling) {
+        int gap = getPixelWidth("   ");
+        var row = Component.text();
+        int width = 0;
+        for (Map.Entry<String, List<CustomTrees.Variant>> entry : bySapling.entrySet()) {
+            String sapling = Lang.getFor(player, "trees.sapling_" + entry.getKey());
+            String label = "&8[" + sapling + "&8]";
+            int labelWidth = getPixelWidth(label);
+            if (width > 0 && width + gap + labelWidth > SAPLING_ROW_WIDTH) {
+                player.sendMessage(centre(row.build(), width));
+                row = Component.text();
+                width = 0;
+            }
+            if (width > 0) {
+                row.append(Component.text("   "));
+                width += gap;
+            }
+            row.append(HEX_SERIALIZER.deserialize(ChatUtils.translateToColor(label))
+                    .hoverEvent(HoverEvent.showText(HEX_SERIALIZER.deserialize(
+                            ChatUtils.translateToColor(getSaplingHover(player, sapling, entry.getValue()))))));
+            width += labelWidth;
+        }
+        if (width > 0) {
+            player.sendMessage(centre(row.build(), width));
         }
     }
 
     /**
-     * Sends the trees as [Name] entries coloured by the size of square they grow from, smallest first.
+     * Provides the hover text of a sapling button: each of its trees from the smallest square to the largest,
+     * with where it grows if it is a rare tree.
      */
-    private void sendTreeLine(Player player, List<CustomTrees.Variant> variants) {
-        if (variants.isEmpty()) {
-            return;
-        }
+    private String getSaplingHover(Player player, String sapling, List<CustomTrees.Variant> variants) {
         List<CustomTrees.Variant> sorted = new ArrayList<>(variants);
         sorted.sort(Comparator.comparingInt(variant -> Math.max(1, variant.getSize())));
-
-        var line = Component.text().append(Component.text("  "));
-        int width = getPixelWidth("  ");
-        boolean first = true;
+        // The sapling's name in bold, keeping its own colour
+        StringBuilder hover = new StringBuilder(sapling.replaceFirst("^(&#[0-9A-Fa-f]{6}|&[0-9a-f])", "$1&l"));
         for (CustomTrees.Variant variant : sorted) {
             int size = Math.max(1, variant.getSize());
-            String name = Lang.getFor(player, "trees.variant_" + variant.name().toLowerCase());
-            String entry = Lang.getFor(player, getTreeEntryKey(size), "name", name);
-
-            String hover = Lang.getFor(player, "mechanics.trees_hover_name", "name", name)
-                    + "\n" + Lang.getFor(player, "gui.trees.grows_from",
-                    "sapling", Lang.getFor(player, "trees.sapling_" + GuiTrees.saplingKey(variant.getSapling())),
-                    "size", size + "x" + size);
+            String key = size >= CustomTreeUtils.LARGE_TREE_SIZE
+                    ? "farmingtrees.trees_hover_entry_duke" : "farmingtrees.trees_hover_entry";
+            hover.append("\n").append(Lang.getFor(player, key,
+                    "name", Lang.getFor(player, "trees.variant_" + variant.name().toLowerCase()),
+                    "size", size + "x" + size));
             if (variant.isRare()) {
-                hover += "\n" + Lang.getFor(player, "gui.trees.where",
-                        "condition", Lang.getFor(player, "trees.condition_" + variant.name().toLowerCase()));
+                hover.append("\n  ").append(Lang.getFor(player, "gui.trees.where",
+                        "condition", Lang.getFor(player, "trees.condition_" + variant.name().toLowerCase())));
             }
-            if (size >= CustomTreeUtils.LARGE_TREE_SIZE) {
-                hover += "\n" + Lang.getFor(player, "mechanics.treetypes_duke_hover");
-            }
-
-            int entryWidth = getPixelWidth(entry);
-            if (!first && width + getPixelWidth(" ") + entryWidth > TREE_LINE_WIDTH) {
-                // Continues the sapling's trees on a further, more indented line
-                player.sendMessage(line.build());
-                line = Component.text().append(Component.text("    "));
-                width = getPixelWidth("    ");
-            } else if (!first) {
-                line.append(Component.text(" "));
-                width += getPixelWidth(" ");
-            }
-            line.append(LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(entry))
-                    .hoverEvent(HoverEvent.showText(LegacyComponentSerializer.legacySection().deserialize(
-                            ChatUtils.translateToColor(hover)))));
-            width += entryWidth;
-            first = false;
         }
-        player.sendMessage(line.build());
+        return hover.toString();
     }
 
     /**
-     * Provides the lang key of a tree entry, coloured by the size of square of saplings it grows from.
+     * Provides the approximate width of a title in Minecraft's default font, where each bold character is 1 pixel wider.
      */
-    private static String getTreeEntryKey(int size) {
-        if (size >= CustomTreeUtils.LARGE_TREE_SIZE) {
-            return "mechanics.trees_entry_duke";
+    private int getTitleWidth(String title) {
+        int width = 0;
+        boolean bold = false;
+        for (String part : title.split("(?=&)")) {
+            String text = part;
+            if (part.matches("(?s)&[0-9a-fk-or].*")) {
+                char code = Character.toLowerCase(part.charAt(1));
+                if (code == 'l') {
+                    bold = true;
+                } else if (code != 'k' && code != 'm' && code != 'n' && code != 'o') {
+                    bold = false;
+                }
+                text = part.substring(2);
+            }
+            width += getPixelWidth(text) + (bold ? text.length() : 0);
         }
-        return "mechanics.trees_entry_" + Math.min(size, 3);
+        return width;
     }
 
     /**

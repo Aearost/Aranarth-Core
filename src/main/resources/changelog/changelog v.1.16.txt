@@ -46,6 +46,7 @@ Economy, Jobs & Quests
 Chat, UI & Sounds
 [+] The Sawmill now has its own page in /aranarth mechanics
 [+] Added /creative items to the /aranarth menu
+[+] Added a Trees, Fruits, and Farming section to /aranarth, covering fruit trees, planting, growing, harvesting, seasons and foraging
 
 Quality of Life
 [~] Final blows no longer kill a player if the fight was from /countdown

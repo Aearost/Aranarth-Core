@@ -13,8 +13,8 @@ public class CommandAranarthCompleter implements TabCompleter {
 
     private static final List<String> TOPICS = List.of(
             "calendar", "aranarthium", "essences", "rules",
-            "dominions", "bending", "ranks", "economy", "perks", "mechanics", "creative", "recipes",
-            "trees"
+            "dominions", "bending", "ranks", "economy", "perks", "mechanics", "creative", "farmingtrees",
+            "recipes", "trees"
     );
 
     @Override
