@@ -9,6 +9,7 @@ import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.ProduceTradeUtils;
 import com.aearost.aranarthcore.utils.TradeManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -21,6 +22,7 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.BrewerInventory;
+import org.bukkit.inventory.MerchantInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -75,6 +77,9 @@ public class InventoryClickEventListener implements Listener {
      */
     @EventHandler
     public void onInventoryDrag(InventoryDragEvent e) {
+        if (e.getView().getTopInventory() instanceof MerchantInventory merchant) {
+            ProduceTradeUtils.refreshPaymentLater(merchant);
+        }
         GuiHolder holder = GuiHolder.of(e.getView().getTopInventory());
         if (holder == null || holder.isDragAllowed()) {
             return;
@@ -252,6 +257,8 @@ public class InventoryClickEventListener implements Listener {
             } else if (TradeManager.isTradeGuiOpen(player)) {
                 new GuiTradeClick().execute(e);
             }
+        } else if (e.getView().getTopInventory() instanceof MerchantInventory merchant) {
+            ProduceTradeUtils.onMerchantClick(e, merchant);
         } else if (e.getView().getType() != InventoryType.CHEST) {
             if (e.getClickedInventory() != null) {
                 if (e.getView().getType() == InventoryType.ANVIL || e.getView().getType() == InventoryType.SMITHING) {

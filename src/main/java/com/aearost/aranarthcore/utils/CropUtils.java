@@ -95,11 +95,16 @@ public class CropUtils {
 		}
 
 		// Fruit, berries, vegetables and their seeds follow the seasons of sweet berries
+		// Produce is checked first, as many are made from a vanilla seed or crop, such as Corn Seeds from Wheat Seeds
 		Material source;
-		if (isCropSeed(item.getType())) {
+		ProduceType produce = Produce.getType(item);
+		if (produce != null) {
+			if (!produce.hasSeasonalLore()) {
+				return;
+			}
+			source = CropType.seasonFor(produce);
+		} else if (isCropSeed(item.getType())) {
 			source = item.getType();
-		} else if (Produce.getType(item) != null && Produce.getType(item).hasSeasonalLore()) {
-			source = CropType.seasonFor(Produce.getType(item));
 		} else {
 			return;
 		}
@@ -587,7 +592,28 @@ public class CropUtils {
 			return false;
 		}
 		ProduceType produce = Produce.getType(item);
-		return isCropSeed(item.getType()) || (produce != null && produce.hasSeasonalLore());
+		if (produce != null) {
+			return produce.hasSeasonalLore();
+		}
+		return isCropSeed(item.getType());
+	}
+
+	/**
+	 * Determines if both items are the same seed or produce, ignoring the seasonal lore that changes every month.
+	 * @param first The first item.
+	 * @param second The second item.
+	 * @return Confirmation of whether both items are the same seed or produce.
+	 */
+	public static boolean isSameSeasonalItem(ItemStack first, ItemStack second) {
+		if (first == null || second == null || first.getType() != second.getType()) {
+			return false;
+		}
+		ProduceType firstProduce = Produce.getType(first);
+		ProduceType secondProduce = Produce.getType(second);
+		if (firstProduce != null || secondProduce != null) {
+			return firstProduce == secondProduce;
+		}
+		return isCropSeed(first.getType());
 	}
 
 	public static void refreshInventory(Inventory inventory, World world) {
@@ -608,7 +634,8 @@ public class CropUtils {
 	 * are left alone, so they keep stacking with each other.
 	 */
 	public static void applyBerryEatSpeed(ItemStack item) {
-		if (item == null || (item.getType() != Material.SWEET_BERRIES && item.getType() != Material.GLOW_BERRIES)) {
+		if (item == null || (item.getType() != Material.SWEET_BERRIES && item.getType() != Material.GLOW_BERRIES)
+				|| Produce.getType(item) != null) {
 			return;
 		}
 		Consumable current = item.getData(DataComponentTypes.CONSUMABLE);

@@ -277,7 +277,7 @@ public class ShopInteract {
                     }
 
                     // Each month changes the lore of crop seeds, must consider that
-                    boolean isSameCropSeed = inventoryItem.getType() == shop.getItem().getType() && CropUtils.isCropSeed(inventoryItem.getType());
+                    boolean isSameCropSeed = CropUtils.isSameSeasonalItem(inventoryItem, shop.getItem());
                     if (inventoryItem.isSimilar(shop.getItem()) || isSameCropSeed) {
                         spaceForShopItemInPlayerInventory += inventoryItem.getMaxStackSize() - inventoryItem.getAmount();
                     }
@@ -294,7 +294,7 @@ public class ShopInteract {
                             if (shulkerItem == null) {
                                 continue;
                             }
-                            boolean isSameCropSeed = shulkerItem.getType() == shop.getItem().getType() && CropUtils.isCropSeed(shulkerItem.getType());
+                            boolean isSameCropSeed = CropUtils.isSameSeasonalItem(shulkerItem, shop.getItem());
                             if (shulkerItem.isSimilar(shop.getItem()) || isSameCropSeed) {
                                 spaceForShopItemInPlayerInventory += shulkerItem.getMaxStackSize() - shulkerItem.getAmount();
                             }
@@ -351,7 +351,7 @@ public class ShopInteract {
                             if (shulkerItem == null) {
                                 continue;
                             }
-                            boolean isSameCropSeed = shulkerItem.getType() == shop.getItem().getType() && CropUtils.isCropSeed(shop.getItem().getType());
+                            boolean isSameCropSeed = CropUtils.isSameSeasonalItem(shulkerItem, shop.getItem());
                             if (shulkerItem.isSimilar(shop.getItem()) || isSameCropSeed) {
                                 int spaceInStack = shulkerItem.getMaxStackSize() - shulkerItem.getAmount();
                                 if (spaceInStack > 0) {
@@ -615,7 +615,7 @@ public class ShopInteract {
                 if (shulkerContent == null) {
                     continue;
                 }
-                boolean isSameCropSeed = shulkerContent.getType() == shop.getItem().getType() && CropUtils.isCropSeed(shop.getItem().getType());
+                boolean isSameCropSeed = CropUtils.isSameSeasonalItem(shulkerContent, shop.getItem());
                 if (shulkerContent.isSimilar(shop.getItem()) || isSameCropSeed) {
                     shulkerContent.setAmount(shulkerContent.getAmount() + amount);
                     shulkerInv.setContents(shulkerContents);
@@ -662,7 +662,7 @@ public class ShopInteract {
                 if (shulkerItem == null) {
                     continue;
                 }
-                boolean isSameCropSeed = shulkerItem.getType() == shop.getItem().getType() && CropUtils.isCropSeed(shop.getItem().getType());
+                boolean isSameCropSeed = CropUtils.isSameSeasonalItem(shulkerItem, shop.getItem());
                 if (shulkerItem.isSimilar(shop.getItem()) || isSameCropSeed) {
                     shulkerContribution += shulkerItem.getMaxStackSize() > 1
                             ? shulkerItem.getAmount() - 1
@@ -680,7 +680,7 @@ public class ShopInteract {
             if (contents[i] == null || isShulkerBox(contents[i])) {
                 continue;
             }
-            boolean isSameCropSeed = contents[i].getType() == shop.getItem().getType() && CropUtils.isCropSeed(shop.getItem().getType());
+            boolean isSameCropSeed = CropUtils.isSameSeasonalItem(contents[i], shop.getItem());
             if (contents[i].isSimilar(shop.getItem()) || isSameCropSeed) {
                 int take = shulkerContribution > 0
                         ? contents[i].getAmount()
@@ -720,7 +720,7 @@ public class ShopInteract {
                 if (shulkerContents[j] == null) {
                     continue;
                 }
-                boolean isSameCropSeed = shulkerContents[j].getType() == shop.getItem().getType() && CropUtils.isCropSeed(shop.getItem().getType());
+                boolean isSameCropSeed = CropUtils.isSameSeasonalItem(shulkerContents[j], shop.getItem());
                 if (shulkerContents[j].isSimilar(shop.getItem()) || isSameCropSeed) {
                     int maxTakeFromSlot = shulkerContents[j].getMaxStackSize() > 1
                             ? shulkerContents[j].getAmount() - 1
@@ -780,7 +780,7 @@ public class ShopInteract {
             if (contents[i] == null || isShulkerBox(contents[i])) {
                 continue;
             }
-            boolean isSameCropSeed = contents[i].getType() == playerShop.getItem().getType() && CropUtils.isCropSeed(playerShop.getItem().getType());
+            boolean isSameCropSeed = CropUtils.isSameSeasonalItem(contents[i], playerShop.getItem());
             if (contents[i].isSimilar(playerShop.getItem()) || isSameCropSeed) {
                 int take = Math.min(needed - collected, contents[i].getAmount());
                 collected += take;
@@ -815,7 +815,7 @@ public class ShopInteract {
                     if (shulkerContents[j] == null) {
                         continue;
                     }
-                    boolean isSameCropSeed = shulkerContents[j].getType() == playerShop.getItem().getType() && CropUtils.isCropSeed(playerShop.getItem().getType());
+                    boolean isSameCropSeed = CropUtils.isSameSeasonalItem(shulkerContents[j], playerShop.getItem());
                     if (shulkerContents[j].isSimilar(playerShop.getItem()) || isSameCropSeed) {
                         int take = Math.min(needed - collected, shulkerContents[j].getAmount());
                         collected += take;

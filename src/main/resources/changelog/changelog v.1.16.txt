@@ -3,6 +3,9 @@ AranarthCore v. 1.16
 World & Events
 [+] Implemented custom trees to be grown from saplings
 [~] All berries, both vanilla and custom, are eaten twice as fast
+[+] Custom produce items now work as their closest vanilla item, so they can be composted and fed to animals
+[+] Farmer villagers now buy custom produce items
+[+] Wandering Farmers now buy and sell custom produce items and their seeds
 [+] Added /trees to choose which custom trees your saplings can grow into
 [~] Players now enter AFK status when only clicking or being moved by external factors
 [~] Entering the arena from a spawn sign now clears all potion effects, so the spawn boost no longer carries over

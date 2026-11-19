@@ -6,10 +6,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.plugin.Plugin;
 
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Crafts one piece of produce on its own into what it holds.
@@ -63,9 +67,27 @@ public class RecipeProduce {
      * @param plugin The plugin.
      */
     private void createRecipe(Plugin plugin) {
+        // Only the bases that no single-item vanilla recipe uses
+        Set<Material> bases = EnumSet.noneOf(Material.class);
+        for (ProduceType type : RESULTS.keySet()) {
+            Material base = type.getBaseMaterial();
+            if (base != Material.BEETROOT && base != Material.MELON_SLICE) {
+                bases.add(base);
+            }
+        }
         ShapelessRecipe recipe = new ShapelessRecipe(new NamespacedKey(plugin, KEY), new Produce(ProduceType.RICE).getItem());
-        recipe.addIngredient(1, Material.FIREWORK_STAR);
+        recipe.addIngredient(new RecipeChoice.MaterialChoice(new ArrayList<>(bases)));
         Bukkit.addRecipe(recipe);
+    }
+
+    /**
+     * Determines if the crafting grid holds exactly one piece of produce and nothing else.
+     * @param matrix The crafting grid.
+     * @return Confirmation of whether the grid holds a single piece of produce.
+     */
+    public static boolean isSingleProduce(ItemStack[] matrix) {
+        ItemStack only = getOnlyItem(matrix);
+        return only != null && Produce.getType(only) != null;
     }
 
     /**
@@ -73,6 +95,17 @@ public class RecipeProduce {
      * @return The result, or null if the grid makes nothing.
      */
     public static ItemStack getResult(ItemStack[] matrix) {
+        ItemStack only = getOnlyItem(matrix);
+        // A plain vanilla item is not produce, and the map cannot be searched for null
+        ProduceType type = only == null ? null : Produce.getType(only);
+        Result result = type == null ? null : RESULTS.get(type);
+        return result == null ? null : result.create();
+    }
+
+    /**
+     * @return The only item in the crafting grid, or null if it is empty or holds more than one item.
+     */
+    private static ItemStack getOnlyItem(ItemStack[] matrix) {
         ItemStack only = null;
         for (ItemStack item : matrix) {
             if (item == null || item.getType() == Material.AIR) {
@@ -83,9 +116,6 @@ public class RecipeProduce {
             }
             only = item;
         }
-        // A plain firework star is not produce, and the map cannot be searched for null
-        ProduceType type = only == null ? null : Produce.getType(only);
-        Result result = type == null ? null : RESULTS.get(type);
-        return result == null ? null : result.create();
+        return only;
     }
 }

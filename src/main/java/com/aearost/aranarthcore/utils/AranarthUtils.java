@@ -3237,7 +3237,7 @@ public class AranarthUtils {
         }
 
         for (ItemStack is : blacklistedItems) {
-            if (is.isSimilar(item) || (item.getType() == is.getType() && CropUtils.isCropSeed(item.getType()))) {
+            if (is.isSimilar(item) || (CropUtils.isSameSeasonalItem(item, is))) {
                 return aranarthPlayer.getBlacklistingMethod();
             }
         }

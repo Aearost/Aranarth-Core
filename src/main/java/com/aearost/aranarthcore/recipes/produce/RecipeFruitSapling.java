@@ -7,7 +7,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.plugin.Plugin;
 
@@ -44,7 +43,8 @@ public class RecipeFruitSapling {
             }
             ShapelessRecipe recipe = new ShapelessRecipe(new NamespacedKey(plugin, KEY_PREFIX + sapling.name()),
                     new FruitSapling(example).getItem());
-            recipe.addIngredient(new RecipeChoice.MaterialChoice(Material.FIREWORK_STAR, Material.APPLE));
+            // Every fruit with a sapling, the vanilla Apple included, is made from an Apple
+            recipe.addIngredient(Material.APPLE);
             recipe.addIngredient(sapling);
             Bukkit.addRecipe(recipe);
         }
@@ -61,7 +61,7 @@ public class RecipeFruitSapling {
             if (item == null || item.getType() == Material.AIR) {
                 continue;
             }
-            if (item.getType() == Material.FIREWORK_STAR || item.getType() == Material.APPLE) {
+            if (item.getType() == Material.APPLE) {
                 if (fruit != null) {
                     return null;
                 }

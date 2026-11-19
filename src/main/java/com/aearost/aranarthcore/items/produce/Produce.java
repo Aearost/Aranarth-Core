@@ -39,7 +39,7 @@ public class Produce implements AranarthItem {
      * @return The produce item.
      */
     public ItemStack getItem() {
-        ItemStack item = new ItemStack(Material.FIREWORK_STAR, 1);
+        ItemStack item = new ItemStack(type.getBaseMaterial(), 1);
         ItemMeta meta = item.getItemMeta();
         if (Objects.nonNull(meta)) {
             meta.setItemModel(new NamespacedKey(AranarthCore.getInstance(), type.getId()));
@@ -53,6 +53,10 @@ public class Produce implements AranarthItem {
                     .saturation(food.saturation()).build());
             item.setData(DataComponentTypes.CONSUMABLE, Consumable.consumable().consumeSeconds(food.seconds())
                     .animation(ItemUseAnimation.EAT).build());
+        } else {
+            // Bases such as the Apple and Beetroot are edible, but Onions, Garlic and Coconuts are not
+            item.unsetData(DataComponentTypes.FOOD);
+            item.unsetData(DataComponentTypes.CONSUMABLE);
         }
         return item;
     }
@@ -79,6 +83,22 @@ public class Produce implements AranarthItem {
             return null;
         }
         return ProduceType.fromId(pdc.get(PRODUCE, PersistentDataType.STRING));
+    }
+
+    /**
+     * Provides the same produce without its seasonal lore, as it is kept in containers and hoppers so it stacks and sorts
+     * the same in every month.
+     * @param item The produce.
+     * @return The produce without lore, or null if the item is not produce.
+     */
+    public static ItemStack withoutLore(ItemStack item) {
+        ProduceType type = getType(item);
+        if (type == null) {
+            return null;
+        }
+        ItemStack plain = new Produce(type).getItem();
+        plain.setAmount(item.getAmount());
+        return plain;
     }
 
     /**

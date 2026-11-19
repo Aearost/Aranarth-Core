@@ -3,6 +3,8 @@ package com.aearost.aranarthcore.event.listener.grouped;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.crafting.*;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
+import com.aearost.aranarthcore.items.produce.Produce;
+import com.aearost.aranarthcore.items.produce.ProduceType;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.CustomItemUtils;
 import com.aearost.aranarthcore.utils.CustomItemUtils.Station;
@@ -61,12 +63,16 @@ public class CraftingOverridesListener implements Listener {
 				return;
 			}
 		}
-		if (isProduceRecipe(e.getRecipe())) {
+		// A single piece of produce also matches vanilla recipes of its base, such as a Tomato matching Beetroot into Red Dye
+		if (isProduceRecipe(e.getRecipe()) || (e.getRecipe() != null && RecipeProduce.isSingleProduce(matrix))) {
 			e.getInventory().setResult(RecipeProduce.getResult(matrix));
 			return;
 		}
 		if (isFruitSaplingRecipe(e.getRecipe())) {
 			e.getInventory().setResult(RecipeFruitSapling.getResult(matrix));
+			return;
+		}
+		if (e.getRecipe() != null && isAllowedProduceRecipe(e.getRecipe().getResult(), matrix)) {
 			return;
 		}
 		if (CustomItemUtils.containsDisallowed(matrix, Station.CRAFTING)) {
@@ -92,6 +98,34 @@ public class CraftingOverridesListener implements Listener {
 	}
 
 	/**
+	 * Determines if  the vanilla recipe is one that produce may be used in.
+	 * @param result The result of the matched vanilla recipe.
+	 * @param matrix The crafting grid.
+	 * @return Confirmation of whether the produce in the grid may be used in the recipe.
+	 */
+	private static boolean isAllowedProduceRecipe(ItemStack result, ItemStack[] matrix) {
+		ProduceType allowed = switch (result == null ? Material.AIR : result.getType()) {
+			case GOLDEN_APPLE -> ProduceType.GREEN_APPLE;
+			case GLISTERING_MELON_SLICE -> ProduceType.CANTALOUPE_SLICE;
+			default -> null;
+		};
+		if (allowed == null) {
+			return false;
+		}
+		boolean hasProduce = false;
+		for (ItemStack item : matrix) {
+			if (item == null || !CustomItemUtils.isCustomItem(item)) {
+				continue;
+			}
+			if (Produce.getType(item) != allowed) {
+				return false;
+			}
+			hasProduce = true;
+		}
+		return hasProduce;
+	}
+
+	/**
 	 * Handles cancelling improper crafting recipes.
 	 * @param e The event.
 	 */
@@ -103,7 +137,7 @@ public class CraftingOverridesListener implements Listener {
 		if (getCustomRepairResult(e.getInventory().getMatrix()) != null) {
 			return;
 		}
-		if (isProduceRecipe(e.getRecipe())) {
+		if (isProduceRecipe(e.getRecipe()) || RecipeProduce.isSingleProduce(e.getInventory().getMatrix())) {
 			if (RecipeProduce.getResult(e.getInventory().getMatrix()) == null) {
 				e.setCancelled(true);
 			}
@@ -113,6 +147,9 @@ public class CraftingOverridesListener implements Listener {
 			if (RecipeFruitSapling.getResult(e.getInventory().getMatrix()) == null) {
 				e.setCancelled(true);
 			}
+			return;
+		}
+		if (isAllowedProduceRecipe(result, e.getInventory().getMatrix())) {
 			return;
 		}
 		if (CustomItemUtils.containsDisallowed(e.getInventory().getMatrix(), Station.CRAFTING)) {

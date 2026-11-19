@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.items.produce;
 
+import org.bukkit.Material;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -146,6 +148,28 @@ public enum ProduceType {
             case SWEET_POTATO -> new Food(1, 0.6F, 1.6F);
             case ROASTED_ACORN -> new Food(2, 1.6F, 0.8F);
             default -> null;
+        };
+    }
+
+    /**
+     * Provides the vanilla item the produce is made from.
+     */
+    public Material getBaseMaterial() {
+        return switch (this) {
+            case BLUEBERRY, RASPBERRY, BLACKBERRY, STRAWBERRY, GREEN_GRAPES, RED_GRAPES -> Material.SWEET_BERRIES;
+            case CANTALOUPE_SLICE -> Material.MELON_SLICE;
+            case TOMATO, GREEN_BELL_PEPPER, YELLOW_BELL_PEPPER, ORANGE_BELL_PEPPER, RED_BELL_PEPPER, CABBAGE, LETTUCE,
+                 ONION, GARLIC -> Material.BEETROOT;
+            case SWEET_POTATO -> Material.POTATO;
+            case CORN -> Material.CARROT;
+            case RICE_STALK -> Material.WHEAT;
+            case RICE, CORN_SEEDS, TOMATO_SEEDS, BELL_PEPPER_SEEDS, LETTUCE_SEEDS, CABBAGE_SEEDS, KIWI_SEEDS -> Material.WHEAT_SEEDS;
+            case CANTALOUPE_SEEDS -> Material.MELON_SEEDS;
+            case COFFEE_BEANS -> Material.COCOA_BEANS;
+            // Acorns are roasted by matching the exact item, so they keep a base no vanilla recipe uses
+            case ACORN, ROASTED_ACORN -> Material.FIREWORK_STAR;
+            // Tree fruit, Kiwi and Pineapple
+            default -> Material.APPLE;
         };
     }
 

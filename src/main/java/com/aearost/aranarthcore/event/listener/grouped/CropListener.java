@@ -38,6 +38,7 @@ import org.bukkit.event.block.BlockGrowEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
@@ -283,6 +284,16 @@ public class CropListener implements Listener {
         }
         Dominion dominion = DominionUtils.getDominionOfChunk(block.getChunk());
         return dominion == null || DominionUtils.hasPermission(player, dominion, DominionPermission.MISC_INTERACT);
+    }
+
+    /**
+     * Produce never places the vanilla crop, bush or cocoa of the item it is made from, such as Rice planting Wheat.
+     */
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onPlace(BlockPlaceEvent e) {
+        if (Produce.getType(e.getItemInHand()) != null) {
+            e.setCancelled(true);
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)

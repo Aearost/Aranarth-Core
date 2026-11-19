@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.utils;
 import com.aearost.aranarthcore.enums.WanderingTraderType;
 import com.aearost.aranarthcore.items.ChorusDiamond;
 import com.aearost.aranarthcore.items.GodAppleFragment;
+import com.aearost.aranarthcore.items.produce.ProduceType;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.CustomKeys;
 import org.bukkit.Bukkit;
@@ -39,6 +40,8 @@ import java.util.stream.Collectors;
 public class WanderingTraderUtils {
 
     private static final Random RANDOM = new Random();
+    /** How many different tree fruits the Wandering Farmer buys from players. */
+    private static final int FRUIT_SELL_TRADES = 4;
 
     private static final Material[] TIER1_STONES = {
         Material.STONE, Material.COBBLESTONE, Material.GRANITE,
@@ -447,7 +450,50 @@ public class WanderingTraderUtils {
         trades.add(buy(new ItemStack(Material.MUSHROOM_STEM, 16), 16, 1));
         trades.add(buy(new ItemStack(Material.HONEY_BLOCK, 2), 24, 1));
 
+        addFarmerProduceTrades(trades);
         return trades;
+    }
+
+    /**
+     * Adds the seeds, berries, crops and tree fruit of Aranarth's custom crops and fruit trees to the Wandering Farmer.
+     */
+    private static void addFarmerProduceTrades(List<MerchantRecipe> trades) {
+        // 2 different seed packs
+        List<ProduceType> seeds = shuffledList(new ProduceType[]{
+            ProduceType.CORN_SEEDS, ProduceType.TOMATO_SEEDS, ProduceType.BELL_PEPPER_SEEDS, ProduceType.LETTUCE_SEEDS,
+            ProduceType.CABBAGE_SEEDS, ProduceType.CANTALOUPE_SEEDS, ProduceType.KIWI_SEEDS
+        });
+        for (int i = 0; i < 2; i++) {
+            trades.add(buy(ProduceTradeUtils.createProduce(seeds.get(i), 8), 16, 1));
+        }
+
+        ProduceType[] berries = {
+            ProduceType.BLUEBERRY, ProduceType.RASPBERRY, ProduceType.BLACKBERRY, ProduceType.STRAWBERRY
+        };
+        // The extra option is vanilla sweet berries
+        int berry = RANDOM.nextInt(berries.length + 1);
+        trades.add(buy(berry == berries.length ? ProduceTradeUtils.createSweetBerries(8)
+                : ProduceTradeUtils.createProduce(berries[berry], 8), 16, 2));
+
+        // A crop planted from itself
+        ProduceType crop = pickRandom(new ProduceType[]{
+            ProduceType.RICE, ProduceType.SWEET_POTATO, ProduceType.ONION, ProduceType.GARLIC,
+            ProduceType.GREEN_GRAPES, ProduceType.RED_GRAPES, ProduceType.COFFEE_BEANS
+        });
+        int cropAmount = crop == ProduceType.GREEN_GRAPES || crop == ProduceType.RED_GRAPES ? 4 : 8;
+        trades.add(buy(ProduceTradeUtils.createProduce(crop, cropAmount), 16, 2));
+
+        if (RANDOM.nextInt(4) == 0) {
+            trades.add(buy(ProduceTradeUtils.createProduce(ProduceType.PINEAPPLE, 1), 8, 3));
+        }
+
+        // One tree fruit to buy, enough to craft its fruit sapling, and 4 different ones to sell
+        List<ProduceType> fruit = new ArrayList<>(ProduceType.getVoteCrateFruit());
+        Collections.shuffle(fruit, RANDOM);
+        trades.add(buy(ProduceTradeUtils.createProduce(fruit.get(0), 4), 8, 2));
+        for (int i = 1; i <= FRUIT_SELL_TRADES && i < fruit.size(); i++) {
+            trades.add(sell(1, 32, ProduceTradeUtils.createProduce(fruit.get(i), 4)));
+        }
     }
 
     private static List<MerchantRecipe> buildSmithTrades() {

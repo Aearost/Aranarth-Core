@@ -114,7 +114,7 @@ public record FruitSapling(Variant variant) implements AranarthItem {
             fruitId = "apple";
         } else {
             ProduceType type = Produce.getType(fruit);
-            if (type == null || fruit.getType() != Material.FIREWORK_STAR) {
+            if (type == null) {
                 return null;
             }
             fruitId = type.getId();

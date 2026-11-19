@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.event.player.QuestNpcInteract;
 import com.aearost.aranarthcore.gui.GuiPetFood;
 import com.aearost.aranarthcore.utils.DefenderUtils;
 import com.aearost.aranarthcore.utils.PetInventoryUtils;
+import com.aearost.aranarthcore.utils.ProduceTradeUtils;
 import com.aearost.aranarthcore.utils.QuestUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.*;
@@ -49,8 +50,12 @@ public class PlayerInteractEntityEventListener implements Listener {
                     return;
                 }
                 new VillagerTradeOverrides().execute(e);
+                ProduceTradeUtils.ensureFarmerTrades((Villager) e.getRightClicked());
+                ProduceTradeUtils.refreshProduceTrades((Villager) e.getRightClicked());
                 new VillagerInventoryViewClick().execute(e);
                 new VillagerCamelPickup().execute(e);
+            } else if (e.getRightClicked() instanceof WanderingTrader trader) {
+                ProduceTradeUtils.refreshProduceTrades(trader);
             } else if (e.getRightClicked() instanceof AbstractHorse || e.getRightClicked() instanceof Wolf
                         || e.getRightClicked() instanceof IronGolem) {
                 new SentinelMark().execute(e);

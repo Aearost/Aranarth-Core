@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiDominionFood;
+import com.aearost.aranarthcore.items.produce.Produce;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -63,13 +64,13 @@ public class GuiDominionFoodClick {
 
 		if (e.getClickedInventory() != null) {
 			if (e.getClickedInventory().getType() == InventoryType.PLAYER) {
-				if (e.getCurrentItem() != null && !isEligibleFoodItem(e.getCurrentItem().getType())) {
+				if (e.getCurrentItem() != null && !isEligibleFoodItem(e.getCurrentItem())) {
 					e.setCancelled(true);
 				}
 			} else {
 				if (e.getAction() == InventoryAction.HOTBAR_SWAP) {
 					ItemStack hotbarItem = e.getView().getBottomInventory().getItem(e.getHotbarButton());
-					if (hotbarItem != null && !isEligibleFoodItem(hotbarItem.getType())) {
+					if (hotbarItem != null && !isEligibleFoodItem(hotbarItem)) {
 						e.setCancelled(true);
 					}
 				}
@@ -105,10 +106,14 @@ public class GuiDominionFoodClick {
 
 	/**
 	 * Determines if the item is an eligible food item.
-	 * @param type The Material of the food item.
+	 * @param item The food item.
 	 * @return Confirmation if the item is an eligible food item.
 	 */
-	public boolean isEligibleFoodItem(Material type) {
+	public boolean isEligibleFoodItem(ItemStack item) {
+		if (Produce.getType(item) != null) {
+			return false;
+		}
+		Material type = item.getType();
 		return type == Material.ENCHANTED_GOLDEN_APPLE || type == Material.CAKE || type == Material.HAY_BLOCK
 				|| type == Material.RABBIT_STEW || type == Material.MUSHROOM_STEW || type == Material.BEETROOT_SOUP
 				|| type == Material.GOLDEN_APPLE || type == Material.COOKED_PORKCHOP || type == Material.COOKED_MUTTON
