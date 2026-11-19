@@ -39,6 +39,8 @@ Aranarthium, Items & Crafting
 [~] Fixed Essence of Magnetism hoes not pulling drops from leaves and other blocks mined with a hoe
 
 Economy, Jobs & Quests
+[+] Custom crops and fruit now count towards Farmer quests, and harvesting them adds progress to Harvest Crops quests
+[+] Added the Pick Fruit and Harvest Produce Farmer quests
 [+] Added 1/4 pay when earning income from jobs while AFK
 [+] Server shop prices recover faster the cheaper the shop is, keeping the current rate for $500 and above
 [~] Alchemists now earn money when using potions

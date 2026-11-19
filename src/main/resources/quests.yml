@@ -233,9 +233,9 @@ quests:
     jobs: [FARMER]
     tier: EASY
     family: crop-any
-    acts: ["h:wheat", "h:carrot", "h:potato", "h:beet", "h:wart", "h:cocoa", "h:melon", "h:pumpkin", "h:berries"]
+    acts: ["h:wheat", "h:carrot", "h:potato", "h:beet", "h:wart", "h:cocoa", "h:melon", "h:pumpkin", "h:berries", "h:produce"]
     trigger: HARVEST
-    targets: ["WHEAT", "CARROTS", "POTATOES", "BEETROOTS", "NETHER_WART", "COCOA", "MELON", "PUMPKIN", "SWEET_BERRY_BUSH", "CAVE_VINES"]
+    targets: ["WHEAT", "CARROTS", "POTATOES", "BEETROOTS", "NETHER_WART", "COCOA", "MELON", "PUMPKIN", "SWEET_BERRY_BUSH", "CAVE_VINES", "PRODUCE_*"]
     level: 1
     daily:
       amount: [460, 600, 775, 900, 1050, 1400, 1750, 2150, 2600]
@@ -307,6 +307,34 @@ quests:
       glow_berries:
         targets: ["CAVE_VINES"]
         level: 4
+  fa_fruit:
+    jobs: [FARMER]
+    tier: STANDARD
+    family: fruit
+    acts: ["h:fruit"]
+    trigger: HARVEST
+    targets: ["FRUIT_*"]
+    level: 1
+    daily:
+      amount: [40, 50, 65, 75, 90, 120, 150, 180, 220]
+      reward: [300, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+    weekly:
+      amount: [220, 290, 400, 500, 625, 825, 1050, 1300, 1550]
+      reward: [1200, 2600, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
+  fa_produce:
+    jobs: [FARMER]
+    tier: STANDARD
+    family: produce
+    acts: ["h:produce"]
+    trigger: HARVEST
+    targets: ["PRODUCE_*"]
+    level: 1
+    daily:
+      amount: [40, 50, 65, 75, 90, 120, 150, 180, 220]
+      reward: [300, 750, 1800, 3500, 6000, 9000, 13000, 18000, 25000]
+    weekly:
+      amount: [220, 290, 400, 500, 625, 825, 1050, 1300, 1550]
+      reward: [1200, 2600, 5200, 11000, 20000, 30000, 44000, 69000, 110000]
   fa_plant:
     jobs: [FARMER]
     tier: EASY

@@ -724,7 +724,7 @@ public class Crops {
             drop(base, type.getSeeds(), seeds);
             if (player != null && shown > 0) {
                 FruitUtils.reward(player, type.getMode() == CropType.HarvestMode.REPLANT ? 40 : 30,
-                        type.getMode() == CropType.HarvestMode.REPLANT ? 0.80 : 0.60);
+                        type.getMode() == CropType.HarvestMode.REPLANT ? 0.80 : 0.60, questKey(type));
             }
         }
         base.getWorld().playSound(base.getLocation().add(0.5, 0.5, 0.5), Sound.BLOCK_SWEET_BERRY_BUSH_PICK_BERRIES, 1F, 1F);
@@ -740,6 +740,13 @@ public class Crops {
             setStage(base, picked, type.getRegrowStage(), layout);
         }
         return true;
+    }
+
+    /**
+     * Provides what a harvest of the crop counts as for quests, such as PRODUCE_TOMATO.
+     */
+    private static String questKey(CropType type) {
+        return "PRODUCE_" + type.name();
     }
 
     /**
@@ -1184,7 +1191,7 @@ public class Crops {
         if (!creative) {
             drop(block, crop.type().getYield(), FruitUtils.scaleYield(1, player, crop.type().getSeason()));
             if (player != null) {
-                FruitUtils.reward(player, 10, 0.20);
+                FruitUtils.reward(player, 10, 0.20, questKey(crop.type()));
             }
         }
         block.getWorld().playSound(block.getLocation().add(0.5, 0.5, 0.5), Sound.BLOCK_SWEET_BERRY_BUSH_PICK_BERRIES, 1F, 1F);
@@ -1402,7 +1409,7 @@ public class Crops {
                 int amount = type.getYieldMin() + r.nextInt(type.getYieldMax() - type.getYieldMin() + 1);
                 drop(base.getRelative(0, bush, 0), type.getYield(), FruitUtils.scaleYield(amount, player, type.getSeason()));
                 if (player != null) {
-                    FruitUtils.reward(player, 15, 0.30);
+                    FruitUtils.reward(player, 15, 0.30, questKey(type));
                 }
             }
         }
@@ -1570,7 +1577,7 @@ public class Crops {
             Block at = type == CropType.BELL_PEPPER ? base.getLocation().add(pieceSpot(crop, pick)).getBlock() : block;
             drop(at, yield, FruitUtils.scaleYield(1, player, type.getSeason()));
             if (player != null) {
-                FruitUtils.reward(player, 10, 0.20);
+                FruitUtils.reward(player, 10, 0.20, questKey(type));
             }
         }
         block.getWorld().playSound(block.getLocation().add(0.5, 0.5, 0.5), Sound.BLOCK_SWEET_BERRY_BUSH_PICK_BERRIES, 1F, 1F);
@@ -1612,7 +1619,7 @@ public class Crops {
                 ProduceType yield = type == CropType.BELL_PEPPER ? CropLayout.pepperColour(piece.stage()) : type.getYield();
                 drop(base, yield, FruitUtils.scaleYield(1, player, type.getSeason()));
                 if (player != null) {
-                    FruitUtils.reward(player, 10, 0.20);
+                    FruitUtils.reward(player, 10, 0.20, questKey(type));
                 }
             }
             pieces.set(i, new CropLayout.Piece(-1, now, piece.picks() + 1));

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.enums.JobType;
+import com.aearost.aranarthcore.enums.QuestTrigger;
 import com.aearost.aranarthcore.items.produce.Produce;
 import com.aearost.aranarthcore.items.produce.ProduceHeads;
 import com.aearost.aranarthcore.items.produce.ProduceType;
@@ -36,6 +37,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import java.util.Set;
 
@@ -230,7 +232,7 @@ public class FruitUtils {
             block.getWorld().dropItemNaturally(block.getLocation().add(0.5, 0.5, 0.5), drop);
         }
         if (player != null) {
-            reward(player, spot.kind());
+            reward(player, spot.kind(), "FRUIT_" + spot.id().toUpperCase(Locale.ROOT));
         }
         return true;
     }
@@ -360,14 +362,15 @@ public class FruitUtils {
     /**
      * Gives Herbalism experience, and Farmer pay to Farmers, for picking fruit in a survival world.
      */
-    private static void reward(Player player, Kind kind) {
-        reward(player, kind == Kind.BUNCH ? 60 : 30, kind == Kind.BUNCH ? 1.20 : 0.60);
+    private static void reward(Player player, Kind kind, String questKey) {
+        reward(player, kind == Kind.BUNCH ? 60 : 30, kind == Kind.BUNCH ? 1.20 : 0.60, questKey);
     }
 
     /**
-     * Gives Herbalism experience, and Farmer pay and job experience to Farmers, for a harvest made by hand in a survival world.
+     * Gives Herbalism experience, Farmer pay and job experience to Farmers.
+     * @param questKey What was harvested, for quests: FRUIT_ and the fruit's id, or PRODUCE_ and the crop's name.
      */
-    public static void reward(Player player, int herbalismXp, double farmerPay) {
+    public static void reward(Player player, int herbalismXp, double farmerPay, String questKey) {
         if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
             return;
         }
@@ -376,6 +379,7 @@ public class FruitUtils {
         if (aranarthPlayer != null && aranarthPlayer.getJobData().hasJob(JobType.FARMER)) {
             JobUtils.awardJob(player, JobType.FARMER, farmerPay);
         }
+        QuestUtils.progress(player, QuestTrigger.HARVEST, questKey, 1);
     }
 
     /**
