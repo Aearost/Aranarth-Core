@@ -1699,7 +1699,7 @@ public class CustomTrees {
     }
 
     /**
-     * #60 Maple - an autumn tree grown from a single poplar sapling. A grey-brown trunk that splits into a few steep limbs
+     * #60 Maple - an autumn tree grown from a single poplar sapling. A poplar wood trunk that splits into a few steep limbs
      * under a dense, egg-shaped crown, taller than it is wide, coloured by the season with a touch of the next colour
      * mixed in.
      */
@@ -1712,13 +1712,11 @@ public class CustomTrees {
             case 2 -> chance(0.5) ? Material.RED_POPLAR_LEAVES : Material.YELLOW_POPLAR_LEAVES;
             default -> Material.ORANGE_POPLAR_LEAVES;
         };
-        // The bark is compared between the two greyest woods
-        Material bark = chance(0.5) ? Material.OAK_WOOD : Material.ACACIA_WOOD;
+        Material bark = Material.POPLAR_WOOD;
         t = new TreeBuilder(world, r, bark, main);
         t.setLeafMix(main, accent, 0.18);
         t.setPorosity(0.18);
         t.info("leaves", main.name().toLowerCase().replace("_poplar_leaves", "").replace("_leaves", ""));
-        t.info("bark", bark.name().toLowerCase().replace("_wood", ""));
         double scale = between(0.9, 1.2);
         double cx = x + 0.5;
         double cz = z + 0.5;
