@@ -19,7 +19,6 @@ World & Events
 [-] Mining Fatigue from the Ardorvor heat no longer applies while it is raining or thundering
 [-] Brewing, barrels, and drinking brews are now disabled in the Creative world
 [~] Fixed the Avatar mannequins causing Mojang rate limit errors on startup by looking up each skin only once at a time
-[-] Holding sneak now prevents thorn damage from sweet berry and blackberry bushes
 
 Bending & Abilities
 [-] Prevented AirBlast from being used while riding a horse, mount, or any other vehicle
@@ -64,6 +63,7 @@ Quality of Life
 [+] Added /creative items to let players give themselves AranarthCore items in Creative
 [+] Added automatic percentage input for /rand if blocks are listed without percentages
 [+] Setting a /randomizer pattern now also enables the randomizer
+[+] Holding sneak now prevents thorn damage from sweet berry and blackberry bushes
 
 Cross-server & Technical
 [+] Added caching to avatar mannequin skins so refreshes avoid session server timeout warnings

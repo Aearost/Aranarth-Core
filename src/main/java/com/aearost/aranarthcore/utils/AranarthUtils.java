@@ -130,6 +130,10 @@ public class AranarthUtils {
     private static final HashMap<UUID, UUID> pendingShopInvites = new HashMap<>(); // invitee UUID → owner UUID
     private static final HashMap<UUID, String> shopNames = new HashMap<>();
     private static final HashMap<UUID, BukkitTask> teleportingPlayers = new HashMap<>();
+    // Where each player stood when their teleport countdown began, used to detect real movement
+    private static final HashMap<UUID, Location> teleportAnchors = new HashMap<>();
+    // How many position changes each player has made during their teleport countdown
+    private static final HashMap<UUID, Integer> teleportMoveCounts = new HashMap<>();
     private static final Set<UUID> skipCountdown = new HashSet<>();
     // Travel rewards: moves larger than this (in blocks) or shortly after a teleport are not active travel
     private static final Map<UUID, Long> recentTeleports = new HashMap<>();
@@ -2681,12 +2685,16 @@ public class AranarthUtils {
             @Override
             public void run() {
                 teleportingPlayers.remove(player.getUniqueId());
+                teleportAnchors.remove(player.getUniqueId());
+                teleportMoveCounts.remove(player.getUniqueId());
                 onSuccess.run();
             }
         }.runTaskLater(AranarthCore.getInstance(), 60);
 
         // This is run before the above task itself due to the delay
         teleportingPlayers.put(player.getUniqueId(), task);
+        teleportAnchors.put(player.getUniqueId(), player.getLocation());
+        teleportMoveCounts.remove(player.getUniqueId());
     }
 
     /**
@@ -2818,6 +2826,28 @@ public class AranarthUtils {
      */
     public static void removeTeleportTask(UUID uuid) {
         teleportingPlayers.remove(uuid);
+        teleportAnchors.remove(uuid);
+        teleportMoveCounts.remove(uuid);
+    }
+
+    /**
+     * Records a position change made during the player's teleport countdown.
+     *
+     * @param uuid The player's UUID.
+     * @return The total number of position changes made since the countdown began.
+     */
+    public static int incrementTeleportMoveCount(UUID uuid) {
+        return teleportMoveCounts.merge(uuid, 1, Integer::sum);
+    }
+
+    /**
+     * Provides the location the player was standing at when their teleport countdown began.
+     *
+     * @param uuid The player's UUID.
+     * @return The starting location, or null if they are not teleporting.
+     */
+    public static Location getTeleportAnchor(UUID uuid) {
+        return teleportAnchors.get(uuid);
     }
 
     /**
