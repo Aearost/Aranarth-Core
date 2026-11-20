@@ -186,6 +186,14 @@ public class FruitUtils {
     }
 
     /**
+     * Determines if the block is a fruit head that was already picked but still shows.
+     */
+    public static boolean isLeftoverHead(Block block) {
+        Spot spot = getStored(block);
+        return spot != null && !spot.isRipe() && spot.kind() == Kind.HEAD && block.getType() == Material.PLAYER_WALL_HEAD;
+    }
+
+    /**
      * Provides the ripe fruit that hangs from the block, which falls if the block is removed.
      */
     public static List<Block> getAttached(Block support) {
@@ -511,6 +519,13 @@ public class FruitUtils {
                 }
                 Material support = block.getRelative(facing.getOppositeFace()).getType();
                 String texture = ProduceHeads.get(spot.id());
+                // A head left floating after its tree was cut is cleared instead of growing back
+                if (block.getType() == Material.PLAYER_WALL_HEAD
+                        && !(Tag.LEAVES.isTagged(support) || Tag.LOGS.isTagged(support))) {
+                    block.setType(Material.AIR, false);
+                    forget(block);
+                    return;
+                }
                 // Fruit only grows back where nothing else took its place and the leaf or log it hangs from remains
                 if (!block.getType().isAir() || texture == null
                         || !(Tag.LEAVES.isTagged(support) || Tag.LOGS.isTagged(support))) {

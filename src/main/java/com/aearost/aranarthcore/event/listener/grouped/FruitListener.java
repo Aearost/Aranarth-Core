@@ -100,8 +100,14 @@ public class FruitListener implements Listener {
             e.setDropItems(false);
             FruitUtils.restartBunch(block, growing);
         }
+        // A picked fruit head left floating after its tree was cut never drops the textured head itself
+        if (FruitUtils.isLeftoverHead(block)) {
+            e.setDropItems(false);
+            FruitUtils.forget(block);
+        }
+        // Fruit hanging from the broken block is removed with it, as heads never fall off on their own
         for (Block fruit : FruitUtils.getAttached(block)) {
-            FruitUtils.harvest(fruit, player, 0, true);
+            FruitUtils.harvest(fruit, player, 0, false);
         }
     }
 
@@ -112,7 +118,7 @@ public class FruitListener implements Listener {
     public void onDecay(LeavesDecayEvent e) {
         Block block = e.getBlock();
         for (Block fruit : FruitUtils.getAttached(block)) {
-            FruitUtils.harvest(fruit, null, 0, true);
+            FruitUtils.harvest(fruit, null, 0, false);
         }
         if (FruitUtils.getRipe(block) != null) {
             e.setCancelled(true);
@@ -130,7 +136,7 @@ public class FruitListener implements Listener {
     public void onBurn(BlockBurnEvent e) {
         Block block = e.getBlock();
         for (Block fruit : FruitUtils.getAttached(block)) {
-            FruitUtils.harvest(fruit, null, 0, true);
+            FruitUtils.harvest(fruit, null, 0, false);
         }
         if (FruitUtils.getStored(block) != null) {
             FruitUtils.forget(block);
