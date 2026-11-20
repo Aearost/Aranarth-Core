@@ -5489,12 +5489,12 @@ public class CustomTrees {
             t.info("low", true);
         }
         for (int h = crownStart; h < y + height - 1; h++) {
-            if (chance(0.3)) {
+            if (chance(0.12)) {
                 continue;
             }
             double p = (double) (h - crownStart) / (y + height - crownStart);
             double radius = base + (top - base) * Math.pow((double) (h - y) / height, 1.1);
-            int sprays = between(2, 4);
+            int sprays = between(3, 5);
             double start = randomAngle();
             for (int i = 0; i < sprays; i++) {
                 double yaw = start + i * Math.PI * 2 / sprays + jitter(0.4);
@@ -5502,6 +5502,8 @@ public class CustomTrees {
                 spray(cx, h, cz, yaw, length, between(0.4, 0.8));
             }
         }
+        // Needles sheath the trunk and the wood of the sprays through the crown, so no bare wood shows between them
+        coverWood(crownStart + 1, 1.1);
         spruceTop(cx, y + height, cz);
     }
 
