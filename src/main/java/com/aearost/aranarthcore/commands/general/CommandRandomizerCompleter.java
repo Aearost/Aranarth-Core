@@ -21,7 +21,7 @@ public class CommandRandomizerCompleter implements TabCompleter {
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
 		if (args.length == 1 && args[0].isEmpty()) {
-			return List.of("#%material,#%material");
+			return List.of("#%material,#%material", "material,material");
 		}
 		return List.of();
 	}

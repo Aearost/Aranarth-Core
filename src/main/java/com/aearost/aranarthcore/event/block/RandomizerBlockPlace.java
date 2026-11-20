@@ -61,7 +61,7 @@ public class RandomizerBlockPlace {
 							higherBracket += randomItem.getPercentage();
 
 							// The selected item
-							if (selectedPercentage < higherBracket) {
+							if (selectedPercentage <= higherBracket) {
 								// Find first stack of the selected item from randomItemList in the player's inventory
 								for (int i = 0; i < contents.length; i++) {
 									if (contents[i] != null) {
