@@ -156,9 +156,7 @@ public class CommandAranarth implements CommandExecutor {
                 }
             }
             case "rules" -> sendRules(player);
-            // A shortcut to the types of custom trees and the sizes they grow from
-            case "trees" -> sendSectionChapter(player, "farmingtrees", "treetypes");
-            case "aranarthium", "essences", "dominions", "bending", "ranks", "economy", "perks", "mechanics",
+                case "aranarthium", "essences", "dominions", "bending", "ranks", "economy", "perks", "mechanics",
                  "creative", "farmingtrees" -> {
                 String topic = args[0].toLowerCase();
                 if (args.length == 1) sendSectionMenu(player, topic);
