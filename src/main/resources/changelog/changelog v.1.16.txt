@@ -42,6 +42,7 @@ Aranarthium, Items & Crafting
 [~] Fixed Essence of Magnetism hoes not pulling drops from leaves and other blocks mined with a hoe
 [~] Altered all brewing recipes to consider the custom produce ingredients where applicable
 [+] Added 17 new brews made from the custom produce ingredients
+[+] Added recipes to turn wood back into logs using a crafting table and also the Sawmill
 
 Economy, Jobs & Quests
 [+] Custom crops and fruit now count towards Farmer quests, and harvesting them adds progress to Harvest Crops quests

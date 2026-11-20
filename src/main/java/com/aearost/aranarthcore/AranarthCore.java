@@ -1429,6 +1429,7 @@ public class AranarthCore extends JavaPlugin {
         new RecipeGreenDye(this);
         new RecipeMushroomStew(this);
         new RecipeSawmill(this);
+        new RecipeWoodToLog(this);
     }
 
     /**
