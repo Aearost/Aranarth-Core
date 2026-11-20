@@ -1591,6 +1591,8 @@ public class AranarthCore extends JavaPlugin {
         getCommand("smpmap").setExecutor(new CommandSmpMap());
         getCommand("brewbook").setExecutor(new CommandBrewBook());
         getCommand("brewbook").setTabCompleter(new CommandBrewBookCompleter());
+        getCommand("recipe").setExecutor(new CommandRecipe());
+        getCommand("recipe").setTabCompleter(new CommandRecipe());
     }
 
     /**

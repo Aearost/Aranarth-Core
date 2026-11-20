@@ -139,6 +139,23 @@ public class GuiRecipes {
         Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> new GuiRecipes(player, 0, query).openGui());
     }
 
+    /**
+     * Opens the recipe guide, filtered by the given query as if it had been entered through the search button.
+     * @param player The player opening the guide.
+     * @param query The search query, or null/blank to show every recipe.
+     */
+    public static void open(Player player, String query) {
+        awaitingSearch.remove(player.getUniqueId());
+        if (query == null || query.isBlank()) {
+            clearFilter(player.getUniqueId());
+            new GuiRecipes(player, 0).openGui();
+            return;
+        }
+        String trimmed = query.trim();
+        activeFilters.put(player.getUniqueId(), trimmed);
+        new GuiRecipes(player, 0, trimmed).openGui();
+    }
+
     public static void clearFilter(UUID uuid) {
         activeFilters.remove(uuid);
     }

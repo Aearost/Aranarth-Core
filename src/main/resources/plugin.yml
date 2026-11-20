@@ -218,6 +218,9 @@ commands:
   rankup:
     description: Directly lists the next rank that the player can rank up to
     permission: aranarth.rankup
+  recipe:
+    description: Opens the custom recipes guide, optionally searching for the input item name (vanilla is /minecraft:recipe)
+    usage: /recipe [item name]
   reply:
     description: Replies to the last received message
     aliases: [ r ]

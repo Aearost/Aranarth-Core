@@ -23,6 +23,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -163,10 +164,9 @@ public class CommandAranarth implements CommandExecutor {
                 if (args.length == 1) sendSectionMenu(player, topic);
                 else sendSectionChapter(player, topic, args[1].toLowerCase());
             }
-            case "recipes" -> {
-                GuiRecipes.clearFilter(player.getUniqueId());
-                new GuiRecipes(player, 0).openGui();
-            }
+            // An optional item name filters the guide, the same as searching with the spyglass
+            case "recipes" -> GuiRecipes.open(player,
+                    args.length > 1 ? String.join(" ", Arrays.copyOfRange(args, 1, args.length)) : null);
             default -> player.sendMessage(ChatUtils.chatMessage(
                     Lang.getFor(player, "guide.invalid_topic", "topic", args[0])));
         }
