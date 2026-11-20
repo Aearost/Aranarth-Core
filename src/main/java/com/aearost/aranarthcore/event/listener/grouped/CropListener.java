@@ -440,12 +440,16 @@ public class CropListener implements Listener {
     }
 
     /**
-     * Only blackberries have thorns. Every other crop grown from a sweet berry bush, such as tomatoes, is harmless.
+     * Players holding sneak take no thorn damage from any berry bush, vanilla sweet berries and blackberries alike.
      */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onThorns(EntityDamageByBlockEvent e) {
         Block block = e.getDamager();
         if (block == null || block.getType() != Material.SWEET_BERRY_BUSH) {
+            return;
+        }
+        if (e.getEntity() instanceof Player player && player.isSneaking()) {
+            e.setCancelled(true);
             return;
         }
         Block base = Crops.getBase(block);
