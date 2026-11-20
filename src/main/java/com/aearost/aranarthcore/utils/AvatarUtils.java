@@ -70,6 +70,11 @@ public class AvatarUtils {
     private static int mannequinGeneration = 0;
     // Completed skin profiles, so that mannequin refreshes do not query Mojang every time
     private static final Map<UUID, PlayerProfile> skinProfileCache = new ConcurrentHashMap<>();
+    // When each skin lookup last failed, so a rate limited UUID is not queried again straight away
+    private static final Map<UUID, Long> skinLookupFailedAt = new ConcurrentHashMap<>();
+    // Only one Mojang skin lookup runs at a time, so a refresh never bursts into a 429 rate limit
+    private static final Object SKIN_LOOKUP_LOCK = new Object();
+    private static final long SKIN_LOOKUP_RETRY_MILLIS = TimeUnit.MINUTES.toMillis(5);
 
     /**
      * Provides the list of all avatars.
@@ -942,24 +947,8 @@ public class AvatarUtils {
         }
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            PlayerProfile profile = skinProfileCache.get(uuid);
-            if (profile == null) {
-                // Fetch and complete the profile (blocking Mojang API call)
-                profile = plugin.getServer().createProfile(uuid);
-                try {
-                    // Fetches the skin from Mojang, Paper logs its own warning if the request times out
-                    if (profile.complete(true) && profile.hasTextures()) {
-                        skinProfileCache.put(uuid, profile);
-                    } else {
-                        profile = null;
-                    }
-                } catch (Exception e) {
-                    logWarning("The skin lookup failed for the mannequin of " + uuid + ": " + e);
-                    profile = null;
-                }
-            }
+            PlayerProfile profile = lookupSkinProfile(uuid);
             boolean completed = profile != null;
-            PlayerProfile skinProfile = profile;
 
             // Jump back to main thread to spawn the mannequin
             Bukkit.getScheduler().runTask(plugin, () -> {
@@ -973,7 +962,7 @@ public class AvatarUtils {
                     loc.getChunk().load();
                     Mannequin mannequin = (Mannequin) loc.getWorld().spawnEntity(loc, EntityType.MANNEQUIN);
                     // Mojang servers unreachable, so the skin is resolved from the UUID later instead
-                    mannequin.setProfile(completed ? ResolvableProfile.resolvableProfile(skinProfile)
+                    mannequin.setProfile(completed ? ResolvableProfile.resolvableProfile(profile)
                             : ResolvableProfile.resolvableProfile().uuid(uuid).build());
                     mannequin.setInvulnerable(true);
                     mannequin.setGravity(false);
@@ -998,6 +987,40 @@ public class AvatarUtils {
                 });
             });
         });
+    }
+
+    /**
+     * Provides the completed skin profile of the input player, querying Mojang only when it is not cached.
+     *
+     * @param uuid The UUID of the player.
+     * @return The completed skin profile, or null if it could not be fetched.
+     */
+    private static PlayerProfile lookupSkinProfile(UUID uuid) {
+        synchronized (SKIN_LOOKUP_LOCK) {
+            // Another mannequin of the same player may have fetched it while this one waited
+            PlayerProfile cached = skinProfileCache.get(uuid);
+            if (cached != null) {
+                return cached;
+            }
+            Long failedAt = skinLookupFailedAt.get(uuid);
+            if (failedAt != null && System.currentTimeMillis() - failedAt < SKIN_LOOKUP_RETRY_MILLIS) {
+                return null;
+            }
+
+            PlayerProfile profile = AranarthCore.getInstance().getServer().createProfile(uuid);
+            try {
+                // Fetches the skin from Mojang, Paper logs its own warning if the request fails
+                if (profile.complete(true) && profile.hasTextures()) {
+                    skinProfileCache.put(uuid, profile);
+                    skinLookupFailedAt.remove(uuid);
+                    return profile;
+                }
+            } catch (Exception e) {
+                logWarning("The skin lookup failed for the mannequin of " + uuid + ": " + e);
+            }
+            skinLookupFailedAt.put(uuid, System.currentTimeMillis());
+            return null;
+        }
     }
 
     /**
