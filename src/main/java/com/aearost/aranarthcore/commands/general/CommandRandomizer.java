@@ -126,6 +126,13 @@ public class CommandRandomizer implements CommandExecutor {
 				} else {
 					aranarthPlayer.setRandomItems(randomItems);
 					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.pattern_updated")));
+
+					// Setting a pattern also turns the randomizer on, but never toggles it off if it was already on
+					if (!aranarthPlayer.isRandomizing()) {
+						aranarthPlayer.isRandomizing(true);
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.blocks_now")));
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					return true;
 				}
 			}
