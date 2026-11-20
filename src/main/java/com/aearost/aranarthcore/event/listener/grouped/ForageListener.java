@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.trees.WildGrowth;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.CropUtils;
+import com.aearost.aranarthcore.utils.FruitUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -65,6 +66,10 @@ public class ForageListener implements Listener {
      * The chance of an acorn falling from a checked spot under oak or dark oak leaves.
      */
     private static final double FALL_CHANCE = 0.12;
+    /**
+     * How close fruit must be for an oak or dark oak leaf to count as part of a fruit tree, which never drops acorns.
+     */
+    private static final int FRUIT_TREE_RADIUS = 6;
 
     private static final Set<Material> GRASS = EnumSet.of(Material.SHORT_GRASS, Material.TALL_GRASS, Material.FERN,
             Material.LARGE_FERN, Material.SHORT_DRY_GRASS, Material.TALL_DRY_GRASS);
@@ -110,8 +115,8 @@ public class ForageListener implements Listener {
     private static Block findCanopyBottom(Block around) {
         for (int dy = -FALL_BELOW; dy <= FALL_ABOVE; dy++) {
             Block block = around.getRelative(0, dy, 0);
-            if (isAcornLeaf(block) && landsReachably(block)) {
-                return block;
+            if (isOakLeaf(block) && landsReachably(block)) {
+                return isOnFruitTree(block) ? null : block;
             }
         }
         return null;
@@ -244,8 +249,22 @@ public class ForageListener implements Listener {
      * Determines if the block is oak or dark oak leaves grown by a tree, rather than placed by a player.
      */
     private static boolean isAcornLeaf(Block block) {
+        return isOakLeaf(block) && !isOnFruitTree(block);
+    }
+
+    /**
+     * Determines if the block is oak or dark oak leaves grown by a tree, rather than placed by a player.
+     */
+    private static boolean isOakLeaf(Block block) {
         return (block.getType() == Material.OAK_LEAVES || block.getType() == Material.DARK_OAK_LEAVES)
                 && block.getBlockData() instanceof Leaves leaves && !leaves.isPersistent();
+    }
+
+    /**
+     * Determines if the leaf belongs to a fruit tree, such as an apple, plum or avocado tree.
+     */
+    private static boolean isOnFruitTree(Block leaf) {
+        return FruitUtils.isNearFruit(leaf, FRUIT_TREE_RADIUS);
     }
 
     private void dropAcorn(Block block) {

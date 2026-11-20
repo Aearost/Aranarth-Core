@@ -22,6 +22,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.Tag;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Skull;
@@ -191,6 +192,46 @@ public class FruitUtils {
     public static boolean isLeftoverHead(Block block) {
         Spot spot = getStored(block);
         return spot != null && !spot.isRipe() && spot.kind() == Kind.HEAD && block.getType() == Material.PLAYER_WALL_HEAD;
+    }
+
+    /**
+     * Determines if the block is part of a fruit tree, as fruit, ripe or picked, is remembered within a few blocks of it.
+     * @param block The block, such as a leaf.
+     * @param radius How far away fruit may be, in blocks on each axis.
+     */
+    public static boolean isNearFruit(Block block, int radius) {
+        World world = block.getWorld();
+        int minX = block.getX() - radius;
+        int maxX = block.getX() + radius;
+        int minZ = block.getZ() - radius;
+        int maxZ = block.getZ() + radius;
+        for (int cx = minX >> 4; cx <= maxX >> 4; cx++) {
+            for (int cz = minZ >> 4; cz <= maxZ >> 4; cz++) {
+                if (!world.isChunkLoaded(cx, cz)) {
+                    continue;
+                }
+                for (NamespacedKey key : world.getChunkAt(cx, cz).getPersistentDataContainer().getKeys()) {
+                    if (!key.getNamespace().equals("aranarthcore") || !key.getKey().startsWith(KEY_PREFIX)) {
+                        continue;
+                    }
+                    String[] parts = key.getKey().substring(KEY_PREFIX.length()).split("_");
+                    if (parts.length != 3) {
+                        continue;
+                    }
+                    try {
+                        int x = (cx << 4) + Integer.parseInt(parts[0]);
+                        int y = Integer.parseInt(parts[1]);
+                        int z = (cz << 4) + Integer.parseInt(parts[2]);
+                        if (x >= minX && x <= maxX && z >= minZ && z <= maxZ && Math.abs(y - block.getY()) <= radius) {
+                            return true;
+                        }
+                    } catch (NumberFormatException ignored) {
+                        // Not a fruit spot key
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**
