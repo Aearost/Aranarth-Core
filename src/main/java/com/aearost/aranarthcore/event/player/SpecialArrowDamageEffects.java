@@ -27,7 +27,7 @@ public class SpecialArrowDamageEffects {
                         case "amethyst" -> e.setDamage(e.getDamage() + 4);
                         case "obsidian" -> e.setDamage(e.getDamage() + 10);
                         case "diamond" -> e.setDamage(e.getDamage() + 12);
-                        case "honing" -> {
+                        case "homing" -> {
                             if (e.getEntity() instanceof Player) {
                                 e.setDamage(e.getDamage() / 2);
                             }

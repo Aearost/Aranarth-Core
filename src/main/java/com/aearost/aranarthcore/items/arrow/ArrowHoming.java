@@ -15,18 +15,18 @@ import java.util.Objects;
 import static com.aearost.aranarthcore.objects.CustomKeys.ARROW;
 
 
-public class ArrowHoning implements AranarthItem {
+public class ArrowHoming implements AranarthItem {
 
 	/**
-	 * @return The Honing Arrow.
+	 * @return The Homing Arrow.
 	 */
 	public ItemStack getItem() {
 		ItemStack item = new ItemStack(Material.ARROW, 1);
 		ItemMeta meta = item.getItemMeta();
 		if (Objects.nonNull(meta)) {
-			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "arrow_honing");
+			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "arrow_homing");
 			meta.setItemModel(key);
-			meta.getPersistentDataContainer().set(ARROW, PersistentDataType.STRING, "honing");
+			meta.getPersistentDataContainer().set(ARROW, PersistentDataType.STRING, "homing");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			meta.setLore(List.of(
 					ChatUtils.translateToColor("&7&oCurves towards nearby targets"),
@@ -37,7 +37,7 @@ public class ArrowHoning implements AranarthItem {
 	}
 
 	public String getName() {
-		return "&#3fbf7aHoning Arrow";
+		return "&#3fbf7aHoming Arrow";
 	}
 	
 }

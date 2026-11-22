@@ -23,7 +23,7 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 /**
- * Handles the effects of the Sonar, Grapple, Honing, Smoke, Shifting, Tether and Tide arrows.
+ * Handles the effects of the Sonar, Grapple, Homing, Smoke, Shifting, Tether and Tide arrows.
  * Grapple and Tether ropes are pulled by sneaking while holding a bow, and snap if the shooter takes damage.
  */
 public class SpecialArrowUtils {
@@ -42,13 +42,13 @@ public class SpecialArrowUtils {
 	private static final double GRAPPLE_END_BOOST = 1;
 	private static final int GRAPPLE_MAX_REEL_TICKS = 100;
 
-	// Honing
-	private static final double HONING_RANGE = 10;
-	private static final double HONING_CONE_RADIANS = Math.toRadians(30);
-	private static final double HONING_CLOSE_CONE_RADIANS = Math.toRadians(50);
-	private static final double HONING_STEER = 0.2;
-	private static final double HONING_CLOSE_STEER = 0.7;
-	private static final int HONING_MAX_TICKS = 100;
+	// Homing
+	private static final double HOMING_RANGE = 10;
+	private static final double HOMING_CONE_RADIANS = Math.toRadians(30);
+	private static final double HOMING_CLOSE_CONE_RADIANS = Math.toRadians(50);
+	private static final double HOMING_STEER = 0.2;
+	private static final double HOMING_CLOSE_STEER = 0.7;
+	private static final int HOMING_MAX_TICKS = 100;
 
 	// Smoke
 	private static final double SMOKE_RADIUS = 6;
@@ -384,40 +384,40 @@ public class SpecialArrowUtils {
 	}
 
 	/**
-	 * Gently curves a Honing Arrow towards the nearest valid target in front of it.
+	 * Gently curves a Homing Arrow towards the nearest valid target in front of it.
 	 *
 	 * @param shooter The player that shot the arrow.
 	 * @param arrow The arrow in flight.
 	 */
-	public static void startHoning(Player shooter, AbstractArrow arrow) {
+	public static void startHoming(Player shooter, AbstractArrow arrow) {
 		// Steers once straight away, so targets that are very close still get homed in on
-		steerHoning(shooter, arrow);
+		steerHoming(shooter, arrow);
 		new BukkitRunnable() {
 			int ticks = 0;
 
 			@Override
 			public void run() {
 				ticks++;
-				if (!arrow.isValid() || arrow.isInBlock() || ticks > HONING_MAX_TICKS) {
+				if (!arrow.isValid() || arrow.isInBlock() || ticks > HOMING_MAX_TICKS) {
 					cancel();
 					return;
 				}
-				steerHoning(shooter, arrow);
+				steerHoming(shooter, arrow);
 			}
 		}.runTaskTimer(AranarthCore.getInstance(), 1, 1);
 	}
 
 	/**
-	 * Steers a Honing Arrow towards its target for a single tick.
+	 * Steers a Homing Arrow towards its target for a single tick.
 	 * The closer the target, the harder it turns, and once the target is within the next couple of ticks of travel it aims straight at it.
 	 */
-	private static void steerHoning(Player shooter, AbstractArrow arrow) {
+	private static void steerHoming(Player shooter, AbstractArrow arrow) {
 		Vector velocity = arrow.getVelocity();
 		double speed = velocity.length();
 		if (speed < 0.2) {
 			return;
 		}
-		LivingEntity target = findHoningTarget(shooter, arrow, velocity);
+		LivingEntity target = findHomingTarget(shooter, arrow, velocity);
 		if (target == null) {
 			return;
 		}
@@ -428,21 +428,21 @@ public class SpecialArrowUtils {
 		if (distance <= speed * 2) {
 			steered = toTarget.multiply(speed);
 		} else {
-			double closeness = 1 - Math.min(1, distance / HONING_RANGE);
-			double steer = HONING_STEER + (HONING_CLOSE_STEER - HONING_STEER) * closeness;
+			double closeness = 1 - Math.min(1, distance / HOMING_RANGE);
+			double steer = HOMING_STEER + (HOMING_CLOSE_STEER - HOMING_STEER) * closeness;
 			steered = velocity.clone().normalize().multiply(1 - steer).add(toTarget.multiply(steer)).normalize().multiply(speed);
 		}
 		arrow.setVelocity(steered);
 	}
 
 	/**
-	 * Finds the closest valid target within the Honing Arrow's cone of vision.
+	 * Finds the closest valid target within the Homing Arrow's cone of vision.
 	 */
-	private static LivingEntity findHoningTarget(Player shooter, AbstractArrow arrow, Vector velocity) {
+	private static LivingEntity findHomingTarget(Player shooter, AbstractArrow arrow, Vector velocity) {
 		LivingEntity closest = null;
 		double closestDistance = Double.MAX_VALUE;
 		Location arrowLocation = arrow.getLocation();
-		for (Entity entity : arrow.getNearbyEntities(HONING_RANGE, HONING_RANGE, HONING_RANGE)) {
+		for (Entity entity : arrow.getNearbyEntities(HOMING_RANGE, HOMING_RANGE, HOMING_RANGE)) {
 			if (!(entity instanceof LivingEntity living) || living instanceof ArmorStand || living.isDead()
 					|| living.equals(shooter) || living.isInvisible() || living.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
 				continue;
@@ -460,9 +460,9 @@ public class SpecialArrowUtils {
 			Vector toEntity = living.getLocation().add(0, living.getHeight() / 2, 0).toVector().subtract(arrowLocation.toVector());
 			double distance = toEntity.length();
 			// A wider cone up close, where a small aiming error is a much bigger angle
-			double closeness = 1 - Math.min(1, distance / HONING_RANGE);
-			double cone = HONING_CONE_RADIANS + (HONING_CLOSE_CONE_RADIANS - HONING_CONE_RADIANS) * closeness;
-			if (distance > HONING_RANGE || velocity.angle(toEntity) > cone) {
+			double closeness = 1 - Math.min(1, distance / HOMING_RANGE);
+			double cone = HOMING_CONE_RADIANS + (HOMING_CLOSE_CONE_RADIANS - HOMING_CONE_RADIANS) * closeness;
+			if (distance > HOMING_RANGE || velocity.angle(toEntity) > cone) {
 				continue;
 			}
 			if (distance < closestDistance) {

@@ -181,7 +181,7 @@ public class RecipeGuideUtils {
                 emptyAlternatives(), List.of(new ArrowheadGrapple().getItem()), notes));
         all.add(createEntry(RecipeStation.FLETCHING,
                 middleColumn(new ArrowheadAmethyst().getItem(), new ItemStack(Material.ENDER_EYE), null),
-                emptyAlternatives(), List.of(new ArrowheadHoning().getItem()), notes));
+                emptyAlternatives(), List.of(new ArrowheadHoming().getItem()), notes));
         all.add(createEntry(RecipeStation.FLETCHING,
                 middleColumn(new ArrowheadObsidian().getItem(), new ItemStack(Material.CHARCOAL), null),
                 emptyAlternatives(), List.of(new ArrowheadSmoke().getItem()), notes));
@@ -211,7 +211,7 @@ public class RecipeGuideUtils {
         arrowheadsByType.put("dragon", new ArrowheadDragon().getItem());
         arrowheadsByType.put("sonar", new ArrowheadSonar().getItem());
         arrowheadsByType.put("grapple", new ArrowheadGrapple().getItem());
-        arrowheadsByType.put("honing", new ArrowheadHoning().getItem());
+        arrowheadsByType.put("homing", new ArrowheadHoming().getItem());
         arrowheadsByType.put("smoke", new ArrowheadSmoke().getItem());
         arrowheadsByType.put("shifting", new ArrowheadShifting().getItem());
         arrowheadsByType.put("tether", new ArrowheadTether().getItem());

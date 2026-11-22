@@ -28,8 +28,8 @@ public class SpecialArrowShoot {
                     projectile.getPersistentDataContainer().set(ARROW, PersistentDataType.STRING, arrowType);
 
                     if (projectile instanceof AbstractArrow abstractArrow) {
-                        if ("honing".equals(arrowType)) {
-                            SpecialArrowUtils.startHoning(player, abstractArrow);
+                        if ("homing".equals(arrowType)) {
+                            SpecialArrowUtils.startHoming(player, abstractArrow);
                         } else if ("tide".equals(arrowType)) {
                             SpecialArrowUtils.startTide(abstractArrow);
                         }

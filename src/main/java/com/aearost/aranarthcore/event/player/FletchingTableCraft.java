@@ -423,12 +423,12 @@ public class FletchingTableCraft {
 				return new ArrowheadGrapple().getItem();
 			}
 
-			// Honing Arrowheads
-			ItemStack[] honingRecipe = new ItemStack[] { new ArrowheadAmethyst().getItem(),
+			// Homing Arrowheads
+			ItemStack[] homingRecipe = new ItemStack[] { new ArrowheadAmethyst().getItem(),
 					new ItemStack(Material.ENDER_EYE),
 					null };
-			if (matchesIngredients(ingredients, honingRecipe)) {
-				return new ArrowheadHoning().getItem();
+			if (matchesIngredients(ingredients, homingRecipe)) {
+				return new ArrowheadHoming().getItem();
 			}
 
 			// Smoke Arrowheads
