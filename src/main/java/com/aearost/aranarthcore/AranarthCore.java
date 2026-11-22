@@ -1,5 +1,8 @@
 package com.aearost.aranarthcore;
 
+import com.aearost.aranarthcore.recipes.produce.RecipeFruitSapling;
+import com.aearost.aranarthcore.recipes.produce.RecipeProduce;
+import com.aearost.aranarthcore.recipes.produce.RecipeRoastedAcorn;
 import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralProjection;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.PastLives;
@@ -7,6 +10,7 @@ import com.aearost.aranarthcore.abilities.earthbending.Tremorsense;
 import com.aearost.aranarthcore.bending.RankCanBindHook;
 import com.aearost.aranarthcore.commands.council.*;
 import com.aearost.aranarthcore.commands.general.*;
+import com.aearost.aranarthcore.trees.WildGrowth;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Weather;
@@ -21,6 +25,7 @@ import com.aearost.aranarthcore.integration.SquaremapIntegration;
 import com.aearost.aranarthcore.integration.WorldEditPlotIntegration;
 import com.aearost.aranarthcore.integration.WorldEditWorldGuard;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
+import com.aearost.aranarthcore.items.brew.ProduceBrewItem;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
@@ -30,6 +35,7 @@ import com.aearost.aranarthcore.recipes.*;
 import com.aearost.aranarthcore.recipes.aranarthium.*;
 import com.aearost.aranarthcore.utils.*;
 import com.aearost.aranarthcore.voice.VoiceChatManager;
+import com.dre.brewery.recipe.PluginItem;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
@@ -383,6 +389,16 @@ public class AranarthCore extends JavaPlugin {
     }
 
     /**
+     * Called when the plugin is loaded, before any plugin is enabled.
+     */
+    @Override
+    public void onLoad() {
+        if (Bukkit.getPluginManager().getPlugin("BreweryX") != null) {
+            PluginItem.registerForConfig(ProduceBrewItem.PREFIX, ProduceBrewItem::new);
+        }
+    }
+
+    /**
      * Called when the plugin is first enabled on server startup.
      * Responsible for initializing all functionality of AranarthCore.
      */
@@ -544,7 +560,8 @@ public class AranarthCore extends JavaPlugin {
                         if (AranarthUtils.isSurvivalWorld(p.getWorld().getName())) {
                             AranarthPlayer ap = AranarthUtils.getPlayer(p.getUniqueId());
                             if (ap != null) {
-                                ap.setSurvivalInventory(ItemUtils.itemStackArrayToBase64(p.getInventory().getContents()));
+                                ap.setSurvivalInventory(CreativeSwapUtils.getSurvivalInventory(p));
+                                CreativeSwapUtils.snapshotCreativeInventory(p);
                                 ap.setSurvivalEnderChest(ItemUtils.itemStackArrayToBase64(p.getEnderChest().getContents()));
                                 ap.setSurvivalHealth(p.getHealth());
                                 ap.setSurvivalFoodLevel(p.getFoodLevel());
@@ -1257,11 +1274,16 @@ public class AranarthCore extends JavaPlugin {
         new SoilTrampleListener(this);
         new CraftingOverridesListener(this);
         new CustomItemStationListener(this);
+        new CustomTreeListener(this);
+        new FruitListener(this);
+        new CropListener(this);
         new PotionConsumeListener(this);
         new WaterbendingBottleRefillListener(this);
         new PlayerRespawnEventListener(this);
         new PlayerGameModeChangeEventListener(this);
+        new CreativeInventorySwapListener(this);
         new DominionProtectionListener(this);
+        new EnemyProximityListener(this);
         new SpawnProtectionListener(this);
         new ShopProtectionListener(this);
         new PlotProtectionListener(this);
@@ -1274,9 +1296,11 @@ public class AranarthCore extends JavaPlugin {
         new BoostEffectsListener(this);
         new McMMOListener(this);
         new LeafDropsListener(this);
+        new ForageListener(this);
         new AranarthCoreBendingListener(this);
         new MountStatsListener(this);
         new SitListener(this);
+        new SparListener(this);
         new MountListener(this);
         new PotionAlchemyExpListener(this);
         new TamedPetStealPreventListener(this);
@@ -1340,6 +1364,9 @@ public class AranarthCore extends JavaPlugin {
         new RecipeHomePad(this);
         new RecipeChorusDiamond(this);
         new RecipeAmethystUncraft(this);
+        new RecipeProduce(this);
+        new RecipeFruitSapling(this);
+        new RecipeRoastedAcorn(this);
         new RecipeDeepslateA(this);
         new RecipeDeepslateB(this);
         new RecipeHorseArmorIron(this);
@@ -1402,6 +1429,7 @@ public class AranarthCore extends JavaPlugin {
         new RecipeGreenDye(this);
         new RecipeMushroomStew(this);
         new RecipeSawmill(this);
+        new RecipeWoodToLog(this);
     }
 
     /**
@@ -1433,6 +1461,7 @@ public class AranarthCore extends JavaPlugin {
         getCommand("countdown").setTabCompleter(new CommandCountdownCompleter());
         getCommand("creative").setExecutor(new CommandCreative());
         getCommand("creative").setTabCompleter(new CommandCreativeCompleter());
+        getCommand("treetest").setExecutor(new CommandTreeTest());
         getCommand("date").setExecutor(new CommandDate());
         getCommand("deaths").setExecutor(new CommandDeaths());
         getCommand("deaths").setTabCompleter(new CommandDeathsCompleter());
@@ -1513,6 +1542,10 @@ public class AranarthCore extends JavaPlugin {
         getCommand("teleport").setTabCompleter(new CommandTeleportCompleter());
         getCommand("ichat").setExecutor(new CommandInteractiveChat());
         getCommand("toggle").setExecutor(new CommandToggle());
+        getCommand("trees").setExecutor(new CommandTrees());
+        getCommand("trees").setTabCompleter(new CommandTreesCompleter());
+        // Carries on growing wild plants where it stopped, once every world has loaded
+        Bukkit.getScheduler().runTaskLater(this, WildGrowth::resumeAll, 20L * 30);
         getCommand("toggle").setTabCompleter(new CommandToggleCompleter());
         getCommand("topdeaths").setExecutor(new CommandTopDeaths());
         getCommand("topkills").setExecutor(new CommandTopKills());
@@ -1559,6 +1592,8 @@ public class AranarthCore extends JavaPlugin {
         getCommand("smpmap").setExecutor(new CommandSmpMap());
         getCommand("brewbook").setExecutor(new CommandBrewBook());
         getCommand("brewbook").setTabCompleter(new CommandBrewBookCompleter());
+        getCommand("recipe").setExecutor(new CommandRecipe());
+        getCommand("recipe").setTabCompleter(new CommandRecipe());
     }
 
     /**
@@ -1809,6 +1844,8 @@ public class AranarthCore extends JavaPlugin {
     @Override
     public void onDisable() {
         savedOnDisable = true;
+        WildGrowth.shutdown();
+        SparUtils.clearAllStuns();
         SitUtils.standUpAll();
         PetRallyUtils.endAllRallies();
         saveAll();
@@ -1877,6 +1914,8 @@ public class AranarthCore extends JavaPlugin {
             try {
                 // Quit events are not received during a shutdown, so the armor must be put back here to be saved
                 InvisibilityListener.restoreArmorBeforeLeaving(p, p.getWorld().getName());
+                // The survival inventory must be the one in their player data and the snapshot below
+                CreativeSwapUtils.restoreBeforeLeaving(p);
                 // Both servers auto-restart around the same time, so SMP players can get bounced here
                 // seconds before this server also shuts down. SMP already saved their data and location,
                 // so writing ours would send them to Survival on next login and could overwrite SMP's data.

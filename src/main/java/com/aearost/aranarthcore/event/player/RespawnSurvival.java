@@ -59,6 +59,13 @@ public class RespawnSurvival {
             new BukkitRunnable() {
                 @Override
                 public void run() {
+                    if (!player.isOnline()) {
+                        return;
+                    }
+                    // Soulbound keeps the armour equipped, but the Curse of Binding must still release on death
+                    if (AranarthUtils.releaseBindingCurseArmor(player)) {
+                        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "access.curse_binding_released")));
+                    }
                     player.setLevel(level);
                     player.setExp(exp);
                     player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 220, 4));

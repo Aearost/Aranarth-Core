@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.items.produce.Produce;
 import com.aearost.aranarthcore.utils.CropUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -27,13 +28,11 @@ public class CropInfoEventListener implements Listener {
 	 */
 	@EventHandler
 	public void onInventoryClose(InventoryCloseEvent e) {
-		if (e.getPlayer() instanceof Player player && e.getInventory().getType() != InventoryType.PLAYER) {
+		if (e.getPlayer() instanceof Player && e.getInventory().getType() != InventoryType.PLAYER) {
 			ItemStack[] contents = e.getInventory().getContents();
 			for (int i = 0; i < contents.length; i++) {
-				ItemStack item = contents[i];
-				if (item != null && CropUtils.isCropSeed(item.getType())) {
-					ItemStack noLore = new ItemStack(item.getType());
-					noLore.setAmount(item.getAmount());
+				ItemStack noLore = withoutLore(contents[i]);
+				if (noLore != null) {
 					e.getInventory().setItem(i, noLore);
 				}
 			}
@@ -46,12 +45,31 @@ public class CropInfoEventListener implements Listener {
 	@EventHandler
 	public void onHopperEnter(InventoryMoveItemEvent e) {
 		if (e.getDestination().getType() == InventoryType.HOPPER) {
-			if (CropUtils.isCropSeed(e.getItem().getType())) {
-				ItemStack noLore = new ItemStack(e.getItem().getType());
-				noLore.setAmount(e.getItem().getAmount());
+			ItemStack noLore = withoutLore(e.getItem());
+			if (noLore != null) {
 				e.setItem(noLore);
 			}
 		}
+	}
+
+	/**
+	 * Provides the seed or produce without its seasonal lore.
+	 * @param item The item.
+	 * @return The item without lore, or null if the item never shows seasonal lore.
+	 */
+	private static ItemStack withoutLore(ItemStack item) {
+		if (item == null) {
+			return null;
+		}
+		if (Produce.getType(item) != null) {
+			return CropUtils.hasSeasonalLore(item) ? Produce.withoutLore(item) : null;
+		}
+		if (!CropUtils.isCropSeed(item.getType())) {
+			return null;
+		}
+		ItemStack noLore = new ItemStack(item.getType());
+		noLore.setAmount(item.getAmount());
+		return noLore;
 	}
 }
 

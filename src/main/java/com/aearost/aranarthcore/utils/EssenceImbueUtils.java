@@ -89,6 +89,47 @@ public class EssenceImbueUtils {
     }
 
     /**
+     * Provides the true total XP points the player has, including the progress within their current level.
+     * @param player The player.
+     * @return The total XP points.
+     */
+    public static int getTotalExp(Player player) {
+        int level = player.getLevel();
+        int toNext = getXpForLevel(level + 1) - getXpForLevel(level);
+        return getXpForLevel(level) + Math.round(player.getExp() * toNext);
+    }
+
+    /**
+     * Sets the player's level and progress so that they have exactly the input total XP points.
+     * @param player The player.
+     * @param totalExp The new total XP points.
+     */
+    public static void setTotalExp(Player player, int totalExp) {
+        totalExp = Math.max(0, totalExp);
+        int level = 0;
+        while (getXpForLevel(level + 1) <= totalExp) {
+            level++;
+        }
+        int toNext = getXpForLevel(level + 1) - getXpForLevel(level);
+        player.setLevel(level);
+        player.setExp(Math.min(0.9999F, (float) (totalExp - getXpForLevel(level)) / toNext));
+    }
+
+    /**
+     * Provides the level the input total XP points reach, including the fraction of the next level.
+     * @param totalExp The total XP points.
+     * @return The exact level, i.e 152.34.
+     */
+    public static double getExactLevel(int totalExp) {
+        int level = 0;
+        while (getXpForLevel(level + 1) <= totalExp) {
+            level++;
+        }
+        int toNext = getXpForLevel(level + 1) - getXpForLevel(level);
+        return level + (double) (totalExp - getXpForLevel(level)) / toNext;
+    }
+
+    /**
      * @return The maximum XP that can be imbued into an Essence.
      */
     public static int getMaxImbuedXp() {
@@ -156,6 +197,9 @@ public class EssenceImbueUtils {
         lore.add("");
         lore.add(ChatUtils.translateToColor("&7&oHalf of your earned XP is imbued"));
         lore.add(ChatUtils.translateToColor("&7&owhile held in your inventory"));
+        lore.add("");
+        lore.add(ChatUtils.translateToColor("&7&oSneak + right-click to transfer"));
+        lore.add(ChatUtils.translateToColor("&7&oyour own EXP into it"));
         return lore;
     }
 

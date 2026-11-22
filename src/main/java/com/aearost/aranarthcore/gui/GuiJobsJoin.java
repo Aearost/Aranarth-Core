@@ -137,7 +137,7 @@ public class GuiJobsJoin {
             case EXCAVATOR -> List.of(Lang.getFor(player, "jobs.action_excavator_dig"), Lang.getFor(player, "jobs.action_excavator_brush"));
             case LUMBERJACK -> List.of(Lang.getFor(player, "jobs.action_lumberjack_chop"), Lang.getFor(player, "jobs.action_lumberjack_craft"));
             case EXPLORER -> List.of(Lang.getFor(player, "jobs.action_explorer_travel"), Lang.getFor(player, "jobs.action_explorer_chests"));
-            case ALCHEMIST -> List.of(Lang.getFor(player, "jobs.action_alchemist_brew"), Lang.getFor(player, "jobs.action_alchemist_enchant"));
+            case ALCHEMIST -> List.of(Lang.getFor(player, "jobs.action_alchemist_brew"), Lang.getFor(player, "jobs.action_alchemist_use"), Lang.getFor(player, "jobs.action_alchemist_enchant"));
             case HUNTER -> List.of(Lang.getFor(player, "jobs.action_hunter_kill"), Lang.getFor(player, "jobs.action_hunter_fish"));
         };
     }

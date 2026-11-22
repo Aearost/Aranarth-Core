@@ -690,8 +690,8 @@ public class TradeManager {
             return;
         }
 
-        // Initiator may have moved to a non-survival world since sending the invite
-        if (!AranarthUtils.isSurvivalWorld(initiator.getWorld().getName())) {
+        // Initiator may have moved to a non-survival world or entered Creative mode since sending the invite
+        if (!AranarthUtils.isSurvivalWorld(initiator.getWorld().getName()) || CreativeSwapUtils.isSwapped(initiatorUuid)) {
             AranarthPlayer initiatorAp = AranarthUtils.getPlayer(initiatorUuid);
             String initiatorNick = initiatorAp != null ? initiatorAp.getNickname() : initiator.getName();
             initiator.sendMessage(ChatUtils.chatMessage(Lang.getFor(initiator, "trade.wrong_world")));

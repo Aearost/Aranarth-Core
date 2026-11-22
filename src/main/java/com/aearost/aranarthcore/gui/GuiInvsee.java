@@ -24,11 +24,53 @@ public class GuiInvsee {
     /** Reverse map: target UUID → all open GUIs currently watching that player. */
     private static final HashMap<UUID, Set<Inventory>> watchedBy = new HashMap<>();
 
-    /** GUIs that show a remote-server snapshot - all interactions are blocked. */
+    /** GUIs that show a copy from the other server, where clicks are sent to that server rather than applied here. */
     private static final HashSet<Inventory> remoteInvsees = new HashSet<>();
 
     /** Reverse map for remote GUIs: target UUID -> all open remote GUIs watching that player. */
     private static final HashMap<UUID, Set<Inventory>> remoteWatchedBy = new HashMap<>();
+
+    /** Reverse map for remote ender chest GUIs: target UUID -> all open remote ender chest GUIs. */
+    private static final HashMap<UUID, Set<Inventory>> remoteEnderWatchedBy = new HashMap<>();
+
+    /** Remote GUIs that show an ender chest rather than an inventory. */
+    private static final HashSet<Inventory> remoteEnders = new HashSet<>();
+
+    public static boolean isRemoteEnder(Inventory inventory) {
+        return remoteEnders.contains(inventory);
+    }
+
+    public static boolean hasRemoteEnderOpen(UUID targetUuid) {
+        Set<Inventory> guis = remoteEnderWatchedBy.get(targetUuid);
+        return guis != null && !guis.isEmpty();
+    }
+
+    /**
+     * Opens a copy of a remote player's ender chest for the given viewer. Changes the viewer makes are
+     * sent to the target's server, which updates the copy once it has applied them.
+     */
+    public static void openRemoteEnder(Player viewer, UUID targetUuid, String targetName, ItemStack[] items) {
+        Inventory gui = GuiHolder.create(null, 27, Lang.getFor(viewer, "user.ender_title", "name", targetName));
+        for (int i = 0; i < items.length && i < 27; i++) {
+            gui.setItem(i, items[i]);
+        }
+        openInvsees.put(gui, targetUuid);
+        remoteInvsees.add(gui);
+        remoteEnders.add(gui);
+        remoteEnderWatchedBy.computeIfAbsent(targetUuid, k -> new HashSet<>()).add(gui);
+        viewer.openInventory(gui);
+    }
+
+    /** Updates all remote ender chest GUIs currently watching the given target with a fresh copy. */
+    public static void refreshRemoteEnderForTarget(UUID targetUuid, ItemStack[] items) {
+        Set<Inventory> guis = remoteEnderWatchedBy.get(targetUuid);
+        if (guis == null) return;
+        for (Inventory gui : guis) {
+            for (int i = 0; i < 27; i++) {
+                gui.setItem(i, i < items.length ? items[i] : null);
+            }
+        }
+    }
 
     public static HashMap<Inventory, UUID> getOpenInvsees() {
         return openInvsees;
@@ -58,7 +100,13 @@ public class GuiInvsee {
     public static void close(Inventory inventory) {
         UUID targetUUID = openInvsees.remove(inventory);
         remoteInvsees.remove(inventory);
+        remoteEnders.remove(inventory);
         if (targetUUID != null) {
+            Set<Inventory> enderGuis = remoteEnderWatchedBy.get(targetUUID);
+            if (enderGuis != null) {
+                enderGuis.remove(inventory);
+                if (enderGuis.isEmpty()) remoteEnderWatchedBy.remove(targetUUID);
+            }
             Set<Inventory> localGuis = watchedBy.get(targetUUID);
             if (localGuis != null) {
                 localGuis.remove(inventory);
@@ -73,7 +121,7 @@ public class GuiInvsee {
     }
 
     /**
-     * Opens a read-only snapshot of a remote player's inventory for the given viewer.
+     * Opens a copy of a remote player's inventory for the given viewer.
      * The guiItems array must be 45 elements matching the GUI slot layout.
      */
     public static void openRemote(Player viewer, UUID targetUuid, String targetName, ItemStack[] guiItems) {
@@ -115,9 +163,10 @@ public class GuiInvsee {
 
     /** Closes all remote invsee GUIs that are watching the given target (e.g. when they go offline). */
     public static void closeAllRemoteFor(UUID targetUuid) {
-        Set<Inventory> guis = remoteWatchedBy.get(targetUuid);
-        if (guis == null || guis.isEmpty()) return;
-        Set<Inventory> copy = new HashSet<>(guis);
+        Set<Inventory> copy = new HashSet<>();
+        if (remoteWatchedBy.get(targetUuid) != null) copy.addAll(remoteWatchedBy.get(targetUuid));
+        if (remoteEnderWatchedBy.get(targetUuid) != null) copy.addAll(remoteEnderWatchedBy.get(targetUuid));
+        if (copy.isEmpty()) return;
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (copy.contains(p.getOpenInventory().getTopInventory())) {
                 p.closeInventory(); // fires InventoryCloseEvent -> GuiInvsee.close()

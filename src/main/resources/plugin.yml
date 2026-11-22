@@ -1,5 +1,5 @@
 name: AranarthCore
-version: 1.15
+version: 1.16
 authors: [ Aearost ]
 main: com.aearost.aranarthcore.AranarthCore
 api-version: 26.3
@@ -71,6 +71,8 @@ commands:
   creative:
     description: Teleports the player to the Creative plots world
     permission: aranarth.creative
+  treetest:
+    description: Grows every tree design under review in a test world
   date:
     description: Lists the current Aranarth calendar date
     permission: aranarth.date
@@ -216,6 +218,9 @@ commands:
   rankup:
     description: Directly lists the next rank that the player can rank up to
     permission: aranarth.rankup
+  recipe:
+    description: Opens the custom recipes guide, optionally searching for the input item name (vanilla is /minecraft:recipe)
+    usage: /recipe [item name]
   reply:
     description: Replies to the last received message
     aliases: [ r ]
@@ -275,6 +280,9 @@ commands:
   toggle:
     description: Allows the player to toggle different functionality
     aliases: [ t ]
+    permission: aranarth.toggle
+  trees:
+    description: Opens a GUI to choose which custom trees your saplings grow into
     permission: aranarth.toggle
   teleport:
     description: Sends a teleport request to the input player

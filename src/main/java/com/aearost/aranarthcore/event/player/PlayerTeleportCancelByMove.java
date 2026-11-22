@@ -15,6 +15,9 @@ import org.bukkit.scheduler.BukkitTask;
  */
 public class PlayerTeleportCancelByMove {
 
+    // How many small position changes are tolerated during the countdown before it is cancelled
+    private static final int MAX_MOVEMENTS = 1;
+
     public void execute(PlayerMoveEvent e) {
         // If they did not move to a different coordinate and only their mouse
         if (e.getTo() == null) {
@@ -26,13 +29,31 @@ public class PlayerTeleportCancelByMove {
         BukkitTask task = AranarthUtils.getTeleportTask(player.getUniqueId());
         // If they're actively trying to teleport
         if (task != null) {
-            Location from = e.getFrom();
+            Location anchor = AranarthUtils.getTeleportAnchor(player.getUniqueId());
+            if (anchor == null) {
+                anchor = e.getFrom();
+            }
             Location to = e.getTo();
-            // Use a threshold to avoid false cancels from residual in-flight movement packets
-            double threshold = 0.05;
-            boolean positionChanged = Math.abs(from.getX() - to.getX()) > threshold
-                    || Math.abs(from.getY() - to.getY()) > threshold
-                    || Math.abs(from.getZ() - to.getZ()) > threshold;
+            // Measured from where the countdown began rather than per packet
+            boolean positionChanged;
+            if (anchor.getWorld() == null || !anchor.getWorld().equals(to.getWorld())) {
+                positionChanged = true;
+            } else {
+                double dx = to.getX() - anchor.getX();
+                double dz = to.getZ() - anchor.getZ();
+                double horizontalThreshold = 0.5;
+                double verticalThreshold = 1.5;
+                positionChanged = (dx * dx + dz * dz) > horizontalThreshold * horizontalThreshold
+                        || Math.abs(to.getY() - anchor.getY()) > verticalThreshold;
+            }
+            // Only one leftover movement is tolerated so players cannot shuffle around much
+            if (!positionChanged) {
+                Location from = e.getFrom();
+                boolean bodyMoved = from.getX() != to.getX() || from.getY() != to.getY() || from.getZ() != to.getZ();
+                if (bodyMoved && AranarthUtils.incrementTeleportMoveCount(player.getUniqueId()) > MAX_MOVEMENTS) {
+                    positionChanged = true;
+                }
+            }
             if (positionChanged) {
                 task.cancel();
                 AranarthUtils.removeTeleportTask(player.getUniqueId());

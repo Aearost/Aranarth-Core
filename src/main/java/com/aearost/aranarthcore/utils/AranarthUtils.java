@@ -10,6 +10,7 @@ import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.enums.WorldEvent;
 import com.aearost.aranarthcore.event.listener.misc.InvisibilityListener;
 import com.aearost.aranarthcore.event.listener.misc.PotionEffectListener;
+import com.aearost.aranarthcore.event.player.AfkCancelByInteract;
 import com.aearost.aranarthcore.items.SugarcaneBlock;
 import com.aearost.aranarthcore.items.arrow.*;
 import com.aearost.aranarthcore.network.NetworkManager;
@@ -37,10 +38,12 @@ import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -127,6 +130,10 @@ public class AranarthUtils {
     private static final HashMap<UUID, UUID> pendingShopInvites = new HashMap<>(); // invitee UUID → owner UUID
     private static final HashMap<UUID, String> shopNames = new HashMap<>();
     private static final HashMap<UUID, BukkitTask> teleportingPlayers = new HashMap<>();
+    // Where each player stood when their teleport countdown began, used to detect real movement
+    private static final HashMap<UUID, Location> teleportAnchors = new HashMap<>();
+    // How many position changes each player has made during their teleport countdown
+    private static final HashMap<UUID, Integer> teleportMoveCounts = new HashMap<>();
     private static final Set<UUID> skipCountdown = new HashSet<>();
     // Travel rewards: moves larger than this (in blocks) or shortly after a teleport are not active travel
     private static final Map<UUID, Long> recentTeleports = new HashMap<>();
@@ -554,6 +561,22 @@ public class AranarthUtils {
     }
 
     public static void switchInventory(Player player, String currentWorld, String destinationWorld) throws IOException {
+        // The game modes set while switching must not swap in the creative inventory, as this already gives the right inventory
+        boolean isSwitchStarted = CreativeSwapUtils.beginWorldSwitch(player.getUniqueId());
+        try {
+            switchInventoryBetweenWorlds(player, currentWorld, destinationWorld);
+        } finally {
+            if (isSwitchStarted) {
+                CreativeSwapUtils.endWorldSwitch(player.getUniqueId());
+            }
+        }
+    }
+
+    private static void switchInventoryBetweenWorlds(Player player, String currentWorld, String destinationWorld) throws IOException {
+        // The creative inventory held in Creative mode only stays while the player is in the Survival worlds
+        if (!getInventoryGroup(destinationWorld).equals("world")) {
+            CreativeSwapUtils.restoreBeforeLeaving(player);
+        }
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
         String rawFrom = currentWorld;
@@ -858,6 +881,35 @@ public class AranarthUtils {
                 || biome == Biome.LUKEWARM_OCEAN || biome == Biome.DEEP_LUKEWARM_OCEAN
                 || biome == Biome.WARM_OCEAN
                 || biome == Biome.RIVER || biome == Biome.FROZEN_RIVER;
+    }
+
+    /**
+     * Unequips any armour with the Curse of Binding after a death where the inventory was kept (i.e Soulbound or the arena).
+     *
+     * @param player The player who respawned.
+     * @return Whether any armour was released.
+     */
+    public static boolean releaseBindingCurseArmor(Player player) {
+        PlayerInventory inventory = player.getInventory();
+        ItemStack[] armor = inventory.getArmorContents();
+        List<ItemStack> released = new ArrayList<>();
+        for (int i = 0; i < armor.length; i++) {
+            ItemStack piece = armor[i];
+            if (piece != null && piece.containsEnchantment(Enchantment.BINDING_CURSE)) {
+                released.add(piece);
+                armor[i] = null;
+            }
+        }
+        if (released.isEmpty()) {
+            return false;
+        }
+        inventory.setArmorContents(armor);
+        for (ItemStack piece : released) {
+            for (ItemStack leftover : inventory.addItem(piece).values()) {
+                player.getWorld().dropItemNaturally(player.getLocation(), leftover);
+            }
+        }
+        return true;
     }
 
     /**
@@ -1220,6 +1272,16 @@ public class AranarthUtils {
                 || type == Material.NETHER_WART || type == Material.COCOA
                 || type == Material.CACTUS || type == Material.SUGAR_CANE
                 || type == Material.MELON || type == Material.PUMPKIN;
+    }
+
+    /**
+     * Confirms if the input item can be harvested by a hoe.
+     *
+     * @param type The type of item it is.
+     * @return Confirmation of whether the input item can be harvested by a hoe.
+     */
+    public static boolean isHarvestableWithHoe(Material type) {
+        return isBlockCrop(type) || Tag.MINEABLE_HOE.isTagged(type);
     }
 
     /**
@@ -1790,6 +1852,13 @@ public class AranarthUtils {
             case "rooting" -> new ArrowRooting().getItem();
             case "gust" -> new ArrowGust().getItem();
             case "dragon" -> new ArrowDragon().getItem();
+            case "sonar" -> new ArrowSonar().getItem();
+            case "grapple" -> new ArrowGrapple().getItem();
+            case "homing" -> new ArrowHoming().getItem();
+            case "smoke" -> new ArrowSmoke().getItem();
+            case "shifting" -> new ArrowShifting().getItem();
+            case "tether" -> new ArrowTether().getItem();
+            case "tide" -> new ArrowTide().getItem();
             default -> null;
         };
     }
@@ -2623,12 +2692,16 @@ public class AranarthUtils {
             @Override
             public void run() {
                 teleportingPlayers.remove(player.getUniqueId());
+                teleportAnchors.remove(player.getUniqueId());
+                teleportMoveCounts.remove(player.getUniqueId());
                 onSuccess.run();
             }
         }.runTaskLater(AranarthCore.getInstance(), 60);
 
         // This is run before the above task itself due to the delay
         teleportingPlayers.put(player.getUniqueId(), task);
+        teleportAnchors.put(player.getUniqueId(), player.getLocation());
+        teleportMoveCounts.remove(player.getUniqueId());
     }
 
     /**
@@ -2710,7 +2783,7 @@ public class AranarthUtils {
         // is what saveInventoryAndTransfer() will flush to MySQL before the BungeeCord handoff.
         if (isSurvivalWorld(actualFromWorld)) {
             try {
-                aranarthPlayer.setSurvivalInventory(ItemUtils.itemStackArrayToBase64(player.getInventory().getContents()));
+                aranarthPlayer.setSurvivalInventory(CreativeSwapUtils.getSurvivalInventory(player));
             } catch (Exception e) {
                 Bukkit.getLogger().warning("[AC] Failed to serialize inventory for " + player.getName());
             }
@@ -2760,6 +2833,28 @@ public class AranarthUtils {
      */
     public static void removeTeleportTask(UUID uuid) {
         teleportingPlayers.remove(uuid);
+        teleportAnchors.remove(uuid);
+        teleportMoveCounts.remove(uuid);
+    }
+
+    /**
+     * Records a position change made during the player's teleport countdown.
+     *
+     * @param uuid The player's UUID.
+     * @return The total number of position changes made since the countdown began.
+     */
+    public static int incrementTeleportMoveCount(UUID uuid) {
+        return teleportMoveCounts.merge(uuid, 1, Integer::sum);
+    }
+
+    /**
+     * Provides the location the player was standing at when their teleport countdown began.
+     *
+     * @param uuid The player's UUID.
+     * @return The starting location, or null if they are not teleporting.
+     */
+    public static Location getTeleportAnchor(UUID uuid) {
+        return teleportAnchors.get(uuid);
     }
 
     /**
@@ -3179,7 +3274,7 @@ public class AranarthUtils {
         }
 
         for (ItemStack is : blacklistedItems) {
-            if (is.isSimilar(item) || (item.getType() == is.getType() && CropUtils.isCropSeed(item.getType()))) {
+            if (is.isSimilar(item) || (CropUtils.isSameSeasonalItem(item, is))) {
                 return aranarthPlayer.getBlacklistingMethod();
             }
         }
@@ -4218,8 +4313,10 @@ public class AranarthUtils {
         // any viewer who has chosen their own prefix styles.
         Map<UUID, ChatPrefix> localPrefixes = new LinkedHashMap<>();
         Map<UUID, String> localSuffixes = new HashMap<>();
+        // Vanished players are formatted too, as those who can see them would otherwise see a plain name.
+        // Who sees a vanished player at all is decided by the vanish visibility above and the tab layout below
         for (SortEntry entry : combined) {
-            if (entry.localPlayer() != null && !entry.vanished()) {
+            if (entry.localPlayer() != null) {
                 Player player = entry.localPlayer();
                 UUID uuid = player.getUniqueId();
                 ChatPrefix prefix = ChatPrefix.of(player);
@@ -4692,38 +4789,31 @@ public class AranarthUtils {
      */
     public static void updateAfkLocations() {
         for (Player player : Bukkit.getOnlinePlayers()) {
+            // A key held through a long ride or walk only fires an input event when it is first pressed
+            Input input = player.getCurrentInput();
+            if (input.isForward() || input.isBackward() || input.isLeft() || input.isRight()) {
+                new AfkCancelByInteract().execute(player);
+            }
             AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
             AfkLocation afkLocation = aranarthPlayer.getAfkLocation();
             if (afkLocation == null) {
                 afkLocation = new AfkLocation(player.getLocation(), 0);
                 aranarthPlayer.setAfkLocation(afkLocation);
                 setPlayer(player.getUniqueId(), aranarthPlayer);
-            } else {
-                // If the player hasn't moved and isn't afk yet
-                if (isSameLocation(player.getLocation(), afkLocation.getLocation())) {
-                    if (afkLocation.getSeconds() < getAfkSecondsAmount()) {
-                        afkLocation.setSeconds(afkLocation.getSeconds() + 5);
-                        aranarthPlayer.setAfkLocation(afkLocation);
-                        setPlayer(player.getUniqueId(), aranarthPlayer);
-                    }
-                    // Auto-afk after the timeout, even if the timeout is not a multiple of 5
-                    else if (aranarthPlayer.getAfkStartTime() == 0) {
-                        toggleAfkStatus(player.getUniqueId(), true);
-                        // Prevents further calls
-                        afkLocation.setSeconds(AranarthUtils.getAfkSecondsAmount() + 5);
-                        aranarthPlayer.setAfkLocation(afkLocation);
-                        setPlayer(player.getUniqueId(), aranarthPlayer);
-                    }
-                }
-                // The player has moved
-                else {
-                    if (isAfk(aranarthPlayer)) {
-                        toggleAfkStatus(player.getUniqueId(), false);
-                    } else {
-                        aranarthPlayer.setAfkLocation(null);
-                        setPlayer(player.getUniqueId(), aranarthPlayer);
-                    }
-                }
+            }
+            // Only real input resets the timer, so being pushed around by water, mobs or pistons still counts as AFK
+            else if (afkLocation.getSeconds() < getAfkSecondsAmount()) {
+                afkLocation.setSeconds(afkLocation.getSeconds() + 5);
+                aranarthPlayer.setAfkLocation(afkLocation);
+                setPlayer(player.getUniqueId(), aranarthPlayer);
+            }
+            // Auto-afk after the timeout, even if the timeout is not a multiple of 5
+            else if (aranarthPlayer.getAfkStartTime() == 0) {
+                toggleAfkStatus(player.getUniqueId(), true);
+                // Prevents further calls
+                afkLocation.setSeconds(AranarthUtils.getAfkSecondsAmount() + 5);
+                aranarthPlayer.setAfkLocation(afkLocation);
+                setPlayer(player.getUniqueId(), aranarthPlayer);
             }
         }
     }

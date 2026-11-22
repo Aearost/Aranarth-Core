@@ -12,9 +12,11 @@ import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.JobUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.QuestUtils;
+import com.dre.brewery.Brew;
 import com.dre.brewery.api.events.brew.BrewModifyEvent;
 import com.gmail.nossr50.mcMMO;
 import org.bukkit.Chunk;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -33,6 +35,7 @@ import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.BrewEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -41,12 +44,15 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionType;
 import org.bukkit.projectiles.ProjectileSource;
 
 import java.util.ArrayDeque;
@@ -1029,6 +1035,67 @@ public class JobEventListener implements Listener {
         }
 
         JobUtils.awardJob(player, JobType.ALCHEMIST, 48.00);
+    }
+
+    // -------------------------------------------------------------------------
+    // ALCHEMIST - Using potions (drinking, throwing splash and lingering)
+    // -------------------------------------------------------------------------
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    public void onPotionDrink(PlayerItemConsumeEvent e) {
+        ItemStack item = e.getItem();
+        if (item.getType() != Material.POTION) {
+            return;
+        }
+        awardPotionUse(e.getPlayer(), item, 4.80);
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    public void onPotionThrow(ProjectileLaunchEvent e) {
+        if (!(e.getEntity() instanceof ThrownPotion thrownPotion)) {
+            return;
+        }
+        if (!(thrownPotion.getShooter() instanceof Player player)) {
+            return;
+        }
+        ItemStack item = thrownPotion.getItem();
+        double pay = item.getType() == Material.LINGERING_POTION ? 9.60 : 4.80;
+        awardPotionUse(player, item, pay);
+    }
+
+    private void awardPotionUse(Player player, ItemStack item, double pay) {
+        // Creative potions are free, so they never pay
+        if (player.getGameMode() != GameMode.SURVIVAL) {
+            return;
+        }
+        if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
+            return;
+        }
+        AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
+        if (ap == null || !ap.getJobData().hasJob(JobType.ALCHEMIST)) {
+            return;
+        }
+        if (!isBrewedPotion(item)) {
+            return;
+        }
+        JobUtils.awardJob(player, JobType.ALCHEMIST, pay);
+    }
+
+    /**
+     * Determines whether the potion is a vanilla brewed potion with an effect.
+     *
+     * @param item The potion item.
+     * @return Whether using the potion should pay Alchemists.
+     */
+    private boolean isBrewedPotion(ItemStack item) {
+        if (item == null || !(item.getItemMeta() instanceof PotionMeta meta)) {
+            return false;
+        }
+        if (meta.hasCustomEffects() || Brew.get(item) != null) {
+            return false;
+        }
+        PotionType baseType = meta.getBasePotionType();
+        return baseType != null && !baseType.getPotionEffects().isEmpty();
     }
 
     // -------------------------------------------------------------------------

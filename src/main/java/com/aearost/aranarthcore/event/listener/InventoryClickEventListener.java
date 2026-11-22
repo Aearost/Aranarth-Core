@@ -9,6 +9,7 @@ import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.ProduceTradeUtils;
 import com.aearost.aranarthcore.utils.TradeManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -21,6 +22,7 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.BrewerInventory;
+import org.bukkit.inventory.MerchantInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -75,6 +77,9 @@ public class InventoryClickEventListener implements Listener {
      */
     @EventHandler
     public void onInventoryDrag(InventoryDragEvent e) {
+        if (e.getView().getTopInventory() instanceof MerchantInventory merchant) {
+            ProduceTradeUtils.refreshPaymentLater(merchant);
+        }
         GuiHolder holder = GuiHolder.of(e.getView().getTopInventory());
         if (holder == null || holder.isDragAllowed()) {
             return;
@@ -103,8 +108,12 @@ public class InventoryClickEventListener implements Listener {
         if (!(e.getWhoClicked() instanceof Player player)) {
             return;
         }
+        // Done first so GUI clicks that return early still count as activity
+        new AfkCancelByInteract().execute(player);
         if (isGui && e.getView().getType() == InventoryType.CHEST) {
-            if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.wrench.title"))) {
+            if (GuiHolder.of(e.getView().getTopInventory()).getData() instanceof GuiUser.HubData hubData) {
+                GuiUser.handleClick(e, hubData);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.wrench.title"))) {
                 new GuiWrenchClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.teleport.title"))) {
                 new GuiHomepadClick().execute(e);
@@ -137,6 +146,8 @@ public class InventoryClickEventListener implements Listener {
                 new GuiRecipesClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiRecipeView.TITLE_KEY))) {
                 new GuiRecipeViewClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiCreativeItems.TITLE_KEY))) {
+                new GuiCreativeItemsClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.ranks.title"))) {
                 new GuiRanksClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.rankup.title"))) {
@@ -215,6 +226,8 @@ public class InventoryClickEventListener implements Listener {
                 new GuiLoginStreakClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.toggle.title"))) {
                 new GuiToggleClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.trees.title"))) {
+                new GuiTreesClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.sitcolor.title"))) {
                 new GuiSitColorClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.prefix.title"))) {
@@ -244,6 +257,8 @@ public class InventoryClickEventListener implements Listener {
             } else if (TradeManager.isTradeGuiOpen(player)) {
                 new GuiTradeClick().execute(e);
             }
+        } else if (e.getView().getTopInventory() instanceof MerchantInventory merchant) {
+            ProduceTradeUtils.onMerchantClick(e, merchant);
         } else if (e.getView().getType() != InventoryType.CHEST) {
             if (e.getClickedInventory() != null) {
                 if (e.getView().getType() == InventoryType.ANVIL || e.getView().getType() == InventoryType.SMITHING) {
@@ -259,8 +274,6 @@ public class InventoryClickEventListener implements Listener {
             }
         }
 
-        // Execute regardless of inventory type
-        new AfkCancelByInteract().execute(player);
 //        new QuiverSwitchSlots().execute(e);
     }
 }

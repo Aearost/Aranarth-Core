@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.SparUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
@@ -60,6 +61,10 @@ public class CommandCountdown implements CommandExecutor {
 			pendingRequests.remove(targetUuid);
 			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "countdown.accepted", "player", targetNickname)));
 			target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "countdown.accepted_by", "player", playerNickname)));
+			// Neither player can kill the other until one of them loses the spar
+			SparUtils.startSpar(player, target);
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "countdown.spar_started", "player", targetNickname)));
+			target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "countdown.spar_started", "player", playerNickname)));
 			startCountdown(player, target);
 			return true;
 		}

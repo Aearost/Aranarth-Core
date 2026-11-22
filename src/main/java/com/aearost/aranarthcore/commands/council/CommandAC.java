@@ -102,6 +102,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandWarn.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("punishments")) {
 			commandResult = CommandPunishments.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("user") || args[0].equalsIgnoreCase("u")) {
+			commandResult = CommandUser.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("broadcast")) {
 			commandResult = CommandBroadcast.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("perks")) {

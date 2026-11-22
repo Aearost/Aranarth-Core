@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.SpecialArrowUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import org.bukkit.*;
@@ -173,6 +174,46 @@ public class ArrowHit {
 					direction.setY(1); // Lifts the entity slightly
 					entity.setVelocity(direction);
 					entity.setFallDistance(0); // Prevents weird fall damage
+				}
+			} else if (type.equals("sonar")) {
+				if (arrow.getShooter() instanceof Player shooter) {
+					SpecialArrowUtils.sonarPulse(shooter, arrow.getLocation());
+				}
+				arrow.remove();
+			} else if (type.equals("grapple")) {
+				// Never damages entities, it passes straight through them
+				if (e.getHitEntity() != null) {
+					e.setCancelled(true);
+					return;
+				}
+				if (block != null && arrow.getShooter() instanceof Player shooter) {
+					SpecialArrowUtils.setGrappleAnchor(shooter, arrow);
+				}
+				// Never breaks blocks such as glass or ice
+				return;
+			} else if (type.equals("smoke")) {
+				if (arrow.getShooter() instanceof Player shooter) {
+					SpecialArrowUtils.smokeCloud(shooter, arrow.getLocation());
+				}
+				arrow.remove();
+			} else if (type.equals("shifting")) {
+				Entity hitEntity = e.getHitEntity();
+				if (hitEntity != null && arrow.getShooter() instanceof Player shooter) {
+					// Remembered now in case the arrow kills the target
+					Location hitLocation = hitEntity.getLocation().clone();
+					// A tick later so the hit and its damage resolve before anyone moves
+					new BukkitRunnable() {
+						@Override
+						public void run() {
+							if (shooter.isOnline() && !shooter.isDead()) {
+								SpecialArrowUtils.shift(shooter, hitEntity, hitLocation);
+							}
+						}
+					}.runTaskLater(AranarthCore.getInstance(), 1L);
+				}
+			} else if (type.equals("tether")) {
+				if (e.getHitEntity() != null && arrow.getShooter() instanceof Player shooter) {
+					SpecialArrowUtils.setTetherAnchor(shooter, e.getHitEntity());
 				}
 			}
 		}

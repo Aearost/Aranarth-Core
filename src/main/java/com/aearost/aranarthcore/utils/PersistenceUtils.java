@@ -2642,7 +2642,7 @@ public class PersistenceUtils {
                     continue;
                 }
 
-                // uuid|date|type|reason|appliedBy
+                // uuid|date|type|reason|appliedBy|category (the category is only written when there is one)
                 String[] fields = row.split("\\|");
 
                 UUID uuid = UUID.fromString(fields[0]);
@@ -2653,7 +2653,8 @@ public class PersistenceUtils {
                 if (!fields[4].equals("CONSOLE")) {
                     appliedBy = UUID.fromString(fields[4]);
                 }
-                Punishment punishment = new Punishment(uuid, date, type, reason, appliedBy);
+                String category = fields.length > 5 ? fields[5] : null;
+                Punishment punishment = new Punishment(uuid, date, type, reason, appliedBy, category);
                 AranarthUtils.addPunishment(uuid, punishment, true);
             }
             Bukkit.getLogger().info("[AC] All punishments have been initialized");
@@ -2706,7 +2707,8 @@ public class PersistenceUtils {
                             appliedBy = appliedByUuid.toString();
                         }
 
-                        String row = uuidString + "|" + date + "|" + type + "|" + reason + "|" + appliedBy + "\n";
+                        String category = punishment.getCategory() != null ? "|" + punishment.getCategory() : "";
+                        String row = uuidString + "|" + date + "|" + type + "|" + reason + "|" + appliedBy + category + "\n";
                         writer.write(row);
                     }
                 }
@@ -6073,6 +6075,9 @@ public class PersistenceUtils {
                 po.addProperty("type", p.getType());
                 po.addProperty("reason", p.getReason());
                 po.addProperty("appliedBy", p.getAppliedBy() != null ? p.getAppliedBy().toString() : "CONSOLE");
+                if (p.getCategory() != null) {
+                    po.addProperty("category", p.getCategory());
+                }
                 arr.add(po);
             }
         }
@@ -6207,6 +6212,9 @@ public class PersistenceUtils {
             obj.addProperty("serverTipsDisabled", ap.isServerTipsDisabled());
             obj.addProperty("sitDisabled", ap.isSitDisabled());
             obj.addProperty("jobsMessageDisabled", ap.isJobsMessageDisabled());
+            obj.addProperty("bigTreeDisabled", ap.isBigTreeDisabled());
+            obj.addProperty("disabledTrees", ap.getEncodedDisabledTrees());
+            obj.addProperty("armorHidden", ap.isArmorHidden());
             obj.addProperty("sitCushionColor", ap.getSitCushionColor());
             obj.addProperty("prefixStyles", ap.getEncodedPrefixStyles());
             obj.addProperty("language", ap.getLanguage());
@@ -7663,12 +7671,16 @@ public class PersistenceUtils {
                     + ", arenaInventory=" + (arenaInventory.isEmpty() ? "empty" : "set") + ")"
                     + " - will skip clear if they switch to survival");
         }
+        // Vanish is not stored in MySQL, so the in-memory state (kept in sync between servers) must survive the reload
+        AranarthPlayer previous = AranarthUtils.getLoadedPlayer(uuid);
+        boolean wasVanished = previous != null && previous.isVanished();
         AranarthUtils.addPlayer(uuid, new AranarthPlayer(resolveUsername(uuid, storedUsername), nickname,
                 survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist,
                 blacklistingMethod, balance, rank, saintRank, councilRank, architectRank, homes,
                 muteEndDate, particles, perks, saintExpireDate, isCompressingItems, votePointsSpent, isUsingSpawnBoost,
                 firstJoinDate,
                 pronouns));
+        AranarthUtils.getPlayer(uuid).setVanished(wasVanished);
         // Stamp the snapshot so cross-server delta logic knows what this server loaded from DB
         AranarthUtils.getPlayer(uuid).setBalanceSnapshot(balance);
         long conquestDisbandCooldownEnd = fields.length > 24 ? Long.parseLong(fields[23]) : 0L;
@@ -8086,7 +8098,8 @@ public class PersistenceUtils {
                     String reason = po.get("reason").getAsString();
                     UUID appliedBy = po.get("appliedBy").getAsString().equals("CONSOLE") ? null
                             : UUID.fromString(po.get("appliedBy").getAsString());
-                    AranarthUtils.addPunishment(uuid, new Punishment(uuid, date, type, reason, appliedBy), true);
+                    String category = po.has("category") ? po.get("category").getAsString() : null;
+                    AranarthUtils.addPunishment(uuid, new Punishment(uuid, date, type, reason, appliedBy, category), true);
                 }
             } catch (Exception e) {
                 Bukkit.getLogger().warning("[AC] Failed to parse punishments for " + uuid + ": " + e.getMessage());
@@ -8316,6 +8329,15 @@ public class PersistenceUtils {
                 if (obj.has("jobsMessageDisabled")) {
                     ap.setJobsMessageDisabled(obj.get("jobsMessageDisabled").getAsBoolean());
                 }
+                if (obj.has("bigTreeDisabled")) {
+                    ap.setBigTreeDisabled(obj.get("bigTreeDisabled").getAsBoolean());
+                }
+                if (obj.has("disabledTrees")) {
+                    ap.setEncodedDisabledTrees(obj.get("disabledTrees").getAsString());
+                }
+                if (obj.has("armorHidden")) {
+                    ap.setArmorHidden(obj.get("armorHidden").getAsBoolean());
+                }
                 if (obj.has("sitCushionColor")) {
                     ap.setSitCushionColor(obj.get("sitCushionColor").getAsString());
                 }
@@ -8390,6 +8412,9 @@ public class PersistenceUtils {
         obj.addProperty("serverTipsDisabled", ap.isServerTipsDisabled());
         obj.addProperty("sitDisabled", ap.isSitDisabled());
         obj.addProperty("jobsMessageDisabled", ap.isJobsMessageDisabled());
+        obj.addProperty("bigTreeDisabled", ap.isBigTreeDisabled());
+        obj.addProperty("disabledTrees", ap.getEncodedDisabledTrees());
+        obj.addProperty("armorHidden", ap.isArmorHidden());
         obj.addProperty("sitCushionColor", ap.getSitCushionColor());
         obj.addProperty("prefixStyles", ap.getEncodedPrefixStyles());
         obj.addProperty("language", ap.getLanguage());
@@ -8557,6 +8582,15 @@ public class PersistenceUtils {
             }
             if (obj.has("jobsMessageDisabled")) {
                 ap.setJobsMessageDisabled(obj.get("jobsMessageDisabled").getAsBoolean());
+            }
+            if (obj.has("bigTreeDisabled")) {
+                ap.setBigTreeDisabled(obj.get("bigTreeDisabled").getAsBoolean());
+            }
+            if (obj.has("disabledTrees")) {
+                ap.setEncodedDisabledTrees(obj.get("disabledTrees").getAsString());
+            }
+            if (obj.has("armorHidden")) {
+                ap.setArmorHidden(obj.get("armorHidden").getAsBoolean());
             }
             if (obj.has("sitCushionColor")) {
                 ap.setSitCushionColor(obj.get("sitCushionColor").getAsString());

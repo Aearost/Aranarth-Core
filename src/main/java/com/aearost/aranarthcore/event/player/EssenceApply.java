@@ -61,7 +61,7 @@ public class EssenceApply {
 				String essenceType = null;
 				ItemMeta essenceMeta = null;
 				for (Item floorItem : allItems) {
-					if (!floorItem.getItemStack().hasItemMeta()) continue;
+					if (!isEssenceItem(floorItem.getItemStack())) continue;
 					ItemMeta meta = floorItem.getItemStack().getItemMeta();
 					if (meta.getPersistentDataContainer().has(ESSENCE_TYPE)) {
 						essenceFloorItem = floorItem;
@@ -319,6 +319,17 @@ public class EssenceApply {
 		} else {
 			floorItem.remove();
 		}
+	}
+
+	/**
+	 * Determines if the input item is an essence itself, rather than an item that already has an essence applied to it.
+	 * Both carry the essence type, but only the essence items are dyes.
+	 * @param item The item.
+	 * @return Whether the item is an essence.
+	 */
+	private boolean isEssenceItem(ItemStack item) {
+		return item.hasItemMeta() && item.getType().name().endsWith("_DYE")
+				&& item.getItemMeta().getPersistentDataContainer().has(ESSENCE_TYPE);
 	}
 
 	/**

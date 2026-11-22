@@ -2,6 +2,8 @@ package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.event.listener.grouped.CustomTreeListener;
+import com.aearost.aranarthcore.utils.CustomTreeUtils;
 import com.gmail.nossr50.mcMMO;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -29,6 +31,11 @@ public class BoneMealSapling {
                     if (clicked.getBlockData() instanceof Sapling sapling) {
                         // 50% chance of instantly growing the tree
                         if (new Random().nextInt(2) == 0) {
+                            // With big trees enabled, it grows straight into its custom tree through the regular growth event
+                            if (CustomTreeUtils.isBigTreeEnabled(player.getUniqueId())) {
+                                CustomTreeListener.growNow(clicked, player);
+                                return;
+                            }
                             Block[] saplings = getSaplingsIfLargeTree(clicked);
                             // If it is a 2x2 tree
                             if (saplings != null) {
@@ -90,6 +97,7 @@ public class BoneMealSapling {
         return switch (sapling) {
             case OAK_SAPLING -> TreeType.TREE;
             case BIRCH_SAPLING -> TreeType.BIRCH;
+            case POPLAR_SAPLING -> TreeType.POPLAR;
             case SPRUCE_SAPLING -> TreeType.REDWOOD;
             case JUNGLE_SAPLING -> TreeType.SMALL_JUNGLE;
             case ACACIA_SAPLING -> TreeType.ACACIA;

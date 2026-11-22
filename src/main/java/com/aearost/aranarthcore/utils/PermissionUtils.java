@@ -576,6 +576,7 @@ public class PermissionUtils {
         perms.setPermission("aranarth.warp.modify", false);
         perms.setPermission("aranarth.warn", false);
         perms.setPermission("aranarth.punishments", false);
+        perms.setPermission("aranarth.council.user", false);
         perms.setPermission("aranarth.avatar.set", false);
         perms.setPermission("aranarth.broadcast", false);
         perms.setPermission("aranarth.shulker", false);
@@ -611,6 +612,7 @@ public class PermissionUtils {
         perms.setPermission("aranarth.plot.spawn", false);
         perms.setPermission("aranarth.questnpc", false);
         perms.setPermission("aranarth.shop.biome", false);
+        perms.setPermission("aranarth.trees.regen", false);
         perms.setPermission("aranarth.sit.toggle", false);
         perms.setPermission("aranarth.smpcreative", false);
         perms.setPermission("aranarth.speed", false);
@@ -1335,6 +1337,7 @@ public class PermissionUtils {
             perms.setPermission("aranarth.mute", true);
             perms.setPermission("aranarth.warn", true);
             perms.setPermission("aranarth.punishments", true);
+            perms.setPermission("aranarth.council.user", true);
             perms.setPermission("aranarth.nick", true);
             perms.setPermission("aranarth.nick.color", true);
             perms.setPermission("aranarth.nick.hex", true);
@@ -1394,6 +1397,7 @@ public class PermissionUtils {
             perms.setPermission("aranarth.og", true);
             perms.setPermission("aranarth.plot.spawn", true);
             perms.setPermission("aranarth.questnpc", true);
+            perms.setPermission("aranarth.trees.regen", true);
             perms.setPermission("aranarth.spy", true);
             perms.setPermission("aranarth.unscramble", true);
             perms.setPermission("aranarth.vanish", true);

@@ -71,6 +71,10 @@ public class GuiAranarthClick {
                 player.closeInventory();
                 player.performCommand("aranarth recipes");
             }
+            case GuiAranarth.SLOT_FARMING -> {
+                player.closeInventory();
+                player.performCommand("aranarth farmingtrees");
+            }
         }
     }
 }

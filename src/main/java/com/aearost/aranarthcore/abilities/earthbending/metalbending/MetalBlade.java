@@ -1,14 +1,18 @@
 package com.aearost.aranarthcore.abilities.earthbending.metalbending;
 
+import com.aearost.aranarthcore.event.listener.grouped.ArenaProtection;
 import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.MetalAbility;
 import com.projectkorra.projectkorra.attribute.Attribute;
+import com.projectkorra.projectkorra.event.AbilityDamageEntityEvent;
 import com.projectkorra.projectkorra.util.DamageHandler;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.LivingEntity;
@@ -27,6 +31,7 @@ public class MetalBlade extends MetalAbility implements AddonAbility {
     private long chargeDuration;
     private long duration;
     private int maxHits;
+    private double weaponDamageRatio;
     private static final double BLADE_HALF_WIDTH = 0.09;
     private static final int BLADE_STEPS = 6;
 
@@ -65,6 +70,7 @@ public class MetalBlade extends MetalAbility implements AddonAbility {
         this.chargeDuration = AbilityConfig.getLong("MetalBlade.ChargeDuration");
         this.duration = AbilityConfig.getLong("MetalBlade.Duration");
         this.maxHits = AbilityConfig.getInt("MetalBlade.MaxHits");
+        this.weaponDamageRatio = AbilityConfig.getDouble("MetalBlade.WeaponDamageRatio");
         this.phase = Phase.CHARGING;
         this.chargeStartTime = System.currentTimeMillis();
         this.hitsLanded = 0;
@@ -163,10 +169,18 @@ public class MetalBlade extends MetalAbility implements AddonAbility {
         if (applyingBladeHit) {
             return;
         }
-        applyingBladeHit = true;
-        event.setCancelled(true);
-        DamageHandler.damageEntity(entity, this.damage, this);
-        applyingBladeHit = false;
+
+        if (isWeapon(player.getInventory().getItemInMainHand().getType())) {
+            // The weapon still hits normally, but the blade is not consumed if its bonus was blocked
+            if (!applyWeaponBonus(entity, event)) {
+                return;
+            }
+        } else {
+            applyingBladeHit = true;
+            event.setCancelled(true);
+            DamageHandler.damageEntity(entity, this.damage, this);
+            applyingBladeHit = false;
+        }
 
         final Location impactLoc = entity.getLocation().add(0, entity.getHeight() * 0.5, 0);
         AranarthBendingUtils.spawnParticle(impactLoc.getWorld(), Particle.DUST, impactLoc, 8, 0.12, 0.18, 0.12, 0, BLADE_DUST);
@@ -177,6 +191,44 @@ public class MetalBlade extends MetalAbility implements AddonAbility {
         if (hitsLanded >= maxHits) {
             endWithCooldown();
         }
+    }
+
+    /**
+     * Keeps the weapon's vanilla damage and adds a fraction of the blade's damage on top of it.
+     *
+     * @param entity The living entity that was struck.
+     * @param event  The vanilla melee damage event to add the bonus to.
+     * @return Whether the bonus was applied.
+     */
+    private boolean applyWeaponBonus(final LivingEntity entity, final EntityDamageByEntityEvent event) {
+        if (entity.hasMetadata("BendingImmunity")) {
+            return false;
+        }
+
+        final AbilityDamageEntityEvent bonusEvent = new AbilityDamageEntityEvent(entity, this, this.damage * weaponDamageRatio, false);
+        Bukkit.getPluginManager().callEvent(bonusEvent);
+
+        // No separate damage event follows this calculation, so the arena cap must not leak onto the weapon hit
+        ArenaProtection.clearPendingArenaCap(entity.getUniqueId());
+
+        if (bonusEvent.isCancelled()) {
+            return false;
+        }
+
+        final double bonus = Math.max(0, bonusEvent.getDamage());
+        event.setDamage(event.getDamage() + bonus);
+        return true;
+    }
+
+    /**
+     * Determines whether the material is a melee weapon that keeps its own damage while the blade is active.
+     * @param type The material held in the player's main hand.
+     * @return Whether the material is a melee weapon.
+     */
+    private static boolean isWeapon(final Material type) {
+        final String name = type.name();
+        return name.endsWith("_SWORD") || name.endsWith("_AXE") || name.endsWith("_SPEAR")
+                || type == Material.MACE || type == Material.TRIDENT;
     }
 
     public void endWithCooldown() {

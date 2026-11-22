@@ -34,6 +34,8 @@ public class CommandVanish {
 			if (NetworkManager.isActive()) {
 				NetworkManager.getInstance().publishVanishUpdate(player.getUniqueId(), aranarthPlayer.isVanished());
 			}
+			// Hides or shows the player right away rather than on the next periodic tab update
+			AranarthUtils.updateTab();
 			return true;
 		} else {
 			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));

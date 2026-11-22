@@ -388,6 +388,18 @@ public class GuiToggleClick {
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.GOLD_INGOT, Lang.getFor(player, "gui.toggle.jobs_message"), !aranarthPlayer.isJobsMessageDisabled()));
             }
+            // Big Trees
+            case 41 -> {
+                if (aranarthPlayer.isBigTreeDisabled()) {
+                    aranarthPlayer.setBigTreeDisabled(false);
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.bigtree_enabled")));
+                } else {
+                    aranarthPlayer.setBigTreeDisabled(true);
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.bigtree_disabled")));
+                }
+                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.OAK_SAPLING, Lang.getFor(player, "gui.toggle.big_trees"), !aranarthPlayer.isBigTreeDisabled()));
+            }
         }
     }
 

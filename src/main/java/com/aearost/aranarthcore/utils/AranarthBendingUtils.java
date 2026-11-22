@@ -340,14 +340,15 @@ public class AranarthBendingUtils {
     public static boolean isBendingBlockedAtLocation(Player player, Location location) {
         Chunk chunk = location.getChunk();
         Outpost outpost = OutpostUtils.getOutpostOfChunk(chunk);
+        // A nearby enemy bypasses the bending flag for everyone in that area
         if (outpost != null) {
-            return !outpost.isBendingEnabled();
+            return !outpost.isBendingEnabled() && !EnemyProximityUtils.isEnemyNear(outpost);
         }
         Dominion dominion = DominionUtils.getDominionOfChunk(chunk);
         if (dominion == null) {
             return false;
         }
-        return !dominion.isBendingEnabled();
+        return !dominion.isBendingEnabled() && !EnemyProximityUtils.isEnemyNear(dominion);
     }
 
     /**

@@ -3,7 +3,9 @@ package com.aearost.aranarthcore.event.listener.misc;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiInvsee;
 import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.CreativeSwapUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -53,15 +55,34 @@ public class InvseeListener implements Listener {
             return;
         }
 
+        // A double-click would gather copies of the target's items out of the GUI
+        if (e.getAction() == InventoryAction.COLLECT_TO_CURSOR) {
+            e.setCancelled(true);
+            return;
+        }
+
+        if (GuiInvsee.isRemote(e.getInventory())) {
+            handleRemoteClick(e, viewer, targetUUID);
+            return;
+        }
+
         Player target = Bukkit.getPlayer(targetUUID);
         if (target == null) {
             e.setCancelled(true);
-            if (!GuiInvsee.isRemote(e.getInventory())) {
-                viewer.closeInventory();
-                viewer.sendMessage(ChatUtils.chatMessage(Lang.getFor(viewer, "invsee.offline")));
-            }
+            viewer.closeInventory();
+            viewer.sendMessage(ChatUtils.chatMessage(Lang.getFor(viewer, "invsee.offline")));
             return;
         }
+        // The target holds their creative inventory, so nothing may be moved in or out of it
+        if (CreativeSwapUtils.isSwapped(targetUUID) && (e.getClickedInventory() == e.getInventory()
+                || e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY)) {
+            e.setCancelled(true);
+            viewer.sendMessage(ChatUtils.chatMessage(Lang.getFor(viewer, "user.edit_blocked_target_creative",
+                    "player", AranarthUtils.getNickname(target))));
+            return;
+        }
+        // Once the click is applied, anyone viewing the target from the other server sees the change
+        scheduleRefresh(target);
 
         // Viewer's own inventory (bottom section)
         if (e.getClickedInventory() != null && e.getClickedInventory() != e.getInventory()) {
@@ -69,6 +90,9 @@ public class InvseeListener implements Listener {
                 e.setCancelled(true);
                 ItemStack item = normalize(e.getCurrentItem());
                 if (item == null) {
+                    return;
+                }
+                if (isBlockedFromEditing(viewer)) {
                     return;
                 }
 
@@ -112,6 +136,13 @@ public class InvseeListener implements Listener {
         ItemStack slotItem = normalize(e.getCurrentItem());
         ItemStack cursor = normalize(e.getView().getCursor());
 
+        // Items can never cross between Creative mode or another world's inventory and a Survival player
+        boolean isPlacing = cursor != null || (clickType == ClickType.NUMBER_KEY
+                && normalize(viewer.getInventory().getItem(e.getHotbarButton())) != null);
+        if ((isPlacing || slotItem != null) && isBlockedFromEditing(viewer)) {
+            return;
+        }
+
         switch (clickType) {
             case LEFT -> handleLeft(e, target, slot, slotItem, cursor);
             case RIGHT -> handleRight(e, target, slot, slotItem, cursor);
@@ -138,11 +169,118 @@ public class InvseeListener implements Listener {
             if (GuiInvsee.isRemote(inv) && NetworkManager.isActive()) {
                 UUID targetUuid = GuiInvsee.getOpenInvsees().get(inv);
                 if (targetUuid != null) {
-                    NetworkManager.getInstance().publishInvseeUnwatch(
-                            e.getPlayer().getUniqueId(), targetUuid);
+                    NetworkManager.getInstance().publishInvseeUnwatch(e.getPlayer().getUniqueId(), targetUuid,
+                            GuiInvsee.isRemoteEnder(inv) ? NetworkManager.CONTAINER_ENDER_CHEST : NetworkManager.CONTAINER_INVENTORY);
                 }
             }
             GuiInvsee.close(inv);
+        }
+    }
+
+    /**
+     * Sends the viewer's changes to a copy of an inventory or ender chest on the other server.
+     */
+    private void handleRemoteClick(InventoryClickEvent e, Player viewer, UUID targetUuid) {
+        Inventory gui = e.getInventory();
+        String container = GuiInvsee.isRemoteEnder(gui) ? NetworkManager.CONTAINER_ENDER_CHEST : NetworkManager.CONTAINER_INVENTORY;
+        if (!NetworkManager.isActive() || NetworkManager.getInstance().getRemotePlayer(targetUuid) == null) {
+            e.setCancelled(true);
+            return;
+        }
+        if (e.getClickedInventory() == null) {
+            return;
+        }
+        NetworkManager network = NetworkManager.getInstance();
+
+        // Viewer's own inventory (bottom section), where only shift-clicks reach the target
+        if (e.getClickedInventory() != gui) {
+            if (e.isShiftClick()) {
+                e.setCancelled(true);
+                ItemStack item = normalize(e.getCurrentItem());
+                if (item == null || isBlockedFromEditing(viewer)) {
+                    return;
+                }
+                e.setCurrentItem(null);
+                network.publishInvseePut(viewer.getUniqueId(), targetUuid, container, -1, item.clone());
+            }
+            return;
+        }
+
+        e.setCancelled(true);
+        int slot = e.getSlot();
+        if (container.equals(NetworkManager.CONTAINER_INVENTORY) && (slot == 0 || slot == 5 || slot == 7 || slot == 8)) {
+            return;
+        }
+        ClickType clickType = e.getClick();
+        ItemStack slotItem = normalize(e.getCurrentItem());
+        ItemStack cursor = normalize(e.getView().getCursor());
+        if (cursor == null) {
+            if (slotItem != null && (clickType == ClickType.LEFT || clickType == ClickType.RIGHT
+                    || clickType == ClickType.SHIFT_LEFT || clickType == ClickType.SHIFT_RIGHT)) {
+                if (isBlockedFromEditing(viewer)) {
+                    return;
+                }
+                // Cleared right away so it cannot be requested twice, and the item arrives once it is taken
+                gui.setItem(slot, null);
+                network.publishInvseeTake(viewer.getUniqueId(), targetUuid, container, slot, slotItem.clone());
+            }
+        } else if (clickType == ClickType.LEFT || clickType == ClickType.RIGHT) {
+            if (isBlockedFromEditing(viewer)) {
+                return;
+            }
+            e.getView().setCursor(null);
+            network.publishInvseePut(viewer.getUniqueId(), targetUuid, container, slot, cursor.clone());
+        }
+    }
+
+    /**
+     * Whether the viewer may not move items into or out of another player's inventory or ender chest, as items
+     * would cross between another world's inventory, such as the arena or Creative worlds, and Survival.
+     */
+    private boolean isBlockedFromEditing(Player viewer) {
+        // In Creative mode in a Survival world, the viewer holds their creative inventory
+        if (CreativeSwapUtils.isSwapped(viewer.getUniqueId())) {
+            viewer.sendMessage(ChatUtils.chatMessage(Lang.getFor(viewer, "user.edit_blocked_creative")));
+            return true;
+        }
+        if (!AranarthUtils.isSurvivalWorld(viewer.getWorld().getName())) {
+            viewer.sendMessage(ChatUtils.chatMessage(Lang.getFor(viewer, "user.edit_blocked")));
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Whether the player's inventory is being viewed from this server or the other one.
+     */
+    private boolean isWatched(UUID uuid) {
+        return GuiInvsee.isBeingWatched(uuid)
+                || (NetworkManager.isActive() && NetworkManager.getInstance().hasRemoteWatchers(uuid));
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onEnderChestClick(InventoryClickEvent e) {
+        checkEnderChestChange(e.getView().getTopInventory());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onEnderChestDrag(InventoryDragEvent e) {
+        checkEnderChestChange(e.getView().getTopInventory());
+    }
+
+    /**
+     * Sends the new contents of an ender chest to its viewers on the other server.
+     */
+    private void checkEnderChestChange(Inventory top) {
+        if (top.getType() != InventoryType.ENDER_CHEST || !NetworkManager.isActive()) {
+            return;
+        }
+        for (UUID uuid : NetworkManager.getInstance().getRemoteEnderWatchedTargets()) {
+            Player owner = Bukkit.getPlayer(uuid);
+            if (owner != null && owner.getEnderChest().equals(top)) {
+                Bukkit.getScheduler().runTask(plugin, () -> NetworkManager.getInstance().publishRemoteEnderUpdate(owner));
+                return;
+            }
         }
     }
 
@@ -151,7 +289,7 @@ public class InvseeListener implements Listener {
         if (!(e.getWhoClicked() instanceof Player player)) {
             return;
         }
-        if (!GuiInvsee.isBeingWatched(player.getUniqueId())) {
+        if (!isWatched(player.getUniqueId())) {
             return;
         }
         // Skip clicks the viewer makes inside an invsee GUI - already handled above
@@ -163,7 +301,7 @@ public class InvseeListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onTargetDrop(PlayerDropItemEvent e) {
-        if (!GuiInvsee.isBeingWatched(e.getPlayer().getUniqueId())) {
+        if (!isWatched(e.getPlayer().getUniqueId())) {
             return;
         }
         scheduleRefresh(e.getPlayer());
@@ -174,7 +312,7 @@ public class InvseeListener implements Listener {
         if (!(e.getEntity() instanceof Player player)) {
             return;
         }
-        if (!GuiInvsee.isBeingWatched(player.getUniqueId())) {
+        if (!isWatched(player.getUniqueId())) {
             return;
         }
         scheduleRefresh(player);
@@ -182,7 +320,7 @@ public class InvseeListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onTargetConsume(PlayerItemConsumeEvent e) {
-        if (!GuiInvsee.isBeingWatched(e.getPlayer().getUniqueId())) {
+        if (!isWatched(e.getPlayer().getUniqueId())) {
             return;
         }
         scheduleRefresh(e.getPlayer());

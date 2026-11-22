@@ -376,7 +376,7 @@ public class FletchingTableCraft {
 			}
 
 			// Spectral Arrowheads
-			ItemStack[] spectralRecipe = new ItemStack[] { new Arrowhead().getItem(),
+			ItemStack[] spectralRecipe = new ItemStack[] { new ArrowheadGold().getItem(),
 					new ItemStack(Material.GLOWSTONE),
 					null };
 			if (matchesIngredients(ingredients, spectralRecipe)) {
@@ -405,6 +405,62 @@ public class FletchingTableCraft {
 					null };
 			if (matchesIngredients(ingredients, dragonRecipe)) {
 				return new ArrowheadDragon().getItem();
+			}
+
+			// Sonar Arrowheads
+			ItemStack[] sonarRecipe = new ItemStack[] { new ArrowheadAmethyst().getItem(),
+					new ItemStack(Material.GLOW_INK_SAC),
+					null };
+			if (matchesIngredients(ingredients, sonarRecipe)) {
+				return new ArrowheadSonar().getItem();
+			}
+
+			// Grapple Arrowheads
+			ItemStack[] grappleRecipe = new ItemStack[] { new ArrowheadIron().getItem(),
+					new ItemStack(Material.IRON_INGOT),
+					new ItemStack(Material.STRING) };
+			if (matchesIngredients(ingredients, grappleRecipe)) {
+				return new ArrowheadGrapple().getItem();
+			}
+
+			// Homing Arrowheads
+			ItemStack[] homingRecipe = new ItemStack[] { new ArrowheadAmethyst().getItem(),
+					new ItemStack(Material.ENDER_EYE),
+					null };
+			if (matchesIngredients(ingredients, homingRecipe)) {
+				return new ArrowheadHoming().getItem();
+			}
+
+			// Smoke Arrowheads
+			ItemStack[] smokeRecipe = new ItemStack[] { new ArrowheadObsidian().getItem(),
+					new ItemStack(Material.CHARCOAL),
+					null };
+			if (matchesIngredients(ingredients, smokeRecipe)) {
+				return new ArrowheadSmoke().getItem();
+			}
+
+			// Shifting Arrowheads
+			ItemStack[] shiftingRecipe = new ItemStack[] { new ArrowheadAmethyst().getItem(),
+					new ItemStack(Material.ENDER_PEARL),
+					null };
+			if (matchesIngredients(ingredients, shiftingRecipe)) {
+				return new ArrowheadShifting().getItem();
+			}
+
+			// Tether Arrowheads
+			ItemStack[] tetherRecipe = new ItemStack[] { new ArrowheadIron().getItem(),
+					new ItemStack(Material.STRING),
+					null };
+			if (matchesIngredients(ingredients, tetherRecipe)) {
+				return new ArrowheadTether().getItem();
+			}
+
+			// Tide Arrowheads
+			ItemStack[] tideRecipe = new ItemStack[] { new ArrowheadIron().getItem(),
+					new ItemStack(Material.PRISMARINE_SHARD),
+					new ItemStack(Material.NAUTILUS_SHELL) };
+			if (matchesIngredients(ingredients, tideRecipe)) {
+				return new ArrowheadTide().getItem();
 			}
 		}
 

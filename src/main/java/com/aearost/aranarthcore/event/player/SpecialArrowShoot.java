@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.utils.SpecialArrowUtils;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Arrow;
@@ -25,6 +26,14 @@ public class SpecialArrowShoot {
                     String arrowType = arrowItem.getItemMeta().getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
                     Entity projectile = e.getProjectile();
                     projectile.getPersistentDataContainer().set(ARROW, PersistentDataType.STRING, arrowType);
+
+                    if (projectile instanceof AbstractArrow abstractArrow) {
+                        if ("homing".equals(arrowType)) {
+                            SpecialArrowUtils.startHoming(player, abstractArrow);
+                        } else if ("tide".equals(arrowType)) {
+                            SpecialArrowUtils.startTide(abstractArrow);
+                        }
+                    }
 
                     // Manual arrow reduction if using a bow with infinity for special arrows
                     if (e.getBow().containsEnchantment(Enchantment.INFINITY)) {

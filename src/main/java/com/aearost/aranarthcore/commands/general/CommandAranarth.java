@@ -4,19 +4,30 @@ import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.gui.GuiAranarth;
 import com.aearost.aranarthcore.gui.GuiRecipes;
+import com.aearost.aranarthcore.gui.GuiTrees;
+import com.aearost.aranarthcore.items.produce.FruitSapling;
+import com.aearost.aranarthcore.trees.CustomTrees;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.CustomTreeUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
 import com.aearost.aranarthcore.utils.FireParticleRegistry;
 import com.aearost.aranarthcore.utils.Lang;
 import com.projectkorra.projectkorra.Element;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -71,18 +82,49 @@ public class CommandAranarth implements CommandExecutor {
     );
 
     static final List<String> MECHANICS_SECTIONS = List.of(
-            "fletchingtable", "specialarrows", "quiver",
-            "potions", "dragonsbreath", "autoplant",
-            "croptrample", "autolock", "bonemealwood",
-            "cauldronbottles", "goathorns", "navigation",
-            "voting", "voicechat", "language",
-            "toggles", "sounds", "heads",
-            "brewbook"
+            "sawmill", "fletchingtable", "specialarrows",
+            "quiver", "potions", "dragonsbreath",
+            "autolock", "bonemealwood", "cauldronbottles",
+            "goathorns", "navigation", "voting",
+            "voicechat", "language", "toggles",
+            "sounds", "heads", "brewbook"
+    );
+
+    static final List<String> FARMING_SECTIONS = List.of(
+            "intro", "bigtrees", "treetypes",
+            "raretrees", "fruittrees", "crops",
+            "growing", "harvesting", "seasons",
+            "foraging", "autoplant", "croptrample"
+    );
+
+    /**
+     * A row of the Tree Types chapter.
+     * @param key The lang key of the row's name, after "trees.sapling_".
+     * @param saplings The saplings whose trees are listed in the row.
+     */
+    private record TreeRow(String key, Material... saplings) {}
+
+    private static final List<TreeRow> TREE_ROWS = List.of(
+            new TreeRow("oak", Material.OAK_SAPLING),
+            new TreeRow("birch", Material.BIRCH_SAPLING),
+            new TreeRow("poplar", Material.POPLAR_SAPLING),
+            new TreeRow("spruce", Material.SPRUCE_SAPLING),
+            new TreeRow("jungle", Material.JUNGLE_SAPLING),
+            new TreeRow("acacia", Material.ACACIA_SAPLING),
+            new TreeRow("dark_oak", Material.DARK_OAK_SAPLING),
+            new TreeRow("pale_oak", Material.PALE_OAK_SAPLING),
+            new TreeRow("cherry", Material.CHERRY_SAPLING),
+            new TreeRow("mangrove", Material.MANGROVE_PROPAGULE),
+            new TreeRow("azalea", Material.AZALEA, Material.FLOWERING_AZALEA),
+            new TreeRow("crimson", Material.CRIMSON_FUNGUS),
+            new TreeRow("warped", Material.WARPED_FUNGUS),
+            new TreeRow("brown_mushroom", Material.BROWN_MUSHROOM),
+            new TreeRow("red_mushroom", Material.RED_MUSHROOM)
     );
 
     static final List<String> CREATIVE_SECTIONS = List.of(
             "overview", "claiming", "merging",
-            "members", "finding", "worldedit"
+            "members", "finding", "worldedit", "items"
     );
 
     private static final Set<String> CALENDAR_EVENT_SET = Set.copyOf(CALENDAR_EVENTS);
@@ -114,16 +156,15 @@ public class CommandAranarth implements CommandExecutor {
                 }
             }
             case "rules" -> sendRules(player);
-            case "aranarthium", "essences", "dominions", "bending", "ranks", "economy", "perks", "mechanics",
-                 "creative" -> {
+                case "aranarthium", "essences", "dominions", "bending", "ranks", "economy", "perks", "mechanics",
+                 "creative", "farmingtrees" -> {
                 String topic = args[0].toLowerCase();
                 if (args.length == 1) sendSectionMenu(player, topic);
                 else sendSectionChapter(player, topic, args[1].toLowerCase());
             }
-            case "recipes" -> {
-                GuiRecipes.clearFilter(player.getUniqueId());
-                new GuiRecipes(player, 0).openGui();
-            }
+            // An optional item name filters the guide, the same as searching with the spyglass
+            case "recipes" -> GuiRecipes.open(player,
+                    args.length > 1 ? String.join(" ", Arrays.copyOfRange(args, 1, args.length)) : null);
             default -> player.sendMessage(ChatUtils.chatMessage(
                     Lang.getFor(player, "guide.invalid_topic", "topic", args[0])));
         }
@@ -279,6 +320,7 @@ public class CommandAranarth implements CommandExecutor {
             case "perks" -> PERKS_SECTIONS;
             case "mechanics" -> MECHANICS_SECTIONS;
             case "creative" -> CREATIVE_SECTIONS;
+            case "farmingtrees" -> FARMING_SECTIONS;
             default -> List.of();
         };
     }
@@ -291,9 +333,11 @@ public class CommandAranarth implements CommandExecutor {
             case "aranarthium" -> new int[]{3, 3, 4};
             case "dominions" -> new int[]{3, 3, 3, 2, 2};
             case "bending" -> new int[]{3, 3, 1};
-            case "ranks", "creative" -> new int[]{3, 3};
+            case "ranks" -> new int[]{3, 3};
+            case "creative" -> new int[]{2, 3, 2};
             case "economy" -> new int[]{2, 2, 2, 2};
-            case "mechanics" -> new int[]{3, 3, 3, 3, 3, 3, 1};
+            case "mechanics" -> new int[]{3, 3, 3, 3, 3, 3};
+            case "farmingtrees" -> new int[]{3, 3, 3, 3};
             default -> new int[]{3, 3, 3};
         };
     }
@@ -302,7 +346,14 @@ public class CommandAranarth implements CommandExecutor {
         List<String> sections = getSections(topic);
         player.sendMessage(Component.empty());
         player.sendMessage(Component.empty());
-        player.sendMessage(ChatUtils.translateToColor("           " + Lang.getFor(player, topic + ".guide_title")));
+        String title = Lang.getFor(player, topic + ".guide_title");
+        // A title with no spaces of its own in front, often a long one, is centred by its width instead
+        if (ChatUtils.stripColorFormatting(title).startsWith(" ")) {
+            player.sendMessage(ChatUtils.translateToColor("           " + title));
+        } else {
+            int spaces = Math.max(0, (MENU_WIDTH_PX - getTitleWidth(title)) / 2 / 4);
+            player.sendMessage(ChatUtils.translateToColor(" ".repeat(spaces) + title));
+        }
         player.sendMessage(ChatUtils.translateToColor("           " + Lang.getFor(player, topic + ".guide_select_section")));
         player.sendMessage(Component.empty());
 
@@ -343,6 +394,18 @@ public class CommandAranarth implements CommandExecutor {
             sendMultilineIndented(player, Lang.getFor(player, "essences.section_" + section + "_content1"));
             player.sendMessage(Component.empty());
             sendMultilineIndented(player, Lang.getFor(player, "essences.section_" + section + "_content2"));
+        } else if (topic.equals("farmingtrees") && section.equals("treetypes")) {
+            sendMultilineIndented(player, Lang.getFor(player, "farmingtrees.section_treetypes_content"));
+            player.sendMessage(Component.empty());
+            sendTreeSizes(player);
+        } else if (topic.equals("farmingtrees") && section.equals("raretrees")) {
+            sendMultilineIndented(player, Lang.getFor(player, "farmingtrees.section_raretrees_content"));
+            player.sendMessage(Component.empty());
+            sendRareTrees(player);
+        } else if (topic.equals("farmingtrees") && section.equals("fruittrees")) {
+            sendMultilineIndented(player, Lang.getFor(player, "farmingtrees.section_fruittrees_content"));
+            player.sendMessage(Component.empty());
+            sendFruitSaplings(player);
         } else if (topic.equals("bending") || topic.equals("ranks")) {
             sendMultilineIndented(player, Lang.getFor(player, topic + ".section_" + section + "_content", getElementColors()));
         } else {
@@ -355,6 +418,161 @@ public class CommandAranarth implements CommandExecutor {
                 .append(buildNavBtn(player, Lang.getFor(player, topic + ".guide_back"), "/aranarth " + topic))
                 .append(Component.text("   "))
                 .append(buildNavBtn(Lang.getFor(player, "guide.nav_next"), Lang.getFor(player, topic + ".section_" + nextSection + "_label"), "/aranarth " + topic + " " + nextSection)));
+    }
+
+    /** The widest a row of sapling buttons may be before the next row starts, in pixels of the chat font. */
+    private static final int SAPLING_ROW_WIDTH = 236;
+
+    /** Reads the hex colours of the saplings' names, which the plain legacy serializer would drop. */
+    private static final LegacyComponentSerializer HEX_SERIALIZER = LegacyComponentSerializer.builder()
+            .character(LegacyComponentSerializer.SECTION_CHAR).hexColors().useUnusualXRepeatedCharacterHexFormat().build();
+
+    /**
+     * Sends a button for each type of sapling, which lists every tree it grows into when hovered over.
+     */
+    private void sendTreeSizes(Player player) {
+        Map<String, List<CustomTrees.Variant>> bySapling = new LinkedHashMap<>();
+        for (TreeRow row : TREE_ROWS) {
+            List<CustomTrees.Variant> variants = new ArrayList<>();
+            for (Material sapling : row.saplings()) {
+                variants.addAll(CustomTrees.Variant.forSapling(sapling));
+            }
+            if (!variants.isEmpty()) {
+                bySapling.put(row.key(), variants);
+            }
+        }
+        sendSaplingButtons(player, bySapling);
+    }
+
+    /**
+     * Sends a button for each type of sapling that grows a rare tree, which lists its rare trees and where they grow.
+     */
+    private void sendRareTrees(Player player) {
+        Map<String, List<CustomTrees.Variant>> bySapling = new LinkedHashMap<>();
+        for (CustomTrees.Variant variant : GuiTrees.rare()) {
+            bySapling.computeIfAbsent(GuiTrees.saplingKey(variant.getSapling()), key -> new ArrayList<>()).add(variant);
+        }
+        sendSaplingButtons(player, bySapling);
+    }
+
+    /**
+     * Sends a button for each type of sapling that crafts a fruit sapling, which lists the fruits it is crafted with.
+     */
+    private void sendFruitSaplings(Player player) {
+        Map<String, List<CustomTrees.Variant>> bySapling = new LinkedHashMap<>();
+        for (CustomTrees.Variant variant : FruitSapling.getVariants()) {
+            bySapling.computeIfAbsent(GuiTrees.saplingKey(variant.getSapling()), key -> new ArrayList<>()).add(variant);
+        }
+        sendSaplingButtons(player, bySapling, this::getFruitSaplingHover);
+    }
+
+    /**
+     * Sends the saplings as centred rows of [Sapling] buttons in the colour of their wood, listing their trees.
+     * @param bySapling The trees of each sapling, by the sapling's lang key after "trees.sapling_".
+     */
+    private void sendSaplingButtons(Player player, Map<String, List<CustomTrees.Variant>> bySapling) {
+        sendSaplingButtons(player, bySapling, this::getSaplingHover);
+    }
+
+    /** Builds the hover text of a sapling button from the player, the sapling's name and its trees. */
+    @FunctionalInterface
+    private interface SaplingHover {
+        String build(Player player, String sapling, List<CustomTrees.Variant> variants);
+    }
+
+    /**
+     * Sends the saplings as centred rows of [Sapling] buttons in the colour of their wood.
+     * @param bySapling The trees of each sapling, by the sapling's lang key after "trees.sapling_".
+     * @param hoverText The hover text of each button.
+     */
+    private void sendSaplingButtons(Player player, Map<String, List<CustomTrees.Variant>> bySapling, SaplingHover hoverText) {
+        int gap = getPixelWidth("   ");
+        var row = Component.text();
+        int width = 0;
+        for (Map.Entry<String, List<CustomTrees.Variant>> entry : bySapling.entrySet()) {
+            String sapling = Lang.getFor(player, "trees.sapling_" + entry.getKey());
+            String label = "&8[" + sapling + "&8]";
+            int labelWidth = getPixelWidth(label);
+            if (width > 0 && width + gap + labelWidth > SAPLING_ROW_WIDTH) {
+                player.sendMessage(centre(row.build(), width));
+                row = Component.text();
+                width = 0;
+            }
+            if (width > 0) {
+                row.append(Component.text("   "));
+                width += gap;
+            }
+            row.append(HEX_SERIALIZER.deserialize(ChatUtils.translateToColor(label))
+                    .hoverEvent(HoverEvent.showText(HEX_SERIALIZER.deserialize(
+                            ChatUtils.translateToColor(hoverText.build(player, sapling, entry.getValue()))))));
+            width += labelWidth;
+        }
+        if (width > 0) {
+            player.sendMessage(centre(row.build(), width));
+        }
+    }
+
+    /**
+     * Provides the hover text of a sapling button: each of its trees from the smallest square to the largest,
+     * with where it grows if it is a rare tree.
+     */
+    private String getSaplingHover(Player player, String sapling, List<CustomTrees.Variant> variants) {
+        List<CustomTrees.Variant> sorted = new ArrayList<>(variants);
+        sorted.sort(Comparator.comparingInt(variant -> Math.max(1, variant.getSize())));
+        // The sapling's name in bold, keeping its own colour
+        StringBuilder hover = new StringBuilder(sapling.replaceFirst("^(&#[0-9A-Fa-f]{6}|&[0-9a-f])", "$1&l"));
+        for (CustomTrees.Variant variant : sorted) {
+            int size = Math.max(1, variant.getSize());
+            String key = size >= CustomTreeUtils.LARGE_TREE_SIZE
+                    ? "farmingtrees.trees_hover_entry_duke" : "farmingtrees.trees_hover_entry";
+            hover.append("\n").append(Lang.getFor(player, key,
+                    "name", Lang.getFor(player, "trees.variant_" + variant.name().toLowerCase()),
+                    "size", size + "x" + size));
+            if (variant.isRare()) {
+                hover.append("\n  ").append(Lang.getFor(player, "gui.trees.where",
+                        "condition", Lang.getFor(player, "trees.condition_" + variant.name().toLowerCase())));
+            }
+        }
+        return hover.toString();
+    }
+
+    /**
+     * Provides the hover text of a fruit sapling button: each fruit that crafts a fruit sapling with this sapling,
+     * with where it grows if it is a rare tree.
+     */
+    private String getFruitSaplingHover(Player player, String sapling, List<CustomTrees.Variant> variants) {
+        StringBuilder hover = new StringBuilder(sapling.replaceFirst("^(&#[0-9A-Fa-f]{6}|&[0-9a-f])", "$1&l"));
+        for (CustomTrees.Variant variant : variants) {
+            hover.append("\n").append(Lang.getFor(player, "farmingtrees.fruit_hover_entry",
+                    "fruit", Lang.getFor(player, "produce." + FruitSapling.getFruitId(variant))));
+            if (variant.isRare()) {
+                hover.append("\n  ").append(Lang.getFor(player, "gui.trees.where",
+                        "condition", Lang.getFor(player, FruitSapling.getConditionKey(variant))));
+            }
+        }
+        return hover.toString();
+    }
+
+    /**
+     * Provides the approximate width of a title in Minecraft's default font, where each bold character is 1 pixel wider.
+     */
+    private int getTitleWidth(String title) {
+        int width = 0;
+        boolean bold = false;
+        for (String part : title.split("(?=&)")) {
+            String text = part;
+            if (part.matches("(?s)&[0-9a-fk-or].*")) {
+                char code = Character.toLowerCase(part.charAt(1));
+                if (code == 'l') {
+                    bold = true;
+                } else if (code != 'k' && code != 'm' && code != 'n' && code != 'o') {
+                    bold = false;
+                }
+                text = part.substring(2);
+            }
+            width += getPixelWidth(text) + (bold ? text.length() : 0);
+        }
+        return width;
     }
 
     /**

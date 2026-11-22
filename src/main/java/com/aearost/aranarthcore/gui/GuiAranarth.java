@@ -31,6 +31,7 @@ public class GuiAranarth {
     public static final int SLOT_MECHANICS = 30;
     public static final int SLOT_CREATIVE = 32;
     public static final int SLOT_RECIPES = 34;
+    public static final int SLOT_FARMING = 40;
 
     private final Player player;
     private final Inventory gui;
@@ -156,6 +157,17 @@ public class GuiAranarth {
                 List.of(
                         Lang.getFor(player, "gui.aranarth.recipes_lore1"),
                         Lang.getFor(player, "gui.aranarth.recipes_lore2")
+                )
+        ));
+
+
+        // Row 4 item
+        inv.setItem(SLOT_FARMING, buildItem(
+                Material.OAK_SAPLING,
+                Lang.getFor(player, "gui.aranarth.farming_name"),
+                List.of(
+                        Lang.getFor(player, "gui.aranarth.farming_lore1"),
+                        Lang.getFor(player, "gui.aranarth.farming_lore2")
                 )
         ));
 

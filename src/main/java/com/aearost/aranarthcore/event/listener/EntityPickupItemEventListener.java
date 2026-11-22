@@ -10,6 +10,8 @@ import com.aearost.aranarthcore.event.player.WakeFishingPickupXp;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
+import com.aearost.aranarthcore.items.produce.Produce;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
@@ -34,6 +36,9 @@ public class EntityPickupItemEventListener implements Listener {
             new WakeFishingPickupXp().execute(e);
         } else if (e.getEntityType() == EntityType.ZOMBIE || e.getEntityType() == EntityType.ZOMBIE_VILLAGER) {
             new EntityEggPickupCancel().execute(e);
+        } else if (e.getEntity() instanceof Villager && Produce.getType(e.getItem().getItemStack()) != null) {
+            // Villagers would plant the vanilla crop of the item produce is made from, such as Wheat from Rice
+            e.setCancelled(true);
         }
 
     }

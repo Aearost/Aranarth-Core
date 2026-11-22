@@ -79,6 +79,15 @@ public enum BrewRecipe {
     COPPER_ALE(         "copper_ale",         Tier.COMMON, 24000, -1, false),
     MOSS_MULE(          "moss_mule",          Tier.COMMON, 26000, -1, false),
 
+    // ─── COMMON tier produce brews ────────────────────────────────────────────
+    AVOCADO_SHAKE(      "avocado_shake",      Tier.COMMON, 9000,  -1, false),  // diff 2
+    KIWI_COOLER(        "kiwi_cooler",        Tier.COMMON, 10000, -1, false),  // diff 2
+    GARDEN_JUICE(       "garden_juice",       Tier.COMMON, 12000, -1, false),  // diff 3
+    PERSIMMON_PUNCH(    "persimmon_punch",    Tier.COMMON, 13000, -1, false),  // diff 3
+    FIG_CORDIAL(        "fig_cordial",        Tier.COMMON, 15000, -1, false),  // diff 3
+    PERRY(              "perry",              Tier.COMMON, 24000, -1, false),  // diff 4, age 3
+    POMEGRANATE_WINE(   "pomegranate_wine",   Tier.COMMON, 26000, -1, false),  // diff 4, age 6 Mangrove
+
     // ─── RARE tier ────────────────────────────────────────────────────────────
     // Difficulty 5–6. Unlocked through vote crates (or by perfecting the recipe).
     // diff 5
@@ -146,6 +155,17 @@ public enum BrewRecipe {
     AMETHYST_APERITIF(  "amethyst_aperitif",  Tier.RARE, 0, -1, false),
     WITCHES_BREW(       "witches_brew",       Tier.RARE, 0, -1, false),
 
+    // ─── RARE tier produce brews ──────────────────────────────────────────────
+    ACORN_COFFEE(       "acorn_coffee",       Tier.RARE, 0, -1, false),  // diff 2
+    OCHRE_SOUR(         "ochre_sour",         Tier.RARE, 0, -1, false),  // diff 5
+    PEARLESCENT_SOUR(   "pearlescent_sour",   Tier.RARE, 0, -1, false),  // diff 5
+    SOUR_APPLE(         "sour_apple",         Tier.RARE, 0, -1, false),  // diff 5, distillruns 2
+    DATE_WINE(          "date_wine",          Tier.RARE, 0, -1, false),  // diff 5, age 4 Acacia
+    COCONUT_COLADA(     "coconut_colada",     Tier.RARE, 0, -1, false),  // diff 6, distillruns 1
+    OLIVE_MARTINI(      "olive_martini",      Tier.RARE, 0, -1, false),  // diff 6, gin base
+    LYCHEE_SOJU(        "lychee_soju",        Tier.RARE, 0, -1, false),  // diff 6, soju base
+    EMBER_TONIC(        "ember_tonic",        Tier.RARE, 0, -1, false),  // diff 6, vodka base
+
     // ─── LEGENDARY tier ───────────────────────────────────────────────────────
     // Difficulty 7–10. Unlocked through weekly quests (rank 5+, 33% chance), or by perfecting.
     EGGNOG(            "eggnog",       Tier.LEGENDARY, 0, -1, false),  // diff 4→end-tier Advocaat
@@ -184,6 +204,7 @@ public enum BrewRecipe {
     NAUTILUS_GROG(      "nautilus_grog",      Tier.LEGENDARY, 0, -1, false),
     LIQUID_LUCK(        "liquid_luck",        Tier.LEGENDARY, 0, -1, false),
     TURTLE_TONIC(       "turtle_tonic",       Tier.LEGENDARY, 0, -1, false),
+    PEPPER_FIREWATER(   "pepper_firewater",   Tier.LEGENDARY, 0, -1, false),  // distillruns 2, age 4 Acacia
     // diff 8
     PEATED_SCOTCH(      "peated_scotch",      Tier.LEGENDARY, 0, -1, false),
     BAIJIU(             "baijiu",             Tier.LEGENDARY, 0, -1, false),

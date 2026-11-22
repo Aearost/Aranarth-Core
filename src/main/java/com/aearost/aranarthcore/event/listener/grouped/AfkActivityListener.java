@@ -6,7 +6,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.player.*;
 
 /**
@@ -23,25 +22,6 @@ public class AfkActivityListener implements Listener {
 	 */
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onInput(PlayerInputEvent e) {
-		new AfkCancelByInteract().execute(e.getPlayer());
-	}
-
-	/**
-	 * Left-clicking, attacking, mining, dropping items and successful entity interactions all swing the arm.
-	 */
-	@EventHandler(priority = EventPriority.MONITOR)
-	public void onArmSwing(PlayerAnimationEvent e) {
-		new AfkCancelByInteract().execute(e.getPlayer());
-	}
-
-	/**
-	 * Right click uses that do not swing the arm, such as eating, drinking, bows and shields.
-	 */
-	@EventHandler(priority = EventPriority.MONITOR)
-	public void onInteract(PlayerInteractEvent e) {
-		if (e.getAction() == Action.PHYSICAL) {
-			return;
-		}
 		new AfkCancelByInteract().execute(e.getPlayer());
 	}
 

@@ -37,6 +37,12 @@ public class PlayerInteractEventListener implements Listener {
 
         new FaeMushroomEat().execute(e);
 
+        // Must run before any block interaction so the Essence never opens or uses the clicked block
+        if (EssenceTransfer.isTransferAttempt(e)) {
+            new EssenceTransfer().execute(e);
+            return;
+        }
+
         if (e.getItem() != null) {
             if (e.getItem().getType().name().equals("LEATHER")) {
                 new QuiverClick().execute(e);

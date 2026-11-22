@@ -43,7 +43,7 @@ public class EssenceMagnetismBlockBreak {
         } else if (name.endsWith("_SHOVEL")) {
             isCorrectTool = AranarthUtils.isHarvestableWithShovel(e.getBlock().getType());
         } else if (name.endsWith("_HOE")) {
-            isCorrectTool = AranarthUtils.isBlockCrop(e.getBlock().getType());
+            isCorrectTool = AranarthUtils.isHarvestableWithHoe(e.getBlock().getType());
         } else {
             isCorrectTool = false;
         }

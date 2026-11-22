@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.block;
 import com.aearost.aranarthcore.gui.GuiWrench;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
+import org.bukkit.GameMode;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
@@ -56,10 +57,10 @@ public class WrenchInteract {
         boolean sameBlock = currentBlockKey.equals(lastBlock);
 
         if (!sameBlock) {
-            // Apply Unbreaking
+            // Apply Unbreaking, with no durability used in Creative
             int unbreakingLevel = meta.getEnchantLevel(Enchantment.UNBREAKING);
-            boolean consumeDurability = unbreakingLevel == 0
-                    || new Random().nextInt(unbreakingLevel + 1) == 0;
+            boolean consumeDurability = player.getGameMode() != GameMode.CREATIVE
+                    && (unbreakingLevel == 0 || new Random().nextInt(unbreakingLevel + 1) == 0);
 
             if (consumeDurability && meta instanceof Damageable damageable) {
                 int newDamage = damageable.getDamage() + 1;

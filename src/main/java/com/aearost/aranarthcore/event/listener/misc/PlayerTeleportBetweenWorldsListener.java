@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.CreativeSwapUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -49,6 +50,8 @@ public class PlayerTeleportBetweenWorldsListener implements Listener {
                     newMode = GameMode.SURVIVAL;
                 }
 
+                // The player is still in the world they are leaving, so the creative inventory must not be swapped
+                boolean isSwitchStarted = CreativeSwapUtils.beginWorldSwitch(player.getUniqueId());
                 try {
                     // Also clears the potion effects, and gives back the saved ones when returning to Survival
                     AranarthUtils.switchInventory(player, currentWorld, destinationWorld);
@@ -56,6 +59,10 @@ public class PlayerTeleportBetweenWorldsListener implements Listener {
                 } catch (IOException exception) {
                     player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.error")));
                     e.setCancelled(true);
+                } finally {
+                    if (isSwitchStarted) {
+                        CreativeSwapUtils.endWorldSwitch(player.getUniqueId());
+                    }
                 }
             } else {
                 try {

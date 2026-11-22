@@ -1,13 +1,28 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.items.brew.ProduceBrewItem;
+import com.aearost.aranarthcore.items.produce.Produce;
+import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.Lang;
+import com.dre.brewery.api.events.IngedientAddEvent;
+import com.dre.brewery.api.events.PlayerChatDistortEvent;
+import com.dre.brewery.api.events.PlayerEffectEvent;
+import com.dre.brewery.api.events.PlayerPukeEvent;
+import com.dre.brewery.api.events.PlayerPushEvent;
+import com.dre.brewery.api.events.barrel.BarrelAccessEvent;
+import com.dre.brewery.api.events.barrel.BarrelCreateEvent;
+import com.dre.brewery.api.events.brew.BrewDrinkEvent;
 import com.dre.brewery.api.events.brew.BrewModifyEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.BrewEvent;
 import org.bukkit.event.inventory.InventoryAction;
@@ -146,6 +161,120 @@ public class BrewingListener implements Listener {
             }
         }
         copyInputStands.remove(loc);
+    }
+
+    /**
+     * Stops produce from going into a brewing cauldron as its vanilla base item.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onIngredientAdd(IngedientAddEvent e) {
+        if (cancelInCreative(e.getPlayer(), e)) {
+            return;
+        }
+        if (Produce.getType(e.getIngredient()) == null) {
+            return;
+        }
+        if (e.getRecipeItem() instanceof ProduceBrewItem) {
+            return;
+        }
+        e.setCancelled(true);
+        e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "brew.produce_not_ingredient")));
+    }
+
+    /**
+     * Prevents drinking brews in the Creative world.
+     */
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onCreativeBrewDrink(BrewDrinkEvent e) {
+        cancelInCreative(e.getPlayer(), e);
+    }
+
+    /**
+     * Prevents creating brewery barrels in the Creative world.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onCreativeBarrelCreate(BarrelCreateEvent e) {
+        cancelInCreative(e.getPlayer(), e);
+    }
+
+    /**
+     * Prevents opening brewery barrels in the Creative world.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onCreativeBarrelAccess(BarrelAccessEvent e) {
+        cancelInCreative(e.getPlayer(), e);
+    }
+
+    /**
+     * Prevents filling, sealing or otherwise modifying brews by players in the Creative world.
+     */
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onCreativeBrewModify(BrewModifyEvent e) {
+        if (e.getPlayer() != null) {
+            cancelInCreative(e.getPlayer(), e);
+        }
+    }
+
+    /**
+     * Prevents drunkenness side effects from carrying into the Creative world.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onCreativeChatDistort(PlayerChatDistortEvent e) {
+        if (isInCreativeWorld(e.getPlayer())) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onCreativePuke(PlayerPukeEvent e) {
+        if (isInCreativeWorld(e.getPlayer())) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onCreativePush(PlayerPushEvent e) {
+        if (isInCreativeWorld(e.getPlayer())) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onCreativeEffect(PlayerEffectEvent e) {
+        if (isInCreativeWorld(e.getPlayer())) {
+            e.setCancelled(true);
+        }
+    }
+
+    /**
+     * Cancels the BreweryX event and notifies the player if they are in the Creative world.
+     * @return true if the event was cancelled.
+     */
+    private static boolean cancelInCreative(Player player, Cancellable e) {
+        if (!isInCreativeWorld(player)) {
+            return false;
+        }
+        e.setCancelled(true);
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "brew.disabled_creative")));
+        return true;
+    }
+
+    private static boolean isInCreativeWorld(Player player) {
+        return player != null && AranarthUtils.getInventoryGroup(player.getWorld().getName()).equals("creative");
+    }
+
+    /**
+     * Drinking a brew that matched no recipe will refill the player's hunger and saturation bars.
+     */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onUnfinishedBrewDrink(BrewDrinkEvent e) {
+        if (e.getBrew().hasRecipe()) {
+            return;
+        }
+        Player player = e.getPlayer();
+        int food = Math.min(20, player.getFoodLevel() + 3);
+        player.setFoodLevel(food);
+        player.setSaturation(Math.min(food, player.getSaturation() + 2F));
     }
 
     /**

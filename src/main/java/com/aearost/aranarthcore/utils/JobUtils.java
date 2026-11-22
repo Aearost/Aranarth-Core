@@ -38,12 +38,13 @@ public class JobUtils {
     public static final long EARNINGS_SUMMARY_INTERVAL_MS = 10 * 1000L;
     private static final Map<UUID, Double> recentEarnings = new HashMap<>();
     private static final Map<UUID, Long> earningsWindowStart = new HashMap<>();
+    private static final Set<UUID> afkEarningsWindow = new HashSet<>();public static final double AFK_PAY_MULTIPLIER = 0.25;
 
     /**
      * A placed block whose Builder pay is held until it has stayed in place long enough.
      */
     private record PendingBuild(UUID playerUuid, UUID worldUuid, int x, int y, int z, Material material,
-                                double basePay, long placedAt) {
+                                double basePay, long placedAt, boolean isAfk) {
     }
 
     private static final long JOIN_COOLDOWN_MS = 3_600_000L; // 1 hour
@@ -142,12 +143,25 @@ public class JobUtils {
     }
 
     public static void awardJob(Player player, JobType job, double basePay) {
-        // Jobs only pay in the survival worlds, never in the arena, creative or other worlds
-        if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
-            return;
-        }
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
         if (ap == null) {
+            return;
+        }
+        awardJob(player, ap, job, basePay, AranarthUtils.isAfk(ap));
+    }
+
+    /**
+     * Awards job pay and XP, reducing both if the player is AFK.
+     *
+     * @param player The player.
+     * @param ap The player's AranarthPlayer.
+     * @param job The job being paid.
+     * @param basePay The base pay before multipliers.
+     * @param isAfk Whether the player was AFK when they performed the action.
+     */
+    private static void awardJob(Player player, AranarthPlayer ap, JobType job, double basePay, boolean isAfk) {
+        // Jobs only pay in the survival worlds, never in the arena, creative or other worlds
+        if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
             return;
         }
         JobData jobData = ap.getJobData();
@@ -163,16 +177,22 @@ public class JobUtils {
         if (AranarthUtils.isRainbowActive()) {
             actualPay *= AranarthUtils.RAINBOW_MULTIPLIER;
         }
+        if (isAfk) {
+            actualPay *= AFK_PAY_MULTIPLIER;
+        }
 
         ap.setBalance(ap.getBalance() + actualPay);
         PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
         if (NetworkManager.isActive()) {
             NetworkManager.getInstance().publishBalanceAdjust(player.getUniqueId(), actualPay);
         }
-        trackEarnings(player.getUniqueId(), actualPay);
+        trackEarnings(player.getUniqueId(), actualPay, isAfk);
 
         if (level < 10) {
             double xpGain = basePay * 100;
+            if (isAfk) {
+                xpGain *= AFK_PAY_MULTIPLIER;
+            }
             jobData.addTotalXp(job, xpGain);
             int newLevel = jobData.getLevel(job);
             for (int lvl = level + 1; lvl <= newLevel; lvl++) {
@@ -200,8 +220,11 @@ public class JobUtils {
      * Holds the Builder pay for a block until it has stayed as the expected material for BUILDER_PAY_DELAY_MS.
      */
     public static void queueBuilderPay(Player player, Block block, Material expectedMaterial, double basePay) {
+        // Whether they were AFK is decided when the block is placed, not when the delayed pay is given
+        AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
+        boolean isAfk = AranarthUtils.isAfk(ap);
         pendingBuilds.addLast(new PendingBuild(player.getUniqueId(), block.getWorld().getUID(), block.getX(), block.getY(),
-                block.getZ(), expectedMaterial, basePay, System.currentTimeMillis()));
+                block.getZ(), expectedMaterial, basePay, System.currentTimeMillis(), isAfk));
     }
 
     /**
@@ -210,6 +233,7 @@ public class JobUtils {
     public static void processPendingBuilderPay() {
         long now = System.currentTimeMillis();
         Map<UUID, Double> payByPlayer = new HashMap<>();
+        Map<UUID, Double> afkPayByPlayer = new HashMap<>();
         while (!pendingBuilds.isEmpty() && now - pendingBuilds.peekFirst().placedAt() >= BUILDER_PAY_DELAY_MS) {
             PendingBuild build = pendingBuilds.pollFirst();
             World world = Bukkit.getWorld(build.worldUuid());
@@ -221,12 +245,18 @@ public class JobUtils {
                     && world.getBlockAt(build.x(), build.y(), build.z()).getType() != build.material()) {
                 continue;
             }
-            payByPlayer.merge(build.playerUuid(), build.basePay(), Double::sum);
+            (build.isAfk() ? afkPayByPlayer : payByPlayer).merge(build.playerUuid(), build.basePay(), Double::sum);
         }
+        payPendingBuilders(payByPlayer, false);
+        payPendingBuilders(afkPayByPlayer, true);
+    }
+
+    private static void payPendingBuilders(Map<UUID, Double> payByPlayer, boolean isAfk) {
         for (Map.Entry<UUID, Double> entry : payByPlayer.entrySet()) {
             Player player = Bukkit.getPlayer(entry.getKey());
-            if (player != null) {
-                awardJob(player, JobType.BUILDER, entry.getValue());
+            AranarthPlayer ap = AranarthUtils.getPlayer(entry.getKey());
+            if (player != null && ap != null) {
+                awardJob(player, ap, JobType.BUILDER, entry.getValue(), isAfk);
             }
         }
     }
@@ -234,7 +264,7 @@ public class JobUtils {
     /**
      * Adds job pay to the player's running total, starting a new summary window if one is not already running.
      */
-    private static void trackEarnings(UUID playerUuid, double amount) {
+    private static void trackEarnings(UUID playerUuid, double amount, boolean isAfk) {
         if (amount <= 0) {
             return;
         }
@@ -244,6 +274,9 @@ public class JobUtils {
         }
         recentEarnings.merge(playerUuid, amount, Double::sum);
         earningsWindowStart.putIfAbsent(playerUuid, System.currentTimeMillis());
+        if (isAfk) {
+            afkEarningsWindow.add(playerUuid);
+        }
     }
 
     /**
@@ -259,6 +292,7 @@ public class JobUtils {
             if (player == null) {
                 iterator.remove();
                 recentEarnings.remove(uuid);
+                afkEarningsWindow.remove(uuid);
                 continue;
             }
             if (now - entry.getValue() < EARNINGS_SUMMARY_INTERVAL_MS) {
@@ -270,10 +304,12 @@ public class JobUtils {
             if (earned < 0.005 || isMessageDisabled) {
                 iterator.remove();
                 recentEarnings.remove(uuid);
+                afkEarningsWindow.remove(uuid);
                 continue;
             }
+            String langKey = afkEarningsWindow.remove(uuid) ? "jobs.earned_recently_afk" : "jobs.earned_recently";
             player.sendActionBar(LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(
-                    Lang.getFor(player, "jobs.earned_recently", "amount", String.format(Locale.US, "%,.2f", earned)))));
+                    Lang.getFor(player, langKey, "amount", String.format(Locale.US, "%,.2f", earned)))));
             recentEarnings.put(uuid, 0.0);
             entry.setValue(now);
         }

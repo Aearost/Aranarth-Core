@@ -11,7 +11,9 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 
@@ -125,6 +127,9 @@ public class AranarthPlayer {
     private boolean isServerTipsDisabled = false;
     private boolean isSitDisabled = false;
     private boolean isJobsMessageDisabled = false;
+    private boolean isBigTreeDisabled = false;
+    private final Set<String> disabledTrees = new HashSet<>();
+    private boolean isArmorHidden = false;
     private String sitCushionColor = "WHITE";
     private PrefixStyle councilPrefixStyle = PrefixStyle.SYMBOL;
     private PrefixStyle saintPrefixStyle = PrefixStyle.SYMBOL;
@@ -2187,6 +2192,70 @@ public class AranarthPlayer {
 
     public void setJobsMessageDisabled(boolean jobsMessageDisabled) {
         this.isJobsMessageDisabled = jobsMessageDisabled;
+    }
+
+    /**
+     * Provides whether the saplings this player plants or bone meals grow into vanilla trees instead of custom trees.
+     */
+    public boolean isBigTreeDisabled() {
+        return isBigTreeDisabled;
+    }
+
+    public void setBigTreeDisabled(boolean bigTreeDisabled) {
+        this.isBigTreeDisabled = bigTreeDisabled;
+    }
+
+    /**
+     * Provides whether the player has turned off a custom tree, so their saplings never grow into it.
+     * @param variant The name of the tree's variant.
+     */
+    public boolean isTreeDisabled(String variant) {
+        return disabledTrees.contains(variant);
+    }
+
+    /**
+     * Turns a custom tree off or back on for the saplings this player plants or bone meals.
+     * @param variant The name of the tree's variant.
+     */
+    public void setTreeDisabled(String variant, boolean disabled) {
+        if (disabled) {
+            disabledTrees.add(variant);
+        } else {
+            disabledTrees.remove(variant);
+        }
+    }
+
+    /**
+     * Provides the custom trees the player has turned off, as their variant names separated by commas.
+     */
+    public String getEncodedDisabledTrees() {
+        return String.join(",", disabledTrees.stream().sorted().toList());
+    }
+
+    /**
+     * Applies the custom trees turned off from a String created by getEncodedDisabledTrees().
+     */
+    public void setEncodedDisabledTrees(String encoded) {
+        disabledTrees.clear();
+        if (encoded == null || encoded.isBlank()) {
+            return;
+        }
+        for (String variant : encoded.split(",")) {
+            if (!variant.isBlank()) {
+                disabledTrees.add(variant.trim());
+            }
+        }
+    }
+
+    /**
+     * Provides whether the player has the Invisible Armor perk toggled on, hiding their armor from other players.
+     */
+    public boolean isArmorHidden() {
+        return isArmorHidden;
+    }
+
+    public void setArmorHidden(boolean armorHidden) {
+        this.isArmorHidden = armorHidden;
     }
 
     public String getSitCushionColor() {

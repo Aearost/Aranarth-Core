@@ -135,6 +135,16 @@ public class OutpostUtils {
     }
 
     /**
+     * Returns the outpost that owns the chunk with the given lookup key, without loading the chunk.
+     *
+     * @param chunkKey The chunk key in the format world:x:z.
+     * @return The owning outpost, or null if not part of an outpost.
+     */
+    public static Outpost getOutpostOfChunkKey(String chunkKey) {
+        return chunkKeyToOutpost.get(chunkKey);
+    }
+
+    /**
      * Returns the outpost with the given ID, or null.
      */
     public static Outpost getOutpostById(UUID id) {

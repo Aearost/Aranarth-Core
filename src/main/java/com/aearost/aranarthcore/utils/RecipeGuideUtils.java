@@ -12,8 +12,13 @@ import com.aearost.aranarthcore.items.aranarthium.ingots.*;
 import com.aearost.aranarthcore.items.arrowhead.*;
 import com.aearost.aranarthcore.items.essence.EssenceBlank;
 import com.aearost.aranarthcore.items.netherite.NetheriteElytra;
+import com.aearost.aranarthcore.items.produce.FruitSapling;
+import com.aearost.aranarthcore.items.produce.Produce;
+import com.aearost.aranarthcore.items.produce.ProduceType;
 import com.aearost.aranarthcore.objects.RecipeGuideEntry;
 import com.aearost.aranarthcore.recipes.RecipeEssences;
+import com.aearost.aranarthcore.recipes.produce.RecipeFruitSapling;
+import com.aearost.aranarthcore.trees.CustomTrees;
 import org.bukkit.Bukkit;
 import org.bukkit.Keyed;
 import org.bukkit.Material;
@@ -93,6 +98,10 @@ public class RecipeGuideUtils {
                 }
                 crafting.add(createEntry(RecipeStation.CRAFTING, grid, alternatives, List.of(shaped.getResult()), getCraftingNotes(key)));
             } else if (recipe instanceof ShapelessRecipe shapeless) {
+                // A fruit sapling recipe only stands in for every fruit of that sapling, so each fruit is listed on its own below
+                if (key.startsWith(RecipeFruitSapling.KEY_PREFIX.toLowerCase(Locale.ROOT))) {
+                    continue;
+                }
                 Map<Material, ItemStack> substitutions = getSubstitutions(key);
                 ItemStack[] grid = new ItemStack[9];
                 List<List<Material>> alternatives = emptyAlternatives();
@@ -105,6 +114,7 @@ public class RecipeGuideUtils {
             }
         }
 
+        addFruitSaplingEntries(crafting);
         crafting.sort(Comparator.comparing(entry -> getName(entry.getResults().getFirst())));
 
         List<RecipeGuideEntry> all = new ArrayList<>(crafting);
@@ -152,7 +162,7 @@ public class RecipeGuideUtils {
                 middleColumn(arrowhead, new ItemStack(Material.LIGHTNING_ROD), null),
                 emptyAlternatives(), List.of(new ArrowheadLightning().getItem()), notes));
         all.add(createEntry(RecipeStation.FLETCHING,
-                middleColumn(arrowhead, new ItemStack(Material.GLOWSTONE), null),
+                middleColumn(new ArrowheadGold().getItem(), new ItemStack(Material.GLOWSTONE), null),
                 emptyAlternatives(), List.of(new ArrowheadSpectral().getItem()), notes));
         all.add(createEntry(RecipeStation.FLETCHING,
                 middleColumn(arrowhead, new ItemStack(Material.HANGING_ROOTS), null),
@@ -163,6 +173,27 @@ public class RecipeGuideUtils {
         all.add(createEntry(RecipeStation.FLETCHING,
                 middleColumn(new ArrowheadObsidian().getItem(), new ItemStack(Material.DRAGON_BREATH), null),
                 emptyAlternatives(), List.of(new ArrowheadDragon().getItem()), notes));
+        all.add(createEntry(RecipeStation.FLETCHING,
+                middleColumn(new ArrowheadAmethyst().getItem(), new ItemStack(Material.GLOW_INK_SAC), null),
+                emptyAlternatives(), List.of(new ArrowheadSonar().getItem()), notes));
+        all.add(createEntry(RecipeStation.FLETCHING,
+                middleColumn(new ArrowheadIron().getItem(), new ItemStack(Material.IRON_INGOT), new ItemStack(Material.STRING)),
+                emptyAlternatives(), List.of(new ArrowheadGrapple().getItem()), notes));
+        all.add(createEntry(RecipeStation.FLETCHING,
+                middleColumn(new ArrowheadAmethyst().getItem(), new ItemStack(Material.ENDER_EYE), null),
+                emptyAlternatives(), List.of(new ArrowheadHoming().getItem()), notes));
+        all.add(createEntry(RecipeStation.FLETCHING,
+                middleColumn(new ArrowheadObsidian().getItem(), new ItemStack(Material.CHARCOAL), null),
+                emptyAlternatives(), List.of(new ArrowheadSmoke().getItem()), notes));
+        all.add(createEntry(RecipeStation.FLETCHING,
+                middleColumn(new ArrowheadAmethyst().getItem(), new ItemStack(Material.ENDER_PEARL), null),
+                emptyAlternatives(), List.of(new ArrowheadShifting().getItem()), notes));
+        all.add(createEntry(RecipeStation.FLETCHING,
+                middleColumn(new ArrowheadIron().getItem(), new ItemStack(Material.STRING), null),
+                emptyAlternatives(), List.of(new ArrowheadTether().getItem()), notes));
+        all.add(createEntry(RecipeStation.FLETCHING,
+                middleColumn(new ArrowheadIron().getItem(), new ItemStack(Material.PRISMARINE_SHARD), new ItemStack(Material.NAUTILUS_SHELL)),
+                emptyAlternatives(), List.of(new ArrowheadTide().getItem()), notes));
 
         // Arrows - arrowhead + stick + feather, or arrowhead + vanilla arrow for special arrowheads
         Map<String, ItemStack> arrowheadsByType = new LinkedHashMap<>();
@@ -178,6 +209,13 @@ public class RecipeGuideUtils {
         arrowheadsByType.put("rooting", new ArrowheadRooting().getItem());
         arrowheadsByType.put("gust", new ArrowheadGust().getItem());
         arrowheadsByType.put("dragon", new ArrowheadDragon().getItem());
+        arrowheadsByType.put("sonar", new ArrowheadSonar().getItem());
+        arrowheadsByType.put("grapple", new ArrowheadGrapple().getItem());
+        arrowheadsByType.put("homing", new ArrowheadHoming().getItem());
+        arrowheadsByType.put("smoke", new ArrowheadSmoke().getItem());
+        arrowheadsByType.put("shifting", new ArrowheadShifting().getItem());
+        arrowheadsByType.put("tether", new ArrowheadTether().getItem());
+        arrowheadsByType.put("tide", new ArrowheadTide().getItem());
 
         for (Map.Entry<String, ItemStack> type : arrowheadsByType.entrySet()) {
             ItemStack arrow = AranarthUtils.getArrowFromType(type.getKey());
@@ -241,6 +279,22 @@ public class RecipeGuideUtils {
                 all.add(createEntry(RecipeStation.ANVIL, anvilGrid(bases[i], ingot),
                         emptyAlternatives(), List.of(pieces[i]), notes));
             }
+        }
+    }
+
+    /**
+     * Adds a recipe for each fruit sapling: its fruit, or a vanilla Apple for the Apple Tree, with the sapling of its tree.
+     */
+    private static void addFruitSaplingEntries(List<RecipeGuideEntry> crafting) {
+        for (CustomTrees.Variant variant : FruitSapling.getVariants()) {
+            String fruitId = FruitSapling.getFruitId(variant);
+            ProduceType produce = ProduceType.fromId(fruitId);
+            ItemStack fruit = produce == null ? new ItemStack(Material.APPLE) : new Produce(produce).getItem();
+            ItemStack[] grid = new ItemStack[9];
+            grid[0] = fruit;
+            grid[1] = new ItemStack(variant.getSapling());
+            crafting.add(createEntry(RecipeStation.CRAFTING, grid, emptyAlternatives(),
+                    List.of(new FruitSapling(variant).getItem()), List.of()));
         }
     }
 

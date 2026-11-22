@@ -1,0 +1,85 @@
+AranarthCore v. 1.16
+
+World & Events
+[+] Implemented custom trees to be grown from saplings
+[~] All berries, both vanilla and custom, are eaten twice as fast
+[+] Custom produce items now work as their closest vanilla item, so they can be composted and fed to animals
+[+] Farmer villagers now buy custom produce items
+[+] Wandering Farmers now buy and sell custom produce items and their seeds
+[+] Added /trees to choose which custom trees your saplings can grow into
+[~] Players now enter AFK status when only clicking or being moved by external factors
+[~] Entering the arena from a spawn sign now clears all potion effects, so the spawn boost no longer carries over
+[~] Entering an arena now clears all potion effects, so the spawn boost no longer carries into an arena
+[~] Players now keep their inventory when dying in the arena
+[~] Reworked invisibility so armor stays worn and is only hidden while invisible
+[~] Worn armor can no longer be changed while invisible
+[~] Any hit to an invisible player ends invisibility
+[~] All mobs other than bosses and Wardens stop chasing invisible players
+[~] Invisible Armor now works on both servers without flickering
+[-] Mining Fatigue from the Ardorvor heat no longer applies while it is raining or thundering
+[-] Brewing, barrels, and drinking brews are now disabled in the Creative world
+[~] Fixed the Avatar mannequins causing Mojang rate limit errors on startup by looking up each skin only once at a time
+
+Bending & Abilities
+[-] Prevented AirBlast from being used while riding a horse, mount, or any other vehicle
+[~] MetalBlade now persists across slot changes once charged, and weapon hits with it active deal a portion of the blade's damage
+[~] JetStream no longer deals wall impact damage in the arena, and can now be ended early by tapping sneak or left-clicking
+[~] Active invisibility effects now return after AstralProjection
+
+Dominion
+[+] Dominion and outpost bending flags are now bypassed while a member of an enemied dominion is within proximity of the land
+[~] Fixed severe lag when claiming or auto-claiming land in large Dominions
+
+Aranarthium, Items & Crafting
+[+] Added over 50 new fruits, berries, vegetables, and more, with various trees and custom crops
+[+] Added /recipe [item name] as a shortcut to /aranarth recipes
+[+] Added the Grapple, Honing, Shifting, Smoke, Sonar, Tether, and Tide arrowheads and arrows
+[~] Reworked all existing arrowhead and arrow textures
+[~] Vote crates now give 8 random fruit instead of bread
+[~] Curse of Binding is now released on death even when the inventory is kept by Soulbound armour or the arena, so cursed armour can no longer be permanently stuck
+[~] Items that already have an essence applied are no longer treated as the essence itself
+[-] Invisible Item Frames can no longer be placed without the Invisible Item Frames perk
+[~] The Wrench no longer loses durability when used in Creative mode
+[~] Fixed items being duplicated by double-clicking in /ac invsee or by editing an ender chest after its owner logged out
+[~] Fixed Essence of Magnetism hoes not pulling drops from leaves and other blocks mined with a hoe
+[~] Altered all brewing recipes to consider the custom produce ingredients where applicable
+[+] Added 17 new brews made from the custom produce ingredients
+[+] Added recipes to turn wood back into logs using a crafting table and also the Sawmill
+
+Economy, Jobs & Quests
+[+] Custom crops and fruit now count towards Farmer quests, and harvesting them adds progress to Harvest Crops quests
+[+] Added the Pick Fruit and Harvest Produce Farmer quests
+[+] Added 1/4 pay when earning income from jobs while AFK
+[+] Server shop prices recover faster the cheaper the shop is, keeping the current rate for $500 and above
+[~] Alchemists now earn money when using potions
+
+Chat, UI & Sounds
+[+] The Sawmill now has its own page in /aranarth mechanics
+[+] Added /creative items to the /aranarth menu
+[+] Added a Trees, Fruits, and Farming section to /aranarth, covering fruit trees, planting, growing, harvesting, seasons and foraging
+
+Quality of Life
+[~] Final blows no longer kill a player if the fight was from /countdown
+[~] Blacklist preset select and clear messages now show the preset's name instead of its number
+[+] Blank Essences can now be filled with your own EXP by sneaking and right-clicking per your Bottled Knowledge efficiency
+[+] Added /creative items to let players give themselves AranarthCore items in Creative
+[+] Added automatic percentage input for /rand if blocks are listed without percentages
+[+] Setting a /randomizer pattern now also enables the randomizer
+[+] Holding sneak now prevents thorn damage from sweet berry and blackberry bushes
+
+Cross-server & Technical
+[+] Added caching to avatar mannequin skins so refreshes avoid session server timeout warnings
+[~] Fixed quest boards failing to generate when server shops exist, which caused errors on player movement
+[+] The vanilla /give command now gives items to players on the other server
+[~] Switching to Creative mode in a survival world now swaps to your creative inventory, and back when returning to Survival
+[~] Ender chests can no longer be opened by anyone in Creative mode
+[~] Players in Creative mode in a survival world can no longer trade, and their inventory can no longer be edited through /ac invsee
+[+] Added /trees regen to grow the custom plants in the world as specified
+[~] The resource world now automatically grows custom plants when regenerating
+
+Miscellaneous
+[+] Added /ac user to manage a player's location, inventory, ender chest and punishments from one centrallized GUI
+[~] Punishments are now issued by offence category, preselecting the player's next punishment from the punishment system's ladders
+[+] Inventories and ender chests of players on the other server can now be edited
+[~] Removing a punishment now applies on both servers
+[+] Added /trees regen to generate wild orchards, fruit trees, berry bushes and crops across the existing land of a world

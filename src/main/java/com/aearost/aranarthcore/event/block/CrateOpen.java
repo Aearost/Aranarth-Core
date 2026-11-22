@@ -18,6 +18,8 @@ import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
 import com.aearost.aranarthcore.items.key.KeyRare;
 import com.aearost.aranarthcore.items.key.KeyVote;
+import com.aearost.aranarthcore.items.produce.Produce;
+import com.aearost.aranarthcore.items.produce.ProduceType;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.AranarthVote;
@@ -87,16 +89,19 @@ public class CrateOpen {
                                 List<Integer> indexes = new ArrayList<>();
                                 indexes.add(0); // blaze rod and breeze rod
                                 indexes.add(0); // brew recipes
+                                indexes.add(0); // fruit, starting from the Pear
                                 GuiCrate gui = new GuiCrate(player, CrateType.VOTE, indexes);
                                 gui.openGui();
                                 indexes.set(0, 1);
                                 indexes.set(1, 1);
+                                indexes.set(2, 1);
+                                final int fruitCount = Produce.getVoteCrateFruitItems().size();
 
                                 scheduledSkipTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(AranarthCore.getInstance(), new Runnable() {
                                     @Override
                                     public void run() {
                                         if (aranarthPlayer.isOpeningCrateWithCyclingItem()) {
-                                            gui.updateVoteCrateItems(indexes.get(0), indexes.get(1));
+                                            gui.updateVoteCrateItems(indexes.get(0), indexes.get(1), indexes.get(2));
 
                                             // Alternate between blaze rod (0) and breeze rod (1)
                                             indexes.set(0, indexes.get(0) == 0 ? 1 : 0);
@@ -107,6 +112,9 @@ public class CrateOpen {
                                                 nextRecipe = 0;
                                             }
                                             indexes.set(1, nextRecipe);
+
+                                            // Cycle through the fruit
+                                            indexes.set(2, (indexes.get(2) + 1) % fruitCount);
                                         } else {
                                             Bukkit.getScheduler().cancelTask(scheduledSkipTask);
                                         }
@@ -476,13 +484,14 @@ public class CrateOpen {
             final int chance = new Random().nextInt(100) + 1;
             final boolean isBlazeRod = new Random().nextBoolean();
             final BrewRecipe lockedRecipe = BrewRecipeUtils.getRandomLockedRare(player.getUniqueId());
+            final ItemStack fruit = Produce.randomVoteCrateFruit(8);
 
             // Determine the display item shown in the animation as the winner
             final ItemStack displayItem;
             if (chance <= 12) {
                 displayItem = new ItemStack(Material.GOLD_INGOT);
             } else if (chance <= 24) {
-                displayItem = new ItemStack(Material.BREAD, 16);
+                displayItem = fruit.clone();
             } else if (chance <= 36) {
                 displayItem = new ItemStack(Material.IRON_INGOT, 16);
             } else if (chance <= 48) {
@@ -535,8 +544,8 @@ public class CrateOpen {
                     Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled $500 of In-Game Currency in a Vote Crate"));
                     return;
                 } else if (chance <= 24) {
-                    reward = new ItemStack(Material.BREAD, 16);
-                    name = Lang.key("crate.reward_amount", "name", Lang.key("gui.crate.bread"), "amount", 16);
+                    reward = fruit.clone();
+                    name = Lang.key("crate.reward_amount", "name", Lang.key(Produce.getLangKey(fruit)), "amount", 8);
                 } else if (chance <= 36) {
                     reward = new ItemStack(Material.IRON_INGOT, 16);
                     name = Lang.key("crate.reward_amount", "name", Lang.key("gui.crate.iron_ingot"), "amount", 16);
@@ -1573,7 +1582,9 @@ public class CrateOpen {
         List<ItemStack> pool = new ArrayList<>();
         switch (type) {
             case VOTE -> {
-                pool.add(new ItemStack(Material.BREAD));
+                pool.add(new Produce(ProduceType.PEAR).getItem());
+                pool.add(new ItemStack(Material.APPLE));
+                pool.add(new Produce(ProduceType.ORANGE).getItem());
                 pool.add(new ItemStack(Material.IRON_INGOT));
                 pool.add(new ItemStack(Material.GOLD_INGOT));
                 pool.add(new GodAppleFragment().getItem());

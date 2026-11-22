@@ -22,6 +22,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -67,6 +68,13 @@ public class AvatarUtils {
     private static String lastSelectionSummary = null;
     // Incremented on every refresh so that mannequins from an older refresh are never spawned
     private static int mannequinGeneration = 0;
+    // Completed skin profiles, so that mannequin refreshes do not query Mojang every time
+    private static final Map<UUID, PlayerProfile> skinProfileCache = new ConcurrentHashMap<>();
+    // When each skin lookup last failed, so a rate limited UUID is not queried again straight away
+    private static final Map<UUID, Long> skinLookupFailedAt = new ConcurrentHashMap<>();
+    // Only one Mojang skin lookup runs at a time, so a refresh never bursts into a 429 rate limit
+    private static final Object SKIN_LOOKUP_LOCK = new Object();
+    private static final long SKIN_LOOKUP_RETRY_MILLIS = TimeUnit.MINUTES.toMillis(5);
 
     /**
      * Provides the list of all avatars.
@@ -932,17 +940,15 @@ public class AvatarUtils {
         UUID uuid = avatar.getUuid();
         AranarthCore plugin = AranarthCore.getInstance();
 
+        // An online player already has their skin, so Mojang does not need to be queried
+        Player online = Bukkit.getPlayer(uuid);
+        if (online != null && online.getPlayerProfile().hasTextures()) {
+            skinProfileCache.put(uuid, online.getPlayerProfile());
+        }
+
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            // Fetch and complete the profile (blocking Mojang API call)
-            PlayerProfile profile = plugin.getServer().createProfile(uuid);
-            boolean isProfileComplete;
-            try {
-                isProfileComplete = profile.complete(true); // Fetches the skin from Mojang
-            } catch (Exception e) {
-                logWarning("The skin lookup failed for the mannequin of " + uuid + ": " + e);
-                isProfileComplete = false;
-            }
-            boolean completed = isProfileComplete;
+            PlayerProfile profile = lookupSkinProfile(uuid);
+            boolean completed = profile != null;
 
             // Jump back to main thread to spawn the mannequin
             Bukkit.getScheduler().runTask(plugin, () -> {
@@ -981,6 +987,40 @@ public class AvatarUtils {
                 });
             });
         });
+    }
+
+    /**
+     * Provides the completed skin profile of the input player, querying Mojang only when it is not cached.
+     *
+     * @param uuid The UUID of the player.
+     * @return The completed skin profile, or null if it could not be fetched.
+     */
+    private static PlayerProfile lookupSkinProfile(UUID uuid) {
+        synchronized (SKIN_LOOKUP_LOCK) {
+            // Another mannequin of the same player may have fetched it while this one waited
+            PlayerProfile cached = skinProfileCache.get(uuid);
+            if (cached != null) {
+                return cached;
+            }
+            Long failedAt = skinLookupFailedAt.get(uuid);
+            if (failedAt != null && System.currentTimeMillis() - failedAt < SKIN_LOOKUP_RETRY_MILLIS) {
+                return null;
+            }
+
+            PlayerProfile profile = AranarthCore.getInstance().getServer().createProfile(uuid);
+            try {
+                // Fetches the skin from Mojang, Paper logs its own warning if the request fails
+                if (profile.complete(true) && profile.hasTextures()) {
+                    skinProfileCache.put(uuid, profile);
+                    skinLookupFailedAt.remove(uuid);
+                    return profile;
+                }
+            } catch (Exception e) {
+                logWarning("The skin lookup failed for the mannequin of " + uuid + ": " + e);
+            }
+            skinLookupFailedAt.put(uuid, System.currentTimeMillis());
+            return null;
+        }
     }
 
     /**

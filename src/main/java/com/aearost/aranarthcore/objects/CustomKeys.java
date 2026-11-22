@@ -56,4 +56,6 @@ public class CustomKeys {
     public static final NamespacedKey COUPON_DISCOUNT = new NamespacedKey(AranarthCore.getInstance(), "coupon_discount");
     public static final NamespacedKey SIT_CUSHION = new NamespacedKey(AranarthCore.getInstance(), "sit_cushion");
     public static final NamespacedKey TABLE_ENCHANTED = new NamespacedKey(AranarthCore.getInstance(), "table_enchanted");
+    public static final NamespacedKey PRODUCE = new NamespacedKey(AranarthCore.getInstance(), "produce");
+    public static final NamespacedKey FRUIT_SAPLING = new NamespacedKey(AranarthCore.getInstance(), "fruit_sapling");
 }

@@ -8,10 +8,13 @@ import com.aearost.aranarthcore.items.essence.*;
 import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
 import com.aearost.aranarthcore.items.key.KeyRare;
+import com.aearost.aranarthcore.items.produce.Produce;
+import com.aearost.aranarthcore.items.produce.ProduceType;
 import com.aearost.aranarthcore.objects.CrateType;
 import com.aearost.aranarthcore.utils.BrewRecipeUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -46,7 +49,7 @@ public class GuiCrate {
 		} else {
 			this.initializedGui = initializeVoteCrate(player);
 			if (indexes != null) {
-				updateVoteCrateItems(indexes.get(0), indexes.get(1));
+				updateVoteCrateItems(indexes.get(0), indexes.get(1), indexes.get(2));
 			}
 		}
 	}
@@ -73,14 +76,7 @@ public class GuiCrate {
 		money250.setItemMeta(money250Meta);
 		gui.setItem(2, money250);
 
-		ItemStack bread = new ItemStack(Material.BREAD, 16);
-		ItemMeta breadMeta = bread.getItemMeta();
-		breadMeta.setDisplayName(Lang.getFor(player, "gui.crate.bread"));
-		List<String> breadLore = new ArrayList<>();
-		breadLore.add(Lang.getFor(player, "gui.crate.chance_12"));
-		breadMeta.setLore(breadLore);
-		bread.setItemMeta(breadMeta);
-		gui.setItem(3, bread);
+		gui.setItem(3, createVoteCrateFruit(player, 0));
 
 		ItemStack iron = new ItemStack(Material.IRON_INGOT, 16);
 		ItemMeta ironMeta = iron.getItemMeta();
@@ -478,8 +474,11 @@ public class GuiCrate {
 	 * Updates the cycling items in the Vote Crate GUI.
 	 * @param rodIndex    0 = Blaze Rod, 1 = Breeze Rod
 	 * @param recipeMapIndex Index into the list of MIDDLE-tier recipes.
+	 * @param fruitIndex Index into the fruit that can be rolled, starting from the Pear.
 	 */
-	public void updateVoteCrateItems(int rodIndex, int recipeMapIndex) {
+	public void updateVoteCrateItems(int rodIndex, int recipeMapIndex, int fruitIndex) {
+		initializedGui.setItem(3, createVoteCrateFruit(player, fruitIndex));
+
 		ItemStack rod;
 		String rodName;
 		String rodColor;
@@ -507,6 +506,39 @@ public class GuiCrate {
 		recipeMapMeta.setLore(recipeMapLore);
 		recipeMap.setItemMeta(recipeMapMeta);
 		initializedGui.setItem(23, recipeMap);
+	}
+
+	/**
+	 * Provides the display of a fruit that can be rolled from a Vote Crate, named after the fruit itself.
+	 * @param player The player viewing the Vote Crate.
+	 * @param fruitIndex Index into the fruit that can be rolled, where 0 is the Pear. Wraps around.
+	 * @return The fruit display item.
+	 */
+	private static ItemStack createVoteCrateFruit(Player player, int fruitIndex) {
+		List<ItemStack> fruits = Produce.getVoteCrateFruitItems();
+		int pearIndex = ProduceType.getVoteCrateFruit().indexOf(ProduceType.PEAR);
+		ItemStack fruit = fruits.get(Math.floorMod(fruitIndex + Math.max(pearIndex, 0), fruits.size()));
+		fruit.setAmount(8);
+		ItemMeta fruitMeta = fruit.getItemMeta();
+		fruitMeta.setDisplayName(boldAfterColor(Lang.getFor(player, Produce.getLangKey(fruit))));
+		List<String> fruitLore = new ArrayList<>();
+		fruitLore.add(Lang.getFor(player, "gui.crate.chance_12"));
+		fruitMeta.setLore(fruitLore);
+		fruit.setItemMeta(fruitMeta);
+		return fruit;
+	}
+
+	/**
+	 * Makes a translated name bold, keeping its leading colour so it matches the other crate rewards.
+	 * @param name The translated name.
+	 * @return The bold name.
+	 */
+	private static String boldAfterColor(String name) {
+		int i = 0;
+		while (i + 1 < name.length() && name.charAt(i) == ChatColor.COLOR_CHAR) {
+			i += 2;
+		}
+		return name.substring(0, i) + ChatColor.BOLD + name.substring(i);
 	}
 
 	/**

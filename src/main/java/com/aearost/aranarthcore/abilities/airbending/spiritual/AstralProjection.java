@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.airbending.spiritual;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.event.listener.misc.InvisibilityListener;
 import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -65,6 +66,9 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
     private ItemStack[] storedArmor;
     // Snapshot of the player's potion effects taken before projection (fallback for restore)
     private Collection<PotionEffect> storedEffects;
+    // An Invisibility potion the player had, kept off the mannequin so the body stays visible
+    private PotionEffect storedInvisibility;
+    private boolean isRestored = false;
     // Pre-projection glowing state so it can be restored accurately on end
     private boolean wasGlowing;
     // Dedicated task that re-applies projection effects each tick AFTER PK's own tick completes
@@ -148,6 +152,9 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
         this.mannequin = m;
         abilityStart = System.currentTimeMillis();
 
+        // Armor left over from the old Invisibility system is put back on first, so that the mannequin wears it
+        InvisibilityListener.restoreArmor(player);
+
         // Transfer armor: save to field + PDC, equip on mannequin, strip from player
         storedArmor = player.getInventory().getArmorContents().clone();
         persistArmorToPlayer(player, storedArmor);
@@ -156,7 +163,12 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
 
         // Snapshot effects BEFORE adding invisibility, transfer to mannequin, clear from player
         storedEffects = player.getActivePotionEffects();
+        storedInvisibility = player.getPotionEffect(PotionEffectType.INVISIBILITY);
         for (PotionEffect effect : storedEffects) {
+            // The body must stay visible so that it can still be found and struck
+            if (effect.getType() == PotionEffectType.INVISIBILITY) {
+                continue;
+            }
             m.addPotionEffect(effect);
         }
         for (PotionEffect effect : storedEffects) {
@@ -252,6 +264,12 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
      * Restores the player's old potion effects and armor upon the end of the ability.
      */
     private void restorePlayer() {
+        // endAbility() restores the player and then calls remove(), which would otherwise restore them a second time
+        // and strip the Invisibility potion that was just given back
+        if (isRestored) {
+            return;
+        }
+        isRestored = true;
         if (projectionEffectTask != null) {
             projectionEffectTask.cancel();
             projectionEffectTask = null;
@@ -273,10 +291,26 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
             }
         } else if (storedEffects != null) {
             for (PotionEffect effect : storedEffects) {
+                if (effect.getType() == PotionEffectType.INVISIBILITY) {
+                    continue;
+                }
                 player.addPotionEffect(effect);
             }
         }
         storedEffects = null;
+        // The Invisibility potion kept ticking down during the projection
+        if (storedInvisibility != null) {
+            if (storedInvisibility.isInfinite()) {
+                player.addPotionEffect(storedInvisibility);
+            } else {
+                int elapsedTicks = (int) ((System.currentTimeMillis() - abilityStart) / 50);
+                int remaining = storedInvisibility.getDuration() - elapsedTicks;
+                if (remaining > 0) {
+                    player.addPotionEffect(storedInvisibility.withDuration(remaining));
+                }
+            }
+            storedInvisibility = null;
+        }
 
         // Restore armor from the in-memory store (covers all normal end paths)
         if (storedArmor != null) {

@@ -35,8 +35,14 @@ public class MarketUtils {
     // Immediate drop from sales made since the last tick, applied as price * e^(-SALE_IMPACT * inventoriesSold)
     // 1 inventory of a 64-stack item drops ~5%, 1 inventory of full shulker boxes (27 inventories) drops ~74%
     private static final double SALE_IMPACT = 0.05;
-    // Price rises from 0.25x to 1.0x in ~3.5 days, and from 1.0x to the 2.5x ceiling in ~2.3 days
+    // At or above RECOVERY_SLOW_PRICE, the price rises from 0.25x to 1.0x in ~3.5 days, and from 1.0x to the 2.5x ceiling in ~2.3 days
     private static final double RISE_RATE = 0.01664;
+    // Cheaper shops recover faster, down to a full floor-to-ceiling reset in RECOVERY_FAST_HOURS at or below RECOVERY_FAST_PRICE
+    // Between the two prices the recovery time is interpolated on a log scale (e.g. ~4h at $100, ~20h at $200, ~47h at $300)
+    private static final double RECOVERY_SLOW_PRICE = 500.0;
+    private static final double RECOVERY_FAST_PRICE = 50.0;
+    private static final double RECOVERY_FAST_HOURS = 1.0;
+    private static final double RECOVERY_SLOW_HOURS = Math.log(PRICE_CEILING_MODIFIER / PRICE_FLOOR_MODIFIER) / Math.log(1.0 + RISE_RATE);
     private static final double PRESSURE_THRESHOLD = 0.01;
     private static final double CHANGE_THRESHOLD = 0.005;
     // A server shop never pays more than this share of the cheapest server shop buy price for the same item
@@ -181,12 +187,17 @@ public class MarketUtils {
 
                     double currentPrice = shop.getSellPrice();
                     double defaultPrice = data.getDefaultSellPrice();
+                    if (defaultPrice <= 0) {
+                        continue;
+                    }
+                    double recoveryHours = getRecoveryHours(defaultPrice);
 
                     // Use fresh DB pressure (combines Survival + SMP sells since last tick)
                     double combinedPressure = freshPressures.getOrDefault(key, data.getSellPressure());
                     // Sales made since the last tick hit the price all at once instead of trickling in
                     double newSales = Math.max(0.0, combinedPressure - data.getAppliedPressure());
-                    double newPressure = combinedPressure * DECAY_RATE;
+                    // Pressure fades faster on cheaper shops so their recovery is not held back by old sales
+                    double newPressure = combinedPressure * Math.pow(DECAY_RATE, RECOVERY_SLOW_HOURS / recoveryHours);
                     data.setSellPressure(newPressure);
                     data.setAppliedPressure(newPressure);
 
@@ -200,8 +211,9 @@ public class MarketUtils {
                         }
                         newPrice = Math.max(defaultPrice * PRICE_FLOOR_MODIFIER, currentPrice * Math.exp(-dropRate));
                     } else {
-                        // No meaningful pressure - price recovers toward ceiling
-                        newPrice = Math.min(defaultPrice * PRICE_CEILING_MODIFIER, currentPrice * (1.0 + RISE_RATE));
+                        // No meaningful pressure - price recovers toward ceiling, faster for cheaper shops
+                        double riseMultiplier = Math.pow(PRICE_CEILING_MODIFIER / PRICE_FLOOR_MODIFIER, 1.0 / recoveryHours);
+                        newPrice = Math.min(defaultPrice * PRICE_CEILING_MODIFIER, currentPrice * riseMultiplier);
                     }
 
                     newPrice = clampToBuyPrices(shop, newPrice);
@@ -227,6 +239,20 @@ public class MarketUtils {
                 }
             });
         });
+    }
+
+    /**
+     * Returns how many hourly ticks a server shop with the given default sell price takes to recover
+     * from its floor to its ceiling.
+     */
+    private static double getRecoveryHours(double defaultPrice) {
+        if (defaultPrice <= RECOVERY_FAST_PRICE) {
+            return RECOVERY_FAST_HOURS;
+        } else if (defaultPrice >= RECOVERY_SLOW_PRICE) {
+            return RECOVERY_SLOW_HOURS;
+        }
+        double progress = Math.log(defaultPrice / RECOVERY_FAST_PRICE) / Math.log(RECOVERY_SLOW_PRICE / RECOVERY_FAST_PRICE);
+        return RECOVERY_FAST_HOURS * Math.pow(RECOVERY_SLOW_HOURS / RECOVERY_FAST_HOURS, progress);
     }
 
     /**

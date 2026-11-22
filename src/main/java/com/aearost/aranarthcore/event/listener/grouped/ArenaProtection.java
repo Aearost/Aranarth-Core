@@ -29,6 +29,7 @@ import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionType;
 
 import java.util.List;
@@ -221,8 +222,19 @@ public class ArenaProtection implements Listener {
 		}
 	}
 
-	private Double pendingArenaCap = null;
-	private UUID pendingArenaCapTarget = null;
+	private static Double pendingArenaCap = null;
+	private static UUID pendingArenaCapTarget = null;
+
+	/**
+	 * Clears a pending arena cap for the given target.
+	 * @param targetUuid The UUID of the entity the cap was stored for.
+	 */
+	public static void clearPendingArenaCap(final UUID targetUuid) {
+		if (targetUuid.equals(pendingArenaCapTarget)) {
+			pendingArenaCap = null;
+			pendingArenaCapTarget = null;
+		}
+	}
 
 	/**
 	 * Reduces bending ability damage in the arena world using a tiered scale.
@@ -361,6 +373,10 @@ public class ArenaProtection implements Listener {
 		Location arenaLoc = new Location(Bukkit.getWorld("arena"), dropOff.x(), dropOff.y(), dropOff.z(), dropOff.yaw(), dropOff.pitch());
 		AranarthUtils.teleportPlayer(player, player.getLocation(), arenaLoc, true, Lang.getFor(player, "teleport.title_arena"), Lang.getFor(player, "arena.tp_success"), success -> {
 			if (success) {
+				// The drop off is in the same world, so the effects are not cleared by the world change (such as the spawn boost)
+				for (PotionEffect effect : player.getActivePotionEffects()) {
+					player.removePotionEffect(effect.getType());
+				}
 				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arena.tp_success")));
 			} else {
 				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arena.tp_fail")));

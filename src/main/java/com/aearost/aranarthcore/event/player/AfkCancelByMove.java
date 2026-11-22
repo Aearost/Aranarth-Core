@@ -5,7 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 /**
- * Handles canceling a player's AFK status, or resetting their AFK timer, if they move or look around.
+ * Handles canceling a player's AFK status, or resetting their AFK timer, if they press a movement key or look around.
  */
 public class AfkCancelByMove {
 
@@ -16,9 +16,10 @@ public class AfkCancelByMove {
             return;
         }
         boolean hasTurned = from.getYaw() != to.getYaw() || from.getPitch() != to.getPitch();
+        // Toggle sneak and toggle sprint can stay on while AFK, so only their key presses count, through PlayerInputEvent
         Input input = e.getPlayer().getCurrentInput();
         boolean isPressingMovement = input.isForward() || input.isBackward() || input.isLeft() || input.isRight()
-                || input.isJump() || input.isSneak() || input.isSprint();
+                || input.isJump();
         if (!hasTurned && !isPressingMovement) {
             return;
         }

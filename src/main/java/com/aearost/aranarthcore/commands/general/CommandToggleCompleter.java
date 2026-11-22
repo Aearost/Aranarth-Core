@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.gui.GuiTrees;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -17,7 +18,7 @@ public class CommandToggleCompleter implements TabCompleter {
             "barbarian", "blacklist", "changeclaim", "chat", "chestlock",
             "emoji", "firetype", "compressor", "daymessage", "dmsgcompact", "gate",
             "gradientchat", "inventory", "invisiblearmor", "jobsmsg", "messages", "pethurt",
-            "reaper", "shulker", "shulkerbulk", "sit", "size", "spawnboost", "teleport", "weathermessage"
+            "reaper", "shulker", "shulkerbulk", "sit", "size", "spawnboost", "teleport", "tree", "weathermessage"
     );
 
     /**
@@ -38,6 +39,9 @@ public class CommandToggleCompleter implements TabCompleter {
             }
             if (args[0].equalsIgnoreCase("blacklist")) {
                 return filter(List.of("off", "ignore", "trash"), args[1]);
+            }
+            if (args[0].equalsIgnoreCase("tree") || args[0].equalsIgnoreCase("bigtree")) {
+                return filter(GuiTrees.toggleable().stream().map(variant -> variant.name().toLowerCase()).toList(), args[1]);
             }
         }
         return List.of();

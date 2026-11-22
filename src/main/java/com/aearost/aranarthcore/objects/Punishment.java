@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.objects;
 import com.aearost.aranarthcore.utils.ChatUtils;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 
 /**
@@ -14,14 +15,34 @@ public class Punishment {
 	private String type;
 	private String reason;
 	private UUID appliedBy;
+	private final String category;
 
 	public Punishment(UUID uuid, LocalDateTime date, String type, String reason, UUID appliedBy) {
+		this(uuid, date, type, reason, appliedBy, null);
+	}
+
+	public Punishment(UUID uuid, LocalDateTime date, String type, String reason, UUID appliedBy, String category) {
 		this.uuid = uuid;
 		this.date = date;
 		this.type = type;
 		reason = ChatUtils.removeSpecialCharacters(reason);
 		this.reason = reason;
 		this.appliedBy = appliedBy;
+		this.category = category == null || category.isEmpty() ? null : category;
+	}
+
+	/**
+	 * Provides the key of the offence category the punishment was issued under.
+	 */
+	public String getCategory() {
+		return category;
+	}
+
+	/**
+	 * Provides the date of the punishment in epoch milliseconds, which identifies it across both servers.
+	 */
+	public long getDateMillis() {
+		return date.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 	}
 
 	/**

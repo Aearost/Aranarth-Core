@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.gui.GuiCreativeItems;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -31,6 +32,16 @@ public class CommandCreative implements CommandExecutor {
 
 			if (args.length > 0 && args[0].equalsIgnoreCase("expand")) {
 				expand(player, aranarthPlayer, args);
+				return true;
+			}
+
+			if (args.length > 0 && (args[0].equalsIgnoreCase("items") || args[0].equalsIgnoreCase("gui"))) {
+				if (!GuiCreativeItems.canUse(player)) {
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "creative.items_creative_only")));
+					return false;
+				}
+				GuiCreativeItems.clearFilter(player.getUniqueId());
+				new GuiCreativeItems(player, 0).openGui();
 				return true;
 			}
 

@@ -104,6 +104,11 @@ public class RecipeSawmill {
 			add(plugin, planks.name().toLowerCase() + "_sign",       sign, 1, planks);
 		}
 
+		// Wood as input - turning wood back into logs, since custom trees grow from wood rather than logs
+		for (Material[] pair : RecipeWoodToLog.getWoodToLog()) {
+			add(plugin, pair[0].name().toLowerCase() + "_log", pair[1], 1, pair[0]);
+		}
+
 		// Bamboo
 		add(plugin, "bamboo_block_planks",         Material.BAMBOO_PLANKS, 6, Material.BAMBOO_BLOCK);
 		add(plugin, "bamboo_block_stripblock",      Material.STRIPPED_BAMBOO_BLOCK, 1, Material.BAMBOO_BLOCK);

@@ -163,7 +163,7 @@ public class EssenceImbueListener implements Listener {
     /**
      * Notifies the player when their Essence becomes imbued enough to craft a new tier of essence.
      */
-    private static void notifyThresholds(Player player, int previousXp, int newXp, int maxXp) {
+    public static void notifyThresholds(Player player, int previousXp, int newXp, int maxXp) {
         if (newXp >= maxXp && previousXp < maxXp) {
             player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.imbue_complete")));
             QuestUtils.progress(player, QuestTrigger.ESSENCE, "ESSENCE", 1);

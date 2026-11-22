@@ -52,39 +52,67 @@ public class CommandRandomizer implements CommandExecutor {
 				}
 
 				String[] components = args[0].split(",");
+				// Materials entered without a percentage, which evenly share whatever percentage is left over
+				List<Material> unspecifiedMaterials = new ArrayList<>();
 				List<RandomItem> randomItems = new ArrayList<>();
+				int specifiedPercentageSum = 0;
 				for (String component : components) {
-					String[] percentageItem = component.split("%");
-					if (percentageItem.length != 2) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.invalid_format")));
-						return true;
-					}
-
-					// Validates the percentage was entered correctly
+					String materialName;
 					int percentage = 0;
-					try {
-						percentage = Integer.parseInt(percentageItem[0]);
-					} catch (NumberFormatException e) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.invalid_percent")));
-						return true;
-					}
-					if (percentage == 0) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.zero_percent")));
-						return true;
+					if (component.contains("%")) {
+						String[] percentageItem = component.split("%");
+						if (percentageItem.length != 2) {
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.invalid_format")));
+							return true;
+						}
+
+						// Validates the percentage was entered correctly
+						try {
+							percentage = Integer.parseInt(percentageItem[0]);
+						} catch (NumberFormatException e) {
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.invalid_percent")));
+							return true;
+						}
+						if (percentage <= 0) {
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.zero_percent")));
+							return true;
+						}
+						materialName = percentageItem[1];
+					} else {
+						materialName = component;
 					}
 
-					// Validates a proper item was entered after the percentage
-					Material material = null;
+					// Validates a proper item was entered
+					Material material;
 					try {
-						material = Material.valueOf(percentageItem[1].toUpperCase());
+						material = Material.valueOf(materialName.toUpperCase());
 					} catch (IllegalArgumentException e) {
 						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.invalid_material")));
 						return true;
 					}
 
-					ItemStack item = new ItemStack(material, 1);
-					RandomItem randomItem = new RandomItem(percentage, item);
-					randomItems.add(randomItem);
+					if (component.contains("%")) {
+						specifiedPercentageSum += percentage;
+						randomItems.add(new RandomItem(percentage, new ItemStack(material, 1)));
+					} else {
+						unspecifiedMaterials.add(material);
+					}
+				}
+
+				// Evenly splits the remaining percentage between the materials entered without one
+				if (!unspecifiedMaterials.isEmpty()) {
+					int remaining = 100 - specifiedPercentageSum;
+					int count = unspecifiedMaterials.size();
+					if (remaining < count) {
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.not_100_percent")));
+						return true;
+					}
+					int base = remaining / count;
+					int extra = remaining % count;
+					for (int i = 0; i < count; i++) {
+						int share = base + (i < extra ? 1 : 0);
+						randomItems.add(new RandomItem(share, new ItemStack(unspecifiedMaterials.get(i), 1)));
+					}
 				}
 
 				// Ensures the total sums to 100%
@@ -98,6 +126,13 @@ public class CommandRandomizer implements CommandExecutor {
 				} else {
 					aranarthPlayer.setRandomItems(randomItems);
 					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.pattern_updated")));
+
+					// Setting a pattern also turns the randomizer on, but never toggles it off if it was already on
+					if (!aranarthPlayer.isRandomizing()) {
+						aranarthPlayer.isRandomizing(true);
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.blocks_now")));
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					return true;
 				}
 			}
