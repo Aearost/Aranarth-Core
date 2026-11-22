@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.player;
 
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -26,6 +27,12 @@ public class SpecialArrowDamageEffects {
                         case "amethyst" -> e.setDamage(e.getDamage() + 4);
                         case "obsidian" -> e.setDamage(e.getDamage() + 10);
                         case "diamond" -> e.setDamage(e.getDamage() + 12);
+                        case "honing" -> {
+                            if (e.getEntity() instanceof Player) {
+                                e.setDamage(e.getDamage() / 2);
+                            }
+                        }
+                        case "grapple" -> e.setCancelled(true);
                     }
 				}
 			}

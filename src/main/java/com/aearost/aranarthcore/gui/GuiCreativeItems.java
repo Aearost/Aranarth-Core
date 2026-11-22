@@ -160,6 +160,13 @@ public class GuiCreativeItems {
         list.add(new ArrowheadRooting().getItem());
         list.add(new ArrowheadGust().getItem());
         list.add(new ArrowheadDragon().getItem());
+        list.add(new ArrowheadSonar().getItem());
+        list.add(new ArrowheadGrapple().getItem());
+        list.add(new ArrowheadHoning().getItem());
+        list.add(new ArrowheadSmoke().getItem());
+        list.add(new ArrowheadShifting().getItem());
+        list.add(new ArrowheadTether().getItem());
+        list.add(new ArrowheadTide().getItem());
         list.add(new ArrowIron().getItem());
         list.add(new ArrowGold().getItem());
         list.add(new ArrowAmethyst().getItem());
@@ -170,6 +177,13 @@ public class GuiCreativeItems {
         list.add(new ArrowRooting().getItem());
         list.add(new ArrowGust().getItem());
         list.add(new ArrowDragon().getItem());
+        list.add(new ArrowSonar().getItem());
+        list.add(new ArrowGrapple().getItem());
+        list.add(new ArrowHoning().getItem());
+        list.add(new ArrowSmoke().getItem());
+        list.add(new ArrowShifting().getItem());
+        list.add(new ArrowTether().getItem());
+        list.add(new ArrowTide().getItem());
 
         // Essences
         list.add(new EssenceBlank().getItem());

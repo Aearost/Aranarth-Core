@@ -1852,6 +1852,13 @@ public class AranarthUtils {
             case "rooting" -> new ArrowRooting().getItem();
             case "gust" -> new ArrowGust().getItem();
             case "dragon" -> new ArrowDragon().getItem();
+            case "sonar" -> new ArrowSonar().getItem();
+            case "grapple" -> new ArrowGrapple().getItem();
+            case "honing" -> new ArrowHoning().getItem();
+            case "smoke" -> new ArrowSmoke().getItem();
+            case "shifting" -> new ArrowShifting().getItem();
+            case "tether" -> new ArrowTether().getItem();
+            case "tide" -> new ArrowTide().getItem();
             default -> null;
         };
     }

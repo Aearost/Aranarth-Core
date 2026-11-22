@@ -33,6 +33,8 @@ Dominion
 Aranarthium, Items & Crafting
 [+] Added over 50 new fruits, berries, vegetables, and more, with various trees and custom crops
 [+] Added /recipe [item name] as a shortcut to /aranarth recipes
+[+] Added the Grapple, Honing, Shifting, Smoke, Sonar, Tether, and Tide arrowheads and arrows
+[~] Reworked all existing arrowhead and arrow textures
 [~] Vote crates now give 8 random fruit instead of bread
 [~] Curse of Binding is now released on death even when the inventory is kept by Soulbound armour or the arena, so cursed armour can no longer be permanently stuck
 [~] Items that already have an essence applied are no longer treated as the essence itself

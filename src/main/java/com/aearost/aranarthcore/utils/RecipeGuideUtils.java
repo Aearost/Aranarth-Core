@@ -162,7 +162,7 @@ public class RecipeGuideUtils {
                 middleColumn(arrowhead, new ItemStack(Material.LIGHTNING_ROD), null),
                 emptyAlternatives(), List.of(new ArrowheadLightning().getItem()), notes));
         all.add(createEntry(RecipeStation.FLETCHING,
-                middleColumn(arrowhead, new ItemStack(Material.GLOWSTONE), null),
+                middleColumn(new ArrowheadGold().getItem(), new ItemStack(Material.GLOWSTONE), null),
                 emptyAlternatives(), List.of(new ArrowheadSpectral().getItem()), notes));
         all.add(createEntry(RecipeStation.FLETCHING,
                 middleColumn(arrowhead, new ItemStack(Material.HANGING_ROOTS), null),
@@ -173,6 +173,27 @@ public class RecipeGuideUtils {
         all.add(createEntry(RecipeStation.FLETCHING,
                 middleColumn(new ArrowheadObsidian().getItem(), new ItemStack(Material.DRAGON_BREATH), null),
                 emptyAlternatives(), List.of(new ArrowheadDragon().getItem()), notes));
+        all.add(createEntry(RecipeStation.FLETCHING,
+                middleColumn(new ArrowheadAmethyst().getItem(), new ItemStack(Material.GLOW_INK_SAC), null),
+                emptyAlternatives(), List.of(new ArrowheadSonar().getItem()), notes));
+        all.add(createEntry(RecipeStation.FLETCHING,
+                middleColumn(new ArrowheadIron().getItem(), new ItemStack(Material.IRON_INGOT), new ItemStack(Material.STRING)),
+                emptyAlternatives(), List.of(new ArrowheadGrapple().getItem()), notes));
+        all.add(createEntry(RecipeStation.FLETCHING,
+                middleColumn(new ArrowheadAmethyst().getItem(), new ItemStack(Material.ENDER_EYE), null),
+                emptyAlternatives(), List.of(new ArrowheadHoning().getItem()), notes));
+        all.add(createEntry(RecipeStation.FLETCHING,
+                middleColumn(new ArrowheadObsidian().getItem(), new ItemStack(Material.CHARCOAL), null),
+                emptyAlternatives(), List.of(new ArrowheadSmoke().getItem()), notes));
+        all.add(createEntry(RecipeStation.FLETCHING,
+                middleColumn(new ArrowheadAmethyst().getItem(), new ItemStack(Material.ENDER_PEARL), null),
+                emptyAlternatives(), List.of(new ArrowheadShifting().getItem()), notes));
+        all.add(createEntry(RecipeStation.FLETCHING,
+                middleColumn(new ArrowheadIron().getItem(), new ItemStack(Material.STRING), null),
+                emptyAlternatives(), List.of(new ArrowheadTether().getItem()), notes));
+        all.add(createEntry(RecipeStation.FLETCHING,
+                middleColumn(new ArrowheadIron().getItem(), new ItemStack(Material.PRISMARINE_SHARD), new ItemStack(Material.NAUTILUS_SHELL)),
+                emptyAlternatives(), List.of(new ArrowheadTide().getItem()), notes));
 
         // Arrows - arrowhead + stick + feather, or arrowhead + vanilla arrow for special arrowheads
         Map<String, ItemStack> arrowheadsByType = new LinkedHashMap<>();
@@ -188,6 +209,13 @@ public class RecipeGuideUtils {
         arrowheadsByType.put("rooting", new ArrowheadRooting().getItem());
         arrowheadsByType.put("gust", new ArrowheadGust().getItem());
         arrowheadsByType.put("dragon", new ArrowheadDragon().getItem());
+        arrowheadsByType.put("sonar", new ArrowheadSonar().getItem());
+        arrowheadsByType.put("grapple", new ArrowheadGrapple().getItem());
+        arrowheadsByType.put("honing", new ArrowheadHoning().getItem());
+        arrowheadsByType.put("smoke", new ArrowheadSmoke().getItem());
+        arrowheadsByType.put("shifting", new ArrowheadShifting().getItem());
+        arrowheadsByType.put("tether", new ArrowheadTether().getItem());
+        arrowheadsByType.put("tide", new ArrowheadTide().getItem());
 
         for (Map.Entry<String, ItemStack> type : arrowheadsByType.entrySet()) {
             ItemStack arrow = AranarthUtils.getArrowFromType(type.getKey());
