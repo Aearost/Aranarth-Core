@@ -1,7 +1,6 @@
 package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
@@ -17,7 +16,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockFertilizeEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
@@ -40,24 +41,11 @@ public class ShopProtectionListener implements Listener {
     }
 
     private boolean isShopsWorld(Location location) {
-        return location.getWorld() != null && location.getWorld().getName().equals(ShopIslandUtils.SHOPS_WORLD);
+        return ShopIslandUtils.isShopsWorld(location);
     }
 
-    /**
-     * Returns true if the player is allowed to modify blocks at the given location.
-     * Admins, the island owner, and invited collaborators may all modify.
-     */
     private boolean canModify(Player player, Location location) {
-        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-        if (aranarthPlayer.isInAdminMode()) {
-            return true;
-        }
-        UUID owner = ShopIslandUtils.getIslandOwnerAtLocation(location);
-        if (owner == null) {
-            return false;
-        }
-        return player.getUniqueId().equals(owner)
-                || AranarthUtils.isShopCollaborator(owner, player.getUniqueId());
+        return ShopIslandUtils.canModify(player, location);
     }
 
     /**
@@ -121,6 +109,12 @@ public class ShopProtectionListener implements Listener {
         if (!isShopsWorld(block.getLocation())) {
             return;
         }
+        // Bone meal can only be used where the player may build, as it changes the blocks around it
+        if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getItem() != null && e.getItem().getType() == Material.BONE_MEAL
+                && !ShopIslandUtils.canBuild(e.getPlayer(), block.getLocation())) {
+            e.setCancelled(true);
+            return;
+        }
         // Only restrict interactive blocks
         if (!isInteractableBlock(block)) {
             return;
@@ -128,6 +122,22 @@ public class ShopProtectionListener implements Listener {
         if (!canModify(e.getPlayer(), block.getLocation())) {
             e.setCancelled(true);
         }
+    }
+
+    /**
+     * Bone meal never grows anything on an island the player cannot build on, and never spreads past the build area.
+     */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onFertilize(BlockFertilizeEvent e) {
+        Location origin = e.getBlock().getLocation();
+        if (!isShopsWorld(origin)) {
+            return;
+        }
+        if (e.getPlayer() != null && !ShopIslandUtils.canBuild(e.getPlayer(), origin)) {
+            e.setCancelled(true);
+            return;
+        }
+        e.getBlocks().removeIf(state -> !ShopIslandUtils.isWithinBuildArea(state.getLocation()));
     }
 
     @EventHandler

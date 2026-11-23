@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
@@ -244,6 +245,58 @@ public class ShopIslandUtils {
             }
         }
         return null;
+    }
+
+    /**
+     * Determines if the location is in the shops world.
+     */
+    public static boolean isShopsWorld(Location location) {
+        return location.getWorld() != null && location.getWorld().getName().equals(SHOPS_WORLD);
+    }
+
+    /**
+     * Returns true if the player is allowed to modify blocks at the given location in the shops world.
+     * @param player   The player.
+     * @param location The location in the shops world.
+     * @return True if the player may modify the location.
+     */
+    public static boolean canModify(Player player, Location location) {
+        if (AranarthUtils.getPlayer(player.getUniqueId()).isInAdminMode()) {
+            return true;
+        }
+        UUID owner = getIslandOwnerAtLocation(location);
+        if (owner == null) {
+            return false;
+        }
+        return player.getUniqueId().equals(owner) || AranarthUtils.isShopCollaborator(owner, player.getUniqueId());
+    }
+
+    /**
+     * Returns true if the player may build at the location.
+     * @param player   The player.
+     * @param location The location.
+     * @return True if the player may build at the location.
+     */
+    public static boolean canBuild(Player player, Location location) {
+        if (!isShopsWorld(location)) {
+            return true;
+        }
+        if (!canModify(player, location)) {
+            return false;
+        }
+        return isWithinBuildArea(location);
+    }
+
+    /**
+     * Determines if the location is within the 50x50 build area of the island whose cell it is in.
+     */
+    public static boolean isWithinBuildArea(Location location) {
+        UUID owner = getIslandOwnerAtLocation(location);
+        if (owner == null) {
+            return false;
+        }
+        int[] center = AranarthUtils.getShopIslandCenters().get(owner);
+        return center == null || isWithinBuildBoundary(location, center[0], center[1]);
     }
 
     // -----------------------------------------------------------------------

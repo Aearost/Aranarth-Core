@@ -12,9 +12,12 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.CropUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.Lang;
+import com.aearost.aranarthcore.utils.PlotUtils;
+import com.aearost.aranarthcore.utils.ShopIslandUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -271,7 +274,7 @@ public class CropListener implements Listener {
     }
 
     private static boolean canBuild(Player player, Block block) {
-        if (AranarthUtils.isProtectedSpawnLocation(block.getLocation())) {
+        if (!isUnprotected(player, block)) {
             return false;
         }
         Dominion dominion = DominionUtils.getDominionOfChunk(block.getChunk());
@@ -279,11 +282,23 @@ public class CropListener implements Listener {
     }
 
     private static boolean canUse(Player player, Block block) {
-        if (AranarthUtils.isProtectedSpawnLocation(block.getLocation())) {
+        if (!isUnprotected(player, block)) {
             return false;
         }
         Dominion dominion = DominionUtils.getDominionOfChunk(block.getChunk());
         return dominion == null || DominionUtils.hasPermission(player, dominion, DominionPermission.MISC_INTERACT);
+    }
+
+    /**
+     * Determines if the block is free of the spawn, shop island and creative plot protections for the player.
+     */
+    private static boolean isUnprotected(Player player, Block block) {
+        Location location = block.getLocation();
+        if (AranarthUtils.isProtectedSpawnLocation(location) || !ShopIslandUtils.canBuild(player, location)) {
+            return false;
+        }
+        return !PlotUtils.isPlotWorld(block.getWorld()) || PlotUtils.isSpawnPlotLocation(location)
+                || PlotUtils.canBuild(player, location);
     }
 
     /**
