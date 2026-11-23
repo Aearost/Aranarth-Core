@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.FruitUtils;
+import com.gmail.nossr50.mcMMO;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -82,6 +83,10 @@ public class EssencePlentifulBlockBreak {
 				harvestable = AranarthUtils.isHarvestableWithPickaxe(block.getType());
 			} else if (name.endsWith("_AXE")) {
 				harvestable = AranarthUtils.isHarvestableWithAxe(block.getType());
+				// Stripped logs/wood/stems/hyphae are only harvested if naturally stripped in the world
+				if (block.getType().name().startsWith("STRIPPED_")) {
+					harvestable = mcMMO.getChunkManager().isEligible(block);
+				}
 			} else if (name.endsWith("_SHOVEL")) {
 				harvestable = AranarthUtils.isHarvestableWithShovel(block.getType());
 			} else if (name.endsWith("_HOE")) {

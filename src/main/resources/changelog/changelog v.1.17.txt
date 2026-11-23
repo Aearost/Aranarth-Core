@@ -1,6 +1,7 @@
 AranarthCore v. 1.17
 
 World & Events
+[+] Essence of Plentiful now breaks naturally stripped logs and wood
 
 Bending & Abilities
 
@@ -13,6 +14,7 @@ Aranarthium, Items & Crafting
 Economy, Jobs & Quests
 
 Chat, UI & Sounds
+[+] Added fruits and berries to the unscramble word list
 
 Quality of Life
 
