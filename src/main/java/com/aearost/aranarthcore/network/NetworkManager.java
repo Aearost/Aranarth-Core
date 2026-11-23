@@ -851,7 +851,7 @@ public class NetworkManager {
     public void publishPlayerQuit(UUID uuid, String quitMessage, boolean isVanished) {
         // Remove from roster in DB
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
-                db.removeRosterEntry(uuid)
+                db.removeRosterEntry(uuid, thisServer)
         );
 
         // Clear any remote invsee watchers for this player

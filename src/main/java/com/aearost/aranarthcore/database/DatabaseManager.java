@@ -1409,11 +1409,15 @@ public class DatabaseManager {
         }
     }
 
-    public void removeRosterEntry(UUID uuid) {
-        String sql = "DELETE FROM network_roster WHERE uuid = ?";
+    /**
+     * Removes the player's roster entry only if it still belongs to the given server.
+     */
+    public void removeRosterEntry(UUID uuid, String server) {
+        String sql = "DELETE FROM network_roster WHERE uuid = ? AND server = ?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
+            ps.setString(2, server);
             ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to remove roster entry for " + uuid + ": " + e.getMessage());
