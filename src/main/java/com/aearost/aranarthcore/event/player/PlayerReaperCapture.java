@@ -39,6 +39,11 @@ public class PlayerReaperCapture {
             return;
         }
 
+        // Dying while combat tagged drops the inventory at the death location with no Reaper option
+        if (aranarthPlayer != null && !aranarthPlayer.getCombatLogTime().isEmpty()) {
+            return;
+        }
+
         List<ItemStack> drops = e.getDrops();
 
         if (drops.isEmpty()) {
