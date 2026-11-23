@@ -94,6 +94,8 @@ public class GuiRecipes {
 
     private ItemStack createEntryDisplay(RecipeGuideEntry entry) {
         ItemStack display = entry.getIcon();
+        // The browse list always shows a single item, the true yield is only shown in the recipe view
+        display.setAmount(1);
         ItemMeta meta = display.getItemMeta();
         List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
         lore.add("");
