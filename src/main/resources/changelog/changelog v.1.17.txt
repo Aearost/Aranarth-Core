@@ -8,6 +8,7 @@ World & Events
 [~] Each fruit's growth speed/yield aligns with the actual season
 [-] Players can no longer plant crops, use bone meal, or pick crops on other players' shop islands
 [+] Moderators now get WorldEdit in survival worlds while in architect mode, matching Architects
+[+] Resource worlds now have immediate respawn enabled
 
 Bending & Abilities
 
