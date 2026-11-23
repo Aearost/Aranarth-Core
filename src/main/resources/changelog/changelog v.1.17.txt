@@ -2,6 +2,7 @@ AranarthCore v. 1.17
 
 World & Events
 [+] Essence of Plentiful now breaks naturally stripped logs and wood
+[~] Fixed Wandering Alchemist potions having two of the same effect
 
 Bending & Abilities
 

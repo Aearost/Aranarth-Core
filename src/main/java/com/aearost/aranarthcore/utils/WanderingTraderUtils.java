@@ -660,7 +660,13 @@ public class WanderingTraderUtils {
 
         ItemStack potion = new ItemStack(Material.POTION);
         PotionMeta meta = (PotionMeta) potion.getItemMeta();
-        meta.setBasePotionType(opt.baseType());
+        if (opt.baseType() == PotionType.WATER) {
+            meta.setBasePotionType(PotionType.WATER);
+        } else {
+            // A base type carries its own vanilla effect, which would stack with the custom one
+            meta.setCustomPotionName(opt.baseType().getKey().getKey());
+            meta.setColor(opt.effectType().getColor());
+        }
         meta.addCustomEffect(new PotionEffect(opt.effectType(), ticks, amplifier, false, true, true), true);
         potion.setItemMeta(meta);
         return potion;
