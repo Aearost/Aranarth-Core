@@ -169,6 +169,34 @@ bundle
 pumpkin
 melon
 
+# Fruits and berries
+green apple
+pear
+date
+coconut
+banana
+lemon
+orange
+lime
+mango
+olive
+plum
+peach
+pomegranate
+apricot
+fig
+avocado
+persimmon
+lychee
+blueberry
+raspberry
+blackberry
+strawberry
+kiwi
+pineapple
+grapes
+cantaloupe
+
 # Essences
 plentiful
 lifesteal

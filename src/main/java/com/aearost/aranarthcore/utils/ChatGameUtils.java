@@ -60,6 +60,7 @@ public class ChatGameUtils {
         if (!wordsFile.exists()) {
             plugin.saveResource("words.txt", false);
         }
+        syncBundledWords(wordsFile);
         loadWords(wordsFile);
         if (!wordPool.isEmpty()) {
             scheduleNextGame(plugin);
@@ -94,6 +95,61 @@ public class ChatGameUtils {
                 globalBestHolderNickname = holderNickname;
                 globalBestTime = time;
             }
+        }
+    }
+
+    /**
+     * Appends words that were newly added to the bundled words.txt into the data folder copy.
+     */
+    private static void syncBundledWords(File wordsFile) {
+        File snapshotFile = new File(plugin.getDataFolder(), "words_snapshot.txt");
+        try (InputStream in = plugin.getResource("words.txt")) {
+            if (in == null) {
+                return;
+            }
+            List<String> bundled = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    line = line.trim().toLowerCase();
+                    if (!line.isEmpty() && !line.startsWith("#")) {
+                        bundled.add(line);
+                    }
+                }
+            }
+
+            // Without a snapshot, compare against the live file instead
+            Set<String> known = new HashSet<>();
+            for (String line : Files.readAllLines((snapshotFile.exists() ? snapshotFile : wordsFile).toPath())) {
+                known.add(line.trim().toLowerCase());
+            }
+            Set<String> live = new HashSet<>();
+            for (String line : Files.readAllLines(wordsFile.toPath())) {
+                live.add(line.trim().toLowerCase());
+            }
+
+            List<String> added = new ArrayList<>();
+            for (String word : bundled) {
+                if (!known.contains(word) && !live.contains(word)) {
+                    added.add(word);
+                }
+            }
+            if (!added.isEmpty()) {
+                byte[] bytes = Files.readAllBytes(wordsFile.toPath());
+                boolean needsNewline = bytes.length > 0 && bytes[bytes.length - 1] != '\n';
+                try (PrintWriter pw = new PrintWriter(new FileWriter(wordsFile, true))) {
+                    if (needsNewline) {
+                        pw.println();
+                    }
+                    for (String word : added) {
+                        pw.println(word);
+                    }
+                }
+                Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "Added " + added.size() + " new unscramble words to words.txt");
+            }
+            Files.write(snapshotFile.toPath(), bundled);
+        } catch (IOException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Failed to sync words.txt: " + e.getMessage());
         }
     }
 
