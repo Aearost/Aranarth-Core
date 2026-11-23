@@ -20,7 +20,7 @@ import static com.aearost.aranarthcore.objects.CustomKeys.ARMOR_TYPE;
  */
 public class AranarthiumAppearanceUtils {
 
-	private static final Set<String> CUSTOM_SETS = Set.of("dwarven", "aquatic", "ardent");
+	private static final Set<String> CUSTOM_SETS = Set.of("dwarven", "aquatic", "ardent", "echo");
 
 	/**
 	 * @param set The Aranarthium set (e.g. "dwarven").

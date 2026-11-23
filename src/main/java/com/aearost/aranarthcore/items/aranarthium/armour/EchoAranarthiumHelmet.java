@@ -2,15 +2,13 @@ package com.aearost.aranarthcore.items.aranarthium.armour;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.AranarthItem;
+import com.aearost.aranarthcore.utils.AranarthiumAppearanceUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ArmorMeta;
-import org.bukkit.inventory.meta.trim.ArmorTrim;
-import org.bukkit.inventory.meta.trim.TrimMaterial;
-import org.bukkit.inventory.meta.trim.TrimPattern;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
@@ -32,7 +30,7 @@ public class EchoAranarthiumHelmet implements AranarthItem {
 		if (Objects.nonNull(meta)) {
 			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "aranarthium_echo_helmet");
 			meta.setItemModel(key);
-			meta.setTrim(new ArmorTrim(TrimMaterial.LAPIS, TrimPattern.SILENCE));
+			AranarthiumAppearanceUtils.applyAppearance(meta, "echo", Material.NETHERITE_HELMET);
 			meta.addEnchant(Enchantment.MENDING, 1, true);
 			ArrayList<String> lore = new ArrayList<>();
 			meta.getPersistentDataContainer().set(ARMOR_TYPE, PersistentDataType.STRING, "echo");
