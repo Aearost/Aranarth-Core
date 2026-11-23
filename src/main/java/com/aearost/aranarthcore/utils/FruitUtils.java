@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.enums.JobType;
 import com.aearost.aranarthcore.enums.QuestTrigger;
+import com.aearost.aranarthcore.items.produce.FruitSeason;
 import com.aearost.aranarthcore.items.produce.Produce;
 import com.aearost.aranarthcore.items.produce.ProduceHeads;
 import com.aearost.aranarthcore.items.produce.ProduceType;
@@ -15,6 +16,7 @@ import com.gmail.nossr50.util.Permissions;
 import com.gmail.nossr50.util.player.UserManager;
 import com.gmail.nossr50.util.random.ProbabilityUtil;
 import com.gmail.nossr50.util.skills.RankUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -70,11 +72,15 @@ public class FruitUtils {
     }
 
     private static final String KEY_PREFIX = "fruit_";
-    /** How long picked fruit takes to grow back in a month of normal growth: 2 hours, or 6 in-game days. */
+    /**
+     * How long picked fruit takes to grow back in a month of normal growth.
+     */
     private static final long REGROW_MS = 2 * 60 * 60 * 1000L;
     private static final Material[] BUNCH_STAGES = {Material.JUNGLE_LEAVES, Material.AZALEA_LEAVES};
     private static final Set<Location> PICKED = new HashSet<>();
     private static final Random RANDOM = new Random();
+    /** The month whose season the fruit of every loaded tree was last thinned for. */
+    private static Month seasonMonth = null;
 
     private static NamespacedKey getKey(Block block) {
         return new NamespacedKey("aranarthcore", KEY_PREFIX + (block.getX() & 15) + "_" + block.getY() + "_" + (block.getZ() & 15));
@@ -106,6 +112,10 @@ public class FruitUtils {
             }
         }
         save(block, new Spot(id, kind, data, 0));
+        // A tree only grows the share of its fruit that is in season, and the rest fills in as its season comes
+        if (!FruitSeason.of(id).bears(block, AranarthUtils.getMonth())) {
+            unripen(block, 0);
+        }
     }
 
     private static void save(Block block, Spot spot) {
@@ -334,8 +344,7 @@ public class FruitUtils {
     }
 
     /**
-     * Creates the fruit dropped by a spot: a realistic number for its kind of fruit, scaled by the season's yield like
-     * sweet berries.
+     * Creates the fruit dropped by a spot.
      * @param player The player who picked it, or null if it fell on its own.
      */
     private static ItemStack createDrop(Spot spot, int fortune, Player player) {
@@ -347,13 +356,12 @@ public class FruitUtils {
         }
         int amount = switch (spot.id()) {
             case "cherry", "lychee" -> between(2, 3);
-            case "olive" -> between(2, 4);
-            case "banana" -> between(2, 4);
+            case "olive", "banana" -> between(2, 4);
             // A bunch of dates drops 3 to 7, or up to 9 with Fortune
             case "date" -> Math.min(9, between(3, 7) + (fortune > 0 ? RANDOM.nextInt(fortune + 1) : 0));
             default -> 1;
         };
-        item.setAmount(Math.min(item.getMaxStackSize(), scaleYield(amount, player, Material.SWEET_BERRIES)));
+        item.setAmount(Math.min(item.getMaxStackSize(), amount));
         CropUtils.updateSeedLore(item, null);
         return item;
     }
@@ -439,21 +447,30 @@ public class FruitUtils {
                 between(9, 12) / 10F);
     }
 
+    /**
+     * Provides how long picked fruit of the season takes to grow back in the month.
+     */
+    public static long getRegrowTime(FruitSeason season, Month month) {
+        return (long) (REGROW_MS / season.getSpeed(month));
+    }
+
     private static int between(int min, int max) {
         return min + RANDOM.nextInt(max - min + 1);
     }
 
     /**
-     * Remembers every picked piece of fruit in the chunk, so that it grows back.
+     * Remembers every picked piece of fruit in the chunk, so that it grows back, and takes down the ripe fruit that is
+     * out of season this month, without dropping it.
      */
     public static void trackPicked(Chunk chunk) {
+        Month month = AranarthUtils.getMonth();
         PersistentDataContainer pdc = chunk.getPersistentDataContainer();
-        for (NamespacedKey key : pdc.getKeys()) {
+        for (NamespacedKey key : new ArrayList<>(pdc.getKeys())) {
             if (!key.getNamespace().equals("aranarthcore") || !key.getKey().startsWith(KEY_PREFIX)) {
                 continue;
             }
             String value = pdc.get(key, PersistentDataType.STRING);
-            if (value == null || value.endsWith(";0")) {
+            if (value == null) {
                 continue;
             }
             String[] parts = key.getKey().substring(KEY_PREFIX.length()).split("_");
@@ -461,7 +478,15 @@ public class FruitUtils {
                 int x = (chunk.getX() << 4) + Integer.parseInt(parts[0]);
                 int y = Integer.parseInt(parts[1]);
                 int z = (chunk.getZ() << 4) + Integer.parseInt(parts[2]);
-                PICKED.add(new Location(chunk.getWorld(), x, y, z));
+                if (value.endsWith(";0")) {
+                    Block block = chunk.getWorld().getBlockAt(x, y, z);
+                    Spot spot = getRipe(block);
+                    if (spot != null && !FruitSeason.of(spot.id()).bears(block, month)) {
+                        unripen(block, 0);
+                    }
+                } else {
+                    PICKED.add(new Location(chunk.getWorld(), x, y, z));
+                }
             } catch (RuntimeException ignored) {
                 // A malformed key is left alone
             }
@@ -477,14 +502,18 @@ public class FruitUtils {
     }
 
     /**
-     * Grows back every picked piece of fruit that has waited long enough.
+     * Grows back every picked piece of fruit that has waited long enough and is in season.
      */
     public static void regrow() {
-        double speed = CropUtils.getCropGrowthSpeed(AranarthUtils.getMonth(), Material.SWEET_BERRIES);
-        if (speed <= 0) {
-            return;
+        Month month = AranarthUtils.getMonth();
+        if (month != seasonMonth) {
+            seasonMonth = month;
+            for (World world : Bukkit.getWorlds()) {
+                for (Chunk chunk : world.getLoadedChunks()) {
+                    trackPicked(chunk);
+                }
+            }
         }
-        long wait = (long) (REGROW_MS / speed);
         long now = System.currentTimeMillis();
         for (Location location : new ArrayList<>(PICKED)) {
             if (!location.isChunkLoaded()) {
@@ -497,10 +526,18 @@ public class FruitUtils {
                 PICKED.remove(location);
                 continue;
             }
+            FruitSeason season = FruitSeason.of(spot.id());
+            boolean bears = season.bears(block, month);
+            long wait = getRegrowTime(season, month);
             if (now - spot.pickedAt() < wait) {
-                if (spot.kind() == Kind.BUNCH) {
+                if (bears && spot.kind() == Kind.BUNCH) {
                     growBunch(block, spot, (now - spot.pickedAt()) / (double) wait);
                 }
+                continue;
+            }
+            if (!bears) {
+                // Fruit out of season waits a full regrowth again, so that it fills in gradually once its season comes
+                save(block, new Spot(spot.id(), spot.kind(), spot.data(), now));
                 continue;
             }
             regrowSpot(block, spot);
@@ -516,9 +553,16 @@ public class FruitUtils {
         if (stage < 0) {
             return;
         }
-        Material target = BUNCH_STAGES[Math.min(stage, BUNCH_STAGES.length - 1)];
+        int targetStage = Math.min(stage, BUNCH_STAGES.length - 1);
+        Material target = BUNCH_STAGES[targetStage];
         if (block.getType() == target) {
             return;
+        }
+        // A bunch never shrinks back to an earlier stage, such as after waiting out of season
+        for (int i = targetStage + 1; i < BUNCH_STAGES.length; i++) {
+            if (block.getType() == BUNCH_STAGES[i]) {
+                return;
+            }
         }
         if (!block.getType().isAir() && getGrowingBunch(block) == null) {
             forget(block);

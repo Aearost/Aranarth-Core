@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.crops.CropType;
+import com.aearost.aranarthcore.items.produce.FruitSeason;
 import com.aearost.aranarthcore.items.produce.Produce;
 import com.aearost.aranarthcore.items.produce.ProduceType;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -102,6 +103,10 @@ public class CropUtils {
 			if (!produce.hasSeasonalLore()) {
 				return;
 			}
+			if (produce.getKind() == ProduceType.Kind.FRUIT) {
+				updateFruitLore(item, FruitSeason.of(produce.getId()));
+				return;
+			}
 			source = CropType.seasonFor(produce);
 		} else if (isCropSeed(item.getType())) {
 			source = item.getType();
@@ -145,6 +150,26 @@ public class CropUtils {
 			lore.add(ChatUtils.translateToColor("&7&oNormal growth"));
 		}
 
+		meta.setLore(lore);
+		item.setItemMeta(meta);
+	}
+
+	/**
+	 * Displays the current month's season of a tree fruit.
+	 * @param item The fruit.
+	 * @param season The fruit's season.
+	 */
+	private static void updateFruitLore(ItemStack item, FruitSeason season) {
+		ItemMeta meta = item.getItemMeta();
+		if (meta == null) {
+			return;
+		}
+		Month month = AranarthUtils.getMonth();
+		List<String> lore = new ArrayList<>();
+		int share = (int) Math.round(season.getShare(month) * 100);
+		lore.add(ChatUtils.translateToColor((share >= 80 ? "&a" : share >= 50 ? "&e" : "&c") + "&o" + share + "% on trees"));
+		double speed = season.getSpeed(month);
+		lore.add(speed == 1 ? ChatUtils.translateToColor("&7&oNormal regrowth") : formatMultiplierLine(speed, "regrowth"));
 		meta.setLore(lore);
 		item.setItemMeta(meta);
 	}

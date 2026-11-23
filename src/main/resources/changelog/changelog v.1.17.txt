@@ -4,6 +4,8 @@ World & Events
 [+] Essence of Plentiful now breaks naturally stripped logs and wood
 [~] Fixed Wandering Alchemist potions having two of the same effect
 [~] Dying while combat tagged now drops your inventory instead of saving it to the Reaper, unless wearing Soulbound
+[~] Tree fruit now gives a fixed amount per pick
+[~] Each fruit's growth speed/yield aligns with the actual season
 
 Bending & Abilities
 

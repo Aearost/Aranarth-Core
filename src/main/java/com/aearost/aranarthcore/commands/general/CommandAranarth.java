@@ -6,11 +6,14 @@ import com.aearost.aranarthcore.gui.GuiAranarth;
 import com.aearost.aranarthcore.gui.GuiRecipes;
 import com.aearost.aranarthcore.gui.GuiTrees;
 import com.aearost.aranarthcore.items.produce.FruitSapling;
+import com.aearost.aranarthcore.items.produce.FruitSeason;
 import com.aearost.aranarthcore.trees.CustomTrees;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.CustomTreeUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
 import com.aearost.aranarthcore.utils.FireParticleRegistry;
+import com.aearost.aranarthcore.utils.FruitUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.projectkorra.projectkorra.Element;
 import net.kyori.adventure.text.Component;
@@ -537,14 +540,26 @@ public class CommandAranarth implements CommandExecutor {
     }
 
     /**
-     * Provides the hover text of a fruit sapling button: each fruit that crafts a fruit sapling with this sapling,
-     * with where it grows if it is a rare tree.
+     * Provides the hover text of a fruit sapling button.
      */
     private String getFruitSaplingHover(Player player, String sapling, List<CustomTrees.Variant> variants) {
         StringBuilder hover = new StringBuilder(sapling.replaceFirst("^(&#[0-9A-Fa-f]{6}|&[0-9a-f])", "$1&l"));
+        Month month = AranarthUtils.getMonth();
         for (CustomTrees.Variant variant : variants) {
+            String fruitId = FruitSapling.getFruitId(variant);
+            FruitSeason season = FruitSeason.of(fruitId);
             hover.append("\n").append(Lang.getFor(player, "farmingtrees.fruit_hover_entry",
-                    "fruit", Lang.getFor(player, "produce." + FruitSapling.getFruitId(variant))));
+                    "fruit", Lang.getFor(player, "produce." + fruitId),
+                    "season", Lang.getFor(player, season.getNameKey())));
+            List<Month> peak = season.getPeakMonths();
+            hover.append("\n  ").append(Lang.getFor(player, "farmingtrees.fruit_hover_peak",
+                    "from", Lang.getFor(player, "calendar." + peak.getFirst().name().toLowerCase() + "_name"),
+                    "to", Lang.getFor(player, "calendar." + peak.getLast().name().toLowerCase() + "_name")));
+            long minutes = FruitUtils.getRegrowTime(season, month) / 60000;
+            hover.append("\n  ").append(Lang.getFor(player, "farmingtrees.fruit_hover_now",
+                    "percent", String.valueOf(Math.round(season.getShare(month) * 100)),
+                    "time", Lang.getFor(player, "farmingtrees.fruit_hover_time",
+                            "hours", String.valueOf(minutes / 60), "minutes", String.valueOf(minutes % 60))));
             if (variant.isRare()) {
                 hover.append("\n  ").append(Lang.getFor(player, "gui.trees.where",
                         "condition", Lang.getFor(player, FruitSapling.getConditionKey(variant))));
