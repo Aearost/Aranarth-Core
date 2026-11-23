@@ -21,6 +21,7 @@ Chat, UI & Sounds
 
 Quality of Life
 [~] Fixed right-clicking leaves with an axe saying you must be sneaking to strip logs
+[~] /countdown sparring and the death stun now only apply in Survival worlds, not the arena
 
 Cross-server & Technical
 [~] Fixed /r and /msg failing after the other player switched servers

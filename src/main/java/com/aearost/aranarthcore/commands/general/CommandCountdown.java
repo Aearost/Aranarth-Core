@@ -61,10 +61,16 @@ public class CommandCountdown implements CommandExecutor {
 			pendingRequests.remove(targetUuid);
 			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "countdown.accepted", "player", targetNickname)));
 			target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "countdown.accepted_by", "player", playerNickname)));
-			// Neither player can kill the other until one of them loses the spar
-			SparUtils.startSpar(player, target);
-			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "countdown.spar_started", "player", targetNickname)));
-			target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "countdown.spar_started", "player", playerNickname)));
+			// Neither player can kill the other until one of them loses the spar, only in Survival worlds
+			if (SparUtils.isInSparWorld(player) && SparUtils.isInSparWorld(target)) {
+				SparUtils.startSpar(player, target);
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "countdown.spar_started", "player", targetNickname)));
+				target.sendMessage(ChatUtils.chatMessage(Lang.getFor(target, "countdown.spar_started", "player", playerNickname)));
+			} else {
+				// Clears any spar from earlier so it cannot carry over into this fight
+				SparUtils.endSpar(player.getUniqueId());
+				SparUtils.endSpar(target.getUniqueId());
+			}
 			startCountdown(player, target);
 			return true;
 		}
