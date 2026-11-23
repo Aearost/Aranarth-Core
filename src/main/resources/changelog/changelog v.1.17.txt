@@ -7,6 +7,7 @@ World & Events
 [~] Tree fruit now gives a fixed amount per pick
 [~] Each fruit's growth speed/yield aligns with the actual season
 [-] Players can no longer plant crops, use bone meal, or pick crops on other players' shop islands
+[+] Moderators now get WorldEdit in survival worlds while in architect mode, matching Architects
 
 Bending & Abilities
 

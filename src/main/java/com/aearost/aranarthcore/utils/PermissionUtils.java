@@ -1247,7 +1247,8 @@ public class PermissionUtils {
      */
     private static void setCreativeWorldEditPermissions(Player player, PermissionAttachment perms, AranarthPlayer aranarthPlayer) {
         String worldName = player.getWorld().getName();
-        boolean isArchitectEditing = aranarthPlayer.getArchitectRank() >= 1 && aranarthPlayer.isInArchitectMode();
+        // Architects and Council both use /architect, and isInArchitectMode() already requires one of those ranks
+        boolean isArchitectEditing = aranarthPlayer.isInArchitectMode();
         if (PlotUtils.isSmpCreativeWorld(worldName)) {
             perms.setPermission("worldedit.*", true);
             if (aranarthPlayer.getCouncilRank() == 0 && !isArchitectEditing) {
