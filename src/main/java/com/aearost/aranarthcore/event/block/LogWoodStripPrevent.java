@@ -1,6 +1,5 @@
 package com.aearost.aranarthcore.event.block;
 
-import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import org.bukkit.Material;
@@ -16,7 +15,7 @@ public class LogWoodStripPrevent {
     public void execute(PlayerInteractEvent e) {
         if (e.getHand() == EquipmentSlot.HAND) {
             if (isHoldingAxe(e.getPlayer())) {
-                if (getMaterialIfLogOrWood(e.getClickedBlock()) != null) {
+                if (isStrippable(e.getClickedBlock())) {
                     if (!e.getPlayer().isSneaking()) {
                         e.setCancelled(true);
                         e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "log.must_sneak_strip")));
@@ -27,21 +26,21 @@ public class LogWoodStripPrevent {
     }
 
     /**
-     * Determines if the input block is a log/wood block or not.
+     * Determines if the input block can be stripped by an axe (unstripped log, wood, stem, hyphae or bamboo block).
      * @param block The block.
-     * @return Confirmation whether the block is a log/wood or not.
+     * @return Confirmation whether the block can be stripped or not.
      */
-    private Material getMaterialIfLogOrWood(Block block) {
-        if (AranarthUtils.isHarvestableWithAxe(block.getType())
-                || block.getType() == Material.OAK_WOOD || block.getType() == Material.BIRCH_WOOD
-                || block.getType() == Material.SPRUCE_WOOD || block.getType() == Material.JUNGLE_WOOD
-                || block.getType() == Material.DARK_OAK_WOOD || block.getType() == Material.ACACIA_WOOD
-                || block.getType() == Material.CRIMSON_HYPHAE || block.getType() == Material.WARPED_HYPHAE
-                || block.getType() == Material.MANGROVE_WOOD || block.getType() == Material.CHERRY_WOOD) {
-            return block.getType();
-        } else {
-            return null;
+    private boolean isStrippable(Block block) {
+        if (block == null) {
+            return false;
         }
+        String name = block.getType().name();
+        if (name.startsWith("STRIPPED_")) {
+            return false;
+        }
+        Material type = block.getType();
+        return name.endsWith("_LOG") || name.endsWith("_WOOD") || name.endsWith("_HYPHAE")
+                || type == Material.CRIMSON_STEM || type == Material.WARPED_STEM || type == Material.BAMBOO_BLOCK;
     }
 
     /**

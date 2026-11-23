@@ -19,6 +19,7 @@ Chat, UI & Sounds
 [+] Added fruits and berries to the unscramble word list
 
 Quality of Life
+[~] Fixed right-clicking leaves with an axe saying you must be sneaking to strip logs
 
 Cross-server & Technical
 
