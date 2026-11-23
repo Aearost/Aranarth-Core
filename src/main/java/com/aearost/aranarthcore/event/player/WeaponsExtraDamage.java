@@ -139,7 +139,8 @@ public class WeaponsExtraDamage {
                         int level = AranarthUtils.getEssenceLevel(weapon);
                         if (essenceType.equals("essence_lifesteal")) {
                             // Undead mobs have no life to steal
-                            if (e.getDamageSource().getDamageType() == DamageType.PLAYER_ATTACK
+                            DamageType damageType = e.getDamageSource().getDamageType();
+                            if ((damageType == DamageType.PLAYER_ATTACK || damageType == DamageType.SPEAR)
                                     && !Tag.ENTITY_TYPES_UNDEAD.isTagged(entity.getType())) {
                                 double healAmount = 0;
                                 if (level == 1) {

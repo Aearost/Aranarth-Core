@@ -15,6 +15,7 @@ Aranarthium, Items & Crafting
 [+] Added custom Aranarthium texture support
 [+] Added Echo Aranarthium armour, which provides buffs involving sound and sonar
 [~] Fixed mcMMO Salvage downgrading over-leveled enchantments to their vanilla max level
+[~] Fixed Essence of Lifesteal not healing when attacking with a spear
 
 Economy, Jobs & Quests
 
