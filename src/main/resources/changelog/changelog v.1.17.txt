@@ -7,6 +7,7 @@ Bending & Abilities
 Dominion
 
 Aranarthium, Items & Crafting
+[+] Added custom Aranarthium texture support
 [+] Added Echo Aranarthium armour, which provides buffs involving sound and sonar
 
 Economy, Jobs & Quests

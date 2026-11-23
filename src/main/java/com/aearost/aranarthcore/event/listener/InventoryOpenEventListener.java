@@ -4,11 +4,13 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.mob.VillagerDominionDiscount;
 import com.aearost.aranarthcore.event.player.AfkCancelByInteract;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.AranarthiumAppearanceUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.BlockInventoryHolder;
 
 /**
@@ -28,6 +30,10 @@ public class InventoryOpenEventListener implements Listener {
         // Migrate any old Incantation items found in block containers
         if (e.getInventory().getHolder() instanceof BlockInventoryHolder) {
             AranarthUtils.migrateInventoryEssences(e.getInventory());
+        }
+        // Give old Aranarthium pieces their set's new worn look (block containers and ender chests)
+        if (e.getInventory().getHolder() instanceof BlockInventoryHolder || e.getInventory().getType() == InventoryType.ENDER_CHEST) {
+            AranarthiumAppearanceUtils.migrateInventory(e.getInventory());
         }
         new VillagerDominionDiscount().execute(e);
     }

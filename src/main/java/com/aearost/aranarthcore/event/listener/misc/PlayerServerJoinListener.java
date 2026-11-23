@@ -276,6 +276,8 @@ public class PlayerServerJoinListener implements Listener {
 
         // Migrate any pre-#420 Incantation items in the player's inventory to Essences.
         AranarthUtils.migrateInventoryEssences(player.getInventory());
+        // Give old Aranarthium pieces (including worn ones) their set's new worn look.
+        AranarthiumAppearanceUtils.migrateInventory(player.getInventory());
 
         // Clear any stale BendingPlayer data PK may have cached from a previous session on
         // this server. Without this, players who switch to SMP, change element, then return

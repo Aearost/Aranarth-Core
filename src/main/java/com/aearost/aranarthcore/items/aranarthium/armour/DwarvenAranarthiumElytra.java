@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.items.aranarthium.armour;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.AranarthItem;
+import com.aearost.aranarthcore.utils.AranarthiumAppearanceUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -42,6 +43,7 @@ public class DwarvenAranarthiumElytra implements AranarthItem {
             meta.getPersistentDataContainer().set(ARMOR_TYPE, PersistentDataType.STRING, "dwarven");
             ((Damageable) meta).setMaxDamage(592);
             meta.setFireResistant(true);
+            AranarthiumAppearanceUtils.applyAppearance(meta, "dwarven", Material.ELYTRA);
             item.setItemMeta(meta);
         }
         return item;
