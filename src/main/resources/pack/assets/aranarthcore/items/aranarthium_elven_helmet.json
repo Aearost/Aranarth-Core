@@ -1,6 +1,19 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "aranarthcore:item/aranarthium_elven_helmet"
+    "type": "minecraft:select",
+    "property": "minecraft:display_context",
+    "cases": [
+      {
+        "when": "head",
+        "model": {
+          "type": "minecraft:model",
+          "model": "aranarthcore:item/aranarthium_elven_helmet_3d"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "aranarthcore:item/aranarthium_elven_helmet"
+    }
   }
 }
