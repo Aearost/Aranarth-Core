@@ -689,18 +689,47 @@ public class EnchantingListener implements Listener {
     }
 
     /**
-     * Carries the table-enchanted tag over to books extracted by mcMMO Arcane Salvaging.
+     * Restores over-leveled enchantments over to books extracted by mcMMO Arcane Salvaging.
      * @param e The event.
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onSalvage(McMMOPlayerSalvageCheckEvent e) {
         ItemStack book = e.getEnchantedBook();
-        if (book == null || !book.hasItemMeta() || !EnchantingUtils.isTableEnchanted(e.getSalvageItem())) {
+        ItemStack salvageItem = e.getSalvageItem();
+        if (book == null || salvageItem == null || !(book.getItemMeta() instanceof EnchantmentStorageMeta meta)) {
             return;
         }
-        ItemMeta meta = book.getItemMeta();
-        EnchantingUtils.markTableEnchanted(meta);
+        restoreOverLeveledEnchants(salvageItem, meta);
+        if (EnchantingUtils.isTableEnchanted(salvageItem)) {
+            EnchantingUtils.markTableEnchanted(meta);
+        }
         book.setItemMeta(meta);
+    }
+
+    /**
+     * mcMMO clamps any enchantment above its vanilla max level down to the max before extracting it.
+     * @param salvageItem The item being salvaged.
+     * @param meta The extracted book's meta.
+     */
+    private void restoreOverLeveledEnchants(ItemStack salvageItem, EnchantmentStorageMeta meta) {
+        for (Map.Entry<Enchantment, Integer> entry : salvageItem.getEnchantments().entrySet()) {
+            Enchantment enchantment = entry.getKey();
+            int vanillaMax = enchantment.getMaxLevel();
+            int originalLevel = Math.min(entry.getValue(), EnchantingUtils.getOverLeveledMax(enchantment));
+            if (originalLevel <= vanillaMax || !meta.hasStoredEnchant(enchantment)) {
+                continue;
+            }
+            int storedLevel = meta.getStoredEnchantLevel(enchantment);
+            // Already above the vanilla max, meaning mcMMO did not clamp it
+            if (storedLevel > vanillaMax) {
+                continue;
+            }
+            // A full extraction stores the max, a partial extraction stores one level below it
+            int restoredLevel = originalLevel - (vanillaMax - storedLevel);
+            if (restoredLevel > storedLevel) {
+                meta.addStoredEnchant(enchantment, restoredLevel, true);
+            }
+        }
     }
 
     /**

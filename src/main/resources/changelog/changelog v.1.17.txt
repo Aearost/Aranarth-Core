@@ -12,6 +12,7 @@ Dominion
 Aranarthium, Items & Crafting
 [+] Added custom Aranarthium texture support
 [+] Added Echo Aranarthium armour, which provides buffs involving sound and sonar
+[~] Fixed mcMMO Salvage downgrading over-leveled enchantments to their vanilla max level
 
 Economy, Jobs & Quests
 
