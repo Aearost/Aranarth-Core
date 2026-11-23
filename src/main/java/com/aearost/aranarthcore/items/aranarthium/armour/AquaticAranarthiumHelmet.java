@@ -2,15 +2,13 @@ package com.aearost.aranarthcore.items.aranarthium.armour;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.AranarthItem;
+import com.aearost.aranarthcore.utils.AranarthiumAppearanceUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ArmorMeta;
-import org.bukkit.inventory.meta.trim.ArmorTrim;
-import org.bukkit.inventory.meta.trim.TrimMaterial;
-import org.bukkit.inventory.meta.trim.TrimPattern;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
@@ -29,7 +27,7 @@ public class AquaticAranarthiumHelmet implements AranarthItem {
 	public ItemStack getItem() {
 		ItemStack item = new ItemStack(Material.NETHERITE_HELMET, 1);
 		ArmorMeta meta = (ArmorMeta) item.getItemMeta();
-		meta.setTrim(new ArmorTrim(TrimMaterial.DIAMOND, TrimPattern.COAST));
+		AranarthiumAppearanceUtils.applyAppearance(meta, "aquatic", Material.NETHERITE_HELMET);
 		meta.addEnchant(Enchantment.AQUA_AFFINITY, 0, false);
 		ArrayList<String> lore = new ArrayList<>();
 		meta.getPersistentDataContainer().set(ARMOR_TYPE, PersistentDataType.STRING, "aquatic");
