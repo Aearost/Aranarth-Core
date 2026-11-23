@@ -2,8 +2,11 @@ package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.world.ArrowHit;
+import com.aearost.aranarthcore.utils.EchoArmourUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Trident;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ProjectileHitEvent;
@@ -19,6 +22,10 @@ public class ProjectileHitEventListener implements Listener {
 
     @EventHandler
     public void onProjectileHit(ProjectileHitEvent e) {
+        // Every arrow shot while wearing Echo Aranarthium sends out a sonar pulse where it lands
+        if (e.getEntity() instanceof AbstractArrow arrow && !(arrow instanceof Trident)) {
+            EchoArmourUtils.onArrowLand(arrow);
+        }
         if (e.getEntity() instanceof Arrow) {
             new ArrowHit().execute(e);
         }

@@ -6,6 +6,7 @@ import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -23,7 +24,7 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 /**
- * Handles the effects of the Sonar, Grapple, Homing, Smoke, Shifting, Tether and Tide arrows.
+ * Handles the effects of the Grapple, Homing, Smoke, Shifting, Tether and Tide arrows, and the sonar pulse of Echo Aranarthium arrows.
  * Grapple and Tether ropes are pulled by sneaking while holding a bow, and snap if the shooter takes damage.
  */
 public class SpecialArrowUtils {
@@ -72,6 +73,11 @@ public class SpecialArrowUtils {
 	 * Only one rope exists per player, the newest one replaces the old one.
 	 */
 	private static final Map<UUID, RopeAnchor> ropeAnchors = new HashMap<>();
+	/**
+	 * For each viewer, the entities currently outlined only for them, and when each outline ends.
+	 * Revealing an entity again extends its outline instead of letting the older one cut it short.
+	 */
+	private static final Map<UUID, Map<UUID, Long>> revealedUntil = new HashMap<>();
 	/** Players whose rope is currently pulling. */
 	private static final Set<UUID> pullingPlayers = new HashSet<>();
 
@@ -91,6 +97,7 @@ public class SpecialArrowUtils {
 
 	/**
 	 * Outlines every living entity near the impact for the shooter only, through walls.
+	 * Every arrow shot while wearing Echo Aranarthium sends out this pulse where it lands.
 	 *
 	 * @param shooter The player that shot the arrow.
 	 * @param impact Where the arrow landed.
@@ -104,39 +111,85 @@ public class SpecialArrowUtils {
 		}
 		world.spawnParticle(Particle.SCULK_SOUL, impact, 6, 0.3, 0.3, 0.3, 0.02);
 
-		List<Entity> glowed = new ArrayList<>();
 		for (Entity entity : world.getNearbyEntities(impact, SONAR_RADIUS, SONAR_RADIUS, SONAR_RADIUS)) {
-			if (!(entity instanceof LivingEntity) || entity instanceof ArmorStand || entity.equals(shooter)) {
-				continue;
-			}
 			if (entity.getLocation().distanceSquared(impact) > SONAR_RADIUS * SONAR_RADIUS) {
 				continue;
 			}
-			if (entity instanceof Player target) {
-				if (AranarthUtils.isVanishedFrom(shooter, target.getUniqueId()) || !DominionUtils.canAttackPlayer(shooter, target)) {
-					continue;
-				}
+			if (canReveal(shooter, entity)) {
+				revealTo(shooter, entity, SONAR_DURATION_TICKS);
 			}
-			sendClientGlow(shooter, entity, true);
-			glowed.add(entity);
 		}
+	}
 
-		if (glowed.isEmpty()) {
-			return;
+	/**
+	 * Provides whether an entity may be outlined for the viewer, which skips the viewer themselves, armor stands,
+	 * spectators, vanished players, and players the viewer is not able to attack.
+	 *
+	 * @param viewer The player who would see the outline.
+	 * @param entity The entity being outlined.
+	 * @return Whether the entity may be outlined for the viewer.
+	 */
+	public static boolean canReveal(Player viewer, Entity entity) {
+		if (!(entity instanceof LivingEntity) || entity instanceof ArmorStand || entity.equals(viewer) || !entity.isValid()) {
+			return false;
 		}
+		if (entity instanceof Player target) {
+			return target.getGameMode() != GameMode.SPECTATOR
+					&& !AranarthUtils.isVanishedFrom(viewer, target.getUniqueId())
+					&& DominionUtils.canAttackPlayer(viewer, target);
+		}
+		return true;
+	}
+
+	/**
+	 * Outlines an entity for a single viewer for the given duration, extending the outline if it is already shown.
+	 *
+	 * @param viewer The player who sees the outline.
+	 * @param entity The entity being outlined.
+	 * @param durationTicks How long the outline lasts.
+	 * @return Whether the entity was not already outlined for the viewer.
+	 */
+	public static boolean revealTo(Player viewer, Entity entity, int durationTicks) {
+		Map<UUID, Long> revealed = revealedUntil.computeIfAbsent(viewer.getUniqueId(), uuid -> new HashMap<>());
+		Long previous = revealed.put(entity.getUniqueId(), System.currentTimeMillis() + durationTicks * 50L);
+		sendClientGlow(viewer, entity, true);
+		if (previous == null) {
+			scheduleRevealEnd(viewer.getUniqueId(), entity, durationTicks);
+		}
+		return previous == null;
+	}
+
+	/**
+	 * Removes an outline once it has run out, waiting longer if it was extended in the meantime.
+	 *
+	 * @param viewerUuid The UUID of the player who sees the outline.
+	 * @param entity The entity being outlined.
+	 * @param delayTicks How long to wait before checking again.
+	 */
+	private static void scheduleRevealEnd(UUID viewerUuid, Entity entity, long delayTicks) {
 		new BukkitRunnable() {
 			@Override
 			public void run() {
-				if (!shooter.isOnline()) {
+				Map<UUID, Long> revealed = revealedUntil.get(viewerUuid);
+				Long until = revealed == null ? null : revealed.get(entity.getUniqueId());
+				if (until == null) {
 					return;
 				}
-				for (Entity entity : glowed) {
-					if (entity.isValid()) {
-						sendClientGlow(shooter, entity, false);
-					}
+				Player viewer = Bukkit.getPlayer(viewerUuid);
+				long remainingTicks = (until - System.currentTimeMillis()) / 50;
+				if (remainingTicks > 0 && viewer != null && entity.isValid()) {
+					scheduleRevealEnd(viewerUuid, entity, remainingTicks);
+					return;
+				}
+				revealed.remove(entity.getUniqueId());
+				if (revealed.isEmpty()) {
+					revealedUntil.remove(viewerUuid);
+				}
+				if (viewer != null && entity.isValid()) {
+					sendClientGlow(viewer, entity, false);
 				}
 			}
-		}.runTaskLater(AranarthCore.getInstance(), SONAR_DURATION_TICKS);
+		}.runTaskLater(AranarthCore.getInstance(), Math.max(1, delayTicks));
 	}
 
 	/**

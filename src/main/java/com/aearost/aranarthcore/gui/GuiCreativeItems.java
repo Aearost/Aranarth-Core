@@ -103,6 +103,7 @@ public class GuiCreativeItems {
         list.add(new AranarthiumAquatic().getItem());
         list.add(new AranarthiumArdent().getItem());
         list.add(new AranarthiumDwarven().getItem());
+        list.add(new AranarthiumEcho().getItem());
         list.add(new AranarthiumElven().getItem());
         list.add(new AranarthiumFae().getItem());
         list.add(new AranarthiumScorched().getItem());
@@ -126,6 +127,11 @@ public class GuiCreativeItems {
         list.add(new DwarvenAranarthiumLeggings().getItem());
         list.add(new DwarvenAranarthiumBoots().getItem());
         list.add(new DwarvenAranarthiumElytra().getItem());
+        list.add(new EchoAranarthiumHelmet().getItem());
+        list.add(new EchoAranarthiumChestplate().getItem());
+        list.add(new EchoAranarthiumLeggings().getItem());
+        list.add(new EchoAranarthiumBoots().getItem());
+        list.add(new EchoAranarthiumElytra().getItem());
         list.add(new ElvenAranarthiumHelmet().getItem());
         list.add(new ElvenAranarthiumChestplate().getItem());
         list.add(new ElvenAranarthiumLeggings().getItem());
@@ -160,7 +166,6 @@ public class GuiCreativeItems {
         list.add(new ArrowheadRooting().getItem());
         list.add(new ArrowheadGust().getItem());
         list.add(new ArrowheadDragon().getItem());
-        list.add(new ArrowheadSonar().getItem());
         list.add(new ArrowheadGrapple().getItem());
         list.add(new ArrowheadHoming().getItem());
         list.add(new ArrowheadSmoke().getItem());
@@ -177,7 +182,6 @@ public class GuiCreativeItems {
         list.add(new ArrowRooting().getItem());
         list.add(new ArrowGust().getItem());
         list.add(new ArrowDragon().getItem());
-        list.add(new ArrowSonar().getItem());
         list.add(new ArrowGrapple().getItem());
         list.add(new ArrowHoming().getItem());
         list.add(new ArrowSmoke().getItem());

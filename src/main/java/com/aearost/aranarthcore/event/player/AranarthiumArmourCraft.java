@@ -479,6 +479,19 @@ public class AranarthiumArmourCraft {
                     enhancedAranarthiumArmor = new SoulboundAranarthiumElytra().getItem();
                 }
             }
+            case "echo" -> {
+                if (type == Material.NETHERITE_HELMET) {
+                    enhancedAranarthiumArmor = new EchoAranarthiumHelmet().getItem();
+                } else if (type == Material.NETHERITE_CHESTPLATE) {
+                    enhancedAranarthiumArmor = new EchoAranarthiumChestplate().getItem();
+                } else if (type == Material.NETHERITE_LEGGINGS) {
+                    enhancedAranarthiumArmor = new EchoAranarthiumLeggings().getItem();
+                } else if (type == Material.NETHERITE_BOOTS) {
+                    enhancedAranarthiumArmor = new EchoAranarthiumBoots().getItem();
+                } else if (type == Material.ELYTRA) {
+                    enhancedAranarthiumArmor = new EchoAranarthiumElytra().getItem();
+                }
+            }
             case "fae" -> {
                 if (type == Material.NETHERITE_HELMET) {
                     enhancedAranarthiumArmor = new FaeAranarthiumHelmet().getItem();

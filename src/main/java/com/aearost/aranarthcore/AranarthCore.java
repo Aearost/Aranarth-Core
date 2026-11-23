@@ -845,6 +845,8 @@ public class AranarthCore extends JavaPlugin {
 
         // Increased XP orb pickup range for Soulbound Aranarthium
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, AranarthUtils::applySoulboundXpMagnet, 0, 2);
+        // Tracks Echo Aranarthium wearers, hiding them from the live map while they wear it
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, EchoArmourUtils::refreshWearers, 0, 10);
 
         // Flower trail for Fae Aranarthium in Fae biomes - random 1-10 tick interval, only when moving
         scheduleFaeFlowerTrail();
@@ -1253,6 +1255,7 @@ public class AranarthCore extends JavaPlugin {
         new BlockFormEventListener(this);
         new BlockPhysicsEventListener(this);
         new ProjectileHitEventListener(this);
+        new GenericGameEventListener(this);
         new ProjectileLaunchEventListener(this);
         new PlayerCommandPreprocessEventListener(this);
         new EntityBreedEventListener(this);
@@ -1423,6 +1426,7 @@ public class AranarthCore extends JavaPlugin {
         new RecipeScorchedAranarthium(this);
         new RecipeArdentAranarthium(this);
         new RecipeSoulboundAranarthium(this);
+        new RecipeEchoAranarthium(this);
         new RecipeEssences(this);
         new com.aearost.aranarthcore.recipes.aranarthium.RecipeFaeAranarthium(this);
         new RecipeGodApple(this);
@@ -1850,6 +1854,7 @@ public class AranarthCore extends JavaPlugin {
         PetRallyUtils.endAllRallies();
         saveAll();
 
+        EchoArmourUtils.disable();
         if (squaremapIntegration != null) {
             squaremapIntegration.disable();
         }

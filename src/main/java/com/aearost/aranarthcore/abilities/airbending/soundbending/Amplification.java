@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.abilities.airbending.soundbending;
 import com.aearost.aranarthcore.utils.AbilityConfig;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.Ability;
 import com.projectkorra.projectkorra.ability.CoreAbility;
@@ -39,8 +40,18 @@ public class Amplification extends SoundAbility implements AddonAbility {
     private boolean consumed;
     private CoreAbility triggeredAbility;
     private double lockedMultiplier;
+    private boolean echoCharged;
 
     public Amplification(Player player) {
+        this(player, false);
+    }
+
+    /**
+     * @param player The player.
+     * @param echoCharged Whether it was fully charged by Echo Aranarthium hearing a sound, which skips the charge
+     *                    and does not need the ability to be on the selected slot.
+     */
+    private Amplification(Player player, boolean echoCharged) {
         super(player);
 
         this.chargeDuration = AbilityConfig.getLong("Amplification.ChargeDuration");
@@ -48,7 +59,7 @@ public class Amplification extends SoundAbility implements AddonAbility {
         this.maxMultiplier = AbilityConfig.getDouble("Amplification.MaxMultiplier");
         this.activeDuration = AbilityConfig.getLong("Amplification.Duration");
 
-        if (!bPlayer.canBend(this)) {
+        if (echoCharged ? !bPlayer.canBendIgnoreBinds(this) : !bPlayer.canBend(this)) {
             remove();
             return;
         }
@@ -60,6 +71,56 @@ public class Amplification extends SoundAbility implements AddonAbility {
         this.lockedMultiplier = maxMultiplier;
 
         start();
+        // The start can be cancelled, such as in an area where bending is disabled
+        if (echoCharged && isStarted() && !isRemoved()) {
+            activateFromEcho();
+        }
+    }
+
+    /**
+     * Fully charges and activates the player's Amplification when an Echo Aranarthium wearer hears a sound.
+     * @param player The Echo Aranarthium wearer.
+     */
+    public static void echoCharge(Player player) {
+        BendingPlayer bPlayer = BendingPlayer.getBendingPlayer(player);
+        if (bPlayer == null || !bPlayer.getAbilities().containsValue("Amplification") || bPlayer.isOnCooldown("Amplification")) {
+            return;
+        }
+        Amplification existing = CoreAbility.getAbility(player, Amplification.class);
+        if (existing == null) {
+            new Amplification(player, true);
+        } else if (!existing.isActive) {
+            // Skips the rest of a charge that was started by sneaking
+            existing.activateFromEcho();
+        } else if (existing.echoCharged && !existing.consumed) {
+            existing.activeStartTime = System.currentTimeMillis();
+        }
+    }
+
+    /**
+     * Activates without a charge and without starting the cooldown.
+     */
+    private void activateFromEcho() {
+        isCharged = true;
+        isActive = true;
+        echoCharged = true;
+        activeStartTime = System.currentTimeMillis();
+        activeAmplifications.put(player.getUniqueId(), this);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WARDEN_SONIC_CHARGE, 0.5f, 1.25f);
+    }
+
+    /**
+     * Locks in the multiplier for the Sound ability that used the buff, starting the cooldown if it was charged by Echo Aranarthium.
+     */
+    private void consume(CoreAbility ability) {
+        consumed = true;
+        lockedMultiplier = getCurrentMultiplier();
+        triggeredAbility = ability;
+        if (echoCharged) {
+            // Same as a sneak charge, where the cooldown runs from the end of the active window
+            long remainingActive = Math.max(0, activeDuration - (System.currentTimeMillis() - activeStartTime));
+            bPlayer.addCooldown(this, cooldown + remainingActive);
+        }
     }
 
     @Override
@@ -125,9 +186,7 @@ public class Amplification extends SoundAbility implements AddonAbility {
         // Consume immediately when the player starts any SoundAbility, even before it hits anything
         CoreAbility active = findActiveSoundAbility();
         if (active != null) {
-            consumed = true;
-            lockedMultiplier = getCurrentMultiplier();
-            triggeredAbility = active;
+            consume(active);
             return;
         }
 
@@ -284,9 +343,7 @@ public class Amplification extends SoundAbility implements AddonAbility {
 
         Ability ability = event.getAbility();
         if (!consumed) {
-            consumed = true;
-            lockedMultiplier = getCurrentMultiplier();
-            triggeredAbility = (CoreAbility) ability;
+            consume((CoreAbility) ability);
         }
 
         if (triggeredAbility == ability) {

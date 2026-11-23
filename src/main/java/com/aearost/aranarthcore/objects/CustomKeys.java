@@ -14,6 +14,7 @@ public class CustomKeys {
     public static final NamespacedKey HONEY_GLAZED_HAM = new NamespacedKey(AranarthCore.getInstance(), "honey_glazed_ham");
     public static final NamespacedKey SUGARCANE_BLOCK = new NamespacedKey(AranarthCore.getInstance(), "sugarcane_block");
     public static final NamespacedKey ARROW = new NamespacedKey(AranarthCore.getInstance(), "arrow");
+    public static final NamespacedKey ECHO_PULSED = new NamespacedKey(AranarthCore.getInstance(), "echo_pulsed");
     public static final NamespacedKey ARROW_HEAD = new NamespacedKey(AranarthCore.getInstance(), "arrowhead");
     public static final NamespacedKey CRATE_KEY = new NamespacedKey(AranarthCore.getInstance(), "crate_key");
     public static final NamespacedKey ESSENCE_TYPE = new NamespacedKey(AranarthCore.getInstance(), "essence_type");

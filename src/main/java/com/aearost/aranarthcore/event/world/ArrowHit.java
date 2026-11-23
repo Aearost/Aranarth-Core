@@ -13,6 +13,7 @@ import com.projectkorra.projectkorra.ability.CoreAbility;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
@@ -33,7 +34,9 @@ public class ArrowHit {
 		Block block = e.getHitBlock();
 
 		if (arrow.getPersistentDataContainer().has(ARROW)) {
-			arrow.setItemStack(AranarthUtils.getArrowFromType(arrow.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING)));
+			ItemStack pickup = AranarthUtils.getArrowFromType(arrow.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING));
+			// Arrows of a removed type (i.e Sonar) are picked back up as plain arrows
+			arrow.setItemStack(pickup != null ? pickup : new ItemStack(Material.ARROW));
 			String type = arrow.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
 			if (type.equals("obsidian") || type.equals("dragon")) {
 				boolean isSpawningBreath = false;
@@ -175,11 +178,6 @@ public class ArrowHit {
 					entity.setVelocity(direction);
 					entity.setFallDistance(0); // Prevents weird fall damage
 				}
-			} else if (type.equals("sonar")) {
-				if (arrow.getShooter() instanceof Player shooter) {
-					SpecialArrowUtils.sonarPulse(shooter, arrow.getLocation());
-				}
-				arrow.remove();
 			} else if (type.equals("grapple")) {
 				// Never damages entities, it passes straight through them
 				if (e.getHitEntity() != null) {

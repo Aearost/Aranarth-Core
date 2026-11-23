@@ -120,6 +120,11 @@ public class CraftingOverridesAranarthium {
             if (!ingotType.equals("aranarthium") && ingredient.getType() != Material.ECHO_SHARD) {
                 return;
             }
+            // The two Echo Shards beside the middle of the Echo Aranarthium recipe are plain vanilla shards,
+            // as long as the middle slot holds a real Aranarthium Ingot
+            if (ingotType.equals("echo") && ingredient.getType() == Material.ECHO_SHARD && hasAranarthiumIngotInMiddle(e.getInventory().getMatrix())) {
+                return;
+            }
         }
 
         Material material = ingredient.getType();
@@ -156,6 +161,8 @@ public class CraftingOverridesAranarthium {
                 ingredientItem = new AranarthiumScorched();
             } else if ("soulbound".equals(ingotPdcValue)) {
                 ingredientItem = new AranarthiumSoulbound();
+            } else if ("echo".equals(ingotPdcValue)) {
+                ingredientItem = new AranarthiumEcho();
             } else {
                 ingredientItem = new AranarthiumIngot();
             }
@@ -193,5 +200,18 @@ public class CraftingOverridesAranarthium {
                 player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "crafting.special_item_restricted", "item", itemName)));
             }
         }
+    }
+
+    /**
+     * Provides whether the middle slot of a 3x3 crafting grid holds a plain Aranarthium Ingot.
+     *
+     * @param matrix The crafting grid.
+     * @return True if the middle slot is an Aranarthium Ingot.
+     */
+    private boolean hasAranarthiumIngotInMiddle(ItemStack[] matrix) {
+        if (matrix.length != 9 || matrix[4] == null || !matrix[4].hasItemMeta()) {
+            return false;
+        }
+        return "aranarthium".equals(matrix[4].getItemMeta().getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING));
     }
 }

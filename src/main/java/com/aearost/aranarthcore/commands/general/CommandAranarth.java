@@ -43,7 +43,7 @@ public class CommandAranarth implements CommandExecutor {
 
     static final List<String> ARANARTHIUM_SECTIONS = List.of(
             "intro", "ingots", "elytra",
-            "aquatic", "ardent", "dwarven",
+            "aquatic", "ardent", "dwarven", "echo",
             "elven", "fae", "scorched", "soulbound"
     );
 
@@ -330,7 +330,7 @@ public class CommandAranarth implements CommandExecutor {
      */
     private static int[] getMenuRows(String topic) {
         return switch (topic) {
-            case "aranarthium" -> new int[]{3, 3, 4};
+            case "aranarthium" -> new int[]{3, 4, 4};
             case "dominions" -> new int[]{3, 3, 3, 2, 2};
             case "bending" -> new int[]{3, 3, 1};
             case "ranks" -> new int[]{3, 3};

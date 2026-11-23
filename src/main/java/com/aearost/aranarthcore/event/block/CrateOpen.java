@@ -336,7 +336,7 @@ public class CrateOpen {
                                             gui.updateGodlyCrateItems(indexes.get(0), indexes.get(1), indexes.get(2));
 
                                             // Cycle through the next enhanced aranarthium iteration
-                                            if (indexes.get(0) < 5) {
+                                            if (indexes.get(0) < 7) {
                                                 indexes.set(0, indexes.get(0) + 1);
                                             } else {
                                                 indexes.set(0, 0);
@@ -1055,7 +1055,7 @@ public class CrateOpen {
             // Pre-roll all random values before animation starts
             final int chance = new Random().nextInt(100) + 1;
             final int blockShulkerRoll = new Random().nextInt(3);
-            final int aranarthiumRoll = new Random().nextInt(6);
+            final int aranarthiumRoll = new Random().nextInt(8);
             final int godlyEggRoll = new Random().nextInt(3);
 
             // Determine the display item shown in the animation as the winner
@@ -1336,8 +1336,10 @@ public class CrateOpen {
             case 1 -> ingot = new AranarthiumAquatic().getItem();
             case 2 -> ingot = new AranarthiumArdent().getItem();
             case 3 -> ingot = new AranarthiumDwarven().getItem();
-            case 4 -> ingot = new AranarthiumElven().getItem();
-            case 5 -> ingot = new AranarthiumScorched().getItem();
+            case 4 -> ingot = new AranarthiumEcho().getItem();
+            case 5 -> ingot = new AranarthiumElven().getItem();
+            case 6 -> ingot = new AranarthiumFae().getItem();
+            case 7 -> ingot = new AranarthiumScorched().getItem();
             default -> ingot = new AranarthiumSoulbound().getItem();
         }
         return ingot;

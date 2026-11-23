@@ -36,6 +36,7 @@ public class RecipeGuideUtils {
             "ac_aquatic_aranarthium", "ac_ardent_aranarthium", "ac_dwarven_aranarthium", "ac_elven_aranarthium",
             "ac_fae_aranarthium", "ac_scorched_aranarthium", "ac_soulbound_aranarthium"
     );
+    private static final String ECHO_ARANARTHIUM_KEY = "ac_echo_aranarthium";
 
     private static List<RecipeGuideEntry> entries;
 
@@ -95,6 +96,10 @@ public class RecipeGuideUtils {
                         grid[index] = fromChoice(choice, substitutions);
                         alternatives.set(index, getAlternatives(choice));
                     }
+                }
+                // Only the middle Echo Shard of Echo Aranarthium is an Aranarthium Ingot, the two beside it are vanilla shards
+                if (key.equals(ECHO_ARANARTHIUM_KEY)) {
+                    grid[4] = new AranarthiumIngot().getItem();
                 }
                 crafting.add(createEntry(RecipeStation.CRAFTING, grid, alternatives, List.of(shaped.getResult()), getCraftingNotes(key)));
             } else if (recipe instanceof ShapelessRecipe shapeless) {
@@ -174,9 +179,6 @@ public class RecipeGuideUtils {
                 middleColumn(new ArrowheadObsidian().getItem(), new ItemStack(Material.DRAGON_BREATH), null),
                 emptyAlternatives(), List.of(new ArrowheadDragon().getItem()), notes));
         all.add(createEntry(RecipeStation.FLETCHING,
-                middleColumn(new ArrowheadAmethyst().getItem(), new ItemStack(Material.GLOW_INK_SAC), null),
-                emptyAlternatives(), List.of(new ArrowheadSonar().getItem()), notes));
-        all.add(createEntry(RecipeStation.FLETCHING,
                 middleColumn(new ArrowheadIron().getItem(), new ItemStack(Material.IRON_INGOT), new ItemStack(Material.STRING)),
                 emptyAlternatives(), List.of(new ArrowheadGrapple().getItem()), notes));
         all.add(createEntry(RecipeStation.FLETCHING,
@@ -209,7 +211,6 @@ public class RecipeGuideUtils {
         arrowheadsByType.put("rooting", new ArrowheadRooting().getItem());
         arrowheadsByType.put("gust", new ArrowheadGust().getItem());
         arrowheadsByType.put("dragon", new ArrowheadDragon().getItem());
-        arrowheadsByType.put("sonar", new ArrowheadSonar().getItem());
         arrowheadsByType.put("grapple", new ArrowheadGrapple().getItem());
         arrowheadsByType.put("homing", new ArrowheadHoming().getItem());
         arrowheadsByType.put("smoke", new ArrowheadSmoke().getItem());
@@ -263,6 +264,8 @@ public class RecipeGuideUtils {
                         new ArdentAranarthiumLeggings().getItem(), new ArdentAranarthiumBoots().getItem(), new ArdentAranarthiumElytra().getItem()}},
                 {new AranarthiumDwarven().getItem(), new ItemStack[]{new DwarvenAranarthiumHelmet().getItem(), new DwarvenAranarthiumChestplate().getItem(),
                         new DwarvenAranarthiumLeggings().getItem(), new DwarvenAranarthiumBoots().getItem(), new DwarvenAranarthiumElytra().getItem()}},
+                {new AranarthiumEcho().getItem(), new ItemStack[]{new EchoAranarthiumHelmet().getItem(), new EchoAranarthiumChestplate().getItem(),
+                        new EchoAranarthiumLeggings().getItem(), new EchoAranarthiumBoots().getItem(), new EchoAranarthiumElytra().getItem()}},
                 {new AranarthiumElven().getItem(), new ItemStack[]{new ElvenAranarthiumHelmet().getItem(), new ElvenAranarthiumChestplate().getItem(),
                         new ElvenAranarthiumLeggings().getItem(), new ElvenAranarthiumBoots().getItem(), new ElvenAranarthiumElytra().getItem()}},
                 {new AranarthiumFae().getItem(), new ItemStack[]{new FaeAranarthiumHelmet().getItem(), new FaeAranarthiumChestplate().getItem(),

@@ -133,6 +133,10 @@ public class GuiQuiverClick {
 													if (stackFromQuiver.getItemMeta().getPersistentDataContainer().has(ARROW)) {
 														String type = stackFromQuiver.getItemMeta().getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
 														ItemStack arrowItem = AranarthUtils.getArrowFromType(type);
+														// Arrows of a removed type (i.e Sonar) have no item of their own anymore
+														if (arrowItem == null) {
+															arrowItem = stackFromQuiver;
+														}
 														String arrowName = arrowItem.getItemMeta().getDisplayName() + "s";
 														player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arrow.now_named", "name", arrowName)));
 														player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
@@ -210,6 +214,10 @@ public class GuiQuiverClick {
 											if (stackFromQuiver.getItemMeta().getPersistentDataContainer().has(ARROW)) {
 												String type = stackFromQuiver.getItemMeta().getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
 												ItemStack arrowItem = AranarthUtils.getArrowFromType(type);
+												// Arrows of a removed type (i.e Sonar) have no item of their own anymore
+												if (arrowItem == null) {
+													arrowItem = stackFromQuiver;
+												}
 												String arrowName = arrowItem.getItemMeta().getDisplayName() + "s";
 												player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "arrow.now_named", "name", arrowName)));
 												player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);

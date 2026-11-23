@@ -731,8 +731,10 @@ public class GuiCrate {
 			case 1 -> ingot = new AranarthiumAquatic().getItem();
 			case 2 -> ingot = new AranarthiumArdent().getItem();
 			case 3 -> ingot = new AranarthiumDwarven().getItem();
-			case 4 -> ingot = new AranarthiumElven().getItem();
-			case 5 -> ingot = new AranarthiumScorched().getItem();
+			case 4 -> ingot = new AranarthiumEcho().getItem();
+			case 5 -> ingot = new AranarthiumElven().getItem();
+			case 6 -> ingot = new AranarthiumFae().getItem();
+			case 7 -> ingot = new AranarthiumScorched().getItem();
 			default -> ingot = new AranarthiumSoulbound().getItem();
 		}
 		ItemMeta cycledIngotMeta = ingot.getItemMeta();

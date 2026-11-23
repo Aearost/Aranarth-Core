@@ -811,6 +811,8 @@ public class AranarthUtils {
             }
         } else if (isWearingArmorType(player, "soulbound")) {
             player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
+        } else if (isWearingArmorType(player, "echo")) {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
         } else if (isWearingArmorType(player, "fae")) {
             player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
             player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 0));
@@ -1852,7 +1854,6 @@ public class AranarthUtils {
             case "rooting" -> new ArrowRooting().getItem();
             case "gust" -> new ArrowGust().getItem();
             case "dragon" -> new ArrowDragon().getItem();
-            case "sonar" -> new ArrowSonar().getItem();
             case "grapple" -> new ArrowGrapple().getItem();
             case "homing" -> new ArrowHoming().getItem();
             case "smoke" -> new ArrowSmoke().getItem();

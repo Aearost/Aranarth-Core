@@ -407,14 +407,6 @@ public class FletchingTableCraft {
 				return new ArrowheadDragon().getItem();
 			}
 
-			// Sonar Arrowheads
-			ItemStack[] sonarRecipe = new ItemStack[] { new ArrowheadAmethyst().getItem(),
-					new ItemStack(Material.GLOW_INK_SAC),
-					null };
-			if (matchesIngredients(ingredients, sonarRecipe)) {
-				return new ArrowheadSonar().getItem();
-			}
-
 			// Grapple Arrowheads
 			ItemStack[] grappleRecipe = new ItemStack[] { new ArrowheadIron().getItem(),
 					new ItemStack(Material.IRON_INGOT),

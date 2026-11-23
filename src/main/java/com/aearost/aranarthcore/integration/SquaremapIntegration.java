@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Integrates with the SquareMap live-map plugin to display dominion land claims, outposts and regions.
@@ -42,6 +43,27 @@ public class SquaremapIntegration {
     private final Map<String, SimpleLayerProvider> outpostProviders = new HashMap<>();
     private final Map<String, SimpleLayerProvider> regionProviders = new HashMap<>();
     private BukkitTask refreshTask;
+
+    /**
+     * Provides whether the player's marker is currently hidden from the live map, for any reason.
+     *
+     * @param uuid The player's UUID.
+     * @return Whether the player is hidden from the map.
+     */
+    public static boolean isPlayerHidden(UUID uuid) {
+        return SquaremapProvider.get().playerManager().hidden(uuid);
+    }
+
+    /**
+     * Hides or shows the player's marker on the live map immediately.
+     * The change is not persisted, so it is reset if the server restarts.
+     *
+     * @param uuid The player's UUID.
+     * @param hidden Whether the player is hidden from the map.
+     */
+    public static void setPlayerHidden(UUID uuid, boolean hidden) {
+        SquaremapProvider.get().playerManager().hidden(uuid, hidden, false);
+    }
 
     /**
      * Registers the dominion layer on all squaremap-enabled worlds and starts the

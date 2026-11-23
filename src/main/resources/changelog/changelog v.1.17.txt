@@ -1,0 +1,20 @@
+AranarthCore v. 1.17
+
+World & Events
+
+Bending & Abilities
+
+Dominion
+
+Aranarthium, Items & Crafting
+[+] Added Echo Aranarthium armour, which provides buffs involving sound and sonar
+
+Economy, Jobs & Quests
+
+Chat, UI & Sounds
+
+Quality of Life
+
+Cross-server & Technical
+
+Miscellaneous
