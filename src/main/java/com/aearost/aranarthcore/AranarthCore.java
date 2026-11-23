@@ -1768,6 +1768,12 @@ public class AranarthCore extends JavaPlugin {
             wc.type(WorldType.NORMAL);
             wc.createWorld();
         }
+        for (String resourceWorldName : new String[] { "resource", "resource_nether", "resource_the_end" }) {
+            World resourceWorld = Bukkit.getWorld(resourceWorldName);
+            if (resourceWorld != null) {
+                resourceWorld.setGameRule(GameRules.IMMEDIATE_RESPAWN, true);
+            }
+        }
 
         // Arena and creative
         if (Bukkit.getWorld("arena") == null) {

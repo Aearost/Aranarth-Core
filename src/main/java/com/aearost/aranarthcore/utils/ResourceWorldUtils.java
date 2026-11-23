@@ -226,6 +226,7 @@ public class ResourceWorldUtils {
 
             world.setGameRule(GameRules.SHOW_ADVANCEMENT_MESSAGES, false);
             world.setGameRule(GameRules.LOCATOR_BAR, false);
+            world.setGameRule(GameRules.IMMEDIATE_RESPAWN, true);
             world.getWorldBorder().setCenter(0, 0);
             world.getWorldBorder().setSize(BORDER_SIZE);
             if (ENVIRONMENTS[index] == World.Environment.NORMAL) {
