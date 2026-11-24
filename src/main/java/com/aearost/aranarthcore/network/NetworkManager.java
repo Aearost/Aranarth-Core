@@ -34,6 +34,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -41,6 +42,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -160,7 +162,12 @@ public class NetworkManager {
     public static final String CH_ORIGINAL_PLAYER_UPDATE = "aranarth:original_player_update";
     public static final String CH_PLAYER_CREATED = "aranarth:player_created";
     public static final String CH_SHOP_STOCK = "aranarth:shop_stock";
+    public static final String CH_SCHEM_TRANSFER = "aranarth:schem_transfer";
+    public static final String CH_SCHEM_TRANSFER_RESULT = "aranarth:schem_transfer_result";
     // Temp-data key prefixes
+    private static final String KEY_SCHEM_TRANSFER = "schem_transfer:";
+    private static final int SCHEM_TRANSFER_TTL_SECONDS = 300;
+    private static final long SCHEM_TRANSFER_TIMEOUT_TICKS = 600L;
     private static final String KEY_PENDING_TP = "pending_tp:";
     private static final String KEY_RETURN_LOC = "return_loc:";
     private static final String KEY_LAST_MSG = "last_msg:";
@@ -220,6 +227,19 @@ public class NetworkManager {
      * Tracks viewer UUIDs watching each local target player's ender chest from another server.
      */
     private final Map<UUID, Set<UUID>> remoteEnderWatchers = new ConcurrentHashMap<>();
+    /**
+     * Schematic transfers sent from this server that are waiting on the other server's result.
+     */
+    private final Map<String, PendingSchemTransfer> pendingSchemTransfers = new ConcurrentHashMap<>();
+
+    /**
+     * A schematic transfer waiting on its result.
+     *
+     * @param senderUuid The player that sent it, or null for the console.
+     * @param fileName   The schematic's path relative to the schematics folder.
+     */
+    private record PendingSchemTransfer(UUID senderUuid, String fileName) {
+    }
     public static final String CONTAINER_INVENTORY = "inventory";
     public static final String CONTAINER_ENDER_CHEST = "ender_chest";
 
@@ -407,6 +427,14 @@ public class NetworkManager {
     public boolean isServerOnline(String serverName) {
         Long lastSeen = serverLastSeen.get(serverName);
         return lastSeen != null && System.currentTimeMillis() - lastSeen < 5 * 60 * 1000L;
+    }
+
+    /**
+     * Returns true if any other server has sent a heartbeat within the last 5 minutes.
+     */
+    public boolean isOtherServerOnline() {
+        return serverLastSeen.keySet().stream()
+                .anyMatch(serverName -> !serverName.equals(thisServer) && isServerOnline(serverName));
     }
 
     /**
@@ -665,6 +693,8 @@ public class NetworkManager {
             case CH_ORIGINAL_PLAYER_UPDATE -> handleOriginalPlayerUpdate(json);
             case CH_PLAYER_CREATED -> handlePlayerCreated(json);
             case CH_SHOP_STOCK -> handleShopStock(json);
+            case CH_SCHEM_TRANSFER -> handleSchematicTransfer(json);
+            case CH_SCHEM_TRANSFER_RESULT -> handleSchematicTransferResult(json);
         }
     }
 
@@ -1401,6 +1431,115 @@ public class NetworkManager {
         json.addProperty("uuid", uuid.toString());
         json.addProperty("isOriginal", isOriginal);
         publish(CH_ORIGINAL_PLAYER_UPDATE, json);
+    }
+
+    /**
+     * Stores a schematic in MySQL and asks the other server to save it into its schematics folder.
+     * @param senderUuid The player sending it, or null for the console.
+     * @param fileName   The schematic's path relative to the schematics folder.
+     * @param data       The schematic's contents, encoded in Base64.
+     * @param override   Whether an existing schematic with the same name may be replaced.
+     * @return False if the schematic could not be stored.
+     */
+    public boolean publishSchematicTransfer(UUID senderUuid, String fileName, String data, boolean override) {
+        String transferId = UUID.randomUUID().toString();
+        // The file is too large for a network message, so it is stored separately and only its key is sent
+        if (!db.saveTempData(KEY_SCHEM_TRANSFER + transferId, data, SCHEM_TRANSFER_TTL_SECONDS)) {
+            return false;
+        }
+        pendingSchemTransfers.put(transferId, new PendingSchemTransfer(senderUuid, fileName));
+
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("transferId", transferId);
+        json.addProperty("fileName", fileName);
+        json.addProperty("override", override);
+        publish(CH_SCHEM_TRANSFER, json);
+
+        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
+            PendingSchemTransfer pending = pendingSchemTransfers.remove(transferId);
+            if (pending != null) {
+                sendSchematicTransferResult(pending, "ac.schemtransfer_no_response");
+                Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                        () -> db.deleteTempData(KEY_SCHEM_TRANSFER + transferId));
+            }
+        }, SCHEM_TRANSFER_TIMEOUT_TICKS);
+        return true;
+    }
+
+    /**
+     * Saves a schematic sent by the other server into this server's schematics folder, then reports back.
+     */
+    private void handleSchematicTransfer(JsonObject json) {
+        String transferId = json.get("transferId").getAsString();
+        String fileName = json.get("fileName").getAsString();
+        boolean override = json.has("override") && json.get("override").getAsBoolean();
+        // Resolved on the main thread since it reads WorldEdit's configuration
+        Path folder = SchematicUtils.getSchematicsFolder();
+
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+            String status;
+            String key = KEY_SCHEM_TRANSFER + transferId;
+            Path target = folder == null ? null : SchematicUtils.resolveInside(folder, fileName);
+            if (target == null) {
+                status = "failed";
+            } else {
+                String data = db.loadTempData(key);
+                if (data == null) {
+                    status = "failed";
+                } else {
+                    try {
+                        status = SchematicUtils.writeSchematic(target, Base64.getDecoder().decode(data), override) ? "success" : "exists";
+                        if (status.equals("success")) {
+                            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[SchemTransfer] Received " + fileName);
+                        }
+                    } catch (Exception e) {
+                        Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[SchemTransfer] Could not save " + fileName + ": " + e.getMessage());
+                        status = "failed";
+                    }
+                }
+            }
+            db.deleteTempData(key);
+
+            JsonObject result = new JsonObject();
+            result.addProperty("server", thisServer);
+            result.addProperty("transferId", transferId);
+            result.addProperty("status", status);
+            publish(CH_SCHEM_TRANSFER_RESULT, result);
+        });
+    }
+
+    /**
+     * Tells the player who sent a schematic whether the other server saved it.
+     */
+    private void handleSchematicTransferResult(JsonObject json) {
+        PendingSchemTransfer pending = pendingSchemTransfers.remove(json.get("transferId").getAsString());
+        if (pending == null) {
+            return;
+        }
+        String key = switch (json.get("status").getAsString()) {
+            case "success" -> "ac.schemtransfer_success";
+            case "exists" -> "ac.schemtransfer_exists";
+            default -> "ac.schemtransfer_failed";
+        };
+        if (key.equals("ac.schemtransfer_success")) {
+            String senderName = pending.senderUuid() == null ? "Console" : Bukkit.getOfflinePlayer(pending.senderUuid()).getName();
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[SchemTransfer] " + senderName + " sent " + pending.fileName());
+        }
+        sendSchematicTransferResult(pending, key);
+    }
+
+    /**
+     * Sends the outcome of a schematic transfer to the player who sent it, if they are still on this server.
+     */
+    private void sendSchematicTransferResult(PendingSchemTransfer pending, String key) {
+        CommandSender recipient = pending.senderUuid() == null ? Bukkit.getConsoleSender() : Bukkit.getPlayer(pending.senderUuid());
+        if (recipient == null) {
+            return;
+        }
+        String otherServer = AranarthCore.isSmpServer() ? "Survival" : "SMP";
+        recipient.sendMessage(ChatUtils.chatMessage(Lang.getFor(recipient, key,
+                "name", SchematicUtils.stripExtension(pending.fileName()), "server", otherServer)));
     }
 
     /**

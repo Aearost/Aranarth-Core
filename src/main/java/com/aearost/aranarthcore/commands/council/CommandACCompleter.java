@@ -10,6 +10,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatGameUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.SchematicUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
@@ -39,7 +40,7 @@ public class CommandACCompleter implements TabCompleter {
     private static final List<String> COUNCIL_OPTIONS = List.of(
             "admin", "architect", "ban", "broadcast", "clearchat", "dateset", "disable", "discordreload", "dominionrank",
             "enable", "give", "home", "invsee", "invswap", "msg", "mute", "og", "perks", "punishments", "questnpc", "rankset",
-            "reload", "resetquest", "speed", "spy", "sudo", "time", "tp", "tpf", "tpw", "u", "unban", "unmute",
+            "reload", "resetquest", "schemtransfer", "speed", "spy", "sudo", "time", "tp", "tpf", "tpw", "u", "unban", "unmute",
             "unscramble", "user", "vanish", "vpedit", "warn", "weather", "whereis", "worldevent"
     );
 
@@ -95,10 +96,22 @@ public class CommandACCompleter implements TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         boolean isAuthorized = false;
-        boolean isArchitectOnly = false;
+        List<String> nonCouncilOptions = null;
         if (sender instanceof Player player) {
             isAuthorized = player.hasPermission("aranarth.ac");
-            isArchitectOnly = isAuthorized && !player.hasPermission("aranarth.ac.council");
+            if (isAuthorized && !player.hasPermission("aranarth.ac.council")) {
+                // Architects and OG players only see the sub-commands they can use
+                nonCouncilOptions = new ArrayList<>();
+                if (player.hasPermission("aranarth.architect")) {
+                    nonCouncilOptions.add("architect");
+                }
+                if (player.hasPermission("aranarth.councilchat")) {
+                    nonCouncilOptions.add("msg");
+                }
+                if (player.hasPermission("aranarth.schemtransfer")) {
+                    nonCouncilOptions.add("schemtransfer");
+                }
+            }
         } else if (sender instanceof ConsoleCommandSender) {
             isAuthorized = true;
         }
@@ -106,7 +119,7 @@ public class CommandACCompleter implements TabCompleter {
             return List.of();
         }
         if (args.length == 1) {
-            return filter(isArchitectOnly ? List.of("architect", "msg") : COUNCIL_OPTIONS, args[0]);
+            return filter(nonCouncilOptions != null ? nonCouncilOptions : COUNCIL_OPTIONS, args[0]);
         }
         return councilArgs(sender, args);
     }
@@ -249,6 +262,18 @@ public class CommandACCompleter implements TabCompleter {
                         .collect(Collectors.toList());
             }
             case "questnpc" -> args.length == 2 ? filter(List.of("spawn", "remove"), args[1]) : List.of();
+            case "schemtransfer" -> {
+                if (sender instanceof Player player && !player.hasPermission("aranarth.schemtransfer")) {
+                    yield List.of();
+                }
+                if (args.length == 2) {
+                    yield filter(SchematicUtils.getSchematicNames(), args[1]);
+                }
+                if (args.length == 3) {
+                    yield filter(List.of("override"), args[2]);
+                }
+                yield List.of();
+            }
             case "unscramble" -> {
                 if (args.length == 2) {
                     yield filter(List.of("add", "remove"), args[1]);

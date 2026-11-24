@@ -2007,7 +2007,12 @@ public class DatabaseManager {
     // network_temp_data  (pending teleports + return locations)
     // -------------------------------------------------------------------------
 
-    public void saveTempData(String key, String valueJson, int ttlSeconds) {
+    /**
+     * Saves a temp data row that expires after the given time.
+     *
+     * @return True if the row was saved.
+     */
+    public boolean saveTempData(String key, String valueJson, int ttlSeconds) {
         String sql = """
                 INSERT INTO network_temp_data (key_name, value_json, expires_at)
                 VALUES (?, ?, DATE_ADD(NOW(), INTERVAL ? SECOND))
@@ -2019,8 +2024,10 @@ public class DatabaseManager {
             ps.setString(2, valueJson);
             ps.setInt(3, ttlSeconds);
             ps.executeUpdate();
+            return true;
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save temp data key=" + key + ": " + e.getMessage());
+            return false;
         }
     }
 

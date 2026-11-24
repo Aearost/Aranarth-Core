@@ -110,10 +110,13 @@ public class PermissionUtils {
             restoreOldAvatarElement(player);
         }
 
-        // Grant the SMP map link and SMP creative world access to original players
+        // Grant the SMP map link, SMP creative world access and schematic transfers to original players
         if (AranarthUtils.isOriginalPlayer(player.getUniqueId())) {
             perms.setPermission("aranarth.smpmap", true);
             perms.setPermission("aranarth.smpcreative", true);
+            // Only /ac schemtransfer, CommandAC limits players without aranarth.ac.council to it
+            perms.setPermission("aranarth.ac", true);
+            perms.setPermission("aranarth.schemtransfer", true);
         }
 
         setCreativeWorldEditPermissions(player, perms, aranarthPlayer);
@@ -611,6 +614,7 @@ public class PermissionUtils {
         perms.setPermission("aranarth.og", false);
         perms.setPermission("aranarth.plot.spawn", false);
         perms.setPermission("aranarth.questnpc", false);
+        perms.setPermission("aranarth.schemtransfer", false);
         perms.setPermission("aranarth.shop.biome", false);
         perms.setPermission("aranarth.trees.regen", false);
         perms.setPermission("aranarth.sit.toggle", false);
@@ -1239,6 +1243,14 @@ public class PermissionUtils {
     }
 
     /**
+     * The WorldEdit nodes for saving, loading, listing and deleting schematics, without sharing them online.
+     */
+    private static final List<String> SCHEMATIC_NODES = List.of(
+            "worldedit.schematic.save", "worldedit.schematic.load", "worldedit.schematic.list",
+            "worldedit.schematic.delete", "worldedit.schematic.formats",
+            "worldedit.clipboard.save", "worldedit.clipboard.load");
+
+    /**
      * Sets the WorldEdit permissions for the player's current world.
      *
      * @param player         The player.
@@ -1249,16 +1261,23 @@ public class PermissionUtils {
         String worldName = player.getWorld().getName();
         // Architects and Council both use /architect, and isInArchitectMode() already requires one of those ranks
         boolean isArchitectEditing = aranarthPlayer.isInArchitectMode();
+        boolean isOriginalPlayer = AranarthUtils.isOriginalPlayer(player.getUniqueId());
         if (PlotUtils.isSmpCreativeWorld(worldName)) {
             perms.setPermission("worldedit.*", true);
             if (aranarthPlayer.getCouncilRank() == 0 && !isArchitectEditing) {
                 // Nothing that reaches another world, the server's files, or other players' mobs
-                for (String node : List.of("worldedit.world", "worldedit.schematic.*", "worldedit.schematic.load",
-                        "worldedit.schematic.save", "worldedit.schematic.delete", "worldedit.schematic.list",
-                        "worldedit.regen", "worldedit.butcher", "worldedit.remove", "worldedit.calc",
-                        "worldedit.generation.shape", "worldedit.generation.shape.biome", "worldedit.scripting.execute",
-                        "worldedit.scripting.execute.last", "worldedit.snapshots.restore", "worldedit.snapshots.list")) {
+                for (String node : List.of("worldedit.world", "worldedit.regen", "worldedit.butcher", "worldedit.remove",
+                        "worldedit.calc", "worldedit.generation.shape", "worldedit.generation.shape.biome",
+                        "worldedit.scripting.execute", "worldedit.scripting.execute.last", "worldedit.snapshots.restore",
+                        "worldedit.snapshots.list", "worldedit.schematic.share", "worldedit.clipboard.share")) {
                     perms.setPermission(node, false);
+                }
+                // OG players can save and load schematics so they can be sent between servers with /ac schemtransfer
+                if (!isOriginalPlayer) {
+                    for (String node : SCHEMATIC_NODES) {
+                        perms.setPermission(node, false);
+                    }
+                    perms.setPermission("worldedit.schematic.*", false);
                 }
             }
             return;
@@ -1277,6 +1296,20 @@ public class PermissionUtils {
 
         // Negate everything first so that only the permissions below are granted
         perms.setPermission("worldedit.*", false);
+
+        // OG players can create and paste schematics in their plots, which the plot mask keeps them inside of
+        if (isOriginalPlayer) {
+            for (String node : SCHEMATIC_NODES) {
+                perms.setPermission(node, true);
+            }
+            for (String node : List.of("worldedit.wand", "worldedit.wand.toggle", "worldedit.selection.pos",
+                    "worldedit.selection.hpos", "worldedit.clipboard.copy", "worldedit.clipboard.paste",
+                    "worldedit.clipboard.rotate", "worldedit.clipboard.flip", "worldedit.clipboard.clear",
+                    "worldedit.history.undo", "worldedit.history.redo")) {
+                perms.setPermission(node, true);
+            }
+        }
+
         int tier = aranarthPlayer.getSaintRank();
         if (tier == 0) {
             return;
@@ -1348,6 +1381,7 @@ public class PermissionUtils {
             perms.setPermission("aranarth.councilchat", true);
             perms.setPermission("aranarth.interactivechat", true);
             perms.setPermission("aranarth.smpcreative", true);
+            perms.setPermission("aranarth.schemtransfer", true);
             perms.setPermission("aranarth.speed", true);
             perms.setPermission("aranarth.toggle.bypass", true);
             setSaintPermissions(perms, 1);

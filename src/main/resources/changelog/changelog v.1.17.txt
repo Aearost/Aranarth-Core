@@ -32,6 +32,7 @@ Quality of Life
 [~] The /recipe browse list now shows results as a single item
 
 Cross-server & Technical
+[+] Added /ac schemtransfer to transfer schematics between servers
 [~] Fixed /r and /msg failing after the other player switched servers
 
 Miscellaneous

@@ -43,7 +43,7 @@ public class CommandAC implements CommandExecutor {
 			}
 			if (!player.hasPermission("aranarth.ac.council")) {
 				if (args.length == 0 || (!args[0].equalsIgnoreCase("msg") && !args[0].equalsIgnoreCase("speed")
-						&& !args[0].equalsIgnoreCase("architect"))) {
+						&& !args[0].equalsIgnoreCase("architect") && !args[0].equalsIgnoreCase("schemtransfer"))) {
 					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
 					return false;
 				}
@@ -112,6 +112,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandAdmin.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("architect")) {
 			commandResult = CommandArchitect.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("schemtransfer")) {
+			commandResult = CommandSchemTransfer.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("spy")) {
 			commandResult = CommandSpy.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("speed")) {
