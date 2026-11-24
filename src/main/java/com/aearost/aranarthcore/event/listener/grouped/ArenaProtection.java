@@ -52,13 +52,13 @@ public class ArenaProtection implements Listener {
 
 	// The drop off locations of arena1, each with its own sign. The random teleport sign selects one of them.
 	private static final List<ArenaDropOff> ARENA1_DROP_OFFS = List.of(
-			new ArenaDropOff(10, 2, 59, 4960.5, 182, 4937.5, -45, 0),
-			new ArenaDropOff(-4, 2, 62, 4998.5, 180, 5069.5, -135, 0),
-			new ArenaDropOff(-8, 4, 59, 4969.5, 189, 5077.5, -135, 0),
-			new ArenaDropOff(8, 2, 66, 5022.5, 180, 4945.5, 0, 0),
-			new ArenaDropOff(1, 3, 68, 5044.5, 185, 5024.5, 45, 0),
-			new ArenaDropOff(-6, 8, 67, 5014.5, 252, 5068.5, -135, 0),
-			new ArenaDropOff(-7, 3, 73, 5078.5, 186.625, 5089.5, 135, 0)
+			new ArenaDropOff(10, 2, 59, 4960.5, 107, 4937.5, -45, 0),
+			new ArenaDropOff(-4, 2, 62, 4998.5, 105, 5069.5, -135, 0),
+			new ArenaDropOff(-8, 4, 59, 4969.5, 114, 5077.5, -135, 0),
+			new ArenaDropOff(8, 2, 66, 5022.5, 105, 4945.5, 0, 0),
+			new ArenaDropOff(1, 3, 68, 5044.5, 110, 5024.5, 45, 0),
+			new ArenaDropOff(-6, 8, 67, 5014.5, 177, 5068.5, -135, 0),
+			new ArenaDropOff(-7, 3, 73, 5078.5, 111.625, 5089.5, 135, 0)
 	);
 
 	public ArenaProtection(AranarthCore plugin) {
