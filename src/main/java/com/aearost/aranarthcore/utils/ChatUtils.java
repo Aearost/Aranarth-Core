@@ -44,6 +44,16 @@ public class ChatUtils {
                     + "|(?<![\\p{L}\\p{N}_])_(?=[^\\s_])(.+?)(?<=[^\\s_])_(?![\\p{L}\\p{N}_])",
             Pattern.DOTALL);
 
+    /**
+     * Matches Discord-style ||spoiler|| tags, where the hidden text must contain at least one non-whitespace character.
+     */
+    public static final Pattern SPOILER_PATTERN = Pattern.compile("\\|\\|(?=[^|]*\\S)([^|]+?)\\|\\|");
+
+    /**
+     * The most spoilers turned into placeholders in a single message.
+     */
+    public static final int MAX_SPOILERS_PER_MESSAGE = 5;
+
     // Maps &0-&f color codes to their Minecraft hex equivalents
     private static final Map<Character, String> COLOR_CODE_TO_HEX = new HashMap<>();
 
@@ -857,6 +867,59 @@ public class ChatUtils {
             result.append(gradientPart != null ? gradientPart : textPart);
         }
         return result.toString();
+    }
+
+    /**
+     * Whether the message contains at least one ||spoiler|| tag.
+     */
+    public static boolean containsSpoiler(String message) {
+        return message != null && SPOILER_PATTERN.matcher(message).find();
+    }
+
+    /**
+     * Builds the [SPOILER] placeholder, which shows the hidden text when hovered over.
+     *
+     * @param hiddenText The hidden text, with § color codes.
+     */
+    public static Component buildSpoilerPlaceholder(String hiddenText) {
+        Component display = LegacyComponentSerializer.legacySection().deserialize(translateToColor("&8[&6SPOILER&8]"));
+        Component hover = LegacyComponentSerializer.legacySection().deserialize(hiddenText);
+        return display.hoverEvent(HoverEvent.showText(hover));
+    }
+
+    /**
+     * Provides the format codes still active at the end of a § formatted string, so text that is split around a
+     * spoiler keeps its colors after the placeholder.
+     *
+     * @param formatted The string with § codes.
+     * @return The active color code followed by any active format codes.
+     */
+    public static String getActiveCodes(String formatted) {
+        String color = "";
+        StringBuilder formats = new StringBuilder();
+        for (int i = 0; i < formatted.length() - 1; i++) {
+            if (formatted.charAt(i) != '§') {
+                continue;
+            }
+            char code = Character.toLowerCase(formatted.charAt(i + 1));
+            if (code == 'x' && i + 14 <= formatted.length()) {
+                color = formatted.substring(i, i + 14);
+                formats.setLength(0);
+                i += 13;
+            } else if (Character.digit(code, 16) != -1) {
+                color = formatted.substring(i, i + 2);
+                formats.setLength(0);
+                i++;
+            } else if (code == 'r') {
+                color = "";
+                formats.setLength(0);
+                i++;
+            } else if (code >= 'k' && code <= 'o') {
+                formats.append('§').append(code);
+                i++;
+            }
+        }
+        return color + formats;
     }
 
     /**

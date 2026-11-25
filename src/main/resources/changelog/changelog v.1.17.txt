@@ -26,6 +26,7 @@ Economy, Jobs & Quests
 
 Chat, UI & Sounds
 [+] Added fruits and berries to the unscramble word list
+[+] Added Spoiler tag support to and from Discord and Minecraft
 
 Quality of Life
 [~] Fixed right-clicking leaves with an axe saying you must be sneaking to strip logs

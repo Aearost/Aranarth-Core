@@ -40,6 +40,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -364,23 +365,18 @@ public class PlayerChatListener implements Listener {
         e.setCancelled(true);
 
         // Build the message component, injecting interactive chat keywords where applicable.
-        Component messageComponent = null;
         List<UUID> createdSnapshotIds = new ArrayList<>();
         boolean canUseInteractiveChat = player.hasPermission("aranarth.interactivechat")
-                && aranarthPlayer.isInteractiveChatEnabled()
-                && INTERACTIVE_PATTERN.matcher(message).find();
-        if (canUseInteractiveChat) {
-            messageComponent = buildInteractiveChatComponent(player, aranarthPlayer, message, chatMessage, createdSnapshotIds);
-        }
-        // Fall back to standard gradient or plain message building.
-        if (messageComponent == null) {
-            if (aranarthPlayer.isGradientChatEnabled() && !aranarthPlayer.getGradientChatColors().isEmpty()) {
-                messageComponent = ChatUtils.buildGradientMessageWithUrls(
-                        aranarthPlayer.getGradientChatColors(), ChatUtils.stripColorFormatting(message), aranarthPlayer.isGradientChatBold());
-            }
-        }
-        if (messageComponent == null) {
-            messageComponent = ChatUtils.buildMessageWithUrls(chatMessage);
+                && aranarthPlayer.isInteractiveChatEnabled();
+        AtomicInteger keywordsUsed = new AtomicInteger();
+        boolean isPublicChat = !aranarthPlayer.isInCouncilChat() && !aranarthPlayer.isInDominionChat();
+        Component messageComponent;
+        if (isPublicChat && ChatUtils.containsSpoiler(message)) {
+            messageComponent = buildSpoilerChatComponent(player, aranarthPlayer, message, canUseInteractiveChat,
+                    keywordsUsed, createdSnapshotIds);
+        } else {
+            messageComponent = buildMessageComponent(player, aranarthPlayer, message, "", canUseInteractiveChat,
+                    keywordsUsed, createdSnapshotIds);
         }
 
         if (aranarthPlayer.isInCouncilChat()) {
@@ -417,26 +413,95 @@ public class PlayerChatListener implements Listener {
     }
 
     /**
+     * Builds a Component for a part of the player's message, using interactive keywords, the player's gradient,
+     * or their regular chat formatting.
+     *
+     * @param rawSegment  The part of the message as typed by the player.
+     * @param activeCodes The § codes still active from the text before this part, for regular chat formatting.
+     */
+    private Component buildMessageComponent(Player player, AranarthPlayer ap, String rawSegment, String activeCodes,
+                                            boolean canUseInteractiveChat, AtomicInteger keywordsUsed,
+                                            List<UUID> createdSnapshotIds) {
+        if (canUseInteractiveChat && keywordsUsed.get() < MAX_INTERACTIVE_KEYWORDS
+                && INTERACTIVE_PATTERN.matcher(rawSegment).find()) {
+            return buildInteractiveChatComponent(player, ap, rawSegment, keywordsUsed, createdSnapshotIds);
+        }
+        // Fall back to standard gradient or plain message building.
+        if (ap.isGradientChatEnabled() && !ap.getGradientChatColors().isEmpty()) {
+            Component gradient = ChatUtils.buildGradientMessageWithUrls(
+                    ap.getGradientChatColors(), ChatUtils.stripColorFormatting(rawSegment), ap.isGradientChatBold());
+            if (gradient != null) {
+                return gradient;
+            }
+        }
+        return ChatUtils.buildMessageWithUrls(activeCodes + ChatUtils.formatChatMessage(player, rawSegment));
+    }
+
+    /**
+     * Builds a Component for a message containing ||spoilers||, replacing each one with a placeholder that
+     * shows the hidden text when hovered over.
+     */
+    private Component buildSpoilerChatComponent(Player player, AranarthPlayer ap, String rawMessage,
+                                                boolean canUseInteractiveChat, AtomicInteger keywordsUsed,
+                                                List<UUID> createdSnapshotIds) {
+        Component result = Component.empty();
+        // The visible text so far, so the colors typed before a spoiler carry on after it
+        StringBuilder visibleText = new StringBuilder();
+
+        Matcher matcher = ChatUtils.SPOILER_PATTERN.matcher(rawMessage);
+        int lastEnd = 0;
+        int spoilerCount = 0;
+        // Only the first few spoilers are hidden, the rest are left as typed
+        while (spoilerCount < ChatUtils.MAX_SPOILERS_PER_MESSAGE && matcher.find()) {
+            spoilerCount++;
+            if (matcher.start() > lastEnd) {
+                String rawSegment = rawMessage.substring(lastEnd, matcher.start());
+                result = result.append(buildMessageComponent(player, ap, rawSegment, activeCodesAfter(player, visibleText),
+                        canUseInteractiveChat, keywordsUsed, createdSnapshotIds));
+                visibleText.append(rawSegment);
+            }
+            result = result.append(ChatUtils.buildSpoilerPlaceholder(ChatUtils.formatChatMessage(player, matcher.group(1))));
+            lastEnd = matcher.end();
+        }
+
+        // Append any remaining text after the last spoiler
+        if (lastEnd < rawMessage.length()) {
+            result = result.append(buildMessageComponent(player, ap, rawMessage.substring(lastEnd),
+                    activeCodesAfter(player, visibleText), canUseInteractiveChat, keywordsUsed, createdSnapshotIds));
+        }
+        return result;
+    }
+
+    /**
+     * Provides the § codes still active at the end of the visible text, once formatted with the player's permissions.
+     */
+    private String activeCodesAfter(Player player, StringBuilder visibleText) {
+        if (visibleText.isEmpty()) {
+            return "";
+        }
+        return ChatUtils.getActiveCodes(ChatUtils.formatChatMessage(player, visibleText.toString()));
+    }
+
+    /**
      * Builds a Component for the player's message.
      * Snapshot IDs created for interactive keywords are added to {@code createdSnapshotIds}.
      */
     private Component buildInteractiveChatComponent(Player player, AranarthPlayer ap, String rawMessage,
-                                                    String chatMessage, List<UUID> createdSnapshotIds) {
+                                                    AtomicInteger keywordsUsed, List<UUID> createdSnapshotIds) {
         String nickname = ap.getNickname().isEmpty() ? player.getName() : ChatUtils.stripColorFormatting(ap.getNickname());
         Location loc = player.getLocation();
         Component result = Component.empty();
 
         Matcher matcher = INTERACTIVE_PATTERN.matcher(rawMessage);
         int lastEnd = 0;
-        int keywordCount = 0;
 
         // Only the first few keywords become interactive, so one message cannot store dozens of snapshots
-        while (keywordCount < MAX_INTERACTIVE_KEYWORDS && matcher.find()) {
-            keywordCount++;
+        while (keywordsUsed.get() < MAX_INTERACTIVE_KEYWORDS && matcher.find()) {
+            keywordsUsed.incrementAndGet();
             // Append the text segment before this keyword
             if (matcher.start() > lastEnd) {
                 String rawSegment = rawMessage.substring(lastEnd, matcher.start());
-                result = result.append(buildSegment(player, ap, rawSegment, chatMessage, lastEnd));
+                result = result.append(buildSegment(player, ap, rawSegment));
             }
 
             String keyword = matcher.group().toLowerCase();
@@ -448,7 +513,7 @@ public class PlayerChatListener implements Listener {
         // Append any remaining text after the last keyword
         if (lastEnd < rawMessage.length()) {
             String rawSegment = rawMessage.substring(lastEnd);
-            result = result.append(buildSegment(player, ap, rawSegment, chatMessage, lastEnd));
+            result = result.append(buildSegment(player, ap, rawSegment));
         }
 
         return result;
@@ -457,7 +522,7 @@ public class PlayerChatListener implements Listener {
     /**
      * Formats a plain text segment using the player's chat permissions (gradient or color).
      */
-    private Component buildSegment(Player player, AranarthPlayer ap, String rawSegment, String chatMessage, int rawOffset) {
+    private Component buildSegment(Player player, AranarthPlayer ap, String rawSegment) {
         if (rawSegment.isEmpty()) {
             return Component.empty();
         }
