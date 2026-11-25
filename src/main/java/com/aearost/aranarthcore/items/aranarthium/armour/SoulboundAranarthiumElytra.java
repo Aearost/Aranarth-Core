@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.items.aranarthium.armour;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.AranarthItem;
+import com.aearost.aranarthcore.utils.AranarthiumAppearanceUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -42,6 +43,7 @@ public class SoulboundAranarthiumElytra implements AranarthItem {
                             0.1, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.CHEST));
             meta.addEnchant(Enchantment.MENDING, 1, true);
             meta.getPersistentDataContainer().set(ARMOR_TYPE, PersistentDataType.STRING, "soulbound");
+            AranarthiumAppearanceUtils.applyAppearance(meta, "soulbound", Material.ELYTRA);
             ((Damageable) meta).setMaxDamage(592);
             meta.setFireResistant(true);
             item.setItemMeta(meta);
