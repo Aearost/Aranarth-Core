@@ -967,12 +967,9 @@ public class AranarthCore extends JavaPlugin {
             }
         }, 10L, 10L);
 
-//		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
-//			@Override
-//			public void run() {
-//				AranarthUtils.applyWaterfallEffect();
-//			}
-//		}, 1, 1);
+        // Waterfall mist - landing spots are scanned asynchronously and cached per chunk
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, WaterfallUtils::refreshCache, 20L, 20L);
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, WaterfallUtils::spawnParticles, 2L, 2L);
 
         // Low health heartbeat sound - interval speeds up as health drops
         Map<UUID, Integer> lowHealthCounters = new HashMap<>();
@@ -1254,6 +1251,7 @@ public class AranarthCore extends JavaPlugin {
         new PlayerElytraBoostEventListener(this);
         new BlockFormEventListener(this);
         new BlockPhysicsEventListener(this);
+        new BlockFromToEventListener(this);
         new ProjectileHitEventListener(this);
         new GenericGameEventListener(this);
         new ProjectileLaunchEventListener(this);

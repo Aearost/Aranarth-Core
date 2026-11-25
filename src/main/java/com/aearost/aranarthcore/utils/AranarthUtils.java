@@ -30,7 +30,6 @@ import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.ban.ProfileBanList;
 import org.bukkit.block.*;
-import org.bukkit.block.data.Levelled;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -1344,81 +1343,6 @@ public class AranarthUtils {
                 || type == Material.MUD || type == Material.SAND || type == Material.RED_SAND
                 || type == Material.GRAVEL || type == Material.CLAY || type == Material.SNOW_BLOCK
                 || type == Material.SOUL_SAND || type == Material.SOUL_SOIL;
-    }
-
-    /**
-     * Applies the waterfall effect at the base of flowing water.
-     */
-    public static void applyWaterfallEffect() {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-            // Skips the particle
-            if (new Random().nextInt(100) >= aranarthPlayer.getParticleNum()) {
-                continue;
-            }
-
-            Location playerLoc = player.getLocation();
-            int radius = 40;
-
-            int px = playerLoc.getBlockX();
-            int py = playerLoc.getBlockY();
-            int pz = playerLoc.getBlockZ();
-
-            World world = player.getWorld();
-
-            for (int x = -radius; x <= radius; x++) {
-                for (int z = -radius; z <= radius; z++) {
-                    for (int y = py + 10; y >= py - 10; y--) {
-                        Block start = world.getBlockAt(px + x, y, pz + z);
-
-                        // Only check flowing water blocks (NOT source blocks)
-                        if (start.getType() != Material.WATER) {
-                            continue;
-                        }
-
-                        if (start.getBlockData() instanceof Levelled startLevel) {
-                            if (startLevel.getLevel() == 0) {
-                                continue; // Skip source blocks
-                            }
-                        } else {
-                            continue;
-                        }
-
-                        // Check how far this water can fall
-                        int fallHeight = 0;
-                        Block landing = null;
-
-                        for (int dy = 1; dy <= 10; dy++) {
-                            Block below = start.getRelative(0, -dy, 0);
-
-                            if (below.getType() == Material.WATER) {
-                                if (below.getBlockData() instanceof Levelled landingLevel) {
-                                    if (landingLevel.getLevel() == 0) {
-                                        // Found a source block as landing
-                                        fallHeight = dy;
-                                        landing = below;
-                                        break;
-                                    }
-                                }
-                            } else if (!below.getType().isAir()) {
-                                // Hit something solid or non-water - stop
-                                break;
-                            }
-                        }
-
-                        // Trigger particle effect if flow into source block from at least 2 blocks up
-                        if (fallHeight >= 2 && landing != null) {
-                            Location particleLoc = landing.getLocation().add(0.5, 1.2, 0.5);
-
-                            if (player.getLocation().distanceSquared(particleLoc) <= radius * radius) {
-                                Particle.DustOptions whiteDust = new Particle.DustOptions(Color.fromRGB(255, 255, 255), 1.0f);
-                                player.spawnParticle(Particle.DUST, particleLoc, 5, 0.6, 0.3, 0.6, whiteDust);
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 
     /**

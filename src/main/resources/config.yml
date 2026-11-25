@@ -202,3 +202,20 @@ creative-plots:
     z: -5.5
     yaw: 180.0
     pitch: 0.0
+
+# Geyser particles along the exposed edges at the base of waterfalls. Changes apply with /ac reload.
+waterfalls:
+  # Turns the waterfall particles on or off
+  enabled: true
+  # Random spread of each particle along its edge of the waterfall, in blocks (0 = middle of the edge)
+  particle-spread: 0.0
+  # How often the particles are sent, in ticks (minimum 2)
+  particle-interval-ticks: 10
+  # The water_blocks value of the geyser_base particle (height of the spray)
+  geyser-water-blocks: 2
+  # The burst_impulse value of the geyser_base particle (strength of the spray)
+  geyser-burst-impulse: 1.0
+  # Logs the main thread time used by the waterfall particles to console, for troubleshooting performance
+  timings: true
+  # How often the timings are logged, in seconds
+  timings-interval-seconds: 300

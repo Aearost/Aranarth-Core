@@ -10,6 +10,7 @@ World & Events
 [+] Moderators now get WorldEdit in survival worlds while in architect mode, matching Architects
 [+] Resource worlds now have immediate respawn enabled
 [~] Updated drop off locations of large arena to be 75 blocks lower
+[~] Fixed and overhauled the waterfall particle effects
 
 Bending & Abilities
 
