@@ -279,6 +279,7 @@ public class PermissionUtils {
             // Aranarth abilities now rank-gated
             perms.setPermission("bending.ability.airsnipe", true);
             perms.setPermission("bending.ability.jetstream", true);
+            perms.setPermission("bending.ability.aircrush", true);
             perms.setPermission("bending.ability.astralprojection", true);
             perms.setPermission("bending.ability.astralshot", true);
             perms.setPermission("bending.ability.vinewhip", true);
@@ -443,6 +444,7 @@ public class PermissionUtils {
         perms.setPermission("bending.ability.daggervolley", true);
         perms.setPermission("bending.ability.airsnipe", true);
         perms.setPermission("bending.ability.jetstream", true);
+        perms.setPermission("bending.ability.aircrush", true);
         perms.setPermission("bending.ability.mendingwaters", true);
         perms.setPermission("bending.ability.healinghelix", true);
         perms.setPermission("bending.ability.corruptinghelix", true);
@@ -830,6 +832,7 @@ public class PermissionUtils {
         // Aranarth abilities now rank-gated
         perms.setPermission("bending.ability.airsnipe", true);
         perms.setPermission("bending.ability.jetstream", true);
+        perms.setPermission("bending.ability.aircrush", true);
         perms.setPermission("bending.ability.astralprojection", true);
         perms.setPermission("bending.ability.astralshot", true);
         perms.setPermission("bending.ability.vinewhip", true);
@@ -1076,6 +1079,7 @@ public class PermissionUtils {
             perms.setPermission("bending.air.sound", true);
             perms.setPermission("bending.earth.lavabending", true);
             perms.setPermission("bending.ability.suffocate", true);
+            perms.setPermission("bending.ability.aircrush", true);            // air combo
             perms.setPermission("bending.ability.astralprojection", true);    // spiritual
             perms.setPermission("bending.ability.astralshot", true);          // spiritual combo
             perms.setPermission("bending.ability.petalstorm", true);          // plant combo

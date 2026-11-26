@@ -13,6 +13,7 @@ World & Events
 [~] Fixed and overhauled the waterfall particle effects
 
 Bending & Abilities
+[+] Implemented the AirCrush combo for airbenders
 
 Dominion
 

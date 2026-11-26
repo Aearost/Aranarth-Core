@@ -52,6 +52,7 @@ public class RankCanBindHook implements CanBindHook {
         ABILITY_MIN_RANKS.put("astralprojection", 5);
         ABILITY_MIN_RANKS.put("astralshot", 5);
         ABILITY_MIN_RANKS.put("suffocate", 5);
+        ABILITY_MIN_RANKS.put("aircrush", 5);
         ABILITY_MIN_RANKS.put("petalstorm", 5);
 
         // Prince

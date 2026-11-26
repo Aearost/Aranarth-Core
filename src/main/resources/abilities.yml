@@ -346,6 +346,24 @@ JetStream:
   # How long the caster and carried entities stay protected from fall damage after release
   FallProtection: 5000
 
+AirCrush:
+  # Damage when fully charged (4 hearts)
+  Damage: 8.0
+  # Damage when crushed instantly (1 heart), scaling up to Damage over ChargeTime
+  MinDamage: 2.0
+  Cooldown: 10000
+  # Max distance to the target, the charge is cancelled if the target moves further away
+  Range: 15.0
+  # How long sneak must be held for the crush to reach full damage
+  ChargeTime: 2000
+  # How long the streams of air take to fully form around the target
+  StreamFormTime: 1000
+  # Number of streams of air that wrap around the target
+  Streams: 4
+  # Distance of the streams from the target when they first form, tightening to InnerRadius once charged
+  OuterRadius: 1.6
+  InnerRadius: 0.7
+
 # ==================== Water - Plant ====================
 
 LeafScythe:

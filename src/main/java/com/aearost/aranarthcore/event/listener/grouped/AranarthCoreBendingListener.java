@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.abilities.airbending.combo.AirCrush;
 import com.aearost.aranarthcore.abilities.airbending.combo.AirSnipe;
 import com.aearost.aranarthcore.abilities.airbending.combo.JetStream;
 import com.aearost.aranarthcore.abilities.airbending.soundbending.*;
@@ -57,6 +58,7 @@ import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.*;
 import com.projectkorra.projectkorra.ability.util.ComboManager;
 import com.projectkorra.projectkorra.airbending.AirBlast;
+import com.projectkorra.projectkorra.airbending.Suffocate;
 import com.projectkorra.projectkorra.avatar.AvatarState;
 import com.projectkorra.projectkorra.configuration.ConfigManager;
 import com.projectkorra.projectkorra.event.*;
@@ -148,6 +150,7 @@ public class AranarthCoreBendingListener implements Listener {
         PastLives.endAllInstances();
         new ArrayList<>(CoreAbility.getAbilities(AirSnipe.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(JetStream.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(AirCrush.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(AstralShot.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(CableSlash.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(EarthRush.class)).forEach(CoreAbility::remove);
@@ -343,6 +346,30 @@ public class AranarthCoreBendingListener implements Listener {
         e.setCancelled(true);
         // AirBlast applies its cooldown before starting
         bendingPlayer.removeCooldown("AirBlast");
+    }
+
+    /**
+     * Prevents the Suffocate from the final sneak of the AirCrush combo from starting at all.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onAirCrushSuffocateStart(final AbilityStartEvent e) {
+        if (!(e.getAbility() instanceof Suffocate suffocate)) {
+            return;
+        }
+        Player player = suffocate.getPlayer();
+        ComboManager.ComboAbilityInfo combo = ComboManager.checkForValidCombo(player);
+        if (combo == null || !combo.getName().equals("AirCrush")) {
+            return;
+        }
+        // Only suppress the Suffocate if AirCrush will actually start
+        BendingPlayer bendingPlayer = suffocate.getBendingPlayer();
+        CoreAbility airCrush = CoreAbility.getAbility(AirCrush.class);
+        if (airCrush == null || bendingPlayer.isOnCooldown(airCrush)
+                || !bendingPlayer.canBendIgnoreBindsCooldowns(airCrush)
+                || AirCrush.getActiveInstance(player.getUniqueId()) != null) {
+            return;
+        }
+        e.setCancelled(true);
     }
 
     /**
@@ -1032,6 +1059,13 @@ public class AranarthCoreBendingListener implements Listener {
         AirSnipe airSnipe = AirSnipe.getActiveInstance(player.getUniqueId());
         if (airSnipe != null) {
             airSnipe.fire();
+            return;
+        }
+
+        // AirCrush: left-click crushes the target, stronger the longer it was charged
+        AirCrush airCrush = AirCrush.getActiveInstance(player.getUniqueId());
+        if (airCrush != null) {
+            airCrush.crush();
             return;
         }
 
