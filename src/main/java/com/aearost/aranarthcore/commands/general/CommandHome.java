@@ -40,6 +40,13 @@ public class CommandHome implements CommandExecutor {
 				}
 
 				String homeName = homeNameBuilder.toString();
+
+				// "Bed" is reserved for the player's bed spawn
+				if (AranarthUtils.isReservedHomeName(homeName)) {
+					AranarthUtils.teleportToBedSpawn(player);
+					return true;
+				}
+
 				for (Home home : aranarthPlayer.getHomes()) {
 					if (homeName.equalsIgnoreCase(ChatUtils.stripColorFormatting(home.getName()))) {
 						if (home.isSmpHome() && !AranarthUtils.isOriginalPlayer(player.getUniqueId())) {
@@ -102,7 +109,8 @@ public class CommandHome implements CommandExecutor {
 				}
 				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.not_found")));
 			} else {
-				if (aranarthPlayer.getHomes().isEmpty()) {
+				// The GUI still opens when the only entry is the bed spawn
+				if (aranarthPlayer.getHomes().isEmpty() && player.getBedSpawnLocation() == null) {
 					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.no_homes")));
 				} else {
 					GuiHomes gui = new GuiHomes(player);

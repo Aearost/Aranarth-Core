@@ -8,6 +8,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,8 +31,16 @@ public class CommandHomeCompleter implements TabCompleter {
 		}
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		String input = String.join(" ", args);
-		return aranarthPlayer.getHomes().stream()
+		List<String> names = new ArrayList<>();
+		if (player.getBedSpawnLocation() != null) {
+			names.add(AranarthUtils.BED_HOME_NAME);
+		}
+		// Legacy homes named "Bed" are skipped since /home Bed always goes to the bed spawn
+		aranarthPlayer.getHomes().stream()
 			.map(home -> ChatUtils.stripColorFormatting(home.getName()))
+			.filter(name -> !AranarthUtils.isReservedHomeName(name))
+			.forEach(names::add);
+		return names.stream()
 			.filter(name -> input.isEmpty() || name.toLowerCase().startsWith(input.toLowerCase()))
 			.collect(Collectors.toList());
 	}

@@ -1984,6 +1984,37 @@ public class AranarthUtils {
         setPlayer(player.getUniqueId(), aranarthPlayer);
     }
 
+    public static final String BED_HOME_NAME = "Bed";
+
+    /**
+     * Determines whether the given home name is reserved and cannot be used for a regular home.
+     * @param homeName The home name, with or without color formatting.
+     * @return Whether the name is reserved.
+     */
+    public static boolean isReservedHomeName(String homeName) {
+        return ChatUtils.stripColorFormatting(homeName).trim().equalsIgnoreCase(BED_HOME_NAME);
+    }
+
+    /**
+     * Teleports the player to their bed spawn (or respawn anchor), notifying them of the result.
+     * @param player The player.
+     */
+    public static void teleportToBedSpawn(Player player) {
+        Location bedSpawn = player.getBedSpawnLocation();
+        if (bedSpawn == null) {
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.no_bed")));
+            return;
+        }
+        AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+        teleportPlayer(player, player.getLocation(), bedSpawn, aranarthPlayer.isInAdminMode(), "&eBed Spawn", Lang.getFor(player, "player.tp_bed_success"), success -> {
+            if (success) {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.tp_bed_success")));
+            } else {
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.tp_bed_fail")));
+            }
+        });
+    }
+
     /**
      * Deletes one of the player's homes.
      *

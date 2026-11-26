@@ -76,6 +76,12 @@ public class CommandSethome implements CommandExecutor {
 					return true;
 				}
 
+				// "Bed" is reserved for /home Bed
+				if (AranarthUtils.isReservedHomeName(strippedName)) {
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "home.reserved_name")));
+					return true;
+				}
+
 				// Replaces the existing home
 				String homeNameToDelete = "";
 				for (Home home : aranarthPlayer.getHomes()) {

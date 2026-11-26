@@ -47,13 +47,7 @@ public class GuiHomesClick {
 							player.closeInventory();
 							return;
 						}
-						AranarthUtils.teleportPlayer(player, player.getLocation(), bedSpawn, aranarthPlayer.isInAdminMode(), "&eBed Spawn", Lang.getFor(player, "player.tp_bed_success"), success -> {
-							if (success) {
-								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.tp_bed_success")));
-							} else {
-								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "player.tp_bed_fail")));
-							}
-						});
+						AranarthUtils.teleportToBedSpawn(player);
 						player.closeInventory();
 						return;
 					}
