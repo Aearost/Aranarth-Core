@@ -47,7 +47,7 @@ public class CouponRedeem {
         Player redeemer = e.getPlayer();
         if (!AranarthUtils.isSurvivalWorld(redeemer.getWorld().getName()) || redeemer.getGameMode() != GameMode.SURVIVAL) {
             if (e.getHand() == EquipmentSlot.HAND) {
-                redeemer.sendMessage(ChatUtils.chatMessage(Lang.getFor(redeemer, "dominion.must_be_gameplay_world")));
+                redeemer.sendMessage(ChatUtils.chatMessage(Lang.getFor(redeemer, "general.survival_only")));
             }
             return;
         }

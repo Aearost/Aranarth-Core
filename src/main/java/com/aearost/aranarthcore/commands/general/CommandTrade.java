@@ -34,7 +34,7 @@ public class CommandTrade implements CommandExecutor {
         }
 
         if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "trade.wrong_world")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.survival_only")));
             return true;
         }
         // Creative mode in a Survival world gives the creative inventory, whose items must never reach another player

@@ -244,7 +244,7 @@ public class InvseeListener implements Listener {
             return true;
         }
         if (!AranarthUtils.isSurvivalWorld(viewer.getWorld().getName())) {
-            viewer.sendMessage(ChatUtils.chatMessage(Lang.getFor(viewer, "user.edit_blocked")));
+            viewer.sendMessage(ChatUtils.chatMessage(Lang.getFor(viewer, "general.survival_only")));
             return true;
         }
         return false;

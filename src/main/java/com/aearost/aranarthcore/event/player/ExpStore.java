@@ -34,7 +34,7 @@ public class ExpStore {
                     if (totalExp >= amountToReduce) {
                         // The bottle would otherwise go to the Creative or Arena inventory, losing the player's EXP
                         if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
-                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "enchanting.bottled_survival_only")));
+                            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.survival_only")));
                             return;
                         }
                         int unlockLevel = EnchantingUtils.getUnlockLevel("bottled-knowledge");

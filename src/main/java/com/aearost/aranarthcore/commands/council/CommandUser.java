@@ -221,7 +221,7 @@ public class CommandUser {
 		if (target != null) {
 			// The real ender chest is opened, so items from another world's inventory could be put into it
 			if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "user.ender_blocked")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.survival_only")));
 				return;
 			}
 			player.openInventory(target.getEnderChest());

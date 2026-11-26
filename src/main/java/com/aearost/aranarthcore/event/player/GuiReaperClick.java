@@ -51,7 +51,7 @@ public class GuiReaperClick {
 
         // Reaper inventory can only be claimed from a survival world
         if (slot != 45 && (player.getWorld() == null || !AranarthUtils.isSurvivalWorld(player.getWorld().getName()))) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "reaper.survival_only")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.survival_only")));
             player.closeInventory();
             return;
         }

@@ -694,7 +694,7 @@ public class TradeManager {
         if (!AranarthUtils.isSurvivalWorld(initiator.getWorld().getName()) || CreativeSwapUtils.isSwapped(initiatorUuid)) {
             AranarthPlayer initiatorAp = AranarthUtils.getPlayer(initiatorUuid);
             String initiatorNick = initiatorAp != null ? initiatorAp.getNickname() : initiator.getName();
-            initiator.sendMessage(ChatUtils.chatMessage(Lang.getFor(initiator, "trade.wrong_world")));
+            initiator.sendMessage(ChatUtils.chatMessage(Lang.getFor(initiator, "general.survival_only")));
             if (NetworkManager.isActive()) {
                 NetworkManager.getInstance().publishTradeCancel(initiatorUuid, initiatorUuid, initiatorNick);
             }

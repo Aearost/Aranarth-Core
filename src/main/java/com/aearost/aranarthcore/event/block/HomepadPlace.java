@@ -26,7 +26,7 @@ public class HomepadPlace {
 				}
 				// A homepad in a creative world would let creative mounts and items reach survival
 				if (!AranarthUtils.isSurvivalWorld(e.getBlockPlaced().getWorld().getName())) {
-					e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "homepad.survival_only")));
+					e.getPlayer().sendMessage(ChatUtils.chatMessage(Lang.getFor(e.getPlayer(), "general.survival_only")));
 					e.setCancelled(true);
 					return;
 				}

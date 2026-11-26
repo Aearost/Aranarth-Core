@@ -63,7 +63,7 @@ public class EssenceTransfer {
         }
         // Also prevents transferring EXP in the Creative and Arena worlds, or while in creative mode
         if (!EnchantingUtils.canUseSkills(player)) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "essence.transfer_survival_only")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.survival_only")));
             return;
         }
         int unlockLevel = EnchantingUtils.getUnlockLevel("bottled-knowledge");

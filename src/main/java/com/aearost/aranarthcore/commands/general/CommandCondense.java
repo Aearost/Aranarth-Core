@@ -30,7 +30,7 @@ public class CommandCondense implements CommandExecutor {
 			}
 
 			if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "condense.wrong_world")));
+				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.survival_only")));
 				return false;
 			}
 

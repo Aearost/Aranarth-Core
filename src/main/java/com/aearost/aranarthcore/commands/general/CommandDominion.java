@@ -2608,7 +2608,7 @@ public class CommandDominion implements CommandExecutor {
      */
     private static void foodStorage(Player player) {
         if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.food_survival_only")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.survival_only")));
             return;
         }
         Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());

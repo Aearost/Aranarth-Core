@@ -35,7 +35,7 @@ public class CommandKeyClaim implements CommandExecutor {
 
         String worldName = player.getWorld().getName();
         if (!AranarthUtils.isSurvivalWorld(worldName)) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "crate.wrong_world")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.survival_only")));
             return true;
         }
 

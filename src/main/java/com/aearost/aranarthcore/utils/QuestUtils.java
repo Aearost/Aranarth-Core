@@ -871,7 +871,7 @@ public class QuestUtils {
         if (quest.hasItemReward()) {
             // Item rewards can only be claimed in a survival world, though crate keys are sent to /keyclaim
             if (!QuestRewardUtils.giveItems(player, quest)) {
-                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.must_be_gameplay_world")));
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.survival_only")));
                 return false;
             }
             String itemName = QuestRewardUtils.getDisplayName(quest.getItemReward());
@@ -978,7 +978,7 @@ public class QuestUtils {
             return false;
         }
         if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "dominion.must_be_gameplay_world")));
+            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.survival_only")));
             return false;
         }
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
