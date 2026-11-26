@@ -128,6 +128,7 @@ public class AranarthPlayer {
     private boolean isSitDisabled = false;
     private boolean isJobsMessageDisabled = false;
     private boolean isBigTreeDisabled = false;
+    private boolean isAranarthiumParticlesDisabled = false;
     private final Set<String> disabledTrees = new HashSet<>();
     private boolean isArmorHidden = false;
     private String sitCushionColor = "WHITE";
@@ -2203,6 +2204,17 @@ public class AranarthPlayer {
 
     public void setBigTreeDisabled(boolean bigTreeDisabled) {
         this.isBigTreeDisabled = bigTreeDisabled;
+    }
+
+    /**
+     * Provides whether the player has hidden every Aranarthium armour particle, their own included.
+     */
+    public boolean isAranarthiumParticlesDisabled() {
+        return isAranarthiumParticlesDisabled;
+    }
+
+    public void setAranarthiumParticlesDisabled(boolean aranarthiumParticlesDisabled) {
+        this.isAranarthiumParticlesDisabled = aranarthiumParticlesDisabled;
     }
 
     /**

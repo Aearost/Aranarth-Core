@@ -400,6 +400,18 @@ public class GuiToggleClick {
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.OAK_SAPLING, Lang.getFor(player, "gui.toggle.big_trees"), !aranarthPlayer.isBigTreeDisabled()));
             }
+            // Aranarthium armour particles
+            case 42 -> {
+                if (aranarthPlayer.isAranarthiumParticlesDisabled()) {
+                    aranarthPlayer.setAranarthiumParticlesDisabled(false);
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.aranarthium_enabled")));
+                } else {
+                    aranarthPlayer.setAranarthiumParticlesDisabled(true);
+                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.aranarthium_disabled")));
+                }
+                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.BLAZE_POWDER, Lang.getFor(player, "gui.toggle.aranarthium_particles"), !aranarthPlayer.isAranarthiumParticlesDisabled()));
+            }
         }
     }
 

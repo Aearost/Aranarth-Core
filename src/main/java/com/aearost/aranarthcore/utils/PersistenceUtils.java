@@ -6213,6 +6213,7 @@ public class PersistenceUtils {
             obj.addProperty("sitDisabled", ap.isSitDisabled());
             obj.addProperty("jobsMessageDisabled", ap.isJobsMessageDisabled());
             obj.addProperty("bigTreeDisabled", ap.isBigTreeDisabled());
+            obj.addProperty("aranarthiumParticlesDisabled", ap.isAranarthiumParticlesDisabled());
             obj.addProperty("disabledTrees", ap.getEncodedDisabledTrees());
             obj.addProperty("armorHidden", ap.isArmorHidden());
             obj.addProperty("sitCushionColor", ap.getSitCushionColor());
@@ -8332,6 +8333,9 @@ public class PersistenceUtils {
                 if (obj.has("bigTreeDisabled")) {
                     ap.setBigTreeDisabled(obj.get("bigTreeDisabled").getAsBoolean());
                 }
+                if (obj.has("aranarthiumParticlesDisabled")) {
+                    ap.setAranarthiumParticlesDisabled(obj.get("aranarthiumParticlesDisabled").getAsBoolean());
+                }
                 if (obj.has("disabledTrees")) {
                     ap.setEncodedDisabledTrees(obj.get("disabledTrees").getAsString());
                 }
@@ -8413,6 +8417,7 @@ public class PersistenceUtils {
         obj.addProperty("sitDisabled", ap.isSitDisabled());
         obj.addProperty("jobsMessageDisabled", ap.isJobsMessageDisabled());
         obj.addProperty("bigTreeDisabled", ap.isBigTreeDisabled());
+        obj.addProperty("aranarthiumParticlesDisabled", ap.isAranarthiumParticlesDisabled());
         obj.addProperty("disabledTrees", ap.getEncodedDisabledTrees());
         obj.addProperty("armorHidden", ap.isArmorHidden());
         obj.addProperty("sitCushionColor", ap.getSitCushionColor());
@@ -8585,6 +8590,9 @@ public class PersistenceUtils {
             }
             if (obj.has("bigTreeDisabled")) {
                 ap.setBigTreeDisabled(obj.get("bigTreeDisabled").getAsBoolean());
+            }
+            if (obj.has("aranarthiumParticlesDisabled")) {
+                ap.setAranarthiumParticlesDisabled(obj.get("aranarthiumParticlesDisabled").getAsBoolean());
             }
             if (obj.has("disabledTrees")) {
                 ap.setEncodedDisabledTrees(obj.get("disabledTrees").getAsString());

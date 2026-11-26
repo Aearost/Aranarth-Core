@@ -141,6 +141,7 @@ public class EchoArmourUtils {
 				continue;
 			}
 			hear(wearer, source);
+			AranarthiumEffectsUtils.playEchoListen(wearer, origin);
 		}
 	}
 

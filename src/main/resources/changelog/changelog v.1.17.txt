@@ -18,8 +18,10 @@ Bending & Abilities
 Dominion
 
 Aranarthium, Items & Crafting
-[+] Added custom Aranarthium texture support
+[+] Added custom Aranarthium texture support with unique animations and particles
 [+] Added Echo Aranarthium armour, which provides buffs involving sound and sonar
+[+] Added /toggle aranarthium to toggle custom particles from Aranarthium armor
+[+] Made all Aranarthium armour particles follow /particles
 [~] Fixed mcMMO Salvage downgrading over-leveled enchantments to their vanilla max level
 [~] Fixed Essence of Lifesteal not healing when attacking with a spear
 

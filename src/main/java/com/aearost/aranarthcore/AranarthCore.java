@@ -43,7 +43,6 @@ import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.util.TempBlock;
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import org.bukkit.*;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.command.SimpleCommandMap;
@@ -722,14 +721,15 @@ public class AranarthCore extends JavaPlugin {
         }, 0, 100);
 
         // Particle trails for Scorched (nether boost) and Aquatic (water/rain/thunder boost) armor sets
+        // (Fae's particles are the fairy dust in AranarthiumEffectsUtils; Fae keeps its biome sounds here)
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 Location loc = player.getLocation();
                 World world = player.getWorld();
                 if (AranarthUtils.isWearingArmorType(player, "scorched")
                         && world.getName().endsWith("_nether")) {
-                    world.spawnParticle(Particle.FLAME, loc, 3, 0.3, 0.15, 0.3, 0.02);
-                    world.spawnParticle(Particle.LAVA, loc, 1, 0.25, 0.1, 0.25, 0);
+                    AranarthiumEffectsUtils.spawn(player, Particle.FLAME, loc, 3, 0.3, 0.15, 0.3, 0.02, null);
+                    AranarthiumEffectsUtils.spawn(player, Particle.LAVA, loc, 1, 0.25, 0.1, 0.25, 0, null);
                     if (new Random().nextInt(20) == 0) {
                         int arVol = AranarthUtils.getPlayer(player.getUniqueId()).getAranarthiumSoundVolume();
                         if (arVol > 0) {
@@ -741,8 +741,8 @@ public class AranarthCore extends JavaPlugin {
                             || AranarthUtils.getWeather() == Weather.THUNDER;
                     if (isRaining || player.isInWater()) {
                         Location above = loc.clone().add(0, 0.3, 0);
-                        world.spawnParticle(Particle.DRIPPING_WATER, above, 5, 0.3, 0.2, 0.3, 0);
-                        world.spawnParticle(Particle.RAIN, above, 3, 0.3, 0.2, 0.3, 0);
+                        AranarthiumEffectsUtils.spawn(player, Particle.DRIPPING_WATER, above, 5, 0.3, 0.2, 0.3, 0, null);
+                        AranarthiumEffectsUtils.spawn(player, Particle.RAIN, above, 3, 0.3, 0.2, 0.3, 0, null);
                         if (new Random().nextInt(20) == 0) {
                             int arVol = AranarthUtils.getPlayer(player.getUniqueId()).getAranarthiumSoundVolume();
                             if (arVol > 0) {
@@ -769,36 +769,6 @@ public class AranarthCore extends JavaPlugin {
                             if (arVol > 0) {
                                 player.playSound(loc, Sound.ENTITY_ALLAY_AMBIENT_WITH_ITEM, 0.9f * (arVol / 100f), 0.6f);
                             }
-                        }
-                    }
-
-                    // Particle trail in Fae biomes
-                    if (inFaeBiome) {
-                        float yaw = loc.getYaw();
-                        double radians = Math.toRadians(yaw);
-                        double dx = Math.sin(radians) * 0.4;
-                        double dz = -Math.cos(radians) * 0.4;
-                        Location trailLoc = loc.clone().add(dx, 0.3, dz);
-
-                        // Scale particle size by the player's scale attribute
-                        var scaleAttr = player.getAttribute(Attribute.SCALE);
-                        float playerScale = (scaleAttr != null) ? (float) scaleAttr.getValue() : 1.0f;
-                        float particleSize = Math.max(0.1f, Math.min(playerScale, 4.0f));
-
-                        // Spawn several particles per tick with varied colours for density
-                        Random rng = new Random();
-                        for (int i = 0; i < 8; i++) {
-                            int colorChoice = rng.nextInt(10);
-                            Color particleColor;
-                            if (colorChoice < 4) {
-                                particleColor = Color.fromRGB(0xB5, 0x7F, 0xB3); // lilac
-                            } else if (colorChoice < 8) {
-                                particleColor = Color.fromRGB(0xFB, 0xA0, 0xE3); // pink
-                            } else {
-                                particleColor = Color.fromRGB(0xFF, 0xF5, 0xE6); // cream
-                            }
-                            world.spawnParticle(Particle.DUST, trailLoc, 1, 0.15, 0.12, 0.15,
-                                    new Particle.DustOptions(particleColor, particleSize));
                         }
                     }
                 } else if (AranarthUtils.isWearingArmorType(player, "dwarven")) {
@@ -847,6 +817,8 @@ public class AranarthCore extends JavaPlugin {
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, AranarthUtils::applySoulboundXpMagnet, 0, 2);
         // Tracks Echo Aranarthium wearers, hiding them from the live map while they wear it
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, EchoArmourUtils::refreshWearers, 0, 10);
+        // Particle-based Aranarthium armour animations (texture animations and glow live in the resource pack shader)
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, AranarthiumEffectsUtils::tick, 0, AranarthiumEffectsUtils.PERIOD_TICKS);
 
         // Flower trail for Fae Aranarthium in Fae biomes - random 1-10 tick interval, only when moving
         scheduleFaeFlowerTrail();
@@ -1859,6 +1831,7 @@ public class AranarthCore extends JavaPlugin {
         saveAll();
 
         EchoArmourUtils.disable();
+        AranarthiumEffectsUtils.disable();
         if (squaremapIntegration != null) {
             squaremapIntegration.disable();
         }

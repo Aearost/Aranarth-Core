@@ -207,6 +207,9 @@ public class GuiToggle {
         // Big Trees
         gui.setItem(41, buildToggleItem(player, Material.OAK_SAPLING, Lang.getFor(player, "gui.toggle.big_trees"), !aranarthPlayer.isBigTreeDisabled()));
 
+        // Aranarthium armour particles
+        gui.setItem(42, buildToggleItem(player, Material.BLAZE_POWDER, Lang.getFor(player, "gui.toggle.aranarthium_particles"), !aranarthPlayer.isAranarthiumParticlesDisabled()));
+
         return gui;
     }
 

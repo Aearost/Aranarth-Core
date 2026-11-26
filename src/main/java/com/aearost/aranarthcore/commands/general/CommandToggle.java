@@ -406,6 +406,15 @@ public class CommandToggle implements CommandExecutor {
 						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.servertips_disabled")));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				} else if (args[0].equalsIgnoreCase("aranarthium")) {
+					if (aranarthPlayer.isAranarthiumParticlesDisabled()) {
+						aranarthPlayer.setAranarthiumParticlesDisabled(false);
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.aranarthium_enabled")));
+					} else {
+						aranarthPlayer.setAranarthiumParticlesDisabled(true);
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.aranarthium_disabled")));
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("jobsmsg")) {
 					if (aranarthPlayer.isJobsMessageDisabled()) {
 						aranarthPlayer.setJobsMessageDisabled(false);
