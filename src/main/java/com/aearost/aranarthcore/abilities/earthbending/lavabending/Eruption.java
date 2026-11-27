@@ -107,7 +107,7 @@ public class Eruption extends LavaAbility implements AddonAbility {
             return;
         }
 
-        cooldown = AbilityConfig.getLong("Eruption.Cooldown");
+        cooldown = AbilityConfig.getLong("Eruption.CooldownPerGeyser");
         range = AbilityConfig.getDouble("Eruption.Range");
         damage = AbilityConfig.getDouble("Eruption.Damage");
         sourceRange = AbilityConfig.getInt("Eruption.SourceRange");
@@ -597,9 +597,12 @@ public class Eruption extends LavaAbility implements AddonAbility {
         return false;
     }
 
+    /**
+     * The cooldown scales with the number of geysers summoned.
+     */
     @Override
     public long getCooldown() {
-        return cooldown;
+        return cooldown * Math.max(1, geysers.size());
     }
 
     @Override

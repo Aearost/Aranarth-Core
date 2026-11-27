@@ -750,7 +750,8 @@ MetalStrips:
 
 Eruption:
   Damage: 6.0
-  Cooldown: 12000
+  # Cooldown is multiplied by the number of geysers summoned
+  CooldownPerGeyser: 4000
   Range: 12.0
   SourceRange: 15
   Geysers: 3
