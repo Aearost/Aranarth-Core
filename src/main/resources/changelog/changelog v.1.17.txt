@@ -25,6 +25,7 @@ Aranarthium, Items & Crafting
 [~] Fixed mcMMO Salvage downgrading over-leveled enchantments to their vanilla max level
 [~] Fixed Essence of Lifesteal not healing when attacking with a spear
 [~] Eruption's cooldown now scales with the number of geysers summoned (4s each)
+[~] Scorched Aranarthium wearers are now immune to winter frostbite
 
 Economy, Jobs & Quests
 

@@ -1073,6 +1073,12 @@ public class DateUtils {
                 continue;
             }
 
+            // Scorched Aranarthium makes you immune to frostbite
+            if (AranarthUtils.isWearingArmorType(player, "scorched")) {
+                outdoorExposureStart.remove(player.getUniqueId());
+                continue;
+            }
+
             Location loc = player.getLocation();
             Block highestBlock = loc.getWorld().getHighestBlockAt(loc.getBlockX(), loc.getBlockZ());
             boolean isOutdoors = loc.getBlockY() + 2 >= highestBlock.getLocation().getBlockY();
