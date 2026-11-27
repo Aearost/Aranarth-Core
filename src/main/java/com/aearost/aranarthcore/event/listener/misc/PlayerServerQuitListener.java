@@ -56,6 +56,7 @@ public class PlayerServerQuitListener implements Listener {
         // Cancel any active trade when a player disconnects
         TradeManager.handleQuit(player);
         CommandUser.clear(player.getUniqueId());
+        RandomizerUtils.clearAwaitingPresetName(player.getUniqueId());
         // Anyone still editing this player's ender chest would be changing a copy that was already saved
         for (Player viewer : Bukkit.getOnlinePlayers()) {
             if (!viewer.equals(player) && viewer.getOpenInventory().getTopInventory().equals(player.getEnderChest())) {

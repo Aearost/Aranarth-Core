@@ -164,6 +164,8 @@ public class InventoryClickEventListener implements Listener {
                 new GuiStoreClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(Lang.getFor(player, "gui.compressor.title"))) {
                 new GuiCompressorClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, GuiRandomizer.TITLE_KEY))) {
+                new GuiRandomizerClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(Lang.getFor(player, "gui.crate.title_vote").split(" - ")[0] + " - ")) {
                 new GuiCrateClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(Lang.getFor(player, "gui.shoplocation.title"))) {

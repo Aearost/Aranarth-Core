@@ -1,22 +1,20 @@
 package com.aearost.aranarthcore.commands.general;
 
-import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.gui.GuiRandomizer;
 import com.aearost.aranarthcore.objects.RandomItem;
-import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.Lang;
-import org.bukkit.Material;
+import com.aearost.aranarthcore.utils.RandomizerUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
- * Allows players to input a pattern and randomize their block placements.
+ * Allows players to input a pattern and randomize their block placements, and to save patterns as presets.
  */
 public class CommandRandomizer implements CommandExecutor {
 
@@ -29,116 +27,86 @@ public class CommandRandomizer implements CommandExecutor {
 	 */
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
-		if (sender instanceof Player player) {
-			if (!player.hasPermission("aranarth.randomizer")) {
-				player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
-				return true;
-			}
-
-			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			if (args.length == 0) {
-				if (aranarthPlayer.isRandomizing()) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.block_no_longer")));
-				} else {
-					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.blocks_now")));
-				}
-				aranarthPlayer.isRandomizing(!aranarthPlayer.isRandomizing());
-				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-				return true;
-			} else {
-				if (!args[0].contains(",")) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.need_multiple_items")));
-					return true;
-				}
-
-				String[] components = args[0].split(",");
-				// Materials entered without a percentage, which evenly share whatever percentage is left over
-				List<Material> unspecifiedMaterials = new ArrayList<>();
-				List<RandomItem> randomItems = new ArrayList<>();
-				int specifiedPercentageSum = 0;
-				for (String component : components) {
-					String materialName;
-					int percentage = 0;
-					if (component.contains("%")) {
-						String[] percentageItem = component.split("%");
-						if (percentageItem.length != 2) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.invalid_format")));
-							return true;
-						}
-
-						// Validates the percentage was entered correctly
-						try {
-							percentage = Integer.parseInt(percentageItem[0]);
-						} catch (NumberFormatException e) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.invalid_percent")));
-							return true;
-						}
-						if (percentage <= 0) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.zero_percent")));
-							return true;
-						}
-						materialName = percentageItem[1];
-					} else {
-						materialName = component;
-					}
-
-					// Validates a proper item was entered
-					Material material;
-					try {
-						material = Material.valueOf(materialName.toUpperCase());
-					} catch (IllegalArgumentException e) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.invalid_material")));
-						return true;
-					}
-
-					if (component.contains("%")) {
-						specifiedPercentageSum += percentage;
-						randomItems.add(new RandomItem(percentage, new ItemStack(material, 1)));
-					} else {
-						unspecifiedMaterials.add(material);
-					}
-				}
-
-				// Evenly splits the remaining percentage between the materials entered without one
-				if (!unspecifiedMaterials.isEmpty()) {
-					int remaining = 100 - specifiedPercentageSum;
-					int count = unspecifiedMaterials.size();
-					if (remaining < count) {
-						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.not_100_percent")));
-						return true;
-					}
-					int base = remaining / count;
-					int extra = remaining % count;
-					for (int i = 0; i < count; i++) {
-						int share = base + (i < extra ? 1 : 0);
-						randomItems.add(new RandomItem(share, new ItemStack(unspecifiedMaterials.get(i), 1)));
-					}
-				}
-
-				// Ensures the total sums to 100%
-				int totalPercentageSum = 0;
-				for (RandomItem randomItem : randomItems) {
-					totalPercentageSum += randomItem.getPercentage();
-				}
-				if (totalPercentageSum != 100) {
-					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.not_100_percent")));
-					return true;
-				} else {
-					aranarthPlayer.setRandomItems(randomItems);
-					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.pattern_updated")));
-
-					// Setting a pattern also turns the randomizer on, but never toggles it off if it was already on
-					if (!aranarthPlayer.isRandomizing()) {
-						aranarthPlayer.isRandomizing(true);
-						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.blocks_now")));
-					}
-					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-					return true;
-				}
-			}
-		} else {
+		if (!(sender instanceof Player player)) {
 			sender.sendMessage(ChatUtils.chatMessage(Lang.getFor(sender, "general.no_permission_console")));
 			return true;
+		}
+		if (!player.hasPermission("aranarth.randomizer")) {
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
+			return true;
+		}
+
+		// /randomizer opens the GUI
+		if (args.length == 0) {
+			new GuiRandomizer(player).openGui();
+			return true;
+		}
+
+		if (args[0].equalsIgnoreCase("preset")) {
+			handlePreset(player, args);
+			return true;
+		}
+
+		// /randomizer <pattern> sets the active pattern
+		List<RandomItem> randomItems = RandomizerUtils.parsePattern(player, RandomizerUtils.joinPattern(args, 0));
+		if (randomItems != null) {
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "randomizer.pattern_updated")));
+			RandomizerUtils.applyPattern(player, randomItems);
+		}
+		return true;
+	}
+
+	/**
+	 * Handles /randomizer preset <create|bind|delete|list>.
+	 */
+	private void handlePreset(Player player, String[] args) {
+		String usage = "randomizer preset <create|bind|delete|list>";
+		if (args.length < 2) {
+			player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", usage)));
+			return;
+		}
+		switch (args[1].toLowerCase()) {
+			case "create" -> {
+				if (args.length < 4) {
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax",
+							"usage", "randomizer preset create <name> <pattern>")));
+					return;
+				}
+				// The name can have spaces, so the pattern starts at the first argument with a comma,
+				// or at the last argument if none has one
+				int patternStart = args.length - 1;
+				for (int i = 3; i < args.length; i++) {
+					if (args[i].contains(",")) {
+						// A pattern typed as "stone ,andesite" starts on the argument before the comma
+						patternStart = args[i].startsWith(",") ? i - 1 : i;
+						break;
+					}
+				}
+				patternStart = Math.max(patternStart, 3);
+				String name = String.join(" ", Arrays.copyOfRange(args, 2, patternStart));
+				List<RandomItem> randomItems = RandomizerUtils.parsePattern(player, RandomizerUtils.joinPattern(args, patternStart));
+				if (randomItems != null) {
+					RandomizerUtils.savePreset(player, name, randomItems);
+				}
+			}
+			case "bind" -> {
+				if (args.length < 3) {
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax",
+							"usage", "randomizer preset bind <name>")));
+					return;
+				}
+				RandomizerUtils.bindPreset(player, String.join(" ", Arrays.copyOfRange(args, 2, args.length)));
+			}
+			case "delete" -> {
+				if (args.length < 3) {
+					player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax",
+							"usage", "randomizer preset delete <name>")));
+					return;
+				}
+				RandomizerUtils.deletePreset(player, String.join(" ", Arrays.copyOfRange(args, 2, args.length)));
+			}
+			case "list" -> RandomizerUtils.listPresets(player);
+			default -> player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", usage)));
 		}
 	}
 

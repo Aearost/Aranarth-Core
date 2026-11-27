@@ -210,6 +210,13 @@ public class GuiToggle {
         // Aranarthium armour particles
         gui.setItem(42, buildToggleItem(player, Material.BLAZE_POWDER, Lang.getFor(player, "gui.toggle.aranarthium_particles"), !aranarthPlayer.isAranarthiumParticlesDisabled()));
 
+        // Randomizer
+        if (player.hasPermission("aranarth.randomizer")) {
+            gui.setItem(43, buildToggleItem(player, Material.BRUSH, Lang.getFor(player, "gui.toggle.randomizer"), aranarthPlayer.isRandomizing()));
+        } else {
+            gui.setItem(43, buildLockedItem(player, Material.BRUSH, Lang.getFor(player, "gui.toggle.randomizer")));
+        }
+
         return gui;
     }
 

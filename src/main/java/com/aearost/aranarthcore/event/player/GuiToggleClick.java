@@ -10,6 +10,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.GateUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PermissionUtils;
+import com.aearost.aranarthcore.utils.RandomizerUtils;
 import com.aearost.aranarthcore.utils.SitUtils;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -411,6 +412,14 @@ public class GuiToggleClick {
                 }
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.BLAZE_POWDER, Lang.getFor(player, "gui.toggle.aranarthium_particles"), !aranarthPlayer.isAranarthiumParticlesDisabled()));
+            }
+            // Randomizer
+            case 43 -> {
+                if (!player.hasPermission("aranarth.randomizer")) {
+                    return;
+                }
+                RandomizerUtils.toggle(player);
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.BRUSH, Lang.getFor(player, "gui.toggle.randomizer"), AranarthUtils.getPlayer(player.getUniqueId()).isRandomizing()));
             }
         }
     }

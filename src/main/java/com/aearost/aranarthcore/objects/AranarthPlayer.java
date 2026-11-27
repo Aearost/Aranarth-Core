@@ -50,6 +50,7 @@ public class AranarthPlayer {
     private int levelBeforeDeath;
     private boolean isAddingToShulker;
     private List<RandomItem> randomItems;
+    private List<RandomizerPreset> randomizerPresets = new ArrayList<>();
     private boolean isRandomizing;
     private boolean isMissingItemMessageSent;
     private double balance;
@@ -719,7 +720,7 @@ public class AranarthPlayer {
     }
 
     /**
-     * Temporary variable tracking the items and percentages the player is randomizing.
+     * Provides the items and percentages the player is randomizing.
      *
      * @return The list of items and percentages the player is randomizing.
      */
@@ -737,7 +738,25 @@ public class AranarthPlayer {
     }
 
     /**
-     * Temporary variable tracking if the player is actively randomizing items.
+     * Provides the randomizer patterns the player has saved as presets.
+     *
+     * @return The player's saved randomizer presets.
+     */
+    public List<RandomizerPreset> getRandomizerPresets() {
+        return randomizerPresets;
+    }
+
+    /**
+     * Setting the randomizer patterns the player has saved as presets.
+     *
+     * @param randomizerPresets The player's saved randomizer presets.
+     */
+    public void setRandomizerPresets(List<RandomizerPreset> randomizerPresets) {
+        this.randomizerPresets = randomizerPresets != null ? randomizerPresets : new ArrayList<>();
+    }
+
+    /**
+     * Tracks if the player is actively randomizing items.
      *
      * @return Whether the player is randomizing items.
      */
@@ -746,7 +765,7 @@ public class AranarthPlayer {
     }
 
     /**
-     * Setting the temporary variable tracking whether the player is randomizing items.
+     * Setting whether the player is randomizing items.
      *
      * @param isRandomizing Whether the player is randomizing items.
      */

@@ -249,6 +249,14 @@ public class PlayerChatListener implements Listener {
             return;
         }
 
+        // If the player is naming a randomizer preset from the /randomizer GUI, handle it
+        if (RandomizerUtils.isAwaitingPresetName(player.getUniqueId())) {
+            e.setCancelled(true);
+            final String presetName = message;
+            Bukkit.getScheduler().runTask(plugin, () -> RandomizerUtils.handlePresetNameInput(player, presetName));
+            return;
+        }
+
         Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
         // If resources are actively being claimed by the Dominion, prioritize this above all other chat functionality
         if (dominion != null) {

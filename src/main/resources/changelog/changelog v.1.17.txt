@@ -33,6 +33,7 @@ Chat, UI & Sounds
 [~] Merged all Survival world-only error messages into one shared message
 
 Quality of Life
+[+] Implemented presets for /randomizer
 [~] Fixed right-clicking leaves with an axe saying you must be sneaking to strip logs
 [~] /countdown sparring and the death stun now only apply in Survival worlds, not the arena
 [~] The /recipe browse list now shows results as a single item

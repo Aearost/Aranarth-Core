@@ -12,6 +12,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.GateUtils;
 import com.aearost.aranarthcore.utils.Lang;
 import com.aearost.aranarthcore.utils.PermissionUtils;
+import com.aearost.aranarthcore.utils.RandomizerUtils;
 import com.aearost.aranarthcore.utils.SitUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -415,6 +416,12 @@ public class CommandToggle implements CommandExecutor {
 						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.aranarthium_disabled")));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				} else if (args[0].equalsIgnoreCase("randomizer")) {
+					if (!player.hasPermission("aranarth.randomizer")) {
+						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.no_permission")));
+						return true;
+					}
+					RandomizerUtils.toggle(player);
 				} else if (args[0].equalsIgnoreCase("jobsmsg")) {
 					if (aranarthPlayer.isJobsMessageDisabled()) {
 						aranarthPlayer.setJobsMessageDisabled(false);

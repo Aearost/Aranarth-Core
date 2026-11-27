@@ -6219,6 +6219,7 @@ public class PersistenceUtils {
             obj.addProperty("sitCushionColor", ap.getSitCushionColor());
             obj.addProperty("prefixStyles", ap.getEncodedPrefixStyles());
             obj.addProperty("language", ap.getLanguage());
+            RandomizerUtils.writeToJson(obj, ap);
             try {
                 db.savePlayerToggles(uuid, GSON.toJson(obj));
             } catch (Exception e) {
@@ -8351,6 +8352,7 @@ public class PersistenceUtils {
                 if (obj.has("language")) {
                     ap.setLanguage(obj.get("language").getAsString());
                 }
+                RandomizerUtils.readFromJson(obj, ap);
                 AranarthUtils.setPlayer(uuid, ap);
             } catch (Exception e) {
                 Bukkit.getLogger().warning("[AC] Failed to parse toggles for " + uuid + ": " + e.getMessage());
@@ -8423,6 +8425,7 @@ public class PersistenceUtils {
         obj.addProperty("sitCushionColor", ap.getSitCushionColor());
         obj.addProperty("prefixStyles", ap.getEncodedPrefixStyles());
         obj.addProperty("language", ap.getLanguage());
+        RandomizerUtils.writeToJson(obj, ap);
         return GSON.toJson(obj);
     }
 
@@ -8609,6 +8612,7 @@ public class PersistenceUtils {
             if (obj.has("language")) {
                 ap.setLanguage(obj.get("language").getAsString());
             }
+            RandomizerUtils.readFromJson(obj, ap);
             AranarthUtils.setPlayer(uuid, ap);
             // Toggles load after the join permissions, and an Architect's permissions depend on architect mode
             Player player = Bukkit.getPlayer(uuid);
