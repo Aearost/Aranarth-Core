@@ -11,8 +11,12 @@ import org.bukkit.Sound;
 import org.bukkit.Tag;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
+import org.bukkit.entity.TNTPrimed;
+import org.bukkit.entity.Tameable;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.world.GenericGameEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
@@ -129,6 +133,9 @@ public class EchoArmourUtils {
 			return;
 		}
 
+		// Vibrations a wearer caused indirectly can still be heard, but never fully charge Amplification
+		boolean canCharge = !isCausedByWearer(source, gameEvent);
+
 		Location origin = e.getLocation();
 		for (UUID uuid : List.copyOf(wearers)) {
 			Player wearer = Bukkit.getPlayer(uuid);
@@ -140,9 +147,38 @@ public class EchoArmourUtils {
 			if (ear.distanceSquared(origin) > HEARING_RANGE * HEARING_RANGE || isOccluded(origin, ear)) {
 				continue;
 			}
-			hear(wearer, source);
+			hear(wearer, source, canCharge);
 			AranarthiumEffectsUtils.playEchoListen(wearer, origin);
 		}
+	}
+
+	/**
+	 * Provides whether a vibration was indirectly caused by a wearer, such as an item they threw, TNT they lit,
+	 * their pet, or an entity they just damaged.
+	 */
+	private static boolean isCausedByWearer(Entity source, GameEvent gameEvent) {
+		if (source == null) {
+			return false;
+		}
+		if (source instanceof Item item) {
+			return item.getThrower() != null && wearers.contains(item.getThrower());
+		}
+		if (source instanceof TNTPrimed tnt) {
+			return tnt.getSource() instanceof Player player && wearers.contains(player.getUniqueId());
+		}
+		if (source instanceof Tameable tameable && tameable.getOwner() != null && wearers.contains(tameable.getOwner().getUniqueId())) {
+			return true;
+		}
+		if (gameEvent == GameEvent.ENTITY_DAMAGE || gameEvent == GameEvent.ENTITY_DIE) {
+			if (source.getLastDamageCause() instanceof EntityDamageByEntityEvent damageEvent) {
+				Entity damager = damageEvent.getDamager();
+				if (damager instanceof Projectile projectile && projectile.getShooter() instanceof Player shooter) {
+					return wearers.contains(shooter.getUniqueId());
+				}
+				return damager instanceof Player player && wearers.contains(player.getUniqueId());
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -188,9 +224,13 @@ public class EchoArmourUtils {
 
 	/**
 	 * Handles a wearer hearing a vibration, which fully charges Amplification and reveals whatever made it.
+	 *
+	 * @param canCharge Whether the vibration can fully charge Amplification, which is false if a wearer caused it.
 	 */
-	private static void hear(Player wearer, Entity source) {
-		Amplification.echoCharge(wearer);
+	private static void hear(Player wearer, Entity source, boolean canCharge) {
+		if (canCharge) {
+			Amplification.echoCharge(wearer);
+		}
 
 		if (!SpecialArrowUtils.canReveal(wearer, source)) {
 			return;

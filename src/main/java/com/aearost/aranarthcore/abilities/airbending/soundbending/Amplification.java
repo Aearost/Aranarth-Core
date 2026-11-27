@@ -373,7 +373,8 @@ public class Amplification extends SoundAbility implements AddonAbility {
     public String getDescription() {
         return "Compress the air around you and release it in a burst of amplification, supercharging your next damaging Sound ability. " +
                 "Hold sneak to charge, then release to empower your next soundbending ability - " +
-                "up to 3x damage if used immediately, decaying over time.\n" +
+                "up to 3x damage if used immediately, decaying over time. " +
+                "Echo Aranarthium detecting vibrations will also result in Amplification fully charging, applying its cooldown only  upon using a " + SoundAbility.SOUND.getColor() + "Sound &fability\n" +
                 ChatUtils.translateToColor("&fUsage: Hold Sneak (to charge) > Release Sneak > Use a " + SoundAbility.SOUND.getColor() + "Sound &fability");
     }
 
