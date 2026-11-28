@@ -47,16 +47,28 @@ public class GuiBlacklistClick {
             return;
         }
 
-        // Mode toggle
+        // On/off toggle
+        if (slot == 4) {
+            int method = AranarthUtils.toggleBlacklist(player);
+            player.playSound(player, Sound.UI_BUTTON_CLICK, 1F, 0.8F);
+            player.getOpenInventory().getTopInventory().setItem(4, GuiBlacklist.buildOnOffButton(player, method != -1));
+            return;
+        }
+
+        // Mode toggle (ignore/trash)
         if (slot == 28) {
-            int current = ap.getBlacklistingMethod();
-            int next = current == 0 ? 1 : current == 1 ? -1 : 0;
-            ap.setBlacklistingMethod(next);
-            AranarthUtils.setPlayer(player.getUniqueId(), ap);
-            String modeName = Lang.getFor(player, next == 0 ? "blacklist.mode_ignore" : next == 1 ? "blacklist.mode_trash" : "blacklist.mode_off");
-            player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "blacklist.mode_set", "mode", modeName)));
+            int next = (ap.getBlacklistingMethod() == -1 ? ap.getLastActiveBlacklistingMethod() : ap.getBlacklistingMethod()) == 0 ? 1 : 0;
+            if (ap.getBlacklistingMethod() == -1) {
+                // Blacklist is off, so only remember the mode for when it is toggled back on
+                ap.setLastActiveBlacklistingMethod(next);
+                AranarthUtils.setPlayer(player.getUniqueId(), ap);
+                String modeName = Lang.getFor(player, next == 0 ? "blacklist.mode_ignore" : "blacklist.mode_trash");
+                player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "blacklist.mode_saved", "mode", modeName)));
+            } else {
+                AranarthUtils.setBlacklistMethod(player, next);
+            }
             player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1.0F);
-            player.getOpenInventory().getTopInventory().setItem(28, GuiBlacklist.buildToggleButton(player, next));
+            player.getOpenInventory().getTopInventory().setItem(28, GuiBlacklist.buildModeButton(player, next));
             return;
         }
 

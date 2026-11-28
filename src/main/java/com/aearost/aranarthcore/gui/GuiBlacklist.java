@@ -45,6 +45,9 @@ public class GuiBlacklist {
         for (int i = 0; i <= 8; i++) inv.setItem(i, pane.clone());
         for (int i = 36; i <= 44; i++) inv.setItem(i, pane.clone());
 
+        // On/off toggle centered in the top row
+        inv.setItem(4, buildOnOffButton(player, method != -1));
+
         // Row 1 (slots 9-17): presets 1-3 at indices 2, 4, 6 (slots 11, 13, 15)
         inv.setItem(11, buildPresetButton(0, presets, activeIndex));
         inv.setItem(13, buildPresetButton(1, presets, activeIndex));
@@ -56,7 +59,7 @@ public class GuiBlacklist {
         inv.setItem(24, buildPresetButton(5, presets, activeIndex));
 
         // Row 3 (slots 27-35): toggle at index 1 (28), select preset centered (31), clear at index 7 (34)
-        inv.setItem(28, buildToggleButton(player, method));
+        inv.setItem(28, buildModeButton(player, method == -1 ? ap.getLastActiveBlacklistingMethod() : method));
         inv.setItem(31, buildActionButton(Material.NETHER_STAR, Lang.getFor(player, "gui.blacklist.select_preset")));
         inv.setItem(34, buildActionButton(Material.TNT, Lang.getFor(player, "gui.blacklist.clear_preset")));
 
@@ -81,22 +84,33 @@ public class GuiBlacklist {
         return item;
     }
 
-    public static ItemStack buildToggleButton(Player player, int method) {
-        Material mat;
-        String name;
-        if (method == 0) {
-            mat = Material.HOPPER;
-            name = Lang.getFor(player, "gui.blacklist.ignoring");
-        } else if (method == 1) {
-            mat = Material.FIRE_CHARGE;
-            name = Lang.getFor(player, "gui.blacklist.trashing");
-        } else {
-            mat = Material.BARRIER;
-            name = Lang.getFor(player, "gui.blacklist.disabled_toggle");
-        }
-        ItemStack item = new ItemStack(mat);
+    /**
+     * Builds the on/off toggle button shown at the top of the blacklist GUI.
+     *
+     * @param player The player viewing the GUI.
+     * @param enabled Whether the player's blacklist is currently enabled.
+     * @return The toggle button.
+     */
+    public static ItemStack buildOnOffButton(Player player, boolean enabled) {
+        ItemStack item = new ItemStack(enabled ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(name);
+        meta.setDisplayName(Lang.getFor(player, enabled ? "gui.blacklist.on" : "gui.blacklist.off"));
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    /**
+     * Builds the mode button that switches between ignoring and trashing blacklisted items.
+     *
+     * @param player The player viewing the GUI.
+     * @param method The mode to display (0 = ignore, 1 = trash).
+     * @return The mode button.
+     */
+    public static ItemStack buildModeButton(Player player, int method) {
+        boolean trashing = method == 1;
+        ItemStack item = new ItemStack(trashing ? Material.FIRE_CHARGE : Material.HOPPER);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(Lang.getFor(player, trashing ? "gui.blacklist.trashing" : "gui.blacklist.ignoring"));
         item.setItemMeta(meta);
         return item;
     }

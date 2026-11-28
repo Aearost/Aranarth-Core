@@ -41,14 +41,14 @@ public class CommandBlacklist implements CommandExecutor {
             } else {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                 if (args[0].equals("ignore")) {
-                    aranarthPlayer.setBlacklistingMethod(0);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "market.sold_blacklist_ignore")));
+                    AranarthUtils.setBlacklistMethod(player, 0);
+                    return true;
                 } else if (args[0].equals("trash")) {
-                    aranarthPlayer.setBlacklistingMethod(1);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "market.sold_blacklist_trash")));
+                    AranarthUtils.setBlacklistMethod(player, 1);
+                    return true;
                 } else if (args[0].equals("off")) {
-                    aranarthPlayer.setBlacklistingMethod(-1);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "market.blacklist_disabled")));
+                    AranarthUtils.setBlacklistMethod(player, -1);
+                    return true;
                 } else if (args[0].equals("clear")) {
                     // Clear all presets
                     for (BlacklistPreset preset : aranarthPlayer.getBlacklistPresets()) {

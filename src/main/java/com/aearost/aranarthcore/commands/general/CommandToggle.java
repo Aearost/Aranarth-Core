@@ -138,22 +138,15 @@ public class CommandToggle implements CommandExecutor {
 				} else if (args[0].equalsIgnoreCase("blacklist")) {
 					if (player.hasPermission("aranarth.blacklist")) {
 						if (args.length == 1) {
-							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "toggle blacklist <ignore|trash|off>")));
+							AranarthUtils.toggleBlacklist(player);
+						} else if (args[1].equals("ignore")) {
+							AranarthUtils.setBlacklistMethod(player, 0);
+						} else if (args[1].equals("trash")) {
+							AranarthUtils.setBlacklistMethod(player, 1);
+						} else if (args[1].equals("off")) {
+							AranarthUtils.setBlacklistMethod(player, -1);
 						} else {
-							if (args[1].equals("ignore")) {
-								aranarthPlayer.setBlacklistingMethod(0);
-								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.blacklist_ignore")));
-							} else if (args[1].equals("trash")) {
-								aranarthPlayer.setBlacklistingMethod(1);
-								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.blacklist_trash")));
-							} else if (args[1].equals("off")) {
-								aranarthPlayer.setBlacklistingMethod(-1);
-								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.blacklist_off")));
-							} else {
-								player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "toggle blacklist <ignore|trash|off>")));
-								return true;
-							}
-							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+							player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "general.invalid_syntax", "usage", "toggle blacklist [ignore|trash|off]")));
 						}
 					} else {
 						player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "toggle.no_blacklist_perk")));

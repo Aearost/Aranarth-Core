@@ -6177,6 +6177,7 @@ public class PersistenceUtils {
             obj.addProperty("inventory", ap.isTogglingInventoryAssist());
             obj.addProperty("shulker", ap.isAddingToShulker());
             obj.addProperty("blacklistMethod", ap.getBlacklistingMethod());
+            obj.addProperty("blacklistLastMethod", ap.getLastActiveBlacklistingMethod());
             obj.addProperty("compressing", ap.isCompressingItems());
             obj.addProperty("chestLock", ap.isAutoLockingChests());
             obj.addProperty("fireType", ap.getFireType().name());
@@ -8223,6 +8224,9 @@ public class PersistenceUtils {
                 if (obj.has("blacklistMethod")) {
                     ap.setBlacklistingMethod(obj.get("blacklistMethod").getAsInt());
                 }
+                if (obj.has("blacklistLastMethod")) {
+                    ap.setLastActiveBlacklistingMethod(obj.get("blacklistLastMethod").getAsInt());
+                }
                 if (obj.has("compressing")) {
                     ap.setCompressingItems(obj.get("compressing").getAsBoolean());
                 }
@@ -8379,6 +8383,7 @@ public class PersistenceUtils {
         obj.addProperty("inventory", ap.isTogglingInventoryAssist());
         obj.addProperty("shulker", ap.isAddingToShulker());
         obj.addProperty("blacklistMethod", ap.getBlacklistingMethod());
+        obj.addProperty("blacklistLastMethod", ap.getLastActiveBlacklistingMethod());
         obj.addProperty("compressing", ap.isCompressingItems());
         obj.addProperty("chestLock", ap.isAutoLockingChests());
         obj.addProperty("fireType", ap.getFireType().name());
@@ -8470,6 +8475,9 @@ public class PersistenceUtils {
             }
             if (obj.has("blacklistMethod")) {
                 ap.setBlacklistingMethod(obj.get("blacklistMethod").getAsInt());
+            }
+            if (obj.has("blacklistLastMethod")) {
+                ap.setLastActiveBlacklistingMethod(obj.get("blacklistLastMethod").getAsInt());
             }
             if (obj.has("compressing")) {
                 ap.setCompressingItems(obj.get("compressing").getAsBoolean());

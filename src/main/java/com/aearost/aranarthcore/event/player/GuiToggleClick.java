@@ -47,15 +47,8 @@ public class GuiToggleClick {
 				if (!player.hasPermission("aranarth.blacklist")) {
 					return;
 				}
-                if (aranarthPlayer.getBlacklistingMethod() != -1) {
-                    aranarthPlayer.setBlacklistingMethod(-1);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "market.blacklist_disabled")));
-                } else {
-                    aranarthPlayer.setBlacklistingMethod(0);
-                    player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, "market.sold_blacklist_ignore")));
-                }
-                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.LAVA_BUCKET, "&f&lBlacklist", aranarthPlayer.getBlacklistingMethod() != -1));
+                int blacklistMethod = AranarthUtils.toggleBlacklist(player);
+                refreshSlot(player, slot, GuiToggle.buildToggleItem(player, Material.LAVA_BUCKET, "&f&lBlacklist", blacklistMethod != -1));
             }
             // Fire Type
             case 11 -> {

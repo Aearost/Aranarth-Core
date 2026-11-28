@@ -3747,6 +3747,33 @@ public class AranarthUtils {
     }
 
     /**
+     * Toggles the player's blacklist on or off and notifies them.
+     *
+     * @param player The player toggling their blacklist.
+     * @return The new blacklisting method.
+     */
+    public static int toggleBlacklist(Player player) {
+        AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+        int method = aranarthPlayer.getBlacklistingMethod() != -1 ? -1 : aranarthPlayer.getLastActiveBlacklistingMethod();
+        setBlacklistMethod(player, method);
+        return method;
+    }
+
+    /**
+     * Sets the player's blacklisting method and notifies them.
+     *
+     * @param player The player updating their blacklist.
+     * @param method The new blacklisting method (0 = ignore, 1 = trash, -1 = off).
+     */
+    public static void setBlacklistMethod(Player player, int method) {
+        AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+        aranarthPlayer.setBlacklistingMethod(method);
+        setPlayer(player.getUniqueId(), aranarthPlayer);
+        String key = method == 0 ? "toggle.blacklist_ignore" : method == 1 ? "toggle.blacklist_trash" : "toggle.blacklist_off";
+        player.sendMessage(ChatUtils.chatMessage(Lang.getFor(player, key)));
+    }
+
+    /**
      * Disables the compressor for all Materials.
      *
      * @param uuid The player's UUID.

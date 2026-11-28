@@ -40,6 +40,7 @@ public class AranarthPlayer {
     private String arenaInventory;
     private String creativeInventory;
     private int blacklistingMethod;
+    private int lastActiveBlacklistingMethod = 0;
     private HashMap<ItemStack, Integer> potions;
     private List<ItemStack> arrows;
     private List<ItemStack> blacklist;
@@ -265,6 +266,7 @@ public class AranarthPlayer {
         this.arrows = arrows;
         this.blacklist = blacklist;
         this.blacklistingMethod = blacklistingMethod;
+        this.lastActiveBlacklistingMethod = blacklistingMethod == 1 ? 1 : 0;
         this.isHitByTippedArrow = false;
         this.isAddingToShulker = true;
         this.randomItems = null;
@@ -558,6 +560,27 @@ public class AranarthPlayer {
      */
     public void setBlacklistingMethod(int blacklistingMethod) {
         this.blacklistingMethod = blacklistingMethod;
+        if (blacklistingMethod == 0 || blacklistingMethod == 1) {
+            this.lastActiveBlacklistingMethod = blacklistingMethod;
+        }
+    }
+
+    /**
+     * Provides the blacklisting method (0 = ignore, 1 = trash) that is restored when the blacklist is toggled back on.
+     *
+     * @return The last active blacklisting method.
+     */
+    public int getLastActiveBlacklistingMethod() {
+        return lastActiveBlacklistingMethod;
+    }
+
+    /**
+     * Updates the blacklisting method (0 = ignore, 1 = trash) that is restored when the blacklist is toggled back on.
+     *
+     * @param lastActiveBlacklistingMethod The last active blacklisting method.
+     */
+    public void setLastActiveBlacklistingMethod(int lastActiveBlacklistingMethod) {
+        this.lastActiveBlacklistingMethod = lastActiveBlacklistingMethod == 1 ? 1 : 0;
     }
 
     /**

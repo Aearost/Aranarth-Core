@@ -40,6 +40,7 @@ Quality of Life
 [~] /countdown sparring and the death stun now only apply in Survival worlds, not the arena
 [~] The /recipe browse list now shows results as a single item
 [+] Added /home Bed to teleport to your bed spawn and reserved "bed" as a home name
+[+] Added a toggle button to the top of the /blacklist GUI
 
 Cross-server & Technical
 [+] Added /ac schemtransfer to transfer schematics between servers
